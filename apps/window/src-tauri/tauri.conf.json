@@ -20,7 +20,13 @@
                 "minHeight": 700,
                 "titleBarStyle": "Overlay",
                 "hiddenTitle": true,
-                "trafficLightPosition": { "x": 18, "y": 16 }
+                "trafficLightPosition": { "x": 18, "y": 25.5 },
+                "theme": "Dark",
+                "transparent": true,
+                "windowEffects": {
+                    "effects": ["underWindowBackground"],
+                    "state": "followsWindowActiveState"
+                }
             }
         ],
         "security": { "csp": "default-src 'self'; font-src 'self' data:; img-src 'self' data:" }

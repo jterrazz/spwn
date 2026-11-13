@@ -6,14 +6,17 @@
     padding: var(--space-14) var(--space-10) var(--space-10);
     min-width: 0;
     overflow-y: auto;
-    background: var(--canvas);
+    background: var(--ground-sidebar);
 }
 .lights {
     height: var(--space-14);
     flex: none;
 }
+:global(html[data-chrome='overlay']) .sidebar {
+    padding-top: 0;
+}
 :global(html[data-chrome='overlay']) .lights {
-    height: var(--space-24);
+    height: var(--chrome-row);
 }
 .find {
     all: unset;

@@ -11,6 +11,7 @@ import { tauriTransport } from './engine/tauri';
 import type { Transport } from './engine/transport';
 import { PAGES } from './pages/registry';
 import { Boundary } from './shell/boundary';
+import { placeOf, wearDress } from './shell/chrome';
 import { startRoute } from './shell/route';
 import type { Route } from './shell/route';
 import { recalled, remember } from './shell/route-memory';
@@ -66,12 +67,11 @@ async function transportOf(): Promise<Transport> {
     return replayTransport(await recordingFor(world), undefined, pace);
 }
 
-const overlaid = inTauri
-    ? /Macintosh/u.test(navigator.userAgent)
-    : proof && query.get('chrome') === 'overlay';
-if (overlaid) {
-    document.documentElement.dataset.chrome = 'overlay';
-}
+wearDress(
+    document.documentElement,
+    placeOf(inTauri, navigator.userAgent, proof && query.get('chrome') === 'overlay'),
+    globalThis,
+);
 
 const root = document.querySelector('#root');
 if (root) {

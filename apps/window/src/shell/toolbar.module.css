@@ -1,5 +1,5 @@
 .toolbar {
-    height: 46px;
+    height: var(--chrome-row);
     flex: none;
     display: flex;
     align-items: center;
@@ -7,7 +7,7 @@
     padding: 0 var(--space-14) 0 var(--space-12);
 }
 :global(html[data-chrome='overlay']) .bare {
-    padding-left: 84px;
+    padding-left: var(--chrome-lights-room);
 }
 .title {
     display: flex;

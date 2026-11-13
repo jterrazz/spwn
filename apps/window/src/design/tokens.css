@@ -78,6 +78,22 @@
 
     --motion-hover: 120ms ease-out;
     --motion-press: scale(0.97);
+
+    --chrome-row: 46px;
+    --chrome-lights-room: 84px;
+
+    --ground-window: var(--canvas);
+    --ground: var(--canvas);
+    --ground-sidebar: var(--canvas);
+}
+
+html[data-material='vibrant'] {
+    --material-canvas: 86%;
+    --material-sidebar: 72%;
+
+    --ground-window: transparent;
+    --ground: color-mix(in srgb, var(--canvas) var(--material-canvas), transparent);
+    --ground-sidebar: color-mix(in srgb, var(--canvas) var(--material-sidebar), transparent);
 }
 
 [data-identity='blue'] {

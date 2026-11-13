@@ -238,6 +238,16 @@ All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `recor
 - A component's states are its stories: a plain array of `{ name, props }` (`Story`, `src/design/story.ts`) in `<component>.stories.ts(x)` beside it, covering each variant and the data states it can meet (empty, long text, missing, withheld, disabled). The gallery renders one entry per component, grouped by layer, from `src/pages/gallery/entries.ts`, and its spec fails a component `src/design/index.ts` exports without an entry. A kit component a page draws in states of its own has its stories beside it too: `OpenButton`'s, drawn on an engine of its own whose opener is `NO_OPENER` (`OpenButtonSample`), so the gallery opens nothing.
 - A read asked again draws nothing: no refreshing mark, no `Reading` over an answer already shown, proved by the engine's react spec. A link still connecting is the sidebar foot's `Engine connecting`, its word `OWN_STATE_WORDS.connecting`, never a read under way.
 
+## The window's chrome on a Mac
+
+On a Mac the window is drawn as a native app with a unified toolbar: its traffic lights sit in the top bar's row, over a discreet vibrancy. Everywhere else (the Linux bench's WebKitGTK, a headless capture, a page outside Tauri) it is drawn opaque, as before.
+
+- The top bar's row is one token, `--chrome-row` (46 px, `src/design/tokens.css`): the toolbar's height, and on a Mac the sidebar's first row, which holds the lights and is a drag region. The lights are placed by `trafficLightPosition` (`src-tauri/tauri.conf.json`) at `x: 18`, the inset Finder's own lights have on macOS 26, and `y: 25.5`, which centres them on that row: `tao` grows the title bar to the button's height plus `y`, and the button's centre lands 2.5 pt above `y` (measured on macOS 26.6, `y: 16` drew it at 13.5 pt). A row height that changes moves `y` by the same half.
+- With the sidebar hidden the toolbar keeps `--chrome-lights-room` (84 px) at its left for the lights. In fullscreen the lights are gone, so `wearDress` (`src/shell/chrome.ts`) drops `data-chrome` while the window fills the screen, and the sidebar and toolbar draw their plain spacing, as off a Mac.
+- The material is one `underWindowBackground` effect under the whole window, its state following the window's (`windowEffects`), on a window made `transparent` and dark (`theme`, so the effect is the dark material whatever the system's appearance). Over it the canvas is drawn at `--material-canvas` (86 %) and the sidebar at `--material-sidebar` (72 %), through `--ground` and `--ground-sidebar`; panels, wells and every colour token stay opaque, so text keeps its contrast.
+- `data-material="vibrant"` is set by `wearDress` in the Tauri window on a Mac alone (the user agent says `Macintosh`), so the translucent tokens apply nowhere else, and no golden moves.
+- Transparency uses macOS's private API, which `tauri` enables unconditionally since 2.12.1 (`macOSPrivateApi` is a no-op there), hence `tauri = "2.12.1"` in `Cargo.toml`: the window is not for the App Store. No capability and no CSP changed.
+
 ## The rules a page meets first
 
 Each is a finding of `typescript check`; `check-quick.sh` shows the per-file ones in seconds.

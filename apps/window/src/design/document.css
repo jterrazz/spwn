@@ -19,7 +19,7 @@ body,
 }
 
 body {
-    background: var(--canvas);
+    background: var(--ground-window);
     color: var(--t1);
     font-family: var(--font-sans);
     font-size: var(--text-body);

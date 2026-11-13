@@ -2,13 +2,14 @@
     height: 100%;
     display: grid;
     grid-template-columns: 244px minmax(0, 1fr);
-    background: var(--canvas);
+    background: var(--ground-window);
     overflow: hidden;
 }
 .collapsed {
     grid-template-columns: minmax(0, 1fr);
 }
 .main {
+    background: var(--ground);
     display: flex;
     flex-direction: column;
     min-width: 0;
