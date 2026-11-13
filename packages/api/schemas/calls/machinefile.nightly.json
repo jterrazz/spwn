@@ -1,0 +1,147 @@
+{
+  "$defs": {
+    "machinefile.Moved": {
+      "additionalProperties": false,
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "now": {
+          "type": "string"
+        },
+        "range": {
+          "type": "string"
+        },
+        "was": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "now",
+        "range",
+        "was"
+      ],
+      "type": "object"
+    },
+    "machinefile.Night": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "failed": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "interrupted": {
+          "type": "boolean"
+        },
+        "last": {
+          "$ref": "#/$defs/machinefile.Night"
+        },
+        "left": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "machinefile": {
+          "type": "string"
+        },
+        "moved": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Moved"
+          },
+          "type": "array"
+        },
+        "unpulled": {
+          "type": "string"
+        },
+        "waiting": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Waiting"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "at",
+        "machinefile"
+      ],
+      "type": "object"
+    },
+    "machinefile.Waiting": {
+      "additionalProperties": false,
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        },
+        "moved": {
+          "type": "string"
+        },
+        "newest": {
+          "type": "string"
+        },
+        "range": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "moved",
+        "newest",
+        "range"
+      ],
+      "type": "object"
+    },
+    "machinefile.calls.Nightly": {
+      "additionalProperties": false,
+      "properties": {
+        "night": {
+          "$ref": "#/$defs/machinefile.Night"
+        },
+        "ran": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "night",
+        "ran"
+      ],
+      "type": "object"
+    },
+    "machinefile.calls.NightlyIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machinefile.nightly.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machinefile.nightly of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machinefile.calls.NightlyIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machinefile.calls.Nightly"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machinefile.nightly",
+  "type": "object"
+}

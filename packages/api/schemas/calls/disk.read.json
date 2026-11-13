@@ -1,0 +1,102 @@
+{
+  "$defs": {
+    "disk.Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "Free": {
+          "type": "integer"
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "Rows": {
+          "items": {
+            "$ref": "#/$defs/disk.Row"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Free",
+        "Pending",
+        "Rows",
+        "Total"
+      ],
+      "type": "object"
+    },
+    "disk.Row": {
+      "additionalProperties": false,
+      "properties": {
+        "App": {
+          "type": "string"
+        },
+        "Bytes": {
+          "type": "integer"
+        },
+        "Group": {
+          "enum": [
+            "",
+            "can-rebuild",
+            "misplaced",
+            "never-touched",
+            "your-data"
+          ],
+          "type": "string"
+        },
+        "MoveTo": {
+          "type": "string"
+        },
+        "Paths": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Pending": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "App",
+        "Bytes",
+        "Group",
+        "MoveTo",
+        "Paths",
+        "Pending"
+      ],
+      "type": "object"
+    },
+    "disk.calls.ReadIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/disk.read.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch disk.read of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/disk.calls.ReadIn"
+    },
+    "out": {
+      "$ref": "#/$defs/disk.Reading"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "disk.read",
+  "type": "object"
+}

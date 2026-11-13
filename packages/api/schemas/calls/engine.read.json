@@ -1,0 +1,84 @@
+{
+  "$defs": {
+    "engine.Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "AwakeUntil": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "State": {
+          "type": "string"
+        },
+        "Station": {
+          "type": "string"
+        },
+        "Stopped": {
+          "$ref": "#/$defs/engine.StopMark"
+        },
+        "Up": {
+          "type": "integer"
+        },
+        "VMs": {
+          "type": "integer"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "AwakeUntil",
+        "State",
+        "Station",
+        "Stopped",
+        "Up",
+        "VMs",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "engine.StopMark": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "by": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "by"
+      ],
+      "type": "object"
+    },
+    "engine.calls.ReadIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.read.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.read of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.calls.ReadIn"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.Reading"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.read",
+  "type": "object"
+}

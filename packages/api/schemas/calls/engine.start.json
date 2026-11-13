@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "engine.Installed": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "Moved": {
+          "type": "boolean"
+        },
+        "Restarted": {
+          "type": "boolean"
+        },
+        "Written": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "From",
+        "Moved",
+        "Restarted",
+        "Written"
+      ],
+      "type": "object"
+    },
+    "engine.StartReport": {
+      "additionalProperties": false,
+      "properties": {
+        "Already": {
+          "type": "boolean"
+        },
+        "Installed": {
+          "$ref": "#/$defs/engine.Installed"
+        },
+        "PID": {
+          "type": "integer"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Already",
+        "Installed",
+        "PID",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "engine.calls.StartIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.start.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.start of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.calls.StartIn"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.StartReport"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.start",
+  "type": "object"
+}

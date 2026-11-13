@@ -1,0 +1,58 @@
+{
+  "$defs": {
+    "machines.Woken": {
+      "additionalProperties": false,
+      "properties": {
+        "Already": {
+          "type": "boolean"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Sent": {
+          "type": "boolean"
+        },
+        "Tell": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Already",
+        "Name",
+        "Sent",
+        "Tell"
+      ],
+      "type": "object"
+    },
+    "machines.calls.WakeIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Tell": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.wake.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machines.wake of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.WakeIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.Woken"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.wake",
+  "type": "object"
+}

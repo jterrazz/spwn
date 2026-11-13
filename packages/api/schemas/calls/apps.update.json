@@ -1,0 +1,195 @@
+{
+  "$defs": {
+    "apps.Outcome": {
+      "additionalProperties": false,
+      "properties": {
+        "Detail": {
+          "type": "string"
+        },
+        "Log": {
+          "type": "string"
+        },
+        "Method": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Newest": {
+          "type": "string"
+        },
+        "Path": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Reasons": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "RequiredBy": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Result": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Steps": {
+          "items": {
+            "$ref": "#/$defs/apps.Step"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Verb": {
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        },
+        "Why": {
+          "enum": [
+            "",
+            "failing",
+            "interrupted",
+            "late",
+            "missing",
+            "outdated",
+            "partial",
+            "unmanaged"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Detail",
+        "Log",
+        "Method",
+        "Name",
+        "Newest",
+        "Path",
+        "Reasons",
+        "RequiredBy",
+        "Result",
+        "Steps",
+        "Verb",
+        "Version",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "apps.Step": {
+      "additionalProperties": false,
+      "properties": {
+        "Detail": {
+          "type": "string"
+        },
+        "Package": {
+          "type": "string"
+        },
+        "Result": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Why": {
+          "enum": [
+            "",
+            "failing",
+            "interrupted",
+            "late",
+            "missing",
+            "outdated",
+            "partial",
+            "unmanaged"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Detail",
+        "Package",
+        "Result",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "apps.calls.UpdateIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Managers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Within": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/apps.update.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call apps.update of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/apps.calls.UpdateIn"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/apps.Outcome"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "apps.update",
+  "type": "object"
+}

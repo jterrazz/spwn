@@ -81,6 +81,9 @@ func main() {
 	if err := os.WriteFile(*machinefiles, machinefileSchema(), 0o600); err != nil {
 		panic(err)
 	}
+	if err := writeAPI("."); err != nil {
+		panic(err)
+	}
 }
 
 func playWorld() []byte {

@@ -1,0 +1,52 @@
+{
+  "$defs": {
+    "agents.Held": {
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "workspaces": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "agents",
+        "workspaces"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.agents-held.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.agents-held of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/agents.Held"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.agents-held",
+  "type": "object"
+}

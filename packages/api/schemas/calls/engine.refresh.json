@@ -1,0 +1,36 @@
+{
+  "$defs": {
+    "engine.PagesIn": {
+      "additionalProperties": false,
+      "properties": {
+        "pages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.refresh.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.refresh of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.PagesIn"
+    },
+    "out": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.refresh",
+  "type": "object"
+}

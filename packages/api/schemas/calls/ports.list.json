@@ -1,0 +1,668 @@
+{
+  "$defs": {
+    "core.machine.Ref": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "On": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name",
+        "On"
+      ],
+      "type": "object"
+    },
+    "ports.AllMachines": {
+      "additionalProperties": false,
+      "properties": {
+        "macs": {
+          "items": {
+            "$ref": "#/$defs/ports.MacPorts"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "macs",
+        "schema"
+      ],
+      "type": "object"
+    },
+    "ports.Declaration": {
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "type": "string"
+        },
+        "machine": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        },
+        "via": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "machine",
+        "port",
+        "via"
+      ],
+      "type": "object"
+    },
+    "ports.EngineInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "running": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "running",
+        "version"
+      ],
+      "type": "object"
+    },
+    "ports.Listener": {
+      "additionalProperties": false,
+      "properties": {
+        "Bind": {
+          "type": "string"
+        },
+        "PID": {
+          "type": "integer"
+        },
+        "Port": {
+          "type": "integer"
+        },
+        "Process": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bind",
+        "PID",
+        "Port",
+        "Process"
+      ],
+      "type": "object"
+    },
+    "ports.Listing": {
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "$ref": "#/$defs/ports.AllMachines"
+        },
+        "tailnet": {
+          "$ref": "#/$defs/ports.Status"
+        }
+      },
+      "required": [
+        "all",
+        "tailnet"
+      ],
+      "type": "object"
+    },
+    "ports.MacPorts": {
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "$ref": "#/$defs/ports.EngineInfo"
+        },
+        "https": {
+          "type": "string"
+        },
+        "listening": {
+          "items": {
+            "$ref": "#/$defs/ports.Machine"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "not_shared": {
+          "items": {
+            "$ref": "#/$defs/ports.NotShared"
+          },
+          "type": "array"
+        },
+        "ports": {
+          "items": {
+            "$ref": "#/$defs/ports.Port"
+          },
+          "type": "array"
+        },
+        "public_name": {
+          "type": "string"
+        },
+        "quiet": {
+          "items": {
+            "$ref": "#/$defs/ports.Quiet"
+          },
+          "type": "array"
+        },
+        "range": {
+          "$ref": "#/$defs/ports.Range"
+        },
+        "reachable": {
+          "type": "boolean"
+        },
+        "serve": {
+          "type": "string"
+        },
+        "shared": {
+          "items": {
+            "$ref": "#/$defs/ports.SharedPort"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "this_mac": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "engine",
+        "https",
+        "name",
+        "public_name",
+        "reachable",
+        "serve",
+        "shared",
+        "this_mac"
+      ],
+      "type": "object"
+    },
+    "ports.Machine": {
+      "additionalProperties": false,
+      "properties": {
+        "Answer": {
+          "enum": [
+            "",
+            "starting",
+            "unreachable"
+          ],
+          "type": "string"
+        },
+        "At": {
+          "enum": [
+            "",
+            "behind",
+            "bridged",
+            "mac"
+          ],
+          "type": "string"
+        },
+        "Listening": {
+          "items": {
+            "$ref": "#/$defs/ports.Listener"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Ref": {
+          "$ref": "#/$defs/core.machine.Ref"
+        }
+      },
+      "required": [
+        "Answer",
+        "At",
+        "Listening",
+        "Ref"
+      ],
+      "type": "object"
+    },
+    "ports.Node": {
+      "additionalProperties": false,
+      "properties": {
+        "DNSName": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "string"
+        },
+        "IP": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Online": {
+          "type": "boolean"
+        },
+        "Tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "DNSName",
+        "ID",
+        "IP",
+        "Name",
+        "Online",
+        "Tags"
+      ],
+      "type": "object"
+    },
+    "ports.NotShared": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "count",
+        "detail",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "ports.Port": {
+      "additionalProperties": false,
+      "properties": {
+        "Answer": {
+          "enum": [
+            "",
+            "starting",
+            "unreachable"
+          ],
+          "type": "string"
+        },
+        "Binds": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Declared": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ports.Declaration"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Device": {
+          "type": "boolean"
+        },
+        "Machine": {
+          "$ref": "#/$defs/core.machine.Ref"
+        },
+        "PID": {
+          "type": "integer"
+        },
+        "Port": {
+          "type": "integer"
+        },
+        "Process": {
+          "type": "string"
+        },
+        "Reach": {
+          "type": "integer"
+        },
+        "Verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ports.Verified"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Answer",
+        "Binds",
+        "Declared",
+        "Device",
+        "Machine",
+        "PID",
+        "Port",
+        "Process",
+        "Reach",
+        "Verified"
+      ],
+      "type": "object"
+    },
+    "ports.Quiet": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "count",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "ports.Range": {
+      "additionalProperties": false,
+      "properties": {
+        "free": {
+          "type": "integer"
+        },
+        "high": {
+          "type": "integer"
+        },
+        "low": {
+          "type": "integer"
+        },
+        "max_per_vm": {
+          "type": "integer"
+        },
+        "reserved": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "free",
+        "high",
+        "low",
+        "max_per_vm",
+        "reserved"
+      ],
+      "type": "object"
+    },
+    "ports.Served": {
+      "additionalProperties": false,
+      "properties": {
+        "Path": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "integer"
+        },
+        "Reserved": {
+          "type": "integer"
+        },
+        "Scheme": {
+          "type": "string"
+        },
+        "Station": {
+          "type": "boolean"
+        },
+        "Target": {
+          "type": "string"
+        },
+        "To": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Path",
+        "Port",
+        "Reserved",
+        "Scheme",
+        "Station",
+        "Target"
+      ],
+      "type": "object"
+    },
+    "ports.SharedPort": {
+      "additionalProperties": false,
+      "properties": {
+        "bind": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "guest_port": {
+          "type": "integer"
+        },
+        "http": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "last_seen_at": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pinned": {
+          "type": "boolean"
+        },
+        "process": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "reserved": {
+          "type": "integer"
+        },
+        "reserved_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "",
+            "closing",
+            "gone",
+            "not-allowed",
+            "refused",
+            "shared",
+            "unknown",
+            "waiting"
+          ],
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "urls": {
+          "$ref": "#/$defs/ports.URLSet"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "bind",
+        "detail",
+        "guest_port",
+        "http",
+        "last_seen_at",
+        "pinned",
+        "process",
+        "profile",
+        "reserved",
+        "state",
+        "urls",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "ports.Status": {
+      "additionalProperties": false,
+      "properties": {
+        "BackendState": {
+          "type": "string"
+        },
+        "CLI": {
+          "type": "string"
+        },
+        "Connected": {
+          "type": "boolean"
+        },
+        "DNSName": {
+          "type": "string"
+        },
+        "IP": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Peers": {
+          "items": {
+            "$ref": "#/$defs/ports.Node"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Serve": {
+          "items": {
+            "$ref": "#/$defs/ports.Served"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "ServeOn": {
+          "type": "boolean"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Variant": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "BackendState",
+        "CLI",
+        "Connected",
+        "DNSName",
+        "IP",
+        "Name",
+        "Peers",
+        "Serve",
+        "ServeOn",
+        "State",
+        "Variant"
+      ],
+      "type": "object"
+    },
+    "ports.URLSet": {
+      "additionalProperties": false,
+      "properties": {
+        "local": {
+          "type": "string"
+        },
+        "public": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "local",
+        "public"
+      ],
+      "type": "object"
+    },
+    "ports.Verified": {
+      "additionalProperties": false,
+      "properties": {
+        "Missing": {
+          "type": "string"
+        },
+        "Seen": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Missing",
+        "Seen"
+      ],
+      "type": "object"
+    },
+    "ports.calls.ListIn": {
+      "additionalProperties": false,
+      "properties": {
+        "AllMachines": {
+          "type": "boolean"
+        },
+        "Of": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/ports.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call ports.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/ports.calls.ListIn"
+    },
+    "out": {
+      "$ref": "#/$defs/ports.Listing"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "ports.list",
+  "type": "object"
+}

@@ -1,0 +1,102 @@
+{
+  "$defs": {
+    "ports.Reservation": {
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "type": "string"
+        },
+        "guest_port": {
+          "type": "integer"
+        },
+        "host_port": {
+          "type": "integer"
+        },
+        "http": {
+          "type": "boolean"
+        },
+        "last_seen_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "public_port": {
+          "type": "integer"
+        },
+        "reserved_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "to": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "guest_port",
+        "host_port",
+        "reserved_at",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "ports.calls.StopSharingIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "string"
+        },
+        "VM": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ports.calls.StopSharingOut": {
+      "additionalProperties": false,
+      "properties": {
+        "Mac": {
+          "type": "string"
+        },
+        "Reservation": {
+          "$ref": "#/$defs/ports.Reservation"
+        }
+      },
+      "required": [
+        "Mac",
+        "Reservation"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/ports.stop-sharing.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call ports.stop-sharing of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/ports.calls.StopSharingIn"
+    },
+    "out": {
+      "$ref": "#/$defs/ports.calls.StopSharingOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "ports.stop-sharing",
+  "type": "object"
+}

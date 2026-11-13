@@ -1,0 +1,70 @@
+{
+  "$defs": {
+    "machines.calls.StopIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "VM": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "machines.calls.StopOut": {
+      "additionalProperties": false,
+      "properties": {
+        "Agents": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Already": {
+          "type": "boolean"
+        },
+        "Kind": {
+          "type": "string"
+        },
+        "Warnings": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Agents",
+        "Already",
+        "Kind",
+        "Warnings"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.stop.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machines.stop of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.StopIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.calls.StopOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.stop",
+  "type": "object"
+}

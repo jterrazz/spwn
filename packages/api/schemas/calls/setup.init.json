@@ -1,0 +1,89 @@
+{
+  "$defs": {
+    "setup.Report": {
+      "additionalProperties": false,
+      "properties": {
+        "Steps": {
+          "items": {
+            "$ref": "#/$defs/setup.Step"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Steps"
+      ],
+      "type": "object"
+    },
+    "setup.Step": {
+      "additionalProperties": false,
+      "properties": {
+        "Changed": {
+          "type": "boolean"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "Log": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Changed",
+        "Detail",
+        "Log",
+        "Name",
+        "State"
+      ],
+      "type": "object"
+    },
+    "setup.calls.InitIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Interactive": {
+          "type": "boolean"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/setup.init.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call setup.init of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/setup.calls.InitIn"
+    },
+    "out": {
+      "$ref": "#/$defs/setup.Report"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "setup.init",
+  "type": "object"
+}

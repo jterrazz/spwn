@@ -1,0 +1,128 @@
+{
+  "$defs": {
+    "machines.Candidate": {
+      "additionalProperties": false,
+      "properties": {
+        "Accounts": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "DiskBytes": {
+          "type": "integer"
+        },
+        "Ended": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Idle": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Ports": {
+          "items": {
+            "type": "integer"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Reason": {
+          "type": "string"
+        },
+        "Stopped": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Accounts",
+        "DiskBytes",
+        "Ended",
+        "Idle",
+        "Name",
+        "Ports",
+        "Reason",
+        "Stopped"
+      ],
+      "type": "object"
+    },
+    "machines.Cleaned": {
+      "additionalProperties": false,
+      "properties": {
+        "Candidates": {
+          "items": {
+            "$ref": "#/$defs/machines.Candidate"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Deleted": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Kept": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Candidates",
+        "Deleted",
+        "Kept"
+      ],
+      "type": "object"
+    },
+    "machines.calls.CleanupIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "VMs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.cleanup.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machines.cleanup of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.CleanupIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.Cleaned"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.cleanup",
+  "type": "object"
+}

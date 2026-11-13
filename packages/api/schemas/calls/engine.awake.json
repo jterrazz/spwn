@@ -1,0 +1,198 @@
+{
+  "$defs": {
+    "awake.End": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "detail",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "awake.GuardState": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "state"
+      ],
+      "type": "object"
+    },
+    "awake.Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "Charging": {
+          "type": "boolean"
+        },
+        "Cycles": {
+          "type": "integer"
+        },
+        "HasBattery": {
+          "type": "boolean"
+        },
+        "Health": {
+          "type": "integer"
+        },
+        "Lid": {
+          "type": "string"
+        },
+        "LowPower": {
+          "type": "boolean"
+        },
+        "Percent": {
+          "type": "integer"
+        },
+        "Source": {
+          "type": "string"
+        },
+        "Thermal": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Charging",
+        "HasBattery",
+        "Lid",
+        "LowPower",
+        "Percent",
+        "Source",
+        "Thermal"
+      ],
+      "type": "object"
+    },
+    "awake.Session": {
+      "additionalProperties": false,
+      "properties": {
+        "battery": {
+          "type": "boolean"
+        },
+        "by": {
+          "type": "string"
+        },
+        "for": {
+          "type": "integer"
+        },
+        "lid": {
+          "type": "boolean"
+        },
+        "run": {
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "until": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "battery",
+        "by",
+        "lid",
+        "started_at",
+        "until"
+      ],
+      "type": "object"
+    },
+    "awake.View": {
+      "additionalProperties": false,
+      "properties": {
+        "guards": {
+          "items": {
+            "$ref": "#/$defs/awake.GuardState"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "last_end": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/awake.End"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "never_held": {
+          "type": "boolean"
+        },
+        "never_since": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "never_sleeps": {
+          "type": "boolean"
+        },
+        "reading": {
+          "$ref": "#/$defs/awake.Reading"
+        },
+        "session": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/awake.Session"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sleeping": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "guards",
+        "last_end",
+        "never_held",
+        "never_sleeps",
+        "reading",
+        "session"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.awake.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.awake of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/awake.View"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.awake",
+  "type": "object"
+}

@@ -1,0 +1,15 @@
+{
+    "name": "@jterrazz/station-api",
+    "private": true,
+    "files": [
+        "index.d.ts",
+        "schemas"
+    ],
+    "type": "module",
+    "types": "./index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./index.d.ts"
+        }
+    }
+}

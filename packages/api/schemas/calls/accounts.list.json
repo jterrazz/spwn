@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "accounts.Account": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "hint": {
+          "type": "string"
+        },
+        "identity": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "origin": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "shared": {
+          "$ref": "#/$defs/accounts.Loan"
+        },
+        "source": {
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "state"
+      ],
+      "type": "object"
+    },
+    "accounts.Loan": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "until": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "name",
+        "until"
+      ],
+      "type": "object"
+    },
+    "accounts.Machine": {
+      "additionalProperties": false,
+      "properties": {
+        "accounts": {
+          "items": {
+            "$ref": "#/$defs/accounts.Account"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "guest": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "lifetime": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "this_mac": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "accounts",
+        "kind",
+        "name"
+      ],
+      "type": "object"
+    },
+    "accounts.Report": {
+      "additionalProperties": false,
+      "properties": {
+        "Engine": {
+          "type": "string"
+        },
+        "Machines": {
+          "items": {
+            "$ref": "#/$defs/accounts.Machine"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Now": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "ShareList": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Shares": {
+          "items": {
+            "$ref": "#/$defs/accounts.Shared"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Engine",
+        "Machines",
+        "Now",
+        "ShareList",
+        "Shares"
+      ],
+      "type": "object"
+    },
+    "accounts.Shared": {
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "until": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "account",
+        "at",
+        "until",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "accounts.calls.ListIn": {
+      "additionalProperties": false,
+      "properties": {
+        "VMs": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/accounts.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch accounts.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/accounts.calls.ListIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.Report"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "accounts.list",
+  "type": "object"
+}

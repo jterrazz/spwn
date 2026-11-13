@@ -1,0 +1,673 @@
+{
+  "$defs": {
+    "apps.Report": {
+      "additionalProperties": false,
+      "properties": {
+        "App": {
+          "$ref": "#/$defs/catalog.App"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "Holds": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "HoldsUnread": {
+          "type": "boolean"
+        },
+        "Irreversible": {
+          "type": "boolean"
+        },
+        "Live": {
+          "type": "string"
+        },
+        "Managed": {
+          "type": "boolean"
+        },
+        "Manager": {
+          "type": "string"
+        },
+        "Method": {
+          "type": "string"
+        },
+        "Needs": {
+          "type": "string"
+        },
+        "Newest": {
+          "type": "string"
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        },
+        "Why": {
+          "enum": [
+            "",
+            "failing",
+            "interrupted",
+            "late",
+            "missing",
+            "outdated",
+            "partial",
+            "unmanaged"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "App",
+        "Detail",
+        "Holds",
+        "HoldsUnread",
+        "Irreversible",
+        "Live",
+        "Managed",
+        "Manager",
+        "Method",
+        "Needs",
+        "Newest",
+        "Pending",
+        "State",
+        "Version",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "apps.calls.ListIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Fresh": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "catalog.Action": {
+      "additionalProperties": false,
+      "properties": {
+        "Delete": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Env": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Exists": {
+          "type": "string"
+        },
+        "On": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Prune": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Run": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Uses": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Delete",
+        "Env",
+        "Exists",
+        "On",
+        "Prune",
+        "Run",
+        "Uses"
+      ],
+      "type": "object"
+    },
+    "catalog.App": {
+      "additionalProperties": false,
+      "properties": {
+        "AppStore": {
+          "type": "boolean"
+        },
+        "Bundle": {
+          "type": "string"
+        },
+        "Category": {
+          "enum": [
+            "",
+            "AI Agents",
+            "AI Apps",
+            "AI Tooling",
+            "Agent skills",
+            "Browsers",
+            "Command line",
+            "Communication",
+            "Containers \u0026 VMs",
+            "Deploy",
+            "Editors \u0026 IDEs",
+            "Git",
+            "Media",
+            "Package Managers",
+            "Productivity",
+            "Remote Access",
+            "Runtimes",
+            "Security",
+            "Shell \u0026 Terminal",
+            "System Utilities"
+          ],
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Disk": {
+          "$ref": "#/$defs/catalog.Disk"
+        },
+        "Installs": {
+          "items": {
+            "$ref": "#/$defs/catalog.LivesOn"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Kind": {
+          "enum": [
+            "manager",
+            "app",
+            "setting"
+          ],
+          "type": "string"
+        },
+        "Live": {
+          "$ref": "#/$defs/catalog.Liveness"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Needs": {
+          "items": {
+            "enum": [
+              "sudo",
+              "terminal",
+              "license",
+              "app-store-login"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Provides": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Replaces": {
+          "type": "string"
+        },
+        "Requires": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Supersedes": {
+          "type": "string"
+        },
+        "Then": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "UpdatesSelf": {
+          "type": "boolean"
+        },
+        "Version": {
+          "$ref": "#/$defs/catalog.VersionRead"
+        }
+      },
+      "required": [
+        "AppStore",
+        "Bundle",
+        "Category",
+        "Description",
+        "Disk",
+        "Installs",
+        "Live",
+        "Name",
+        "Needs",
+        "Path",
+        "Provides",
+        "Replaces",
+        "Requires",
+        "Supersedes",
+        "Then",
+        "UpdatesSelf",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "catalog.Disk": {
+      "additionalProperties": false,
+      "properties": {
+        "Erase": {
+          "items": {
+            "$ref": "#/$defs/catalog.Action"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Free": {
+          "items": {
+            "$ref": "#/$defs/catalog.Action"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Installed": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Misplaced": {
+          "items": {
+            "$ref": "#/$defs/catalog.Misplaced"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "NoErase": {
+          "type": "string"
+        },
+        "Paths": {
+          "items": {
+            "$ref": "#/$defs/catalog.Stored"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Quit": {
+          "type": "string"
+        },
+        "Relocate": {
+          "items": {
+            "$ref": "#/$defs/catalog.Relocation"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Removal": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Size": {
+          "enum": [
+            "",
+            "docker-system-df"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Erase",
+        "Free",
+        "Installed",
+        "Misplaced",
+        "NoErase",
+        "Paths",
+        "Quit",
+        "Relocate",
+        "Removal",
+        "Size"
+      ],
+      "type": "object"
+    },
+    "catalog.Liveness": {
+      "additionalProperties": false,
+      "properties": {
+        "Command": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Process": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Command",
+        "Process"
+      ],
+      "type": "object"
+    },
+    "catalog.LivesOn": {
+      "additionalProperties": false,
+      "properties": {
+        "Install": {},
+        "Kinds": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Method": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Kinds"
+      ],
+      "type": "object"
+    },
+    "catalog.Misplaced": {
+      "additionalProperties": false,
+      "properties": {
+        "Busy": {
+          "type": "string"
+        },
+        "Free": {
+          "items": {
+            "$ref": "#/$defs/catalog.Action"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Move": {
+          "items": {
+            "$ref": "#/$defs/catalog.Move"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Prune": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Then": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Busy",
+        "Free",
+        "Move",
+        "Path",
+        "Prune",
+        "Then"
+      ],
+      "type": "object"
+    },
+    "catalog.Move": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "From",
+        "To"
+      ],
+      "type": "object"
+    },
+    "catalog.Relocation": {
+      "additionalProperties": false,
+      "properties": {
+        "File": {
+          "enum": [
+            "",
+            "go-env",
+            "npmrc",
+            "bunfig",
+            "mise settings"
+          ],
+          "type": "string"
+        },
+        "Key": {
+          "type": "string"
+        },
+        "Pending": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "File",
+        "Key",
+        "Pending",
+        "Value"
+      ],
+      "type": "object"
+    },
+    "catalog.Stored": {
+      "additionalProperties": false,
+      "properties": {
+        "Level": {
+          "enum": [
+            "",
+            "cache",
+            "data",
+            "settings",
+            "kept"
+          ],
+          "type": "string"
+        },
+        "Memos": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Note": {
+          "type": "string"
+        },
+        "On": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Level",
+        "Memos",
+        "Note",
+        "On",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "catalog.VersionRead": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Pattern": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Path",
+        "Pattern"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/apps.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch apps.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/apps.calls.ListIn"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/apps.Report"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "apps.list",
+  "type": "object"
+}

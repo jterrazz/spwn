@@ -1,0 +1,57 @@
+{
+  "$defs": {
+    "engine.Hello": {
+      "additionalProperties": false,
+      "properties": {
+        "calls": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "executable": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "pid": {
+          "type": "integer"
+        },
+        "started_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pid",
+        "started_at",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.hello.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.hello of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.Hello"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.hello",
+  "type": "object"
+}

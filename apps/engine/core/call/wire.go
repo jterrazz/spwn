@@ -165,6 +165,27 @@ func fields(t reflect.Type) []field {
 	return out
 }
 
+type EncodedKey struct {
+	Name      string
+	Type      reflect.Type
+	OmitEmpty bool
+}
+
+func EncodedKeys(t reflect.Type) ([]EncodedKey, bool) {
+	// value: the keys Encode writes for a struct it walks itself, one that
+	// holds an error, and whether it does: a key is left out only when its
+	// tag says omitempty and its value is zero, omitzero and `,string` are
+	// not read. A struct Encode does not walk is encoding/json's.
+	if t.Kind() != reflect.Struct || !holdsError(t) {
+		return nil, false
+	}
+	var out []EncodedKey
+	for _, f := range fields(t) {
+		out = append(out, EncodedKey{Name: f.name, Type: t.FieldByIndex(f.index).Type, OmitEmpty: f.omitEmpty})
+	}
+	return out, true
+}
+
 func holdsError(t reflect.Type) bool { return reaches(t, map[reflect.Type]bool{}) }
 
 func reaches(t reflect.Type, seen map[reflect.Type]bool) bool {

@@ -1,0 +1,106 @@
+{
+  "$defs": {
+    "machinefile.Origin": {
+      "additionalProperties": false,
+      "properties": {
+        "File": {
+          "type": "string"
+        },
+        "Layer": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "File",
+        "Layer",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "machinefile.Value": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string"
+        },
+        "Origin": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
+        "Text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key",
+        "Origin",
+        "Text"
+      ],
+      "type": "object"
+    },
+    "machinefile.calls.ExplainIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string"
+        },
+        "Machinefile": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "machinefile.calls.ExplainOut": {
+      "additionalProperties": false,
+      "properties": {
+        "Files": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Origin"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Values": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Value"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Files",
+        "Name",
+        "Values"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machinefile.explain.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machinefile.explain of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machinefile.calls.ExplainIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machinefile.calls.ExplainOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machinefile.explain",
+  "type": "object"
+}

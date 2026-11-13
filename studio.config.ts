@@ -22,8 +22,10 @@ export default defineConfig({
                     "written by `make generate` from the stories' scene, byte for byte what the play world drift test compares",
                 'apps/engine/remote/api/calls.json':
                     'written by `make generate` from the call registry, byte for byte what the calls-json-fresh test compares',
+                'packages/api/index.d.ts':
+                    "written by `make generate` from the calls' schemas, byte for byte what the packages-api drift test compares",
                 'packages/api/schemas/**':
-                    "written by `make generate` from the catalog's Go types, byte for byte what the catalog schema drift test compares",
+                    "written by `make generate` from the catalog's and the calls' Go types, byte for byte what the catalog schema and the packages-api drift tests compare",
             },
         },
         roots: {

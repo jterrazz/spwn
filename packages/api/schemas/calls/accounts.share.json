@@ -1,0 +1,66 @@
+{
+  "$defs": {
+    "accounts.Shared": {
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "until": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "account",
+        "at",
+        "until",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "accounts.calls.ShareIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Account": {
+          "type": "string"
+        },
+        "For": {
+          "type": "integer"
+        },
+        "From": {
+          "type": "string"
+        },
+        "With": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/accounts.share.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call accounts.share of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/accounts.calls.ShareIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.Shared"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "accounts.share",
+  "type": "object"
+}

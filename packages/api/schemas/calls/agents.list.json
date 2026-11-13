@@ -1,0 +1,235 @@
+{
+  "$defs": {
+    "agents.Agent": {
+      "additionalProperties": false,
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "ask": {
+          "$ref": "#/$defs/agents.Ask"
+        },
+        "change": {
+          "$ref": "#/$defs/agents.Change"
+        },
+        "ended": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "folder": {
+          "type": "string"
+        },
+        "mac": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "pr": {
+          "$ref": "#/$defs/agents.PR"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "session": {
+          "type": "string"
+        },
+        "since": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/agents.Step"
+          },
+          "type": "array"
+        },
+        "task": {
+          "type": "string"
+        },
+        "terminal": {
+          "type": "string"
+        },
+        "updated": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "session",
+        "state"
+      ],
+      "type": "object"
+    },
+    "agents.Ask": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "title"
+      ],
+      "type": "object"
+    },
+    "agents.Change": {
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "type": "integer"
+        },
+        "minus": {
+          "type": "integer"
+        },
+        "plus": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "files",
+        "minus",
+        "plus"
+      ],
+      "type": "object"
+    },
+    "agents.Diff": {
+      "additionalProperties": false,
+      "properties": {
+        "minus": {
+          "type": "integer"
+        },
+        "plus": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "minus",
+        "plus"
+      ],
+      "type": "object"
+    },
+    "agents.PR": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "number",
+        "url"
+      ],
+      "type": "object"
+    },
+    "agents.Step": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "diff": {
+          "$ref": "#/$defs/agents.Diff"
+        },
+        "object": {
+          "type": "string"
+        },
+        "tests": {
+          "$ref": "#/$defs/agents.Tests"
+        },
+        "verb": {
+          "enum": [
+            "",
+            "build",
+            "command",
+            "commit",
+            "delegate",
+            "edit",
+            "install",
+            "open-pr",
+            "read",
+            "test",
+            "web"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "verb"
+      ],
+      "type": "object"
+    },
+    "agents.Tests": {
+      "additionalProperties": false,
+      "properties": {
+        "pass": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pass",
+        "total"
+      ],
+      "type": "object"
+    },
+    "agents.calls.ListIn": {
+      "additionalProperties": false,
+      "properties": {
+        "AsGiven": {
+          "type": "boolean"
+        },
+        "On": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/agents.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call agents.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/agents.calls.ListIn"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/agents.Agent"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "agents.list",
+  "type": "object"
+}

@@ -1,0 +1,130 @@
+{
+  "$defs": {
+    "ports.SharedPort": {
+      "additionalProperties": false,
+      "properties": {
+        "bind": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "guest_port": {
+          "type": "integer"
+        },
+        "http": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "last_seen_at": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pinned": {
+          "type": "boolean"
+        },
+        "process": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "reserved": {
+          "type": "integer"
+        },
+        "reserved_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "",
+            "closing",
+            "gone",
+            "not-allowed",
+            "refused",
+            "shared",
+            "unknown",
+            "waiting"
+          ],
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "urls": {
+          "$ref": "#/$defs/ports.URLSet"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "bind",
+        "detail",
+        "guest_port",
+        "http",
+        "last_seen_at",
+        "pinned",
+        "process",
+        "profile",
+        "reserved",
+        "state",
+        "urls",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "ports.URLSet": {
+      "additionalProperties": false,
+      "properties": {
+        "local": {
+          "type": "string"
+        },
+        "public": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "local",
+        "public"
+      ],
+      "type": "object"
+    },
+    "ports.calls.ShareIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Port": {
+          "type": "string"
+        },
+        "VM": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/ports.share.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call ports.share of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/ports.calls.ShareIn"
+    },
+    "out": {
+      "$ref": "#/$defs/ports.SharedPort"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "ports.share",
+  "type": "object"
+}

@@ -1,0 +1,59 @@
+{
+  "$defs": {
+    "engine.AccountsView": {
+      "additionalProperties": false,
+      "properties": {
+        "vms": {
+          "items": {
+            "$ref": "#/$defs/engine.VMAccounts"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "vms"
+      ],
+      "type": "object"
+    },
+    "engine.VMAccounts": {
+      "additionalProperties": false,
+      "properties": {
+        "accounts": {},
+        "guest": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "guest",
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.accounts.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.accounts of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.AccountsView"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.accounts",
+  "type": "object"
+}

@@ -1,0 +1,277 @@
+{
+  "$defs": {
+    "awake.End": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "detail",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "awake.GuardState": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "state"
+      ],
+      "type": "object"
+    },
+    "awake.Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "Charging": {
+          "type": "boolean"
+        },
+        "Cycles": {
+          "type": "integer"
+        },
+        "HasBattery": {
+          "type": "boolean"
+        },
+        "Health": {
+          "type": "integer"
+        },
+        "Lid": {
+          "type": "string"
+        },
+        "LowPower": {
+          "type": "boolean"
+        },
+        "Percent": {
+          "type": "integer"
+        },
+        "Source": {
+          "type": "string"
+        },
+        "Thermal": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Charging",
+        "HasBattery",
+        "Lid",
+        "LowPower",
+        "Percent",
+        "Source",
+        "Thermal"
+      ],
+      "type": "object"
+    },
+    "awake.Report": {
+      "additionalProperties": false,
+      "properties": {
+        "Caps": {
+          "$ref": "#/$defs/core.machine.Capabilities"
+        },
+        "Engine": {
+          "type": "string"
+        },
+        "Guards": {
+          "items": {
+            "$ref": "#/$defs/awake.GuardState"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "LastEnd": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/awake.End"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "NeverHeld": {
+          "type": "boolean"
+        },
+        "NeverSince": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "NeverSleeps": {
+          "type": "boolean"
+        },
+        "Now": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Pauses": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Reading": {
+          "$ref": "#/$defs/awake.Reading"
+        },
+        "Servers": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Session": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/awake.Session"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ThisMac": {
+          "type": "boolean"
+        },
+        "Zone": {
+          "additionalProperties": false,
+          "properties": {},
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Caps",
+        "Engine",
+        "Guards",
+        "LastEnd",
+        "Mac",
+        "NeverHeld",
+        "NeverSince",
+        "NeverSleeps",
+        "Now",
+        "Pauses",
+        "Reading",
+        "Servers",
+        "Session",
+        "ThisMac",
+        "Zone"
+      ],
+      "type": "object"
+    },
+    "awake.Session": {
+      "additionalProperties": false,
+      "properties": {
+        "battery": {
+          "type": "boolean"
+        },
+        "by": {
+          "type": "string"
+        },
+        "for": {
+          "type": "integer"
+        },
+        "lid": {
+          "type": "boolean"
+        },
+        "run": {
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "until": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "battery",
+        "by",
+        "lid",
+        "started_at",
+        "until"
+      ],
+      "type": "object"
+    },
+    "awake.calls.ReadIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "core.machine.Capabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "Battery": {
+          "type": "boolean"
+        },
+        "Engine": {
+          "type": "boolean"
+        },
+        "Jobs": {
+          "type": "boolean"
+        },
+        "Lid": {
+          "type": "boolean"
+        },
+        "Thermal": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Battery",
+        "Engine",
+        "Jobs",
+        "Lid",
+        "Thermal"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/awake.read.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch awake.read of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/awake.calls.ReadIn"
+    },
+    "out": {
+      "$ref": "#/$defs/awake.Report"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "awake.read",
+  "type": "object"
+}

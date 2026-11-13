@@ -1,0 +1,331 @@
+{
+  "$defs": {
+    "Answer": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HelloFrame"
+        },
+        {
+          "$ref": "#/$defs/ProgressFrame"
+        },
+        {
+          "$ref": "#/$defs/OutFrame"
+        },
+        {
+          "$ref": "#/$defs/ErrorFrame"
+        },
+        {
+          "$ref": "#/$defs/DoneFrame"
+        }
+      ]
+    },
+    "CallFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "call": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "in": {},
+        "target": {
+          "$ref": "#/$defs/Target"
+        },
+        "v": {
+          "const": 2
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "call"
+      ],
+      "type": "object"
+    },
+    "DoneFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "done": {
+          "const": true
+        },
+        "id": {
+          "type": "string"
+        },
+        "v": {
+          "const": 2
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "done"
+      ],
+      "type": "object"
+    },
+    "ErrorFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "$ref": "#/$defs/core.call.WireError"
+        },
+        "id": {
+          "type": "string"
+        },
+        "v": {
+          "const": 2
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "error"
+      ],
+      "type": "object"
+    },
+    "Hello": {
+      "additionalProperties": false,
+      "properties": {
+        "calls": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "kind": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "calls",
+        "version"
+      ],
+      "type": "object"
+    },
+    "HelloFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "hello": {
+          "$ref": "#/$defs/Hello"
+        },
+        "id": {
+          "type": "string"
+        },
+        "v": {
+          "const": 2
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "hello"
+      ],
+      "type": "object"
+    },
+    "OutFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "out": {},
+        "v": {
+          "const": 2
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "out"
+      ],
+      "type": "object"
+    },
+    "Progress": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "done": {
+          "type": "boolean"
+        },
+        "error": {
+          "$ref": "#/$defs/core.call.WireError"
+        },
+        "task": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "task"
+      ],
+      "type": "object"
+    },
+    "ProgressFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "progress": {
+          "$ref": "#/$defs/Progress"
+        },
+        "v": {
+          "const": 2
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "progress"
+      ],
+      "type": "object"
+    },
+    "Request": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HelloFrame"
+        },
+        {
+          "$ref": "#/$defs/CallFrame"
+        },
+        {
+          "$ref": "#/$defs/WatchFrame"
+        }
+      ]
+    },
+    "Target": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "on": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "WatchFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "in": {},
+        "target": {
+          "$ref": "#/$defs/Target"
+        },
+        "v": {
+          "const": 2
+        },
+        "watch": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "watch"
+      ],
+      "type": "object"
+    },
+    "core.call.WireError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "detail": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "exit": {
+          "type": "integer"
+        },
+        "fix": {
+          "$ref": "#/$defs/core.finding.Fix"
+        },
+        "hint": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "declined",
+            "engine-stopped",
+            "failed",
+            "far-too-old",
+            "interrupted",
+            "needs-confirmation",
+            "needs-terminal",
+            "not-for-this-machine",
+            "not-found",
+            "refused",
+            "unreachable"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    },
+    "core.finding.Fix": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Command": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Call",
+        "Command",
+        "Path"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/frame.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Request"
+    },
+    {
+      "$ref": "#/$defs/Answer"
+    }
+  ],
+  "description": "One frame of station.api/v2, one JSON object per line: a Request, or an Answer carrying the request's id. A call's `in` and `out` are its own schema's, under calls/. Written by make generate; remote/api's test holds it to remote/api.Frame.",
+  "title": "station.api/v2"
+}

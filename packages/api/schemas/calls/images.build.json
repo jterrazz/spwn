@@ -1,0 +1,92 @@
+{
+  "$defs": {
+    "images.Record": {
+      "additionalProperties": false,
+      "properties": {
+        "base": {
+          "type": "string"
+        },
+        "built_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "fetched": {
+          "type": "boolean"
+        },
+        "lock": {
+          "type": "string"
+        },
+        "machinefile": {
+          "type": "string"
+        },
+        "machinefile_sha": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "recipe_sha": {
+          "type": "string"
+        },
+        "size_gb": {
+          "type": "integer"
+        },
+        "station": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "base",
+        "built_at",
+        "name",
+        "recipe_sha",
+        "size_gb",
+        "station",
+        "version"
+      ],
+      "type": "object"
+    },
+    "images.calls.BuildIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Binary": {
+          "type": "string"
+        },
+        "Names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/images.build.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call images.build of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/images.calls.BuildIn"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/images.Record"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "images.build",
+  "type": "object"
+}

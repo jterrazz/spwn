@@ -1,0 +1,692 @@
+{
+  "$defs": {
+    "core.call.WireError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "detail": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "exit": {
+          "type": "integer"
+        },
+        "fix": {
+          "$ref": "#/$defs/core.finding.Fix"
+        },
+        "hint": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "declined",
+            "engine-stopped",
+            "failed",
+            "far-too-old",
+            "interrupted",
+            "needs-confirmation",
+            "needs-terminal",
+            "not-for-this-machine",
+            "not-found",
+            "refused",
+            "unreachable"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    },
+    "core.finding.Fix": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Command": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Call",
+        "Command",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "core.machine.Hardware": {
+      "additionalProperties": false,
+      "properties": {
+        "CPUs": {
+          "type": "integer"
+        },
+        "Chip": {
+          "type": "string"
+        },
+        "Ether": {
+          "type": "string"
+        },
+        "Memory": {
+          "type": "integer"
+        },
+        "Model": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "CPUs",
+        "Memory"
+      ],
+      "type": "object"
+    },
+    "machines.AgentView": {
+      "additionalProperties": false,
+      "properties": {
+        "Ask": {
+          "type": "string"
+        },
+        "Ended": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Reason": {
+          "type": "string"
+        },
+        "Since": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "State": {
+          "type": "string"
+        },
+        "Step": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Task": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Ask",
+        "Ended",
+        "Reason",
+        "Since",
+        "State",
+        "Task"
+      ],
+      "type": "object"
+    },
+    "machines.AllMachines": {
+      "additionalProperties": false,
+      "properties": {
+        "Macs": {
+          "items": {
+            "$ref": "#/$defs/machines.MacView"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Read": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "Macs",
+        "Read"
+      ],
+      "type": "object"
+    },
+    "machines.Birth": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "progress": {
+          "type": "integer"
+        },
+        "step": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "progress",
+        "step"
+      ],
+      "type": "object"
+    },
+    "machines.CheckStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "since": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "failing",
+            "passing",
+            "waiting"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "machines.EngineView": {
+      "additionalProperties": false,
+      "properties": {
+        "Installed": {
+          "type": "boolean"
+        },
+        "Known": {
+          "type": "boolean"
+        },
+        "Running": {
+          "type": "boolean"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Installed",
+        "Known",
+        "Running",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "machines.Incident": {
+      "additionalProperties": false,
+      "properties": {
+        "cause": {
+          "type": "string"
+        },
+        "from": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "to": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from"
+      ],
+      "type": "object"
+    },
+    "machines.LatencyPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "took": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "took"
+      ],
+      "type": "object"
+    },
+    "machines.MacView": {
+      "additionalProperties": false,
+      "properties": {
+        "Answered": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Asleep": {
+          "type": "boolean"
+        },
+        "Engine": {
+          "$ref": "#/$defs/machines.EngineView"
+        },
+        "Hardware": {
+          "$ref": "#/$defs/core.machine.Hardware"
+        },
+        "LAN": {
+          "type": "string"
+        },
+        "Laptop": {
+          "type": "boolean"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Node": {
+          "$ref": "#/$defs/machines.Node"
+        },
+        "Reachable": {
+          "type": "boolean"
+        },
+        "StationVersion": {
+          "type": "string"
+        },
+        "ThisMac": {
+          "type": "boolean"
+        },
+        "User": {
+          "type": "string"
+        },
+        "VMs": {
+          "items": {
+            "$ref": "#/$defs/machines.VM"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Answered",
+        "Asleep",
+        "Engine",
+        "Hardware",
+        "LAN",
+        "Laptop",
+        "Name",
+        "Node",
+        "Reachable",
+        "StationVersion",
+        "ThisMac",
+        "User",
+        "VMs"
+      ],
+      "type": "object"
+    },
+    "machines.Node": {
+      "additionalProperties": false,
+      "properties": {
+        "IP": {
+          "type": "string"
+        },
+        "Online": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "IP",
+        "Online"
+      ],
+      "type": "object"
+    },
+    "machines.Resources": {
+      "additionalProperties": false,
+      "properties": {
+        "CPUs": {
+          "type": "integer"
+        },
+        "DiskBytes": {
+          "type": "integer"
+        },
+        "MemoryBytes": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "CPUs",
+        "DiskBytes",
+        "MemoryBytes"
+      ],
+      "type": "object"
+    },
+    "machines.RestartWalk": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "step": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "step"
+      ],
+      "type": "object"
+    },
+    "machines.Restarts": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "last": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "looping": {
+          "type": "boolean"
+        },
+        "recent": {
+          "items": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "streak": {
+          "type": "integer"
+        },
+        "wait": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "machines.Uptime": {
+      "additionalProperties": false,
+      "properties": {
+        "days": {
+          "items": {
+            "$ref": "#/$defs/machines.UptimeDay"
+          },
+          "type": "array"
+        },
+        "incidents": {
+          "items": {
+            "$ref": "#/$defs/machines.Incident"
+          },
+          "type": "array"
+        },
+        "since": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "machines.UptimeDay": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "down_s": {
+          "type": "integer"
+        },
+        "restarts": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date"
+      ],
+      "type": "object"
+    },
+    "machines.VM": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.AgentView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Agents": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Birth": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.Birth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "BootAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Cause": {
+          "type": "string"
+        },
+        "Check": {
+          "type": "string"
+        },
+        "CheckStatus": {
+          "$ref": "#/$defs/machines.CheckStatus"
+        },
+        "CreatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "Device": {
+          "type": "string"
+        },
+        "Guest": {
+          "type": "string"
+        },
+        "IP": {
+          "type": "string"
+        },
+        "Image": {
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "",
+            "mac",
+            "linux",
+            "macos"
+          ],
+          "type": "string"
+        },
+        "LastLines": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Latency": {
+          "items": {
+            "$ref": "#/$defs/machines.LatencyPoint"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Lifetime": {
+          "type": "string"
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Network": {
+          "type": "string"
+        },
+        "ReadyAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Resources": {
+          "$ref": "#/$defs/machines.Resources"
+        },
+        "Restart": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.RestartWalk"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Restarts": {
+          "$ref": "#/$defs/machines.Restarts"
+        },
+        "SSH": {
+          "type": "boolean"
+        },
+        "SizeGB": {
+          "type": "integer"
+        },
+        "State": {
+          "type": "string"
+        },
+        "Uptime": {
+          "$ref": "#/$defs/machines.Uptime"
+        },
+        "Version": {
+          "type": "string"
+        },
+        "Want": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Agent",
+        "Birth",
+        "BootAt",
+        "Cause",
+        "Check",
+        "CheckStatus",
+        "CreatedAt",
+        "Detail",
+        "Device",
+        "Guest",
+        "IP",
+        "Image",
+        "Kind",
+        "LastLines",
+        "Latency",
+        "Lifetime",
+        "Mac",
+        "Name",
+        "Network",
+        "ReadyAt",
+        "Resources",
+        "Restart",
+        "Restarts",
+        "SSH",
+        "SizeGB",
+        "State",
+        "Uptime",
+        "Version",
+        "Want"
+      ],
+      "type": "object"
+    },
+    "machines.calls.ListIn": {
+      "additionalProperties": false,
+      "properties": {
+        "ThisMac": {
+          "type": "boolean"
+        },
+        "Unwritten": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "machines.calls.ListOut": {
+      "additionalProperties": false,
+      "properties": {
+        "All": {
+          "$ref": "#/$defs/machines.AllMachines"
+        },
+        "Unrefreshed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.call.WireError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "All",
+        "Unrefreshed"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch machines.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.ListIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.calls.ListOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.list",
+  "type": "object"
+}

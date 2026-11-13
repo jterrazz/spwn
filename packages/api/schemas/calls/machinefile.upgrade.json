@@ -1,0 +1,1566 @@
+{
+  "$defs": {
+    "catalog.AgentHooks": {
+      "additionalProperties": false,
+      "properties": {
+        "Apps": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Apps"
+      ],
+      "type": "object"
+    },
+    "catalog.AptMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "Packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Packages"
+      ],
+      "type": "object"
+    },
+    "catalog.Copy": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "Mode": {
+          "type": "integer"
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "From",
+        "Mode",
+        "To"
+      ],
+      "type": "object"
+    },
+    "catalog.DefaultKey": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string"
+        },
+        "Type": {
+          "enum": [
+            "",
+            "string",
+            "integer",
+            "float",
+            "boolean"
+          ],
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key",
+        "Type",
+        "Value"
+      ],
+      "type": "object"
+    },
+    "catalog.FileMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "Copy": {
+          "items": {
+            "$ref": "#/$defs/catalog.Copy"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Mode": {
+          "enum": [
+            "",
+            "file",
+            "block"
+          ],
+          "type": "string"
+        },
+        "Reload": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Touch": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Copy",
+        "Mode",
+        "Reload",
+        "Touch"
+      ],
+      "type": "object"
+    },
+    "catalog.GitAlias": {
+      "additionalProperties": false,
+      "properties": {
+        "Command": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Command",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "catalog.GitAliases": {
+      "additionalProperties": false,
+      "properties": {
+        "Aliases": {
+          "items": {
+            "$ref": "#/$defs/catalog.GitAlias"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "File": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Aliases",
+        "File"
+      ],
+      "type": "object"
+    },
+    "catalog.GitHubReleaseMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "Asset": {
+          "type": "string"
+        },
+        "Checksums": {
+          "type": "string"
+        },
+        "Repo": {
+          "type": "string"
+        },
+        "Unverified": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Asset",
+        "Checksums",
+        "Repo",
+        "Unverified"
+      ],
+      "type": "object"
+    },
+    "catalog.LockSource": {
+      "additionalProperties": false,
+      "properties": {
+        "Commit": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Commit",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "catalog.LockedApp": {
+      "additionalProperties": false,
+      "properties": {
+        "Method": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Method",
+        "Name",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "catalog.MacOSDefaults": {
+      "additionalProperties": false,
+      "properties": {
+        "Domain": {
+          "type": "string"
+        },
+        "Keys": {
+          "items": {
+            "$ref": "#/$defs/catalog.DefaultKey"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "ThisMac": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Domain",
+        "Keys",
+        "ThisMac"
+      ],
+      "type": "object"
+    },
+    "catalog.MasMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ID",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "catalog.MethodSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "AgentHooks": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.AgentHooks"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Apt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.AptMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Arch": {
+          "enum": [
+            "",
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
+        "Brew": {
+          "type": "string"
+        },
+        "Builtin": {
+          "type": "string"
+        },
+        "Bun": {
+          "type": "string"
+        },
+        "Cask": {
+          "type": "string"
+        },
+        "Family": {
+          "enum": [
+            "",
+            "linux",
+            "debian"
+          ],
+          "type": "string"
+        },
+        "File": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.FileMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "GitAliases": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.GitAliases"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "GitHubRelease": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.GitHubReleaseMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "MacOSDefaults": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.MacOSDefaults"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Machine": {
+          "items": {
+            "enum": [
+              "computer",
+              "workspace",
+              "server"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Mas": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.MasMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Mise": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.MiseMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "MuxMachines": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.MuxMachines"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Needs": {
+          "items": {
+            "enum": [
+              "sudo",
+              "terminal",
+              "license",
+              "app-store-login"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Npm": {
+          "type": "string"
+        },
+        "OS": {
+          "enum": [
+            "",
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
+        },
+        "Package": {
+          "type": "string"
+        },
+        "Path": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Pin": {
+          "enum": [
+            "",
+            "none",
+            "version"
+          ],
+          "type": "string"
+        },
+        "ProvidedBy": {
+          "type": "string"
+        },
+        "Provides": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Script": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.ScriptMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Shell": {
+          "items": {
+            "$ref": "#/$defs/catalog.ShellBlock"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Skill": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.SkillMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Trusted": {
+          "type": "boolean"
+        },
+        "Upgrade": {
+          "type": "string"
+        },
+        "Uv": {
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "AgentHooks",
+        "Apt",
+        "Arch",
+        "Brew",
+        "Builtin",
+        "Bun",
+        "Cask",
+        "Family",
+        "File",
+        "GitAliases",
+        "GitHubRelease",
+        "MacOSDefaults",
+        "Machine",
+        "Mas",
+        "Mise",
+        "MuxMachines",
+        "Needs",
+        "Npm",
+        "OS",
+        "Package",
+        "Path",
+        "Pin",
+        "ProvidedBy",
+        "Provides",
+        "Script",
+        "Shell",
+        "Skill",
+        "Trusted",
+        "Upgrade",
+        "Uv",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "catalog.MiseMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "catalog.MuxMachines": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "catalog.ScriptMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Check": {
+          "type": "string"
+        },
+        "Env": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Hint": {
+          "type": "string"
+        },
+        "OffTerminal": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "OnTerminal": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Run": {
+          "type": "string"
+        },
+        "URL": {
+          "type": "string"
+        },
+        "Undo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Check",
+        "Env",
+        "Hint",
+        "OffTerminal",
+        "OnTerminal",
+        "Run",
+        "URL",
+        "Undo"
+      ],
+      "type": "object"
+    },
+    "catalog.ShellBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "ID": {
+          "type": "string"
+        },
+        "Zsh": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ID",
+        "Zsh"
+      ],
+      "type": "object"
+    },
+    "catalog.SkillMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Repo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name",
+        "Repo"
+      ],
+      "type": "object"
+    },
+    "machinefile.Asked": {
+      "additionalProperties": false,
+      "properties": {
+        "Need": {
+          "enum": [
+            "",
+            "sudo",
+            "terminal",
+            "license",
+            "app-store-login"
+          ],
+          "type": "string"
+        },
+        "Packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Need",
+        "Packages"
+      ],
+      "type": "object"
+    },
+    "machinefile.Block": {
+      "additionalProperties": false,
+      "properties": {
+        "Action": {
+          "enum": [
+            "",
+            "adopt",
+            "install",
+            "keep",
+            "leave",
+            "remove",
+            "set"
+          ],
+          "type": "string"
+        },
+        "Condition": {
+          "enum": [
+            "",
+            "absent",
+            "changed",
+            "extra",
+            "not-managed",
+            "outdated",
+            "present",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Diff": {
+          "type": "string"
+        },
+        "Fate": {
+          "enum": [
+            "",
+            "gone",
+            "kept-another-way",
+            "kept-edited",
+            "kept-holding",
+            "kept-irreversible",
+            "kept-manager-missing",
+            "kept-required",
+            "kept-unread",
+            "taken"
+          ],
+          "type": "string"
+        },
+        "ID": {
+          "type": "string"
+        },
+        "Package": {
+          "type": "string"
+        },
+        "Zsh": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Action",
+        "Condition",
+        "Diff",
+        "Fate",
+        "ID",
+        "Package",
+        "Zsh"
+      ],
+      "type": "object"
+    },
+    "machinefile.Done": {
+      "additionalProperties": false,
+      "properties": {
+        "Detail": {
+          "type": "string"
+        },
+        "Installed": {
+          "type": "boolean"
+        },
+        "Line": {
+          "$ref": "#/$defs/machinefile.Line"
+        },
+        "Log": {
+          "type": "string"
+        },
+        "Method": {
+          "type": "string"
+        },
+        "Newest": {
+          "type": "string"
+        },
+        "Reason": {
+          "enum": [
+            "",
+            "interrupted",
+            "not-run",
+            "pinned",
+            "updates-itself",
+            "waits-for-you"
+          ],
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Updated": {
+          "type": "boolean"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Detail",
+        "Installed",
+        "Line",
+        "Log",
+        "Method",
+        "Newest",
+        "Reason",
+        "State",
+        "Updated",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "machinefile.ExtraLine": {
+      "additionalProperties": false,
+      "properties": {
+        "Action": {
+          "enum": [
+            "",
+            "adopt",
+            "install",
+            "keep",
+            "leave",
+            "remove",
+            "set"
+          ],
+          "type": "string"
+        },
+        "Installed": {
+          "$ref": "#/$defs/machinefile.Installed"
+        },
+        "RequiredBy": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Seen": {
+          "$ref": "#/$defs/machinefile.Seen"
+        },
+        "Step": {
+          "$ref": "#/$defs/machinefile.Step"
+        }
+      },
+      "required": [
+        "Action",
+        "Installed",
+        "RequiredBy",
+        "Seen",
+        "Step"
+      ],
+      "type": "object"
+    },
+    "machinefile.Installed": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "machinefile": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "package": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "machinefile",
+        "method",
+        "package"
+      ],
+      "type": "object"
+    },
+    "machinefile.Line": {
+      "additionalProperties": false,
+      "properties": {
+        "Action": {
+          "enum": [
+            "",
+            "adopt",
+            "install",
+            "keep",
+            "leave",
+            "remove",
+            "set"
+          ],
+          "type": "string"
+        },
+        "Seen": {
+          "$ref": "#/$defs/machinefile.Seen"
+        },
+        "Step": {
+          "$ref": "#/$defs/machinefile.Step"
+        }
+      },
+      "required": [
+        "Action",
+        "Seen",
+        "Step"
+      ],
+      "type": "object"
+    },
+    "machinefile.Lock": {
+      "additionalProperties": false,
+      "properties": {
+        "Apps": {
+          "items": {
+            "$ref": "#/$defs/catalog.LockedApp"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "File": {
+          "type": "string"
+        },
+        "Lock": {
+          "type": "string"
+        },
+        "Machinefile": {
+          "type": "string"
+        },
+        "Source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.LockSource"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Apps",
+        "File",
+        "Lock",
+        "Machinefile",
+        "Source"
+      ],
+      "type": "object"
+    },
+    "machinefile.LockChange": {
+      "additionalProperties": false,
+      "properties": {
+        "App": {
+          "type": "string"
+        },
+        "Now": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.LockedApp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Was": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.LockedApp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "App",
+        "Now",
+        "Was"
+      ],
+      "type": "object"
+    },
+    "machinefile.LockDiff": {
+      "additionalProperties": false,
+      "properties": {
+        "Apps": {
+          "items": {
+            "$ref": "#/$defs/machinefile.LockChange"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Source": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Apps",
+        "Source"
+      ],
+      "type": "object"
+    },
+    "machinefile.Origin": {
+      "additionalProperties": false,
+      "properties": {
+        "File": {
+          "type": "string"
+        },
+        "Layer": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "File",
+        "Layer",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "machinefile.Plan": {
+      "additionalProperties": false,
+      "properties": {
+        "Blocks": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Block"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Extra": {
+          "items": {
+            "$ref": "#/$defs/machinefile.ExtraLine"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Lines": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Line"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Lock": {
+          "$ref": "#/$defs/machinefile.Lock"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Needs": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Asked"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Passwordless": {
+          "type": "boolean"
+        },
+        "Phase": {
+          "enum": [
+            "",
+            "image",
+            "boot",
+            "apply"
+          ],
+          "type": "string"
+        },
+        "Restarts": {
+          "items": {
+            "enum": [
+              "restart-dock",
+              "restart-finder",
+              "restart-menu-bar",
+              "logout",
+              "reboot"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Scripts": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Script"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Skipped": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Skip"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.LockSource"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Blocks",
+        "Extra",
+        "Lines",
+        "Lock",
+        "Name",
+        "Needs",
+        "Passwordless",
+        "Phase",
+        "Restarts",
+        "Scripts",
+        "Skipped",
+        "Source"
+      ],
+      "type": "object"
+    },
+    "machinefile.Ran": {
+      "additionalProperties": false,
+      "properties": {
+        "Detail": {
+          "type": "string"
+        },
+        "Script": {
+          "$ref": "#/$defs/machinefile.Script"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Detail",
+        "Script",
+        "State"
+      ],
+      "type": "object"
+    },
+    "machinefile.Script": {
+      "additionalProperties": false,
+      "properties": {
+        "Lines": {
+          "type": "string"
+        },
+        "Origin": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
+        "Phase": {
+          "enum": [
+            "",
+            "boot",
+            "image",
+            "upgrade"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Lines",
+        "Origin",
+        "Phase"
+      ],
+      "type": "object"
+    },
+    "machinefile.Seen": {
+      "additionalProperties": false,
+      "properties": {
+        "Condition": {
+          "enum": [
+            "",
+            "absent",
+            "changed",
+            "extra",
+            "not-managed",
+            "outdated",
+            "present",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "Holds": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "HoldsUnread": {
+          "type": "boolean"
+        },
+        "Irreversible": {
+          "type": "boolean"
+        },
+        "Lacks": {
+          "type": "string"
+        },
+        "Method": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Condition",
+        "Detail",
+        "Holds",
+        "HoldsUnread",
+        "Irreversible",
+        "Lacks",
+        "Method",
+        "State",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "machinefile.Skip": {
+      "additionalProperties": false,
+      "properties": {
+        "Origin": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
+        "Package": {
+          "type": "string"
+        },
+        "Why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Origin",
+        "Package",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "machinefile.Step": {
+      "additionalProperties": false,
+      "properties": {
+        "Baked": {
+          "type": "boolean"
+        },
+        "Chosen": {
+          "type": "string"
+        },
+        "Defined": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
+        "From": {
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "",
+            "manager",
+            "app",
+            "setting"
+          ],
+          "type": "string"
+        },
+        "Lock": {
+          "type": "string"
+        },
+        "Locked": {
+          "type": "string"
+        },
+        "Method": {
+          "type": "string"
+        },
+        "Needs": {
+          "items": {
+            "enum": [
+              "sudo",
+              "terminal",
+              "license",
+              "app-store-login"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Origin": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
+        "Package": {
+          "type": "string"
+        },
+        "Phase": {
+          "enum": [
+            "",
+            "image",
+            "boot",
+            "apply"
+          ],
+          "type": "string"
+        },
+        "Recorded": {
+          "type": "string"
+        },
+        "Restarts": {
+          "items": {
+            "enum": [
+              "restart-dock",
+              "restart-finder",
+              "restart-menu-bar",
+              "logout",
+              "reboot"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Spec": {
+          "$ref": "#/$defs/catalog.MethodSpec"
+        },
+        "UpdatesSelf": {
+          "type": "boolean"
+        },
+        "Values": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Version": {
+          "type": "string"
+        },
+        "Waits": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Baked",
+        "Chosen",
+        "Defined",
+        "From",
+        "Kind",
+        "Lock",
+        "Locked",
+        "Method",
+        "Needs",
+        "Origin",
+        "Package",
+        "Phase",
+        "Recorded",
+        "Restarts",
+        "Spec",
+        "UpdatesSelf",
+        "Values",
+        "Version",
+        "Waits",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "machinefile.Upgraded": {
+      "additionalProperties": false,
+      "properties": {
+        "Done": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Done"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Interrupted": {
+          "type": "boolean"
+        },
+        "Lock": {
+          "$ref": "#/$defs/machinefile.LockDiff"
+        },
+        "Plan": {
+          "$ref": "#/$defs/machinefile.Plan"
+        },
+        "Ran": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machinefile.Ran"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Unbound": {
+          "type": "boolean"
+        },
+        "Unpulled": {
+          "type": "string"
+        },
+        "Waiting": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Waiting"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Done",
+        "Interrupted",
+        "Lock",
+        "Plan",
+        "Ran",
+        "Unbound",
+        "Unpulled",
+        "Waiting"
+      ],
+      "type": "object"
+    },
+    "machinefile.Waiting": {
+      "additionalProperties": false,
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        },
+        "moved": {
+          "type": "string"
+        },
+        "newest": {
+          "type": "string"
+        },
+        "range": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "moved",
+        "newest",
+        "range"
+      ],
+      "type": "object"
+    },
+    "machinefile.calls.UpgradeIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Interactive": {
+          "type": "boolean"
+        },
+        "Machinefile": {
+          "type": "string"
+        },
+        "Unattended": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machinefile.upgrade.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machinefile.upgrade of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machinefile.calls.UpgradeIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machinefile.Upgraded"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machinefile.upgrade",
+  "type": "object"
+}

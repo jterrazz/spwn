@@ -1,0 +1,84 @@
+{
+  "$defs": {
+    "NoticeEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "const": "notice"
+        },
+        "notice": {
+          "$ref": "#/$defs/engine.Notice"
+        }
+      },
+      "required": [
+        "event",
+        "notice"
+      ],
+      "type": "object"
+    },
+    "engine.Notice": {
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "type": "object"
+    },
+    "engine.Opened": {
+      "additionalProperties": false,
+      "properties": {
+        "pages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "stream": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "stream"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.events.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch engine.events of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/engine.Opened"
+        },
+        {
+          "$ref": "#/$defs/NoticeEvent"
+        }
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.events",
+  "type": "object"
+}

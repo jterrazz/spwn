@@ -1,0 +1,2200 @@
+{
+  "$defs": {
+    "activity.Battery": {
+      "additionalProperties": false,
+      "properties": {
+        "charging": {
+          "type": "boolean"
+        },
+        "cycles": {
+          "type": "integer"
+        },
+        "health": {
+          "type": "integer"
+        },
+        "on_battery": {
+          "type": "boolean"
+        },
+        "percent": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "charging",
+        "on_battery",
+        "percent"
+      ],
+      "type": "object"
+    },
+    "activity.Busiest": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "items": {
+            "$ref": "#/$defs/activity.Process"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "memory": {
+          "items": {
+            "$ref": "#/$defs/activity.Process"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "cpu",
+        "memory"
+      ],
+      "type": "object"
+    },
+    "activity.Process": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "pid": {
+          "type": "integer"
+        },
+        "value": {
+          "type": "number"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "pid",
+        "value"
+      ],
+      "type": "object"
+    },
+    "activity.Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "run": {
+          "$ref": "#/$defs/activity.Usage"
+        },
+        "sample": {
+          "$ref": "#/$defs/activity.Sample"
+        },
+        "top": {
+          "$ref": "#/$defs/activity.Busiest"
+        },
+        "vms": {
+          "items": {
+            "$ref": "#/$defs/activity.VMUsage"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "sample",
+        "top"
+      ],
+      "type": "object"
+    },
+    "activity.Sample": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "battery": {
+          "$ref": "#/$defs/activity.Battery"
+        },
+        "boot": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cpu_busy": {
+          "type": "integer"
+        },
+        "cpu_total": {
+          "type": "integer"
+        },
+        "cpus": {
+          "type": "integer"
+        },
+        "disk_free": {
+          "type": "integer"
+        },
+        "disk_read": {
+          "type": "integer"
+        },
+        "disk_total": {
+          "type": "integer"
+        },
+        "disk_written": {
+          "type": "integer"
+        },
+        "load": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        },
+        "mem_total": {
+          "type": "integer"
+        },
+        "mem_used": {
+          "type": "integer"
+        },
+        "net_in": {
+          "type": "integer"
+        },
+        "net_out": {
+          "type": "integer"
+        },
+        "pressure": {
+          "enum": [
+            "critical",
+            "normal",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "swap_used": {
+          "type": "integer"
+        },
+        "thermal": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "boot",
+        "cpu_busy",
+        "cpu_total",
+        "cpus",
+        "disk_read",
+        "disk_written",
+        "load",
+        "mem_total",
+        "mem_used",
+        "net_in",
+        "net_out",
+        "swap_used",
+        "thermal"
+      ],
+      "type": "object"
+    },
+    "activity.Usage": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "type": "number"
+        },
+        "memory": {
+          "type": "integer"
+        },
+        "started": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cpu",
+        "memory"
+      ],
+      "type": "object"
+    },
+    "activity.VMUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "type": "number"
+        },
+        "memory": {
+          "type": "integer"
+        },
+        "started": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cpu",
+        "memory",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "apps.Report": {
+      "additionalProperties": false,
+      "properties": {
+        "App": {
+          "$ref": "#/$defs/catalog.App"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "Holds": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "HoldsUnread": {
+          "type": "boolean"
+        },
+        "Irreversible": {
+          "type": "boolean"
+        },
+        "Live": {
+          "type": "string"
+        },
+        "Managed": {
+          "type": "boolean"
+        },
+        "Manager": {
+          "type": "string"
+        },
+        "Method": {
+          "type": "string"
+        },
+        "Needs": {
+          "type": "string"
+        },
+        "Newest": {
+          "type": "string"
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        },
+        "Why": {
+          "enum": [
+            "",
+            "failing",
+            "interrupted",
+            "late",
+            "missing",
+            "outdated",
+            "partial",
+            "unmanaged"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "App",
+        "Detail",
+        "Holds",
+        "HoldsUnread",
+        "Irreversible",
+        "Live",
+        "Managed",
+        "Manager",
+        "Method",
+        "Needs",
+        "Newest",
+        "Pending",
+        "State",
+        "Version",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "background.Task": {
+      "additionalProperties": false,
+      "properties": {
+        "ByHand": {
+          "type": "string"
+        },
+        "Exit": {
+          "type": "integer"
+        },
+        "Group": {
+          "enum": [
+            "",
+            "known",
+            "orphan",
+            "station",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Owner": {
+          "type": "string"
+        },
+        "OwnerGone": {
+          "type": "boolean"
+        },
+        "PID": {
+          "type": "integer"
+        },
+        "Plist": {
+          "type": "string"
+        },
+        "Program": {
+          "type": "string"
+        },
+        "Removal": {
+          "type": "string"
+        },
+        "Run": {
+          "enum": [
+            "",
+            "failing",
+            "idle",
+            "not loaded",
+            "running",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Scope": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "ByHand",
+        "Exit",
+        "Group",
+        "Label",
+        "Owner",
+        "OwnerGone",
+        "PID",
+        "Plist",
+        "Program",
+        "Removal",
+        "Run",
+        "Scope",
+        "State"
+      ],
+      "type": "object"
+    },
+    "catalog.Action": {
+      "additionalProperties": false,
+      "properties": {
+        "Delete": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Env": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Exists": {
+          "type": "string"
+        },
+        "On": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Prune": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Run": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Uses": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Delete",
+        "Env",
+        "Exists",
+        "On",
+        "Prune",
+        "Run",
+        "Uses"
+      ],
+      "type": "object"
+    },
+    "catalog.App": {
+      "additionalProperties": false,
+      "properties": {
+        "AppStore": {
+          "type": "boolean"
+        },
+        "Bundle": {
+          "type": "string"
+        },
+        "Category": {
+          "enum": [
+            "",
+            "AI Agents",
+            "AI Apps",
+            "AI Tooling",
+            "Agent skills",
+            "Browsers",
+            "Command line",
+            "Communication",
+            "Containers \u0026 VMs",
+            "Deploy",
+            "Editors \u0026 IDEs",
+            "Git",
+            "Media",
+            "Package Managers",
+            "Productivity",
+            "Remote Access",
+            "Runtimes",
+            "Security",
+            "Shell \u0026 Terminal",
+            "System Utilities"
+          ],
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Disk": {
+          "$ref": "#/$defs/catalog.Disk"
+        },
+        "Installs": {
+          "items": {
+            "$ref": "#/$defs/catalog.LivesOn"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Kind": {
+          "enum": [
+            "manager",
+            "app",
+            "setting"
+          ],
+          "type": "string"
+        },
+        "Live": {
+          "$ref": "#/$defs/catalog.Liveness"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Needs": {
+          "items": {
+            "enum": [
+              "sudo",
+              "terminal",
+              "license",
+              "app-store-login"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Provides": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Replaces": {
+          "type": "string"
+        },
+        "Requires": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Supersedes": {
+          "type": "string"
+        },
+        "Then": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "UpdatesSelf": {
+          "type": "boolean"
+        },
+        "Version": {
+          "$ref": "#/$defs/catalog.VersionRead"
+        }
+      },
+      "required": [
+        "AppStore",
+        "Bundle",
+        "Category",
+        "Description",
+        "Disk",
+        "Installs",
+        "Live",
+        "Name",
+        "Needs",
+        "Path",
+        "Provides",
+        "Replaces",
+        "Requires",
+        "Supersedes",
+        "Then",
+        "UpdatesSelf",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "catalog.Disk": {
+      "additionalProperties": false,
+      "properties": {
+        "Erase": {
+          "items": {
+            "$ref": "#/$defs/catalog.Action"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Free": {
+          "items": {
+            "$ref": "#/$defs/catalog.Action"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Installed": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Misplaced": {
+          "items": {
+            "$ref": "#/$defs/catalog.Misplaced"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "NoErase": {
+          "type": "string"
+        },
+        "Paths": {
+          "items": {
+            "$ref": "#/$defs/catalog.Stored"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Quit": {
+          "type": "string"
+        },
+        "Relocate": {
+          "items": {
+            "$ref": "#/$defs/catalog.Relocation"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Removal": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Size": {
+          "enum": [
+            "",
+            "docker-system-df"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Erase",
+        "Free",
+        "Installed",
+        "Misplaced",
+        "NoErase",
+        "Paths",
+        "Quit",
+        "Relocate",
+        "Removal",
+        "Size"
+      ],
+      "type": "object"
+    },
+    "catalog.Input": {
+      "additionalProperties": false,
+      "properties": {
+        "DefaultEnv": {
+          "type": "string"
+        },
+        "Help": {
+          "type": "string"
+        },
+        "Kind": {
+          "type": "integer"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Options": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "DefaultEnv",
+        "Help",
+        "Kind",
+        "Label",
+        "Name",
+        "Options",
+        "Required"
+      ],
+      "type": "object"
+    },
+    "catalog.Liveness": {
+      "additionalProperties": false,
+      "properties": {
+        "Command": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Process": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Command",
+        "Process"
+      ],
+      "type": "object"
+    },
+    "catalog.LivesOn": {
+      "additionalProperties": false,
+      "properties": {
+        "Install": {},
+        "Kinds": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Method": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Kinds"
+      ],
+      "type": "object"
+    },
+    "catalog.Misplaced": {
+      "additionalProperties": false,
+      "properties": {
+        "Busy": {
+          "type": "string"
+        },
+        "Free": {
+          "items": {
+            "$ref": "#/$defs/catalog.Action"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Move": {
+          "items": {
+            "$ref": "#/$defs/catalog.Move"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Prune": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Then": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Busy",
+        "Free",
+        "Move",
+        "Path",
+        "Prune",
+        "Then"
+      ],
+      "type": "object"
+    },
+    "catalog.Move": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "From",
+        "To"
+      ],
+      "type": "object"
+    },
+    "catalog.Relocation": {
+      "additionalProperties": false,
+      "properties": {
+        "File": {
+          "enum": [
+            "",
+            "go-env",
+            "npmrc",
+            "bunfig",
+            "mise settings"
+          ],
+          "type": "string"
+        },
+        "Key": {
+          "type": "string"
+        },
+        "Pending": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "File",
+        "Key",
+        "Pending",
+        "Value"
+      ],
+      "type": "object"
+    },
+    "catalog.Setting": {
+      "additionalProperties": false,
+      "properties": {
+        "Category": {
+          "enum": [
+            "",
+            "Agents",
+            "Editor",
+            "Headless",
+            "Network",
+            "Security",
+            "Shell",
+            "System",
+            "Terminal"
+          ],
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Guided": {
+          "type": "boolean"
+        },
+        "Help": {
+          "type": "string"
+        },
+        "Inputs": {
+          "items": {
+            "$ref": "#/$defs/catalog.Input"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Interactive": {
+          "type": "boolean"
+        },
+        "Kinds": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "NeedsRoot": {
+          "type": "boolean"
+        },
+        "OrRequires": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Requires": {
+          "type": "string"
+        },
+        "Reversible": {
+          "type": "boolean"
+        },
+        "RunOnce": {
+          "type": "boolean"
+        },
+        "Sets": {
+          "items": {
+            "$ref": "#/$defs/catalog.Value"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Writes": {
+          "items": {
+            "$ref": "#/$defs/catalog.Stored"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Category",
+        "Description",
+        "Guided",
+        "Help",
+        "Inputs",
+        "Interactive",
+        "Kinds",
+        "Name",
+        "NeedsRoot",
+        "Requires",
+        "Reversible",
+        "RunOnce",
+        "Sets",
+        "Writes"
+      ],
+      "type": "object"
+    },
+    "catalog.Stored": {
+      "additionalProperties": false,
+      "properties": {
+        "Level": {
+          "enum": [
+            "",
+            "cache",
+            "data",
+            "settings",
+            "kept"
+          ],
+          "type": "string"
+        },
+        "Memos": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Note": {
+          "type": "string"
+        },
+        "On": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Level",
+        "Memos",
+        "Note",
+        "On",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "catalog.Value": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "type": "object"
+    },
+    "catalog.VersionRead": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Pattern": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Path",
+        "Pattern"
+      ],
+      "type": "object"
+    },
+    "core.call.WireError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "detail": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "exit": {
+          "type": "integer"
+        },
+        "fix": {
+          "$ref": "#/$defs/core.finding.Fix"
+        },
+        "hint": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "declined",
+            "engine-stopped",
+            "failed",
+            "far-too-old",
+            "interrupted",
+            "needs-confirmation",
+            "needs-terminal",
+            "not-for-this-machine",
+            "not-found",
+            "refused",
+            "unreachable"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    },
+    "core.finding.Fix": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Command": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Call",
+        "Command",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "disk.MisplacedReport": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Repair": {
+          "type": "string"
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Name",
+        "Path",
+        "Repair",
+        "To"
+      ],
+      "type": "object"
+    },
+    "overview.AwakeState": {
+      "additionalProperties": false,
+      "properties": {
+        "Held": {
+          "type": "boolean"
+        },
+        "Lid": {
+          "type": "boolean"
+        },
+        "Until": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "Held",
+        "Lid",
+        "Until"
+      ],
+      "type": "object"
+    },
+    "overview.Check": {
+      "additionalProperties": false,
+      "properties": {
+        "Detail": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Detail",
+        "Name",
+        "State",
+        "Value"
+      ],
+      "type": "object"
+    },
+    "overview.Disk": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Level": {
+          "enum": [
+            "",
+            "cache",
+            "data",
+            "settings",
+            "kept"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Level",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "overview.Environment": {
+      "additionalProperties": false,
+      "properties": {
+        "Network": {
+          "items": {
+            "$ref": "#/$defs/overview.Check"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Ports": {
+          "items": {
+            "$ref": "#/$defs/overview.Port"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Protections": {
+          "items": {
+            "$ref": "#/$defs/overview.Check"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Updates": {
+          "items": {
+            "$ref": "#/$defs/overview.Check"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Network",
+        "Ports",
+        "Protections",
+        "Updates"
+      ],
+      "type": "object"
+    },
+    "overview.Head": {
+      "additionalProperties": false,
+      "properties": {
+        "Kind": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "ThisMac": {
+          "type": "boolean"
+        },
+        "Up": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Kind",
+        "Name",
+        "ThisMac",
+        "Up"
+      ],
+      "type": "object"
+    },
+    "overview.Line": {
+      "additionalProperties": false,
+      "properties": {
+        "Parts": {
+          "items": {
+            "$ref": "#/$defs/overview.Part"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "Section": {
+          "enum": [
+            "",
+            "accounts",
+            "activity",
+            "apps",
+            "awake",
+            "background",
+            "disk",
+            "images",
+            "overview",
+            "ports",
+            "settings",
+            "ssh"
+          ],
+          "type": "string"
+        },
+        "Unread": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Parts",
+        "Pending",
+        "Section",
+        "Unread"
+      ],
+      "type": "object"
+    },
+    "overview.Machine": {
+      "additionalProperties": false,
+      "properties": {
+        "Arch": {
+          "type": "string"
+        },
+        "Hostname": {
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "",
+            "mac",
+            "linux",
+            "macos"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "OS": {
+          "type": "string"
+        },
+        "Registered": {
+          "type": "boolean"
+        },
+        "Shell": {
+          "type": "string"
+        },
+        "User": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Arch",
+        "Hostname",
+        "Kind",
+        "Name",
+        "OS",
+        "Registered",
+        "Shell",
+        "User"
+      ],
+      "type": "object"
+    },
+    "overview.Need": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Broken": {
+          "type": "boolean"
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Command": {
+          "type": "string"
+        },
+        "Machine": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Section": {
+          "enum": [
+            "",
+            "accounts",
+            "activity",
+            "apps",
+            "awake",
+            "background",
+            "disk",
+            "images",
+            "overview",
+            "ports",
+            "settings",
+            "ssh"
+          ],
+          "type": "string"
+        },
+        "Severity": {
+          "enum": [
+            "",
+            "broken",
+            "needs-a-look"
+          ],
+          "type": "string"
+        },
+        "Subject": {
+          "type": "string"
+        },
+        "Text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Broken",
+        "Call",
+        "Command",
+        "Machine",
+        "Path",
+        "Section",
+        "Severity",
+        "Subject",
+        "Text"
+      ],
+      "type": "object"
+    },
+    "overview.Part": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Counted": {
+          "type": "boolean"
+        },
+        "Key": {
+          "type": "string"
+        },
+        "N": {
+          "type": "integer"
+        },
+        "Of": {
+          "type": "integer"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Word": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Counted",
+        "Key",
+        "N",
+        "Of",
+        "State",
+        "Word"
+      ],
+      "type": "object"
+    },
+    "overview.Port": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "PID": {
+          "type": "integer"
+        },
+        "Port": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name",
+        "PID",
+        "Port"
+      ],
+      "type": "object"
+    },
+    "overview.Setup": {
+      "additionalProperties": false,
+      "properties": {
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Steps": {
+          "items": {
+            "$ref": "#/$defs/overview.Step"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "State",
+        "Steps"
+      ],
+      "type": "object"
+    },
+    "overview.Snapshot.apps.Report.settings.Report.disk.MisplacedReport": {
+      "additionalProperties": false,
+      "properties": {
+        "Apps": {
+          "items": {
+            "$ref": "#/$defs/apps.Report"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "AppsPending": {
+          "type": "boolean"
+        },
+        "Awake": {
+          "$ref": "#/$defs/overview.AwakeState"
+        },
+        "AwakeKnown": {
+          "type": "boolean"
+        },
+        "Background": {
+          "items": {
+            "$ref": "#/$defs/background.Task"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Environment": {
+          "$ref": "#/$defs/overview.Environment"
+        },
+        "Err": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.call.WireError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Gateways": {
+          "items": {
+            "$ref": "#/$defs/overview.Check"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "GeneratedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Identity": {
+          "items": {
+            "$ref": "#/$defs/overview.Check"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Machine": {
+          "$ref": "#/$defs/overview.Machine"
+        },
+        "Readiness": {
+          "items": {
+            "$ref": "#/$defs/overview.Check"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Settings": {
+          "items": {
+            "$ref": "#/$defs/settings.Report"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "SettingsPending": {
+          "type": "boolean"
+        },
+        "Setup": {
+          "$ref": "#/$defs/overview.Setup"
+        },
+        "Station": {
+          "$ref": "#/$defs/overview.Station"
+        },
+        "System": {
+          "$ref": "#/$defs/overview.System"
+        },
+        "Tailnet": {
+          "$ref": "#/$defs/ports.Status"
+        },
+        "Workspace": {
+          "$ref": "#/$defs/overview.Workspace.disk.MisplacedReport"
+        }
+      },
+      "required": [
+        "Apps",
+        "AppsPending",
+        "Awake",
+        "AwakeKnown",
+        "Background",
+        "Environment",
+        "Err",
+        "Gateways",
+        "GeneratedAt",
+        "Identity",
+        "Machine",
+        "Readiness",
+        "Settings",
+        "SettingsPending",
+        "Setup",
+        "Station",
+        "System",
+        "Tailnet",
+        "Workspace"
+      ],
+      "type": "object"
+    },
+    "overview.Station": {
+      "additionalProperties": false,
+      "properties": {
+        "Commit": {
+          "type": "string"
+        },
+        "Engine": {
+          "$ref": "#/$defs/overview.Check"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Commit",
+        "Engine",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "overview.Step": {
+      "additionalProperties": false,
+      "properties": {
+        "Detail": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Detail",
+        "Name",
+        "State"
+      ],
+      "type": "object"
+    },
+    "overview.Summary": {
+      "additionalProperties": false,
+      "properties": {
+        "Engine": {
+          "enum": [
+            "",
+            "running",
+            "stopped"
+          ],
+          "type": "string"
+        },
+        "Head": {
+          "$ref": "#/$defs/overview.Head"
+        },
+        "Lines": {
+          "items": {
+            "$ref": "#/$defs/overview.Line"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Needs": {
+          "items": {
+            "$ref": "#/$defs/overview.Need"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "Readiness": {
+          "items": {
+            "$ref": "#/$defs/overview.Check"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "VMs": {
+          "items": {
+            "$ref": "#/$defs/overview.VM"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Engine",
+        "Head",
+        "Lines",
+        "Needs",
+        "Pending",
+        "Readiness",
+        "VMs"
+      ],
+      "type": "object"
+    },
+    "overview.System": {
+      "additionalProperties": false,
+      "properties": {
+        "Battery": {
+          "type": "string"
+        },
+        "MemoryTotal": {
+          "type": "integer"
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "Reading": {
+          "$ref": "#/$defs/activity.Reading"
+        },
+        "Uptime": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Battery",
+        "MemoryTotal",
+        "Pending",
+        "Reading",
+        "Uptime"
+      ],
+      "type": "object"
+    },
+    "overview.VM": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Running": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Name",
+        "Running"
+      ],
+      "type": "object"
+    },
+    "overview.Workspace.disk.MisplacedReport": {
+      "additionalProperties": false,
+      "properties": {
+        "Disk": {
+          "items": {
+            "$ref": "#/$defs/overview.Disk"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "DiskPending": {
+          "type": "boolean"
+        },
+        "Misplaced": {
+          "items": {
+            "$ref": "#/$defs/disk.MisplacedReport"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Disk",
+        "DiskPending",
+        "Misplaced"
+      ],
+      "type": "object"
+    },
+    "overview.calls.ReadIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Fresh": {
+          "type": "boolean"
+        },
+        "V2": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "overview.calls.ReadOut": {
+      "additionalProperties": false,
+      "properties": {
+        "Summary": {
+          "$ref": "#/$defs/overview.Summary"
+        },
+        "V2": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/overview.Snapshot.apps.Report.settings.Report.disk.MisplacedReport"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Summary",
+        "V2"
+      ],
+      "type": "object"
+    },
+    "ports.Node": {
+      "additionalProperties": false,
+      "properties": {
+        "DNSName": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "string"
+        },
+        "IP": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Online": {
+          "type": "boolean"
+        },
+        "Tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "DNSName",
+        "ID",
+        "IP",
+        "Name",
+        "Online",
+        "Tags"
+      ],
+      "type": "object"
+    },
+    "ports.Served": {
+      "additionalProperties": false,
+      "properties": {
+        "Path": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "integer"
+        },
+        "Reserved": {
+          "type": "integer"
+        },
+        "Scheme": {
+          "type": "string"
+        },
+        "Station": {
+          "type": "boolean"
+        },
+        "Target": {
+          "type": "string"
+        },
+        "To": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Path",
+        "Port",
+        "Reserved",
+        "Scheme",
+        "Station",
+        "Target"
+      ],
+      "type": "object"
+    },
+    "ports.Status": {
+      "additionalProperties": false,
+      "properties": {
+        "BackendState": {
+          "type": "string"
+        },
+        "CLI": {
+          "type": "string"
+        },
+        "Connected": {
+          "type": "boolean"
+        },
+        "DNSName": {
+          "type": "string"
+        },
+        "IP": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Peers": {
+          "items": {
+            "$ref": "#/$defs/ports.Node"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Serve": {
+          "items": {
+            "$ref": "#/$defs/ports.Served"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "ServeOn": {
+          "type": "boolean"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Variant": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "BackendState",
+        "CLI",
+        "Connected",
+        "DNSName",
+        "IP",
+        "Name",
+        "Peers",
+        "Serve",
+        "ServeOn",
+        "State",
+        "Variant"
+      ],
+      "type": "object"
+    },
+    "settings.Report": {
+      "additionalProperties": false,
+      "properties": {
+        "Applies": {
+          "type": "boolean"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "Package": {
+          "$ref": "#/$defs/catalog.Setting"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Applies",
+        "Detail",
+        "Package",
+        "State"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/overview.read.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch overview.read of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/overview.calls.ReadIn"
+    },
+    "out": {
+      "$ref": "#/$defs/overview.calls.ReadOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "overview.read",
+  "type": "object"
+}

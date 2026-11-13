@@ -1,0 +1,361 @@
+{
+  "$defs": {
+    "catalog.Input": {
+      "additionalProperties": false,
+      "properties": {
+        "DefaultEnv": {
+          "type": "string"
+        },
+        "Help": {
+          "type": "string"
+        },
+        "Kind": {
+          "type": "integer"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Options": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "DefaultEnv",
+        "Help",
+        "Kind",
+        "Label",
+        "Name",
+        "Options",
+        "Required"
+      ],
+      "type": "object"
+    },
+    "catalog.Setting": {
+      "additionalProperties": false,
+      "properties": {
+        "Category": {
+          "enum": [
+            "",
+            "Agents",
+            "Editor",
+            "Headless",
+            "Network",
+            "Security",
+            "Shell",
+            "System",
+            "Terminal"
+          ],
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Guided": {
+          "type": "boolean"
+        },
+        "Help": {
+          "type": "string"
+        },
+        "Inputs": {
+          "items": {
+            "$ref": "#/$defs/catalog.Input"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Interactive": {
+          "type": "boolean"
+        },
+        "Kinds": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "NeedsRoot": {
+          "type": "boolean"
+        },
+        "OrRequires": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Requires": {
+          "type": "string"
+        },
+        "Reversible": {
+          "type": "boolean"
+        },
+        "RunOnce": {
+          "type": "boolean"
+        },
+        "Sets": {
+          "items": {
+            "$ref": "#/$defs/catalog.Value"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Writes": {
+          "items": {
+            "$ref": "#/$defs/catalog.Stored"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Category",
+        "Description",
+        "Guided",
+        "Help",
+        "Inputs",
+        "Interactive",
+        "Kinds",
+        "Name",
+        "NeedsRoot",
+        "Requires",
+        "Reversible",
+        "RunOnce",
+        "Sets",
+        "Writes"
+      ],
+      "type": "object"
+    },
+    "catalog.Stored": {
+      "additionalProperties": false,
+      "properties": {
+        "Level": {
+          "enum": [
+            "",
+            "cache",
+            "data",
+            "settings",
+            "kept"
+          ],
+          "type": "string"
+        },
+        "Memos": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Note": {
+          "type": "string"
+        },
+        "On": {
+          "items": {
+            "enum": [
+              "mac",
+              "linux",
+              "macos"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Level",
+        "Memos",
+        "Note",
+        "On",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "catalog.Value": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "type": "object"
+    },
+    "core.finding.Fix": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Command": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Call",
+        "Command",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "settings.Row": {
+      "additionalProperties": false,
+      "properties": {
+        "Checked": {
+          "enum": [
+            "",
+            "as-expected",
+            "needs-fix",
+            "not-for-this-machine",
+            "off-here",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Expected": {
+          "type": "string"
+        },
+        "Fix": {
+          "$ref": "#/$defs/core.finding.Fix"
+        },
+        "Group": {
+          "enum": [
+            "",
+            "always-on-mac",
+            "checked",
+            "set"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Needs": {
+          "type": "string"
+        },
+        "Package": {
+          "$ref": "#/$defs/catalog.Setting"
+        },
+        "Since": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "applied",
+            "changed-since",
+            "not-applied",
+            "not-for-this-machine",
+            "off-here",
+            "reading"
+          ],
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        },
+        "Where": {
+          "type": "string"
+        },
+        "Why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Checked",
+        "Expected",
+        "Fix",
+        "Group",
+        "Name",
+        "Needs",
+        "Package",
+        "Since",
+        "State",
+        "Value",
+        "Where",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "settings.calls.ShowIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/settings.show.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call settings.show of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/settings.calls.ShowIn"
+    },
+    "out": {
+      "$ref": "#/$defs/settings.Row"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "settings.show",
+  "type": "object"
+}

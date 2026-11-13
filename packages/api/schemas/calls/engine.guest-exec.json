@@ -1,0 +1,57 @@
+{
+  "$defs": {
+    "engine.ExecIn": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "type": "string"
+        },
+        "stdin": {
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "engine.ExecOut": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "stderr": {
+          "type": "string"
+        },
+        "stdout": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "stderr",
+        "stdout"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.guest-exec.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.guest-exec of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.ExecIn"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.ExecOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.guest-exec",
+  "type": "object"
+}

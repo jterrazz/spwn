@@ -1,0 +1,231 @@
+{
+  "$defs": {
+    "engine.VMView": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "$ref": "#/$defs/machines.AgentView"
+        },
+        "boot_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cause": {
+          "type": "string"
+        },
+        "check": {
+          "$ref": "#/$defs/machines.CheckStatus"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "guest": {
+          "type": "string"
+        },
+        "holder": {
+          "type": "integer"
+        },
+        "ip": {
+          "type": "string"
+        },
+        "last_lines": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "latency": {
+          "items": {
+            "$ref": "#/$defs/machines.LatencyPoint"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "ready_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "restart": {
+          "$ref": "#/$defs/machines.RestartWalk"
+        },
+        "restarts": {
+          "$ref": "#/$defs/machines.Restarts"
+        },
+        "run_pid": {
+          "type": "integer"
+        },
+        "ssh": {
+          "type": "boolean"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "detail",
+        "guest",
+        "ip",
+        "name",
+        "run_pid",
+        "state"
+      ],
+      "type": "object"
+    },
+    "machines.AgentView": {
+      "additionalProperties": false,
+      "properties": {
+        "Ask": {
+          "type": "string"
+        },
+        "Ended": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Reason": {
+          "type": "string"
+        },
+        "Since": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "State": {
+          "type": "string"
+        },
+        "Step": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Task": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Ask",
+        "Ended",
+        "Reason",
+        "Since",
+        "State",
+        "Task"
+      ],
+      "type": "object"
+    },
+    "machines.CheckStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "since": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "failing",
+            "passing",
+            "waiting"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "machines.LatencyPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "took": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "took"
+      ],
+      "type": "object"
+    },
+    "machines.RestartWalk": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "step": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "step"
+      ],
+      "type": "object"
+    },
+    "machines.Restarts": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "last": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "looping": {
+          "type": "boolean"
+        },
+        "recent": {
+          "items": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "streak": {
+          "type": "integer"
+        },
+        "wait": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.vms.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.vms of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/engine.VMView"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.vms",
+  "type": "object"
+}

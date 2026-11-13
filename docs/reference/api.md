@@ -7,6 +7,7 @@
 | The transport          | The sockets and the ssh bridge the frames travel on                 |
 | The frames             | One JSON object per line, and what each key means                   |
 | calls.json             | The list of calls, generated from the Registry and the engine's own |
+| packages/api           | Every call's schema and the TypeScript types, generated             |
 | The engine's own calls | What a process of this Mac asks of the engine's live state          |
 | Errors                 | The error object and its codes                                      |
 
@@ -36,6 +37,10 @@ A frame (`remote/api.Frame`) carries `v` (2) and `id`. A request carries `hello`
 ## calls.json
 
 [`apps/engine/remote/api/calls.json`](../../apps/engine/remote/api/calls.json) is the Registry and the engine's own calls, projected by `make generate` (`station.calls/v1`): each call's `name`, the `schema` of its output (`station.<call>/v<n>`, the version of the document `--json` prints, the call's `Document`: `station.machinefile.plan/v2`), its `section`, its `where` (`at-target`, `in-engine`, `in-process`), the confirmation it may require, the `errors` it declares, its input and output types, `watch` for a read that fills progressively, and `own` for a call the engine serves beside the Registry (below). The engine serves every call of it, a Registry's call run on this Mac as the CLI runs it; the menu bar names its actions by these names; `api_test.go` fails when the file differs from the Registry and `enginecalls.Owns`.
+
+## packages/api
+
+[`packages/api/`](../../packages/api/README.md) is the same wire, machine-readable, written by `make generate` from the Go types: `schemas/calls/<call>.json`, one JSON Schema per call of `calls.json` (its `in`, and the `out` of each answer), `schemas/frame.json` (the frames), `schemas/event.json` (the events of a watch of pages), and `index.d.ts`, their TypeScript, with `Calls`, the map a client types `call('ports.list', input)` by. Its drift test fails `make test` when a file and the Go types differ, and the recorded streams and page fixtures are checked against its schemas.
 
 ## The engine's own calls
 

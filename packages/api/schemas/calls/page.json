@@ -1,0 +1,1629 @@
+{
+  "$defs": {
+    "NoticeEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "const": "notice"
+        },
+        "notice": {
+          "$ref": "#/$defs/engine.Notice"
+        }
+      },
+      "required": [
+        "event",
+        "notice"
+      ],
+      "type": "object"
+    },
+    "PageEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "const": "page"
+        },
+        "page": {
+          "$ref": "#/$defs/page.Document"
+        }
+      },
+      "required": [
+        "event",
+        "page"
+      ],
+      "type": "object"
+    },
+    "SampleEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "event": {
+          "const": "sample"
+        },
+        "stale": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "values": {
+          "additionalProperties": {
+            "$ref": "#/$defs/page.Value"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "event",
+        "at"
+      ],
+      "type": "object"
+    },
+    "TickEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "event": {
+          "const": "tick"
+        }
+      },
+      "required": [
+        "event",
+        "at"
+      ],
+      "type": "object"
+    },
+    "engine.Notice": {
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "type": "object"
+    },
+    "engine.Opened": {
+      "additionalProperties": false,
+      "properties": {
+        "pages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "stream": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "stream"
+      ],
+      "type": "object"
+    },
+    "engine.PagesIn": {
+      "additionalProperties": false,
+      "properties": {
+        "pages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "page.About": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Action": {
+      "additionalProperties": false,
+      "properties": {
+        "busy": {
+          "type": "string"
+        },
+        "confirm": {
+          "$ref": "#/$defs/page.Confirm"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "destructive": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "string"
+        },
+        "form": {
+          "$ref": "#/$defs/page.Form"
+        },
+        "hud": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "mutates": {
+          "type": "boolean"
+        },
+        "on": {
+          "enum": [
+            "menu",
+            "page",
+            "row"
+          ],
+          "type": "string"
+        },
+        "picked": {
+          "type": "boolean"
+        },
+        "prefill": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "rows": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "run": {
+          "$ref": "#/$defs/page.Run"
+        },
+        "sheet": {
+          "type": "string"
+        },
+        "submenu": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "page.Anomaly": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "integer"
+        },
+        "sentence": {
+          "type": "string"
+        },
+        "to": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    },
+    "page.Badge": {
+      "additionalProperties": false,
+      "properties": {
+        "down": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "needs": {
+          "type": "integer"
+        },
+        "restarting": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "needs"
+      ],
+      "type": "object"
+    },
+    "page.Chart": {
+      "additionalProperties": false,
+      "properties": {
+        "anomaly": {
+          "$ref": "#/$defs/page.Anomaly"
+        },
+        "at": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "ends": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "bars",
+            "line",
+            "mirror"
+          ],
+          "type": "string"
+        },
+        "peak": {
+          "$ref": "#/$defs/page.Peak"
+        },
+        "series": {
+          "items": {
+            "$ref": "#/$defs/page.Series"
+          },
+          "type": "array"
+        },
+        "window": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Column": {
+      "additionalProperties": false,
+      "properties": {
+        "keep": {
+          "type": "integer"
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "age",
+            "command",
+            "count",
+            "duration",
+            "identity",
+            "levels",
+            "list",
+            "listing",
+            "none",
+            "off",
+            "on",
+            "path",
+            "pending",
+            "percent",
+            "port",
+            "portmap",
+            "range",
+            "ratio",
+            "size",
+            "spark",
+            "text",
+            "unknown",
+            "until",
+            "url",
+            "version"
+          ],
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "levels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "show": {
+          "enum": [
+            "",
+            "detail",
+            "eye",
+            "pipe"
+          ],
+          "type": "string"
+        },
+        "whole": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "page.Confirm": {
+      "additionalProperties": false,
+      "properties": {
+        "danger": {
+          "type": "boolean"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/page.Value"
+          },
+          "type": "array"
+        },
+        "no": {
+          "type": "string"
+        },
+        "question": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "yes": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Context": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "machine": {
+          "type": "string"
+        },
+        "on": {
+          "type": "string"
+        },
+        "registered": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "page.Day": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "mark": {
+          "type": "string"
+        },
+        "tip": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Document": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/page.Action"
+          },
+          "type": "array"
+        },
+        "badge": {
+          "$ref": "#/$defs/page.Badge"
+        },
+        "command": {
+          "type": "string"
+        },
+        "context": {
+          "$ref": "#/$defs/page.Context"
+        },
+        "error": {
+          "$ref": "#/$defs/page.Error"
+        },
+        "footer": {
+          "$ref": "#/$defs/page.Footer"
+        },
+        "header": {
+          "$ref": "#/$defs/page.Header"
+        },
+        "hints": {
+          "items": {
+            "$ref": "#/$defs/page.Hint"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "live": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/page.Section"
+          },
+          "type": "array"
+        },
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/page.Segment"
+          },
+          "type": "array"
+        },
+        "state": {
+          "enum": [
+            "failed",
+            "loading",
+            "ready"
+          ],
+          "type": "string"
+        },
+        "strip": {
+          "$ref": "#/$defs/page.Strip"
+        }
+      },
+      "required": [
+        "schema"
+      ],
+      "type": "object"
+    },
+    "page.Empty": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "glyph": {
+          "$ref": "#/$defs/page.Glyph"
+        },
+        "hint": {
+          "$ref": "#/$defs/page.Hint"
+        },
+        "noun": {
+          "type": "string"
+        },
+        "sub": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Error": {
+      "additionalProperties": false,
+      "properties": {
+        "hint": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/page.Value"
+        }
+      },
+      "type": "object"
+    },
+    "page.Field": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/page.Field"
+          },
+          "type": "array"
+        },
+        "follows": {
+          "type": "string"
+        },
+        "hint": {
+          "$ref": "#/$defs/page.Hint"
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "command",
+            "confirm",
+            "disclosure",
+            "multiselect",
+            "note",
+            "pick",
+            "rows",
+            "secret",
+            "segmented",
+            "select",
+            "slider",
+            "text"
+          ],
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "limit_note": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/page.Option"
+          },
+          "type": "array"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "stops": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "summary": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "swaps": {
+          "type": "boolean"
+        },
+        "taken": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "taken_hud": {
+          "type": "string"
+        },
+        "when": {
+          "$ref": "#/$defs/page.When"
+        }
+      },
+      "type": "object"
+    },
+    "page.Footer": {
+      "additionalProperties": false,
+      "properties": {
+        "buttons": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "copy": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "kind": {
+          "enum": [
+            "",
+            "find",
+            "none",
+            "ssh",
+            "terminal-list"
+          ],
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "page.Form": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/page.Field"
+          },
+          "type": "array"
+        },
+        "primary": {
+          "items": {
+            "$ref": "#/$defs/page.Primary"
+          },
+          "type": "array"
+        },
+        "split": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "warn": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Gauge": {
+      "additionalProperties": false,
+      "properties": {
+        "bar": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "note": {
+          "type": "string"
+        },
+        "spark": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/page.Value"
+        }
+      },
+      "type": "object"
+    },
+    "page.Glyph": {
+      "additionalProperties": false,
+      "properties": {
+        "dot": {
+          "enum": [
+            "dash",
+            "fill",
+            "ping",
+            "ring",
+            "square"
+          ],
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "progress": {
+          "type": "integer"
+        },
+        "ring": {
+          "type": "string"
+        },
+        "signal": {
+          "enum": [
+            "active",
+            "asleep",
+            "done",
+            "failing",
+            "faint",
+            "quiet",
+            "stale",
+            "waits",
+            "well"
+          ],
+          "type": "string"
+        },
+        "spin": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "page.Group": {
+      "additionalProperties": false,
+      "properties": {
+        "fold": {
+          "enum": [
+            "auto",
+            "brief",
+            "calm",
+            "folded",
+            "open"
+          ],
+          "type": "string"
+        },
+        "head": {
+          "$ref": "#/$defs/page.Row"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/page.Item"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "page.Header": {
+      "additionalProperties": false,
+      "properties": {
+        "back": {
+          "type": "string"
+        },
+        "buttons": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "glyph": {
+          "$ref": "#/$defs/page.Glyph"
+        },
+        "stale": {
+          "$ref": "#/$defs/page.Value"
+        }
+      },
+      "type": "object"
+    },
+    "page.Hint": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "external": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Item": {
+      "additionalProperties": false,
+      "properties": {
+        "chart": {
+          "$ref": "#/$defs/page.Chart"
+        },
+        "empty": {
+          "$ref": "#/$defs/page.Empty"
+        },
+        "error": {
+          "$ref": "#/$defs/page.Error"
+        },
+        "fact": {
+          "$ref": "#/$defs/page.Fact"
+        },
+        "gauge": {
+          "$ref": "#/$defs/page.Gauge"
+        },
+        "group": {
+          "$ref": "#/$defs/page.Group"
+        },
+        "link": {
+          "$ref": "#/$defs/page.Link"
+        },
+        "log": {
+          "$ref": "#/$defs/page.Log"
+        },
+        "message": {
+          "$ref": "#/$defs/page.Message"
+        },
+        "note": {
+          "$ref": "#/$defs/page.Note"
+        },
+        "row": {
+          "$ref": "#/$defs/page.Row"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/page.Step"
+          },
+          "type": "array"
+        },
+        "tile": {
+          "$ref": "#/$defs/page.Tile"
+        },
+        "uptime": {
+          "$ref": "#/$defs/page.Uptime"
+        }
+      },
+      "type": "object"
+    },
+    "page.Link": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "label": {
+          "type": "string"
+        },
+        "lead": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "page": {
+          "type": "string"
+        },
+        "row": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/page.Value"
+        }
+      },
+      "type": "object"
+    },
+    "page.Log": {
+      "additionalProperties": false,
+      "properties": {
+        "cause": {
+          "type": "integer"
+        },
+        "lines": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "more": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Message": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "pr": {
+          "$ref": "#/$defs/page.PR"
+        },
+        "reply": {
+          "type": "boolean"
+        },
+        "since": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Note": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Option": {
+      "additionalProperties": false,
+      "properties": {
+        "disabled": {
+          "type": "string"
+        },
+        "glyph": {
+          "$ref": "#/$defs/page.Glyph"
+        },
+        "label": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "of": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.PR": {
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "type": "integer"
+        },
+        "minus": {
+          "type": "integer"
+        },
+        "number": {
+          "type": "integer"
+        },
+        "opened": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "plus": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Peak": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "value": {
+          "$ref": "#/$defs/page.Value"
+        }
+      },
+      "required": [
+        "index"
+      ],
+      "type": "object"
+    },
+    "page.Primary": {
+      "additionalProperties": false,
+      "properties": {
+        "danger": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "when": {
+          "$ref": "#/$defs/page.When"
+        }
+      },
+      "type": "object"
+    },
+    "page.Row": {
+      "additionalProperties": false,
+      "properties": {
+        "birth": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/page.Value"
+          },
+          "type": "array"
+        },
+        "detail": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "fresh": {
+          "type": "boolean"
+        },
+        "glyph": {
+          "$ref": "#/$defs/page.Glyph"
+        },
+        "hint": {
+          "$ref": "#/$defs/page.Hint"
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "left": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "mac": {
+          "type": "string"
+        },
+        "mark": {
+          "type": "string"
+        },
+        "menu": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "nav": {
+          "type": "string"
+        },
+        "quick": {
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "degraded",
+            "differs",
+            "down",
+            "expiring",
+            "exposed",
+            "failing",
+            "guard",
+            "late",
+            "mismatch",
+            "misplaced",
+            "missing",
+            "orphan",
+            "outdated",
+            "partial",
+            "refused",
+            "stale",
+            "stopped",
+            "unmanaged",
+            "unreachable",
+            "unset",
+            "waiting"
+          ],
+          "type": "string"
+        },
+        "sentence": {
+          "type": "boolean"
+        },
+        "short": {
+          "type": "string"
+        },
+        "signal": {
+          "enum": [
+            "active",
+            "asleep",
+            "done",
+            "failing",
+            "faint",
+            "quiet",
+            "stale",
+            "waits",
+            "well"
+          ],
+          "type": "string"
+        },
+        "trail": {
+          "type": "string"
+        },
+        "verb": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Run": {
+      "additionalProperties": false,
+      "properties": {
+        "and": {
+          "items": {
+            "$ref": "#/$defs/page.Run"
+          },
+          "type": "array"
+        },
+        "argv": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "call": {
+          "type": "string"
+        },
+        "copy": {
+          "type": "string"
+        },
+        "in": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "open": {
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/page.Target"
+        },
+        "terminal": {
+          "type": "boolean"
+        },
+        "then": {
+          "$ref": "#/$defs/page.Run"
+        }
+      },
+      "type": "object"
+    },
+    "page.Section": {
+      "additionalProperties": false,
+      "properties": {
+        "about": {
+          "$ref": "#/$defs/page.About"
+        },
+        "break": {
+          "type": "integer"
+        },
+        "caption": {
+          "items": {
+            "$ref": "#/$defs/page.Value"
+          },
+          "type": "array"
+        },
+        "card": {
+          "enum": [
+            "care",
+            "chart",
+            "check",
+            "empty",
+            "exposed",
+            "flush",
+            "gauges",
+            "health",
+            "hero",
+            "log",
+            "now",
+            "plain",
+            "tiles",
+            "uptime",
+            "wait"
+          ],
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/page.Column"
+          },
+          "type": "array"
+        },
+        "counts": {
+          "items": {
+            "$ref": "#/$defs/page.Tally"
+          },
+          "type": "array"
+        },
+        "fold": {
+          "enum": [
+            "auto",
+            "brief",
+            "calm",
+            "folded",
+            "open"
+          ],
+          "type": "string"
+        },
+        "glance": {
+          "items": {
+            "$ref": "#/$defs/page.Value"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/page.Item"
+          },
+          "type": "array"
+        },
+        "joined": {
+          "type": "boolean"
+        },
+        "picker": {
+          "items": {
+            "$ref": "#/$defs/page.Action"
+          },
+          "type": "array"
+        },
+        "pipe_counts": {
+          "type": "boolean"
+        },
+        "pipe_groups": {
+          "type": "boolean"
+        },
+        "rest": {
+          "$ref": "#/$defs/page.Item"
+        },
+        "role": {
+          "enum": [
+            "",
+            "actions",
+            "banner",
+            "lifted",
+            "summary"
+          ],
+          "type": "string"
+        },
+        "says_dropped": {
+          "type": "boolean"
+        },
+        "segment": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "top": {
+          "type": "integer"
+        },
+        "uncounted": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "page.Segment": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "picked": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "page.Series": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "unit": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Step": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "current": {
+          "type": "boolean"
+        },
+        "diff": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Strip": {
+      "additionalProperties": false,
+      "properties": {
+        "awake": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "battery": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "cpu": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "memory": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "memory_spark": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "net": {
+          "items": {
+            "$ref": "#/$defs/page.Value"
+          },
+          "type": "array"
+        },
+        "net_spark": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "spark": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "top": {
+          "$ref": "#/$defs/page.Section"
+        }
+      },
+      "type": "object"
+    },
+    "page.Tally": {
+      "additionalProperties": false,
+      "properties": {
+        "mark": {
+          "type": "string"
+        },
+        "n": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "page.Target": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "on": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Tile": {
+      "additionalProperties": false,
+      "properties": {
+        "caption": {
+          "type": "string"
+        },
+        "glyph": {
+          "$ref": "#/$defs/page.Glyph"
+        },
+        "key": {
+          "type": "string"
+        },
+        "nav": {
+          "type": "string"
+        },
+        "number": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "plus": {
+          "type": "string"
+        },
+        "signal": {
+          "enum": [
+            "active",
+            "asleep",
+            "done",
+            "failing",
+            "faint",
+            "quiet",
+            "stale",
+            "waits",
+            "well"
+          ],
+          "type": "string"
+        },
+        "tip": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "toggle": {
+          "type": "string"
+        },
+        "word": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.Uptime": {
+      "additionalProperties": false,
+      "properties": {
+        "availability": {
+          "$ref": "#/$defs/page.Value"
+        },
+        "days": {
+          "items": {
+            "$ref": "#/$defs/page.Day"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "page.Value": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/page.Value"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "age",
+            "command",
+            "count",
+            "duration",
+            "identity",
+            "levels",
+            "list",
+            "listing",
+            "none",
+            "off",
+            "on",
+            "path",
+            "pending",
+            "percent",
+            "port",
+            "portmap",
+            "range",
+            "ratio",
+            "size",
+            "spark",
+            "text",
+            "unknown",
+            "until",
+            "url",
+            "version"
+          ],
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "live": {
+          "type": "string"
+        },
+        "n": {
+          "type": "integer"
+        },
+        "nav": {
+          "type": "string"
+        },
+        "of": {
+          "type": "integer"
+        },
+        "pri": {
+          "type": "integer"
+        },
+        "short": {
+          "type": "string"
+        },
+        "signal": {
+          "enum": [
+            "active",
+            "asleep",
+            "done",
+            "failing",
+            "faint",
+            "quiet",
+            "stale",
+            "waits",
+            "well"
+          ],
+          "type": "string"
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "page.When": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "key": {
+          "type": "string"
+        },
+        "set": {
+          "type": "boolean"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/page.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch page of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.PagesIn"
+    },
+    "out": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/engine.Opened"
+        },
+        {
+          "$ref": "#/$defs/PageEvent"
+        },
+        {
+          "$ref": "#/$defs/SampleEvent"
+        },
+        {
+          "$ref": "#/$defs/TickEvent"
+        },
+        {
+          "$ref": "#/$defs/NoticeEvent"
+        }
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "page",
+  "type": "object"
+}

@@ -1,0 +1,95 @@
+{
+  "$defs": {
+    "awake.Awoken": {
+      "additionalProperties": false,
+      "properties": {
+        "battery": {
+          "type": "boolean"
+        },
+        "by": {
+          "type": "string"
+        },
+        "for": {
+          "type": "integer"
+        },
+        "lid": {
+          "type": "boolean"
+        },
+        "mac": {
+          "type": "string"
+        },
+        "never_sleeps": {
+          "type": "boolean"
+        },
+        "refreshed": {
+          "type": "boolean"
+        },
+        "run": {
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "until": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "battery",
+        "by",
+        "lid",
+        "mac",
+        "never_sleeps",
+        "refreshed",
+        "started_at",
+        "until"
+      ],
+      "type": "object"
+    },
+    "engine.AwakeIn": {
+      "additionalProperties": false,
+      "properties": {
+        "battery": {
+          "type": "boolean"
+        },
+        "by": {
+          "type": "string"
+        },
+        "for": {
+          "type": "integer"
+        },
+        "lid": {
+          "type": "boolean"
+        },
+        "run": {
+          "type": "string"
+        },
+        "until": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.awake-keep.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.awake-keep of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.AwakeIn"
+    },
+    "out": {
+      "$ref": "#/$defs/awake.Awoken"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.awake-keep",
+  "type": "object"
+}
