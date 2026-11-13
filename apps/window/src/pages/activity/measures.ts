@@ -1,6 +1,7 @@
 import type {
     ActivityBucket,
     ActivityProcess,
+    ActivityReading,
     ActivityReport,
     ActivitySample,
     MachinesMacView,
@@ -83,6 +84,33 @@ export function busiestOf(
         shown: by === 'cpu' ? `${percent(process.value)} %` : memory(process.value),
         vm: process.vm === undefined || process.vm === '' ? undefined : process.vm,
     }));
+}
+
+export function busiestWithVms(reading: ActivityReading, by: 'cpu' | 'memory'): readonly Busy[] {
+    const total = reading.sample.mem_total;
+    const processes = busiestOf(
+        (by === 'cpu' ? reading.top.cpu : reading.top.memory) ?? [],
+        by,
+        total,
+    );
+    const listed = new Set(processes.map((row) => row.vm));
+    const unlisted = busiestOf(
+        (reading.vms ?? [])
+            .filter((usage) => !listed.has(usage.vm))
+            .map((usage) => ({
+                name: usage.vm,
+                pid: 0,
+                value: by === 'cpu' ? usage.cpu : usage.memory,
+                vm: usage.vm,
+            })),
+        by,
+        total,
+    );
+    const vms = [...processes.filter((row) => row.vm !== undefined), ...unlisted];
+    return [
+        ...vms.toSorted((a, b) => b.share - a.share),
+        ...processes.filter((row) => row.vm === undefined),
+    ];
 }
 
 export function vmOf(mac: MachinesMacView, name: string) {

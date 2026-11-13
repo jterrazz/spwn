@@ -6,7 +6,7 @@ import { machineKindOf } from '../../engine/provisional';
 import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
-import { busiestOf, vmOf } from './measures';
+import { busiestWithVms, vmOf } from './measures';
 import type { Busy } from './measures';
 
 import styles from './activity.module.css';
@@ -55,7 +55,13 @@ function Process({
     if (row.vm === undefined) {
         return (
             <div className={styles.process}>
-                <Row lead={leads ? null : undefined} size="slim" title={name} value={measured} />
+                <Row
+                    lead={leads ? null : undefined}
+                    size="slim"
+                    title={name}
+                    titleLook="mono"
+                    value={measured}
+                />
             </div>
         );
     }
@@ -85,8 +91,7 @@ export function Busiest({
     go: (to: Route) => void;
 }) {
     const [by, setBy] = useState<By>('cpu');
-    const { top, sample } = report.last;
-    const rows = busiestOf((by === 'cpu' ? top.cpu : top.memory) ?? [], by, sample.mem_total);
+    const rows = busiestWithVms(report.last, by);
     const leads = rows.some((row) => row.vm !== undefined);
     return (
         <Panel

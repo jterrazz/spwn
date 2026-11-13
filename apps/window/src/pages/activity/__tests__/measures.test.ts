@@ -1,6 +1,8 @@
+import type { ActivityReading } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { busiestOf, chartedOf, marksOf, spanOf } from '../measures';
+import { busiestOf, busiestWithVms, chartedOf, marksOf, spanOf } from '../measures';
+import { reportPeakingAt } from './tiles.fixtures';
 
 describe('measures', () => {
     test('a window is asked in the nanoseconds of a Go duration', () => {
@@ -51,6 +53,36 @@ describe('measures', () => {
         expect(rows.map((row) => [row.vm, row.share, row.shown])).toStrictEqual([
             ['linux-1', 50, '8 GB'],
             [undefined, 6.25, '1 GB'],
+        ]);
+    });
+
+    test("a Mac's busiest list opens on the VMs it runs, busiest first, then its other processes", () => {
+        // Given - a reading whose top names linux-1's process, and whose VMs add agent-7f and web
+        const reading: ActivityReading = {
+            sample: reportPeakingAt(0).last.sample,
+            top: {
+                cpu: [
+                    { name: 'Virtualization', pid: 7, value: 30, vm: 'linux-1' },
+                    { name: 'WindowServer', pid: 9, value: 4 },
+                ],
+                memory: null,
+            },
+            vms: [
+                { cpu: 30, memory: 0, vm: 'linux-1' },
+                { cpu: 1, memory: 0, vm: 'agent-7f' },
+                { cpu: 12, memory: 0, vm: 'web' },
+            ],
+        };
+
+        // When - it is listed by CPU
+        const rows = busiestWithVms(reading, 'cpu');
+
+        // Then - every VM, busiest first and linux-1 once, then the other processes as sent
+        expect(rows.map((row) => [row.vm ?? row.name, row.shown])).toStrictEqual([
+            ['linux-1', '30 %'],
+            ['web', '12 %'],
+            ['agent-7f', '1 %'],
+            ['WindowServer', '4 %'],
         ]);
     });
 });
