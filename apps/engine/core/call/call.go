@@ -81,15 +81,19 @@ type Watch[D, In, Out any] struct {
 func (w Watch[D, In, Out]) Schema() string { return schema(w.Name, w.Document) }
 
 type Meta struct {
-	Name     string
-	Section  section.ID
-	Where    Where
-	Applies  machine.Applies
-	Needs    []machine.Need
-	Confirm  confirm.Action
-	Errors   []fail.Code
-	In       string
-	Out      string
+	Name    string
+	Section section.ID
+	Where   Where
+	Applies machine.Applies
+	Needs   []machine.Need
+	Confirm confirm.Action
+	Errors  []fail.Code
+	In      string
+	Out     string
+	// value: the Go types the call reads and answers, which the wire's
+	// schemas are reflected from.
+	InType   reflect.Type
+	OutType  reflect.Type
 	Watch    bool
 	Document int
 }
@@ -162,14 +166,16 @@ func valueOf[Out any](name string, v any) (Out, error) {
 func Bind[D, In, Out any](c Call[D, In, Out], d D) Handler {
 	return bound[D, In, Out]{meta: Meta{
 		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, Errors: c.Errors,
-		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), Document: c.Document,
+		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), InType: reflect.TypeFor[In](), OutType: reflect.TypeFor[Out](),
+		Document: c.Document,
 	}, runFn: c.Run, deps: d}
 }
 
 func BindWatch[D, In, Out any](w Watch[D, In, Out], d D) Handler {
 	return watched[D, In, Out]{meta: Meta{
 		Name: w.Name, Section: w.Section, Where: w.Where, Applies: w.Applies, Needs: w.Needs, Errors: w.Errors,
-		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), Watch: true, Document: w.Document,
+		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), InType: reflect.TypeFor[In](), OutType: reflect.TypeFor[Out](), Watch: true,
+		Document: w.Document,
 	}, runFn: w.Run, deps: d}
 }
 

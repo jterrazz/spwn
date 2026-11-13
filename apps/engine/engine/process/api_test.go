@@ -24,7 +24,7 @@ func TestAGuestsServerAnswersTheGuestsCallsAlone(t *testing.T) {
 			t.Errorf("%s is not answered, want it relayed as the guest's", name)
 		}
 	}
-	for _, name := range []string{engine.CallHello, engine.CallVMs, engine.CallStopAll, engine.CallGuestExec, engine.CallVM(VMDelete), "machines.delete"} {
+	for _, name := range []string{engine.CallHello, engine.CallVMs, engine.CallStopAll, engine.CallGuestExec, engine.CallVM(engine.VMDelete), "machines.delete"} {
 		if _, ok := s.Calls(name); ok {
 			t.Errorf("%s is answered to a guest, want it unknown", name)
 		}

@@ -41,10 +41,15 @@ func allCalls(t *testing.T) *call.Registry {
 }
 
 // invariant: rule calls-json-fresh (13.3 rule 14, AR-08): calls.json is the
-// registry's Meta as make generate writes it, so a call added, renamed or
-// reshaped without make generate fails here.
+// registry's Meta and the engine's own calls as make generate writes them, so
+// a call added, renamed or reshaped without make generate fails here.
 func TestCallsJSONFresh(t *testing.T) {
-	want, err := allCalls(t).Catalogue()
+	owns := enginecalls.Owns()
+	own := make([]call.Meta, 0, len(owns))
+	for _, o := range owns {
+		own = append(own, o.Meta)
+	}
+	want, err := allCalls(t).Catalogue(own...)
 	if err != nil {
 		t.Fatal(err)
 	}

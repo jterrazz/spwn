@@ -5,3 +5,9 @@ const (
 	// Mac, the engine's own.
 	ThisMac = ""
 )
+
+type Watching struct {
+	// value: the opening of an engine.watch: the machines it holds, This Mac
+	// left unnamed.
+	Machines []string `json:"machines"`
+}

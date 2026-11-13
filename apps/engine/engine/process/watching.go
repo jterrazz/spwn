@@ -33,10 +33,6 @@ func (w *watchers) watched(machine string) bool {
 	return w.on[machine] > 0
 }
 
-type Watching struct {
-	Machines []string `json:"machines"`
-}
-
 func (d *Engine) Watch(ctx context.Context, machines []string, send func(any) error) error {
 	// invariant: SPEC §6.3: a machine is watched while a surface holds this
 	// watch open on it (the menu bar open), and only then; a watch of pages or
@@ -47,7 +43,7 @@ func (d *Engine) Watch(ctx context.Context, machines []string, send func(any) er
 	}
 	d.watchers.hold(held, 1)
 	defer d.watchers.hold(held, -1)
-	if err := send(Watching{Machines: slices.DeleteFunc(slices.Clone(held), func(m string) bool { return m == engine.ThisMac })}); err != nil {
+	if err := send(engine.Watching{Machines: slices.DeleteFunc(slices.Clone(held), func(m string) bool { return m == engine.ThisMac })}); err != nil {
 		return nil
 	}
 	<-ctx.Done()

@@ -9,7 +9,8 @@ import (
 
 // value: the names of the engine's own calls: what a process of this Mac
 // asks of the engine's live state (its runs, its leases, its guest
-// connections, its Power), served beside the registry and never in calls.json.
+// connections, its Power), served beside the registry; enginecalls.Owns
+// says the types each reads and answers.
 const (
 	CallHello     = "engine.hello"
 	CallVMs       = "engine.vms"
@@ -40,6 +41,22 @@ const (
 	// that machine is sampled every 2 s until it leaves.
 	CallWatch = "engine.watch"
 )
+
+// value: what a VM's verb asks of the engine, by the verb's name.
+const (
+	VMRun     = "run"
+	VMStart   = "start"
+	VMStop    = "stop"
+	VMRestart = "restart"
+	VMDelete  = "delete"
+	VMForget  = "forget"
+	VMReady   = "ready"
+)
+
+func VMVerbs() []string {
+	// value: the verbs of the engine's calls on one VM, engine.vm-<verb>.
+	return []string{VMRun, VMStart, VMStop, VMRestart, VMDelete, VMForget, VMReady}
+}
 
 func CallVM(verb string) string { return "engine.vm-" + verb }
 

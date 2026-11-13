@@ -6,10 +6,13 @@ import (
 	"errors"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/agents"
+	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/ports"
 	"github.com/jterrazz/studio-station/apps/engine/remote/serve"
 
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -28,10 +31,10 @@ func activityOf(d *Engine) engine.ActivityOut {
 	return out
 }
 
-func own[In any](d *Engine, name string, run func(ctx context.Context, d *Engine, in In) (any, error)) call.Handler {
-	return call.Bind(call.Call[*Engine, In, any]{
+func own[In, Out any](d *Engine, name string, run func(ctx context.Context, d *Engine, in In) (Out, error)) call.Handler {
+	return call.Bind(call.Call[*Engine, In, Out]{
 		Name: name, Where: call.InEngine, Applies: machine.Anywhere,
-		Run: func(ctx context.Context, d *Engine, in In, _ call.Progress) (any, error) {
+		Run: func(ctx context.Context, d *Engine, in In, _ call.Progress) (Out, error) {
 			out, err := run(ctx, d, in)
 			return out, worded(err)
 		},
@@ -53,46 +56,50 @@ func worded(err error) error {
 }
 
 func calls(d *Engine, served []string) []call.Handler {
-	out := make([]call.Handler, 0, 12+len(VMVerbs()))
+	out := make([]call.Handler, 0, 12+len(engine.VMVerbs()))
 	out = append(out,
-		own(d, engine.CallHello, func(_ context.Context, d *Engine, _ struct{}) (any, error) {
+		own(d, engine.CallHello, func(_ context.Context, d *Engine, _ struct{}) (engine.Hello, error) {
 			h := d.Hello()
 			h.Calls = served
 			return h, nil
 		}),
-		own(d, engine.CallVMs, func(_ context.Context, d *Engine, _ struct{}) (any, error) { return d.VMs(), nil }),
-		own(d, engine.CallPorts, func(ctx context.Context, d *Engine, in engine.VMIn) (any, error) { return d.Ports(ctx, in.VM), nil }),
-		own(d, engine.CallReserve, func(ctx context.Context, d *Engine, in engine.ReserveIn) (any, error) {
+		own(d, engine.CallVMs, func(_ context.Context, d *Engine, _ struct{}) ([]engine.VMView, error) { return d.VMs(), nil }),
+		own(d, engine.CallPorts, func(ctx context.Context, d *Engine, in engine.VMIn) (ports.MacPorts, error) {
+			return d.Ports(ctx, in.VM), nil
+		}),
+		own(d, engine.CallReserve, func(ctx context.Context, d *Engine, in engine.ReserveIn) (ports.SharedPort, error) {
 			return d.Reserve(ctx, in.VM, in.GuestPort)
 		}),
-		own(d, engine.CallRelease, func(ctx context.Context, d *Engine, in engine.ReserveIn) (any, error) {
+		own(d, engine.CallRelease, func(ctx context.Context, d *Engine, in engine.ReserveIn) (ports.Reservation, error) {
 			return d.Release(ctx, in.VM, in.GuestPort)
 		}),
-		own(d, engine.CallGuestExec, func(ctx context.Context, d *Engine, in engine.ExecIn) (any, error) {
+		own(d, engine.CallGuestExec, func(ctx context.Context, d *Engine, in engine.ExecIn) (engine.ExecOut, error) {
 			ran, err := d.GuestExec(ctx, in.VM, in.Line, in.Stdin)
 			return engine.ExecOut(ran), err
 		}),
-		own(d, engine.CallAccounts, func(ctx context.Context, d *Engine, _ struct{}) (any, error) { return d.Accounts(ctx), nil }),
-		own(d, engine.CallStopAll, func(ctx context.Context, d *Engine, _ struct{}) (any, error) { return d.StopAll(ctx), nil }),
-		own(d, engine.CallAwakeView, func(_ context.Context, d *Engine, _ struct{}) (any, error) { return d.AwakeView(), nil }),
-		own(d, engine.CallKeepAwake, func(_ context.Context, d *Engine, in engine.AwakeIn) (any, error) { return d.Awake(in) }),
-		own(d, engine.CallAwakeOff, func(_ context.Context, d *Engine, _ struct{}) (any, error) { return d.Sleep(), nil }),
-		own(d, engine.CallActivity, func(_ context.Context, d *Engine, _ struct{}) (any, error) { return activityOf(d), nil }),
-		own(d, engine.CallKeepSettings, func(_ context.Context, d *Engine, in engine.KeepSettingsIn) (any, error) {
+		own(d, engine.CallAccounts, func(ctx context.Context, d *Engine, _ struct{}) (engine.AccountsView, error) {
+			return d.Accounts(ctx), nil
+		}),
+		own(d, engine.CallStopAll, func(ctx context.Context, d *Engine, _ struct{}) (engine.StopAll, error) { return d.StopAll(ctx), nil }),
+		own(d, engine.CallAwakeView, func(_ context.Context, d *Engine, _ struct{}) (awake.View, error) { return d.AwakeView(), nil }),
+		own(d, engine.CallKeepAwake, func(_ context.Context, d *Engine, in engine.AwakeIn) (awake.Awoken, error) { return d.Awake(in) }),
+		own(d, engine.CallAwakeOff, func(_ context.Context, d *Engine, _ struct{}) (engine.AwakeOff, error) { return d.Sleep(), nil }),
+		own(d, engine.CallActivity, func(_ context.Context, d *Engine, _ struct{}) (engine.ActivityOut, error) { return activityOf(d), nil }),
+		own(d, engine.CallKeepSettings, func(_ context.Context, d *Engine, in engine.KeepSettingsIn) (struct{}, error) {
 			d.KeepSettings(in.VM, in.Read)
 			return struct{}{}, nil
 		}),
-		own(d, engine.CallLastSettings, func(_ context.Context, d *Engine, in engine.VMIn) (any, error) {
+		own(d, engine.CallLastSettings, func(_ context.Context, d *Engine, in engine.VMIn) (engine.LastSettingsOut, error) {
 			read, ok := d.LastSettings(in.VM)
 			return engine.LastSettingsOut{Read: read, Kept: ok}, nil
 		}),
-		own(d, engine.CallRefresh, func(_ context.Context, d *Engine, in engine.PagesIn) (any, error) {
+		own(d, engine.CallRefresh, func(_ context.Context, d *Engine, in engine.PagesIn) (struct{}, error) {
 			return struct{}{}, d.Refresh(in.Pages)
 		}),
-		own(d, engine.CallAgentsHeld, func(ctx context.Context, d *Engine, _ struct{}) (any, error) { return d.AgentsHeld(ctx) }),
+		own(d, engine.CallAgentsHeld, func(ctx context.Context, d *Engine, _ struct{}) (agents.Held, error) { return d.AgentsHeld(ctx) }),
 	)
-	for _, verb := range VMVerbs() {
-		out = append(out, own(d, engine.CallVM(verb), func(ctx context.Context, d *Engine, in engine.VMIn) (any, error) {
+	for _, verb := range engine.VMVerbs() {
+		out = append(out, own(d, engine.CallVM(verb), func(ctx context.Context, d *Engine, in engine.VMIn) (*struct{}, error) {
 			return nil, d.VM(ctx, verb, in.VM)
 		}))
 	}

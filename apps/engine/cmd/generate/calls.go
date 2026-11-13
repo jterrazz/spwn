@@ -22,8 +22,8 @@ import (
 const callsPath = "apps/engine/remote/api/calls.json"
 
 // invariant: the registry with zero Deps: only its Meta is read, no call runs.
-func calls() []byte {
-	registry, err := call.NewRegistry(
+func registry() *call.Registry {
+	r, err := call.NewRegistry(
 		accountscalls.All(accountscalls.Deps{}), activitycalls.All(activitycalls.Deps{}), appscalls.All(appscalls.Deps{}),
 		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}), agentscalls.All(agentscalls.Deps{}),
 		imagescalls.All(imagescalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
@@ -32,7 +32,16 @@ func calls() []byte {
 	if err != nil {
 		panic(err)
 	}
-	data, err := registry.Catalogue()
+	return r
+}
+
+func calls() []byte {
+	owns := enginecalls.Owns()
+	own := make([]call.Meta, 0, len(owns))
+	for _, o := range owns {
+		own = append(own, o.Meta)
+	}
+	data, err := registry().Catalogue(own...)
 	if err != nil {
 		panic(err)
 	}

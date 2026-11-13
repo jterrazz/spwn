@@ -2,8 +2,10 @@ package call
 
 import (
 	"encoding/json"
+	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 const CatalogueSchema = "station.calls/v1"
@@ -19,6 +21,9 @@ type Entry struct {
 	In      string   `json:"in,omitempty"`
 	Out     string   `json:"out,omitempty"`
 	Watch   bool     `json:"watch,omitempty"`
+	// value: served by the engine itself beside the registry, so never named
+	// in a hello's calls.
+	Own bool `json:"own,omitempty"`
 }
 
 type Catalogue struct {
@@ -33,12 +38,21 @@ func schema(name string, document int) string {
 	return "station." + name + "/v" + strconv.Itoa(max(document, 1))
 }
 
-func (r *Registry) Catalogue() ([]byte, error) {
-	// value: calls.json, the registry's Meta as the API's catalogue: the
-	// names a client calls, the menu bar's action ids, the palette's entries.
+func (r *Registry) Catalogue(own ...Meta) ([]byte, error) {
+	// value: calls.json, the registry's Meta and the engine's own calls as
+	// the API's catalogue: the names a client calls, the menu bar's action
+	// ids, the palette's entries.
 	c := Catalogue{Schema: CatalogueSchema, Calls: []Entry{}}
-	for _, m := range r.Metas() {
-		e := Entry{Name: m.Name, Schema: schema(m.Name, m.Document), Section: string(m.Section), Where: string(m.Where), Confirm: string(m.Confirm), In: m.In, Out: m.Out, Watch: m.Watch}
+	metas := r.Metas()
+	for _, m := range own {
+		if _, taken := r.byName[m.Name]; taken {
+			return nil, fmt.Errorf("call: two calls are named %q", m.Name)
+		}
+	}
+	metas = append(metas, own...)
+	slices.SortFunc(metas, func(a, b Meta) int { return strings.Compare(a.Name, b.Name) })
+	for _, m := range metas {
+		e := Entry{Name: m.Name, Schema: schema(m.Name, m.Document), Section: string(m.Section), Where: string(m.Where), Confirm: string(m.Confirm), In: m.In, Out: m.Out, Watch: m.Watch, Own: slices.ContainsFunc(own, func(o Meta) bool { return o.Name == m.Name })}
 		for _, code := range m.Errors {
 			e.Errors = append(e.Errors, string(code))
 		}

@@ -15,7 +15,7 @@ type Hello struct {
 	PID        int       `json:"pid"`
 	StartedAt  time.Time `json:"started_at"`
 	Executable string    `json:"executable,omitempty"`
-	// value: the names of the calls this engine serves, as calls.json lists them.
+	// value: the names of the Registry's calls this engine serves, never its own.
 	Calls []string `json:"calls,omitempty"`
 	Page  int      `json:"page,omitempty"`
 }

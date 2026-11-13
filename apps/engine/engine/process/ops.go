@@ -61,36 +61,21 @@ func (d *Engine) stopSharing(ctx context.Context, vm string, port int) (ports.Re
 	return l, d.o.Remember(vm, port, true)
 }
 
-// value: what a VM's verb asks of the engine, by the verb's name.
-const (
-	VMRun     = "run"
-	VMStart   = "start"
-	VMStop    = "stop"
-	VMRestart = "restart"
-	VMDelete  = "delete"
-	VMForget  = "forget"
-	VMReady   = "ready"
-)
-
-func VMVerbs() []string {
-	return []string{VMRun, VMStart, VMStop, VMRestart, VMDelete, VMForget, VMReady}
-}
-
 func (d *Engine) VM(ctx context.Context, verb, vm string) error {
 	switch verb {
-	case VMRun:
+	case engine.VMRun:
 		if err := d.opRun(ctx, vm); err != nil {
 			return err
 		}
 		return d.awaitGuest(ctx, vm)
-	case VMStart:
+	case engine.VMStart:
 		if err := d.opStart(ctx, vm); err != nil {
 			return err
 		}
 		return d.awaitGuest(ctx, vm)
-	case VMStop:
+	case engine.VMStop:
 		return d.opStop(ctx, vm, true)
-	case VMRestart:
+	case engine.VMRestart:
 		if err := d.opStop(ctx, vm, false); err != nil {
 			return err
 		}
@@ -98,12 +83,12 @@ func (d *Engine) VM(ctx context.Context, verb, vm string) error {
 			return err
 		}
 		return d.awaitGuest(ctx, vm)
-	case VMDelete:
+	case engine.VMDelete:
 		return d.opDelete(ctx, vm)
-	case VMForget:
+	case engine.VMForget:
 		d.forget(vm)
 		return nil
-	case VMReady:
+	case engine.VMReady:
 		return d.ready(ctx, vm)
 	}
 	return fault("unknown_op", "unknown verb \""+verb+"\" for a VM", "station machines")

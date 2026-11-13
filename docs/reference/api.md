@@ -2,13 +2,13 @@
 
 `station.api/v2` is how every caller reaches a call on another process or another machine: the CLI reaches this Mac's engine with it, the menu bar does, a Mac reaches another Mac's engine with it over ssh, and an engine reaches the guest inside each VM with it ([ADR-016](../decisions/016-api-v2-and-remote-by-api.md)). Where a call runs is [Architecture](../concepts/architecture.md#the-router)'s.
 
-| Section                | Answers                                                    |
-| ---------------------- | ---------------------------------------------------------- |
-| The transport          | The sockets and the ssh bridge the frames travel on        |
-| The frames             | One JSON object per line, and what each key means          |
-| calls.json             | The list of calls, generated from the Registry             |
-| The engine's own calls | What a process of this Mac asks of the engine's live state |
-| Errors                 | The error object and its codes                             |
+| Section                | Answers                                                             |
+| ---------------------- | ------------------------------------------------------------------- |
+| The transport          | The sockets and the ssh bridge the frames travel on                 |
+| The frames             | One JSON object per line, and what each key means                   |
+| calls.json             | The list of calls, generated from the Registry and the engine's own |
+| The engine's own calls | What a process of this Mac asks of the engine's live state          |
+| Errors                 | The error object and its codes                                      |
 
 ## The transport
 
@@ -35,15 +35,15 @@ A frame (`remote/api.Frame`) carries `v` (2) and `id`. A request carries `hello`
 
 ## calls.json
 
-[`apps/engine/remote/api/calls.json`](../../apps/engine/remote/api/calls.json) is the Registry, projected by `make generate` (`station.calls/v1`): each call's `name`, the `schema` of its output (`station.<call>/v<n>`, the version of the document `--json` prints, the call's `Document`: `station.machinefile.plan/v2`), its `section`, its `where` (`at-target`, `in-engine`, `in-process`), the confirmation it may require, the `errors` it declares, its input and output types, and `watch` for a read that fills progressively. The engine serves every call of it, run on this Mac as the CLI runs it; the menu bar names its actions by these names; `api_test.go` fails when the file and the Registry differ.
+[`apps/engine/remote/api/calls.json`](../../apps/engine/remote/api/calls.json) is the Registry and the engine's own calls, projected by `make generate` (`station.calls/v1`): each call's `name`, the `schema` of its output (`station.<call>/v<n>`, the version of the document `--json` prints, the call's `Document`: `station.machinefile.plan/v2`), its `section`, its `where` (`at-target`, `in-engine`, `in-process`), the confirmation it may require, the `errors` it declares, its input and output types, `watch` for a read that fills progressively, and `own` for a call the engine serves beside the Registry (below). The engine serves every call of it, a Registry's call run on this Mac as the CLI runs it; the menu bar names its actions by these names; `api_test.go` fails when the file differs from the Registry and `enginecalls.Owns`.
 
 ## The engine's own calls
 
-Beside the Registry, the engine serves calls of its own, which the CLI's reads and the VMs' guests ask of its live state; they are never in `calls.json`:
+Beside the Registry, the engine serves calls of its own, which the CLI's reads and the VMs' guests ask of its live state; `calls.json` lists them with `own`, and a hello's `calls` never names them:
 
 | call                                                       | in                            | out                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `engine.hello`                                             |                               | `version pid started_at executable`, `calls`, the names of `calls.json` it serves, and `page`, the revision of `station.page/v1` its pages speak: the menu bar shows "Update station here" when it is older than its own                                                                                                                                                                                                                                           |
+| `engine.hello`                                             |                               | `version pid started_at executable`, `calls`, the names of the Registry's calls it serves, and `page`, the revision of `station.page/v1` its pages speak: the menu bar shows "Update station here" when it is older than its own                                                                                                                                                                                                                                   |
 | `engine.vms`                                               |                               | each VM's `name state run_pid guest ip detail`                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `engine.vm-run`                                            | `vm`                          | supervises a new record; answers when its guest is connected                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `engine.vm-start` / `engine.vm-stop` / `engine.vm-restart` | `vm`                          | any VM                                                                                                                                                                                                                                                                                                                                                                                                                                                             |

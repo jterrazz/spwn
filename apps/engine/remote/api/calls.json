@@ -301,11 +301,123 @@
       "watch": true
     },
     {
+      "name": "engine.accounts",
+      "schema": "station.engine.accounts/v1",
+      "where": "in-engine",
+      "out": "AccountsView",
+      "own": true
+    },
+    {
+      "name": "engine.activity",
+      "schema": "station.engine.activity/v1",
+      "where": "in-engine",
+      "out": "ActivityOut",
+      "own": true
+    },
+    {
+      "name": "engine.agents-held",
+      "schema": "station.engine.agents-held/v1",
+      "where": "in-engine",
+      "out": "Held",
+      "own": true
+    },
+    {
+      "name": "engine.awake",
+      "schema": "station.engine.awake/v1",
+      "where": "in-engine",
+      "out": "View",
+      "own": true
+    },
+    {
+      "name": "engine.awake-keep",
+      "schema": "station.engine.awake-keep/v1",
+      "where": "in-engine",
+      "in": "AwakeIn",
+      "out": "Awoken",
+      "own": true
+    },
+    {
+      "name": "engine.awake-off",
+      "schema": "station.engine.awake-off/v1",
+      "where": "in-engine",
+      "out": "AwakeOff",
+      "own": true
+    },
+    {
+      "name": "engine.events",
+      "schema": "station.engine.events/v1",
+      "where": "in-engine",
+      "out": "Opened|Event",
+      "watch": true,
+      "own": true
+    },
+    {
+      "name": "engine.guest-exec",
+      "schema": "station.engine.guest-exec/v1",
+      "where": "in-engine",
+      "in": "ExecIn",
+      "out": "ExecOut",
+      "own": true
+    },
+    {
+      "name": "engine.hello",
+      "schema": "station.engine.hello/v1",
+      "where": "in-engine",
+      "out": "Hello",
+      "own": true
+    },
+    {
+      "name": "engine.ports",
+      "schema": "station.engine.ports/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "out": "MacPorts",
+      "own": true
+    },
+    {
       "name": "engine.read",
       "schema": "station.engine.read/v1",
       "where": "at-target",
       "in": "ReadIn",
       "out": "Reading"
+    },
+    {
+      "name": "engine.refresh",
+      "schema": "station.engine.refresh/v1",
+      "where": "in-engine",
+      "in": "PagesIn",
+      "own": true
+    },
+    {
+      "name": "engine.release",
+      "schema": "station.engine.release/v1",
+      "where": "in-engine",
+      "in": "ReserveIn",
+      "out": "Reservation",
+      "own": true
+    },
+    {
+      "name": "engine.reserve",
+      "schema": "station.engine.reserve/v1",
+      "where": "in-engine",
+      "in": "ReserveIn",
+      "out": "SharedPort",
+      "own": true
+    },
+    {
+      "name": "engine.settings-keep",
+      "schema": "station.engine.settings-keep/v1",
+      "where": "in-engine",
+      "in": "KeepSettingsIn",
+      "own": true
+    },
+    {
+      "name": "engine.settings-last",
+      "schema": "station.engine.settings-last/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "out": "LastSettingsOut",
+      "own": true
     },
     {
       "name": "engine.start",
@@ -327,6 +439,77 @@
       ],
       "in": "StopIn",
       "out": "StopOut"
+    },
+    {
+      "name": "engine.stop-all",
+      "schema": "station.engine.stop-all/v1",
+      "where": "in-engine",
+      "out": "StopAll",
+      "own": true
+    },
+    {
+      "name": "engine.vm-delete",
+      "schema": "station.engine.vm-delete/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "own": true
+    },
+    {
+      "name": "engine.vm-forget",
+      "schema": "station.engine.vm-forget/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "own": true
+    },
+    {
+      "name": "engine.vm-ready",
+      "schema": "station.engine.vm-ready/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "own": true
+    },
+    {
+      "name": "engine.vm-restart",
+      "schema": "station.engine.vm-restart/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "own": true
+    },
+    {
+      "name": "engine.vm-run",
+      "schema": "station.engine.vm-run/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "own": true
+    },
+    {
+      "name": "engine.vm-start",
+      "schema": "station.engine.vm-start/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "own": true
+    },
+    {
+      "name": "engine.vm-stop",
+      "schema": "station.engine.vm-stop/v1",
+      "where": "in-engine",
+      "in": "VMIn",
+      "own": true
+    },
+    {
+      "name": "engine.vms",
+      "schema": "station.engine.vms/v1",
+      "where": "in-engine",
+      "own": true
+    },
+    {
+      "name": "engine.watch",
+      "schema": "station.engine.watch/v1",
+      "where": "in-engine",
+      "in": "WatchIn",
+      "out": "Watching",
+      "watch": true,
+      "own": true
     },
     {
       "name": "images.build",
@@ -605,6 +788,15 @@
       "in": "ReadIn",
       "out": "ReadOut",
       "watch": true
+    },
+    {
+      "name": "page",
+      "schema": "station.page/v1",
+      "where": "in-engine",
+      "in": "PagesIn",
+      "out": "Opened|Event",
+      "watch": true,
+      "own": true
     },
     {
       "name": "ports.declare",
