@@ -9,17 +9,17 @@
     color: var(--t1);
 }
 .icon.page {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-well);
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
 }
 .icon.page svg,
 .icon.page .mark {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
 }
 .icon.page .letters {
-    font-size: 14px;
+    font-size: 16px;
 }
 .icon svg {
     width: 14px;

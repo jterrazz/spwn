@@ -18,6 +18,7 @@ type RowState = { tone: Tone; word: string; asWritten?: boolean; calm?: 'unsaid'
 // value: the sentence when it is an address, cut in the middle.
 export type RowProps = {
     title: string;
+    titleLook?: 'mono' | 'plain';
     tag?: string;
     tagLook?: 'chip' | 'hint';
     sentence?: ReactNode;
@@ -122,14 +123,18 @@ function titledIfCut(event: MouseEvent<HTMLSpanElement>): void {
 
 type NameProps = {
     title: string;
+    titleLook: 'mono' | 'plain' | undefined;
     tag: string | undefined;
     tagLook: 'chip' | 'hint';
     sentence: ReactNode;
 };
 
-function Name({ title, tag, tagLook, sentence }: NameProps) {
+function Name({ title, titleLook, tag, tagLook, sentence }: NameProps) {
     const titled = (
-        <span className={styles.title} onMouseEnter={titledIfCut}>
+        <span
+            className={`${styles.title} ${titleLook === 'mono' ? styles.mono : ''}`}
+            onMouseEnter={titledIfCut}
+        >
             {title}
         </span>
     );
@@ -160,6 +165,7 @@ const NO_CELLS: readonly ReactNode[] = [];
 
 function RowBody({
     title,
+    titleLook,
     tag,
     tagLook = 'chip',
     sentence,
@@ -175,7 +181,13 @@ function RowBody({
         <>
             {lead === undefined ? null : <div className={styles.lead}>{lead}</div>}
             {stateAt === 'start' ? <StateCell at="start" state={state} /> : null}
-            <Name sentence={sentence} tag={tag} tagLook={tagLook} title={title} />
+            <Name
+                sentence={sentence}
+                tag={tag}
+                tagLook={tagLook}
+                title={title}
+                titleLook={titleLook}
+            />
             {kind === undefined ? null : (
                 <div className={styles.kind}>
                     {kind === null ? null : <TypeTag>{kind}</TypeTag>}

@@ -1,7 +1,7 @@
 .head {
     display: flex;
     align-items: center;
-    gap: var(--space-14);
+    gap: var(--space-16);
     padding: var(--space-8) 0 var(--space-4);
 }
 .named {
@@ -13,11 +13,12 @@
 }
 .name {
     margin: 0;
-    font-size: var(--text-tab-verdict);
+    font-size: 26px;
     font-weight: var(--weight-strong);
+    letter-spacing: -0.02em;
     display: flex;
     align-items: center;
-    gap: var(--space-8);
+    gap: var(--space-10);
     flex-wrap: wrap;
 }
 .about {

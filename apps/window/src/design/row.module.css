@@ -131,6 +131,10 @@
 .slim .title {
     font-size: var(--text-body);
 }
+.title.mono {
+    font-family: var(--font-mono);
+    font-weight: var(--weight-regular);
+}
 .sentence {
     color: var(--t3);
     font-size: var(--text-label);

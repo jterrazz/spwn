@@ -1,11 +1,12 @@
 import type { SettingsMatrix, SettingsRow } from '@jterrazz/station-api';
 
-import { Facts, Panel, Row, StatePill } from '../../design/index';
+import { Facts, Panel, Row, StatePill, Value } from '../../design/index';
 import { reversibleState } from '../../engine/shown';
 import { CATALOG_KIND_NAMES, CATALOG_KIND_WORDS, CATALOG_LEVEL_WORDS } from '../../engine/words';
 import { needsOf } from './item-model';
 import { factOf, ItemChips, ItemHead, MachineChips, Rail, systemsWord, Two } from './item-parts';
 import type { ItemProps } from './item-parts';
+import { Marked } from './marked';
 import { categoryWord } from './shelves';
 
 import styles from './item.module.css';
@@ -51,18 +52,24 @@ function Changes({ row }: { row: SettingsRow }) {
                     <Row
                         key={stored.Path}
                         kind={CATALOG_LEVEL_WORDS[stored.Level]}
-                        sentence={stored.Note}
+                        sentence={<Marked>{stored.Note}</Marked>}
                         size="slim"
                         title={stored.Path}
+                        titleLook="mono"
                     />
                 ))}
                 {sets.map((value) => (
                     <Row
                         key={value.Key}
                         kind="value"
-                        sentence={`set to ${value.Value}`}
+                        sentence={
+                            <>
+                                set to <Value>{value.Value}</Value>
+                            </>
+                        }
                         size="slim"
                         title={value.Key}
+                        titleLook="mono"
                     />
                 ))}
             </div>
