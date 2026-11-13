@@ -63,6 +63,9 @@
     --column-name: minmax(140px, 180px);
     --column-cells: minmax(0, 1fr);
 }
+.catalog .cell {
+    white-space: normal;
+}
 .catalog.hasValue {
     --column-value: 88px;
 }

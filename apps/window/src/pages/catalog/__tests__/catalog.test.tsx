@@ -61,6 +61,24 @@ describe('Catalog', () => {
         await expect(result.tree).toMatch(file('./__expected__/stories-apps-git.aria.yaml'));
     });
 
+    test('a description is drawn whole, on a second line when it is long, never cut', async () => {
+        // Given - the window on Apps over stories, its descriptions of every length
+        let cut: string[] = ['not read'];
+        await component.render(
+            windowOver('stories', { page: 'catalog-apps' }),
+            async (visitor) => {
+                // When - apps.list has answered
+                await visitor.see(content('gh'));
+                cut = [...document.querySelectorAll('div[class*="_cell_"]')]
+                    .filter((cell) => cell.scrollWidth > cell.clientWidth)
+                    .map((cell) => cell.textContent ?? '');
+            },
+        );
+
+        // Then - no description overflows its column
+        expect(cut).toStrictEqual([]);
+    });
+
     test('the search narrows the shelf, and says when nothing matches', async () => {
         // Given - the window on Apps over two-macs
         const result = await component.render(

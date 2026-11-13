@@ -47,15 +47,15 @@
     - paragraph: Network 1
     - 'button "tailscale-cli setting The tailscale command for the App Store app: a script on PATH, never a link to the app 0 of 2 machines OK"'
     - paragraph: Agents 2
-    - 'button "agent-hooks setting The agent hook: station sees what Claude Code and Codex do, and what they wait for · VMs only 0 of 4 machines OK"'
+    - 'button "agent-hooks setting The agent hook: station sees what Claude Code and Codex do, and what they wait for 0 of 4 machines OK"'
     - 'button "herdr-machine setting Herdr reaches every workspace of this Mac: its agents show in Herdr 0 of 2 machines OK"'
     - paragraph: No category given 9
-    - button "filevault setting on 2 of 2 machines OK"
-    - button "firewall setting off 1 of 2 machines OK"
-    - button "sip setting on 2 of 2 machines OK"
-    - button "automatic-updates setting on 2 of 2 machines OK"
-    - button "screen-lock setting locks after 2 min 2 of 2 machines OK"
-    - button "gatekeeper setting on 2 of 2 machines OK"
-    - button "remote-login setting could not be read 0 of 2 machines OK"
-    - button "time-machine setting last backup 1 d ago 2 of 2 machines OK"
-    - button "macos-updates setting up to date 2 of 2 machines OK"
+    - button "filevault setting 2 of 2 machines OK"
+    - button "firewall setting 1 of 2 machines OK"
+    - button "sip setting 2 of 2 machines OK"
+    - button "automatic-updates setting 2 of 2 machines OK"
+    - button "screen-lock setting 2 of 2 machines OK"
+    - button "gatekeeper setting 2 of 2 machines OK"
+    - button "remote-login setting 0 of 2 machines OK"
+    - button "time-machine setting 2 of 2 machines OK"
+    - button "macos-updates setting 2 of 2 machines OK"

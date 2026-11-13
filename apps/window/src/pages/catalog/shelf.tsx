@@ -1,6 +1,6 @@
 import type { AppsReport, SettingsMatrixRow, SettingsRow } from '@jterrazz/station-api';
 
-import { AppIcon, Row, Value } from '../../design/index';
+import { AppIcon, Row, StatePill, Value } from '../../design/index';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { appUpdate } from '../../engine/shown';
@@ -15,6 +15,8 @@ import { appsOn, packageOfApp, packageOfSetting } from './model';
 import type { Shelf } from './model';
 import { SHELVES } from './shelves';
 
+import styles from './catalog.module.css';
+
 const ABOUT =
     'Everything station knows how to install or set: apps, agent skills and settings, each one a package';
 
@@ -27,9 +29,10 @@ type Open = (name: string) => void;
 function AppRow({ report, open }: { report: AppsReport; open: Open }) {
     const { App } = report;
     const update = appUpdate(report);
+    const version = report.Version === '' ? null : <Value look="raised">{report.Version}</Value>;
     return (
         <Row
-            cells={[sentence([App.Description, report.Detail])]}
+            cells={[update === null ? sentence([App.Description, report.Detail]) : App.Description]}
             kind={App.Kind === undefined ? null : kindOf(CATALOG_KIND_WORDS[App.Kind])}
             lead={<AppIcon kind={App.Kind} name={App.Name} />}
             onOpen={() => {
@@ -37,16 +40,33 @@ function AppRow({ report, open }: { report: AppsReport; open: Open }) {
             }}
             size="slim"
             state={
-                update ?? {
-                    tone: APP_STATE_TONES[report.State],
-                    word: APP_STATE_WORDS[report.State],
-                }
+                update === null
+                    ? { tone: APP_STATE_TONES[report.State], word: APP_STATE_WORDS[report.State] }
+                    : null
             }
             template="catalog"
             title={App.Name}
-            value={report.Version === '' ? null : <Value look="raised">{report.Version}</Value>}
+            value={
+                update === null ? (
+                    version
+                ) : (
+                    <span className={styles.update}>
+                        <StatePill {...update} />
+                        {version}
+                    </span>
+                )
+            }
+            valueSize={update === null ? 'short' : 'long'}
         />
     );
+}
+
+function settingValue(row: SettingsRow, held: SettingsMatrixRow | undefined): null | string {
+    if (held !== undefined) {
+        return `${held.OK} of ${held.Of} ${held.Of === 1 ? 'machine' : 'machines'} OK`;
+    }
+    const reading = sentence([row.Value, row.Why]);
+    return reading === '' ? null : reading;
 }
 
 function SettingRow({
@@ -60,7 +80,7 @@ function SettingRow({
 }) {
     return (
         <Row
-            cells={[sentence([row.Package.Description, row.Value, row.Why])]}
+            cells={[row.Package.Description]}
             kind={CATALOG_KIND_WORDS.setting}
             lead={<AppIcon kind="setting" name={row.Name} />}
             onOpen={() => {
@@ -69,11 +89,7 @@ function SettingRow({
             size="slim"
             template="catalog"
             title={row.Name}
-            value={
-                held === undefined
-                    ? null
-                    : `${held.OK} of ${held.Of} ${held.Of === 1 ? 'machine' : 'machines'} OK`
-            }
+            value={settingValue(row, held)}
             valueSize="long"
         />
     );
