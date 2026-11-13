@@ -61,6 +61,20 @@ export const SWITCH_STORIES: readonly Story<SwitchProps<string>>[] = [
         },
     },
     {
+        name: 'bare, each option its identity',
+        props: {
+            label: 'Machine files',
+            onChange: nothing,
+            options: [
+                { id: 'base', identity: 'blue', label: 'base' },
+                { id: 'dev-tools', identity: 'purple', label: 'dev-tools' },
+                { id: 'macbook-pro', identity: 'teal', label: 'macbook-pro' },
+            ],
+            surface: 'bare',
+            value: 'macbook-pro',
+        },
+    },
+    {
         name: 'disabled',
         props: {
             disabled: true,

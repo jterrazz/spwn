@@ -15,6 +15,19 @@
 .inPanel {
     background: var(--inset);
 }
+.bare {
+    background: none;
+    padding: 0;
+}
+.dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: var(--space-6);
+    border-radius: var(--radius-tick);
+    background: var(--c);
+    vertical-align: 1px;
+}
 .option {
     all: unset;
     cursor: pointer;

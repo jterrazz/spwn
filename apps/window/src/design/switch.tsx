@@ -1,12 +1,19 @@
+import type { Identity } from './identity';
+
 import styles from './switch.module.css';
 
-export type SwitchOption<T extends string> = { id: T; label: string; count?: number | undefined };
+export type SwitchOption<T extends string> = {
+    id: T;
+    label: string;
+    count?: number | undefined;
+    identity?: Identity | undefined;
+};
 
 type Shared<T extends string> = {
     label: string;
     options: readonly SwitchOption<T>[];
     variant?: 'filter' | 'tabs';
-    surface?: 'canvas' | 'panel';
+    surface?: 'bare' | 'canvas' | 'panel';
     disabled?: boolean;
     wrap?: boolean;
     controls?: string;
@@ -21,6 +28,7 @@ export type SwitchProps<T extends string> = Shared<T> &
 function Option({
     label,
     count,
+    identity,
     chosen,
     tabs,
     disabled,
@@ -29,6 +37,7 @@ function Option({
 }: {
     label: string;
     count?: number | undefined;
+    identity?: Identity | undefined;
     chosen: boolean;
     tabs: boolean;
     disabled: boolean;
@@ -47,6 +56,9 @@ function Option({
             tabIndex={tabs && !chosen ? -1 : undefined}
             type="button"
         >
+            {identity === undefined ? null : (
+                <span aria-hidden="true" className={styles.dot} data-identity={identity} />
+            )}
             {label}
             {count === undefined ? null : <span className={styles.count}>{count}</span>}
         </button>
@@ -71,7 +83,7 @@ export function Switch<T extends string>(props: SwitchProps<T>) {
             className={[
                 styles.switch,
                 styles[variant],
-                surface === 'panel' ? styles.inPanel : '',
+                surface === 'canvas' ? '' : styles[surface === 'panel' ? 'inPanel' : 'bare'],
                 wrap ? styles.wrap : '',
             ].join(' ')}
             role={tabs ? 'tablist' : 'group'}
@@ -94,6 +106,7 @@ export function Switch<T extends string>(props: SwitchProps<T>) {
                     controls={controls}
                     count={option.count}
                     disabled={disabled}
+                    identity={option.identity}
                     key={option.id}
                     label={option.label}
                     onPick={() => {
