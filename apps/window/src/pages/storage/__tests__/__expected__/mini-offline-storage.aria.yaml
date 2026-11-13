@@ -17,4 +17,4 @@
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
     - button "jterrazz-mac-mini the Mac itself"
-    - button "infra 8 CPU · 24 GB"
+    - button "infra"

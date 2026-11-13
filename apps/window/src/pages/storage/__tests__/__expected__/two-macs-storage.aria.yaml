@@ -41,5 +41,5 @@
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
     - button "jterrazz-macbook-pro the Mac itself"
-    - button "api 4 CPU · 8 GB · 50 GB disk 50 GB"
-    - button "linux-1 4 CPU · 8 GB · 50 GB disk 50 GB"
+    - button "api 50 GB"
+    - button "linux-1 50 GB"

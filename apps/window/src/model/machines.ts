@@ -6,8 +6,6 @@ import type {
     Target,
 } from '@jterrazz/station-api';
 
-import { bytes, memory, sentence } from './format';
-
 export type Found = { mac: MachinesMacView; vm?: MachinesVM | undefined };
 
 export function macsOf(out: MachinesListOutput | undefined): readonly MachinesMacView[] {
@@ -47,13 +45,4 @@ export function driftAsked(found: Found): MachinefileDriftInput {
         return { Machine: found.vm.Name };
     }
     return found.mac.ThisMac ? {} : { Machine: found.mac.Name };
-}
-
-export function resourcesOf(vm: MachinesVM): string {
-    const { CPUs, MemoryBytes, DiskBytes } = vm.Resources;
-    return sentence([
-        CPUs > 0 ? `${CPUs} CPU` : undefined,
-        MemoryBytes > 0 ? memory(MemoryBytes) : undefined,
-        DiskBytes > 0 ? `${bytes(DiskBytes)} disk` : undefined,
-    ]);
 }

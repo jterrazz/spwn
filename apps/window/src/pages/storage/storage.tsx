@@ -6,7 +6,7 @@ import { diskGestureOf, machineKindOf } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { sentence } from '../../model/format';
-import { resourcesOf, targetOf } from '../../model/machines';
+import { targetOf } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { shortDay } from '../activity/when';
@@ -122,7 +122,7 @@ function Machines({ mac, go }: { mac: MachinesMacView; go: Go }) {
                     onOpen={() => {
                         go(machineRoute(vm.Name, 'Storage'));
                     }}
-                    sentence={resourcesOf(vm)}
+                    sentence={vm.Purpose}
                     title={vm.Name}
                     value={vm.SizeGB > 0 ? `${vm.SizeGB} GB` : null}
                 />

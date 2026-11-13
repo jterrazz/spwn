@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 
-const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'two-macs');
+const recordingFor = await recordingsOf('creating', 'mini-offline', 'one-mac', 'two-macs');
 
 function storageOver(world: string) {
     return pageOver(recordingFor(world), { page: 'storage' });
@@ -33,15 +33,25 @@ describe('Storage', () => {
             await visitor.see(within(region('Machines'), content('linux-1')));
 
             // When - linux-1 is opened from the Machines panel
-            await visitor.click(
-                within(region('Machines'), button('linux-1 4 CPU · 8 GB · 50 GB disk 50 GB')),
-            );
+            await visitor.click(within(region('Machines'), button('linux-1 50 GB')));
 
             // Then - its own Storage tab is shown, with its disk
             await visitor.see(heading('linux-1 Running'));
             await visitor.see(region('By app'));
         });
         expect(result.errors.text).toBe('');
+    });
+
+    test("a machine's line under its name is what it is for, and nothing when it was made for nothing", async () => {
+        // Given - Storage over creating, whose linux-5 was made for a lot and linux-4 for nothing
+        const result = await component.render(storageOver('creating'), async (visitor) => {
+            // When - its machines are listed
+            await visitor.see(within(region('Machines'), content('linux-4')));
+        });
+
+        // Then - the purpose the engine keeps, and no resources line in its place
+        expect(result.content.text).toContain('Lot shell, one block per package');
+        expect(result.content.text).not.toContain('CPU ·');
     });
 
     test('a Mac the world holds no answer for shows that no answer came', async () => {
