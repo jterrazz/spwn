@@ -25,3 +25,6 @@ apps/menubar/.build/
 
 # The menu bar's symbols, drawn by apps/menubar/scripts/symbols.swift before every build
 apps/menubar/sources/station-kit/token/symbols.xcassets/
+
+# Turborepo
+.turbo/

@@ -126,7 +126,7 @@ export const { cleanup, cli } = await specification.cli(STATION_BIN, {
     },
     serve: {
         github: {
-            command: 'node specs/cli/__setup__/github-api.ts',
+            command: `node ${resolve(import.meta.dirname, '__setup__/github-api.ts')}`,
             env: 'STATION_GITHUB_API_URL',
             ready: /listening on port (?<port>\d+)/u,
             url: (port) => `http://127.0.0.1:${port}`,

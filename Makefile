@@ -64,14 +64,14 @@ fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 
 # value: AR-02: the use-case suites a second hypervisor must pass unchanged, run a
 # second time over the fake vz once every spec has passed over tart's.
-VZ_SUITES    := specs/usecases/machines specs/usecases/engine/keep
+VZ_SUITES    := usecases/machines usecases/engine/keep
 
 test: node_modules/.install ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station, then the VM suites again over vz
 	@go test ./apps/engine/... ./catalog/... ./specs/...
 	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./apps/engine/wire
 	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./apps/engine/cmd/station && touch $(TEST_PATH)
-	@STATION_SPEC_BUILT=1 npx typescript test
-	@STATION_SPEC_BUILT=1 STATION_SPEC_HYPERVISOR=vz npx vitest run $(VZ_SUITES)
+	@STATION_SPEC_BUILT=1 npm --workspace specs exec -- vitest --run
+	@STATION_SPEC_BUILT=1 STATION_SPEC_HYPERVISOR=vz npm --workspace specs exec -- vitest --run $(VZ_SUITES)
 
 check: lint test build-linux menubar-check ## Every gate a change passes
 

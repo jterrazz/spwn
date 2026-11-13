@@ -25,15 +25,15 @@ Three tiers prove station, each with one purpose, and a fourth rig runs the menu
 ## The two suites
 
 ```sh
-make test      # go test ./apps/engine/... ./specs/..., the spec build's world under -race, then typescript test: the specs against a fresh build of station, then the machines and engine/keep use cases again over vz
-npm test       # the specs alone
+make test      # go test ./apps/engine/... ./specs/..., the spec build's world under -race, then the specs of `specs/` on Vitest: the specs against a fresh build of station, then the machines and engine/keep use cases again over vz
+npm --workspace specs test   # the specs alone, once `make test` built the binary
 ```
 
 The Go tests come first. The module tests are `*_test.go` files next to the code they judge, kept only for what no session of the binary reaches honestly: a state the terminal driver cannot observe (a busy screen, the renderer's colours), a timing budget, root, a pure algorithm whose edge cases are cheaper at its own level (the renderer goldens: every page fixture of `apps/engine/ui/testdata/pages/`, written by `make generate` from the real page functions, rendered by every renderer of `apps/engine/ui/render/` and compared with its file in `apps/engine/ui/testdata/__expected__/`; `go test ./apps/engine/ui/... -update` rewrites them). The architecture test, `specs/architecture/`, proves each of its rules still bites by judging one violating file in memory; its rules are [Architecture](../concepts/architecture.md#who-may-import-whom)'s. Each contract's suite, `apps/engine/<family>/contract/contracttest/`, runs against its real adapter (over `platform/local/localtest`'s scripted door) and its fake alike, so a fake cannot drift from what it stands for.
 
 Then `make test` runs the CLI specs under `specs/cli/` on Vitest, through `@jterrazz/test`. There is exactly one runner, and every spec drives one binary, `.artifacts/go/station-test`, stamped with the version `git describe` prints: the spec build (`-tags world`), which runs the real adapters unless a document hands it a world ([below](#a-use-case-over-a-world)). `make test` builds it once before the runner starts, so no worker links it while another drives a session (with one build per worker, nine links ran beside the first sessions), and tells the runner so (`STATION_SPEC_BUILT=1`): a gate runs that one binary to its end, even when `apps/engine/` changes under it, rather than documents rebuilding it in every worker and half the run testing other code. Run directly, `specs/cli/cli.specification.ts` rebuilds it when it is missing or when any file under `apps/engine/` is newer than it, beside the binary and renamed into its own file, so a worker never executes a half-written file. It is an mtime check, so editing the CLI and re-running the suite always exercises the change instead of a stale build.
 
-`vitest.config.ts` is the one line `@jterrazz/test` derives from `studio.config.ts`: its `cli` project collects `specs/cli/`, `specs/adapters/`, and `specs/usecases/`, and every `*.spec.yaml` there becomes a one-test module driving that runner. A document of `specs/adapters/<tech>/` proves one adapter speaks its program (its argv, its parsing, against the stub CLIs a fixture carries): `.calls` assertions belong there, and nowhere else once a family has moved. The runner's defaults are [the fenced run](#the-fenced-run).
+`specs/vitest.config.ts` is the one line `@jterrazz/test` derives from `specs/studio.config.ts`, the declaration of the `studio-station-specs` workspace member: its `cli` project collects `cli/`, `adapters/`, and `usecases/` of that folder, and every `*.spec.yaml` there becomes a one-test module driving that runner. A document of `specs/adapters/<tech>/` proves one adapter speaks its program (its argv, its parsing, against the stub CLIs a fixture carries): `.calls` assertions belong there, and nowhere else once a family has moved. The runner's defaults are [the fenced run](#the-fenced-run).
 
 ## A scenario is a document
 
@@ -52,7 +52,7 @@ runs:
 
 A document may stand on ground of its own: `fixture: ./__fixtures__/<case>/` spreads that folder into the working directory, which is the run's `HOME`, so a stub program under its `bin/` answers the binary. Ground sits in a special folder spelt with double underscores; a subject folder never starts with one. Where a stream is long and only some of it is the claim, the command writes it to a file (`help > help.txt`) and `files:` asserts what it `contains`.
 
-`TEST_UPDATE=1 npm test` rewrites the `exit:` and the streams of every document from what the binary actually printed: deliberately, after a change to a command's output, and never as a way to make a red suite go green. Nothing else in the file is touched.
+`TEST_UPDATE=1 npm --workspace specs test` rewrites the `exit:` and the streams of every document from what the binary actually printed: deliberately, after a change to a command's output, and never as a way to make a red suite go green. Nothing else in the file is touched.
 
 ## The fenced run
 
