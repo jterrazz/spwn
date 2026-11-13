@@ -143,9 +143,10 @@ func extraBlock(zshrc string, w machinefile.Written, app machinefile.Fate) machi
 // invariant: a block is written once its app reads there, and only while
 // the file still holds what the plan judged; it is recorded as written,
 // so a later edit by hand reads changed and a later template change reads
-// outdated. A block already exactly as apply writes it is recorded too when
-// the ledger holds no record of that text, so it follows its package from
-// then on. An extra's block is not judged here: it follows its app in
+// outdated. A block already exactly as apply writes it is recorded too,
+// once its app is there, when the ledger holds no record of that text, so
+// it follows its package from then on; one whose app is not there waits on
+// it, unrecorded. An extra's block is not judged here: it follows its app in
 // `apply --remove` (followApp).
 func (r *run) blocks(ctx context.Context, p machinefile.Plan) []machinefile.BlockDone {
 	out := make([]machinefile.BlockDone, 0, len(p.Blocks))
@@ -154,12 +155,12 @@ func (r *run) blocks(ctx context.Context, p machinefile.Plan) []machinefile.Bloc
 		switch {
 		case b.Condition == machinefile.Extra:
 			continue
-		case b.Action == machinefile.Keep:
-			done = r.recordBlock(ctx, done)
 		case b.Action == machinefile.Leave:
 			done.State, done.Detail = catalog.StateDegraded, "edited by hand: left as it is"
 		case !r.there[b.Item]:
 			done.State, done.Detail = catalog.StateAbsent, "waits on "+b.Item
+		case b.Action == machinefile.Keep:
+			done = r.recordBlock(ctx, done)
 		case ctx.Err() != nil:
 			done.State = catalog.StateBroken
 		default:
@@ -231,6 +232,10 @@ func (r *run) followApp(ctx context.Context, p machinefile.Plan, item string, en
 // its app is listed no longer: the owner's from then on.
 const editedKept = "edited by hand: kept, and yours"
 
+// value: the words of a block station would take back that the owner
+// deleted from ~/.zshrc already: nothing is left to take.
+const deletedGone = "deleted by hand: already gone"
+
 func (r *run) letGo(ctx context.Context, done machinefile.BlockDone, detail string) machinefile.BlockDone {
 	done.Detail = detail
 	if err := r.d.Ledger.DeleteBlock(ctx, done.ID); err != nil {
@@ -243,7 +248,7 @@ func (r *run) letGo(ctx context.Context, done machinefile.BlockDone, detail stri
 // file it replaces and against the ledger as it is then, so a record
 // another writer of ~/.zshrc made or dropped since the plan counts.
 func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machinefile.BlockDone {
-	edited := false
+	edited, gone := false, false
 	err := r.d.Zshrc.Edit(ctx, func(zshrc string) (string, error) {
 		written, read := writtenBlocks(ctx, r.d)
 		if read != nil {
@@ -266,6 +271,7 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 		default:
 			have, state := settings.PackageBlock(zshrc, done.ID)
 			if w, ok := written[done.ID]; !lastWritten(have, state, w, ok) {
+				gone = state == settings.BlockAbsent
 				return zshrc, nil
 			}
 			text, _ := settings.RemovePackageBlock(zshrc, done.ID)
@@ -277,6 +283,8 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 	case err != nil:
 		done.State, done.Detail = catalog.StateBroken, err.Error()
 		return done
+	case gone:
+		return r.letGo(ctx, done, deletedGone)
 	case !edited && done.Action != machinefile.Set:
 		return r.letGo(ctx, done, editedKept)
 	case !edited && done.State == catalog.StateOK:

@@ -296,3 +296,30 @@ func TestABlockIsJudgedInsideTheEditAgainstTheLedgerAsItIsThen(t *testing.T) {
 		t.Errorf("wrote %+v, left %q; want station's older text, recorded by the other writer, rewritten", done, z.text)
 	}
 }
+
+func TestABlockTheOwnerDeletedIsToldApartFromOneHeEdited(t *testing.T) {
+	z := &zshrcText{soloUntouched}
+	d := depsOver(z)
+	l := &writtenLedger{blocks: []machinefile.Written{soloRecord}}
+	d.Ledger, d.Calls, d.Now = l, &calls{}, epoch
+	p, err := withBlocks(t.Context(), d, machinefile.Plan{Extra: []machinefile.ExtraLine{soloTaken}}, catalog.Catalog{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	z.text = "mine\n"
+	_, blocks := (&run{d: d, name: "laptop", ended: map[string]catalog.State{}}).remove(t.Context(), p)
+	if len(blocks) != 1 || blocks[0].Detail != deletedGone || blocks[0].State != catalog.StateOK || len(l.blocks) != 0 {
+		t.Errorf("blocks %+v, records %+v; want %q and no record", blocks, l.blocks, deletedGone)
+	}
+}
+
+func TestABlockAlreadyThereIsRecordedOnlyOnceItsAppIs(t *testing.T) {
+	body := "export SOLO=1\n"
+	z, l := &zshrcText{soloFile(body)}, &writtenLedger{}
+	r := &run{d: Deps{Zshrc: z, Ledger: l, Now: epoch}, there: map[string]bool{}}
+	keep := machinefile.Block{Item: "solo", ID: "station:solo", Zsh: body, Condition: machinefile.Present, Action: machinefile.Keep}
+	done := r.blocks(t.Context(), machinefile.Plan{Blocks: []machinefile.Block{keep}})
+	if len(done) != 1 || done[0].State != catalog.StateAbsent || len(l.blocks) != 0 {
+		t.Errorf("kept %+v, recorded %+v; want it waiting on solo, unrecorded", done, l.blocks)
+	}
+}
