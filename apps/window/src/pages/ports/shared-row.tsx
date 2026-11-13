@@ -38,7 +38,7 @@ type SharedRowProps = {
 };
 
 export function SharedRow({ share, target, onThisMac, compact = false }: SharedRowProps) {
-    const to = share.to ?? '';
+    const { to } = share;
     const label = share.label ?? '';
     const stop = usePortStop({ port: share.guest_port, target, vm: share.vm });
     const stopButton = (
@@ -67,7 +67,9 @@ export function SharedRow({ share, target, onThisMac, compact = false }: SharedR
                 <GestureRow
                     {...rest}
                     {...(isCalm(state.tone) ? {} : { state })}
-                    {...(to === '' ? {} : { tag: shareToWord(to), tagLook: 'hint' as const })}
+                    {...(to === undefined
+                        ? {}
+                        : { tag: shareToWord(to), tagLook: 'hint' as const })}
                     sentence={<Value>{shareAddressOf(share)}</Value>}
                     trail={stopButton}
                 />
@@ -82,7 +84,7 @@ export function SharedRow({ share, target, onThisMac, compact = false }: SharedR
                 sentence={<Value>{shareAddressOf(share)}</Value>}
                 trail={
                     <span className={styles.trail}>
-                        {to === '' ? null : <TypeTag>{shareToWord(to)}</TypeTag>}
+                        {to === undefined ? null : <TypeTag>{shareToWord(to)}</TypeTag>}
                         {stopButton}
                     </span>
                 }

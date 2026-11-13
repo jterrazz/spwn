@@ -8,6 +8,7 @@ import type {
     MachinesVM,
     OverviewNeed,
     PortsPort,
+    PortsSharedPort,
 } from '@jterrazz/station-api';
 
 import type { Tone } from '../tone';
@@ -156,13 +157,6 @@ export function engineViewWord(engine: MachinesEngineView): string | undefined {
     return state === undefined ? undefined : ENGINE_STATE_WORDS[state];
 }
 
-function isCodeOf<T extends PropertyKey>(
-    words: Readonly<Record<T, string>>,
-    code: PropertyKey,
-): code is T {
-    return Object.hasOwn(words, code);
-}
-
-export function shareToWord(to: string): string {
-    return isCodeOf(SHARE_TO_WORDS, to) ? SHARE_TO_WORDS[to] : to;
+export function shareToWord(to: NonNullable<PortsSharedPort['to']>): string {
+    return SHARE_TO_WORDS[to];
 }

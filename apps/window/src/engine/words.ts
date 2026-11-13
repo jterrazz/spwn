@@ -17,7 +17,6 @@ import type {
     MachinesCheckStatus,
     OverviewNeed,
     PortsPort,
-    PortsReservation,
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
@@ -356,7 +355,7 @@ export const SHARE_STATE_WORDS: Words<PortsSharedPort['state']> = {
     waiting: 'waiting',
 };
 
-export const SHARE_TO_WORDS: Words<NonNullable<PortsReservation['to']>> = {
+export const SHARE_TO_WORDS: Words<NonNullable<PortsSharedPort['to']>> = {
     local: 'Local',
     private: 'Private',
     public: 'Public',
