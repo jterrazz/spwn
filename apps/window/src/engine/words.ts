@@ -153,8 +153,8 @@ export const ENGINE_STATE_WORDS: Words<EngineState> = {
 
 export const VM_CHECK_WORDS: Words<'' | NonNullable<MachinesCheckStatus['state']>> = {
     '': NO_STATE_WORD,
-    failing: 'failing',
-    passing: 'passing',
+    failing: 'fails',
+    passing: 'passes',
     waiting: 'waiting',
 };
 

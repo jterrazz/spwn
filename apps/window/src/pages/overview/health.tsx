@@ -65,7 +65,8 @@ export function CheckTile({ vm }: { vm: MachinesVM }) {
     const last = (vm.Latency ?? []).at(-1);
     return (
         <Tile
-            foot={sentence([vmCheck(vm).word, ageOf(vm.CheckStatus.at)])}
+            foot={ageOf(vm.CheckStatus.at) ?? ''}
+            footState={vmCheck(vm)}
             label="Check"
             unit={last ? 'ms' : ''}
             value={last ? millis(last.took) : <MissingMark />}

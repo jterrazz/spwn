@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import type { Tone } from '../tone';
+
 import styles from './tile.module.css';
 
 export type TileProps = {
@@ -7,11 +9,14 @@ export type TileProps = {
     value: ReactNode;
     unit?: string;
     foot: ReactNode;
+    footState?: undefined | { tone: Tone; word: string };
     viz?: ReactNode;
     aside?: { text: string; tone: 'ok' | 'plain' };
 };
 
-export function Tile({ label, value, unit, foot, viz, aside }: TileProps) {
+const JOINED = ' · ';
+
+export function Tile({ label, value, unit, foot, footState, viz, aside }: TileProps) {
     return (
         <div className={styles.tile}>
             <div className={styles.label}>
@@ -29,7 +34,15 @@ export function Tile({ label, value, unit, foot, viz, aside }: TileProps) {
                 </div>
                 {viz}
             </div>
-            <div className={styles.foot}>{foot}</div>
+            <div className={styles.foot}>
+                {footState === undefined ? null : (
+                    <span className={`${styles.footState} ${styles[footState.tone]}`}>
+                        {footState.word}
+                    </span>
+                )}
+                {footState === undefined || foot === '' ? null : JOINED}
+                {foot}
+            </div>
         </div>
     );
 }

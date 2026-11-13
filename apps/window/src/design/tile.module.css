@@ -44,3 +44,18 @@
 .asideOk {
     color: var(--ok);
 }
+.footState {
+    color: var(--t3);
+}
+.footState.ok {
+    color: var(--ok);
+}
+.footState.warn {
+    color: var(--warn);
+}
+.footState.bad {
+    color: var(--bad);
+}
+.footState.new {
+    color: var(--new);
+}

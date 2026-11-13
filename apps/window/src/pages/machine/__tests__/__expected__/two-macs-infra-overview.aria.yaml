@@ -19,10 +19,10 @@
   - paragraph:
     - img "no answer"
     - text: No answer
-  - text: CPU no answer Memory no answer Disk no answer Check 41ms passing · 3 s ago
+  - text: CPU no answer Memory no answer Disk no answer Check 41ms passes · 3 s ago
   - region "Health":
     - heading "Health checked 3 s ago" [level=2]
-    - text: Its state Running Its address 192.168.64.5 SSH Answers Its check Passing
+    - text: Its state Running Its address 192.168.64.5 SSH Answers Its check Passes
   - region "Check latency":
     - heading "Check latency" [level=2]
     - text: 41 ms now
