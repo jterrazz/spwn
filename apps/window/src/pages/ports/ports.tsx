@@ -9,6 +9,7 @@ import { PORT_ANSWER_WORDS } from '../../engine/words';
 import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import type { Route } from '../../shell/route';
+import { ChapterDiffers } from '../kit/chapter-differs';
 import { GestureButton, GestureRow, HeldOutcomes } from '../kit/gestures';
 import { NoVerdict, Reading, Unanswered } from '../kit/readings';
 import { Needs } from '../needs/needs-panel';
@@ -126,6 +127,14 @@ function Alarm({ found, name, go }: { found: Found; name: string; go: Go }) {
     );
 }
 
+function portName(of: PortsOf, port: number): string {
+    const share = of.shared.find((one) => one.guest_port === port);
+    if (share !== undefined) {
+        return (share.label ?? '') === '' ? share.process : (share.label ?? '');
+    }
+    return of.ports.find((one) => one.Port === port)?.Process ?? '';
+}
+
 type VmPortsProps = { of: PortsOf; vm: string; target: Target | undefined };
 
 function VmPorts({ of, vm, target }: VmPortsProps) {
@@ -216,6 +225,13 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
                     <VmPorts of={of} target={targetOf({ mac: found.mac })} vm={vm} />
                 )}
             </HeldOutcomes>
+            {vm === undefined ? null : (
+                <ChapterDiffers
+                    chapter="ports"
+                    found={found}
+                    nameOf={(differing) => portName(of, differing.Port)}
+                />
+            )}
         </Page>
     );
 }

@@ -36,3 +36,6 @@
     - button "4 h" [disabled]
     - button "12 h" [disabled]
     - button "7 days" [disabled]
+  - region "Differs from its file":
+    - heading "Differs from its file 2" [level=2]
+    - text: The file says This machine has claude Not in the file claude Shared github Not in the file github Shared

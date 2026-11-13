@@ -3,6 +3,7 @@ import type {
     CoreVerdictVerdict,
     EngineReading,
     MachinefileChapter,
+    MachinefileDiffering,
     MachinesEngineView,
     MachinesMacView,
     MachinesVM,
@@ -37,6 +38,9 @@ import {
 } from './tones';
 import {
     APP_WHY_WORDS,
+    DIFFERING_ACCOUNT_ASKED_WORDS,
+    DIFFERING_ACCOUNT_SEEN_WORDS,
+    DIFFERING_PORT_WORDS,
     ENGINE_STATE_WORDS,
     MAC_STATE_WORDS,
     MACHINE_KIND_WORDS,
@@ -155,6 +159,26 @@ export function chapterNoun(chapter: MachinefileChapter, count: number): string 
 export function engineViewWord(engine: MachinesEngineView): string | undefined {
     const state = engineViewStateOf(engine);
     return state === undefined ? undefined : ENGINE_STATE_WORDS[state];
+}
+
+export type SharedChapter = Extract<MachinefileChapter, 'accounts' | 'ports'>;
+
+export type DifferingSide = 'asked' | 'seen';
+
+function differingWordsOf(chapter: SharedChapter, side: DifferingSide) {
+    if (chapter === 'ports') {
+        return DIFFERING_PORT_WORDS;
+    }
+    return side === 'asked' ? DIFFERING_ACCOUNT_ASKED_WORDS : DIFFERING_ACCOUNT_SEEN_WORDS;
+}
+
+export function differingSide(
+    chapter: SharedChapter,
+    side: DifferingSide,
+    differing: MachinefileDiffering,
+): Shown {
+    const code = side === 'asked' ? differing.Asked : differing.Seen;
+    return { tone: 'plain', word: differingWordsOf(chapter, side)[code] ?? code };
 }
 
 export function shareToWord(to: NonNullable<PortsSharedPort['to']>): string {

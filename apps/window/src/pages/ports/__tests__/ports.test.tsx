@@ -61,11 +61,12 @@ describe('ports', () => {
     test("a workspace's listeners that are not shared are listed apart, each with its Share", async () => {
         // Given - linux-1's Ports over stories, 3000 and 5173 shared, 4321 and 9229 listening
         const result = await component.render(portsOver('stories', 'linux-1'), async (visitor) => {
-            // When - the listing has been read
+            // When - the listing and the drift have been read
             await visitor.see(region('Listening, not shared'));
+            await visitor.see(region('Differs from its file'));
         });
 
-        // Then - the shares, then only the listeners the engine lists no share of
+        // Then - the shares, the listeners not shared, and 3000 shared public where its file asks private
         expect(result.content.text).not.toContain('What listens on');
         await expect(result.tree).toMatch(file('./__expected__/stories-linux-1.aria.yaml'));
     });

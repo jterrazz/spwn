@@ -27,6 +27,7 @@ import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
+import { ChapterDiffers } from '../kit/chapter-differs';
 import { GestureRow, HeldOutcomes } from '../kit/gestures';
 import { OpenButton } from '../kit/opens';
 import { NoVerdict, Reading, Unanswered } from '../kit/readings';
@@ -291,6 +292,7 @@ export function AccountsTab({ found, go }: { found: Found; go: Go }) {
                 <SharedWithIt found={found} report={report} target={target} />
             </HeldOutcomes>
             <ShareList mac={found.mac.Name} report={report} />
+            <ChapterDiffers chapter="accounts" found={found} nameOf={(one) => one.Account} />
         </Page>
     );
 }

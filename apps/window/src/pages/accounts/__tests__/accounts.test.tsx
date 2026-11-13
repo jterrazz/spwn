@@ -44,12 +44,14 @@ describe('Accounts tab', () => {
         const result = await component.render(
             accountsOver(recordingFor('stories'), 'linux-1'),
             async (visitor) => {
-                // When - the accounts have been read
+                // When - the accounts and the drift have been read
                 await visitor.see(content('ends in 24 min'));
+                await visitor.see(region('Differs from its file'));
             },
         );
 
-        // Then - the shares with their Mac's identities and gestures, the share list's held disabled, no unread row
+        // Then - the shares, the share list held, no unread row, and the two copies its file does not ask for
+        expect(result.content.text).toContain('Not in the file');
         expect(result.content.text).not.toContain('?');
         expect(result.content.text).not.toContain('Accounts on linux-1');
         await expect(result.tree).toMatch(file('./__expected__/stories-linux-1.aria.yaml'));

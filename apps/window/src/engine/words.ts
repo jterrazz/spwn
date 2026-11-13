@@ -361,6 +361,13 @@ export const SHARE_TO_WORDS: Words<NonNullable<PortsSharedPort['to']>> = {
     public: 'Public',
 };
 
+export const DIFFERING_PORT_WORDS: WordsOfAnOpenCode = {
+    '': 'Not shared',
+    local: 'Local',
+    private: 'Private',
+    public: 'Public',
+};
+
 export const ACCOUNT_STATE_WORDS: Words<AccountsAccount['state']> = {
     '': NO_STATE_WORD,
     absent: 'signed out',
@@ -386,4 +393,14 @@ export const ACCOUNT_ORIGIN_WORDS: WordsOfAnOpenCode = {
     own: 'kept here',
     'own+shared': 'kept here, and a copy',
     shared: 'a copy, shared',
+};
+
+export const DIFFERING_ACCOUNT_ASKED_WORDS: WordsOfAnOpenCode = {
+    '': 'Not in the file',
+    shared: 'Shared',
+};
+
+export const DIFFERING_ACCOUNT_SEEN_WORDS: WordsOfAnOpenCode = {
+    '': 'Not shared',
+    shared: 'Shared',
 };
