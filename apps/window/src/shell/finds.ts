@@ -3,15 +3,16 @@ import type { MachinesVM, OverviewNeed } from '@jterrazz/station-api';
 import { machineKindOf } from '../engine/provisional';
 import type { MachineKind } from '../engine/provisional';
 import { vmKindWord } from '../engine/shown';
+import { THIS_MAC_WORD } from '../engine/words';
 import { machineRoute, TABS } from './route';
 import type { PlainPage, Route } from './route';
 
 export const KINDS = [
     'Places',
-    'Needs',
     'Machines',
     'Tabs',
     'Library',
+    'Needs',
     'Packages',
     'Actions',
 ] as const;
@@ -37,6 +38,7 @@ export type Held = {
     withGallery: boolean;
     macs: readonly {
         Name: string;
+        ThisMac?: boolean;
         VMs: null | readonly { Name: string; Lifetime: MachinesVM['Lifetime'] }[];
     }[];
     needs: readonly OverviewNeed[];
@@ -69,7 +71,7 @@ function page(held: Held, kind: Kind, one: PlainPage): Result {
 function machinesOf(held: Held): readonly Result[] {
     return held.macs.flatMap((mac): Result[] => [
         {
-            detail: 'Mac',
+            detail: mac.ThisMac === true ? THIS_MAC_WORD : 'Mac',
             kind: 'Machines',
             label: mac.Name,
             machine: { kind: 'mac', name: mac.Name },
@@ -158,8 +160,12 @@ function machineOf(result: Result): string {
 }
 
 // invariant: a machine's tabs keep the tab bar's order, the order everything() lists them in, so only their
-// invariant: machines are sorted, and toSorted is stable.
+// invariant: machines are sorted, and toSorted is stable. The machines keep the sidebar's order, each Mac then its
+// invariant: VMs, as machines.list sends them.
 function inOrder(kind: Kind): (a: Result, b: Result) => number {
+    if (kind === 'Machines') {
+        return () => 0;
+    }
     return kind === 'Tabs'
         ? (a, b) => machineOf(a).localeCompare(machineOf(b), 'en')
         : (a, b) => a.label.localeCompare(b.label, 'en');

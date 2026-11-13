@@ -58,18 +58,32 @@ function shown(groups: readonly Group[]) {
 }
 
 describe('finds', () => {
-    test("an empty query lists what the sidebar holds, in the sidebar's order, by name in each kind", () => {
+    test("an empty query lists what the sidebar holds, in the sidebar's order, machines as listed", () => {
         // Given - two Macs, two VMs, a need and three packages held
         const groups = matching(everything(HELD), '');
 
-        // Then - places, needs, machines, the library and the actions; tabs and packages wait for a query
+        // Then - places, the machines each Mac then its VMs, the library, needs and the actions; tabs and packages wait for a query
         expect(shown(groups)).toStrictEqual([
             ['Places', ['Home', 'Inbox', 'Storage']],
-            ['Needs', ['web does not answer on :3000']],
-            ['Machines', ['api', 'book', 'linux-1', 'mini']],
+            ['Machines', ['mini', 'book', 'linux-1', 'api']],
             ['Library', ['Apps', 'Catalog', 'Machine files', 'Settings', 'Skills']],
+            ['Needs', ['web does not answer on :3000']],
             ['Actions', ['New machine', 'Show or hide the sidebar']],
         ]);
+    });
+
+    test('this Mac is named so, any other Mac is a Mac', () => {
+        // Given - book as the Mac the window runs on
+        const groups = matching(
+            everything({
+                ...HELD,
+                macs: HELD.macs.map((mac) => ({ ...mac, ThisMac: mac.Name === 'book' })),
+            }),
+            'book',
+        );
+
+        // Then - book's row says This Mac
+        expect(groups[0]?.results[0]?.detail).toBe('This Mac');
     });
 
     test('every word of a query is found in a name or its kind, in any case', () => {
