@@ -39,7 +39,6 @@ import {
 } from 'simple-icons';
 import type { SimpleIcon } from 'simple-icons';
 
-import type { IconName } from './icon';
 import { MENUBAR_MARKS } from './menubar-marks';
 
 // value: a name the engine sends (`App.Name`, `Step.Item`, `provider`) to the menu bar mark it names otherwise.
@@ -91,9 +90,7 @@ export const LOGOS: Readonly<Record<string, SimpleIcon>> = {
     zed: siZedindustries,
 };
 
-export const KIND_GLYPHS: Readonly<Record<string, IconName>> = {
-    setting: 'settings',
-};
+export const LETTERED_KINDS: ReadonlySet<string> = new Set(['setting']);
 
 export type Shape = {
     attributes: Readonly<Record<string, string>>;
@@ -102,10 +99,7 @@ export type Shape = {
     tag: string;
 };
 
-export type Mark =
-    | { glyph: IconName; kind: 'glyph' }
-    | { kind: 'drawn'; shapes: readonly Shape[] }
-    | { kind: 'monogram'; letters: string };
+export type Mark = { kind: 'drawn'; shapes: readonly Shape[] } | { kind: 'monogram'; letters: string };
 
 const LOGO_IN_THE_BOX = 'translate(2 2) scale(0.6667)';
 
@@ -145,10 +139,13 @@ const DRAWN: Readonly<Record<string, readonly Shape[]>> = Object.fromEntries(
     Object.entries(MENUBAR_MARKS).map(([name, markup]) => [name, shapesOf(markup)]),
 );
 
+function monogramOf(name: string): Mark {
+    return { kind: 'monogram', letters: name.replaceAll(/[^\p{L}\p{N}]/gu, '').slice(0, 2) };
+}
+
 export function markOf(name: string, kind = ''): Mark {
-    const glyph: IconName | undefined = KIND_GLYPHS[kind];
-    if (glyph !== undefined) {
-        return { glyph, kind: 'glyph' };
+    if (LETTERED_KINDS.has(kind)) {
+        return monogramOf(name);
     }
     const lower = name.toLowerCase();
     const drawn: readonly Shape[] | undefined = DRAWN[ALIASES[lower] ?? lower];
@@ -169,5 +166,5 @@ export function markOf(name: string, kind = ''): Mark {
             ],
         };
     }
-    return { kind: 'monogram', letters: name.replaceAll(/[^\p{L}\p{N}]/gu, '').slice(0, 2) };
+    return monogramOf(name);
 }

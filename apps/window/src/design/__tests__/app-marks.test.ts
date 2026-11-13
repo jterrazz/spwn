@@ -99,16 +99,19 @@ describe('app marks', () => {
         expect(second).toStrictEqual(first);
     });
 
-    test('a setting is drawn by the glyph of its shelf, even when it names an app', () => {
-        // Given - a setting named for the app it configures
-        const name = 'docker-shortcuts';
+    test("a setting is drawn by its two letters, even when it bears an app's name", () => {
+        // Given - a setting named for the app it configures, and one named as the app itself
+        const names = ['docker-shortcuts', 'docker'];
 
-        // When - it is marked as a setting, and as an app
-        const asSetting = markOf(name, 'setting');
+        // When - each is marked as a setting, and docker as an app
+        const asSettings = names.map((name) => markOf(name, 'setting'));
         const asApp = markOf('docker', 'app');
 
-        // Then - the setting draws the glyph, the app its mark
-        expect(asSetting).toStrictEqual({ glyph: 'settings', kind: 'glyph' });
+        // Then - each setting draws its letters, as the mockup's tile does, and the app its mark
+        expect(asSettings).toStrictEqual([
+            { kind: 'monogram', letters: 'do' },
+            { kind: 'monogram', letters: 'do' },
+        ]);
         expect(asApp.kind).toBe('drawn');
     });
 
