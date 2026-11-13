@@ -13,10 +13,10 @@ import (
 // the two folders a source is read for.
 func held() map[string]string {
 	return map[string]string{
-		"catalog/apps/jq.yaml":           "package: station.package/v1\n",
-		"machinefiles/laptop.yaml":       "machinefile: station.machinefile/v1\n",
-		"machinefiles/laptop.local.yaml": "machinefile: station.machinefile/v1\n",
-		"notes/readme.md":                "not read",
+		"catalog/apps/jq.yaml":             "package: station.package/v1\n",
+		"machinefiles/laptop.machine.yaml": "machinefile: station.machinefile/v1\n",
+		"machinefiles/laptop.local.yaml":   "machinefile: station.machinefile/v1\n",
+		"notes/readme.md":                  "not read",
 	}
 }
 
@@ -38,7 +38,7 @@ func Source(t *testing.T, subject Subject) {
 				t.Errorf("%s reads %q, holds %q", f.Path, f.Body, held[f.Path])
 			}
 		}
-		want := []string{"catalog/apps/jq.yaml", "machinefiles/laptop.local.yaml", "machinefiles/laptop.yaml"}
+		want := []string{"catalog/apps/jq.yaml", "machinefiles/laptop.local.yaml", "machinefiles/laptop.machine.yaml"}
 		if !slices.Equal(paths, want) {
 			t.Errorf("read %v, want %v", paths, want)
 		}

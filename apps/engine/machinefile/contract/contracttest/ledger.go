@@ -118,8 +118,8 @@ type OwnedSubject func(t *testing.T, path, body string) (contract.Owned, contrac
 func Owned(t *testing.T, subject OwnedSubject) {
 	ctx := context.Background()
 	t.Run("a file read at its path is its bytes; a path with no file is not found", func(t *testing.T) {
-		o, _ := subject(t, "laptop.yaml", "name: laptop\n")
-		if got, err := o.Read(ctx, "laptop.yaml"); err != nil || string(got) != "name: laptop\n" {
+		o, _ := subject(t, "laptop.machine.yaml", "name: laptop\n")
+		if got, err := o.Read(ctx, "laptop.machine.yaml"); err != nil || string(got) != "name: laptop\n" {
 			t.Errorf("Read = %q, %v", got, err)
 		}
 		if _, err := o.Read(ctx, "nothing.yaml"); !errors.Is(err, fs.ErrNotExist) {
@@ -134,7 +134,7 @@ func Owned(t *testing.T, subject OwnedSubject) {
 			}
 		}
 		tree, err := src.Read(ctx)
-		if err != nil || len(tree.Files) != 1 || tree.Files[0].Path != "machinefiles/laptop.yaml" || string(tree.Files[0].Body) != "old\n" {
+		if err != nil || len(tree.Files) != 1 || tree.Files[0].Path != "machinefiles/laptop.machine.yaml" || string(tree.Files[0].Body) != "old\n" {
 			t.Errorf("read back %+v, %v", tree.Files, err)
 		}
 	})

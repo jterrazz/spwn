@@ -2,7 +2,7 @@ description: 'the npm tilde form holds node to the patches of 22.11'
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -27,4 +27,4 @@ runs:
           ●	gh		2.98.0 by brew, was 2.97.0 by brew
           ●	node		22.11.5 by mise, was 22.11.0 by mise
           # Waiting
-          ◐	node		25.1.0 available: change '~22.11.0' to '~25.1.0' in ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml
+          ◐	node		25.1.0 available: change '~22.11.0' to '~25.1.0' in ~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml

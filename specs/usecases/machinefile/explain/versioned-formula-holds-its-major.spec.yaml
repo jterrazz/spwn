@@ -2,7 +2,7 @@ description: 'a versioned formula (postgresql@18) holds its own major and refuse
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -12,9 +12,9 @@ runs:
     - command: 'explain apps.postgres'
       exit: 2
       stderr: |
-          Error: postgres 17: brew holds only its newest of 18 (postgresql@18), never 17 (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
+          Error: postgres 17: brew holds only its newest of 18 (postgresql@18), never 17 (~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml:4)
           Hint: no method of postgres for this system holds it: drop its version
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

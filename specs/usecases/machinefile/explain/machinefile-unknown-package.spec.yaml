@@ -1,7 +1,7 @@
 description: 'an unknown app or baked package, or a setting listed as an app, is refused at its file and line'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -11,9 +11,9 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: the catalog has no package nope (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
+          Error: the catalog has no package nope (~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml:4)
           Hint: station apps
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -23,9 +23,9 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: hushlogin is a setting: list it under settings (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
+          Error: hushlogin is a setting: list it under settings (~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml:4)
           Hint: station explain
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -35,5 +35,5 @@ runs:
     - command: 'explain --machinefile studio-linux'
       exit: 2
       stderr: |
-          Error: the catalog has no package nope (~/.config/station/machinefiles/studio-linux.yaml)
+          Error: the catalog has no package nope (~/.config/station/machinefiles/studio-linux.machine.yaml)
           Hint: station apps

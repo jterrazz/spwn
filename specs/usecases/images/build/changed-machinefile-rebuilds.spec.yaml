@@ -2,7 +2,7 @@ description: 'a bare build rebuilds an image whose Machinefile changed, and only
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -19,7 +19,7 @@ runs:
       exit: 0
       stdout: |
           	none
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux

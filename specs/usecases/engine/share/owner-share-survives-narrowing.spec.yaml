@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           https://jterrazz-macbook-pro.tail1234.ts.net:40001
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

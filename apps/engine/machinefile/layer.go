@@ -28,7 +28,7 @@ const (
 // value: one source's files: its layer, the words a reader names it by
 // (`~/.config/station`, `studio@1a2b3c4`, `built-in`), and its files by
 // slash path under it, `catalog/<category>/<name>.yaml` and
-// `machinefiles/<name>.yaml`.
+// `machinefiles/<name>.machine.yaml`.
 
 type Tree struct {
 	Layer Layer
@@ -155,14 +155,17 @@ func Load(trees []Tree) (Library, error) {
 				continue
 			}
 			file := t.display(f)
-			if strings.Contains(rest, "/") || !strings.HasSuffix(rest, ".yaml") {
-				return Library{}, refusedFile("machinefile", &catalog.FileError{File: file, Problem: "is no Machinefile: a Machinefile is machinefiles/<name>.yaml"})
+			if strings.Contains(rest, "/") {
+				return Library{}, refusedFile("machinefile", &catalog.FileError{File: file, Problem: "is no Machinefile: a Machinefile is machinefiles/<name>" + catalog.MachinefileSuffix})
+			}
+			if _, _, named := catalog.MachinefileOf(rest); !named {
+				return Library{}, refusedFile("machinefile", catalog.MisnamedMachinefile(file, "machinefiles/<name>"+catalog.MachinefileSuffix))
 			}
 			mf, err := catalog.DecodeMachinefile(file, f.Body)
 			if err != nil {
 				return Library{}, refusedFile("machinefile", err)
 			}
-			name, overlay := catalog.MachinefileOf(path.Base(f.Path))
+			name, overlay, _ := catalog.MachinefileOf(path.Base(f.Path))
 			placed := Placed{File: mf, Layer: t.Layer, Path: file, Body: f.Body}
 			switch {
 			case overlay && t.Layer != User:

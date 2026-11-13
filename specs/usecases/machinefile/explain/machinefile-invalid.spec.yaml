@@ -1,7 +1,7 @@
 description: 'a Machinefile with an unknown key or an anchor is refused at its line, and never rewritten'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -12,9 +12,9 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml: unmarshal errors: line 5: field tint not found in type catalog.Machinefile
+          Error: ~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml: unmarshal errors: line 5: field tint not found in type catalog.Machinefile
           Hint: fix that line: station never rewrites a Machinefile
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -24,5 +24,5 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4: an anchor (&mine): write the value out
+          Error: ~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml:4: an anchor (&mine): write the value out
           Hint: fix that line: station never rewrites a Machinefile

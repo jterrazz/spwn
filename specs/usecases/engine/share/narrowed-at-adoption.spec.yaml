@@ -1,7 +1,7 @@
 description: 'rights narrowed from public to private: the engine that adopts the VM unfunnels what they close'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1
@@ -16,7 +16,7 @@ runs:
       exit: 0
       stdout: |
           {"reserved":[[3000,40000,"public","rights"],[3001,40001,"public","rights"]],"shared":[[443,"/",40000,"public"],[8443,"/",40001,"public"]],"funnel":[443,8443]}
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

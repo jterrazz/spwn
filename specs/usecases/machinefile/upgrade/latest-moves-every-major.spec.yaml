@@ -2,7 +2,7 @@ description: 'latest moves node to the newest its manager offers, and nothing wa
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

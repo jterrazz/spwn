@@ -2,7 +2,7 @@ description: 'apply --remove removes only what station installed and the Machine
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -19,7 +19,7 @@ runs:
           ●	jq	1.8.1	brew
           ●	fd	10.3.0	brew
           ●	eza	0.23.4	brew
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

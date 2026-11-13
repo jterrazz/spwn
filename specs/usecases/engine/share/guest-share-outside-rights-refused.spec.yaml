@@ -1,7 +1,7 @@
 description: 'a guest is never the owner: its share is refused outside its rights, and takes their audience inside'
 env: in-linux-1
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

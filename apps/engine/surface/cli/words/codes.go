@@ -135,6 +135,9 @@ func Codes() map[fail.Code]Wording {
 			if strings.HasSuffix(e.Subject, catalog.LockSuffix) {
 				return e.Detail["problem"], "remove it: the next station apply writes it anew from what is there"
 			}
+			if e.Detail["rename"] != "" {
+				return e.Detail["problem"], "rename it " + e.Detail["rename"] + ": station reads a Machinefile by that name alone"
+			}
 			return e.Detail["problem"], "fix that line: station never rewrites a Machinefile"
 		},
 		machinefilecalls.NewerSchema: func(e *fail.Error) (string, string) {

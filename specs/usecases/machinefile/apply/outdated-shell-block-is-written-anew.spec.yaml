@@ -22,7 +22,7 @@ runs:
                       zsh: |
                           export SERVED_PORT={{ option.port }}
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -33,7 +33,7 @@ runs:
       exit: 0
     - command: 'apply > /dev/null'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -74,7 +74,7 @@ runs:
           export SERVED_PORT=9090
     - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/9090/7070/'' .zshrc'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

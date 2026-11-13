@@ -2,7 +2,7 @@ description: 'while another run holds the machine, upgrade waits a while, then i
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

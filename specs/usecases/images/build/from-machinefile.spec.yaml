@@ -2,7 +2,7 @@ description: 'an owner''s VM Machinefile builds an image after its name, recordi
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux

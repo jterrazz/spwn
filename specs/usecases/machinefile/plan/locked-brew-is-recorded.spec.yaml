@@ -2,7 +2,7 @@ description: 'brew cannot pin: the plan says the lock records a version, apply i
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

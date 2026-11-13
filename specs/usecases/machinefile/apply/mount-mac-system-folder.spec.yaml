@@ -1,7 +1,7 @@
 description: 'a vm.mounts folder of the Mac''s system, read through its data volume, is refused'
 env: in-workspace
 runs:
-    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1
@@ -13,5 +13,5 @@ runs:
     - command: 'apply --yes'
       exit: 2
       stderr: |
-          Error: ~/.config/station/machinefiles/linux-1.yaml:4: mount folder "/System/Volumes/Data/private/etc" of the computer is in the system folder /private: mount a folder of a home or of /Volumes
+          Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "/System/Volumes/Data/private/etc" of the computer is in the system folder /private: mount a folder of a home or of /Volumes
           Hint: fix that line: station never rewrites a Machinefile

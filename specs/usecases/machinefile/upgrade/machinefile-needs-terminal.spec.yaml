@@ -14,7 +14,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.installed.rooted = "1.0.0" | .macs["jterrazz-macbook-pro"].apps.brew.behind.rooted = "1.1.0"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

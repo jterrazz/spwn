@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
@@ -116,7 +117,7 @@ func (o Owned) Keep(_ context.Context, name string, body []byte) error {
 	o.w.Lock()
 	defer o.w.Unlock()
 	m := o.w.Mac(o.mac)
-	at := "machinefiles/" + name + ".yaml"
+	at := "machinefiles/" + name + catalog.MachinefileSuffix
 	if there, ok := m.Files[at]; ok && there != string(body) {
 		return &contract.KeptError{Name: name, Path: at}
 	}

@@ -2,29 +2,29 @@ description: 'a file named by its path never replaces your Machinefile of that n
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/laptop.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/laptop.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: laptop
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro downloads/laptop.yaml'
+    - command: 'world edit jterrazz-macbook-pro downloads/laptop.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: laptop
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
-    - command: 'apply --machinefile downloads/laptop.yaml'
+    - command: 'apply --machinefile downloads/laptop.machine.yaml'
       exit: 2
       stdout: |
           # To install
           ○	fd	brew
       stderr: |
-          Error: machinefiles/laptop.yaml already holds another laptop: station never replaces your Machinefile
-          Hint: edit that file, or remove it to copy downloads/laptop.yaml instead
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.machinefile, .files["machinefiles/laptop.yaml"]]'' world.json'
+          Error: machinefiles/laptop.machine.yaml already holds another laptop: station never replaces your Machinefile
+          Hint: edit that file, or remove it to copy downloads/laptop.machine.yaml instead
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.machinefile, .files["machinefiles/laptop.machine.yaml"]]'' world.json'
       exit: 0
       stdout: |
           [null,"machinefile: station.machinefile/v1\nname: laptop\nmachine: { kind: computer, system: { os: macos } }\napps: [jq]\n"]
@@ -38,14 +38,14 @@ runs:
           lives on	every machine
           category	Command line
           what	Fast find alternative
-    - command: 'world edit jterrazz-macbook-pro downloads/laptop.yaml'
+    - command: 'world edit jterrazz-macbook-pro downloads/laptop.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: laptop
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply --machinefile downloads/laptop.yaml'
+    - command: 'apply --machinefile downloads/laptop.machine.yaml'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq

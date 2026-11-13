@@ -2,7 +2,7 @@ description: 'apply --remove forgets an extra gone, keeps one held another way, 
 fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

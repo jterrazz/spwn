@@ -20,6 +20,8 @@ type FileError struct {
 	File    string
 	Line    int
 	Problem string
+	// value: the name the file is read under, when its name alone is refused.
+	Rename string
 }
 
 func (e *FileError) Error() string {

@@ -2,7 +2,7 @@ description: 'a workspace from an image its Machinefile moved on from shows that
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -14,7 +14,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''(.macs["jterrazz-macbook-pro"].stores.images[] | select(.name == "studio-linux") | .lock) = "lock: station.lock/v1\nmachinefile: studio-linux\napps:\n  - { name: mise, method: script, version: 2026.11.1 }\n  - { name: git, method: apt }\n"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux

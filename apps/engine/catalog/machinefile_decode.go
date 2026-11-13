@@ -10,9 +10,14 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-// value: the suffix of an overlay's file, `<name>.local.yaml`.
+// value: the suffix of a Machinefile's file, `<name>.machine.yaml`, and of an
+// overlay's, `<name>.local.yaml`: a file of `machinefiles/` that ends in
+// neither is no Machinefile.
 
-const OverlaySuffix = ".local.yaml"
+const (
+	MachinefileSuffix = ".machine.yaml"
+	OverlaySuffix     = ".local.yaml"
+)
 
 // value: a Machinefile's name, as its file is named: lower-case words
 // joined by dashes, `<whose>-<what>` by convention (`jterrazz-macbook-pro`).
@@ -39,6 +44,9 @@ const PublicPorts = 3
 
 func DecodeMachinefile(file string, body []byte) (Machinefile, error) {
 	var mf Machinefile
+	if _, _, ok := MachinefileOf(file); !ok {
+		return Machinefile{}, MisnamedMachinefile(file, "<name>"+MachinefileSuffix)
+	}
 	doc, err := strict(file, body, machinefiles, &mf)
 	if err != nil {
 		return Machinefile{}, err
@@ -49,14 +57,22 @@ func DecodeMachinefile(file string, body []byte) (Machinefile, error) {
 	return mf, nil
 }
 
-func MachinefileOf(file string) (name string, overlay bool) {
-	// value: the name a Machinefile's file gives it, and whether the file is
-	// an overlay.
+func MisnamedMachinefile(file, rule string) *FileError {
+	// value: the refusal of a file whose name says no Machinefile, with the
+	// name it is read under.
 	base := path.Base(file)
-	if name, ok := strings.CutSuffix(base, OverlaySuffix); ok {
-		return name, true
+	return &FileError{File: file, Problem: "is no Machinefile: a Machinefile is " + rule, Rename: strings.TrimSuffix(base, path.Ext(base)) + MachinefileSuffix}
+}
+
+func MachinefileOf(file string) (name string, overlay, ok bool) {
+	// value: the name a Machinefile's file gives it, whether the file is an
+	// overlay, and whether it is a Machinefile's file at all.
+	base := path.Base(file)
+	if stem, found := strings.CutSuffix(base, OverlaySuffix); found {
+		return stem, true, true
 	}
-	return strings.TrimSuffix(base, ".yaml"), false
+	name, ok = strings.CutSuffix(base, MachinefileSuffix)
+	return name, false, ok
 }
 
 // invariant: one check per key, in the reading order, each saying the key
@@ -64,7 +80,7 @@ func MachinefileOf(file string) (name string, overlay bool) {
 // package, an option, a method for the system, vm on a computer) is the
 // resolution's, never the file's.
 func checkMachinefile(file string, doc *yaml.Node, mf Machinefile) error {
-	name, overlay := MachinefileOf(file)
+	name, overlay, _ := MachinefileOf(file)
 	if problem := checkHead(mf, name, overlay); problem != "" {
 		key := "name"
 		if overlay {

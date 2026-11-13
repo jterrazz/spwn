@@ -1,7 +1,7 @@
 description: 'a port that listens outside the rights is flagged with them and never reserved nor served'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

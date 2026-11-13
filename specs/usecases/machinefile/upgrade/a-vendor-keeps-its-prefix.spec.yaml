@@ -2,7 +2,7 @@ description: 'a range of java keeps the catalog''s vendor: 21 installs temurin-2
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -24,4 +24,4 @@ runs:
           ●	mise	2026.10.1	brew
           ●	java	temurin-21.0.13+9.0.LTS	mise	within 21
           # Waiting
-          ◐	java		temurin-27.0.1+0 available: change '21' to '27' in ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml
+          ◐	java		temurin-27.0.1+0 available: change '21' to '27' in ~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml

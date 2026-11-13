@@ -158,7 +158,7 @@ func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights
 		}
 		trees = append(trees, t)
 		for _, f := range t.Files {
-			named = named || f.Path == "machinefiles/"+vm+".yaml"
+			named = named || f.Path == "machinefiles/"+vm+catalog.MachinefileSuffix
 		}
 	}
 	name := vm

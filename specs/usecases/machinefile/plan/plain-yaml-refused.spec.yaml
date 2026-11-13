@@ -1,0 +1,15 @@
+description: 'a plain .yaml file in machinefiles/ is refused with its path, never read as a Machinefile'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/laptop.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: laptop
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'plan'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/laptop.yaml: is no Machinefile: a Machinefile is machinefiles/<name>.machine.yaml
+          Hint: rename it laptop.machine.yaml: station reads a Machinefile by that name alone

@@ -9,7 +9,7 @@ runs:
       exit: 0
       stdout: |
           {"reserved":[[5173,40001,null,null],[7000,40002,null,null],[3000,40000,null,"rights"],[3001,40003,null,"rights"]],"shared":[[40000,"/",40000,"private"],[40001,"/",40001,"private"],[40002,"",40002,"private"],[40003,"/",40003,"private"]],"funnel":null}
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

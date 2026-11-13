@@ -53,7 +53,7 @@ func RightsOf(trees []Tree, name string) (rights *catalog.PortRights, err error)
 // value: the Machinefile of that name in the strongest tree that holds
 // one, or its overlay, the owner's alone.
 func decodeNamed(trees []Tree, name string, overlay bool) (catalog.Machinefile, bool, error) {
-	file := machinefilesDir + "/" + name + ".yaml"
+	file := machinefilesDir + "/" + name + catalog.MachinefileSuffix
 	if overlay {
 		file = machinefilesDir + "/" + name + catalog.OverlaySuffix
 	}

@@ -147,7 +147,7 @@ func TestPullOnNoCloneClonesItOnce(t *testing.T) {
 }
 
 func TestACloneThatHoldsChangesIsNotTrusted(t *testing.T) {
-	for _, held := range []string{"1 .M N... 100644 100644 100644 a b machinefiles/laptop.yaml", "? machinefiles/planted.yaml", "! catalog/apps/hidden.yaml"} {
+	for _, held := range []string{"1 .M N... 100644 100644 100644 a b machinefiles/laptop.machine.yaml", "? machinefiles/planted.machine.yaml", "! catalog/apps/hidden.yaml"} {
 		cache := t.TempDir()
 		dir := filepath.Join(cache, "sources", "studio")
 		clone(t, dir, nil)

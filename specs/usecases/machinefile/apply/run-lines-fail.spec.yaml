@@ -1,7 +1,7 @@
 description: 'a failing run.boot line ends its step broken, its last lines said, counted as a step'
 env: in-workspace
 runs:
-    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

@@ -1,7 +1,7 @@
 description: 'a computer that says vm, itself or through a file it extends, is refused naming the file'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -11,5 +11,5 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: jterrazz-macbook-pro is a computer, and built-in/machinefiles/station-macos.yaml says vm: vm is a workspace's or a server's
+          Error: jterrazz-macbook-pro is a computer, and built-in/machinefiles/station-macos.machine.yaml says vm: vm is a workspace's or a server's
           Hint: remove vm, or say kind: workspace or server

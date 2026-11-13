@@ -22,7 +22,7 @@ runs:
                       zsh: |
                           export SERVED_PORT={{ option.port }}
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -32,9 +32,9 @@ runs:
     - command: 'plan'
       exit: 2
       stderr: |
-          Error: served's shell: station:served: option port has no value (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml)
+          Error: served's shell: station:served: option port has no value (~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml)
           Hint: station explain
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

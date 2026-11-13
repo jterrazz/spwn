@@ -19,7 +19,7 @@ type renaming interface {
 }
 
 // value: the locks of the owner's Machinefiles folder, `<name>.lock`
-// beside `<name>.yaml`, which no source reads.
+// beside `<name>.machine.yaml`, which no source reads.
 
 type Locks struct {
 	fs        renaming

@@ -1,7 +1,7 @@
 description: 'explain --on another Mac reads that Mac''s Machinefile with its sources'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.yaml'
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-mac-mini

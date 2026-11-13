@@ -33,7 +33,7 @@ type Template struct {
 	Mounts   []catalog.Mount
 	Shares   []catalog.AccountShare
 	// value: each file by its slash path under the owner's folder
-	// (`machinefiles/<name>.yaml`, `machinefiles/<name>.local.yaml`).
+	// (`machinefiles/<name>.machine.yaml`, `machinefiles/<name>.local.yaml`).
 	Files []File
 	Lock  []byte
 	SHA   string

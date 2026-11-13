@@ -1,7 +1,7 @@
 description: 'a port open to local is carried to its Mac''s loopback alone: no serve, its link the local one'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

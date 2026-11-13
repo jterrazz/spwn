@@ -53,7 +53,7 @@ func DecodeLock(file string, body []byte) (LockFile, error) {
 	if _, err := strict(file, body, locks, &l); err != nil {
 		return LockFile{}, err
 	}
-	name, _ := MachinefileOf(strings.TrimSuffix(file, LockSuffix) + ".yaml")
+	name, _, _ := MachinefileOf(strings.TrimSuffix(file, LockSuffix) + MachinefileSuffix)
 	if l.Machinefile != name {
 		return LockFile{}, &FileError{File: file, Problem: fmt.Sprintf("locks %q, not the Machinefile %s its name says", l.Machinefile, name)}
 	}

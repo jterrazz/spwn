@@ -134,7 +134,7 @@ case_begin image-build IM-09 ADR-044
 mkdir -p "$mac/.config/station/machinefiles" "$mac/shared"
 on_mac git init -q "$work/seed" && on_mac git -C "$work/seed" -c user.name=e2e -c user.email=e2e@station.test commit -q --allow-empty -m seed \
   && on_mac git -C "$work/seed" bundle create -q "$mac/shared/seed.bundle" HEAD || fail "make the seed repository's bundle"
-cat > "$mac/.config/station/machinefiles/studio-linux.yaml" << 'YAML'
+cat > "$mac/.config/station/machinefiles/studio-linux.machine.yaml" << 'YAML'
 machinefile: station.machinefile/v1
 name: studio-linux
 machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
@@ -168,7 +168,7 @@ created=$(cat "$work/ws1-created.json")
 [ "$(jq -r '.lifetime, .cpus, .disk_bytes' <<< "$created" | tr '\n' ' ')" = "persistent 4 30000000000 " ] || fail "ws1 is not sized and kept as studio-linux's vm says: $created"
 [ "$(jq -r '.boot.failed // ""' <<< "$created")" = "" ] || fail "ws1's boot phase failed: $(jq -r .boot.failed <<< "$created")"
 [ "$(jq -c '.boot.drift' <<< "$created")" = "[]" ] || fail "ws1, made from the newest studio-linux, shows drift: $(jq -c .boot.drift <<< "$created")"
-in_vm ws1 'test -s ~/.config/station/machinefiles/studio-linux.yaml' || fail "the boot phase left no studio-linux.yaml in ws1"
+in_vm ws1 'test -s ~/.config/station/machinefiles/studio-linux.machine.yaml' || fail "the boot phase left no studio-linux.machine.yaml in ws1"
 [ "$(in_vm ws1 'cat ~/.local/state/e2e/run-image')" = image ] || fail "run.image left nothing in ws1's image"
 in_vm ws1 'git -C ~/Developer/seed log --format=%s -1' 2>> "$log" | grep -qx seed || fail "run.boot did not clone the seed into ws1"
 echo live > "$mac/shared/live.txt"
@@ -177,7 +177,7 @@ refused=$(in_vm ws1 'touch ~/shared/from-guest' 2>&1) && fail "ws1 wrote into a 
 grep -q 'Read-only file system' <<< "$refused" || fail "a write into ws1's read-only mount failed for another reason: $refused"
 st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1 exited $?"
 [ "$(in_vm ws1 'cat ~/shared/live.txt')" = live ] || fail "ws1's mount is gone after a restart"
-sed -i.bak '/^  mounts:/d' "$mac/.config/station/machinefiles/studio-linux.yaml" && rm -f "$mac/.config/station/machinefiles/studio-linux.yaml.bak"
+sed -i.bak '/^  mounts:/d' "$mac/.config/station/machinefiles/studio-linux.machine.yaml" && rm -f "$mac/.config/station/machinefiles/studio-linux.machine.yaml.bak"
 st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1, its mount taken out, exited $?"
 in_vm ws1 'mountpoint -q ~/shared' && fail "ws1 still mounts ~/shared once vm.mounts no longer names it"
 in_vm ws1 'grep -q "^station-" /etc/fstab' && fail "ws1's /etc/fstab keeps a mount vm.mounts no longer names"
@@ -448,7 +448,7 @@ case_begin rights-private ADR-035
 # 3000 is shared on a port of the Mac and served on the stub tailnet, 8443
 # is flagged and never reaches it.
 mkdir -p "$mac/.config/station/machinefiles"
-printf 'machinefile: station.machinefile/v1\nname: ws1\nmachine: { kind: workspace }\nports: { open: 3000-3999, to: private }\n' > "$mac/.config/station/machinefiles/ws1.yaml"
+printf 'machinefile: station.machinefile/v1\nname: ws1\nmachine: { kind: workspace }\nports: { open: 3000-3999, to: private }\n' > "$mac/.config/station/machinefiles/ws1.machine.yaml"
 st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1 exited $?"
 in_vm ws1 '(nohup python3 -m http.server 3000 > /dev/null 2>&1 &); (nohup python3 -m http.server 8443 > /dev/null 2>&1 &)' || fail "start ws1's two servers"
 state_of() { st ports --json | jq -r --argjson p "$1" '[.ports[] | select(.machine == "ws1" and .port == $p) | .state] | first // "none"'; }
@@ -459,7 +459,7 @@ on=$(st ports --json | jq -r '[.ports[] | select(.machine == "ws1" and .port == 
 grep -q -- "serve --bg --https=$on http://127.0.0.1:$on" "$mac/.calls" || miss "3000 was never served on the tailnet at $on"
 grep -q -- "8443" "$mac/.calls" && miss "8443 reached the tailnet"
 curl -fsS -o /dev/null "http://127.0.0.1:$on/" || miss "3000 does not answer on the Mac's loopback port $on"
-rm -f "$mac/.config/station/machinefiles/ws1.yaml"
+rm -f "$mac/.config/station/machinefiles/ws1.machine.yaml"
 say "   3000 shared on $on and served; 8443 flagged, never served"
 case_pass
 

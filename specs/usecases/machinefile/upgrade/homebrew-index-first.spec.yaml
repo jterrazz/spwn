@@ -3,7 +3,7 @@ env: bridged-macos
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "macos-1"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit macos-1 machinefiles/macos-1.yaml'
+    - command: 'world edit macos-1 machinefiles/macos-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: macos-1

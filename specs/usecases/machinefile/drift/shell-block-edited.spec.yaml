@@ -4,7 +4,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.offers["postgresql@18"] = "18.1"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

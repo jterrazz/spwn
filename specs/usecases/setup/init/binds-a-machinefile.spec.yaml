@@ -2,14 +2,14 @@ description: 'init --machinefile with a file copies it among yours, binds it, pl
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro downloads/laptop.yaml'
+    - command: 'world edit jterrazz-macbook-pro downloads/laptop.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: laptop
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
-    - command: 'init --name jterrazz-macbook-pro --machinefile downloads/laptop.yaml'
+    - command: 'init --name jterrazz-macbook-pro --machinefile downloads/laptop.machine.yaml'
       exit: 0
       stdout: |
           ●	name	jterrazz-macbook-pro
@@ -17,7 +17,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart
           # Machinefile
-          	downloads/laptop.yaml: applied below, which binds it
+          	downloads/laptop.machine.yaml: applied below, which binds it
           # To install
           ○	fd	brew
           ●	homebrew	5.0.1	script	the manager of jq
@@ -26,7 +26,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [(.preferences.machinefile | .bound_at |= type), (.files | keys)]'' world.json'
       exit: 0
       stdout: |
-          [{"name":"laptop","bound_at":"string"},["downloads/laptop.yaml","machinefiles/laptop.lock","machinefiles/laptop.yaml"]]
+          [{"name":"laptop","bound_at":"string"},["downloads/laptop.machine.yaml","machinefiles/laptop.lock","machinefiles/laptop.machine.yaml"]]
     - command: 'drift'
       exit: 0
       stdout: |

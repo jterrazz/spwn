@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"path/filepath"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 )
 
@@ -29,7 +30,7 @@ func NewOwned(fsys writable, dir string) Owned { return Owned{fs: fsys, dir: dir
 func (o Owned) Read(_ context.Context, path string) ([]byte, error) { return o.fs.ReadFile(path) }
 
 func (o Owned) Keep(_ context.Context, name string, body []byte) error {
-	at := filepath.Join(o.dir, name+".yaml")
+	at := filepath.Join(o.dir, name+catalog.MachinefileSuffix)
 	switch there, err := o.fs.ReadFile(at); {
 	case err == nil && bytes.Equal(there, body):
 		return nil

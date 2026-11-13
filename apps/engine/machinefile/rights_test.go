@@ -22,11 +22,11 @@ const head = "machinefile: station.machinefile/v1\n"
 // it extends, the overlay's winning whole; no Machinefile reads none.
 func TestRightsAreReadFromTheChainAndTheOverlayWins(t *testing.T) {
 	user := tree(machinefile.User, map[string]string{
-		"machinefiles/api.yaml":       head + "name: api\nextends: [base]\nmachine: { kind: workspace }\n",
-		"machinefiles/base.yaml":      head + "name: base\nports: { open: 3000-3999, to: private }\n",
-		"machinefiles/web.yaml":       head + "name: web\nmachine: { kind: workspace }\nports: { open: 5173, to: local }\n",
-		"machinefiles/web.local.yaml": head + "overrides: web\nports: { open: [3000], to: public }\n",
-		"machinefiles/broken.yaml":    head + "name: broken\nports: { open: 3000-3999, to: public }\n",
+		"machinefiles/api.machine.yaml":    head + "name: api\nextends: [base]\nmachine: { kind: workspace }\n",
+		"machinefiles/base.machine.yaml":   head + "name: base\nports: { open: 3000-3999, to: private }\n",
+		"machinefiles/web.machine.yaml":    head + "name: web\nmachine: { kind: workspace }\nports: { open: 5173, to: local }\n",
+		"machinefiles/web.local.yaml":      head + "overrides: web\nports: { open: [3000], to: public }\n",
+		"machinefiles/broken.machine.yaml": head + "name: broken\nports: { open: 3000-3999, to: public }\n",
 	})
 	rights, err := machinefile.RightsOf([]machinefile.Tree{user}, "api")
 	if err != nil || rights == nil || rights.To != catalog.AudiencePrivate || rights.Open[0] != (catalog.PortSpan{From: 3000, To: 3999}) {

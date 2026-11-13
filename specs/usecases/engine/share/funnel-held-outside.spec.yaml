@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].tailnet.shares += [{Port: 443, Path: "/", Scheme: "https", Target: "http://127.0.0.1:8080", To: "public"}] | .macs["jterrazz-macbook-pro"].tailnet.funnel = [443]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

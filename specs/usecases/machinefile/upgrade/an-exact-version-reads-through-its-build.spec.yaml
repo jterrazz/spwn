@@ -2,7 +2,7 @@ description: 'three numbers hold java at its vendor''s build of them: 21.0.13 is
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
@@ -26,4 +26,4 @@ runs:
           ●	mise	2026.10.1	brew
           ●	java	temurin-21.0.13+9.0.LTS	mise	held at 21.0.13
           # Waiting
-          ◐	java		temurin-27.0.1+0 available: change '21.0.13' to '27.0.1' in ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml
+          ◐	java		temurin-27.0.1+0 available: change '21.0.13' to '27.0.1' in ~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml

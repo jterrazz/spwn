@@ -1,7 +1,7 @@
 description: 'a plan of a phase none of the Machinefile has is refused'
 env: in-workspace
 runs:
-    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

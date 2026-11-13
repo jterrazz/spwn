@@ -5,7 +5,7 @@ fixture:
 env:
     - STATION_MACHINE_KIND=linux
 runs:
-    - command: 'apply --machinefile ci.yaml --yes'
+    - command: 'apply --machinefile ci.machine.yaml --yes'
       exit: 0
       stdout: |
           # To install
@@ -16,7 +16,7 @@ runs:
           ●	foo	1.0	apt
     - command: '--version >/dev/null; /usr/bin/sed -i.bak "s/packages: \[foo, foo-extra\]/packages: [foo]/" .config/station/catalog/command-line/foo.yaml'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak "s/apps: \[foo\]/apps: []/" .config/station/machinefiles/ci.yaml'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak "s/apps: \[foo\]/apps: []/" .config/station/machinefiles/ci.machine.yaml'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 0

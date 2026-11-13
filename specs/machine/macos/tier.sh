@@ -381,7 +381,7 @@ in_vm 'sudo -n rm -rf /opt/homebrew /usr/local/Homebrew' || fail "make the base 
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
 scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
 scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/scripts/install.sh" "$user@$ip:/tmp/station-e2e/install.sh" || fail "copy install.sh"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$suite/macos/e2e-apply.yaml" "$user@$ip:/tmp/station-e2e/e2e-apply.yaml" || fail "copy the Machinefile"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$suite/macos/e2e-apply.machine.yaml" "$user@$ip:/tmp/station-e2e/e2e-apply.machine.yaml" || fail "copy the Machinefile"
 fp="$work/home-apply"
 mkdir -p "$fp"
 steps=()
@@ -395,7 +395,7 @@ password="{ while :; do echo admin; sleep 3; done; }"
 # gives it one; the run is interrupted once the cask's install has started. The
 # shell script(1) runs writes its own pid, then becomes station, so SIGINT reaches
 # station alone, never script(1), whose arguments name the same command.
-in_vm "($password | script -q /tmp/station-e2e/first.log sh -c 'echo \$\$ > /tmp/station-e2e/station.pid; exec $station init --machinefile /tmp/station-e2e/e2e-apply.yaml' > /dev/null 2>&1; echo \$? > /tmp/station-e2e/first.exit) > /dev/null 2>&1 &" || fail "start init --machinefile"
+in_vm "($password | script -q /tmp/station-e2e/first.log sh -c 'echo \$\$ > /tmp/station-e2e/station.pid; exec $station init --machinefile /tmp/station-e2e/e2e-apply.machine.yaml' > /dev/null 2>&1; echo \$? > /tmp/station-e2e/first.exit) > /dev/null 2>&1 &" || fail "start init --machinefile"
 # hazard: $out is run.sh's artifacts folder and every case shares one shell, so a case keeps its captured output in another name, or this copy lands in a path made of that output.
 # value: the transcript is the only witness of an apply that ends early: it is copied
 # to the host's artifacts before the VM is deleted, and its tail rides every failure.

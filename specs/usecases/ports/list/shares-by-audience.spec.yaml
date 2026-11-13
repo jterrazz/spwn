@@ -1,7 +1,7 @@
 description: 'a share is listed under its audience, and its JSON says it: public, to public'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

@@ -2,7 +2,7 @@ description: 'create --from makes its image, sized and kept as its vm says, reco
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux

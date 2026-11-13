@@ -106,7 +106,7 @@ func TestAMethodIsChosenBySelectorThenPriorityThenPrefer(t *testing.T) {
 		{"another system, its own method, named as it runs", machine("a", "{ os: ubuntu }", "[fd]"), "shell"},
 	}
 	for _, c := range cases {
-		lib := library(t, map[string]string{"machinefiles/a.yaml": c.file}, nil)
+		lib := library(t, map[string]string{"machinefiles/a.machine.yaml": c.file}, nil)
 		if got := methodOf(t, lib, "a", "fd"); got != c.want {
 			t.Errorf("%s: chose %s, want %s", c.about, got, c.want)
 		}
@@ -131,7 +131,7 @@ func TestALaterFileReplacesAndAnOverlayAddsAndRemoves(t *testing.T) {
 	base := "machinefile: station.machinefile/v1\nname: base\napps: [packages, { name: fd, version: '1' }]\nvm: { network: nat, resources: { cpus: 2 } }\n"
 	top := machine("top", "{ os: macos, version: '26' }", "[{ name: fd, manager: cask }]") + "extends: [base]\nvm: { resources: { cpus: 8 } }\n"
 	overlay := "machinefile: station.machinefile/v1\noverrides: top\napps: { add: [releases], remove: [packages] }\n"
-	lib := library(t, map[string]string{"machinefiles/top.yaml": top, "machinefiles/top.local.yaml": overlay}, map[string]string{"machinefiles/base.yaml": base})
+	lib := library(t, map[string]string{"machinefiles/top.machine.yaml": top, "machinefiles/top.local.yaml": overlay}, map[string]string{"machinefiles/base.machine.yaml": base})
 	r, err := machinefile.Resolve(lib, "top", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
@@ -158,8 +158,8 @@ func TestALaterFileReplacesAndAnOverlayAddsAndRemoves(t *testing.T) {
 }
 
 func TestASameNameFileOfAStrongerLayerReplacesTheWeakerWhole(t *testing.T) {
-	lib := library(t, map[string]string{"machinefiles/a.yaml": machine("a", "{ os: macos }", "[fd]")},
-		map[string]string{"machinefiles/a.yaml": machine("a", "{ os: ubuntu, version: '24.04' }", "[left]")})
+	lib := library(t, map[string]string{"machinefiles/a.machine.yaml": machine("a", "{ os: macos }", "[fd]")},
+		map[string]string{"machinefiles/a.machine.yaml": machine("a", "{ os: ubuntu, version: '24.04' }", "[left]")})
 	if got := methodOf(t, lib, "a", "fd"); got != "cask" {
 		t.Errorf("the owner's a resolved fd by %s, want its macos cask", got)
 	}
@@ -174,8 +174,8 @@ func TestACycleIsPrintedAroundItsLoop(t *testing.T) {
 		files map[string]string
 		want  string
 	}{
-		{"extends", map[string]string{"machinefiles/a.yaml": ext("a", "b"), "machinefiles/b.yaml": ext("b", "c"), "machinefiles/c.yaml": ext("c", "b")}, "b extends c extends b"},
-		{"requires", map[string]string{"machinefiles/a.yaml": machine("a", "{ os: macos }", "[left]")}, "left needs right needs left"},
+		{"extends", map[string]string{"machinefiles/a.machine.yaml": ext("a", "b"), "machinefiles/b.machine.yaml": ext("b", "c"), "machinefiles/c.machine.yaml": ext("c", "b")}, "b extends c extends b"},
+		{"requires", map[string]string{"machinefiles/a.machine.yaml": machine("a", "{ os: macos }", "[left]")}, "left needs right needs left"},
 	}
 	for _, c := range cases {
 		_, err := machinefile.Resolve(library(t, c.files, nil), "a", machinefile.Machine{}, machinefile.Lock{})
@@ -189,7 +189,7 @@ func TestACycleIsPrintedAroundItsLoop(t *testing.T) {
 func TestAccountsAndPortsAreReplacedWhole(t *testing.T) {
 	base := machine("a", "{ os: macos }", "[]") + "accounts: { share: [{ account: claude, for: 7d }, { account: github }], keep: [github] }\nports: { open: 3000-9999, to: private, except: [22] }\n"
 	overlay := "machinefile: station.machinefile/v1\noverrides: a\naccounts: { share: [{ account: claude, for: 1d }] }\nports: { open: 8080, to: local }\n"
-	lib := library(t, map[string]string{"machinefiles/a.yaml": base, "machinefiles/a.local.yaml": overlay}, nil)
+	lib := library(t, map[string]string{"machinefiles/a.machine.yaml": base, "machinefiles/a.local.yaml": overlay}, nil)
 	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
@@ -208,10 +208,10 @@ func TestAccountsAndPortsAreReplacedWhole(t *testing.T) {
 
 func TestAFileThatIsNoYAMLIsNotRead(t *testing.T) {
 	files := map[string]string{
-		"machinefiles/a.yaml":       machine("a", "{ os: macos }", "[fd]"),
-		"machinefiles/a.lock":       "not yaml at all: [",
-		"machinefiles/README.md":    "# my machines",
-		"catalog/command-line/NOTE": "a note",
+		"machinefiles/a.machine.yaml": machine("a", "{ os: macos }", "[fd]"),
+		"machinefiles/a.lock":         "not yaml at all: [",
+		"machinefiles/README.md":      "# my machines",
+		"catalog/command-line/NOTE":   "a note",
 	}
 	if got := methodOf(t, library(t, files, nil), "a", "fd"); got != "cask" {
 		t.Errorf("chose %s", got)
@@ -227,13 +227,13 @@ func TestAFileThatIsNoYAMLIsNotRead(t *testing.T) {
 
 func TestARefusedEntryIsNamedAtItsLine(t *testing.T) {
 	cases := []struct{ about, file, want string }{
-		{"an unknown app", machine("a", "{ os: macos }", "\n    - fd\n    - nope"), "nope (~/.config/station/machinefiles/a.yaml:6)"},
-		{"a bad value", machine("a", "{ os: macos }", "[{ name: fd, options: { tint: blue } }]"), "fd's tint: no option of fd (~/.config/station/machinefiles/a.yaml:4)"},
-		{"no method", machine("a", "{ os: debian, version: '12' }", "[{ name: fd, manager: skill }]"), "(listed, ~/.config/station/machinefiles/a.yaml:4)"},
-		{"a package baked that the catalog lacks", machine("a", "{ os: macos }", "[]") + "vm: { image: { bake: [fd, nope] } }\n", "nope (~/.config/station/machinefiles/a.yaml)"},
+		{"an unknown app", machine("a", "{ os: macos }", "\n    - fd\n    - nope"), "nope (~/.config/station/machinefiles/a.machine.yaml:6)"},
+		{"a bad value", machine("a", "{ os: macos }", "[{ name: fd, options: { tint: blue } }]"), "fd's tint: no option of fd (~/.config/station/machinefiles/a.machine.yaml:4)"},
+		{"no method", machine("a", "{ os: debian, version: '12' }", "[{ name: fd, manager: skill }]"), "(listed, ~/.config/station/machinefiles/a.machine.yaml:4)"},
+		{"a package baked that the catalog lacks", machine("a", "{ os: macos }", "[]") + "vm: { image: { bake: [fd, nope] } }\n", "nope (~/.config/station/machinefiles/a.machine.yaml)"},
 	}
 	for _, c := range cases {
-		_, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": c.file}, nil), "a", machinefile.Machine{}, machinefile.Lock{})
+		_, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.machine.yaml": c.file}, nil), "a", machinefile.Machine{}, machinefile.Lock{})
 		if err == nil || !strings.Contains(err.Error(), c.want) {
 			t.Errorf("%s: %v, want it saying %q", c.about, err, c.want)
 		}
@@ -242,7 +242,7 @@ func TestARefusedEntryIsNamedAtItsLine(t *testing.T) {
 
 func TestAnOptionalAppWhoseManagerHasNoMethodSaysWhatItHas(t *testing.T) {
 	file := machine("a", "{ os: macos }", "[{ name: fd, manager: skill, optional: true }]")
-	r, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": file}, nil), "a", machinefile.Machine{}, machinefile.Lock{})
+	r, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.machine.yaml": file}, nil), "a", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -258,7 +258,7 @@ func TestAPackageProvidedByAnotherBringsItInFirst(t *testing.T) {
 		"catalog/ai-agents/core.yaml":    "package: station.package/v1\nkind: app\nname: core\ndescription: the engine\nprovides: [engine]\nmethods:\n    - { os: any, provided-by: desktop }\n",
 		"catalog/ai-agents/desktop.yaml": "package: station.package/v1\nkind: app\nname: desktop\ndescription: the app\nmethods:\n    - { os: any, script: { run: 'true' } }\n",
 	}
-	lib := library(t, map[string]string{"machinefiles/a.yaml": machine("a", "{ os: macos }", "[core]")}, provided)
+	lib := library(t, map[string]string{"machinefiles/a.machine.yaml": machine("a", "{ os: macos }", "[core]")}, provided)
 	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)

@@ -1,14 +1,14 @@
 description: 'a Machinefile that extends a mixin takes its values, its own win, and its overlay adds and removes'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-base.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-base.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-base
           apps: [git, jq]
           accounts: { keep: [github] }
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

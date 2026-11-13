@@ -1,7 +1,7 @@
 description: 'the shared source is read at its default branch, and the owner''s same-name file replaces it'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machinefiles/jterrazz-macbook-pro.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [gh]\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machinefiles/jterrazz-macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [gh]\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'explain apps'
       exit: 0
@@ -13,7 +13,7 @@ runs:
           	apps.gh	listed	shared	jterrazz-macbook-pro
           	apps.gh.method	brew	built-in	gh
           	apps.gh.because	its one method for macos	built-in	gh
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro

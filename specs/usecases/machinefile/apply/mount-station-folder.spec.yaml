@@ -1,7 +1,7 @@
 description: 'a vm.mounts guest folder that holds station''s own folder of the VM is refused'
 env: in-workspace
 runs:
-    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1
@@ -13,5 +13,5 @@ runs:
     - command: 'apply --yes'
       exit: 2
       stderr: |
-          Error: ~/.config/station/machinefiles/linux-1.yaml:4: mount folder "~/.config" of the VM holds ~/.config/station, station's own files, which no mount reaches: mount a folder beside it
+          Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "~/.config" of the VM holds ~/.config/station, station's own files, which no mount reaches: mount a folder beside it
           Hint: fix that line: station never rewrites a Machinefile

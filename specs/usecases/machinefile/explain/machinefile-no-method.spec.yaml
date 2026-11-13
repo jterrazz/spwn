@@ -1,7 +1,7 @@
 description: 'an app with no method for the system stops the plan, and says how to make it optional'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -11,5 +11,5 @@ runs:
     - command: 'explain --machinefile studio-linux'
       exit: 2
       stderr: |
-          Error: ghostty has no method for ubuntu 24.04 (listed, ~/.config/station/machinefiles/studio-linux.yaml:4)
+          Error: ghostty has no method for ubuntu 24.04 (listed, ~/.config/station/machinefiles/studio-linux.machine.yaml:4)
           Hint: list it as { name: ghostty, optional: true } to skip it there

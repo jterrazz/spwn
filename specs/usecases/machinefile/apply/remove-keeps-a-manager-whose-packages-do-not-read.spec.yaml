@@ -1,7 +1,7 @@
 description: 'a runtime station installed whose packages cannot be listed is kept: what it holds may be yours'
 env: in-workspace
 runs:
-    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

@@ -2,7 +2,7 @@ description: 'another Mac upgrades its own Machinefile at night, and its overvie
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.yaml'
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-mac-mini

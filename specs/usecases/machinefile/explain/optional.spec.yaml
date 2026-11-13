@@ -1,7 +1,7 @@
 description: 'an optional app with no method is skipped saying why; a required one stops the plan'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -13,7 +13,7 @@ runs:
       stdout: |
           # studio-linux
           	apps.ghostty	optional, no method for ubuntu 24.04	user	studio-linux
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux

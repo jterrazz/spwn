@@ -64,11 +64,11 @@ func TestTheOwnersFoldersFollowALinkToAFileAlone(t *testing.T) {
 		mode, to  fs.FileMode
 		refused   bool
 	}{
-		{"a link to a file", "machinefiles/laptop.yaml", fs.ModeSymlink, 0, false},
-		{"a link to a folder", "machinefiles/laptop.yaml", fs.ModeSymlink, fs.ModeDir, true},
+		{"a link to a file", "machinefiles/laptop.machine.yaml", fs.ModeSymlink, 0, false},
+		{"a link to a folder", "machinefiles/laptop.machine.yaml", fs.ModeSymlink, fs.ModeDir, true},
 		{"a link to a folder named as a package", "catalog/apps/jq.yaml", fs.ModeSymlink, fs.ModeDir, true},
 		{"a pipe", "catalog/apps/jq.yaml", fs.ModeNamedPipe, 0, true},
-		{"a device", "machinefiles/laptop.yaml", fs.ModeDevice, 0, true},
+		{"a device", "machinefiles/laptop.machine.yaml", fs.ModeDevice, 0, true},
 	}
 	for _, c := range cases {
 		dir := linked{MapFS: fstest.MapFS{c.at: &fstest.MapFile{Mode: c.mode}}, targets: map[string]fs.FileMode{c.at: c.to}}
@@ -83,7 +83,7 @@ func TestTheOwnersFoldersFollowALinkToAFileAlone(t *testing.T) {
 }
 
 func TestASharedSourceFollowsNoLink(t *testing.T) {
-	for _, at := range []string{"machinefiles/laptop.yaml", "catalog/apps/jq.yaml"} {
+	for _, at := range []string{"machinefiles/laptop.machine.yaml", "catalog/apps/jq.yaml"} {
 		dir := linked{MapFS: fstest.MapFS{at: &fstest.MapFile{Mode: fs.ModeSymlink}}, targets: map[string]fs.FileMode{at: 0}}
 		_, err := files.New(dir, contract.NoLinks, "catalog", "machinefiles", machinefile.Shared, "studio@1a2b3c4").Read(t.Context())
 		if err == nil || !strings.Contains(err.Error(), at+": is a link") {

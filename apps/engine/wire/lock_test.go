@@ -28,7 +28,7 @@ type lockBench struct{ bench }
 func lockBenchOf(t *testing.T, kind catalog.MachineKind, lock string, entries ...string) lockBench {
 	t.Helper()
 	b := benchOf(t, kind, "")
-	b.files["machinefiles/m.yaml"] = machinefileOf(kind, entries...)
+	b.files["machinefiles/m.machine.yaml"] = machinefileOf(kind, entries...)
 	if lock != "" {
 		b.w.Mac("here").Files = map[string]string{"machinefiles/m.lock": lock}
 	}

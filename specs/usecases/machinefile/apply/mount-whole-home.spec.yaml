@@ -1,7 +1,7 @@
 description: 'a vm.mounts folder that is a whole home is refused: a mount shadows or shares all of it'
 env: in-workspace
 runs:
-    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1
@@ -13,5 +13,5 @@ runs:
     - command: 'apply --yes'
       exit: 2
       stderr: |
-          Error: ~/.config/station/machinefiles/linux-1.yaml:4: mount folder "~" of the VM is a whole home: mount a folder inside it
+          Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "~" of the VM is a whole home: mount a folder inside it
           Hint: fix that line: station never rewrites a Machinefile

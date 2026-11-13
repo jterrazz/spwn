@@ -137,7 +137,7 @@ func named(ctx context.Context, d Deps, asked string) (name string, path *machin
 	if mf.Name == "" {
 		return "", nil, Worded(&machinefile.RefusedFileError{Format: "machinefile", Err: &catalog.FileError{File: asked, Problem: "names no Machinefile: a file named by its path says its name"}})
 	}
-	return mf.Name, &machinefile.Tree{Layer: machinefile.User, Root: filepath.Dir(asked), Files: []machinefile.File{{Path: "machinefiles/" + mf.Name + ".yaml", Body: body, At: asked}}}, nil
+	return mf.Name, &machinefile.Tree{Layer: machinefile.User, Root: filepath.Dir(asked), Files: []machinefile.File{{Path: "machinefiles/" + mf.Name + catalog.MachinefileSuffix, Body: body, At: asked}}}, nil
 }
 
 func resolve(ctx context.Context, d Deps, asked string) (machinefile.Resolved, error) {
@@ -222,7 +222,11 @@ func Worded(err error) error {
 		if file.Format == "catalog" {
 			code = CatalogInvalid
 		}
-		return refused(fail.Refused, code, fileError.File, map[string]string{"problem": fileError.Error()})
+		detail := map[string]string{"problem": fileError.Error()}
+		if fileError.Rename != "" {
+			detail["rename"] = fileError.Rename
+		}
+		return refused(fail.Refused, code, fileError.File, detail)
 	case errors.As(err, &notFound):
 		return refused(fail.NotFound, NotFound, notFound.Name, map[string]string{"by": notFound.By})
 	case errors.As(err, &mixin):

@@ -1,7 +1,7 @@
 description: 'plan --phase boot shows each of the owner''s run.boot lines before it runs, with its Machinefile'
 env: in-workspace
 runs:
-    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: linux-1

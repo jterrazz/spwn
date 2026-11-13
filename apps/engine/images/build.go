@@ -26,7 +26,7 @@ type Template struct {
 }
 
 // value: a file of a template's chain, by its slash path under the
-// owner's folder (`machinefiles/<name>.yaml`).
+// owner's folder (`machinefiles/<name>.machine.yaml`).
 
 type TemplateFile struct {
 	Path string

@@ -115,7 +115,7 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 		listed = []string{entry}
 	}
 	files := map[string]string{
-		"machinefiles/m.yaml":              machinefileOf(kind, listed...),
+		"machinefiles/m.machine.yaml":      machinefileOf(kind, listed...),
 		"catalog/command-line/twin.yaml":   twin,
 		"catalog/command-line/probed.yaml": probed,
 		"catalog/command-line/lined.yaml":  lined,
@@ -554,7 +554,7 @@ func TestAnExtraHeldByAnotherMethodThanItsRecordIsLeftByApplyRemove(t *testing.T
 	if _, err := b.shelf.Move(context.Background(), "twin", catalog.MethodSkill, nil); err != nil {
 		t.Fatal(err)
 	}
-	b.files["machinefiles/m.yaml"] = machinefileOf(catalog.Mac)
+	b.files["machinefiles/m.machine.yaml"] = machinefileOf(catalog.Mac)
 	b.shelf.Forget()
 	left := doneOf(t, b.apply(t, true).Removed, "twin")
 	if !b.holds(catalog.MethodSkill, "twin") || left.Detail != machinefile.AnotherWay {

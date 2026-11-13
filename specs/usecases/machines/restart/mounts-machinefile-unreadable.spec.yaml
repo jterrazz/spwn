@@ -4,7 +4,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /bin/mkdir -p data'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -18,7 +18,7 @@ runs:
       exit: 0
     - command: 'machines create web --from studio-linux >/dev/null'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: [studio-linux
@@ -37,4 +37,4 @@ runs:
     - command: 'machines --json | /usr/bin/jq -r ''.macs[].vms[] | select(.name == "web") | .detail'''
       exit: 0
       stdout: |
-          web's Machinefile studio-linux could not be read (~/.config/station/machinefiles/studio-linux.yaml: line 1: did not find expected ',' or ']'): it shares the folders of its last start
+          web's Machinefile studio-linux could not be read (~/.config/station/machinefiles/studio-linux.machine.yaml: line 1: did not find expected ',' or ']'): it shares the folders of its last start
