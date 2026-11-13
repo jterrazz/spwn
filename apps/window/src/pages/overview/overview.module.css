@@ -60,6 +60,7 @@
 }
 .strip {
     display: grid;
+    grid-template-columns: repeat(var(--days), minmax(0, 1fr));
     gap: 3px;
     height: 30px;
 }

@@ -1,7 +1,6 @@
-import type { CSSProperties } from 'react';
-
 import type { Tone } from '../tone';
 import type { Identity } from './identity';
+import type { Measured } from './measure';
 
 import styles from './bar.module.css';
 
@@ -15,7 +14,7 @@ export type BarProps = {
 
 export function Bar({ percent, label, identity, tone = 'plain', width = 'fill' }: BarProps) {
     const shown = Math.max(2, Math.min(100, percent));
-    const fill = { width: `${shown}%` };
+    const fill: Measured = { '--fill': `${String(shown)}%` };
     return (
         <div
             aria-label={label}
@@ -44,8 +43,6 @@ export type ShareBarProps = {
     label: string;
     of?: number | undefined;
 };
-
-type Measured = CSSProperties & Readonly<Record<`--${string}`, number | string>>;
 
 function shareOf(part: SharePart, of: number | undefined): Measured {
     return of === undefined

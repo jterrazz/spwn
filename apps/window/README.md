@@ -200,6 +200,10 @@ The route (page, machine, tab, and the file Machine files opens on) is kept acro
 
 All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `record.py` writes the worlds, `node scripts/capture.ts <out>` photographs every page of every world, and `check.sh` is the proof, with `check-quick.sh` for the seconds between two edits. A page opens directly in a dev or proof build by its start route, `?world=<world>&page=<page>` (Machine files on one file by `&file=<name>`) or `?world=<world>&machine=<name>&tab=<Tab>`.
 
+## The design rules
+
+- No inline style. A size computed from data is the one accepted form: a CSS custom property set on the element, typed `Measured` (`src/design/measure.ts`), which the module's CSS draws (`width: var(--fill)`). A colour, a spacing or a tone is a class, never a value written inline.
+
 ## The rules a page meets first
 
 Each is a finding of `typescript check`; `check-quick.sh` shows the per-file ones in seconds.

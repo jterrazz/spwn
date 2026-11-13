@@ -66,7 +66,7 @@ describe('LineList', () => {
         // Then - one line of 5 000 is shown, in a box of the height the whole log takes
         expect(drawn(result.html.text)).toBe(1);
         expect(result.content.text).toContain('1 of 5000 lines');
-        expect(result.html.text).toContain('height: 546px');
+        expect(result.html.text).toContain('--height: 546px');
     });
 
     test('a list left and returned to is where it was left', async () => {

@@ -16,12 +16,17 @@
     font-size: var(--text-label);
     line-height: var(--row);
     color: var(--t2);
+    height: var(--height);
     overflow: auto;
     overscroll-behavior: contain;
     user-select: text;
 }
 .extent {
     min-width: max-content;
+    height: var(--extent);
+}
+.span {
+    transform: translateY(var(--offset));
 }
 .line {
     display: flex;

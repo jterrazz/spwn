@@ -2,6 +2,7 @@ import type { MachinesUptimeDay, MachinesVM } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
+import type { Measured } from '../../design/index';
 import { vmCheck, vmSsh, vmState } from '../../engine/shown';
 import { clock, seconds, sentence } from '../../model/format';
 import { shortDay } from '../activity/when';
@@ -114,6 +115,10 @@ function dayOf(day: MachinesUptimeDay): string {
     ]);
 }
 
+function daysOf(count: number): Measured {
+    return { '--days': count };
+}
+
 // invariant: the record keeps a day only once the server went down or restarted on it, so a cell is such a day,
 // invariant: never a day of a calendar: the days between two cells are not drawn.
 export function LastDays({ vm }: { vm: MachinesVM }) {
@@ -128,9 +133,7 @@ export function LastDays({ vm }: { vm: MachinesVM }) {
                         aria-label="Its days"
                         className={styles.strip}
                         role="img"
-                        style={{
-                            gridTemplateColumns: `repeat(${String(days.length)}, minmax(0, 1fr))`,
-                        }}
+                        style={daysOf(days.length)}
                     >
                         {days.map((day) => (
                             <i key={day.date} title={dayOf(day)} />

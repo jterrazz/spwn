@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
+import type { Measured } from '../../design/index';
 import { countOf, filtered, numbered } from './lines';
 import { heightOf, spanOf } from './windowed';
 
@@ -12,6 +13,14 @@ const MOST = 26 * ROW;
 const OVERSCAN = 12;
 
 const scrolls = new Map<string, number>();
+
+function pixels(name: '--extent' | '--height' | '--offset', value: number): Measured {
+    const size = `${String(value)}px`;
+    if (name === '--extent') {
+        return { '--extent': size };
+    }
+    return name === '--height' ? { '--height': size } : { '--offset': size };
+}
 
 type LineListProps = { lines: readonly string[]; query: string; memory: string; foot?: string };
 
@@ -53,7 +62,7 @@ export function LineList({ lines, query, memory, foot = '' }: LineListProps) {
                 }}
                 ref={box}
                 role="log"
-                style={{ height }}
+                style={pixels('--height', height)}
                 tabIndex={0}
             >
                 {shown.length === 0 ? (
@@ -63,11 +72,8 @@ export function LineList({ lines, query, memory, foot = '' }: LineListProps) {
                             : `No line holds "${query}".`}
                     </p>
                 ) : (
-                    <div className={styles.extent} style={{ height: shown.length * ROW }}>
-                        <div
-                            className={styles.span}
-                            style={{ transform: `translateY(${String(start * ROW)}px)` }}
-                        >
+                    <div className={styles.extent} style={pixels('--extent', shown.length * ROW)}>
+                        <div className={styles.span} style={pixels('--offset', start * ROW)}>
                             {shown.slice(start, end).map((line) => (
                                 <div className={styles.line} key={line.number}>
                                     <span className={styles.number}>{line.number}</span>

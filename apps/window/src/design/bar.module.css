@@ -8,6 +8,7 @@
 }
 .fill {
     display: block;
+    width: var(--fill);
     height: 100%;
     background: var(--c, var(--t3));
     border-radius: var(--radius-tick);
