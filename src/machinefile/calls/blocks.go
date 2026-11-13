@@ -239,14 +239,16 @@ func (r *run) letGo(ctx context.Context, done machinefile.BlockDone, detail stri
 	return done
 }
 
+// invariant: a block is judged again inside the locked edit, against the
+// file it replaces and against the ledger as it is then, so a record
+// another writer of ~/.zshrc made or dropped since the plan counts.
 func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machinefile.BlockDone {
-	written, err := writtenBlocks(ctx, r.d)
-	if err != nil {
-		done.State, done.Detail = catalog.StateBroken, err.Error()
-		return done
-	}
 	edited := false
-	err = r.d.Zshrc.Edit(ctx, func(zshrc string) (string, error) {
+	err := r.d.Zshrc.Edit(ctx, func(zshrc string) (string, error) {
+		written, read := writtenBlocks(ctx, r.d)
+		if read != nil {
+			return zshrc, read
+		}
 		switch done.Action {
 		case machinefile.Set:
 			switch judgeBlock(zshrc, done.Item, done.ID, done.Zsh, written).Action {

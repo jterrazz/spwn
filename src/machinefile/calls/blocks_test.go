@@ -266,3 +266,33 @@ func TestRemoveTakesABlockOnlyWithItsApp(t *testing.T) {
 		})
 	}
 }
+
+// value: a ~/.zshrc another writer changes, file and ledger, in the lock's
+// turn before this edit gets it.
+type racedZshrc struct {
+	zshrcText
+	first func(*zshrcText)
+}
+
+func (z *racedZshrc) Edit(ctx context.Context, edit func(string) (string, error)) error {
+	if z.first != nil {
+		z.first(&z.zshrcText)
+		z.first = nil
+	}
+	return z.zshrcText.Edit(ctx, edit)
+}
+
+func TestABlockIsJudgedInsideTheEditAgainstTheLedgerAsItIsThen(t *testing.T) {
+	older, body := "export SOLO=0\n", "export SOLO=1\n"
+	l := &writtenLedger{}
+	z := &racedZshrc{zshrcText: zshrcText{"mine\n"}, first: func(z *zshrcText) {
+		z.text = soloFile(older)
+		l.blocks = []machinefile.Written{{ID: "station:solo", Item: "solo", Digest: machinefile.BlockDigest(older)}}
+	}}
+	r := &run{d: Deps{Zshrc: z, Ledger: l, Now: epoch}, there: map[string]bool{"solo": true}}
+	set := machinefile.Block{Item: "solo", ID: "station:solo", Zsh: body, Condition: machinefile.Absent, Action: machinefile.Set}
+	done := r.blocks(t.Context(), machinefile.Plan{Blocks: []machinefile.Block{set}})
+	if len(done) != 1 || done[0].Detail != "written" || z.text != soloFile(body) {
+		t.Errorf("wrote %+v, left %q; want station's older text, recorded by the other writer, rewritten", done, z.text)
+	}
+}
