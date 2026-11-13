@@ -25,7 +25,7 @@
       - button "Stop sharing"
       - text: https://jterrazz-macbook-pro.tail1234.ts.net:40001
       - button "Copy https://jterrazz-macbook-pro.tail1234.ts.net:40001": Copy
-      - button "Open" [disabled]
+      - button "Open"
       - button "Hide QR code"
       - img "QR code of https://jterrazz-macbook-pro.tail1234.ts.net:40001"
     - region "Port 7000":

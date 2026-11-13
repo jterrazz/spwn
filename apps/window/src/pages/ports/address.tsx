@@ -3,14 +3,16 @@ import { useState } from 'react';
 import { CopyButton } from '../../design/copy-button';
 import { Button, Value } from '../../design/index';
 import { QrCode } from '../../design/qr-code';
+import type { Openable } from '../../engine/opener';
+import { OpenButton } from '../kit/opens';
 
 import styles from './ports.module.css';
 
-const OPEN_NEEDS = 'Opening an address needs a browser outside the window';
+const NO_WEB_ADDRESS = 'The engine gives no web address for this port';
 
-type AddressProps = { url: string; qr: boolean; label?: string; opens?: boolean };
+type AddressProps = { url: string; qr: boolean; label?: string; opens?: Openable | undefined };
 
-export function Address({ label = '', url, qr, opens = false }: AddressProps) {
+export function Address({ label = '', url, qr, opens }: AddressProps) {
     const [open, setOpen] = useState(false);
     if (url === '') {
         return null;
@@ -21,11 +23,14 @@ export function Address({ label = '', url, qr, opens = false }: AddressProps) {
             <Value>{url}</Value>
             <span className={styles.links}>
                 <CopyButton name={`Copy ${url}`} text={url} />
-                {opens ? (
-                    <Button disabled title={OPEN_NEEDS} variant="link">
-                        Open
-                    </Button>
-                ) : null}
+                {opens === undefined ? null : (
+                    <OpenButton
+                        held={NO_WEB_ADDRESS}
+                        label="Open"
+                        openable={opens}
+                        variant="link"
+                    />
+                )}
                 {qr ? (
                     <Button
                         onClick={() => {

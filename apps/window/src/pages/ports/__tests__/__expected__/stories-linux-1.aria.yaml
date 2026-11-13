@@ -25,14 +25,14 @@
       - button "Stop sharing"
       - text: https://macbook-pro.tail77a797.ts.net:443
       - button "Copy https://macbook-pro.tail77a797.ts.net:443": Copy
-      - button "Open" [disabled]
+      - button "Open"
       - button "QR code"
     - region "Port 5173":
       - text: :5173 Vite node Shared Private
       - button "Stop sharing"
       - text: https://macbook-pro.tail77a797.ts.net:40001
       - button "Copy https://macbook-pro.tail77a797.ts.net:40001": Copy
-      - button "Open" [disabled]
+      - button "Open"
       - button "QR code"
   - region "Listening, not shared":
     - heading "Listening, not shared" [level=2]

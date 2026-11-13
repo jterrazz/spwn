@@ -1,6 +1,7 @@
 import type { PortsSharedPort, Target } from '@jterrazz/station-api';
 
 import { TypeTag, Value } from '../../design/index';
+import { Openable, shareAddressOf } from '../../engine/opener';
 import { shareToWord } from '../../engine/shown';
 import { SHARE_STATE_TONES } from '../../engine/tones';
 import { SHARE_STATE_WORDS } from '../../engine/words';
@@ -10,10 +11,6 @@ import { Address } from './address';
 import { usePortStop } from './port-gestures';
 
 import styles from './ports.module.css';
-
-export function addressOf(share: PortsSharedPort): string {
-    return share.urls.public === '' ? share.urls.local : share.urls.public;
-}
 
 export function SharedRow({
     share,
@@ -48,7 +45,7 @@ export function SharedRow({
                 <GestureRow
                     {...row}
                     {...(to === '' ? {} : { tag: shareToWord(to) })}
-                    sentence={<Value>{addressOf(share)}</Value>}
+                    sentence={<Value>{shareAddressOf(share)}</Value>}
                     trail={stopButton}
                 />
             </section>
@@ -67,7 +64,11 @@ export function SharedRow({
                 }
                 trailSize="wide"
             />
-            <Address opens={share.http} qr={share.urls.public !== ''} url={addressOf(share)} />
+            <Address
+                opens={Openable.ofShare(share)}
+                qr={share.urls.public !== ''}
+                url={shareAddressOf(share)}
+            />
         </section>
     );
 }
