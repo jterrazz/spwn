@@ -4,6 +4,7 @@ import type {
     EngineReading,
     MachinefileChapter,
     MachinefileDiffering,
+    MachinesBirth,
     MachinesEngineView,
     MachinesMacView,
     MachinesVM,
@@ -65,11 +66,20 @@ export function ownState(state: OwnState): Shown {
 }
 
 export function vmState(vm: MachinesVM): Shown {
+    if (vm.Birth !== null) {
+        const { Tone, Word } = wordOf('MachinesBirthStep', vm.Birth.step);
+        return { tone: Tone, word: Word };
+    }
     const state = vmStateOf(vm);
     if (state === undefined) {
         return { tone: 'plain', word: vm.State === '' ? NO_STATE_WORD : vm.State };
     }
     return { tone: VM_STATE_TONES[state], word: VM_STATE_WORDS[state] };
+}
+
+export function birthSentence(birth: MachinesBirth): string {
+    const { Word, Detail = '' } = wordOf('MachinesBirthStep', birth.step);
+    return `${Word} · ${Detail} ${birth.position} of ${birth.steps}`;
 }
 
 export function vmCheck(vm: MachinesVM): Shown {

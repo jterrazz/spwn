@@ -138,7 +138,6 @@ export const NEED_UNWIRED_WORD = 'Fix';
 
 export const VM_STATE_WORDS: Words<VmState> = {
     broken: 'broken',
-    creating: 'creating',
     running: 'running',
     stale: 'stale',
     stopped: 'stopped',

@@ -4,7 +4,7 @@ import { Icon } from '../../design/icon';
 import { identityOf, MachineIcon, MissingMark, Panel, Row, Tile } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
-import { verdictShown, vmState } from '../../engine/shown';
+import { birthSentence, verdictShown, vmState } from '../../engine/shown';
 import { duration, sentence } from '../../model/format';
 import { driftAsked } from '../../model/machines';
 import type { Found } from '../../model/machines';
@@ -45,6 +45,9 @@ function upFor(vm: MachinesVM, read: string | undefined): string | undefined {
 
 function stateUp(vm: MachinesVM, read: string | undefined) {
     const shown = vmState(vm);
+    if (vm.Birth !== null) {
+        return { ...shown, word: birthSentence(vm.Birth) };
+    }
     return { ...shown, word: sentence([shown.word, upFor(vm, read)]) };
 }
 

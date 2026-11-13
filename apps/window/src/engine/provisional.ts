@@ -26,20 +26,13 @@ import type { ConfirmName } from './confirms';
 import type { AskForm } from './gesture';
 
 // outside: machines.list sends a Mac's reach as two booleans and no state code, and packages/api types a VM's
-// outside: State as a plain string though station's Go gives it seven codes (apps/engine/machines/allmachines.go,
-// outside: birth.go). This file is the one place either becomes a code; it goes when the wire carries both.
+// outside: State as a plain string though station's Go gives it seven codes (apps/engine/machines/allmachines.go);
+// outside: its creating is drawn from Birth, the engine's words. This file is the one place either becomes a code;
+// outside: it goes when the wire carries both.
 
 export type MacState = 'asleep' | 'reachable' | 'unreachable';
 
-export const VM_STATES = [
-    'broken',
-    'creating',
-    'running',
-    'stale',
-    'stopped',
-    'suspended',
-    'unknown',
-] as const;
+export const VM_STATES = ['broken', 'running', 'stale', 'stopped', 'suspended', 'unknown'] as const;
 
 export type VmState = (typeof VM_STATES)[number];
 

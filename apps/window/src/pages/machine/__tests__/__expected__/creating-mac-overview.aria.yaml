@@ -1,0 +1,27 @@
+- main:
+  - heading "jterrazz-macbook-pro Online" [level=2]
+  - paragraph: This Mac · Engine running
+  - button "New machine"
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 2machines Not given yet
+  - region "Memory":
+    - heading "Memory" [level=2]
+    - paragraph: Not given yet What each machine holds of this Mac's memory.
+  - region "Its machines":
+    - heading "Its machines" [level=2]
+    - button "linux-4 by you Creating · boot 2 of 4"
+    - button "linux-5 Lot shell, one block per package · by studio-os-fe Creating · image 1 of 5"
+  - region "Packages":
+    - heading "Packages" [level=2]
+    - text: "Not found no Machinefile named jterrazz-macbook-pro. give this machine one: station init --machinefile <name>"

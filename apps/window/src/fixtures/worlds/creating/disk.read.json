@@ -1,0 +1,5 @@
+{"world": "creating", "station": "dev", "exchanges": [
+{"request":{"watch":"disk.read","in":{}},"answers":[{"v":2,"out":{"Total":0,"Free":0,"Rows":null,"Pending":false}},{"v":2,"out":{"Total":0,"Free":0,"Rows":null,"Pending":false}},{"v":2,"done":true}]},
+{"request":{"watch":"disk.read","in":{},"target":{"name":"linux-4"}},"answers":[{"v":2,"error":{"type":"refused","code":"vm_stopped","message":"linux-4 is stopped","hint":"station machines start linux-4"}}]},
+{"request":{"watch":"disk.read","in":{},"target":{"name":"linux-5"}},"answers":[{"v":2,"error":{"type":"refused","code":"vm_stopped","message":"linux-5 is stopped","hint":"station machines start linux-5"}}]}
+]}

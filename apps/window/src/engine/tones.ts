@@ -121,7 +121,6 @@ export const MAC_STATE_TONES: Tones<MacState> = {
 
 export const VM_STATE_TONES: Tones<VmState> = {
     broken: 'bad',
-    creating: 'new',
     running: 'ok',
     stale: 'warn',
     stopped: 'plain',

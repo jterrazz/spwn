@@ -1,0 +1,5 @@
+{"world": "creating", "station": "dev", "exchanges": [
+{"request":{"call":"machinefile.explain","in":{}},"answers":[{"v":2,"error":{"type":"not-found","code":"machinefile.not-found","subject":"jterrazz-macbook-pro","detail":{"by":""},"message":"no Machinefile named jterrazz-macbook-pro","hint":"give this machine one: station init --machinefile <name>"}}]},
+{"request":{"call":"machinefile.explain","in":{},"target":{"name":"linux-4"}},"answers":[{"v":2,"error":{"type":"refused","code":"vm_stopped","message":"linux-4 is stopped","hint":"station machines start linux-4"}}]},
+{"request":{"call":"machinefile.explain","in":{},"target":{"name":"linux-5"}},"answers":[{"v":2,"error":{"type":"refused","code":"vm_stopped","message":"linux-5 is stopped","hint":"station machines start linux-5"}}]}
+]}

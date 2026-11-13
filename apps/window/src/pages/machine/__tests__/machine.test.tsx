@@ -5,6 +5,7 @@ import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 
 const recordingFor = await recordingsOf(
+    'creating',
     'machinefile-differs',
     'machinefile-kept',
     'stories',
@@ -16,6 +17,37 @@ function overviewOver(world: string, machine = 'jterrazz-macbook-pro') {
 }
 
 describe('machine', () => {
+    test('a machine being created reads Creating, then its step, its position and how many there are', async () => {
+        // Given - This Mac's Overview over creating, linux-4 booting and linux-5 building its image
+        const result = await component.render(overviewOver('creating'), async (visitor) => {
+            // When - its machines have been read
+            await visitor.see(content('linux-5'));
+        });
+
+        // Then - each row says the engine's word and its birth's numbers, no state of the window's own
+        expect(result.content.text).toContain('Creating · image 1 of 5');
+        expect(result.content.text).toContain('Creating · boot 2 of 4');
+        await expect(result.tree).toMatch(file('./__expected__/creating-mac-overview.aria.yaml'));
+    });
+
+    test('the machine being created heads its Overview with its step, and says what it is for', async () => {
+        // Given - linux-5's Overview over creating, its image being built
+        const result = await component.render(
+            overviewOver('creating', 'linux-5'),
+            async (visitor) => {
+                // When - its overview has been read
+                await visitor.see(content('Why it exists'));
+
+                // Then - the head's line is its birth
+                await visitor.see(content('Creating · image 1 of 5'));
+            },
+        );
+
+        // Then - the purpose and the creator are the engine's
+        expect(result.content.text).toContain('Lot shell, one block per package');
+        expect(result.content.text).toContain('by studio-os-fe');
+    });
+
     test("a Mac that holds its file and one whose file asks more each say the engine's verdict of the file it follows", async () => {
         // Given - This Mac's Overview over machinefile-kept, then over machinefile-differs
         const kept = await component.render(overviewOver('machinefile-kept'), async (visitor) => {
