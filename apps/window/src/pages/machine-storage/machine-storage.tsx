@@ -11,7 +11,7 @@ import { Page } from '../page';
 
 import styles from './machine-storage.module.css';
 
-const FOOT = "Data is never freed here. Erasing an app's data is asked for by its name.";
+const FOOT = "Data and settings are never freed here. Erasing an app's data is asked for by name.";
 
 type Go = (to: Route) => void;
 

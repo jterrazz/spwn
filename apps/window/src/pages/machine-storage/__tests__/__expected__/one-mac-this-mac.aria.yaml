@@ -17,4 +17,4 @@
   - region "By app":
     - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
     - paragraph: Nothing listed on jterrazz-macbook-pro.
-    - paragraph: Data is never freed here. Erasing an app's data is asked for by its name.
+    - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.

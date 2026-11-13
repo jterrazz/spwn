@@ -71,4 +71,4 @@
     - text: ollama ~/.ollama/models data 1.9 GB
     - button "Erase… ollama": Erase…
     - text: gpg ~/.gnupg never touched 200 KB ssh ~/.ssh never touched 100 KB
-    - paragraph: Data is never freed here. Erasing an app's data is asked for by its name.
+    - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.
