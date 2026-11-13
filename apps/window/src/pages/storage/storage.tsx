@@ -5,10 +5,11 @@ import { Button, identityOf, MachineIcon, Panel, Row, Switch } from '../../desig
 import { diskGestureOf, machineKindOf } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
-import { day, sentence } from '../../model/format';
+import { sentence } from '../../model/format';
 import { resourcesOf, targetOf } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
+import { shortDay } from '../activity/when';
 import { Freed, useFreeAll } from '../disk/disk-gestures';
 import { DiskPanel, groupOf, GroupPanel } from '../disk/disk-view';
 import { HeldOutcomes } from '../kit/gestures';
@@ -54,7 +55,7 @@ function DiskOf({ disk, mac, target }: DiskOfMacProps) {
 function imageSentence(image: ImagesReport): string {
     const made = (image.VMs ?? []).length;
     return sentence([
-        `built ${day(image.Record.built_at) ?? image.Record.built_at}`,
+        `built ${shortDay(image.Record.built_at) ?? image.Record.built_at}`,
         `${image.Record.size_gb} GB`,
         made === 0
             ? 'no machine made from it'

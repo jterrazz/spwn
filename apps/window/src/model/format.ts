@@ -101,10 +101,3 @@ export function clock(at: Date | string | undefined): string | undefined {
     const date = dateOf(at);
     return date ? `${two(date.getHours())}:${two(date.getMinutes())}` : undefined;
 }
-
-export function day(at: Date | string | undefined): string | undefined {
-    const date = dateOf(at);
-    return date
-        ? `${String(date.getFullYear())}-${two(date.getMonth() + 1)}-${two(date.getDate())}`
-        : undefined;
-}
