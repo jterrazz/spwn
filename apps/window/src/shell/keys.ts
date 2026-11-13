@@ -5,7 +5,7 @@ import { focusablesIn, moveFocus, moveOfKey } from '../design/focus';
 import { aDialogIsOpen } from '../design/index';
 import { machineRoute } from './route';
 import type { Router } from './router';
-import { shortcutOf } from './shortcut';
+import { mouseShortcutOf, shortcutOf } from './shortcut';
 import type { Shortcut } from './shortcut';
 
 function obey(shortcut: Shortcut, router: Router, onFind: () => void): void {
@@ -52,9 +52,21 @@ export function useShortcuts(router: Router, onFind: () => void, withGallery: bo
                 obey(shortcut, router, onFind);
             }
         };
+        const onMouse = (event: MouseEvent) => {
+            const shortcut = mouseShortcutOf(event.button);
+            if (shortcut === undefined) {
+                return;
+            }
+            event.preventDefault();
+            if (!aDialogIsOpen()) {
+                obey(shortcut, router, onFind);
+            }
+        };
         globalThis.addEventListener('keydown', onKey);
+        globalThis.addEventListener('mouseup', onMouse);
         return () => {
             globalThis.removeEventListener('keydown', onKey);
+            globalThis.removeEventListener('mouseup', onMouse);
         };
     }, [router, onFind, withGallery]);
 }

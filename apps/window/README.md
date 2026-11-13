@@ -218,7 +218,7 @@ The shortcuts are `src/shell/keys.ts` over `src/shell/shortcut.ts`, ⌘ or Ctrl 
 | Keys        | Does                                                                                                                                                                     |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | ⌘K          | Find: machines, pages, a machine's tabs, packages and needs the window already holds; its first row as drawn is chosen, and a machine's tabs come in the tab bar's order |
-| ⌘[ and ⌘]   | Back and forward, as the toolbar's two buttons do                                                                                                                        |
+| ⌘[ and ⌘]   | Back and forward, as the toolbar's two buttons and a mouse's back and forward buttons do                                                                                 |
 | ⌘0          | Home                                                                                                                                                                     |
 | ⌘1 to ⌘7    | A machine's tab, in the tab bar's order                                                                                                                                  |
 | Arrows      | The sidebar's rows up and down, a tab bar's tabs sideways, Find's results; a tab bar is one Tab stop, its chosen tab                                                     |

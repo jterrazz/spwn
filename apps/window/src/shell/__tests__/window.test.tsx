@@ -250,6 +250,24 @@ describe('Window', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test("the mouse's back and forward buttons walk the history", async () => {
+        // Given - the window on Home over two-macs, This Mac opened
+        const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
+            await visitor.click(within(sidebar, button('jterrazz-macbook-pro online')));
+            await visitor.see(heading('jterrazz-macbook-pro Online'));
+
+            // When - the mouse's back button is released, then its forward button
+            globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 3 }));
+            await visitor.see(content('npm sign-in expired'));
+            globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 4 }));
+
+            // Then - the window is on This Mac again
+            await visitor.see(heading('jterrazz-macbook-pro Online'));
+            await visitor.see(disabled(forward));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test('a route to a machine the engine no longer lists lands on Home with one line saying so', async () => {
         // Given - the window reopened on a machine two-macs does not hold
         const result = await component.render(

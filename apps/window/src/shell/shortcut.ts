@@ -12,6 +12,12 @@ const COMMANDS: Readonly<Record<string, 'back' | 'find' | 'forward' | 'home'>> =
     k: 'find',
 };
 
+const MOUSE_BUTTONS: Readonly<Record<number, 'back' | 'forward'>> = { 3: 'back', 4: 'forward' };
+
+export function mouseShortcutOf(button: number): 'back' | 'forward' | undefined {
+    return MOUSE_BUTTONS[button];
+}
+
 export function shortcutOf(stroke: Keystroke, withGallery: boolean): Shortcut | undefined {
     if (!stroke.metaKey && !stroke.ctrlKey) {
         return undefined;

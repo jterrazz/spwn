@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { shortcutOf } from '../shortcut';
+import { mouseShortcutOf, shortcutOf } from '../shortcut';
 import type { Keystroke } from '../shortcut';
 
 const bare: Keystroke = { ctrlKey: false, key: '', metaKey: false, shiftKey: false };
 
-describe('shortcutOf', () => {
+describe('shortcut', () => {
     test.each([
         { expected: 'back', stroke: { ...bare, key: '[', metaKey: true } },
         { expected: 'home', stroke: { ...bare, key: '0', metaKey: true } },
@@ -24,6 +24,14 @@ describe('shortcutOf', () => {
 
         // Then - the command it names, or none without a command key
         expect(shortcut).toBe(expected);
+    });
+
+    test("a mouse's back and forward buttons are back and forward, and no other button is", () => {
+        // Given - the buttons a mouse reports: main, middle, secondary, back, forward
+        const read = [0, 1, 2, 3, 4].map((pressed) => mouseShortcutOf(pressed));
+
+        // Then - only the fourth and fifth name a command
+        expect(read).toStrictEqual([undefined, undefined, undefined, 'back', 'forward']);
     });
 
     test('a window without the gallery has no gallery shortcut', () => {
