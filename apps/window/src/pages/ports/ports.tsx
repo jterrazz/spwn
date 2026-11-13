@@ -1,6 +1,6 @@
 import type { PortsPort, Target } from '@jterrazz/station-api';
 
-import { Chip, Panel, Row, StatePill } from '../../design/index';
+import { Panel, Row, StatePill, Value } from '../../design/index';
 import { isPortShared } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
 import { portReach } from '../../engine/shown';
@@ -38,7 +38,7 @@ function ShareableRow({ port, vm, target }: ShareableProps) {
     return (
         <GestureRow
             gesture={share}
-            lead={<Chip>{`:${port.Port}`}</Chip>}
+            lead={<Value look="raised">{`:${port.Port}`}</Value>}
             leadSize="value"
             sentence={aboutPort(port)}
             title={port.Process === '' ? 'process not given yet' : port.Process}
@@ -61,7 +61,7 @@ function ShareableRow({ port, vm, target }: ShareableProps) {
 function MacPortRow({ port }: { port: PortsPort }) {
     return (
         <Row
-            lead={<Chip>{`:${port.Port}`}</Chip>}
+            lead={<Value look="raised">{`:${port.Port}`}</Value>}
             leadSize="value"
             sentence={aboutPort(port)}
             title={port.Process === '' ? 'process not given yet' : port.Process}

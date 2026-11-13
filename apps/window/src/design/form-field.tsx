@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-import styles from './field.module.css';
+import styles from './form-field.module.css';
 
 export type FormFieldProps = {
     label: string;

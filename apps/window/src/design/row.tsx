@@ -1,9 +1,9 @@
 import type { MouseEvent, ReactNode } from 'react';
 
 import type { Tone } from '../tone';
-import { Chip } from './chip';
 import { StatePill } from './state-pill';
 import { TypeTag } from './type-tag';
+import { Value } from './value';
 
 import styles from './row.module.css';
 
@@ -123,7 +123,7 @@ function Name({ title, tag, sentence }: NameProps) {
             ) : (
                 <span className={styles.tagged}>
                     {titled}
-                    <Chip>{tag}</Chip>
+                    <Value look="raised">{tag}</Value>
                 </span>
             )}
             {sentence === undefined || sentence === null || sentence === '' ? null : (

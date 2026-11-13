@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import {
     Button,
-    Field,
     IconButton,
     Screen,
     StatePill,
@@ -44,8 +43,8 @@ export function Tags() {
             <Value>24.11.1</Value>
             <Value>:3000</Value>
             <Value>~/.claude/settings.json</Value>
-            <Field>36</Field>
-            <Field>vault:claude</Field>
+            <Value look="raised">24.11.1</Value>
+            <Value look="boxed">vault:claude</Value>
         </Section>
     );
 }

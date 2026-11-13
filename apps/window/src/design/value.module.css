@@ -1,18 +1,18 @@
-.chip {
+.value {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: var(--space-6);
+    min-width: 0;
     max-width: 100%;
     font-family: var(--font-mono);
     font-size: var(--text-label);
     color: var(--t2);
+    white-space: pre;
+}
+.raised {
     background: var(--raise);
     border-radius: var(--radius-icon);
     padding: 1px var(--space-6);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: none;
 }
 .boxed {
     color: var(--t1);
@@ -24,7 +24,24 @@
 .square {
     width: 7px;
     height: 7px;
+    margin-right: var(--space-6);
     border-radius: var(--radius-tick);
     background: var(--c);
+    flex: none;
+}
+.whole {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+.start {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.finish {
     flex: none;
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { Caption, Chip, SearchField, Switch } from '../../design/index';
+import { Caption, SearchField, Switch, Value } from '../../design/index';
 import { categoriesOf, countIn, EVERY_CATEGORY, matches } from './model';
 import type { Package } from './model';
 import { categoryWord } from './shelves';
@@ -65,7 +65,7 @@ function Group<T>({
     return (
         <div className={styles.group}>
             <Caption>
-                <Chip>{categoryWord(category)}</Chip>
+                <Value look="raised">{categoryWord(category)}</Value>
                 <span>{rows.length}</span>
             </Caption>
             {rows.map(renderRow)}

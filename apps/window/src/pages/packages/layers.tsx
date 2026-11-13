@@ -1,4 +1,4 @@
-import { AppIcon, Caption, Chip, DotStrip, StatePill, TypeTag } from '../../design/index';
+import { AppIcon, Caption, DotStrip, StatePill, TypeTag, Value } from '../../design/index';
 import type { PlanLine } from '../../engine/provisional';
 import { CONDITION_TONES } from '../../engine/tones';
 import { ANY_VERSION_WORD, CATALOG_KIND_WORDS, CONDITION_WORDS } from '../../engine/words';
@@ -41,7 +41,7 @@ function MachineLine({ line, differs }: { line: PlanLine; differs: boolean }) {
                         word={CONDITION_WORDS[Seen.Condition]}
                     />
                 ) : Seen.Version === '' ? null : (
-                    <Chip>{Seen.Version}</Chip>
+                    <Value look="raised">{Seen.Version}</Value>
                 )}
             </span>
             <span />
@@ -55,9 +55,9 @@ function FileLine({ line, description }: { line: PlanLine; description: string }
             <Name kinded line={line} />
             <span className={styles.description}>{description}</span>
             <span className={styles.end}>
-                <Chip look="boxed">
+                <Value look="boxed">
                     {line.Step.Version === '' ? ANY_VERSION_WORD : line.Step.Version}
-                </Chip>
+                </Value>
             </span>
         </div>
     );
@@ -66,7 +66,9 @@ function FileLine({ line, description }: { line: PlanLine; description: string }
 function LayerHead({ layer, shelf, dots }: { layer: Layer; shelf: Shelf; dots: boolean }) {
     return (
         <Caption>
-            <Chip identity={layer.identity}>{layer.name === '' ? NO_LAYER_WORD : layer.name}</Chip>
+            <Value identity={layer.identity} look="raised">
+                {layer.name === '' ? NO_LAYER_WORD : layer.name}
+            </Value>
             <span>{countWord(layer.lines.length, shelf)}</span>
             {dots ? (
                 <DotStrip

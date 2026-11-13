@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { Icon } from '../../design/icon';
-import { Chip, Facts, Missing, Panel, Switch } from '../../design/index';
+import { Facts, Missing, Panel, Switch, Value } from '../../design/index';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { machineKindWord } from '../../engine/shown';
@@ -103,7 +103,9 @@ function Extends({
                     }}
                     type="button"
                 >
-                    <Chip identity={extended.identity}>{extended.name}</Chip>
+                    <Value identity={extended.identity} look="raised">
+                        {extended.name}
+                    </Value>
                 </button>
             ))}
         </span>

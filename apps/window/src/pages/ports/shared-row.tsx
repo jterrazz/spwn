@@ -1,6 +1,6 @@
 import type { PortsSharedPort, Target } from '@jterrazz/station-api';
 
-import { Chip, TypeTag, Value } from '../../design/index';
+import { TypeTag, Value } from '../../design/index';
 import { shareToWord } from '../../engine/shown';
 import { SHARE_STATE_TONES } from '../../engine/tones';
 import { SHARE_STATE_WORDS } from '../../engine/words';
@@ -37,7 +37,7 @@ export function SharedRow({
     );
     const row = {
         gesture: stop,
-        lead: <Chip>{`:${share.guest_port}`}</Chip>,
+        lead: <Value look="raised">{`:${share.guest_port}`}</Value>,
         leadSize: 'value',
         state: { tone: SHARE_STATE_TONES[share.state], word: SHARE_STATE_WORDS[share.state] },
         title: label === '' ? share.process : label,

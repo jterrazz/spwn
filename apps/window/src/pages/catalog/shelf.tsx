@@ -1,6 +1,6 @@
 import type { AppsReport, SettingsMatrixRow, SettingsRow } from '@jterrazz/station-api';
 
-import { AppIcon, Chip, Row } from '../../design/index';
+import { AppIcon, Row, Value } from '../../design/index';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { appUpdate } from '../../engine/shown';
@@ -38,7 +38,7 @@ function AppRow({ report }: { report: AppsReport }) {
             }
             template="catalog"
             title={App.Name}
-            value={report.Version === '' ? null : <Chip>{report.Version}</Chip>}
+            value={report.Version === '' ? null : <Value look="raised">{report.Version}</Value>}
         />
     );
 }
