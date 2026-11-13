@@ -41,6 +41,7 @@ func ToWire(err error, word Wording) *WireError {
 	}
 	if f.Fix.Call != "" || f.Fix.Command != "" || f.Fix.Path != "" || len(f.Fix.Args) > 0 {
 		fix := f.Fix
+		fix.Call, fix.Command, fix.Path, fix.Args = secret.Kept(fix.Call), secret.Kept(fix.Command), secret.Kept(fix.Path), screenedAll(fix.Args)
 		w.Fix = &fix
 	}
 	return w
