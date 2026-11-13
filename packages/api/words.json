@@ -124,6 +124,16 @@
       "Tone": "new"
     }
   },
+  "MachinesFit": {
+    "fits": {
+      "Word": "fits",
+      "Tone": "plain"
+    },
+    "no-room": {
+      "Word": "no room",
+      "Tone": "plain"
+    }
+  },
   "MachinesLifetime": {
     "always-on": {
       "Word": "always on",
@@ -137,6 +147,38 @@
     "persistent": {
       "Word": "persistent",
       "Detail": "Stays until you delete it",
+      "Tone": "plain"
+    }
+  },
+  "MachinesPreset": {
+    "gate": {
+      "Word": "gate",
+      "Tone": "plain"
+    },
+    "small": {
+      "Word": "small",
+      "Tone": "plain"
+    },
+    "workspace": {
+      "Word": "workspace",
+      "Tone": "plain"
+    }
+  },
+  "MachinesRoomFor": {
+    "gate": {
+      "Word": "room for one more gate",
+      "Tone": "plain"
+    },
+    "none": {
+      "Word": "no room for another machine",
+      "Tone": "plain"
+    },
+    "small": {
+      "Word": "room for a small machine",
+      "Tone": "plain"
+    },
+    "workspace": {
+      "Word": "room for one more workspace",
       "Tone": "plain"
     }
   }

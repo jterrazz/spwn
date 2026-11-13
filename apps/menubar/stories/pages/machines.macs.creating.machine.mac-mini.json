@@ -2502,21 +2502,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 16 GB free on mac-mini"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 16,
                 "limit_note": "Over 16 GB would squeeze mac-mini"
@@ -2737,21 +2731,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 16 GB free on mac-mini"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 16,
                 "limit_note": "Over 16 GB would squeeze mac-mini"
@@ -2961,21 +2949,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 28 GB free on This Mac"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
@@ -3201,21 +3183,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 28 GB free on This Mac"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
@@ -3432,21 +3408,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 28 GB free on This Mac"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
@@ -3603,21 +3573,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 28 GB free on This Mac"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
@@ -3772,21 +3736,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 16 GB free on mac-mini"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 16,
                 "limit_note": "Over 16 GB would squeeze mac-mini"
@@ -4007,21 +3965,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 16 GB free on mac-mini"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 16,
                 "limit_note": "Over 16 GB would squeeze mac-mini"
@@ -4230,21 +4182,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 16 GB free on mac-mini"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 16,
                 "limit_note": "Over 16 GB would squeeze mac-mini"
@@ -4406,21 +4352,15 @@
                     "label": "8 GB"
                   },
                   {
-                    "value": "17179869184",
-                    "label": "16 GB"
-                  },
-                  {
-                    "value": "34359738368",
-                    "label": "32 GB",
-                    "disabled": "only 16 GB free on mac-mini"
+                    "value": "12884901888",
+                    "label": "12 GB"
                   }
                 ],
                 "default": "8589934592",
                 "stops": [
                   4,
                   8,
-                  16,
-                  32
+                  12
                 ],
                 "limit": 16,
                 "limit_note": "Over 16 GB would squeeze mac-mini"

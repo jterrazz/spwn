@@ -106,3 +106,81 @@ func TestEachMacThatSaidItsMemoryHasItsRoom(t *testing.T) {
 		}
 	}
 }
+
+func TestEachPresetIsJudgedByFitsAndTheRoomSaysTheLargestThatFits(t *testing.T) {
+	for _, c := range []struct {
+		free int64
+		fits []Fit
+		room RoomFor
+	}{
+		{12 * gb, []Fit{FitsIn, FitsIn, FitsIn}, RoomForGate},
+		{8 * gb, []Fit{FitsIn, FitsIn, NoRoom}, RoomForWorkspace},
+		{8*gb - 1, []Fit{FitsIn, NoRoom, NoRoom}, RoomForSmall},
+		{3 * gb, []Fit{NoRoom, NoRoom, NoRoom}, RoomForNone},
+	} {
+		r := RoomOf("mac-mini", Capacity{Total: 64 * gb, MacOS: KeptForMacOS, Free: c.free})
+		if len(r.Presets) != len(Presets()) {
+			t.Fatalf("%d bytes free: presets %+v, want one per preset", c.free, r.Presets)
+		}
+		for i, p := range r.Presets {
+			if p.Preset != Presets()[i] || p.MemoryBytes != p.Preset.MemoryBytes() || p.Fit != c.fits[i] {
+				t.Errorf("%d bytes free: %+v, want %s judged %s", c.free, p, Presets()[i], c.fits[i])
+			}
+		}
+		if r.RoomFor != c.room {
+			t.Errorf("%d bytes free: room for %q, want %q", c.free, r.RoomFor, c.room)
+		}
+	}
+}
+
+func TestThePresetsAreFourEightAndTwelveGigabytes(t *testing.T) {
+	want := map[Preset]int64{PresetSmall: 4 << 30, PresetWorkspace: 8 << 30, PresetGate: 12 << 30}
+	for _, p := range Presets() {
+		if p.MemoryBytes() != want[p] {
+			t.Errorf("%s: %d bytes, want %d", p, p.MemoryBytes(), want[p])
+		}
+	}
+	if MinMemoryBytes != 2<<30 {
+		t.Errorf("the least memory a VM is made with is %d bytes, want 2 GiB", MinMemoryBytes)
+	}
+}
+
+func TestTheRoomiestMacIsOneThatTakesAVM(t *testing.T) {
+	this := MacView{Name: "macbook-pro", ThisMac: true, Reachable: true, Hardware: machine.Hardware{Memory: 16 * gb}}
+	full := MacView{Name: "macbook-pro", ThisMac: true, Reachable: true, Hardware: machine.Hardware{Memory: 16 * gb}, VMs: []VM{sized(VM{Name: "big", State: Running}, 10*gb+gb/2)}}
+	asleep := mini()
+	asleep.Asleep = true
+	for _, c := range []struct {
+		name string
+		f    AllMachines
+		want string
+	}{
+		{"a Mac with less than the least memory a VM takes free", AllMachines{Macs: []MacView{full}}, ""},
+		{"an asleep Mac, however roomy", AllMachines{Macs: []MacView{this, asleep}}, "macbook-pro"},
+	} {
+		if got := Roomiest(c.f); got != c.want {
+			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+}
+
+func TestANewVMIsOfferedOnTheMacAskedThenTheRoomiestThenThisMac(t *testing.T) {
+	this := MacView{Name: "macbook-pro", ThisMac: true, Reachable: true, Hardware: machine.Hardware{Memory: 16 * gb}}
+	silent := MacView{Name: "mac-studio", Hardware: machine.Hardware{Memory: 128 * gb}}
+	full := MacView{Name: "macbook-pro", ThisMac: true, Reachable: true, Hardware: machine.Hardware{Memory: 4 * gb}}
+	for _, c := range []struct {
+		name  string
+		f     AllMachines
+		asked string
+		want  string
+	}{
+		{"the Mac asked for, though another is roomier", AllMachines{Macs: []MacView{this, mini()}}, "macbook-pro", "macbook-pro"},
+		{"the roomiest, when the Mac asked for is silent", AllMachines{Macs: []MacView{this, mini(), silent}}, "mac-studio", "mac-mini"},
+		{"the roomiest, when none is asked for", AllMachines{Macs: []MacView{this, mini()}}, "", "mac-mini"},
+		{"This Mac, when no Mac takes a VM", AllMachines{Macs: []MacView{full, silent}}, "", "macbook-pro"},
+	} {
+		if got := Preselected(c.f, c.asked); got != c.want {
+			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+}

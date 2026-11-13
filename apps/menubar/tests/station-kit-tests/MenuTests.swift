@@ -63,7 +63,7 @@ final class MenuTests: XCTestCase {
         XCTAssertEqual(read["menu.context.workspace"], ["linux-1 on This Mac", "Open ↩", "Open in Terminal ⌘↩", "Open Vite", "-",
                                                         "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…, An account…]", "-",
                                                         "Stop…", "-", "Delete… (red)"])
-        XCTAssertEqual(read["menu.new-vm.on"], ["This Mac · 28 GB free", "✓ mac-mini · 24 GB free", "macbook-air · asleep (off)"])
+        XCTAssertEqual(read["menu.new-vm.on"], ["This Mac · 28 GB free", "✓ mac-mini · 8 GB free", "macbook-air · asleep (off)"])
         XCTAssertEqual(read["menu.new-vm.create"], ["Create ↩", "Create and Open in Terminal ⌥↩"])
         let workspaces = ["✓ linux-1 · on This Mac", "agent-7f · on This Mac", "linux-3 · on mac-mini", "review-bot · on mac-mini"]
         XCTAssertEqual(read["menu.lend.to"], workspaces)
@@ -148,7 +148,7 @@ final class MenuTests: XCTestCase {
             XCTAssertEqual(shown[story.id]?.map { $0.replacingOccurrences(of: " (icon)", with: "") }, Self.read(drawn), story.id)
         }
         XCTAssertEqual(shown["menu.page.mac"]?.map { $0.replacingOccurrences(of: " (icon)", with: "") }, ["mac-mini", "Open in Terminal ⌘T", "-", "Restart…", "Stop everything… (red)", "-", "Forget… (red)"])
-        XCTAssertEqual(shown["menu.new-vm.on"], ["This Mac · 28 GB free", "✓ mac-mini · 24 GB free", "macbook-air · asleep (off)"])
+        XCTAssertEqual(shown["menu.new-vm.on"], ["This Mac · 28 GB free", "✓ mac-mini · 8 GB free", "macbook-air · asleep (off)"])
         XCTAssertEqual(shown["menu.new-vm.create"], ["Create ↩ (icon)", "Create and Open in Terminal ⌥↩ (icon)"])
     }
 

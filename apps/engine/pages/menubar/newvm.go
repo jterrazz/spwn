@@ -23,8 +23,14 @@ const (
 	soon                                  = "Ready in about a minute."
 )
 
-// value: the memory a new VM may ask, in GB, on the slider's log scale.
-func memoryStops() []int { return []int{4, 8, 16, 32} }
+// value: the memory a new VM may ask, in GB: the presets.
+func memoryStops() []int {
+	out := make([]int, 0, len(model.Presets()))
+	for _, p := range model.Presets() {
+		out = append(out, int(p.MemoryBytes()>>30))
+	}
+	return out
+}
 
 // invariant: SPEC A5 New VM: the engine builds the sheet whole, one form
 // per Mac and per kind, so every word it says (the memory a Mac has free,
@@ -122,7 +128,7 @@ func (s vmSheet) memory(h model.MacView, key string) page.Field {
 	name := model.Label(s.all, h)
 	_, room, known := free(h)
 	gb := int(room >> 30)
-	f := page.Field{Key: key, Label: "Memory", Kind: page.FieldSlider, Stops: memoryStops(), Default: gigabytes(8)}
+	f := page.Field{Key: key, Label: "Memory", Kind: page.FieldSlider, Stops: memoryStops(), Default: gigabytes(model.PresetWorkspace.MemoryBytes() >> 30)}
 	if known {
 		f.Limit, f.LimitNote = gb, "Over "+strconv.Itoa(gb)+" GB would squeeze "+name
 	}

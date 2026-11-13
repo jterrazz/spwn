@@ -44,14 +44,23 @@ final class NewVMSheetTests: XCTestCase {
     }
 
     // invariant: SPEC A9 1-8: the hatch starts where the Mac's free memory
-    // truly falls on the log scale, and a stop past it is refused.
+    // truly falls on the log scale of the presets, and a stop past it is refused.
     func testTheMemoryPastWhatTheMacHasFreeIsHatchedAndRefused() throws {
+        let (_, tight) = try sheet("new-vm:mac-mini")
+        let memory = try XCTUnwrap(tight.field("Request.Size.MemoryBytes"))
+        XCTAssertEqual(memory.stops, [4, 8, 12])
+        XCTAssertEqual(memory.limit_note, "Over 8 GB would squeeze mac-mini")
+        XCTAssertEqual(MemorySlider.share(8, stops: [4, 8, 12]), log2(2.0) / log2(3.0), accuracy: 1e-9)
+        XCTAssertEqual(MemorySlider.share(Double(memory.limit ?? 0), stops: memory.stops ?? []), log2(2.0) / log2(3.0), accuracy: 1e-9)
+        XCTAssertEqual(memory.options?.filter { $0.disabled != nil }.compactMap(\.label), ["12 GB"])
+    }
+
+    func testAMacWithRoomForTheLargestPresetHatchesAndRefusesNothing() throws {
         let (_, answers) = try sheet()
         let memory = try XCTUnwrap(answers.field("Request.Size.MemoryBytes"))
         XCTAssertEqual(memory.limit_note, "Over 28 GB would squeeze This Mac")
-        XCTAssertEqual(MemorySlider.share(8, stops: [4, 8, 16, 32]), 1.0 / 3, accuracy: 1e-9)
-        XCTAssertEqual(MemorySlider.share(Double(memory.limit ?? 0), stops: memory.stops ?? []), log2(28.0 / 4) / 3, accuracy: 1e-9)
-        XCTAssertEqual(memory.options?.filter { $0.disabled != nil }.compactMap(\.label), ["32 GB"])
+        XCTAssertEqual(MemorySlider.share(Double(memory.limit ?? 0), stops: memory.stops ?? []), 1.0, accuracy: 1e-9)
+        XCTAssertEqual(memory.options?.filter { $0.disabled != nil }.count, 0)
     }
 
     func testOnAndKindOpenTheFormTheEngineBuiltForThatMacAndKind() throws {

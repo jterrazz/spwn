@@ -405,6 +405,35 @@
       ],
       "type": "object"
     },
+    "machines.PresetOn": {
+      "additionalProperties": false,
+      "properties": {
+        "Fit": {
+          "enum": [
+            "fits",
+            "no-room"
+          ],
+          "type": "string"
+        },
+        "MemoryBytes": {
+          "type": "integer"
+        },
+        "Preset": {
+          "enum": [
+            "small",
+            "workspace",
+            "gate"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Fit",
+        "MemoryBytes",
+        "Preset"
+      ],
+      "type": "object"
+    },
     "machines.Resources": {
       "additionalProperties": false,
       "properties": {
@@ -479,11 +508,31 @@
         },
         "Mac": {
           "type": "string"
+        },
+        "Presets": {
+          "items": {
+            "$ref": "#/$defs/machines.PresetOn"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "RoomFor": {
+          "enum": [
+            "small",
+            "workspace",
+            "gate",
+            "none"
+          ],
+          "type": "string"
         }
       },
       "required": [
         "Capacity",
-        "Mac"
+        "Mac",
+        "Presets",
+        "RoomFor"
       ],
       "type": "object"
     },

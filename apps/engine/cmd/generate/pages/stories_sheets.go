@@ -7,7 +7,9 @@ import (
 
 // value: the sheets' worlds: home as its stories draw it, reading what
 // every Mac is signed in to (mac-mini to GitHub and Claude as the bot),
-// with linux-3's page over it; and the fleet of This Mac alone.
+// with linux-3's page over it and mac-mini down to 8 GB free, so its
+// sheet hatches and refuses the 12 GB preset; and the fleet of This Mac
+// alone.
 func sheetWorlds() []World {
 	sheet := func(name string, edits ...func(*Scene)) World {
 		return World{Name: name, Edit: func(f *Scene) {
@@ -21,9 +23,22 @@ func sheetWorlds() []World {
 	}
 	mini := sheet("machines.sheet")
 	mini.Pages = append(mini.Pages, "machine.linux-3")
+	edit := mini.Edit
+	mini.Edit = func(f *Scene) {
+		edit(f)
+		miniTight(f)
+	}
 	return []World{
 		mini,
 		sheet("machines.sheet.first", thisMacAlone),
+	}
+}
+
+func miniTight(f *Scene) {
+	for i, h := range f.All.Macs {
+		if h.Name == miniMac {
+			f.All.Macs[i].Hardware.Memory = 48 * gb
+		}
 	}
 }
 

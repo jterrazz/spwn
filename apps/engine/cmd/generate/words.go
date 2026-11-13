@@ -57,6 +57,21 @@ func wordedEnums() []worded {
 			string(machines.Persistent): {Word: machines.Persistent.Word(), Detail: "Stays until you delete it", Tone: verdict.Plain},
 			string(machines.AlwaysOn):   plain(machines.AlwaysOn.Word()),
 		}},
+		{machines.Preset(""), map[string]word{
+			string(machines.PresetSmall):     plain(machines.PresetSmall.Word()),
+			string(machines.PresetWorkspace): plain(machines.PresetWorkspace.Word()),
+			string(machines.PresetGate):      plain(machines.PresetGate.Word()),
+		}},
+		{machines.Fit(""), map[string]word{
+			string(machines.FitsIn): plain("fits"),
+			string(machines.NoRoom): plain("no room"),
+		}},
+		{machines.RoomFor(""), map[string]word{
+			string(machines.RoomForGate):      plain("room for one more " + machines.PresetGate.Word()),
+			string(machines.RoomForWorkspace): plain("room for one more " + machines.PresetWorkspace.Word()),
+			string(machines.RoomForSmall):     plain("room for a " + machines.PresetSmall.Word() + " machine"),
+			string(machines.RoomForNone):      plain("no room for another machine"),
+		}},
 		{machines.BirthStep(""), map[string]word{
 			string(machines.BornBuilding): {Word: machines.BornBuilding.Word(), Detail: machines.BornBuilding.Noun(), Tone: verdict.New},
 			string(machines.BornCloning):  {Word: machines.BornCloning.Word(), Detail: machines.BornCloning.Noun(), Tone: verdict.New},

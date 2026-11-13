@@ -23,7 +23,9 @@ type Reserved struct {
 }
 
 type Resources struct {
-	CPUs        int
+	CPUs int
+	// value: bytes, both: memory sized in binary units (GiB, as macOS and
+	// the hypervisor count RAM), disk in decimal ones (GB, base 1000).
 	MemoryBytes int64
 	DiskBytes   int64
 }

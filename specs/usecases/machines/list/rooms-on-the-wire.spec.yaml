@@ -1,11 +1,11 @@
-description: 'machines.list gives each Mac its room by name and the roomiest Mac, in bytes'
+description: 'machines.list gives each Mac its room by name, its presets judged, and the roomiest Mac, in bytes'
 env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {Roomiest, Rooms: [.Rooms[] | {Mac, Total: .Capacity.Total, Free: .Capacity.Free}]}'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {Roomiest, Rooms: [.Rooms[] | {Mac, Total: .Capacity.Total, Free: .Capacity.Free, Presets: [.Presets[] | "\(.Preset) \(.MemoryBytes) \(.Fit)"], RoomFor}]}'''
       stdin: |
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          {"Roomiest":"jterrazz-mac-mini","Rooms":[{"Mac":"jterrazz-macbook-pro","Total":17179869184,"Free":4294967296},{"Mac":"jterrazz-mac-mini","Total":68719476736,"Free":38654705664}]}
+          {"Roomiest":"jterrazz-mac-mini","Rooms":[{"Mac":"jterrazz-macbook-pro","Total":17179869184,"Free":4294967296,"Presets":["small 4294967296 fits","workspace 8589934592 no-room","gate 12884901888 no-room"],"RoomFor":"small"},{"Mac":"jterrazz-mac-mini","Total":68719476736,"Free":38654705664,"Presets":["small 4294967296 fits","workspace 8589934592 fits","gate 12884901888 fits"],"RoomFor":"gate"}]}

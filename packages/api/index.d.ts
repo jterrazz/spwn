@@ -1710,6 +1710,12 @@ export type MachinesNode = {
     Online: boolean;
 };
 
+export type MachinesPresetOn = {
+    Fit: 'fits' | 'no-room';
+    MemoryBytes: number;
+    Preset: 'small' | 'workspace' | 'gate';
+};
+
 export type MachinesReminded = {
     Already: boolean;
     Name: string;
@@ -1760,6 +1766,8 @@ export type MachinesRestarts = {
 export type MachinesRoom = {
     Capacity: MachinesCapacity;
     Mac: string;
+    Presets: MachinesPresetOn[] | null;
+    RoomFor: 'small' | 'workspace' | 'gate' | 'none';
 };
 
 export type MachinesSSHTarget = {
@@ -3155,7 +3163,13 @@ export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'thi
 
 export type MachinesBirthStep = 'building' | 'cloning' | 'booting' | 'address' | 'ssh';
 
+export type MachinesFit = 'fits' | 'no-room';
+
 export type MachinesLifetime = 'ephemeral' | 'persistent' | 'always-on';
+
+export type MachinesPreset = 'small' | 'workspace' | 'gate';
+
+export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
 export type StationWord = {
     Detail?: string;
@@ -3172,5 +3186,8 @@ export type StationWords = {
     MachinefileChapter: Record<MachinefileChapter, StationWord>;
     MachinefileLayer: Record<MachinefileLayer, StationWord>;
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
+    MachinesFit: Record<MachinesFit, StationWord>;
     MachinesLifetime: Record<MachinesLifetime, StationWord>;
+    MachinesPreset: Record<MachinesPreset, StationWord>;
+    MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
 };
