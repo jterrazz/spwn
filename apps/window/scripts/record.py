@@ -200,6 +200,9 @@ GESTURES = {
     "one-mac": [
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5"}, "Confirm": "yes"}},
     ],
+    "creating": [
+        {"call": "machines.delete", "in": {"VM": "linux-5", "Confirm": "linux-5"}},
+    ],
     "machinefile-differs": [
         {"call": "machinefile.apply", "in": {"Confirm": "yes"}},
         {"call": "machinefile.apply", "in": {"Confirm": "yes"}, **at("api")},

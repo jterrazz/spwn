@@ -23,7 +23,7 @@ import type { Route } from '../../../shell/route';
 import { Window } from '../../../shell/window';
 import { PAGES } from '../../registry';
 
-const recordingFor = await recordingsOf('engine-stopped', 'two-macs');
+const recordingFor = await recordingsOf('creating', 'engine-stopped', 'two-macs');
 
 const sidebar = navigation('Sidebar');
 
@@ -201,6 +201,31 @@ describe('gestures', () => {
             await visitor.see(region('Needs you'));
             await visitor.gone(gone);
         });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a delete of a machine being created shows the refusal the engine words and codes', async () => {
+        // Given - linux-5's page over creating, its image still being built
+        const result = await component.render(
+            machineOver('creating', 'linux-5'),
+            async (visitor) => {
+                await visitor.see(content('Creating · image 1 of 5'));
+
+                // When - its delete is confirmed by its name
+                await visitor.click(button('Delete linux-5…'));
+                const asked = dialog('Delete linux-5?');
+                await visitor.fill(within(asked, field('Type linux-5 to confirm')), 'linux-5');
+                await visitor.click(within(asked, button('Delete')));
+
+                // Then - the engine's message and its hint, no word of the window's own
+                await visitor.see(
+                    content('is being created on jterrazz-macbook-pro', { exact: false }),
+                );
+                await visitor.see(
+                    content('wait for its create to end, or interrupt it where it runs'),
+                );
+            },
+        );
         expect(result.errors.text).toBe('');
     });
 
