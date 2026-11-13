@@ -20,7 +20,7 @@
     - button "24 h"
   - region "CPU":
     - heading "CPU" [level=2]
-    - text: load 0 0 0 0%
+    - text: load 0 0%
     - paragraph: "Not given yet No chart: no bar of this window holds a sample of the engine."
   - region "Memory":
     - heading "Memory" [level=2]

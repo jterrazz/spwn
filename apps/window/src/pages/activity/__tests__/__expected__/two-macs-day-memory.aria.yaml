@@ -20,7 +20,7 @@
     - button "24 h" [pressed]
   - region "CPU":
     - heading "CPU" [level=2]
-    - text: 10 CPUs · load 2.8 3.1 2.9 34%
+    - text: 10 CPUs · load 2.8 34%
     - paragraph: "Not given yet No chart: no bar of this window holds a sample of the engine."
   - region "Memory":
     - heading "Memory" [level=2]

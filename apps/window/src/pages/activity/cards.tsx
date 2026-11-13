@@ -100,11 +100,12 @@ function Cpu(props: CardProps) {
     const { report } = props;
     const { sample } = report.last;
     const figure = cpuOf(report);
+    const [minute] = sample.load;
     return (
         <Card
             meta={sentence([
                 sample.cpus > 0 ? `${String(sample.cpus)} CPUs` : undefined,
-                sample.load.length > 0 ? `load ${sample.load.join(' ')}` : undefined,
+                minute === undefined ? undefined : `load ${String(minute)}`,
             ])}
             title="CPU"
         >
