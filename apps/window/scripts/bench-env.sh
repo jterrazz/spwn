@@ -20,6 +20,8 @@ export PATH=$HOME/go-sdk/go/bin:$PATH
 unset GOFLAGS GOENV GH_TOKEN GITHUB_TOKEN
 # invariant: Go's caches are this copy's own, under its artifacts folder: two copies building at once never write one
 # invariant: cache. A copy's first run seeds them from the shared bench's, hard-linked where the disk allows, else copied.
+# hazard: Go writes its module cache read-only and cp keeps the modes, so a copy's folder would refuse rm -rf: its own
+# hazard: directories are made writable, never the files, which are the bench's own under a hard link.
 go_caches=$window/.artifacts/go
 for cache in gomod gocache gopath; do
     if [ ! -d "$go_caches/$cache" ]; then
@@ -29,12 +31,14 @@ for cache in gomod gocache gopath; do
                 rm -rf "${go_caches:?}/$cache"
                 cp -a "$bench/$cache" "$go_caches/$cache"
             }
+            find "$go_caches/$cache" -type d ! -perm -u+w -exec chmod u+w {} +
         else
             mkdir -p "$go_caches/$cache"
         fi
     fi
 done
 export GOMODCACHE=$go_caches/gomod GOCACHE=$go_caches/gocache GOPATH=$go_caches/gopath GOTOOLCHAIN=local
+export GOFLAGS=-modcacherw
 export PLAYWRIGHT_BROWSERS_PATH=$bench/pw
 export npm_config_cache=$bench/npm-cache
 export CI=1
