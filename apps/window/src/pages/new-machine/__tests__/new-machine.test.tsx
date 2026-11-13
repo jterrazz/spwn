@@ -53,17 +53,20 @@ describe('New machine', () => {
             await visitor.click(within(sheet, button('Create')));
             await visitor.click(within(dialog('Create linux-1?'), button('Create')));
 
-            // Then - the sheet stays, with the engine's refusal, its hint, and the word of a refusal of no type
+            // Then - the sheet stays, with the engine's refusal naming the Mac, its hint, and the word of its type
             await visitor.see(
-                within(sheet, content('"linux-1" is taken (on This Mac)', { exact: false })),
+                within(
+                    sheet,
+                    content('"linux-1" is taken (on jterrazz-macbook-pro)', { exact: false }),
+                ),
             );
             await visitor.see(within(sheet, content('pick another name', { exact: false })));
-            await visitor.see(within(sheet, content('Error')));
+            await visitor.see(within(sheet, content('Refused')));
         });
         expect(result.errors.text).toBe('');
     });
 
-    test('more memory than this Mac has left is refused by the engine', async () => {
+    test('more memory than this Mac has left is refused by the engine, naming the Mac', async () => {
         // Given - the New machine sheet over two-macs
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
             await visitor.click(button('New machine'));
@@ -75,9 +78,17 @@ describe('New machine', () => {
             await visitor.click(within(sheet, button('Create')));
             await visitor.click(within(dialog('Create big?'), button('Create')));
 
-            // Then - the engine says what is left
+            // Then - the engine says what is left, and on which Mac
             await visitor.see(
-                within(sheet, content('64 GB asked, 4 GB left for VMs', { exact: false })),
+                within(
+                    sheet,
+                    content(
+                        'not enough memory on jterrazz-macbook-pro: 64 GB asked, 4 GB left for VMs',
+                        {
+                            exact: false,
+                        },
+                    ),
+                ),
             );
         });
         expect(result.errors.text).toBe('');
