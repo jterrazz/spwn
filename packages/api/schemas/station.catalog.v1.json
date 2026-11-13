@@ -959,7 +959,7 @@
       "type": "object"
     }
   },
-  "$id": "https://github.com/jterrazz/studio-station/blob/main/schemas/station.catalog.v1.json",
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/station.catalog.v1.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "description": "One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.",

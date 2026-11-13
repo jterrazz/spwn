@@ -30,7 +30,7 @@ It is read as strictly as an item:
 
 What needs the catalog or the files a Machinefile extends (an item, an option, a method for the system, `vm` on a computer) is judged by the resolution, never by the file alone.
 
-The JSON Schema an editor checks a file against, [`schemas/station.machinefile.v1.json`](../../schemas/station.machinefile.v1.json), is projected from the decoder's Go types by `make generate`, and a test fails when it drifts. It covers a Machinefile and its overlay alike; station alone checks which keys each may carry.
+The JSON Schema an editor checks a file against, [`packages/api/schemas/station.machinefile.v1.json`](../../packages/api/schemas/station.machinefile.v1.json), is projected from the decoder's Go types by `make generate`, and a test fails when it drifts. It covers a Machinefile and its overlay alike; station alone checks which keys each may carry.
 
 ## The keys
 

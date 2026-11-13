@@ -215,7 +215,7 @@
       "type": "object"
     }
   },
-  "$id": "https://github.com/jterrazz/studio-station/blob/main/schemas/station.machinefile.v1.json",
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/station.machinefile.v1.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "description": "One Machinefile: what a machine carries (machine, vm, extends, prefer, apps, settings, accounts, ports), or its overlay \u003cname\u003e.local.yaml (overrides). Written by make generate from apps/engine/catalog; station alone checks what needs the catalog. The format is docs/reference/machinefiles.md.",

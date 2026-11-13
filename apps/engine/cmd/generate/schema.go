@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	schemaPath            = "schemas/station.catalog.v1.json"
-	machinefileSchemaPath = "schemas/station.machinefile.v1.json"
+	schemaPath            = "packages/api/schemas/station.catalog.v1.json"
+	machinefileSchemaPath = "packages/api/schemas/station.machinefile.v1.json"
 )
 
 type enumerated interface{ Enum() []string }

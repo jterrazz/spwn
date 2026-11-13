@@ -48,7 +48,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | `@jterrazz` stack conventions                        | `docs/concepts/stack.md`            |
 | Repo doctrine (corpus/injection/compiler)            | `docs/concepts/repo-structure.md`   |
 
-The repo-structure doctrine is authored **here** and ships to agents as the `studio-repo-structure` skill. This repo is an application: it adopts the corpus + injection layers and generates no API reference. Its one compiler is `make generate` (`apps/engine/cmd/generate/`), which projects the catalog into the `studio-toolbelt` skill, `docs/reference/footprint.md` and the JSON Schemas `schemas/station.catalog.v1.json` and `schemas/station.machinefile.v1.json`, writes the page fixtures of `apps/engine/ui/testdata/pages/` and the story worlds' pages of `apps/menubar/stories/pages/` from the real page functions, and the Registry into `apps/engine/remote/api/calls.json`.
+The repo-structure doctrine is authored **here** and ships to agents as the `studio-repo-structure` skill. This repo is an application: it adopts the corpus + injection layers and generates no API reference. Its one compiler is `make generate` (`apps/engine/cmd/generate/`), which projects the catalog into the `studio-toolbelt` skill, `docs/reference/footprint.md` and the JSON Schemas `packages/api/schemas/station.catalog.v1.json` and `packages/api/schemas/station.machinefile.v1.json`, writes the page fixtures of `apps/engine/ui/testdata/pages/` and the story worlds' pages of `apps/menubar/stories/pages/` from the real page functions, and the Registry into `apps/engine/remote/api/calls.json`.
 
 ## Setup & commands
 
@@ -68,4 +68,4 @@ make provision  # put this build on the machine as the real station, then statio
 - **Add to the catalog, not to command code.** Which folder a change opens is the table in `docs/guides/develop.md`.
 - **Four things land in the same commit as the change that makes them true**: the `make generate` projection, the story that proves the behaviour, the page the behaviour falsified, and the skill a doctrine page feeds. Each is stated once, in `docs/guides/develop.md` § What a change owes.
 - **An allowlist of `specs/architecture/` only shrinks.** A change that would add a line to one stops and asks.
-- **Never edit a generated section by hand**: the blocks between the `GENERATED` markers of `skills/studio-toolbelt/SKILL.md` come from `make generate`, and `docs/reference/footprint.md`, the two `schemas/*.json` and `apps/engine/remote/api/calls.json` are generated whole.
+- **Never edit a generated section by hand**: the blocks between the `GENERATED` markers of `skills/studio-toolbelt/SKILL.md` come from `make generate`, and `docs/reference/footprint.md`, the two `packages/api/schemas/*.json` and `apps/engine/remote/api/calls.json` are generated whole.

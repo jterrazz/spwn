@@ -25,7 +25,7 @@ A file is read strictly, so a typo is a refusal with its line, never a silent de
 - no plain scalar that YAML 1.1 reads otherwise (`yes`, `on`, `0755`): write `true`, quote it, or `0o755`;
 - every enumerated value one of its list, every check of this page passed.
 
-The JSON Schema an editor checks a file against, [`schemas/station.catalog.v1.json`](../../schemas/station.catalog.v1.json), is projected from the decoder's Go types by `make generate`. It checks the keys, their types, the required ones and the enumerated values. Only station checks the rest: a key that belongs to another kind, a method's one manager key, an option's default against its type, a version range, an `${option.<name>}` reference, and what judges the catalog whole (a requirement that names no app, two managers of one method key), whose refusal names the file it is in.
+The JSON Schema an editor checks a file against, [`packages/api/schemas/station.catalog.v1.json`](../../packages/api/schemas/station.catalog.v1.json), is projected from the decoder's Go types by `make generate`. It checks the keys, their types, the required ones and the enumerated values. Only station checks the rest: a key that belongs to another kind, a method's one manager key, an option's default against its type, a version range, an `${option.<name>}` reference, and what judges the catalog whole (a requirement that names no app, two managers of one method key), whose refusal names the file it is in.
 
 The lists stand by category, in the categories' order (`Package Managers`, `Runtimes`, `Shell & Terminal`... for the apps; `Shell`, `Terminal`, `Security`... for the settings), then by name. A file has no order of its own.
 
