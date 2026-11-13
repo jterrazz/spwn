@@ -2,8 +2,10 @@ package jsonfile
 
 import (
 	"context"
+	"fmt"
 	"slices"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	"github.com/jterrazz/studio-station/apps/engine/ports/contract"
@@ -28,7 +30,7 @@ func NewReservations(files Files, file string) *Reservations {
 }
 
 func (r *Reservations) Get(_ context.Context, vm string, guestPort int) (ports.Reservation, error) {
-	all, err := r.list.load()
+	all, err := r.load()
 	if err != nil {
 		return ports.Reservation{}, err
 	}
@@ -39,7 +41,7 @@ func (r *Reservations) Get(_ context.Context, vm string, guestPort int) (ports.R
 }
 
 func (r *Reservations) Put(_ context.Context, res ports.Reservation) error {
-	all, err := r.list.load()
+	all, err := r.load()
 	if err != nil {
 		return err
 	}
@@ -48,7 +50,7 @@ func (r *Reservations) Put(_ context.Context, res ports.Reservation) error {
 }
 
 func (r *Reservations) List(context.Context) ([]ports.Reservation, error) {
-	all, err := r.list.load()
+	all, err := r.load()
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +59,7 @@ func (r *Reservations) List(context.Context) ([]ports.Reservation, error) {
 }
 
 func (r *Reservations) Delete(_ context.Context, vm string, guestPort int) error {
-	all, err := r.list.load()
+	all, err := r.load()
 	if err != nil {
 		return err
 	}
@@ -69,8 +71,23 @@ func (r *Reservations) Delete(_ context.Context, vm string, guestPort int) error
 }
 
 func (r *Reservations) Migrate(context.Context) error {
-	_, err := r.list.load()
+	_, err := r.load()
 	return store.OnlyNewer(err)
+}
+
+// invariant: a reservation's audience is one of catalog.Audience's, or
+// empty; a file holding any other is unreadable, never served.
+func (r *Reservations) load() ([]ports.Reservation, error) {
+	all, err := r.list.load()
+	if err != nil {
+		return nil, err
+	}
+	for _, x := range all {
+		if x.To != "" && !slices.Contains(catalog.Audience("").Enum(), string(x.To)) {
+			return nil, &store.UnreadableError{Path: r.list.path, Cause: fmt.Errorf("port %d of %s is shared to %q, not one of %v", x.GuestPort, x.VM, x.To, catalog.Audience("").Enum())}
+		}
+	}
+	return all, nil
 }
 
 func (r *Reservations) save(all []ports.Reservation) error {

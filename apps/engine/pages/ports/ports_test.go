@@ -85,9 +85,9 @@ func TestAListenerOutsideItsRightsReadsNotAllowed(t *testing.T) {
 // audience's: public for one open to the internet, private for the others,
 // and `to` names the audience itself.
 func TestASharedPortsClassFollowsItsAudience(t *testing.T) {
-	for to, class := range map[string]string{"public": "public", "private": "private", "local": "private"} {
+	for to, class := range map[catalog.Audience]string{"public": "public", "private": "private", "local": "private"} {
 		got := PortObject(ports.SharedPort{VM: "ws1", GuestPort: 3000, Reserved: 40000, To: to})
-		if got.Class != class || got.To != to {
+		if got.Class != class || got.To != string(to) {
 			t.Fatalf("to %q: class %q, to %q, want class %q", to, got.Class, got.To, class)
 		}
 	}

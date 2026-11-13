@@ -11,7 +11,7 @@ import (
 // value: a part of what a Machinefile puts on a machine, as drift counts
 // it: its apps (managers and the blocks of ~/.zshrc their methods write
 // included), its settings, the ports a VM shares and the accounts it is
-// lent.
+// given.
 
 type Chapter string
 
@@ -75,7 +75,28 @@ type Applying struct {
 	Sentence                      string
 }
 
-func DriftOf(p Plan) Drift {
+// value: what a VM's Mac holds of what its Machinefile gives it: each port
+// the VM shares, with the audience it is shared with against the one its
+// file opens it to ("" where the file does not open it, or it is not
+// shared), and each account, its copy there or not against shared by the
+// file or not.
+
+type Access struct {
+	Ports    []PortHeld
+	Accounts []AccountHeld
+}
+
+type PortHeld struct {
+	Port        int
+	Seen, Asked catalog.Audience
+}
+
+type AccountHeld struct {
+	Account     string
+	Seen, Asked bool
+}
+
+func DriftOf(p Plan, access *Access) Drift {
 	// invariant: Differences is the one count of a drift: every package
 	// that does not read present, every block of ~/.zshrc of a listed
 	// package that does not, and every extra and extra block; each counts
@@ -134,11 +155,77 @@ func DriftOf(p Plan) Drift {
 		}
 	}
 	d := Drift{Plan: p, Apply: apply.worded()}
-	for _, name := range []Chapter{ChapterApps, ChapterSettings} {
+	order := []Chapter{ChapterApps, ChapterSettings}
+	if access != nil {
+		chapters[ChapterPorts], chapters[ChapterAccounts] = access.ports(), access.accounts()
+		order = append(order, ChapterPorts, ChapterAccounts)
+	}
+	for _, name := range order {
 		d.Chapters = append(d.Chapters, chapters[name].worded())
 		d.Differences += len(chapters[name].Differing)
 	}
 	d.Verdict = Verdict(d.Differences, p.Name)
+	return d
+}
+
+// invariant: a port or an account the file gives counts as listed; one
+// held otherwise than the file asks differs: absent when the file gives it
+// and the Mac holds none, extra when the Mac holds what the file does not
+// give, changed when a port is shared with another audience.
+func (a Access) ports() *ChapterDrift {
+	c := &ChapterDrift{Chapter: ChapterPorts}
+	for _, h := range a.Ports {
+		if h.Asked != "" {
+			c.Listed++
+		}
+		if h.Seen == h.Asked {
+			if h.Asked != "" {
+				c.Matching++
+			}
+			continue
+		}
+		c.Differing = append(c.Differing, Differing{Port: h.Port, Condition: held(h.Seen != "", h.Asked != ""), Seen: string(h.Seen), Asked: string(h.Asked)})
+	}
+	return c
+}
+
+func (a Access) accounts() *ChapterDrift {
+	c := &ChapterDrift{Chapter: ChapterAccounts}
+	word := func(shared bool) string {
+		if shared {
+			return "shared"
+		}
+		return ""
+	}
+	for _, h := range a.Accounts {
+		if h.Asked {
+			c.Listed++
+		}
+		if h.Seen == h.Asked {
+			if h.Asked {
+				c.Matching++
+			}
+			continue
+		}
+		c.Differing = append(c.Differing, Differing{Account: h.Account, Condition: held(h.Seen, h.Asked), Seen: word(h.Seen), Asked: word(h.Asked)})
+	}
+	return c
+}
+
+func held(seen, asked bool) Condition {
+	switch {
+	case !seen:
+		return Absent
+	case !asked:
+		return Extra
+	}
+	return Changed
+}
+
+func (d Drift) AccessUnread() Drift {
+	// value: a VM's drift whose ports and accounts were not read (asked
+	// inside it, or its Mac's shares unread) says so after its count.
+	d.Verdict.Sentence += " Its ports and accounts are read from its Mac."
 	return d
 }
 

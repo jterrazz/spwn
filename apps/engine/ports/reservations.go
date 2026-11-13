@@ -38,7 +38,7 @@ func (e Exposure) Word() string {
 
 func ViewOf(l Reservation, e Exposure, httpsMode string, phase Phase) SharedPort {
 	v := SharedPort{
-		VM: l.VM, GuestPort: l.GuestPort, Reserved: l.MacPort, State: phase, To: string(l.Audience()),
+		VM: l.VM, GuestPort: l.GuestPort, Reserved: l.MacPort, State: phase, To: l.Audience(),
 		HTTP: l.HTTP != nil && *l.HTTP, URLs: URLs(l, e.PublicName, httpsMode, e.On), ReservedAt: l.ReservedAt,
 	}
 	if !l.LastSeenAt.IsZero() {

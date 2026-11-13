@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	pagemachinefile "github.com/jterrazz/studio-station/apps/engine/pages/machinefile"
@@ -29,7 +30,7 @@ func Command(deps Deps, env kit.Env) *cobra.Command {
 		Read:  func(*Input) bool { return true },
 		Pages: true,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			d, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Drift, machinefilecalls.PlanIn{Machinefile: in.Machinefile}, nil)
+			d, err := call.Invoke(ctx, env.Calls, machine.Ref{}, machinefilecalls.Drift, machinefilecalls.DriftIn{Machine: env.Target().Name, Machinefile: in.Machinefile}, nil)
 			if err != nil {
 				return err
 			}

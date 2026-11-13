@@ -139,11 +139,13 @@ Every surface reaches a call through `core/call.Router` (`Invoke`, `Watch`); `ca
 
 | Target                         | `Where`              | Runs                                                                                                  |
 | ------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------- |
-| any                            | `in-process`         | in this process; the call itself may fan out to many machines through `remote/each`                   |
+| none                           | `in-process`         | in this process; the call itself may fan out to many machines through `remote/each`                   |
 | this machine                   | `at-target`          | in this process                                                                                       |
 | a VM of this Mac               | `at-target`          | this Mac's engine, over its socket, which relays the frame to the VM's guest over its one connection  |
 | this Mac, or a VM of this Mac  | `in-engine`          | this Mac's engine, over its unix socket                                                               |
 | another Mac, or one of its VMs | any but `in-process` | that Mac's engine, dialed by `ssh <mac> station engine attach`, which resolves the frame the same way |
+
+A target always wins over `Where`: an `in-process` call asked with one runs on that machine like any other, so a call that reads another machine from here takes that machine in its input, as `machinefile.drift {Machine}` does to read a VM's ports and accounts on its Mac.
 
 So there is one way into a VM (its Mac's engine and its one `Guest` connection) and one way to another Mac (`sshstdio`); station never runs `ssh <vm>` ([ADR-016](../decisions/016-api-v2-and-remote-by-api.md)). The far side returns data, and this binary renders it with its own pages, so `station apps --on linux-1` looks exactly like `station apps` on linux-1. Each connection opens with `Hello`: the far version and the calls it serves; a call it does not serve is `far-too-old`, with the command that updates it, and so is a far release before `remote/api.Floor`, as a caller before it is refused by the far side. A confirmation travels in the call's input and the far side judges it with the same `confirm.For`. When this Mac's engine is down an action that needs it is refused with `engine-stopped`; a read never is, it returns what it can read and the `Engine stopped` finding, exit 0. Inside a VM, station targets the VM itself, and its few `in-engine` calls (`ports.share`) reach its Mac's engine through the socket the engine offers inside the VM over the same guest connection, so a VM holds no key to its Mac. All machines is `remote/each.Do`: 4 machines at a time, 5 s each, an unreachable Mac a finding of its own. The frames are [The API](../reference/api.md)'s.
 

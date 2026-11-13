@@ -296,14 +296,55 @@ func Drift(d machinefile.Drift, thisMac page.Context) page.Page {
 	}
 	rows = append(rows, extraRows(p, condition(machinefile.Extra))...)
 	rows = append(rows, extraBlockRows(p, condition(machinefile.Extra))...)
+	access := accessRows(d)
 	mark, words := page.OK, []string{"no drift"}
 	var hints []page.Hint
 	if d.Differences > 0 {
-		mark, words = page.Attention, []string{counted(d.Differences, "drifted"), counted(len(rows)-d.Differences, "present")}
+		mark, words = page.Attention, []string{counted(d.Differences, "drifted"), counted(len(rows)+len(access)-d.Differences, "present")}
 		hints = []page.Hint{{Command: "station plan", Text: "what apply would do"}}
 	}
 	sections := []page.Section{head(p.Name, mark, words), section("packages", "Packages", rows)}
+	if len(access) > 0 {
+		sections = append(sections, section("access", "Ports and accounts", access))
+	}
 	return page.Seal(page.Page{ID: ID, Command: "drift", Context: thisMac, Sections: sections, Hints: hints})
+}
+
+// value: each port and account of a VM held otherwise than its file
+// gives it, in the owner's words.
+func accessRows(d machinefile.Drift) []page.Row {
+	var rows []page.Row
+	for _, c := range d.Chapters {
+		for _, f := range c.Differing {
+			switch c.Chapter {
+			case machinefile.ChapterPorts:
+				rows = append(rows, accessRow("ports/"+strconv.Itoa(f.Port), "port "+strconv.Itoa(f.Port), f, held(f.Seen, "shared "+f.Seen, "not shared"), held(f.Asked, "its file opens it to "+f.Asked, "its file does not open it")))
+			case machinefile.ChapterAccounts:
+				rows = append(rows, accessRow("accounts/"+f.Account, f.Account, f, held(f.Seen, "copied", "not copied"), held(f.Asked, "its file shares it", "its file does not share it")))
+			case machinefile.ChapterApps, machinefile.ChapterSettings:
+			}
+		}
+	}
+	return rows
+}
+
+func held(v, is, isNot string) string {
+	if v == "" {
+		return isNot
+	}
+	return is
+}
+
+func accessRow(id, label string, f machinefile.Differing, seen, asked string) page.Row {
+	mark := page.Attention
+	switch f.Condition {
+	case machinefile.Absent:
+		mark = page.Absent
+	case machinefile.Extra:
+		mark = page.NotKnown
+	case machinefile.Present, machinefile.Outdated, machinefile.Changed, machinefile.NotManaged, machinefile.Unknown:
+	}
+	return page.Row{ID: id, Label: label, Mark: mark, Cells: []page.Value{page.Texts("")}, Detail: page.Texts(condition(f.Condition), seen+", "+asked)}
 }
 
 // value: a line's words in a run once it ended, filled by the surface for

@@ -46,6 +46,12 @@ type Deps struct {
 	// value: this machine's own calls: apps and settings read and act
 	// through them, never through their adapters.
 	Calls call.Router
+	// value: the calls of every machine, by target: a drift's packages
+	// judged on another machine, and a VM's shares read from its Mac.
+	Far call.Router
+	// value: the Mac a VM runs on; ok false for a Mac's name or a name no
+	// Mac holds.
+	MacOf func(ctx context.Context, name string) (mac string, ok bool)
 }
 
 type Vault interface {

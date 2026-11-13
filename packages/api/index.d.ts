@@ -1212,6 +1212,11 @@ export type MachinefileCallsApplyIn = {
     Remove?: boolean;
 };
 
+export type MachinefileCallsDriftIn = {
+    Machine?: string;
+    Machinefile?: string;
+};
+
 export type MachinefileCallsExplainIn = {
     Key?: string;
     Machinefile?: string;
@@ -2595,7 +2600,7 @@ export type PortsSharedPort = {
     reserved: number;
     reserved_at?: string;
     state: '' | 'closing' | 'gone' | 'not-allowed' | 'refused' | 'shared' | 'unknown' | 'waiting';
-    to?: string;
+    to?: 'local' | 'private' | 'public';
     urls: PortsURLSet;
     vm: string;
 };
@@ -2950,7 +2955,7 @@ export type ImagesUpdateInput = ImagesCallsUpdateIn;
 export type ImagesUpdateOutput = ImagesUpdate[] | null;
 export type MachinefileApplyInput = MachinefileCallsApplyIn;
 export type MachinefileApplyOutput = MachinefileApplied;
-export type MachinefileDriftInput = MachinefileCallsPlanIn;
+export type MachinefileDriftInput = MachinefileCallsDriftIn;
 export type MachinefileDriftOutput = MachinefileDrift;
 export type MachinefileExplainInput = MachinefileCallsExplainIn;
 export type MachinefileExplainOutput = MachinefileCallsExplainOut;

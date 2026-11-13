@@ -473,7 +473,7 @@ func TestAShareOpensItsLinkOnlyWhileItIsServed(t *testing.T) {
 		{"issuing", ports.SharedPort{Reserved: 40001, State: ports.PhaseShared, Detail: catalog.IssuingDetail}, false, page.Attention, catalog.IssuingDetail, false},
 		{"not allowed", ports.SharedPort{State: ports.PhaseNotAllowed, Detail: "listens, not allowed (open: 3000-3999)"}, false, page.Attention, catalog.NotAllowedWord, true},
 	}
-	cards := map[string]string{"public": SectionPublic, "private": SectionPrivate, "local": SectionLocal}
+	cards := map[catalog.Audience]string{"public": SectionPublic, "private": SectionPrivate, "local": SectionLocal}
 	for _, st := range states {
 		for audience, section := range cards {
 			share := st.share

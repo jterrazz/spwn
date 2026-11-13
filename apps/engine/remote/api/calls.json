@@ -568,11 +568,11 @@
     {
       "name": "machinefile.drift",
       "schema": "station.machinefile.drift/v3",
-      "where": "at-target",
+      "where": "in-process",
       "errors": [
         "machinefile.not-found"
       ],
-      "in": "PlanIn",
+      "in": "DriftIn",
       "out": "Drift"
     },
     {

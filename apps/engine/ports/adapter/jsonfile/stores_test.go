@@ -2,11 +2,14 @@ package jsonfile_test
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/jsonfile"
@@ -38,5 +41,24 @@ func TestReservationsReadAsTodaysLeases(t *testing.T) {
 	want := "{\n  \"schema\": \"station.leases/v1\",\n  \"leases\": [\n    {\n      \"vm\": \"api\",\n      \"guest_port\": 3000,\n      \"host_port\": 40010,\n      \"reserved_at\": \"2026-11-01T09:00:00Z\"\n    }\n  ]\n}\n"
 	if string(got) != want {
 		t.Errorf("leases.json =\n%s\nwant\n%s", got, want)
+	}
+}
+
+func TestAReservationSharedToNoAudienceIsUnreadable(t *testing.T) {
+	file := filepath.Join(t.TempDir(), "leases.json")
+	body := `{"schema": "station.leases/v1", "leases": [{"vm": "api", "guest_port": 3000, "host_port": 40010, "to": "everyone", "reserved_at": "2026-11-01T09:00:00Z"}]}`
+	if err := os.WriteFile(file, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var unreadable *store.UnreadableError
+	if _, err := jsonfile.NewReservations(disk(), file).List(context.Background()); !errors.As(err, &unreadable) {
+		t.Errorf("list = %v; want the file unreadable for an audience outside the union", err)
+	}
+	ok := strings.Replace(body, "everyone", "public", 1)
+	if err := os.WriteFile(file, []byte(ok), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := jsonfile.NewReservations(disk(), file).List(context.Background()); err != nil || len(got) != 1 || got[0].To != "public" {
+		t.Errorf("list = %+v, %v; want the public share read", got, err)
 	}
 }

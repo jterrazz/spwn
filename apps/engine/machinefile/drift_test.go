@@ -43,7 +43,7 @@ func TestDriftCountsEachChapterAndWordsItsVerdicts(t *testing.T) {
 		{Package: "apppa", ID: "apppa", Condition: machinefile.Present, Action: machinefile.Keep},
 	}
 	p.Extra = []machinefile.ExtraLine{{Line: machinefile.Line{Step: machinefile.Step{Package: "jq", Kind: catalog.KindApp}, Seen: machinefile.Seen{Condition: machinefile.Present}, Action: machinefile.Leave}}}
-	d := machinefile.DriftOf(p)
+	d := machinefile.DriftOf(p, nil)
 	apps := chapter(t, d, machinefile.ChapterApps)
 	if apps.Listed != 43 || apps.Matching != 40 || len(apps.Differing) != 4 {
 		t.Errorf("apps: %d of %d match, %d differ; want 40 of 43, 4", apps.Matching, apps.Listed, len(apps.Differing))
@@ -65,7 +65,7 @@ func TestDriftCountsEachChapterAndWordsItsVerdicts(t *testing.T) {
 
 func TestDriftOfAMatchingMachineIsCalm(t *testing.T) {
 	p := machinefile.Plan{Name: "linux-dev", Lines: []machinefile.Line{line("jq", catalog.KindApp, machinefile.Present, machinefile.Keep)}}
-	d := machinefile.DriftOf(p)
+	d := machinefile.DriftOf(p, nil)
 	if d.Differences != 0 || d.Verdict != (verdict.Verdict{Tone: verdict.OK, Sentence: "Matches linux-dev."}) {
 		t.Errorf("drift: %d, %+v", d.Differences, d.Verdict)
 	}
@@ -98,9 +98,58 @@ func TestDriftSaysWhatApplyWouldDo(t *testing.T) {
 		{"none", machinefile.Plan{}, "Nothing to apply."},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			if got := machinefile.DriftOf(c.plan).Apply.Sentence; got != c.words {
+			if got := machinefile.DriftOf(c.plan, nil).Apply.Sentence; got != c.words {
 				t.Errorf("%q; want %q", got, c.words)
 			}
 		})
+	}
+}
+
+func TestDriftReadsAVMsPortsAndAccountsAgainstItsFile(t *testing.T) {
+	// invariant: a port shared public that the file opens to private
+	// differs, as does an account the file shares that has no copy and a
+	// copy the file does not share; what matches counts as matching.
+	access := machinefile.Access{
+		Ports: []machinefile.PortHeld{
+			{Port: 3000, Seen: catalog.AudiencePublic, Asked: catalog.AudiencePrivate},
+			{Port: 5173, Seen: catalog.AudiencePrivate, Asked: catalog.AudiencePrivate},
+		},
+		Accounts: []machinefile.AccountHeld{
+			{Account: "forge", Seen: false, Asked: true},
+			{Account: "mail", Seen: true, Asked: true},
+			{Account: "notes", Seen: true, Asked: false},
+		},
+	}
+	d := machinefile.DriftOf(machinefile.Plan{Name: "linux-dev"}, &access)
+
+	ports := chapter(t, d, machinefile.ChapterPorts)
+	if ports.Listed != 2 || ports.Matching != 1 || len(ports.Differing) != 1 {
+		t.Fatalf("ports: %+v", ports)
+	}
+	if got := ports.Differing[0]; got.Port != 3000 || got.Condition != machinefile.Changed || got.Seen != "public" || got.Asked != "private" {
+		t.Errorf("port 3000 reads %+v; want changed, public against private", got)
+	}
+	accounts := chapter(t, d, machinefile.ChapterAccounts)
+	if accounts.Listed != 2 || accounts.Matching != 1 || len(accounts.Differing) != 2 {
+		t.Fatalf("accounts: %+v", accounts)
+	}
+	if got := accounts.Differing[0]; got.Account != "forge" || got.Condition != machinefile.Absent || got.Seen != "" || got.Asked != "shared" {
+		t.Errorf("forge reads %+v; want absent, shared by the file", got)
+	}
+	if got := accounts.Differing[1]; got.Account != "notes" || got.Condition != machinefile.Extra {
+		t.Errorf("notes reads %+v; want extra", got)
+	}
+	if d.Differences != 3 || d.Verdict.Sentence != "3 differences from linux-dev." {
+		t.Errorf("drift: %d, %q", d.Differences, d.Verdict.Sentence)
+	}
+}
+
+func TestADriftWithoutItsMacsReadSaysSo(t *testing.T) {
+	d := machinefile.DriftOf(machinefile.Plan{Name: "linux-dev"}, nil).AccessUnread()
+	if len(d.Chapters) != 2 {
+		t.Errorf("chapters %+v; want apps and settings alone", d.Chapters)
+	}
+	if want := "Matches linux-dev. Its ports and accounts are read from its Mac."; d.Verdict.Sentence != want {
+		t.Errorf("%q; want %q", d.Verdict.Sentence, want)
 	}
 }

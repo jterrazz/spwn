@@ -8,10 +8,10 @@ runs:
           {"v":2,"id":"1","call":"machinefile.drift","target":{"name":"linux-1"},"in":{}}
       exit: 0
       stdout: |
-          {"name":"linux-dev","apps":[["jq","jterrazz-base","present","1.7.1"],["gh","jterrazz-base","outdated","2.45.0"],["ripgrep","linux-dev","absent",""]],"chapters":[["apps",4,1,"3 differences"],["settings",0,0,"Matches"]],"differences":3,"apply":"Apply will install 2.","verdict":{"Tone":"warn","Sentence":"3 differences from linux-dev."}}
+          {"name":"linux-dev","apps":[["jq","jterrazz-base","present","1.7.1"],["gh","jterrazz-base","outdated","2.45.0"],["ripgrep","linux-dev","absent",""]],"chapters":[["apps",4,1,"3 differences"],["settings",0,0,"Matches"]],"differences":3,"apply":"Apply will install 2.","verdict":{"Tone":"warn","Sentence":"3 differences from linux-dev. Its ports and accounts are read from its Mac."}}
     - command: 'guest serve --stdio | /usr/bin/jq -c ''{name: .out.Plan.Name, apps: [.out.Plan.Lines[] | select(.Step.Kind == "app") | [.Step.Package, .Step.Origin.Name, .Seen.Condition, .Seen.Version]], chapters: [.out.Chapters[] | [.Chapter, .Listed, .Matching, .Verdict.Sentence]], differences: .out.Differences, apply: .out.Apply.Sentence, verdict: .out.Verdict}'''
       stdin: |
           {"v":2,"id":"1","call":"machinefile.drift","target":{"name":"agent-7f"},"in":{}}
       exit: 0
       stdout: |
-          {"name":"linux-dev","apps":[["jq","jterrazz-base","present","1.7.1"],["gh","jterrazz-base","present","2.45.0"],["ripgrep","linux-dev","present","14.1.0"]],"chapters":[["apps",4,3,"1 difference"],["settings",0,0,"Matches"]],"differences":1,"apply":"Apply will install 1.","verdict":{"Tone":"warn","Sentence":"1 difference from linux-dev."}}
+          {"name":"linux-dev","apps":[["jq","jterrazz-base","present","1.7.1"],["gh","jterrazz-base","present","2.45.0"],["ripgrep","linux-dev","present","14.1.0"]],"chapters":[["apps",4,3,"1 difference"],["settings",0,0,"Matches"]],"differences":1,"apply":"Apply will install 1.","verdict":{"Tone":"warn","Sentence":"1 difference from linux-dev. Its ports and accounts are read from its Mac."}}

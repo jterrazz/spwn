@@ -1,0 +1,11 @@
+description: 'a drift asked inside a VM reads its packages alone, and says its ports and accounts are its Mac''s'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {machine: .Machine, chapters: [.Chapters[] | .Chapter], verdict: .Verdict}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{"name":"linux-1"},"in":{}}
+      exit: 0
+      stdout: |
+          {"machine":"linux-1","chapters":["apps","settings"],"verdict":{"Tone":"warn","Sentence":"3 differences from linux-dev. Its ports and accounts are read from its Mac."}}

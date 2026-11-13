@@ -102,7 +102,7 @@ func stateWord(s ports.SharedPort) string {
 // it public when what listens there is reachable outside the tailnet or
 // declared public.
 func classWord(s ports.SharedPort) string {
-	if catalog.Audience(s.To) == catalog.AudiencePublic {
+	if s.To == catalog.AudiencePublic {
 		return string(ports.Public)
 	}
 	return string(ports.Private)
@@ -118,7 +118,7 @@ func PortObject(s ports.SharedPort) PortJSON {
 		proto = "http"
 	}
 	known := s.Named()
-	return PortJSON{Machine: s.VM, Port: s.GuestPort, Proto: proto, Process: s.Process, Name: known.Name, Logo: known.Logo, Bind: bind, Class: classWord(s), To: s.To,
+	return PortJSON{Machine: s.VM, Port: s.GuestPort, Proto: proto, Process: s.Process, Name: known.Name, Logo: known.Logo, Bind: bind, Class: classWord(s), To: string(s.To),
 		State: stateWord(s), Reserved: s.Reserved, SharedAt: sharedAt(s.ReservedAt), URL: s.URLs.Public, Detail: s.Detail}
 }
 

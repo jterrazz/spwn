@@ -1,6 +1,10 @@
 package ports
 
-import "time"
+import (
+	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+)
 
 type Phase string
 
@@ -43,8 +47,8 @@ type SharedPort struct {
 	// of what probably serves it, never a decision.
 	Label string `json:"label,omitempty"`
 	// value: who it is shared with: local, private or public.
-	To   string `json:"to,omitempty"`
-	URLs URLSet `json:"urls"`
+	To   catalog.Audience `json:"to,omitempty"`
+	URLs URLSet           `json:"urls"`
 	// value: the address it listens on inside its VM, as its guest reports it.
 	Bind       string     `json:"bind"`
 	LastSeenAt *time.Time `json:"last_seen_at"`

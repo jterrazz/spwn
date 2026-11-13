@@ -96,7 +96,7 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 			shared[row.ID] = true
 			into := &private
 			if s.State != ports.PhaseNotAllowed {
-				switch catalog.Audience(s.To) {
+				switch s.To {
 				case catalog.AudiencePublic:
 					into = &publicShares
 				case catalog.AudienceLocal:
@@ -418,7 +418,7 @@ func classOf(s ports.SharedPort) string {
 	// value: who a VM's shared port reaches, in the class words: the
 	// internet's for one open to public, its Mac's alone for one open to
 	// local, else the owner's devices.
-	switch catalog.Audience(s.To) {
+	switch s.To {
 	case catalog.AudiencePublic:
 		return ClassPublic
 	case catalog.AudienceLocal:

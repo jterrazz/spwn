@@ -1,0 +1,26 @@
+description: 'a VM''s drift, asked with no target, reads its ports and accounts on its Mac'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {machine: .Machine, chapters: [.Chapters[] | [.Chapter, .Listed, .Matching, .Verdict.Sentence]], access: [.Chapters[] | select(.Chapter == "ports" or .Chapter == "accounts") | .Differing[] | [.Port, .Account, .Condition, .Seen, .Asked]], verdict: .Verdict}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","in":{"Machine":"linux-1"}}
+      exit: 0
+      stdout: |
+          {"machine":"linux-1","chapters":[["apps",4,1,"3 differences"],["settings",0,0,"Matches"],["ports",4,1,"3 differences"],["accounts",0,0,"2 differences"]],"access":[[3000,"","changed","public","private"],[4321,"","absent","","private"],[9229,"","absent","","private"],[0,"claude","extra","shared",""],[0,"github","extra","shared",""]],"verdict":{"Tone":"warn","Sentence":"8 differences from linux-dev."}}
+    - command: 'drift --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Packages
+          ○	apt	apt	absent
+          ●	jq	apt	present
+          ◐	gh	apt	outdated
+          ○	ripgrep	apt	absent
+          # Ports and accounts
+          ◐	port 3000		changed · shared public, its file opens it to private
+          ○	port 4321		absent · not shared, its file opens it to private
+          ○	port 9229		absent · not shared, its file opens it to private
+          ?	claude		extra · copied, its file does not share it
+          ?	github		extra · copied, its file does not share it

@@ -147,6 +147,8 @@ type merged struct {
 	mounts  []catalog.Mount
 	scripts map[RunPhase]Script
 	prefer  []catalog.ManagerKey
+	// value: the ports of the strongest file that says them, whole.
+	ports   *catalog.PortRights
 	apps    []listed[catalog.AppEntry]
 	set     map[string]listed[catalog.SettingEntry]
 	setting []string
@@ -260,6 +262,7 @@ func merge(files []Placed) merged {
 			}
 		}
 		if p := f.Ports; p != nil {
+			m.ports = p
 			m.drop("ports")
 			m.put("ports.open", spans(p.Open), o)
 			m.put("ports.to", string(p.To), o)

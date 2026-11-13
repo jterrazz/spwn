@@ -55,6 +55,11 @@
           "type": "string"
         },
         "to": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
           "type": "string"
         },
         "urls": {

@@ -62,15 +62,7 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 		Memory: m.values["vm.resources.memory"].Text, Disk: m.values["vm.resources.disk"].Text, Mounts: m.mounts,
 	}
 	t.CPUs, _ = strconv.Atoi(m.values["vm.resources.cpus"].Text)
-	for _, key := range m.order {
-		if account, ok := strings.CutPrefix(key, "accounts.share."); ok {
-			term := m.values[key].Text
-			if term == "shared" {
-				term = ""
-			}
-			t.Shares = append(t.Shares, catalog.AccountShare{Account: account, For: term})
-		}
-	}
+	t.Shares = m.shares()
 	for _, b := range m.bake {
 		t.Bake = append(t.Bake, b.name)
 	}
@@ -98,4 +90,40 @@ func (l Library) Templates() []string {
 		}
 	}
 	return out
+}
+
+func (m merged) shares() []catalog.AccountShare {
+	var out []catalog.AccountShare
+	for _, key := range m.order {
+		if account, ok := strings.CutPrefix(key, "accounts.share."); ok {
+			term := m.values[key].Text
+			if term == "shared" {
+				term = ""
+			}
+			out = append(out, catalog.AccountShare{Account: account, For: term})
+		}
+	}
+	return out
+}
+
+// value: what a Machinefile gives the VM that follows it, as the VM's Mac
+// holds it: the ports it may open and to whom (nil, the file says none),
+// the accounts it is shared, and whether it is a server's.
+
+type Given struct {
+	Ports  *catalog.PortRights
+	Shares []catalog.AccountShare
+	Server bool
+}
+
+func GivenOf(lib Library, name string) (Given, error) {
+	// invariant: read from the file's whole chain, its overlays included,
+	// the strongest file that says ports winning whole, as the resolution
+	// merges them.
+	files, err := lib.chain(name)
+	if err != nil {
+		return Given{}, err
+	}
+	m := merge(files)
+	return Given{Ports: m.ports, Shares: m.shares(), Server: catalog.MachineRole(m.values["machine.kind"].Text) == catalog.RoleServer}, nil
 }

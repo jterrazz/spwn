@@ -120,9 +120,9 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 			switch {
 			case s.State == ports.PhaseNotAllowed:
 				listening = append(listening, b.notAllowedRow(s, p.Answer, h, sc))
-			case catalog.Audience(s.To) == catalog.AudiencePublic:
+			case s.To == catalog.AudiencePublic:
 				public = append(public, b.sharedRow(s, p.Answer, h, sc))
-			case catalog.Audience(s.To) == catalog.AudienceLocal:
+			case s.To == catalog.AudienceLocal:
 				local = append(local, b.sharedRow(s, p.Answer, h, sc))
 			default:
 				private = append(private, b.sharedRow(s, p.Answer, h, sc))
