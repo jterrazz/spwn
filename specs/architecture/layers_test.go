@@ -33,7 +33,7 @@ const (
 	cprof  = "github.com/charmbracelet/colorprofile"
 	std    = "std"
 	sshPkg = "golang.org/x/crypto/ssh"
-	// value: the YAML 1.2 decoder the catalog's item files are read with.
+	// value: the YAML 1.2 decoder the catalog's package files are read with.
 	yamlPkg       = "go.yaml.in/yaml/v3"
 	catalogModule = "github.com/jterrazz/studio-station/catalog"
 )

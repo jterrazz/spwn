@@ -194,7 +194,7 @@ func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, 
 	if refused != nil {
 		// invariant: a file of the owner's refused is never silent where the
 		// engine answers: it is a need, with the file to fix, while the run
-		// reads the built-in items.
+		// reads the built-in packages.
 		own = append(own, finding.Finding{Machine: machine.Ref{Name: head.Name}, Section: section.Overview, Severity: finding.Broken, Subject: overview.RefusedSubject,
 			Text: refused.Text, Fix: finding.Fix{Path: refused.File}})
 	}

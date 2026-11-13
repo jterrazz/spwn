@@ -243,7 +243,7 @@ func TestARefusedFileOfTheOwnerIsUpkeepNamingItsFileAndLine(t *testing.T) {
 	}
 	n := upkeep[0]
 	if n.Hero != "A file of yours is refused on This Mac" || n.Verb.Label != VerbShow ||
-		!slices.Equal(n.Detail, []string{"~/.config/station/catalog/apps/jq.yaml:3: unknown key", "fix ~/.config/station/catalog/apps/jq.yaml: station reads the built-in items meanwhile"}) {
+		!slices.Equal(n.Detail, []string{"~/.config/station/catalog/apps/jq.yaml:3: unknown key", "fix ~/.config/station/catalog/apps/jq.yaml: station reads the built-in packages meanwhile"}) {
 		t.Errorf("the refused file says %q, %q, %q", n.Hero, n.Verb.Label, n.Detail)
 	}
 }

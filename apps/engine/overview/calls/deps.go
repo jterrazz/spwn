@@ -45,7 +45,7 @@ type Deps[App, Item, Misplaced any] struct {
 	// value: the catalog this run reads: which settings need root.
 	Catalog catalog.Catalog
 	// value: the owner's file this run refused, when one was: this run
-	// reads the built-in items, and says so in Needs you.
+	// reads the built-in packages, and says so in Needs you.
 	Refused *Refusal
 	// value: the Router the Overview reads each section of this machine
 	// through, and the machine's kind, which decides its sections.

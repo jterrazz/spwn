@@ -346,13 +346,13 @@ func swiftTexts(root string) ([]corpusText, error) {
 	return out, err
 }
 
-// value: the keys of a catalog item whose value is a command line station
+// value: the keys of a catalog package whose value is a command line station
 // runs, another program's words like the Args of a Go step.
 func catalogArgv() []string {
 	return []string{"run", "args", "command", "reload", "upgrade", "env", "url", "check", "undo"}
 }
 
-// invariant: a catalog item says its words in its values, as its Go literal
+// invariant: a catalog package says its words in its values, as its Go literal
 // did before it was a file, and in its comments: every scalar but a command
 // line and another program's text, and every comment, read as the catalog's
 // own folder so the catalog alone may still name OrbStack.
@@ -416,7 +416,7 @@ func vocabularyTexts(t *testing.T, w *world) []corpusText {
 }
 
 // invariant: OrbStack may stay a catalog app (SPEC §2.2): the catalog names
-// it, in its Go and its items, and so does the footprint `make generate`
+// it, in its Go and its packages, and so does the footprint `make generate`
 // projects from it; nothing else does.
 func catalogueApp(c corpusText, word string) bool {
 	return word == "OrbStack" && (c.dir == "apps/engine/catalog" || strings.HasPrefix(c.at, "docs/reference/footprint.md:"))
@@ -491,9 +491,12 @@ func TestVocabularyBites(t *testing.T) {
 		{"docs/mutant", "docs/mutant/mutant.md:1", "The fleet of hosts"},
 		{"specs/usecases/mutant", "specs/usecases/mutant/mutant.spec.yaml", "a port is leased"},
 		{"apps/menubar/sources/mutant", "apps/menubar/sources/mutant/Mutant.swift:1", "Lending linux-1 a token"},
+		{"docs/mutant-item", "docs/mutant-item/mutant.md:1", "an item file"},
+		{"specs/usecases/mutant-item", "specs/usecases/mutant-item/mutant.spec.yaml", "an item file"},
+		{"apps/engine/apps", "apps/engine/apps/mutant_item.go:3", "an item file"},
 	}
 	got := ruleVocabulary(append(texts, planted...))
-	for _, want := range []string{"apps/engine/apps/mutant_vocabulary.go", "docs/mutant/mutant.md", "specs/usecases/mutant/mutant.spec.yaml", "apps/menubar/sources/mutant/Mutant.swift"} {
+	for _, want := range []string{"apps/engine/apps/mutant_vocabulary.go", "docs/mutant/mutant.md", "specs/usecases/mutant/mutant.spec.yaml", "apps/menubar/sources/mutant/Mutant.swift", "docs/mutant-item/mutant.md", "specs/usecases/mutant-item/mutant.spec.yaml", "apps/engine/apps/mutant_item.go"} {
 		if !slices.ContainsFunc(got, func(f finding) bool { return strings.HasPrefix(f.where, want) }) {
 			t.Errorf("the vocabulary rule did not report %s, which says a retired word", want)
 		}

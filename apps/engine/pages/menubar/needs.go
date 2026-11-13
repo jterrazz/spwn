@@ -294,7 +294,7 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 			}
 			row("A file of yours is refused on "+label, "1 file refused", VerbShow)
 			item.Glyph = symbol("exclamationmark.triangle", page.SignalFailing)
-			item.Detail = []string{n.Text, "fix " + n.Path + ": station reads the built-in items meanwhile"}
+			item.Detail = []string{n.Text, "fix " + n.Path + ": station reads the built-in packages meanwhile"}
 		default:
 			continue
 		}

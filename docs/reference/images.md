@@ -52,7 +52,7 @@ The recipe is the base plumbing of a system, shell files embedded under `apps/en
 2. as `vm_user`, the image phase: the build puts every file of the Machinefile's chain that is not station's built-in one, and this Mac's lock of it (its shared source left out), into `vm_user`'s folder, and `linux-bake.sh` runs `station apply --machinefile <name> --phase image` there, which installs what `vm.image.bake` lists and what it requires ([Machinefiles](machinefiles.md#phases)), then prints the lock that run wrote, which the image record keeps. `station-linux` bakes mise, git, Docker, `build-essential` and `playwright-deps` (the libraries and fonts headless Chromium needs on Ubuntu 24.04), so a fresh workspace runs a browser gate and `docker run`;
 3. as `vm_user`, `linux-cleanup.sh` stops the base's `tart-guest-agent` (it runs as `admin`), removes the base's user and fails the build if it cannot, empties the machine id and the host keys, and powers off.
 
-The plumbing is bounded at 30 minutes, and the image phase at 35: 15 for its items, then 20 for its `run.image` lines ([Phases](machinefiles.md#phases)). A VM's first boot sets its own name and machine id and grows the disk. No tailscale is in the image: a VM is reached through its Mac ([Machines](machines.md#ssh-and-herdr)).
+The plumbing is bounded at 30 minutes, and the image phase at 35: 15 for its packages, then 20 for its `run.image` lines ([Phases](machinefiles.md#phases)). A VM's first boot sets its own name and machine id and grows the disk. No tailscale is in the image: a VM is reached through its Mac ([Machines](machines.md#ssh-and-herdr)).
 
 ## The binary inside
 

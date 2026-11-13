@@ -22,7 +22,7 @@ public struct MotionSheet: View {
         "M13": "a number rolls by contentTransition, which draws its end state",
         "M14": "a symbol flips by contentTransition, which draws its end state",
         "M16": "Spinner turns on a TimelineView, still at a fixed angle",
-        "M29": "StatusItem draws the item's frames at a progress",
+        "M29": "StatusItem draws the status item's frames at a progress",
     ]
 
     static func card(_ fill: Color, _ ink: Color) -> some View {

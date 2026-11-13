@@ -354,7 +354,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![needs.catalog-refused](stories/needs.catalog-refused.png) ![needs.catalog-refused light](stories/needs.catalog-refused.light.png)
 
 - **Capture**: [dark](stories/needs.catalog-refused.png), [light](stories/needs.catalog-refused.light.png)
-- **Shows**: A file of the owner's catalog is refused: the upkeep row "A file of yours is refused on macbook-pro · 1 file refused" with its warning glyph and its verb Show; unfolded, it names the file's problem (its line and the unknown key) and the file to fix, saying the built-in items are read meanwhile.
+- **Shows**: A file of the owner's catalog is refused: the upkeep row "A file of yours is refused on macbook-pro · 1 file refused" with its warning glyph and its verb Show; unfolded, it names the file's problem (its line and the unknown key) and the file to fix, saying the built-in packages are read meanwhile.
 - **Data**: needs() with a refused catalog file (its worded problem and its path)
 - **Interactions**: "All machines" → back; "Review" → push(vm:review-bot); "Extend" → extend(s2); "How to" → howto(firewall); "Sign in" → signin(thismac:npm); "Show" → goUpkeep(thismac)
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)

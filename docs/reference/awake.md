@@ -39,7 +39,7 @@ So a Mac mini, which reports no battery and no lid, has no battery or lid guard;
 
 ## Never sleeps
 
-`never-sleeps` is a setting of the Always-on Mac group ([Settings](settings.md#the-items)): applied, it writes `never_sleeps` to [`preferences.json`](preferences.md), and the engine's `awake` job holds the Mac awake for as long as it runs, its servers with it; no admin, applied from any Mac. `station awake off` ends a keep-awake only; Never sleeps stays until `station settings off never-sleeps`. A Mac that hosts servers lists it in its [Mac readiness](machines.md#mac-readiness).
+`never-sleeps` is a setting of the Always-on Mac group ([Settings](settings.md#the-packages)): applied, it writes `never_sleeps` to [`preferences.json`](preferences.md), and the engine's `awake` job holds the Mac awake for as long as it runs, its servers with it; no admin, applied from any Mac. `station awake off` ends a keep-awake only; Never sleeps stays until `station settings off never-sleeps`. A Mac that hosts servers lists it in its [Mac readiness](machines.md#mac-readiness).
 
 ## Related
 

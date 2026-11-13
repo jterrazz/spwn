@@ -20,7 +20,7 @@ install -d -m 0700 -o "$VM_USER" -g "$VM_USER" "/home/$VM_USER/.config" "/home/$
 apt-get update
 # outside: zsh is the user's login shell, growpart (cloud-guest-utils) grows the disk at first boot, and node's linux builds link libatomic, which the base lacks.
 apt-get install -y zsh curl ca-certificates cloud-guest-utils libatomic1
-# outside: the docker group exists before the docker item installs, so the user is in it from the image's first session.
+# outside: the docker group exists before the docker package installs, so the user is in it from the image's first session.
 groupadd -f docker
 usermod -aG docker "$VM_USER"
 

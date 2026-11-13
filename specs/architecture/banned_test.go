@@ -67,6 +67,7 @@ func bannedWords() []banned {
 		{word: "VM engine"},
 		{word: "NAT", exact: true},
 		{word: "tailnet", forms: []string{"tailnets"}, allowed: []string{"your tailnet"}},
+		{word: "item", forms: []string{"items"}, allowed: []string{"login item", "login items", "status item", "menu item", "keychain item"}, only: `\b(?:an?|the|each|every|one|no|its|this|built-in|owner's|shared|unknown|catalog|\d+)\s+items?\b|\bitems?\s+files?\b`},
 	}
 }
 

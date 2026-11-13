@@ -6,9 +6,9 @@ A Go CLI that sets up and runs a Mac, its VMs (servers and workspaces) and the o
 
 - **Families first.** `apps/engine/` is one package per family (`machines`, `apps`, `settings`, `ports`, `awake`...), each with its model, `contract/`, `calls/` and `adapter/<tech>/`; the architecture test holds the tree and every import ([`docs/concepts/architecture.md`](docs/concepts/architecture.md)).
 - **A use case is a call.** `<family>.<verb>`, reached through the Router, which runs it in this process, at its target, or in a Mac's engine; every surface makes the same call.
-- **Add to the catalog, not to command code.** An app (agent skills included, its disk row in the same file) or a setting is one item file, `catalog/packages/<category>/<name>.yaml` (`station.package/v1`); images are still values in `apps/engine/catalog/`, and a dev server's port and env are its item's `ports`.
+- **Add to the catalog, not to command code.** An app (agent skills included, its disk row in the same file) or a setting is one package file, `catalog/packages/<category>/<name>.yaml` (`station.package/v1`); images are still values in `apps/engine/catalog/`, and a dev server's port and env are its package's `ports`.
 - **Capabilities, never model names.** What a machine can do is its `Profile`; a section a kind does not have is refused as not for this machine.
-- **The binary is hermetic.** The catalog's items, the built-in Machinefiles, dotfiles and VM recipes are embedded; nothing reads a file inside the clone. The owner's items and Machinefiles (`~/.config/station/`) and the shared source are layers above them ([`docs/reference/machinefiles.md`](docs/reference/machinefiles.md)).
+- **The binary is hermetic.** The catalog's packages, the built-in Machinefiles, dotfiles and VM recipes are embedded; nothing reads a file inside the clone. The owner's packages and Machinefiles (`~/.config/station/`) and the shared source are layers above them ([`docs/reference/machinefiles.md`](docs/reference/machinefiles.md)).
 - **The words are the glossary's.** One word per concept ([`docs/concepts/glossary.md`](docs/concepts/glossary.md)); the retired words are refused by `specs/architecture/`.
 - **A use case is proved over a world.** Every outcome of every call has its story under `specs/usecases/`, told over the fake world; an adapter's argv is proved once in `specs/adapters/`.
 
@@ -36,7 +36,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | The settings and the Checked group                   | `docs/reference/settings.md`        |
 | `preferences.json`, the environment variables        | `docs/reference/preferences.md`     |
 | Apps, methods, skills, the toolbelt                  | `docs/reference/apps-and-skills.md` |
-| Every key of a catalog item file                     | `docs/reference/catalog.md`         |
+| Every key of a catalog package file                  | `docs/reference/catalog.md`         |
 | Every key of a Machinefile, its layers, `explain`    | `docs/reference/machinefiles.md`    |
 | VM images and their recipe                           | `docs/reference/images.md`          |
 | The shell block, the embedded dotfiles               | `docs/reference/dotfiles.md`        |

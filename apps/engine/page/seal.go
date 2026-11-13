@@ -138,7 +138,7 @@ func checkItem(s Section, it Item, judged bool, rows map[string]bool, depth int)
 		}
 	}
 	if set != 1 {
-		return errors.New("an item holds exactly one node, not " + strconv.Itoa(set))
+		return errors.New("an entry of a section holds exactly one node, not " + strconv.Itoa(set))
 	}
 	switch {
 	case it.Row != nil:

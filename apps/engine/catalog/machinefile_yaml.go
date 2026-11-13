@@ -153,7 +153,7 @@ var settingChanges = []string{"set", "remove"}
 func (l *SettingList) UnmarshalYAML(n *yaml.Node) error {
 	// invariant: a mapping whose keys are set and remove alone is an
 	// overlay's changes; any other, a Machinefile's settings by name (no
-	// item is named set or remove).
+	// setting is named set or remove).
 	if n.Kind != yaml.MappingNode {
 		return errSettingList
 	}

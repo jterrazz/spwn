@@ -2,17 +2,17 @@
 
 `station settings` is what station sets up on a machine (dotfiles, logins, macOS defaults, shortcuts) and what it checks there without applying it. Each entry is a setting, named by what it sets; station's own choices are not settings, they are [Preferences](preferences.md).
 
-| Section   | Answers                                                     |
-| --------- | ----------------------------------------------------------- |
-| The items | Every setting station applies, where it lives, what it does |
-| Checked   | What station reads from macOS without applying it           |
-| Values    | How a setting that needs values asks for them               |
+| Section      | Answers                                                     |
+| ------------ | ----------------------------------------------------------- |
+| The packages | Every setting station applies, where it lives, what it does |
+| Checked      | What station reads from macOS without applying it           |
+| Values       | How a setting that needs values asks for them               |
 
-## The items
+## The packages
 
 A setting that does not live on this machine's kind reads Not for this machine, and an apply of it is refused with exit 2. Each that lives here reads Applied (exactly as station applied it), Changed since (applied, then changed by someone: `station settings diff` shows how), Not applied (never applied, or still exactly as station applied it while station writes it otherwise now, so the next apply writes the new text without asking), or Off here (the owner's choice, kept as `off_here` in [`preferences.json`](preferences.md)). What station applied, its fingerprint and when, is kept under `~/.local/state/station/applied/`. The fingerprint is what the machine holds of the setting's effect, never what station would write: an edit by hand, or a part taken away (a file deleted, a workspace taken out of the multiplexer), moves it and reads Changed since; a part the setting gained that is not there yet (a new file, a new block, a new workspace) does not, so the setting reads Not applied and the next apply writes it.
 
-| Item                        | Lives on   | Sets                                                                                                                                                                                                                                          | Reversible |
+| Package                     | Lives on   | Sets                                                                                                                                                                                                                                          | Reversible |
 | --------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | `hushlogin`                 | all        | `~/.hushlogin`                                                                                                                                                                                                                                | no         |
 | `tmux-dotfiles`             | all        | `~/.tmux.conf`, reloaded in a running tmux                                                                                                                                                                                                    | no         |
@@ -61,7 +61,7 @@ The Checked group is what station reads from macOS and never applies, on a Mac o
 
 ## Values
 
-An item with inputs (`autologin`, `claude-token`) or an interactive procedure (`git-signing`, `ssh-key`, `github-login`) runs on a terminal only. A form asks each value, a password is never echoed, and `AGENT_PASSWORD` pre-fills the autologin password. Off a terminal the command exits 2 with `Hint: run it on a terminal`.
+A package with inputs (`autologin`, `claude-token`) or an interactive procedure (`git-signing`, `ssh-key`, `github-login`) runs on a terminal only. A form asks each value, a password is never echoed, and `AGENT_PASSWORD` pre-fills the autologin password. Off a terminal the command exits 2 with `Hint: run it on a terminal`.
 
 There is no flag to pass a value: a secret never travels in argv or shell history ([ADR-009](../decisions/009-one-bootstrap-verb-and-no-values-in-argv.md)).
 
@@ -69,5 +69,5 @@ There is no flag to pass a value: a secret never travels in argv or shell histor
 
 - [Commands](commands.md): `station settings`.
 - [Preferences](preferences.md): `off_here`, and the environment station reads.
-- [Dotfiles](dotfiles.md): the files the dotfile items copy.
+- [Dotfiles](dotfiles.md): the files the dotfile packages copy.
 - [Footprint](footprint.md): every file station writes.
