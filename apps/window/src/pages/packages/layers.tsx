@@ -9,10 +9,12 @@ import type { Layer, Shelf } from './model';
 import styles from './layers.module.css';
 
 export type Look =
-    | { kind: 'file'; descriptions: ReadonlyMap<string, string> }
+    | { kind: 'file'; descriptions: ReadonlyMap<string, string>; file: string }
     | { kind: 'machine'; differing: ReadonlySet<PlanLine> };
 
 const NO_LAYER_WORD = 'in no layer';
+const THIS_FILE_WORD = 'this file';
+const EXTENDED_WORD = 'extended';
 
 function keyOf(line: PlanLine): string {
     return `${line.Step.Kind}/${line.Step.Package}`;
@@ -79,13 +81,21 @@ function hollowOf(layer: Layer, look: Look): ReadonlyMap<string, Tone> {
     );
 }
 
+function countOf(layer: Layer, shelf: Shelf, look: Look): string {
+    if (look.kind === 'machine' || layer.name === '') {
+        return countWord(layer.lines.length, shelf);
+    }
+    const relation = layer.name === look.file ? THIS_FILE_WORD : EXTENDED_WORD;
+    return `${relation} · ${String(layer.lines.length)}`;
+}
+
 function LayerHead({ layer, shelf, look }: LayerHeadProps) {
     return (
         <Caption>
             <Value identity={layer.identity} look="raised">
                 {layer.name === '' ? NO_LAYER_WORD : layer.name}
             </Value>
-            <span>{countWord(layer.lines.length, shelf)}</span>
+            <span>{countOf(layer, shelf, look)}</span>
             {look.kind === 'machine' ? (
                 <DotStrip
                     hollow={hollowOf(layer, look)}

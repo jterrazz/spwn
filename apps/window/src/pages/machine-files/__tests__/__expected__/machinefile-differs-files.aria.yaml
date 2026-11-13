@@ -2,7 +2,7 @@
   - heading "No verdict from the engine." [level=1]
   - paragraph:
     - img "Not given yet"
-    - text: A machine file is the recipe a machine is made from, and kept in line with
+    - text: A machine file is the recipe a machine is made from
   - group "Machine files":
     - button "jterrazz-base"
     - button "jterrazz-macbook-pro" [pressed]
@@ -27,8 +27,8 @@
       - button "Settings0"
       - button "Access"
     - region "jterrazz-base":
-      - paragraph: jterrazz-base 2 apps
+      - paragraph: jterrazz-base extended · 2
       - text: homebrew manager macOS package manager any version jq Command-line JSON processor any version
     - region "jterrazz-macbook-pro":
-      - paragraph: jterrazz-macbook-pro 4 apps
+      - paragraph: jterrazz-macbook-pro this file · 4
       - text: lazygit Terminal UI for git any version bat Cat clone with syntax highlighting any version ripgrep Fast grep, the rg agents and editors shell out to any version fd Fast find alternative any version

@@ -24,9 +24,9 @@ import type { Chapter, Extended } from './model';
 
 import styles from './machine-files.module.css';
 
-const RECIPE = 'A machine file is the recipe a machine is made from, and kept in line with';
+const RECIPE = 'A machine file is the recipe a machine is made from';
 
-function Chapters({ plan }: { plan: MachinefilePlan }) {
+function Chapters({ plan, file }: { plan: MachinefilePlan; file: string }) {
     const [chapter, setChapter] = useState<Chapter>('Apps');
     const apps = useWatch('apps.list', {});
     const reports = apps.kind === 'read' ? (apps.out ?? []) : [];
@@ -55,7 +55,7 @@ function Chapters({ plan }: { plan: MachinefilePlan }) {
             ) : (
                 <LayerList
                     layers={onShelf(layers, chapter, categories)}
-                    look={{ descriptions: descriptionsOf(reports), kind: 'file' }}
+                    look={{ descriptions: descriptionsOf(reports), file, kind: 'file' }}
                     shelf={chapter}
                 />
             )}
@@ -215,7 +215,7 @@ function File({
                 what="The machines made from it, and whether each matches it"
             />
             {drift.kind === 'read' ? (
-                <Chapters plan={drift.out.Plan} />
+                <Chapters file={file} plan={drift.out.Plan} />
             ) : drift.kind === 'failed' ? (
                 <Unanswered error={drift.error} size="tab" />
             ) : (
