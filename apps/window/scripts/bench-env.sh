@@ -1,6 +1,6 @@
 # outside: sourced by every bench script, in a Linux VM only: a Mac never installs, builds nor runs the window's toolchain.
 # value: STATION_BENCH names the cache every copy of the repository shares (~/bench by default): npm's cache,
-# value: Playwright's browsers, Go's module and build caches, the oxc allocator shim and the world builds.
+# value: Playwright's browsers, the oxc allocator shim and the world builds; Go's caches are only seeded from it.
 # shellcheck shell=bash
 [ "$(uname)" = Linux ] || {
     echo "bench-env.sh: the bench runs in a Linux VM only; a Mac never installs, builds nor runs the window's toolchain" >&2
@@ -18,7 +18,23 @@ if [ -s "$HOME/.nvm/nvm.sh" ]; then
 fi
 export PATH=$HOME/go-sdk/go/bin:$PATH
 unset GOFLAGS GOENV GH_TOKEN GITHUB_TOKEN
-export GOMODCACHE=$bench/gomod GOCACHE=$bench/gocache GOPATH=$bench/gopath GOTOOLCHAIN=local
+# invariant: Go's caches are this copy's own, under its artifacts folder: two copies building at once never write one
+# invariant: cache. A copy's first run seeds them from the shared bench's, hard-linked where the disk allows, else copied.
+go_caches=$window/.artifacts/go
+for cache in gomod gocache gopath; do
+    if [ ! -d "$go_caches/$cache" ]; then
+        mkdir -p "$go_caches"
+        if [ -d "$bench/$cache" ]; then
+            cp -al "$bench/$cache" "$go_caches/$cache" 2>/dev/null || {
+                rm -rf "${go_caches:?}/$cache"
+                cp -a "$bench/$cache" "$go_caches/$cache"
+            }
+        else
+            mkdir -p "$go_caches/$cache"
+        fi
+    fi
+done
+export GOMODCACHE=$go_caches/gomod GOCACHE=$go_caches/gocache GOPATH=$go_caches/gopath GOTOOLCHAIN=local
 export PLAYWRIGHT_BROWSERS_PATH=$bench/pw
 export npm_config_cache=$bench/npm-cache
 export CI=1
