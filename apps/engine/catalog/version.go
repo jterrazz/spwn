@@ -344,6 +344,20 @@ func (r *Range) UnmarshalYAML(n *yaml.Node) error {
 
 func (r Range) MarshalYAML() (any, error) { return r.text, nil }
 
+func (r Range) MarshalText() ([]byte, error) { return []byte(r.text), nil }
+
+func (r *Range) UnmarshalText(text []byte) error {
+	// invariant: the wire carries the word MarshalText wrote, and an exact
+	// version written after `=` travels without it, so a word no form reads
+	// is that exact version.
+	parsed, err := ParseRange(string(text))
+	if err != nil {
+		parsed = Exactly(string(text))
+	}
+	*r = parsed
+	return nil
+}
+
 func (r Range) IsZero() bool { return r.form == RangeAny && r.text == "" }
 
 func HoldOf(in Install) Hold {

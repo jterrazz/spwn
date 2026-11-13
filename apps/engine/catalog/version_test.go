@@ -1,7 +1,10 @@
 package catalog_test
 
 import (
+	"encoding/json"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -56,6 +59,20 @@ func TestAWordThatIsNoVersionIsRefusedNamingTheForms(t *testing.T) {
 	for _, text := range []string{"lts", "24.x", ">=24", "^", "24.11.3.1", "1 2", "=", "=lts"} {
 		if _, err := catalog.ParseRange(text); err == nil || err.Error() != `version "`+text+`" is no version: `+catalog.RangeForms {
 			t.Errorf("ParseRange(%q) = %v; want refused naming the forms", text, err)
+		}
+	}
+}
+
+func TestAVersionTravelsTheWireAsTheWordItWasWritten(t *testing.T) {
+	for _, text := range forms {
+		r, _ := catalog.ParseRange(text)
+		data, err := json.Marshal(struct{ Version catalog.Range }{r})
+		if want := `{"Version":` + strconv.Quote(strings.TrimPrefix(text, "=")) + `}`; err != nil || string(data) != want {
+			t.Errorf("%q on the wire: %s, %v; want %s", text, data, err, want)
+		}
+		var back struct{ Version catalog.Range }
+		if err := json.Unmarshal(data, &back); err != nil || !reflect.DeepEqual(back.Version, r) {
+			t.Errorf("%q read back: %#v, %v; want %#v", text, back.Version, err, r)
 		}
 	}
 }
