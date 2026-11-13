@@ -4,7 +4,15 @@ import { describe, expect, test } from 'vitest';
 import type { Out } from '../../../engine/client';
 import { keyOf } from '../../../engine/frame';
 import { recordingsOf } from '../../../fixtures/recordings';
-import { byAction, countOn, layersOf, onShelf, SHELVES } from '../model';
+import {
+    byAction,
+    countOn,
+    differencesOf,
+    differingLinesOf,
+    layersOf,
+    onShelf,
+    SHELVES,
+} from '../model';
 
 const recordingFor = await recordingsOf('machinefile-differs', 'stories-file', 'two-macs');
 
@@ -79,5 +87,25 @@ describe('model', () => {
         // Then - each group holds the lines of its action, in the plan's order
         expect(groups.map(([action]) => action)).toStrictEqual(['keep', 'install', 'set']);
         expect(groups.flatMap(([, lines]) => lines)).toHaveLength(plan.Lines?.length ?? 0);
+    });
+
+    test("the differences drawn are the engine's own, apps and settings, each on its plan line", () => {
+        // Given - This Mac's drift over machinefile-differs
+        const drift = answered('machinefile-differs', { name: 'machinefile.drift', watch: false });
+
+        // When - its differences are read
+        const differences = differencesOf(drift);
+
+        // Then - one per line the engine names, as many as it counts, each a line it does not hold as asked
+        expect(differences.length).toBeGreaterThan(0);
+        expect(differences).toHaveLength(drift.Differences);
+        expect(
+            differences.every(
+                ({ differing, line }) =>
+                    line?.Step.Package === differing.Package &&
+                    line.Seen.Condition !== 'present',
+            ),
+        ).toBe(true);
+        expect(differingLinesOf(drift).size).toBe(differences.length);
     });
 });

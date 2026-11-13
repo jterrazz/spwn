@@ -4,9 +4,9 @@ import { Icon } from '../../design/icon';
 import { identityOf, MachineIcon, MissingMark, Panel, Row, Tile } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
-import { vmLifetimeWord, vmState } from '../../engine/shown';
+import { verdictShown, vmLifetimeWord, vmState } from '../../engine/shown';
 import { duration, sentence } from '../../model/format';
-import { resourcesOf, targetOf } from '../../model/machines';
+import { driftAsked, resourcesOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
@@ -75,7 +75,7 @@ export function Machines({ found, go }: { found: Found; go: Go }) {
 }
 
 export function Follows({ found, go }: { found: Found; go: Go }) {
-    const drift = useRead('machinefile.drift', {}, targetOf(found));
+    const drift = useRead('machinefile.drift', driftAsked(found));
     if (drift.kind === 'reading') {
         return null;
     }
@@ -98,8 +98,8 @@ export function Follows({ found, go }: { found: Found; go: Go }) {
                     go({ page: 'machine-files' });
                 }}
                 sentence="its apps, settings and the values you set are read in Machine files"
+                state={verdictShown(drift.out.Verdict)}
                 title={`Follows ${drift.out.Plan.Name}`}
-                trail={<MissingMark />}
             />
         </Panel>
     );

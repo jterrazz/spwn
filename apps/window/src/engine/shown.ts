@@ -1,6 +1,8 @@
 import type {
     AppsReport,
+    CoreVerdictVerdict,
     EngineReading,
+    MachinefileChapter,
     MachinesEngineView,
     MachinesMacView,
     MachinesVM,
@@ -134,6 +136,19 @@ export function vmLifetimeWord(vm: Pick<MachinesVM, 'Lifetime'>): string {
 
 export function vmKindWord(vm: Pick<MachinesVM, 'Lifetime'>): string {
     return machineKindWord(machineKindOf(vm));
+}
+
+export function verdictShown(verdict: CoreVerdictVerdict): Shown {
+    return { tone: verdict.Tone, word: verdict.Sentence };
+}
+
+export function chapterWord(chapter: MachinefileChapter): string {
+    return wordOf('MachinefileChapter', chapter).Word;
+}
+
+export function chapterNoun(chapter: MachinefileChapter, count: number): string {
+    const { One, Other } = wordOf('MachinefileChapter', chapter);
+    return (count === 1 ? One : Other) ?? chapter;
 }
 
 export function engineViewWord(engine: MachinesEngineView): string | undefined {

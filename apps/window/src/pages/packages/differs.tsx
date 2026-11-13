@@ -1,13 +1,13 @@
-import type { MachinefilePlan } from '@jterrazz/station-api';
+import type { MachinefileDiffering, MachinefileDrift } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { AppIcon, Button, Panel, StatePill, Switch, Value } from '../../design/index';
 import type { Identity } from '../../design/index';
-import { differingLines, layerOf } from '../../engine/provisional';
+import { layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
 import { ACTION_TONES, CONDITION_TONES } from '../../engine/tones';
 import { ACTION_WORDS, CONDITION_WORDS } from '../../engine/words';
-import { layersOf } from './model';
+import { differencesOf, layersOf } from './model';
 
 import styles from './packages.module.css';
 
@@ -60,7 +60,34 @@ function DiffRow({ line, layer, toFile }: { line: PlanLine; layer: Layered; toFi
     );
 }
 
-function DiffFoot({ toFile, onPlan }: { toFile: boolean; onPlan: () => void }) {
+function BlockRow({ differing }: { differing: MachinefileDiffering }) {
+    return (
+        <div className={styles.compare}>
+            <div className={styles.item}>
+                <AppIcon name={differing.Package} />
+                <span className={styles.name}>{differing.Package}</span>
+                <Value look="raised">{differing.Block}</Value>
+            </div>
+            <div className={styles.state}>
+                <StatePill
+                    tone={CONDITION_TONES[differing.Condition]}
+                    word={CONDITION_WORDS[differing.Condition]}
+                />
+            </div>
+            <div className={styles.will} />
+        </div>
+    );
+}
+
+function DiffFoot({
+    toFile,
+    onPlan,
+    apply,
+}: {
+    toFile: boolean;
+    onPlan: () => void;
+    apply: string;
+}) {
     if (toFile) {
         return (
             <div className={styles.foot}>
@@ -73,7 +100,7 @@ function DiffFoot({ toFile, onPlan }: { toFile: boolean; onPlan: () => void }) {
     }
     return (
         <div className={styles.foot}>
-            <span>The plan says each step before anything is applied.</span>
+            <span>{apply}</span>
             <Button onClick={onPlan} variant="primary">
                 Plan
             </Button>
@@ -81,13 +108,14 @@ function DiffFoot({ toFile, onPlan }: { toFile: boolean; onPlan: () => void }) {
     );
 }
 
-export function Differs({ plan, onPlan }: { plan: MachinefilePlan; onPlan: () => void }) {
+export function Differs({ drift, onPlan }: { drift: MachinefileDrift; onPlan: () => void }) {
     const [direction, setDirection] = useState<Direction>('machine');
-    const lines = differingLines(plan);
-    if (lines.length === 0) {
+    const differences = differencesOf(drift);
+    if (differences.length === 0) {
         return null;
     }
     const toFile = direction === 'file';
+    const plan = drift.Plan;
     const all = [...(plan.Lines ?? []), ...(plan.Extra ?? [])];
     const identities = new Map(layersOf(plan).map((layer) => [layer.name, layer.identity]));
     return (
@@ -101,7 +129,7 @@ export function Differs({ plan, onPlan }: { plan: MachinefilePlan; onPlan: () =>
                     value={direction}
                 />
             }
-            note={String(lines.length)}
+            note={String(differences.length)}
             title="Differs from its file"
         >
             <div className={`${styles.compare} ${styles.head}`}>
@@ -109,7 +137,15 @@ export function Differs({ plan, onPlan }: { plan: MachinefilePlan; onPlan: () =>
                 <span>This machine has</span>
                 <span className={styles.will}>{toFile ? 'The file will' : 'The machine will'}</span>
             </div>
-            {lines.map((line) => {
+            {differences.map(({ differing, line }) => {
+                if (line === undefined) {
+                    return (
+                        <BlockRow
+                            differing={differing}
+                            key={`${differing.Package}/${differing.Block}`}
+                        />
+                    );
+                }
                 const name = layerOf(line, all);
                 return (
                     <DiffRow
@@ -120,7 +156,7 @@ export function Differs({ plan, onPlan }: { plan: MachinefilePlan; onPlan: () =>
                     />
                 );
             })}
-            <DiffFoot onPlan={onPlan} toFile={toFile} />
+            <DiffFoot apply={drift.Apply.Sentence} onPlan={onPlan} toFile={toFile} />
         </Panel>
     );
 }

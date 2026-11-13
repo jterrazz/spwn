@@ -1,9 +1,15 @@
-import type { CallName, MachinefileDrift, Target } from '@jterrazz/station-api';
+import type {
+    CallName,
+    MachinefileDrift,
+    MachinefileDriftInput,
+    Target,
+} from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Screen } from '../../design/index';
+import { Screen, Verdict } from '../../design/index';
 import type { Reading as Read } from '../../engine/react';
 import { useRead } from '../../engine/react';
+import { chapterNoun, verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import { useRouter } from '../../shell/router';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
@@ -11,6 +17,7 @@ import { NotGiven, NoVerdict, Reading } from '../kit/readings';
 import { Page } from '../page';
 import { Differs } from './differs';
 import { Inventory } from './inventory';
+import { packageChapters } from './model';
 import { PlanView } from './plan';
 
 import styles from './packages.module.css';
@@ -33,20 +40,34 @@ function FileLink({ file }: { file: string }) {
     );
 }
 
+function chaptersMatch(drift: MachinefileDrift): string {
+    return packageChapters(drift)
+        .filter((chapter) => chapter.Listed > 0)
+        .map(
+            (chapter) =>
+                `${chapter.Matching} of ${chapter.Listed} ${chapterNoun(chapter.Chapter, chapter.Listed)} match · `,
+        )
+        .join('');
+}
+
 function FileState({ drift, name }: { drift: Read<MachinefileDrift>; name: string }) {
     if (drift.kind === 'reading') {
         return <Reading size="tab" what={`the file ${name} follows`} />;
     }
+    if (drift.kind === 'failed') {
+        return <NoVerdict line="What the engine answered is below" size="tab" />;
+    }
     return (
-        <NoVerdict
+        <Verdict
             line={
-                drift.kind === 'read' ? (
+                <>
+                    {chaptersMatch(drift.out)}
                     <FileLink file={drift.out.Plan.Name} />
-                ) : (
-                    'What the engine answered is below'
-                )
+                </>
             }
             size="tab"
+            title={drift.out.Verdict.Sentence}
+            {...verdictShown(drift.out.Verdict)}
         />
     );
 }
@@ -54,6 +75,8 @@ function FileState({ drift, name }: { drift: Read<MachinefileDrift>; name: strin
 const UPGRADE_REREADS: readonly CallName[] = ['machinefile.drift', 'machinefile.plan'];
 
 type Aimed = { target: Target | undefined; name: string };
+
+type Asked = Aimed & { asked: MachinefileDriftInput };
 
 function Upgrades({ target, name }: Aimed) {
     const upgrade = useGesture('machinefile.upgrade', {
@@ -81,19 +104,19 @@ function Upgrades({ target, name }: Aimed) {
     );
 }
 
-function Setup({ target, name, onPlan }: Aimed & { onPlan: () => void }) {
-    const drift = useRead('machinefile.drift', {}, target);
+function Setup({ target, name, asked, onPlan }: Asked & { onPlan: () => void }) {
+    const drift = useRead('machinefile.drift', asked);
     return (
         <Page>
             <FileState drift={drift} name={name} />
-            {drift.kind === 'read' ? <Differs onPlan={onPlan} plan={drift.out.Plan} /> : null}
+            {drift.kind === 'read' ? <Differs drift={drift.out} onPlan={onPlan} /> : null}
             <Upgrades name={name} target={target} />
             <Inventory drift={drift} target={target} />
         </Page>
     );
 }
 
-export function PackagesTab({ name, target }: Aimed) {
+export function PackagesTab({ name, target, asked }: Asked) {
     const [planning, setPlanning] = useState(false);
     return (
         <Screen>
@@ -107,6 +130,7 @@ export function PackagesTab({ name, target }: Aimed) {
                 />
             ) : (
                 <Setup
+                    asked={asked}
                     name={name}
                     onPlan={() => {
                         setPlanning(true);

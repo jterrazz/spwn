@@ -1,4 +1,5 @@
 import type {
+    MachinefileDriftInput,
     MachinesListOutput,
     MachinesMacView,
     MachinesVM,
@@ -33,6 +34,15 @@ export function targetOf(found: Found): Target | undefined {
         return { name: found.vm.Name };
     }
     return found.mac.ThisMac ? undefined : { name: found.mac.Name };
+}
+
+// invariant: a drift is asked of this Mac's engine with the machine in its input and no target: a target would run it
+// invariant: inside the machine, where a VM's Mac's shares do not read; this Mac is the input left empty.
+export function driftAsked(found: Found): MachinefileDriftInput {
+    if (found.vm) {
+        return { Machine: found.vm.Name };
+    }
+    return found.mac.ThisMac ? {} : { Machine: found.mac.Name };
 }
 
 export function resourcesOf(vm: MachinesVM): string {

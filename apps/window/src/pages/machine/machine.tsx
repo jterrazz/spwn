@@ -1,4 +1,4 @@
-import { targetOf } from '../../model/machines';
+import { driftAsked, targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import type { Route, Tab } from '../../shell/route';
 import { AccountsTab } from '../accounts/accounts';
@@ -21,7 +21,14 @@ export function MachineTab({ found, tab, go }: Props) {
             return <ActivityTab found={found} go={go} />;
         }
         case 'Packages': {
-            return <PackagesTab key={name} name={name} target={targetOf(found)} />;
+            return (
+                <PackagesTab
+                    asked={driftAsked(found)}
+                    key={name}
+                    name={name}
+                    target={targetOf(found)}
+                />
+            );
         }
         case 'Ports': {
             return <PortsTab found={found} go={go} />;

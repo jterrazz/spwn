@@ -6,7 +6,6 @@ import type { Out } from '../client';
 import { keyOf } from '../frame';
 import {
     confirmFormOf,
-    differingLines,
     diskGestureOf,
     engineStateOf,
     freesWhole,
@@ -48,23 +47,6 @@ function listingOf(world: string) {
 
 function portsOf(world: string) {
     return listingOf(world).all.macs ?? [];
-}
-
-function planOf(world: string) {
-    const asked = keyOf({
-        call: 'machinefile.plan',
-        in: { Machinefile: 'station-macos' },
-    });
-    const exchange = recordingFor(world).exchanges.find((one) => keyOf(one.request) === asked);
-    const outs = (exchange?.answers ?? []).filter(
-        (answer): answer is { out: Out<'machinefile.plan'> } =>
-            typeof answer === 'object' && answer !== null && 'out' in answer,
-    );
-    const plan = outs.at(-1)?.out;
-    if (!plan) {
-        throw new Error(`${world} records no machinefile.plan.`);
-    }
-    return plan;
 }
 
 function diskOf(world: string) {
@@ -227,21 +209,6 @@ describe('provisional', () => {
             { kind: 'ended' },
             { kind: 'unread' },
         ]);
-    });
-
-    test('the lines of a plan that differ are those the machine does not hold as asked', () => {
-        // Given - the plan of station-macos over two-macs
-        const plan = planOf('two-macs');
-        const all = [...(plan.Lines ?? []), ...(plan.Extra ?? [])];
-
-        // When - what differs is kept
-        const differing = differingLines(plan);
-
-        // Then - every line but the present ones
-        expect(differing).toHaveLength(
-            all.filter((line) => line.Seen.Condition !== 'present').length,
-        );
-        expect(differing.every((line) => line.Seen.Condition !== 'present')).toBe(true);
     });
 
     test('a catalog entry is a skill when the catalog files it under Agent skills, and no other is', () => {

@@ -110,7 +110,8 @@ def at(name):
 
 def asks(here):
     """The reads the window asks of this Mac and its VMs. This Mac's engine is the socket's own, so a read of it
-    names no target, as targetOf (src/model/machines.ts) sends it, and a read two pages ask is asked once."""
+    names no target, as targetOf (src/model/machines.ts) sends it, and a read two pages ask is asked once. A drift
+    names its machine in its input and no target, as driftAsked sends it."""
     vms = [(mac, vm) for mac in here for vm in mac.get("VMs") or []]
     targets = [{} for _ in here] + [at(vm["Name"]) for _, vm in vms]
     return list({keyOf(request): request for request in [
@@ -126,9 +127,10 @@ def asks(here):
         *[{"watch": "engine.watch", "in": {"machines": [vm["Name"]]}} for _, vm in vms],
         *[{kind: call, "in": {}, **target} for target in targets for kind, call in (
             ("watch", "overview.read"), ("watch", "apps.list"), ("watch", "settings.list"),
-            ("call", "machinefile.drift"), ("call", "machinefile.plan"), ("call", "machinefile.explain"),
-            ("watch", "disk.read"),
+            ("call", "machinefile.plan"), ("call", "machinefile.explain"), ("watch", "disk.read"),
         )],
+        {"call": "machinefile.drift", "in": {}},
+        *[{"call": "machinefile.drift", "in": {"Machine": vm["Name"]}} for _, vm in vms],
         *[{"call": call, "in": {"Machinefile": "station-macos"}}
           for _ in here for call in ("machinefile.drift", "machinefile.plan")],
         *[{"watch": "activity.read", "in": {"graph": graph}, **target} for target in targets for graph in GRAPHS],

@@ -1,4 +1,3 @@
-import type { MachinefilePlan } from '@jterrazz/station-api';
 import {
     button,
     component,
@@ -30,20 +29,19 @@ const recordingFor = await recordingsOf(
     'two-macs',
 );
 
-function builtInPlan(call: 'machinefile.drift' | 'machinefile.plan'): MachinefilePlan {
+function builtIn<N extends 'machinefile.drift' | 'machinefile.plan'>(call: N): Out<N> {
     const asked = keyOf({
         call,
         in: { Machinefile: 'station-macos' },
     });
     const exchange = recordingFor('two-macs').exchanges.find((one) => keyOf(one.request) === asked);
     const answer = exchange?.answers.find(
-        (one): one is { out: Out<typeof call> } =>
-            typeof one === 'object' && one !== null && 'out' in one,
+        (one): one is { out: Out<N> } => typeof one === 'object' && one !== null && 'out' in one,
     );
     if (!answer) {
         throw new Error(`two-macs records no answer to ${asked}.`);
     }
-    return 'Plan' in answer.out ? answer.out.Plan : answer.out;
+    return answer.out;
 }
 
 function windowOver(world: string, machine: string) {
@@ -164,14 +162,14 @@ describe('Packages', () => {
     test("what differs from a file says what the machine would do, and the file's side is not given", async () => {
         // Given - the drift of This Mac from the built-in station-macos, read over two-macs
         let planned = false;
-        const plan = builtInPlan('machinefile.drift');
+        const drift = builtIn('machinefile.drift');
         const result = await component.render(
             <Screen>
                 <Differs
+                    drift={drift}
                     onPlan={() => {
                         planned = true;
                     }}
-                    plan={plan}
                 />
             </Screen>,
             async (visitor) => {
@@ -190,7 +188,7 @@ describe('Packages', () => {
 
     test('a plan is its steps that change something, grouped by what each does, each from its layer', async () => {
         // Given - the plan of the built-in station-macos for This Mac, read over two-macs
-        const plan = builtInPlan('machinefile.plan');
+        const plan = builtIn('machinefile.plan');
 
         // When - it is drawn
         const result = await component.render(<PlanSteps plan={plan} />, async (visitor) => {
@@ -203,7 +201,7 @@ describe('Packages', () => {
 
     test("a count's unit is the shelf its lines are on, packages when they are on both", () => {
         // Given - the built-in station-macos plan's installs and settings
-        const lines = builtInPlan('machinefile.plan').Lines ?? [];
+        const lines = builtIn('machinefile.plan').Lines ?? [];
         const installs = lines.filter((line) => line.Step.Kind !== 'setting');
         const settings = lines.filter((line) => line.Step.Kind === 'setting');
 

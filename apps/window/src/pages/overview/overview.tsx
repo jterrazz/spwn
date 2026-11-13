@@ -94,7 +94,7 @@ function StoppedOverview({ mac, vm, go }: VmProps) {
     return (
         <Page>
             <NoVerdict size="tab" />
-            <FileChapters file="" go={go} vm={vm.Name} />
+            <FileChapters drift={undefined} go={go} vm={vm.Name} />
             <DeleteGesture go={go} key={vm.Name} mac={mac} vm={vm} />
         </Page>
     );

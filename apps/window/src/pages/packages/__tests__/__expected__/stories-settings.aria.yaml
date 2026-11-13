@@ -10,17 +10,17 @@
     - tab "Accounts"
     - tab "Storage"
     - tab "Logs"
-  - heading "No verdict from the engine." [level=1]
+  - heading "2 differences from macbook-pro." [level=1]
   - paragraph:
-    - img "Not given yet"
-    - text: Its machine file is
+    - img "2 differences from macbook-pro."
+    - text: 4 of 5 apps match · 0 of 1 setting match · Its machine file is
     - button "macbook-pro"
   - region "Differs from its file":
     - heading "Differs from its file 2" [level=2]
     - group "Which side changes":
       - button "Change the machine" [pressed]
       - button "Change the file"
-    - text: The file says This machine has The machine will git-shortcuts macbook-pro Not installed Set it gh macbook-pro Outdated 2.97.0 Keep it The plan says each step before anything is applied.
+    - text: The file says This machine has The machine will gh macbook-pro Outdated 2.97.0 Keep it git-shortcuts macbook-pro Not installed Set it Apply will install 1.
     - button "Plan"
   - region "Upgrades":
     - heading "Upgrades" [level=2]

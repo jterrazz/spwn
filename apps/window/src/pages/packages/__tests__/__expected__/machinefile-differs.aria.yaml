@@ -10,17 +10,17 @@
     - tab "Accounts"
     - tab "Storage"
     - tab "Logs"
-  - heading "No verdict from the engine." [level=1]
+  - heading "2 differences from jterrazz-macbook-pro." [level=1]
   - paragraph:
-    - img "Not given yet"
-    - text: Its machine file is
+    - img "2 differences from jterrazz-macbook-pro."
+    - text: 4 of 6 apps match · Its machine file is
     - button "jterrazz-macbook-pro"
   - region "Differs from its file":
     - heading "Differs from its file 2" [level=2]
     - group "Which side changes":
       - button "Change the machine" [pressed]
       - button "Change the file"
-    - text: The file says This machine has The machine will ripgrep jterrazz-macbook-pro Not installed Install it fd jterrazz-macbook-pro Not installed Install it The plan says each step before anything is applied.
+    - text: The file says This machine has The machine will ripgrep jterrazz-macbook-pro Not installed Install it fd jterrazz-macbook-pro Not installed Install it Apply will install 2.
     - button "Plan"
   - region "Upgrades":
     - heading "Upgrades" [level=2]

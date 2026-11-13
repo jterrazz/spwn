@@ -16,24 +16,24 @@ function overviewOver(world: string, machine = 'jterrazz-macbook-pro') {
 }
 
 describe('machine', () => {
-    test('a Mac that holds its file and one whose file asks more read the same, the engine giving the Overview no file verdict', async () => {
+    test("a Mac that holds its file and one whose file asks more each say the engine's verdict of the file it follows", async () => {
         // Given - This Mac's Overview over machinefile-kept, then over machinefile-differs
         const kept = await component.render(overviewOver('machinefile-kept'), async (visitor) => {
-            await visitor.see(content('No verdict from the engine.'));
-            await visitor.see(content('Follows jterrazz-macbook-pro'));
+            await visitor.see(content('Matches jterrazz-macbook-pro.'));
         });
         const differs = await component.render(
             overviewOver('machinefile-differs'),
             async (visitor) => {
                 // When - both overview.read and machinefile.drift answers have settled
-                await visitor.see(content('No verdict from the engine.'));
-                await visitor.see(content('Follows jterrazz-macbook-pro'));
+                await visitor.see(content('2 differences from jterrazz-macbook-pro.'));
             },
         );
 
-        // Then - one tree for both: the Overview names the file it follows, never a count of its differences
+        // Then - each Follows row carries the drift's own sentence and tone, the window counting nothing
         await expect(kept.tree).toMatch(file('./__expected__/machinefile-overview.aria.yaml'));
-        expect(differs.tree.text).toBe(kept.tree.text);
+        await expect(differs.tree).toMatch(
+            file('./__expected__/machinefile-overview-differs.aria.yaml'),
+        );
     });
 
     test("a workspace's Overview opens on its tiles, then its file, ports and accounts beside why it exists", async () => {

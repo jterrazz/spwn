@@ -10,10 +10,10 @@
     - tab "Accounts"
     - tab "Storage"
     - tab "Logs"
-  - heading "No verdict from the engine." [level=1]
+  - heading "Matches jterrazz-macbook-pro." [level=1]
   - paragraph:
-    - img "Not given yet"
-    - text: Its machine file is
+    - img "Matches jterrazz-macbook-pro."
+    - text: 4 of 4 apps match · Its machine file is
     - button "jterrazz-macbook-pro"
   - region "Upgrades":
     - heading "Upgrades" [level=2]

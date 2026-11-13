@@ -1,13 +1,12 @@
-import type { MachinefileDrift, MachinefilePlan, Target } from '@jterrazz/station-api';
+import type { MachinefileDrift, Target } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { Panel, Switch } from '../../design/index';
-import { differingLines } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import type { Reading as Read } from '../../engine/react';
 import { Unanswered } from '../kit/readings';
 import { LayerList } from './layers';
-import { categoriesOf, countOn, layersOf, onShelf, SHELVES } from './model';
+import { categoriesOf, countOn, differingLinesOf, layersOf, onShelf, SHELVES } from './model';
 import type { Shelf } from './model';
 
 import styles from './packages.module.css';
@@ -15,19 +14,19 @@ import styles from './packages.module.css';
 const BY_LAYER = 'by layer, a later one wins';
 
 function Lines({
-    plan,
+    drift,
     shelf,
     target,
     setShelf,
 }: {
-    plan: MachinefilePlan;
+    drift: MachinefileDrift;
     shelf: Shelf;
     target: Target | undefined;
     setShelf: (shelf: Shelf) => void;
 }) {
     const apps = useWatch('apps.list', {}, target);
     const categories = categoriesOf(apps.kind === 'read' ? (apps.out ?? []) : []);
-    const layers = layersOf(plan);
+    const layers = layersOf(drift.Plan);
     return (
         <>
             <Switch
@@ -43,7 +42,7 @@ function Lines({
             <Panel note={BY_LAYER} title={shelf}>
                 <LayerList
                     layers={onShelf(layers, shelf, categories)}
-                    look={{ differing: new Set(differingLines(plan)), kind: 'machine' }}
+                    look={{ differing: differingLinesOf(drift), kind: 'machine' }}
                     shelf={shelf}
                 />
             </Panel>
@@ -60,7 +59,7 @@ export function Inventory({
 }) {
     const [shelf, setShelf] = useState<Shelf>('Apps');
     if (drift.kind === 'read') {
-        return <Lines plan={drift.out.Plan} setShelf={setShelf} shelf={shelf} target={target} />;
+        return <Lines drift={drift.out} setShelf={setShelf} shelf={shelf} target={target} />;
     }
     return (
         <Panel note={BY_LAYER} title={shelf}>

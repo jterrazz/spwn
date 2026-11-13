@@ -1,4 +1,12 @@
-import type { AppsReport, CatalogApp, MachinefilePlan } from '@jterrazz/station-api';
+import type {
+    AppsReport,
+    CatalogApp,
+    MachinefileChapter,
+    MachinefileChapterDrift,
+    MachinefileDiffering,
+    MachinefileDrift,
+    MachinefilePlan,
+} from '@jterrazz/station-api';
 
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
@@ -78,4 +86,32 @@ const SINGULAR: Readonly<Record<Shelf, string>> = {
 
 export function countWord(count: number, shelf: Shelf): string {
     return `${count} ${SINGULAR[shelf]}${count === 1 ? '' : 's'}`;
+}
+
+const PACKAGE_CHAPTERS: readonly MachinefileChapter[] = ['apps', 'settings'];
+
+export function packageChapters(drift: MachinefileDrift): readonly MachinefileChapterDrift[] {
+    const chapters: readonly MachinefileChapterDrift[] = drift.Chapters ?? [];
+    return chapters.filter((chapter) => PACKAGE_CHAPTERS.some((one) => one === chapter.Chapter));
+}
+
+function packageDifferences(drift: MachinefileDrift): readonly MachinefileDiffering[] {
+    return packageChapters(drift).flatMap((chapter) => chapter.Differing ?? []);
+}
+
+export type Difference = { differing: MachinefileDiffering; line: PlanLine | undefined };
+
+export function differencesOf(drift: MachinefileDrift): readonly Difference[] {
+    const all = [...(drift.Plan.Lines ?? []), ...(drift.Plan.Extra ?? [])];
+    return packageDifferences(drift).map((differing) => ({
+        differing,
+        line:
+            differing.Block === ''
+                ? all.find((line) => line.Step.Package === differing.Package)
+                : undefined,
+    }));
+}
+
+export function differingLinesOf(drift: MachinefileDrift): ReadonlySet<PlanLine> {
+    return new Set(differencesOf(drift).flatMap(({ line }) => (line === undefined ? [] : [line])));
 }

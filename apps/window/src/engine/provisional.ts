@@ -10,7 +10,6 @@ import type {
     EngineStartInput,
     MachinefileExtraLine,
     MachinefileLine,
-    MachinefilePlan,
     MachinesEngineView,
     MachinesLifetime,
     MachinesMacView,
@@ -230,14 +229,6 @@ export function shareEndWordOf(end: ShareEnd, until: string): string {
 }
 
 export type PlanLine = MachinefileExtraLine | MachinefileLine;
-
-// outside: machinefile.drift gives every line of a plan with its condition, and does not say which differ from the
-// outside: file: a line differs when the machine does not hold it as the file asks, until the plan lists those.
-export function differingLines(plan: MachinefilePlan): readonly PlanLine[] {
-    return [...(plan.Lines ?? []), ...(plan.Extra ?? [])].filter(
-        (line) => line.Seen.Condition !== 'present',
-    );
-}
 
 // outside: a step's Origin names the Machinefile that lists it, or the package that brought it (homebrew's is jq,
 // outside: "the manager of jq"); a brought line is drawn in its bringer's layer, until each step names its file.
