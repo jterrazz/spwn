@@ -190,8 +190,9 @@ func checkVM(v VMSpec) string {
 // alone, since the guest's is handed to a script run as root and the
 // computer's to the hypervisor's argv; neither climbs with `..`. Neither
 // is a whole home, nor covers, nor sits inside, a folder its side keeps
-// out of every mount (mountSides); the guest's is no system folder. No two
-// mounts share a folder of the guest, `~` read as the home it opens.
+// out of every mount (mountSides), nor sits in a system folder of its
+// side. No two mounts share a folder of the guest, `~` read as the home it
+// opens.
 func checkMounts(mounts []Mount) string {
 	guests := map[string]bool{}
 	for _, m := range mounts {
@@ -231,33 +232,67 @@ func mountSafe(p string) bool {
 // value: the folders one side of a mount keeps out of it: the folder its
 // homes sit in (`/Users`, `/home`), the system's folders (each with all
 // it holds), and the folders of a home (each with all it holds) that hold
-// keys, the system's own data or station's own files.
+// keys, the system's own data or station's own files. The computer's
+// folders are compared caseless, as APFS reads them, and its data volume
+// (`/System/Volumes/Data/...`) read as the root it is mounted at; the
+// guest's are compared as Linux reads them, case and all.
 
 type mountSide struct {
-	word, homes string
-	system      []string
-	kept        []keptFolder
+	word, homes, data, elsewhere string
+	caseless                     bool
+	system                       []string
+	kept                         []keptFolder
 }
 
 type keptFolder struct{ at, what string }
 
 var (
 	stationKept  = []keptFolder{{".ssh", "the ssh keys"}, {".config/station", "station's own files"}, {".local/state/station", "station's own state"}}
-	computerSide = mountSide{word: "computer", homes: "/Users", kept: append([]keptFolder{{"Library", "the Mac's own data"}}, stationKept...)}
-	guestSide    = mountSide{word: "VM", homes: "/home", kept: stationKept, system: []string{
-		"/etc", "/usr", "/bin", "/sbin", "/lib", "/lib64", "/var", "/boot", "/proc", "/sys", "/dev", "/root", "/run", "/tmp",
-	}}
+	computerSide = mountSide{
+		word: "computer", homes: "/Users", data: "/System/Volumes/Data", caseless: true,
+		elsewhere: "mount a folder of a home or of /Volumes",
+		kept:      append([]keptFolder{{"Library", "the Mac's own data"}}, stationKept...),
+		system:    []string{"/System", "/private", "/etc", "/var", "/usr", "/bin", "/sbin", "/dev", "/Library", "/cores"},
+	}
+	guestSide = mountSide{
+		word: "VM", homes: "/home", elsewhere: "mount under /srv, /opt, /mnt, /data or the home", kept: stationKept,
+		system: []string{"/etc", "/usr", "/bin", "/sbin", "/lib", "/lib64", "/var", "/boot", "/proc", "/sys", "/dev", "/root", "/run", "/tmp"},
+	}
 )
+
+// value: a folder of this side as it compares: clean, folded when the side
+// is caseless, its data volume read as the root.
+func (s mountSide) canon(p string) string {
+	p = s.fold(path.Clean(p))
+	if s.data == "" {
+		return p
+	}
+	data := s.fold(s.data)
+	if p == data {
+		return "/"
+	}
+	if rest, ok := strings.CutPrefix(p, data+"/"); ok {
+		return "/" + rest
+	}
+	return p
+}
+
+func (s mountSide) fold(p string) string {
+	if s.caseless {
+		return strings.ToLower(p)
+	}
+	return p
+}
 
 // value: a folder of this side as a path from its home, `~` for the home
 // itself, when it is in one (`~/...`, or a home under the folder of its
-// homes); its clean path otherwise.
+// homes); its canonical path otherwise.
 func (s mountSide) home(p string) string {
-	p = path.Clean(p)
+	p = s.canon(p)
 	if p == "~" || strings.HasPrefix(p, "~/") {
 		return p
 	}
-	if rest, ok := strings.CutPrefix(p, s.homes+"/"); ok {
+	if rest, ok := strings.CutPrefix(p, s.fold(s.homes)+"/"); ok {
 		_, inside, _ := strings.Cut(rest, "/")
 		return path.Join("~", inside)
 	}
@@ -270,22 +305,22 @@ func (s mountSide) check(p string) string {
 	}
 	at := s.home(p)
 	switch at {
-	case "/", s.homes:
+	case "/", s.fold(s.homes):
 		return fmt.Sprintf("mount folder %q of the %s holds every home: mount a folder inside one", p, s.word)
 	case "~":
 		return fmt.Sprintf("mount folder %q of the %s is a whole home: mount a folder inside it", p, s.word)
 	}
 	for _, sys := range s.system {
-		if at == sys || strings.HasPrefix(at, sys+"/") {
-			return fmt.Sprintf("mount folder %q of the VM is in the system folder %s: mount under /srv, /opt, /mnt, /data or the home", p, sys)
+		if f := s.fold(sys); at == f || strings.HasPrefix(at, f+"/") {
+			return fmt.Sprintf("mount folder %q of the %s is in the system folder %s: %s", p, s.word, sys, s.elsewhere)
 		}
 	}
 	for _, k := range s.kept {
 		kept := "~/" + k.at
-		switch {
-		case at == kept || strings.HasPrefix(at, kept+"/"):
+		switch f := s.fold(kept); {
+		case at == f || strings.HasPrefix(at, f+"/"):
 			return fmt.Sprintf("mount folder %q of the %s is in %s, %s, which no mount reaches", p, s.word, kept, k.what)
-		case strings.HasPrefix(kept, at+"/"):
+		case strings.HasPrefix(f, at+"/"):
 			return fmt.Sprintf("mount folder %q of the %s holds %s, %s, which no mount reaches: mount a folder beside it", p, s.word, kept, k.what)
 		}
 	}
