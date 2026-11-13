@@ -6,12 +6,12 @@ import { afterAll } from 'vitest';
 
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
 const STATION_BIN = resolve(REPO_ROOT, '.artifacts/go/station-test');
-const SOURCES = resolve(REPO_ROOT, 'src');
+const SOURCES = resolve(REPO_ROOT, 'apps/engine');
 const VM_SSHD = resolve(import.meta.dirname, '__fixtures__/vm-sshd');
 const WORLDS = resolve(REPO_ROOT, 'specs/usecases/worlds');
 
 // hazard: a stale binary silently tests old behaviour, so the suite rebuilds when any
-// file under `src/` is newer than the binary: the embedded dotfiles and recipes are
+// file under `apps/engine/` is newer than the binary: the embedded dotfiles and recipes are
 // build inputs as much as the Go sources are.
 function binaryIsStale(): boolean {
     if (!existsSync(STATION_BIN)) {
@@ -31,7 +31,7 @@ function binaryIsStale(): boolean {
 
 // invariant: `make test` builds the binary before the runner starts and says so
 // (STATION_SPEC_BUILT), so every document of a gate runs the one binary it built, even
-// when `src/` changes under the run; a direct run that finds it stale builds it beside
+// when `apps/engine/` changes under the run; a direct run that finds it stale builds it beside
 // and renames it into place, so a worker never runs a binary another worker is still
 // writing.
 if (process.env.STATION_SPEC_BUILT !== '1' && binaryIsStale()) {
@@ -40,7 +40,7 @@ if (process.env.STATION_SPEC_BUILT !== '1' && binaryIsStale()) {
         .trim();
     const building = `${STATION_BIN}.${process.pid}`;
     execSync(
-        `go build -tags world -ldflags "-X github.com/jterrazz/studio-station/src/wire.version=${version}" -o ${building} ./src/cmd/station`,
+        `go build -tags world -ldflags "-X github.com/jterrazz/studio-station/apps/engine/wire.version=${version}" -o ${building} ./apps/engine/cmd/station`,
         { cwd: REPO_ROOT, stdio: 'inherit' },
     );
     renameSync(building, STATION_BIN);

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	uitoken "github.com/jterrazz/studio-station/src/ui/token"
+	uitoken "github.com/jterrazz/studio-station/apps/engine/ui/token"
 )
 
 func under(pkg string, patterns ...string) bool {
@@ -66,7 +66,7 @@ func ruleLevels(w *world) []finding {
 			continue
 		}
 		for i, ip := range f.imports {
-			rel, ok := strings.CutPrefix(ip, module+"/src/")
+			rel, ok := strings.CutPrefix(ip, module+"/")
 			if !ok {
 				continue
 			}
@@ -168,10 +168,10 @@ func semantic(t types.Type) bool {
 		return false
 	}
 	path := named.Obj().Pkg().Path()
-	if path == module+"/src/page" {
+	if path == module+"/page" {
 		return true
 	}
-	return strings.HasPrefix(path, module+"/src/pages/") && strings.HasSuffix(named.Obj().Name(), "JSON")
+	return strings.HasPrefix(path, module+"/pages/") && strings.HasSuffix(named.Obj().Name(), "JSON")
 }
 
 func bannedRunes() []rune {
@@ -198,7 +198,7 @@ func ruleGlyphs(w *world) []finding {
 		literals(f, func(lit *ast.BasicLit, value string) {
 			for _, r := range value {
 				if slices.Contains(banned, r) {
-					out = append(out, finding{"glyphs", f.at(lit.Pos()), fmt.Sprintf("the glyph %q outside src/ui/token", r)})
+					out = append(out, finding{"glyphs", f.at(lit.Pos()), fmt.Sprintf("the glyph %q outside apps/engine/ui/token", r)})
 					return
 				}
 			}
@@ -248,11 +248,11 @@ func ruleBuilders(w *world) []finding {
 			switch x := n.(type) {
 			case *ast.CompositeLit:
 				if named, ok := f.info.TypeOf(x).(*types.Named); ok && len(x.Elts) > 0 && named.Obj().Pkg() != nil &&
-					named.Obj().Pkg().Path() == module+"/src/page" && slices.Contains(nodes, named.Obj().Name()) {
+					named.Obj().Pkg().Path() == module+"/page" && slices.Contains(nodes, named.Obj().Name()) {
 					out = append(out, finding{"builders", f.at(x.Pos()), "a page." + named.Obj().Name() + " built outside a page function"})
 				}
 			case *ast.CallExpr:
-				if callee(f, x) == module+"/src/page.Seal" {
+				if callee(f, x) == module+"/page.Seal" {
 					out = append(out, finding{"builders", f.at(x.Pos()), "page.Seal called outside a page function"})
 				}
 			}
@@ -262,7 +262,7 @@ func ruleBuilders(w *world) []finding {
 	return out
 }
 
-// invariant: rule 21: layout lives in the kit: outside src/ui nothing pads,
+// invariant: rule 21: layout lives in the kit: outside apps/engine/ui nothing pads,
 // measures or repeats a line, and only the program wraps a view.
 func ruleLayout(w *world) []finding {
 	var out []finding
@@ -294,7 +294,7 @@ func ruleLayout(w *world) []finding {
 }
 
 // invariant: rule 18: the renderers every fixture is proved by, the golden
-// names src/ui/render/render_test.go writes.
+// names apps/engine/ui/render/render_test.go writes.
 func goldensOf(fixture string) []string {
 	out := []string{"tty100", "tty80", "pipe", "json"}
 	if strings.HasSuffix(fixture, ".full") {
@@ -311,7 +311,7 @@ func missingGoldens(fixtures []string, goldens map[string]bool) []finding {
 	for _, fx := range fixtures {
 		for _, r := range goldensOf(fx) {
 			if !goldens[fx+"."+r] {
-				out = append(out, finding{"goldens", "src/ui/testdata/__expected__/" + fx + "." + r, "a fixture without its golden"})
+				out = append(out, finding{"goldens", "apps/engine/ui/testdata/__expected__/" + fx + "." + r, "a fixture without its golden"})
 			}
 		}
 	}
@@ -320,7 +320,7 @@ func missingGoldens(fixtures []string, goldens map[string]bool) []finding {
 
 func TestEveryFixtureHasItsGoldens(t *testing.T) {
 	root := repoRoot(t)
-	entries, err := os.ReadDir(filepath.Join(root, "src", "ui", "testdata", "pages"))
+	entries, err := os.ReadDir(filepath.Join(root, "apps", "engine", "ui", "testdata", "pages"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -329,7 +329,7 @@ func TestEveryFixtureHasItsGoldens(t *testing.T) {
 		fixtures = append(fixtures, strings.TrimSuffix(e.Name(), ".json"))
 	}
 	goldens := map[string]bool{}
-	files, err := os.ReadDir(filepath.Join(root, "src", "ui", "testdata", "__expected__"))
+	files, err := os.ReadDir(filepath.Join(root, "apps", "engine", "ui", "testdata", "__expected__"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -338,7 +338,7 @@ func TestEveryFixtureHasItsGoldens(t *testing.T) {
 	}
 	t.Run("holds", func(t *testing.T) {
 		if len(fixtures) == 0 {
-			t.Fatal("no page fixture under src/ui/testdata/pages")
+			t.Fatal("no page fixture under apps/engine/ui/testdata/pages")
 		}
 		for _, f := range missingGoldens(fixtures, goldens) {
 			t.Errorf("%s: %s", f.where, f.what)
@@ -393,26 +393,26 @@ func missingPages(packages, families, fixtures []string) []finding {
 		if !slices.ContainsFunc(families, func(f string) bool {
 			return f == pkg || strings.ReplaceAll(f, "-", "") == pkg || strings.HasPrefix(f, pkg+"-")
 		}) {
-			out = append(out, finding{"fixtures", "src/pages/" + pkg, "a page package with no fixture family in UI-SPEC §17"})
+			out = append(out, finding{"fixtures", "apps/engine/pages/" + pkg, "a page package with no fixture family in UI-SPEC §17"})
 		}
 	}
 	for _, f := range families {
 		for _, state := range pageStates() {
 			if !have[f+"."+state] {
-				out = append(out, finding{"fixtures", "src/ui/testdata/pages/" + f + "." + state + ".json", "a §17 fixture family without its " + state + " state"})
+				out = append(out, finding{"fixtures", "apps/engine/ui/testdata/pages/" + f + "." + state + ".json", "a §17 fixture family without its " + state + " state"})
 			}
 		}
 	}
 	for f, worlds := range worldFamilies() {
 		for _, w := range worlds {
 			if !have[f+"."+w] {
-				out = append(out, finding{"fixtures", "src/ui/testdata/pages/" + f + "." + w + ".json", "a world fixture the menu bar's proofs cite is missing"})
+				out = append(out, finding{"fixtures", "apps/engine/ui/testdata/pages/" + f + "." + w + ".json", "a world fixture the menu bar's proofs cite is missing"})
 			}
 		}
 	}
 	for f := range present {
 		if _, world := worldFamilies()[f]; !world && !slices.Contains(families, f) {
-			out = append(out, finding{"fixtures", "src/ui/testdata/pages/" + f + ".*.json", "a fixture family UI-SPEC §17 does not list"})
+			out = append(out, finding{"fixtures", "apps/engine/ui/testdata/pages/" + f + ".*.json", "a fixture family UI-SPEC §17 does not list"})
 		}
 	}
 	return out
@@ -420,7 +420,7 @@ func missingPages(packages, families, fixtures []string) []finding {
 
 func TestEveryPageHasItsFourFixtures(t *testing.T) {
 	root := repoRoot(t)
-	dirs, err := os.ReadDir(filepath.Join(root, "src", "pages"))
+	dirs, err := os.ReadDir(filepath.Join(root, "apps", "engine", "pages"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -430,7 +430,7 @@ func TestEveryPageHasItsFourFixtures(t *testing.T) {
 			packages = append(packages, d.Name())
 		}
 	}
-	entries, err := os.ReadDir(filepath.Join(root, "src", "ui", "testdata", "pages"))
+	entries, err := os.ReadDir(filepath.Join(root, "apps", "engine", "ui", "testdata", "pages"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -448,7 +448,7 @@ func TestEveryPageHasItsFourFixtures(t *testing.T) {
 			return f == "ports.error" || strings.HasPrefix(f, "run.") || f == "menubar.home.infra-down"
 		}
 		got := missingPages(append(slices.Clone(packages), "mutant"), pageFamilies(), append(slices.DeleteFunc(slices.Clone(fixtures), gone), "outcome-tools.full"))
-		if !slices.ContainsFunc(got, func(f finding) bool { return f.where == "src/pages/mutant" }) {
+		if !slices.ContainsFunc(got, func(f finding) bool { return f.where == "apps/engine/pages/mutant" }) {
 			t.Error("the fixtures rule did not report a page package with no fixture")
 		}
 		if !slices.ContainsFunc(got, func(f finding) bool { return strings.HasSuffix(f.where, "ports.error.json") }) {

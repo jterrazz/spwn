@@ -30,8 +30,8 @@ func codeWords() []string { return []string{"tailnet", "path", "space"} }
 // own pages, ids and fields never do.
 func powerContract(dir, word string) bool {
 	return word == "power" && slices.Contains([]string{
-		"src/awake/contract", "src/awake/contract/contracttest", "src/awake/adapter/fake", "src/awake/adapter/macos",
-		"src/platform/local", "src/platform/darwin", "src/world",
+		"apps/engine/awake/contract", "apps/engine/awake/contract/contracttest", "apps/engine/awake/adapter/fake", "apps/engine/awake/adapter/macos",
+		"apps/engine/platform/local", "apps/engine/platform/darwin", "apps/engine/world",
 	}, dir)
 }
 
@@ -44,7 +44,7 @@ func holdsPowerContract(obj types.Object) bool {
 		t = p.Elem()
 	}
 	named, ok := t.(*types.Named)
-	return ok && named.Obj().Name() == "Power" && named.Obj().Pkg() != nil && strings.HasSuffix(named.Obj().Pkg().Path(), "/src/awake/contract")
+	return ok && named.Obj().Name() == "Power" && named.Obj().Pkg() != nil && strings.HasSuffix(named.Obj().Pkg().Path(), "/apps/engine/awake/contract")
 }
 
 func codeBanned() []banned {
@@ -210,7 +210,7 @@ func sourceTexts(w *world) []corpusText {
 		}
 		// invariant: a file cgo rewrote is read from the build cache, in the
 		// folder of the package it belongs to.
-		dir := "src/" + f.pkg
+		dir := "apps/engine/" + f.pkg
 		base := strings.TrimSuffix(filepath.Base(f.rel), ".go")
 		out = append(out, corpusText{dir, f.rel, splitText(base)}, corpusText{dir, f.rel, splitText(f.syntax.Name.Name)})
 		skip := map[ast.Node]bool{}
@@ -362,7 +362,7 @@ var yamlComment = regexp.MustCompile(`(?m)^\s*#\s?`)
 func catalogTexts(root string) ([]corpusText, error) {
 	var out []corpusText
 	var failed error
-	err := walk(root, "src/catalog/items", func(rel string) bool { return strings.HasSuffix(rel, ".yaml") }, func(rel, body string) {
+	err := walk(root, "apps/engine/catalog/items", func(rel string) bool { return strings.HasSuffix(rel, ".yaml") }, func(rel, body string) {
 		var doc yaml.Node
 		if err := yaml.Unmarshal([]byte(body), &doc); err != nil {
 			failed = fmt.Errorf("%s: %w", rel, err)
@@ -371,7 +371,7 @@ func catalogTexts(root string) ([]corpusText, error) {
 		said := func(n *yaml.Node) {
 			for _, c := range []string{n.HeadComment, n.LineComment, n.FootComment} {
 				if c != "" {
-					out = append(out, corpusText{"src/catalog", fmt.Sprintf("%s:%d", rel, n.Line), inlineCodeRe.ReplaceAllString(yamlComment.ReplaceAllString(c, ""), "")})
+					out = append(out, corpusText{"apps/engine/catalog", fmt.Sprintf("%s:%d", rel, n.Line), inlineCodeRe.ReplaceAllString(yamlComment.ReplaceAllString(c, ""), "")})
 				}
 			}
 		}
@@ -381,7 +381,7 @@ func catalogTexts(root string) ([]corpusText, error) {
 			switch n.Kind {
 			case yaml.ScalarNode:
 				if !argv && !foreignShape.MatchString(n.Value) {
-					out = append(out, corpusText{"src/catalog", fmt.Sprintf("%s:%d", rel, n.Line), inlineCodeRe.ReplaceAllString(n.Value, "")})
+					out = append(out, corpusText{"apps/engine/catalog", fmt.Sprintf("%s:%d", rel, n.Line), inlineCodeRe.ReplaceAllString(n.Value, "")})
 				}
 			case yaml.MappingNode:
 				for i := 0; i+1 < len(n.Content); i += 2 {
@@ -419,7 +419,7 @@ func vocabularyTexts(t *testing.T, w *world) []corpusText {
 // it, in its Go and its items, and so does the footprint `make generate`
 // projects from it; nothing else does.
 func catalogueApp(c corpusText, word string) bool {
-	return word == "OrbStack" && (c.dir == "src/catalog" || strings.HasPrefix(c.at, "docs/reference/footprint.md:"))
+	return word == "OrbStack" && (c.dir == "apps/engine/catalog" || strings.HasPrefix(c.at, "docs/reference/footprint.md:"))
 }
 
 func vocabularySaid(texts []corpusText) (said, where map[string][]string) {
@@ -461,10 +461,10 @@ func TestVocabularySourceNamesAwake(t *testing.T) { judge(t, "VocabularyAwake") 
 
 func TestVocabularyKeepsPowerForItsContractOnly(t *testing.T) {
 	planted := []corpusText{
-		{"src/awake/contract", "src/awake/contract/power.go:1", "power"},
-		{"src/platform/local", "src/platform/local/power_mac.go:1", "new power"},
-		{"src/engine", "src/engine/awake.go:1", "power ended"},
-		{"src/pages/menubar", "src/pages/menubar/menubar.go:1", "power-sleep"},
+		{"apps/engine/awake/contract", "apps/engine/awake/contract/power.go:1", "power"},
+		{"apps/engine/platform/local", "apps/engine/platform/local/power_mac.go:1", "new power"},
+		{"apps/engine/engine", "apps/engine/engine/awake.go:1", "power ended"},
+		{"apps/engine/pages/menubar", "apps/engine/pages/menubar/menubar.go:1", "power-sleep"},
 		{"apps/menubar/sources/page", "apps/menubar/sources/page/Page.swift:1", "power"},
 	}
 	found := ruleVocabulary(planted)
@@ -472,7 +472,7 @@ func TestVocabularyKeepsPowerForItsContractOnly(t *testing.T) {
 	for _, f := range found {
 		got = append(got, f.where)
 	}
-	if want := []string{"apps/menubar/sources/page/Page.swift:1", "src/engine/awake.go:1", "src/pages/menubar/menubar.go:1"}; !slices.Equal(got, want) {
+	if want := []string{"apps/engine/engine/awake.go:1", "apps/engine/pages/menubar/menubar.go:1", "apps/menubar/sources/page/Page.swift:1"}; !slices.Equal(got, want) {
 		t.Errorf("the rule reports power at %v, want %v: only the Power contract keeps the word", got, want)
 	}
 }
@@ -493,7 +493,7 @@ func TestVocabularyBites(t *testing.T) {
 		{"apps/menubar/sources/mutant", "apps/menubar/sources/mutant/Mutant.swift:1", "Lending linux-1 a token"},
 	}
 	got := ruleVocabulary(append(texts, planted...))
-	for _, want := range []string{"src/apps/mutant_vocabulary.go", "docs/mutant/mutant.md", "specs/usecases/mutant/mutant.spec.yaml", "apps/menubar/sources/mutant/Mutant.swift"} {
+	for _, want := range []string{"apps/engine/apps/mutant_vocabulary.go", "docs/mutant/mutant.md", "specs/usecases/mutant/mutant.spec.yaml", "apps/menubar/sources/mutant/Mutant.swift"} {
 		if !slices.ContainsFunc(got, func(f finding) bool { return strings.HasPrefix(f.where, want) }) {
 			t.Errorf("the vocabulary rule did not report %s, which says a retired word", want)
 		}
@@ -502,7 +502,7 @@ func TestVocabularyBites(t *testing.T) {
 
 func TestVocabularyReadsTheCatalogsItems(t *testing.T) {
 	root := t.TempDir()
-	dir := filepath.Join(root, "src", "catalog", "items", "system-utilities")
+	dir := filepath.Join(root, "apps", "engine", "catalog", "items", "system-utilities")
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
@@ -520,9 +520,9 @@ func TestVocabularyReadsTheCatalogsItems(t *testing.T) {
 		got = append(got, f.where+" "+f.what)
 	}
 	want := []string{
-		`src/catalog/items/system-utilities/orb.yaml:4 src/catalog says "daemon", a word SPEC §2.2 retired`,
-		`src/catalog/items/system-utilities/orb.yaml:6 src/catalog says "host", a word SPEC §2.2 retired`,
-		`src/catalog/items/system-utilities/orb.yaml:10 src/catalog says "storage", a word SPEC §2.2 retired`,
+		`apps/engine/catalog/items/system-utilities/orb.yaml:4 apps/engine/catalog says "daemon", a word SPEC §2.2 retired`,
+		`apps/engine/catalog/items/system-utilities/orb.yaml:6 apps/engine/catalog says "host", a word SPEC §2.2 retired`,
+		`apps/engine/catalog/items/system-utilities/orb.yaml:10 apps/engine/catalog says "storage", a word SPEC §2.2 retired`,
 	}
 	if !slices.Equal(got, want) {
 		t.Errorf("the rule reports %v, want %v: a description, a note and a comment are read, a run line and a check are not, and the catalog may name OrbStack", got, want)
@@ -544,17 +544,17 @@ func TestVocabularyKeepsItsPhrases(t *testing.T) {
 
 func TestVocabularyLetsOnlyTheCatalogueSayOrbStack(t *testing.T) {
 	planted := []corpusText{
-		{"src/catalog", "src/catalog/apps.go:1", "OrbStack"},
+		{"apps/engine/catalog", "apps/engine/catalog/apps.go:1", "OrbStack"},
 		{"docs/reference", "docs/reference/footprint.md:1", "OrbStack's own home"},
 		{"docs/reference", "docs/reference/machines.md:1", "OrbStack runs the VMs"},
-		{"src/machines", "src/machines/errors.go:1", "OrbStack"},
+		{"apps/engine/machines", "apps/engine/machines/errors.go:1", "OrbStack"},
 	}
 	found := ruleVocabulary(planted)
 	got := make([]string, 0, len(found))
 	for _, f := range found {
 		got = append(got, f.where)
 	}
-	if want := []string{"docs/reference/machines.md:1", "src/machines/errors.go:1"}; !slices.Equal(got, want) {
+	if want := []string{"apps/engine/machines/errors.go:1", "docs/reference/machines.md:1"}; !slices.Equal(got, want) {
 		t.Errorf("the rule reports OrbStack at %v, want %v: only the catalogue and its footprint name it", got, want)
 	}
 }
@@ -602,28 +602,28 @@ func f() {
 // v3's words; v2's hidden commands that are no kit.Alias.
 func legacyEncodings() []string {
 	return []string{
-		"src/accounts/adapter/jsonfile sharedIn",
-		"src/accounts/contract GroupV2ShareList",
-		"src/catalog StatusV1Kind",
-		"src/engine/process hello",
-		"src/images UnmarshalJSON",
-		"src/machines UnmarshalText",
-		"src/machines/adapter/jsonfile file",
-		"src/pages/apps AppStatusJSON",
-		"src/pages/apps statusV1Category",
-		"src/pages/home SnapshotJSON",
-		"src/pages/home awakeJSON",
-		"src/pages/home stationJSON",
-		"src/pages/home workspaceJSON",
-		"src/pages/settings ItemJSON",
-		"src/ports Reservation",
-		"src/ports VMLivesOn",
-		"src/ports/adapter/guest Hello",
-		"src/ports/adapter/jsonfile ReservationsSchema",
-		"src/ports/contract RetiredGroupPorts",
-		"src/setup/contract RetiredGroupName",
-		"src/surface/cli/kit RetiredEngineCommand",
-		"src/surface/cli/settings containerShortcuts",
-		"src/world Kept",
+		"apps/engine/accounts/adapter/jsonfile sharedIn",
+		"apps/engine/accounts/contract GroupV2ShareList",
+		"apps/engine/catalog StatusV1Kind",
+		"apps/engine/engine/process hello",
+		"apps/engine/images UnmarshalJSON",
+		"apps/engine/machines UnmarshalText",
+		"apps/engine/machines/adapter/jsonfile file",
+		"apps/engine/pages/apps AppStatusJSON",
+		"apps/engine/pages/apps statusV1Category",
+		"apps/engine/pages/home SnapshotJSON",
+		"apps/engine/pages/home awakeJSON",
+		"apps/engine/pages/home stationJSON",
+		"apps/engine/pages/home workspaceJSON",
+		"apps/engine/pages/settings ItemJSON",
+		"apps/engine/ports Reservation",
+		"apps/engine/ports VMLivesOn",
+		"apps/engine/ports/adapter/guest Hello",
+		"apps/engine/ports/adapter/jsonfile ReservationsSchema",
+		"apps/engine/ports/contract RetiredGroupPorts",
+		"apps/engine/setup/contract RetiredGroupName",
+		"apps/engine/surface/cli/kit RetiredEngineCommand",
+		"apps/engine/surface/cli/settings containerShortcuts",
+		"apps/engine/world Kept",
 	}
 }

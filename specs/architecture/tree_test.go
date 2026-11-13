@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// invariant: ARCHITECTURE 13.1: the top level of src/ names what station does.
+// invariant: ARCHITECTURE 13.1: the top level of apps/engine/ names what station does.
 func families() []string {
 	return []string{"machines", "activity", "apps", "settings", "disk", "ports", "accounts", "background", "awake", "images", "overview", "setup", "engine", "agents", "machinefile"}
 }
@@ -90,16 +90,16 @@ func ruleTree(w *world) []finding {
 		switch {
 		case slices.Contains(families(), top):
 			if !familyInside(top, restOf(pkg)) {
-				out = append(out, finding{"tree-screams", "src/" + pkg, "a family holds only its model, contract/, calls/ and adapter/<tech>/"})
+				out = append(out, finding{"tree-screams", "apps/engine/" + pkg, "a family holds only its model, contract/, calls/ and adapter/<tech>/"})
 			}
 		case slices.Contains(plumbing(), top):
 		default:
-			out = append(out, finding{"tree-screams", "src/" + pkg, "a top-level package that is neither a family nor named plumbing"})
+			out = append(out, finding{"tree-screams", "apps/engine/" + pkg, "a top-level package that is neither a family nor named plumbing"})
 		}
 	}
 	for _, family := range sectioned() {
 		if filled[family] && !applies[family] {
-			out = append(out, finding{"tree-screams", "src/" + family, "a family with a section has an applies.go that declares Applies"})
+			out = append(out, finding{"tree-screams", "apps/engine/" + family, "a family with a section has an applies.go that declares Applies"})
 		}
 	}
 	return out

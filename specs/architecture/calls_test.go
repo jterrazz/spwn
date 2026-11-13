@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jterrazz/studio-station/src/core/machine"
-	"github.com/jterrazz/studio-station/src/core/section"
-	"github.com/jterrazz/studio-station/src/surface/cli/words"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
 
 type callValue struct {
@@ -70,7 +70,7 @@ func isCallType(t types.Type) bool {
 	if !ok || named.Obj().Pkg() == nil {
 		return false
 	}
-	return named.Obj().Pkg().Path() == module+"/src/core/call" && (named.Obj().Name() == "Call" || named.Obj().Name() == "Watch")
+	return named.Obj().Pkg().Path() == module+"/core/call" && (named.Obj().Name() == "Call" || named.Obj().Name() == "Watch")
 }
 
 // value: the identifiers a package's All function body names.
@@ -143,7 +143,7 @@ func requires(fn ast.Node, info *types.Info) bool {
 			return true
 		}
 		if sel, ok := ce.Fun.(*ast.SelectorExpr); ok {
-			if obj := info.Uses[sel.Sel]; obj != nil && obj.Pkg() != nil && obj.Pkg().Path() == module+"/src/core/confirm" && (obj.Name() == "Require" || obj.Name() == "Ask") {
+			if obj := info.Uses[sel.Sel]; obj != nil && obj.Pkg() != nil && obj.Pkg().Path() == module+"/core/confirm" && (obj.Name() == "Require" || obj.Name() == "Ask") {
 				found = true
 			}
 		}
@@ -170,7 +170,7 @@ func methodOf(obj types.Object) string {
 	if !ok || named.Obj().Pkg() == nil {
 		return ""
 	}
-	return strings.TrimPrefix(named.Obj().Pkg().Path(), module+"/src/") + "." + named.Obj().Name() + "." + fn.Name()
+	return strings.TrimPrefix(named.Obj().Pkg().Path(), module+"/") + "." + named.Obj().Name() + "." + fn.Name()
 }
 
 // value: the spans of the Ask fields of every kit.Leaf literal of a file:
@@ -183,7 +183,7 @@ func leafAsks(f *file) [][2]token.Pos {
 			return true
 		}
 		named, ok := f.info.TypeOf(lit).(*types.Named)
-		if !ok || named.Obj().Pkg() == nil || named.Obj().Pkg().Path() != module+"/src/surface/cli/kit" || named.Obj().Name() != "Leaf" {
+		if !ok || named.Obj().Pkg() == nil || named.Obj().Pkg().Path() != module+"/surface/cli/kit" || named.Obj().Name() != "Leaf" {
 			return true
 		}
 		for _, e := range lit.Elts {
@@ -201,7 +201,7 @@ func leafAsks(f *file) [][2]token.Pos {
 // value: why a selector of a surface decides a confirmation, or "".
 func decides(f *file, n *ast.SelectorExpr, asks [][2]token.Pos) string {
 	obj := f.info.Uses[n.Sel]
-	if obj != nil && obj.Pkg() != nil && obj.Pkg().Path() == module+"/src/core/confirm" && obj.Name() == "Yes" && f.pkg != "surface/cli/kit" {
+	if obj != nil && obj.Pkg() != nil && obj.Pkg().Path() == module+"/core/confirm" && obj.Name() == "Yes" && f.pkg != "surface/cli/kit" {
 		return "a surface answers a confirmation before its call asks (confirm.Yes)"
 	}
 	if methodOf(obj) != "surface/cli/kit.Asker.Confirm" {
@@ -303,7 +303,7 @@ func ruleEveryCodeWorded(w *world) []finding {
 	}
 	for _, code := range slices.Sorted(maps.Keys(worded)) {
 		if !declared[code] {
-			out = append(out, finding{"every-code-worded", "src/surface/cli/words/codes.go", fmt.Sprintf("%q is worded but no package declares it", code)})
+			out = append(out, finding{"every-code-worded", "apps/engine/surface/cli/words/codes.go", fmt.Sprintf("%q is worded but no package declares it", code)})
 		}
 	}
 	return out
@@ -311,7 +311,7 @@ func ruleEveryCodeWorded(w *world) []finding {
 
 func isCode(t types.Type) bool {
 	named, ok := t.(*types.Named)
-	return ok && named.Obj().Pkg() != nil && named.Obj().Pkg().Path() == module+"/src/core/fail" && named.Obj().Name() == "Code"
+	return ok && named.Obj().Pkg() != nil && named.Obj().Pkg().Path() == module+"/core/fail" && named.Obj().Name() == "Code"
 }
 
 func TestCallsGated(t *testing.T)       { judge(t, "CallsGated") }

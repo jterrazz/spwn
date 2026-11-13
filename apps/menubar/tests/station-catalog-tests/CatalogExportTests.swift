@@ -7,7 +7,7 @@ import XCTest
 final class CatalogExportTests: XCTestCase {
     static let repository = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         .deletingLastPathComponent().deletingLastPathComponent()
-    static let pages = repository.appendingPathComponent("src/ui/testdata/pages")
+    static let pages = repository.appendingPathComponent("apps/engine/ui/testdata/pages")
 
     var root: URL!
     var stories: URL { root.appendingPathComponent("stories") }

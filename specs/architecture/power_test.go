@@ -12,7 +12,7 @@ import (
 )
 
 func cgoFiles() []string {
-	return []string{"src/platform/darwin/power_darwin.go", "src/platform/darwin/kernel_darwin.go"}
+	return []string{"apps/engine/platform/darwin/power_darwin.go", "apps/engine/platform/darwin/kernel_darwin.go"}
 }
 
 func cgoTags() map[string]string {
@@ -48,7 +48,7 @@ func unsafePower() []string {
 }
 
 func powerPaths() []string {
-	return []string{"src/awake/", "src/pages/keepawake/", "src/surface/cli/awake/", "src/pages/awake/", "src/platform/darwin/power_", "src/wire/awake.go", "src/wire/keepawake.go", "src/engine/awake.go", "src/engine/process/awake.go"}
+	return []string{"apps/engine/awake/", "apps/engine/pages/keepawake/", "apps/engine/surface/cli/awake/", "apps/engine/pages/awake/", "apps/engine/platform/darwin/power_", "apps/engine/wire/awake.go", "apps/engine/wire/keepawake.go", "apps/engine/engine/awake.go", "apps/engine/engine/process/awake.go"}
 }
 
 func powerCode(rel string) bool {
@@ -64,14 +64,14 @@ func powerPackages() []string {
 	return []string{"awake", "awake/contract", "awake/adapter/macos", "awake/calls"}
 }
 
-// invariant: rule 23: Power is safe by construction: no string under src/
+// invariant: rule 23: Power is safe by construction: no string under apps/engine/
 // asks for a display assertion or disablesleep, the power code holds no
 // sudo, and the awake family, its macOS adapter and its calls reach no
 // file system: no file is written for power.
 func rulePowerSafe(w *world) []finding {
 	var out []finding
 	for _, f := range w.files {
-		if f.test || !strings.HasPrefix(f.rel, "src/") {
+		if f.test || !strings.HasPrefix(f.rel, "apps/engine/") {
 			continue
 		}
 		ast.Inspect(f.syntax, func(n ast.Node) bool {
@@ -104,14 +104,14 @@ func rulePowerSafe(w *world) []finding {
 
 func isFS(t types.Type) bool {
 	named, ok := types.Unalias(t).(*types.Named)
-	return ok && named.Obj().Name() == "FS" && named.Obj().Pkg() != nil && named.Obj().Pkg().Path() == module+"/src/platform/local"
+	return ok && named.Obj().Name() == "FS" && named.Obj().Pkg() != nil && named.Obj().Pkg().Path() == module+"/platform/local"
 }
 
 func powerRaw(w *world) []finding {
 	var out []finding
 	var matches []string
 	for _, dir := range []string{"local", "darwin"} {
-		found, _ := filepath.Glob(filepath.Join(w.root, "src", "platform", dir, "power_*.go"))
+		found, _ := filepath.Glob(filepath.Join(w.root, "apps", "engine", "platform", dir, "power_*.go"))
 		matches = append(matches, found...)
 	}
 	for _, m := range matches {

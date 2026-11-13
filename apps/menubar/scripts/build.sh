@@ -22,8 +22,8 @@ done
 iconutil -c icns "$icons" -o "$app/Contents/Resources/AppIcon.icns"
 version=$(git -C "$root" describe --tags --always --dirty | sed 's/^v//')
 plutil -replace CFBundleShortVersionString -string "$version" "$app/Contents/Info.plist"
-cp "$root/src/ui/testdata/pages/menubar.home.engine-stopped.json" "$app/Contents/Resources/stopped.json"
-cp "$root/src/ui/testdata/pages/menubar.home.engine-outdated.json" "$app/Contents/Resources/outdated.json"
+cp "$root/apps/engine/ui/testdata/pages/menubar.home.engine-stopped.json" "$app/Contents/Resources/stopped.json"
+cp "$root/apps/engine/ui/testdata/pages/menubar.home.engine-outdated.json" "$app/Contents/Resources/outdated.json"
 codesign --force --sign - --timestamp=none "$app"
 codesign --verify --strict "$app"
 printf '● Built %s (%s, signed ad hoc)\n' ".artifacts/menubar/Station.app" "$version"

@@ -31,7 +31,7 @@ home_of() {
   # automatic pruning is off (TART_NO_AUTO_PRUNE in as), or a clone of this run
   # deletes the owner's other base images to make room.
   [ -z "$real_cache" ] || ln -s "$real_cache" "$h/.local/share/station/vms/cache"
-  cp "$repo/src/catalog/dotfiles/tart/tart" "$h/.local/bin/tart"
+  cp "$repo/apps/engine/catalog/dotfiles/tart/tart" "$h/.local/bin/tart"
   cp "$repo/.artifacts/go/station" "$h/.local/bin/station"
   cp "$suite/linux/stubs/"* "$h/.local/bin/"
   chmod +x "$h/.local/bin/"*

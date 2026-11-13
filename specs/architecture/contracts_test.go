@@ -92,7 +92,7 @@ func declNames(f *file, n ast.Node, contractPath string) suiteDecl {
 				}
 			}
 		case *ast.Ident:
-			if tn, ok := f.info.Uses[n].(*types.TypeName); ok && tn.Pkg() != nil && tn.Pkg().Path() == module+"/src/"+f.pkg {
+			if tn, ok := f.info.Uses[n].(*types.TypeName); ok && tn.Pkg() != nil && tn.Pkg().Path() == module+"/"+f.pkg {
 				d.local = append(d.local, tn.Name())
 			}
 		}
@@ -120,7 +120,7 @@ func suitesOf(w *world) map[string]map[string][]string {
 		if f.test || f.pkg != topOf(f.pkg)+"/contract/contracttest" {
 			continue
 		}
-		fam, path := topOf(f.pkg), module+"/src/"+topOf(f.pkg)+"/contract"
+		fam, path := topOf(f.pkg), module+"/"+topOf(f.pkg)+"/contract"
 		if decls[fam] == nil {
 			decls[fam] = map[string]suiteDecl{}
 		}
@@ -208,7 +208,7 @@ func ruleContracts(w *world) []finding {
 			})
 		}
 		if fam, tech, ok := adapterOf(f.pkg); ok && f.test {
-			selectorsOf(f, module+"/src/"+fam+"/contract/contracttest", func(name string) {
+			selectorsOf(f, module+"/"+fam+"/contract/contracttest", func(name string) {
 				key := fam + "/" + name
 				if ran[key] == nil {
 					ran[key] = map[bool]bool{}
@@ -228,11 +228,11 @@ func ruleContracts(w *world) []finding {
 		}
 		switch {
 		case !hasReal:
-			out = append(out, finding{"contracts-are-whole", c.where, c.name + " has no real adapter in src/" + c.family + "/adapter/"})
+			out = append(out, finding{"contracts-are-whole", c.where, c.name + " has no real adapter in apps/engine/" + c.family + "/adapter/"})
 		case !fake:
-			out = append(out, finding{"contracts-are-whole", c.where, c.name + " has no fake in src/" + c.family + "/adapter/fake"})
+			out = append(out, finding{"contracts-are-whole", c.where, c.name + " has no fake in apps/engine/" + c.family + "/adapter/fake"})
 		case len(suites[c.family][c.name]) == 0:
-			out = append(out, finding{"contracts-are-whole", c.where, c.name + " has no suite in src/" + c.family + "/contract/contracttest"})
+			out = append(out, finding{"contracts-are-whole", c.where, c.name + " has no suite in apps/engine/" + c.family + "/contract/contracttest"})
 		case !byReal || !byFake:
 			out = append(out, finding{"contracts-are-whole", c.where, c.name + "'s suite is not run by both a real adapter and the fake"})
 		}

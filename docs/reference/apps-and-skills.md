@@ -13,7 +13,7 @@ An app is installed content: software or an agent skill (v2 had its own word for
 
 ## The catalog
 
-An app is one item file, `src/catalog/items/<category>/<name>.yaml`, in the schema `station.catalog/v1`: its `kind` (`manager` for one that installs other apps, `app` otherwise), name, description, its category (the folder), the commands it `provides`, what it `requires`, its `methods` and its disk row. A method is a selector (`os`, `family`, `version`, `arch`, `kind`) and exactly one manager key, the first method that matches the machine winning. Every key of the format, and how strictly a file is read, is [The catalog's item format](catalog.md):
+An app is one item file, `apps/engine/catalog/items/<category>/<name>.yaml`, in the schema `station.catalog/v1`: its `kind` (`manager` for one that installs other apps, `app` otherwise), name, description, its category (the folder), the commands it `provides`, what it `requires`, its `methods` and its disk row. A method is a selector (`os`, `family`, `version`, `arch`, `kind`) and exactly one manager key, the first method that matches the machine winning. Every key of the format, and how strictly a file is read, is [The catalog's item format](catalog.md):
 
 ```yaml
 item: station.catalog/v1
@@ -40,7 +40,7 @@ The method an app is installed by is the first of its methods here in the system
 
 ## Methods
 
-One registry, `Installers` in `src/apps/contract/`, holds an installer per method, each its own adapter under `src/apps/adapter/<method>/` with its commands and its parser; nothing else switches on a method. A method that holds what it adds by app, apt, is a `Holder` too: the apps model hands its install and its removal the app they serve and whether you asked that removal by name, and its plain install and removal refuse. `wire` builds the registry; `src/apps/calls` asks each installer what it can do and what is behind (`Outdated`), as [Currency](#currency) says.
+One registry, `Installers` in `apps/engine/apps/contract/`, holds an installer per method, each its own adapter under `apps/engine/apps/adapter/<method>/` with its commands and its parser; nothing else switches on a method. A method that holds what it adds by app, apt, is a `Holder` too: the apps model hands its install and its removal the app they serve and whether you asked that removal by name, and its plain install and removal refuse. `wire` builds the registry; `apps/engine/apps/calls` asks each installer what it can do and what is behind (`Outdated`), as [Currency](#currency) says.
 
 | Method            | Install                                                               | Remove                                           | Update                                         | Kinds      |
 | ----------------- | --------------------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------- | ---------- |
@@ -78,7 +78,7 @@ An App Store app is installed by mas itself, outside the bundle: signed out, the
 
 ## Currency
 
-An app is Update available when its method's own program says a newer version exists, and the catalog names the methods that read it (`ReadsCurrency`, whose home is `src/catalog/`); every other method leaves its apps current. Every read runs as any other of station's commands does, from your home in the environment station builds, and is bounded to 5 s: a program that does not answer in time leaves its apps OK with `currency unknown`, never behind, and never holds `station apps`.
+An app is Update available when its method's own program says a newer version exists, and the catalog names the methods that read it (`ReadsCurrency`, whose home is `apps/engine/catalog/`); every other method leaves its apps current. Every read runs as any other of station's commands does, from your home in the environment station builds, and is bounded to 5 s: a program that does not answer in time leaves its apps OK with `currency unknown`, never behind, and never holds `station apps`.
 
 | Method           | Reads                                                       | Behind when                                                                             |
 | ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -120,7 +120,7 @@ Only community skills are in the catalog. The `@jterrazz` skills are not curated
 
 ## The toolbelt
 
-[`skills/studio-toolbelt/`](../../skills/studio-toolbelt/SKILL.md) tells an agent on a studio machine what is available. The sections between its `GENERATED` markers are compiled from the catalog by `make generate` (`src/cmd/generate/`), never edited by hand, and a test run by `make test` fails when the catalog and the skill drift. Change the catalog, run `make generate`, commit both together.
+[`skills/studio-toolbelt/`](../../skills/studio-toolbelt/SKILL.md) tells an agent on a studio machine what is available. The sections between its `GENERATED` markers are compiled from the catalog by `make generate` (`apps/engine/cmd/generate/`), never edited by hand, and a test run by `make test` fails when the catalog and the skill drift. Change the catalog, run `make generate`, commit both together.
 
 ## Related
 

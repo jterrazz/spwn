@@ -14,7 +14,7 @@ Everything `station` shows, in a terminal or a pipe, comes from one palette, one
 
 ## The palette
 
-Semantic tokens, each a light and a dark value chosen by the terminal's background (Catppuccin Latte and Macchiato, the flavour the dotfiles already use). `src/ui/token/palette.go` is the only file a colour is written in; the layer test refuses a hex or a colour constructor anywhere else.
+Semantic tokens, each a light and a dark value chosen by the terminal's background (Catppuccin Latte and Macchiato, the flavour the dotfiles already use). `apps/engine/ui/token/palette.go` is the only file a colour is written in; the layer test refuses a hex or a colour constructor anywhere else.
 
 | Token     | Used for                                                          |
 | --------- | ----------------------------------------------------------------- |
@@ -52,7 +52,7 @@ Beside the marks, a few glyphs carry structure, never a state:
 | `├─`, `└─` | a Mac's VMs under it               |
 | `▁▂▃▄▅▆▇█` | a sparkline ([Graphs](#graphs))    |
 
-The glyph is the meaning and survives a pipe and `NO_COLOR`; colour only reinforces it. `◌` (Muted) marks a row whose read has not answered yet, on a terminal only: a pipe, `NO_COLOR` and `--json` wait for every read, so they never carry it. `⊘` and `?` are Muted, `–` Subtle, each always followed by its word (`page.OffHere`, `page.NotForThisMachine`, `page.NotKnown`); the families draw them as they take their v3 words. Every glyph station prints is a token of `src/ui/token/glyphs.go` (`token.Glyphs`), and the layer test refuses one in any other Go literal of a migrated package.
+The glyph is the meaning and survives a pipe and `NO_COLOR`; colour only reinforces it. `◌` (Muted) marks a row whose read has not answered yet, on a terminal only: a pipe, `NO_COLOR` and `--json` wait for every read, so they never carry it. `⊘` and `?` are Muted, `–` Subtle, each always followed by its word (`page.OffHere`, `page.NotForThisMachine`, `page.NotKnown`); the families draw them as they take their v3 words. Every glyph station prints is a token of `apps/engine/ui/token/glyphs.go` (`token.Glyphs`), and the layer test refuses one in any other Go literal of a migrated package.
 
 ## Typography
 

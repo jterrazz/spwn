@@ -33,7 +33,7 @@ cleanup_tier() {
 
 ssh_key="$work/id_ed25519"
 ssh-keygen -q -t ed25519 -N '' -C "station-e2e" -f "$ssh_key" || fail "ssh-keygen"
-hash=$(cd "$repo" && find src/catalog -type f | LC_ALL=C sort | xargs cat | shasum -a 256 | cut -c1-12)
+hash=$(cd "$repo" && find apps/engine/catalog -type f | LC_ALL=C sort | xargs cat | shasum -a 256 | cut -c1-12)
 base="station-e2e-macos-$hash"
 user=admin
 say "-- base $base"
@@ -264,7 +264,7 @@ mem=$(in_vm 'sysctl -n hw.memsize')
 [ "$(jq -r '.memory.total_bytes' <<< "$act")" = "$mem" ] || fail "memory $(jq -r '.memory.total_bytes' <<< "$act") vs hw.memsize $mem"
 [ "$(jq -r '.thermal, .battery' <<< "$act" | sort -u)" = null ] || fail "a macOS workspace reads a Thermal or a Battery line"
 # value: the binary under test is built without cgo (cross-built by `make e2e-binaries`), so it knows the CPU
-# count and the memory size only (src/platform/darwin/kernel_sysctl_darwin.go); the busy
+# count and the memory size only (apps/engine/platform/darwin/kernel_sysctl_darwin.go); the busy
 # share, the used memory and the top processes are the cgo build's, which tier 3 does not
 # run: they are read empty here, never asserted.
 say "   $(jq -c '{cpus: .cpu.cpus, busy: .cpu.busy_percent, used: .memory.used_bytes, total: .memory.total_bytes, up: .up_s}' <<< "$act")"

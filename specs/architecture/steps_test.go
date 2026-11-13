@@ -12,7 +12,7 @@ import (
 const mostSteps = 2
 
 func TestAPageEndsWithAtMostTwoNextSteps(t *testing.T) {
-	dir := filepath.Join(repoRoot(t), "src", "ui", "testdata", "pages")
+	dir := filepath.Join(repoRoot(t), "apps", "engine", "ui", "testdata", "pages")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		t.Fatal(err)
@@ -31,7 +31,7 @@ func TestAPageEndsWithAtMostTwoNextSteps(t *testing.T) {
 			t.Fatal(err)
 		}
 		if len(p.Hints) > mostSteps {
-			t.Errorf("src/ui/testdata/pages/%s ends with %d next steps, more than %d", e.Name(), len(p.Hints), mostSteps)
+			t.Errorf("apps/engine/ui/testdata/pages/%s ends with %d next steps, more than %d", e.Name(), len(p.Hints), mostSteps)
 		}
 	}
 }

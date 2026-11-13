@@ -35,7 +35,7 @@ A frame (`remote/api.Frame`) carries `v` (2) and `id`. A request carries `hello`
 
 ## calls.json
 
-[`src/remote/api/calls.json`](../../src/remote/api/calls.json) is the Registry, projected by `make generate` (`station.calls/v1`): each call's `name`, the `schema` of its output (`station.<call>/v1`), its `section`, its `where` (`at-target`, `in-engine`, `in-process`), the confirmation it may require, the `errors` it declares, its input and output types, and `watch` for a read that fills progressively. The engine serves every call of it, run on this Mac as the CLI runs it; the menu bar names its actions by these names; `api_test.go` fails when the file and the Registry differ.
+[`apps/engine/remote/api/calls.json`](../../apps/engine/remote/api/calls.json) is the Registry, projected by `make generate` (`station.calls/v1`): each call's `name`, the `schema` of its output (`station.<call>/v1`), its `section`, its `where` (`at-target`, `in-engine`, `in-process`), the confirmation it may require, the `errors` it declares, its input and output types, and `watch` for a read that fills progressively. The engine serves every call of it, run on this Mac as the CLI runs it; the menu bar names its actions by these names; `api_test.go` fails when the file and the Registry differ.
 
 ## The engine's own calls
 

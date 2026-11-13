@@ -144,7 +144,7 @@ Each read of the rights judges the VM's reservations again. One the rights made 
 | `private` | your devices on the tailnet: `tailscale serve`, as [Serve and HTTPS](#serve-and-https) says                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `public`  | the internet: `tailscale funnel --bg --https=<funnel port> http://127.0.0.1:<port>` (`--tcp` for a raw server); Funnel answers on 443, 8443 and 10000 only, so `public` takes a list of at most three ports, never a range, each mapped in order onto them, and a Funnel port another VM's share holds is refused. In `path` mode 443 carries the private paths, so it is never a public port: the list maps onto 8443 and 10000, and a third port is refused (`no Funnel port is left for 3002`) |
 
-The Audience contract (`src/ports/contract/audience.go`) carries the three; its adapters are `tailscale` and the world's `fake`. A row of a port names its label from the catalog's items' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision.
+The Audience contract (`apps/engine/ports/contract/audience.go`) carries the three; its adapters are `tailscale` and the world's `fake`. A row of a port names its label from the catalog's items' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision.
 
 ## What an item sets
 

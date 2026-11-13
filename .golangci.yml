@@ -1,6 +1,6 @@
 version: '2'
 
-# value: the spec build's files (`-tags world`, src/wire/world_on.go) are linted
+# value: the spec build's files (`-tags world`, apps/engine/wire/world_on.go) are linted
 # with the rest; the release build's world_off.go holds no logic to lint.
 run:
     build-tags:
@@ -52,7 +52,7 @@ linters:
         gosec:
             excludes:
                 # invariant: running a declared command is what this CLI IS. Every
-                # subprocess comes from the catalogue under src/catalog/ or a domain
+                # subprocess comes from the catalogue under apps/engine/catalog/ or a domain
                 # operation, never from free input.
                 - G204
                 - G702

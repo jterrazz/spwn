@@ -11,7 +11,7 @@ The application configs `station` puts on a machine are embedded in the binary, 
 
 ## The files
 
-They live under `src/catalog/dotfiles/` and are embedded with `go:embed`.
+They live under `apps/engine/catalog/dotfiles/` and are embedded with `go:embed`.
 
 | Application | Contents                                                                              | Installed by        |
 | ----------- | ------------------------------------------------------------------------------------- | ------------------- |

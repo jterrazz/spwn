@@ -15,7 +15,7 @@ import (
 // family; only it writes the store (Put, Delete, Set, Write), only wire
 // builds a store's adapter, and each group is written by one contract.
 func storeOwners() map[string]string {
-	src := module + "/src/"
+	src := module + "/"
 	return map[string]string{
 		src + "core/contract.Preferences":           "core/contract",
 		src + "setup/contract.NamePrefs":            "setup/calls",
@@ -68,7 +68,7 @@ func storeOf(f *file, sel *ast.SelectorExpr) (string, bool) {
 // invariant: a store's own packages write it freely: its contract (the typed
 // groups over Preferences), its adapters and its suite.
 func ownStorePackage(pkg, store string) bool {
-	owner := strings.TrimPrefix(store, module+"/src/")
+	owner := strings.TrimPrefix(store, module+"/")
 	family := topOf(owner)
 	return pkg == family+"/contract" || pkg == family+"/contract/contracttest" || strings.HasPrefix(pkg, family+"/adapter/")
 }
@@ -82,7 +82,7 @@ func mayWrite(pkg, store string) bool {
 	return pkg == storeOwners()[store] || ownStorePackage(pkg, store)
 }
 
-const preferences = module + "/src/core/contract.Preferences"
+const preferences = module + "/core/contract.Preferences"
 
 func ruleOneWriterPerStore(w *world) []finding {
 	var out []finding
@@ -123,7 +123,7 @@ func ruleOneWriterPerStore(w *world) []finding {
 			if mayWrite(f.pkg, store) {
 				return true
 			}
-			out = append(out, finding{"one-writer-per-store", f.at(call.Pos()), fmt.Sprintf("%q writes %s: only %s does", f.pkg, strings.TrimPrefix(store, module+"/src/"), storeOwners()[store])})
+			out = append(out, finding{"one-writer-per-store", f.at(call.Pos()), fmt.Sprintf("%q writes %s: only %s does", f.pkg, strings.TrimPrefix(store, module+"/"), storeOwners()[store])})
 			return true
 		})
 	}

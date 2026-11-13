@@ -167,7 +167,7 @@ func namedConstants(f *file) map[ast.Node]bool {
 
 func adapterPackage(obj types.Object) bool {
 	pn, ok := obj.(*types.PkgName)
-	return ok && isAdapter(strings.TrimPrefix(pn.Imported().Path(), module+"/src/"))
+	return ok && isAdapter(strings.TrimPrefix(pn.Imported().Path(), module+"/"))
 }
 
 type said struct{ pkg, word string }

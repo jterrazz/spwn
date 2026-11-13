@@ -17,7 +17,7 @@ import (
 // adapters and suite dial a Guest.
 func sshExecOwners() []string { return []string{"remote/adapter/sshstdio", "machines/adapter/macos"} }
 
-const guestDialer = module + "/src/machines/contract.GuestDialer"
+const guestDialer = module + "/machines/contract.GuestDialer"
 
 func dialsAGuest(f *file, call *ast.CallExpr) bool {
 	sel, ok := call.Fun.(*ast.SelectorExpr)
@@ -35,7 +35,7 @@ func mayDialAGuest(f *file) bool {
 	switch {
 	case f.pkg == "engine" || strings.HasPrefix(f.pkg, "engine/"):
 		return true
-	case f.rel == "src/wire/guest_dialer.go":
+	case f.rel == "apps/engine/wire/guest_dialer.go":
 		return true
 	case strings.HasPrefix(f.pkg, "machines/adapter/") || f.pkg == "machines/contract/contracttest":
 		return true

@@ -3,26 +3,26 @@ package architecture_test
 import (
 	"bytes"
 	"encoding/json"
-	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
+	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	"os"
 	"path/filepath"
 	"testing"
 
-	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
-	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
-	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
-	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
-	backgroundcalls "github.com/jterrazz/studio-station/src/background/calls"
-	"github.com/jterrazz/studio-station/src/core/call"
-	diskcalls "github.com/jterrazz/studio-station/src/disk/calls"
-	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
-	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
-	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
-	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
-	overviewcalls "github.com/jterrazz/studio-station/src/overview/calls"
-	portscalls "github.com/jterrazz/studio-station/src/ports/calls"
-	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
-	setupcalls "github.com/jterrazz/studio-station/src/setup/calls"
+	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
+	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
+	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
+	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
+	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
+	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
+	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
+	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
+	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
+	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
+	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
+	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
+	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
 )
 
 // value: every call of the binary, bound with zero Deps: its Meta only.
@@ -48,12 +48,12 @@ func TestCallsJSONFresh(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := os.ReadFile(filepath.Join(repoRoot(t), "src", "remote", "api", "calls.json"))
+	got, err := os.ReadFile(filepath.Join(repoRoot(t), "apps", "engine", "remote", "api", "calls.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !bytes.Equal(got, want) {
-		t.Errorf("src/remote/api/calls.json is not the registry's catalogue: run make generate and commit the result")
+		t.Errorf("apps/engine/remote/api/calls.json is not the registry's catalogue: run make generate and commit the result")
 	}
 }
 
@@ -62,7 +62,7 @@ func TestCallsJSONFresh(t *testing.T) {
 // a terminal, or copies or opens what its page gave it; nothing else runs.
 func TestPaletteCoversCalls(t *testing.T) {
 	root := repoRoot(t)
-	data, err := os.ReadFile(filepath.Join(root, "src", "remote", "api", "calls.json"))
+	data, err := os.ReadFile(filepath.Join(root, "apps", "engine", "remote", "api", "calls.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func TestPaletteCoversCalls(t *testing.T) {
 		known[e.Name] = true
 	}
 	var files []string
-	for _, dir := range []string{filepath.Join(root, "src", "ui", "testdata", "pages"), filepath.Join(root, "apps", "menubar", "stories", "pages")} {
+	for _, dir := range []string{filepath.Join(root, "apps", "engine", "ui", "testdata", "pages"), filepath.Join(root, "apps", "menubar", "stories", "pages")} {
 		entries, err := os.ReadDir(dir)
 		if err != nil {
 			t.Fatal(err)

@@ -18,8 +18,8 @@ SDK_PROBE    ?= xcrun --sdk macosx --show-sdk-path
 MENUBAR_HOME := $(HOME)/Applications/Station.app
 CATALOG_BIN  := .artifacts/menubar/build/debug/StationCatalog
 CATALOG_OUT  ?= .artifacts/catalog
-LDFLAGS      := -X github.com/jterrazz/studio-station/src/wire.version=$(shell git describe --tags --always --dirty)
-SPEC_LDFLAGS := -X github.com/jterrazz/studio-station/src/wire.version=$(shell git describe --tags --always --dirty --long)
+LDFLAGS      := -X github.com/jterrazz/studio-station/apps/engine/wire.version=$(shell git describe --tags --always --dirty)
+SPEC_LDFLAGS := -X github.com/jterrazz/studio-station/apps/engine/wire.version=$(shell git describe --tags --always --dirty --long)
 
 CYAN  := \033[36m
 GREEN := \033[32m
@@ -39,26 +39,26 @@ install: node_modules/.install ## Install the dependencies of both halves
 	@go mod download
 
 build: ## Build the binary, stamped with the version git describes
-	@go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./src/cmd/station
+	@go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./apps/engine/cmd/station
 	@printf "$(GREEN)●$(RESET) Built $(BUILD_PATH)\n"
 
 build-linux: ## Build the linux/arm64 binary a VM image carries
-	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(LINUX_PATH) ./src/cmd/station
+	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(LINUX_PATH) ./apps/engine/cmd/station
 	@printf "$(GREEN)●$(RESET) Built $(LINUX_PATH)\n"
 
 lint: node_modules/.install ## Both halves: gofmt, golangci-lint and deadcode over Go, typescript check over the rest
-	@unformatted=$$(gofmt -l ./src ./specs); \
+	@unformatted=$$(gofmt -l ./apps/engine ./specs); \
 		if [ -n "$$unformatted" ]; then printf "gofmt would rewrite:\n%s\n" "$$unformatted"; exit 1; fi
-	@go tool golangci-lint run ./src/... ./specs/...
-	@GOOS=linux $$(go tool -n golangci-lint) run ./src/... ./specs/...
-	@dead=$$(go tool deadcode -test -tags $(SPEC_TAGS) ./src/...); \
+	@go tool golangci-lint run ./apps/engine/... ./specs/...
+	@GOOS=linux $$(go tool -n golangci-lint) run ./apps/engine/... ./specs/...
+	@dead=$$(go tool deadcode -test -tags $(SPEC_TAGS) ./apps/engine/...); \
 		if [ -n "$$dead" ]; then printf "deadcode found unreachable functions:\n%s\n" "$$dead"; exit 1; fi
 	@printf "$(GREEN)●$(RESET) Go lint passed\n"
 	@npm run --silent lint
 
 fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 	@status=0; \
-	gofmt -w ./src ./specs || status=1; \
+	gofmt -w ./apps/engine ./specs || status=1; \
 	npx typescript fix || status=1; \
 	exit $$status
 
@@ -67,9 +67,9 @@ fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 VZ_SUITES    := specs/usecases/machines specs/usecases/engine/keep
 
 test: node_modules/.install ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station, then the VM suites again over vz
-	@go test ./src/... ./specs/...
-	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./src/wire
-	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./src/cmd/station && touch $(TEST_PATH)
+	@go test ./apps/engine/... ./specs/...
+	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./apps/engine/wire
+	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./apps/engine/cmd/station && touch $(TEST_PATH)
 	@STATION_SPEC_BUILT=1 npx typescript test
 	@STATION_SPEC_BUILT=1 STATION_SPEC_HYPERVISOR=vz npx vitest run $(VZ_SUITES)
 
@@ -118,7 +118,7 @@ e2e-machine: build build-linux ## The machine specs on a real VM of this host: K
 	@specs/machine/run.sh $(KIND) $(LABEL)
 
 e2e-binaries: build-linux ## The two binaries the machine tiers carry (darwin/arm64 and linux/arm64, no cgo, unlike the release's darwin), cross-built where Go is, to copy to the Mac
-	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./src/cmd/station
+	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./apps/engine/cmd/station
 	@printf "$(GREEN)●$(RESET) Built $(BUILD_PATH) and $(LINUX_PATH) for the machine tiers\n"
 
 # hazard: macOS kills (SIGKILL) a signed binary rewritten in place once it has run, so
@@ -141,8 +141,8 @@ deprovision: ## Remove the binary from ~/.local/bin; the user data stays
 	fi
 
 generate: ## Regenerate the catalog's projections
-	@go run ./src/cmd/generate
-	@printf "$(GREEN)●$(RESET) Regenerated skills/studio-toolbelt/SKILL.md, docs/reference/footprint.md, schemas/station.catalog.v1.json, schemas/station.machinefile.v1.json, src/remote/api/calls.json, the page fixtures, the story worlds' pages and the recorded menubar stream\n"
+	@go run ./apps/engine/cmd/generate
+	@printf "$(GREEN)●$(RESET) Regenerated skills/studio-toolbelt/SKILL.md, docs/reference/footprint.md, schemas/station.catalog.v1.json, schemas/station.machinefile.v1.json, apps/engine/remote/api/calls.json, the page fixtures, the story worlds' pages and the recorded menubar stream\n"
 	@if $(SDK_PROBE) >/dev/null 2>&1; then \
 		mkdir -p .artifacts/menubar; \
 		STATION_UPDATE_INDEX=1 swift test --package-path apps/menubar --scratch-path .artifacts/menubar/build --filter StoryCoverageTests > .artifacts/menubar/index.log 2>&1 \

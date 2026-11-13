@@ -1,0 +1,249 @@
+package wire
+
+import (
+	"context"
+	"errors"
+	"path/filepath"
+	"slices"
+
+	"github.com/spf13/cobra"
+
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/bash"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/files"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/git"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/sudoers"
+	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
+	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
+	"github.com/jterrazz/studio-station/apps/engine/output"
+	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/apply"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/drift"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/explain"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/plan"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/upgrade"
+)
+
+// value: the owner's files, ~/.config/station/{catalog,machinefiles}; in
+// a world, its Mac's station files.
+func userSource(world *worldMac, fsys local.FS, prefs string) machinefilecontract.Source {
+	if world != nil {
+		return world.userSource()
+	}
+	return files.New(fsys, machinefilecontract.FileLinks, filepath.Join(prefs, "catalog"), filepath.Join(prefs, "machinefiles"), machinefile.User, "~/.config/station")
+}
+
+func (m machine) userSource() machinefilecontract.Source {
+	return userSource(m.world, m.sys.FS, m.paths.Prefs)
+}
+
+func builtinSource() machinefilecontract.Source {
+	return files.New(files.Embedded{FS: catalog.BuiltinFiles()}, machinefilecontract.NoLinks, "items", "machinefiles", machinefile.Builtin, "built-in")
+}
+
+// invariant: the sources strongest first: the owner's, the shared source
+// preferences.json names (read from its clone in the cache), the
+// built-in.
+func (m machine) machinefileSources() []machinefilecontract.Source {
+	sources := []machinefilecontract.Source{m.userSource()}
+	if shared, ok, err := machinefilecontract.NewSourcePrefs(m.stores.prefs).Get(); err == nil && ok {
+		if m.world != nil {
+			sources = append(sources, m.world.sharedSource(shared))
+		} else {
+			sources = append(sources, git.New(m.sys.Run, m.sys.FS, m.paths.Cache, shared))
+		}
+	}
+	return append(sources, builtinSource())
+}
+
+// invariant: the catalog every command reads is the owner's items over
+// the built-in ones, a same-name item replacing it whole. A file of the
+// owner's the strict decoder refuses leaves the built-in catalog, and is
+// returned worded at its line for the gate to judge.
+func layerCatalog(user machinefilecontract.Source, builtin catalog.Catalog) (catalog.Catalog, error) {
+	tree, err := user.Read(context.Background())
+	if err != nil {
+		return builtin, err
+	}
+	if len(tree.Files) == 0 {
+		return builtin, nil
+	}
+	embedded, err := builtinSource().Read(context.Background())
+	if err != nil {
+		return builtin, err
+	}
+	c, err := machinefile.CatalogOf([]machinefile.Tree{tree, embedded})
+	if err != nil {
+		return builtin, machinefilecalls.Worded(err)
+	}
+	return c, nil
+}
+
+// value: the owner's file refused, as Needs you says it: the worded
+// problem at its file and line, and the file to fix (the owner's catalog
+// folder when the refusal names none).
+func refusalOf(broken error) *overviewcalls.Refusal {
+	if broken == nil {
+		return nil
+	}
+	file := "~/.config/station/catalog"
+	var named *catalog.FileError
+	if errors.As(broken, &named) {
+		file = named.File
+	}
+	return &overviewcalls.Refusal{Text: kit.Translate(broken, "").Message, File: file}
+}
+
+// value: the commands that read no catalog, by their word under the root:
+// help, the shell's completion, the engine (the menu bar's, which must
+// keep answering whatever file the owner broke, and its start and stop)
+// and a world's own events.
+func catalogFree() []string {
+	return []string{"help", "completion", cobra.ShellCompRequestCmd, cobra.ShellCompNoDescRequestCmd, "engine", "start", "stop", "world"}
+}
+
+// invariant: an owner's item file refused stops every command that reads
+// the catalog, at its file and line; a command that reads none runs on
+// the built-in items, and so do --version and --help, which cobra answers
+// before any command runs: each says the file is refused on stderr, once.
+// The returned func says it after the run when nothing else did.
+func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reported func()) {
+	if broken == nil {
+		return func() {}
+	}
+	worded := kit.Translate(broken, "")
+	said := false
+	say := func() {
+		if !said {
+			said = true
+			out.Note(worded.Message, "this run reads the built-in items")
+		}
+	}
+	pre := root.PersistentPreRunE
+	root.PersistentPreRunE = func(c *cobra.Command, args []string) error {
+		top := c
+		for top.HasParent() && top.Parent() != root {
+			top = top.Parent()
+		}
+		if top == root || !slices.Contains(catalogFree(), top.Name()) {
+			said = true
+			return worded
+		}
+		say()
+		if pre == nil {
+			return nil
+		}
+		return pre(c, args)
+	}
+	return say
+}
+
+// value: the ports the Machinefile named after a VM says it may open, else
+// the one it was made from (create --from), read from every source as
+// explain reads them; nil when there is none or it says none. A source
+// that cannot be read, or a refused file of its chain, is the error: the
+// VM then opens nothing.
+func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights, error) {
+	trees := make([]machinefile.Tree, 0, 3)
+	named := false
+	for _, s := range m.machinefileSources() {
+		t, err := s.Read(ctx)
+		if err != nil {
+			return nil, err
+		}
+		trees = append(trees, t)
+		for _, f := range t.Files {
+			named = named || f.Path == "machinefiles/"+vm+".yaml"
+		}
+	}
+	name := vm
+	if rec, err := m.stores.machines.Get(ctx, vm); !named && err == nil && rec.Template != "" {
+		name = rec.Template
+	}
+	rights, err := machinefile.RightsOf(trees, name)
+	if err != nil {
+		return nil, machinefilecalls.Worded(err)
+	}
+	return rights, nil
+}
+
+func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
+	return machinefilecalls.Deps{
+		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
+		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Locks: m.locks(), Owned: m.owned(), Vault: m.vault(),
+		Password: m.password(), Turn: m.turn(), Shell: m.phaseShell(), Now: m.sys.Clock.Now, Calls: calls, Zshrc: m.zshrc(), Home: m.sys.Env.Home(),
+	}
+}
+
+// value: the machine's one turn of apply, upgrade and the night, across
+// its processes; in a world, its Mac's.
+func (m machine) turn() machinefilecontract.Turn {
+	if m.world != nil {
+		return m.world.turn()
+	}
+	return files.NewTurn(filepath.Join(m.paths.State, "runs.lock"), local.ExclusiveWithin)
+}
+
+// value: the shell the owner's lines of a phase run in, as this
+// machine's user; in a world, the world's.
+func (m machine) phaseShell() machinefilecontract.Shell {
+	if m.world != nil {
+		return m.world.phaseShell()
+	}
+	return bash.New(m.sys.Run, m.sys.Env.Home())
+}
+
+// value: whether a line run as root asks a password here, as sudo answers
+// it; in a world, its Mac's.
+func (m machine) password() machinefilecontract.Password {
+	if m.world != nil {
+		return m.world.password()
+	}
+	return sudoers.New(m.sys.Run)
+}
+
+// value: the owner's Machinefiles folder, which a Machinefile named by its
+// path is copied into; in a world, its Mac's station files.
+func (m machine) owned() machinefilecontract.Owned {
+	if m.world != nil {
+		return m.world.owned()
+	}
+	return files.NewOwned(m.sys.FS, filepath.Join(m.paths.Prefs, "machinefiles"))
+}
+
+// value: the locks beside the owner's Machinefiles; in a world, its
+// Mac's station files.
+func (m machine) locks() machinefilecontract.Locks {
+	if m.world != nil {
+		return m.world.locks()
+	}
+	return files.NewLocks(m.sys.FS, filepath.Join(m.paths.Prefs, "machinefiles"), "~/.config/station/machinefiles")
+}
+
+// value: this machine as a Machinefile's selector reads it: Station's
+// Linux machines are Ubuntu.
+func machineOf(p coremachine.Profile) machinefile.Machine {
+	os := catalog.OS(p.System.OS)
+	if p.System.OS == coremachine.Linux {
+		os = catalog.OSUbuntu
+	}
+	return machinefile.Machine{Kind: catalog.MachineRole(p.Kind), System: catalog.SystemSpec{OS: os, Version: p.System.Version, Arch: catalog.Arch(p.System.Arch)}}
+}
+
+func explainCommand(env kit.Env, m machine) *cobra.Command {
+	return explain.Command(explain.Deps{ThisMachine: m.where}, env)
+}
+
+func machinefileCommands(env kit.Env, m machine) []*cobra.Command {
+	return []*cobra.Command{
+		plan.Command(plan.Deps{ThisMachine: m.where}, env),
+		apply.Command(apply.Deps{ThisMachine: m.where}, env),
+		drift.Command(drift.Deps{ThisMachine: m.where}, env),
+		upgrade.Command(upgrade.Deps{ThisMachine: m.where}, env),
+	}
+}

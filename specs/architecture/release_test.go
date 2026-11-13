@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-const srcModule = module + "/src/"
+const srcModule = module + "/"
 
 // value: the packages the binary links under the given build tags.
 func linked(t *testing.T, tags string) []string {
@@ -19,7 +19,7 @@ func linked(t *testing.T, tags string) []string {
 	if tags != "" {
 		args = append(args, "-tags", tags)
 	}
-	cmd := exec.Command("go", append(args, "./src/cmd/station")...)
+	cmd := exec.Command("go", append(args, "./apps/engine/cmd/station")...)
 	cmd.Dir = repoRoot(t)
 	out, err := cmd.Output()
 	if err != nil {
@@ -60,7 +60,7 @@ func TestTheSpecBuildWiresEveryFamilysFake(t *testing.T) {
 	if !slices.Contains(got, srcModule+"world") {
 		t.Fatal("the spec build links no world: the release rule proves nothing")
 	}
-	cmd := exec.Command("go", "list", "./src/...")
+	cmd := exec.Command("go", "list", "./apps/engine/...")
 	cmd.Dir = repoRoot(t)
 	out, err := cmd.Output()
 	if err != nil {

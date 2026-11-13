@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
 // value: a JSON fixture the repository commits: a page fixture, a recorded
@@ -21,7 +21,7 @@ func jsonFixtures(t *testing.T, root string) map[string]string {
 	t.Helper()
 	var paths []string
 	worlds := filepath.Join(root, "specs", "usecases", "worlds")
-	for _, top := range []string{"src", "specs", "apps"} {
+	for _, top := range []string{"apps/engine", "specs", "apps"} {
 		err := filepath.WalkDir(filepath.Join(root, top), func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
@@ -136,7 +136,7 @@ func TestFixturesCarryNoSecret(t *testing.T) {
 		t.Errorf("%s: %s", f.where, f.what)
 	}
 	t.Run("bites", func(t *testing.T) {
-		mutant := map[string]string{"src/ui/testdata/pages/accounts.list.json": `{"token":"` + secrets[0] + `"}`}
+		mutant := map[string]string{"apps/engine/ui/testdata/pages/accounts.list.json": `{"token":"` + secrets[0] + `"}`}
 		if len(ruleFixturesCarryNoSecret(mutant, secrets)) == 0 {
 			t.Error("a page fixture that prints a world's secret passed the rule")
 		}

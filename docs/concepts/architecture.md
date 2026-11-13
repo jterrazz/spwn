@@ -4,7 +4,7 @@
 
 | Section                    | Answers                                                           |
 | -------------------------- | ----------------------------------------------------------------- |
-| The tree                   | The packages under `src/`, families first                         |
+| The tree                   | The packages under `apps/engine/`, families first                 |
 | The hexagon in each family | Model, contracts, calls, adapters; strategies; what applies where |
 | The contracts              | Every contract, the family that owns it, its adapters             |
 | The Router                 | Where a call runs: this process, the target, a Mac's engine       |
@@ -22,7 +22,7 @@
 The families, each with its model, `contract/`, `calls/` and `adapter/<tech>/`:
 
 ```text
-src/
+apps/engine/
   machines/  apps/  settings/  disk/  ports/  accounts/  background/  awake/  activity/  images/
   agents/    the coding agents of a workspace, each named and in a terminal of its own: Judge folds
              their hook events into a state, Scrub keeps only what privacy lets through
@@ -85,7 +85,7 @@ The data, the presentation and the surfaces:
   cmd/       station/ (process entry: argv, environment, streams, once), generate/ (the compiler)
 ```
 
-Beside `src/`: `apps/menubar` (Swift: StationKit, the kit every view is drawn from, the menu bar app, a client of the engine's socket, and the Station Catalog, the dev-only window over every story, which is also its test suite: [ADR-026](../decisions/026-the-stories-are-the-menu-bars-test-suite.md)), `specs/` (the proofs, [Test](../guides/test.md)), `skills/` (what this repository ships to agents).
+Beside `apps/engine/`: `apps/menubar` (Swift: StationKit, the kit every view is drawn from, the menu bar app, a client of the engine's socket, and the Station Catalog, the dev-only window over every story, which is also its test suite: [ADR-026](../decisions/026-the-stories-are-the-menu-bars-test-suite.md)), `specs/` (the proofs, [Test](../guides/test.md)), `skills/` (what this repository ships to agents).
 
 ## The hexagon in each family
 
@@ -104,7 +104,7 @@ A call also declares its `Needs`, what it cannot run without (`machine.Hyperviso
 
 What a machine can do is its `core/machine.Profile`, built once by `wire`: its kind and system from `Self`, its battery, lid and thermal from `awake/contract.Power`, a job manager and an engine from what it wires, and on a Mac the provider of each need. A rule reads the capabilities, never a model name: a desktop Mac has no battery guard because it reports no battery, and a Linux workspace has no Background because it reports no job manager.
 
-A strategy is a contract with several adapters chosen per item at run time, through one registry in the contract package: `Installers` of `src/apps/contract/` (per catalog method), `settings/contract.Appliers` (per effect), `ports/contract.PublicRoutes` (per `--via` route). No other code switches on a method, an effect or a route. The `Hypervisor` is one contract with one real adapter, `tart`; the spec build runs the VM stories a second time over a fake `vz`, so a second hypervisor is a folder and a line in `wire`. A family may import another family's `contract` (Settings' `lock-after-login` writes through `background/contract.Jobs`, its `agent-hooks` through `agents/contract.Hooks`), never its adapters.
+A strategy is a contract with several adapters chosen per item at run time, through one registry in the contract package: `Installers` of `apps/engine/apps/contract/` (per catalog method), `settings/contract.Appliers` (per effect), `ports/contract.PublicRoutes` (per `--via` route). No other code switches on a method, an effect or a route. The `Hypervisor` is one contract with one real adapter, `tart`; the spec build runs the VM stories a second time over a fake `vz`, so a second hypervisor is a folder and a line in `wire`. A family may import another family's `contract` (Settings' `lock-after-login` writes through `background/contract.Jobs`, its `agent-hooks` through `agents/contract.Hooks`), never its adapters.
 
 ## The contracts
 
@@ -164,7 +164,7 @@ An event is the one channel the `Notifier` and the menu bar read, a `notice` of 
 
 ## The fake world
 
-`src/world` is the fake world: one serialisable value holding, for each Mac and VM, one slice per family, the image registry, the clock, and the faults scripted for the fakes; its events are a closed list (`reboot`, `power-cut`, `crash`, `listen`, `advance`, `unplug`...). The spec build (`-tags world`, never shipped) is the one build that wires it: under `$STATION_WORLD`, `wire/world_on.go` hands every family's `adapter/fake` over its machine's slice where the release build's `wire/world_off.go` keeps the real adapter, and steps each Mac's engine over the world's clock. How a use case is told over it is [Test](../guides/test.md#a-use-case-over-a-world)'s, and why is [ADR-020](../decisions/020-the-fake-world.md).
+`apps/engine/world` is the fake world: one serialisable value holding, for each Mac and VM, one slice per family, the image registry, the clock, and the faults scripted for the fakes; its events are a closed list (`reboot`, `power-cut`, `crash`, `listen`, `advance`, `unplug`...). The spec build (`-tags world`, never shipped) is the one build that wires it: under `$STATION_WORLD`, `wire/world_on.go` hands every family's `adapter/fake` over its machine's slice where the release build's `wire/world_off.go` keeps the real adapter, and steps each Mac's engine over the world's clock. How a use case is told over it is [Test](../guides/test.md#a-use-case-over-a-world)'s, and why is [ADR-020](../decisions/020-the-fake-world.md).
 
 ## The path of a request
 
@@ -186,7 +186,7 @@ The rules are Go tests under [`specs/architecture/`](../../specs/architecture/);
 
 | Rule                                                                     | File                                                   | Holds                                                                                                                                                                                           |
 | ------------------------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tree-screams`                                                           | `tree_test.go`                                         | the top of `src/` is families and the named shared packages; inside a family, only its four parts; every call sets `Applies`                                                                    |
+| `tree-screams`                                                           | `tree_test.go`                                         | the top of `apps/engine/` is families and the named shared packages; inside a family, only its four parts; every call sets `Applies`                                                            |
 | `imports`                                                                | `imports_test.go`                                      | the families' import table: a model reaches no platform, an adapter only its own contract, a surface the engine only through `engine/calls`                                                     |
 | the layers                                                               | `layers_test.go`                                       | the presentation's table (page, pages, ui, output, surfaces, wire) and who may hold a symbol: `os/exec`, files, the clock, a colour, Fang, cgo                                                  |
 | `technology-words`, `no-model-names`                                     | `words_test.go`, `models_test.go`                      | a technology is named only in its adapter; no rule reads a Mac's model name                                                                                                                     |
@@ -224,11 +224,11 @@ Fang renders the help, the version and the completion script, and handles the in
 
 ## The catalog
 
-The catalog is what station can put on a machine, and each of its items is one file: `src/catalog/items/<category>/<name>.yaml`, in the schema `station.catalog/v1`, a manager, an app (agent skills included) or a setting, with its methods and, for an app, its disk row. The catalog defines; a Machinefile chooses, and never defines an item ([ADR-031](../decisions/031-the-catalog-defines-the-machinefile-chooses.md)).
+The catalog is what station can put on a machine, and each of its items is one file: `apps/engine/catalog/items/<category>/<name>.yaml`, in the schema `station.catalog/v1`, a manager, an app (agent skills included) or a setting, with its methods and, for an app, its disk row. The catalog defines; a Machinefile chooses, and never defines an item ([ADR-031](../decisions/031-the-catalog-defines-the-machinefile-chooses.md)).
 
 The items are embedded, so the binary reads no file of the clone. Above them stand the owner's own items, `~/.config/station/catalog/<category>/<name>.yaml`, each replacing the built-in item of its name whole ([Machinefiles](../reference/machinefiles.md#sources-and-layers)). `wire` loads them once a run, through the strict decoder (every key known, no anchor or merge key, YAML 1.2 scalars, a newer schema refused with `update station`), and hands the one `catalog.Catalog` value to every reader. Its JSON Schema, `schemas/station.catalog.v1.json`, is projected from the decoder's Go types.
 
-An item's file is data: behaviour chosen by data belongs to a family, picked from a closed union (the method's manager key, a setting's effect), and no Go value of the catalog carries a function, which a test says. **Add to the catalog, not to command code**: one item file gives an app a row in `station apps`, a count in the Overview, an install, a remove, an update and its Disk row, because all of them read the same item. Each method's selector says where the item lives on (`mac-only`, `every-machine`, `vms-only`), so one binary lists and installs only what fits its machine. Images and dev-server profiles are still Go values of `src/catalog/`, carried by the same `catalog.Catalog` value, never read as a package list. The item format, every key of it, is [The catalog's item format](../reference/catalog.md). Which folder a change opens is [Develop](../guides/develop.md#where-a-change-goes)'s.
+An item's file is data: behaviour chosen by data belongs to a family, picked from a closed union (the method's manager key, a setting's effect), and no Go value of the catalog carries a function, which a test says. **Add to the catalog, not to command code**: one item file gives an app a row in `station apps`, a count in the Overview, an install, a remove, an update and its Disk row, because all of them read the same item. Each method's selector says where the item lives on (`mac-only`, `every-machine`, `vms-only`), so one binary lists and installs only what fits its machine. Images and dev-server profiles are still Go values of `apps/engine/catalog/`, carried by the same `catalog.Catalog` value, never read as a package list. The item format, every key of it, is [The catalog's item format](../reference/catalog.md). Which folder a change opens is [Develop](../guides/develop.md#where-a-change-goes)'s.
 
 ## The state
 
@@ -251,7 +251,7 @@ The shared source's clone, `~/.cache/station/sources/<name>`, is no store: it is
 
 ## The compiler
 
-This repository is an application in the sense of the [repo-structure doctrine](repo-structure.md): it authors a corpus and generates no API reference. Its compiler is `make generate` (`src/cmd/generate/`), which writes, from the catalog and the Registry: the rosters between the `GENERATED` markers of `skills/studio-toolbelt/SKILL.md`, `docs/reference/footprint.md` whole, the JSON Schemas of an item and of a Machinefile, `schemas/station.catalog.v1.json` and `schemas/station.machinefile.v1.json`, the page fixtures of `src/ui/testdata/pages/` from the real page functions, the pages of the menu bar's story worlds (`src/cmd/generate/pages/stories.go`: the `machines` world of every Mac and VM, the clock pinned at 2026-11-07 10:30, and its variants, one file per group of stories, `stories_<group>.go`) into `apps/menubar/stories/pages/<world>.<page>.json`, the menu bar's recorded streams, and `src/remote/api/calls.json`. Each projection is committed, and a test fails when one drifts.
+This repository is an application in the sense of the [repo-structure doctrine](repo-structure.md): it authors a corpus and generates no API reference. Its compiler is `make generate` (`apps/engine/cmd/generate/`), which writes, from the catalog and the Registry: the rosters between the `GENERATED` markers of `skills/studio-toolbelt/SKILL.md`, `docs/reference/footprint.md` whole, the JSON Schemas of an item and of a Machinefile, `schemas/station.catalog.v1.json` and `schemas/station.machinefile.v1.json`, the page fixtures of `apps/engine/ui/testdata/pages/` from the real page functions, the pages of the menu bar's story worlds (`apps/engine/cmd/generate/pages/stories.go`: the `machines` world of every Mac and VM, the clock pinned at 2026-11-07 10:30, and its variants, one file per group of stories, `stories_<group>.go`) into `apps/menubar/stories/pages/<world>.<page>.json`, the menu bar's recorded streams, and `apps/engine/remote/api/calls.json`. Each projection is committed, and a test fails when one drifts.
 
 ## Related
 

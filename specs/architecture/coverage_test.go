@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jterrazz/studio-station/src/core/call"
-	"github.com/jterrazz/studio-station/src/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
 
 // value: the machines every call is judged against (ARCHITECTURE 14.3): the

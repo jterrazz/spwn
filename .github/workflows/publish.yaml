@@ -34,9 +34,9 @@ jobs:
         uses: jterrazz/studio-actions/.github/workflows/publish-go.yaml@main
         with:
             binary-name: station
-            build-path: ./src/cmd/station
+            build-path: ./apps/engine/cmd/station
             go-version-file: go.mod
-            ldflags: -X github.com/jterrazz/studio-station/src/wire.version={tag}
+            ldflags: -X github.com/jterrazz/studio-station/apps/engine/wire.version={tag}
             targets: 'linux/arm64,linux/amd64'
 
     darwin:
@@ -65,7 +65,7 @@ jobs:
               env:
                   # value: the oldest macOS the binaries run on, Sonoma.
                   MACOSX_DEPLOYMENT_TARGET: '14.0'
-                  LDFLAGS: -X github.com/jterrazz/studio-station/src/wire.version=${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
+                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
               run: |
                   set -euo pipefail
                   dist="$RUNNER_TEMP/dist"
@@ -74,7 +74,7 @@ jobs:
                   for arch in arm64 amd64; do
                       case "$arch" in arm64) target=arm64 ;; amd64) target=x86_64 ;; esac
                       CGO_ENABLED=1 GOOS=darwin GOARCH="$arch" CC="clang -arch $target -isysroot $sdk -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET" \
-                          go build -ldflags "$LDFLAGS" -o "$dist/station-darwin-$arch" ./src/cmd/station
+                          go build -ldflags "$LDFLAGS" -o "$dist/station-darwin-$arch" ./apps/engine/cmd/station
                       # invariant: a darwin asset without cgo has no IOKit, so it is never released.
                       go version -m "$dist/station-darwin-$arch" | grep -q 'CGO_ENABLED=1'
                       lipo -archs "$dist/station-darwin-$arch"

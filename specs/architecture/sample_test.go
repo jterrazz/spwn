@@ -13,7 +13,7 @@ func samplePath() []string {
 }
 
 func spawning() []string {
-	return []string{"os/exec", module + "/src/platform/local"}
+	return []string{"os/exec", module + "/platform/local"}
 }
 
 // invariant: rule no-subprocess-in-sample (13.3 rule 10, SPEC §6.3, B5.3):

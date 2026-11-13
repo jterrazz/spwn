@@ -138,7 +138,7 @@ func bannedInList(list []banned, texts []string) []string {
 }
 
 func bannedFindings(root string) (map[string][]string, error) {
-	dir := filepath.Join(root, "src", "ui", "testdata", "pages")
+	dir := filepath.Join(root, "apps", "engine", "ui", "testdata", "pages")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -175,7 +175,7 @@ func TestBannedWords(t *testing.T) {
 	}
 	for family, words := range found {
 		for _, w := range words {
-			t.Errorf("src/ui/testdata/pages/%s.*.json says %q, a word SPEC §2.2 retired", family, w)
+			t.Errorf("apps/engine/ui/testdata/pages/%s.*.json says %q, a word SPEC §2.2 retired", family, w)
 		}
 	}
 }

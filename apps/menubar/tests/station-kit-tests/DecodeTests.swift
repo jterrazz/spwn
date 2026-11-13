@@ -15,7 +15,7 @@ final class DecodeTests: XCTestCase {
     }
 
     func testAPageThatSetsEveryFieldOfTheLanguageDecodesWhole() throws {
-        let data = try Data(contentsOf: Tree.root.appendingPathComponent("src/page/testdata/every-field.json"))
+        let data = try Data(contentsOf: Tree.root.appendingPathComponent("apps/engine/page/testdata/every-field.json"))
         let page = try Page.decode(data)
         let sent = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? NSDictionary)
         let kept = try XCTUnwrap(JSONSerialization.jsonObject(with: page.encoded()) as? NSDictionary)

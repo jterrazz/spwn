@@ -198,7 +198,7 @@ func ruleFamilyImports(w *world) []finding {
 		}
 		for i, ip := range f.imports {
 			allowed := allowedOutside(p, ip, f.test)
-			if rel, mod := strings.CutPrefix(ip, module+"/src/"); mod {
+			if rel, mod := strings.CutPrefix(ip, module+"/"); mod {
 				allowed = allowedModule(p, f.pkg, rel, f.test)
 			}
 			if !allowed {

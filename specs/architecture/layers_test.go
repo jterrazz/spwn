@@ -18,7 +18,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-const module = "github.com/jterrazz/studio-station"
+const module = "github.com/jterrazz/studio-station/apps/engine"
 
 const (
 	cobra  = "github.com/spf13/cobra"
@@ -133,13 +133,13 @@ func symbolRules() []symbolRule {
 		{symbols: paletteSymbols(), owners: []string{"ui/token"}},
 		{symbols: []string{lip + ".*"}, owners: []string{"ui/*"}},
 		{symbols: []string{bubble + "/key.*"}, owners: []string{"ui/organism", "ui/render/tty"}},
-		{symbols: []string{bubble + "/spinner.New", module + "/src/ui/token.Spinner"}, owners: []string{"ui/atom"}},
+		{symbols: []string{bubble + "/spinner.New", module + "/ui/token.Spinner"}, owners: []string{"ui/atom"}},
 		{symbols: []string{bubble + "/spinner.*"}, owners: []string{"ui/atom", "ui/render/tty"}},
 		{symbols: []string{tea + ".*", bubble + "/*"}, owners: []string{"ui/organism", "ui/render/tty"}},
 		{symbols: []string{huh + ".*"}, owners: []string{"ui/organism", "ui/render/tty"}},
 		{symbols: []string{fang + ".*"}, owners: []string{"ui/help", "wire"}},
-		{symbols: prefixed(module+"/src/core/fail.", "Silent", "Interruption"), owners: []string{"surface/cli/kit", "wire"}},
-		{symbols: append(prefixed(module+"/src/output.", "NewWriter", "Detect", "For"), module+"/src/output.Writer.*"), owners: []string{"surface/cli/kit", "wire"}},
+		{symbols: prefixed(module+"/core/fail.", "Silent", "Interruption"), owners: []string{"surface/cli/kit", "wire"}},
+		{symbols: append(prefixed(module+"/output.", "NewWriter", "Detect", "For"), module+"/output.Writer.*"), owners: []string{"surface/cli/kit", "wire"}},
 	}
 }
 
@@ -206,7 +206,7 @@ func load(t *testing.T, overlay map[string]string) *world {
 	for name, src := range overlay {
 		cfg.Overlay[filepath.Join(root, name)] = []byte(src)
 	}
-	pkgs, err := packages.Load(cfg, "./src/...")
+	pkgs, err := packages.Load(cfg, "./apps/engine/...")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +219,7 @@ func load(t *testing.T, overlay map[string]string) *world {
 		for _, e := range p.Errors {
 			t.Errorf("%s: %v", p.ID, e)
 		}
-		rel, ok := strings.CutPrefix(strings.TrimSuffix(p.PkgPath, "_test"), module+"/src/")
+		rel, ok := strings.CutPrefix(strings.TrimSuffix(p.PkgPath, "_test"), module+"/")
 		if !ok {
 			continue
 		}
@@ -285,11 +285,11 @@ func allowedImport(row, pkg, ip string, test bool) bool {
 	allowed := importTable()[row]
 	if test {
 		allowed = append(slices.Clone(allowed), testImports...)
-		if ip == module+"/src/"+pkg {
+		if ip == module+"/"+pkg {
 			return true
 		}
 	}
-	if rel, ok := strings.CutPrefix(ip, module+"/src/"); ok {
+	if rel, ok := strings.CutPrefix(ip, module+"/"); ok {
 		for _, a := range allowed {
 			if matches(a, rel) {
 				return true
@@ -319,7 +319,7 @@ func ruleRows(w *world) []finding {
 			continue
 		}
 		if _, ok := rowOf(pkg); !ok {
-			out = append(out, finding{"rows", "src/" + pkg, "no row of the import table names this package"})
+			out = append(out, finding{"rows", "apps/engine/" + pkg, "no row of the import table names this package"})
 		}
 	}
 	return out
@@ -384,7 +384,7 @@ func ruleSymbols(w *world) []finding {
 	var out []finding
 	rules := symbolRules()
 	for _, f := range w.files {
-		self := module + "/src/" + f.pkg
+		self := module + "/" + f.pkg
 		ast.Inspect(f.syntax, func(n ast.Node) bool {
 			id, ok := n.(*ast.Ident)
 			if !ok {
@@ -418,7 +418,7 @@ func ruleSystemtest(w *world) []finding {
 	var out []finding
 	for _, f := range w.files {
 		for i, ip := range f.imports {
-			if ip == module+"/src/platform/local/localtest" && !f.test {
+			if ip == module+"/platform/local/localtest" && !f.test {
 				out = append(out, finding{"systemtest", f.at(f.syntax.Imports[i].Pos()), "platform/local/localtest is imported outside a _test.go file"})
 			}
 		}
@@ -583,7 +583,7 @@ func ruleWorded(w *world) []finding {
 					continue
 				}
 				if !worded[f.types.Path()+"."+ts.Name.Name] {
-					out = append(out, finding{"worded", f.at(ts.Pos()), ts.Name.Name + " is no errors.As target of src/surface/cli/kit/failures_*.go"})
+					out = append(out, finding{"worded", f.at(ts.Pos()), ts.Name.Name + " is no errors.As target of apps/engine/surface/cli/kit/failures_*.go"})
 				}
 			}
 		}
@@ -689,7 +689,7 @@ func ruleStreams(w *world) []finding {
 				if x.Sel.Name != "Streams" {
 					return true
 				}
-				if fn, ok := f.info.Uses[x.Sel].(*types.Func); ok && fn.Pkg() != nil && fn.Pkg().Path() == module+"/src/surface/cli/kit" {
+				if fn, ok := f.info.Uses[x.Sel].(*types.Func); ok && fn.Pkg() != nil && fn.Pkg().Path() == module+"/surface/cli/kit" {
 					calls = append(calls, x.Pos())
 				}
 			}
@@ -723,66 +723,66 @@ type rule struct {
 
 func rules() []rule {
 	return []rule{
-		{"Rows", ruleRows, "src/mutant/mutant.go", "package mutant\n", "src/mutant"},
-		{"RowsPresentation", ruleRows, "src/ui/mutantleak/leak.go", "package mutantleak\n\nimport _ \"os/exec\"\n", "src/ui/mutantleak"},
-		{"Imports", ruleImports, "src/catalog/mutant_imports.go", "package catalog\n\nimport _ \"os/exec\"\n", "src/catalog/mutant_imports.go"},
-		{"ImportsCore", ruleImports, "src/core/machine/mutant_imports.go", "package machine\n\nimport _ \"os\"\n", "src/core/machine/mutant_imports.go"},
-		{"ImportsCoreFiles", ruleImports, "src/core/section/mutant_imports.go", "package section\n\nimport _ \"path/filepath\"\n", "src/core/section/mutant_imports.go"},
-		{"Symbols", ruleSymbols, "src/pages/apps/mutant_symbols.go", "package apps\n\nimport \"time\"\n\nfunc mutantNow() time.Time { return time.Now() }\n", "src/pages/apps/mutant_symbols.go"},
-		{"Systemtest", ruleSystemtest, "src/ui/token/mutant_systemtest.go", "package token\n\nimport _ \"" + module + "/src/platform/local/localtest\"\n", "src/ui/token/mutant_systemtest.go"},
-		{"ANSI", ruleANSI, "src/pages/apps/mutant_ansi.go", "package apps\n\nconst mutantBold = \"\\x1b[1m\"\n", "src/pages/apps/mutant_ansi.go"},
-		{"Palette", rulePalette, "src/pages/apps/mutant_palette.go", "package apps\n\nconst mutantRed = \"#ff0000\"\n", "src/pages/apps/mutant_palette.go"},
-		{"Catalog", ruleCatalog, "src/catalog/mutant_catalog.go", "package catalog\n\ntype mutantEntry struct{ Check func() bool }\n\nvar mutantDefault = mutantEntry{Check: func() bool { return true }}\n", "src/catalog/mutant_catalog.go"},
-		{"Worded", ruleWorded, "src/ports/mutant_worded.go", "package ports\n\ntype UnwordedError struct{}\n\nfunc (UnwordedError) Error() string { return \"unworded\" }\n", "src/ports/mutant_worded.go"},
-		{"Comments", ruleComments, "src/pages/apps/mutant_comments.go", "package apps\n\n// a comment that states no kind\nconst mutantComment = 1\n", "src/pages/apps/mutant_comments.go"},
-		{"Streams", ruleStreams, "src/surface/cli/mutant/mutant_streams.go", "package mutant\n\nimport \"" + module + "/src/surface/cli/kit\"\n\nfunc mutantStreams(o kit.IO) { _, _ = o.Streams() }\n", "src/surface/cli/mutant"},
-		{"Kit", ruleKit, "src/pages/apps/mutant_kit.go", "package apps\n\nimport _ \"" + lip + "\"\n", "src/pages/apps/mutant_kit.go"},
-		{"Levels", ruleLevels, "src/ui/atom/mutant_levels.go", "package atom\n\nimport _ \"" + module + "/src/ui/render/json\"\n", "src/ui/atom/mutant_levels.go"},
-		{"LevelsCatalog", ruleLevels, "src/ui/organism/mutant_levels.go", "package organism\n\nimport _ \"" + module + "/src/catalog\"\n", "src/ui/organism/mutant_levels.go"},
-		{"Semantic", ruleSemantic, "src/pages/apps/mutant_semantic.go", "package apps\n\nfunc Line() string { return \"\" }\n", "src/pages/apps/mutant_semantic.go"},
-		{"Glyphs", ruleGlyphs, "src/surface/cli/apps/mutant_glyphs.go", "package appscmd\n\nconst mutantMark = \"\u25cf\"\n", "src/surface/cli/apps/mutant_glyphs.go"},
-		{"Presentation", rulePresentation, "src/page/mutant_presentation.go", "package page\n\ntype mutantStyled struct{ Tone int }\n", "src/page/mutant_presentation.go"},
-		{"Builders", ruleBuilders, "src/surface/cli/apps/mutant_builders.go", "package appscmd\n\nimport \"" + module + "/src/page\"\n\nvar mutantSection = page.Section{Title: \"x\"}\n", "src/surface/cli/apps/mutant_builders.go"},
-		{"Layout", ruleLayout, "src/surface/cli/apps/mutant_layout.go", "package appscmd\n\nimport \"fmt\"\n\nfunc mutantPad(x string) string { return fmt.Sprintf(\"%-20s\", x) }\n", "src/surface/cli/apps/mutant_layout.go"},
-		{"LayoutRepeat", ruleLayout, "src/surface/cli/apps/mutant_layout_repeat.go", "package appscmd\n\nimport \"strings\"\n\nfunc mutantRule(n int) string { return strings.Repeat(\"-\", n) }\n", "src/surface/cli/apps/mutant_layout_repeat.go"},
-		{"Cgo", ruleCgo, "src/awake/adapter/macos/mutant_cgo.go", "package macos\n\nimport \"C\"\n", "src/awake/adapter/macos/mutant_cgo.go"},
-		{"PowerSafe", func(w *world) []finding { return append(rulePowerSafe(w), powerRaw(w)...) }, "src/awake/mutant_safe.go", "package awake\n\nconst mutantSafe = \"pmset -a disablesleep 1\"\n", "src/awake/mutant_safe.go"},
-		{"PowerFiles", rulePowerSafe, "src/awake/adapter/macos/mutant_files.go", "package macos\n\nimport \"github.com/jterrazz/studio-station/src/platform/local\"\n\nfunc mutantWrite(files local.FS) error { return files.WriteFile(\"x\", nil, 0o600) }\n", "src/awake/adapter/macos/mutant_files.go"},
-		{"HelpWords", ruleHelpWords, "src/surface/cli/use/mutant_help.go", "package usecmd\n\nimport \"" + cobra + "\"\n\nvar mutantHelp = &cobra.Command{Use: \"share\", Short: \"Share a port on the tailnet\"}\n", "src/surface/cli/use/mutant_help.go"},
-		{"HelpWordsFlag", ruleHelpWords, "src/surface/cli/use/mutant_flag.go", "package usecmd\n\nimport \"" + cobra + "\"\n\nfunc mutantFlag(c *cobra.Command) { c.Flags().Bool(\"here\", false, \"this host only\") }\n", "src/surface/cli/use/mutant_flag.go"},
-		{"HelpWordsConstant", ruleHelpWords, "src/surface/cli/use/mutant_constant.go", "package usecmd\n\nimport \"" + cobra + "\"\n\nconst mutantWord = \"its own config\"\n\nvar mutantMove = &cobra.Command{Use: \"move\", Short: \"Move it where \" + mutantWord + \" says\"}\n", "src/surface/cli/use/mutant_constant.go"},
-		{"TreeScreams", ruleTree, "src/utils/mutant.go", "package utils\n", "src/utils"},
-		{"ContractsAreWhole", ruleContracts, "src/disk/contract/mutant_contract.go", "package contract\n\ntype MutantProbe interface{ Probe() }\n", "src/disk/contract/mutant_contract.go"},
-		{"TreeInside", ruleTree, "src/apps/helpers/mutant.go", "package helpers\n", "src/apps/helpers"},
-		{"TreeApplies", ruleTree, "src/awake/applies.go", "package awake\n", "src/awake"},
-		{"TreeAppliesElsewhere", ruleTree, "src/awake/mutant_gate.go", "package awake\n\nimport \"" + module + "/src/core/machine\"\n\nvar Applies = machine.Anywhere\n", "src/awake"},
-		{"FamilyImports", ruleFamilyImports, "src/apps/mutant_imports.go", "package apps\n\nimport _ \"os/exec\"\n", "src/apps/mutant_imports.go"},
-		{"FamilyImportsPlatform", ruleFamilyImports, "src/disk/mutant_imports_platform.go", "package disk\n\nimport _ \"" + module + "/src/platform/local\"\n", "src/disk/mutant_imports_platform.go"},
-		{"FamilyImportsSurfaceEngine", ruleFamilyImports, "src/surface/cli/start/mutant_engine.go", "package startcmd\n\nimport _ \"" + module + "/src/engine\"\n", "src/surface/cli/start/mutant_engine.go"},
-		{"TechnologyWords", ruleTechnologyWords, "src/apps/mutant_words.go", "package apps\n\nconst mutantMethod = \"brew\"\n", "src/apps/mutant_words.go"},
-		{"TechnologyWordsSSH", ruleTechnologyWords, "src/apps/mutant_ssh.go", "package apps\n\nvar mutantArgv = []string{\"ssh\", \"-o\", \"BatchMode=yes\", \"vm\", \"true\"}\n", "src/apps/mutant_ssh.go"},
-		{"TechnologyWordsSSHPath", ruleTechnologyWords, "src/apps/mutant_ssh_path.go", "package apps\n\nconst mutantBinary = \"nohup /usr/bin/ssh vm\"\n", "src/apps/mutant_ssh_path.go"},
-		{"TechnologyWordsSSHLine", ruleTechnologyWords, "src/apps/mutant_ssh_line.go", "package apps\n\nconst mutantLine = \"exec ssh -o BatchMode=yes vm\"\n", "src/apps/mutant_ssh_line.go"},
-		{"OneWayIntoAVM", ruleOneWayIntoAVM, "src/apps/mutant_vm_ssh.go", "package apps\n\ntype mutantCmd struct{ Name string }\n\nvar mutantInto = mutantCmd{Name: \"ssh\"}\n", "src/apps/mutant_vm_ssh.go"},
-		{"OneWayIntoAVMSCP", ruleOneWayIntoAVM, "src/apps/mutant_vm_scp.go", "package apps\n\nvar mutantCopy = []string{\"scp\", \"a\", \"vm:/tmp\"}\n", "src/apps/mutant_vm_scp.go"},
-		{"OneWayIntoAVMDial", ruleOneWayIntoAVM, "src/apps/mutant_vm_dial.go", "package apps\n\nimport (\n\t\"context\"\n\n\t\"" + module + "/src/machines/contract\"\n)\n\nfunc mutantDial(ctx context.Context, d contract.GuestDialer) { _, _ = d.Dial(ctx, contract.GuestTarget{}) }\n", "src/apps/mutant_vm_dial.go"},
-		{"OneWriterPerStore", ruleOneWriterPerStore, "src/apps/mutant_store.go", "package apps\n\nimport (\n\t\"context\"\n\n\t\"" + module + "/src/machines/contract\"\n)\n\nfunc mutantForget(ctx context.Context, s contract.MachineStore) { _ = s.Delete(ctx, \"api\") }\n", "src/apps/mutant_store.go"},
-		{"OneWriterPerStoreBuilt", ruleOneWriterPerStore, "src/apps/mutant_store_built.go", "package apps\n\nimport \"" + module + "/src/machines/adapter/jsonfile\"\n\nvar mutantStore = jsonfile.New(nil, \"vms\")\n", "src/apps/mutant_store_built.go"},
-		{"OneWriterPerStoreGroup", ruleOneWriterPerStore, "src/apps/contract/mutant_group.go", "package contract\n\nimport core \"" + module + "/src/core/contract\"\n\nfunc mutantName(p core.Preferences) error { return p.Write(\"name\", \"mutant\") }\n", "src/apps/contract/mutant_group.go"},
-		{"NoOutboundLiterals", ruleNoOutboundLiterals, "src/overview/mutant_outbound.go", "package overview\n\nconst mutantLookup = \"curl -s https://ifconfig.me\"\n", "src/overview/mutant_outbound.go"},
-		{"EngineNoTCP", ruleEngineNoTCP, "src/remote/serve/mutant_tcp.go", "package serve\n\ntype mutantSockets interface{ ListenTCP(ip string, port int) (any, error) }\n\nfunc mutantListen(s mutantSockets) { _, _ = s.ListenTCP(\"127.0.0.1\", 8080) }\n", "src/remote/serve/mutant_tcp.go"},
-		{"NoRemoteReexec", ruleNoRemoteReexec, "src/apps/mutant_reexec.go", "package apps\n\nfunc mutantRelay(host string) []string { return []string{host, \"--\", \"station\", \"apps\", \"--json\"} }\n", "src/apps/mutant_reexec.go"},
-		{"NoSudoLiteral", ruleNoSudoLiteral, "src/apps/mutant_sudo.go", "package apps\n\nvar mutantRoot = []string{\"sudo\", \"brew\", \"install\"}\n", "src/apps/mutant_sudo.go"},
-		{"NoModelNames", ruleNoModelNames, "src/awake/mutant_models.go", "package awake\n\nfunc mutantLaptop(model string) bool { return model == \"MacBook\" }\n", "src/awake/mutant_models.go"},
-		{"CallsGated", ruleCallsGated, "src/apps/calls/mutant_calls.go", "package calls\n\nimport \"" + module + "/src/core/call\"\n\nvar Mutant = call.Call[Deps, struct{}, struct{}]{Name: \"tools.mutant\"}\n", "src/apps/calls/mutant_calls.go"},
-		{"ConfirmInUsecase", ruleConfirmInUsecase, "src/disk/calls/mutant_confirm.go", "package calls\n\nimport (\n\t\"context\"\n\n\t\"" + module + "/src/core/call\"\n\t\"" + module + "/src/core/confirm\"\n\t\"" + module + "/src/core/machine\"\n)\n\nvar mutantErase = call.Call[Deps, struct{}, struct{}]{Name: \"storage.mutant\", Applies: machine.Anywhere, Confirm: confirm.Erase,\n\tRun: func(context.Context, Deps, struct{}, call.Progress) (struct{}, error) { return struct{}{}, nil }}\n", "src/disk/calls/mutant_confirm.go"},
-		{"ConfirmInUsecaseLeafAsks", ruleConfirmInUsecase, "src/surface/cli/stop/mutant_ask.go", "package stopcmd\n\nimport (\n\t\"" + module + "/src/page\"\n\t\"" + module + "/src/surface/cli/kit\"\n)\n\nfunc mutantAsk(a kit.Asker) { _, _ = a.Confirm(page.Confirm{}) }\n", "src/surface/cli/stop/mutant_ask.go"},
-		{"EveryCodeWorded", ruleEveryCodeWorded, "src/apps/mutant_code.go", "package apps\n\nimport \"" + module + "/src/core/fail\"\n\nconst mutantCode fail.Code = \"apps.mutant\"\n", "src/apps/mutant_code.go"},
-		{"EveryCodeWordedRaised", ruleEveryCodeWorded, "src/surface/cli/words/mutant_unraised.go", "package words\n\nimport \"" + module + "/src/core/fail\"\n\nconst mutantUnraised fail.Code = \"usage.needs-terminal\"\n", "src/surface/cli/words/mutant_unraised.go"},
-		{"NoSubprocessInSample", ruleNoSubprocessInSample, "src/activity/adapter/macos/mutant_exec.go", "package macos\n\nimport _ \"os/exec\"\n", "src/activity/adapter/macos/mutant_exec.go"},
-		{"Vocabulary", ruleVocabularySource, "src/apps/mutant_vocabulary.go", "package apps\n\ntype mutantLease struct{ Fleet string }\n", "src/apps/mutant_vocabulary.go"},
-		{"VocabularyAwake", ruleVocabularySource, "src/ports/mutant_awake.go", "package ports\n\ntype mutantStrip struct {\n\tHeld bool `json:\"power\"`\n}\n\nconst mutantHeld = \"Power session held\"\n", "src/ports/mutant_awake.go"},
-		{"Registries", ruleRegistries, "src/pages/apps/mutant_registries.go", "package apps\n\nvar mutantRegistry = map[string]int{}\n\nfunc init() { mutantRegistry[\"x\"] = 1 }\n", "src/pages/apps/mutant_registries.go"},
+		{"Rows", ruleRows, "apps/engine/mutant/mutant.go", "package mutant\n", "apps/engine/mutant"},
+		{"RowsPresentation", ruleRows, "apps/engine/ui/mutantleak/leak.go", "package mutantleak\n\nimport _ \"os/exec\"\n", "apps/engine/ui/mutantleak"},
+		{"Imports", ruleImports, "apps/engine/catalog/mutant_imports.go", "package catalog\n\nimport _ \"os/exec\"\n", "apps/engine/catalog/mutant_imports.go"},
+		{"ImportsCore", ruleImports, "apps/engine/core/machine/mutant_imports.go", "package machine\n\nimport _ \"os\"\n", "apps/engine/core/machine/mutant_imports.go"},
+		{"ImportsCoreFiles", ruleImports, "apps/engine/core/section/mutant_imports.go", "package section\n\nimport _ \"path/filepath\"\n", "apps/engine/core/section/mutant_imports.go"},
+		{"Symbols", ruleSymbols, "apps/engine/pages/apps/mutant_symbols.go", "package apps\n\nimport \"time\"\n\nfunc mutantNow() time.Time { return time.Now() }\n", "apps/engine/pages/apps/mutant_symbols.go"},
+		{"Systemtest", ruleSystemtest, "apps/engine/ui/token/mutant_systemtest.go", "package token\n\nimport _ \"" + module + "/platform/local/localtest\"\n", "apps/engine/ui/token/mutant_systemtest.go"},
+		{"ANSI", ruleANSI, "apps/engine/pages/apps/mutant_ansi.go", "package apps\n\nconst mutantBold = \"\\x1b[1m\"\n", "apps/engine/pages/apps/mutant_ansi.go"},
+		{"Palette", rulePalette, "apps/engine/pages/apps/mutant_palette.go", "package apps\n\nconst mutantRed = \"#ff0000\"\n", "apps/engine/pages/apps/mutant_palette.go"},
+		{"Catalog", ruleCatalog, "apps/engine/catalog/mutant_catalog.go", "package catalog\n\ntype mutantEntry struct{ Check func() bool }\n\nvar mutantDefault = mutantEntry{Check: func() bool { return true }}\n", "apps/engine/catalog/mutant_catalog.go"},
+		{"Worded", ruleWorded, "apps/engine/ports/mutant_worded.go", "package ports\n\ntype UnwordedError struct{}\n\nfunc (UnwordedError) Error() string { return \"unworded\" }\n", "apps/engine/ports/mutant_worded.go"},
+		{"Comments", ruleComments, "apps/engine/pages/apps/mutant_comments.go", "package apps\n\n// a comment that states no kind\nconst mutantComment = 1\n", "apps/engine/pages/apps/mutant_comments.go"},
+		{"Streams", ruleStreams, "apps/engine/surface/cli/mutant/mutant_streams.go", "package mutant\n\nimport \"" + module + "/surface/cli/kit\"\n\nfunc mutantStreams(o kit.IO) { _, _ = o.Streams() }\n", "apps/engine/surface/cli/mutant"},
+		{"Kit", ruleKit, "apps/engine/pages/apps/mutant_kit.go", "package apps\n\nimport _ \"" + lip + "\"\n", "apps/engine/pages/apps/mutant_kit.go"},
+		{"Levels", ruleLevels, "apps/engine/ui/atom/mutant_levels.go", "package atom\n\nimport _ \"" + module + "/ui/render/json\"\n", "apps/engine/ui/atom/mutant_levels.go"},
+		{"LevelsCatalog", ruleLevels, "apps/engine/ui/organism/mutant_levels.go", "package organism\n\nimport _ \"" + module + "/catalog\"\n", "apps/engine/ui/organism/mutant_levels.go"},
+		{"Semantic", ruleSemantic, "apps/engine/pages/apps/mutant_semantic.go", "package apps\n\nfunc Line() string { return \"\" }\n", "apps/engine/pages/apps/mutant_semantic.go"},
+		{"Glyphs", ruleGlyphs, "apps/engine/surface/cli/apps/mutant_glyphs.go", "package appscmd\n\nconst mutantMark = \"\u25cf\"\n", "apps/engine/surface/cli/apps/mutant_glyphs.go"},
+		{"Presentation", rulePresentation, "apps/engine/page/mutant_presentation.go", "package page\n\ntype mutantStyled struct{ Tone int }\n", "apps/engine/page/mutant_presentation.go"},
+		{"Builders", ruleBuilders, "apps/engine/surface/cli/apps/mutant_builders.go", "package appscmd\n\nimport \"" + module + "/page\"\n\nvar mutantSection = page.Section{Title: \"x\"}\n", "apps/engine/surface/cli/apps/mutant_builders.go"},
+		{"Layout", ruleLayout, "apps/engine/surface/cli/apps/mutant_layout.go", "package appscmd\n\nimport \"fmt\"\n\nfunc mutantPad(x string) string { return fmt.Sprintf(\"%-20s\", x) }\n", "apps/engine/surface/cli/apps/mutant_layout.go"},
+		{"LayoutRepeat", ruleLayout, "apps/engine/surface/cli/apps/mutant_layout_repeat.go", "package appscmd\n\nimport \"strings\"\n\nfunc mutantRule(n int) string { return strings.Repeat(\"-\", n) }\n", "apps/engine/surface/cli/apps/mutant_layout_repeat.go"},
+		{"Cgo", ruleCgo, "apps/engine/awake/adapter/macos/mutant_cgo.go", "package macos\n\nimport \"C\"\n", "apps/engine/awake/adapter/macos/mutant_cgo.go"},
+		{"PowerSafe", func(w *world) []finding { return append(rulePowerSafe(w), powerRaw(w)...) }, "apps/engine/awake/mutant_safe.go", "package awake\n\nconst mutantSafe = \"pmset -a disablesleep 1\"\n", "apps/engine/awake/mutant_safe.go"},
+		{"PowerFiles", rulePowerSafe, "apps/engine/awake/adapter/macos/mutant_files.go", "package macos\n\nimport \"github.com/jterrazz/studio-station/apps/engine/platform/local\"\n\nfunc mutantWrite(files local.FS) error { return files.WriteFile(\"x\", nil, 0o600) }\n", "apps/engine/awake/adapter/macos/mutant_files.go"},
+		{"HelpWords", ruleHelpWords, "apps/engine/surface/cli/use/mutant_help.go", "package usecmd\n\nimport \"" + cobra + "\"\n\nvar mutantHelp = &cobra.Command{Use: \"share\", Short: \"Share a port on the tailnet\"}\n", "apps/engine/surface/cli/use/mutant_help.go"},
+		{"HelpWordsFlag", ruleHelpWords, "apps/engine/surface/cli/use/mutant_flag.go", "package usecmd\n\nimport \"" + cobra + "\"\n\nfunc mutantFlag(c *cobra.Command) { c.Flags().Bool(\"here\", false, \"this host only\") }\n", "apps/engine/surface/cli/use/mutant_flag.go"},
+		{"HelpWordsConstant", ruleHelpWords, "apps/engine/surface/cli/use/mutant_constant.go", "package usecmd\n\nimport \"" + cobra + "\"\n\nconst mutantWord = \"its own config\"\n\nvar mutantMove = &cobra.Command{Use: \"move\", Short: \"Move it where \" + mutantWord + \" says\"}\n", "apps/engine/surface/cli/use/mutant_constant.go"},
+		{"TreeScreams", ruleTree, "apps/engine/utils/mutant.go", "package utils\n", "apps/engine/utils"},
+		{"ContractsAreWhole", ruleContracts, "apps/engine/disk/contract/mutant_contract.go", "package contract\n\ntype MutantProbe interface{ Probe() }\n", "apps/engine/disk/contract/mutant_contract.go"},
+		{"TreeInside", ruleTree, "apps/engine/apps/helpers/mutant.go", "package helpers\n", "apps/engine/apps/helpers"},
+		{"TreeApplies", ruleTree, "apps/engine/awake/applies.go", "package awake\n", "apps/engine/awake"},
+		{"TreeAppliesElsewhere", ruleTree, "apps/engine/awake/mutant_gate.go", "package awake\n\nimport \"" + module + "/core/machine\"\n\nvar Applies = machine.Anywhere\n", "apps/engine/awake"},
+		{"FamilyImports", ruleFamilyImports, "apps/engine/apps/mutant_imports.go", "package apps\n\nimport _ \"os/exec\"\n", "apps/engine/apps/mutant_imports.go"},
+		{"FamilyImportsPlatform", ruleFamilyImports, "apps/engine/disk/mutant_imports_platform.go", "package disk\n\nimport _ \"" + module + "/platform/local\"\n", "apps/engine/disk/mutant_imports_platform.go"},
+		{"FamilyImportsSurfaceEngine", ruleFamilyImports, "apps/engine/surface/cli/start/mutant_engine.go", "package startcmd\n\nimport _ \"" + module + "/engine\"\n", "apps/engine/surface/cli/start/mutant_engine.go"},
+		{"TechnologyWords", ruleTechnologyWords, "apps/engine/apps/mutant_words.go", "package apps\n\nconst mutantMethod = \"brew\"\n", "apps/engine/apps/mutant_words.go"},
+		{"TechnologyWordsSSH", ruleTechnologyWords, "apps/engine/apps/mutant_ssh.go", "package apps\n\nvar mutantArgv = []string{\"ssh\", \"-o\", \"BatchMode=yes\", \"vm\", \"true\"}\n", "apps/engine/apps/mutant_ssh.go"},
+		{"TechnologyWordsSSHPath", ruleTechnologyWords, "apps/engine/apps/mutant_ssh_path.go", "package apps\n\nconst mutantBinary = \"nohup /usr/bin/ssh vm\"\n", "apps/engine/apps/mutant_ssh_path.go"},
+		{"TechnologyWordsSSHLine", ruleTechnologyWords, "apps/engine/apps/mutant_ssh_line.go", "package apps\n\nconst mutantLine = \"exec ssh -o BatchMode=yes vm\"\n", "apps/engine/apps/mutant_ssh_line.go"},
+		{"OneWayIntoAVM", ruleOneWayIntoAVM, "apps/engine/apps/mutant_vm_ssh.go", "package apps\n\ntype mutantCmd struct{ Name string }\n\nvar mutantInto = mutantCmd{Name: \"ssh\"}\n", "apps/engine/apps/mutant_vm_ssh.go"},
+		{"OneWayIntoAVMSCP", ruleOneWayIntoAVM, "apps/engine/apps/mutant_vm_scp.go", "package apps\n\nvar mutantCopy = []string{\"scp\", \"a\", \"vm:/tmp\"}\n", "apps/engine/apps/mutant_vm_scp.go"},
+		{"OneWayIntoAVMDial", ruleOneWayIntoAVM, "apps/engine/apps/mutant_vm_dial.go", "package apps\n\nimport (\n\t\"context\"\n\n\t\"" + module + "/machines/contract\"\n)\n\nfunc mutantDial(ctx context.Context, d contract.GuestDialer) { _, _ = d.Dial(ctx, contract.GuestTarget{}) }\n", "apps/engine/apps/mutant_vm_dial.go"},
+		{"OneWriterPerStore", ruleOneWriterPerStore, "apps/engine/apps/mutant_store.go", "package apps\n\nimport (\n\t\"context\"\n\n\t\"" + module + "/machines/contract\"\n)\n\nfunc mutantForget(ctx context.Context, s contract.MachineStore) { _ = s.Delete(ctx, \"api\") }\n", "apps/engine/apps/mutant_store.go"},
+		{"OneWriterPerStoreBuilt", ruleOneWriterPerStore, "apps/engine/apps/mutant_store_built.go", "package apps\n\nimport \"" + module + "/machines/adapter/jsonfile\"\n\nvar mutantStore = jsonfile.New(nil, \"vms\")\n", "apps/engine/apps/mutant_store_built.go"},
+		{"OneWriterPerStoreGroup", ruleOneWriterPerStore, "apps/engine/apps/contract/mutant_group.go", "package contract\n\nimport core \"" + module + "/core/contract\"\n\nfunc mutantName(p core.Preferences) error { return p.Write(\"name\", \"mutant\") }\n", "apps/engine/apps/contract/mutant_group.go"},
+		{"NoOutboundLiterals", ruleNoOutboundLiterals, "apps/engine/overview/mutant_outbound.go", "package overview\n\nconst mutantLookup = \"curl -s https://ifconfig.me\"\n", "apps/engine/overview/mutant_outbound.go"},
+		{"EngineNoTCP", ruleEngineNoTCP, "apps/engine/remote/serve/mutant_tcp.go", "package serve\n\ntype mutantSockets interface{ ListenTCP(ip string, port int) (any, error) }\n\nfunc mutantListen(s mutantSockets) { _, _ = s.ListenTCP(\"127.0.0.1\", 8080) }\n", "apps/engine/remote/serve/mutant_tcp.go"},
+		{"NoRemoteReexec", ruleNoRemoteReexec, "apps/engine/apps/mutant_reexec.go", "package apps\n\nfunc mutantRelay(host string) []string { return []string{host, \"--\", \"station\", \"apps\", \"--json\"} }\n", "apps/engine/apps/mutant_reexec.go"},
+		{"NoSudoLiteral", ruleNoSudoLiteral, "apps/engine/apps/mutant_sudo.go", "package apps\n\nvar mutantRoot = []string{\"sudo\", \"brew\", \"install\"}\n", "apps/engine/apps/mutant_sudo.go"},
+		{"NoModelNames", ruleNoModelNames, "apps/engine/awake/mutant_models.go", "package awake\n\nfunc mutantLaptop(model string) bool { return model == \"MacBook\" }\n", "apps/engine/awake/mutant_models.go"},
+		{"CallsGated", ruleCallsGated, "apps/engine/apps/calls/mutant_calls.go", "package calls\n\nimport \"" + module + "/core/call\"\n\nvar Mutant = call.Call[Deps, struct{}, struct{}]{Name: \"tools.mutant\"}\n", "apps/engine/apps/calls/mutant_calls.go"},
+		{"ConfirmInUsecase", ruleConfirmInUsecase, "apps/engine/disk/calls/mutant_confirm.go", "package calls\n\nimport (\n\t\"context\"\n\n\t\"" + module + "/core/call\"\n\t\"" + module + "/core/confirm\"\n\t\"" + module + "/core/machine\"\n)\n\nvar mutantErase = call.Call[Deps, struct{}, struct{}]{Name: \"storage.mutant\", Applies: machine.Anywhere, Confirm: confirm.Erase,\n\tRun: func(context.Context, Deps, struct{}, call.Progress) (struct{}, error) { return struct{}{}, nil }}\n", "apps/engine/disk/calls/mutant_confirm.go"},
+		{"ConfirmInUsecaseLeafAsks", ruleConfirmInUsecase, "apps/engine/surface/cli/stop/mutant_ask.go", "package stopcmd\n\nimport (\n\t\"" + module + "/page\"\n\t\"" + module + "/surface/cli/kit\"\n)\n\nfunc mutantAsk(a kit.Asker) { _, _ = a.Confirm(page.Confirm{}) }\n", "apps/engine/surface/cli/stop/mutant_ask.go"},
+		{"EveryCodeWorded", ruleEveryCodeWorded, "apps/engine/apps/mutant_code.go", "package apps\n\nimport \"" + module + "/core/fail\"\n\nconst mutantCode fail.Code = \"apps.mutant\"\n", "apps/engine/apps/mutant_code.go"},
+		{"EveryCodeWordedRaised", ruleEveryCodeWorded, "apps/engine/surface/cli/words/mutant_unraised.go", "package words\n\nimport \"" + module + "/core/fail\"\n\nconst mutantUnraised fail.Code = \"usage.needs-terminal\"\n", "apps/engine/surface/cli/words/mutant_unraised.go"},
+		{"NoSubprocessInSample", ruleNoSubprocessInSample, "apps/engine/activity/adapter/macos/mutant_exec.go", "package macos\n\nimport _ \"os/exec\"\n", "apps/engine/activity/adapter/macos/mutant_exec.go"},
+		{"Vocabulary", ruleVocabularySource, "apps/engine/apps/mutant_vocabulary.go", "package apps\n\ntype mutantLease struct{ Fleet string }\n", "apps/engine/apps/mutant_vocabulary.go"},
+		{"VocabularyAwake", ruleVocabularySource, "apps/engine/ports/mutant_awake.go", "package ports\n\ntype mutantStrip struct {\n\tHeld bool `json:\"power\"`\n}\n\nconst mutantHeld = \"Power session held\"\n", "apps/engine/ports/mutant_awake.go"},
+		{"Registries", ruleRegistries, "apps/engine/pages/apps/mutant_registries.go", "package apps\n\nvar mutantRegistry = map[string]int{}\n\nfunc init() { mutantRegistry[\"x\"] = 1 }\n", "apps/engine/pages/apps/mutant_registries.go"},
 	}
 }
 
@@ -801,7 +801,7 @@ func worlds(t *testing.T) (clean, mutant *world) {
 		cleanWorld, mutantWorld = load(t, nil), load(t, overlay)
 	})
 	if cleanWorld == nil || mutantWorld == nil {
-		t.Fatal("the packages under src/ did not load")
+		t.Fatal("the packages under apps/engine/ did not load")
 	}
 	return cleanWorld, mutantWorld
 }
