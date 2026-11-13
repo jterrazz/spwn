@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 )
 
@@ -122,6 +123,7 @@ func (w *writer) frame(f api.Frame) error {
 	if err != nil {
 		return err
 	}
+	secret.Tripwire(data)
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	_, err = w.w.Write(append(data, '\n'))

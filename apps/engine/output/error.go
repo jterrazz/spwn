@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 const ErrorSchema = "station.error/v1"
@@ -44,6 +45,7 @@ func (w *Writer) FailureJSON(err error) {
 	if mErr != nil {
 		return
 	}
+	secret.Tripwire(data)
 	w.settle()
 	_, _ = io.WriteString(w.stdout.W, string(data)+"\n")
 }

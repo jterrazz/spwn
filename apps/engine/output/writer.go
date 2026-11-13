@@ -1,12 +1,14 @@
 package output
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"sort"
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/ui/render/tty"
 )
@@ -29,6 +31,7 @@ func NewWriter(stdout, stderr Stream, env map[string]string) *Writer {
 }
 
 func (w *Writer) Raw(p []byte) error {
+	secret.Tripwire(p)
 	w.settle()
 	_, err := w.stdout.W.Write(p)
 	return err
@@ -50,18 +53,23 @@ func (w *Writer) Failure(err error) {
 	w.settle()
 	c := Detect(w.stderr, w.env, false)
 	block := tty.ErrorBlock(page.Error{Message: e.Message, Hint: e.Hint}, c.Mode == TTY, c.Dark)
+	secret.Tripwire([]byte(block))
 	_, _ = io.WriteString(w.colored(w.stderr, c), block)
 }
 
 func (w *Writer) Finding(m page.Mark, parts ...string) error {
+	line := tty.FindingLine(m, parts...)
+	secret.Tripwire([]byte(line))
 	w.settle()
-	_, err := io.WriteString(w.stdout.W, tty.FindingLine(m, parts...))
+	_, err := io.WriteString(w.stdout.W, line)
 	return err
 }
 
 func (w *Writer) Note(parts ...string) {
+	line := tty.NoteLine(parts...)
+	secret.Tripwire([]byte(line))
 	w.settle()
-	_, _ = io.WriteString(w.stderr.W, tty.NoteLine(parts...))
+	_, _ = io.WriteString(w.stderr.W, line)
 }
 
 func (w *Writer) Now(command string) {
@@ -69,12 +77,17 @@ func (w *Writer) Now(command string) {
 	// command it ran (SPEC §4.3).
 	w.settle()
 	c := Detect(w.stderr, w.env, false)
-	_, _ = io.WriteString(w.colored(w.stderr, c), tty.NowLine(command, c.Mode == TTY, c.Dark))
+	line := tty.NowLine(command, c.Mode == TTY, c.Dark)
+	secret.Tripwire([]byte(line))
+	_, _ = io.WriteString(w.colored(w.stderr, c), line)
 }
 
 func (w *Writer) Menu(render func(io.Writer)) {
 	w.settle()
-	render(w.stderr.W)
+	var menu bytes.Buffer
+	render(&menu)
+	secret.Tripwire(menu.Bytes())
+	_, _ = w.stderr.W.Write(menu.Bytes())
 }
 
 func (w *Writer) Wait(label string) func() {
@@ -82,6 +95,7 @@ func (w *Writer) Wait(label string) func() {
 	if c.Mode != TTY {
 		return func() {}
 	}
+	secret.Tripwire([]byte(label))
 	w.settle()
 	stop := tty.Wait(w.colored(w.stderr, c), label, c.Dark)
 	w.waiting = stop
@@ -106,8 +120,10 @@ func (w *Writer) Ahead(parts ...string) {
 		return
 	}
 	c := Detect(w.stderr, w.env, false)
+	line := tty.AheadLine(tty.NoteLine(parts...), c.Mode == TTY, c.Dark)
+	secret.Tripwire([]byte(line))
 	w.settle()
-	_, _ = io.WriteString(w.colored(w.stderr, c), tty.AheadLine(tty.NoteLine(parts...), c.Mode == TTY, c.Dark))
+	_, _ = io.WriteString(w.colored(w.stderr, c), line)
 }
 
 func (w *Writer) settle() {

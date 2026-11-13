@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 var strict bool
@@ -47,6 +49,7 @@ func Seal(p Page) Page {
 	if err := Check(p); err != nil && strict {
 		panic(err)
 	}
+	secret.TripwireJSON(p)
 	return p
 }
 

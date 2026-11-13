@@ -11,6 +11,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/remote/contract"
 )
 
@@ -116,7 +117,7 @@ func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, i
 		if err != nil {
 			return nil, e.over(err)
 		}
-		return call.Encode(out, e.word())
+		return e.encoded(out)
 	}
 	v, err := e.m.Registry.Input(name, in)
 	if err != nil {
@@ -126,7 +127,7 @@ func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, i
 	if err != nil {
 		return nil, e.over(err)
 	}
-	return call.Encode(out, e.word())
+	return e.encoded(out)
 }
 
 func (e endpoint) Watch(ctx context.Context, target machine.Ref, name string, in json.RawMessage, p call.Progress) (<-chan call.Update[json.RawMessage], error) {
@@ -147,7 +148,7 @@ func (e endpoint) Watch(ctx context.Context, target machine.Ref, name string, in
 			}
 			next := call.Update[json.RawMessage]{Err: e.over(u.Err)}
 			if u.Err == nil {
-				next.Value, next.Err = call.Encode(u.Value, e.word())
+				next.Value, next.Err = e.encoded(u.Value)
 			}
 			out <- next
 		}
@@ -164,6 +165,16 @@ func (e endpoint) stream(ctx context.Context, target machine.Ref, name string, i
 		return nil, err
 	}
 	return e.m.Registry.Stream(ctx, e.m.Profile, name, v, p)
+}
+
+func (e endpoint) encoded(out any) (json.RawMessage, error) {
+	// invariant: what crosses from one Mac to the other is an answer: the
+	// world build's tripwire reads it as the serve loop reads a frame.
+	data, err := call.Encode(out, e.word())
+	if err == nil {
+		secret.Tripwire(data)
+	}
+	return data, err
 }
 
 func (e endpoint) Close() error {
@@ -190,5 +201,7 @@ func (e endpoint) over(err error) error {
 	if err == nil {
 		return nil
 	}
-	return call.ToWire(err, e.word()).Err()
+	w := call.ToWire(err, e.word())
+	secret.TripwireJSON(w)
+	return w.Err()
 }

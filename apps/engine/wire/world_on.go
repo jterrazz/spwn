@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 
 	"github.com/spf13/cobra"
 
@@ -143,6 +144,7 @@ type worldMac struct {
 func openWorld(vars map[string]string, look bool) (*worldRun, error) {
 	path := vars["STATION_WORLD"]
 	if path == "" {
+		armTripwire(nil)
 		return nil, nil
 	}
 	held := lockWorld(path)
@@ -160,6 +162,7 @@ func openWorld(vars map[string]string, look bool) (*worldRun, error) {
 		return nil, err
 	}
 	w.UseHypervisor(vars["STATION_WORLD_HYPERVISOR"])
+	armTripwire(w)
 	if look {
 		unlockWorld(held)
 		return &worldRun{path: path, w: w, macs: map[string]*worldMac{}, shared: true}, nil
@@ -167,6 +170,29 @@ func openWorld(vars map[string]string, look bool) (*worldRun, error) {
 	r := &worldRun{path: path, w: w, macs: map[string]*worldMac{}, held: held}
 	w.OnPause(r.pause)
 	return r, nil
+}
+
+// value: the spec build's tripwire is armed: every frame, CLI write and
+// sealed page that carries a secret of the world, or a token shaped by its
+// issuer, panics, so every story is a leak check.
+const tripwireArmed = true
+
+func armTripwire(w *world.World) {
+	if !tripwireArmed {
+		return
+	}
+	var secrets []string
+	if w != nil {
+		for _, m := range w.Macs {
+			for _, v := range m.Vault {
+				secrets = append(secrets, string(v))
+			}
+			for _, v := range m.Secrets {
+				secrets = append(secrets, v)
+			}
+		}
+	}
+	secret.Arm(secrets, func(said string) { panic("tripwire: " + said) })
 }
 
 // invariant: a call held in a run that writes its world back writes it back

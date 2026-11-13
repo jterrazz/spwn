@@ -3,6 +3,7 @@ package output
 import (
 	"io"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	pagejson "github.com/jterrazz/studio-station/apps/engine/ui/render/json"
 	"github.com/jterrazz/studio-station/apps/engine/ui/render/pipe"
@@ -36,16 +37,20 @@ func (w *Writer) Page(p page.Page, contract any, want Want) error {
 	out := w.stdout.W
 	switch {
 	case want.Page:
-		_, err := out.Write(pagejson.Render(p))
+		body := pagejson.Render(p)
+		secret.Tripwire(body)
+		_, err := out.Write(body)
 		return err
 	case c.Mode == JSON:
 		body, err := Document(contract, want.Envelope)
 		if err != nil {
 			return err
 		}
+		secret.Tripwire(body)
 		_, err = out.Write(body)
 		return err
 	case c.Mode == Pipe && want.Piped != nil:
+		secret.Tripwire(want.Piped)
 		_, err := out.Write(want.Piped)
 		return err
 	case c.Mode == Pipe:
@@ -56,11 +61,14 @@ func (w *Writer) Page(p page.Page, contract any, want Want) error {
 		if err != nil {
 			return err
 		}
+		secret.Tripwire(body)
 		_, err = out.Write(body)
 		return err
 	case c.Mode == TTY:
 	}
-	_, err := w.colored(w.stdout, c).Write(tty.Render(p, tty.Options{Width: c.Width, Dark: c.Dark}))
+	body := tty.Render(p, tty.Options{Width: c.Width, Dark: c.Dark})
+	secret.Tripwire(body)
+	_, err := w.colored(w.stdout, c).Write(body)
 	return err
 }
 
@@ -78,6 +86,7 @@ func (w *Writer) LivePage(pages <-chan page.Page) error {
 		drawn int
 	)
 	for p := range pages {
+		secret.TripwireJSON(p)
 		last, got = p, true
 		lines := tty.Frame(p, o, w.stdout.Height)
 		if _, err := io.WriteString(out, tty.Draw(lines, drawn)); err != nil {
