@@ -1,4 +1,4 @@
-import { button, component, content, dialog, field, heading, within } from '@jterrazz/test';
+import { button, component, content, dialog, field, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { Client } from '../../../engine/client';
@@ -105,9 +105,9 @@ describe('New machine', () => {
     });
 
     test('a Mac with no image says so, and the engine refuses the create', async () => {
-        // Given - the New machine sheet over one-mac, which has built no image
+        // Given - the New machine sheet over one-mac, which has built no image nor any machine
         const result = await component.render(windowOver('one-mac'), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(within(region('Start here'), button('New machine')));
 
             // When - gate5 is asked for
             await visitor.fill(within(sheet, field('Name')), 'gate5');

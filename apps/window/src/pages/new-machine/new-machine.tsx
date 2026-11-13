@@ -146,8 +146,8 @@ function Fields({ draft, images, change }: ImagesProps) {
             <Size change={change} draft={draft} />
             <Choice label="Its machine file">
                 <Missing>
-                    Neither create call takes a machine file: which one the new machine follows is
-                    not asked here.
+                    Not asked here yet: a workspace can be made from a machine file, a server cannot
+                    be given one.
                 </Missing>
             </Choice>
         </>

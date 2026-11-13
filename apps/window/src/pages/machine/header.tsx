@@ -75,9 +75,7 @@ function Actions({ found, onNewMachine }: Pick<Props, 'found' | 'onNewMachine'>)
     if (!vm) {
         return (
             <div className={styles.actions}>
-                <Button onClick={onNewMachine} variant="primary" yields>
-                    New machine
-                </Button>
+                <Button onClick={onNewMachine}>New machine</Button>
             </div>
         );
     }

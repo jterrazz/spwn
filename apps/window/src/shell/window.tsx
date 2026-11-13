@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { Screen } from '../design/index';
+import { engineViewStateOf } from '../engine/provisional';
 import { useRead, useWatch } from '../engine/react';
 import type { Reading } from '../engine/react';
 import { findMachine, macsOf } from '../model/machines';
@@ -201,6 +202,12 @@ function useSheets() {
     return { act, close, find, sheet, sidebar };
 }
 
+// value: while this Mac's engine is stopped, Start the engine leads Home and New machine stands back.
+function engineStopped(macs: readonly MachinesMacView[]): boolean {
+    const thisMac = macs.find((mac) => mac.ThisMac);
+    return thisMac !== undefined && engineViewStateOf(thisMac.Engine) === 'stopped';
+}
+
 function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages: Pages }) {
     const router = useRouter();
     const { route, go, back, canGoBack } = router;
@@ -220,6 +227,7 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                     <Toolbar
                         canGoBack={canGoBack}
                         crumbs={crumbsOf(route, found, go)}
+                        newMachineLeads={!engineStopped(macs)}
                         onBack={back}
                         onFind={find}
                         onNewMachine={route.page === 'home' ? newMachine : undefined}

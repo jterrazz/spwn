@@ -46,14 +46,14 @@ describe('Machine files', () => {
         );
     });
 
-    test('a Mac behind its file shows what is outdated and what applying would ask', async () => {
+    test('a Mac behind its file shows what is outdated, each file tab in its layer colour', async () => {
         // Given - the window on Machine files over stories-file, where gh and ghostty are behind
         const result = await component.render(windowOver('stories-file'), async (visitor) => {
             // When - the drift has answered
             await visitor.see(content('ghostty'));
         });
 
-        // Then - the outdated lines and the password homebrew asks
+        // Then - the outdated lines, and no panel the mockup does not draw
         await expect(result.tree).toMatch(file('./__expected__/stories-files.aria.yaml'));
     });
 

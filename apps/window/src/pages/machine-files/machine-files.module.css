@@ -12,6 +12,9 @@
     align-items: center;
     gap: var(--space-12);
 }
+.actions {
+    margin-left: auto;
+}
 .icon {
     width: 28px;
     height: 28px;

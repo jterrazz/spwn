@@ -15,6 +15,7 @@ import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
 import { HomeMachines } from './home-machines';
 import { HomeTiles } from './home-tiles';
+import { StartHere } from './start-here';
 
 type Go = (to: Route) => void;
 
@@ -22,9 +23,10 @@ export type HomeProps = {
     macs: readonly MachinesMacView[];
     overview: Reading<OverviewReadOutput>;
     go: Go;
+    onNewMachine?: (() => void) | undefined;
 };
 
-export function HomePage({ macs, overview, go }: HomeProps) {
+export function HomePage({ macs, overview, go, onNewMachine }: HomeProps) {
     const reach = useReach();
     if (reach.kind === 'unanswered') {
         return (
@@ -53,6 +55,7 @@ export function HomePage({ macs, overview, go }: HomeProps) {
         <Page>
             <NoVerdict size="page" />
             {thisMac ? <HomeTiles mac={thisMac} /> : null}
+            <StartHere go={go} macs={macs} onNewMachine={onNewMachine} />
             <HeldOutcomes>
                 <Needs go={go} macs={macs} needs={Summary.Needs ?? []} title="Needs you" />
             </HeldOutcomes>

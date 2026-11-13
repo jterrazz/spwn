@@ -3,7 +3,9 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { Icon } from '../../design/icon';
-import { Facts, Missing, Panel, Switch, Value } from '../../design/index';
+import { Button, Facts, Missing, Panel, Switch, Value } from '../../design/index';
+import type { Identity } from '../../design/index';
+import { makesAVm } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { machineKindWord } from '../../engine/shown';
@@ -16,7 +18,6 @@ import {
 } from '../kit/readings';
 import { LayerList } from '../packages/layers';
 import { categoriesOf, countOn, layersOf, onShelf } from '../packages/model';
-import { Asks } from '../packages/plan';
 import { Page } from '../page';
 import { CHAPTERS, descriptionsOf, extendedBy, factsOf, filesOf } from './model';
 import type { Chapter, Extended } from './model';
@@ -62,14 +63,18 @@ function Chapters({ plan }: { plan: MachinefilePlan }) {
     );
 }
 
+type Identities = ReadonlyMap<string, Identity>;
+
 function Files({
     explain,
     file,
     choose,
+    identities,
 }: {
     explain: MachinefileCallsExplainOut;
     file: string;
     choose: (file: string) => void;
+    identities: Identities;
 }) {
     const files = filesOf(explain);
     if (files.length < 2) {
@@ -79,7 +84,12 @@ function Files({
         <Switch
             label="Machine files"
             onChange={choose}
-            options={files.map((candidate) => ({ id: candidate.Name, label: candidate.Name }))}
+            options={files.map((candidate) => ({
+                id: candidate.Name,
+                identity: identities.get(candidate.Name),
+                label: candidate.Name,
+            }))}
+            surface="bare"
             value={file}
         />
     );
@@ -116,16 +126,23 @@ function Head({
     explain,
     file,
     choose,
+    identities,
+    onNewMachine,
 }: {
     explain: MachinefileCallsExplainOut;
     file: string;
     choose: (file: string) => void;
+    identities: Identities;
+    onNewMachine?: (() => void) | undefined;
 }) {
     const origin = filesOf(explain).find((candidate) => candidate.Name === file);
     const path = origin?.File ?? '';
     const named = path === '' ? file : (path.split('/').at(-1) ?? file);
     const { makes, system } = factsOf(explain, file);
-    const extended = extendedBy(explain, file);
+    const extended = extendedBy(explain, file).map((one) => ({
+        ...one,
+        identity: identities.get(one.name) ?? one.identity,
+    }));
     const facts: { label: string; value: ReactNode }[] = [
         { label: 'Makes', value: makes === '' ? null : `a ${machineKindWord(makes)}` },
         { label: 'System', value: system === '' ? null : system },
@@ -144,6 +161,13 @@ function Head({
                     <h2 className={styles.name}>{named}</h2>
                     {path === '' ? null : <span className={styles.path}>{path}</span>}
                 </div>
+                {makesAVm(makes) && onNewMachine !== undefined ? (
+                    <span className={styles.actions}>
+                        <Button onClick={onNewMachine} variant="primary">
+                            New machine
+                        </Button>
+                    </span>
+                ) : null}
             </div>
             {facts.length === 0 ? null : <Facts facts={facts} />}
         </section>
@@ -161,26 +185,37 @@ function File({
     bound,
     file,
     choose,
+    onNewMachine,
 }: {
     bound: MachinefileCallsExplainOut;
     file: string;
     choose: (file: string) => void;
+    onNewMachine?: (() => void) | undefined;
 }) {
     const input = { Machinefile: file };
     const drift = useRead('machinefile.drift', input);
+    const own = useRead('machinefile.explain', input);
+    const identities: Identities = new Map(
+        drift.kind === 'read'
+            ? layersOf(drift.out).map((layer) => [layer.name, layer.identity] as const)
+            : [],
+    );
     return (
         <>
-            <Files choose={choose} explain={bound} file={file} />
-            <Head choose={choose} explain={bound} file={file} />
+            <Files choose={choose} explain={bound} file={file} identities={identities} />
+            <Head
+                choose={choose}
+                explain={own.kind === 'read' ? own.out : bound}
+                file={file}
+                identities={identities}
+                onNewMachine={onNewMachine}
+            />
             <NotGiven
                 title="Machines that follow it"
                 what="The machines made from it, and whether each matches it"
             />
             {drift.kind === 'read' ? (
-                <>
-                    <Asks plan={drift.out.Plan} title="What applying it would ask of you" />
-                    <Chapters plan={drift.out.Plan} />
-                </>
+                <Chapters plan={drift.out.Plan} />
             ) : drift.kind === 'failed' ? (
                 <Unanswered error={drift.error} size="tab" />
             ) : (
@@ -190,7 +225,13 @@ function File({
     );
 }
 
-export function MachineFilesPage({ opened }: { opened?: string | undefined }) {
+export function MachineFilesPage({
+    opened,
+    onNewMachine,
+}: {
+    opened?: string | undefined;
+    onNewMachine?: (() => void) | undefined;
+}) {
     const reach = useReach();
     const explain = useRead('machinefile.explain', {});
     const [chosen, setChosen] = useState<string | undefined>(undefined);
@@ -212,7 +253,7 @@ export function MachineFilesPage({ opened }: { opened?: string | undefined }) {
     return (
         <Page>
             <NoVerdict line={RECIPE} size="page" />
-            <File bound={explain.out} choose={setChosen} file={file} />
+            <File bound={explain.out} choose={setChosen} file={file} onNewMachine={onNewMachine} />
         </Page>
     );
 }

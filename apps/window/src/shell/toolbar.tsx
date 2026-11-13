@@ -11,6 +11,7 @@ export type ToolbarProps = {
     onToggleSidebar: () => void;
     onFind: () => void;
     onNewMachine?: (() => void) | undefined;
+    newMachineLeads?: boolean;
     sidebar?: boolean;
 };
 
@@ -21,6 +22,7 @@ export function Toolbar({
     onToggleSidebar,
     onFind,
     onNewMachine,
+    newMachineLeads = true,
     sidebar = true,
 }: ToolbarProps) {
     const last = crumbs.at(-1);
@@ -50,7 +52,7 @@ export function Toolbar({
             </div>
             <IconButton icon="find" label="Find" onClick={onFind} shortcut="⌘K" />
             {onNewMachine === undefined ? null : (
-                <Button onClick={onNewMachine} variant="primary">
+                <Button onClick={onNewMachine} variant={newMachineLeads ? 'primary' : 'plain'}>
                     New machine
                 </Button>
             )}

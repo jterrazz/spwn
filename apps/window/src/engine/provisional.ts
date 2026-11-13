@@ -87,6 +87,11 @@ export function machineKindOf(vm: Pick<MachinesVM, 'Lifetime'>): MachineKind {
     return vm.Lifetime === 'always-on' ? 'server' : 'workspace';
 }
 
+// outside: machinefile.explain sends `machine.kind` as a plain text; a file whose kind is a VM's makes a new machine.
+export function makesAVm(kind: string): boolean {
+    return kind === 'server' || kind === 'workspace';
+}
+
 export function macStateOf(mac: MachinesMacView): MacState {
     if (mac.Asleep) {
         return 'asleep';

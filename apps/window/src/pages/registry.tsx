@@ -21,10 +21,10 @@ function Head({ route, found, go, newMachine }: PageProps) {
     ) : null;
 }
 
-function Body({ route, found, home, go, Gallery }: PageProps) {
+function Body({ route, found, home, go, Gallery, newMachine }: PageProps) {
     switch (route.page) {
         case 'home': {
-            return <HomePage go={go} {...home} />;
+            return <HomePage go={go} onNewMachine={newMachine} {...home} />;
         }
         case 'inbox': {
             return <InboxPage go={go} {...home} />;
@@ -40,7 +40,13 @@ function Body({ route, found, home, go, Gallery }: PageProps) {
             );
         }
         case 'machine-files': {
-            return <MachineFilesPage key={route.file ?? ''} opened={route.file} />;
+            return (
+                <MachineFilesPage
+                    key={route.file ?? ''}
+                    onNewMachine={newMachine}
+                    opened={route.file}
+                />
+            );
         }
         case 'catalog': {
             return <CatalogPage go={go} />;

@@ -2,6 +2,7 @@ import {
     button,
     component,
     content,
+    dialog,
     disabled,
     enabled,
     file,
@@ -21,7 +22,13 @@ import { PAGES } from '../../pages/registry';
 import type { Route } from '../route';
 import { Window } from '../window';
 
-const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'two-macs');
+const recordingFor = await recordingsOf(
+    'bare-mac',
+    'mini-offline',
+    'one-mac',
+    'stories-file',
+    'two-macs',
+);
 
 const sidebar = navigation('Sidebar');
 const back = button('Back');
@@ -235,6 +242,60 @@ describe('Window', () => {
                     ),
                 );
                 await visitor.see(disabled(back));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a Mac with no machine yet opens on Start here, whose New machine opens the dialog', async () => {
+        // Given - the window on Home over bare-mac, which lists no VM
+        const result = await component.render(windowOver('bare-mac', HOME), async (visitor) => {
+            // When - Start here's New machine is clicked
+            await visitor.click(within(region('Start here'), button('New machine')));
+
+            // Then - the New machine dialog opens
+            await visitor.see(dialog('New machine on this Mac'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test("a workspace's machine file offers New machine, which opens the dialog", async () => {
+        // Given - stories-file, where linux-dev explained by name answers what agent-7f's explain answers
+        const recording = recordingFor('stories-file');
+        const explained = recording.exchanges.find(
+            (exchange) =>
+                exchange.request.call === 'machinefile.explain' &&
+                JSON.stringify(exchange.request.target) === '{"name":"agent-7f"}',
+        );
+        const byName: Recording = {
+            ...recording,
+            exchanges: [
+                ...recording.exchanges,
+                ...(explained === undefined
+                    ? []
+                    : [
+                          {
+                              ...explained,
+                              request: {
+                                  call: 'machinefile.explain',
+                                  in: { Machinefile: 'linux-dev' },
+                              },
+                          },
+                      ]),
+            ],
+        };
+        const result = await component.render(
+            <EngineProvider client={new Client(replayTransport(byName))}>
+                <Window initial={{ file: 'linux-dev', page: 'machine-files' }} pages={PAGES} />
+            </EngineProvider>,
+            async (visitor) => {
+                // When - its head's New machine is clicked
+                await visitor.click(
+                    within(region('linux-dev.machine.yaml'), button('New machine')),
+                );
+
+                // Then - the New machine dialog opens
+                await visitor.see(dialog('New machine on this Mac'));
             },
         );
         expect(result.errors.text).toBe('');
