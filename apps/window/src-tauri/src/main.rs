@@ -2,11 +2,13 @@
 
 mod bridge;
 mod engine;
+mod opener;
 
 use tauri::webview::PageLoadEvent;
 use tauri::WindowEvent;
 
 fn main() {
+    opener::sweep(&opener::folder());
     let bridge = engine::Bridge::new();
     let loading = bridge.exchanges.clone();
     let closing = bridge.exchanges.clone();
@@ -15,7 +17,9 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             engine::engine_link,
             engine::engine_open,
-            engine::engine_close
+            engine::engine_close,
+            opener::open_url,
+            opener::open_in_terminal
         ])
         .on_page_load(move |webview, payload| {
             if payload.event() == PageLoadEvent::Started {
