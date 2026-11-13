@@ -53,7 +53,8 @@ type (
 
 // invariant: the forms two types write with their own MarshalJSON, mirrored
 // from catalog's wireLivesOn and activity's seriesJSON, which no other
-// package sees: Install is the install of its Method, kept untyped.
+// package sees, and held to them by their drift test: Install is the install
+// of its Method, kept untyped.
 type (
 	livesOnJSON struct {
 		Kinds   []catalog.MachineKind
@@ -81,9 +82,19 @@ type eventShape struct {
 	required, optional []string
 }
 
-// value: the events a watch streams, by their `event`, in the order
-// event.json lists them.
-func events() []string { return []string{"page", engine.EventSample, "tick", "notice"} }
+// value: the events the engine's watches stream, by their `event`, in the
+// order enginecalls.Owns first names them, which event.json keeps.
+func events() []string {
+	var out []string
+	for _, o := range enginecalls.Owns() {
+		for _, e := range o.Events {
+			if !slices.Contains(out, e) {
+				out = append(out, e)
+			}
+		}
+	}
+	return out
+}
 
 func eventOf(event string) eventShape {
 	return map[string]eventShape{

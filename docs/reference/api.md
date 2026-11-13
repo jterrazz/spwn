@@ -40,7 +40,7 @@ A frame (`remote/api.Frame`) carries `v` (2) and `id`. A request carries `hello`
 
 ## packages/api
 
-[`packages/api/`](../../packages/api/README.md) is the same wire, machine-readable, written by `make generate` from the Go types: `schemas/calls/<call>.json`, one JSON Schema per call of `calls.json` (its `in`, and the `out` of each answer), `schemas/frame.json` (the frames), `schemas/event.json` (the events of a watch of pages), and `index.d.ts`, their TypeScript, with `Calls`, the map a client types `call('ports.list', input)` by. Its drift test fails `make test` when a file and the Go types differ, and the recorded streams and page fixtures are checked against its schemas.
+[`packages/api/`](../../packages/api/README.md) is the same wire, machine-readable, written by `make generate` from the Go types: `schemas/calls/<call>.json`, one JSON Schema per call of `calls.json` (its `in`, and the `out` of each answer), `schemas/frame.json` (the frames), `schemas/event.json` (the events of a watch of pages), and `index.d.ts`, their TypeScript, with `Calls`, the map a client types `call('ports.list', input)` by. Its drift test fails `make test` when a file and the Go types differ, the recorded streams and page fixtures are checked against its schemas, and `answers-match-schemas` sends every read that asks no confirmation to `guest serve --stdio` of the spec build over each world and checks each answer against its call's schema.
 
 ## The engine's own calls
 

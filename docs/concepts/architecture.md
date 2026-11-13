@@ -203,6 +203,7 @@ The rules are Go tests under [`specs/architecture/`](../../specs/architecture/);
 | `spec-build-never-ships`                                                 | `release_test.go`                                      | the release binary links no world and no fake; the spec build links every family's fake                                                                                                         |
 | the words                                                                | `banned_test.go`, `vocabulary_test.go`, `help_test.go` | the retired words never come back in a page, a help line or an error word                                                                                                                       |
 | the calls' list                                                          | `api_test.go`                                          | `calls.json` is what the Registry and the engine's own calls hold                                                                                                                               |
+| `answers-match-schemas`                                                  | `answers_test.go`                                      | every read the Registry serves without a confirmation answers, over every world, what its schema in `packages/api` says                                                                         |
 
 ## The error model
 

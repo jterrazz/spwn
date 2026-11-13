@@ -19,4 +19,6 @@ Nothing here is written by hand but this page and `package.json`: the generator 
 - **A string type with constants is an enum** when the code gives it only those constants; a type converted from any other string stays a plain string.
 - **Untyped is said as such.** A value Go keeps as `json.RawMessage` (a frame's `in` and `out`, an install's body, a VM's accounts) is `unknown` here; a frame's `in` and `out` are the call's own schema's.
 
+The answers are proved against the schemas, beside the drift test: the recorded streams and page fixtures in `apps/engine/cmd/generate/`, and every read the Registry serves without a confirmation, sent over every world of the spec build, in `specs/architecture/answers_test.go`.
+
 The protocol itself (the transport, the frames, the errors, what each engine call does) is [the API reference](../../docs/reference/api.md).
