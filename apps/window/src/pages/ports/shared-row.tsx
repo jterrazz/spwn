@@ -62,11 +62,12 @@ export function SharedRow({ share, target, onThisMac, compact = false }: SharedR
         title: label === '' ? share.process : label,
     } as const;
     if (compact) {
+        const { state, ...rest } = row;
         return (
             <section aria-label={`Port ${share.guest_port}`} className={styles.shared}>
                 <GestureRow
-                    {...row}
-                    state={isCalm(row.state.tone) ? undefined : row.state}
+                    {...rest}
+                    {...(isCalm(state.tone) ? {} : { state })}
                     {...(to === '' ? {} : { tag: shareToWord(to), tagLook: 'hint' as const })}
                     sentence={<Value>{shareAddressOf(share)}</Value>}
                     trail={stopButton}

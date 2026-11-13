@@ -128,7 +128,11 @@ describe('ports', () => {
         // Given - linux-1's Overview over stories, its port 3000 shared and running
         let gap = -1;
         const result = await component.render(
-            pageOver(recordingFor('stories'), { machine: 'linux-1', page: 'machine', tab: 'Overview' }),
+            pageOver(recordingFor('stories'), {
+                machine: 'linux-1',
+                page: 'machine',
+                tab: 'Overview',
+            }),
             async (visitor) => {
                 // When - its Ports panel is drawn
                 await visitor.see(region('Port 3000'));

@@ -8,6 +8,14 @@ const SHORT = 'npm sign-in expired';
 const LONG =
     'com.jterrazz.brain.x-snapshot is failing, last exit 2, after its third retry this hour';
 
+function leftOf(text: string): number {
+    return (
+        [...document.querySelectorAll('div, span')]
+            .find((one) => one.textContent === text)
+            ?.getBoundingClientRect().x ?? 0
+    );
+}
+
 describe('Row', () => {
     test('a row that opens keeps its link a gesture of its own, named apart', async () => {
         // Given - an account row that opens, its machine as a chip in its link slot
@@ -61,10 +69,6 @@ describe('Row', () => {
 
     test('a nested row moves its mark and name in, and keeps its cells in their columns', async () => {
         // Given - a Mac's row and a VM's row nested under it, in the meters template
-        const at = (text: string) =>
-            [...document.querySelectorAll('div, span')]
-                .find((one) => one.textContent === text)
-                ?.getBoundingClientRect().x ?? 0;
         let shift = { cell: -1, name: -1 };
         await component.render(
             <div style={{ width: 640 }}>
@@ -80,7 +84,11 @@ describe('Row', () => {
             async (visitor) => {
                 // When - both are drawn
                 await visitor.see(content('infra'));
-                shift = { cell: at('12 %') - at('31 %'), name: at('infra') - at('mac') };            },
+                shift = {
+                    cell: leftOf('12 %') - leftOf('31 %'),
+                    name: leftOf('infra') - leftOf('mac'),
+                };
+            },
         );
 
         // Then - the VM's name sits 14 px in, its first cell where the Mac's is

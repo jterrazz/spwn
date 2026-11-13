@@ -71,7 +71,9 @@ export function duration(nanoseconds: number): string {
     if (hours === 0) {
         return `${String(minutes)} min`;
     }
-    return minutes % 60 > 0 ? `${String(hours)} h ${String(minutes % 60)} min` : `${String(hours)} h`;
+    return minutes % 60 > 0
+        ? `${String(hours)} h ${String(minutes % 60)} min`
+        : `${String(hours)} h`;
 }
 
 export function seconds(nanoseconds: number): string {
