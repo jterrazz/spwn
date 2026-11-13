@@ -102,8 +102,7 @@ describe('model', () => {
         expect(
             differences.every(
                 ({ differing, line }) =>
-                    line?.Step.Package === differing.Package &&
-                    line.Seen.Condition !== 'present',
+                    line?.Step.Package === differing.Package && line.Seen.Condition !== 'present',
             ),
         ).toBe(true);
         expect(differingLinesOf(drift).size).toBe(differences.length);
