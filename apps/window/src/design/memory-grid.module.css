@@ -3,7 +3,7 @@
     flex-direction: column;
     gap: var(--space-10);
     padding: var(--space-12);
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-card);
     background: var(--inset);
 }
 .head {
@@ -31,7 +31,7 @@
 }
 .cell {
     aspect-ratio: 1;
-    border-radius: var(--radius-tick);
+    border-radius: var(--radius-cell);
     background: var(--c, var(--raise));
 }
 .cell.free {
@@ -60,7 +60,7 @@
     content: '';
     width: 8px;
     height: 8px;
-    border-radius: var(--radius-hair);
+    border-radius: var(--radius-tick);
     background: var(--c, var(--raise));
 }
 .legend b {
