@@ -43,5 +43,5 @@
     - text: :9229 node 0.0.0.0
     - button "Share :9229": Share
   - region "Differs from its file":
-    - heading "Differs from its file 1" [level=2]
-    - text: The file says This machine has :3000 Node or Next Private :3000 Node or Next Public
+    - heading "Differs from its file 3" [level=2]
+    - text: The file says This machine has :3000 Node or Next Private :3000 Node or Next Public :4321 astro Private :4321 astro Not shared :9229 node Private :9229 node Not shared
