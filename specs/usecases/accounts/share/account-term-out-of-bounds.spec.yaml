@@ -6,7 +6,7 @@ runs:
     - command: 'accounts share github --with linux-1 --for 8d'
       exit: 2
       stderr: |
-          Error: "8d" is not between 1 min and 7 d
+          Error: a share lasts 1 min to 7 d, not 192h0m0s
           Hint: station accounts share github --with linux-1 --for 12h
     - command: '--version >/dev/null; /usr/bin/jq -c ''[(.macs["linux-1"].secrets // {} | to_entries | map([.key, (.value == $mac[.key])])), (.macs["jterrazz-macbook-pro"].stores.shares["linux-1"] // [] | map([.name, (((.until|fromdate) - (.at|fromdate)) / 3600)]))]'' --argjson mac "$(/usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].secrets'' world.json)" world.json'
       exit: 0

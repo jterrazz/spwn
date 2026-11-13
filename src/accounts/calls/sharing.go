@@ -158,8 +158,9 @@ func (s *Sharing) CheckReceiver(ctx context.Context, vm string) error {
 }
 
 func (s *Sharing) Share(ctx context.Context, account, vm string, term time.Duration) (accounts.Shared, error) {
-	if term == 0 {
-		term = accounts.DefaultShareTerm
+	term, ok := accounts.CheckTerm(term)
+	if !ok {
+		return accounts.Shared{}, &accounts.TermError{Account: account, VM: vm, Term: term}
 	}
 	secret, err := s.CheckShare(ctx, account, vm)
 	if err != nil {

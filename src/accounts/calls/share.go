@@ -22,12 +22,18 @@ type ShareIn struct {
 
 var Share = call.Call[Deps, ShareIn, accounts.Shared]{
 	Name: "accounts.share", Section: section.Accounts, Where: call.InEngine, Applies: accounts.SharedFrom, Needs: accounts.ShareNeeds(),
-	Errors: []fail.Code{Unknown, NotShareable, NotSignedIn, Unreadable, VMStopped, ToServer, OtherMac, UnknownVM},
+	Errors: []fail.Code{Unknown, NotShareable, NotSignedIn, Unreadable, VMStopped, ToServer, OtherMac, UnknownVM, TermOutOfBounds},
 	Run: func(ctx context.Context, d Deps, in ShareIn, _ call.Progress) (accounts.Shared, error) {
+		// invariant: a term outside the span is refused before any read or
+		// effect, whichever surface sent it.
+		term, ok := accounts.CheckTerm(in.For)
+		if !ok {
+			return accounts.Shared{}, coded(&accounts.TermError{Account: in.Account, VM: in.With, Term: term})
+		}
 		if err := d.Shares.CheckFrom(ctx, in.Account, in.With, in.From); err != nil {
 			return accounts.Shared{}, coded(err)
 		}
-		out, err := d.Shares.Share(ctx, in.Account, in.With, in.For)
+		out, err := d.Shares.Share(ctx, in.Account, in.With, term)
 		return out, coded(err)
 	},
 }

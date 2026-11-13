@@ -19,6 +19,7 @@
         "account.not-shareable",
         "account.not-signed-in",
         "account.other-mac",
+        "account.term-out-of-bounds",
         "account.to-server",
         "account.unknown",
         "account.unknown-vm",

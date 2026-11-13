@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 )
@@ -16,6 +17,15 @@ type OffMacError struct{ ThisMachine catalog.MachineKind }
 
 func (e *OffMacError) Error() string {
 	return "accounts are shared from a Mac; here is " + e.ThisMachine.Article()
+}
+
+type TermError struct {
+	Account, VM string
+	Term        time.Duration
+}
+
+func (e *TermError) Error() string {
+	return "a share lasts 1 min to 7 d, not " + e.Term.String()
 }
 
 type NoStudioError struct{ VM string }

@@ -35,7 +35,7 @@ func bind(in *Input, args []string) error {
 	}
 	term, ok := accounts.ParseTerm(in.For)
 	if !ok {
-		return kit.Refuse("\""+in.For+"\" is not between 1 min and 7 d", "station accounts share "+in.Account+" --with "+in.With+" --for 12h")
+		return kit.Refuse("\""+in.For+"\" is not a duration", "station accounts share "+in.Account+" --with "+in.With+" --for 12h")
 	}
 	in.Term = term
 	return nil

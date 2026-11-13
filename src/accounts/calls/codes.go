@@ -17,6 +17,8 @@ const (
 	UnknownVM    fail.Code = "account.unknown-vm"
 	ToServer     fail.Code = "account.to-server"
 	OtherMac     fail.Code = "account.other-mac"
+
+	TermOutOfBounds fail.Code = "account.term-out-of-bounds"
 )
 
 func coded(err error) error {
@@ -31,6 +33,7 @@ func coded(err error) error {
 	var unknownVM *accounts.UnknownVMError
 	var toServer *accounts.ToServerError
 	var otherMac *accounts.OtherMacError
+	var badTerm *accounts.TermError
 	switch {
 	case errors.As(err, &unknown):
 		return fail.New(fail.NotFound, Unknown, unknown.Account, nil)
@@ -48,6 +51,8 @@ func coded(err error) error {
 		return fail.New(fail.Refused, ToServer, toServer.VM, nil)
 	case errors.As(err, &otherMac):
 		return fail.New(fail.Refused, OtherMac, otherMac.VM, map[string]string{"mac": otherMac.Mac, "account": otherMac.Account})
+	case errors.As(err, &badTerm):
+		return fail.New(fail.Refused, TermOutOfBounds, badTerm.Term.String(), map[string]string{"account": badTerm.Account, "vm": badTerm.VM})
 	case errors.As(err, &unknownVM):
 		return fail.New(fail.NotFound, UnknownVM, unknownVM.VM, nil)
 	}

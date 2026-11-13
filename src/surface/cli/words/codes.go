@@ -264,6 +264,9 @@ func Codes() map[fail.Code]Wording {
 			mac := cmp.Or(e.Detail["label"], e.Detail["mac"])
 			return e.Subject + " is on " + mac + ": share from " + mac + "'s accounts", "station accounts share " + e.Detail["account"] + " --with " + e.Subject + " --on " + mac
 		},
+		accountscalls.TermOutOfBounds: func(e *fail.Error) (string, string) {
+			return "a share lasts 1 min to 7 d, not " + e.Subject, "station accounts share " + e.Detail["account"] + " --with " + e.Detail["vm"] + " --for 12h"
+		},
 		accountscalls.ToServer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a server: station shares no account with it", "give it its secrets with your own tooling"
 		},

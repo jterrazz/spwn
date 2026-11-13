@@ -133,18 +133,24 @@ func sortedVMs(held map[string][]Share) []string {
 	return vms
 }
 
+func CheckTerm(term time.Duration) (time.Duration, bool) {
+	// invariant: a share lasts 1 min to 7 d, and a term of 0 is the default:
+	// every surface and the engine judge a term by this one rule.
+	if term == 0 {
+		return DefaultShareTerm, true
+	}
+	return term, term >= ShortestShare && term <= LongestShare
+}
+
 func ParseTerm(text string) (time.Duration, bool) {
 	// value: how long a share lasts, Go-style with a unit, days as `7d`;
-	// false outside 1 min to 7 d.
+	// false when the text is no duration, whatever its span.
 	term, err := time.ParseDuration(text)
 	if days, ok := strings.CutSuffix(text, "d"); ok {
 		n, convErr := strconv.Atoi(days)
 		term, err = time.Duration(n)*24*time.Hour, convErr
 	}
-	if err != nil || term < ShortestShare || term > LongestShare {
-		return 0, false
-	}
-	return term, true
+	return term, err == nil
 }
 
 func Left(until, now time.Time) string {
