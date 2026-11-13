@@ -1,4 +1,4 @@
-module github.com/jterrazz/studio-station
+module github.com/jterrazz/studio-station/apps/engine
 
 go 1.27.3
 
@@ -11,12 +11,12 @@ require (
 	github.com/charmbracelet/colorprofile v0.4.3
 	github.com/charmbracelet/x/ansi v0.11.9
 	github.com/charmbracelet/x/term v0.2.2
+	github.com/jterrazz/studio-station/catalog v0.0.0
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/crypto v0.58.0
 	golang.org/x/sys v0.49.0
-	golang.org/x/tools v0.52.0
 )
 
 require (
@@ -227,6 +227,7 @@ require (
 	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/telemetry v0.0.0-20261009151841-97e8ea77aa2a // indirect
 	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/tools v0.52.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -240,3 +241,5 @@ tool (
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 	golang.org/x/tools/cmd/deadcode
 )
+
+replace github.com/jterrazz/studio-station/catalog => ../../catalog

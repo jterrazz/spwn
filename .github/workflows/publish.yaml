@@ -35,7 +35,7 @@ jobs:
         with:
             binary-name: station
             build-path: ./apps/engine/cmd/station
-            go-version-file: go.mod
+            go-version-file: go.work
             ldflags: -X github.com/jterrazz/studio-station/apps/engine/wire.version={tag}
             targets: 'linux/arm64,linux/amd64'
 
@@ -59,7 +59,7 @@ jobs:
             - name: Set up Go
               uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
               with:
-                  go-version-file: go.mod
+                  go-version-file: go.work
 
             - name: Build the binaries with cgo
               env:

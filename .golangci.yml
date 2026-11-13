@@ -8,7 +8,7 @@ run:
 
 # invariant: `default: none` makes the roster a decision: a golangci-lint release
 # that adds a linter to a preset cannot change a verdict without a line in this
-# file. The version that reads it is the `tool` directive of go.mod.
+# file. The version that reads it is the `tool` directive of apps/engine/go.mod.
 linters:
     default: none
     enable:

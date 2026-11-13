@@ -36,7 +36,7 @@ node_modules/.install: package.json package-lock.json
 	@touch node_modules/.install
 
 install: node_modules/.install ## Install the dependencies of both halves
-	@go mod download
+	@go work sync
 
 build: ## Build the binary, stamped with the version git describes
 	@go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./apps/engine/cmd/station
@@ -47,10 +47,10 @@ build-linux: ## Build the linux/arm64 binary a VM image carries
 	@printf "$(GREEN)●$(RESET) Built $(LINUX_PATH)\n"
 
 lint: node_modules/.install ## Both halves: gofmt, golangci-lint and deadcode over Go, typescript check over the rest
-	@unformatted=$$(gofmt -l ./apps/engine ./specs); \
+	@unformatted=$$(gofmt -l ./apps/engine ./catalog ./specs); \
 		if [ -n "$$unformatted" ]; then printf "gofmt would rewrite:\n%s\n" "$$unformatted"; exit 1; fi
-	@go tool golangci-lint run ./apps/engine/... ./specs/...
-	@GOOS=linux $$(go tool -n golangci-lint) run ./apps/engine/... ./specs/...
+	@go tool golangci-lint run ./apps/engine/... ./catalog/... ./specs/...
+	@GOOS=linux $$(go tool -n golangci-lint) run ./apps/engine/... ./catalog/... ./specs/...
 	@dead=$$(go tool deadcode -test -tags $(SPEC_TAGS) ./apps/engine/...); \
 		if [ -n "$$dead" ]; then printf "deadcode found unreachable functions:\n%s\n" "$$dead"; exit 1; fi
 	@printf "$(GREEN)●$(RESET) Go lint passed\n"
@@ -58,7 +58,7 @@ lint: node_modules/.install ## Both halves: gofmt, golangci-lint and deadcode ov
 
 fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 	@status=0; \
-	gofmt -w ./apps/engine ./specs || status=1; \
+	gofmt -w ./apps/engine ./catalog ./specs || status=1; \
 	npx typescript fix || status=1; \
 	exit $$status
 
@@ -67,7 +67,7 @@ fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 VZ_SUITES    := specs/usecases/machines specs/usecases/engine/keep
 
 test: node_modules/.install ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station, then the VM suites again over vz
-	@go test ./apps/engine/... ./specs/...
+	@go test ./apps/engine/... ./catalog/... ./specs/...
 	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./apps/engine/wire
 	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./apps/engine/cmd/station && touch $(TEST_PATH)
 	@STATION_SPEC_BUILT=1 npx typescript test
