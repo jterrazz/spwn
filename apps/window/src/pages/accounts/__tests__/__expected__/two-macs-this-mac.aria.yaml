@@ -23,7 +23,7 @@
     - text: npm kept here · token refused npm login
     - button "Copy npm login": Copy
     - text: Refused
-    - button "Sign in" [disabled]
+    - button "Sign in"
     - text: claude admin@jterrazz.com · max · kept here Signed in
     - paragraph:
       - text: shared with

@@ -17,6 +17,7 @@ import {
     Value,
 } from '../../design/index';
 import { looksSecret } from '../../design/secret';
+import { Openable } from '../../engine/opener';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { holdsFor } from '../../engine/shown';
@@ -27,6 +28,7 @@ import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { GestureRow, HeldOutcomes } from '../kit/gestures';
+import { OpenButton } from '../kit/opens';
 import { NoVerdict, Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { aboutOf, accountsOf, sharesOf, whoOf, wordOf } from './accounts-of';
@@ -36,7 +38,11 @@ import styles from './accounts.module.css';
 
 const DURATIONS = ['4 h', '12 h', '7 days'] as const;
 
-const SIGN_IN_NEEDS = 'Signing in needs a terminal outside the window';
+const NO_FIX = 'The engine gives no command that signs in';
+
+function elsewhere(mac: string): string {
+    return `Sign in on ${mac} itself: the terminal the window opens is this Mac's`;
+}
 
 const MAC_LINE =
     'An account lives on this Mac; a machine gets a copy for a time, never the account itself · no secret is ever shown here';
@@ -138,9 +144,11 @@ function AccountRow({ account, report, found, go, target }: AccountRowProps) {
                             word={wordOf(account)}
                         />
                         {hint === '' || looksSecret(hint) ? null : (
-                            <Button disabled title={SIGN_IN_NEEDS}>
-                                Sign in
-                            </Button>
+                            <OpenButton
+                                held={found.mac.ThisMac ? NO_FIX : elsewhere(on)}
+                                label="Sign in"
+                                openable={found.mac.ThisMac ? Openable.ofFix(account) : undefined}
+                            />
                         )}
                         {loan ? <TakeBackButton gesture={back} shown={shown} vm={on} /> : null}
                     </span>

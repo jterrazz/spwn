@@ -1,6 +1,7 @@
-import { component, content, file, heading, region } from '@jterrazz/test';
+import { button, component, content, file, heading, region } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { tauriOpener } from '../../../engine/opener';
 import { recordingOf } from '../../../engine/replay';
 import type { Recording } from '../../../engine/replay';
 import { pageOver } from '../../../fixtures/page-over';
@@ -13,6 +14,8 @@ function accountsOver(recording: Recording, machine: string) {
 }
 
 const TOKEN = ['ghp', '0123456789abcdefghijABCDEFGHIJ'].join('_');
+
+type Invoked = { command: string; args: Record<string, unknown> | undefined };
 
 function leaking(recording: Recording): Recording {
     const planted = `"provider":"github","detail":"${TOKEN}"`;
@@ -95,5 +98,35 @@ describe('Accounts tab', () => {
         // Then - the page names the detail, and the token is nowhere in it
         expect(result.content.text).toContain('Not shown: detail held what looks like a secret');
         expect(result.content.text).not.toContain(TOKEN);
+    });
+
+    test("sign in runs the engine's fix in a terminal, its command still shown with Copy", async () => {
+        // Given - This Mac's Accounts over two-macs, npm refused with `npm login` as its fix
+        const invoked: Invoked[] = [];
+        const opener = tauriOpener({
+            invoke: async (command, args) => {
+                invoked.push({ args, command });
+                return await Promise.resolve(null);
+            },
+        });
+        const page = pageOver(
+            recordingFor('two-macs'),
+            { machine: 'jterrazz-macbook-pro', page: 'machine', tab: 'Accounts' },
+            opener,
+        );
+        const result = await component.render(page, async (visitor) => {
+            await visitor.see(content('Refused'));
+            await visitor.see(button('Copy npm login'));
+
+            // When - Sign in is clicked
+            await visitor.click(button('Sign in'));
+
+            // Then - the row keeps its state and its command
+            await visitor.see(button('Copy npm login'));
+        });
+        expect(invoked).toStrictEqual([
+            { args: { command: 'npm login' }, command: 'open_in_terminal' },
+        ]);
+        expect(result.content.text).not.toContain('Done');
     });
 });
