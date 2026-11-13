@@ -33,7 +33,7 @@ cleanup_tier() {
 
 ssh_key="$work/id_ed25519"
 ssh-keygen -q -t ed25519 -N '' -C "station-e2e" -f "$ssh_key" || fail "ssh-keygen"
-hash=$(cd "$repo" && find apps/engine/catalog -type f | LC_ALL=C sort | xargs cat | shasum -a 256 | cut -c1-12)
+hash=$(cd "$repo" && find apps/engine/catalog catalog -type f | LC_ALL=C sort | xargs cat | shasum -a 256 | cut -c1-12)
 base="station-e2e-macos-$hash"
 user=admin
 say "-- base $base"

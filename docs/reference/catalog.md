@@ -15,7 +15,7 @@ An item of the catalog is one YAML file in the schema `station.catalog/v1`: what
 
 ## The file
 
-The built-in items are embedded in the binary, `apps/engine/catalog/items/<category>/<name>.yaml`: the folder is the item's category (`git`, `ai-agents`, `security`...), the file's name its `name`. Its first key names the schema, `item: station.catalog/v1`. The owner's own items, `~/.config/station/catalog/<category>/<name>.yaml`, and a shared source's are layers above them: a same-name item replaces the built-in one whole, never merged ([Machinefiles](machinefiles.md#sources-and-layers)), and an owner's file refused stops every command that reads the catalog at its line ([what is read today](machinefiles.md#what-is-read-today)).
+The built-in items are embedded in the binary, `catalog/packages/<category>/<name>.yaml`: the folder is the item's category (`git`, `ai-agents`, `security`...), the file's name its `name`. Its first key names the schema, `item: station.catalog/v1`. The owner's own items, `~/.config/station/catalog/<category>/<name>.yaml`, and a shared source's are layers above them: a same-name item replaces the built-in one whole, never merged ([Machinefiles](machinefiles.md#sources-and-layers)), and an owner's file refused stops every command that reads the catalog at its line ([what is read today](machinefiles.md#what-is-read-today)).
 
 A file is read strictly, so a typo is a refusal with its line, never a silent default:
 

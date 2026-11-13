@@ -2,12 +2,13 @@ package catalog
 
 import (
 	"cmp"
-	"embed"
 	"fmt"
 	"io/fs"
 	"path"
 	"slices"
 	"strings"
+
+	catalogfiles "github.com/jterrazz/studio-station/catalog"
 )
 
 type Catalog struct {
@@ -19,21 +20,18 @@ type Catalog struct {
 	Items []Placed
 }
 
-// invariant: the built-in items and Machinefiles are embedded, so the
-// binary reads no file of the clone: apps/engine/catalog/items/<category>/<name>.yaml,
-// one file an item, and apps/engine/catalog/machinefiles/<name>.yaml.
-//
-//go:embed items machinefiles
-var builtin embed.FS
+// invariant: the built-in packages and Machinefiles are embedded by the catalog
+// module, so the binary reads no file of the clone.
+var builtin = catalogfiles.Files
 
 // value: the layer every built-in file stands in, the weakest.
 
 const BuiltinLayer = "built-in"
 
-func Builtin() (Catalog, error) { return Load(builtin, "items") }
+func Builtin() (Catalog, error) { return Load(builtin, "packages") }
 
 func BuiltinFiles() fs.FS {
-	// value: the embedded files: items/ holds the catalog's, machinefiles/ the
+	// value: the embedded files: packages/ holds the catalog's, machines/ the
 	// built-in Machinefiles.
 	return builtin
 }

@@ -224,7 +224,7 @@ Fang renders the help, the version and the completion script, and handles the in
 
 ## The catalog
 
-The catalog is what station can put on a machine, and each of its items is one file: `apps/engine/catalog/items/<category>/<name>.yaml`, in the schema `station.catalog/v1`, a manager, an app (agent skills included) or a setting, with its methods and, for an app, its disk row. The catalog defines; a Machinefile chooses, and never defines an item ([ADR-031](../decisions/031-the-catalog-defines-the-machinefile-chooses.md)).
+The catalog is what station can put on a machine, and each of its items is one file: `catalog/packages/<category>/<name>.yaml`, in the schema `station.catalog/v1`, a manager, an app (agent skills included) or a setting, with its methods and, for an app, its disk row. The catalog defines; a Machinefile chooses, and never defines an item ([ADR-031](../decisions/031-the-catalog-defines-the-machinefile-chooses.md)).
 
 The items are embedded, so the binary reads no file of the clone. Above them stand the owner's own items, `~/.config/station/catalog/<category>/<name>.yaml`, each replacing the built-in item of its name whole ([Machinefiles](../reference/machinefiles.md#sources-and-layers)). `wire` loads them once a run, through the strict decoder (every key known, no anchor or merge key, YAML 1.2 scalars, a newer schema refused with `update station`), and hands the one `catalog.Catalog` value to every reader. Its JSON Schema, `schemas/station.catalog.v1.json`, is projected from the decoder's Go types.
 

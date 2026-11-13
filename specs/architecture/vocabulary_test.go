@@ -362,7 +362,7 @@ var yamlComment = regexp.MustCompile(`(?m)^\s*#\s?`)
 func catalogTexts(root string) ([]corpusText, error) {
 	var out []corpusText
 	var failed error
-	err := walk(root, "apps/engine/catalog/items", func(rel string) bool { return strings.HasSuffix(rel, ".yaml") }, func(rel, body string) {
+	err := walk(root, "catalog/packages", func(rel string) bool { return strings.HasSuffix(rel, ".yaml") }, func(rel, body string) {
 		var doc yaml.Node
 		if err := yaml.Unmarshal([]byte(body), &doc); err != nil {
 			failed = fmt.Errorf("%s: %w", rel, err)
@@ -502,7 +502,7 @@ func TestVocabularyBites(t *testing.T) {
 
 func TestVocabularyReadsTheCatalogsItems(t *testing.T) {
 	root := t.TempDir()
-	dir := filepath.Join(root, "apps", "engine", "catalog", "items", "system-utilities")
+	dir := filepath.Join(root, "catalog", "packages", "system-utilities")
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
@@ -520,9 +520,9 @@ func TestVocabularyReadsTheCatalogsItems(t *testing.T) {
 		got = append(got, f.where+" "+f.what)
 	}
 	want := []string{
-		`apps/engine/catalog/items/system-utilities/orb.yaml:4 apps/engine/catalog says "daemon", a word SPEC §2.2 retired`,
-		`apps/engine/catalog/items/system-utilities/orb.yaml:6 apps/engine/catalog says "host", a word SPEC §2.2 retired`,
-		`apps/engine/catalog/items/system-utilities/orb.yaml:10 apps/engine/catalog says "storage", a word SPEC §2.2 retired`,
+		`catalog/packages/system-utilities/orb.yaml:4 apps/engine/catalog says "daemon", a word SPEC §2.2 retired`,
+		`catalog/packages/system-utilities/orb.yaml:6 apps/engine/catalog says "host", a word SPEC §2.2 retired`,
+		`catalog/packages/system-utilities/orb.yaml:10 apps/engine/catalog says "storage", a word SPEC §2.2 retired`,
 	}
 	if !slices.Equal(got, want) {
 		t.Errorf("the rule reports %v, want %v: a description, a note and a comment are read, a run line and a check are not, and the catalog may name OrbStack", got, want)

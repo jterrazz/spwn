@@ -34,7 +34,8 @@ const (
 	std    = "std"
 	sshPkg = "golang.org/x/crypto/ssh"
 	// value: the YAML 1.2 decoder the catalog's item files are read with.
-	yamlPkg = "go.yaml.in/yaml/v3"
+	yamlPkg       = "go.yaml.in/yaml/v3"
+	catalogModule = "github.com/jterrazz/studio-station/catalog"
 )
 
 // invariant: the import table of docs/concepts/architecture.md, owned HERE. A
@@ -64,7 +65,7 @@ func importTable() map[string][]string {
 		"machines/adapter/tart":      {"platform/local", "machines", "machines/contract", "machines/contract/contracttest", "images/contract", "core/call", "net/netip", std},
 		"platform/local":             {"os", "os/exec", "os/user", "net", "net/http", "syscall", "unsafe", "golang.org/x/sys/unix", std},
 		"platform/local/localtest":   {"platform/local", "testing", "testing/fstest", "net", std},
-		"catalog":                    {"embed", yamlPkg, std},
+		"catalog":                    {catalogModule, yamlPkg, std},
 		"page":                       {std},
 		"pages":                      {"page", "catalog", std},
 		"pages/*":                    {"page", "pages", "pages/*", "core/call/lanes", "core/finding", "core/machine", "core/section", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "agents", "machinefile", "catalog", std},

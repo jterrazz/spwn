@@ -22,4 +22,5 @@ The repository grew from one Go module with an engine at `src/`, a Swift app at 
 - The release builds `./apps/engine/cmd/station` with the same version flag, under the module's new path.
 - Branches held on the old layout are replayed through the same scripts, not merged by hand.
 - If the owner chooses pnpm, the change is `workspaces` in a `pnpm-workspace.yaml`, the lock file and the install command, and a doctrine commit that lands first.
+- The engine's catalog row of the architecture rules reads the embedded files through the catalog module, a swap of `embed` for the module's path that keeps the row at three entries.
 - A Go member without `studio.config.ts` gives the studio toolchain nothing to judge; the Go modules are judged by their own lint and tests.

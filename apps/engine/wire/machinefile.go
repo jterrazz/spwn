@@ -43,7 +43,7 @@ func (m machine) userSource() machinefilecontract.Source {
 }
 
 func builtinSource() machinefilecontract.Source {
-	return files.New(files.Embedded{FS: catalog.BuiltinFiles()}, machinefilecontract.NoLinks, "items", "machinefiles", machinefile.Builtin, "built-in")
+	return files.New(files.Embedded{FS: catalog.BuiltinFiles()}, machinefilecontract.NoLinks, "packages", "machines", machinefile.Builtin, "built-in")
 }
 
 // invariant: the sources strongest first: the owner's, the shared source

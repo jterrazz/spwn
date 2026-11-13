@@ -6,24 +6,26 @@ import { afterAll } from 'vitest';
 
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
 const STATION_BIN = resolve(REPO_ROOT, '.artifacts/go/station-test');
-const SOURCES = resolve(REPO_ROOT, 'apps/engine');
+const SOURCES = [resolve(REPO_ROOT, 'apps/engine'), resolve(REPO_ROOT, 'catalog')];
 const VM_SSHD = resolve(import.meta.dirname, '__fixtures__/vm-sshd');
 const WORLDS = resolve(REPO_ROOT, 'specs/usecases/worlds');
 
 // hazard: a stale binary silently tests old behaviour, so the suite rebuilds when any
-// file under `apps/engine/` is newer than the binary: the embedded dotfiles and recipes are
+// file under `apps/engine/` or `catalog/` is newer than the binary: the embedded dotfiles and recipes are
 // build inputs as much as the Go sources are.
 function binaryIsStale(): boolean {
     if (!existsSync(STATION_BIN)) {
         return true;
     }
     const binModifiedMs = statSync(STATION_BIN).mtimeMs;
-    for (const entry of readdirSync(SOURCES, { recursive: true, withFileTypes: true })) {
-        if (
-            entry.isFile() &&
-            statSync(resolve(entry.parentPath, entry.name)).mtimeMs > binModifiedMs
-        ) {
-            return true;
+    for (const source of SOURCES) {
+        for (const entry of readdirSync(source, { recursive: true, withFileTypes: true })) {
+            if (
+                entry.isFile() &&
+                statSync(resolve(entry.parentPath, entry.name)).mtimeMs > binModifiedMs
+            ) {
+                return true;
+            }
         }
     }
     return false;
@@ -31,7 +33,7 @@ function binaryIsStale(): boolean {
 
 // invariant: `make test` builds the binary before the runner starts and says so
 // (STATION_SPEC_BUILT), so every document of a gate runs the one binary it built, even
-// when `apps/engine/` changes under the run; a direct run that finds it stale builds it beside
+// when `apps/engine/` or `catalog/` changes under the run; a direct run that finds it stale builds it beside
 // and renames it into place, so a worker never runs a binary another worker is still
 // writing.
 if (process.env.STATION_SPEC_BUILT !== '1' && binaryIsStale()) {
