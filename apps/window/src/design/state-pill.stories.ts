@@ -20,4 +20,5 @@ export const STATE_PILL_STORIES: readonly Story<ComponentProps<typeof StatePill>
         props: { quiet: true, tone, word: WORDS[tone] },
     })),
     { name: 'long text', props: { tone: 'warn', word: 'Needs a look before it can update' } },
+    { name: 'as written', props: { asWritten: true, tone: 'warn', word: 'ends in 40 min' } },
 ];

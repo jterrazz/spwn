@@ -106,7 +106,7 @@ export function ShareRow({ holds, lead, sentence, ...held }: ShareRowProps) {
             leadSize={lead === undefined ? 'icon' : 'chip'}
             outcome={<ScreenedOutcome gesture={shownGesture} />}
             sentence={sentence ?? ''}
-            state={holds}
+            state={{ ...holds, asWritten: true }}
             title={shown}
             trail={
                 <span className={styles.trail}>

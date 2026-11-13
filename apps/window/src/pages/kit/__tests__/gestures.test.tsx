@@ -99,12 +99,12 @@ describe('gestures', () => {
             }),
             async (visitor) => {
                 const shared = region('Shared with it');
-                await visitor.see(within(shared, content('Ends in 24 min')));
+                await visitor.see(within(shared, content('ends in 24 min')));
                 before = heightOf('Shared with it');
 
                 // When - Extend of claude is clicked and accounts.list read again
                 await visitor.click(within(shared, button('Extend claude by 12 h')));
-                await visitor.see(within(shared, content('Ends in 11 h 59 min')));
+                await visitor.see(within(shared, content('ends in 11 h 59 min')));
 
                 // Then - the row says done where it stands, and no panel repeats it
                 await visitor.see(within(shared, content('Done')));

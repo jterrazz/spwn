@@ -45,7 +45,7 @@ describe('Accounts tab', () => {
             accountsOver(recordingFor('stories'), 'linux-1'),
             async (visitor) => {
                 // When - the accounts have been read
-                await visitor.see(content('Ends in 24 min'));
+                await visitor.see(content('ends in 24 min'));
             },
         );
 

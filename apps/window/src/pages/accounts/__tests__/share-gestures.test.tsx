@@ -31,14 +31,14 @@ describe('share gestures', () => {
             accountsOver(recordingFor('stories'), 'linux-1'),
             async (visitor) => {
                 const shared = region('Shared with it');
-                await visitor.see(within(shared, content('Ends in 24 min')));
+                await visitor.see(within(shared, content('ends in 24 min')));
 
                 // When - Extend of claude is clicked
                 await visitor.click(within(shared, button('Extend claude by 12 h')));
 
                 // Then - accounts.list, read again a few seconds on, says the copy holds 12 h
-                await visitor.see(within(shared, content('Ends in 11 h 59 min')));
-                await visitor.gone(within(shared, content('Ends in 24 min')));
+                await visitor.see(within(shared, content('ends in 11 h 59 min')));
+                await visitor.gone(within(shared, content('ends in 24 min')));
             },
         );
         expect(result.errors.text).toBe('');

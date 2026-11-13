@@ -20,10 +20,10 @@
     - text: "A share is a copy, for a time: when the time ends macbook-pro takes it back · no secret is ever shown here"
   - region "Shared with it":
     - heading "Shared with it" [level=2]
-    - text: claude admin@jterrazz.com · max Ends in 24 min
+    - text: claude admin@jterrazz.com · max ends in 24 min
     - button "Extend claude by 12 h": Extend 12 h
     - button "Take back claude": Take back
-    - text: github jterrazz · repo, workflow Ends in 4 h 0 min
+    - text: github jterrazz · repo, workflow ends in 4 h 0 min
     - button "Extend github by 12 h": Extend 12 h
     - button "Take back github": Take back
   - region "Can be shared":

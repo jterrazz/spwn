@@ -52,6 +52,15 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
     },
     { name: 'a tag', props: { sentence: 'From the catalog', tag: '24.11.1', title: 'node' } },
     {
+        name: 'a tag as a hint',
+        props: {
+            sentence: 'https://vite.example.ts.net',
+            tag: 'Private',
+            tagLook: 'hint',
+            title: 'Vite',
+        },
+    },
+    {
         name: 'catalog template, slim',
         props: {
             cells: ['One tool that installs every runtime'],

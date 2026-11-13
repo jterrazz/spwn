@@ -30,18 +30,18 @@
     - heading "Ports" [level=2]
     - button "All ports"
     - region "Port 5173":
-      - text: :5173 Vite Private https://jterrazz-macbook-pro.tail1234.ts.net:40001 Shared
+      - text: :5173 Vite Private https://jterrazz-macbook-pro.tail1234.ts.net:40001
       - button "Stop sharing"
     - region "Port 7000":
-      - text: :7000 server Private jterrazz-macbook-pro.tail1234.ts.net:40002 Shared
+      - text: :7000 server Private jterrazz-macbook-pro.tail1234.ts.net:40002
       - button "Stop sharing"
   - region "Accounts shared with it":
     - heading "Accounts shared with it" [level=2]
     - button "All accounts"
-    - text: github Ends in 11 h 10 min
+    - text: github ends in 11 h 10 min
     - button "Extend github by 12 h": Extend 12 h
     - button "Take back github": Take back
-    - text: claude Ends in 11 h 10 min
+    - text: claude ends in 11 h 10 min
     - button "Extend claude by 12 h": Extend 12 h
     - button "Take back claude": Take back
   - region "Why it exists":
@@ -49,7 +49,7 @@
     - term: Purpose
     - definition: Not given yet
     - term: Created
-    - definition: 4 Nov, by Not given yet
+    - definition: 4 Nov
     - term: Hold
     - definition: Not given yet
   - region "Busiest now":

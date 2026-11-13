@@ -114,6 +114,11 @@
     gap: var(--space-8);
     min-width: 0;
 }
+.hint {
+    flex: none;
+    color: var(--t3);
+    font-size: var(--text-label);
+}
 .slim .title {
     font-size: var(--text-body);
 }

@@ -21,14 +21,14 @@
   - region "Shared":
     - heading "Shared" [level=2]
     - region "Port 3000":
-      - text: :3000 Node or Next node Shared Public
+      - text: :3000 Node or Next node Public
       - button "Stop sharing"
       - text: https://macbook-pro.tail77a797.ts.net:443
       - button "Copy https://macbook-pro.tail77a797.ts.net:443": Copy
       - button "Open"
       - button "QR code"
     - region "Port 5173":
-      - text: :5173 Vite node Shared Private
+      - text: :5173 Vite node Private
       - button "Stop sharing"
       - text: https://macbook-pro.tail77a797.ts.net:40001
       - button "Copy https://macbook-pro.tail77a797.ts.net:40001": Copy

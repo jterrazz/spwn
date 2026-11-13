@@ -29,17 +29,14 @@ function ShareAddress({ share, onThisMac }: { share: PortsSharedPort; onThisMac:
     );
 }
 
-export function SharedRow({
-    share,
-    target,
-    onThisMac,
-    compact = false,
-}: {
+type SharedRowProps = {
     share: PortsSharedPort;
     target: Target | undefined;
     onThisMac: boolean;
     compact?: boolean;
-}) {
+};
+
+export function SharedRow({ share, target, onThisMac, compact = false }: SharedRowProps) {
     const to = share.to ?? '';
     const label = share.label ?? '';
     const stop = usePortStop({ port: share.guest_port, target, vm: share.vm });
@@ -55,7 +52,11 @@ export function SharedRow({
         gesture: stop,
         lead: <Value look="raised">{`:${share.guest_port}`}</Value>,
         leadSize: 'value',
-        state: { tone: SHARE_STATE_TONES[share.state], word: SHARE_STATE_WORDS[share.state] },
+        state: {
+            calm: 'unsaid',
+            tone: SHARE_STATE_TONES[share.state],
+            word: SHARE_STATE_WORDS[share.state],
+        },
         title: label === '' ? share.process : label,
     } as const;
     if (compact) {
@@ -63,7 +64,7 @@ export function SharedRow({
             <section aria-label={`Port ${share.guest_port}`} className={styles.shared}>
                 <GestureRow
                     {...row}
-                    {...(to === '' ? {} : { tag: shareToWord(to) })}
+                    {...(to === '' ? {} : { tag: shareToWord(to), tagLook: 'hint' as const })}
                     sentence={<Value>{shareAddressOf(share)}</Value>}
                     trail={stopButton}
                 />

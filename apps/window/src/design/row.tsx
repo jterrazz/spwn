@@ -1,7 +1,7 @@
 import type { MouseEvent, ReactNode } from 'react';
 
 import type { Tone } from '../tone';
-import { StatePill } from './state-pill';
+import { isCalm, StatePill } from './state-pill';
 import { TypeTag } from './type-tag';
 import { Value } from './value';
 
@@ -9,7 +9,8 @@ import styles from './row.module.css';
 
 export type RowTemplate = 'catalog' | 'flow' | 'meters';
 
-type RowState = { tone: Tone; word: string };
+// value: `calm: 'unsaid'` draws no word for a calm state, where the panel's title already says it ("Shared").
+type RowState = { tone: Tone; word: string; asWritten?: boolean; calm?: 'unsaid' | 'word' };
 
 // value: a column given `null` is kept empty in this row, so a list whose rows differ still aligns; a column
 // value: left `undefined` is not a column of this list at all. A value given as a string is plain text with
@@ -18,6 +19,7 @@ type RowState = { tone: Tone; word: string };
 export type RowProps = {
     title: string;
     tag?: string;
+    tagLook?: 'chip' | 'hint';
     sentence?: ReactNode;
     lead?: ReactNode;
     leadSize?: 'chip' | 'icon' | 'value';
@@ -98,7 +100,14 @@ function StateCell({ state, at }: { state: null | RowState | undefined; at: 'end
     }
     return (
         <div className={`${styles.state} ${at === 'end' ? styles.atEnd : ''}`}>
-            {state === null ? null : <StatePill quiet tone={state.tone} word={state.word} />}
+            {state === null || (state.calm === 'unsaid' && isCalm(state.tone)) ? null : (
+                <StatePill
+                    asWritten={state.asWritten ?? false}
+                    quiet
+                    tone={state.tone}
+                    word={state.word}
+                />
+            )}
         </div>
     );
 }
@@ -108,9 +117,14 @@ function titledIfCut(event: MouseEvent<HTMLSpanElement>): void {
     span.title = span.scrollWidth > span.clientWidth ? (span.textContent ?? '') : '';
 }
 
-type NameProps = { title: string; tag: string | undefined; sentence: ReactNode };
+type NameProps = {
+    title: string;
+    tag: string | undefined;
+    tagLook: 'chip' | 'hint';
+    sentence: ReactNode;
+};
 
-function Name({ title, tag, sentence }: NameProps) {
+function Name({ title, tag, tagLook, sentence }: NameProps) {
     const titled = (
         <span className={styles.title} onMouseEnter={titledIfCut}>
             {title}
@@ -123,7 +137,11 @@ function Name({ title, tag, sentence }: NameProps) {
             ) : (
                 <span className={styles.tagged}>
                     {titled}
-                    <Value look="raised">{tag}</Value>
+                    {tagLook === 'hint' ? (
+                        <span className={styles.hint}>{tag}</span>
+                    ) : (
+                        <Value look="raised">{tag}</Value>
+                    )}
                 </span>
             )}
             {sentence === undefined || sentence === null || sentence === '' ? null : (
@@ -140,6 +158,7 @@ const NO_CELLS: readonly ReactNode[] = [];
 function RowBody({
     title,
     tag,
+    tagLook = 'chip',
     sentence,
     lead,
     state,
@@ -153,7 +172,7 @@ function RowBody({
         <>
             {lead === undefined ? null : <div className={styles.lead}>{lead}</div>}
             {stateAt === 'start' ? <StateCell at="start" state={state} /> : null}
-            <Name sentence={sentence} tag={tag} title={title} />
+            <Name sentence={sentence} tag={tag} tagLook={tagLook} title={title} />
             {kind === undefined ? null : (
                 <div className={styles.kind}>
                     {kind === null ? null : <TypeTag>{kind}</TypeTag>}
