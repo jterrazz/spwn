@@ -2,11 +2,12 @@
 // value: usage: node scripts/capture.ts [<out-dir> [<world>...]]: .artifacts/captures and every recorded world by
 // value: default. It builds the proof pages, serves them, and saves <world>/<page>.png for each page of the
 // value: sidebar and <world>/<machine>-<tab>.png for each tab of each machine the world lists, the full height of
-// value: the page, and gallery.png, the design components, opened by its start route (`?page=`, `?machine=&tab=`) so no capture clicks.
+// value: the page, and gallery.png, the design components, with gallery/<Component>.png, one reference image per
+// value: component the gallery enters, each opened by its start route (`?page=`, `?machine=&tab=`) so no capture clicks.
 import { mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import type { Browser } from 'playwright';
+import type { Browser, Page } from 'playwright';
 import { build, preview } from 'vite';
 
 const window = resolve(import.meta.dirname, '..');
@@ -24,7 +25,7 @@ const PAGES = [
 const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Accounts', 'Storage', 'Logs'];
 const PARALLEL = 6;
 
-type Shot = { name: string; query: string };
+type Shot = { name: string; query: string; entries?: boolean };
 
 function fieldOf(value: unknown, key: string): unknown {
     if (typeof value !== 'object' || value === null) {
@@ -96,8 +97,19 @@ async function capture(browser: Browser, base: string, out: string, shot: Shot):
         await page.waitForTimeout(200);
     }
     await page.screenshot({ path: join(out, `${shot.name}.png`) });
+    if (shot.entries === true) {
+        await captureEntries(page, join(out, shot.name));
+    }
     await page.close();
     return errors;
+}
+
+async function captureEntries(page: Page, folder: string): Promise<void> {
+    mkdirSync(folder, { recursive: true });
+    for (const entry of await page.locator('[data-entry]').all()) {
+        const name = (await entry.getAttribute('data-entry')) ?? 'entry';
+        await entry.screenshot({ path: join(folder, `${name}.png`) });
+    }
 }
 
 const [outArgument, ...named] = process.argv.slice(2);
@@ -114,7 +126,7 @@ const server = await preview({ build: { outDir: proof }, preview: { port: 0 }, r
 const base = (server.resolvedUrls?.local[0] ?? '').replace(/\/$/u, '');
 const shots = [
     ...chosen.flatMap((world) => shotsOf(world)),
-    { name: 'gallery', query: '?page=gallery' },
+    { entries: true, name: 'gallery', query: '?page=gallery' },
 ];
 for (const world of chosen) {
     mkdirSync(join(out, world), { recursive: true });

@@ -1,6 +1,6 @@
 export { AppIcon } from './app-icon';
 export { Bar, ShareBar, type SharePart } from './bar';
-export { Button, BUTTON_VARIANTS, Screen } from './button';
+export { Button, Screen } from './button';
 export { asSentence, capitalised } from './case';
 export { Caption } from './caption';
 export { Chart } from './chart';
@@ -26,7 +26,6 @@ export { StateDot } from './state-dot';
 export { StatePill } from './state-pill';
 export { Switch } from './switch';
 export { Tile } from './tile';
-export { TONES } from '../tone';
 export { TypeTag } from './type-tag';
 export { Value } from './value';
 export { Verdict } from './verdict';
