@@ -114,6 +114,7 @@ function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
             <Row
                 cells={macCells(mac.Name, report)}
                 lead={<MachineIcon kind="mac" />}
+                leadSize="machine"
                 onOpen={() => {
                     go(machineRoute(mac.Name));
                 }}
@@ -125,6 +126,7 @@ function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
                     cells={vmCells(vm, report)}
                     key={vm.Name}
                     lead={<MachineIcon identity={identityOf(vm.Name)} kind={machineKindOf(vm)} />}
+                    leadSize="machine"
                     nested
                     onOpen={() => {
                         go(machineRoute(vm.Name));

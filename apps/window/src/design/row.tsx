@@ -270,7 +270,7 @@ export function RowHead({
 }) {
     return (
         <div
-            className={`${styles.row} ${styles.grid} ${styles[template]} ${lead ? styles.leadIcon : ''} ${styles.head}`}
+            className={`${styles.row} ${styles.grid} ${styles[template]} ${lead ? styles.leadMachine : ''} ${styles.head}`}
         >
             {lead ? <span /> : null}
             {columns.map((column) => (

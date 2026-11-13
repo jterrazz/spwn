@@ -81,6 +81,7 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
                 <Bar identity="purple" key="memory" label="Memory" percent={72} />,
             ],
             lead: <MachineIcon identity="purple" kind="workspace" />,
+            leadSize: 'machine',
             onOpen: nothing,
             template: 'meters',
             title: 'gate',
@@ -91,6 +92,7 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
         props: {
             cells: ['12 %', '2 / 4'],
             lead: <MachineIcon identity="blue" kind="server" />,
+            leadSize: 'machine',
             nested: true,
             template: 'meters',
             title: 'infra',
