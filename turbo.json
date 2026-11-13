@@ -19,9 +19,6 @@
         "test": {},
         "specs#test": {
             "cache": false
-        },
-        "studio-station-specs#test": {
-            "cache": false
         }
     },
     "globalPassThroughEnv": [

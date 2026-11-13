@@ -2,9 +2,6 @@
     "name": "studio-station-specs",
     "private": true,
     "type": "module",
-    "scripts": {
-        "test": "vitest --run"
-    },
     "devDependencies": {
         "@types/node": "^25.9.9"
     }
