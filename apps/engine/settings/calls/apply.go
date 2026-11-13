@@ -54,7 +54,7 @@ var Apply = call.Call[Deps, ApplyIn, []settings.Change]{
 				}
 			}
 			change, err := d.Settings.Apply(ctx, t.it.Name, values, in.Interactive || answered(t.it, in))
-			change.Item, change.Verb = t.it.Name, "apply"
+			change.Package, change.Verb = t.it.Name, "apply"
 			if err != nil {
 				change.Result = catalog.StateBroken
 				if len(change.Steps) == 0 {
@@ -100,7 +100,7 @@ type target struct {
 func targetsOf(ctx context.Context, d Deps, in ApplyIn, off map[string]bool) ([]target, error) {
 	var out []target
 	if len(in.Names) == 0 {
-		for _, it := range d.Settings.Items() {
+		for _, it := range d.Settings.Packages() {
 			if settings.GroupOf(it) != settings.SetByStation || asks(it) {
 				continue
 			}
@@ -155,7 +155,7 @@ func keep(ctx context.Context, d Deps, it catalog.Setting) error {
 
 func setOff(d Deps, off map[string]bool) error {
 	names := make([]string, 0, len(off))
-	for _, it := range d.Settings.Items() {
+	for _, it := range d.Settings.Packages() {
 		if off[it.Name] {
 			names = append(names, it.Name)
 		}

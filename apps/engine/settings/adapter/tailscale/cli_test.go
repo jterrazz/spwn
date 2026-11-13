@@ -46,7 +46,7 @@ func TestApplier(t *testing.T) {
 			AppStoreCLI: func() string { return "/Applications/Tailscale.app/Contents/MacOS/Tailscale" },
 			LookPath:    func(string) (string, bool) { return "", false },
 		})
-		return contracttest.Opened{Applier: cli, Item: catalog.Setting{Name: "tailscale-cli", Effect: catalog.ProcTailscaleCLI}, Edit: func(*testing.T) {
+		return contracttest.Opened{Applier: cli, Package: catalog.Setting{Name: "tailscale-cli", Effect: catalog.ProcTailscaleCLI}, Edit: func(*testing.T) {
 			files.files["/home/u/.local/bin/tailscale"] = []byte("#!/bin/sh\necho mine\n")
 		}}
 	})

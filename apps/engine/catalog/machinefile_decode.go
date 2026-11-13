@@ -392,10 +392,10 @@ func checkSettings(s SettingList, overlay bool) string {
 }
 
 // invariant: a `vault:` value names a secret of the vault, never holds one.
-func checkValues(item string, values map[string]OptionValue) string {
+func checkValues(pkg string, values map[string]OptionValue) string {
 	for _, k := range sortedKeys(values) {
 		if ref, ok := strings.CutPrefix(string(values[k]), VaultPrefix); ok && !vaultName.MatchString(ref) {
-			return fmt.Sprintf("%s's %s: %q names no secret (`vault:<name>`)", item, k, values[k])
+			return fmt.Sprintf("%s's %s: %q names no secret (`vault:<name>`)", pkg, k, values[k])
 		}
 	}
 	return ""

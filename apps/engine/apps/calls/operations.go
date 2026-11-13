@@ -211,7 +211,7 @@ func (s *Shelf) supersede(ctx context.Context, t catalog.App) []apps.Step {
 	if !listedOld(t, listings) || !s.ownInstall(t, listings) {
 		return nil
 	}
-	step := apps.Step{Item: t.Supersedes + " formula", Result: catalog.StateOK, Detail: "uninstalled: the app replaces it"}
+	step := apps.Step{Package: t.Supersedes + " formula", Result: catalog.StateOK, Detail: "uninstalled: the app replaces it"}
 	if err := s.o.Installers[old.Method()].Remove(ctx, []catalog.Install{old}, s.logs([]catalog.App{t})); err != nil {
 		words, why := s.failed(verbUninstall, []catalog.App{t}, err)
 		step.Detail, _ = words(t.Name)
@@ -259,8 +259,8 @@ func (s *Shelf) Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outc
 	via := map[catalog.Method]bool{}
 	for _, k := range r.Via {
 		owner, _ := s.cat.Manager(string(k))
-		if it, ok := s.cat.Item(owner); ok {
-			for _, m := range it.Item.Manages {
+		if it, ok := s.cat.Package(owner); ok {
+			for _, m := range it.Package.Manages {
 				via[catalog.Method(m)] = true
 			}
 		}
@@ -467,14 +467,14 @@ func (s *Shelf) run(ctx context.Context, verb string, t catalog.App, word bool, 
 
 func (s *Shelf) then(ctx context.Context, t catalog.App, interactive bool) []apps.Step {
 	steps := make([]apps.Step, 0, len(t.Then))
-	for _, item := range t.Then {
+	for _, pkg := range t.Then {
 		if s.cfg == nil {
-			steps = append(steps, apps.Step{Item: item, Result: catalog.StateAbsent, Detail: "not applied: station settings apply " + item})
+			steps = append(steps, apps.Step{Package: pkg, Result: catalog.StateAbsent, Detail: "not applied: station settings apply " + pkg})
 			continue
 		}
-		step, err := s.cfg.Configure(ctx, item, interactive)
+		step, err := s.cfg.Configure(ctx, pkg, interactive)
 		if err != nil {
-			step = apps.Step{Item: item, Result: catalog.StateBroken, Detail: err.Error()}
+			step = apps.Step{Package: pkg, Result: catalog.StateBroken, Detail: err.Error()}
 		}
 		steps = append(steps, step)
 	}
@@ -491,8 +491,8 @@ func (s *Shelf) requirements(ctx context.Context, t catalog.App) []string {
 	var reqs []string
 	for _, kind := range []catalog.LinkKind{catalog.LinkManager, catalog.LinkProvidedBy, catalog.LinkRequires} {
 		for _, l := range links {
-			if l.Kind == kind && (kind != catalog.LinkManager || missing) && !slices.Contains(reqs, l.Items[0]) {
-				reqs = append(reqs, l.Items[0])
+			if l.Kind == kind && (kind != catalog.LinkManager || missing) && !slices.Contains(reqs, l.Packages[0]) {
+				reqs = append(reqs, l.Packages[0])
 			}
 		}
 	}
@@ -594,10 +594,10 @@ func sameName(t catalog.App) func(catalog.App) bool {
 // never a failure: the owner opens the provider once, then asks again.
 func (s *Shelf) firstOpen(t catalog.App, e *apps.NotYetProvidedError) string {
 	again := "station apps install " + t.Name
-	if by, ok := s.byName[e.Item]; ok && by.Bundle != "" {
+	if by, ok := s.byName[e.Package]; ok && by.Bundle != "" {
 		return "open " + by.Bundle + " once, then " + again
 	}
-	return e.Error() + ": open " + e.Item + " once, then " + again
+	return e.Error() + ": open " + e.Package + " once, then " + again
 }
 
 const verbMove = "move"
@@ -652,10 +652,10 @@ func (s *Shelf) Move(ctx context.Context, name string, to catalog.Method, p call
 
 func (s *Shelf) leave(ctx context.Context, t catalog.App, was apps.Report) apps.Step {
 	old := s.holding(t, was)
-	step := apps.Step{Item: string(was.Method) + " copy", Result: catalog.StateOK}
+	step := apps.Step{Package: string(was.Method) + " copy", Result: catalog.StateOK}
 	switch {
 	case !was.Managed:
-		step.Item, step.Detail = "copy on PATH", "kept: it is yours, installed by none of its methods"
+		step.Package, step.Detail = "copy on PATH", "kept: it is yours, installed by none of its methods"
 	case s.uninstallable(old) != nil:
 		step.Detail = "kept: station cannot uninstall it"
 	case s.unrecorded(ctx, old):

@@ -112,7 +112,7 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 		if method == "" {
 			method = d.Line.Method()
 		}
-		steps = append(steps, pages.RunStep{ID: d.Line.Step.Item, State: d.State, Cells: []page.Value{page.Version(d.Version), page.Texts(method)}, Why: said, Detail: detail, Log: d.Log})
+		steps = append(steps, pages.RunStep{ID: d.Line.Step.Package, State: d.State, Cells: []page.Value{page.Version(d.Version), page.Texts(method)}, Why: said, Detail: detail, Log: d.Log})
 		switch {
 		case d.Reason == machinefile.Interrupted:
 			interrupted = true

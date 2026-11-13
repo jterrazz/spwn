@@ -230,8 +230,8 @@ func (OptionType) Enum() []string {
 	return []string{string(OptionString), string(OptionInteger), string(OptionBoolean), string(OptionEnum)}
 }
 
-type Item struct {
-	Item        string   `yaml:"item"`
+type Package struct {
+	Package     string   `yaml:"item"`
 	Kind        Kind     `yaml:"kind"`
 	Name        string   `yaml:"name"`
 	Description string   `yaml:"description"`

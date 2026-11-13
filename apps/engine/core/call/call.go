@@ -282,7 +282,7 @@ func gate(m Meta, target machine.Profile) error {
 	}
 	for _, n := range m.Needs {
 		if p, lacks := target.Caps.Lacks(n); lacks {
-			return fail.New(fail.Refused, NeedMissing, p.Name, map[string]string{"call": m.Name, "need": string(n), "item": p.Item})
+			return fail.New(fail.Refused, NeedMissing, p.Name, map[string]string{"call": m.Name, "need": string(n), "item": p.Package})
 		}
 	}
 	return nil

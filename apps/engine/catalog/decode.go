@@ -56,18 +56,18 @@ type format struct {
 }
 
 var (
-	items        = format{key: "item", schema: Schema, family: SchemaFamily}
+	packages     = format{key: "item", schema: Schema, family: SchemaFamily}
 	machinefiles = format{key: "machinefile", schema: MachinefileSchema, family: MachinefileFamily}
 )
 
-func Decode(file string, body []byte) (Item, error) {
-	var it Item
-	doc, err := strict(file, body, items, &it)
+func Decode(file string, body []byte) (Package, error) {
+	var it Package
+	doc, err := strict(file, body, packages, &it)
 	if err != nil {
-		return Item{}, err
+		return Package{}, err
 	}
-	if err := checkItem(file, doc, it); err != nil {
-		return Item{}, err
+	if err := checkPackage(file, doc, it); err != nil {
+		return Package{}, err
 	}
 	return it, nil
 }
@@ -169,7 +169,7 @@ func known[E interface {
 
 // invariant: one check per key, in the file's order, each saying the key it
 // judges: a refusal names the line the owner fixes.
-func checkItem(file string, doc *yaml.Node, it Item) error {
+func checkPackage(file string, doc *yaml.Node, it Package) error {
 	if !known(it.Kind) {
 		return refused(file, doc, "kind", fmt.Sprintf("kind %q is none of %s", it.Kind, strings.Join(it.Kind.Enum(), ", ")))
 	}
@@ -265,7 +265,7 @@ func refused(file string, doc *yaml.Node, key, problem string) error {
 
 // invariant: a key belongs to the kinds that read it: an app's disk row is
 // no key of a setting, a setting's writes none of an app's.
-func foreignKey(it Item) string {
+func foreignKey(it Package) string {
 	type key struct {
 		name string
 		set  bool
@@ -357,7 +357,7 @@ func checkSelector(s Selector, method bool) string {
 	return ""
 }
 
-func checkMethod(it Item, m MethodSpec) string {
+func checkMethod(it Package, m MethodSpec) string {
 	if problem := checkSelector(m.Selector, true); problem != "" {
 		return problem
 	}
@@ -607,7 +607,7 @@ func checkDisk(d Disk) string {
 
 // invariant: a manager names the method keys it installs by, and only a
 // manager does; a priority is a rank, from 1.
-func checkManages(it Item) string {
+func checkManages(it Package) string {
 	for _, k := range it.Manages {
 		if !known(k) {
 			return fmt.Sprintf("%q is none of %s", k, strings.Join(k.Enum(), ", "))

@@ -6,5 +6,5 @@ runs:
     - command: 'explain --machinefile station-macos'
       exit: 2
       stderr: |
-          Error: studio@1a2b3c4/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Item
+          Error: studio@1a2b3c4/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package
           Hint: fix that line: station never rewrites an item file

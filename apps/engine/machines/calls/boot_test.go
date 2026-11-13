@@ -22,13 +22,13 @@ func (e *boundEngine) GuestExec(ctx context.Context, _, _, _ string) (GuestRan, 
 	return GuestRan{}, nil
 }
 
-func TestABootPhaseOutlastsItsItemsAndItsLines(t *testing.T) {
+func TestABootPhaseOutlastsItsPackagesAndItsLines(t *testing.T) {
 	// invariant: the boot phase's apply is given the items' share and the
 	// lines' bound together, so lines that run long end as a broken
 	// run.boot step inside it, never as the apply cut short.
 	e := &boundEngine{}
 	s := &Machinist{engineAPI: e}
-	want := catalog.ItemsBound + catalog.RunBound
+	want := catalog.PackagesBound + catalog.RunBound
 	ref, cancel := context.WithTimeout(context.Background(), want)
 	defer cancel()
 	due, _ := ref.Deadline()

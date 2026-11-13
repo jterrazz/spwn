@@ -17,7 +17,7 @@ type Catalog struct {
 	Images   []Image
 	// value: every item as its file says it, and the layer it was read
 	// from, in the lists' order: what the Machinefile's resolution reads.
-	Items []Placed
+	Packages []Placed
 }
 
 // invariant: the built-in packages and Machinefiles are embedded by the catalog
@@ -40,15 +40,15 @@ func BuiltinFiles() fs.FS {
 // layer it stands in.
 
 type Placed struct {
-	Item   Item
-	Folder string
-	File   string
-	Layer  string
+	Package Package
+	Folder  string
+	File    string
+	Layer   string
 }
 
-func (c Catalog) Item(name string) (Placed, bool) {
-	for _, p := range c.Items {
-		if p.Item.Name == name {
+func (c Catalog) Package(name string) (Placed, bool) {
+	for _, p := range c.Packages {
+		if p.Package.Name == name {
 			return p, true
 		}
 	}
@@ -74,21 +74,21 @@ func (c Catalog) Setting(name string) (Setting, bool) {
 }
 
 func Load(fsys fs.FS, root string) (Catalog, error) {
-	items, err := Items(fsys, root, BuiltinLayer)
+	pkgs, err := Packages(fsys, root, BuiltinLayer)
 	if err != nil {
 		return Catalog{}, err
 	}
-	return Assemble(items)
+	return Assemble(pkgs)
 }
 
-func Items(fsys fs.FS, root, layer string) ([]Placed, error) {
+func Packages(fsys fs.FS, root, layer string) ([]Placed, error) {
 	// value: the items of one tree, `<root>/<category>/<name>.yaml`, each
 	// decoded strictly, in the layer named.
 	folders, err := fs.ReadDir(fsys, root)
 	if err != nil {
 		return nil, err
 	}
-	var items []Placed
+	var pkgs []Placed
 	for _, folder := range folders {
 		if !folder.IsDir() {
 			return nil, &FileError{File: path.Join(root, folder.Name()), Problem: "is no category folder"}
@@ -110,10 +110,10 @@ func Items(fsys fs.FS, root, layer string) ([]Placed, error) {
 			if err != nil {
 				return nil, err
 			}
-			items = append(items, p)
+			pkgs = append(pkgs, p)
 		}
 	}
-	return items, nil
+	return pkgs, nil
 }
 
 func Read(file, folder, layer string, body []byte) (Placed, error) {
@@ -122,7 +122,7 @@ func Read(file, folder, layer string, body []byte) (Placed, error) {
 	if err != nil {
 		return Placed{}, err
 	}
-	return Placed{Item: it, Folder: folder, File: file, Layer: layer}, nil
+	return Placed{Package: it, Folder: folder, File: file, Layer: layer}, nil
 }
 
 func Over(layers ...[]Placed) []Placed {
@@ -132,8 +132,8 @@ func Over(layers ...[]Placed) []Placed {
 	seen := map[string]bool{}
 	for _, layer := range layers {
 		for _, p := range layer {
-			if !seen[p.Item.Name] {
-				seen[p.Item.Name] = true
+			if !seen[p.Package.Name] {
+				seen[p.Package.Name] = true
 				out = append(out, p)
 			}
 		}
@@ -141,31 +141,31 @@ func Over(layers ...[]Placed) []Placed {
 	return out
 }
 
-func Assemble(items []Placed) (Catalog, error) {
+func Assemble(pkgs []Placed) (Catalog, error) {
 	// value: the catalog of the items given, judged whole.
-	items = slices.Clone(items)
-	slices.SortFunc(items, byCategory)
-	c := Catalog{Images: builtinImages, Items: items}
+	pkgs = slices.Clone(pkgs)
+	slices.SortFunc(pkgs, byCategory)
+	c := Catalog{Images: builtinImages, Packages: pkgs}
 	files := map[string]string{}
-	for _, p := range items {
-		files[p.Item.Name] = p.File
-		if p.Item.Kind == KindSetting {
+	for _, p := range pkgs {
+		files[p.Package.Name] = p.File
+		if p.Package.Kind == KindSetting {
 			category, ok := settingCategory(p.Folder)
 			if !ok {
 				return Catalog{}, &FileError{File: p.File, Problem: "folder " + p.Folder + " is no category of settings"}
 			}
-			c.Settings = append(c.Settings, p.Item.setting(category))
+			c.Settings = append(c.Settings, p.Package.setting(category))
 			continue
 		}
 		category, ok := appCategory(p.Folder)
 		if !ok {
 			return Catalog{}, &FileError{File: p.File, Problem: "folder " + p.Folder + " is no category of apps"}
 		}
-		t := p.Item.app(category)
-		t.Installs = c.placed(p.Item)
+		t := p.Package.app(category)
+		t.Installs = c.placed(p.Package)
 		c.Apps = append(c.Apps, t)
 	}
-	if err := whole(items, files); err != nil {
+	if err := whole(pkgs, files); err != nil {
 		return Catalog{}, err
 	}
 	return c, nil
@@ -175,18 +175,18 @@ func Assemble(items []Placed) (Catalog, error) {
 // category, in the order of the categories' tables, then by name; a folder
 // that is no category sorts last, refused by the load.
 func byCategory(a, b Placed) int {
-	if (a.Item.Kind == KindSetting) != (b.Item.Kind == KindSetting) {
-		if a.Item.Kind == KindSetting {
+	if (a.Package.Kind == KindSetting) != (b.Package.Kind == KindSetting) {
+		if a.Package.Kind == KindSetting {
 			return 1
 		}
 		return -1
 	}
-	return cmp.Or(cmp.Compare(a.rank(), b.rank()), cmp.Compare(a.Item.Name, b.Item.Name))
+	return cmp.Or(cmp.Compare(a.rank(), b.rank()), cmp.Compare(a.Package.Name, b.Package.Name))
 }
 
 func (p Placed) rank() int {
 	folders := make([]string, 0, len(Categories))
-	if p.Item.Kind == KindSetting {
+	if p.Package.Kind == KindSetting {
 		for _, c := range SettingCategories {
 			folders = append(folders, c.Folder())
 		}
@@ -204,26 +204,26 @@ func (p Placed) rank() int {
 // invariant: the items judged together, each refusal naming the file that
 // says it: each name is one item's, and every name an item gives (requires,
 // after, then, provided-by, renamed-from) is an item of the right kind.
-func whole(items []Placed, files map[string]string) error {
+func whole(pkgs []Placed, files map[string]string) error {
 	owner := owners{}
 	for _, it := range CheckedSettings {
 		owner[it.Name] = "checked setting"
 	}
-	for _, p := range items {
+	for _, p := range pkgs {
 		what := "app"
-		if p.Item.Kind == KindSetting {
+		if p.Package.Kind == KindSetting {
 			what = "setting"
 		}
-		if err := owner.claim(p.Item.Name, what); err != nil {
-			return &FileError{File: files[p.Item.Name], Problem: err.Error()}
+		if err := owner.claim(p.Package.Name, what); err != nil {
+			return &FileError{File: files[p.Package.Name], Problem: err.Error()}
 		}
 	}
-	if err := managers(items, files); err != nil {
+	if err := managers(pkgs, files); err != nil {
 		return err
 	}
 	renamed := map[string]string{}
-	for _, p := range items {
-		it := p.Item
+	for _, p := range pkgs {
+		it := p.Package
 		if problem := judged(it, owner, renamed); problem != "" {
 			return &FileError{File: files[it.Name], Problem: problem}
 		}
@@ -231,7 +231,7 @@ func whole(items []Placed, files map[string]string) error {
 	return nil
 }
 
-func judged(it Item, owner owners, renamed map[string]string) string {
+func judged(it Package, owner owners, renamed map[string]string) string {
 	for _, old := range it.RenamedFrom {
 		if owner[old] != "" {
 			return fmt.Sprintf("%s is renamed from %q, which names an item still", it.Name, old)
@@ -277,15 +277,15 @@ func judged(it Item, owner owners, renamed map[string]string) string {
 
 // invariant: a method key has one manager, and a system's priority one
 // manager at each rank, so the order a system installs by is declared once.
-func managers(items []Placed, files map[string]string) error {
+func managers(pkgs []Placed, files map[string]string) error {
 	by := map[ManagerKey]string{}
 	type slot struct {
 		system string
 		at     int
 	}
 	at := map[slot]string{}
-	for _, p := range items {
-		it := p.Item
+	for _, p := range pkgs {
+		it := p.Package
 		for _, k := range it.Manages {
 			if prev, ok := by[k]; ok {
 				return &FileError{File: files[it.Name], Problem: fmt.Sprintf("%s and %s both manage %s", prev, it.Name, k)}
@@ -322,18 +322,18 @@ func (o owners) claim(name, what string) error {
 
 // value: a port an item serves on, and the item that says so.
 
-type ItemPort struct {
-	Item string
+type PackagePort struct {
+	Package string
 	PortHint
 }
 
-func (c Catalog) Ports() []ItemPort {
+func (c Catalog) Ports() []PackagePort {
 	// value: every port the catalog's items serve on, in the items' order:
 	// the label a listening port is shown with, and what sharing it sets.
-	var out []ItemPort
-	for _, p := range c.Items {
-		for _, h := range p.Item.Ports {
-			out = append(out, ItemPort{Item: p.Item.Name, PortHint: h})
+	var out []PackagePort
+	for _, p := range c.Packages {
+		for _, h := range p.Package.Ports {
+			out = append(out, PackagePort{Package: p.Package.Name, PortHint: h})
 		}
 	}
 	return out

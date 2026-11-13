@@ -61,7 +61,7 @@ func (e *CycleError) Said() string {
 	return strings.Join(e.Path, verb)
 }
 
-type UnknownItemError struct {
+type UnknownPackageError struct {
 	Name string
 	// value: the file that lists it, or the item that requires it.
 	By string
@@ -70,7 +70,7 @@ type UnknownItemError struct {
 	At string
 }
 
-func (e *UnknownItemError) Error() string {
+func (e *UnknownPackageError) Error() string {
 	if e.Is != "" {
 		return e.Name + " is " + e.Is + " (" + within(e.At, e.By) + ")"
 	}
@@ -78,7 +78,7 @@ func (e *UnknownItemError) Error() string {
 }
 
 type NoMethodError struct {
-	Item, System string
+	Package, System string
 	// value: the manager the Machinefile asked, when it asked one.
 	Manager string
 	// value: why the item is in the plan: listed, or required by another.
@@ -91,7 +91,7 @@ func (e *NoMethodError) Error() string {
 	if e.Manager != "" {
 		by = " by " + e.Manager
 	}
-	return e.Item + " has no method" + by + " for " + e.System + " (" + e.Why + suffix(e.At) + ")"
+	return e.Package + " has no method" + by + " for " + e.System + " (" + e.Why + suffix(e.At) + ")"
 }
 
 func suffix(at string) string {
@@ -106,26 +106,26 @@ func suffix(at string) string {
 // empty.
 
 type UnpinnableError struct {
-	Item, Version, Method string
-	Holds                 string
-	Alternative           string
-	At                    string
+	Package, Version, Method string
+	Holds                    string
+	Alternative              string
+	At                       string
 }
 
 func (e *UnpinnableError) Error() string {
-	return e.Item + " " + e.Version + ": " + e.Method + " holds " + e.Holds + ", never " + e.Version + " (" + e.At + ")"
+	return e.Package + " " + e.Version + ": " + e.Method + " holds " + e.Holds + ", never " + e.Version + " (" + e.At + ")"
 }
 
 type BadValueError struct {
-	Item, Key, Problem string
-	At                 string
+	Package, Key, Problem string
+	At                    string
 }
 
 func (e *BadValueError) Error() string {
 	if e.Key == "" {
-		return e.Item + ": " + e.Problem + " (" + e.At + ")"
+		return e.Package + ": " + e.Problem + " (" + e.At + ")"
 	}
-	return e.Item + "'s " + e.Key + ": " + e.Problem + " (" + e.At + ")"
+	return e.Package + "'s " + e.Key + ": " + e.Problem + " (" + e.At + ")"
 }
 
 type UnknownKeyError struct{ Key, Name string }

@@ -50,8 +50,8 @@ func (b lockBench) lock(t *testing.T) catalog.LockFile {
 	return l
 }
 
-func lockedOf(l catalog.LockFile, item string) (catalog.LockedApp, bool) {
-	return machinefile.Lock{LockFile: l}.App(item)
+func lockedOf(l catalog.LockFile, pkg string) (catalog.LockedApp, bool) {
+	return machinefile.Lock{LockFile: l}.App(pkg)
 }
 
 // invariant: the lock names what the machine holds: for every app the
@@ -69,11 +69,11 @@ func holdsWhatTheLockNames(t *testing.T, about string, b lockBench, plan machine
 		if line.Step.Kind == catalog.KindSetting {
 			continue
 		}
-		row := b.row(t, line.Step.Item)
-		got, ok := lockedOf(l, line.Step.Item)
+		row := b.row(t, line.Step.Package)
+		got, ok := lockedOf(l, line.Step.Package)
 		st := apps.StateOf(row)
 		if row.Managed && row.Method != "" && (st == apps.OK || st == apps.UpdateAvailable) {
-			want := catalog.LockedApp{Name: line.Step.Item, Method: string(row.Method), Version: row.Version}
+			want := catalog.LockedApp{Name: line.Step.Package, Method: string(row.Method), Version: row.Version}
 			if listless(b.bench, row.Method) || listless(b.bench, catalog.Method(got.Method)) {
 				// invariant: a method that keeps no list is read by its app's own check, which
 				// names neither the method that put the app there nor the version its
@@ -81,16 +81,16 @@ func holdsWhatTheLockNames(t *testing.T, about string, b lockBench, plan machine
 				want, got = catalog.LockedApp{Name: want.Name}, catalog.LockedApp{Name: got.Name}
 			}
 			if !ok || got != want {
-				t.Errorf("%s: %s holds %+v, the lock names %+v", about, line.Step.Item, want, got)
+				t.Errorf("%s: %s holds %+v, the lock names %+v", about, line.Step.Package, want, got)
 			}
 			continue
 		}
-		was, had := plan.Lock.App(line.Step.Item)
+		was, had := plan.Lock.App(line.Step.Package)
 		if st == apps.NotManaged {
 			was, had = catalog.LockedApp{}, false
 		}
 		if ok != had || got != was {
-			t.Errorf("%s: %s reads %s, and the lock moved from %+v to %+v", about, line.Step.Item, st, was, got)
+			t.Errorf("%s: %s reads %s, and the lock moved from %+v to %+v", about, line.Step.Package, st, was, got)
 		}
 	}
 }
@@ -125,17 +125,17 @@ func TestWhatApplyInstallsIsWhatTheLockNamesOnEveryPath(t *testing.T) {
 			again := lockBenchOf(t, kind, string(body), a.Name)
 			out = again.apply(t)
 			for _, d := range out.Done {
-				locked, ok := lockedOf(l, d.Line.Step.Item)
+				locked, ok := lockedOf(l, d.Line.Step.Package)
 				if !ok || !d.Line.Acts() {
 					continue
 				}
 				if d.Method != locked.Method {
-					t.Errorf("%s locked: %s locked by %s, installed by %s", about, d.Line.Step.Item, locked.Method, d.Method)
+					t.Errorf("%s locked: %s locked by %s, installed by %s", about, d.Line.Step.Package, locked.Method, d.Method)
 				}
 				if d.Line.Step.Spec.Pins() {
 					pinned[catalog.Method(d.Line.Step.Method)]++
 					if !catalog.Exactly(locked.Version).Contains(d.Version) {
-						t.Errorf("%s locked: %s locked at %s, installed at %s", about, d.Line.Step.Item, locked.Version, d.Version)
+						t.Errorf("%s locked: %s locked at %s, installed at %s", about, d.Line.Step.Package, locked.Version, d.Version)
 					}
 				}
 			}
@@ -184,7 +184,7 @@ func TestTheLockChoosesAmongTheMethodsTheMachinefileAllows(t *testing.T) {
 		b := lockBenchOf(t, catalog.Mac, "lock: station.lock/v1\nmachinefile: m\napps:\n    - "+c.lock+"\n", c.entry)
 		out := b.apply(t)
 		i := slices.IndexFunc(out.Done, func(d machinefile.Done) bool {
-			return d.Line.Step.Item != "" && strings.Contains(c.entry, d.Line.Step.Item)
+			return d.Line.Step.Package != "" && strings.Contains(c.entry, d.Line.Step.Package)
 		})
 		if i < 0 {
 			t.Fatalf("%s: no line in %+v", c.about, out.Done)
@@ -245,7 +245,7 @@ func TestAnUpgradeLeavesTheLockOfWhatItUpdated(t *testing.T) {
 		if d.Line.Step.Kind != catalog.KindManager {
 			managers = false
 		} else if !managers {
-			t.Errorf("the manager %s updated after an app", d.Line.Step.Item)
+			t.Errorf("the manager %s updated after an app", d.Line.Step.Package)
 		}
 	}
 }
@@ -262,7 +262,7 @@ func TestALockedVersionThatCannotInstallHasAWayOut(t *testing.T) {
 	delete(b.w.Mac("here").Apps[catalog.Method(rt)].Installed, "node")
 	b.w.Script = []world.Fault{{Call: "Installer.Install", Times: 1}}
 	out := b.apply(t)
-	i := slices.IndexFunc(out.Done, func(d machinefile.Done) bool { return d.Line.Step.Item == "node" })
+	i := slices.IndexFunc(out.Done, func(d machinefile.Done) bool { return d.Line.Step.Package == "node" })
 	if i < 0 || out.Done[i].State != catalog.StateBroken || !strings.Contains(out.Done[i].Detail, "station upgrade") {
 		t.Fatalf("apply ended %+v; want node broken, naming station upgrade", out.Done)
 	}
@@ -274,7 +274,7 @@ func TestALockedVersionThatCannotInstallHasAWayOut(t *testing.T) {
 	if err != nil {
 		t.Fatalf("upgrade: %v", err)
 	}
-	j := slices.IndexFunc(up.Done, func(d machinefile.Done) bool { return d.Line.Step.Item == "node" })
+	j := slices.IndexFunc(up.Done, func(d machinefile.Done) bool { return d.Line.Step.Package == "node" })
 	if j < 0 || up.Done[j].State != catalog.StateOK || !up.Done[j].Installed {
 		t.Fatalf("upgrade ended %+v; want node installed", up.Done)
 	}

@@ -25,7 +25,7 @@ const (
 	backupWithin = 7 * 24 * time.Hour
 )
 
-func (r Row) CheckedItem() catalog.CheckedSetting {
+func (r Row) CheckedPackage() catalog.CheckedSetting {
 	for _, it := range catalog.CheckedSettings {
 		if it.Name == r.Name {
 			return it

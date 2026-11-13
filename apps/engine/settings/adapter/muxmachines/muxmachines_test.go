@@ -38,7 +38,7 @@ func workspaces(names ...string) func(context.Context) ([]string, error) {
 
 func TestApplier(t *testing.T) {
 	contracttest.Applier(t, func(*testing.T) contracttest.Opened {
-		return contracttest.Opened{Applier: muxmachines.New(&mux{}, workspaces("linux-1", "linux-2")), Item: setting()}
+		return contracttest.Opened{Applier: muxmachines.New(&mux{}, workspaces("linux-1", "linux-2")), Package: setting()}
 	})
 }
 

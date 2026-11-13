@@ -192,7 +192,7 @@ func (e *FunnelHeld) Error() string {
 	return "Funnel port " + strconv.Itoa(e.Port) + " already serves an entry station did not make"
 }
 
-func HintOf(hints []catalog.ItemPort, port int) (catalog.ItemPort, bool) {
+func HintOf(hints []catalog.PackagePort, port int) (catalog.PackagePort, bool) {
 	// value: the first item that serves on this port, the label a row of it
 	// is shown with.
 	for _, h := range hints {
@@ -200,10 +200,10 @@ func HintOf(hints []catalog.ItemPort, port int) (catalog.ItemPort, bool) {
 			return h, true
 		}
 	}
-	return catalog.ItemPort{}, false
+	return catalog.PackagePort{}, false
 }
 
-func Hinted(v SharedPort, hints []catalog.ItemPort) SharedPort {
+func Hinted(v SharedPort, hints []catalog.PackagePort) SharedPort {
 	// value: a shared port with what the catalog's items say of it: its
 	// label, and the item whose env sharing it sets (`profile`, v1's word).
 	for _, h := range hints {
@@ -214,7 +214,7 @@ func Hinted(v SharedPort, hints []catalog.ItemPort) SharedPort {
 			v.Label = h.Label
 		}
 		if v.Profile == "" && len(h.Env) > 0 {
-			v.Profile = h.Item
+			v.Profile = h.Package
 		}
 	}
 	return v

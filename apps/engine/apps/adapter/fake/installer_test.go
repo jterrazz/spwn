@@ -27,7 +27,7 @@ func TestInstaller(t *testing.T) {
 		catalog.ShellInstall{Line: "npx playwright install chromium"},
 		catalog.ShellInstall{Line: "make tool", Undo: "make untool"},
 		catalog.AppInstall{Hint: "download it from its website"},
-		catalog.ProvidedByInstall{Item: "desk-app", Commands: []string{"dk"}},
+		catalog.ProvidedByInstall{Package: "desk-app", Commands: []string{"dk"}},
 		catalog.GitHubReleaseInstall{Repo: "acme/tool", Asset: "tool-*-{os}-{arch}.tar.gz", Commands: []string{"tool"}},
 	}
 	for _, sample := range samples {

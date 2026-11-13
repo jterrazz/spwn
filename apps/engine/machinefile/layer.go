@@ -114,7 +114,7 @@ func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 	// layer replaces a weaker one whole, as a same-name Machinefile does.
 	layers := make([][]catalog.Placed, 0, len(trees))
 	for _, t := range trees {
-		var items []catalog.Placed
+		var pkgs []catalog.Placed
 		for _, f := range t.Files {
 			rest, ok := strings.CutPrefix(f.Path, catalogDir+"/")
 			if !ok {
@@ -131,9 +131,9 @@ func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 			if err != nil {
 				return catalog.Catalog{}, refusedFile(catalogDir, err)
 			}
-			items = append(items, p)
+			pkgs = append(pkgs, p)
 		}
-		layers = append(layers, items)
+		layers = append(layers, pkgs)
 	}
 	c, err := catalog.Assemble(catalog.Over(layers...))
 	return c, refusedFile(catalogDir, err)

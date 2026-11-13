@@ -51,19 +51,19 @@ func Relocked(p Plan, done []Done, source *catalog.LockSource) catalog.LockFile 
 	out := catalog.LockFile{Machinefile: p.Name, Source: source}
 	ended := map[string]Done{}
 	for _, d := range done {
-		ended[d.Line.Step.Item] = d
+		ended[d.Line.Step.Package] = d
 	}
 	for _, l := range p.Lines {
 		if l.Step.Kind == catalog.KindSetting {
 			continue
 		}
-		locked, ok := p.Lock.App(l.Step.Item)
-		if d, ran := ended[l.Step.Item]; ran && (l.Acts() || d.Updated) {
+		locked, ok := p.Lock.App(l.Step.Package)
+		if d, ran := ended[l.Step.Package]; ran && (l.Acts() || d.Updated) {
 			if d.State == catalog.StateOK && d.Reason == "" {
-				locked, ok = catalog.LockedApp{Name: l.Step.Item, Method: cmp.Or(d.Method, l.Step.Method), Version: d.Version}, true
+				locked, ok = catalog.LockedApp{Name: l.Step.Package, Method: cmp.Or(d.Method, l.Step.Method), Version: d.Version}, true
 			}
 		} else if (l.Seen.Condition == Present || l.Seen.Condition == Outdated) && l.Seen.Method != "" {
-			locked, ok = catalog.LockedApp{Name: l.Step.Item, Method: l.Seen.Method, Version: l.Seen.Version}, true
+			locked, ok = catalog.LockedApp{Name: l.Step.Package, Method: l.Seen.Method, Version: l.Seen.Version}, true
 		} else if l.Seen.Condition == NotManaged {
 			ok = false
 		}

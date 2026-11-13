@@ -38,7 +38,7 @@ func TestEachKindOfNameIsCheckedByOneRule(t *testing.T) {
 	}
 }
 
-func TestAnItemWhoseNameEscapesItsRuleIsRefused(t *testing.T) {
+func TestAPackageWhoseNameEscapesItsRuleIsRefused(t *testing.T) {
 	release := strings.Replace(gh, "brew: gh", "github-release: {repo: acme/tool, asset: 'tool-{os}-{arch}'}", 1)
 	apt := strings.Replace(gh, "    - os: macos\n      brew: gh", "    - os: ubuntu\n      needs: [sudo]\n      apt: {packages: [gh]}", 1)
 	if err := decoded(t, release); err != nil {

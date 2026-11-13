@@ -136,7 +136,7 @@ func (s hostedServers) Hosted(ctx context.Context) bool {
 
 type settingsRead struct{ *settingscalls.Catalogue }
 
-func (settingsRead) Placed(r settings.Report) (string, catalog.State) { return r.Item.Name, r.State }
+func (settingsRead) Placed(r settings.Report) (string, catalog.State) { return r.Package.Name, r.State }
 
 type setupRead struct{ s *setupcalls.Provisioner }
 

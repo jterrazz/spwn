@@ -68,7 +68,7 @@ func (l *Ledger) read() (file, error) {
 }
 
 func (l *Ledger) write(f file) error {
-	slices.SortFunc(f.Installed, func(a, b machinefile.Installed) int { return strings.Compare(a.Item, b.Item) })
+	slices.SortFunc(f.Installed, func(a, b machinefile.Installed) int { return strings.Compare(a.Package, b.Package) })
 	slices.SortFunc(f.Blocks, func(a, b machinefile.Written) int { return strings.Compare(a.ID, b.ID) })
 	if err := l.files.MkdirAll(path.Dir(l.at), 0o700); err != nil {
 		return &store.UnwritableError{Path: l.at, Cause: err}
@@ -134,14 +134,14 @@ func (l *Ledger) List(context.Context) ([]machinefile.Installed, error) {
 
 func (l *Ledger) Put(_ context.Context, in machinefile.Installed) error {
 	return l.change(func(f *file) bool {
-		f.Installed = append(slices.DeleteFunc(f.Installed, func(e machinefile.Installed) bool { return e.Item == in.Item }), in)
+		f.Installed = append(slices.DeleteFunc(f.Installed, func(e machinefile.Installed) bool { return e.Package == in.Package }), in)
 		return true
 	})
 }
 
-func (l *Ledger) Delete(_ context.Context, item string) error {
+func (l *Ledger) Delete(_ context.Context, pkg string) error {
 	return l.change(func(f *file) bool {
-		of := func(e machinefile.Installed) bool { return e.Item == item }
+		of := func(e machinefile.Installed) bool { return e.Package == pkg }
 		held := slices.ContainsFunc(f.Installed, of)
 		f.Installed = slices.DeleteFunc(f.Installed, of)
 		return held

@@ -282,7 +282,7 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 	}
 }
 
-func TestAnItemIsLookedForAndReadOnTheOwnersPath(t *testing.T) {
+func TestAPackageIsLookedForAndReadOnTheOwnersPath(t *testing.T) {
 	// invariant: a manager command's PATH leaves nvm's versions out, so an
 	// item looked for there would read absent, never present another way.
 	home := "/home/u"

@@ -99,8 +99,8 @@ func TestStateAManagerHoldsWhatNoAppOfTheCatalogInstalls(t *testing.T) {
 	manager := catalog.App{Name: "casks", Kind: catalog.KindManager, Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.AptInstall{Packages: []string{"casks-manager"}}}}}
 	tool := catalog.App{Name: "tool", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.CaskInstall{Token: "tool"}}}}
 	cat := catalog.Catalog{
-		Apps:  []catalog.App{manager, tool},
-		Items: []catalog.Placed{{Item: catalog.Item{Name: "casks", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{catalog.ManagerKey(catalog.MethodCask)}}}, {Item: catalog.Item{Name: "tool"}}},
+		Apps:     []catalog.App{manager, tool},
+		Packages: []catalog.Placed{{Package: catalog.Package{Name: "casks", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{catalog.ManagerKey(catalog.MethodCask)}}}, {Package: catalog.Package{Name: "tool"}}},
 	}
 	for _, c := range []struct {
 		casks  *fake.State

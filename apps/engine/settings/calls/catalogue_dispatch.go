@@ -16,11 +16,11 @@ const ReadBudget = 5 * time.Second
 // effect no Applier writes is an error, never a silent success.
 func (s *Catalogue) handler(it catalog.Setting) (handler, error) {
 	if p, ok := it.Effect.(catalog.Procedure); ok && !p.Known() {
-		return handler{}, &settings.UnhandledError{Item: it.Name, Builtin: string(p)}
+		return handler{}, &settings.UnhandledError{Package: it.Name, Builtin: string(p)}
 	}
 	a, ok := s.appliers.For(it)
 	if !ok {
-		return handler{}, &settings.UnhandledError{Item: it.Name}
+		return handler{}, &settings.UnhandledError{Package: it.Name}
 	}
 	h := handler{
 		install: func(ctx context.Context, values map[string]string) (settings.Change, error) {

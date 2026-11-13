@@ -99,19 +99,19 @@ func TestEveryMethodMeetsEveryVersionForm(t *testing.T) {
 		catalog.MethodShell:         catalog.ShellInstall{Line: "true"},
 		catalog.MethodApp:           catalog.AppInstall{Hint: "the App Store"},
 		catalog.MethodSkill:         catalog.SkillInstall{Repo: "o/r", Skill: "s"},
-		catalog.MethodProvidedBy:    catalog.ProvidedByInstall{Item: "node"},
+		catalog.MethodProvidedBy:    catalog.ProvidedByInstall{Package: "node"},
 	}
 	c, err := catalog.Builtin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, it := range c.Items {
-		if it.Item.Kind == catalog.KindSetting {
+	for _, it := range c.Packages {
+		if it.Package.Kind == catalog.KindSetting {
 			continue
 		}
-		for _, m := range it.Item.Methods {
+		for _, m := range it.Package.Methods {
 			if _, ok := installs[catalog.Method(m.Method())]; !ok {
-				t.Errorf("%s's method %s is not enumerated here", it.Item.Name, m.Method())
+				t.Errorf("%s's method %s is not enumerated here", it.Package.Name, m.Method())
 			}
 		}
 	}

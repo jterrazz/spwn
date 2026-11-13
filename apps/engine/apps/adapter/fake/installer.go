@@ -347,8 +347,8 @@ func (f *Installer) unopened(installs []catalog.Install) error {
 	f.w.Lock()
 	defer f.w.Unlock()
 	for _, i := range installs {
-		if by, ok := i.(catalog.ProvidedByInstall); ok && slices.Contains(f.w.Mac(f.mac).Unopened, by.Item) && len(by.Commands) > 0 {
-			return &apps.NotYetProvidedError{Item: by.Item, Command: by.Commands[0]}
+		if by, ok := i.(catalog.ProvidedByInstall); ok && slices.Contains(f.w.Mac(f.mac).Unopened, by.Package) && len(by.Commands) > 0 {
+			return &apps.NotYetProvidedError{Package: by.Package, Command: by.Commands[0]}
 		}
 	}
 	return nil

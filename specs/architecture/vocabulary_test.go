@@ -500,14 +500,14 @@ func TestVocabularyBites(t *testing.T) {
 	}
 }
 
-func TestVocabularyReadsTheCatalogsItems(t *testing.T) {
+func TestVocabularyReadsTheCatalogsPackages(t *testing.T) {
 	root := t.TempDir()
 	dir := filepath.Join(root, "catalog", "packages", "system-utilities")
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
-	item := "item: station.catalog/v1\nkind: app\nname: orb\ndescription: Restart the daemon\n# outside: the host keeps it\nmethods:\n    - os: macos\n      script: {run: daemon --tools, check: daemon --version}\ndisk:\n    paths: [{path: ~/.orb, level: cache, note: OrbStack's own storage}]\n"
-	if err := os.WriteFile(filepath.Join(dir, "orb.yaml"), []byte(item), 0o600); err != nil {
+	pkg := "item: station.catalog/v1\nkind: app\nname: orb\ndescription: Restart the daemon\n# outside: the host keeps it\nmethods:\n    - os: macos\n      script: {run: daemon --tools, check: daemon --version}\ndisk:\n    paths: [{path: ~/.orb, level: cache, note: OrbStack's own storage}]\n"
+	if err := os.WriteFile(filepath.Join(dir, "orb.yaml"), []byte(pkg), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	texts, err := catalogTexts(root)
@@ -614,7 +614,7 @@ func legacyEncodings() []string {
 		"apps/engine/pages/home awakeJSON",
 		"apps/engine/pages/home stationJSON",
 		"apps/engine/pages/home workspaceJSON",
-		"apps/engine/pages/settings ItemJSON",
+		"apps/engine/pages/settings PackageJSON",
 		"apps/engine/ports Reservation",
 		"apps/engine/ports VMLivesOn",
 		"apps/engine/ports/adapter/guest Hello",

@@ -325,7 +325,7 @@ func TestAShareAnOwedEntryHeldIsServedAtTheTickThatRemovesIt(t *testing.T) {
 		}
 		return rightsTo(catalog.AudiencePrivate, 5173)(ctx, vm)
 	}
-	h.d.o.Ports = []catalog.ItemPort{{PortHint: catalog.PortHint{Port: 5173, HTTP: true}}, {PortHint: catalog.PortHint{Port: 3000, HTTP: true}}}
+	h.d.o.Ports = []catalog.PackagePort{{PortHint: catalog.PortHint{Port: 5173, HTTP: true}}, {PortHint: catalog.PortHint{Port: 3000, HTTP: true}}}
 	ctx := t.Context()
 	h.d.refreshSelf(ctx)
 	h.d.reconcileServe(ctx)
@@ -422,7 +422,7 @@ func TestAnOwedEntryServedAgainIsKept(t *testing.T) {
 	tn := &flakyTailnet{keptTailnet: &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}}
 	h.d.tn = tn
 	h.d.o.Rights = rightsTo(catalog.AudiencePrivate, 5173)
-	h.d.o.Ports = []catalog.ItemPort{{PortHint: catalog.PortHint{Port: 5173, HTTP: true}}}
+	h.d.o.Ports = []catalog.PackagePort{{PortHint: catalog.PortHint{Port: 5173, HTTP: true}}}
 	ctx := t.Context()
 	h.d.refreshSelf(ctx)
 	h.d.adopt(ctx)

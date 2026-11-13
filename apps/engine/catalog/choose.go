@@ -39,8 +39,8 @@ func (c Catalog) Standing(m MethodSpec, os OS, prefer []ManagerKey) Standing {
 		s.Preferred = i
 	}
 	if owner, ok := c.Manager(key); ok {
-		if it, _ := c.Item(owner); it.Item.Priority != nil {
-			if r := it.Item.Priority.on(os); r > 0 {
+		if it, _ := c.Package(owner); it.Package.Priority != nil {
+			if r := it.Package.Priority.on(os); r > 0 {
 				s.Class, s.Rank = ClassRanked, r
 				return s
 			}
@@ -96,7 +96,7 @@ func (k MachineKind) os() OS {
 // that run there, in the order Ordered gives them on that kind's system,
 // so the install a machine carries by default is the one a Machinefile's
 // resolution chooses there when it asks no manager.
-func (c Catalog) placed(it Item) []LivesOn {
+func (c Catalog) placed(it Package) []LivesOn {
 	var out []LivesOn
 	for _, k := range []MachineKind{Mac, Linux, MacOS} {
 		var on []MethodSpec

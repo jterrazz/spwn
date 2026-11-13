@@ -77,10 +77,10 @@ type Outcome struct {
 }
 
 type Step struct {
-	Item   string
-	Result catalog.State
-	Detail string
-	Why    Why
+	Package string
+	Result  catalog.State
+	Detail  string
+	Why     Why
 }
 
 type InstallRequest struct {

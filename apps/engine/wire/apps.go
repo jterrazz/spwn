@@ -108,7 +108,7 @@ func (l ledgerOf) Recorded(ctx context.Context, name string, m catalog.Method) (
 	if err != nil {
 		return false, err
 	}
-	return slices.ContainsFunc(all, func(in machinefile.Installed) bool { return in.Item == name && in.Method == string(m) }), nil
+	return slices.ContainsFunc(all, func(in machinefile.Installed) bool { return in.Package == name && in.Method == string(m) }), nil
 }
 
 // invariant: every command station runs for apps, a manager's read, install or
@@ -186,25 +186,25 @@ type configurer struct {
 	ask      kit.Asker
 }
 
-func (c configurer) Configure(ctx context.Context, item string, interactive bool) (apps.Step, error) {
-	found, err := c.settings.Find([]string{item})
+func (c configurer) Configure(ctx context.Context, pkg string, interactive bool) (apps.Step, error) {
+	found, err := c.settings.Find([]string{pkg})
 	if err != nil {
 		return apps.Step{}, err
 	}
 	it := found[0]
 	if c.settings.NeedsInput(it) && !interactive {
-		return apps.Step{Item: item, Result: catalog.StateAbsent, Detail: "needs a terminal: station settings apply " + item}, nil
+		return apps.Step{Package: pkg, Result: catalog.StateAbsent, Detail: "needs a terminal: station settings apply " + pkg}, nil
 	}
 	var values map[string]string
 	if len(it.Inputs) > 0 && c.ask != nil {
-		if values, err = c.ask.Form(pagesettings.InputsForm(item, it.Inputs, c.settings.Defaults(item))); err != nil {
+		if values, err = c.ask.Form(pagesettings.InputsForm(pkg, it.Inputs, c.settings.Defaults(pkg))); err != nil {
 			return apps.Step{}, err
 		}
 	}
-	change, err := c.settings.Install(ctx, item, values, interactive)
+	change, err := c.settings.Install(ctx, pkg, values, interactive)
 	var root *settings.NeedsRootError
 	if errors.As(err, &root) {
-		return apps.Step{Item: item, Result: catalog.StateAbsent, Detail: "needs root: " + words.SettingsAsRoot("apply", item)}, nil
+		return apps.Step{Package: pkg, Result: catalog.StateAbsent, Detail: "needs root: " + words.SettingsAsRoot("apply", pkg)}, nil
 	}
 	if err != nil {
 		return apps.Step{}, err
@@ -216,7 +216,7 @@ func (c configurer) Configure(ctx context.Context, item string, interactive bool
 	case n > 1:
 		detail = change.Steps[0].Label + " and " + strconv.Itoa(n-1) + " more"
 	}
-	return apps.Step{Item: item, Result: catalog.StateOK, Detail: detail}, nil
+	return apps.Step{Package: pkg, Result: catalog.StateOK, Detail: detail}, nil
 }
 
 func appsMachineOf(m machine) appsMachine {

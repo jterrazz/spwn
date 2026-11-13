@@ -6,13 +6,13 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
-func builtinItems(t *testing.T) []catalog.Placed {
+func builtinPackages(t *testing.T) []catalog.Placed {
 	t.Helper()
 	c, err := catalog.Builtin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	return c.Items
+	return c.Packages
 }
 
 func TestEveryShellBlockOfTheCatalogRendersOnEverySystemAndRoundTrips(t *testing.T) {
@@ -25,12 +25,12 @@ func TestEveryShellBlockOfTheCatalogRendersOnEverySystemAndRoundTrips(t *testing
 		{Home: "/home/a", OS: catalog.OSUbuntu, Arch: catalog.ArchARM64},
 	}
 	declared := 0
-	for _, p := range builtinItems(t) {
-		for _, m := range p.Item.Methods {
+	for _, p := range builtinPackages(t) {
+		for _, m := range p.Package.Methods {
 			for _, b := range m.Shell {
 				declared++
 				for _, v := range systems {
-					body, err := p.Item.RenderShell(b, v)
+					body, err := p.Package.RenderShell(b, v)
 					if err != nil {
 						t.Errorf("%s on %s: %v", b.ID, v.OS, err)
 						continue

@@ -21,12 +21,12 @@ func (v *boundVM) Run(ctx context.Context, _ Login, _, _ string) (Ran, error) {
 	return Ran{}, nil
 }
 
-func TestTheImagePhaseOutlastsItsItemsAndItsLines(t *testing.T) {
+func TestTheImagePhaseOutlastsItsPackagesAndItsLines(t *testing.T) {
 	// invariant: the bake is given the items' share and the run.image
 	// lines' bound together, as a first start's boot phase is.
 	vm := &boundVM{}
 	s := &Builder{o: BuilderOptions{User: "admin"}}
-	want := catalog.ItemsBound + catalog.RunBound
+	want := catalog.PackagesBound + catalog.RunBound
 	ref, cancel := context.WithTimeout(context.Background(), want)
 	defer cancel()
 	due, _ := ref.Deadline()

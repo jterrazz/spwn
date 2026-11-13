@@ -92,8 +92,8 @@ func snapshot() pagehome.Overview {
 		},
 		Apps: appReports,
 		Settings: []settings.Report{
-			{Item: catalog.Setting{Name: "hushlogin", Description: "Silence the login banner"}, State: catalog.StateOK, Applies: true},
-			{Item: catalog.Setting{Name: "restart-after-power-cut", Description: "Restarts after a power cut, and wakes for the network"}, State: catalog.StateDegraded, Detail: "partly applied", Applies: true},
+			{Package: catalog.Setting{Name: "hushlogin", Description: "Silence the login banner"}, State: catalog.StateOK, Applies: true},
+			{Package: catalog.Setting{Name: "restart-after-power-cut", Description: "Restarts after a power cut, and wakes for the network"}, State: catalog.StateDegraded, Detail: "partly applied", Applies: true},
 		},
 		Setup:    overview.Setup{State: catalog.StateOK, Steps: []overview.Step{{Name: "name", State: catalog.StateOK, Detail: "macbook"}}},
 		Identity: []overview.Check{check("git-email", catalog.StateOK, "admin@jterrazz.com", ""), check("git-signing", catalog.StateOK, "on", "")},
@@ -169,7 +169,7 @@ func settingRows(reading bool) []settings.Row {
 	states := []settings.State{settings.StateApplied, settings.StateChangedSince, settings.StateNotApplied, settings.StateOffThisMac, settings.StateNotForThisMachine}
 	out := make([]settings.Row, 0, len(builtin().Settings))
 	for i, it := range builtin().Settings {
-		r := settings.Row{Name: it.Name, Item: it, Group: settings.GroupOf(it), State: states[i%len(states)]}
+		r := settings.Row{Name: it.Name, Package: it, Group: settings.GroupOf(it), State: states[i%len(states)]}
 		switch {
 		case reading:
 			r.State = settings.StateReading
@@ -463,12 +463,12 @@ func allMachinesStates() []Fixture {
 func outcomes() []Fixture {
 	appOutcomes := []apps.Outcome{
 		{Name: "jq", Verb: "install", Result: catalog.StateOK, Method: catalog.MethodBrew, Version: "1.8.1"},
-		{Name: "mise", Verb: "install", Result: catalog.StateOK, Method: catalog.MethodBrew, Version: "2026.10.1", Steps: []apps.Step{{Item: "activate", Result: catalog.StateDegraded, Detail: "restart the shell"}}},
+		{Name: "mise", Verb: "install", Result: catalog.StateOK, Method: catalog.MethodBrew, Version: "2026.10.1", Steps: []apps.Step{{Package: "activate", Result: catalog.StateDegraded, Detail: "restart the shell"}}},
 		{Name: "typewhisper", Verb: "install", Result: catalog.StateBroken, Method: catalog.MethodCask, Detail: "brew bundle exited 1"},
 	}
 	changes := []settings.Change{
-		{Item: "restart-after-power-cut", Verb: "apply", Result: catalog.StateOK, Before: []settings.KeyValue{{Key: "autorestart", Value: "0"}}, After: []settings.KeyValue{{Key: "autorestart", Value: "1"}}},
-		{Item: catalog.HypervisorLauncher, Verb: "apply", Result: catalog.StateOK},
+		{Package: "restart-after-power-cut", Verb: "apply", Result: catalog.StateOK, Before: []settings.KeyValue{{Key: "autorestart", Value: "0"}}, After: []settings.KeyValue{{Key: "autorestart", Value: "1"}}},
+		{Package: catalog.HypervisorLauncher, Verb: "apply", Result: catalog.StateOK},
 	}
 	cleaned := []disk.Outcome{
 		{Name: "homebrew", Result: catalog.StateOK, Freed: 26 * gb},

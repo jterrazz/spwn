@@ -20,21 +20,21 @@ const schema = "station.status/v1"
 type SnapshotJSON struct {
 	// value: alias of station.status/v1, the OS connector's, kept byte for
 	// byte one release.
-	Schema      string                   `json:"schema"`
-	GeneratedAt string                   `json:"generated_at"`
-	Station     stationJSON              `json:"station"`
-	Machine     machineJSON              `json:"machine"`
-	System      systemJSON               `json:"system"`
-	Environment environmentJSON          `json:"environment"`
-	Workspace   workspaceJSON            `json:"workspace"`
-	Apps        []pageapps.AppStatusJSON `json:"tools"`
-	Settings    []pagesettings.ItemJSON  `json:"config"`
-	Setup       setupJSON                `json:"setup"`
-	Identity    []checkJSON              `json:"identity"`
-	Background  []jobJSON                `json:"background"`
-	Gateways    []checkJSON              `json:"gateways"`
-	Tailnet     pageports.TailnetJSON    `json:"tailnet"`
-	Power       *awakeJSON               `json:"power,omitempty"`
+	Schema      string                     `json:"schema"`
+	GeneratedAt string                     `json:"generated_at"`
+	Station     stationJSON                `json:"station"`
+	Machine     machineJSON                `json:"machine"`
+	System      systemJSON                 `json:"system"`
+	Environment environmentJSON            `json:"environment"`
+	Workspace   workspaceJSON              `json:"workspace"`
+	Apps        []pageapps.AppStatusJSON   `json:"tools"`
+	Settings    []pagesettings.PackageJSON `json:"config"`
+	Setup       setupJSON                  `json:"setup"`
+	Identity    []checkJSON                `json:"identity"`
+	Background  []jobJSON                  `json:"background"`
+	Gateways    []checkJSON                `json:"gateways"`
+	Tailnet     pageports.TailnetJSON      `json:"tailnet"`
+	Power       *awakeJSON                 `json:"power,omitempty"`
 }
 
 // value: alias of station.status/v1's power, byte for byte one release.
@@ -206,7 +206,7 @@ func SnapshotContract(s Overview) SnapshotJSON {
 			Misplaced:    pagedisk.MisplacedContract(s.Workspace.Misplaced),
 		},
 		Apps:       make([]pageapps.AppStatusJSON, 0, len(s.Apps)),
-		Settings:   make([]pagesettings.ItemJSON, 0, len(s.Settings)),
+		Settings:   make([]pagesettings.PackageJSON, 0, len(s.Settings)),
 		Setup:      setupJSON{State: string(s.Setup.State), Steps: make([]stepJSON, 0, len(s.Setup.Steps))},
 		Identity:   checks(s.Identity),
 		Background: jobs(s.Background),
@@ -227,7 +227,7 @@ func SnapshotContract(s Overview) SnapshotJSON {
 		body.Apps = append(body.Apps, pageapps.AppObject(t))
 	}
 	for _, c := range s.Settings {
-		body.Settings = append(body.Settings, pagesettings.ItemObject(c))
+		body.Settings = append(body.Settings, pagesettings.PackageObject(c))
 	}
 	for _, step := range s.Setup.Steps {
 		body.Setup.Steps = append(body.Setup.Steps, stepJSON{Name: step.Name, State: string(step.State), Detail: step.Detail})

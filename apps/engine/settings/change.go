@@ -3,19 +3,19 @@ package settings
 import "github.com/jterrazz/studio-station/apps/engine/catalog"
 
 type Report struct {
-	Item    catalog.Setting
+	Package catalog.Setting
 	State   catalog.State
 	Detail  string
 	Applies bool
 }
 
 type Change struct {
-	Item   string
-	Verb   string
-	Result catalog.State
-	Before []KeyValue
-	After  []KeyValue
-	Steps  []ChangeStep
+	Package string
+	Verb    string
+	Result  catalog.State
+	Before  []KeyValue
+	After   []KeyValue
+	Steps   []ChangeStep
 }
 
 type KeyValue struct{ Key, Value string }
@@ -26,10 +26,10 @@ type ChangeStep struct {
 	Detail string
 }
 
-type StudioMissingError struct{ Item string }
+type StudioMissingError struct{ Package string }
 
 func (e *StudioMissingError) Error() string {
-	return e.Item + " is kept by the studio CLI, which is not on PATH"
+	return e.Package + " is kept by the studio CLI, which is not on PATH"
 }
 
 func Sets(it catalog.Setting) []KeyValue {

@@ -27,7 +27,7 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 		// setting still exactly as station applied it is undone; any other
 		// is left as it is, and every one is Off here after. A checked
 		// setting Off here is only no longer checked here.
-		var items []catalog.Setting
+		var pkgs []catalog.Setting
 		var checked []string
 		for _, name := range in.Names {
 			if c, ok := settings.CheckedNamed(name); ok {
@@ -44,21 +44,21 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 			if err := admitted(d, it, "off"); err != nil {
 				return nil, err
 			}
-			items = append(items, it)
+			pkgs = append(pkgs, it)
 		}
 		if err := confirm.Require(confirm.For(confirm.OffHere, d.Kind), strings.Join(in.Names, ", "), in.Confirm); err != nil {
 			return nil, err
 		}
 		off := offThisMac(d)
-		changes := make([]settings.Change, 0, len(items)+len(checked))
+		changes := make([]settings.Change, 0, len(pkgs)+len(checked))
 		for _, name := range checked {
 			off[name] = true
-			changes = append(changes, settings.Change{Item: name, Verb: "off", Result: catalog.StateOK,
+			changes = append(changes, settings.Change{Package: name, Verb: "off", Result: catalog.StateOK,
 				Steps: []settings.ChangeStep{{Label: "off here", State: catalog.StateOK, Detail: "not checked on this machine"}}})
 		}
-		for _, it := range items {
+		for _, it := range pkgs {
 			row, _ := judge(ctx, d, it, map[string]bool{})
-			change := settings.Change{Item: it.Name, Verb: "off", Result: catalog.StateOK}
+			change := settings.Change{Package: it.Name, Verb: "off", Result: catalog.StateOK}
 			if row.State == settings.StateApplied {
 				if a, ok := d.Appliers.For(it); ok {
 					undone, err := a.Undo(ctx, it)

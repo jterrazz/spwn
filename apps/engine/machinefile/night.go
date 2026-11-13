@@ -82,12 +82,12 @@ func (n *Night) seen(u Upgraded) {
 	for _, d := range u.Done {
 		switch {
 		case d.Reason == WaitsForYou:
-			n.Left = append(n.Left, d.Line.Step.Item)
+			n.Left = append(n.Left, d.Line.Step.Package)
 		case d.Reason == Interrupted || d.Reason == NotRun:
 		case d.State == catalog.StateBroken:
-			n.Failed = append(n.Failed, d.Line.Step.Item)
+			n.Failed = append(n.Failed, d.Line.Step.Package)
 		case d.Updated && d.Version != "" && d.Version != d.Line.Seen.Version:
-			n.Moved = append(n.Moved, Moved{App: d.Line.Step.Item, Was: d.Line.Seen.Version, Now: d.Version, Range: d.Line.Step.Version.String()})
+			n.Moved = append(n.Moved, Moved{App: d.Line.Step.Package, Was: d.Line.Seen.Version, Now: d.Version, Range: d.Line.Step.Version.String()})
 		}
 	}
 }
@@ -112,7 +112,7 @@ func (n Night) Reread(p Plan) Night {
 	// kept beside a night that did not end is read the same way.
 	ranges := map[string]Line{}
 	for _, l := range p.Lines {
-		ranges[l.Step.Item] = l
+		ranges[l.Step.Package] = l
 	}
 	var waiting []Waiting
 	for _, w := range n.Waiting {
@@ -160,7 +160,7 @@ func (p Plan) Waits() []string {
 	// whose update asks the owner something here (a password).
 	var out []string
 	for _, a := range p.UpgradeNeeds() {
-		for _, it := range a.Items {
+		for _, it := range a.Packages {
 			if !slices.Contains(out, it) {
 				out = append(out, it)
 			}

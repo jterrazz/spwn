@@ -65,7 +65,7 @@ type Shell interface {
 }
 
 type Settings interface {
-	Items() []catalog.Setting
+	Packages() []catalog.Setting
 	Lives(it catalog.Setting) bool
 	// value: the app a setting needs that is not installed here; empty when
 	// it needs none or has it.
@@ -79,7 +79,7 @@ type Settings interface {
 }
 
 type Ask interface {
-	Values(item catalog.Setting) (map[string]string, error)
+	Values(pkg catalog.Setting) (map[string]string, error)
 }
 
 func All(d Deps) []call.Handler {
@@ -94,7 +94,7 @@ func asks(it catalog.Setting) bool { return len(it.Inputs) > 0 || it.Interactive
 // invariant: a setting is named by its catalogue name; one that lives on
 // no machine of this kind is refused before any effect.
 func find(d Deps, name string, living bool) (catalog.Setting, error) {
-	for _, it := range d.Settings.Items() {
+	for _, it := range d.Settings.Packages() {
 		if it.Name != name {
 			continue
 		}
@@ -181,7 +181,7 @@ func readFact(ctx context.Context, i contract.Inspector, f catalog.Fact, budget 
 // own row reads it.
 func expectation(ctx context.Context, d Deps, off map[string]bool) settings.Expectation {
 	alwaysOn := false
-	for _, it := range d.Settings.Items() {
+	for _, it := range d.Settings.Packages() {
 		if it.Effect == catalog.ProcNeverSleeps {
 			row, _ := judge(ctx, d, it, off)
 			alwaysOn = row.State == settings.StateApplied

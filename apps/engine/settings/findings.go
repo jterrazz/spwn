@@ -25,7 +25,7 @@ func Findings(rows []Row, m machine.Ref) []finding.Finding {
 }
 
 func checkedText(r Row) string {
-	words := r.CheckedItem().Label + ": " + r.Value
+	words := r.CheckedPackage().Label + ": " + r.Value
 	if r.Expected != "" {
 		words += ", " + r.Expected
 	}

@@ -20,7 +20,7 @@ const (
 )
 
 type Configurer interface {
-	Configure(ctx context.Context, item string, interactive bool) error
+	Configure(ctx context.Context, pkg string, interactive bool) error
 }
 
 func (s *Provisioner) placedApps() []catalog.App {
@@ -160,11 +160,11 @@ func (s *Provisioner) moveMisplaced(ctx context.Context, interactive bool) (move
 			if did {
 				moved = append(moved, st.Path)
 			}
-			for _, item := range st.Then {
+			for _, pkg := range st.Then {
 				if s.o.Configurer == nil {
 					continue
 				}
-				if err := s.o.Configurer.Configure(ctx, item, interactive); err != nil {
+				if err := s.o.Configurer.Configure(ctx, pkg, interactive); err != nil {
 					return moved, notes, err
 				}
 			}

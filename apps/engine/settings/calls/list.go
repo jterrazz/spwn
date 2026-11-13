@@ -19,21 +19,21 @@ var List = call.Watch[Deps, ListIn, []settings.Row]{
 		// invariant: the first value is every setting, those that live here
 		// being read; each fills as its Applier answers, so the list costs its
 		// slowest read.
-		items := d.Settings.Items()
+		pkgs := d.Settings.Packages()
 		off := offThisMac(d)
 		type answer struct {
 			i   int
 			row settings.Row
 		}
-		rows := make([]settings.Row, len(items), len(items)+len(catalog.CheckedSettings))
-		answers := make(chan answer, len(items)+len(catalog.CheckedSettings))
+		rows := make([]settings.Row, len(pkgs), len(pkgs)+len(catalog.CheckedSettings))
+		answers := make(chan answer, len(pkgs)+len(catalog.CheckedSettings))
 		left := 0
-		for i, it := range items {
+		for i, it := range pkgs {
 			if !d.Settings.Lives(it) || off[it.Name] {
 				rows[i], _ = judge(ctx, d, it, off)
 				continue
 			}
-			rows[i] = settings.Row{Name: it.Name, Item: it, Group: settings.GroupOf(it), State: settings.StateReading}
+			rows[i] = settings.Row{Name: it.Name, Package: it, Group: settings.GroupOf(it), State: settings.StateReading}
 			left++
 			go func() {
 				row, _ := judge(ctx, d, it, off)

@@ -44,7 +44,7 @@ type SurveyorOptions struct {
 }
 
 type Configurer interface {
-	Configure(ctx context.Context, item string, interactive bool) error
+	Configure(ctx context.Context, pkg string, interactive bool) error
 }
 
 type Surveyor struct {
@@ -422,11 +422,11 @@ func (s *Surveyor) move(ctx context.Context, e disk.Entry, st catalog.Misplaced)
 	for _, dir := range st.Prune {
 		s.m.Prune(s.o.Expand.Expand(dir))
 	}
-	for _, item := range st.Then {
+	for _, pkg := range st.Then {
 		if s.o.Configurer == nil {
 			continue
 		}
-		if err := s.o.Configurer.Configure(ctx, item, false); err != nil {
+		if err := s.o.Configurer.Configure(ctx, pkg, false); err != nil {
 			return disk.Outcome{}, err
 		}
 	}

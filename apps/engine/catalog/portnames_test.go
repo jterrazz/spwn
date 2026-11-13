@@ -34,7 +34,7 @@ func TestAPortIsKnownByItsSoftware(t *testing.T) {
 // invariant: one owner per port: a port is never named twice, every port
 // an item's env is set for has its name, and an item names a port as the
 // table does.
-func TestEveryPortIsNamedOnceAndEveryItemPortAgrees(t *testing.T) {
+func TestEveryPortIsNamedOnceAndEveryPackagePortAgrees(t *testing.T) {
 	seen := map[int]string{}
 	for _, s := range catalog.PortNames {
 		if _, known := catalog.KnownPortOf(s.Port, ""); known || seen[s.Port] != "" {
@@ -44,7 +44,7 @@ func TestEveryPortIsNamedOnceAndEveryItemPortAgrees(t *testing.T) {
 	}
 	for _, p := range builtin(t).Ports() {
 		if name, ok := seen[p.Port]; (len(p.Env) > 0 && !ok) || (ok && name != p.Label) {
-			t.Errorf("%s: port %d carries the label %q, named %q", p.Item, p.Port, p.Label, name)
+			t.Errorf("%s: port %d carries the label %q, named %q", p.Package, p.Port, p.Label, name)
 		}
 	}
 }

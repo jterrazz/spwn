@@ -19,16 +19,16 @@ const (
 // which serves; every kind but requires-one-of names one.
 
 type Link struct {
-	Kind  LinkKind
-	Items []string
+	Kind     LinkKind
+	Packages []string
 }
 
-func (l Link) Names(item string) bool {
+func (l Link) Names(pkg string) bool {
 	// value: whether the link leans on that item.
-	return slices.Contains(l.Items, item)
+	return slices.Contains(l.Packages, pkg)
 }
 
-func (c Catalog) Links(it Item, method string, sys System) []Link {
+func (c Catalog) Links(it Package, method string, sys System) []Link {
 	// invariant: the one list of what an item by a method leans on, read by
 	// the resolution, which brings an item in and orders it, by what keeps
 	// an extra another one there still needs, and, through InstallLinks,
@@ -41,7 +41,7 @@ func (c Catalog) InstallLinks(t App, in Install) []Link {
 	// provider is that install's, its manager that of the install's method.
 	var by string
 	if p, ok := in.(ProvidedByInstall); ok {
-		by = p.Item
+		by = p.Package
 	}
 	var method string
 	if in != nil {
@@ -53,16 +53,16 @@ func (c Catalog) InstallLinks(t App, in Install) []Link {
 func (c Catalog) links(name string, requires, oneOf []string, by, method string) []Link {
 	var out []Link
 	for _, r := range requires {
-		out = append(out, Link{Kind: LinkRequires, Items: []string{r}})
+		out = append(out, Link{Kind: LinkRequires, Packages: []string{r}})
 	}
 	if len(oneOf) > 0 {
-		out = append(out, Link{Kind: LinkRequiresOneOf, Items: slices.Clone(oneOf)})
+		out = append(out, Link{Kind: LinkRequiresOneOf, Packages: slices.Clone(oneOf)})
 	}
 	if by != "" && by != name {
-		out = append(out, Link{Kind: LinkProvidedBy, Items: []string{by}})
+		out = append(out, Link{Kind: LinkProvidedBy, Packages: []string{by}})
 	}
 	if owner, ok := c.Manager(method); ok && owner != name {
-		out = append(out, Link{Kind: LinkManager, Items: []string{owner}})
+		out = append(out, Link{Kind: LinkManager, Packages: []string{owner}})
 	}
 	return out
 }
@@ -71,8 +71,8 @@ func (c Catalog) ManagerKeys() []string {
 	// value: every method key a manager item of the catalog installs by,
 	// in the catalog's order: the words `--to` and `--manager` take.
 	var out []string
-	for _, p := range c.Items {
-		for _, k := range p.Item.Manages {
+	for _, p := range c.Packages {
+		for _, k := range p.Package.Manages {
 			out = append(out, string(k))
 		}
 	}
@@ -81,9 +81,9 @@ func (c Catalog) ManagerKeys() []string {
 
 func (c Catalog) Manager(method string) (string, bool) {
 	// value: the item that manages a method key, when one does.
-	for _, p := range c.Items {
-		if slices.Contains(p.Item.Manages, ManagerKey(method)) {
-			return p.Item.Name, true
+	for _, p := range c.Packages {
+		if slices.Contains(p.Package.Manages, ManagerKey(method)) {
+			return p.Package.Name, true
 		}
 	}
 	return "", false
@@ -91,7 +91,7 @@ func (c Catalog) Manager(method string) (string, bool) {
 
 // invariant: the provider is the one of the item's method by that key
 // for this system, else of its first method by that key.
-func providerOf(it Item, method string, sys System) string {
+func providerOf(it Package, method string, sys System) string {
 	by := ""
 	for _, m := range it.Methods {
 		if m.ProvidedBy == "" || m.Method() != method {

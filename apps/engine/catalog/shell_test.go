@@ -45,7 +45,7 @@ func refusedPg(t *testing.T, body, want string) {
 	refusedAt(t, "items/databases/pg.yaml", body, want)
 }
 
-func shelled(t *testing.T, body string) catalog.Item {
+func shelled(t *testing.T, body string) catalog.Package {
 	t.Helper()
 	it, err := catalog.Decode("items/databases/pg.yaml", []byte(body))
 	if err != nil {
@@ -88,7 +88,7 @@ func TestAnUnknownShellVariableIsRefusedAtDecodeAndAtRender(t *testing.T) {
 	refusedPg(t, strings.Replace(pg, "{{ option.port }}", "{{ option.nope }}", 1), "names no option of the item")
 	refusedPg(t, strings.Replace(pg, "{{ option.port }}", "{{ option.token }}", 1), "is secret")
 	refusedPg(t, strings.Replace(pg, "{{ option.port }}", "{{ {{ home }}", 1), "is no variable")
-	it := catalog.Item{Name: "x"}
+	it := catalog.Package{Name: "x"}
 	if _, err := it.RenderShell(catalog.ShellBlock{ID: "station:x", Zsh: "echo {{ shell }}"}, catalog.ShellVars{}); err == nil {
 		t.Error("an unknown name rendered as an empty string")
 	}
@@ -97,7 +97,7 @@ func TestAnUnknownShellVariableIsRefusedAtDecodeAndAtRender(t *testing.T) {
 	}
 }
 
-func TestAShellIdNamesItsItemAndIsWrittenOnce(t *testing.T) {
+func TestAShellIdNamesItsPackageAndIsWrittenOnce(t *testing.T) {
 	refusedPg(t, strings.Replace(pg, "station:pg/path", "station:other/path", 1), "names another item than pg")
 	refusedPg(t, strings.Replace(pg, "station:pg/path", "pg/path", 1), "is `station:<item>` or `station:<item>/<sub>`")
 	refusedPg(t, strings.Replace(pg, "station:pg/path", "station:pg/Path", 1), "is `station:<item>` or `station:<item>/<sub>`")

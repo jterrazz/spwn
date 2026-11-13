@@ -158,13 +158,13 @@ func TestServeIsReadEveryThirtyTicksAndOnlyServesWhileOn(t *testing.T) {
 	}
 }
 
-func TestARunRendersTheItemsEnvironmentAndAnAdoptionKeepsIt(t *testing.T) {
+func TestARunRendersThePackagesEnvironmentAndAnAdoptionKeepsIt(t *testing.T) {
 	kept := map[string]string{"EXPO_PACKAGER_PROXY_URL": "http://127.0.0.1:40000"}
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning, Env: kept})
 	h.d.tn = &fakeTailnet{sharing: ports.SharingState{DNSName: "x.tail1234.ts.net", Backend: ports.Running, On: true}}
 	yes := true
-	expo := catalog.ItemPort{Item: "expo", PortHint: catalog.PortHint{Port: 8081, Label: "Expo", HTTP: true, Env: map[string]string{"EXPO_PACKAGER_PROXY_URL": "{url}"}}}
-	h.d.o.Ports = []catalog.ItemPort{expo}
+	expo := catalog.PackagePort{Package: "expo", PortHint: catalog.PortHint{Port: 8081, Label: "Expo", HTTP: true, Env: map[string]string{"EXPO_PACKAGER_PROXY_URL": "{url}"}}}
+	h.d.o.Ports = []catalog.PackagePort{expo}
 	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: expo.Port, MacPort: 40000, HTTP: &yes}}
 	h.d.refreshSelf(t.Context())
 	h.hv.outlived("api")

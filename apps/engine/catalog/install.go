@@ -131,7 +131,7 @@ type AppInstall struct{ Hint string }
 type SkillInstall struct{ Repo, Skill string }
 
 type ProvidedByInstall struct {
-	Item string
+	Package string
 	// value: the commands the item brings, which its install finds.
 	Commands []string
 }
@@ -184,7 +184,7 @@ func (i ScriptInstall) Key() string        { return i.URL }
 func (i ShellInstall) Key() string         { return i.Line }
 func (i AppInstall) Key() string           { return i.Hint }
 func (i SkillInstall) Key() string         { return i.Skill }
-func (i ProvidedByInstall) Key() string    { return i.Item }
+func (i ProvidedByInstall) Key() string    { return i.Package }
 
 func (BrewInstall) isInstall()          {}
 func (CaskInstall) isInstall()          {}

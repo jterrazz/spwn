@@ -90,10 +90,10 @@ func (e *SignedOutError) Error() string {
 // value: the item that provides a command is installed and the command is
 // not there yet: it comes when that item is first opened.
 
-type NotYetProvidedError struct{ Item, Command string }
+type NotYetProvidedError struct{ Package, Command string }
 
 func (e *NotYetProvidedError) Error() string {
-	return e.Command + " did not come with " + e.Item + " yet"
+	return e.Command + " did not come with " + e.Package + " yet"
 }
 
 type NotReversibleError struct{ App string }

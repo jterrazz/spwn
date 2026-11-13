@@ -9,7 +9,7 @@ import (
 	settingsmodel "github.com/jterrazz/studio-station/apps/engine/settings"
 )
 
-type ItemJSON struct {
+type PackageJSON struct {
 	// value: alias of station.status/v1's row, kept byte for byte one release.
 	Name     string   `json:"name"`
 	Category string   `json:"category"`
@@ -18,12 +18,12 @@ type ItemJSON struct {
 	Detail   string   `json:"detail"`
 }
 
-func ItemObject(r settingsmodel.Report) ItemJSON {
-	livesOn := make([]string, len(r.Item.Kinds))
-	for i, p := range r.Item.Kinds {
+func PackageObject(r settingsmodel.Report) PackageJSON {
+	livesOn := make([]string, len(r.Package.Kinds))
+	for i, p := range r.Package.Kinds {
 		livesOn[i] = catalog.StatusV1Kind(p)
 	}
-	return ItemJSON{Name: r.Item.Name, Category: string(r.Item.Category), LivesOn: livesOn, State: string(r.State), Detail: r.Detail}
+	return PackageJSON{Name: r.Package.Name, Category: string(r.Package.Category), LivesOn: livesOn, State: string(r.State), Detail: r.Detail}
 }
 
 func ReportColumns() []page.Column {
@@ -36,8 +36,8 @@ func ReportColumns() []page.Column {
 const differs = "differs from station's"
 
 func ReportRow(r settingsmodel.Report) page.Row {
-	name := r.Item.Name
-	row := page.Row{ID: name, Label: name, Mark: pages.MarkOf(r.State), Cells: []page.Value{page.Text(r.Item.Description)}}
+	name := r.Package.Name
+	row := page.Row{ID: name, Label: name, Mark: pages.MarkOf(r.State), Cells: []page.Value{page.Text(r.Package.Description)}}
 	install := page.Cmd("station settings apply " + name)
 	detail := r.Detail
 	switch {
@@ -45,7 +45,7 @@ func ReportRow(r settingsmodel.Report) page.Row {
 		row.Detail = page.Pending()
 		return row
 	case r.State == catalog.StateAbsent && detail == "" && !r.Applies:
-		row.Reason, detail, row.Hint = page.Missing, "needs "+r.Item.NeedsSaid(), page.Cmd("station apps install "+r.Item.Requires)
+		row.Reason, detail, row.Hint = page.Missing, "needs "+r.Package.NeedsSaid(), page.Cmd("station apps install "+r.Package.Requires)
 	case r.State == catalog.StateAbsent:
 		row.Hint = install
 	case strings.HasPrefix(detail, differs):

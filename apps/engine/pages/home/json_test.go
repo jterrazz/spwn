@@ -52,8 +52,8 @@ func fixed() pagehome.Overview {
 		},
 		Apps: []apps.Report{{App: node, Method: node.Installs[0].Install.Method(), State: catalog.StateOK, Version: "24.11.0", Managed: true}},
 		Settings: []settings.Report{{
-			Item:  catalog.Setting{Name: "hushlogin", Category: catalog.CategoryTerminal, Kinds: []catalog.MachineKind{catalog.Mac, catalog.Linux, catalog.MacOS}},
-			State: catalog.StateOK,
+			Package: catalog.Setting{Name: "hushlogin", Category: catalog.CategoryTerminal, Kinds: []catalog.MachineKind{catalog.Mac, catalog.Linux, catalog.MacOS}},
+			State:   catalog.StateOK,
 		}},
 		Setup: overview.Setup{State: catalog.StateOK, Steps: []overview.Step{
 			{Name: "name", State: catalog.StateOK, Detail: "macbook"},

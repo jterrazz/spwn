@@ -81,7 +81,7 @@ type Provider struct {
 	Name string
 	// value: the catalogue item that installs it; empty when station
 	// installs none.
-	Item string
+	Package string
 	// value: the presence read, asked only by the gate of a call that needs
 	// it, at each such call: a call that declares no need reads nothing, and
 	// a provider installed since, by this run or another process, is seen.

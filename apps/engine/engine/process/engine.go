@@ -70,7 +70,7 @@ type Options struct {
 	ThisMachine catalog.MachineKind
 	// value: the ports the catalog's items serve on: a reserved port's HTTP
 	// and label, the env a VM's run sets.
-	Ports []catalog.ItemPort
+	Ports []catalog.PackagePort
 	// value: the ports a VM's Machinefile says it may open, read by its
 	// name; nil when it says none (or there is none), and nil Rights reads
 	// none for every VM.

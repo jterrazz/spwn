@@ -41,8 +41,8 @@ func TestTwoAppliesAtOnceLoseNoRecord(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for i := range 40 {
-				item := "app-" + strconv.Itoa(n) + "-" + strconv.Itoa(i)
-				if err := l.Put(context.Background(), machinefile.Installed{Item: item, Method: "first", Machinefile: "laptop"}); err != nil {
+				pkg := "app-" + strconv.Itoa(n) + "-" + strconv.Itoa(i)
+				if err := l.Put(context.Background(), machinefile.Installed{Package: pkg, Method: "first", Machinefile: "laptop"}); err != nil {
 					t.Error(err)
 				}
 			}

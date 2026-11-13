@@ -58,10 +58,10 @@ func (o Observation) Present() bool { return o.State == catalog.StateOK }
 type Row struct {
 	// value: the setting's catalog name, and Item its whole entry as the
 	// machine that judged it reads it; a checked row's Item is empty.
-	Name  string
-	Item  catalog.Setting
-	Group Group
-	State State
+	Name    string
+	Package catalog.Setting
+	Group   Group
+	State   State
 	// value: a row of the Checked group: its state there, State left empty.
 	Checked CheckedState
 	// value: ChangedSince and Applied: when station applied it.
@@ -86,11 +86,11 @@ func Known(rows []Row, local func(string) (catalog.Setting, bool)) []Row {
 	// its name alone.
 	out := slices.Clone(rows)
 	for i, r := range out {
-		if r.Group == Checked || r.Item.Name != "" {
+		if r.Group == Checked || r.Package.Name != "" {
 			continue
 		}
 		if it, ok := local(r.Name); ok {
-			out[i].Item = it
+			out[i].Package = it
 		}
 	}
 	return out
@@ -126,7 +126,7 @@ func JudgeSet(it catalog.Setting, lives bool, applied *Applied, now Observation,
 	// station's own earlier text for apply to write anew; with no record, a
 	// setting already exactly as station writes it is Applied, from before
 	// station kept records.
-	row := Row{Name: it.Name, Item: it, Group: GroupOf(it), Where: now.Where}
+	row := Row{Name: it.Name, Package: it, Group: GroupOf(it), Where: now.Where}
 	switch {
 	case !lives:
 		row.State, row.Where, row.Why = StateNotForThisMachine, "", LivesOnReason(it.Kinds)

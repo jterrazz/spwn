@@ -55,7 +55,7 @@ func (a *Applier) of(it catalog.Setting) ([]rendered, error) {
 	}
 	var out []rendered
 	for _, b := range s.Blocks {
-		body, err := catalog.Item{}.RenderShell(b, catalog.ShellVars{Home: a.o.Home, OS: a.o.OS, Arch: a.o.Arch})
+		body, err := catalog.Package{}.RenderShell(b, catalog.ShellVars{Home: a.o.Home, OS: a.o.OS, Arch: a.o.Arch})
 		if err != nil {
 			return nil, err
 		}

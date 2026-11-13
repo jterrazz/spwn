@@ -12,7 +12,7 @@ type Ledger interface {
 	List(ctx context.Context) ([]machinefile.Installed, error)
 	Put(ctx context.Context, in machinefile.Installed) error
 	// invariant: deleting an item never recorded changes nothing.
-	Delete(ctx context.Context, item string) error
+	Delete(ctx context.Context, pkg string) error
 	// invariant: the last night the engine's upgrade recorded, as the last
 	// Write left it; none written reads as none (false) with no error.
 	Night(ctx context.Context) (machinefile.Night, bool, error)

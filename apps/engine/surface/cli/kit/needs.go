@@ -22,12 +22,12 @@ func (e Env) answerNeed(ctx context.Context, err error, o IO, again func() error
 	if !e.Interactive || e.Install == nil || e.Prompt == nil || o.JSON || o.PageJSON {
 		return err
 	}
-	item := refused.Detail["item"]
+	pkg := refused.Detail["item"]
 	message, hint := words.Codes()[call.NeedMissing](refused)
 	if printed := e.Out.Finding(page.Absent, message, hint); printed != nil {
 		return printed
 	}
-	yes, asked := e.Prompt.Confirm(page.Confirm{Question: words.NeedAsk(item)})
+	yes, asked := e.Prompt.Confirm(page.Confirm{Question: words.NeedAsk(pkg)})
 	switch {
 	case errors.Is(asked, context.Canceled):
 		return fail.Interruption()
@@ -36,7 +36,7 @@ func (e Env) answerNeed(ctx context.Context, err error, o IO, again func() error
 	case !yes:
 		return fail.Silent(fail.ExitUsage)
 	}
-	if installed := e.Install(ctx, item, o); installed != nil {
+	if installed := e.Install(ctx, pkg, o); installed != nil {
 		return installed
 	}
 	return again()

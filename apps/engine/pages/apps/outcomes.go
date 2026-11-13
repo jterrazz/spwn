@@ -38,7 +38,7 @@ func Outcomes(verb string, outcomes []apps.Outcome, run Run, thisMac page.Contex
 			landed = append(landed, o.Name)
 		}
 		for _, s := range o.Steps {
-			steps = append(steps, pages.RunStep{ID: o.Name + "/" + s.Item, Label: s.Item, State: s.Result, Detail: s.Detail})
+			steps = append(steps, pages.RunStep{ID: o.Name + "/" + s.Package, Label: s.Package, State: s.Result, Detail: s.Detail})
 		}
 	}
 	r := pages.Run{Command: "apps " + verb, Columns: Columns(), Steps: steps, Empty: "apps to " + verb}

@@ -8,22 +8,22 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 )
 
-func placed(it catalog.Item) catalog.Placed { return catalog.Placed{Item: it} }
+func placed(it catalog.Package) catalog.Placed { return catalog.Placed{Package: it} }
 
 func TestJudgeTakesBackOnlyThisMachinefilesExtrasDependentsFirst(t *testing.T) {
 	// invariant: an install of another Machinefile is no extra; what an
 	// extra waits on (its manager, what it requires) is taken back after
 	// it; only one there by the ledger's method is removed.
-	cat := catalog.Catalog{Items: []catalog.Placed{
-		placed(catalog.Item{Name: "manager", Manages: []catalog.ManagerKey{"pkg"}}),
-		placed(catalog.Item{Name: "lib"}),
-		placed(catalog.Item{Name: "tool", Requires: []string{"lib"}}),
+	cat := catalog.Catalog{Packages: []catalog.Placed{
+		placed(catalog.Package{Name: "manager", Manages: []catalog.ManagerKey{"pkg"}}),
+		placed(catalog.Package{Name: "lib"}),
+		placed(catalog.Package{Name: "tool", Requires: []string{"lib"}}),
 	}}
 	ledger := []machinefile.Installed{
-		{Item: "lib", Method: "pkg", Machinefile: "laptop"},
-		{Item: "manager", Method: "installer", Machinefile: "laptop"},
-		{Item: "other", Method: "pkg", Machinefile: "old-laptop"},
-		{Item: "tool", Method: "pkg", Machinefile: "laptop"},
+		{Package: "lib", Method: "pkg", Machinefile: "laptop"},
+		{Package: "manager", Method: "installer", Machinefile: "laptop"},
+		{Package: "other", Method: "pkg", Machinefile: "old-laptop"},
+		{Package: "tool", Method: "pkg", Machinefile: "laptop"},
 	}
 	seen := map[string]machinefile.Seen{
 		"lib":     {Condition: machinefile.Present, Method: "pkg"},
@@ -35,9 +35,9 @@ func TestJudgeTakesBackOnlyThisMachinefilesExtrasDependentsFirst(t *testing.T) {
 	order := make([]string, 0, 3)
 	var removed []string
 	for _, e := range p.Extra {
-		order = append(order, e.Step.Item)
+		order = append(order, e.Step.Package)
 		if e.Takes() {
-			removed = append(removed, e.Step.Item)
+			removed = append(removed, e.Step.Package)
 		}
 	}
 	if want := []string{"tool", "lib", "manager"}; !slices.Equal(order, want) {
@@ -48,32 +48,32 @@ func TestJudgeTakesBackOnlyThisMachinefilesExtrasDependentsFirst(t *testing.T) {
 	}
 }
 
-func TestJudgeKeepsAnItemSkippedOnThisSystem(t *testing.T) {
+func TestJudgeKeepsAPackageSkippedOnThisSystem(t *testing.T) {
 	// invariant: an optional item the Machinefile still lists is no extra
 	// while this system skips it: no method here today is no removal.
-	cat := catalog.Catalog{Items: []catalog.Placed{placed(catalog.Item{Name: "foo"})}}
-	ledger := []machinefile.Installed{{Item: "foo", Method: "pkg", Machinefile: "laptop"}}
+	cat := catalog.Catalog{Packages: []catalog.Placed{placed(catalog.Package{Name: "foo"})}}
+	ledger := []machinefile.Installed{{Package: "foo", Method: "pkg", Machinefile: "laptop"}}
 	seen := map[string]machinefile.Seen{"foo": {Condition: machinefile.Present, Method: "pkg"}}
-	r := machinefile.Resolved{Name: "laptop", Skipped: []machinefile.Skip{{Item: "foo", Why: "optional, no method for macos 27"}}}
+	r := machinefile.Resolved{Name: "laptop", Skipped: []machinefile.Skip{{Package: "foo", Why: "optional, no method for macos 27"}}}
 	for _, e := range machinefile.Judge(r, cat, seen, ledger, false, "").Extra {
-		t.Errorf("%s is extra (%s); want none: it is still listed", e.Step.Item, e.Action)
+		t.Errorf("%s is extra (%s); want none: it is still listed", e.Step.Package, e.Action)
 	}
 }
 
 func TestJudgeKeepsAnExtraAnotherAppStillNeeds(t *testing.T) {
 	// invariant: an extra an app there still needs (what requires it, what
 	// its manager installed) is kept, unless that app is taken back too.
-	cat := catalog.Catalog{Items: []catalog.Placed{
-		placed(catalog.Item{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
-		placed(catalog.Item{Name: "lib"}),
-		placed(catalog.Item{Name: "tool", Requires: []string{"lib"}}),
-		placed(catalog.Item{Name: "own"}),
-		placed(catalog.Item{Name: "dotfiles", Kind: catalog.KindSetting, Requires: []string{"own"}}),
+	cat := catalog.Catalog{Packages: []catalog.Placed{
+		placed(catalog.Package{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
+		placed(catalog.Package{Name: "lib"}),
+		placed(catalog.Package{Name: "tool", Requires: []string{"lib"}}),
+		placed(catalog.Package{Name: "own"}),
+		placed(catalog.Package{Name: "dotfiles", Kind: catalog.KindSetting, Requires: []string{"own"}}),
 	}}
 	ledger := []machinefile.Installed{
-		{Item: "manager", Method: "installer", Machinefile: "laptop"},
-		{Item: "lib", Method: "pkg", Machinefile: "laptop"},
-		{Item: "own", Method: "pkg", Machinefile: "laptop"},
+		{Package: "manager", Method: "installer", Machinefile: "laptop"},
+		{Package: "lib", Method: "pkg", Machinefile: "laptop"},
+		{Package: "own", Method: "pkg", Machinefile: "laptop"},
 	}
 	seen := map[string]machinefile.Seen{
 		"manager":  {Condition: machinefile.Present, Method: "installer"},
@@ -85,7 +85,7 @@ func TestJudgeKeepsAnExtraAnotherAppStillNeeds(t *testing.T) {
 	kept := map[string][]string{}
 	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false, "").Extra {
 		if !e.Takes() {
-			kept[e.Step.Item] = e.RequiredBy
+			kept[e.Step.Package] = e.RequiredBy
 		}
 	}
 	want := map[string][]string{"lib": {"tool"}, "manager": {"lib", "tool"}}
@@ -97,21 +97,21 @@ func TestJudgeKeepsAnExtraAnotherAppStillNeeds(t *testing.T) {
 func TestJudgeKeepsTheProviderOfAListedApp(t *testing.T) {
 	// invariant: an app provided by an extra leans on it like on what it
 	// requires: the provider stays while that app is there.
-	cat := catalog.Catalog{Items: []catalog.Placed{
-		placed(catalog.Item{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
-		placed(catalog.Item{Name: "desktop"}),
-		placed(catalog.Item{Name: "core", Methods: []catalog.MethodSpec{{ProvidedBy: "desktop"}}}),
+	cat := catalog.Catalog{Packages: []catalog.Placed{
+		placed(catalog.Package{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
+		placed(catalog.Package{Name: "desktop"}),
+		placed(catalog.Package{Name: "core", Methods: []catalog.MethodSpec{{ProvidedBy: "desktop"}}}),
 	}}
-	ledger := []machinefile.Installed{{Item: "desktop", Method: "pkg", Machinefile: "laptop"}}
+	ledger := []machinefile.Installed{{Package: "desktop", Method: "pkg", Machinefile: "laptop"}}
 	seen := map[string]machinefile.Seen{
 		"manager": {Condition: machinefile.Present, Method: "script"},
 		"desktop": {Condition: machinefile.Present, Method: "pkg"},
 		"core":    {Condition: machinefile.Present, Method: "provided-by"},
 	}
-	r := machinefile.Resolved{Name: "laptop", Steps: []machinefile.Step{{Item: "core", Kind: catalog.KindApp, Method: "provided-by", Phase: catalog.PhaseApply}}}
+	r := machinefile.Resolved{Name: "laptop", Steps: []machinefile.Step{{Package: "core", Kind: catalog.KindApp, Method: "provided-by", Phase: catalog.PhaseApply}}}
 	for _, e := range machinefile.Judge(r, cat, seen, ledger, false, "").Extra {
 		if e.Takes() || !slices.Equal(e.RequiredBy, []string{"core"}) {
-			t.Errorf("%s: takes %v, required by %v; want kept, required by [core]", e.Step.Item, e.Takes(), e.RequiredBy)
+			t.Errorf("%s: takes %v, required by %v; want kept, required by [core]", e.Step.Package, e.Takes(), e.RequiredBy)
 		}
 	}
 }
@@ -119,13 +119,13 @@ func TestJudgeKeepsTheProviderOfAListedApp(t *testing.T) {
 func TestJudgeKeepsWhatAnExtraStationCannotUninstallNeeds(t *testing.T) {
 	// invariant: an extra station cannot uninstall stays, so what it
 	// requires is never taken back under it.
-	cat := catalog.Catalog{Items: []catalog.Placed{
-		placed(catalog.Item{Name: "runtime"}),
-		placed(catalog.Item{Name: "browsers", Requires: []string{"runtime"}}),
+	cat := catalog.Catalog{Packages: []catalog.Placed{
+		placed(catalog.Package{Name: "runtime"}),
+		placed(catalog.Package{Name: "browsers", Requires: []string{"runtime"}}),
 	}}
 	ledger := []machinefile.Installed{
-		{Item: "runtime", Method: "pkg", Machinefile: "laptop"},
-		{Item: "browsers", Method: "script", Machinefile: "laptop"},
+		{Package: "runtime", Method: "pkg", Machinefile: "laptop"},
+		{Package: "browsers", Method: "script", Machinefile: "laptop"},
 	}
 	seen := map[string]machinefile.Seen{
 		"runtime":  {Condition: machinefile.Present, Method: "pkg"},
@@ -133,8 +133,8 @@ func TestJudgeKeepsWhatAnExtraStationCannotUninstallNeeds(t *testing.T) {
 	}
 	fates := map[string]machinefile.Fate{}
 	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false, "").Extra {
-		fates[e.Step.Item] = e.Fate()
-		if e.Step.Item == "runtime" && !slices.Equal(e.RequiredBy, []string{"browsers"}) {
+		fates[e.Step.Package] = e.Fate()
+		if e.Step.Package == "runtime" && !slices.Equal(e.RequiredBy, []string{"browsers"}) {
 			t.Errorf("runtime required by %v; want [browsers]", e.RequiredBy)
 		}
 	}
@@ -149,12 +149,12 @@ func TestJudgeGivesEveryExtraOneFateWhetherAnAppNeedsIt(t *testing.T) {
 	// what its removal asks; what needs one that stays there by station's
 	// method is said and keeps it, the one station cannot uninstall
 	// included; nothing else is ever asked, nor removed but its record.
-	cat := catalog.Catalog{Items: []catalog.Placed{
-		placed(catalog.Item{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
-		placed(catalog.Item{Name: "lib", Needs: []catalog.Need{catalog.NeedSudo}}),
-		placed(catalog.Item{Name: "tool", Requires: []string{"lib"}}),
+	cat := catalog.Catalog{Packages: []catalog.Placed{
+		placed(catalog.Package{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
+		placed(catalog.Package{Name: "lib", Needs: []catalog.Need{catalog.NeedSudo}}),
+		placed(catalog.Package{Name: "tool", Requires: []string{"lib"}}),
 	}}
-	ledger := []machinefile.Installed{{Item: "lib", Method: "pkg", Machinefile: "laptop"}}
+	ledger := []machinefile.Installed{{Package: "lib", Method: "pkg", Machinefile: "laptop"}}
 	for _, c := range []struct {
 		reads           string
 		lib             machinefile.Seen
@@ -200,21 +200,21 @@ func TestJudgeGivesEveryExtraOneFateWhetherAnAppNeedsIt(t *testing.T) {
 func TestJudgeAsksThePasswordOnlyWhereTheMachineAsksOne(t *testing.T) {
 	// invariant: a sudo need asks the owner only where the machine said a
 	// line run as root asks a password; every other need still asks.
-	cat := catalog.Catalog{Items: []catalog.Placed{
-		placed(catalog.Item{Name: "manager", Needs: []catalog.Need{catalog.NeedSudo}}),
-		placed(catalog.Item{Name: "editor", Needs: []catalog.Need{catalog.NeedLicense}}),
-		placed(catalog.Item{Name: "old", Needs: []catalog.Need{catalog.NeedSudo}}),
+	cat := catalog.Catalog{Packages: []catalog.Placed{
+		placed(catalog.Package{Name: "manager", Needs: []catalog.Need{catalog.NeedSudo}}),
+		placed(catalog.Package{Name: "editor", Needs: []catalog.Need{catalog.NeedLicense}}),
+		placed(catalog.Package{Name: "old", Needs: []catalog.Need{catalog.NeedSudo}}),
 	}}
 	r := machinefile.Resolved{Name: "laptop", Steps: []machinefile.Step{
-		{Item: "manager", Kind: catalog.KindApp, Method: "script", Phase: catalog.PhaseApply, Needs: []catalog.Need{catalog.NeedSudo}},
-		{Item: "editor", Kind: catalog.KindApp, Method: "pkg", Phase: catalog.PhaseApply, Needs: []catalog.Need{catalog.NeedLicense}},
+		{Package: "manager", Kind: catalog.KindApp, Method: "script", Phase: catalog.PhaseApply, Needs: []catalog.Need{catalog.NeedSudo}},
+		{Package: "editor", Kind: catalog.KindApp, Method: "pkg", Phase: catalog.PhaseApply, Needs: []catalog.Need{catalog.NeedLicense}},
 	}}
 	seen := map[string]machinefile.Seen{
 		"manager": {Condition: machinefile.Absent},
 		"editor":  {Condition: machinefile.Absent},
 		"old":     {Condition: machinefile.Present, Method: "pkg"},
 	}
-	ledger := []machinefile.Installed{{Item: "old", Method: "pkg", Machinefile: "laptop"}}
+	ledger := []machinefile.Installed{{Package: "old", Method: "pkg", Machinefile: "laptop"}}
 	needs := func(a []machinefile.Asked) []catalog.Need {
 		out := make([]catalog.Need, 0, len(a))
 		for _, n := range a {
@@ -245,13 +245,13 @@ func TestJudgeAsksThePasswordOnlyWhereTheMachineAsksOne(t *testing.T) {
 func TestUpgradeAsksOnlyWhatTheUpdateNeedsNotItsInstalls(t *testing.T) {
 	// invariant: an upgrade asks the item's needs only for an app it
 	// installs; an app it updates asks its method's needs alone.
-	cat := catalog.Catalog{Items: []catalog.Placed{
-		placed(catalog.Item{Name: "manager", Needs: []catalog.Need{catalog.NeedSudo}}),
-		placed(catalog.Item{Name: "gone", Needs: []catalog.Need{catalog.NeedSudo}}),
-		placed(catalog.Item{Name: "pkg"}),
+	cat := catalog.Catalog{Packages: []catalog.Placed{
+		placed(catalog.Package{Name: "manager", Needs: []catalog.Need{catalog.NeedSudo}}),
+		placed(catalog.Package{Name: "gone", Needs: []catalog.Need{catalog.NeedSudo}}),
+		placed(catalog.Package{Name: "pkg"}),
 	}}
-	step := func(item string, spec catalog.MethodSpec, needs ...catalog.Need) machinefile.Step {
-		return machinefile.Step{Item: item, Kind: catalog.KindApp, Method: "script", Spec: spec, Phase: catalog.PhaseApply, Lock: "station.lock", Needs: needs}
+	step := func(pkg string, spec catalog.MethodSpec, needs ...catalog.Need) machinefile.Step {
+		return machinefile.Step{Package: pkg, Kind: catalog.KindApp, Method: "script", Spec: spec, Phase: catalog.PhaseApply, Lock: "station.lock", Needs: needs}
 	}
 	r := machinefile.Resolved{Name: "laptop", Steps: []machinefile.Step{
 		step("manager", catalog.MethodSpec{}, catalog.NeedSudo),
@@ -265,7 +265,7 @@ func TestUpgradeAsksOnlyWhatTheUpdateNeedsNotItsInstalls(t *testing.T) {
 	}
 	p := machinefile.Judge(r, cat, seen, nil, false, "")
 	got := p.UpgradeNeeds()
-	if len(got) != 2 || got[0].Need != catalog.NeedSudo || !slices.Equal(got[0].Items, []string{"gone"}) || got[1].Need != catalog.NeedLicense || !slices.Equal(got[1].Items, []string{"pkg"}) {
+	if len(got) != 2 || got[0].Need != catalog.NeedSudo || !slices.Equal(got[0].Packages, []string{"gone"}) || got[1].Need != catalog.NeedLicense || !slices.Equal(got[1].Packages, []string{"pkg"}) {
 		t.Errorf("upgrade asks %+v; want sudo for gone (installed) and a license for pkg (its method's)", got)
 	}
 }

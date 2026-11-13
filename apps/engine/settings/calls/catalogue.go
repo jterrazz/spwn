@@ -29,18 +29,18 @@ type CatalogueOptions struct {
 }
 
 type Catalogue struct {
-	items    []catalog.Setting
+	packages []catalog.Setting
 	byName   map[string]catalog.Setting
 	o        CatalogueOptions
 	appliers settingscontract.Appliers
 }
 
-func NewCatalogue(items []catalog.Setting, o CatalogueOptions) *Catalogue {
-	byName := make(map[string]catalog.Setting, len(items))
-	for _, it := range items {
+func NewCatalogue(pkgs []catalog.Setting, o CatalogueOptions) *Catalogue {
+	byName := make(map[string]catalog.Setting, len(pkgs))
+	for _, it := range pkgs {
 		byName[it.Name] = it
 	}
-	return &Catalogue{items: items, byName: byName, o: o, appliers: settingscontract.NewAppliers(o.Appliers...)}
+	return &Catalogue{packages: pkgs, byName: byName, o: o, appliers: settingscontract.NewAppliers(o.Appliers...)}
 }
 
 type handler struct {
@@ -51,7 +51,7 @@ type handler struct {
 
 func (s *Catalogue) Placed() []catalog.Setting {
 	var placed []catalog.Setting
-	for _, it := range s.items {
+	for _, it := range s.packages {
 		if slices.Contains(it.Kinds, s.o.ThisMachine) {
 			placed = append(placed, it)
 		}
@@ -59,7 +59,7 @@ func (s *Catalogue) Placed() []catalog.Setting {
 	return placed
 }
 
-func (s *Catalogue) Items() []catalog.Setting { return s.items }
+func (s *Catalogue) Packages() []catalog.Setting { return s.packages }
 
 func (s *Catalogue) Lives(it catalog.Setting) bool { return slices.Contains(it.Kinds, s.o.ThisMachine) }
 
@@ -102,7 +102,7 @@ func (s *Catalogue) Watch(ctx context.Context) (<-chan []settings.Report, error)
 		if err != nil {
 			return nil, err
 		}
-		reports[i] = settings.Report{Item: it, State: catalog.StateAbsent, Detail: "run once", Applies: s.applies(it)}
+		reports[i] = settings.Report{Package: it, State: catalog.StateAbsent, Detail: "run once", Applies: s.applies(it)}
 		if h.check != nil {
 			reports[i].State, reports[i].Detail, checks[i] = catalog.StatePending, "", h.check
 		}
@@ -159,10 +159,10 @@ func (s *Catalogue) Find(names []string) ([]catalog.Setting, error) {
 		seen[name] = true
 		it, ok := s.byName[name]
 		if !ok {
-			return nil, &settings.UnknownItemError{Name: name}
+			return nil, &settings.UnknownPackageError{Name: name}
 		}
 		if !slices.Contains(it.Kinds, s.o.ThisMachine) {
-			return nil, &settings.WrongLivesOnError{Item: name, Kinds: it.Kinds, ThisMachine: s.o.ThisMachine}
+			return nil, &settings.WrongLivesOnError{Package: name, Kinds: it.Kinds, ThisMachine: s.o.ThisMachine}
 		}
 		found = append(found, it)
 	}
@@ -173,8 +173,8 @@ func (s *Catalogue) NeedsInput(it catalog.Setting) bool {
 	return len(it.Inputs) > 0 || it.Interactive
 }
 
-func (s *Catalogue) Defaults(item string) map[string]string {
-	return clone(s.o.Defaults[item])
+func (s *Catalogue) Defaults(pkg string) map[string]string {
+	return clone(s.o.Defaults[pkg])
 }
 
 func (s *Catalogue) CheckInstall(names []string, interactive bool) error {
@@ -208,13 +208,13 @@ func (s *Catalogue) CheckUninstall(names []string) error {
 func (s *Catalogue) admit(it catalog.Setting, verb string, interactive bool) error {
 	switch {
 	case !slices.Contains(it.Kinds, s.o.ThisMachine):
-		return &settings.WrongLivesOnError{Item: it.Name, Kinds: it.Kinds, ThisMachine: s.o.ThisMachine}
+		return &settings.WrongLivesOnError{Package: it.Name, Kinds: it.Kinds, ThisMachine: s.o.ThisMachine}
 	case verb == verbUninstall && !it.Reversible:
-		return &settings.NotReversibleError{Item: it.Name}
+		return &settings.NotReversibleError{Package: it.Name}
 	case verb == verbInstall && s.NeedsInput(it) && !interactive:
-		return &settings.NeedsTerminalError{Item: it.Name}
+		return &settings.NeedsTerminalError{Package: it.Name}
 	case it.NeedsRoot && !s.o.Admin:
-		return &settings.NeedsRootError{Item: it.Name, Verb: verb}
+		return &settings.NeedsRootError{Package: it.Name, Verb: verb}
 	}
 	return nil
 }
@@ -241,7 +241,7 @@ func (s *Catalogue) Uninstall(ctx context.Context, name string) (settings.Change
 }
 
 func (s *Catalogue) apply(name, verb string, interactive bool, run func(handler, catalog.Setting) (settings.Change, error)) (settings.Change, error) {
-	failed := settings.Change{Item: name, Verb: verb, Result: catalog.StateBroken}
+	failed := settings.Change{Package: name, Verb: verb, Result: catalog.StateBroken}
 	found, err := s.Find([]string{name})
 	if err != nil {
 		return failed, err
@@ -255,7 +255,7 @@ func (s *Catalogue) apply(name, verb string, interactive bool, run func(handler,
 		return failed, err
 	}
 	change, err := run(h, it)
-	change.Item, change.Verb = it.Name, verb
+	change.Package, change.Verb = it.Name, verb
 	if err != nil {
 		change.Result = catalog.StateBroken
 		change.Steps = append(change.Steps, settings.ChangeStep{Label: "failed", State: catalog.StateBroken, Detail: firstLine(err.Error())})

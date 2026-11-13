@@ -96,7 +96,7 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 			}
 			break
 		}
-		if slices.Contains(waits, l.Step.Item) {
+		if slices.Contains(waits, l.Step.Package) {
 			out.Done = append(out.Done, machinefile.Done{Line: l, State: l.Seen.State, Method: l.Seen.Method, Version: l.Seen.Version, Reason: machinefile.WaitsForYou})
 			continue
 		}
@@ -231,7 +231,7 @@ func finishedUpdate(ctx context.Context, d Deps, done machinefile.Done) machinef
 	done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
 	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), rereadBudget)
 	defer cancel()
-	now, ok := reread(past, d, done.Line.Step.Item)
+	now, ok := reread(past, d, done.Line.Step.Package)
 	if !ok || (now.Condition != machinefile.Present && now.Condition != machinefile.Outdated) || now.Version == done.Line.Seen.Version {
 		return done
 	}
@@ -252,7 +252,7 @@ func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) ma
 		done.Reason = machinefile.Pinned
 		return done
 	}
-	outcomes, err := call.Invoke(ctx, d.Calls, machine.Ref{}, appscalls.Update, appscalls.UpdateIn{Names: []string{l.Step.Item}, Within: l.Step.Within()}, p)
+	outcomes, err := call.Invoke(ctx, d.Calls, machine.Ref{}, appscalls.Update, appscalls.UpdateIn{Names: []string{l.Step.Package}, Within: l.Step.Within()}, p)
 	switch {
 	case ctx.Err() != nil:
 		return finishedUpdate(ctx, d, done)
@@ -265,7 +265,7 @@ func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) ma
 		return done
 	}
 	for _, o := range outcomes {
-		if o.Name != l.Step.Item {
+		if o.Name != l.Step.Package {
 			continue
 		}
 		done.State, done.Detail, done.Log, done.Updated, done.Newest = o.Result, o.Detail, o.Log, true, o.Newest

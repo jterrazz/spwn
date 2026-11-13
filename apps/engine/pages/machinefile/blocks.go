@@ -26,7 +26,7 @@ func lines(body string) string {
 }
 
 func blockRow(b machinefile.Block, words ...string) page.Row {
-	row := page.Row{ID: b.ID, Label: b.Item, Cells: []page.Value{page.Texts(blockMethod)}}
+	row := page.Row{ID: b.ID, Label: b.Package, Cells: []page.Value{page.Texts(blockMethod)}}
 	switch b.Condition {
 	case machinefile.Present:
 		row.Mark = page.OK
@@ -76,12 +76,12 @@ func extraBlockRows(p machinefile.Plan, lead ...string) []page.Row {
 func blockFate(b machinefile.Block) string {
 	switch b.Fate {
 	case machinefile.Taken, machinefile.Gone:
-		return "written by station, goes with " + b.Item
+		return "written by station, goes with " + b.Package
 	case machinefile.KeptEdited:
 		return "edited by hand since station wrote it: kept, and yours"
 	case machinefile.KeptIrreversible, machinefile.KeptAnotherWay:
-		return "kept with " + b.Item + ", and yours"
+		return "kept with " + b.Package + ", and yours"
 	case machinefile.KeptRequired, machinefile.KeptHolding, machinefile.KeptManagerMissing, machinefile.KeptUnread:
 	}
-	return "kept with " + b.Item
+	return "kept with " + b.Package
 }

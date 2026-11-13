@@ -29,7 +29,7 @@ func (*memory) MkdirAll(string, fs.FileMode) error { return nil }
 
 const owners = "[user]\n\tname = Owner\n[alias]\n\tco = checkout\n"
 
-func item() catalog.Setting {
+func pkg() catalog.Setting {
 	c, err := catalog.Builtin()
 	if err != nil {
 		panic(err)
@@ -45,7 +45,7 @@ func TestApplier(t *testing.T) {
 			text := string(files.files["/home/u/.gitconfig"])
 			files.files["/home/u/.gitconfig"] = []byte(strings.Replace(text, "-m WIP", "-m mine", 1))
 		}
-		return contracttest.Opened{Applier: gitaliases.New(files, "/home/u"), Item: item(), Edit: edit}
+		return contracttest.Opened{Applier: gitaliases.New(files, "/home/u"), Package: pkg(), Edit: edit}
 	})
 }
 
@@ -54,14 +54,14 @@ func TestTheOwnersOwnConfigStaysAroundStationsBlock(t *testing.T) {
 	files := &memory{files: map[string][]byte{"/home/u/.gitconfig": []byte(owners)}}
 	a := gitaliases.New(files, "/home/u")
 
-	if _, err := a.Apply(ctx, item(), nil); err != nil {
+	if _, err := a.Apply(ctx, pkg(), nil); err != nil {
 		t.Fatal(err)
 	}
 	applied := string(files.files["/home/u/.gitconfig"])
 	if !strings.HasPrefix(applied, owners) || !strings.Contains(applied, "\tfeat = \"!f() { git add . && git commit -m \\\"feat: $*\\\"; }; f\"\n") {
 		t.Fatalf("applied:\n%s", applied)
 	}
-	if _, err := a.Undo(ctx, item()); err != nil {
+	if _, err := a.Undo(ctx, pkg()); err != nil {
 		t.Fatal(err)
 	}
 	if got := string(files.files["/home/u/.gitconfig"]); got != owners {

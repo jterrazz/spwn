@@ -34,7 +34,7 @@ type ShelfOptions struct {
 }
 
 type Configurer interface {
-	Configure(ctx context.Context, item string, interactive bool) (apps.Step, error)
+	Configure(ctx context.Context, pkg string, interactive bool) (apps.Step, error)
 }
 
 type VMs interface {

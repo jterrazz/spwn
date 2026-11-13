@@ -64,23 +64,23 @@ func (z zshrcIn) Edit(ctx context.Context, edit func(string) (string, error)) er
 func TestApplier(t *testing.T) {
 	contracttest.Applier(t, func(*testing.T) contracttest.Opened {
 		files := &memory{files: map[string][]byte{}}
-		item := catalog.Setting{Name: "greetings", Effect: catalog.ShellBlocks{Blocks: []catalog.ShellBlock{{ID: "station:greetings", Zsh: "greet() { echo hi; }\n"}}}}
+		pkg := catalog.Setting{Name: "greetings", Effect: catalog.ShellBlocks{Blocks: []catalog.ShellBlock{{ID: "station:greetings", Zsh: "greet() { echo hi; }\n"}}}}
 		edit := func(*testing.T) {
 			files.files[zshrc] = []byte("# >>> station:greetings >>>\ngreet() { echo mine; }\n# <<< station:greetings <<<\n")
 		}
-		return contracttest.Opened{Applier: zshblock.New(zshrcIn{files}, zshblock.Options{Home: "/home/u", OS: catalog.OSMacOS, Arch: catalog.ArchARM64}), Item: item, Edit: edit}
+		return contracttest.Opened{Applier: zshblock.New(zshrcIn{files}, zshblock.Options{Home: "/home/u", OS: catalog.OSMacOS, Arch: catalog.ArchARM64}), Package: pkg, Edit: edit}
 	})
 }
 
 func TestApplyWritesTheExactBytesAndUndoGivesTheOwnersFileBack(t *testing.T) {
 	owner := "export EDITOR=vim\n\n# >>> station >>>\nexport PATH=\"$HOME/.local/bin:$PATH\"\n# <<< station <<<\nalias gs='git status'\n"
 	files := &memory{files: map[string][]byte{zshrc: []byte(owner)}}
-	item := catalog.Setting{Name: "greetings", Effect: catalog.ShellBlocks{Blocks: []catalog.ShellBlock{
+	pkg := catalog.Setting{Name: "greetings", Effect: catalog.ShellBlocks{Blocks: []catalog.ShellBlock{
 		{ID: "station:greetings", Zsh: "export HELLO={{ home }}\n"},
 		{ID: "station:greetings/path", Zsh: "path=({{ home }}/bin $path)\n"},
 	}}}
 	applier := zshblock.New(zshrcIn{files}, zshblock.Options{Home: "/home/u", OS: catalog.OSMacOS, Arch: catalog.ArchARM64})
-	if _, err := applier.Apply(t.Context(), item, nil); err != nil {
+	if _, err := applier.Apply(t.Context(), pkg, nil); err != nil {
 		t.Fatal(err)
 	}
 	main := "export EDITOR=vim\n\n# >>> station >>>\nexport PATH=\"$HOME/.local/bin:$PATH\"\n# <<< station <<<\n"
@@ -91,7 +91,7 @@ func TestApplyWritesTheExactBytesAndUndoGivesTheOwnersFileBack(t *testing.T) {
 	if got := string(files.files[zshrc]); got != want {
 		t.Fatalf("applied\n%s\nwant\n%s", got, want)
 	}
-	if _, err := applier.Undo(t.Context(), item); err != nil {
+	if _, err := applier.Undo(t.Context(), pkg); err != nil {
 		t.Fatal(err)
 	}
 	if got := string(files.files[zshrc]); got != owner {
@@ -104,8 +104,8 @@ func TestALoneBlocksFingerprintIsItsTextsAlone(t *testing.T) {
 	// wrote matches the block that file's bytes moved into.
 	body := "greet() { echo hi; }\n"
 	files := &memory{files: map[string][]byte{zshrc: []byte("mine\n# >>> station:greetings >>>\n" + body + "# <<< station:greetings <<<\n")}}
-	item := catalog.Setting{Name: "greetings", Effect: catalog.ShellBlocks{Blocks: []catalog.ShellBlock{{ID: "station:greetings", Zsh: body}}}}
-	o, err := zshblock.New(zshrcIn{files}, zshblock.Options{Home: "/home/u"}).Observe(t.Context(), item)
+	pkg := catalog.Setting{Name: "greetings", Effect: catalog.ShellBlocks{Blocks: []catalog.ShellBlock{{ID: "station:greetings", Zsh: body}}}}
+	o, err := zshblock.New(zshrcIn{files}, zshblock.Options{Home: "/home/u"}).Observe(t.Context(), pkg)
 	sum := sha256.Sum256([]byte(body))
 	if err != nil || o.Digest != "sha256:"+hex.EncodeToString(sum[:]) {
 		t.Errorf("fingerprint %q, %v", o.Digest, err)

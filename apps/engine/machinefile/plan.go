@@ -78,7 +78,7 @@ type Line struct {
 // it, and when.
 
 type Installed struct {
-	Item        string    `json:"item"`
+	Package     string    `json:"item"`
 	Method      string    `json:"method"`
 	Machinefile string    `json:"machinefile"`
 	At          time.Time `json:"at"`
@@ -102,8 +102,8 @@ type ExtraLine struct {
 // that ask it.
 
 type Asked struct {
-	Need  catalog.Need
-	Items []string
+	Need     catalog.Need
+	Packages []string
 }
 
 // value: a Machinefile against the machine: what it asks of the owner,
@@ -172,11 +172,11 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 	p := Plan{Name: r.Name, Phase: phase, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless, Scripts: r.Scripts}
 	listed := map[string]bool{}
 	for _, s := range r.Skipped {
-		listed[s.Item] = true
+		listed[s.Package] = true
 	}
 	for _, s := range r.Steps {
-		listed[s.Item] = true
-		l := Line{Step: s, Seen: seen[s.Item]}
+		listed[s.Package] = true
+		l := Line{Step: s, Seen: seen[s.Package]}
 		if l.Seen.Condition == "" {
 			l.Seen.Condition = Unknown
 		}
@@ -188,7 +188,7 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 	}
 	var extra []Installed
 	for _, in := range ledger {
-		if phase == catalog.PhaseApply && in.Machinefile == r.Name && !listed[in.Item] {
+		if phase == catalog.PhaseApply && in.Machinefile == r.Name && !listed[in.Package] {
 			extra = append(extra, in)
 		}
 	}
@@ -220,7 +220,7 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []Installed) []ExtraLine {
 	out := make([]ExtraLine, 0, len(extra))
 	for _, in := range extra {
-		s := ExtraLine{Installed: in, Line: Line{Step: Step{Item: in.Item, Kind: catalog.KindApp, Method: in.Method, Phase: catalog.PhaseApply}, Seen: seen[in.Item]}}
+		s := ExtraLine{Installed: in, Line: Line{Step: Step{Package: in.Package, Kind: catalog.KindApp, Method: in.Method, Phase: catalog.PhaseApply}, Seen: seen[in.Package]}}
 		if s.Seen.Condition == "" {
 			s.Seen.Condition = Unknown
 		}
@@ -236,10 +236,10 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 			}
 		case Changed, NotManaged, Extra, Unknown:
 		}
-		if it, ok := cat.Item(in.Item); ok {
-			s.Step.Needs = removalNeeds(it.Item, in.Method, sys)
-			for _, l := range cat.Links(it.Item, in.Method, sys) {
-				s.Step.Waits = append(s.Step.Waits, l.Items...)
+		if it, ok := cat.Package(in.Package); ok {
+			s.Step.Needs = removalNeeds(it.Package, in.Method, sys)
+			for _, l := range cat.Links(it.Package, in.Method, sys) {
+				s.Step.Waits = append(s.Step.Waits, l.Packages...)
 			}
 		}
 		out = append(out, s)
@@ -259,20 +259,20 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []ExtraLine) []ExtraLine {
 	taken := map[string]bool{}
 	for _, s := range extra {
-		taken[s.Step.Item] = s.Takes()
+		taken[s.Step.Package] = s.Takes()
 	}
 	held := map[string]bool{}
 	for kept := true; kept; {
 		kept = false
 		for _, s := range extra {
-			if taken[s.Step.Item] && len(needing(sys, cat, seen, taken, s.Step.Item)) > 0 {
-				taken[s.Step.Item], held[s.Step.Item], kept = false, true, true
+			if taken[s.Step.Package] && len(needing(sys, cat, seen, taken, s.Step.Package)) > 0 {
+				taken[s.Step.Package], held[s.Step.Package], kept = false, true, true
 			}
 		}
 	}
 	for i := range extra {
-		if s := &extra[i]; held[s.Step.Item] || s.Fate() == KeptIrreversible || s.Fate() == KeptHolding {
-			s.Action, s.RequiredBy = Leave, needing(sys, cat, seen, taken, s.Step.Item)
+		if s := &extra[i]; held[s.Step.Package] || s.Fate() == KeptIrreversible || s.Fate() == KeptHolding {
+			s.Action, s.RequiredBy = Leave, needing(sys, cat, seen, taken, s.Step.Package)
 		}
 	}
 	return extra
@@ -282,14 +282,14 @@ func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, ext
 // one apps chose here, even for an app present another way; an app with
 // no row of the inventory does not live on this machine, so holds
 // nothing, and a setting's requirement holds no app.
-func needing(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, taken map[string]bool, item string) []string {
+func needing(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, taken map[string]bool, pkg string) []string {
 	var out []string
-	for _, it := range cat.Items {
-		name := it.Item.Name
-		if name == item || taken[name] || it.Item.Kind == catalog.KindSetting || !there(seen[name]) {
+	for _, it := range cat.Packages {
+		name := it.Package.Name
+		if name == pkg || taken[name] || it.Package.Kind == catalog.KindSetting || !there(seen[name]) {
 			continue
 		}
-		if slices.ContainsFunc(cat.Links(it.Item, seen[name].Method, sys), func(l catalog.Link) bool { return l.Names(item) }) {
+		if slices.ContainsFunc(cat.Links(it.Package, seen[name].Method, sys), func(l catalog.Link) bool { return l.Names(pkg) }) {
 			out = append(out, name)
 		}
 	}
@@ -308,7 +308,7 @@ func there(s Seen) bool {
 // value: what removing an item by a method asks of the owner: the item's
 // needs and the method's own (a cask's sudo); an extra already gone asks
 // nothing, and Plan.Interactive judges that.
-func removalNeeds(it catalog.Item, method string, sys catalog.System) []catalog.Need {
+func removalNeeds(it catalog.Package, method string, sys catalog.System) []catalog.Need {
 	needs := slices.Clone(it.Needs)
 	for _, m := range it.Methods {
 		if m.Method() == method && m.Matches(sys) {
@@ -326,7 +326,7 @@ func reversed(extra []ExtraLine) []ExtraLine {
 	left := slices.Clone(extra)
 	for len(left) > 0 {
 		next := slices.IndexFunc(left, func(s ExtraLine) bool {
-			return !slices.ContainsFunc(left, func(o ExtraLine) bool { return slices.Contains(o.Step.Waits, s.Step.Item) })
+			return !slices.ContainsFunc(left, func(o ExtraLine) bool { return slices.Contains(o.Step.Waits, s.Step.Package) })
 		})
 		if next < 0 {
 			return append(out, left...)
@@ -343,14 +343,14 @@ func (p Plan) asked(lines []Line) []Asked {
 		if !p.Asks(catalog.Need(need)) {
 			continue
 		}
-		var items []string
+		var pkgs []string
 		for _, l := range lines {
-			if slices.Contains(l.Step.Needs, catalog.Need(need)) && !slices.Contains(items, l.Step.Item) {
-				items = append(items, l.Step.Item)
+			if slices.Contains(l.Step.Needs, catalog.Need(need)) && !slices.Contains(pkgs, l.Step.Package) {
+				pkgs = append(pkgs, l.Step.Package)
 			}
 		}
-		if len(items) > 0 {
-			out = append(out, Asked{Need: catalog.Need(need), Items: items})
+		if len(pkgs) > 0 {
+			out = append(out, Asked{Need: catalog.Need(need), Packages: pkgs})
 		}
 	}
 	return out
@@ -629,7 +629,7 @@ func WaitingOf(done []Done) []Waiting {
 		if d.Newest == "" || !r.Past(d.Newest) {
 			continue
 		}
-		out = append(out, Waiting{App: d.Line.Step.Item, Newest: d.Newest, Range: r.String(), Moved: r.Moved(d.Newest), File: d.Line.Step.Origin.File})
+		out = append(out, Waiting{App: d.Line.Step.Package, Newest: d.Newest, Range: r.String(), Moved: r.Moved(d.Newest), File: d.Line.Step.Origin.File})
 	}
 	return out
 }
@@ -692,7 +692,7 @@ func (p Plan) reaches(l Line) bool {
 		return false
 	}
 	return !slices.ContainsFunc(l.Step.Waits, func(w string) bool {
-		return slices.ContainsFunc(p.Lines, func(o Line) bool { return o.Step.Item == w && o.Acts() })
+		return slices.ContainsFunc(p.Lines, func(o Line) bool { return o.Step.Package == w && o.Acts() })
 	})
 }
 

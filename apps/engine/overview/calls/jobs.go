@@ -237,7 +237,7 @@ func (r *Reader[App, Item, Misplaced]) protections(reports []Item) []overview.Ch
 	var out []overview.Check
 	for _, p := range overview.Protections() {
 		for _, rep := range reports {
-			if item, state := r.d.Settings.Placed(rep); item == p[0] {
+			if pkg, state := r.d.Settings.Placed(rep); pkg == p[0] {
 				out = append(out, overview.Protection(state, p[1]))
 				break
 			}

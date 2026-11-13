@@ -26,7 +26,7 @@ type schematic interface{ JSONSchema() map[string]any }
 // key without omitempty is required, every struct refuses a key it does not
 // name, and a type with an Enum lists its values.
 func catalogSchema() []byte {
-	return projected(reflect.TypeFor[catalog.Item](), "item", catalog.Schema, schemaPath,
+	return projected(reflect.TypeFor[catalog.Package](), "item", catalog.Schema, schemaPath,
 		"One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.")
 }
 

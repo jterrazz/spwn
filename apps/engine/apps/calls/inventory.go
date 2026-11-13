@@ -315,12 +315,12 @@ func (s *Shelf) holds(t catalog.App, listings map[catalog.Method]listing) (held 
 // value: the methods a manager manages that this machine has an installer
 // of; none for an app that manages nothing.
 func (s *Shelf) managed(t catalog.App) []catalog.Method {
-	it, ok := s.cat.Item(t.Name)
-	if !ok || it.Item.Kind != catalog.KindManager {
+	it, ok := s.cat.Package(t.Name)
+	if !ok || it.Package.Kind != catalog.KindManager {
 		return nil
 	}
 	var out []catalog.Method
-	for _, key := range it.Item.Manages {
+	for _, key := range it.Package.Manages {
 		if _, wired := s.o.Installers[catalog.Method(key)]; wired {
 			out = append(out, catalog.Method(key))
 		}
@@ -471,8 +471,8 @@ func (s *Shelf) kept(t catalog.App, where string) bool {
 // item installs by, else the method's own.
 func (s *Shelf) managerKey(m catalog.Method) string {
 	if owner, ok := s.cat.Manager(string(m)); ok {
-		if it, ok := s.cat.Item(owner); ok && len(it.Item.Manages) > 0 {
-			return string(it.Item.Manages[0])
+		if it, ok := s.cat.Package(owner); ok && len(it.Package.Manages) > 0 {
+			return string(it.Package.Manages[0])
 		}
 	}
 	return string(m)

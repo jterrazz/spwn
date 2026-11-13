@@ -61,7 +61,7 @@ func BrewPrefix(os OS, arch Arch) string {
 
 var shellVar = regexp.MustCompile(`\{\{([^{}]*)\}\}`)
 
-func (it Item) RenderShell(b ShellBlock, v ShellVars) (string, error) {
+func (it Package) RenderShell(b ShellBlock, v ShellVars) (string, error) {
 	// invariant: a variable is plain text substitution of a fixed set of names:
 	// a name outside it, an option with no value, or a brace pair that is no
 	// variable is an error, never an empty string, and nothing is evaluated.
@@ -86,7 +86,7 @@ func (it Item) RenderShell(b ShellBlock, v ShellVars) (string, error) {
 	return out.String() + "\n", nil
 }
 
-func (it Item) shellValue(b ShellBlock, name string, v ShellVars) (string, error) {
+func (it Package) shellValue(b ShellBlock, name string, v ShellVars) (string, error) {
 	switch {
 	case name == VarBrewPrefix:
 		return BrewPrefix(v.OS, v.Arch), nil
@@ -117,7 +117,7 @@ var shellID = regexp.MustCompile(`^station:([a-z0-9][a-z0-9.-]*)(/[a-z0-9][a-z0-
 // same block; its zsh says something, never holds a marker line, and names
 // only variables the machine or the item's non-secret options can fill (a
 // setting's takes the machine's alone: options are an app's).
-func (it Item) checkShell(blocks []ShellBlock) string {
+func (it Package) checkShell(blocks []ShellBlock) string {
 	seen := map[string]bool{}
 	for _, b := range blocks {
 		m := shellID.FindStringSubmatch(b.ID)
@@ -144,7 +144,7 @@ func (it Item) checkShell(blocks []ShellBlock) string {
 	return ""
 }
 
-func (it Item) checkShellVars(b ShellBlock) string {
+func (it Package) checkShellVars(b ShellBlock) string {
 	for _, m := range shellVar.FindAllString(b.Zsh, -1) {
 		name := strings.TrimSpace(m[2 : len(m)-2])
 		switch {

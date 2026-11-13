@@ -173,7 +173,7 @@ func Codes() map[fail.Code]Wording {
 			}
 			return said, "no method of " + e.Subject + " for this system holds it: drop its version"
 		},
-		machinefilecalls.UnknownItem: func(e *fail.Error) (string, string) {
+		machinefilecalls.UnknownPackage: func(e *fail.Error) (string, string) {
 			where := cmp.Or(e.Detail["at"], e.Detail["by"])
 			if is := e.Detail["is"]; is != "" {
 				return e.Subject + " is " + is + " (" + where + ")", "station explain"

@@ -59,7 +59,7 @@ func Row(r settings.Row, now time.Time) page.Row {
 		row.Hint = page.Cmd("station settings apply " + name)
 		if r.Needs != "" {
 			row.Reason = page.Missing
-			row.Cells = []page.Value{page.Texts("not applied", "needs "+r.Item.NeedsSaid())}
+			row.Cells = []page.Value{page.Texts("not applied", "needs "+r.Package.NeedsSaid())}
 			row.Hint = page.Cmd("station apps install " + r.Needs)
 		}
 	case settings.StateOffThisMac:
@@ -379,8 +379,8 @@ func Show(r settings.Row, now time.Time, thisMac page.Context) page.Page {
 	}
 	facts := []page.Item{
 		{Fact: &page.Fact{Key: "group", Value: group}},
-		{Fact: &page.Fact{Key: "does", Value: page.Text(r.Item.Description)}},
-		{Fact: &page.Fact{Key: "lives on", Value: page.Text(livesOn(r.Item.Kinds))}},
+		{Fact: &page.Fact{Key: "does", Value: page.Text(r.Package.Description)}},
+		{Fact: &page.Fact{Key: "lives on", Value: page.Text(livesOn(r.Package.Kinds))}},
 	}
 	if r.Where != "" {
 		facts = append(facts, page.Item{Fact: &page.Fact{Key: "where", Value: page.Text(r.Where)}})
@@ -396,7 +396,7 @@ func Show(r settings.Row, now time.Time, thisMac page.Context) page.Page {
 }
 
 func showChecked(r settings.Row, head page.Row, thisMac page.Context) page.Page {
-	it := r.CheckedItem()
+	it := r.CheckedPackage()
 	facts := []page.Item{
 		{Fact: &page.Fact{Key: "group", Value: page.Text("Checked")}},
 		{Fact: &page.Fact{Key: "does", Value: page.Text(it.Description)}},
@@ -464,9 +464,9 @@ func Changes(verb string, changes []settings.Change, thisMac page.Context) page.
 	var rows []page.Row
 	var extra []page.Section
 	for _, c := range changes {
-		extra = append(extra, values(c.Item, "before", c.Before)...)
-		extra = append(extra, values(c.Item, "after", c.After)...)
-		head := pages.Done(c.Item, c.Result, "")
+		extra = append(extra, values(c.Package, "before", c.Before)...)
+		extra = append(extra, values(c.Package, "after", c.After)...)
+		head := pages.Done(c.Package, c.Result, "")
 		if len(c.Steps) == 1 {
 			s := c.Steps[0]
 			head.Detail = page.Text(step(s))
@@ -475,7 +475,7 @@ func Changes(verb string, changes []settings.Change, thisMac page.Context) page.
 		}
 		rows = append(rows, head)
 		for i, s := range c.Steps {
-			r := pages.Done(c.Item+"/"+strconv.Itoa(i), s.State, s.Detail)
+			r := pages.Done(c.Package+"/"+strconv.Itoa(i), s.State, s.Detail)
 			r.Label = s.Label
 			rows = append(rows, r)
 		}
@@ -483,7 +483,7 @@ func Changes(verb string, changes []settings.Change, thisMac page.Context) page.
 	return pages.Outcome("settings "+verb, thisMac, nil, rows, "settings to "+verb, extra...)
 }
 
-func values(item, when string, list []settings.KeyValue) []page.Section {
+func values(pkg, when string, list []settings.KeyValue) []page.Section {
 	if len(list) == 0 {
 		return nil
 	}
@@ -491,7 +491,7 @@ func values(item, when string, list []settings.KeyValue) []page.Section {
 	for _, kv := range list {
 		items = append(items, page.Item{Fact: &page.Fact{Key: kv.Key, Value: page.Text(kv.Value)}})
 	}
-	return []page.Section{{ID: item + "-" + when, Title: item + " " + when, Columns: pages.OutcomeColumns(), Items: items}}
+	return []page.Section{{ID: pkg + "-" + when, Title: pkg + " " + when, Columns: pages.OutcomeColumns(), Items: items}}
 }
 
 func step(s settings.ChangeStep) string {
@@ -526,9 +526,9 @@ func Object(r settings.Row) SettingJSON {
 		if state == "" {
 			state = string(r.State)
 		}
-		return SettingJSON{Name: r.Name, Label: r.CheckedItem().Label, Group: string(r.Group), State: state, Why: r.Why, Value: r.Value, Fix: r.Fix.Path}
+		return SettingJSON{Name: r.Name, Label: r.CheckedPackage().Label, Group: string(r.Group), State: state, Why: r.Why, Value: r.Value, Fix: r.Fix.Path}
 	}
-	o := SettingJSON{Name: r.Name, Label: r.Item.Description, Group: string(r.Group), State: string(r.State), Where: r.Where, Why: r.Why, Admin: r.Item.NeedsRoot}
+	o := SettingJSON{Name: r.Name, Label: r.Package.Description, Group: string(r.Group), State: string(r.State), Where: r.Where, Why: r.Why, Admin: r.Package.NeedsRoot}
 	if !r.Since.IsZero() {
 		at := r.Since.UTC()
 		o.AppliedAt = &at

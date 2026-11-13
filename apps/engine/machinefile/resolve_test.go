@@ -13,7 +13,7 @@ import (
 // value: a catalog of two managers, one ranked on macOS; an app with
 // two methods on macOS, a version range on the ranked one, and one on Ubuntu; and two apps that require
 // each other.
-func items() map[string]string {
+func packages() map[string]string {
 	return map[string]string{
 		"catalog/package-managers/releases.yaml": `item: station.catalog/v1
 kind: manager
@@ -69,7 +69,7 @@ func library(t *testing.T, user, builtin map[string]string) machinefile.Library 
 		}
 		return tr
 	}
-	all := items()
+	all := packages()
 	for p, b := range builtin {
 		all[p] = b
 	}
@@ -84,15 +84,15 @@ func machine(name, system, apps string) string {
 	return "machinefile: station.machinefile/v1\nname: " + name + "\nmachine: { kind: workspace, system: " + system + " }\napps: " + apps + "\n"
 }
 
-func methodOf(t *testing.T, lib machinefile.Library, name, item string) string {
+func methodOf(t *testing.T, lib machinefile.Library, name, pkg string) string {
 	t.Helper()
 	r, err := machinefile.Resolve(lib, name, machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	i := slices.IndexFunc(r.Steps, func(s machinefile.Step) bool { return s.Item == item })
+	i := slices.IndexFunc(r.Steps, func(s machinefile.Step) bool { return s.Package == pkg })
 	if i < 0 {
-		t.Fatalf("%s holds no step %s: %+v", name, item, r.Steps)
+		t.Fatalf("%s holds no step %s: %+v", name, pkg, r.Steps)
 	}
 	return r.Steps[i].Method
 }
@@ -251,7 +251,7 @@ func TestAnOptionalAppWhoseManagerHasNoMethodSaysWhatItHas(t *testing.T) {
 	}
 }
 
-func TestAnItemProvidedByAnotherBringsItInFirst(t *testing.T) {
+func TestAPackageProvidedByAnotherBringsItInFirst(t *testing.T) {
 	// invariant: provided-by is a link like requires: its provider is
 	// resolved into the plan and runs before it.
 	provided := map[string]string{
@@ -265,7 +265,7 @@ func TestAnItemProvidedByAnotherBringsItInFirst(t *testing.T) {
 	}
 	order := make([]string, 0, len(r.Steps))
 	for _, s := range r.Steps {
-		order = append(order, s.Item+" "+s.Why)
+		order = append(order, s.Package+" "+s.Why)
 	}
 	if want := []string{"desktop the provider of core", "core listed"}; !slices.Equal(order, want) {
 		t.Errorf("steps %q; want %q", order, want)

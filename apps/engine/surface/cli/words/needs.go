@@ -15,16 +15,16 @@ func NeededBy(call string) string {
 	return family
 }
 
-func NeedFix(program, item string) string {
+func NeedFix(program, pkg string) string {
 	// value: the gesture that provides a need: its catalogue item installed,
 	// else the program put on the search path by hand.
-	if item == "" {
+	if pkg == "" {
 		return "install " + program + ", then run it again"
 	}
-	return "station apps install " + item
+	return "station apps install " + pkg
 }
 
-func NeedAsk(item string) string {
+func NeedAsk(pkg string) string {
 	// value: the question a terminal puts before it installs a need.
-	return "Install " + item + " now?"
+	return "Install " + pkg + " now?"
 }

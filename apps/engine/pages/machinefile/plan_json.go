@@ -7,7 +7,7 @@ import (
 )
 
 type LineJSON struct {
-	Item      string `json:"item"`
+	Package   string `json:"item"`
 	Kind      string `json:"kind"`
 	Method    string `json:"method"`
 	Condition string `json:"condition"`
@@ -19,12 +19,12 @@ type LineJSON struct {
 }
 
 type NeedJSON struct {
-	Need  string   `json:"need"`
-	Items []string `json:"items"`
+	Need     string   `json:"need"`
+	Packages []string `json:"items"`
 }
 
 type ExtraJSON struct {
-	Item        string `json:"item"`
+	Package     string `json:"item"`
 	Method      string `json:"method"`
 	Machinefile string `json:"machinefile"`
 	// value: what the item reads now, and what `apply --remove` does with
@@ -43,7 +43,7 @@ type ExtraJSON struct {
 // in a run with `--remove` alone.
 
 type BlockJSON struct {
-	Item      string `json:"item"`
+	Package   string `json:"item"`
 	ID        string `json:"id"`
 	Condition string `json:"condition"`
 	Action    string `json:"action"`
@@ -88,7 +88,7 @@ type PlanJSON struct {
 }
 
 func lineJSON(l machinefile.Line, result, detail string) LineJSON {
-	out := LineJSON{Item: l.Step.Item, Kind: string(l.Step.Kind), Method: l.Method(), Condition: string(l.Seen.Condition), Action: string(l.Action), Result: result, Detail: detail}
+	out := LineJSON{Package: l.Step.Package, Kind: string(l.Step.Kind), Method: l.Method(), Condition: string(l.Seen.Condition), Action: string(l.Action), Result: result, Detail: detail}
 	for k, v := range l.Step.Values {
 		if out.Values == nil {
 			out.Values = map[string]string{}
@@ -103,16 +103,16 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 	// the plan's needs, its lines, what is extra and what follows an apply.
 	out := PlanJSON{Schema: schema, Machinefile: p.Name, Needs: []NeedJSON{}, Lines: []LineJSON{}, Extra: []ExtraJSON{}, AfterApply: []string{}}
 	for _, a := range p.Needs {
-		out.Needs = append(out.Needs, NeedJSON{Need: string(a.Need), Items: a.Items})
+		out.Needs = append(out.Needs, NeedJSON{Need: string(a.Need), Packages: a.Packages})
 	}
 	for _, l := range p.Lines {
 		out.Lines = append(out.Lines, lineJSON(l, "", l.Seen.Detail))
 	}
 	for _, e := range p.Extra {
-		out.Extra = append(out.Extra, ExtraJSON{Item: e.Step.Item, Method: e.Step.Method, Machinefile: e.Installed.Machinefile, Condition: string(e.Seen.Condition), Action: string(e.Action)})
+		out.Extra = append(out.Extra, ExtraJSON{Package: e.Step.Package, Method: e.Step.Method, Machinefile: e.Installed.Machinefile, Condition: string(e.Seen.Condition), Action: string(e.Action)})
 	}
 	for _, b := range p.Blocks {
-		out.Blocks = append(out.Blocks, BlockJSON{Item: b.Item, ID: b.ID, Condition: string(b.Condition), Action: string(b.Action)})
+		out.Blocks = append(out.Blocks, BlockJSON{Package: b.Package, ID: b.ID, Condition: string(b.Condition), Action: string(b.Action)})
 	}
 	for _, r := range p.Restarts {
 		out.AfterApply = append(out.AfterApply, string(r))

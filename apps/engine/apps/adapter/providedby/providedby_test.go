@@ -11,7 +11,7 @@ import (
 )
 
 func TestInstaller(t *testing.T) {
-	sample := catalog.ProvidedByInstall{Item: "desk-app", Commands: []string{"dk"}}
+	sample := catalog.ProvidedByInstall{Package: "desk-app", Commands: []string{"dk"}}
 	contracttest.Installer(t, sample, func(t *testing.T, seed contracttest.Seed) contract.Installer {
 		run := localtest.NewRunner(t)
 		if !seed.Fails {

@@ -120,7 +120,7 @@ type Apps[App any] interface {
 type Settings[Item any] interface {
 	List(ctx context.Context) ([]Item, error)
 	// value: the config item a row is, and its state.
-	Placed(r Item) (item string, state catalog.State)
+	Placed(r Item) (pkg string, state catalog.State)
 }
 
 type Setup interface {

@@ -175,34 +175,34 @@ func (b bench) apply(t *testing.T, remove bool) machinefile.Applied {
 }
 
 // value: the line of item in the plan of m as `station plan` reads it.
-func (b bench) planned(t *testing.T, item string) machinefile.Line {
+func (b bench) planned(t *testing.T, pkg string) machinefile.Line {
 	t.Helper()
 	b.shelf.Forget()
 	p, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, machinefilecalls.Plan, machinefilecalls.PlanIn{}, nil)
 	if err != nil {
 		t.Fatalf("plan: %v", err)
 	}
-	i := slices.IndexFunc(p.Lines, func(l machinefile.Line) bool { return l.Step.Item == item })
+	i := slices.IndexFunc(p.Lines, func(l machinefile.Line) bool { return l.Step.Package == pkg })
 	if i < 0 {
-		t.Fatalf("no line %s in the plan", item)
+		t.Fatalf("no line %s in the plan", pkg)
 	}
 	return p.Lines[i]
 }
 
-func (b bench) recorded(item string) (machinefile.Installed, bool) {
+func (b bench) recorded(pkg string) (machinefile.Installed, bool) {
 	for _, in := range b.w.Mac("here").Store().Ledger {
-		if in.Item == item {
+		if in.Package == pkg {
 			return in, true
 		}
 	}
 	return machinefile.Installed{}, false
 }
 
-func doneOf(t *testing.T, done []machinefile.Done, item string) machinefile.Done {
+func doneOf(t *testing.T, done []machinefile.Done, pkg string) machinefile.Done {
 	t.Helper()
-	i := slices.IndexFunc(done, func(d machinefile.Done) bool { return d.Line.Step.Item == item })
+	i := slices.IndexFunc(done, func(d machinefile.Done) bool { return d.Line.Step.Package == pkg })
 	if i < 0 {
-		t.Fatalf("no line of %s ran in %+v", item, done)
+		t.Fatalf("no line of %s ran in %+v", pkg, done)
 	}
 	return done[i]
 }
@@ -216,29 +216,29 @@ func (waiting) Sleep(ctx context.Context, _ time.Duration) error {
 	return ctx.Err()
 }
 
-func (b bench) step(t *testing.T, item string) machinefile.Step {
+func (b bench) step(t *testing.T, pkg string) machinefile.Step {
 	t.Helper()
 	r, err := machinefile.Resolve(b.lib, "m", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	i := slices.IndexFunc(r.Steps, func(s machinefile.Step) bool { return s.Item == item })
+	i := slices.IndexFunc(r.Steps, func(s machinefile.Step) bool { return s.Package == pkg })
 	if i < 0 {
-		t.Fatalf("no step %s in %+v", item, r.Steps)
+		t.Fatalf("no step %s in %+v", pkg, r.Steps)
 	}
 	return r.Steps[i]
 }
 
-func (b bench) row(t *testing.T, item string) apps.Report {
+func (b bench) row(t *testing.T, pkg string) apps.Report {
 	t.Helper()
 	b.shelf.Forget()
 	reports, err := b.shelf.Inventory(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	i := slices.IndexFunc(reports, func(r apps.Report) bool { return r.App.Name == item })
+	i := slices.IndexFunc(reports, func(r apps.Report) bool { return r.App.Name == pkg })
 	if i < 0 {
-		t.Fatalf("no row %s", item)
+		t.Fatalf("no row %s", pkg)
 	}
 	return reports[i]
 }
@@ -248,11 +248,11 @@ func (b bench) holds(method catalog.Method, key string) bool {
 	return ok
 }
 
-func outcomeOf(t *testing.T, out []apps.Outcome, item string) apps.Outcome {
+func outcomeOf(t *testing.T, out []apps.Outcome, pkg string) apps.Outcome {
 	t.Helper()
-	i := slices.IndexFunc(out, func(o apps.Outcome) bool { return o.Name == item })
+	i := slices.IndexFunc(out, func(o apps.Outcome) bool { return o.Name == pkg })
 	if i < 0 {
-		t.Fatalf("no outcome of %s in %+v", item, out)
+		t.Fatalf("no outcome of %s in %+v", pkg, out)
 	}
 	return out[i]
 }
@@ -262,8 +262,8 @@ func outcomeOf(t *testing.T, out []apps.Outcome, item string) apps.Outcome {
 // there, at a version where that method pins one.
 func entries(cat catalog.Catalog, a catalog.App, kind catalog.MachineKind) []string {
 	out := []string{a.Name}
-	it, _ := cat.Item(a.Name)
-	for _, m := range it.Item.Methods {
+	it, _ := cat.Package(a.Name)
+	for _, m := range it.Package.Methods {
 		key := m.Key()
 		if !slices.Contains(catalog.ManagerKey("").Enum(), key) {
 			continue
@@ -369,30 +369,30 @@ func TestAnAppHeldByAnotherOfItsMethodsIsAdoptedNeverInstalledAgain(t *testing.T
 	// holds (its row, the plan, an install by name, an update, a removal),
 	// the method that holds it is the one named and reached.
 	ctx := context.Background()
-	for _, c := range []struct{ item, held, key string }{{"twin", "skill", "twin"}} {
-		b := benchOf(t, catalog.Mac, c.item)
+	for _, c := range []struct{ pkg, held, key string }{{"twin", "skill", "twin"}} {
+		b := benchOf(t, catalog.Mac, c.pkg)
 		b.w.Mac("here").Apps[catalog.Method(c.held)].Installed[c.key] = "1.0.0"
-		step := b.step(t, c.item)
-		row := b.row(t, c.item)
+		step := b.step(t, c.pkg)
+		row := b.row(t, c.pkg)
 		if string(row.Method) != c.held || row.State != catalog.StateOK {
-			t.Errorf("%s: reads %s by %s (%s), want ok by %s", c.item, row.State, row.Method, row.Detail, c.held)
+			t.Errorf("%s: reads %s by %s (%s), want ok by %s", c.pkg, row.State, row.Method, row.Detail, c.held)
 		}
-		seen := map[string]machinefile.Seen{c.item: {Condition: machinefile.Present, State: catalog.StateOK, Method: string(row.Method)}}
+		seen := map[string]machinefile.Seen{c.pkg: {Condition: machinefile.Present, State: catalog.StateOK, Method: string(row.Method)}}
 		line := machinefile.Judge(machinefile.Resolved{Name: "m", Steps: []machinefile.Step{step}}, b.cat, seen, nil, false, "").Lines[0]
 		if step.Method == c.held || line.Action != machinefile.Adopt || line.Method() != c.held {
-			t.Errorf("%s: the plan chose %s and %s it by %s; want it adopted by %s", c.item, step.Method, line.Action, line.Method(), c.held)
+			t.Errorf("%s: the plan chose %s and %s it by %s; want it adopted by %s", c.pkg, step.Method, line.Action, line.Method(), c.held)
 		}
-		out, err := b.shelf.Install(ctx, apps.InstallRequest{Names: []string{c.item}}, nil)
-		if o := outcomeOf(t, out, c.item); err != nil || o.Detail != apps.AlreadyInstalled || string(o.Method) != c.held || b.holds(catalog.Method(step.Method), c.key) {
-			t.Errorf("%s: installed again: %+v (%v)", c.item, out, err)
+		out, err := b.shelf.Install(ctx, apps.InstallRequest{Names: []string{c.pkg}}, nil)
+		if o := outcomeOf(t, out, c.pkg); err != nil || o.Detail != apps.AlreadyInstalled || string(o.Method) != c.held || b.holds(catalog.Method(step.Method), c.key) {
+			t.Errorf("%s: installed again: %+v (%v)", c.pkg, out, err)
 		}
-		up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{Names: []string{c.item}})
-		if err != nil || string(outcomeOf(t, up, c.item).Method) != c.held {
-			t.Errorf("%s: the update reached %+v (%v)", c.item, up, err)
+		up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{Names: []string{c.pkg}})
+		if err != nil || string(outcomeOf(t, up, c.pkg).Method) != c.held {
+			t.Errorf("%s: the update reached %+v (%v)", c.pkg, up, err)
 		}
-		gone, err := b.shelf.Uninstall(ctx, []string{c.item}, true)
-		if err != nil || string(outcomeOf(t, gone, c.item).Method) != c.held || b.holds(catalog.Method(c.held), c.key) {
-			t.Errorf("%s: the removal reached %+v (%v)", c.item, gone, err)
+		gone, err := b.shelf.Uninstall(ctx, []string{c.pkg}, true)
+		if err != nil || string(outcomeOf(t, gone, c.pkg).Method) != c.held || b.holds(catalog.Method(c.held), c.key) {
+			t.Errorf("%s: the removal reached %+v (%v)", c.pkg, gone, err)
 		}
 	}
 }
@@ -464,23 +464,23 @@ func TestAMoveHandsTheAppToTheMethodAskedOnEveryPath(t *testing.T) {
 	// the outcome, the read after it and the plan that asks that method
 	// name it, and the copy of the method it left is gone.
 	ctx := context.Background()
-	for _, c := range []struct{ item, from, to, entry string }{
+	for _, c := range []struct{ pkg, from, to, entry string }{
 		{"twin", "skill", "cask", "twin"}, {"twin", "cask", "skill", "{ name: twin, manager: skill }"},
 	} {
-		about := c.item + " " + c.from + " to " + c.to
+		about := c.pkg + " " + c.from + " to " + c.to
 		b := benchOf(t, catalog.Mac, c.entry)
-		b.w.Mac("here").Apps[catalog.Method(c.from)].Installed[c.item] = "1.0.0"
-		out, err := b.shelf.Move(ctx, c.item, catalog.Method(c.to), nil)
+		b.w.Mac("here").Apps[catalog.Method(c.from)].Installed[c.pkg] = "1.0.0"
+		out, err := b.shelf.Move(ctx, c.pkg, catalog.Method(c.to), nil)
 		if err != nil {
 			t.Fatalf("%s: %v", about, err)
 		}
-		o := outcomeOf(t, out, c.item)
-		if string(o.Method) != c.to || !b.holds(catalog.Method(c.to), c.item) || b.holds(catalog.Method(c.from), c.item) {
-			t.Errorf("%s: moved to %s; held by %s %v, by %s %v", about, o.Method, c.to, b.holds(catalog.Method(c.to), c.item), c.from, b.holds(catalog.Method(c.from), c.item))
+		o := outcomeOf(t, out, c.pkg)
+		if string(o.Method) != c.to || !b.holds(catalog.Method(c.to), c.pkg) || b.holds(catalog.Method(c.from), c.pkg) {
+			t.Errorf("%s: moved to %s; held by %s %v, by %s %v", about, o.Method, c.to, b.holds(catalog.Method(c.to), c.pkg), c.from, b.holds(catalog.Method(c.from), c.pkg))
 		}
-		row := b.row(t, c.item)
-		step := b.step(t, c.item)
-		seen := map[string]machinefile.Seen{c.item: {Condition: machinefile.Present, State: catalog.StateOK, Method: string(row.Method)}}
+		row := b.row(t, c.pkg)
+		step := b.step(t, c.pkg)
+		seen := map[string]machinefile.Seen{c.pkg: {Condition: machinefile.Present, State: catalog.StateOK, Method: string(row.Method)}}
 		line := machinefile.Judge(machinefile.Resolved{Name: "m", Steps: []machinefile.Step{step}}, b.cat, seen, nil, false, "").Lines[0]
 		if string(row.Method) != c.to || step.Method != c.to || line.Action != machinefile.Keep {
 			t.Errorf("%s: reads by %s, the plan asks %s and %s it", about, row.Method, step.Method, line.Action)
@@ -509,19 +509,19 @@ func TestACommandInAManagersOwnFolderIsThatManagersForTheAppsItCarries(t *testin
 	for _, dirs := range kept {
 		for _, dir := range dirs {
 			for _, c := range []struct {
-				item string
+				pkg  string
 				want apps.State
 			}{{carried, apps.NotInstalled}, {"probed", apps.NotManaged}} {
-				b := benchOf(t, catalog.Mac, c.item)
-				command := b.lib.Catalog.Apps[slices.IndexFunc(b.lib.Catalog.Apps, func(a catalog.App) bool { return a.Name == c.item })].Provides[0]
-				where := dir + "/" + c.item + "/2/bin/" + command
-				b = benchOf(t, catalog.Mac, c.item, func(r *localtest.Runner, o *appscalls.ShelfOptions) {
+				b := benchOf(t, catalog.Mac, c.pkg)
+				command := b.lib.Catalog.Apps[slices.IndexFunc(b.lib.Catalog.Apps, func(a catalog.App) bool { return a.Name == c.pkg })].Provides[0]
+				where := dir + "/" + c.pkg + "/2/bin/" + command
+				b = benchOf(t, catalog.Mac, c.pkg, func(r *localtest.Runner, o *appscalls.ShelfOptions) {
 					r.Paths[command] = where
 					r.On(where, "--version").Reply(local.Output{Stdout: command + " 2.0.0\n"})
 					o.Kept = kept
 				})
-				if row := b.row(t, c.item); apps.StateOf(row) != c.want {
-					t.Errorf("%s at %s reads %s (%s), want %s", c.item, where, apps.StateOf(row), row.Detail, c.want)
+				if row := b.row(t, c.pkg); apps.StateOf(row) != c.want {
+					t.Errorf("%s at %s reads %s (%s), want %s", c.pkg, where, apps.StateOf(row), row.Detail, c.want)
 				}
 			}
 		}
@@ -630,7 +630,7 @@ func TestAMoveFromACopyOnPathKeepsIt(t *testing.T) {
 		t.Fatal(err)
 	}
 	o := outcomeOf(t, out, "twin")
-	if o.Result != catalog.StateOK || !b.holds(catalog.MethodSkill, "twin") || len(o.Steps) != 1 || o.Steps[0].Item != "copy on PATH" || !strings.HasPrefix(o.Steps[0].Detail, "kept") {
+	if o.Result != catalog.StateOK || !b.holds(catalog.MethodSkill, "twin") || len(o.Steps) != 1 || o.Steps[0].Package != "copy on PATH" || !strings.HasPrefix(o.Steps[0].Detail, "kept") {
 		t.Errorf("moved %+v", o)
 	}
 }
@@ -659,7 +659,7 @@ func TestAMoveOffALineRunsItsUndoOnlyForACopyTheLedgerHolds(t *testing.T) {
 		}
 		o := outcomeOf(t, out, "lined")
 		_, there := b.w.Mac("here").Apps[catalog.MethodShell].Installed["install-lined"]
-		if o.Result != catalog.StateOK || len(o.Steps) != 1 || o.Steps[0].Item != "shell copy" || there != c.kept || strings.HasPrefix(o.Steps[0].Detail, "kept") != c.kept {
+		if o.Result != catalog.StateOK || len(o.Steps) != 1 || o.Steps[0].Package != "shell copy" || there != c.kept || strings.HasPrefix(o.Steps[0].Detail, "kept") != c.kept {
 			t.Errorf("%s: moved %+v, the shell copy there: %v", c.name, o, there)
 		}
 	}

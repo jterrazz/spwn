@@ -34,7 +34,7 @@ func refusedFor(t *testing.T, body, want string) {
 	}
 }
 
-func TestAnItemFileDecodesIntoItsItem(t *testing.T) {
+func TestAPackageFileDecodesIntoItsPackage(t *testing.T) {
 	it, err := catalog.Decode("items/git/gh.yaml", []byte(gh))
 	if err != nil {
 		t.Fatal(err)
@@ -81,7 +81,7 @@ func TestANewerSchemaIsRefusedWithUpdateStation(t *testing.T) {
 	refusedFor(t, strings.Replace(gh, "item: station.catalog/v1\n", "", 1), "names no schema")
 }
 
-func TestAnItemIsJudgedAlone(t *testing.T) {
+func TestAPackageIsJudgedAlone(t *testing.T) {
 	for body, want := range map[string]string{
 		strings.Replace(gh, "name: gh", "name: hub", 1):                                                                `names "hub", its file "gh"`,
 		strings.Replace(gh, "kind: app", "kind: tool", 1):                                                              `kind "tool" is none of`,
@@ -245,7 +245,7 @@ func manager(name, manages, at string) string {
 	return "item: station.catalog/v1\nkind: manager\nname: " + name + "\ndescription: d\nmanages: " + manages + "\npriority: {macos: " + at + "}\nmethods:\n    - os: macos\n      script: {url: https://x.sh}\n"
 }
 
-func TestTheItemsAreJudgedTogether(t *testing.T) {
+func TestThePackagesAreJudgedTogether(t *testing.T) {
 	dns := "item: station.catalog/v1\nkind: setting\nname: dns\ndescription: d\nrequires: [gpg]\nmethods:\n    - os: any\n      builtin: dns\n"
 	for files, want := range map[*map[string]string]string{
 		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "requires: [git]", 1)}: `items/git/gh.yaml: gh requires "git", which is no app`,
@@ -267,13 +267,13 @@ func TestTheItemsAreJudgedTogether(t *testing.T) {
 	}
 }
 
-func TestItemsStandByCategoryThenByName(t *testing.T) {
-	item := func(name string) string {
+func TestPackagesStandByCategoryThenByName(t *testing.T) {
+	pkg := func(name string) string {
 		return strings.Replace(strings.Replace(gh, "name: gh", "name: "+name, 1), "brew: gh", "brew: "+name, 1)
 	}
 	c, err := catalogOf(map[string]string{
-		"git/zz.yaml": item("zz"), "git/aa.yaml": item("aa"),
-		"runtimes/mm.yaml": item("mm"), "agent-skills/bb.yaml": item("bb"),
+		"git/zz.yaml": pkg("zz"), "git/aa.yaml": pkg("aa"),
+		"runtimes/mm.yaml": pkg("mm"), "agent-skills/bb.yaml": pkg("bb"),
 	})
 	if err != nil {
 		t.Fatal(err)

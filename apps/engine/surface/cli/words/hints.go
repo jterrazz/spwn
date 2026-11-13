@@ -1,6 +1,6 @@
 package words
 
-func SettingsAsRoot(verb, item string) string { return "sudo station settings " + verb + " " + item }
+func SettingsAsRoot(verb, pkg string) string { return "sudo station settings " + verb + " " + pkg }
 
 func PasswordlessRestart(mac string) string {
 	return "check that sudo needs no password for fdesetup on " + mac

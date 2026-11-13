@@ -55,8 +55,8 @@ func setupOf(env kit.Env, m machine) *setupcalls.Provisioner {
 
 type setupSettingsWriter struct{ settings *settingscalls.Catalogue }
 
-func (c setupSettingsWriter) Configure(ctx context.Context, item string, interactive bool) error {
-	_, err := c.settings.Install(ctx, item, nil, interactive)
+func (c setupSettingsWriter) Configure(ctx context.Context, pkg string, interactive bool) error {
+	_, err := c.settings.Install(ctx, pkg, nil, interactive)
 	return err
 }
 

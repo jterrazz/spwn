@@ -35,12 +35,12 @@ func Diffs(ctx context.Context, env kit.Env, p machinefile.Plan) string {
 	shown := map[string]bool{}
 	for _, l := range p.Lines {
 		if l.Step.Kind == catalog.KindSetting && (l.Action == machinefile.Set || l.Seen.Condition == machinefile.Changed) {
-			if d, err := call.Invoke(ctx, env.Calls, env.Target(), settingscalls.Diff, settingscalls.DiffIn{Name: l.Step.Item}, nil); err == nil {
+			if d, err := call.Invoke(ctx, env.Calls, env.Target(), settingscalls.Diff, settingscalls.DiffIn{Name: l.Step.Package}, nil); err == nil {
 				out.WriteString(settings.ReversedDiff(d.Diff))
 			}
 		}
 		for _, b := range p.Blocks {
-			if b.Item == l.Step.Item && !shown[b.ID] {
+			if b.Package == l.Step.Package && !shown[b.ID] {
 				shown[b.ID] = true
 				out.WriteString(b.Diff)
 			}

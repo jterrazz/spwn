@@ -111,7 +111,7 @@ func (m MethodSpec) install(provides []string) Install {
 	case m.Skill != nil:
 		return SkillInstall{Repo: m.Skill.Repo, Skill: m.Skill.Name}
 	case m.ProvidedBy != "":
-		return ProvidedByInstall{Item: m.ProvidedBy, Commands: provides}
+		return ProvidedByInstall{Package: m.ProvidedBy, Commands: provides}
 	}
 	return nil
 }
@@ -137,7 +137,7 @@ func (m MethodSpec) effect() Effect {
 	return m.Builtin
 }
 
-func (it Item) app(category Category) App {
+func (it Package) app(category Category) App {
 	t := App{
 		Name: it.Name, Kind: it.Kind, Description: it.Description, Category: category, Replaces: it.Replaces,
 		Supersedes: it.Supersedes, AppStore: slices.Contains(it.Accepts, SourceAppStore), UpdatesSelf: it.Updates == UpdatesSelf, Provides: it.Provides, Bundle: it.Bundle,
@@ -162,7 +162,7 @@ func (it Item) app(category Category) App {
 	return t
 }
 
-func (it Item) setting(category SettingCategory) Setting {
+func (it Package) setting(category SettingCategory) Setting {
 	s := Setting{
 		Name: it.Name, Description: it.Description, Help: it.Help, Declares: it.Declares, Category: category,
 		Interactive: slices.Contains(it.Needs, NeedTerminal), NeedsRoot: slices.Contains(it.Needs, NeedSudo),

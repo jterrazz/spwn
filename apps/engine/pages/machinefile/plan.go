@@ -65,7 +65,7 @@ func values(s machinefile.Step) []string {
 }
 
 func lineRow(l machinefile.Line, words ...string) page.Row {
-	row := page.Row{ID: l.Step.Item, Label: l.Step.Item, Mark: pages.MarkOf(l.Seen.State), Cells: []page.Value{page.Texts(l.Method())}}
+	row := page.Row{ID: l.Step.Package, Label: l.Step.Package, Mark: pages.MarkOf(l.Seen.State), Cells: []page.Value{page.Texts(l.Method())}}
 	if l.Seen.Condition == machinefile.NotManaged {
 		row.Mark = page.NotKnown
 	}
@@ -119,7 +119,7 @@ func needsSection(p machinefile.Plan) []page.Section {
 	}
 	rows := make([]page.Row, 0, len(p.Needs))
 	for _, a := range p.Needs {
-		rows = append(rows, page.Row{ID: string(a.Need), Label: strings.Join(a.Items, ", "), Mark: page.Attention, Detail: page.Text(asks(a.Need))})
+		rows = append(rows, page.Row{ID: string(a.Need), Label: strings.Join(a.Packages, ", "), Mark: page.Attention, Detail: page.Text(asks(a.Need))})
 	}
 	return []page.Section{section("needs", "Asks you", rows)}
 }
@@ -168,7 +168,7 @@ func extraRows(p machinefile.Plan, lead ...string) []page.Row {
 				}
 			}
 		}
-		rows = append(rows, page.Row{ID: e.Step.Item, Label: e.Step.Item, Mark: page.NotKnown, Cells: []page.Value{page.Texts(e.Step.Method)}, Detail: page.Texts(words...)})
+		rows = append(rows, page.Row{ID: e.Step.Package, Label: e.Step.Package, Mark: page.NotKnown, Cells: []page.Value{page.Texts(e.Step.Method)}, Detail: page.Texts(words...)})
 	}
 	return rows
 }
@@ -346,7 +346,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 		if len(d.Words) > 0 {
 			said, detail = append(said, d.Words[:len(d.Words)-1]...), d.Words[len(d.Words)-1]
 		}
-		steps = append(steps, pages.RunStep{ID: d.Line.Step.Item, State: d.State, Cells: []page.Value{page.Version(d.Version), page.Texts(d.Line.Method())}, Why: said, Detail: detail, Log: d.Log})
+		steps = append(steps, pages.RunStep{ID: d.Line.Step.Package, State: d.State, Cells: []page.Value{page.Version(d.Version), page.Texts(d.Line.Method())}, Why: said, Detail: detail, Log: d.Log})
 		switch {
 		case d.Reason == machinefile.Interrupted:
 			interrupted = true
@@ -360,7 +360,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 		step(d)
 	}
 	block := func(b machinefile.BlockDone) {
-		steps = append(steps, pages.RunStep{ID: b.ID, Label: b.Item, State: b.State, Cells: []page.Value{page.Version(""), page.Texts(blockMethod)}, Detail: strings.TrimSuffix(blockWhere(b.Block)+": "+b.Detail, ": ")})
+		steps = append(steps, pages.RunStep{ID: b.ID, Label: b.Package, State: b.State, Cells: []page.Value{page.Version(""), page.Texts(blockMethod)}, Detail: strings.TrimSuffix(blockWhere(b.Block)+": "+b.Detail, ": ")})
 		switch {
 		case b.State == catalog.StateBroken:
 			failed++

@@ -20,7 +20,7 @@ import (
 // --remove` does with it.
 
 type Block struct {
-	Item      string
+	Package   string
 	ID        string
 	Zsh       string
 	Condition Condition
@@ -39,10 +39,10 @@ func (b Block) Forgets() bool {
 // for, the digest of the text written between its markers, and when.
 
 type Written struct {
-	ID     string    `json:"id"`
-	Item   string    `json:"item"`
-	Digest string    `json:"digest"`
-	At     time.Time `json:"at"`
+	ID      string    `json:"id"`
+	Package string    `json:"item"`
+	Digest  string    `json:"digest"`
+	At      time.Time `json:"at"`
 }
 
 func BlockDigest(body string) string {

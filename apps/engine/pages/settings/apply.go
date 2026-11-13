@@ -41,8 +41,8 @@ func EveryMachine(applies []MachineApply, thisMac page.Context) page.Page {
 			continue
 		}
 		for _, c := range a.Changes {
-			row := pages.Done(a.Machine+"/"+c.Item, c.Result, "")
-			row.Label, row.Detail = a.Machine, page.Texts(c.Item, summary(c))
+			row := pages.Done(a.Machine+"/"+c.Package, c.Result, "")
+			row.Label, row.Detail = a.Machine, page.Texts(c.Package, summary(c))
 			rows = append(rows, row)
 		}
 		for _, e := range a.Elsewhere {

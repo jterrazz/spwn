@@ -62,7 +62,7 @@ const (
 	Cycle          fail.Code = "machinefile.cycle"
 	NoMethod       fail.Code = "machinefile.no-method"
 	Unpinnable     fail.Code = "machinefile.unpinnable"
-	UnknownItem    fail.Code = "machinefile.unknown-item"
+	UnknownPackage fail.Code = "machinefile.unknown-item"
 	BadValue       fail.Code = "machinefile.bad-value"
 	UnknownKey     fail.Code = "machinefile.unknown-key"
 	Unavailable    fail.Code = "machinefile.source-unavailable"
@@ -73,7 +73,7 @@ const (
 
 func resolution() []fail.Code {
 	// value: every code reading the Machinefile may end in.
-	return []fail.Code{NotFound, Invalid, NewerSchema, Mixin, VMOnComputer, Cycle, NoMethod, Unpinnable, UnknownItem, BadValue, Unavailable, CatalogInvalid, CatalogNewer}
+	return []fail.Code{NotFound, Invalid, NewerSchema, Mixin, VMOnComputer, Cycle, NoMethod, Unpinnable, UnknownPackage, BadValue, Unavailable, CatalogInvalid, CatalogNewer}
 }
 
 type ExplainIn struct {
@@ -203,7 +203,7 @@ func Worded(err error) error {
 		cycle     *machinefile.CycleError
 		none      *machinefile.NoMethodError
 		pin       *machinefile.UnpinnableError
-		item      *machinefile.UnknownItemError
+		pkg       *machinefile.UnknownPackageError
 		value     *machinefile.BadValueError
 		key       *machinefile.UnknownKeyError
 		gone      *contract.UnavailableError
@@ -232,13 +232,13 @@ func Worded(err error) error {
 	case errors.As(err, &cycle):
 		return refused(fail.Refused, Cycle, cycle.Said(), map[string]string{"of": cycle.Of})
 	case errors.As(err, &none):
-		return refused(fail.Refused, NoMethod, none.Item, map[string]string{"system": none.System, "manager": none.Manager, "why": none.Why, "at": none.At})
+		return refused(fail.Refused, NoMethod, none.Package, map[string]string{"system": none.System, "manager": none.Manager, "why": none.Why, "at": none.At})
 	case errors.As(err, &pin):
-		return refused(fail.Refused, Unpinnable, pin.Item, map[string]string{"version": pin.Version, "method": pin.Method, "holds": pin.Holds, "alternative": pin.Alternative, "at": pin.At})
-	case errors.As(err, &item):
-		return refused(fail.NotFound, UnknownItem, item.Name, map[string]string{"by": item.By, "is": item.Is, "at": item.At})
+		return refused(fail.Refused, Unpinnable, pin.Package, map[string]string{"version": pin.Version, "method": pin.Method, "holds": pin.Holds, "alternative": pin.Alternative, "at": pin.At})
+	case errors.As(err, &pkg):
+		return refused(fail.NotFound, UnknownPackage, pkg.Name, map[string]string{"by": pkg.By, "is": pkg.Is, "at": pkg.At})
 	case errors.As(err, &value):
-		return refused(fail.Refused, BadValue, value.Item, map[string]string{"key": value.Key, "problem": value.Problem, "at": value.At})
+		return refused(fail.Refused, BadValue, value.Package, map[string]string{"key": value.Key, "problem": value.Problem, "at": value.At})
 	case errors.As(err, &key):
 		return refused(fail.NotFound, UnknownKey, key.Key, map[string]string{"name": key.Name})
 	case errors.As(err, &gone):

@@ -98,8 +98,8 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	router := thisMac.router(kenv)
 	defer router.Close()
 	kenv.Calls = router
-	kenv.Install = func(ctx context.Context, item string, o kit.IO) error {
-		return appsinstall.Run(ctx, appsinstall.Deps{ThisMachine: thisMac.where, Now: thisMac.sys.Clock.Now}, kenv, []string{item}, o)
+	kenv.Install = func(ctx context.Context, pkg string, o kit.IO) error {
+		return appsinstall.Run(ctx, appsinstall.Deps{ThisMachine: thisMac.where, Now: thisMac.sys.Clock.Now}, kenv, []string{pkg}, o)
 	}
 	if session != nil {
 		world.engineFrom(func() *process.Engine { return thisMac.engine(kenv) })

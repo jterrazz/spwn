@@ -11,6 +11,6 @@ import (
 func TestApplier(t *testing.T) {
 	contracttest.Applier(t, func(*testing.T) contracttest.Opened {
 		a := fake.NewApplier(catalog.EffectDotfile)
-		return contracttest.Opened{Applier: a, Item: catalog.Setting{Name: "starship"}, Edit: func(*testing.T) { a.Edit("starship", "yours") }}
+		return contracttest.Opened{Applier: a, Package: catalog.Setting{Name: "starship"}, Edit: func(*testing.T) { a.Edit("starship", "yours") }}
 	})
 }

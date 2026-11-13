@@ -87,7 +87,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		var extra []string
 		for _, e := range plan.Extra {
 			if e.Takes() {
-				extra = append(extra, e.Step.Item)
+				extra = append(extra, e.Step.Package)
 			}
 		}
 		if in.Remove && len(extra) > 0 {
@@ -180,12 +180,12 @@ func badPhase(phase catalog.Phase, remove bool) error {
 }
 
 func refusedOffTerminal(asked []machinefile.Asked, verb string) error {
-	items, needs := []string{}, make([]string, 0, len(asked))
+	pkgs, needs := []string{}, make([]string, 0, len(asked))
 	for _, a := range asked {
 		needs = append(needs, string(a.Need))
-		for _, it := range a.Items {
-			if !slices.Contains(items, it) {
-				items = append(items, it)
+		for _, it := range a.Packages {
+			if !slices.Contains(pkgs, it) {
+				pkgs = append(pkgs, it)
 			}
 		}
 	}
@@ -193,7 +193,7 @@ func refusedOffTerminal(asked []machinefile.Asked, verb string) error {
 	if verb != "apply" {
 		detail["verb"] = verb
 	}
-	return fail.New(fail.NeedsTerminal, NeedsTerminal, strings.Join(items, ", "), detail)
+	return fail.New(fail.NeedsTerminal, NeedsTerminal, strings.Join(pkgs, ", "), detail)
 }
 
 // invariant: a Machinefile named by its path is copied into the owner's
@@ -235,7 +235,7 @@ type run struct {
 func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile.Done {
 	if r.in.Phase == catalog.PhaseImage || r.in.Phase == catalog.PhaseBoot {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, catalog.ItemsBound)
+		ctx, cancel = context.WithTimeout(ctx, catalog.PackagesBound)
 		defer cancel()
 	}
 	out := make([]machinefile.Done, 0, len(lines))
@@ -247,10 +247,10 @@ func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile
 			break
 		}
 		done := r.line(ctx, l)
-		r.ended[l.Step.Item] = done.State
-		r.there[l.Step.Item] = l.Step.Kind == catalog.KindApp && done.Reason == "" && (done.State == catalog.StateOK || (l.Action == machinefile.Adopt && done.State == catalog.StateDegraded))
+		r.ended[l.Step.Package] = done.State
+		r.there[l.Step.Package] = l.Step.Kind == catalog.KindApp && done.Reason == "" && (done.State == catalog.StateOK || (l.Action == machinefile.Adopt && done.State == catalog.StateDegraded))
 		if done.Reason == machinefile.NotRun {
-			r.ended[l.Step.Item] = catalog.StateBroken
+			r.ended[l.Step.Package] = catalog.StateBroken
 		}
 		out = append(out, done)
 	}
@@ -297,7 +297,7 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 	// invariant: what finished is in the ledger before the interrupt is
 	// read, so an item installed just before Ctrl-C is station's to take
 	// back like any other.
-	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{l.Step.Item}, Interactive: r.in.Interactive, Method: l.Step.Method, Version: l.Step.InstallVersion()}, r.p)
+	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{l.Step.Package}, Interactive: r.in.Interactive, Method: l.Step.Method, Version: l.Step.InstallVersion()}, r.p)
 	if err != nil && ctx.Err() == nil {
 		done.State, done.Detail = catalog.StateBroken, err.Error()
 		return done
@@ -306,12 +306,12 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 	for _, o := range outcomes {
 		fresh := o.Result == catalog.StateOK && o.Detail != apps.AlreadyInstalled
 		if fresh {
-			if err := r.d.Ledger.Put(ctx, machinefile.Installed{Item: o.Name, Method: string(o.Method), Machinefile: r.name, At: r.d.Now().UTC()}); err != nil {
+			if err := r.d.Ledger.Put(ctx, machinefile.Installed{Package: o.Name, Method: string(o.Method), Machinefile: r.name, At: r.d.Now().UTC()}); err != nil {
 				done.State, done.Detail = catalog.StateBroken, err.Error()
 				return done
 			}
 		}
-		if o.Name != l.Step.Item {
+		if o.Name != l.Step.Package {
 			continue
 		}
 		answered = o.Why != apps.WhyInterrupted
@@ -335,11 +335,11 @@ func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile
 	done.State, done.Reason, done.Detail = catalog.StateBroken, machinefile.Interrupted, ""
 	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), rereadBudget)
 	defer cancel()
-	now, ok := reread(past, r.d, l.Step.Item)
+	now, ok := reread(past, r.d, l.Step.Package)
 	if !ok || (now.Condition != machinefile.Present && now.Condition != machinefile.Outdated) {
 		return done
 	}
-	if r.d.Ledger.Put(past, machinefile.Installed{Item: l.Step.Item, Method: now.Method, Machinefile: r.name, At: r.d.Now().UTC()}) != nil {
+	if r.d.Ledger.Put(past, machinefile.Installed{Package: l.Step.Package, Method: now.Method, Machinefile: r.name, At: r.d.Now().UTC()}) != nil {
 		return done
 	}
 	done.State, done.Method, done.Version, done.Reason, done.Installed = catalog.StateOK, now.Method, now.Version, "", true
@@ -350,7 +350,7 @@ func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile
 // dropped, every method listed again), taken at that app's first answer
 // without waiting for the others; false when the read failed or did not
 // answer.
-func reread(ctx context.Context, d Deps, item string) (machinefile.Seen, bool) {
+func reread(ctx context.Context, d Deps, pkg string) (machinefile.Seen, bool) {
 	updates, err := call.Follow(ctx, d.Calls, machine.Ref{}, appscalls.List, appscalls.ListIn{Fresh: true}, nil)
 	if err != nil {
 		return machinefile.Seen{}, false
@@ -360,7 +360,7 @@ func reread(ctx context.Context, d Deps, item string) (machinefile.Seen, bool) {
 			return machinefile.Seen{}, false
 		}
 		for _, report := range u.Value {
-			if report.App.Name == item && !report.Pending {
+			if report.App.Name == pkg && !report.Pending {
 				return appSeen(report), true
 			}
 		}
@@ -375,11 +375,11 @@ func (r *run) set(ctx context.Context, l machinefile.Line, done machinefile.Done
 		return done
 	}
 	if r.p != nil {
-		r.p.Step("Setting "+l.Step.Item, "")
+		r.p.Step("Setting "+l.Step.Package, "")
 	}
-	in := settingscalls.ApplyIn{Names: []string{l.Step.Item}, Interactive: r.in.Interactive}
+	in := settingscalls.ApplyIn{Names: []string{l.Step.Package}, Interactive: r.in.Interactive}
 	if values != nil {
-		in.Values = map[string]map[string]string{l.Step.Item: values}
+		in.Values = map[string]map[string]string{l.Step.Package: values}
 	}
 	changes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, settingscalls.Apply, in, nil)
 	switch {
@@ -453,7 +453,7 @@ func (r *run) remove(ctx context.Context, p machinefile.Plan) ([]machinefile.Don
 	var blocks []machinefile.BlockDone
 	var stayed []machinefile.ExtraLine
 	follow := func(e machinefile.ExtraLine, end appEnd) bool {
-		done, broke := r.followApp(ctx, p, e.Step.Item, end)
+		done, broke := r.followApp(ctx, p, e.Step.Package, end)
 		blocks = append(blocks, done...)
 		return broke
 	}
@@ -488,7 +488,7 @@ func (r *run) remove(ctx context.Context, p machinefile.Plan) ([]machinefile.Don
 		case machinefile.Gone:
 			done.State, done.Detail = catalog.StateAbsent, "already gone"
 		case machinefile.Taken:
-			if needers := leaningOn(stayed, e.Step.Item); len(needers) > 0 {
+			if needers := leaningOn(stayed, e.Step.Package); len(needers) > 0 {
 				done.Detail = "required by " + strings.Join(needers, ", ") + ": kept, judged again next run"
 				stayed = append(stayed, e)
 				out = append(out, done)
@@ -519,7 +519,7 @@ func (r *run) remove(ctx context.Context, p machinefile.Plan) ([]machinefile.Don
 			out = append(out, done)
 			continue
 		}
-		if err := r.d.Ledger.Delete(ctx, e.Step.Item); err != nil {
+		if err := r.d.Ledger.Delete(ctx, e.Step.Package); err != nil {
 			done.State, done.Detail = catalog.StateBroken, err.Error()
 		}
 		out = append(out, done)
@@ -527,18 +527,18 @@ func (r *run) remove(ctx context.Context, p machinefile.Plan) ([]machinefile.Don
 	return out, blocks
 }
 
-func leaningOn(stayed []machinefile.ExtraLine, item string) []string {
+func leaningOn(stayed []machinefile.ExtraLine, pkg string) []string {
 	var out []string
 	for _, s := range stayed {
-		if slices.Contains(s.Step.Waits, item) {
-			out = append(out, s.Step.Item)
+		if slices.Contains(s.Step.Waits, pkg) {
+			out = append(out, s.Step.Package)
 		}
 	}
 	return out
 }
 
 func (r *run) uninstall(ctx context.Context, e machinefile.ExtraLine, done machinefile.Done) machinefile.Done {
-	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Remove, appscalls.RemoveIn{Names: []string{e.Step.Item}, Confirm: confirm.Yes}, nil)
+	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Remove, appscalls.RemoveIn{Names: []string{e.Step.Package}, Confirm: confirm.Yes}, nil)
 	var (
 		refused      *fail.Error
 		irreversible *apps.NotReversibleError

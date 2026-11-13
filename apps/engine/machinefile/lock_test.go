@@ -18,8 +18,8 @@ func TestARunThatStopsKeepsTheLockOfWhatItDidNotReach(t *testing.T) {
 		{Name: "failed", Method: "pkg", Version: "1.0"}, {Name: "skipped", Method: "pkg", Version: "1.0"},
 		{Name: "yours", Method: "pkg", Version: "1.0"}, {Name: "gone", Method: "pkg", Version: "1.0"},
 	}}}
-	line := func(item string, a machinefile.Action, seen machinefile.Seen) machinefile.Line {
-		return machinefile.Line{Step: machinefile.Step{Item: item, Kind: catalog.KindApp, Method: "pkg", Phase: catalog.PhaseApply}, Action: a, Seen: seen}
+	line := func(pkg string, a machinefile.Action, seen machinefile.Seen) machinefile.Line {
+		return machinefile.Line{Step: machinefile.Step{Package: pkg, Kind: catalog.KindApp, Method: "pkg", Phase: catalog.PhaseApply}, Action: a, Seen: seen}
 	}
 	absent := machinefile.Seen{Condition: machinefile.Absent, State: catalog.StateAbsent}
 	p := machinefile.Plan{Name: "m", Lock: old, Lines: []machinefile.Line{

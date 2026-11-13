@@ -31,7 +31,7 @@ func TestApplier(t *testing.T) {
 		a := agenthooks.New(func(string) bool { return true },
 			agenthooks.Hook{App: "writer", File: "~/.writer/settings.json", Hooks: &hook{}},
 			agenthooks.Hook{App: "reviewer", File: "~/.reviewer/config.toml", Hooks: &hook{}})
-		return contracttest.Opened{Applier: a, Item: setting()}
+		return contracttest.Opened{Applier: a, Package: setting()}
 	})
 }
 

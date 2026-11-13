@@ -33,10 +33,10 @@ type Value struct {
 // values it is given.
 
 type Step struct {
-	Item   string
-	Kind   catalog.Kind
-	Method string
-	Chosen string
+	Package string
+	Kind    catalog.Kind
+	Method  string
+	Chosen  string
 	// value: the method chosen, as its file says it.
 	Spec catalog.MethodSpec
 	// value: the range of versions the Machinefile lets the app move within,
@@ -70,8 +70,8 @@ type Step struct {
 // value: an item the Machinefile marks optional that has no method for the system.
 
 type Skip struct {
-	Item, Why string
-	Origin    Origin
+	Package, Why string
+	Origin       Origin
 }
 
 // value: a Machinefile resolved: its name, the files read weakest first,
@@ -405,7 +405,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	p := planner{cat: lib.Catalog, sys: r.System, prefer: m.prefer, lock: lock, at: map[string]int{}}
 	for _, b := range m.bake {
 		if _, ok := p.lookup(b.name); !ok {
-			return Resolved{}, &UnknownItemError{Name: b.name, By: b.origin.Name, At: b.origin.File}
+			return Resolved{}, &UnknownPackageError{Name: b.name, By: b.origin.Name, At: b.origin.File}
 		}
 	}
 	for _, a := range m.apps {
@@ -414,7 +414,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 		}
 	}
 	for _, b := range m.bake {
-		if _, ok := p.at[b.name]; ok || slices.ContainsFunc(p.skipped, func(s Skip) bool { return s.Item == b.name }) {
+		if _, ok := p.at[b.name]; ok || slices.ContainsFunc(p.skipped, func(s Skip) bool { return s.Package == b.name }) {
 			continue
 		}
 		if baked := p.app(catalog.AppEntry{Name: b.name}, b.origin, "baked"); baked != nil {
@@ -424,7 +424,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	for _, s := range m.setting {
 		l := m.set[s]
 		if l.entry.From == catalog.FromComputer && r.Kind == catalog.RoleComputer {
-			return Resolved{}, &BadValueError{Item: s, Key: "from", Problem: "a computer takes no values from a computer: from is a VM's", At: at(l.origin, l.entry.Line)}
+			return Resolved{}, &BadValueError{Package: s, Key: "from", Problem: "a computer takes no values from a computer: from is a VM's", At: at(l.origin, l.entry.Line)}
 		}
 		if set := p.setting(s, l.entry, l.origin); set != nil {
 			return Resolved{}, set
@@ -459,10 +459,10 @@ type planner struct {
 
 // value: an item by its name, or by a name it was renamed from.
 func (p *planner) lookup(name string) (catalog.Placed, bool) {
-	it, ok := p.cat.Item(name)
+	it, ok := p.cat.Package(name)
 	if !ok {
-		for _, c := range p.cat.Items {
-			if slices.Contains(c.Item.RenamedFrom, name) {
+		for _, c := range p.cat.Packages {
+			if slices.Contains(c.Package.RenamedFrom, name) {
 				it, ok = c, true
 			}
 		}
@@ -482,21 +482,21 @@ func at(o Origin, line int) string {
 	return o.File
 }
 
-func (p *planner) item(name string, by Origin, where string, want catalog.Kind) (catalog.Placed, error) {
+func (p *planner) pkg(name string, by Origin, where string, want catalog.Kind) (catalog.Placed, error) {
 	it, ok := p.lookup(name)
 	switch {
 	case !ok:
-		return catalog.Placed{}, &UnknownItemError{Name: name, By: by.Name, At: where}
-	case want == catalog.KindSetting && it.Item.Kind != catalog.KindSetting:
-		return catalog.Placed{}, &UnknownItemError{Name: name, By: by.Name, Is: "an app: list it under apps", At: where}
-	case want != catalog.KindSetting && it.Item.Kind == catalog.KindSetting:
-		return catalog.Placed{}, &UnknownItemError{Name: name, By: by.Name, Is: "a setting: list it under settings", At: where}
+		return catalog.Placed{}, &UnknownPackageError{Name: name, By: by.Name, At: where}
+	case want == catalog.KindSetting && it.Package.Kind != catalog.KindSetting:
+		return catalog.Placed{}, &UnknownPackageError{Name: name, By: by.Name, Is: "an app: list it under apps", At: where}
+	case want != catalog.KindSetting && it.Package.Kind == catalog.KindSetting:
+		return catalog.Placed{}, &UnknownPackageError{Name: name, By: by.Name, Is: "a setting: list it under settings", At: where}
 	}
 	return it, nil
 }
 
-func itemOrigin(it catalog.Placed) Origin {
-	return Origin{Name: it.Item.Name, Layer: Layer(it.Layer), File: it.File}
+func packageOrigin(it catalog.Placed) Origin {
+	return Origin{Name: it.Package.Name, Layer: Layer(it.Layer), File: it.File}
 }
 
 // invariant: what the image bakes is its bake list and, step by step,
@@ -505,7 +505,7 @@ func itemOrigin(it catalog.Placed) Origin {
 func (p *planner) baked(steps []Step, bake []listed[struct{}]) []Step {
 	at := make(map[string]int, len(steps))
 	for i, s := range steps {
-		at[s.Item] = i
+		at[s.Package] = i
 	}
 	queue := make([]string, 0, len(bake))
 	for _, b := range bake {
@@ -519,9 +519,9 @@ func (p *planner) baked(steps []Step, bake []listed[struct{}]) []Step {
 			continue
 		}
 		steps[i].Baked = true
-		it, _ := p.cat.Item(name)
-		for _, l := range p.cat.Links(it.Item, steps[i].Method, p.sys) {
-			queue = append(queue, l.Items...)
+		it, _ := p.cat.Package(name)
+		for _, l := range p.cat.Links(it.Package, steps[i].Method, p.sys) {
+			queue = append(queue, l.Packages...)
 		}
 	}
 	return steps
@@ -529,18 +529,18 @@ func (p *planner) baked(steps []Step, bake []listed[struct{}]) []Step {
 
 func (p *planner) app(e catalog.AppEntry, o Origin, why string) error {
 	where := at(o, e.Line)
-	it, err := p.item(e.Name, o, where, catalog.KindApp)
+	it, err := p.pkg(e.Name, o, where, catalog.KindApp)
 	if err != nil {
 		return err
 	}
-	if bad := checkValues(it.Item, e.Options, where); bad != nil {
+	if bad := checkValues(it.Package, e.Options, where); bad != nil {
 		return bad
 	}
 	step, err := p.choose(it, e.Manager, e.Version, why, where)
 	if err != nil {
 		var none *NoMethodError
 		if e.Optional && errors.As(err, &none) {
-			p.skipped = append(p.skipped, Skip{Item: it.Item.Name, Why: p.skippedFor(it, e.Manager), Origin: o})
+			p.skipped = append(p.skipped, Skip{Package: it.Package.Name, Why: p.skippedFor(it, e.Manager), Origin: o})
 			return nil
 		}
 		return err
@@ -552,18 +552,18 @@ func (p *planner) app(e catalog.AppEntry, o Origin, why string) error {
 
 func (p *planner) setting(name string, e catalog.SettingEntry, o Origin) error {
 	where := at(o, e.Line)
-	it, err := p.item(name, o, where, catalog.KindSetting)
+	it, err := p.pkg(name, o, where, catalog.KindSetting)
 	if err != nil {
 		return err
 	}
-	if bad := checkValues(it.Item, e.Values, where); bad != nil {
+	if bad := checkValues(it.Package, e.Values, where); bad != nil {
 		return bad
 	}
 	step, err := p.choose(it, "", catalog.Range{}, "listed", where)
 	if err != nil {
 		var none *NoMethodError
 		if e.Optional && errors.As(err, &none) {
-			p.skipped = append(p.skipped, Skip{Item: name, Why: "optional, no method for " + p.system(), Origin: o})
+			p.skipped = append(p.skipped, Skip{Package: name, Why: "optional, no method for " + p.system(), Origin: o})
 			return nil
 		}
 		return err
@@ -582,7 +582,7 @@ func (p *planner) skippedFor(it catalog.Placed, manager catalog.ManagerKey) stri
 		return "optional, no method for " + p.system()
 	}
 	var has []string
-	for _, m := range it.Item.Methods {
+	for _, m := range it.Package.Methods {
 		if m.Matches(p.sys) && !slices.Contains(has, m.Key()) {
 			has = append(has, m.Key())
 		}
@@ -594,7 +594,7 @@ func (p *planner) skippedFor(it catalog.Placed, manager catalog.ManagerKey) stri
 }
 
 func (p *planner) add(s Step) {
-	p.at[s.Item] = len(p.steps)
+	p.at[s.Package] = len(p.steps)
 	p.steps = append(p.steps, s)
 }
 
@@ -608,18 +608,18 @@ func (p *planner) system() string {
 
 func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version catalog.Range, why, where string) (Step, error) {
 	var matching []catalog.MethodSpec
-	for _, m := range it.Item.Methods {
+	for _, m := range it.Package.Methods {
 		if m.Matches(p.sys) && (manager == "" || m.Key() == string(manager)) {
 			matching = append(matching, m)
 		}
 	}
 	if len(matching) == 0 {
-		return Step{}, &NoMethodError{Item: it.Item.Name, System: p.system(), Manager: string(manager), Why: why, At: where}
+		return Step{}, &NoMethodError{Package: it.Package.Name, System: p.system(), Manager: string(manager), Why: why, At: where}
 	}
 	matching = p.cat.Ordered(matching, p.sys.OS, p.prefer)
 	chosen, because := matching[0], p.because(matching[0], len(matching))
-	locked, ok := p.lock.App(it.Item.Name)
-	if ok && it.Item.Kind != catalog.KindSetting {
+	locked, ok := p.lock.App(it.Package.Name)
+	if ok && it.Package.Kind != catalog.KindSetting {
 		at := slices.IndexFunc(matching, func(m catalog.MethodSpec) bool { return m.Method() == locked.Method && m.Fits(version) })
 		if at >= 0 {
 			chosen, because = matching[at], "locked"
@@ -635,16 +635,16 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version 
 				break
 			}
 		}
-		return Step{}, &UnpinnableError{Item: it.Item.Name, Version: version.String(), Method: chosen.Key(), Holds: chosen.HoldWords(), Alternative: alt, At: where}
+		return Step{}, &UnpinnableError{Package: it.Package.Name, Version: version.String(), Method: chosen.Key(), Holds: chosen.HoldWords(), Alternative: alt, At: where}
 	}
 	held, recorded := lockedAt(ok, version, locked.Version), ""
 	if !chosen.Pins() {
 		held, recorded = "", held
 	}
 	return Step{
-		Item: it.Item.Name, Kind: it.Item.Kind, Method: chosen.Method(), Chosen: because, Spec: chosen,
-		Version: version, UpdatesSelf: it.Item.Updates == catalog.UpdatesSelf, Locked: held, Recorded: recorded, Lock: lockFile(ok, p.lock.File), Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
-		Restarts: it.Item.AfterApply, Why: why, Defined: itemOrigin(it),
+		Package: it.Package.Name, Kind: it.Package.Kind, Method: chosen.Method(), Chosen: because, Spec: chosen,
+		Version: version, UpdatesSelf: it.Package.Updates == catalog.UpdatesSelf, Locked: held, Recorded: recorded, Lock: lockFile(ok, p.lock.File), Phase: cmp.Or(it.Package.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Package.Needs, chosen.Needs),
+		Restarts: it.Package.AfterApply, Why: why, Defined: packageOrigin(it),
 	}, nil
 }
 
@@ -686,16 +686,16 @@ func (p *planner) implied() error {
 	for next := 0; next < len(p.steps); {
 		s := p.steps[next]
 		next++
-		it, _ := p.cat.Item(s.Item)
-		for _, l := range p.cat.Links(it.Item, s.Method, p.sys) {
-			if slices.ContainsFunc(l.Items, p.holds) {
+		it, _ := p.cat.Package(s.Package)
+		for _, l := range p.cat.Links(it.Package, s.Method, p.sys) {
+			if slices.ContainsFunc(l.Packages, p.holds) {
 				continue
 			}
-			dep, err := p.item(l.Items[0], Origin{Name: s.Item}, "", catalog.KindApp)
+			dep, err := p.pkg(l.Packages[0], Origin{Name: s.Package}, "", catalog.KindApp)
 			if err != nil {
 				return err
 			}
-			step, err := p.choose(dep, "", catalog.Range{}, broughtBy(l.Kind, s.Item), "")
+			step, err := p.choose(dep, "", catalog.Range{}, broughtBy(l.Kind, s.Package), "")
 			if err != nil {
 				return err
 			}
@@ -706,15 +706,15 @@ func (p *planner) implied() error {
 	return nil
 }
 
-func broughtBy(k catalog.LinkKind, item string) string {
+func broughtBy(k catalog.LinkKind, pkg string) string {
 	switch k {
 	case catalog.LinkManager:
-		return "the manager of " + item
+		return "the manager of " + pkg
 	case catalog.LinkProvidedBy:
-		return "the provider of " + item
+		return "the provider of " + pkg
 	case catalog.LinkRequires, catalog.LinkRequiresOneOf:
 	}
-	return "required by " + item
+	return "required by " + pkg
 }
 
 func (p *planner) holds(name string) bool { _, ok := p.at[name]; return ok }
@@ -725,10 +725,10 @@ func (p *planner) holds(name string) bool { _, ok := p.at[name]; return ok }
 func (p *planner) ordered() ([]Step, error) {
 	deps := make([][]int, len(p.steps))
 	for i, s := range p.steps {
-		it, _ := p.cat.Item(s.Item)
-		before := slices.Clone(it.Item.After)
-		for _, l := range p.cat.Links(it.Item, s.Method, p.sys) {
-			before = append(before, l.Items...)
+		it, _ := p.cat.Package(s.Package)
+		before := slices.Clone(it.Package.After)
+		for _, l := range p.cat.Links(it.Package, s.Method, p.sys) {
+			before = append(before, l.Packages...)
 		}
 		for _, b := range before {
 			if j, ok := p.at[b]; ok && j != i && !slices.Contains(deps[i], j) {
@@ -739,7 +739,7 @@ func (p *planner) ordered() ([]Step, error) {
 	for i := range p.steps {
 		p.steps[i].Waits = nil
 		for _, j := range deps[i] {
-			p.steps[i].Waits = append(p.steps[i].Waits, p.steps[j].Item)
+			p.steps[i].Waits = append(p.steps[i].Waits, p.steps[j].Package)
 		}
 	}
 	done := make([]bool, len(p.steps))
@@ -778,30 +778,30 @@ func (p *planner) cycle(deps [][]int, done []bool) []string {
 	loop := path[slices.Index(path, at):]
 	names := make([]string, 0, len(loop)+1)
 	for _, i := range loop {
-		names = append(names, p.steps[i].Item)
+		names = append(names, p.steps[i].Package)
 	}
 	return append(names, names[0])
 }
 
 // invariant: every value names an option of its item and fits its type; a
 // secret's is a `vault:` reference, never the secret written out.
-func checkValues(it catalog.Item, values map[string]catalog.OptionValue, where string) error {
+func checkValues(it catalog.Package, values map[string]catalog.OptionValue, where string) error {
 	for _, k := range sortedNames(values) {
 		v := values[k]
 		i := slices.IndexFunc(it.Options, func(o catalog.Option) bool { return o.Name == k })
 		if i < 0 {
-			return &BadValueError{Item: it.Name, Key: k, Problem: "no option of " + it.Name, At: where}
+			return &BadValueError{Package: it.Name, Key: k, Problem: "no option of " + it.Name, At: where}
 		}
 		o := it.Options[i]
 		vault := strings.HasPrefix(string(v), catalog.VaultPrefix)
 		switch {
 		case o.Secret && !vault:
-			return &BadValueError{Item: it.Name, Key: k, Problem: "a secret is a vault: reference (`vault:<name>`), never written out", At: where}
+			return &BadValueError{Package: it.Name, Key: k, Problem: "a secret is a vault: reference (`vault:<name>`), never written out", At: where}
 		case vault && o.Type != catalog.OptionString:
-			return &BadValueError{Item: it.Name, Key: k, Problem: "a vault: reference is a string option's value", At: where}
+			return &BadValueError{Package: it.Name, Key: k, Problem: "a vault: reference is a string option's value", At: where}
 		case !vault:
 			if problem := o.Check(v); problem != "" {
-				return &BadValueError{Item: it.Name, Key: k, Problem: problem, At: where}
+				return &BadValueError{Package: it.Name, Key: k, Problem: problem, At: where}
 			}
 		}
 	}
@@ -827,7 +827,7 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		if s.Kind == catalog.KindSetting {
 			group = "settings."
 		}
-		key := group + s.Item
+		key := group + s.Package
 		text := s.Why
 		if !s.Version.IsZero() {
 			text = s.Version.String()
@@ -849,10 +849,10 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 	}
 	for _, s := range r.Skipped {
 		group := "apps."
-		if it, ok := c.Item(s.Item); ok && it.Item.Kind == catalog.KindSetting {
+		if it, ok := c.Package(s.Package); ok && it.Package.Kind == catalog.KindSetting {
 			group = "settings."
 		}
-		out = append(out, Value{Key: group + s.Item, Text: s.Why, Origin: s.Origin})
+		out = append(out, Value{Key: group + s.Package, Text: s.Why, Origin: s.Origin})
 	}
 	for _, f := range []string{"accounts", "ports", "run"} {
 		for _, k := range m.order {

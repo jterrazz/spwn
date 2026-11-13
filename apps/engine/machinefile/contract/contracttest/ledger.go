@@ -13,8 +13,8 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 )
 
-func installed(item, method string) machinefile.Installed {
-	return machinefile.Installed{Item: item, Method: method, Machinefile: "laptop", At: time.Date(2026, 11, 11, 9, 0, 0, 0, time.UTC)}
+func installed(pkg, method string) machinefile.Installed {
+	return machinefile.Installed{Package: pkg, Method: method, Machinefile: "laptop", At: time.Date(2026, 11, 11, 9, 0, 0, 0, time.UTC)}
 }
 
 func Ledger(t *testing.T, open func(t *testing.T) contract.Ledger) {
@@ -37,9 +37,9 @@ func Ledger(t *testing.T, open func(t *testing.T) contract.Ledger) {
 		if err := l.Put(ctx, installed("jq", "first")); err != nil {
 			t.Fatal(err)
 		}
-		for _, item := range []string{"jq", "jq", "fd"} {
-			if err := l.Delete(ctx, item); err != nil {
-				t.Errorf("Delete(%s) = %v", item, err)
+		for _, pkg := range []string{"jq", "jq", "fd"} {
+			if err := l.Delete(ctx, pkg); err != nil {
+				t.Errorf("Delete(%s) = %v", pkg, err)
 			}
 		}
 		if got, err := l.List(ctx); err != nil || len(got) != 0 {
@@ -106,8 +106,8 @@ func Ledger(t *testing.T, open func(t *testing.T) contract.Ledger) {
 }
 
 func written(id, body string) machinefile.Written {
-	item, _, _ := strings.Cut(strings.TrimPrefix(id, "station:"), "/")
-	return machinefile.Written{ID: id, Item: item, Digest: machinefile.BlockDigest(body), At: time.Date(2026, 11, 12, 9, 0, 0, 0, time.UTC)}
+	pkg, _, _ := strings.Cut(strings.TrimPrefix(id, "station:"), "/")
+	return machinefile.Written{ID: id, Package: pkg, Digest: machinefile.BlockDigest(body), At: time.Date(2026, 11, 12, 9, 0, 0, 0, time.UTC)}
 }
 
 // value: an owner's folder whose path holds body (none when path is

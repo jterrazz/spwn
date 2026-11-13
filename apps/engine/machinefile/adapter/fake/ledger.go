@@ -36,16 +36,16 @@ func (l *Ledger) Put(_ context.Context, in machinefile.Installed) error {
 	l.w.Lock()
 	defer l.w.Unlock()
 	st := l.w.Mac(l.mac).Store()
-	st.Ledger = append(slices.DeleteFunc(st.Ledger, func(e machinefile.Installed) bool { return e.Item == in.Item }), in)
-	slices.SortFunc(st.Ledger, func(a, b machinefile.Installed) int { return strings.Compare(a.Item, b.Item) })
+	st.Ledger = append(slices.DeleteFunc(st.Ledger, func(e machinefile.Installed) bool { return e.Package == in.Package }), in)
+	slices.SortFunc(st.Ledger, func(a, b machinefile.Installed) int { return strings.Compare(a.Package, b.Package) })
 	return nil
 }
 
-func (l *Ledger) Delete(_ context.Context, item string) error {
+func (l *Ledger) Delete(_ context.Context, pkg string) error {
 	l.w.Lock()
 	defer l.w.Unlock()
 	st := l.w.Mac(l.mac).Store()
-	st.Ledger = slices.DeleteFunc(st.Ledger, func(e machinefile.Installed) bool { return e.Item == item })
+	st.Ledger = slices.DeleteFunc(st.Ledger, func(e machinefile.Installed) bool { return e.Package == pkg })
 	return nil
 }
 

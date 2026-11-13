@@ -32,7 +32,7 @@ func (m machine) providers() map[coremachine.Need]coremachine.Provider {
 		}
 		p := coremachine.Provider{Name: name, Look: look}
 		if _, ok := m.cat.App(name); ok {
-			p.Item = name
+			p.Package = name
 		}
 		out[need] = p
 	}

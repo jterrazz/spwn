@@ -43,13 +43,13 @@ func TestAnApplyReadsWhatWaitsAgainstTheRangesItApplied(t *testing.T) {
 	// invariant: a version past the range its app's line holds now still
 	// waits, in that range's words; one the line's range was moved to
 	// hold, or of an app listed no longer, waits no more.
-	line := func(item, version string) machinefile.Line {
+	line := func(pkg, version string) machinefile.Line {
 		r, err := catalog.ParseRange(version)
 		if err != nil {
 			t.Fatal(err)
 		}
 		var l machinefile.Line
-		l.Step.Item, l.Step.Version = item, r
+		l.Step.Package, l.Step.Version = pkg, r
 		return l
 	}
 	n := machinefile.Night{Machinefile: "m", Waiting: []machinefile.Waiting{

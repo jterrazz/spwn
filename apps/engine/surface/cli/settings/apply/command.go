@@ -175,7 +175,7 @@ func partial(changes []settings.Change, verb string) error {
 	for _, c := range changes {
 		if c.Result == catalog.StateBroken {
 			if failed == 0 {
-				hint = "re-run it: station settings " + verb + " " + c.Item
+				hint = "re-run it: station settings " + verb + " " + c.Package
 			}
 			failed++
 		}

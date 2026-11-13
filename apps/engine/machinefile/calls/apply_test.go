@@ -39,12 +39,12 @@ func (c *calls) Invoke(ctx context.Context, _ machine.Ref, name string, in, out 
 		}
 	case appscalls.Remove.Name:
 		req, _ := in.(appscalls.RemoveIn)
-		item := req.Names[0]
-		c.asked[len(c.asked)-1] += " " + item
-		if slices.Contains(c.broken, item) {
-			return errors.New(item + " did not uninstall")
+		pkg := req.Names[0]
+		c.asked[len(c.asked)-1] += " " + pkg
+		if slices.Contains(c.broken, pkg) {
+			return errors.New(pkg + " did not uninstall")
 		}
-		give(out, []apps.Outcome{{Name: item, Result: catalog.StateOK}})
+		give(out, []apps.Outcome{{Name: pkg, Result: catalog.StateOK}})
 	}
 	return nil
 }
@@ -72,8 +72,8 @@ func (*ledger) Night(context.Context) (machinefile.Night, bool, error) {
 	return machinefile.Night{}, false, nil
 }
 func (*ledger) Write(context.Context, machinefile.Night) error { return nil }
-func (l *ledger) Delete(_ context.Context, item string) error {
-	l.deleted = append(l.deleted, item)
+func (l *ledger) Delete(_ context.Context, pkg string) error {
+	l.deleted = append(l.deleted, pkg)
 	return nil
 }
 func (*ledger) Blocks(context.Context) ([]machinefile.Written, error) { return nil, nil }
@@ -88,7 +88,7 @@ func TestAnInstallThatAnsweredBeforeTheInterruptIsNotReadAgain(t *testing.T) {
 	defer cancel()
 	c := &calls{answer: []apps.Outcome{{Name: "tool", Result: catalog.StateOK, Detail: apps.AlreadyInstalled}}, hook: cancel}
 	r := run{d: Deps{Calls: c, Ledger: &ledger{}, Now: epoch}, name: "laptop", ended: map[string]catalog.State{}}
-	l := machinefile.Line{Step: machinefile.Step{Item: "tool", Kind: catalog.KindApp, Method: "pkg"}, Action: machinefile.Install}
+	l := machinefile.Line{Step: machinefile.Step{Package: "tool", Kind: catalog.KindApp, Method: "pkg"}, Action: machinefile.Install}
 	done := r.install(ctx, l, machinefile.Done{Line: l})
 	if slices.Contains(c.asked, appscalls.List.Name) {
 		t.Errorf("asked %v; want no read past the interrupt", c.asked)
@@ -104,9 +104,9 @@ func TestAnExtraThatDidNotUninstallKeepsWhatItLeansOn(t *testing.T) {
 	c := &calls{broken: []string{"browsers"}}
 	l := &ledger{}
 	r := run{d: Deps{Calls: c, Ledger: l, Now: epoch}, name: "laptop", ended: map[string]catalog.State{}}
-	extra := func(item string, waits ...string) machinefile.ExtraLine {
+	extra := func(pkg string, waits ...string) machinefile.ExtraLine {
 		return machinefile.ExtraLine{Line: machinefile.Line{
-			Step:   machinefile.Step{Item: item, Kind: catalog.KindApp, Method: "pkg", Waits: waits},
+			Step:   machinefile.Step{Package: pkg, Kind: catalog.KindApp, Method: "pkg", Waits: waits},
 			Seen:   machinefile.Seen{Condition: machinefile.Present, Method: "pkg"},
 			Action: machinefile.Remove,
 		}}
@@ -120,20 +120,20 @@ func TestAnExtraThatDidNotUninstallKeepsWhatItLeansOn(t *testing.T) {
 	}
 	for _, d := range out[1:3] {
 		if d.Detail == "" {
-			t.Errorf("%s kept with no words", d.Line.Step.Item)
+			t.Errorf("%s kept with no words", d.Line.Step.Package)
 		}
 	}
 }
 
-func TestAPhaseInAVMHoldsItsItemsToTheirShare(t *testing.T) {
+func TestAPhaseInAVMHoldsItsPackagesToTheirShare(t *testing.T) {
 	// invariant: inside a VM's phase (image, boot) the items run within
 	// catalog.ItemsBound, so the owner's lines keep catalog.RunBound of the
 	// phase's bound; apply's own phase bounds them by nothing.
-	l := machinefile.Line{Step: machinefile.Step{Item: "tool", Kind: catalog.KindApp, Method: "pkg"}, Action: machinefile.Install}
+	l := machinefile.Line{Step: machinefile.Step{Package: "tool", Kind: catalog.KindApp, Method: "pkg"}, Action: machinefile.Install}
 	for _, c := range []struct {
 		phase catalog.Phase
 		share time.Duration
-	}{{catalog.PhaseBoot, catalog.ItemsBound}, {catalog.PhaseImage, catalog.ItemsBound}, {catalog.PhaseApply, 0}} {
+	}{{catalog.PhaseBoot, catalog.PackagesBound}, {catalog.PhaseImage, catalog.PackagesBound}, {catalog.PhaseApply, 0}} {
 		t.Run(string(c.phase), func(t *testing.T) {
 			fake := &calls{answer: []apps.Outcome{{Name: "tool", Result: catalog.StateOK}}}
 			r := run{d: Deps{Calls: fake, Ledger: &ledger{}, Now: epoch}, in: ApplyIn{Phase: c.phase}, name: "ws", ended: map[string]catalog.State{}, there: map[string]bool{}}

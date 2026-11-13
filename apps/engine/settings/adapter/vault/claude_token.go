@@ -68,7 +68,7 @@ func (c *ClaudeToken) values(ctx context.Context) []settings.KeyValue {
 func (c *ClaudeToken) Apply(ctx context.Context, it catalog.Setting, values map[string]string) (settings.Change, error) {
 	// invariant: the token travels on studio's stdin, never in argv.
 	if _, ok := c.run.LookPath("studio"); !ok {
-		return settings.Change{}, &settings.StudioMissingError{Item: it.Name}
+		return settings.Change{}, &settings.StudioMissingError{Package: it.Name}
 	}
 	payload, err := json.Marshal(map[string]string{tokenName: values["token"]})
 	if err != nil {
@@ -89,7 +89,7 @@ func (c *ClaudeToken) Apply(ctx context.Context, it catalog.Setting, values map[
 
 func (c *ClaudeToken) Undo(ctx context.Context, it catalog.Setting) (settings.Change, error) {
 	if _, ok := c.run.LookPath("studio"); !ok {
-		return settings.Change{}, &settings.StudioMissingError{Item: it.Name}
+		return settings.Change{}, &settings.StudioMissingError{Package: it.Name}
 	}
 	if _, err := local.Must(ctx, c.run, local.Command("studio", "credentials", "delete", tokenName)); err != nil {
 		return settings.Change{}, err

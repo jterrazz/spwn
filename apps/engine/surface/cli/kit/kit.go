@@ -45,7 +45,7 @@ type Env struct {
 	Locate func(name string) (machine.Ref, bool)
 	// value: installs one catalogue item on the target and prints its
 	// outcome, as apps install does; how a terminal answers a missing need.
-	Install func(ctx context.Context, item string, o IO) error
+	Install func(ctx context.Context, pkg string, o IO) error
 }
 
 type IO struct {

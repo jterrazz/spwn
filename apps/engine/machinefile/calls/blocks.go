@@ -50,7 +50,7 @@ func withBlocks(ctx context.Context, d Deps, p machinefile.Plan, cat catalog.Cat
 		if l.Step.Kind != catalog.KindApp || len(l.Step.Spec.Shell) == 0 {
 			continue
 		}
-		it, _ := cat.Item(l.Step.Item)
+		it, _ := cat.Package(l.Step.Package)
 		for _, b := range l.Step.Spec.Shell {
 			judged[b.ID] = true
 			if l.Action == machinefile.Leave {
@@ -58,20 +58,20 @@ func withBlocks(ctx context.Context, d Deps, p machinefile.Plan, cat catalog.Cat
 			}
 			v := vars
 			v.Options = l.Step.Values
-			body, err := it.Item.RenderShell(b, v)
+			body, err := it.Package.RenderShell(b, v)
 			if err != nil {
-				return p, &machinefile.BadValueError{Item: l.Step.Item, Key: "shell", Problem: err.Error(), At: l.Step.Origin.File}
+				return p, &machinefile.BadValueError{Package: l.Step.Package, Key: "shell", Problem: err.Error(), At: l.Step.Origin.File}
 			}
-			p.Blocks = append(p.Blocks, judgeBlock(zshrc, l.Step.Item, b.ID, body, written))
+			p.Blocks = append(p.Blocks, judgeBlock(zshrc, l.Step.Package, b.ID, body, written))
 		}
 	}
 	extras := map[string]machinefile.Fate{}
 	for _, e := range p.Extra {
-		extras[e.Step.Item] = e.Fate()
+		extras[e.Step.Package] = e.Fate()
 	}
 	for _, id := range settings.PackageBlockIDs(zshrc) {
 		w, ok := written[id]
-		fate, extra := extras[w.Item]
+		fate, extra := extras[w.Package]
 		if ok && extra && !judged[id] {
 			judged[id] = true
 			p.Blocks = append(p.Blocks, extraBlock(zshrc, w, fate))
@@ -103,10 +103,10 @@ func lastWritten(have string, state settings.BlockState, w machinefile.Written, 
 	return ok && state == settings.BlockHere && machinefile.BlockDigest(have) == w.Digest
 }
 
-func judgeBlock(zshrc, item, id, body string, written map[string]machinefile.Written) machinefile.Block {
+func judgeBlock(zshrc, pkg, id, body string, written map[string]machinefile.Written) machinefile.Block {
 	have, state := settings.PackageBlock(zshrc, id)
 	w, recorded := written[id]
-	b := machinefile.Block{Item: item, ID: id, Zsh: body}
+	b := machinefile.Block{Package: pkg, ID: id, Zsh: body}
 	switch {
 	case state == settings.BlockAbsent:
 		b.Condition, b.Action = machinefile.Absent, machinefile.Set
@@ -130,7 +130,7 @@ func judgeBlock(zshrc, item, id, body string, written map[string]machinefile.Wri
 // kept, once edited by hand since station wrote it.
 func extraBlock(zshrc string, w machinefile.Written, app machinefile.Fate) machinefile.Block {
 	have, state := settings.PackageBlock(zshrc, w.ID)
-	b := machinefile.Block{Item: w.Item, ID: w.ID, Zsh: have, Condition: machinefile.Extra, Action: machinefile.Leave, Fate: app}
+	b := machinefile.Block{Package: w.Package, ID: w.ID, Zsh: have, Condition: machinefile.Extra, Action: machinefile.Leave, Fate: app}
 	switch {
 	case !lastWritten(have, state, w, true):
 		b.Fate = machinefile.KeptEdited
@@ -157,8 +157,8 @@ func (r *run) blocks(ctx context.Context, p machinefile.Plan) []machinefile.Bloc
 			continue
 		case b.Action == machinefile.Leave:
 			done.State, done.Detail = catalog.StateDegraded, "edited by hand: left as it is"
-		case !r.there[b.Item]:
-			done.State, done.Detail = catalog.StateAbsent, "waits on "+b.Item
+		case !r.there[b.Package]:
+			done.State, done.Detail = catalog.StateAbsent, "waits on "+b.Package
 		case b.Action == machinefile.Keep:
 			done = r.recordBlock(ctx, done)
 		case ctx.Err() != nil:
@@ -192,9 +192,9 @@ const (
 // goes or is let go of, no record of its blocks is left; broke is true when
 // one could not be taken or let go of, so the app's own record is kept and
 // the next run tries again.
-func (r *run) followApp(ctx context.Context, p machinefile.Plan, item string, end appEnd) (out []machinefile.BlockDone, broke bool) {
+func (r *run) followApp(ctx context.Context, p machinefile.Plan, pkg string, end appEnd) (out []machinefile.BlockDone, broke bool) {
 	for _, b := range p.Blocks {
-		if b.Condition != machinefile.Extra || b.Item != item {
+		if b.Condition != machinefile.Extra || b.Package != pkg {
 			continue
 		}
 		done := machinefile.BlockDone{Block: b, State: catalog.StateOK}
@@ -202,9 +202,9 @@ func (r *run) followApp(ctx context.Context, p machinefile.Plan, item string, en
 		case b.Fate == machinefile.KeptEdited:
 			done = r.letGo(ctx, done, editedKept)
 		case end == appLetGo:
-			done = r.letGo(ctx, done, "kept with "+item+", and yours")
+			done = r.letGo(ctx, done, "kept with "+pkg+", and yours")
 		case end == appStays || b.Action != machinefile.Remove:
-			done.Detail = "kept with " + item + ": judged again next run"
+			done.Detail = "kept with " + pkg + ": judged again next run"
 		case ctx.Err() != nil:
 			done.State = catalog.StateBroken
 		default:
@@ -218,12 +218,12 @@ func (r *run) followApp(ctx context.Context, p machinefile.Plan, item string, en
 	}
 	written, err := writtenBlocks(ctx, r.d)
 	for _, w := range written {
-		if err == nil && w.Item == item {
+		if err == nil && w.Package == pkg {
 			err = r.d.Ledger.DeleteBlock(ctx, w.ID)
 		}
 	}
 	if err != nil {
-		out = append(out, machinefile.BlockDone{Block: machinefile.Block{Item: item, Condition: machinefile.Extra}, State: catalog.StateBroken, Detail: err.Error()})
+		out = append(out, machinefile.BlockDone{Block: machinefile.Block{Package: pkg, Condition: machinefile.Extra}, State: catalog.StateBroken, Detail: err.Error()})
 	}
 	return out, err != nil
 }
@@ -256,7 +256,7 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 		}
 		switch done.Action {
 		case machinefile.Set:
-			switch judgeBlock(zshrc, done.Item, done.ID, done.Zsh, written).Action {
+			switch judgeBlock(zshrc, done.Package, done.ID, done.Zsh, written).Action {
 			case machinefile.Keep:
 				done.Detail = ""
 				return zshrc, nil
@@ -293,7 +293,7 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 		return done
 	}
 	if done.Action == machinefile.Set {
-		err = r.d.Ledger.PutBlock(ctx, machinefile.Written{ID: done.ID, Item: done.Item, Digest: machinefile.BlockDigest(done.Zsh), At: r.d.Now().UTC()})
+		err = r.d.Ledger.PutBlock(ctx, machinefile.Written{ID: done.ID, Package: done.Package, Digest: machinefile.BlockDigest(done.Zsh), At: r.d.Now().UTC()})
 	} else {
 		err = r.d.Ledger.DeleteBlock(ctx, done.ID)
 	}
@@ -306,11 +306,11 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 func (r *run) recordBlock(ctx context.Context, done machinefile.BlockDone) machinefile.BlockDone {
 	written, err := writtenBlocks(ctx, r.d)
 	digest := machinefile.BlockDigest(done.Zsh)
-	if w, ok := written[done.ID]; err == nil && ok && w.Item == done.Item && w.Digest == digest {
+	if w, ok := written[done.ID]; err == nil && ok && w.Package == done.Package && w.Digest == digest {
 		return done
 	}
 	if err == nil {
-		err = r.d.Ledger.PutBlock(ctx, machinefile.Written{ID: done.ID, Item: done.Item, Digest: digest, At: r.d.Now().UTC()})
+		err = r.d.Ledger.PutBlock(ctx, machinefile.Written{ID: done.ID, Package: done.Package, Digest: digest, At: r.d.Now().UTC()})
 	}
 	if err != nil {
 		done.State, done.Detail = catalog.StateBroken, err.Error()
