@@ -17,6 +17,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	corestore "github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	machines "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -419,6 +420,24 @@ func TestWhatIsWrittenWhileACreateBootsStaysOrIsRefused(t *testing.T) {
 	}
 	if rec.MemoryBytes != 4<<30 || rec.Want != model.WantStopped || !slices.Equal(rec.Agents, []string{"docs-bot"}) || rec.Birth != nil {
 		t.Errorf("web after its create: %d bytes, want %q, agents %v, birth %+v; want its 4 GB, stopped, docs-bot kept, no birth", rec.MemoryBytes, rec.Want, rec.Agents, rec.Birth)
+	}
+}
+
+func TestASaveOfAVMDeletedMeanwhileLeavesItGone(t *testing.T) {
+	ctx := context.Background()
+	b := creating(t, true)
+	if err := b.store.Put(ctx, model.Record{Name: "web", Image: "station-linux", Lifetime: model.Persistent, MemoryBytes: 4 << 30}); err != nil {
+		t.Fatal(err)
+	}
+	held := model.VMRecord{Name: "web", Image: "station-linux", Lifetime: model.Persistent, Want: model.WantStopped}
+	if err := b.store.Delete(ctx, "web"); err != nil {
+		t.Fatal(err)
+	}
+	if err := b.m.Save(held); !errors.As(err, new(*model.UnknownMachineError)) {
+		t.Errorf("a save of web after its delete: %v; want web unknown", err)
+	}
+	if kept, err := b.store.Get(ctx, "web"); !errors.Is(err, corestore.ErrNotFound) {
+		t.Errorf("a save of web after its delete made its record again: %+v, %v", kept, err)
 	}
 }
 

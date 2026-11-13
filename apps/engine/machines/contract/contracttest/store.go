@@ -125,27 +125,6 @@ func MachineStore(t *testing.T, open func(t *testing.T) contract.MachineStore) {
 		}
 	})
 
-	t.Run("an update changes the record as it is stored, and makes one never put from its name", func(t *testing.T) {
-		s := open(t)
-		if err := s.Put(ctx, vmRecord("api")); err != nil {
-			t.Fatalf("Put: %v", err)
-		}
-		if err := s.Update(ctx, "api", func(r *machines.Record) { r.Want = "stopped" }); err != nil {
-			t.Fatalf("Update: %v", err)
-		}
-		want := vmRecord("api")
-		want.Want = "stopped"
-		if got, err := s.Get(ctx, "api"); err != nil || !reflect.DeepEqual(got, want) {
-			t.Fatalf("Get = %+v, %v; want %+v", got, err, want)
-		}
-		if err := s.Update(ctx, "web", func(r *machines.Record) { r.Image = "linux" }); err != nil {
-			t.Fatalf("Update: %v", err)
-		}
-		if got, err := s.Get(ctx, "web"); err != nil || got.Name != "web" || got.Image != "linux" {
-			t.Fatalf("Get = %+v, %v; want web made from its name", got, err)
-		}
-	})
-
 	t.Run("an amend changes a record as it is stored, and never makes one", func(t *testing.T) {
 		s := open(t)
 		if err := s.Put(ctx, vmRecord("api")); err != nil {

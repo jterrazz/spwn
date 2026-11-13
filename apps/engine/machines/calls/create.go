@@ -15,6 +15,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 )
 
@@ -585,13 +586,18 @@ func (s *Machinist) removeFiles(name string, record bool) {
 
 func (s *Machinist) Save(r model.VMRecord) error {
 	// invariant: a birth is the create's alone to write: a record saved by
-	// anyone else keeps the one stored, read in the same Update as its
-	// write, so none outlives its create.
-	return s.recs.Update(context.Background(), r.Name, func(stored *model.Record) {
+	// anyone else keeps the one stored, read in the same Amend as its
+	// write, so none outlives its create; a record gone (deleted) is never
+	// made again, and its save reads the VM unknown.
+	err := s.recs.Amend(context.Background(), r.Name, func(stored *model.Record) {
 		birth, owner := stored.Birth, stored.Owner
 		*stored = storedOf(r)
 		stored.Birth, stored.Owner = birth, owner
 	})
+	if errors.Is(err, store.ErrNotFound) {
+		return &model.UnknownMachineError{Name: r.Name}
+	}
+	return err
 }
 
 // invariant: a create writes back only what it owns of its record: its

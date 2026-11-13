@@ -137,11 +137,11 @@ func (d *racingDisk) Hold(context.Context, string) (func(), error) {
 	return d.held.Unlock, nil
 }
 
-// invariant: two updates of one record never interleave, from two
+// invariant: two amends of one record never interleave, from two
 // processes (two stores over one folder, one lock): the engine's save
 // that read the create's birth while the create ended it never writes
 // that birth back, so none outlives its create.
-func TestTwoUpdatesOfARecordNeverInterleave(t *testing.T) {
+func TestTwoAmendsOfARecordNeverInterleave(t *testing.T) {
 	ctx := context.Background()
 	racing := &racingDisk{Files: disk(), waiting: make(chan struct{})}
 	dir := filepath.Join(t.TempDir(), "vms")
@@ -153,7 +153,7 @@ func TestTwoUpdatesOfARecordNeverInterleave(t *testing.T) {
 	ended := make(chan error, 1)
 	hook := func() {
 		go func() {
-			ended <- create.Update(ctx, "linux-4", func(r *machines.Record) { r.Birth = nil })
+			ended <- create.Amend(ctx, "linux-4", func(r *machines.Record) { r.Birth = nil })
 		}()
 		select {
 		case <-racing.waiting:
@@ -165,7 +165,7 @@ func TestTwoUpdatesOfARecordNeverInterleave(t *testing.T) {
 	racing.onRead = hook
 	racing.mu.Unlock()
 	engine := jsonfile.New(racing, dir)
-	if err := engine.Update(ctx, "linux-4", func(r *machines.Record) { r.Env = map[string]string{"PORT": "40001"} }); err != nil {
+	if err := engine.Amend(ctx, "linux-4", func(r *machines.Record) { r.Env = map[string]string{"PORT": "40001"} }); err != nil {
 		t.Fatal(err)
 	}
 	if err := <-ended; err != nil {

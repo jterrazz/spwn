@@ -139,20 +139,6 @@ func (s *Store) held(ctx context.Context, run func() error) error {
 	return run()
 }
 
-func (s *Store) Update(ctx context.Context, name string, change func(r *machines.Record)) error {
-	return s.held(ctx, func() error {
-		r, err := s.Get(ctx, name)
-		switch {
-		case errors.Is(err, store.ErrNotFound):
-			r = machines.Record{Name: name}
-		case err != nil:
-			return err
-		}
-		change(&r)
-		return s.put(r)
-	})
-}
-
 func (s *Store) Amend(ctx context.Context, name string, change func(r *machines.Record)) error {
 	return s.held(ctx, func() error {
 		r, err := s.Get(ctx, name)

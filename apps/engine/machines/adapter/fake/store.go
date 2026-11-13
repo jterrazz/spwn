@@ -51,21 +51,9 @@ func (s *Store) Get(_ context.Context, name string) (machines.Record, error) {
 	return record(name, v), nil
 }
 
-func (s *Store) Update(_ context.Context, name string, change func(r *machines.Record)) error {
-	// invariant: the world's lock is every process's of a run, so an
-	// update holds it from its read to its write.
-	s.w.Lock()
-	defer s.w.Unlock()
-	r := machines.Record{Name: name}
-	if v, ok := s.vms()[name]; ok && v.Kept != nil {
-		r = record(name, v)
-	}
-	change(&r)
-	s.put(r)
-	return nil
-}
-
 func (s *Store) Amend(_ context.Context, name string, change func(r *machines.Record)) error {
+	// invariant: the world's lock is every process's of a run, so an
+	// amend holds it from its read to its write.
 	s.w.Lock()
 	defer s.w.Unlock()
 	v, ok := s.vms()[name]
