@@ -15,6 +15,10 @@ const (
 	AlwaysOn Lifetime = "always-on"
 )
 
+func (Lifetime) Enum() []string {
+	return []string{string(Ephemeral), string(Persistent), string(AlwaysOn)}
+}
+
 func (l Lifetime) Kind() machine.Kind {
 	// invariant: the lifetime is the one record of a VM's kind: always on is
 	// a server, every other a workspace.

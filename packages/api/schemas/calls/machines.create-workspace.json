@@ -99,6 +99,11 @@
           "type": "string"
         },
         "Lifetime": {
+          "enum": [
+            "ephemeral",
+            "persistent",
+            "always-on"
+          ],
           "type": "string"
         },
         "Name": {
@@ -472,7 +477,6 @@
         },
         "Kind": {
           "enum": [
-            "",
             "mac",
             "linux",
             "macos"
@@ -498,6 +502,11 @@
           ]
         },
         "Lifetime": {
+          "enum": [
+            "ephemeral",
+            "persistent",
+            "always-on"
+          ],
           "type": "string"
         },
         "Mac": {

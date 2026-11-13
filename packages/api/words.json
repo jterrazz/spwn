@@ -1,0 +1,90 @@
+{
+  "CatalogArch": {
+    "amd64": {
+      "Word": "amd64",
+      "Tone": "plain"
+    },
+    "arm64": {
+      "Word": "arm64",
+      "Tone": "plain"
+    }
+  },
+  "CatalogMachineKind": {
+    "linux": {
+      "Word": "Linux",
+      "Tone": "plain"
+    },
+    "mac": {
+      "Word": "Mac",
+      "Tone": "plain"
+    },
+    "macos": {
+      "Word": "macOS VM",
+      "Tone": "plain"
+    }
+  },
+  "CatalogOS": {
+    "any": {
+      "Word": "any system",
+      "Tone": "plain"
+    },
+    "debian": {
+      "Word": "Debian",
+      "Tone": "plain"
+    },
+    "macos": {
+      "Word": "macOS",
+      "Tone": "plain"
+    },
+    "ubuntu": {
+      "Word": "Ubuntu",
+      "Tone": "plain"
+    }
+  },
+  "MachinefileLayer": {
+    "built-in": {
+      "Word": "built into station",
+      "Tone": "plain"
+    },
+    "catalog": {
+      "Word": "the catalog",
+      "Tone": "plain"
+    },
+    "lock": {
+      "Word": "the lock",
+      "Tone": "plain"
+    },
+    "overlay": {
+      "Word": "this machine's own changes",
+      "Tone": "plain"
+    },
+    "shared": {
+      "Word": "a shared source",
+      "Tone": "plain"
+    },
+    "this machine": {
+      "Word": "this machine",
+      "Tone": "plain"
+    },
+    "user": {
+      "Word": "~/.config/station",
+      "Tone": "plain"
+    }
+  },
+  "MachinesLifetime": {
+    "always-on": {
+      "Word": "always on",
+      "Tone": "plain"
+    },
+    "ephemeral": {
+      "Word": "ephemeral",
+      "Detail": "Deleted when it powers off",
+      "Tone": "plain"
+    },
+    "persistent": {
+      "Word": "persistent",
+      "Detail": "Stays until you delete it",
+      "Tone": "plain"
+    }
+  }
+}

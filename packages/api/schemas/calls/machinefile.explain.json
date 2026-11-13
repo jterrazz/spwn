@@ -7,6 +7,15 @@
           "type": "string"
         },
         "Layer": {
+          "enum": [
+            "overlay",
+            "user",
+            "shared",
+            "built-in",
+            "this machine",
+            "catalog",
+            "lock"
+          ],
           "type": "string"
         },
         "Name": {

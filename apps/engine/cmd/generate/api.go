@@ -361,6 +361,8 @@ func apiFiles(root string) map[string][]byte {
 	out[framePath] = indented(frame)
 	out[eventPath] = indented(event)
 	out[typesPath] = typescript(calls, docs, frame, event)
+	out[wordsPath] = indented(wordsTable())
+	out[wordsTypesPath] = wordsDeclaration()
 	return out
 }
 

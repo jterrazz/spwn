@@ -244,7 +244,7 @@ runs:
     - command: 'disk --json | /usr/bin/jq -S -c ''del(.free_bytes, .total_bytes, .generated_at, .station.version?, .station.commit?) | (.. | objects | select(has("station_version")) | .station_version) |= "V"'''
       exit: 0
       stdout: |
-          {"findings":[],"machine":{"kind":"computer","label":"This Mac","name":"x","on":null,"this_mac":true},"rows":[{"app":"homebrew","bytes":2000,"group":"can-rebuild","paths":["~/Library/Caches/Homebrew"]},{"app":"station","bytes":961,"group":"never-touched","paths":["~/.config/station/preferences.json","~/.ssh/config"]},{"app":"ssh","bytes":655,"group":"never-touched","paths":["~/.ssh"]}],"schema":"station.disk.read/v1"}
+          {"findings":[],"machine":{"kind":"computer","label":"This Mac","name":"x","on":null,"this_mac":true},"rows":[{"app":"homebrew","bytes":2000,"group":"can-rebuild","paths":["~/Library/Caches/Homebrew"]},{"app":"station","bytes":988,"group":"never-touched","paths":["~/.config/station/preferences.json","~/.ssh/config"]},{"app":"ssh","bytes":655,"group":"never-touched","paths":["~/.ssh"]}],"schema":"station.disk.read/v1"}
     - command: 'machines --json | /usr/bin/jq -S -c ''del(.generated_at, .station.version?, .station.commit?, .roomiest, .macs[].hardware, .macs[].capacity) | (.. | objects | select(has("station_version")) | .station_version) |= "V"'''
       exit: 0
       stdout: |

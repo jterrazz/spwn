@@ -3,13 +3,19 @@
     "private": true,
     "files": [
         "index.d.ts",
-        "schemas"
+        "schemas",
+        "words.d.ts",
+        "words.json"
     ],
     "type": "module",
     "types": "./index.d.ts",
     "exports": {
         ".": {
             "types": "./index.d.ts"
+        },
+        "./words.json": {
+            "types": "./words.d.ts",
+            "default": "./words.json"
         }
     }
 }

@@ -1,4 +1,4 @@
-import type { OverviewNeed } from '@jterrazz/station-api';
+import type { MachinesVM, OverviewNeed } from '@jterrazz/station-api';
 
 import { machineKindOf } from '../engine/provisional';
 import type { MachineKind } from '../engine/provisional';
@@ -37,7 +37,7 @@ export type Held = {
     withGallery: boolean;
     macs: readonly {
         Name: string;
-        VMs: null | readonly { Name: string; Lifetime: string }[];
+        VMs: null | readonly { Name: string; Lifetime: MachinesVM['Lifetime'] }[];
     }[];
     needs: readonly OverviewNeed[];
     routeOfNeed: (need: OverviewNeed) => Route;

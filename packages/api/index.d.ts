@@ -631,7 +631,7 @@ export type CatalogMasMethod = {
 export type CatalogMethodSpec = {
     AgentHooks: CatalogAgentHooks | null;
     Apt: CatalogAptMethod | null;
-    Arch: '' | 'arm64' | 'amd64';
+    Arch?: 'arm64' | 'amd64';
     Brew: string;
     Builtin: string;
     Bun: string;
@@ -647,7 +647,7 @@ export type CatalogMethodSpec = {
     MuxMachines: CatalogMuxMachines | null;
     Needs: ('sudo' | 'terminal' | 'license' | 'app-store-login')[] | null;
     Npm: string;
-    OS: '' | 'macos' | 'ubuntu' | 'debian' | 'any';
+    OS?: 'macos' | 'ubuntu' | 'debian' | 'any';
     Package: string;
     Path: string[] | null;
     Pin: '' | 'none' | 'version';
@@ -1303,7 +1303,7 @@ export type MachinefileNight = {
 
 export type MachinefileOrigin = {
     File: string;
-    Layer: string;
+    Layer: 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
     Name: string;
 };
 
@@ -1568,7 +1568,7 @@ export type MachinesCreateRequest = {
     Check?: string;
     From?: string;
     Image?: string;
-    Lifetime?: string;
+    Lifetime?: 'ephemeral' | 'persistent' | 'always-on';
     Name?: string;
     Network?: string;
     Server?: boolean;
@@ -1734,10 +1734,10 @@ export type MachinesVM = {
     Guest: string;
     IP: string;
     Image: string;
-    Kind: '' | 'mac' | 'linux' | 'macos';
+    Kind: 'mac' | 'linux' | 'macos';
     LastLines: string[] | null;
     Latency: MachinesLatencyPoint[] | null;
-    Lifetime: string;
+    Lifetime: 'ephemeral' | 'persistent' | 'always-on';
     Mac: string;
     Name: string;
     Network: string;
@@ -1824,7 +1824,7 @@ export type OverviewLine = {
 export type OverviewMachine = {
     Arch: string;
     Hostname: string;
-    Kind: '' | 'mac' | 'linux' | 'macos';
+    Kind: 'mac' | 'linux' | 'macos';
     Name: string;
     OS: string;
     Registered: boolean;
@@ -3067,3 +3067,31 @@ export interface Calls {
 }
 
 export type CallName = keyof Calls;
+
+export type CatalogArch = 'arm64' | 'amd64';
+
+export type CatalogMachineKind = 'mac' | 'linux' | 'macos';
+
+export type CatalogOS = 'macos' | 'ubuntu' | 'debian' | 'any';
+
+export type CoreVerdictTone = 'ok' | 'warn' | 'bad' | 'plain' | 'new';
+
+export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
+
+export type MachinesLifetime = 'ephemeral' | 'persistent' | 'always-on';
+
+export type StationWord = {
+    Detail?: string;
+    One?: string;
+    Other?: string;
+    Tone: CoreVerdictTone;
+    Word: string;
+};
+
+export type StationWords = {
+    CatalogArch: Record<CatalogArch, StationWord>;
+    CatalogMachineKind: Record<CatalogMachineKind, StationWord>;
+    CatalogOS: Record<CatalogOS, StationWord>;
+    MachinefileLayer: Record<MachinefileLayer, StationWord>;
+    MachinesLifetime: Record<MachinesLifetime, StationWord>;
+};

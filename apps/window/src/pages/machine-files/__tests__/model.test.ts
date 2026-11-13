@@ -1,8 +1,13 @@
+import type { MachinefileLayer } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
 import { extendedBy, factsOf, filesOf } from '../model';
 
-const origin = (Name: string, Layer: string) => ({ File: `/files/${Name}.yaml`, Layer, Name });
+const origin = (Name: string, Layer: MachinefileLayer) => ({
+    File: `/files/${Name}.yaml`,
+    Layer,
+    Name,
+});
 
 describe('model', () => {
     test('the files a machine file is read from are each listed once, in the engine order', () => {

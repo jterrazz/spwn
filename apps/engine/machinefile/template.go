@@ -25,7 +25,7 @@ type Template struct {
 	OS       catalog.OS
 	Kind     catalog.MachineRole
 	Bake     []string
-	Lifetime string
+	Lifetime catalog.Lifetime
 	Network  string
 	CPUs     int
 	Memory   string
@@ -58,7 +58,7 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 	}
 	t := Template{
 		Name: name, From: from, OS: catalog.OS(m.values["machine.system.os"].Text), Kind: kind, Lock: lock,
-		Lifetime: m.values["vm.lifetime"].Text, Network: m.values["vm.network"].Text,
+		Lifetime: catalog.Lifetime(m.values["vm.lifetime"].Text), Network: m.values["vm.network"].Text,
 		Memory: m.values["vm.resources.memory"].Text, Disk: m.values["vm.resources.disk"].Text, Mounts: m.mounts,
 	}
 	t.CPUs, _ = strconv.Atoi(m.values["vm.resources.cpus"].Text)

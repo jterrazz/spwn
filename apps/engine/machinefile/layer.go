@@ -25,6 +25,10 @@ const (
 	Locked      Layer = "lock"
 )
 
+func (Layer) Enum() []string {
+	return []string{string(Overlay), string(User), string(Shared), string(Builtin), string(ThisMachine), string(Catalog), string(Locked)}
+}
+
 // value: one source's files: its layer, the words a reader names it by
 // (`~/.config/station`, `studio@1a2b3c4`, `built-in`), and its files by
 // slash path under it, `catalog/<category>/<name>.yaml` and

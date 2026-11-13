@@ -289,7 +289,6 @@
         },
         "Arch": {
           "enum": [
-            "",
             "arm64",
             "amd64"
           ],
@@ -419,7 +418,6 @@
         },
         "OS": {
           "enum": [
-            "",
             "macos",
             "ubuntu",
             "debian",
@@ -504,7 +502,6 @@
       "required": [
         "AgentHooks",
         "Apt",
-        "Arch",
         "Brew",
         "Builtin",
         "Bun",
@@ -520,7 +517,6 @@
         "MuxMachines",
         "Needs",
         "Npm",
-        "OS",
         "Package",
         "Path",
         "Pin",
@@ -1108,6 +1104,15 @@
           "type": "string"
         },
         "Layer": {
+          "enum": [
+            "overlay",
+            "user",
+            "shared",
+            "built-in",
+            "this machine",
+            "catalog",
+            "lock"
+          ],
           "type": "string"
         },
         "Name": {

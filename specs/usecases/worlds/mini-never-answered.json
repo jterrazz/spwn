@@ -23,6 +23,7 @@
                             {
                                 "name": "infra",
                                 "lifetime": "always-on",
+                                "kind": "linux",
                                 "cpus": 8,
                                 "memory_bytes": 25769803776
                             }

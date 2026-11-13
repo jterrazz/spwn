@@ -226,11 +226,27 @@ func (r *reflector) wireOf(t reflect.Type) map[string]any {
 // key reads as the same zero.
 func (r *reflector) zeroable(t reflect.Type, s map[string]any) map[string]any {
 	values, ok := s["enum"].([]string)
-	if r.input || !ok || t.Kind() != reflect.String || slices.Contains(values, "") {
+	if r.input || !ok || t.Kind() != reflect.String || slices.Contains(values, "") || slices.Contains(neverZero(), t) {
 		return s
 	}
 	out := maps.Clone(s)
 	out["enum"] = append([]string{""}, values...)
+	return out
+}
+
+// invariant: a worded enum is one the engine never writes as its zero, so a
+// client draws each of its values by its word and none is a guess. A VM's
+// lifetime is set at its create, and the store's migrator rewrites an
+// older record's word; an Origin on the wire takes its layer from the
+// layer it was read in; a machine's kind, system and architecture come
+// from the catalog's own. The worlds' answers are held to these schemas by
+// specs/architecture.
+func neverZero() []reflect.Type {
+	enums := wordedEnums()
+	out := make([]reflect.Type, 0, len(enums))
+	for _, w := range enums {
+		out = append(out, reflect.TypeOf(w.of))
+	}
 	return out
 }
 

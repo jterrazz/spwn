@@ -1437,7 +1437,6 @@
         },
         "Kind": {
           "enum": [
-            "",
             "mac",
             "linux",
             "macos"

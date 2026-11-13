@@ -157,7 +157,6 @@ export const LIFETIME_WORDS: Words<VmLifetime> = {
 };
 
 export const SYSTEM_WORDS: Words<MachinesVM['Kind']> = {
-    '': '',
     linux: 'linux',
     mac: 'mac',
     macos: 'macos',

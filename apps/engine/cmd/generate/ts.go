@@ -87,6 +87,10 @@ func typescript(calls []wireCall, docs map[string]map[string]any, more ...map[st
 	}
 	b.WriteString("\nexport interface Calls {\n" + strings.Join(entries, "") + "}\n")
 	b.WriteString("\nexport type CallName = keyof Calls;\n")
+	for _, name := range wordsNames() {
+		claim(name, "the words of "+name)
+	}
+	b.WriteString(wordsTypes())
 	return []byte(b.String())
 }
 

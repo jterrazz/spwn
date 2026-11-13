@@ -86,10 +86,10 @@ type Roles []MachineRole
 // what the machine is.
 
 type Selector struct {
-	OS      OS     `yaml:"os,omitempty"`
+	OS      OS     `json:",omitempty" yaml:"os,omitempty"`
 	Family  Family `yaml:"family,omitempty"`
 	Version string `yaml:"version,omitempty"`
-	Arch    Arch   `yaml:"arch,omitempty"`
+	Arch    Arch   `json:",omitempty" yaml:"arch,omitempty"`
 	Machine Roles  `yaml:"machine,omitempty"`
 }
 

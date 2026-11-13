@@ -3,6 +3,7 @@ package machines
 import (
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
 
@@ -51,10 +52,11 @@ type MacRecord struct {
 }
 
 type SeenVM struct {
-	Name        string   `json:"name"`
-	Lifetime    Lifetime `json:"lifetime"`
-	CPUs        int      `json:"cpus"`
-	MemoryBytes int64    `json:"memory_bytes"`
+	Name        string              `json:"name"`
+	Kind        catalog.MachineKind `json:"kind"`
+	Lifetime    Lifetime            `json:"lifetime"`
+	CPUs        int                 `json:"cpus"`
+	MemoryBytes int64               `json:"memory_bytes"`
 	// value: the agents a stopped workspace of it held, as that Mac last said.
 	Agents []string `json:"agents,omitempty"`
 }
