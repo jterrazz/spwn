@@ -9,6 +9,7 @@ import {
     heading,
     navigation,
     region,
+    waitUntil,
     within,
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
@@ -16,6 +17,7 @@ import { describe, expect, test } from 'vitest';
 import { Client } from '../../../engine/client';
 import { EngineProvider } from '../../../engine/react';
 import { replayTransport, stagedReplay } from '../../../engine/replay';
+import { holdingCall } from '../../../fixtures/held-call';
 import { recordingsOf } from '../../../fixtures/recordings';
 import type { Route } from '../../../shell/route';
 import { Window } from '../../../shell/window';
@@ -114,14 +116,10 @@ describe('gestures', () => {
     });
 
     test('a stop whose connection drops before it answers is unknown, and the page shows what the engine says', async () => {
-        // Given - linux-1's page over two-macs, where machines.stop answers a second after it is sent
-        const stage = stagedReplay(recordingFor('two-macs'), undefined, {
-            gestureFrame: 0,
-            latency: (request) =>
-                'call' in request && request.call === 'machines.stop' ? 1000 : 0,
-        });
+        // Given - linux-1's page over two-macs, where machines.stop is held unanswered once sent
+        const stop = holdingCall(stagedReplay(recordingFor('two-macs')), 'machines.stop');
         const result = await component.render(
-            <EngineProvider client={new Client(stage.transport)}>
+            <EngineProvider client={new Client(stop.transport)}>
                 <Window
                     initial={{ machine: 'linux-1', page: 'machine', tab: 'Overview' }}
                     pages={PAGES}
@@ -134,7 +132,8 @@ describe('gestures', () => {
                 await visitor.click(button('Stop'));
                 await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
                 await visitor.gone(dialog('Stop linux-1?'));
-                stage.drop();
+                await waitUntil(() => stop.sent(), { why: 'machines.stop sent' });
+                stop.drop();
 
                 // Then - the stop is unknown, never failed, and the header is the engine's machines.list read again
                 await visitor.see(content('the engine may have done it', { exact: false }));

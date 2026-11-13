@@ -2,6 +2,7 @@ import type { Request } from '@jterrazz/station-api';
 import { component, content, waitUntil } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { holdingCall } from '../../fixtures/held-call';
 import { recordingsOf } from '../../fixtures/recordings';
 import { PAGES } from '../../pages/registry';
 import { Window } from '../../shell/window';
@@ -29,16 +30,6 @@ const STARTING: Recording = {
             request: { call: 'engine.read', in: {} },
         },
     ],
-    gestures: [
-        {
-            after: [],
-            answers: [
-                { progress: { task: 'Starting the engine' }, v: 2 },
-                { out: {}, v: 2 },
-            ],
-            request: { call: 'engine.start', in: {} },
-        },
-    ],
     station: 'dev',
     world: 'test',
 };
@@ -49,10 +40,15 @@ function Start() {
         rereads: ['engine.read'],
         subject: 'engine',
     });
+    const { state } = gesture;
+    const task = state.kind === 'running' ? (state.progress.at(-1)?.task ?? '') : '';
     return (
-        <button onClick={gesture.start} type="button">
-            {`Start: ${gesture.state.kind}`}
-        </button>
+        <>
+            <button onClick={gesture.start} type="button">
+                {`Start: ${state.kind}`}
+            </button>
+            <p>{`progress: ${task === '' ? 'none' : task}`}</p>
+        </>
     );
 }
 
@@ -153,15 +149,17 @@ describe('react', () => {
     });
 
     test('a gesture whose connection drops before it answers is unknown, and its reads are asked again', async () => {
-        // Given - a start whose answer comes a second after its progress, and engine.read shown beside it
-        const stage = stagedReplay(
-            STARTING,
-            { hello: HELLO, kind: 'open', refused: undefined, socket: 'replay' },
-            { gestureFrame: 1000 },
-        );
-        const client = new Client(stage.transport);
+        // Given - a start the spec answers step by step, and engine.read shown beside it
+        const stage = stagedReplay(STARTING, {
+            hello: HELLO,
+            kind: 'open',
+            refused: undefined,
+            socket: 'replay',
+        });
+        const start = holdingCall(stage, 'engine.start');
+        const client = new Client(start.transport);
 
-        // When - it is started, and its connection drops while it runs
+        // When - it is started, sends its progress, and its connection drops while it runs
         const result = await component.render(
             <EngineProvider client={client}>
                 <Start />
@@ -171,7 +169,10 @@ describe('react', () => {
                 await visitor.see(content('engine: stopped'));
                 await visitor.click(content('Start: idle'));
                 await visitor.see(content('Start: running'));
-                stage.drop();
+                await waitUntil(() => start.sent(), { why: 'engine.start sent' });
+                start.progress('Starting the engine');
+                await visitor.see(content('progress: Starting the engine'));
+                start.drop();
                 await visitor.see(content('Start: unknown'));
             },
         );
