@@ -29,6 +29,12 @@
 .leadChip {
     --column-lead: 196px;
 }
+.nested.leadIcon {
+    --column-lead: 38px;
+}
+.nested .lead {
+    padding-left: 14px;
+}
 .hasStart {
     --column-start: 104px;
 }

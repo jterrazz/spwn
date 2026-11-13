@@ -58,4 +58,32 @@ describe('Row', () => {
         expect(result.html.text).toContain(`title="${LONG}"`);
         expect(result.html.text).not.toContain(`title="${SHORT}"`);
     });
+
+    test('a nested row moves its mark and name in, and keeps its cells in their columns', async () => {
+        // Given - a Mac's row and a VM's row nested under it, in the meters template
+        const at = (text: string) =>
+            [...document.querySelectorAll('div, span')]
+                .find((one) => one.textContent === text)
+                ?.getBoundingClientRect().x ?? 0;
+        let shift = { cell: -1, name: -1 };
+        await component.render(
+            <div style={{ width: 640 }}>
+                <Row cells={['31 %', '6 / 64']} lead={<span />} template="meters" title="mac" />
+                <Row
+                    cells={['12 %', '2 / 4']}
+                    lead={<span />}
+                    nested
+                    template="meters"
+                    title="infra"
+                />
+            </div>,
+            async (visitor) => {
+                // When - both are drawn
+                await visitor.see(content('infra'));
+                shift = { cell: at('12 %') - at('31 %'), name: at('infra') - at('mac') };            },
+        );
+
+        // Then - the VM's name sits 14 px in, its first cell where the Mac's is
+        expect(shift).toStrictEqual({ cell: 0, name: 14 });
+    });
 });

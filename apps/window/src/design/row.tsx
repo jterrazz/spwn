@@ -33,6 +33,7 @@ export type RowProps = {
     trailSize?: 'fit' | 'pill' | 'wide';
     size?: 'regular' | 'slim';
     template?: RowTemplate;
+    nested?: boolean;
     onOpen?: () => void;
     link?: ReactNode;
 };
@@ -42,6 +43,7 @@ type Columns = Pick<
     | 'kind'
     | 'lead'
     | 'leadSize'
+    | 'nested'
     | 'state'
     | 'stateAt'
     | 'template'
@@ -73,11 +75,12 @@ function valueOf({ value, valueSize = 'short' }: Columns): string | undefined {
 }
 
 function columnsOf(columns: Columns): string[] {
-    const { kind, trail, trailSize = 'fit', template = 'flow' } = columns;
+    const { kind, nested = false, trail, trailSize = 'fit', template = 'flow' } = columns;
     return [
         styles.grid,
         template === 'flow' ? undefined : styles[template],
         leadOf(columns),
+        nested ? styles.nested : undefined,
         stateOf(columns),
         kind === undefined ? undefined : styles.hasKind,
         valueOf(columns),

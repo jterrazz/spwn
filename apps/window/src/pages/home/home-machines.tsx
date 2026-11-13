@@ -126,6 +126,7 @@ function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
                     cells={vmCells(vm, report)}
                     key={vm.Name}
                     lead={<MachineIcon identity={identityOf(vm.Name)} kind={machineKindOf(vm)} />}
+                    nested
                     onOpen={() => {
                         go(machineRoute(vm.Name));
                     }}

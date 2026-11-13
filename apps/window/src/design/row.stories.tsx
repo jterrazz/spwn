@@ -87,6 +87,16 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
         },
     },
     {
+        name: 'meters template, nested under its Mac',
+        props: {
+            cells: ['12 %', '2 / 4'],
+            lead: <MachineIcon identity="blue" kind="server" />,
+            nested: true,
+            template: 'meters',
+            title: 'infra',
+        },
+    },
+    {
         name: 'opens, and a chip that opens another',
         props: {
             link: <MachineChip kind="workspace" name="gate4" onOpen={nothing} />,
