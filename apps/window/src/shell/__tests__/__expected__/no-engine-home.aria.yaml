@@ -17,6 +17,7 @@
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]
+  - button "Forward" [disabled]
   - text: Home
   - button "New machine"
   - heading "No engine answers at /run/engine.sock." [level=1]

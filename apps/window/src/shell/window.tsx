@@ -203,7 +203,7 @@ function engineStopped(macs: readonly MachinesMacView[]): boolean {
 
 function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages: Pages }) {
     const router = useRouter();
-    const { route, go, back, canGoBack } = router;
+    const { route, go, back, forward, canGoBack, canGoForward } = router;
     const { home, listed, macs, needs, rail } = useStation();
     const { close, find, newMachine, sheet, sidebar, toggleSidebar } = useSheets();
     useShortcuts(router, find, Gallery !== undefined);
@@ -216,9 +216,11 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                 <main className={styles.main}>
                     <Toolbar
                         canGoBack={canGoBack}
+                        canGoForward={canGoForward}
                         crumbs={crumbsOf(route, found, go)}
                         newMachineLeads={!engineStopped(macs)}
                         onBack={back}
+                        onForward={forward}
                         onNewMachine={route.page === 'home' ? newMachine : undefined}
                         onToggleSidebar={toggleSidebar}
                         sidebar={sidebar}

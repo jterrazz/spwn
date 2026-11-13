@@ -7,7 +7,9 @@ export type Crumb = { label: string; open?: (() => void) | undefined };
 export type ToolbarProps = {
     crumbs: readonly Crumb[];
     canGoBack: boolean;
+    canGoForward: boolean;
     onBack: () => void;
+    onForward: () => void;
     onToggleSidebar: () => void;
     onNewMachine?: (() => void) | undefined;
     newMachineLeads?: boolean;
@@ -17,7 +19,9 @@ export type ToolbarProps = {
 export function Toolbar({
     crumbs,
     canGoBack,
+    canGoForward,
     onBack,
+    onForward,
     onToggleSidebar,
     onNewMachine,
     newMachineLeads = true,
@@ -36,6 +40,13 @@ export function Toolbar({
                 label="Back"
                 onClick={onBack}
                 shortcut="⌘["
+            />
+            <IconButton
+                disabled={!canGoForward}
+                icon="forward"
+                label="Forward"
+                onClick={onForward}
+                shortcut="⌘]"
             />
             <div className={styles.title}>
                 {crumbs.slice(0, -1).map((crumb) => (

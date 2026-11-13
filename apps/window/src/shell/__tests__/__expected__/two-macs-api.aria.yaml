@@ -32,6 +32,7 @@
 - main:
   - button "Show or hide the sidebar"
   - button "Back"
+  - button "Forward" [disabled]
   - button "jterrazz-macbook-pro"
   - text: api
   - heading "api Stopped" [level=2]

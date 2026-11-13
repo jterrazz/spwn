@@ -218,11 +218,13 @@ The shortcuts are `src/shell/keys.ts` over `src/shell/shortcut.ts`, ⌘ or Ctrl 
 | Keys        | Does                                                                                                                                                                     |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | ⌘K          | Find: machines, pages, a machine's tabs, packages and needs the window already holds; its first row as drawn is chosen, and a machine's tabs come in the tab bar's order |
-| ⌘[ and ⌘]   | Back and forward; the toolbar draws Back alone, as the mockup does                                                                                                       |
+| ⌘[ and ⌘]   | Back and forward, as the toolbar's two buttons do                                                                                                                        |
 | ⌘0          | Home                                                                                                                                                                     |
 | ⌘1 to ⌘7    | A machine's tab, in the tab bar's order                                                                                                                                  |
 | Arrows      | The sidebar's rows up and down, a tab bar's tabs sideways, Find's results; a tab bar is one Tab stop, its chosen tab                                                     |
 | Tab, Escape | A dialog keeps the focus inside it, Escape closes it, and the focus returns to its opener                                                                                |
+
+Back and Forward walk the window's own history, never a parent page: one stack of the routes this window session opened and a cursor, held by `src/shell/router.tsx` over `src/shell/route.ts`, which every navigation goes through. A change of page, machine, tab, Machine files' file or catalog item is one entry; a filter, a switch, a dialog or a scroll is none, as the route does not hold them; a navigation after a Back drops what was ahead, and a machine the owner goes back to that is gone draws the page's own absent state. The toolbar draws both after the sidebar toggle, in every state of the window, each disabled where its side of the stack is empty.
 
 The route (page, machine, tab, the file Machine files opens on and the catalog item a shelf opens on) is kept across a relaunch (`src/shell/route-memory.ts`); a machine the engine's whole listing no longer holds opens Home with one line saying so (`src/shell/lost.tsx`). A page that throws draws its own frame with what broke and Reload (`src/shell/boundary.tsx`), and the shell stays.
 

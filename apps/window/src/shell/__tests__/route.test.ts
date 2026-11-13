@@ -81,6 +81,21 @@ describe('route', () => {
         expect(elsewhere.forward).toStrictEqual([]);
     });
 
+    test('a navigation after a back drops what was ahead and keeps what was behind', () => {
+        // Given - Inbox then Storage opened from Home, then back taken once
+        const inbox = goBack(navigate(navigate(start, { page: 'inbox' }), { page: 'storage' }));
+
+        // When - Catalog is opened
+        const catalog = navigate(inbox, { page: 'catalog' });
+
+        // Then - Storage is gone, and back walks Inbox then Home
+        expect(catalog).toStrictEqual({
+            back: [{ page: 'home' }, { page: 'inbox' }],
+            current: { page: 'catalog' },
+            forward: [],
+        });
+    });
+
     test('a replace changes the place shown and pushes nothing', () => {
         // Given - a machine opened from Home
         const history = navigate(start, machineRoute('gone'));

@@ -20,6 +20,7 @@
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]
+  - button "Forward" [disabled]
   - text: jterrazz-macbook-pro
   - heading "jterrazz-macbook-pro Online" [level=2]
   - paragraph: This Mac · Engine running

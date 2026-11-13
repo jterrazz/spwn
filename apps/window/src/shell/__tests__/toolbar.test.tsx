@@ -1,4 +1,4 @@
-import { button, component } from '@jterrazz/test';
+import { button, component, disabled, enabled } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { Button, Screen } from '../../design/index';
@@ -10,8 +10,10 @@ function toolbar(onNewMachine: (() => void) | undefined) {
     return (
         <Toolbar
             canGoBack={false}
+            canGoForward={false}
             crumbs={[{ label: 'Storage' }]}
             onBack={IDLE}
+            onForward={IDLE}
             onNewMachine={onNewMachine}
             onToggleSidebar={IDLE}
         />
@@ -19,6 +21,42 @@ function toolbar(onNewMachine: (() => void) | undefined) {
 }
 
 describe('Toolbar', () => {
+    test('back and forward follow their history and name their shortcuts', async () => {
+        // Given - a toolbar with a place behind it and nothing ahead
+        const taken: string[] = [];
+        let titles: (null | string)[] = [];
+        await component.render(
+            <Toolbar
+                canGoBack
+                canGoForward={false}
+                crumbs={[{ label: 'Storage' }]}
+                onBack={() => {
+                    taken.push('back');
+                }}
+                onForward={() => {
+                    taken.push('forward');
+                }}
+                onToggleSidebar={IDLE}
+            />,
+            async (visitor) => {
+                // When - both are clicked
+                await visitor.see(enabled(button('Back')));
+                await visitor.see(disabled(button('Forward')));
+                await visitor.click(button('Back'));
+                titles = ['Back', 'Forward'].map(
+                    (label) =>
+                        document
+                            .querySelector(`button[aria-label="${label}"]`)
+                            ?.getAttribute('title') ?? null,
+                );
+            },
+        );
+
+        // Then - back acts, forward is drawn disabled, and each title carries its keys
+        expect(taken).toStrictEqual(['back']);
+        expect(titles).toStrictEqual(['Back (⌘[)', 'Forward (⌘])']);
+    });
+
     test("a toolbar with no New machine leaves the screen's primary to its page", async () => {
         // Given - a screen holding a toolbar off Home and a page's one primary
         const result = await component.render(
