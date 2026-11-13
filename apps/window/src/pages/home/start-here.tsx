@@ -52,7 +52,7 @@ export function StartHere({ macs, go, onNewMachine }: StartHereProps) {
                 trail={
                     <Button
                         onClick={() => {
-                            go({ page: 'catalog' });
+                            go({ page: 'catalog-apps' });
                         }}
                     >
                         Open Catalog

@@ -1,4 +1,4 @@
-import { machineRoute, PLAIN_PAGES, plainRoute, TABS } from './route';
+import { machineRoute, plainPageOf, plainRoute, TABS } from './route';
 import type { Route } from './route';
 
 export type Memory = Pick<Storage, 'getItem' | 'setItem'>;
@@ -28,7 +28,7 @@ function routeOf(value: unknown): Route | undefined {
             ? machineRoute(machine, known)
             : undefined;
     }
-    const plain = PLAIN_PAGES.find((one) => one === page);
+    const plain = plainPageOf(page);
     if (plain === undefined) {
         return undefined;
     }

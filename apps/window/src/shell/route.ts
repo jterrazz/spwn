@@ -13,7 +13,6 @@ export type Tab = (typeof TABS)[number];
 export const TAB_PANEL = 'machine-tab-panel';
 
 export const PLAIN_PAGES = [
-    'catalog',
     'catalog-apps',
     'catalog-settings',
     'catalog-skills',
@@ -100,8 +99,13 @@ export function startRoute(query: URLSearchParams): Route {
     if (machine !== null && machine !== '') {
         return machineRoute(machine, oneOf(TABS, query.get('tab')) ?? 'Overview');
     }
-    const page = oneOf(PLAIN_PAGES, query.get('page')) ?? 'home';
+    const page = plainPageOf(query.get('page')) ?? 'home';
     return plainRoute(page, query.get('file'), query.get('item'));
+}
+
+// hazard: a route an earlier window stored or linked may name the page `catalog`; it opens the first shelf, Apps.
+export function plainPageOf(value: unknown): PlainPage | undefined {
+    return value === 'catalog' ? 'catalog-apps' : oneOf(PLAIN_PAGES, value);
 }
 
 function named(value: unknown): string | undefined {

@@ -93,17 +93,23 @@ function Machines({ macs, route, go }: Pick<SidebarProps, 'go' | 'macs' | 'route
     );
 }
 
-function Library({ place }: { place: Place }) {
+function MachineFiles({ place }: { place: Place }) {
     return (
-        <div aria-labelledby="side-library" className={styles.group} role="group">
-            <h2 className={styles.caption} id="side-library">
-                Library
-            </h2>
+        <div className={styles.group}>
             <NavItem {...place('machine-files')} icon="file" label="Machine files" />
-            <NavItem {...place('catalog')} icon="box" label="Catalog" />
-            <NavItem {...place('catalog-apps')} icon="apps" indent label="Apps" />
-            <NavItem {...place('catalog-skills')} icon="skills" indent label="Skills" />
-            <NavItem {...place('catalog-settings')} icon="settings" indent label="Settings" />
+        </div>
+    );
+}
+
+function Catalog({ place }: { place: Place }) {
+    return (
+        <div aria-labelledby="side-catalog" className={styles.group} role="group">
+            <h2 className={styles.caption} id="side-catalog">
+                Catalog
+            </h2>
+            <NavItem {...place('catalog-apps')} icon="apps" label="Apps" />
+            <NavItem {...place('catalog-skills')} icon="skills" label="Skills" />
+            <NavItem {...place('catalog-settings')} icon="settings" label="Settings" />
         </div>
     );
 }
@@ -173,7 +179,8 @@ export function Sidebar({ macs, needs, engine, route, go, onFind }: SidebarProps
             </button>
             <Places needs={needs} place={place} />
             <Machines go={go} macs={macs} route={route} />
-            <Library place={place} />
+            <MachineFiles place={place} />
+            <Catalog place={place} />
             <Engine engine={engine} />
         </nav>
     );

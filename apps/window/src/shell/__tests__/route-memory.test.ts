@@ -43,6 +43,14 @@ describe('route memory', () => {
         expect(recalled(file, false)).toStrictEqual({ file: 'api', page: 'machine-files' });
     });
 
+    test('a route stored on the page catalog is recalled as the Apps shelf', () => {
+        // Given - the window left on the page catalog by an earlier version
+        const memory = memoryOf('{"page":"catalog"}');
+
+        // Then - the next launch opens Apps, the catalog's first shelf
+        expect(recalled(memory, false)).toStrictEqual({ page: 'catalog-apps' });
+    });
+
     test.each([
         { text: 'not json' },
         { text: '{"page":"nope"}' },

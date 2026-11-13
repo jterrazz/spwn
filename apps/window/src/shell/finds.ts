@@ -7,7 +7,15 @@ import { THIS_MAC_WORD } from '../engine/words';
 import { machineRoute, TABS } from './route';
 import type { PlainPage, Route } from './route';
 
-export const KINDS = ['Places', 'Machines', 'Tabs', 'Library', 'Needs', 'Packages'] as const;
+export const KINDS = [
+    'Places',
+    'Machines',
+    'Tabs',
+    'Machine files',
+    'Catalog',
+    'Needs',
+    'Packages',
+] as const;
 
 export type Kind = (typeof KINDS)[number];
 
@@ -37,11 +45,21 @@ export type Held = {
 };
 
 const PLACES: readonly PlainPage[] = ['home', 'inbox', 'storage'];
-const LIBRARY: readonly PlainPage[] = ['machine-files', 'catalog', 'storage'];
+const SHELVES: readonly PlainPage[] = ['catalog-apps', 'catalog-skills', 'catalog-settings'];
 const FOUND_BY_NAME: ReadonlySet<PlainPage> = new Set<PlainPage>(['gallery']);
 
 const WITH_A_QUERY: ReadonlySet<Kind> = new Set<Kind>(['Needs', 'Packages', 'Tabs']);
-const PAGE_DETAILS: Partial<Record<Kind, string>> = { Library: 'setup', Places: 'page' };
+const PAGE_DETAILS: Partial<Record<Kind, string>> = {
+    Catalog: 'catalog',
+    'Machine files': 'setup',
+    Places: 'page',
+};
+const AS_LISTED: ReadonlySet<Kind> = new Set<Kind>([
+    'Catalog',
+    'Machine files',
+    'Machines',
+    'Places',
+]);
 
 function page(held: Held, kind: Kind, one: PlainPage): Result {
     return {
@@ -115,9 +133,9 @@ function sentenceOf(parts: readonly string[]): string {
 }
 
 export function everything(held: Held): readonly Result[] {
-    const library = held.withGallery ? [...LIBRARY, 'gallery' as const] : LIBRARY;
+    const places = held.withGallery ? [...PLACES, 'gallery' as const] : PLACES;
     return [
-        ...PLACES.map((one) => page(held, 'Places', one)),
+        ...places.map((one) => page(held, 'Places', one)),
         ...held.needs.map((need): Result => ({
             detail: need.Machine,
             kind: 'Needs',
@@ -126,7 +144,8 @@ export function everything(held: Held): readonly Result[] {
         })),
         ...machinesOf(held),
         ...tabsOf(held),
-        ...library.map((one) => page(held, 'Library', one)),
+        page(held, 'Machine files', 'machine-files'),
+        ...SHELVES.map((one) => page(held, 'Catalog', one)),
         ...packagesOf(held),
     ];
 }
@@ -157,9 +176,9 @@ function machineOf(result: Result): string {
 
 // invariant: a machine's tabs keep the tab bar's order, the order everything() lists them in, so only their
 // invariant: machines are sorted, and toSorted is stable. The machines keep the sidebar's order, each Mac then its
-// invariant: VMs, as machines.list sends them, and the library rows keep the sidebar's.
+// invariant: VMs, as machines.list sends them, and the places, Machine files and the shelves keep the sidebar's.
 function inOrder(kind: Kind): (a: Result, b: Result) => number {
-    if (kind === 'Machines' || kind === 'Library') {
+    if (AS_LISTED.has(kind)) {
         return () => 0;
     }
     return kind === 'Tabs'

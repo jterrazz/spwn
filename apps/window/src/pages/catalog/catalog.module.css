@@ -1,8 +1,3 @@
-.cards {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-14);
-}
 .list {
     background: var(--panel);
     border-radius: var(--radius-panel);

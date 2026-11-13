@@ -7,7 +7,6 @@ import { machineRoute } from '../route';
 import type { PlainPage } from '../route';
 
 const TITLES: Record<PlainPage, string> = {
-    catalog: 'Catalog',
     'catalog-apps': 'Apps',
     'catalog-settings': 'Settings',
     'catalog-skills': 'Skills',
@@ -62,23 +61,38 @@ describe('finds', () => {
         // Given - two Macs, two VMs, a need and three packages held
         const groups = matching(everything(HELD), '');
 
-        // Then - places, the machines each Mac then its VMs, and the library, no action; tabs, needs and packages wait for a query
+        // Then - places, the machines each Mac then its VMs, Machine files, then the catalog's shelves, no action; tabs, needs and packages wait for a query
         expect(shown(groups)).toStrictEqual([
             ['Places', ['Home', 'Inbox', 'Storage']],
             ['Machines', ['mini', 'book', 'linux-1', 'api']],
-            ['Library', ['Machine files', 'Catalog', 'Storage']],
+            ['Machine files', ['Machine files']],
+            ['Catalog', ['Apps', 'Skills', 'Settings']],
         ]);
     });
 
-    test('a place is a page, and a library row is setup', () => {
+    test('a place is a page, Machine files is setup, and a shelf says it is the catalog', () => {
         // Given - the empty query's groups
         const groups = matching(everything(HELD), '');
 
-        // Then - each place and each library row carries its trail
+        // Then - each row carries the trail of its section
         const details = (kind: string) =>
             groups.find((group) => group.kind === kind)?.results.map((result) => result.detail);
         expect(details('Places')).toStrictEqual(['page', 'page', 'page']);
-        expect(details('Library')).toStrictEqual(['setup', 'setup', 'setup']);
+        expect(details('Machine files')).toStrictEqual(['setup']);
+        expect(details('Catalog')).toStrictEqual(['catalog', 'catalog', 'catalog']);
+    });
+
+    test('the word catalog finds its three shelves, each opening its own page', () => {
+        // Given - a query for the catalog
+        const groups = matching(everything(HELD), 'catalog');
+
+        // Then - Apps, Skills and Settings, in the sidebar's order
+        expect(shown(groups)).toStrictEqual([['Catalog', ['Apps', 'Skills', 'Settings']]]);
+        expect(groups[0]?.results.map((result) => result.to)).toStrictEqual([
+            { route: { page: 'catalog-apps' } },
+            { route: { page: 'catalog-skills' } },
+            { route: { page: 'catalog-settings' } },
+        ]);
     });
 
     test('this Mac is named so, any other Mac is a Mac', () => {
@@ -147,8 +161,8 @@ describe('finds', () => {
 
         // Then - only the proof window finds it, and its empty query does not list it
         expect(production).toStrictEqual([]);
-        expect(shown(proof)).toStrictEqual([['Library', ['Gallery']]]);
-        expect(shown(unasked)).toContainEqual(['Library', ['Machine files', 'Catalog', 'Storage']]);
+        expect(shown(proof)).toStrictEqual([['Places', ['Gallery']]]);
+        expect(shown(unasked)).toContainEqual(['Places', ['Home', 'Inbox', 'Storage']]);
     });
 
     test('a query nothing holds finds nothing', () => {

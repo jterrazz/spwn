@@ -72,7 +72,7 @@ describe('route', () => {
         // When - forward is taken once, then once more, then a new page is opened
         const once = goForward(home);
         const twice = goForward(once);
-        const elsewhere = navigate(once, { page: 'catalog' });
+        const elsewhere = navigate(once, { page: 'catalog-apps' });
 
         // Then - Inbox, then Storage, and a navigation leaves nothing ahead
         expect(once.current).toStrictEqual({ page: 'inbox' });
@@ -85,13 +85,13 @@ describe('route', () => {
         // Given - Inbox then Storage opened from Home, then back taken once
         const inbox = goBack(navigate(navigate(start, { page: 'inbox' }), { page: 'storage' }));
 
-        // When - Catalog is opened
-        const catalog = navigate(inbox, { page: 'catalog' });
+        // When - Apps is opened
+        const apps = navigate(inbox, { page: 'catalog-apps' });
 
         // Then - Storage is gone, and back walks Inbox then Home
-        expect(catalog).toStrictEqual({
+        expect(apps).toStrictEqual({
             back: [{ page: 'home' }, { page: 'inbox' }],
-            current: { page: 'catalog' },
+            current: { page: 'catalog-apps' },
             forward: [],
         });
     });
@@ -143,6 +143,16 @@ describe('route', () => {
             page: 'catalog-apps',
         });
         expect(startOf('?page=inbox&item=node')).toStrictEqual({ page: 'inbox' });
+    });
+
+    test('a link to the page catalog opens the Apps shelf', () => {
+        // Given - a start route an earlier window wrote
+        // Then - it opens Apps, the catalog's first shelf, with its item when it names one
+        expect(startOf('?page=catalog')).toStrictEqual({ page: 'catalog-apps' });
+        expect(startOf('?page=catalog&item=node')).toStrictEqual({
+            item: 'node',
+            page: 'catalog-apps',
+        });
     });
 
     test('a catalog item is a navigation of its own, its shelf one step back', () => {

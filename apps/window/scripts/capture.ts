@@ -18,7 +18,6 @@ const PAGES = [
     'inbox',
     'storage',
     'machine-files',
-    'catalog',
     'catalog-apps',
     'catalog-skills',
     'catalog-settings',

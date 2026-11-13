@@ -8,10 +8,9 @@
     - button "jterrazz-macbook-pro online":
       - text: jterrazz-macbook-pro
       - img "online"
-  - group "Library":
-    - heading "Library" [level=2]
-    - button "Machine files"
-    - button "Catalog"
+  - button "Machine files"
+  - group "Catalog":
+    - heading "Catalog" [level=2]
     - button "Apps"
     - button "Skills"
     - button "Settings"

@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 
 import { TITLES } from '../shell/window';
 import type { PageProps, Pages } from '../shell/window';
-import { CatalogPage } from './catalog/catalog';
 import { ItemPage } from './catalog/item';
 import { ShelfPage } from './catalog/shelf';
 import { HomePage } from './home/home';
@@ -66,9 +65,6 @@ function Body({ route, found, home, go, Gallery, newMachine }: PageProps) {
                     opened={route.file}
                 />
             );
-        }
-        case 'catalog': {
-            return <CatalogPage go={go} />;
         }
         case 'catalog-apps': {
             return <Shelf go={go} item={route.item} macs={home.macs} shelf="apps" />;

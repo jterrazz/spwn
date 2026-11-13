@@ -13,36 +13,18 @@ function windowOver(world: string, initial: Route) {
 
 const category = (name: string, count: number) => button(`${name}${count}`, { exact: true });
 
-const EVERY_PACKAGE =
-    'Everything station knows how to install or set, 139 packages · choose what to browse';
-
-describe('Catalog', () => {
-    test('the catalog is a chooser of three shelves, each with the categories the engine gave', async () => {
-        // Given - the window on the Catalog over stories
+describe('shelf', () => {
+    test('the Skills shelf lists the agent skills alone', async () => {
+        // Given - the window on Skills over stories
         const result = await component.render(
-            windowOver('stories', { page: 'catalog' }),
+            windowOver('stories', { page: 'catalog-skills' }),
             async (visitor) => {
-                // When - apps.list and settings.list have answered
-                await visitor.see(content(EVERY_PACKAGE));
-            },
-        );
-
-        // Then - its title, the count of what was read, and three cards, skills among them
-        await expect(result.tree).toMatch(file('./__expected__/stories-catalog.aria.yaml'));
-    });
-
-    test('a card opens its shelf', async () => {
-        // Given - the window on the Catalog over stories
-        const result = await component.render(
-            windowOver('stories', { page: 'catalog' }),
-            async (visitor) => {
-                // When - the Skills card is chosen
-                await visitor.click(button('Skills 17 in the catalog', { exact: false }));
-
-                // Then - the Skills shelf lists the agent skills alone
+                // When - apps.list has answered
                 await visitor.see(content('agent-browser-skill'));
             },
         );
+
+        // Then - the agent skills, and no other app
         await expect(result.tree).toMatch(file('./__expected__/stories-skills.aria.yaml'));
     });
 

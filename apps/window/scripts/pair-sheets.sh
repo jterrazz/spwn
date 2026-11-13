@@ -20,7 +20,7 @@ PAIRS=(
     c2-macact:"$mac"-activity c3-macpkg:"$mac"-packages
     c4-macports:"$mac"-ports c5-macacc:"$mac"-accounts
     c6-macstor:"$mac"-storage c7-maclogs:"$mac"-logs
-    d1-files:machine-files d2-catalog:catalog d3-catapps:catalog-apps d4-catset:catalog-settings
+    d1-files:machine-files d3-catapps:catalog-apps d4-catset:catalog-settings
     d5-itemapp:catalog-item-node d6-itemset:catalog-item-agent-hooks
     e1-palette:live/palette e2-destroy:live/destroy
     f1-find:dialog-find f2-nmhome:dialog-new-machine-home f3-nmmac:dialog-new-machine-mac

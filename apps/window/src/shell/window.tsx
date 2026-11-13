@@ -26,7 +26,6 @@ export const TITLES: Record<PlainPage, string> = {
     inbox: 'Inbox',
     storage: 'Storage',
     'machine-files': 'Machine files',
-    catalog: 'Catalog',
     'catalog-apps': 'Apps',
     'catalog-skills': 'Skills',
     'catalog-settings': 'Settings',
@@ -76,17 +75,17 @@ type Sheet = 'find' | 'new-machine' | 'none';
 
 function crumbsOf(route: Route, found: Found | undefined, go: Go): Crumb[] {
     if (route.page !== 'machine') {
-        const page = { label: route.item ?? TITLES[route.page] };
-        if (!IN_CATALOG.has(route.page)) {
-            return [page];
+        const { page, item } = route;
+        if (item === undefined || !IN_CATALOG.has(page)) {
+            return [{ label: TITLES[page] }];
         }
-        const catalog = {
-            label: TITLES.catalog,
+        const shelf = {
+            label: TITLES[page],
             open: () => {
-                go({ page: 'catalog' });
+                go({ page });
             },
         };
-        return [catalog, page];
+        return [shelf, { label: item }];
     }
     if (found?.vm) {
         const mac = found.mac.Name;
@@ -107,7 +106,7 @@ export function whereOf(route: Route): string {
     if (route.page === 'machine') {
         return `${route.machine} › ${route.tab}`;
     }
-    return route.item === undefined ? TITLES[route.page] : `${TITLES.catalog} › ${route.item}`;
+    return route.item === undefined ? TITLES[route.page] : `${TITLES[route.page]} › ${route.item}`;
 }
 
 type AreaProps = PageProps & { pages: Pages; panel?: boolean };
