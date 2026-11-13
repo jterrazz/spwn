@@ -37,11 +37,18 @@ func MountTag(i int) string {
 // asks, a line no mount asks any more is taken out and its folder
 // unmounted, and every mount is mounted at its guest folder, made for the
 // VM user when missing. It runs as root and may run again at once: it
-// changes nothing that already reads as asked.
+// changes nothing that already reads as asked. The engine's mount step
+// and a first start's may run at once, so a run holds a lock for all it
+// does, and replaces /etc/fstab by a rename, never leaving it half
+// written.
 const mountScript = `set -e
+fstab=/etc/fstab
+lock=/run/station-mounts.lock
 home=$1
 user=$2
 shift 2
+exec 9>"$lock"
+flock 9
 nl='
 '
 want=
@@ -54,7 +61,7 @@ while [ $# -ge 3 ]; do
   want=$want"$1 $at virtiofs $3,nofail 0 0"$nl
   shift 3
 done
-have=$(grep '^station-[0-9][0-9]* ' /etc/fstab || true)
+have=$(grep '^station-[0-9][0-9]* ' "$fstab" || true)
 while read -r tag at rest; do
   [ -n "$tag" ] || continue
   case $nl$want in *"$nl$tag $at $rest$nl"*) continue ;; esac
@@ -63,8 +70,12 @@ done <<EOF
 $have
 EOF
 if [ "$have" != "${want%"$nl"}" ]; then
-  kept=$(grep -v '^station-[0-9][0-9]* ' /etc/fstab || true)
-  printf '%s\n%s' "$kept" "$want" > /etc/fstab
+  kept=$(grep -v '^station-[0-9][0-9]* ' "$fstab" || true)
+  next=$(mktemp "$fstab.station.XXXXXX")
+  trap 'rm -f "$next"' EXIT
+  printf '%s\n%s' "$kept" "$want" > "$next"
+  chmod 644 "$next"
+  mv -f "$next" "$fstab"
 fi
 while read -r tag at rest; do
   [ -n "$tag" ] || continue
