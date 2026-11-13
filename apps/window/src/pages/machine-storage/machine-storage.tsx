@@ -1,6 +1,6 @@
 import type { DiskReading, Target } from '@jterrazz/station-api';
 
-import { Button, Screen } from '../../design/index';
+import { Screen } from '../../design/index';
 import { useWatch } from '../../engine/react';
 import type { Route } from '../../shell/route';
 import { Freed, useFreeAll } from '../disk/disk-gestures';
@@ -8,6 +8,8 @@ import { ByApp, DiskPanel } from '../disk/disk-view';
 import { HeldOutcomes } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
+
+import styles from './machine-storage.module.css';
 
 const FOOT = "Data is never freed here. Erasing an app's data is asked for by its name.";
 
@@ -20,14 +22,15 @@ function Inside({ go }: { go: Go | undefined }) {
             {go === undefined ? (
                 'Storage'
             ) : (
-                <Button
+                <button
+                    className={styles.storageLink}
                     onClick={() => {
                         go({ page: 'storage' });
                     }}
-                    variant="link"
+                    type="button"
                 >
                     Storage
-                </Button>
+                </button>
             )}
         </>
     );
