@@ -79,7 +79,6 @@ export const OWN_STATE_WORDS = {
     'not-given': 'Not given yet',
     'not-measured': 'Not measured',
     'not-wired': 'Not wired',
-    'read-once': 'Read once',
     reading: 'Reading',
     unknown: 'unknown',
     'window-error': 'Error',

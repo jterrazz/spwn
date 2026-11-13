@@ -9,7 +9,6 @@
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage"
-    - tab "Logs"
   - 'heading "Disk almost full: 4 % free" [level=1]'
   - paragraph:
     - img "broken"
@@ -59,3 +58,6 @@
     - definition: 98 % · 112 cycles
     - term: Up for
     - definition: 3 d
+  - region "What station did on this Mac":
+    - heading "What station did on this Mac" [level=2]
+    - paragraph: Not given yet The engine's own lines and its setup runs.

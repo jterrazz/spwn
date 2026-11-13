@@ -43,13 +43,13 @@ describe('Find', () => {
         const result = await component.render(windowOnHome(), async (visitor) => {
             await visitor.see(content('npm sign-in expired'));
 
-            // When - ⌘K is pressed, then linux-1 logs typed and Enter pressed
+            // When - ⌘K is pressed, then linux-1 activity typed and Enter pressed
             await visitor.press(COMMAND_K);
             await visitor.see(focused(query));
-            await visitor.fill(query, 'linux-1 logs');
+            await visitor.fill(query, 'linux-1 activity');
             await visitor.press('Enter');
 
-            // Then - the palette is gone and linux-1's Logs is open
+            // Then - the palette is gone and linux-1's Activity is open, its log at its foot
             await visitor.gone(find);
             await visitor.see(region('What linux-1 prints'));
         });

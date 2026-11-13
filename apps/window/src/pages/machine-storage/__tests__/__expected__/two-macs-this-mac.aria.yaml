@@ -9,7 +9,6 @@
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage" [selected]
-    - tab "Logs"
   - region "Storage":
     - heading "Storage" [level=2]
     - paragraph: 606 GB of 994 GB used

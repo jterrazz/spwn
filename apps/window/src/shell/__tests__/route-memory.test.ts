@@ -20,15 +20,23 @@ function memoryOf(text?: string): Memory & { held: Map<string, string> } {
 
 describe('route memory', () => {
     test('a route remembered is the route recalled', () => {
-        // Given - the window left on linux-1's Logs
+        // Given - the window left on linux-1's Storage
         const memory = memoryOf();
-        remember(memory, machineRoute('linux-1', 'Logs'));
+        remember(memory, machineRoute('linux-1', 'Storage'));
 
         // When - the next launch reads it back
         const route = recalled(memory, false);
 
         // Then - it opens where it was left
-        expect(route).toStrictEqual(machineRoute('linux-1', 'Logs'));
+        expect(route).toStrictEqual(machineRoute('linux-1', 'Storage'));
+    });
+
+    test('a window left on the Logs tab reopens on Activity, which holds the log', () => {
+        // Given - a route a window wrote while a machine had a Logs tab
+        const memory = memoryOf('{"page":"machine","machine":"linux-1","tab":"Logs"}');
+
+        // Then - the next launch opens linux-1's Activity
+        expect(recalled(memory, false)).toStrictEqual(machineRoute('linux-1', 'Activity'));
     });
 
     test('a catalog item and a machine file are recalled with the page that holds them', () => {
@@ -54,7 +62,7 @@ describe('route memory', () => {
     test.each([
         { text: 'not json' },
         { text: '{"page":"nope"}' },
-        { text: '{"page":"machine","machine":"","tab":"Logs"}' },
+        { text: '{"page":"machine","machine":"","tab":"Activity"}' },
         { text: '{"page":"machine","machine":"linux-1","tab":"Nope"}' },
         { text: 'null' },
     ])('a stored value that names no route, $text, is no route', ({ text }) => {

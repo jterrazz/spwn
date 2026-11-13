@@ -10,6 +10,7 @@ import { Page } from '../page';
 import { Busiest } from './busiest';
 import { Cards } from './cards';
 import { Findings, Head } from './head';
+import { Log } from './log';
 import { MacFacts } from './mac-facts';
 import { SPANS } from './measures';
 import type { Span } from './measures';
@@ -63,30 +64,31 @@ export function ActivityTab({ found, go }: { found: Found; go: Go }) {
             />
         </div>
     );
+    let now;
     if (shown?.kind === 'failed') {
-        return (
-            <Page>
-                {readers}
-                <Unanswered error={shown.error} size="tab" />
-            </Page>
+        now = <Unanswered error={shown.error} size="tab" />;
+    } else if (shown) {
+        now = (
+            <>
+                <Head report={shown.out} />
+                {switcher}
+                <Findings findings={shown.out.findings ?? []} />
+                <Measured found={found} go={go} report={shown.out} span={span} />
+            </>
         );
-    }
-    if (!shown) {
-        return (
-            <Page>
-                {readers}
+    } else {
+        now = (
+            <>
                 <Reading size="tab" what={`the activity of ${name}`} />
                 {switcher}
-            </Page>
+            </>
         );
     }
     return (
         <Page>
             {readers}
-            <Head report={shown.out} />
-            {switcher}
-            <Findings findings={shown.out.findings ?? []} />
-            <Measured found={found} go={go} report={shown.out} span={span} />
+            {now}
+            <Log found={found} />
         </Page>
     );
 }

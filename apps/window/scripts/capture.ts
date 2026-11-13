@@ -22,7 +22,7 @@ const PAGES = [
     'catalog-skills',
     'catalog-settings',
 ];
-const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Accounts', 'Storage', 'Logs'];
+const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Accounts', 'Storage'];
 const PARALLEL = 6;
 
 // value: a step a shot takes once its start route has drawn: a button clicked by its whole accessible name, or a key

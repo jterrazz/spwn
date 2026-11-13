@@ -135,6 +135,14 @@ describe('route', () => {
         });
     });
 
+    test('a start route to the Logs tab opens Activity, which holds the log', () => {
+        // Given - a link written while a machine had a Logs tab
+        const route = startOf('?machine=linux-1&tab=Logs');
+
+        // Then - it opens the machine's Activity
+        expect(route).toStrictEqual(machineRoute('linux-1', 'Activity'));
+    });
+
     test('a start route opens a catalog item on its shelf alone', () => {
         // Given - the queries a capture opens an item with
         // Then - a shelf opens on its item, and a page that holds none ignores it

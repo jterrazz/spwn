@@ -111,12 +111,12 @@ describe('finds', () => {
 
     test('every word of a query is found in a name or its kind, in any case', () => {
         // Given - a query naming a machine and a tab
-        const groups = matching(everything(HELD), 'LINUX logs');
+        const groups = matching(everything(HELD), 'LINUX activity');
 
         // Then - the one tab of linux-1 it names, and no other result
-        expect(shown(groups)).toStrictEqual([['Tabs', ['linux-1 › Logs']]]);
+        expect(shown(groups)).toStrictEqual([['Tabs', ['linux-1 › Activity']]]);
         expect(groups[0]?.results[0]?.to).toStrictEqual({
-            route: machineRoute('linux-1', 'Logs'),
+            route: machineRoute('linux-1', 'Activity'),
         });
     });
 
@@ -124,18 +124,17 @@ describe('finds', () => {
         // Given - a query every tab of linux-1 and of api answers
         const groups = matching(everything(HELD), '›');
 
-        // Then - api's seven tabs, then linux-1's, each in the order of the tab bar, with no detail of their own
+        // Then - api's six tabs, then linux-1's, each in the order of the tab bar, with no detail of their own
         const tabs = groups.find((group) => group.kind === 'Tabs')?.results ?? [];
-        expect(tabs.slice(0, 7).map((result) => result.label)).toStrictEqual([
+        expect(tabs.slice(0, 6).map((result) => result.label)).toStrictEqual([
             'api › Overview',
             'api › Activity',
             'api › Packages',
             'api › Ports',
             'api › Accounts',
             'api › Storage',
-            'api › Logs',
         ]);
-        expect(tabs[7]?.label).toBe('book › Overview');
+        expect(tabs[6]?.label).toBe('book › Overview');
         expect(tabs.every((result) => result.detail === '')).toBe(true);
     });
 

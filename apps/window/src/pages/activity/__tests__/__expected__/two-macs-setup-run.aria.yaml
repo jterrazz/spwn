@@ -1,0 +1,55 @@
+- main:
+  - heading "linux-1 Running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "jterrazz-macbook-pro"
+  - button "Start"
+  - button "Stop"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity" [selected]
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+  - heading "No finding from the engine." [level=1]
+  - paragraph:
+    - img "No finding"
+    - text: Read live · two samples read now, 1 s apart
+  - group "Window":
+    - button "6 min" [pressed]
+    - button "1 h"
+    - button "24 h"
+  - region "CPU":
+    - heading "CPU" [level=2]
+    - text: 4 CPUs · load 0.3 8%
+    - paragraph: "Not given yet No chart: the engine keeps no history of it over this window."
+  - region "Memory":
+    - heading "Memory" [level=2]
+    - text: pressure normal · no swap 1.1GB of 4
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Disk":
+    - heading "Disk" [level=2]
+    - text: 400 KB/s written 200KB/s read
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Network":
+    - heading "Network" [level=2]
+    - text: 100 KB/s out 300KB/s in
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Busiest":
+    - heading "Busiest" [level=2]
+    - group "Busiest by":
+      - button "By CPU" [pressed]
+      - button "By memory"
+    - text: node
+    - meter "CPU of node"
+    - text: 6 % vite
+    - meter "CPU of vite"
+    - text: 2 %
+  - region "Its last setup run":
+    - heading "Its last setup run what the file installed and wrote" [level=2]
+    - group "Which log":
+      - button "Console"
+      - button "Setup run" [pressed]
+    - paragraph: Not given yet What its file installed and wrote on its last run.

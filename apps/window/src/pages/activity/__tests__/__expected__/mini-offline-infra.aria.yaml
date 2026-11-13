@@ -9,13 +9,18 @@
   - button "Open in Terminal" [disabled]
   - tablist "Tabs":
     - tab "Overview"
-    - tab "Activity"
+    - tab "Activity" [selected]
     - tab "Packages"
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage"
-    - tab "Logs" [selected]
   - heading "No answer from the engine." [level=1]
   - paragraph:
     - img "no answer"
     - text: No answer
+  - region "What infra prints":
+    - heading "What infra prints its console, then its hypervisor" [level=2]
+    - group "Which log":
+      - button "Console" [pressed]
+      - button "Setup run"
+    - text: No answer No answer from the engine.

@@ -9,8 +9,10 @@
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage"
-    - tab "Logs"
   - heading "No answer from the engine." [level=1]
   - paragraph:
     - img "no answer"
     - text: No answer
+  - region "What station did on this Mac":
+    - heading "What station did on this Mac" [level=2]
+    - paragraph: Not given yet The engine's own lines and its setup runs.

@@ -13,7 +13,6 @@
     - tab "Ports" [selected]
     - tab "Accounts"
     - tab "Storage"
-    - tab "Logs"
   - heading "No verdict from the engine." [level=1]
   - paragraph:
     - img "Not given yet"

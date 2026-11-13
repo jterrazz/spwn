@@ -271,7 +271,7 @@ describe('Window', () => {
     test('a route to a machine the engine no longer lists lands on Home with one line saying so', async () => {
         // Given - the window reopened on a machine two-macs does not hold
         const result = await component.render(
-            windowOver('two-macs', { machine: 'gate9', page: 'machine', tab: 'Logs' }),
+            windowOver('two-macs', { machine: 'gate9', page: 'machine', tab: 'Activity' }),
             async (visitor) => {
                 // When - machines.list has answered whole
                 await visitor.see(content('npm sign-in expired'));

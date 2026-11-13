@@ -1,4 +1,4 @@
-import { machineRoute, plainPageOf, plainRoute, TABS } from './route';
+import { machineRoute, plainPageOf, plainRoute, tabOf } from './route';
 import type { Route } from './route';
 
 export type Memory = Pick<Storage, 'getItem' | 'setItem'>;
@@ -23,7 +23,7 @@ function routeOf(value: unknown): Route | undefined {
     }
     const { page, machine, tab, file, item } = value;
     if (page === 'machine') {
-        const known = TABS.find((one) => one === tab);
+        const known = tabOf(tab);
         return typeof machine === 'string' && machine !== '' && known
             ? machineRoute(machine, known)
             : undefined;

@@ -43,7 +43,6 @@
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage"
-    - tab "Logs"
   - tabpanel "Overview":
     - heading "No answer from the engine." [level=1]
     - paragraph:

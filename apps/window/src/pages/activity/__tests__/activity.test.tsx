@@ -1,4 +1,4 @@
-import { button, component, content, file, heading } from '@jterrazz/test';
+import { button, clock, component, content, file, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../fixtures/page-over';
@@ -54,13 +54,20 @@ describe('Activity', () => {
     });
 
     test('a VM its Mac keeps no history of is read inside it, and its refusal shown', async () => {
-        // Given - api over two-macs, a VM that is stopped
+        // Given - api over two-macs, a VM that is stopped, its log read at 14:20
+        using _ = clock.at('2026-11-04T14:20:00Z');
         const result = await component.render(activityOf('two-macs', 'api'), async (visitor) => {
             // When - its Mac answered no history, then the VM itself was asked
             await visitor.see(heading('api is stopped.'));
+            await visitor.see(
+                within(
+                    region('What api prints'),
+                    content('0 lines · read at 14:20', { exact: false }),
+                ),
+            );
         });
 
-        // Then - the tab is the VM's own refusal, and no measure is drawn
+        // Then - the tab is the VM's own refusal, no measure is drawn, and its log is still read
         await expect(result.tree).toMatch(file('./__expected__/two-macs-api.aria.yaml'));
     });
 

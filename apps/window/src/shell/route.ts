@@ -1,14 +1,15 @@
-export const TABS = [
-    'Overview',
-    'Activity',
-    'Packages',
-    'Ports',
-    'Accounts',
-    'Storage',
-    'Logs',
-] as const;
+export const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Accounts', 'Storage'] as const;
 
 export type Tab = (typeof TABS)[number];
+
+const FOLDED: ReadonlyMap<string, Tab> = new Map([['Logs', 'Activity']]);
+
+export function tabOf(value: unknown): Tab | undefined {
+    if (typeof value !== 'string') {
+        return undefined;
+    }
+    return TABS.find((known) => known === value) ?? FOLDED.get(value);
+}
 
 export const TAB_PANEL = 'machine-tab-panel';
 
@@ -97,7 +98,7 @@ function oneOf<T extends string>(values: readonly T[], value: unknown): T | unde
 export function startRoute(query: URLSearchParams): Route {
     const machine = query.get('machine');
     if (machine !== null && machine !== '') {
-        return machineRoute(machine, oneOf(TABS, query.get('tab')) ?? 'Overview');
+        return machineRoute(machine, tabOf(query.get('tab')) ?? 'Overview');
     }
     const page = plainPageOf(query.get('page')) ?? 'home';
     return plainRoute(page, query.get('file'), query.get('item'));

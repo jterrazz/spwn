@@ -13,8 +13,18 @@
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage"
-    - tab "Logs"
   - heading "api is stopped." [level=1]
   - paragraph:
     - img "refused"
     - text: Refused · station machines start api
+  - region "What api prints":
+    - heading "What api prints its console, then its hypervisor" [level=2]
+    - group "Which log":
+      - button "Console" [pressed]
+      - button "Setup run"
+    - searchbox "Filter the lines"
+    - button "Refresh"
+    - button "Copy all"
+    - log "Log lines":
+      - paragraph: The engine read no line.
+    - paragraph: "0 lines · read at 14:20 · a reading, not a live feed: press Refresh for the newest lines"
