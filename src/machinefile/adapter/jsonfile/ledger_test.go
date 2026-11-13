@@ -19,7 +19,7 @@ import (
 // value: the machine's files with the lock wire gives the ledger.
 type lockable struct{ local.FS }
 
-func (lockable) Lock(path string) (func(), error) { return local.Exclusive(path) }
+func (lockable) Lock(path string) (func(), error) { return local.Exclusive(context.Background(), path) }
 
 func open(at string) *jsonfile.Ledger {
 	return jsonfile.NewLedger(lockable{local.New(nil, nil, nil, nil).FS}, at)

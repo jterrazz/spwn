@@ -29,6 +29,13 @@ func (f *FS) WriteFile(p string, data []byte, perm fs.FileMode) error {
 	return nil
 }
 
+func (f *FS) Replace(p string, data []byte, perm fs.FileMode) error {
+	if file, ok := f.Files[key(p)]; ok {
+		perm = file.Mode.Perm()
+	}
+	return f.WriteFile(p, data, perm)
+}
+
 func (f *FS) MkdirAll(p string, perm fs.FileMode) error {
 	if _, ok := f.Files[key(p)]; !ok {
 		f.Files[key(p)] = &fstest.MapFile{Mode: fs.ModeDir | perm}

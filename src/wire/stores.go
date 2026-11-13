@@ -117,7 +117,7 @@ func newStores(files local.FS, p setup.Paths) *stores {
 // value: the machine's files with the lock a store takes around a change.
 type lockable struct{ local.FS }
 
-func (lockable) Lock(path string) (func(), error) { return local.Exclusive(path) }
+func (lockable) Lock(path string) (func(), error) { return local.Exclusive(context.Background(), path) }
 
 func (s *stores) migrators() []store.Migrator {
 	return []store.Migrator{s.prefs, s.ports(), s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}

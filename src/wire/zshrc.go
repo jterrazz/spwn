@@ -29,13 +29,15 @@ func (z zshrcFile) Read(context.Context) (string, error) {
 
 // invariant: an edit reads ~/.zshrc and writes it back under the one lock
 // every station process takes for it, so two writers at once never drop
-// each other's block; it lands whole, beside the file a link names, with
-// the file's own mode (local.Rewrite), and only when edit changed it.
-func (z zshrcFile) Edit(_ context.Context, edit func(text string) (string, error)) error {
+// each other's block; a wait for that lock ends with ctx, and reads
+// interrupted. It lands whole and durably, in the file a link names, with
+// the file's own mode and owner (local.Rewrite), and only when edit
+// changed it.
+func (z zshrcFile) Edit(ctx context.Context, edit func(text string) (string, error)) error {
 	if err := z.fs.MkdirAll(filepath.Dir(z.lock), 0o700); err != nil {
 		return err
 	}
-	release, err := local.Exclusive(z.lock)
+	release, err := local.Exclusive(ctx, z.lock)
 	if err != nil {
 		return err
 	}

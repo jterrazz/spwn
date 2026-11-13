@@ -56,3 +56,36 @@ func TestAWaitForAHeldLockEndsHeldOrInterrupted(t *testing.T) {
 		t.Errorf("a wait the run's ctx ended answered held %v, %v", held, err)
 	}
 }
+
+func TestAWaitForAHeldLockEndsWithItsContext(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "zshrc.lock")
+	release, err := Exclusive(t.Context(), at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer release()
+	ctx, cancel := context.WithCancel(t.Context())
+	ended := make(chan error, 1)
+	go func() {
+		second, err := Exclusive(ctx, at)
+		if err == nil {
+			second()
+		}
+		ended <- err
+	}()
+	time.Sleep(30 * time.Millisecond)
+	select {
+	case err := <-ended:
+		t.Fatalf("took a held lock: %v", err)
+	default:
+	}
+	cancel()
+	select {
+	case err := <-ended:
+		if err == nil || err.Error() != "interrupted" || !errors.Is(err, context.Canceled) {
+			t.Errorf("Exclusive = %v, want interrupted", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("the wait outlived its context")
+	}
+}

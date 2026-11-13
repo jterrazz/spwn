@@ -28,6 +28,10 @@ func (disk) WriteFile(path string, data []byte, perm fs.FileMode) error {
 	return os.WriteFile(path, data, perm)
 }
 
+func (disk) Replace(path string, data []byte, perm fs.FileMode) error {
+	return durable{sync: (*os.File).Sync}.replace(path, data, perm)
+}
+
 func (disk) WalkDir(root string, fn fs.WalkDirFunc) error { return filepath.WalkDir(root, fn) }
 
 // invariant: the lock is flock(2)'s on its own file, exclusive and
@@ -54,7 +58,7 @@ func ExclusiveWithin(ctx context.Context, path string, within time.Duration) (re
 	// tenth of a second until it is free; one another holder keeps past
 	// within is answered held, never waited for longer, and a wait ctx
 	// ends first answers ctx's error: the run was interrupted, not refused.
-	wait, cancel := context.WithTimeout(ctx, within)
+	deadline, cancel := context.WithTimeout(ctx, within)
 	defer cancel()
 	tick := time.NewTicker(100 * time.Millisecond)
 	defer tick.Stop()
@@ -64,7 +68,7 @@ func ExclusiveWithin(ctx context.Context, path string, within time.Duration) (re
 			return release, false, err
 		}
 		select {
-		case <-wait.Done():
+		case <-deadline.Done():
 			if err := ctx.Err(); err != nil {
 				return nil, false, err
 			}
@@ -142,16 +146,27 @@ func Erase(paths []string) error {
 	return failed
 }
 
-func Exclusive(path string) (release func(), err error) {
+func Exclusive(ctx context.Context, path string) (release func(), err error) {
 	// invariant: an exclusive flock(2) on path, made when missing, held until
 	// release: a second holder, in this process or another, waits for it,
 	// and the kernel lets it go when its process ends, so a crash never
-	// leaves it held.
+	// leaves it held. The wait asks the lock again and again, without
+	// blocking, at a growing pause up to lockPause, and ends when ctx does
+	// (it reads interrupted): a blocking flock(2) could not be cut short.
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:gosec // a lock file of station's own state folder.
 	if err != nil {
 		return nil, err
 	}
-	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
+	for pause := time.Millisecond; ; pause = min(2*pause, lockPause) {
+		err = syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+		if !errors.Is(err, syscall.EWOULDBLOCK) {
+			break
+		}
+		if err = wait(ctx, pause); err != nil {
+			break
+		}
+	}
+	if err != nil {
 		_ = f.Close()
 		return nil, err
 	}
@@ -160,3 +175,24 @@ func Exclusive(path string) (release func(), err error) {
 		_ = f.Close()
 	}, nil
 }
+
+// value: the longest pause between two asks of a lock another holds.
+const lockPause = 50 * time.Millisecond
+
+func wait(ctx context.Context, pause time.Duration) error {
+	t := time.NewTimer(pause)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+		return lockInterrupted{cause: ctx.Err()}
+	case <-t.C:
+		return nil
+	}
+}
+
+// value: a wait its context ended before the lock was free; it reads
+// "interrupted", and is the context's own error underneath.
+type lockInterrupted struct{ cause error }
+
+func (lockInterrupted) Error() string   { return "interrupted" }
+func (i lockInterrupted) Unwrap() error { return i.cause }

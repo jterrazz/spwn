@@ -80,6 +80,9 @@ type FS interface {
 	fs.FS
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte, perm fs.FileMode) error
+	// value: the file at path replaced whole, at once and durably, with its
+	// own mode and owner; one not there yet is made with perm.
+	Replace(path string, data []byte, perm fs.FileMode) error
 	MkdirAll(path string, perm fs.FileMode) error
 	Remove(path string) error
 	RemoveAll(path string) error
