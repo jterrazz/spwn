@@ -61,6 +61,9 @@ type Options struct {
 	// value: shares an account this Mac holds with one of its VMs for a
 	// term, as accounts share does; nil shares none.
 	Share func(ctx context.Context, account, vm string, term time.Duration) error
+	// value: the processes of this Mac, which say whether a create still
+	// runs; nil says none does.
+	Processes contract.Processes
 }
 
 type Templates interface {

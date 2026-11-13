@@ -269,6 +269,10 @@ func (e *RecordError) Error() string {
 
 func (e *RecordError) Unwrap() error { return e.Cause }
 
+type BeingCreatedError struct{ Name, Mac string }
+
+func (e *BeingCreatedError) Error() string { return e.Name + " is being created on " + e.Mac }
+
 type NotAVMError struct{ Name, Verb string }
 
 func (e *NotAVMError) Error() string { return e.Name + " is a Mac" }

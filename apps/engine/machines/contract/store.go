@@ -19,6 +19,16 @@ type MachineStore interface {
 	// the engine its env) never writes back another's stale; a VM never
 	// put is changed from its zero record, named.
 	Update(ctx context.Context, name string, change func(r *machines.Record)) error
+	// invariant: an amend changes a VM's record as an update does, and never
+	// makes one: a VM with no record answers store.ErrNotFound, nothing
+	// written.
+	Amend(ctx context.Context, name string, change func(r *machines.Record)) error
+	// invariant: a claim reads every VM's record and writes the one judge
+	// answers as one step no other Claim, Update or Amend of any process on
+	// this Mac interleaves, so what judge decided from is still so when its
+	// record lands; a judge's error writes nothing and is the claim's. A
+	// claim that waits for another ends when ctx does, with ctx's error.
+	Claim(ctx context.Context, judge func(held []machines.Record) (machines.Record, error)) error
 	// invariant: every VM put, sorted by name.
 	List(ctx context.Context) ([]machines.Record, error)
 	// invariant: every VM put whose record parses, sorted by name; a record

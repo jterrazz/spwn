@@ -234,7 +234,7 @@ func (o macOverview) vmRow(vm model.VM) page.Row {
 	switch {
 	case vm.State == model.Creating && vm.Birth != nil:
 		row.Glyph = page.Glyph{Dot: page.DotRing, Progress: vm.Birth.Progress, Signal: page.SignalActive}
-		row.Detail = page.Texts("creating", vm.Birth.Step)
+		row.Detail = page.Texts("creating", vm.Birth.Doing())
 		birth := page.Value{Kind: page.KindRatio, N: int64(vm.Birth.Progress), Of: 1000}
 		row.Birth, row.Cells = &birth, nil
 		row.Trail = ""

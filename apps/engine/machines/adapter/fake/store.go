@@ -36,7 +36,7 @@ func record(name string, v *world.VM) machines.Record {
 	k := v.Kept
 	return machines.Record{
 		Name: name, Image: k.Image, Version: k.Version, Lifetime: k.Lifetime, Want: k.Want, Network: k.Network, Check: k.Check,
-		Env: k.Env, CPUs: v.Size.CPUs, MemoryBytes: v.Size.Memory, DiskBytes: v.Size.Disk, CreatedAt: k.CreatedAt, Birth: k.Birth, Agents: k.Agents, Template: k.Template, Mounts: k.Mounts,
+		Env: k.Env, CPUs: v.Size.CPUs, MemoryBytes: v.Size.Memory, DiskBytes: v.Size.Disk, CreatedAt: k.CreatedAt, Birth: k.Birth, Owner: k.Owner, Agents: k.Agents, Template: k.Template, Mounts: k.Mounts,
 		Purpose: k.Purpose, Creator: k.Creator,
 	}
 }
@@ -65,6 +65,42 @@ func (s *Store) Update(_ context.Context, name string, change func(r *machines.R
 	return nil
 }
 
+func (s *Store) Amend(_ context.Context, name string, change func(r *machines.Record)) error {
+	s.w.Lock()
+	defer s.w.Unlock()
+	v, ok := s.vms()[name]
+	if !ok || v.Kept == nil {
+		return store.ErrNotFound
+	}
+	r := record(name, v)
+	change(&r)
+	s.put(r)
+	return nil
+}
+
+// invariant: the claims of every world of this process take turns, so
+// judge may read the world, whose lock it does not hold, and no claim
+// writes between another's read and its write.
+var claims = make(chan struct{}, 1)
+
+func (s *Store) Claim(ctx context.Context, judge func(held []machines.Record) (machines.Record, error)) error {
+	select {
+	case claims <- struct{}{}:
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	defer func() { <-claims }()
+	held, err := s.List(ctx)
+	if err != nil {
+		return err
+	}
+	r, err := judge(held)
+	if err != nil {
+		return err
+	}
+	return s.Put(ctx, r)
+}
+
 func (s *Store) Put(_ context.Context, r machines.Record) error {
 	s.w.Lock()
 	defer s.w.Unlock()
@@ -84,7 +120,7 @@ func (s *Store) put(r machines.Record) {
 	}
 	v.Kept = &world.Kept{
 		Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
-		CreatedAt: r.CreatedAt, Birth: r.Birth, Agents: agents, Template: r.Template, Mounts: r.Mounts,
+		CreatedAt: r.CreatedAt, Birth: r.Birth, Owner: r.Owner, Agents: agents, Template: r.Template, Mounts: r.Mounts,
 		Purpose: r.Purpose, Creator: r.Creator,
 	}
 	v.Size = machines.Size{CPUs: r.CPUs, Memory: r.MemoryBytes, Disk: r.DiskBytes}

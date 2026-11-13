@@ -11,6 +11,16 @@
                 "here": "jterrazz-macbook-pro",
                 "vm_user": "admin"
             },
+            "processes": [
+                {
+                    "pid": 4242,
+                    "start": "1762250400.120000"
+                },
+                {
+                    "pid": 4243,
+                    "start": "1762250401.330000"
+                }
+            ],
             "power": {
                 "Lid": "open",
                 "Source": "ac",
@@ -34,9 +44,15 @@
                         "version": "2026.11.01",
                         "lifetime": "ephemeral",
                         "created_at": "2026-11-04T10:00:00Z",
+                        "owner": {
+                            "pid": 4242,
+                            "start": "1762250400.120000"
+                        },
                         "birth": {
                             "progress": 400,
                             "step": "booting",
+                            "position": 2,
+                            "steps": 4,
                             "at": "2026-11-04T10:00:03Z"
                         }
                     },
@@ -44,6 +60,32 @@
                     "size": {
                         "CPUs": 4,
                         "Memory": 8589934592,
+                        "Disk": 20000000000
+                    }
+                },
+                "linux-5": {
+                    "kept": {
+                        "image": "station-linux",
+                        "lifetime": "persistent",
+                        "created_at": "2026-11-04T10:00:01Z",
+                        "purpose": "Lot shell, one block per package",
+                        "creator": "studio-os-fe",
+                        "owner": {
+                            "pid": 4243,
+                            "start": "1762250401.330000"
+                        },
+                        "birth": {
+                            "progress": 20,
+                            "step": "building",
+                            "position": 1,
+                            "steps": 5,
+                            "detail": "image 2 of 3",
+                            "at": "2026-11-04T10:00:04Z"
+                        }
+                    },
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 4294967296,
                         "Disk": 20000000000
                     }
                 }

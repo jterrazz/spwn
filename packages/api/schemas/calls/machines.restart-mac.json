@@ -73,17 +73,35 @@
           "format": "date-time",
           "type": "string"
         },
+        "detail": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer"
+        },
         "progress": {
           "type": "integer"
         },
         "step": {
+          "enum": [
+            "building",
+            "cloning",
+            "booting",
+            "address",
+            "ssh"
+          ],
           "type": "string"
+        },
+        "steps": {
+          "type": "integer"
         }
       },
       "required": [
         "at",
+        "position",
         "progress",
-        "step"
+        "step",
+        "steps"
       ],
       "type": "object"
     },

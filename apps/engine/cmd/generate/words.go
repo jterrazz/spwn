@@ -57,6 +57,13 @@ func wordedEnums() []worded {
 			string(machines.Persistent): {Word: machines.Persistent.Word(), Detail: "Stays until you delete it", Tone: verdict.Plain},
 			string(machines.AlwaysOn):   plain(machines.AlwaysOn.Word()),
 		}},
+		{machines.BirthStep(""), map[string]word{
+			string(machines.BornBuilding): {Word: machines.BornBuilding.Word(), Detail: machines.BornBuilding.Noun(), Tone: verdict.New},
+			string(machines.BornCloning):  {Word: machines.BornCloning.Word(), Detail: machines.BornCloning.Noun(), Tone: verdict.New},
+			string(machines.BornBooting):  {Word: machines.BornBooting.Word(), Detail: machines.BornBooting.Noun(), Tone: verdict.New},
+			string(machines.BornAddress):  {Word: machines.BornAddress.Word(), Detail: machines.BornAddress.Noun(), Tone: verdict.New},
+			string(machines.BornSSH):      {Word: machines.BornSSH.Word(), Detail: machines.BornSSH.Noun(), Tone: verdict.New},
+		}},
 		{catalog.OS(""), map[string]word{
 			string(catalog.OSMacOS):  plain("macOS"),
 			string(catalog.OSUbuntu): plain("Ubuntu"),

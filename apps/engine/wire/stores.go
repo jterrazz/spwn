@@ -103,7 +103,7 @@ func newStores(files local.FS, p setup.Paths) *stores {
 	return &stores{
 		prefs: corejsonfile.NewPreferences(files, p.Prefs, preferenceGroups()).Renaming(machinescontract.RetiredGroupMacs, machinescontract.GroupMacs).
 			Renaming(setupcontract.RetiredGroupName, setupcontract.GroupName).Renaming(portscontract.RetiredGroupPorts, portscontract.GroupPorts),
-		machines:     machinesjsonfile.New(files, filepath.Join(p.State, "vms")),
+		machines:     machinesjsonfile.New(lockable{files}, filepath.Join(p.State, "vms")),
 		images:       imagesjsonfile.New(files, filepath.Join(p.State, "images")),
 		shares:       accountsjsonfile.NewShares(files, filepath.Join(p.State, "shares.json"), filepath.Join(p.State, "vms")),
 		reservations: portsjsonfile.NewReservations(files, filepath.Join(p.State, "leases.json")),
@@ -118,6 +118,10 @@ func newStores(files local.FS, p setup.Paths) *stores {
 type lockable struct{ local.FS }
 
 func (lockable) Lock(path string) (func(), error) { return local.Exclusive(context.Background(), path) }
+
+func (lockable) Hold(ctx context.Context, path string) (func(), error) {
+	return local.Exclusive(ctx, path)
+}
 
 func (s *stores) migrators() []store.Migrator {
 	return []store.Migrator{s.prefs, s.ports(), s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}

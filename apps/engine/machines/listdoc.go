@@ -125,15 +125,18 @@ type ListVM struct {
 }
 
 type ListBirth struct {
-	Progress int    `json:"progress"`
-	Step     string `json:"step"`
+	Progress int       `json:"progress"`
+	Step     BirthStep `json:"step"`
+	// value: what its step does now, the build's own step while its image
+	// is built; absent for none.
+	Detail string `json:"detail,omitempty"`
 }
 
 func birthOf(vm VM) *ListBirth {
 	if vm.Birth == nil {
 		return nil
 	}
-	return &ListBirth{Progress: vm.Birth.Progress, Step: vm.Birth.Step}
+	return &ListBirth{Progress: vm.Birth.Progress, Step: vm.Birth.Step, Detail: vm.Birth.Detail}
 }
 
 type ListUptime struct {

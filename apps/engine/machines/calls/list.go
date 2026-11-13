@@ -68,15 +68,14 @@ var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
 	Run: func(ctx context.Context, d Deps, in CreateIn, p call.Progress) (machines.Created, error) {
 		r := in.Request
 		r.Server = false
+		var b ImageBuild
 		if image := missingImage(ctx, d, r); image != "" {
 			if err := confirm.Ask(confirm.BuildImage, d.Kind, d.OS, image, in.Confirm); err != nil {
 				return machines.Created{}, err
 			}
-			if err := build(ctx, d, image, p); err != nil {
-				return machines.Created{}, err
-			}
+			b = builds(d, image)
 		}
-		return create(ctx, d, r, p)
+		return create(ctx, d, r, b, p)
 	},
 }
 
@@ -100,15 +99,14 @@ var CreateServer = call.Call[Deps, CreateServerIn, machines.Created]{
 	Errors: serverRefusals(),
 	Run: func(ctx context.Context, d Deps, in CreateServerIn, p call.Progress) (machines.Created, error) {
 		r := machines.CreateRequest{Image: in.Image, Name: in.Name, Server: true, Network: in.Network, Size: in.Size, Check: in.Check, Purpose: in.Purpose, Creator: in.Creator}
+		var b ImageBuild
 		if image := missingImage(ctx, d, r); image != "" {
 			if err := confirm.Ask(confirm.BuildImage, d.Kind, d.OS, image, in.Confirm); err != nil {
 				return machines.Created{}, err
 			}
-			if err := build(ctx, d, image, p); err != nil {
-				return machines.Created{}, err
-			}
+			b = builds(d, image)
 		}
-		created, err := create(ctx, d, r, p)
+		created, err := create(ctx, d, r, b, p)
 		created.OnALaptop = err == nil && d.Laptop
 		return created, err
 	},
@@ -128,24 +126,17 @@ func missingImage(ctx context.Context, d Deps, r machines.CreateRequest) string 
 	return ""
 }
 
-func build(ctx context.Context, d Deps, image string, p call.Progress) error {
-	last := ""
-	err := d.Images.Build(ctx, image, func(label string) {
-		if last != "" {
-			p.Done(last, nil)
-		}
-		last = label
-		p.Step(label, "")
-	})
-	if last != "" {
-		p.Done(last, err)
+// value: the build of image on this Mac, which the create runs once its
+// record holds the VM.
+func builds(d Deps, image string) ImageBuild {
+	return func(ctx context.Context, step func(label string)) error {
+		return imagescalls.Worded(d.Images.Build(ctx, image, step))
 	}
-	return imagescalls.Worded(err)
 }
 
-func create(ctx context.Context, d Deps, r machines.CreateRequest, p call.Progress) (machines.Created, error) {
+func create(ctx context.Context, d Deps, r machines.CreateRequest, b ImageBuild, p call.Progress) (machines.Created, error) {
 	last := ""
-	created, err := d.Machines.Create(ctx, r, func(s machines.Step) {
+	created, err := d.Machines.Create(ctx, r, b, func(s machines.Step) {
 		if last != "" {
 			p.Done(last, nil)
 		}

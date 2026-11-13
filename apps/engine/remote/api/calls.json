@@ -708,7 +708,8 @@
       "confirm": "delete",
       "errors": [
         "confirm.mismatch",
-        "confirm.needed"
+        "confirm.needed",
+        "machines.being-created"
       ],
       "in": "DeleteIn",
       "out": "DeleteReport"

@@ -1,0 +1,12 @@
+description: 'a VM whose create still runs is refused, and stays on the list, being created'
+env: creating
+runs:
+    - command: 'machines delete linux-4 --confirm=linux-4'
+      exit: 2
+      stderr: |
+          Error: linux-4 is being created on jterrazz-macbook-pro
+          Hint: wait for its create to end, or interrupt it where it runs
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[0].vms[] | select(.name == "linux-4") | [.name, .state]]'''
+      exit: 0
+      stdout: |
+          [["linux-4","creating"]]

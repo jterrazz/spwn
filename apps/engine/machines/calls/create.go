@@ -110,10 +110,20 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	if err != nil {
 		return r, err
 	}
-	return s.checkCreate(ctx, r)
+	if r, _, err = s.checkCreate(ctx, r); err != nil {
+		return r, err
+	}
+	if err := s.built(ctx, r.Image); err != nil {
+		return r, err
+	}
+	return r, s.engineUp(ctx, false)
 }
 
-func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (model.CreateRequest, error) {
+// invariant: every refusal of a create that needs no built image, the
+// memory's included, so a create the Mac has no room for is refused before
+// its image is built; with the names the fleet holds, which the create's
+// claim judges again with This Mac's records as they are then.
+func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (model.CreateRequest, claims, error) {
 	server := r.Server
 	switch {
 	case server:
@@ -121,53 +131,47 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 	case r.Lifetime == "":
 		r.Lifetime = model.Ephemeral
 	case r.Lifetime != model.Ephemeral && r.Lifetime != model.Persistent:
-		return r, &model.BadLifetimeError{Value: string(r.Lifetime)}
+		return r, claims{}, &model.BadLifetimeError{Value: string(r.Lifetime)}
 	}
 	switch {
 	case server && r.Name == "":
-		return r, ServerNeedsNameRule
+		return r, claims{}, ServerNeedsNameRule
 	case server && r.Network == model.Bridged:
-		return r, ServerBridgedRule
+		return r, claims{}, ServerBridgedRule
 	case !server && r.Check != "":
-		return r, CheckForServersRule
+		return r, claims{}, CheckForServersRule
 	case r.Check != "" && !validCheck(r.Check):
-		return r, &model.BadCheckError{Value: r.Check}
+		return r, claims{}, &model.BadCheckError{Value: r.Check}
 	case r.Creator != "" && (!validName(r.Creator) || r.Creator == model.ByOwner):
-		return r, &model.BadCreatorError{Session: r.Creator}
+		return r, claims{}, &model.BadCreatorError{Session: r.Creator}
 	case !validPurpose(r.Purpose):
-		return r, &model.BadPurposeError{Purpose: r.Purpose}
+		return r, claims{}, &model.BadPurposeError{Purpose: r.Purpose}
 	}
 	img, ok := s.imageOf(ctx, r.Image)
 	if !ok {
-		return r, &model.UnknownImageError{Image: r.Image}
+		return r, claims{}, &model.UnknownImageError{Image: r.Image}
 	}
 	r.Image = img.Name
 	network, err := networkFor(img, r.Network)
 	if err != nil {
-		return r, err
+		return r, claims{}, err
 	}
 	r.Network = network
 	if r.Name != "" && !validName(r.Name) {
-		return r, &model.BadNameError{Name: r.Name}
+		return r, claims{}, &model.BadNameError{Name: r.Name}
 	}
 	if _, err = s.engine.Version(ctx); err != nil {
-		return r, &model.NoEngineError{Hypervisor: s.engine.Name(), Cause: err}
-	}
-	if _, _, err = s.img.Latest(ctx, r.Image); err != nil {
-		if unbuilt := new(model.NoImageError); errors.As(err, &unbuilt) {
-			return r, &model.NoImageError{Image: unbuilt.Image, Mac: s.ThisMacName(), Fetched: unbuilt.Fetched}
-		}
-		return r, err
+		return r, claims{}, &model.NoEngineError{Hypervisor: s.engine.Name(), Cause: err}
 	}
 	held, err := s.claims(ctx)
 	if err != nil {
-		return r, err
+		return r, claims{}, err
 	}
 	switch {
 	case r.Name == "":
 		r.Name = allocateName(string(img.Kind), held)
 	case !held.free(r.Name):
-		return r, held.taken(r.Name)
+		return r, claims{}, held.taken(r.Name)
 	}
 	size := model.Resources{CPUs: img.Defaults.CPUs, MemoryBytes: img.Defaults.MemoryBytes, DiskBytes: img.Defaults.DiskBytes}
 	if server {
@@ -183,12 +187,18 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 		r.Size.DiskBytes = size.DiskBytes
 	}
 	if left, ok := s.memoryLeft(ctx); ok && r.Size.MemoryBytes > left {
-		return r, &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(max(left, 0) >> 30)}
+		return r, claims{}, &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(max(left, 0) >> 30)}
 	}
-	if err := s.engineUp(ctx, false); err != nil {
-		return r, err
+	return r, held, nil
+}
+
+// value: refuses an image not built on this Mac, in its name.
+func (s *Machinist) built(ctx context.Context, image string) error {
+	_, _, err := s.img.Latest(ctx, image)
+	if unbuilt := new(model.NoImageError); errors.As(err, &unbuilt) {
+		return &model.NoImageError{Image: unbuilt.Image, Mac: s.ThisMacName(), Fetched: unbuilt.Fetched}
 	}
-	return r, nil
+	return err
 }
 
 func (s *Machinist) EngineUp(ctx context.Context) error { return s.engineUp(ctx, true) }
@@ -274,11 +284,66 @@ func (s *Machinist) memoryLeft(ctx context.Context) (int64, bool) {
 	return c.Free, ok
 }
 
-func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress func(model.Step)) (model.Created, error) {
-	// invariant: a failure after the clone and before the first run rolls
-	// every made thing back, and from the first run on the VM is kept, with
-	// what failed; the ports its env names are reserved by its Mac's engine
-	// at that run, and read back once it answers.
+// invariant: a create's record lands by a claim of This Mac's records, so
+// two creates of any processes of this Mac never both take the memory or
+// the name one of them was judged for: the claim judges the name and the
+// memory again from the records as they are then, the names the fleet
+// held and what the Mac and its engine said read before it, so no other
+// Mac nor the engine is waited for while the records are held. A name the
+// create chose is chosen again there.
+func (s *Machinist) claim(ctx context.Context, asked string, r *model.CreateRequest, img catalog.Image, others claims, rec *model.VMRecord) error {
+	hardware, disks := s.hardware(ctx), s.disks(ctx)
+	_, live := s.engineView(ctx)
+	var refused error
+	err := s.recs.Claim(ctx, func(records []model.Record) (model.Record, error) {
+		held := others.with(s.ThisMacName(), records)
+		switch {
+		case asked == "":
+			r.Name = allocateName(string(img.Kind), held)
+		case !held.free(asked):
+			refused = held.taken(asked)
+			return model.Record{}, refused
+		}
+		vms := s.vmsOf("", records, disks, live)
+		if c, ok := model.CapacityOf(model.MacView{Hardware: hardware, VMs: vms}); ok && r.Size.MemoryBytes > c.Free {
+			refused = &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(max(c.Free, 0) >> 30)}
+			return model.Record{}, refused
+		}
+		rec.Name = r.Name
+		return storedOf(*rec), nil
+	})
+	switch {
+	case refused != nil:
+		return refused
+	case err != nil && ctx.Err() == nil:
+		return &model.CreateFailedError{Name: r.Name, Step: "the record", Cause: err}
+	}
+	return err
+}
+
+// value: the process this create runs in; nil when it cannot say, which
+// no reader reads as running.
+func (s *Machinist) self() *model.Process {
+	if s.o.Processes == nil {
+		return nil
+	}
+	p, err := s.o.Processes.Self()
+	if err != nil {
+		return nil
+	}
+	return &p
+}
+
+func (s *Machinist) runs(p *model.Process) bool {
+	return p != nil && s.o.Processes != nil && s.o.Processes.Runs(*p)
+}
+
+func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build ImageBuild, progress func(model.Step)) (model.Created, error) {
+	// invariant: a failure before the first run, the image's build
+	// included, rolls every made thing back, its record too, and from the
+	// first run on the VM is kept, with what failed; the ports its env
+	// names are reserved by its Mac's engine at that run, and read back
+	// once it answers.
 	if err := s.CheckMac(); err != nil {
 		return model.Created{}, err
 	}
@@ -286,8 +351,16 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	if err != nil {
 		return model.Created{}, err
 	}
-	if r, err = s.checkCreate(ctx, r); err != nil {
+	asked := r.Name
+	r, others, err := s.checkCreate(ctx, r)
+	if err != nil {
 		return model.Created{}, err
+	}
+	switch unbuilt := s.built(ctx, r.Image); {
+	case unbuilt == nil:
+		build = nil
+	case build == nil || !errors.As(unbuilt, new(*model.NoImageError)):
+		return model.Created{}, unbuilt
 	}
 	if up := s.EngineUp(ctx); up != nil {
 		return model.Created{}, up
@@ -302,15 +375,12 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		return model.Created{}, err
 	}
 	img, _ := s.imageOf(ctx, r.Image)
-	disk, version, err := s.img.Latest(ctx, r.Image)
-	if err != nil {
-		return model.Created{}, err
-	}
 	server := r.Lifetime == model.AlwaysOn
+	owner := s.self()
 	rec := model.VMRecord{
-		Name: r.Name, Image: r.Image, Version: version, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check,
+		Name: r.Name, Image: r.Image, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check,
 		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second), Template: r.From,
-		Purpose: r.Purpose, Creator: r.Creator,
+		Purpose: r.Purpose, Creator: r.Creator, Owner: owner,
 	}
 	want := ""
 	if r.Lifetime == model.Persistent || server {
@@ -330,25 +400,61 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		return failed(&model.CreateFailedError{Name: r.Name, Step: step, Cause: cause})
 	}
 	// invariant: SPEC B5.10: the record exists from the create's first
-	// frame, its memory reserved, wanting nothing until its disk is made;
-	// each step moves its birth on, and the create's end, made or kept
-	// failing, takes it off.
-	born := func(step string) error {
-		rec.Birth = model.BirthAt(step, s.h.Now())
+	// frame, its image's build included, its memory reserved, wanting
+	// nothing until its disk is made; each step moves its birth on, and a
+	// record gone meanwhile (deleted) stops the create, never made again;
+	// a failure before the clone takes it off, and the create's end, made
+	// or kept failing, takes its birth off.
+	born := func(step model.BirthStep, detail string) error {
+		rec.Birth = model.BirthAt(step, build != nil, s.h.Now())
+		rec.Birth.Detail = detail
 		return s.writeBirth(rec)
 	}
 	defer func() {
 		if made.record && !made.undone {
-			rec.Birth = nil
+			rec.Birth, rec.Owner = nil, nil
 			_ = s.writeBirth(rec)
 		}
 	}()
-
-	say("cloning " + disk)
-	if err = born(model.BornCloning); err != nil {
-		return fail("the record", err)
+	first := model.BornCloning
+	if build != nil {
+		first = model.BornBuilding
+	}
+	rec.Birth = model.BirthAt(first, build != nil, s.h.Now())
+	if err = s.claim(ctx, asked, &r, img, others, &rec); err != nil {
+		return failed(err)
 	}
 	made.record = true
+
+	if build != nil {
+		building, stop := context.WithCancel(ctx)
+		var gone error
+		err = build(building, func(label string) {
+			say(label)
+			if moved := born(model.BornBuilding, label); moved != nil && gone == nil {
+				gone = moved
+				stop()
+			}
+		})
+		stop()
+		if gone != nil {
+			return fail("the record", gone)
+		}
+		if err != nil {
+			s.undoCreate(ctx, r.Name, made)
+			return failed(err)
+		}
+	}
+	disk, version, err := s.img.Latest(ctx, r.Image)
+	if err != nil {
+		s.undoCreate(ctx, r.Name, made)
+		return failed(err)
+	}
+	rec.Version = version
+	say("cloning " + disk)
+	if err = born(model.BornCloning, ""); err != nil {
+		return fail("the record", err)
+	}
 	if err = s.engine.Clone(ctx, imagescontract.ImageLocation{Hypervisor: s.engine.Name(), Ref: disk}, r.Name); err != nil {
 		return fail("the clone", err)
 	}
@@ -361,19 +467,25 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		return fail("the record", err)
 	}
 	say(model.StepRunning)
-	_ = born(model.BornBooting)
+	if err = born(model.BornBooting, ""); err != nil {
+		return fail("the record", err)
+	}
 	if err = s.engineAPI.Do(ctx, engine.VMRun, r.Name); err != nil {
 		return failed(s.unhealthy(ctx, r.Name, err))
 	}
 	say(model.StepAddress)
-	_ = born(model.BornAddress)
+	if err = born(model.BornAddress, ""); err != nil {
+		return failed(&model.UnknownMachineError{Name: r.Name})
+	}
 	addr, err := s.engine.Address(ctx, r.Name, ipWait)
 	if err != nil {
 		return failed(&model.UnhealthyError{Name: r.Name, Step: model.StepAddress, Detail: "none after 60 s"})
 	}
 	ip := addr.String()
 	say(model.StepSSH)
-	_ = born(model.BornSSH)
+	if err = born(model.BornSSH, ""); err != nil {
+		return failed(&model.UnknownMachineError{Name: r.Name})
+	}
 	if err := s.setUp(ctx, img, r); err != nil {
 		return failed(&model.UnhealthyError{Name: r.Name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())})
 	}
@@ -472,18 +584,18 @@ func (s *Machinist) Save(r model.VMRecord) error {
 	// anyone else keeps the one stored, read in the same Update as its
 	// write, so none outlives its create.
 	return s.recs.Update(context.Background(), r.Name, func(stored *model.Record) {
-		birth := stored.Birth
+		birth, owner := stored.Birth, stored.Owner
 		*stored = storedOf(r)
-		stored.Birth = birth
+		stored.Birth, stored.Owner = birth, owner
 	})
 }
 
 // invariant: the env and the mounts are the engine's to write, at the
 // VM's run: each write of the create keeps the ones stored, read in the
-// same Update as its write, so the create never writes back what the
-// engine replaced.
+// same Amend as its write, so the create never writes back what the
+// engine replaced; a record gone is never made again.
 func (s *Machinist) writeBirth(r model.VMRecord) error {
-	return s.recs.Update(context.Background(), r.Name, func(stored *model.Record) {
+	return s.recs.Amend(context.Background(), r.Name, func(stored *model.Record) {
 		env, mounts := stored.Env, stored.Mounts
 		*stored = storedOf(r)
 		stored.Env, stored.Mounts = env, mounts

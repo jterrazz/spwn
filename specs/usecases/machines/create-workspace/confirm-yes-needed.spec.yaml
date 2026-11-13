@@ -15,3 +15,7 @@ runs:
       stderr: |
           Error: this station is a dev build: there is no release binary to put in the image
           Hint: make build-linux, then station images build station-linux --binary .artifacts/go/station-linux-arm64
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name]'''
+      exit: 0
+      stdout: |
+          []

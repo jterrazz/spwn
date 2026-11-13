@@ -1,9 +1,9 @@
-description: 'a create stalled for half an hour reads stopped and half made, its memory given back'
+description: 'a create its engine died in reads stopped and half made, its memory given back'
 env: creating
 runs:
-    - command: 'world advance 31m'
+    - command: 'world reboot jterrazz-macbook-pro'
       exit: 0
-    - command: 'machines --json | /usr/bin/jq -c ''.macs[0] | [(.vms[0] | .state, .detail, .birth), .capacity.free_bytes]'''
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[0] | [(.vms[] | [.name, .state, .detail, .birth]), .capacity.free_bytes]'''
       exit: 0
       stdout: |
-          ["stopped","was left half made",null,21474836480]
+          [["linux-4","stopped","was left half made",null],["linux-5","stopped","was left half made",null],21474836480]

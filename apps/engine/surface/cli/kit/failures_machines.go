@@ -17,6 +17,7 @@ func machinesFailure(err error) (*fail.Error, bool) {
 	var macOnly *model.OnlyOnMacError
 	var taken *model.NameTakenError
 	var bad *model.BadNameError
+	var born *model.BeingCreatedError
 	var unreachable *model.UnreachableError
 	var noEther *model.NoHardwareAddressError
 	var timeout *model.RestartTimeoutError
@@ -38,7 +39,7 @@ func machinesFailure(err error) (*fail.Error, bool) {
 		return usage(notMac.Error(), notAMacHint(notMac)), true
 	case errors.As(err, &macOnly):
 		return usage(macOnly.Error(), "run it on a Mac"), true
-	case errors.As(err, &taken), errors.As(err, &bad):
+	case errors.As(err, &taken), errors.As(err, &bad), errors.As(err, &born):
 		return Translate(machinescalls.Worded(err), ""), true
 	case errors.As(err, &unreachable):
 		return failed(unreachable.Error(), "station machines", err), true

@@ -56,6 +56,8 @@ type VMRecord struct {
 	Resources            Resources
 	CreatedAt            time.Time
 	Birth                *Birth
+	// value: the process its create runs in, while it runs; nil after.
+	Owner *Process
 	// value: the agents a workspace held when it last stopped.
 	Agents []string
 	// value: the Machinefile it was made from; empty for none.

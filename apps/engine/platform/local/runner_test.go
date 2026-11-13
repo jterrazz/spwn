@@ -25,15 +25,18 @@ func TestReapKillsOnlyTheProcessThatWasRecorded(t *testing.T) {
 	file := filepath.Join(dir, strconv.Itoa(cmd.Process.Pid))
 	r := &runner{}
 
-	recycled := time.Now().Add(-time.Hour).Unix()
-	if err := os.WriteFile(file, []byte(strconv.FormatInt(recycled, 10)), 0o600); err != nil {
+	start, err := StartOf(cmd.Process.Pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(file, []byte(start+"1\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if n := r.Reap(dir); n != 0 || syscall.Kill(cmd.Process.Pid, 0) != nil {
 		t.Fatalf("a pid whose start does not match was killed (%d)", n)
 	}
 
-	if err := os.WriteFile(file, []byte(strconv.FormatInt(time.Now().Unix(), 10)), 0o600); err != nil {
+	if err := os.WriteFile(file, []byte(start+"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if n := r.Reap(dir); n != 1 {

@@ -26,6 +26,7 @@ const (
 	NoHypervisor    fail.Code = "machines.no-hypervisor"
 	BadName         fail.Code = "machines.bad-name"
 	NameTaken       fail.Code = "machines.name-taken"
+	BeingCreated    fail.Code = "machines.being-created"
 	BadPurpose      fail.Code = "machines.bad-purpose"
 )
 
@@ -45,7 +46,7 @@ func serverRefusals() []fail.Code {
 }
 
 func Worded(err error) error {
-	// invariant: each refusal of a create or an add is one code; its words
+	// invariant: each refusal of a create, an add or a delete is one code; its words
 	// are built from its subject and its detail alone, the Mac it was
 	// refused on among them, so a far Mac's refusal reads the same here.
 	if err == nil {
@@ -69,6 +70,7 @@ func Worded(err error) error {
 		hyper  *machines.NoEngineError
 		bad    *machines.BadNameError
 		taken  *machines.NameTakenError
+		born   *machines.BeingCreatedError
 		why    *machines.BadPurposeError
 	)
 	switch {
@@ -104,6 +106,8 @@ func Worded(err error) error {
 		return refused(fail.Refused, NameTaken, taken.Name, map[string]string{"by": takenBy(taken), "on": taken.On, "agent": taken.Agent})
 	case errors.As(err, &why):
 		return refused(fail.Refused, BadPurpose, why.Purpose, nil)
+	case errors.As(err, &born):
+		return refused(fail.Refused, BeingCreated, born.Name, map[string]string{"mac": born.Mac})
 	}
 	return err
 }

@@ -1,0 +1,19 @@
+description: 'a create with no room is refused for memory before its missing image is built'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+      exit: 0
+    - command: 'machines create web --from studio-linux --memory 60G --yes'
+      exit: 2
+      stderr: |
+          Error: not enough memory on jterrazz-macbook-pro: 60 GB asked, 4 GB left for VMs
+          Hint: ask for less: --memory 4G
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name | select(. == "web")]'''
+      exit: 0
+      stdout: |
+          []

@@ -43,6 +43,7 @@ func MachineStore(t *testing.T, open func(t *testing.T) contract.MachineStore) {
 		s := open(t)
 		creating := vmRecord("linux-4")
 		creating.Birth = &machines.Birth{Progress: 400, Step: machines.BornBooting, At: time.Date(2026, 11, 1, 9, 0, 5, 0, time.UTC)}
+		creating.Owner = &machines.Process{PID: 4242, Start: "1761987605.5"}
 		if err := s.Put(ctx, creating); err != nil {
 			t.Fatalf("Put: %v", err)
 		}
@@ -52,8 +53,8 @@ func MachineStore(t *testing.T, open func(t *testing.T) contract.MachineStore) {
 		if err := s.Put(ctx, vmRecord("linux-4")); err != nil {
 			t.Fatalf("Put: %v", err)
 		}
-		if got, _ := s.Get(ctx, "linux-4"); got.Birth != nil {
-			t.Errorf("Birth = %+v once made; want none", got.Birth)
+		if got, _ := s.Get(ctx, "linux-4"); got.Birth != nil || got.Owner != nil {
+			t.Errorf("Birth = %+v, Owner = %+v once made; want none", got.Birth, got.Owner)
 		}
 	})
 
@@ -142,6 +143,52 @@ func MachineStore(t *testing.T, open func(t *testing.T) contract.MachineStore) {
 		}
 		if got, err := s.Get(ctx, "web"); err != nil || got.Name != "web" || got.Image != "linux" {
 			t.Fatalf("Get = %+v, %v; want web made from its name", got, err)
+		}
+	})
+
+	t.Run("an amend changes a record as it is stored, and never makes one", func(t *testing.T) {
+		s := open(t)
+		if err := s.Put(ctx, vmRecord("api")); err != nil {
+			t.Fatalf("Put: %v", err)
+		}
+		if err := s.Amend(ctx, "api", func(r *machines.Record) { r.Want = "stopped" }); err != nil {
+			t.Fatalf("Amend: %v", err)
+		}
+		if got, err := s.Get(ctx, "api"); err != nil || got.Want != "stopped" || got.Image != "linux" {
+			t.Fatalf("Get = %+v, %v; want api stopped, the rest as put", got, err)
+		}
+		if err := s.Amend(ctx, "web", func(r *machines.Record) { r.Image = "linux" }); !errors.Is(err, store.ErrNotFound) {
+			t.Fatalf("Amend of a VM never put: %v; want not found", err)
+		}
+		if _, err := s.Get(ctx, "web"); !errors.Is(err, store.ErrNotFound) {
+			t.Fatalf("Get after an amend of a VM never put: %v; want not found", err)
+		}
+	})
+
+	t.Run("a claim writes what its judge answers from every record, and nothing when it refuses", func(t *testing.T) {
+		s := open(t)
+		if err := s.Put(ctx, vmRecord("api")); err != nil {
+			t.Fatalf("Put: %v", err)
+		}
+		var seen []string
+		err := s.Claim(ctx, func(held []machines.Record) (machines.Record, error) {
+			for _, r := range held {
+				seen = append(seen, r.Name)
+			}
+			return vmRecord("web"), nil
+		})
+		if err != nil || !reflect.DeepEqual(seen, []string{"api"}) {
+			t.Fatalf("Claim = %v, judged from %v; want api judged", err, seen)
+		}
+		if got, err := s.Get(ctx, "web"); err != nil || !reflect.DeepEqual(got, vmRecord("web")) {
+			t.Fatalf("Get = %+v, %v; want web as the judge answered", got, err)
+		}
+		no := errors.New("no room")
+		if err := s.Claim(ctx, func([]machines.Record) (machines.Record, error) { return vmRecord("db"), no }); !errors.Is(err, no) {
+			t.Fatalf("Claim refused = %v; want the judge's refusal", err)
+		}
+		if _, err := s.Get(ctx, "db"); !errors.Is(err, store.ErrNotFound) {
+			t.Fatalf("Get after a refused claim: %v; want nothing written", err)
 		}
 	})
 }

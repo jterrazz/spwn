@@ -123,13 +123,19 @@ func run(cmd *exec.Cmd, track string) error {
 	// invariant: a tracked child's file lives while it runs, so a parent killed
 	// with -9 leaves the record its next start reaps.
 	file := filepath.Join(track, strconv.Itoa(cmd.Process.Pid))
-	_ = os.WriteFile(file, []byte(strconv.FormatInt(time.Now().Unix(), 10)+"\n"), 0o600)
+	if start, err := StartOf(cmd.Process.Pid); err == nil {
+		_ = os.WriteFile(file, []byte(start+"\n"), 0o600)
+	}
 	err := cmd.Wait()
 	_ = os.Remove(file)
 	return err
 }
 
 func (r *runner) Reap(dir string) int {
+	// invariant: a recorded pid is killed only while it still names the
+	// process that was recorded: its start, read from the kernel as
+	// Processes reads it, must be the one written, so a recycled pid
+	// survives.
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return 0
@@ -143,8 +149,7 @@ func (r *runner) Reap(dir string) int {
 		if err != nil || pid <= 1 {
 			continue
 		}
-		started, err := strconv.ParseInt(strings.TrimSpace(string(data)), 10, 64)
-		if err != nil || !r.startedAt(pid, started) {
+		if !(Processes{}).Runs(pid, strings.TrimSpace(string(data))) {
 			continue
 		}
 		if syscall.Kill(-pid, syscall.SIGKILL) == nil {
@@ -152,24 +157,6 @@ func (r *runner) Reap(dir string) int {
 		}
 	}
 	return killed
-}
-
-// invariant: a recorded pid is killed only while it still names the process
-// that was recorded: its start time must match, so a recycled pid survives.
-// ps prints that time in the C locale, the only one its layout parses.
-func (r *runner) startedAt(pid int, unix int64) bool {
-	cmd := exec.Command("/bin/ps", "-o", "lstart=", "-p", strconv.Itoa(pid))
-	cmd.Env = append(append([]string{}, r.env...), "LC_ALL=C")
-	out, err := cmd.Output()
-	if err != nil {
-		return false
-	}
-	t, err := time.ParseInLocation("Mon Jan _2 15:04:05 2006", strings.TrimSpace(string(out)), time.Local)
-	if err != nil {
-		return false
-	}
-	d := t.Unix() - unix
-	return d >= -2 && d <= 2
 }
 
 func (r *runner) Output(ctx context.Context, c Cmd) (Output, error) {

@@ -21,6 +21,8 @@ type Record struct {
 	CreatedAt   time.Time
 	// value: SPEC B5.10: its create's progress while it runs; nil after.
 	Birth *Birth
+	// value: the process its create runs in, while it runs; nil after.
+	Owner *Process
 	// value: the name of every agent a workspace held when it last stopped,
 	// finished ones too: what it holds while no one reads its journal.
 	Agents []string

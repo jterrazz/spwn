@@ -15,7 +15,7 @@ func recordOf(r model.Record) model.VMRecord {
 	return model.VMRecord{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		Resources: model.Resources{CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes},
-		CreatedAt: r.CreatedAt, Birth: r.Birth, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
+		CreatedAt: r.CreatedAt, Birth: r.Birth, Owner: r.Owner, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
 		Purpose: r.Purpose, Creator: r.Creator,
 	}
 }
@@ -24,18 +24,26 @@ func storedOf(r model.VMRecord) model.Record {
 	return model.Record{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.Resources.CPUs, MemoryBytes: r.Resources.MemoryBytes, DiskBytes: r.Resources.DiskBytes, CreatedAt: r.CreatedAt,
-		Birth: r.Birth, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
+		Birth: r.Birth, Owner: r.Owner, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
 		Purpose: r.Purpose, Creator: r.Creator,
 	}
 }
 
-func (s *Machinist) records() ([]model.VMRecord, error) {
+func (s *Machinist) stored() ([]model.Record, error) {
 	stored, err := s.recs.List(context.Background())
 	if err != nil {
 		var unreadable *store.UnreadableError
 		if errors.As(err, &unreadable) {
 			return nil, &model.RecordError{Path: unreadable.Path, Cause: unreadable.Cause}
 		}
+		return nil, err
+	}
+	return stored, nil
+}
+
+func (s *Machinist) records() ([]model.VMRecord, error) {
+	stored, err := s.stored()
+	if err != nil {
 		return nil, err
 	}
 	out := make([]model.VMRecord, 0, len(stored))
@@ -59,21 +67,41 @@ func (s *Machinist) Records() ([]model.VMRecord, error) { return s.records() }
 func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineVM) ([]model.VM, error) {
 	// invariant: the daemon's view wins; without it, no engine or a listing that
 	// fails means nothing is running: every workspace reads stopped.
-	records, err := s.records()
-	if err != nil || len(records) == 0 {
+	stored, err := s.stored()
+	if err != nil || len(stored) == 0 {
 		return nil, err
 	}
-	engine := map[string]contract.Disk{}
-	if s.engine != nil {
-		if disks, listErr := s.engine.Disks(ctx); listErr == nil {
-			for _, d := range disks {
-				engine[d.VM] = d
-			}
+	out := s.vmsOf(mac, stored, s.disks(ctx), live)
+	for i, vm := range out {
+		if vm.Lifetime == model.AlwaysOn && s.o.Uptime != nil {
+			out[i].Uptime, _ = s.o.Uptime.Get(ctx, vm.Name)
 		}
 	}
-	out := make([]model.VM, 0, len(records))
-	for _, r := range records {
-		info := engine[r.Name]
+	return out, nil
+}
+
+// value: the disks this Mac's hypervisor holds, by VM; none when it does
+// not say.
+func (s *Machinist) disks(ctx context.Context) map[string]contract.Disk {
+	out := map[string]contract.Disk{}
+	if s.engine == nil {
+		return out
+	}
+	if disks, err := s.engine.Disks(ctx); err == nil {
+		for _, d := range disks {
+			out[d.VM] = d
+		}
+	}
+	return out
+}
+
+// value: the VMs these records are, as the disks and the engine's view
+// say, each birth judged by whether its create's process runs.
+func (s *Machinist) vmsOf(mac string, stored []model.Record, disks map[string]contract.Disk, live map[string]EngineVM) []model.VM {
+	out := make([]model.VM, 0, len(stored))
+	for _, rec := range stored {
+		r := recordOf(rec)
+		info := disks[r.Name]
 		vm := model.VM{
 			Name: r.Name, Image: r.Image, Version: r.Version, Mac: mac, Kind: s.kindOfImage(r.Image),
 			Lifetime: r.Lifetime, State: stateOf(info), Resources: r.Resources, SizeGB: int(info.Bytes / 1e9),
@@ -89,13 +117,9 @@ func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineV
 			vm.Latency, vm.Restart = d.Latency, d.Restart
 			vm.Cause, vm.LastLines, vm.ReadyAt, vm.Agent = d.Cause, d.LastLines, d.ReadyAt, d.Agent
 		}
-		vm = model.Born(vm, r.Birth, s.h.Now())
-		if r.Lifetime == model.AlwaysOn && s.o.Uptime != nil {
-			vm.Uptime, _ = s.o.Uptime.Get(ctx, r.Name)
-		}
-		out = append(out, vm)
+		out = append(out, model.Born(vm, r.Birth, s.runs(r.Owner)))
 	}
-	return out, nil
+	return out
 }
 
 func networkOf(r model.VMRecord) string {

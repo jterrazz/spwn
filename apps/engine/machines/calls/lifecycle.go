@@ -96,10 +96,10 @@ type DeleteIn struct {
 
 var Delete = call.Call[Deps, DeleteIn, machines.DeleteReport]{
 	Name: "machines.delete", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Delete,
-	Errors: []fail.Code{confirm.Needed, confirm.Mismatch},
+	Errors: []fail.Code{confirm.Needed, confirm.Mismatch, BeingCreated},
 	Run: func(ctx context.Context, d Deps, in DeleteIn, _ call.Progress) (machines.DeleteReport, error) {
-		if err := d.Machines.CheckVM(in.VM, "delete"); err != nil {
-			return machines.DeleteReport{}, err
+		if err := d.Machines.CheckDelete(in.VM); err != nil {
+			return machines.DeleteReport{}, Worded(err)
 		}
 		running, _ := d.Machines.Running(ctx, in.VM)
 		var named []string
@@ -118,7 +118,7 @@ var Delete = call.Call[Deps, DeleteIn, machines.DeleteReport]{
 		}
 		report, err := d.Machines.Delete(ctx, in.VM)
 		report.Agents, report.Warnings = stopped, slices.Concat(warned, report.Warnings)
-		return report, err
+		return report, Worded(err)
 	},
 }
 

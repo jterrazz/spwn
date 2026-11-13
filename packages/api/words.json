@@ -71,6 +71,33 @@
       "Tone": "plain"
     }
   },
+  "MachinesBirthStep": {
+    "address": {
+      "Word": "Creating",
+      "Detail": "network",
+      "Tone": "new"
+    },
+    "booting": {
+      "Word": "Creating",
+      "Detail": "boot",
+      "Tone": "new"
+    },
+    "building": {
+      "Word": "Creating",
+      "Detail": "image",
+      "Tone": "new"
+    },
+    "cloning": {
+      "Word": "Creating",
+      "Detail": "disk",
+      "Tone": "new"
+    },
+    "ssh": {
+      "Word": "Creating",
+      "Detail": "SSH",
+      "Tone": "new"
+    }
+  },
   "MachinesLifetime": {
     "always-on": {
       "Word": "always on",

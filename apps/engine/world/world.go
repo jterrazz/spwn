@@ -135,6 +135,9 @@ type Mac struct {
 	// guest is station's image's.
 	Fresh *VM            `json:"fresh,omitempty"`
 	VMs   map[string]*VM `json:"vms,omitempty"`
+	// value: the processes of station that run on this Mac besides its
+	// engine, a create a command runs: a reboot ends them.
+	Processes []machines.Process `json:"processes,omitempty"`
 
 	Jobs map[string]*Job `json:"jobs,omitempty"`
 	// value: the job manager's overrides by label: enabled or not.
@@ -425,6 +428,8 @@ type Kept struct {
 	Env       map[string]string `json:"env,omitempty"`
 	CreatedAt time.Time         `json:"created_at,omitzero"`
 	Birth     *machines.Birth   `json:"birth,omitempty"`
+	// value: the process its create runs in, while it runs.
+	Owner *machines.Process `json:"owner,omitempty"`
 	// value: the shares station v2 kept in the VM's record, by name, until
 	// the accounts' store moves them out once.
 	Shared []string `json:"lent,omitempty"`

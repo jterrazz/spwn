@@ -1,0 +1,11 @@
+description: 'a VM whose image is being built is listed Creating, image 1 of 5, the build''s step its detail'
+env: creating
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[0] | {vm: (.vms[] | select(.name == "linux-5") | {state, birth, purpose, creator}), held: [.capacity.vms[] | select(.name == "linux-5") | .memory_bytes]}'''
+      exit: 0
+      stdout: |
+          {"vm":{"state":"creating","birth":{"progress":20,"step":"building","detail":"image 2 of 3"},"purpose":"Lot shell, one block per package","creator":"studio-os-fe"},"held":[4294967296]}
+    - command: 'machines | /usr/bin/grep linux-5'
+      exit: 0
+      stdout: |
+          	linux-5	Workspace	jterrazz-macbook-pro	Creating · persistent	4 CPU	4 GB	image 1 of 5

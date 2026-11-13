@@ -2,6 +2,7 @@ package jsonfile_test
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -125,7 +126,7 @@ func (d *racingDisk) ReadFile(p string) ([]byte, error) {
 	return data, err
 }
 
-func (d *racingDisk) Lock(string) (func(), error) {
+func (d *racingDisk) Hold(context.Context, string) (func(), error) {
 	d.mu.Lock()
 	if d.taken {
 		close(d.waiting)
@@ -173,5 +174,58 @@ func TestTwoUpdatesOfARecordNeverInterleave(t *testing.T) {
 	got, err := create.Get(ctx, "linux-4")
 	if err != nil || got.Birth != nil || got.Env["PORT"] != "40001" {
 		t.Errorf("record after the save and the create's end = %+v, %v; want no birth, PORT 40001", got, err)
+	}
+}
+
+// value: the disk with its flock, as the machine wires the records.
+type flocked struct{ jsonfile.Files }
+
+func (flocked) Hold(ctx context.Context, path string) (func(), error) {
+	return local.Exclusive(ctx, path)
+}
+
+// invariant: a claim holds the records against a claim of another store
+// over the same folder, as of another process, from its judge's read to its
+// write; the one that waits for it gives up when its ctx ends, its judge
+// never run.
+func TestAClaimHoldsTheRecordsAgainstAnotherProcessAndItsWaitEndsWithItsContext(t *testing.T) {
+	ctx := context.Background()
+	dir := filepath.Join(t.TempDir(), "vms")
+	first, second := jsonfile.New(flocked{disk()}, dir), jsonfile.New(flocked{disk()}, dir)
+	judging, release := make(chan struct{}), make(chan struct{})
+	bound, stop := context.WithTimeout(ctx, 20*time.Second)
+	defer stop()
+	held := make(chan error, 1)
+	go func() {
+		held <- first.Claim(ctx, func([]machines.Record) (machines.Record, error) {
+			close(judging)
+			select {
+			case <-release:
+			case <-bound.Done():
+			}
+			return machines.Record{Name: "api"}, nil
+		})
+	}()
+	select {
+	case <-judging:
+	case <-bound.Done():
+		t.Fatal("the first claim never judged")
+	}
+	short, cancel := context.WithTimeout(ctx, 300*time.Millisecond)
+	defer cancel()
+	judged := false
+	err := second.Claim(short, func([]machines.Record) (machines.Record, error) {
+		judged = true
+		return machines.Record{Name: "web"}, nil
+	})
+	close(release)
+	if !errors.Is(err, context.DeadlineExceeded) || judged {
+		t.Errorf("a claim while another store's claim judges: %v, judged %v; want it to wait, then end with its context, never judged", err, judged)
+	}
+	if err := <-held; err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.Get(ctx, "web"); err == nil {
+		t.Error("the claim that gave up wrote its record")
 	}
 }

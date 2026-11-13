@@ -45,6 +45,8 @@ type Agents interface {
 	Held(ctx context.Context, vm string) []string
 }
 
+type ImageBuild func(ctx context.Context, step func(label string)) error
+
 type ImageBuilds interface {
 	// value: builds image on this Mac, each step's label to step as it starts.
 	Build(ctx context.Context, image string, step func(label string)) error
@@ -58,7 +60,9 @@ type Machines interface {
 	// value: keeps when each other Mac answered, and its VMs then.
 	Remember(ctx context.Context, f machines.AllMachines) error
 	CheckCreate(ctx context.Context, r machines.CreateRequest) (machines.CreateRequest, error)
-	Create(ctx context.Context, r machines.CreateRequest, progress func(machines.Step)) (machines.Created, error)
+	// value: build is nil when the image is built, or when the owner was
+	// not asked to build it.
+	Create(ctx context.Context, r machines.CreateRequest, build ImageBuild, progress func(machines.Step)) (machines.Created, error)
 	// value: refuses every action while this Mac's engine is stopped.
 	EngineUp(ctx context.Context) error
 	CheckStart(name string) error
@@ -75,6 +79,9 @@ type Machines interface {
 	KeepAgents(name string, agents []string) error
 	// value: refuses a name that is no VM of this host, worded for verb.
 	CheckVM(name, verb string) error
+	// value: refuses what CheckVM refuses for a delete, and a VM whose
+	// create still runs.
+	CheckDelete(name string) error
 	Delete(ctx context.Context, name string) (machines.DeleteReport, error)
 	// value: the lines a VM of this Mac's runs wrote, as its hypervisor keeps them.
 	Log(ctx context.Context, name string) ([]string, error)

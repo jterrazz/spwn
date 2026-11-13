@@ -8,7 +8,6 @@ import (
 	"path"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
@@ -29,7 +28,9 @@ type Files interface {
 type Store struct {
 	files Files
 	dir   string
-	mu    *sync.Mutex
+	// invariant: one turn of this process at a time holds the records,
+	// waited for as long as ctx lasts.
+	turn chan struct{}
 }
 
 var (
@@ -37,7 +38,9 @@ var (
 	_ store.Migrator        = (*Store)(nil)
 )
 
-func New(files Files, dir string) *Store { return &Store{files: files, dir: dir, mu: &sync.Mutex{}} }
+func New(files Files, dir string) *Store {
+	return &Store{files: files, dir: dir, turn: make(chan struct{}, 1)}
+}
 
 func (s *Store) recordFile(name string) string { return path.Join(s.dir, name+".json") }
 
@@ -58,6 +61,7 @@ type file struct {
 	Shared      json.RawMessage   `json:"lent,omitempty"`
 	CreatedAt   time.Time         `json:"created_at"`
 	Birth       *machines.Birth   `json:"birth,omitempty"`
+	Owner       *machines.Process `json:"owner,omitempty"`
 	Agents      []string          `json:"agents,omitempty"`
 	Template    string            `json:"template,omitempty"`
 	Mounts      []machines.Mount  `json:"mounts,omitempty"`
@@ -69,7 +73,7 @@ type file struct {
 func (f file) record() machines.Record {
 	return machines.Record{
 		Name: f.Name, Image: f.Image, Version: f.Version, Lifetime: f.Lifetime, Want: f.Want, Network: f.Network, Check: f.Check, Env: f.Env,
-		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt, Birth: f.Birth, Agents: f.Agents, Template: f.Template, Mounts: f.Mounts,
+		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt, Birth: f.Birth, Owner: f.Owner, Agents: f.Agents, Template: f.Template, Mounts: f.Mounts,
 		Purpose: f.Purpose, Creator: f.Creator,
 	}
 }
@@ -105,36 +109,73 @@ func (s *Store) Get(_ context.Context, name string) (machines.Record, error) {
 }
 
 type Locker interface {
-	// invariant: what serializes an Update between the processes of one
-	// Mac: a lock on a file of the records' folder (the disk's flock),
-	// held until unlock.
-	Lock(path string) (unlock func(), err error)
+	// invariant: what serializes a change between the processes of one
+	// Mac: a lock on a file of the records' folder (the disk's flock), held
+	// until release; a wait for another holder ends when ctx does, with
+	// ctx's error.
+	Hold(ctx context.Context, path string) (release func(), err error)
 }
 
-func (s *Store) Update(ctx context.Context, name string, change func(r *machines.Record)) error {
+// invariant: run runs while this process's turn and the records' lock are
+// held, both waited for as long as ctx lasts; a Files with no lock (a
+// test's) is one process's alone, which the turn serializes.
+func (s *Store) held(ctx context.Context, run func() error) error {
 	if err := s.files.MkdirAll(s.dir, 0o700); err != nil {
 		return err
 	}
-	// invariant: a Files with no lock (a test's) is one process's alone,
-	// whose updates the store's own mutex serializes.
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	select {
+	case s.turn <- struct{}{}:
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	defer func() { <-s.turn }()
 	if l, ok := s.files.(Locker); ok {
-		unlock, err := l.Lock(path.Join(s.dir, ".records.lock"))
+		release, err := l.Hold(ctx, path.Join(s.dir, ".records.lock"))
 		if err != nil {
 			return err
 		}
-		defer unlock()
+		defer release()
 	}
-	r, err := s.Get(ctx, name)
-	switch {
-	case errors.Is(err, store.ErrNotFound):
-		r = machines.Record{Name: name}
-	case err != nil:
-		return err
-	}
-	change(&r)
-	return s.put(r)
+	return run()
+}
+
+func (s *Store) Update(ctx context.Context, name string, change func(r *machines.Record)) error {
+	return s.held(ctx, func() error {
+		r, err := s.Get(ctx, name)
+		switch {
+		case errors.Is(err, store.ErrNotFound):
+			r = machines.Record{Name: name}
+		case err != nil:
+			return err
+		}
+		change(&r)
+		return s.put(r)
+	})
+}
+
+func (s *Store) Amend(ctx context.Context, name string, change func(r *machines.Record)) error {
+	return s.held(ctx, func() error {
+		r, err := s.Get(ctx, name)
+		if err != nil {
+			return err
+		}
+		change(&r)
+		return s.put(r)
+	})
+}
+
+func (s *Store) Claim(ctx context.Context, judge func(held []machines.Record) (machines.Record, error)) error {
+	return s.held(ctx, func() error {
+		records, err := s.list(false)
+		if err != nil {
+			return err
+		}
+		r, err := judge(records)
+		if err != nil {
+			return err
+		}
+		return s.put(r)
+	})
 }
 
 func (s *Store) Put(_ context.Context, r machines.Record) error {
@@ -159,7 +200,7 @@ func (s *Store) put(r machines.Record) error {
 	data, err := json.MarshalIndent(file{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, Shared: held.Shared, CreatedAt: r.CreatedAt,
-		Birth: r.Birth, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts, Purpose: r.Purpose, Creator: r.Creator, V: Version,
+		Birth: r.Birth, Owner: r.Owner, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts, Purpose: r.Purpose, Creator: r.Creator, V: Version,
 	}, "", "  ")
 	if err != nil {
 		return err

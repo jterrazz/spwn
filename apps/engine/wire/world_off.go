@@ -58,6 +58,7 @@ func (*worldMac) imageSource(string) imagescontract.ImageSource          { retur
 func (*worldMac) sshConfig() contract.SSHConfig                          { return nil }
 func (*worldMac) unlocker() contract.Unlocker                            { return nil }
 func (*worldMac) waker() contract.Waker                                  { return nil }
+func (*worldMac) processes(kernel contract.Processes) contract.Processes { return kernel }
 func (*worldMac) jobs() backgroundcontract.Jobs                          { return nil }
 func (*worldMac) inspector() settingscontract.Inspector                  { return nil }
 func (*worldMac) procedureAppliers() []settingscontract.Applier          { return nil }

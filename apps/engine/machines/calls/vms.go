@@ -141,8 +141,21 @@ func (s *Machinist) restartVM(ctx context.Context, name string, say func(phase, 
 	return model.RestartReport{Name: name, VM: true, IP: addr.String(), Waited: s.h.Now().Sub(started)}, nil
 }
 
+func (s *Machinist) CheckDelete(name string) error {
+	// invariant: a VM whose create still runs is no one else's to delete:
+	// its create would go on writing a VM that is gone.
+	r, err := s.VM(name, engine.VMDelete)
+	if err != nil {
+		return err
+	}
+	if r.Birth != nil && r.Birth.Known() && s.runs(r.Owner) {
+		return &model.BeingCreatedError{Name: name, Mac: s.ThisMacName()}
+	}
+	return nil
+}
+
 func (s *Machinist) Delete(ctx context.Context, name string) (model.DeleteReport, error) {
-	if _, err := s.VM(name, engine.VMDelete); err != nil {
+	if err := s.CheckDelete(name); err != nil {
 		return model.DeleteReport{}, err
 	}
 	if err := s.EngineUp(ctx); err != nil {

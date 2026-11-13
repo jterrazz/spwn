@@ -23,6 +23,7 @@ import (
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/kernel"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/macos"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/openssh"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/udp"
@@ -80,7 +81,17 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		StartEngine: m.startEngine,
 		Templates:   machineTemplates{m},
 		Share:       m.shareAccount,
+		Processes:   m.processes(),
 	})
+}
+
+// value: this Mac's processes, as its kernel says; its world's in the spec
+// build, which adds the processes the world says run.
+func (m machine) processes() contract.Processes {
+	if m.world != nil {
+		return m.world.processes(kernel.Processes{})
+	}
+	return kernel.Processes{}
 }
 
 // value: engine start's own use case, run for a call that needs the engine

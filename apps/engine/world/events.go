@@ -141,6 +141,7 @@ func reboot(w *World, args []string) error {
 	if m.Power != nil {
 		m.Power.Holds, m.Power.Clamshell = nil, false
 	}
+	m.Processes = nil
 	return nil
 }
 

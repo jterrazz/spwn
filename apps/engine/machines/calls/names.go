@@ -1,6 +1,7 @@
 package calls
 
 import (
+	"maps"
 	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/agents"
@@ -47,6 +48,18 @@ func (c claims) taken(name string) *model.NameTakenError {
 		return &model.NameTakenError{Name: name, Agent: a.Name, On: a.VM}
 	}
 	return &model.NameTakenError{Name: name, VM: c.held[name] == claimVM, Mac: c.held[name] == claimMac, On: c.on[name]}
+}
+
+// value: the claims with each VM This Mac records, on mac.
+func (c claims) with(mac string, records []model.Record) claims {
+	out := claims{held: maps.Clone(c.held), on: maps.Clone(c.on), agents: c.agents}
+	if out.held == nil {
+		out.held, out.on = map[string]claim{}, map[string]string{}
+	}
+	for _, r := range records {
+		out.held[r.Name], out.on[r.Name] = claimVM, mac
+	}
+	return out
 }
 
 func allocateName(image string, c claims) string { return model.FirstFree(image, c.free) }

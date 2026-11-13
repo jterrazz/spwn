@@ -23,7 +23,7 @@ runs:
     - command: '--version >/dev/null; /bin/cat seen'
       exit: 0
       stdout: |
-          {"vms":[{"state":"creating","birth":{"progress":50,"step":"cloning the image"}}],"held":[4294967296]}
+          {"vms":[{"state":"creating","birth":{"progress":50,"step":"cloning"}}],"held":[4294967296]}
     - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[] | select(.name == "linux-4")]'''
       exit: 0
       stdout: |

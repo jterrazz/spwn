@@ -244,8 +244,8 @@ func TestAVMBeingCreatedShowsItsBirthThenLands(t *testing.T) {
 		items := sectionOf(p, SectionVMs).Items
 		return *items[len(items)-1].Row
 	}
-	creating := born(func(vm *model.VM) { vm.Birth = model.BirthAt(model.BornBooting, macNow) })
-	if creating.Birth == nil || creating.Birth.N != 400 || creating.Glyph.Progress != 400 || words(creating.Detail) != "creating | booting" {
+	creating := born(func(vm *model.VM) { vm.Birth = model.BirthAt(model.BornBooting, false, macNow) })
+	if creating.Birth == nil || creating.Birth.N != 400 || creating.Glyph.Progress != 400 || words(creating.Detail) != "creating | boot 2 of 4" {
 		t.Fatalf("creating row %+v", creating)
 	}
 	ready := born(func(vm *model.VM) { vm.State, vm.ReadyAt = model.Running, macNow.Add(-2*time.Second) })

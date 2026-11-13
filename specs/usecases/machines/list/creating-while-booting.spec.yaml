@@ -22,7 +22,7 @@ runs:
     - command: '--version >/dev/null; /bin/cat seen'
       exit: 0
       stdout: |
-          	linux-4	Workspace	jterrazz-macbook-pro	Creating · ephemeral	4 CPU	4 GB	booting
+          	linux-4	Workspace	jterrazz-macbook-pro	Creating · ephemeral	4 CPU	4 GB	boot 2 of 4
     - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[] | select(.name == "linux-4") | {state, birth}]'''
       exit: 0
       stdout: |

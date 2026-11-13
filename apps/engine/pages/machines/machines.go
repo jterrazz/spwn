@@ -148,7 +148,7 @@ func vmRow(vm model.VM) page.Row {
 	case model.Creating:
 		row.Mark = page.Unjudged
 		if vm.Birth != nil {
-			detail = page.Text(vm.Birth.Step)
+			detail = page.Text(vm.Birth.Doing())
 		}
 	}
 	row.Cells = []page.Value{page.Text(string(vm.Lifetime.Kind())), page.Text(vm.Mac), page.Text(string(vm.Lifetime)), page.Text(string(vm.Lifetime)), page.Text(""), page.Text(string(vm.State)), orDash(vm.IP), record(resources, detail), resources, detail}

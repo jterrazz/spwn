@@ -156,7 +156,7 @@ func listVMRow(mac string, vm model.VM) page.Row {
 	case model.Creating:
 		row.Mark, state = page.Unjudged, page.List(page.Text("Creating"), lifetime)
 		if vm.Birth != nil {
-			detail = page.Text(vm.Birth.Step)
+			detail = page.Text(vm.Birth.Doing())
 		}
 	}
 	switch {

@@ -1,12 +1,12 @@
 description: 'an image station only fetches, not on This Mac, is refused with how to fetch it'
 env: two-macs
 runs:
-    - command: 'machines create --image macos'
+    - command: 'machines create --image macos --memory 4G'
       exit: 2
       stderr: |
           Error: image macos is not on jterrazz-macbook-pro
           Hint: station images update macos
-    - command: 'machines create --image macos --yes'
+    - command: 'machines create --image macos --memory 4G --yes'
       exit: 2
       stderr: |
           Error: image macos is not on jterrazz-macbook-pro

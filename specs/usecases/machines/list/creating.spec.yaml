@@ -4,9 +4,10 @@ runs:
     - command: 'machines --json | /usr/bin/jq -c ''.macs[0] | {vms: [.vms[] | {name, state, birth}], capacity: (.capacity | {free_bytes, vms})}'''
       exit: 0
       stdout: |
-          {"vms":[{"name":"linux-4","state":"creating","birth":{"progress":400,"step":"booting"}}],"capacity":{"free_bytes":12884901888,"vms":[{"name":"linux-4","memory_bytes":8589934592}]}}
+          {"vms":[{"name":"linux-4","state":"creating","birth":{"progress":400,"step":"booting"}},{"name":"linux-5","state":"creating","birth":{"progress":20,"step":"building","detail":"image 2 of 3"}}],"capacity":{"free_bytes":8589934592,"vms":[{"name":"linux-4","memory_bytes":8589934592},{"name":"linux-5","memory_bytes":4294967296}]}}
     - command: 'machines'
       exit: 0
       stdout: |
           ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          	linux-4	Workspace	jterrazz-macbook-pro	Creating · ephemeral	4 CPU	8 GB	booting
+          	linux-4	Workspace	jterrazz-macbook-pro	Creating · ephemeral	4 CPU	8 GB	boot 2 of 4
+          	linux-5	Workspace	jterrazz-macbook-pro	Creating · persistent	4 CPU	4 GB	image 1 of 5

@@ -1431,8 +1431,11 @@ export type MachinesBack = {
 
 export type MachinesBirth = {
     at: string;
+    detail?: string;
+    position: number;
     progress: number;
-    step: string;
+    step: 'building' | 'cloning' | 'booting' | 'address' | 'ssh';
+    steps: number;
 };
 
 export type MachinesCallsAddIn = {
@@ -3084,6 +3087,8 @@ export type CoreVerdictTone = 'ok' | 'warn' | 'bad' | 'plain' | 'new';
 
 export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
 
+export type MachinesBirthStep = 'building' | 'cloning' | 'booting' | 'address' | 'ssh';
+
 export type MachinesLifetime = 'ephemeral' | 'persistent' | 'always-on';
 
 export type StationWord = {
@@ -3099,5 +3104,6 @@ export type StationWords = {
     CatalogMachineKind: Record<CatalogMachineKind, StationWord>;
     CatalogOS: Record<CatalogOS, StationWord>;
     MachinefileLayer: Record<MachinefileLayer, StationWord>;
+    MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
     MachinesLifetime: Record<MachinesLifetime, StationWord>;
 };

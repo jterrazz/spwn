@@ -104,7 +104,7 @@ func linux4() model.VM {
 
 func linux4Creating(f *Scene) {
 	vm := linux4()
-	vm.Birth = model.BirthAt(model.BornBooting, storyNow.Add(-20*time.Second))
+	vm.Birth = model.BirthAt(model.BornBooting, false, storyNow.Add(-20*time.Second))
 	f.All.Macs[1].VMs = append(f.All.Macs[1].VMs, vm)
 }
 
