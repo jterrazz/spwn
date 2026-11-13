@@ -29,6 +29,10 @@ func TestARefusalOfACreateCarriesItsCodeAndItsMac(t *testing.T) {
 		{&model.ServerTemplateError{Name: "infra"}, ServerTemplate, "infra", nil},
 		{&model.BadNetworkError{Value: "bridged", Bridge: true}, BadNetwork, "bridged", map[string]string{"bridge": "yes"}},
 		{&model.NoEngineError{Hypervisor: "hv"}, NoHypervisor, "hv", nil},
+		{&model.BadNameError{Name: "Bad_Name"}, BadName, "Bad_Name", nil},
+		{&model.NameTakenError{Name: "infra", VM: true, On: "jterrazz-mac-mini"}, NameTaken, "infra", map[string]string{"by": "vm", "on": "jterrazz-mac-mini", "agent": ""}},
+		{&model.NameTakenError{Name: "docs-bot", Agent: "docs-bot", On: "linux-1"}, NameTaken, "docs-bot", map[string]string{"by": "agent", "on": "linux-1", "agent": "docs-bot"}},
+		{&model.NameTakenError{Name: "jterrazz-mac-mini"}, NameTaken, "jterrazz-mac-mini", map[string]string{"by": "added", "on": "", "agent": ""}},
 	} {
 		var got *fail.Error
 		if !errors.As(Worded(c.err), &got) {

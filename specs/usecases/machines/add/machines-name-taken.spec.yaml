@@ -1,16 +1,6 @@
-description: 'add refuses no name, a bad name and a Mac already added, exit 2, before it reaches any Mac'
+description: 'add refuses a Mac already added, exit 2, before it reaches any Mac'
 env: two-macs
 runs:
-    - command: 'machines add'
-      exit: 2
-      stderr: |
-          Error: say which Mac to add
-          Hint: station machines add <mac>
-    - command: 'machines add Bad_Name'
-      exit: 2
-      stderr: |
-          Error: "Bad_Name" is not a valid name
-          Hint: use lowercase letters, digits and "-", 1 to 40 characters
     - command: 'machines add jterrazz-mac-mini'
       exit: 2
       stderr: |

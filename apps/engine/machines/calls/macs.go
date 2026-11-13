@@ -21,6 +21,7 @@ type AddIn struct {
 
 var Add = call.Call[Deps, AddIn, machines.Added]{
 	Name: "machines.add", Where: call.InProcess, Applies: machines.AddsMacs,
+	Errors: []fail.Code{BadName, NameTaken, call.Unreachable, call.NoStation},
 	Run: func(ctx context.Context, d Deps, in AddIn, _ call.Progress) (machines.Added, error) {
 		if err := d.Machines.CheckMac(); err != nil {
 			return machines.Added{}, err

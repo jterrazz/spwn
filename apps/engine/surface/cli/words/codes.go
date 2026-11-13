@@ -347,6 +347,24 @@ func Codes() map[fail.Code]Wording {
 		imagescalls.NoHypervisor: func(e *fail.Error) (string, string) {
 			return (&images.NoEngineError{Hypervisor: e.Subject}).Error(), "station apps install " + e.Subject
 		},
+		machinescalls.BadName: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is not a valid name", "use lowercase letters, digits and \"-\", 1 to 40 characters"
+		},
+		machinescalls.NameTaken: func(e *fail.Error) (string, string) {
+			name, on, agent := "\""+e.Subject+"\"", e.Detail["on"], e.Detail["agent"]
+			switch e.Detail["by"] {
+			case "agent":
+				if agent == e.Subject {
+					return name + " is taken (an agent on " + on + ")", "pick another name"
+				}
+				return name + " is taken (agent " + agent + " on " + on + ")", "pick another name"
+			case "mac":
+				return name + " already names a Mac", "pick another name"
+			case "vm":
+				return name + " is taken (on " + on + ")", "pick another name"
+			}
+			return "machine " + name + " already exists", "station machines forget " + e.Subject + " first, to change it"
+		},
 		machinescalls.NotFinished: func(e *fail.Error) (string, string) {
 			return e.Subject + " stays: only an ephemeral workspace that is stopped, or whose agent finished, is deleted by a cleanup", "station machines cleanup"
 		},

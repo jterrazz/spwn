@@ -38,10 +38,8 @@ func machinesFailure(err error) (*fail.Error, bool) {
 		return usage(notMac.Error(), notAMacHint(notMac)), true
 	case errors.As(err, &macOnly):
 		return usage(macOnly.Error(), "run it on a Mac"), true
-	case errors.As(err, &taken):
-		return usage(taken.Error(), takenHint(taken)), true
-	case errors.As(err, &bad):
-		return usage(bad.Error(), "use lowercase letters, digits and \"-\", 1 to 40 characters"), true
+	case errors.As(err, &taken), errors.As(err, &bad):
+		return Translate(machinescalls.Worded(err), ""), true
 	case errors.As(err, &unreachable):
 		return failed(unreachable.Error(), "station machines", err), true
 	case errors.As(err, &noEther):
@@ -65,13 +63,6 @@ func notAMacHint(e *model.NotAMacError) string {
 		return "station machines delete " + e.Name
 	}
 	return "run station machines for the hosts"
-}
-
-func takenHint(e *model.NameTakenError) string {
-	if e.VM || e.Mac || e.Agent != "" {
-		return "pick another name"
-	}
-	return "station machines forget " + e.Name + " first, to change it"
 }
 
 func vmFailure(err error) (*fail.Error, bool) {

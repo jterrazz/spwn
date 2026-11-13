@@ -1,0 +1,8 @@
+description: 'a server name a VM of another Mac holds is refused: names are unique across All machines'
+env: two-macs
+runs:
+    - command: 'machines create infra --server'
+      exit: 2
+      stderr: |
+          Error: "infra" is taken (on jterrazz-mac-mini)
+          Hint: pick another name

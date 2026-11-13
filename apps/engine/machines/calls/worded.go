@@ -23,13 +23,15 @@ const (
 	ServerTemplate  fail.Code = "machines.server-template"
 	BadNetwork      fail.Code = "machines.bad-network"
 	NoHypervisor    fail.Code = "machines.no-hypervisor"
+	BadName         fail.Code = "machines.bad-name"
+	NameTaken       fail.Code = "machines.name-taken"
 )
 
 // value: the refusals both creates declare, each coded by Worded; each
 // create adds those only it can end in, and a missing hypervisor is their
 // need, refused before they run.
 func createRefusals() []fail.Code {
-	return []fail.Code{confirm.YesNeeded, NotEnoughMemory, NoImage, EngineDown, UnknownImage, BadNetwork, imagescalls.NoLinuxBinary}
+	return []fail.Code{confirm.YesNeeded, NotEnoughMemory, NoImage, EngineDown, BadName, NameTaken, UnknownImage, BadNetwork, imagescalls.NoLinuxBinary}
 }
 
 func workspaceRefusals() []fail.Code {
@@ -41,9 +43,9 @@ func serverRefusals() []fail.Code {
 }
 
 func Worded(err error) error {
-	// invariant: each refusal of a create is one code; its words are built
-	// from its subject and its detail alone, the Mac it was refused on
-	// among them, so a far Mac's refusal reads the same here.
+	// invariant: each refusal of a create or an add is one code; its words
+	// are built from its subject and its detail alone, the Mac it was
+	// refused on among them, so a far Mac's refusal reads the same here.
 	if err == nil {
 		return nil
 	}
@@ -62,6 +64,8 @@ func Worded(err error) error {
 		tmpl   *machines.ServerTemplateError
 		net    *machines.BadNetworkError
 		hyper  *machines.NoEngineError
+		bad    *machines.BadNameError
+		taken  *machines.NameTakenError
 	)
 	switch {
 	case errors.As(err, &tooBig):
@@ -88,6 +92,10 @@ func Worded(err error) error {
 		return refused(fail.Refused, BadNetwork, net.Value, map[string]string{"bridge": yes(net.Bridge)})
 	case errors.As(err, &hyper):
 		return refused(fail.Refused, NoHypervisor, hyper.Hypervisor, nil)
+	case errors.As(err, &bad):
+		return refused(fail.Refused, BadName, bad.Name, nil)
+	case errors.As(err, &taken):
+		return refused(fail.Refused, NameTaken, taken.Name, map[string]string{"by": takenBy(taken), "on": taken.On, "agent": taken.Agent})
 	}
 	return err
 }
@@ -97,4 +105,18 @@ func yes(b bool) string {
 		return "yes"
 	}
 	return ""
+}
+
+// value: what holds a taken name: a VM, a Mac, an agent, or a Mac this one
+// already added.
+func takenBy(e *machines.NameTakenError) string {
+	switch {
+	case e.Agent != "":
+		return "agent"
+	case e.Mac:
+		return "mac"
+	case e.VM:
+		return "vm"
+	}
+	return "added"
 }
