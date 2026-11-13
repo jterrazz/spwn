@@ -1,4 +1,6 @@
 import { Client } from '../engine/client';
+import { NO_OPENER } from '../engine/opener';
+import type { Opener } from '../engine/opener';
 import { EngineProvider } from '../engine/react';
 import { replayTransport } from '../engine/replay';
 import type { Recording } from '../engine/replay';
@@ -22,10 +24,10 @@ function Area() {
     );
 }
 
-export function pageOver(recording: Recording, initial: Route) {
+export function pageOver(recording: Recording, initial: Route, opener: Opener = NO_OPENER) {
     const client = new Client(replayTransport(recording));
     return (
-        <EngineProvider client={client}>
+        <EngineProvider client={client} opener={opener}>
             <RouterProvider initial={initial}>
                 <Area />
             </RouterProvider>

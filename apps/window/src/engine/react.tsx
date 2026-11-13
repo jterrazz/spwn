@@ -6,6 +6,8 @@ import type { Client, In, Out, ReadName, WatchName } from './client';
 import { READING } from './entry';
 import type { Asked, Reading } from './entry';
 import { GestureStore } from './gesture-store';
+import { NO_OPENER } from './opener';
+import type { Opener } from './opener';
 import { reachOf } from './reach';
 import type { Reach } from './reach';
 import { askedKey, ReadStore } from './store';
@@ -13,14 +15,22 @@ import type { Link } from './transport';
 
 export type { Reading } from './entry';
 
-type Engine = { client: Client; store: ReadStore; gestures: GestureStore };
+type Engine = { client: Client; store: ReadStore; gestures: GestureStore; opener: Opener };
 
 const EngineContext = createContext<Engine | null>(null);
 
-export function EngineProvider({ client, children }: { client: Client; children: ReactNode }) {
+export function EngineProvider({
+    client,
+    opener = NO_OPENER,
+    children,
+}: {
+    client: Client;
+    opener?: Opener;
+    children: ReactNode;
+}) {
     const engine = useMemo(
-        () => ({ client, gestures: new GestureStore(), store: new ReadStore(client) }),
-        [client],
+        () => ({ client, gestures: new GestureStore(), opener, store: new ReadStore(client) }),
+        [client, opener],
     );
     return <EngineContext value={engine}>{children}</EngineContext>;
 }
@@ -39,6 +49,10 @@ export function useClient(): Client {
 
 export function useGestureStore(): GestureStore {
     return useEngine().gestures;
+}
+
+export function useOpener(): Opener {
+    return useEngine().opener;
 }
 
 export function useReread(): (names: readonly CallName[]) => void {

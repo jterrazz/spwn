@@ -1,8 +1,10 @@
 import './design/document.css';
+import { invoke } from '@tauri-apps/api/core';
 import { lazy, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { Client } from './engine/client';
+import { NO_OPENER, tauriOpener } from './engine/opener';
 import { EngineProvider } from './engine/react';
 import { replayTransport } from './engine/replay';
 import { tauriTransport } from './engine/tauri';
@@ -82,7 +84,10 @@ if (root) {
                 }}
                 where="the window"
             >
-                <EngineProvider client={client}>
+                <EngineProvider
+                    client={client}
+                    opener={inTauri ? tauriOpener({ invoke }) : NO_OPENER}
+                >
                     <Window
                         Gallery={Gallery}
                         initial={initialRoute()}
