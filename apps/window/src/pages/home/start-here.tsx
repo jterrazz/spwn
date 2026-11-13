@@ -9,7 +9,7 @@ type StartHereProps = {
     onNewMachine?: (() => void) | undefined;
 };
 
-function holdsNoMachine(macs: readonly MachinesMacView[]): boolean {
+export function holdsNoMachine(macs: readonly MachinesMacView[]): boolean {
     return macs.length > 0 && macs.every((mac) => (mac.VMs ?? []).length === 0);
 }
 

@@ -259,6 +259,18 @@ describe('Window', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test('a Mac with no machine yet draws no Last night, as no night ran on a machine', async () => {
+        // Given - the window on Home over bare-mac, which lists no VM
+        const result = await component.render(windowOver('bare-mac', HOME), async (visitor) => {
+            // When - Home has answered
+            await visitor.see(region('Start here'));
+        });
+
+        // Then - its panels end on Machines
+        expect(result.html.text).not.toContain('Last night');
+        expect(result.errors.text).toBe('');
+    });
+
     test("a workspace's machine file offers New machine, which opens the dialog", async () => {
         // Given - stories, where the engine explains linux-dev by name as a file whose machine.kind is workspace
         const result = await component.render(
