@@ -16,6 +16,7 @@ export { IDENTITIES, type Identity, identityOf } from './identity';
 export { MachineChip } from './machine-chip';
 export { MachineIcon } from './machine-icon';
 export type { Measured } from './measure';
+export { MemoryGrid, type MemoryHolder } from './memory-grid';
 export { Missing, MissingMark } from './missing';
 export { NavItem } from './nav-item';
 export { Panel } from './panel';

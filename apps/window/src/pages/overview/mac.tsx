@@ -11,7 +11,7 @@ import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { between, firstUnitOf } from '../activity/when';
-import { NotGiven, Unanswered } from '../kit/readings';
+import { Unanswered } from '../kit/readings';
 
 import styles from './overview.module.css';
 
@@ -27,10 +27,6 @@ export function MachinesTile({ found }: { found: Found }) {
             value={count}
         />
     );
-}
-
-export function MemoryOfMachines() {
-    return <NotGiven title="Memory" what="What each machine holds of this Mac's memory." />;
 }
 
 // value: how long a VM has run, from its boot to the moment machines.list was read: a date drawn as "6 d".

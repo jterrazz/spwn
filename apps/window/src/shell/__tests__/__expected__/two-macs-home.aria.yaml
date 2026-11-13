@@ -39,7 +39,9 @@
   - paragraph:
     - img "Not given yet"
     - text: What follows is what the engine answers, with no sentence that sums it up
-  - text: Memory free Not given yet CPU, this Mac 34% 10 CPUs Awake, this Mac Off on power Disk free, this Mac 388GB
+  - text: Memory free 40GB
+  - img "Memory each machine holds, and what is free"
+  - text: of 80 CPU, this Mac 34% 10 CPUs Awake, this Mac Off on power Disk free, this Mac 388GB
   - 'meter "Disk free, this Mac: used of its total"'
   - text: of 994 GB · machines hold 100 GB
   - region "Needs you":
@@ -68,8 +70,16 @@
     - text: sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
     - button "Copy sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist": Copy
   - region "Memory":
-    - heading "Memory" [level=2]
-    - paragraph: Not given yet What each machine holds, against each Mac's total
+    - heading "Memory one square, one GB" [level=2]
+    - text: jterrazz-macbook-pro
+    - emphasis: 4 GB free
+    - text: of 16
+    - img "Memory of jterrazz-macbook-pro, one square per GB"
+    - text: 4 macOS 8 linux-1 4 free jterrazz-mac-mini
+    - emphasis: 36 GB free
+    - text: of 64
+    - img "Memory of jterrazz-mac-mini, one square per GB"
+    - text: 4 macOS 24 infra 36 free
   - region "Machines":
     - heading "Machines" [level=2]
     - text: Machine What it is for CPU Memory, GB

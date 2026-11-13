@@ -45,8 +45,12 @@
     - text: sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
     - button "Copy sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist": Copy
   - region "Memory":
-    - heading "Memory" [level=2]
-    - paragraph: Not given yet What each machine holds of this Mac's memory.
+    - heading "Memory one square, one GB" [level=2]
+    - text: jterrazz-macbook-pro
+    - emphasis: 4 GB free
+    - text: of 16
+    - img "Memory of jterrazz-macbook-pro, one square per GB"
+    - text: 4 macOS 8 linux-1 4 free
   - region "Its machines":
     - heading "Its machines" [level=2]
     - button "api by you Stopped"

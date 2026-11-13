@@ -8,7 +8,7 @@ const DECIMAL_UNITS = [
     { of: 1e6, unit: 'MB' },
     { of: 1e3, unit: 'KB' },
 ] as const;
-const GIB = 1024 ** 3;
+export const GIB = 1024 ** 3;
 const MIB = 1024 ** 2;
 const NS_PER_SECOND = 1_000_000_000;
 const NS_PER_MINUTE = 60 * NS_PER_SECOND;

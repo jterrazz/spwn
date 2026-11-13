@@ -32,6 +32,8 @@ import { MachineChip } from '../../design/machine-chip';
 import { MACHINE_CHIP_STORIES } from '../../design/machine-chip.stories';
 import { MachineIcon } from '../../design/machine-icon';
 import { MACHINE_ICON_STORIES } from '../../design/machine-icon.stories';
+import { MemoryGrid } from '../../design/memory-grid';
+import { MEMORY_GRID_STORIES } from '../../design/memory-grid.stories';
 import { Missing, MissingMark } from '../../design/missing';
 import { MISSING_MARK_STORIES, MISSING_STORIES } from '../../design/missing.stories';
 import { NavItem } from '../../design/nav-item';
@@ -86,6 +88,11 @@ export const ENTRIES: readonly Entry[] = [
     }),
     entry('Chart', 'Measures', { Component: Chart, frame: 'block', stories: CHART_STORIES }),
     entry('Tile', 'Measures', { Component: Tile, frame: 'meter', stories: TILE_STORIES }),
+    entry('MemoryGrid', 'Measures', {
+        Component: MemoryGrid,
+        frame: 'block',
+        stories: MEMORY_GRID_STORIES,
+    }),
     entry('ProgressLine', 'Measures', {
         Component: ProgressLine,
         frame: 'block',

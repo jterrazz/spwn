@@ -9,6 +9,7 @@ import type { Found } from '../../model/machines';
 import type { Route } from '../../shell/route';
 import { ActivityTiles } from '../activity/tiles';
 import { DiskTile } from '../disk/disk-tile';
+import { MemoryPanel } from '../home/memory';
 import { HeldOutcomes } from '../kit/gestures';
 import { NoVerdict, Reading, Unanswered } from '../kit/readings';
 import { DeleteGesture } from '../machine/gestures';
@@ -16,7 +17,7 @@ import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
 import { CheckLatency, CheckTile, Health, LastDays } from './health';
 import { FileChapters, ItsFile } from './its-file';
-import { Follows, Machines, MachinesTile, MemoryOfMachines } from './mac';
+import { Follows, Machines, MachinesTile } from './mac';
 import { SharedAccounts, SharedPorts } from './shared';
 import { BusiestNow, WhyItExists } from './why';
 
@@ -85,7 +86,7 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
                     title="Needs you, on this Mac"
                 />
             </HeldOutcomes>
-            <MemoryOfMachines />
+            <MemoryPanel macs={[found.mac]} only={name} />
             <Machines found={found} go={go} />
             <Follows found={found} go={go} />
         </Page>

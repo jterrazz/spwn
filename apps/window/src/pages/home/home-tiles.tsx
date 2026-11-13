@@ -6,9 +6,10 @@ import { AWAKE_ON_TONE } from '../../engine/tones';
 import { AWAKE_WORDS, POWER_SOURCE_WORDS } from '../../engine/words';
 import { bytes, clock, duration, sentence } from '../../model/format';
 import { useActivity } from '../activity/reading';
-import { CpuTile, NotGivenTile, split, Unknown, unknownOf } from '../activity/tiles';
+import { CpuTile, split, Unknown, unknownOf } from '../activity/tiles';
 import { DiskTile } from '../disk/disk-tile';
 import { Tiles } from '../page';
+import { MemoryFreeTile } from './memory';
 
 const NS_PER_MS = 1_000_000;
 
@@ -16,7 +17,6 @@ const LABELS = {
     awake: 'Awake, this Mac',
     cpu: 'CPU, this Mac',
     disk: 'Disk free, this Mac',
-    memory: 'Memory free',
 } as const;
 
 const BYTES_PER_GB = 1e9;
@@ -98,7 +98,7 @@ export function HomeTiles({ mac }: { mac: MachinesMacView }) {
         <>
             {readers}
             <Tiles>
-                <NotGivenTile label={LABELS.memory} />
+                <MemoryFreeTile />
                 {unknown !== undefined || report === undefined ? (
                     <Unknown label={LABELS.cpu} state={unknown ?? 'reading'} />
                 ) : (

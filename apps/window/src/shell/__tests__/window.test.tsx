@@ -199,7 +199,7 @@ describe('Window', () => {
             await visitor.see(region('What listens on this Mac'));
             await visitor.see(enabled(back));
             await visitor.click(back);
-            await visitor.see(content("What each machine holds of this Mac's memory."));
+            await visitor.see(region('Its machines'));
             await visitor.click(back);
 
             // Then - the window is back on Home, back disabled

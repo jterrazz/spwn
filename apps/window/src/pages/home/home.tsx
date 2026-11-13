@@ -15,6 +15,7 @@ import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
 import { HomeMachines } from './home-machines';
 import { HomeTiles } from './home-tiles';
+import { MemoryPanel } from './memory';
 import { holdsNoMachine, StartHere } from './start-here';
 
 type Go = (to: Route) => void;
@@ -59,7 +60,7 @@ export function HomePage({ macs, overview, go, onNewMachine }: HomeProps) {
             <HeldOutcomes>
                 <Needs go={go} macs={macs} needs={Summary.Needs ?? []} title="Needs you" />
             </HeldOutcomes>
-            <NotGiven title="Memory" what="What each machine holds, against each Mac's total" />
+            <MemoryPanel macs={macs} />
             {macs.length > 0 ? <HomeMachines go={go} macs={macs} /> : null}
             {holdsNoMachine(macs) ? null : (
                 <NotGiven title="Last night" what="What moved, held or failed overnight" />
