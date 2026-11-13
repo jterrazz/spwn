@@ -18,7 +18,9 @@ export function DotStrip({ names, identity, hollow = NONE_HOLLOW }: DotStripProp
                 const tone = hollow.get(name);
                 return (
                     <i
-                        className={tone === undefined ? styles.dot : `${styles.dot} ${styles.hollow}`}
+                        className={
+                            tone === undefined ? styles.dot : `${styles.dot} ${styles.hollow}`
+                        }
                         data-tone={tone}
                         key={name}
                         title={name}

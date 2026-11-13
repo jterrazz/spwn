@@ -64,16 +64,13 @@ describe('Catalog', () => {
     test('a description is drawn whole, on a second line when it is long, never cut', async () => {
         // Given - the window on Apps over stories, its descriptions of every length
         let cut: string[] = ['not read'];
-        await component.render(
-            windowOver('stories', { page: 'catalog-apps' }),
-            async (visitor) => {
-                // When - apps.list has answered
-                await visitor.see(content('gh'));
-                cut = [...document.querySelectorAll('div[class*="_cell_"]')]
-                    .filter((cell) => cell.scrollWidth > cell.clientWidth)
-                    .map((cell) => cell.textContent ?? '');
-            },
-        );
+        await component.render(windowOver('stories', { page: 'catalog-apps' }), async (visitor) => {
+            // When - apps.list has answered
+            await visitor.see(content('gh'));
+            cut = [...document.querySelectorAll('div[class*="_cell_"]')]
+                .filter((cell) => cell.scrollWidth > cell.clientWidth)
+                .map((cell) => cell.textContent ?? '');
+        });
 
         // Then - no description overflows its column
         expect(cut).toStrictEqual([]);

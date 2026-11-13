@@ -1,8 +1,8 @@
 import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../design/index';
 import type { PlanLine } from '../../engine/provisional';
-import type { Tone } from '../../tone';
 import { CONDITION_TONES } from '../../engine/tones';
 import { ANY_VERSION_WORD, CATALOG_KIND_WORDS, CONDITION_WORDS } from '../../engine/words';
+import type { Tone } from '../../tone';
 import { countWord } from './model';
 import type { Layer, Shelf } from './model';
 
@@ -42,7 +42,7 @@ function MachineLine({ line, differs }: { line: PlanLine; differs: boolean }) {
         <div className={`${styles.line} ${styles.machine}`}>
             <Name kinded={false} line={line} />
             <span className={styles.chip}>
-                {Seen.Version !== '' ? <Value look="raised">{Seen.Version}</Value> : null}
+                {Seen.Version === '' ? null : <Value look="raised">{Seen.Version}</Value>}
                 {Seen.Version === '' && differs ? (
                     <Value look="raised" tone={CONDITION_TONES[Seen.Condition]}>
                         {CONDITION_WORDS[Seen.Condition]}

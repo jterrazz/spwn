@@ -99,7 +99,7 @@ describe('Packages', () => {
                 // When - its layer is drawn
                 await visitor.see(within(region('jterrazz-macbook-pro'), content('ripgrep')));
                 square =
-                    document.querySelector('i[title="ripgrep"]')?.getAttribute('data-tone') ?? '';
+                    document.querySelector<HTMLElement>('i[title="ripgrep"]')?.dataset.tone ?? '';
                 layer =
                     document.querySelector('section[aria-label="jterrazz-macbook-pro"]')
                         ?.innerHTML ?? '';

@@ -99,7 +99,9 @@ export type Shape = {
     tag: string;
 };
 
-export type Mark = { kind: 'drawn'; shapes: readonly Shape[] } | { kind: 'monogram'; letters: string };
+export type Mark =
+    | { kind: 'drawn'; shapes: readonly Shape[] }
+    | { kind: 'monogram'; letters: string };
 
 const LOGO_IN_THE_BOX = 'translate(2 2) scale(0.6667)';
 
