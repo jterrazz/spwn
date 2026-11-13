@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { bytes, memory, percent, rate, seconds } from '../format';
+import { bytes, duration, memory, percent, rate, seconds } from '../format';
 
 describe('format', () => {
     test('raw bytes read in decimal units, as the engine prints them', () => {
@@ -31,5 +31,17 @@ describe('format', () => {
         expect(memory(52_428_800)).toBe('50 MB');
         expect(seconds(10_000_000_000)).toBe('10 s');
         expect(seconds(1_800_000_000_000)).toBe('30 min');
+    });
+
+    test('a duration leaves out a second unit that reads zero', () => {
+        // Given - spans of 4 h, 4 h 10 min, 2 d and 2 d 3 h, in nanoseconds
+        const hour = 3_600_000_000_000;
+        const spans = [4 * hour, 4 * hour + hour / 6, 48 * hour, 51 * hour];
+
+        // When - each is shown
+        const shown = spans.map(duration);
+
+        // Then - "4 h", never "4 h 0 min"
+        expect(shown).toStrictEqual(['4 h', '4 h 10 min', '2 d', '2 d 3 h']);
     });
 });

@@ -23,7 +23,7 @@
     - text: claude admin@jterrazz.com · max ends in 24 min
     - button "Extend claude by 12 h": Extend 12 h
     - button "Take back claude": Take back
-    - text: github jterrazz · repo, workflow ends in 4 h 0 min
+    - text: github jterrazz · repo, workflow ends in 4 h
     - button "Extend github by 12 h": Extend 12 h
     - button "Take back github": Take back
   - region "Can be shared":

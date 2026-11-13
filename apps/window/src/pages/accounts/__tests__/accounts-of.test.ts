@@ -95,9 +95,9 @@ describe('accounts of', () => {
         // Then - nine hours, six days, and an end already past
         expect(holdsFor('2026-11-12T19:00:00Z', REPORT.Now)).toStrictEqual({
             tone: 'warn',
-            word: 'ends in 9 h 0 min',
+            word: 'ends in 9 h',
         });
-        expect(holdsFor('2026-11-18T10:00:00Z', REPORT.Now).word).toBe('ends in 6 d 0 h');
+        expect(holdsFor('2026-11-18T10:00:00Z', REPORT.Now).word).toBe('ends in 6 d');
         expect(holdsFor('2026-11-12T09:00:00Z', REPORT.Now)).toStrictEqual({
             tone: 'plain',
             word: 'ended at 2026-11-12T09:00:00Z',

@@ -66,9 +66,12 @@ export function duration(nanoseconds: number): string {
     const days = Math.floor(minutes / 1440);
     const hours = Math.floor((minutes % 1440) / 60);
     if (days > 0) {
-        return `${String(days)} d ${String(hours)} h`;
+        return hours > 0 ? `${String(days)} d ${String(hours)} h` : `${String(days)} d`;
     }
-    return hours > 0 ? `${String(hours)} h ${String(minutes % 60)} min` : `${String(minutes)} min`;
+    if (hours === 0) {
+        return `${String(minutes)} min`;
+    }
+    return minutes % 60 > 0 ? `${String(hours)} h ${String(minutes % 60)} min` : `${String(hours)} h`;
 }
 
 export function seconds(nanoseconds: number): string {
