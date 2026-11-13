@@ -13,6 +13,8 @@ import type { Route } from '../../shell/route';
 import { between, firstUnitOf } from '../activity/when';
 import { NotGiven, Unanswered } from '../kit/readings';
 
+import styles from './overview.module.css';
+
 type Go = (to: Route) => void;
 
 export function MachinesTile({ found }: { found: Found }) {
@@ -41,6 +43,11 @@ function upFor(vm: MachinesVM, read: string | undefined): string | undefined {
     return `up ${value} ${unit}`;
 }
 
+function stateUp(vm: MachinesVM, read: string | undefined) {
+    const shown = vmState(vm);
+    return { ...shown, word: sentence([shown.word, upFor(vm, read)]) };
+}
+
 export function Machines({ found, go }: { found: Found; go: Go }) {
     const listing = useWatch('machines.list', {});
     const read = listing.kind === 'read' ? listing.out.All.Read : undefined;
@@ -58,9 +65,8 @@ export function Machines({ found, go }: { found: Found; go: Go }) {
                         go(machineRoute(vm.Name));
                     }}
                     sentence={sentence([vmAbout(vm).lifetime, resourcesOf(vm)])}
-                    state={vmState(vm)}
+                    state={stateUp(vm, read)}
                     title={vm.Name}
-                    value={upFor(vm, read) ?? null}
                 />
             ))}
         </Panel>
@@ -82,7 +88,11 @@ export function Follows({ found, go }: { found: Found; go: Go }) {
     return (
         <Panel title="Packages">
             <Row
-                lead={<Icon name="file" />}
+                lead={
+                    <span aria-hidden="true" className={styles.fileTile}>
+                        <Icon name="file" />
+                    </span>
+                }
                 onOpen={() => {
                     go({ page: 'machine-files' });
                 }}

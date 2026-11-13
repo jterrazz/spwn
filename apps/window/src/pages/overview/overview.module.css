@@ -75,6 +75,20 @@
     font-size: var(--text-label);
     margin-top: var(--space-6);
 }
+.fileTile {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-icon);
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--t3) 22%, transparent);
+    color: var(--t3);
+}
+.fileTile svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 1.6;
+}
 @media (width < 760px) {
     .columns {
         grid-template-columns: minmax(0, 1fr);

@@ -1,4 +1,4 @@
-import { component, content, file } from '@jterrazz/test';
+import { component, content, file, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../fixtures/page-over';
@@ -94,5 +94,19 @@ describe('machine', () => {
 
         // Then - the tiles hold the Mac's numbers, its machines listed, the file it follows named
         await expect(result.tree).toMatch(file('./__expected__/two-macs-mac-overview.aria.yaml'));
+    });
+
+    test("a Mac's machine reads its state and how long it has been up as one string, at the row's end", async () => {
+        // Given - macbook-pro's Overview over stories, linux-1 running since its boot
+        const result = await component.render(
+            overviewOver('stories', 'macbook-pro'),
+            async (visitor) => {
+                // When - its machines are listed
+                await visitor.see(heading('Its machines'));
+            },
+        );
+
+        // Then - Running and its uptime share the state's place, as the mockup's "Running · up 6 d"
+        expect(result.html.text).toMatch(/>Running · up \d+ (?:min|h|d)</u);
     });
 });
