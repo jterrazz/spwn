@@ -1,0 +1,17 @@
+description: 'a vm.mounts folder that climbs with .. is refused before anything runs'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          vm:
+            mounts:
+              - { computer: ~/notes/../.ssh, guest: ~/notes }
+      exit: 0
+    - command: 'apply --yes'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/linux-1.yaml:4: mount folder "~/notes/../.ssh" of the computer climbs with ..: write the folder it means
+          Hint: fix that line: station never rewrites a Machinefile

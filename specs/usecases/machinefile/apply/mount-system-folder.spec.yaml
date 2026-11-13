@@ -1,0 +1,17 @@
+description: 'a vm.mounts guest folder in a system folder of the VM is refused'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          vm:
+            mounts:
+              - { computer: ~/notes, guest: /etc/notes }
+      exit: 0
+    - command: 'apply --yes'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/linux-1.yaml:4: mount folder "/etc/notes" of the VM is in the system folder /etc: mount under /srv, /opt, /mnt, /data or the home
+          Hint: fix that line: station never rewrites a Machinefile

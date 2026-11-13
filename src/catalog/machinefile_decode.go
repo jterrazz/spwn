@@ -188,8 +188,10 @@ func checkVM(v VMSpec) string {
 // invariant: a mount names both of its folders, each a path from the root
 // or the home (`~/`) written in letters, digits, `.`, `_`, `-` and `/`
 // alone, since the guest's is handed to a script run as root and the
-// computer's to the hypervisor's argv; no two mounts share a folder of the
-// guest.
+// computer's to the hypervisor's argv; neither climbs with `..`. Neither
+// is a whole home, nor covers, nor sits inside, a folder its side keeps
+// out of every mount (mountSides); the guest's is no system folder. No two
+// mounts share a folder of the guest, `~` read as the home it opens.
 func checkMounts(mounts []Mount) string {
 	guests := map[string]bool{}
 	for _, m := range mounts {
@@ -200,10 +202,20 @@ func checkMounts(mounts []Mount) string {
 			return fmt.Sprintf("mount folder %q of the VM is not a path from / or ~/", m.Guest)
 		case !mountSafe(m.Computer) || !mountSafe(m.Guest):
 			return fmt.Sprintf("mount %q at %q: a mount's folders hold letters, digits, ., _, - and / alone", m.Computer, m.Guest)
-		case guests[path.Clean(m.Guest)]:
+		}
+		for _, side := range []struct {
+			folder string
+			rules  mountSide
+		}{{m.Computer, computerSide}, {m.Guest, guestSide}} {
+			if problem := side.rules.check(side.folder); problem != "" {
+				return problem
+			}
+		}
+		at := guestSide.home(m.Guest)
+		if guests[at] {
 			return fmt.Sprintf("two mounts share the guest folder %q", m.Guest)
 		}
-		guests[path.Clean(m.Guest)] = true
+		guests[at] = true
 	}
 	return ""
 }
@@ -214,6 +226,70 @@ func mountFolder(p string) bool {
 
 func mountSafe(p string) bool {
 	return strings.Trim(strings.TrimPrefix(p, "~"), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-/") == ""
+}
+
+// value: the folders one side of a mount keeps out of it: the folder its
+// homes sit in (`/Users`, `/home`), the system's folders (each with all
+// it holds), and the folders of a home (each with all it holds) that hold
+// keys, the system's own data or station's own files.
+
+type mountSide struct {
+	word, homes string
+	system      []string
+	kept        []keptFolder
+}
+
+type keptFolder struct{ at, what string }
+
+var (
+	stationKept  = []keptFolder{{".ssh", "the ssh keys"}, {".config/station", "station's own files"}, {".local/state/station", "station's own state"}}
+	computerSide = mountSide{word: "computer", homes: "/Users", kept: append([]keptFolder{{"Library", "the Mac's own data"}}, stationKept...)}
+	guestSide    = mountSide{word: "VM", homes: "/home", kept: stationKept, system: []string{
+		"/etc", "/usr", "/bin", "/sbin", "/lib", "/lib64", "/var", "/boot", "/proc", "/sys", "/dev", "/root", "/run", "/tmp",
+	}}
+)
+
+// value: a folder of this side as a path from its home, `~` for the home
+// itself, when it is in one (`~/...`, or a home under the folder of its
+// homes); its clean path otherwise.
+func (s mountSide) home(p string) string {
+	p = path.Clean(p)
+	if p == "~" || strings.HasPrefix(p, "~/") {
+		return p
+	}
+	if rest, ok := strings.CutPrefix(p, s.homes+"/"); ok {
+		_, inside, _ := strings.Cut(rest, "/")
+		return path.Join("~", inside)
+	}
+	return p
+}
+
+func (s mountSide) check(p string) string {
+	if slices.Contains(strings.Split(p, "/"), "..") {
+		return fmt.Sprintf("mount folder %q of the %s climbs with ..: write the folder it means", p, s.word)
+	}
+	at := s.home(p)
+	switch at {
+	case "/", s.homes:
+		return fmt.Sprintf("mount folder %q of the %s holds every home: mount a folder inside one", p, s.word)
+	case "~":
+		return fmt.Sprintf("mount folder %q of the %s is a whole home: mount a folder inside it", p, s.word)
+	}
+	for _, sys := range s.system {
+		if at == sys || strings.HasPrefix(at, sys+"/") {
+			return fmt.Sprintf("mount folder %q of the VM is in the system folder %s: mount under /srv, /opt, /mnt, /data or the home", p, sys)
+		}
+	}
+	for _, k := range s.kept {
+		kept := "~/" + k.at
+		switch {
+		case at == kept || strings.HasPrefix(at, kept+"/"):
+			return fmt.Sprintf("mount folder %q of the %s is in %s, %s, which no mount reaches", p, s.word, kept, k.what)
+		case strings.HasPrefix(kept, at+"/"):
+			return fmt.Sprintf("mount folder %q of the %s holds %s, %s, which no mount reaches: mount a folder beside it", p, s.word, kept, k.what)
+		}
+	}
+	return ""
 }
 
 func checkPrefer(prefer []ManagerKey) string {

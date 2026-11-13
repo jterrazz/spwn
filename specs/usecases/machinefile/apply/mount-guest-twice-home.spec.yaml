@@ -1,0 +1,18 @@
+description: 'two vm.mounts at one guest folder are refused, ~ read as the home it opens'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          vm:
+            mounts:
+              - { computer: ~/notes, guest: ~/notes }
+              - { computer: ~/data, guest: /home/admin/notes }
+      exit: 0
+    - command: 'apply --yes'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/linux-1.yaml:4: two mounts share the guest folder "/home/admin/notes"
+          Hint: fix that line: station never rewrites a Machinefile
