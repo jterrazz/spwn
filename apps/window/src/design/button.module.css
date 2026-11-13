@@ -13,10 +13,16 @@
     gap: var(--space-6);
     white-space: nowrap;
     flex: none;
-    transition: background var(--motion-hover);
+    transition:
+        background var(--motion-hover),
+        transform var(--motion-hover);
 }
-.button:hover {
+.button:hover,
+.button:active {
     background: var(--raise-2);
+}
+.button:active {
+    transform: var(--motion-press);
 }
 .primary {
     background: linear-gradient(var(--primary-top), var(--primary-bottom));
@@ -24,7 +30,8 @@
     font-weight: var(--weight-medium);
     box-shadow: var(--shadow-primary);
 }
-.primary:hover {
+.primary:hover,
+.primary:active {
     background: var(--primary-top);
 }
 .link,
@@ -43,13 +50,18 @@
     color: var(--t1);
     font-weight: var(--weight-medium);
 }
-.destroy:hover {
+.destroy:hover,
+.destroy:active {
     background: var(--bad-hover);
 }
 .link:hover,
 .danger:hover {
     background: none;
     text-decoration: underline;
+}
+.link:active,
+.danger:active {
+    background: var(--raise-2);
 }
 .button:disabled {
     background: none;

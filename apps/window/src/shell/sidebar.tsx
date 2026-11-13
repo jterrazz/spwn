@@ -118,6 +118,15 @@ function Engine({ engine }: Pick<SidebarProps, 'engine'>) {
             </div>
         );
     }
+    if (reach.kind === 'connecting') {
+        const { tone, word } = ownState('connecting');
+        return (
+            <div className={styles.foot}>
+                <StateDot tone={tone} word={word} />
+                <span className={styles.footText}>Engine {word.toLowerCase()}</span>
+            </div>
+        );
+    }
     if (engine.kind === 'failed') {
         const { tone, word } = failedState(engine.error);
         return (

@@ -87,6 +87,9 @@
 .open:hover {
     background: var(--raise);
 }
+.open:active {
+    background: var(--raise-2);
+}
 .lead {
     display: flex;
     align-items: center;
@@ -192,6 +195,9 @@
 }
 .opener:hover {
     background: var(--raise);
+}
+.opener:active {
+    background: var(--raise-2);
 }
 .link {
     flex: none;

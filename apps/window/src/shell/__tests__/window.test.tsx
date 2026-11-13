@@ -119,6 +119,28 @@ describe('Window', () => {
         await expect(result.tree).toMatch(file('./__expected__/no-engine-home.aria.yaml'));
     });
 
+    test('a link still connecting says so in the foot line, never a read under way', async () => {
+        // Given - a transport still connecting to its socket
+        const client = new Client(
+            replayTransport(
+                { exchanges: [], station: '', world: 'none' },
+                { kind: 'connecting', socket: '/run/engine.sock' },
+            ),
+        );
+        const result = await component.render(
+            <EngineProvider client={client}>
+                <Window initial={HOME} pages={PAGES} />
+            </EngineProvider>,
+            async (visitor) => {
+                // When - the window has heard from its transport
+                await visitor.see(within(sidebar, content('Engine connecting')));
+            },
+        );
+
+        // Then - the foot's dot is labelled Connecting, never Reading
+        expect(result.tree.text).toMatch(/img "Connecting"\n\s*- text: Engine connecting/u);
+    });
+
     test("an engine.read the engine refuses is the foot line's error, in the engine's words", async () => {
         // Given - two-macs, where engine.read answers the engine's refusal
         const recording = recordingFor('two-macs');

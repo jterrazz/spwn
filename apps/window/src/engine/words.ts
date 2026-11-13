@@ -72,6 +72,7 @@ export const ANY_VERSION_WORD = 'any version';
 // value: what the window says of its own reading of a call or of a gesture's fate, never of an engine code: an
 // value: answer not yet come, none at all, a slot no call fills, a gesture done or of unknown outcome.
 export const OWN_STATE_WORDS = {
+    connecting: 'Connecting',
     done: 'done',
     'engine-absent': 'No answer',
     'no-answer': 'no answer',

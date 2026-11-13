@@ -30,6 +30,10 @@
 .option:hover {
     color: var(--t1);
 }
+.option:active {
+    background: var(--raise-2);
+    color: var(--t1);
+}
 .option[aria-selected='true'],
 .option[aria-pressed='true'] {
     background: var(--raise-2);

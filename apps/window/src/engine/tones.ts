@@ -19,6 +19,7 @@ import type { OwnState } from './words';
 type Tones<T extends PropertyKey> = Readonly<Record<T, Tone>>;
 
 export const OWN_STATE_TONES: Tones<OwnState> = {
+    connecting: 'new',
     done: 'ok',
     'engine-absent': 'bad',
     'no-answer': 'plain',

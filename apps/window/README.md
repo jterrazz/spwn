@@ -203,7 +203,9 @@ All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `recor
 ## The design rules
 
 - No inline style. A size computed from data is the one accepted form: a CSS custom property set on the element, typed `Measured` (`src/design/measure.ts`), which the module's CSS draws (`width: var(--fill)`). A colour, a spacing or a tone is a class, never a value written inline.
+- A control that acts is drawn pressed on one token, `raise-2`: a button, an icon button, a switch's option, a nav item, a choice card and a row that opens. A button also sinks by `--motion-press`, the hierarchy's press scale, and a filled one (primary, destroy) keeps its fill, as `raise-2` would erase it.
 - A button takes one of five looks, named once in `BUTTON_VARIANTS` (`src/design/button.tsx`): `primary` leads a screen, `plain` is any other gesture, `link` reads as a sentence, `danger` opens a destruction, and `destroy`, the filled danger, only confirms one. `destroy` is drawn by `ConfirmDialog` alone, and the button spec fails a page that names it.
+- A read asked again draws nothing: no refreshing mark, no `Reading` over an answer already shown, proved by the engine's react spec. A link still connecting is the sidebar foot's `Engine connecting`, its word `OWN_STATE_WORDS.connecting`, never a read under way.
 
 ## The rules a page meets first
 

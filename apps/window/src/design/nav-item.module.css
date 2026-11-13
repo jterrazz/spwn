@@ -20,6 +20,10 @@
     background: var(--raise);
     color: var(--t1);
 }
+.item:active {
+    background: var(--raise-2);
+    color: var(--t1);
+}
 .indent {
     padding-left: 20px;
 }

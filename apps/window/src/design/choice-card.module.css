@@ -14,6 +14,9 @@
 .card:hover {
     background: var(--raise);
 }
+.card:active {
+    background: var(--raise-2);
+}
 .icon {
     width: 34px;
     height: 34px;

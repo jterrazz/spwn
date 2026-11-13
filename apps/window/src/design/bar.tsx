@@ -13,14 +13,15 @@ export type BarProps = {
 };
 
 export function Bar({ percent, label, identity, tone = 'plain', width = 'fill' }: BarProps) {
-    const shown = Math.max(2, Math.min(100, percent));
+    const known = Number.isFinite(percent);
+    const shown = known ? Math.max(2, Math.min(100, percent)) : 0;
     const fill: Measured = { '--fill': `${String(shown)}%` };
     return (
         <div
             aria-label={label}
             aria-valuemax={100}
             aria-valuemin={0}
-            aria-valuenow={Math.round(percent)}
+            aria-valuenow={known ? Math.round(percent) : 0}
             className={`${styles.bar} ${styles[tone]} ${width === 'fixed' ? styles.fixed : ''}`}
             data-identity={identity}
             role="meter"
@@ -45,9 +46,11 @@ export type ShareBarProps = {
 };
 
 function shareOf(part: SharePart, of: number | undefined): Measured {
-    return of === undefined
-        ? { '--size': part.size }
-        : { '--share': `${((Math.max(0, part.size) / of) * 100).toFixed(2)}%` };
+    if (of === undefined) {
+        return { '--size': Number.isFinite(part.size) ? Math.max(0, part.size) : 0 };
+    }
+    const share = of > 0 ? (Math.max(0, part.size) / of) * 100 : 0;
+    return { '--share': `${(Number.isFinite(share) ? share : 0).toFixed(2)}%` };
 }
 
 export function ShareBar({ parts, label, of }: ShareBarProps) {

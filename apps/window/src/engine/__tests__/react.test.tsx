@@ -1,4 +1,5 @@
-import { component, content } from '@jterrazz/test';
+import type { Request } from '@jterrazz/station-api';
+import { component, content, waitUntil } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { recordingsOf } from '../../fixtures/recordings';
@@ -9,6 +10,7 @@ import { keyOf } from '../frame';
 import { EngineProvider, useRead } from '../react';
 import { stagedReplay } from '../replay';
 import type { Recording } from '../replay';
+import type { Receiver, Transport } from '../transport';
 import { useGesture } from '../use-gesture';
 
 const recordingFor = await recordingsOf('two-macs');
@@ -75,6 +77,32 @@ function opened(recording: Recording) {
         refused: undefined,
         socket: 'replay',
     });
+}
+
+const CHANGES = { characterData: true, childList: true, subtree: true };
+
+function readingsIn(html: string): number {
+    return html.split('Reading').length;
+}
+
+function countingFrames(transport: Transport) {
+    let frames = 0;
+    return {
+        frames: () => frames,
+        transport: {
+            link: (listener: Parameters<Transport['link']>[0]) => transport.link(listener),
+            open: (request: Request, receiver: Receiver) =>
+                transport.open(request, {
+                    end: (reason, sent) => {
+                        receiver.end(reason, sent);
+                    },
+                    frame: (frame) => {
+                        frames += 1;
+                        receiver.frame(frame);
+                    },
+                }),
+        } satisfies Transport,
+    };
 }
 
 describe('react', () => {
@@ -154,5 +182,44 @@ describe('react', () => {
             .filter((request) => keyOf(request) === 'call engine.read {} {}');
         expect(reads).toHaveLength(2);
         expect(result.errors.text).toBe('');
+    });
+
+    test('reads asked again change nothing visible, and draw no refreshing mark', async () => {
+        // Given - the window on Home over two-macs, its answers counted as they come
+        const stage = opened(recordingFor('two-macs'));
+        const counted = countingFrames(stage.transport);
+        const drawn: string[] = [];
+        const watcher = new MutationObserver(() => {
+            drawn.push(document.body.innerHTML);
+        });
+        let before = '';
+        let after = '';
+        await component.render(
+            <EngineProvider client={new Client(counted.transport)}>
+                <Window initial={{ page: 'home' }} pages={PAGES} />
+            </EngineProvider>,
+            async (visitor) => {
+                await visitor.see(content('npm sign-in expired'));
+                before = document.body.innerHTML;
+                watcher.observe(document.body, CHANGES);
+
+                // When - the window loses the focus and regains it, and every read it shows is answered again
+                const asked = stage.asked().length;
+                const framed = counted.frames();
+                globalThis.dispatchEvent(new Event('blur'));
+                globalThis.dispatchEvent(new Event('focus'));
+                await waitUntil(() => stage.asked().length > asked, { why: 'reads asked again' });
+                const again = stage.asked().length - asked;
+                await waitUntil(() => counted.frames() >= framed + again, {
+                    why: 'every read asked again answered',
+                });
+                watcher.disconnect();
+                after = document.body.innerHTML;
+            },
+        );
+
+        // Then - the page reads as before, and no frame in between said it was reading
+        expect(after).toBe(before);
+        expect(drawn.filter((html) => readingsIn(html) > readingsIn(before))).toStrictEqual([]);
     });
 });

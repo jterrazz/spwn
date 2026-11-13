@@ -14,6 +14,10 @@
     background: var(--panel);
     color: var(--t1);
 }
+.button:active {
+    background: var(--raise-2);
+    color: var(--t1);
+}
 .button:disabled {
     opacity: 0.35;
     pointer-events: none;
