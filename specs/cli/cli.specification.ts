@@ -48,11 +48,12 @@ if (process.env.STATION_SPEC_BUILT !== '1' && binaryIsStale()) {
     renameSync(building, STATION_BIN);
 }
 
-// invariant: no run reaches the real machine. HOME is the run's own directory, and
-// the variables that would move its folders, name a credential or describe the
-// owner's terminal (XDG_*_HOME, GOENV, MISE_*, GH_TOKEN, GITHUB_TOKEN, TERM,
-// TERM_PROGRAM, COLORTERM) are unset unless a document states them, so the CI
-// runner's XDG_CONFIG_HOME never becomes one folder of preferences every run shares; PATH
+// invariant: no run reaches the real machine. A run's environment is the defaults
+// below, what its document states, and of the runner's own variables only those
+// INHERITED names: every other one is unset, so a cache folder the runner exports
+// (GOMODCACHE, GOCACHE, npm_config_cache) is never the folder a run's stub empties,
+// and the CI runner's XDG_CONFIG_HOME never becomes one folder of preferences every
+// run shares. HOME is the run's own directory; PATH
 // holds only the fixture's stubs and STATION_SYSTEM_DIRS adds no system directory, so
 // an unstubbed tool is "not found" alike on a Mac and on the Linux CI runner;
 // STATION_SYSTEM_ROOT reads /Applications, /opt/homebrew, /Library and /usr/local under
@@ -70,6 +71,13 @@ if (process.env.STATION_SPEC_BUILT !== '1' && binaryIsStale()) {
 // its second pass over the machines and engine/keep suites), every world's Macs run
 // the fake of that hypervisor instead of tart's; `two-macs-vz` is two-macs over vz.
 const hypervisor = process.env.STATION_SPEC_HYPERVISOR ?? '';
+// value: the temp root @jterrazz/test points TMPDIR, TMP and TEMP at, its run's own.
+const INHERITED = new Set(['TEMP', 'TMP', 'TMPDIR']);
+const runnerUnset = Object.fromEntries(
+    Object.keys(process.env)
+        .filter((name) => !INHERITED.has(name))
+        .map((name) => [name, null]),
+);
 // value: a world runs in a terminal with the station block (STATION_TERMINAL set);
 // `no-block` is two-macs from a terminal without it.
 const world = (seed: string, over: string, block = true) => ({
@@ -90,15 +98,9 @@ const worlds = {
 
 export const { cleanup, cli } = await specification.cli(STATION_BIN, {
     defaults: {
-        COLORTERM: null,
+        ...runnerUnset,
         COLUMNS: '80',
-        GH_TOKEN: null,
-        GITHUB_TOKEN: null,
-        GOENV: null,
         HOME: '$WORKDIR',
-        MISE_CONFIG_DIR: null,
-        MISE_DATA_DIR: null,
-        MISE_GLOBAL_CONFIG_FILE: null,
         NO_COLOR: '1',
         PATH: '$WORKDIR/bin',
         STATION_GITHUB_API_URL: 'http://127.0.0.1:9',
@@ -107,13 +109,7 @@ export const { cleanup, cli } = await specification.cli(STATION_BIN, {
         STATION_POWER_STUB: '$WORKDIR/power',
         STATION_SYSTEM_DIRS: '',
         STATION_SYSTEM_ROOT: '$WORKDIR/root',
-        TERM: null,
-        TERM_PROGRAM: null,
         TZ: 'UTC',
-        XDG_CACHE_HOME: null,
-        XDG_CONFIG_HOME: null,
-        XDG_DATA_HOME: null,
-        XDG_STATE_HOME: null,
     },
     // value: a document that needs a terminal runs `terminal "$STATION"`, the binary on a
     // pseudo-terminal its fixture's driver opens, since a run is never given a TTY, and
