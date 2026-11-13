@@ -39,7 +39,11 @@ function Steps({ lines, all, title, note = String(lines.length) }: StepsProps) {
                         size="slim"
                         {...(line.Step.Version === '' ? {} : { tag: line.Step.Version })}
                         title={line.Step.Package}
-                        trail={layer === '' ? null : `from ${layer}`}
+                        trail={
+                            layer === '' ? null : (
+                                <span className={styles.muted}>{`from ${layer}`}</span>
+                            )
+                        }
                     />
                 );
             })}
