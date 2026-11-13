@@ -3,7 +3,11 @@ import type { ReactNode } from 'react';
 
 import styles from './button.module.css';
 
-export type ButtonVariant = 'danger' | 'destroy' | 'link' | 'plain' | 'primary';
+// value: the five looks of a button, named once: primary leads a screen, plain is any other gesture, link reads
+// value: as a sentence, danger opens a destruction, and destroy, the filled danger, only confirms one.
+export const BUTTON_VARIANTS = ['primary', 'plain', 'link', 'danger', 'destroy'] as const;
+
+export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 
 type Refuse = (refused: boolean) => void;
 

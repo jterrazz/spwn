@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import {
     Button,
+    BUTTON_VARIANTS,
     IconButton,
     Screen,
     StatePill,
@@ -55,10 +56,11 @@ export function Buttons() {
             <Screen>
                 <Button variant="primary">Open in Terminal</Button>
             </Screen>
-            <Button>Stop</Button>
-            <Button variant="link">3 more can wait</Button>
-            <Button variant="danger">Delete workspace…</Button>
-            <Button variant="destroy">Delete</Button>
+            {BUTTON_VARIANTS.filter((variant) => variant !== 'primary').map((variant) => (
+                <Button key={variant} variant={variant}>
+                    {variant}
+                </Button>
+            ))}
             <Button disabled>Disabled</Button>
             <Screen>
                 <Button disabled variant="primary">

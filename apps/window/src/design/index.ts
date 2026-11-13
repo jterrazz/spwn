@@ -1,6 +1,6 @@
 export { AppIcon } from './app-icon';
 export { Bar, ShareBar, type SharePart } from './bar';
-export { Button, Screen } from './button';
+export { Button, BUTTON_VARIANTS, Screen } from './button';
 export { asSentence, capitalised } from './case';
 export { Caption } from './caption';
 export { Chart } from './chart';

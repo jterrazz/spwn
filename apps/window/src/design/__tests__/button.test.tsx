@@ -3,6 +3,19 @@ import { describe, expect, test } from 'vitest';
 
 import { Button, Screen } from '../button';
 
+const SOURCES = import.meta.glob<string>(['../../**/*.{ts,tsx}', '!../../**/__tests__/**'], {
+    eager: true,
+    import: 'default',
+    query: '?raw',
+});
+
+const DRAWS_DESTROY = [
+    /(?:^|\/)button\.tsx$/u,
+    /(?:^|\/)confirm-dialog\.tsx$/u,
+    /\.stories\.tsx?$/u,
+    /(?:^|\/)gallery\//u,
+];
+
 describe('Button', () => {
     test('one primary per screen draws', async () => {
         // Given - a screen with one primary and one plain button
@@ -86,6 +99,20 @@ describe('Button', () => {
         // Then - only the page's primary is drawn primary, and no rule is broken
         expect(result.html.text.match(/class="[^"]*primary/gu)).toHaveLength(1);
         expect(result.errors.text).toBe('');
+    });
+
+    test('the filled danger is drawn only by the confirmation of a destruction', () => {
+        // Given - every source file of the window but the button, its confirmation and the gallery's samples
+        const swept = Object.entries(SOURCES).filter(
+            ([file]) => !DRAWS_DESTROY.some((allowed) => allowed.test(file)),
+        );
+        const drawing = swept
+            .filter(([, source]) => /['"]destroy['"]/u.test(source))
+            .map(([file]) => file);
+
+        // Then - the sweep read the window, and none of its files names the destroy look
+        expect(swept.length).toBeGreaterThan(100);
+        expect(drawing).toStrictEqual([]);
     });
 
     test('a yielding primary alone on its screen is drawn primary', async () => {
