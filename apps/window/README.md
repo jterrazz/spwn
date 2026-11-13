@@ -226,7 +226,7 @@ The route (page, machine, tab, the file Machine files opens on and the catalog i
 
 ## Recording, capturing, proving
 
-All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `record.py` writes the worlds, `node scripts/capture.ts <out>` photographs every page of every world, and `check.sh` is the proof, with `check-quick.sh` for the seconds between two edits. A page opens directly in a dev or proof build by its start route, `?world=<world>&page=<page>` (Machine files on one file by `&file=<name>`, a catalog item on its shelf by `&item=<name>`) or `?world=<world>&machine=<name>&tab=<Tab>`.
+All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `record.py` writes the worlds, `node scripts/capture.ts <out>` photographs every page of every world, and `check.sh` is the proof, `recordings-check.py` among it, failing a recording the engine of the tree no longer answers so, with `check-quick.sh` for the seconds between two edits. A page opens directly in a dev or proof build by its start route, `?world=<world>&page=<page>` (Machine files on one file by `&file=<name>`, a catalog item on its shelf by `&item=<name>`) or `?world=<world>&machine=<name>&tab=<Tab>`.
 
 ## The design rules
 

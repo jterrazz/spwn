@@ -3,7 +3,8 @@
 # value: the full proof of the window, after bench-setup.sh:
 # value: the window's tests in Chromium, `typescript check` over the repository, the release and proof builds, then
 # value: the bridge's Rust tests (`cargo test`, in the shared Tauri target, WINDOW_CARGO_JOBS jobs, 3 by default),
-# value: `cargo fmt --check` and `cargo clippy --all-targets` with warnings denied (the rustfmt and clippy components).
+# value: `cargo fmt --check` and `cargo clippy --all-targets` with warnings denied (the rustfmt and clippy components),
+# value: then recordings-check.py, which fails a recording the world build of this tree no longer answers so.
 # value: One exit code: 0 when apps/window has no finding and its tests and builds pass; a finding outside
 # value: apps/window is the root's and is counted apart. `--update` rewrites the
 # value: goldens the tests compare, before the toolchain's named-path pass asks for a golden no run wrote yet.
@@ -40,6 +41,8 @@ rustfmt=$?
     cargo clippy -j "${WINDOW_CARGO_JOBS:-3}" --all-targets -- -D warnings) >"$logs/clippy.log" 2>&1
 clippy=$?
 rm -rf "$window/src-tauri/gen" "$window/src-tauri/Cargo.lock"
+timeout 520 python3 "$scripts/recordings-check.py" >"$logs/recordings.log" 2>&1
+recordings=$?
 echo "typescript check: exit $check, its passes:"
 sed 's/\x1b\[[0-9;]*m//g' "$logs/check.log" | grep -aE ' RUN |Passed|Failed' | paste - - \
     | sed -E 's/ *RUN +//; s/✓ Passed.*/ok/; s/✗ Failed.*/FAILED/' | sed 's/^/  /'
@@ -50,8 +53,9 @@ echo "builds: exit $build"
 echo "rust tests: exit $rust, $(grep -aE '^test result' "$logs/rust.log" | tail -1)"
 echo "rustfmt: exit $rustfmt, $(grep -ac '^Diff in' "$logs/rustfmt.log") files to format"
 echo "clippy: exit $clippy, $(grep -acE '^(warning|error)' "$logs/clippy.log") findings"
+echo "recordings: exit $recordings, $(tail -1 "$logs/recordings.log")"
 status=0
 [ "$check" -ne 124 ] && [ "$window_clean" -eq 0 ] && [ "$test" -eq 0 ] && [ "$build" -eq 0 ] && [ "$rust" -eq 0 ] \
-    && [ "$rustfmt" -eq 0 ] && [ "$clippy" -eq 0 ] || status=1
+    && [ "$rustfmt" -eq 0 ] && [ "$clippy" -eq 0 ] && [ "$recordings" -eq 0 ] || status=1
 echo "check: window exit $status · root $root_findings findings, typescript check exit $check · $(($(date +%s) - start)) s · logs in $logs"
 exit "$status"

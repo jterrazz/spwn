@@ -43,7 +43,6 @@ TIMED = {"activity.read", "engine.watch"}
 NOISE = {"engine.start": "PID"}
 MACHINES = {"watch": "machines.list", "in": {}}
 binary = world_binary()
-print("world build:", binary)
 
 
 class Door:
@@ -356,19 +355,21 @@ def again(world):
     return f"{world}: {len(wanted)} exchanges of {only} asked again -> {path}"
 
 
-arguments = sys.argv[1:]
-calls = {argument.removeprefix("--call=") for argument in arguments if argument.startswith("--call=")}
-only = next((argument.removeprefix("--only=") for argument in arguments if argument.startswith("--only=")), None)
-given = next((json.loads(argument.removeprefix("--in=")) for argument in arguments if argument.startswith("--in=")), None)
-alone = "--gestures" in arguments or bool(calls)
-named = [argument for argument in arguments if not argument.startswith("--")]
-everywhere = sorted({folder.name for folder in out_root.iterdir() if folder.is_dir()} | set(SEEDS))
-if only is not None:
-    worlds = named or [world for world in everywhere if (out_root / world / f"{only}.json").exists()]
-    job = again
-else:
-    worlds = named or [world for world in everywhere if not calls or calls & {callOf(it) for it in GESTURES.get(world, [])}]
-    job = record
-with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-    for line in pool.map(job, worlds):
-        print(line)
+if __name__ == "__main__":
+    print("world build:", binary)
+    arguments = sys.argv[1:]
+    calls = {argument.removeprefix("--call=") for argument in arguments if argument.startswith("--call=")}
+    only = next((argument.removeprefix("--only=") for argument in arguments if argument.startswith("--only=")), None)
+    given = next((json.loads(argument.removeprefix("--in=")) for argument in arguments if argument.startswith("--in=")), None)
+    alone = "--gestures" in arguments or bool(calls)
+    named = [argument for argument in arguments if not argument.startswith("--")]
+    everywhere = sorted({folder.name for folder in out_root.iterdir() if folder.is_dir()} | set(SEEDS))
+    if only is not None:
+        worlds = named or [world for world in everywhere if (out_root / world / f"{only}.json").exists()]
+        job = again
+    else:
+        worlds = named or [world for world in everywhere if not calls or calls & {callOf(it) for it in GESTURES.get(world, [])}]
+        job = record
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+        for line in pool.map(job, worlds):
+            print(line)
