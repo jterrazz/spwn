@@ -156,3 +156,11 @@ func TestIssuedIsTheShapesThatNameTheirIssuer(t *testing.T) {
 		}
 	}
 }
+
+func TestKeptIsScreensWordsWithoutTheFlag(t *testing.T) {
+	text := "key " + token("g", "ho_abc") + " after"
+	want, _ := secret.Screen(text)
+	if got := secret.Kept(text); got != want || got == text {
+		t.Errorf("Kept(%q) = %q, want %q", text, got, want)
+	}
+}

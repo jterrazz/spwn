@@ -14,6 +14,11 @@ func Screen(text string) (kept string, withheld bool) {
 	return kept, kept != text
 }
 
+func Kept(text string) string {
+	kept, _ := Screen(text)
+	return kept
+}
+
 func Shaped(v string) bool {
 	// value: whether a whole value holds a secret, for a value withheld whole
 	// rather than word by word.

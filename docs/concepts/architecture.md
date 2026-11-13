@@ -55,7 +55,7 @@ The shared kernel, which does no I/O:
     contract/  the contracts every family shares: Self, Preferences
     store/     what every store shares: its errors, its version, the Migrator init runs
     fail/      the error: its type, its code, its words
-    secret/    what a secret looks like (the token shapes, Screen) and the Value that never prints in clear
+    secret/    what a secret looks like (the token shapes, Screen and Kept) and the Value that never prints in clear
     adapter/   macos and linux (Self), jsonfile (Preferences), fake
 ```
 

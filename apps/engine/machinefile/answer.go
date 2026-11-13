@@ -31,7 +31,7 @@ func (a Applied) Answered() Applied {
 	a.Removed = each(a.Removed, Done.answered)
 	a.Ran = a.Ran.answered()
 	a.Blocks = each(a.Blocks, func(b BlockDone) BlockDone {
-		b.Block, b.Detail = b.answered(), screened(b.Detail)
+		b.Block, b.Detail = b.answered(), secret.Kept(b.Detail)
 		return b
 	})
 	return a
@@ -41,7 +41,7 @@ func (u Upgraded) Answered() Upgraded {
 	u.Plan = u.Plan.Answered()
 	u.Done = each(u.Done, Done.answered)
 	u.Ran = u.Ran.answered()
-	u.Unpulled = screened(u.Unpulled)
+	u.Unpulled = secret.Kept(u.Unpulled)
 	return u
 }
 
@@ -54,13 +54,13 @@ func (l Line) answered() Line {
 		}
 		l.Step.Values = values
 	}
-	l.Step.From = screened(l.Step.From)
-	l.Seen.Detail = screened(l.Seen.Detail)
+	l.Step.From = secret.Kept(l.Step.From)
+	l.Seen.Detail = secret.Kept(l.Seen.Detail)
 	return l
 }
 
 func (d Done) answered() Done {
-	d.Line, d.Detail = d.Line.answered(), screened(d.Detail)
+	d.Line, d.Detail = d.Line.answered(), secret.Kept(d.Detail)
 	return d
 }
 
@@ -69,17 +69,17 @@ func (r *Ran) answered() *Ran {
 		return nil
 	}
 	out := *r
-	out.Script, out.Detail = r.Script.answered(), screened(r.Detail)
+	out.Script, out.Detail = r.Script.answered(), secret.Kept(r.Detail)
 	return &out
 }
 
 func (s Script) answered() Script {
-	s.Lines = screened(s.Lines)
+	s.Lines = secret.Kept(s.Lines)
 	return s
 }
 
 func (b Block) answered() Block {
-	b.Zsh, b.Diff = screened(b.Zsh), screened(b.Diff)
+	b.Zsh, b.Diff = secret.Kept(b.Zsh), secret.Kept(b.Diff)
 	return b
 }
 
@@ -92,9 +92,4 @@ func each[T any](in []T, answered func(T) T) []T {
 		out[i] = answered(v)
 	}
 	return out
-}
-
-func screened(text string) string {
-	kept, _ := secret.Screen(text)
-	return kept
 }

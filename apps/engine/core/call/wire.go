@@ -35,9 +35,9 @@ func ToWire(err error, word Wording) *WireError {
 	if f == nil {
 		f = &fail.Error{Message: err.Error(), Exit: fail.ExitFailure}
 	}
-	w := &WireError{Type: f.Type, Code: f.Code, Subject: screened(f.Subject), Detail: screenedAll(f.Detail), Message: screened(f.Message), Hint: screened(f.Hint), Exit: f.Exit}
+	w := &WireError{Type: f.Type, Code: f.Code, Subject: secret.Kept(f.Subject), Detail: screenedAll(f.Detail), Message: secret.Kept(f.Message), Hint: secret.Kept(f.Hint), Exit: f.Exit}
 	if w.Message == "" {
-		w.Message = screened(f.Error())
+		w.Message = secret.Kept(f.Error())
 	}
 	if f.Fix.Call != "" || f.Fix.Command != "" || f.Fix.Path != "" || len(f.Fix.Args) > 0 {
 		fix := f.Fix
@@ -46,18 +46,13 @@ func ToWire(err error, word Wording) *WireError {
 	return w
 }
 
-func screened(text string) string {
-	kept, _ := secret.Screen(text)
-	return kept
-}
-
 func screenedAll(detail map[string]string) map[string]string {
 	if detail == nil {
 		return nil
 	}
 	out := make(map[string]string, len(detail))
 	for k, v := range detail {
-		out[k] = screened(v)
+		out[k] = secret.Kept(v)
 	}
 	return out
 }

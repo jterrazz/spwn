@@ -62,9 +62,7 @@ func screenedError(e *Error) *Error {
 	if e == nil {
 		return nil
 	}
-	message, _ := secret.Screen(e.Message)
-	hint, _ := secret.Screen(e.Hint)
-	return &Error{Message: message, Hint: hint}
+	return &Error{Message: secret.Kept(e.Message), Hint: secret.Kept(e.Hint)}
 }
 
 func screenedErrors(items []Item) {

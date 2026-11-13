@@ -134,7 +134,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 // (saidLines), and what was applied stays applied.
 func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *machinefile.Ran {
 	task := "run." + string(s.Phase)
-	p.Step(task, screened(strings.Join(machinefile.ScriptLines(s.Lines), "\n")))
+	p.Step(task, secret.Kept(strings.Join(machinefile.ScriptLines(s.Lines), "\n")))
 	out := &machinefile.Ran{Script: s, State: catalog.StateOK}
 	if d.Shell == nil {
 		out.State, out.Detail = catalog.StateBroken, "this machine runs no shell"
@@ -426,11 +426,6 @@ func (r *run) values(ctx context.Context, given map[string]catalog.OptionValue) 
 		values[k], secrets[string(plain)] = string(plain), string(v)
 	}
 	return values, secrets, nil
-}
-
-func screened(text string) string {
-	kept, _ := secret.Screen(text)
-	return kept
 }
 
 func masked(words string, secrets map[string]string) string {

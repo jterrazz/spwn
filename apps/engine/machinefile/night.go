@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 // value: the hour of the night the engine upgrades a bound Machinefile at,
@@ -52,7 +53,7 @@ func NightOf(u Upgraded, failed error, name string, at time.Time) Night {
 	// before its end keeps its error, so the owner reads it.
 	n := Night{At: at.UTC(), Machinefile: cmp.Or(u.Plan.Name, name), Waiting: u.Waiting, Interrupted: u.Interrupted, Unpulled: u.Unpulled}
 	if failed != nil && !u.Interrupted {
-		n.Error = screened(failed.Error())
+		n.Error = secret.Kept(failed.Error())
 	}
 	n.seen(u)
 	return n

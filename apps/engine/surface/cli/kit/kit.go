@@ -462,17 +462,24 @@ func (s *Spinner) Step(task, detail string) {
 	// spinner line, replacing the last; a step that asks the owner is a line
 	// of its own instead, under which its prompt waits.
 	s.stop()
-	detail, _ = secret.Screen(detail)
 	why := strings.Split(detail, "\n")
 	if detail == "" {
 		why = nil
 	}
-	if len(why) > 0 && why[0] == call.Asks {
+	asks := len(why) > 0 && why[0] == call.Asks
+	if asks {
+		why = why[1:]
+	}
+	line := append([]string{task}, words.Reasons(why)...)
+	for i, part := range line {
+		line[i] = secret.Kept(part)
+	}
+	if asks {
 		s.stop = func() {}
-		s.io.out.Ahead(append([]string{task}, words.Reasons(why[1:])...)...)
+		s.io.out.Ahead(line...)
 		return
 	}
-	s.stop = s.io.Wait(output.Said(append([]string{task}, words.Reasons(why)...)...))
+	s.stop = s.io.Wait(output.Said(line...))
 }
 
 func (*Spinner) Done(string, error) {}
