@@ -27,7 +27,7 @@ export const OWN_STATE_TONES: Tones<OwnState> = {
     'not-given': 'plain',
     'not-measured': 'plain',
     'not-wired': 'plain',
-    'read-once': 'plain',
+    'read-once': 'ok',
     reading: 'new',
     unknown: 'warn',
     'window-error': 'plain',

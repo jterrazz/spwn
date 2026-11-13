@@ -14,13 +14,17 @@ describe('Logs', () => {
     test("a VM's log is the engine's lines, counted and timed by the read", async () => {
         // Given - linux-1 over two-macs, its log read at 14:20
         using _ = clock.at('2026-11-04T14:20:00Z');
+        let dot = '';
         const result = await component.render(logsOf('two-macs', 'linux-1'), async (visitor) => {
             // When - its log has been read
             await visitor.see(heading('0 lines, read at 14:20.'));
+            dot = document.querySelector('[role="img"][aria-label="Read once"]')?.className ?? '';
         });
 
-        // Then - the tab says the engine read no line, with its filter and Refresh
+        // Then - the tab says the engine read no line, with its filter and Refresh, under the mockup's green dot
         await expect(result.tree).toMatch(file('./__expected__/two-macs-linux-1.aria.yaml'));
+        expect(dot).toContain('_dot_');
+        expect(dot).not.toContain('_plain_');
     });
 
     test('a filter and a refresh keep the tab on the engine read', async () => {
