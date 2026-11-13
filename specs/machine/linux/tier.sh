@@ -125,7 +125,7 @@ until_true 6 st engine --json > /dev/null 2>&1 || fail "the engine of this build
 say "-- the engine of this build runs for $mac (pid $engine_pid)"
 
 
-case_begin image-build IM-09 ADR-043
+case_begin image-build IM-09 ADR-044
 # value: the owner's template, read through the run's own user source: it extends
 # station-linux and bakes what it bakes, shares a folder of the Mac read-only, and
 # its own lines run at the image's build (run.image) and at a first start (run.boot,
@@ -161,7 +161,7 @@ jq -r .lock <<< "$record" | grep -q '^lock: station.lock/v1' || fail "the image 
 case_pass
 
 
-case_begin create-workspace-from ADR-043
+case_begin create-workspace-from ADR-044
 st machines create ws1 --from studio-linux --json > "$work/ws1-created.json" 2>> "$log" || fail "machines create ws1 --from studio-linux exited $?"
 created=$(cat "$work/ws1-created.json")
 [ "$(jq -r '.template' <<< "$created")" = studio-linux ] || fail "ws1 is not made from studio-linux: $created"
@@ -187,7 +187,7 @@ say "   ws1 made from studio-linux $built: persistent, 4 CPU, 30 GB, its boot ph
 case_pass
 
 
-case_begin drift-clean ADR-043
+case_begin drift-clean ADR-044
 kind_inside=$(st overview --on ws1 --json | jq -r '.machine.kind')
 [ "$kind_inside" = workspace ] || fail "station inside ws1 reports $kind_inside, not workspace"
 for baked in mise git docker build-essential playwright-deps; do
@@ -240,7 +240,7 @@ say "   ws1 answers ssh, its apps install through the engine, its home holds onl
 case_pass
 
 
-case_begin chromium-headless ADR-043
+case_begin chromium-headless ADR-044
 # value: headless Chromium launches on the libraries station-linux bakes alone: no
 # `playwright install-deps`, which would install them as root.
 # hazard: playwright 1.55.0's browser install never ends on Node 26 (the archive is

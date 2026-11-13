@@ -1,4 +1,4 @@
-# ADR-043: An image is baked from its Machinefile; the recipe is plumbing alone
+# ADR-044: An image is baked from its Machinefile; the recipe is plumbing alone
 
 **Status:** Proposed
 **Date:** 2026-11-12

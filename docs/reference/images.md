@@ -1,6 +1,6 @@
 # Images
 
-An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac holds its own: built there from a Machinefile, the image named after it, or fetched where a registry offers it ([ADR-043](../decisions/043-draft-an-image-is-baked-from-its-machinefile.md)). Station knows `station-linux`, the built-in Linux workspace's Machinefile, and `macos`, fetched only (station has no recipe for it yet); every Machinefile of yours or of the shared source that says a VM's `vm.image.from` on Ubuntu is an image too (`studio-linux`).
+An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac holds its own: built there from a Machinefile, the image named after it, or fetched where a registry offers it ([ADR-044](../decisions/044-an-image-is-baked-from-its-machinefile.md)). Station knows `station-linux`, the built-in Linux workspace's Machinefile, and `macos`, fetched only (station has no recipe for it yet); every Machinefile of yours or of the shared source that says a VM's `vm.image.from` on Ubuntu is an image too (`studio-linux`).
 
 | Section           | Answers                                                 |
 | ----------------- | ------------------------------------------------------- |
