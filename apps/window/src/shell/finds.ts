@@ -56,10 +56,11 @@ const LIBRARY: readonly PlainPage[] = [
 ];
 
 const WITH_A_QUERY: ReadonlySet<Kind> = new Set<Kind>(['Packages', 'Tabs']);
+const PAGE_DETAILS: Partial<Record<Kind, string>> = { Library: 'setup', Places: 'page' };
 
 function page(held: Held, kind: Kind, one: PlainPage): Result {
     return {
-        detail: kind === 'Places' ? 'page' : '',
+        detail: PAGE_DETAILS[kind] ?? '',
         kind,
         label: held.titles[one],
         to: { route: { page: one } },
@@ -169,9 +170,9 @@ function machineOf(result: Result): string {
 
 // invariant: a machine's tabs keep the tab bar's order, the order everything() lists them in, so only their
 // invariant: machines are sorted, and toSorted is stable. The machines keep the sidebar's order, each Mac then its
-// invariant: VMs, as machines.list sends them.
+// invariant: VMs, as machines.list sends them, and the library rows keep the sidebar's.
 function inOrder(kind: Kind): (a: Result, b: Result) => number {
-    if (kind === 'Machines') {
+    if (kind === 'Machines' || kind === 'Library') {
         return () => 0;
     }
     return kind === 'Tabs'

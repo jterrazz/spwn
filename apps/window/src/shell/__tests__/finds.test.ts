@@ -66,10 +66,21 @@ describe('finds', () => {
         expect(shown(groups)).toStrictEqual([
             ['Places', ['Home', 'Inbox', 'Storage']],
             ['Machines', ['mini', 'book', 'linux-1', 'api']],
-            ['Library', ['Apps', 'Catalog', 'Machine files', 'Settings', 'Skills']],
+            ['Library', ['Machine files', 'Catalog', 'Apps', 'Skills', 'Settings']],
             ['Needs', ['web does not answer on :3000']],
             ['Actions', ['New machine', 'Show or hide the sidebar']],
         ]);
+    });
+
+    test('a place is a page, and a library row is setup', () => {
+        // Given - the empty query's groups
+        const groups = matching(everything(HELD), '');
+
+        // Then - each place and each library row carries its trail
+        const details = (kind: string) =>
+            groups.find((group) => group.kind === kind)?.results.map((result) => result.detail);
+        expect(details('Places')).toStrictEqual(['page', 'page', 'page']);
+        expect(details('Library')).toStrictEqual(['setup', 'setup', 'setup', 'setup', 'setup']);
     });
 
     test('this Mac is named so, any other Mac is a Mac', () => {
