@@ -1,13 +1,16 @@
+import type { MachinesVM } from '@jterrazz/station-api';
+
 import { Icon } from '../../design/icon';
 import { identityOf, MachineIcon, MissingMark, Panel, Row, Tile } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
-import { useRead } from '../../engine/react';
+import { useRead, useWatch } from '../../engine/react';
 import { vmAbout, vmState } from '../../engine/shown';
-import { sentence } from '../../model/format';
+import { duration, sentence } from '../../model/format';
 import { resourcesOf, targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
+import { between, firstUnitOf } from '../activity/when';
 import { NotGiven, Unanswered } from '../kit/readings';
 
 type Go = (to: Route) => void;
@@ -28,7 +31,19 @@ export function MemoryOfMachines() {
     return <NotGiven title="Memory" what="What each machine holds of this Mac's memory." />;
 }
 
+// value: how long a VM has run, from its boot to the moment machines.list was read: a date drawn as "6 d".
+function upFor(vm: MachinesVM, read: string | undefined): string | undefined {
+    const span = between(vm.BootAt, read);
+    if (span === undefined) {
+        return undefined;
+    }
+    const { value, unit } = firstUnitOf(duration(span));
+    return `up ${value} ${unit}`;
+}
+
 export function Machines({ found, go }: { found: Found; go: Go }) {
+    const listing = useWatch('machines.list', {});
+    const read = listing.kind === 'read' ? listing.out.All.Read : undefined;
     const vms = found.mac.VMs ?? [];
     if (vms.length === 0) {
         return null;
@@ -45,6 +60,7 @@ export function Machines({ found, go }: { found: Found; go: Go }) {
                     sentence={sentence([vmAbout(vm).lifetime, resourcesOf(vm)])}
                     state={vmState(vm)}
                     title={vm.Name}
+                    value={upFor(vm, read) ?? null}
                 />
             ))}
         </Panel>
