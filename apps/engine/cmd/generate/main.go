@@ -32,7 +32,7 @@ func main() {
 	catalogue := flag.String("calls", callsPath, "calls.json, the registry's catalogue, rewritten whole")
 	stories := flag.String("stories", storiesDir, "the folder the story worlds' pages are written to")
 	world := flag.String("world", pages.PlayWorldPath, "the stories' machines as an engine world, the play rig's, rewritten whole")
-	schema := flag.String("schema", schemaPath, "the JSON Schema of an item file of the catalog, rewritten whole")
+	schema := flag.String("schema", schemaPath, "the JSON Schema of a package file of the catalog, rewritten whole")
 	machinefiles := flag.String("machinefile-schema", machinefileSchemaPath, "the JSON Schema of a Machinefile, rewritten whole")
 	flag.Parse()
 	current, err := os.ReadFile(*path)

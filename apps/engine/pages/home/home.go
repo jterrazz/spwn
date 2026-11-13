@@ -114,7 +114,7 @@ func appsSection(s Overview) page.Section {
 
 func settingsSection(s Overview) page.Section {
 	if s.SettingsPending {
-		return section("settings", "Settings", []page.Row{pending("items", "items")})
+		return section("settings", "Settings", []page.Row{pending("packages", "packages")})
 	}
 	var items []page.Item
 	for _, r := range s.Settings {

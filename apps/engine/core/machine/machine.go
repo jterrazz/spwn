@@ -79,7 +79,7 @@ const (
 type Provider struct {
 	// value: the program that provides the need, as the owner reads it.
 	Name string
-	// value: the catalogue item that installs it; empty when station
+	// value: the catalogue package that installs it; empty when station
 	// installs none.
 	Package string
 	// value: the presence read, asked only by the gate of a call that needs

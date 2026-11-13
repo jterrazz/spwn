@@ -17,7 +17,7 @@ import (
 
 // value: this machine's calls as a run of apply reaches them: an install
 // answers what answer says and then hook runs, an uninstall fails for the
-// items of broken, and every call is noted.
+// packages of broken, and every call is noted.
 type calls struct {
 	answer []apps.Outcome
 	hook   func()
@@ -81,7 +81,7 @@ func (*ledger) PutBlock(context.Context, machinefile.Written) error   { return n
 func (*ledger) DeleteBlock(context.Context, string) error             { return nil }
 
 func TestAnInstallThatAnsweredBeforeTheInterruptIsNotReadAgain(t *testing.T) {
-	// invariant: the read past an interrupt is for an item whose install
+	// invariant: the read past an interrupt is for a package whose install
 	// handed back nothing; one that answered already installed is kept as
 	// it said.
 	ctx, cancel := context.WithCancel(context.Background())
@@ -126,7 +126,7 @@ func TestAnExtraThatDidNotUninstallKeepsWhatItLeansOn(t *testing.T) {
 }
 
 func TestAPhaseInAVMHoldsItsPackagesToTheirShare(t *testing.T) {
-	// invariant: inside a VM's phase (image, boot) the items run within
+	// invariant: inside a VM's phase (image, boot) the packages run within
 	// catalog.ItemsBound, so the owner's lines keep catalog.RunBound of the
 	// phase's bound; apply's own phase bounds them by nothing.
 	l := machinefile.Line{Step: machinefile.Step{Package: "tool", Kind: catalog.KindApp, Method: "pkg"}, Action: machinefile.Install}
@@ -152,7 +152,7 @@ func TestAPhaseInAVMHoldsItsPackagesToTheirShare(t *testing.T) {
 				return
 			}
 			if off := got.Sub(due); off < 0 || off > time.Minute {
-				t.Fatalf("the install had %v; want the items' share, %v", off+c.share, c.share)
+				t.Fatalf("the install had %v; want the packages' share, %v", off+c.share, c.share)
 			}
 		})
 	}

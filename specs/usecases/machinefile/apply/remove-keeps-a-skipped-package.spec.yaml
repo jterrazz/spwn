@@ -1,4 +1,4 @@
-description: 'apply --remove keeps an optional item the Machinefile still lists, skipped on this system'
+description: 'apply --remove keeps an optional package the Machinefile still lists, skipped on this system'
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
@@ -35,7 +35,7 @@ runs:
       exit: 0
       stdout: |
           ●	fd	10.3.0	brew
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0
       stdout: |
           ["fd"]

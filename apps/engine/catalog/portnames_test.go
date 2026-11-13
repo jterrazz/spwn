@@ -32,7 +32,7 @@ func TestAPortIsKnownByItsSoftware(t *testing.T) {
 }
 
 // invariant: one owner per port: a port is never named twice, every port
-// an item's env is set for has its name, and an item names a port as the
+// a package's env is set for has its name, and a package names a port as the
 // table does.
 func TestEveryPortIsNamedOnceAndEveryPackagePortAgrees(t *testing.T) {
 	seen := map[int]string{}

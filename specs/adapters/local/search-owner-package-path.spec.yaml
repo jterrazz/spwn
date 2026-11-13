@@ -1,0 +1,7 @@
+description: 'the folder an owner''s package lands its commands in (path:) is searched as a built-in package''s is'
+fixture: ./__fixtures__/owner-package-path/
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "thing") | .state'''
+      exit: 0
+      stdout: |
+          ok

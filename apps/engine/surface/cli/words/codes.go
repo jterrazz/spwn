@@ -81,7 +81,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is a " + machine.Kind(e.Detail["kind"]).Word(machine.OS(e.Detail["os"])) + ": station does not manage its " + e.Detail["section"], "run station overview for what " + e.Subject + " has"
 		},
 		call.NeedMissing: func(e *fail.Error) (string, string) {
-			return e.Subject + " is required by " + NeededBy(e.Detail["call"]), NeedFix(e.Subject, e.Detail["item"])
+			return e.Subject + " is required by " + NeededBy(e.Detail["call"]), NeedFix(e.Subject, e.Detail["package"])
 		},
 		call.BadInput: func(e *fail.Error) (string, string) {
 			return e.Subject + " cannot read its input", "check the request against " + e.Detail["in"]
@@ -141,7 +141,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", "update station"
 		},
 		machinefilecalls.CatalogInvalid: func(e *fail.Error) (string, string) {
-			return e.Detail["problem"], "fix that line: station never rewrites an item file"
+			return e.Detail["problem"], "fix that line: station never rewrites a package file"
 		},
 		machinefilecalls.CatalogNewer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", "update station"
@@ -178,7 +178,7 @@ func Codes() map[fail.Code]Wording {
 			if is := e.Detail["is"]; is != "" {
 				return e.Subject + " is " + is + " (" + where + ")", "station explain"
 			}
-			return "the catalog has no item " + e.Subject + " (" + where + ")", "station apps"
+			return "the catalog has no package " + e.Subject + " (" + where + ")", "station apps"
 		},
 		machinefilecalls.BadValue: func(e *fail.Error) (string, string) {
 			at := " (" + e.Detail["at"] + ")"

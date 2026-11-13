@@ -15,7 +15,7 @@ type Catalog struct {
 	Apps     []App
 	Settings []Setting
 	Images   []Image
-	// value: every item as its file says it, and the layer it was read
+	// value: every package as its file says it, and the layer it was read
 	// from, in the lists' order: what the Machinefile's resolution reads.
 	Packages []Placed
 }
@@ -36,7 +36,7 @@ func BuiltinFiles() fs.FS {
 	return builtin
 }
 
-// value: an item, the file it was read from, its category folder and the
+// value: a package, the file it was read from, its category folder and the
 // layer it stands in.
 
 type Placed struct {
@@ -82,7 +82,7 @@ func Load(fsys fs.FS, root string) (Catalog, error) {
 }
 
 func Packages(fsys fs.FS, root, layer string) ([]Placed, error) {
-	// value: the items of one tree, `<root>/<category>/<name>.yaml`, each
+	// value: the packages of one tree, `<root>/<category>/<name>.yaml`, each
 	// decoded strictly, in the layer named.
 	folders, err := fs.ReadDir(fsys, root)
 	if err != nil {
@@ -100,7 +100,7 @@ func Packages(fsys fs.FS, root, layer string) ([]Placed, error) {
 		for _, f := range files {
 			file := path.Join(root, folder.Name(), f.Name())
 			if f.IsDir() || !strings.HasSuffix(f.Name(), ".yaml") {
-				return nil, &FileError{File: file, Problem: "is no item file: an item is <name>.yaml"}
+				return nil, &FileError{File: file, Problem: "is no package file: a package is <name>.yaml"}
 			}
 			body, err := fs.ReadFile(fsys, file)
 			if err != nil {
@@ -117,7 +117,7 @@ func Packages(fsys fs.FS, root, layer string) ([]Placed, error) {
 }
 
 func Read(file, folder, layer string, body []byte) (Placed, error) {
-	// value: one item file read, in its folder and layer.
+	// value: one package file read, in its folder and layer.
 	it, err := Decode(file, body)
 	if err != nil {
 		return Placed{}, err
@@ -126,7 +126,7 @@ func Read(file, folder, layer string, body []byte) (Placed, error) {
 }
 
 func Over(layers ...[]Placed) []Placed {
-	// invariant: the layers strongest first; an item of a stronger layer
+	// invariant: the layers strongest first; a package of a stronger layer
 	// replaces a same-name one of a weaker layer whole, never merged.
 	var out []Placed
 	seen := map[string]bool{}
@@ -142,7 +142,7 @@ func Over(layers ...[]Placed) []Placed {
 }
 
 func Assemble(pkgs []Placed) (Catalog, error) {
-	// value: the catalog of the items given, judged whole.
+	// value: the catalog of the packages given, judged whole.
 	pkgs = slices.Clone(pkgs)
 	slices.SortFunc(pkgs, byCategory)
 	c := Catalog{Images: builtinImages, Packages: pkgs}
@@ -201,9 +201,9 @@ func (p Placed) rank() int {
 	return len(folders)
 }
 
-// invariant: the items judged together, each refusal naming the file that
-// says it: each name is one item's, and every name an item gives (requires,
-// after, then, provided-by, renamed-from) is an item of the right kind.
+// invariant: the packages judged together, each refusal naming the file that
+// says it: each name is one package's, and every name a package gives (requires,
+// after, then, provided-by, renamed-from) is a package of the right kind.
 func whole(pkgs []Placed, files map[string]string) error {
 	owner := owners{}
 	for _, it := range CheckedSettings {
@@ -234,7 +234,7 @@ func whole(pkgs []Placed, files map[string]string) error {
 func judged(it Package, owner owners, renamed map[string]string) string {
 	for _, old := range it.RenamedFrom {
 		if owner[old] != "" {
-			return fmt.Sprintf("%s is renamed from %q, which names an item still", it.Name, old)
+			return fmt.Sprintf("%s is renamed from %q, which names a package still", it.Name, old)
 		}
 		if prev, ok := renamed[old]; ok {
 			return fmt.Sprintf("%s and %s are both renamed from %q", prev, it.Name, old)
@@ -242,11 +242,11 @@ func judged(it Package, owner owners, renamed map[string]string) string {
 		renamed[old] = it.Name
 	}
 	if d := it.Deprecated; d != nil && d.Use != "" && owner[d.Use] != "app" && owner[d.Use] != "setting" {
-		return fmt.Sprintf("%s says to use %q, which is no item", it.Name, d.Use)
+		return fmt.Sprintf("%s says to use %q, which is no package", it.Name, d.Use)
 	}
 	for _, a := range it.After {
 		if owner[a] != "app" && owner[a] != "setting" {
-			return fmt.Sprintf("%s comes after %q, which is no item", it.Name, a)
+			return fmt.Sprintf("%s comes after %q, which is no package", it.Name, a)
 		}
 	}
 	if it.Kind == KindSetting {
@@ -320,7 +320,7 @@ func (o owners) claim(name, what string) error {
 	return nil
 }
 
-// value: a port an item serves on, and the item that says so.
+// value: a port a package serves on, and the package that says so.
 
 type PackagePort struct {
 	Package string
@@ -328,7 +328,7 @@ type PackagePort struct {
 }
 
 func (c Catalog) Ports() []PackagePort {
-	// value: every port the catalog's items serve on, in the items' order:
+	// value: every port the catalog's packages serve on, in the packages' order:
 	// the label a listening port is shown with, and what sharing it sets.
 	var out []PackagePort
 	for _, p := range c.Packages {

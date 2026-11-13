@@ -32,7 +32,7 @@ runs:
           Changes  ● tart · 1.0.0 · shell
 
           → station apply  resumes
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.item, .method])'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.package, .method])'' world.json'
       exit: 0
       stdout: |
           [["tart","shell"]]

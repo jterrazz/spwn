@@ -206,7 +206,7 @@ func checkPackage(file string, doc *yaml.Node, it Package) error {
 		return refused(file, doc, "phase", fmt.Sprintf("phase %q is none of %s", it.Phase, strings.Join(it.Phase.Enum(), ", ")))
 	}
 	if slices.Contains(it.RenamedFrom, it.Name) {
-		return refused(file, doc, "renamed-from", "an item is not renamed from its own name")
+		return refused(file, doc, "renamed-from", "a package is not renamed from its own name")
 	}
 	for _, a := range it.Accepts {
 		if !known(a) {
@@ -654,13 +654,13 @@ func checkPortEnv(p PortHint) string {
 var reference = regexp.MustCompile(`\$\{option\.([^}]*)\}`)
 
 // invariant: every `${option.<name>}` inside a method's values names an
-// option of the item; one that names none is refused at decode.
+// option of the package; one that names none is refused at decode.
 func references(v reflect.Value, options []Option) string {
 	switch v.Kind() {
 	case reflect.String:
 		for _, m := range reference.FindAllStringSubmatch(v.String(), -1) {
 			if !hasOption(options, m[1]) {
-				return m[0] + " names no option of the item"
+				return m[0] + " names no option of the package"
 			}
 		}
 	case reflect.Pointer:

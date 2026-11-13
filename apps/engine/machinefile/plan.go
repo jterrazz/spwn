@@ -9,7 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
-// value: what one item of a Machinefile is on the machine now, as drift
+// value: what one package of a Machinefile is on the machine now, as drift
 // says it: there as the Machinefile asks, not there, there behind its
 // newest, no longer as station left it (a setting edited by hand, an app
 // that no longer answers), there by another way than its method, installed
@@ -27,7 +27,7 @@ const (
 	Unknown    Condition = "unknown"
 )
 
-// value: what apply does with an item: install it, set it, adopt it as
+// value: what apply does with a package: install it, set it, adopt it as
 // it is (never reinstalled), keep it (already there), leave it as it is
 // (the owner's change, a read that did not answer), or remove it (an extra,
 // with --remove alone).
@@ -43,7 +43,7 @@ const (
 	Remove  Action = "remove"
 )
 
-// value: what an item reads on the machine, as its family read it: its
+// value: what a package reads on the machine, as its family read it: its
 // condition, its state, the method that holds it, the version there, the
 // words of its read, the manager its method lacks here, when that
 // manager is not installed, whether station cannot uninstall it here,
@@ -74,18 +74,18 @@ type Line struct {
 }
 
 // value: one install station made for a Machinefile, as its ledger keeps
-// it: the item, the method that installed it, the Machinefile that listed
+// it: the package, the method that installed it, the Machinefile that listed
 // it, and when.
 
 type Installed struct {
-	Package     string    `json:"item"`
+	Package     string    `json:"package"`
 	Method      string    `json:"method"`
 	Machinefile string    `json:"machinefile"`
 	At          time.Time `json:"at"`
 }
 
 // value: an install of the ledger the Machinefile lists no longer, as a
-// line: its step is the item by the ledger's method, with what its removal
+// line: its step is the package by the ledger's method, with what its removal
 // asks of the owner and the extras it waits on, what it reads now, and
 // what `apply --remove` does with it: remove it, or leave it.
 
@@ -98,7 +98,7 @@ type ExtraLine struct {
 	RequiredBy []string
 }
 
-// value: what the plan asks of the owner, grouped by need, with the items
+// value: what the plan asks of the owner, grouped by need, with the packages
 // that ask it.
 
 type Asked struct {
@@ -123,7 +123,7 @@ type Plan struct {
 	Lines  []Line
 	Extra  []ExtraLine
 	// value: the blocks of ~/.zshrc the lines' methods write, in the plan's
-	// order, then those of an item the plan carries no longer.
+	// order, then those of a package the plan carries no longer.
 	Blocks       []Block
 	Skipped      []Skip
 	Restarts     []catalog.AfterApply
@@ -133,7 +133,7 @@ type Plan struct {
 }
 
 func (p Plan) Script() (Script, bool) {
-	// value: the owner's lines this plan's phase runs once its items are
+	// value: the owner's lines this plan's phase runs once its packages are
 	// carried out: the image's as it is built, the boot's at a first
 	// start; apply's phase runs none.
 	switch p.Phase {
@@ -151,7 +151,7 @@ func (p Plan) ScriptOf(phase RunPhase) (Script, bool) {
 }
 
 func InPhase(s Step, phase catalog.Phase) bool {
-	// invariant: a step is of the phase its item says, apply's by default;
+	// invariant: a step is of the phase its package says, apply's by default;
 	// the image phase also runs every baked step, which a bare apply
 	// carries too.
 	if phase == catalog.PhaseImage && s.Baked {
@@ -161,12 +161,12 @@ func InPhase(s Step, phase catalog.Phase) bool {
 }
 
 func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Installed, passwordless bool, phase catalog.Phase) Plan {
-	// invariant: an item's action follows from what it reads: absent is
+	// invariant: a package's action follows from what it reads: absent is
 	// installed or set, present by its method kept, present by another of
 	// its methods or another way adopted and never reinstalled, an app that no longer answers installed again, a
 	// setting changed by hand or a read that did not answer left as it is
-	// (the owner's to decide); an item of another phase is left to it. An
-	// item skipped on this system is still listed, so never extra; only
+	// (the owner's to decide); a package of another phase is left to it. An
+	// package skipped on this system is still listed, so never extra; only
 	// apply's phase has extras, since another phase carries a part.
 	phase = cmp.Or(phase, catalog.PhaseApply)
 	p := Plan{Name: r.Name, Phase: phase, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless, Scripts: r.Scripts}
@@ -305,7 +305,7 @@ func there(s Seen) bool {
 	return false
 }
 
-// value: what removing an item by a method asks of the owner: the item's
+// value: what removing a package by a method asks of the owner: the package's
 // needs and the method's own (a cask's sudo); an extra already gone asks
 // nothing, and Plan.Interactive judges that.
 func removalNeeds(it catalog.Package, method string, sys catalog.System) []catalog.Need {
@@ -636,7 +636,7 @@ func WaitingOf(done []Done) []Waiting {
 
 // value: a Machinefile applied: its plan, each line as it ended in the
 // order it ran, each extra removed or left, the Machinefile bound when the
-// run bound one, and whether it was interrupted (an item may have finished
+// run bound one, and whether it was interrupted (a package may have finished
 // just before).
 
 type Applied struct {
@@ -699,7 +699,7 @@ func (p Plan) reaches(l Line) bool {
 func (p Plan) UpgradeNeeds() []Asked {
 	// value: what an upgrade asks of the owner: the needs of each app it
 	// updates, a version the Machinefile pins being kept as it is. An app
-	// updated asks only what its method asks; the item's needs are its
+	// updated asks only what its method asks; the package's needs are its
 	// install's, asked when the upgrade installs an app that is not there.
 	var lines []Line
 	for _, l := range p.Upgrades() {

@@ -16,13 +16,13 @@ import (
 // refusal, and answered no it ends there, the line already said.
 func (e Env) answerNeed(ctx context.Context, err error, o IO, again func() error) error {
 	var refused *fail.Error
-	if !errors.As(err, &refused) || refused.Code != call.NeedMissing || refused.Detail["item"] == "" {
+	if !errors.As(err, &refused) || refused.Code != call.NeedMissing || refused.Detail["package"] == "" {
 		return err
 	}
 	if !e.Interactive || e.Install == nil || e.Prompt == nil || o.JSON || o.PageJSON {
 		return err
 	}
-	pkg := refused.Detail["item"]
+	pkg := refused.Detail["package"]
 	message, hint := words.Codes()[call.NeedMissing](refused)
 	if printed := e.Out.Finding(page.Absent, message, hint); printed != nil {
 		return printed

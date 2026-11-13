@@ -62,7 +62,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 				return err
 			}
 			shared := held(ctx, env, last)
-			return io.PageRecords(pageaccounts.Page(last, d.ThisMachine), pageaccounts.List(last, shared), pageaccounts.ListContract(call.Schema(accountscalls.List.Name), last, shared))
+			return io.PageRecords(pageaccounts.Page(last, d.ThisMachine), pageaccounts.List(last, shared), pageaccounts.ListContract(accountscalls.List.Schema(), last, shared))
 		},
 	}, env)
 	cmd.AddCommand(children...)
@@ -158,7 +158,7 @@ func everyMachine(ctx context.Context, env kit.Env, io kit.IO) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	return io.Page(pageaccounts.EveryMachine(blocks), pageaccounts.EveryMachineContract(call.Schema(accountscalls.List.Name), blocks))
+	return io.Page(pageaccounts.EveryMachine(blocks), pageaccounts.EveryMachineContract(accountscalls.List.Schema(), blocks))
 }
 
 func faulted(b pageaccounts.MachineBlock, err error) pageaccounts.MachineBlock {

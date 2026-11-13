@@ -157,9 +157,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			}
 			steps := kit.Steps(io)
 			var created machines.Created
-			schema := call.Schema(machinescalls.CreateWorkspace.Name)
+			schema := machinescalls.CreateWorkspace.Schema()
 			if in.Server {
-				schema = call.Schema(machinescalls.CreateServer.Name)
+				schema = machinescalls.CreateServer.Schema()
 			}
 			err := io.Confirmed(func(answer string) (err error) {
 				r := in.request

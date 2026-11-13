@@ -42,7 +42,7 @@ type ReserverOptions struct {
 	Listening func(ctx context.Context) ([]ports.Listener, error)
 	// value: the routes a declared port is verified by; nil verifies none.
 	Routes contract.PublicRoutes
-	// value: the ports the catalog's items serve on: a row's label.
+	// value: the ports the catalog's packages serve on: a row's label.
 	Ports []catalog.PackagePort
 }
 

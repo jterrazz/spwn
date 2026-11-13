@@ -16,7 +16,7 @@ func NeededBy(call string) string {
 }
 
 func NeedFix(program, pkg string) string {
-	// value: the gesture that provides a need: its catalogue item installed,
+	// value: the gesture that provides a need: its catalogue package installed,
 	// else the program put on the search path by hand.
 	if pkg == "" {
 		return "install " + program + ", then run it again"

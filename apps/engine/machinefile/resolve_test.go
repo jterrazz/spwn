@@ -230,7 +230,7 @@ func TestARefusedEntryIsNamedAtItsLine(t *testing.T) {
 		{"an unknown app", machine("a", "{ os: macos }", "\n    - fd\n    - nope"), "nope (~/.config/station/machinefiles/a.yaml:6)"},
 		{"a bad value", machine("a", "{ os: macos }", "[{ name: fd, options: { tint: blue } }]"), "fd's tint: no option of fd (~/.config/station/machinefiles/a.yaml:4)"},
 		{"no method", machine("a", "{ os: debian, version: '12' }", "[{ name: fd, manager: skill }]"), "(listed, ~/.config/station/machinefiles/a.yaml:4)"},
-		{"an item baked that the catalog lacks", machine("a", "{ os: macos }", "[]") + "vm: { image: { bake: [fd, nope] } }\n", "nope (~/.config/station/machinefiles/a.yaml)"},
+		{"a package baked that the catalog lacks", machine("a", "{ os: macos }", "[]") + "vm: { image: { bake: [fd, nope] } }\n", "nope (~/.config/station/machinefiles/a.yaml)"},
 	}
 	for _, c := range cases {
 		_, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": c.file}, nil), "a", machinefile.Machine{}, machinefile.Lock{})

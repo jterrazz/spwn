@@ -468,7 +468,7 @@ func (s *Shelf) kept(t catalog.App, where string) bool {
 }
 
 // value: the key a method's apps are updated by: the first its manager
-// item installs by, else the method's own.
+// package installs by, else the method's own.
 func (s *Shelf) managerKey(m catalog.Method) string {
 	if owner, ok := s.cat.Manager(string(m)); ok {
 		if it, ok := s.cat.Package(owner); ok && len(it.Package.Manages) > 0 {

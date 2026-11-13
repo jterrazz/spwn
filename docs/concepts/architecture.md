@@ -249,7 +249,7 @@ The binary holds the catalog; the machine holds its own state, in the XDG folder
 | `UptimeStore`      | `machines`    | `~/.local/state/station/uptime.json`, written by the engine's keep job alone                                                   |
 | `Journal`          | `agents`      | `~/.local/state/station/agents/`, inside a VM, one file per session                                                            |
 
-The shared source's clone, `~/.cache/station/sources/<name>`, is no store: it is cloned at its default branch, moved only by `upgrade` and only forward, and cloned again when it is gone. Each store carries its version; `station init` runs every store's `Migrator`, and a store written by a newer station is refused rather than read. Nothing else is consulted, and no file inside the clone matters: the dotfiles and the VM recipes are embedded. [Footprint](../reference/footprint.md) lists every file station writes.
+The shared source's clone, `~/.cache/station/sources/<name>`, is no store: it is cloned at its default branch, moved only by `upgrade` and only forward, and cloned again when it is gone. Each store carries its version; `station init` runs every store's `Migrator`, and a store written by a newer station is refused rather than read, as is a ledger an older station wrote, until `station init` rewrites it. Nothing else is consulted, and no file inside the clone matters: the dotfiles and the VM recipes are embedded. [Footprint](../reference/footprint.md) lists every file station writes.
 
 ## The compiler
 

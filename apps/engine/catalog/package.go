@@ -9,8 +9,8 @@ const (
 	SchemaFamily = "station.package"
 )
 
-// value: what an item IS (how it installs is its methods): a manager installs
-// other items, an app is run or used, a setting is a state of the system.
+// value: what a package IS (how it installs is its methods): a manager installs
+// other packages, an app is run or used, a setting is a state of the system.
 
 type Kind string
 
@@ -93,7 +93,7 @@ type Selector struct {
 	Machine Roles  `yaml:"machine,omitempty"`
 }
 
-// value: what an item needs from the owner, grouped at the head of a plan:
+// value: what a package needs from the owner, grouped at the head of a plan:
 // the password sudo asks, a terminal to ask at, a license to accept (Xcode's),
 // the App Store signed in.
 
@@ -110,7 +110,7 @@ func (Need) Enum() []string {
 	return []string{string(NeedSudo), string(NeedTerminal), string(NeedLicense), string(NeedAppStoreLogin)}
 }
 
-// value: when an item is applied: baked into a VM image, at a VM's first
+// value: when a package is applied: baked into a VM image, at a VM's first
 // start, or by `apply` (the default).
 
 type Phase string
@@ -125,7 +125,7 @@ func (Phase) Enum() []string {
 	return []string{string(PhaseImage), string(PhaseBoot), string(PhaseApply)}
 }
 
-// value: a method key a manager item installs by, the one its methods
+// value: a method key a manager package installs by, the one its methods
 // name: homebrew manages brew and cask.
 
 type ManagerKey string
@@ -135,11 +135,11 @@ func (ManagerKey) Enum() []string {
 }
 
 // value: where a manager stands in its system's default priority, lowest
-// first: the first manager of the list that has a method for an item
+// first: the first manager of the list that has a method for a package
 // installs it, unless a Machinefile says `prefer:`. A system's order is
-// these numbers across the manager items, each number one manager's. A
+// these numbers across the manager packages, each number one manager's. A
 // `script` method has no manager and no rank: it is tried after every
-// manager of the system; a `github-release` method is ranked by the item
+// manager of the system; a `github-release` method is ranked by the package
 // that manages it.
 
 type Priority struct {
@@ -161,14 +161,14 @@ type PortHint struct {
 	Env   map[string]string `yaml:"env,omitempty"`
 }
 
-// value: why an item goes, and the item to take instead.
+// value: why a package goes, and the package to take instead.
 
 type Deprecation struct {
 	Why string `yaml:"why"`
 	Use string `yaml:"use,omitempty"`
 }
 
-// value: what has to happen once an item is applied for it to take: a
+// value: what has to happen once a package is applied for it to take: a
 // process restarted, the owner logged out, the machine rebooted; a plan
 // lists each once.
 
@@ -241,7 +241,7 @@ type Package struct {
 	Requires    []string `yaml:"requires,omitempty"`
 	// value: a setting's apps of which any one serves.
 	RequiresOneOf []string `yaml:"requires-one-of,omitempty"`
-	// value: items applied before this one when both are, never installed
+	// value: packages applied before this one when both are, never installed
 	// for it (requires does that).
 	After []string `yaml:"after,omitempty"`
 	Then  []string `yaml:"then,omitempty"`
@@ -274,7 +274,7 @@ type Package struct {
 	Disk       *Disk        `yaml:"disk,omitempty"`
 }
 
-// value: one value the owner gives an item, a form field in the menu bar:
+// value: one value the owner gives a package, a form field in the menu bar:
 // its type, its default, an integer's bounds, an enum's values, and examples
 // a form shows as its placeholder.
 
@@ -310,7 +310,7 @@ type MethodSpec struct {
 	// knows the install by (bun's `github:tobi/qmd`, known as qmd).
 	Package string `yaml:"package,omitempty"`
 	// value: the commands this method lands when they differ from the
-	// item's (Debian's fd is `fdfind`).
+	// package's (Debian's fd is `fdfind`).
 	Provides []string `yaml:"provides,omitempty"`
 	// value: the shell line that upgrades what this method installed, where
 	// its manager's own upgrade does not fit.
@@ -318,7 +318,7 @@ type MethodSpec struct {
 	// value: what this method can pin, where it differs from its manager's.
 	Pin Pin `yaml:"pin,omitempty"`
 	// value: what this method alone asks of the owner (apt's sudo on a
-	// Linux computer, mas's App Store login); the item's needs are every
+	// Linux computer, mas's App Store login); the package's needs are every
 	// method's.
 	Needs []Need `yaml:"needs,omitempty"`
 	// value: a brew or cask from a third-party tap the owner trusts.
@@ -374,7 +374,7 @@ type GitHubReleaseMethod struct {
 }
 
 // value: the escape hatch: `check` is the shell line whose exit 0 says it is
-// there (the item's provides, without one); the install is `run`, a shell
+// there (the package's provides, without one); the install is `run`, a shell
 // line, or `url`, an installer fetched and run; `undo` takes it back; a
 // script with neither is installed by the owner, as `hint` says.
 

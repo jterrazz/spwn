@@ -1,4 +1,4 @@
-description: 'a refused owner''s item leaves --version, help and the engine running; what reads the catalog stops'
+description: 'a refused owner''s package leaves --version, help and the engine running; what reads it stops'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
@@ -14,22 +14,22 @@ runs:
     - command: '--version >/dev/null'
       exit: 0
       stderr: |
-          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package · this run reads the built-in items
+          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package · this run reads the built-in packages
     - command: 'help apps >/dev/null'
       exit: 0
       stderr: |
-          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package · this run reads the built-in items
+          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package · this run reads the built-in packages
     - command: 'engine'
       exit: 0
       stdout: |
           ●	engine	running · {{string}} · up 3 d · 1 VM
       stderr: |
-          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package · this run reads the built-in items
+          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package · this run reads the built-in packages
     - command: 'apps'
       exit: 2
       stderr: |
           Error: ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package
-          Hint: fix that line: station never rewrites an item file
+          Hint: fix that line: station never rewrites a package file
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
       stdin: |
           package: station.package/v1
@@ -40,7 +40,7 @@ runs:
               - { os: macos, brew: jq }
       exit: 0
       stderr: |
-          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package · this run reads the built-in items
+          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package · this run reads the built-in packages
     - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "jq") | .name'''
       exit: 0
       stdout: |

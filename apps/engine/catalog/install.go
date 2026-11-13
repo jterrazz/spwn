@@ -25,8 +25,8 @@ const (
 	MethodShell         Method = "shell"
 	MethodApp           Method = "app"
 	MethodSkill         Method = "skill"
-	// invariant: the command comes with another item's install: installing it
-	// installs that item, and its presence is its own provides.
+	// invariant: the command comes with another package's install: installing it
+	// installs that package, and its presence is its own provides.
 	MethodProvidedBy Method = "provided-by"
 )
 
@@ -132,7 +132,7 @@ type SkillInstall struct{ Repo, Skill string }
 
 type ProvidedByInstall struct {
 	Package string
-	// value: the commands the item brings, which its install finds.
+	// value: the commands the package brings, which its install finds.
 	Commands []string
 }
 
@@ -331,7 +331,7 @@ func lastSegment(name string) string {
 	return name[strings.LastIndex(name, "/")+1:]
 }
 
-// invariant: a skill item is named after its skill, except where that name is
+// invariant: a skill package is named after its skill, except where that name is
 // already an app's: then it carries the `-skill` suffix, and its install keeps
 // the upstream name the skills lock records.
 

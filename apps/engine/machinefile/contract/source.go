@@ -7,7 +7,7 @@ import (
 )
 
 type Source interface {
-	// invariant: the source's catalog items and Machinefiles, each by its
+	// invariant: the source's catalog packages and Machinefiles, each by its
 	// slash path under the source (`catalog/<category>/<name>.yaml`,
 	// `machinefiles/<name>.yaml`), in path order, in the source's layer; a
 	// source that holds neither folder answers no file.

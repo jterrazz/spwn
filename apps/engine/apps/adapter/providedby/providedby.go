@@ -11,8 +11,8 @@ import (
 )
 
 type ProvidedBy struct {
-	// invariant: a command that comes with another item's install runs
-	// nothing of its own: the item that provides it is its requirement,
+	// invariant: a command that comes with another package's install runs
+	// nothing of its own: the package that provides it is its requirement,
 	// installed before it, and its install is that its commands are on the
 	// search path now.
 	run local.Runner
@@ -38,7 +38,7 @@ func (p *ProvidedBy) Install(_ context.Context, installs []catalog.Install, _ co
 	for _, i := range installs {
 		v, ok := i.(catalog.ProvidedByInstall)
 		if !ok {
-			return errors.New(i.Key() + " is not provided by another item")
+			return errors.New(i.Key() + " is not provided by another package")
 		}
 		for _, name := range v.Commands {
 			if _, found := p.run.LookPath(name); !found {

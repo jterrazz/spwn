@@ -49,7 +49,7 @@ func TestJudgeTakesBackOnlyThisMachinefilesExtrasDependentsFirst(t *testing.T) {
 }
 
 func TestJudgeKeepsAPackageSkippedOnThisSystem(t *testing.T) {
-	// invariant: an optional item the Machinefile still lists is no extra
+	// invariant: an optional package the Machinefile still lists is no extra
 	// while this system skips it: no method here today is no removal.
 	cat := catalog.Catalog{Packages: []catalog.Placed{placed(catalog.Package{Name: "foo"})}}
 	ledger := []machinefile.Installed{{Package: "foo", Method: "pkg", Machinefile: "laptop"}}
@@ -243,7 +243,7 @@ func TestJudgeAsksThePasswordOnlyWhereTheMachineAsksOne(t *testing.T) {
 }
 
 func TestUpgradeAsksOnlyWhatTheUpdateNeedsNotItsInstalls(t *testing.T) {
-	// invariant: an upgrade asks the item's needs only for an app it
+	// invariant: an upgrade asks the package's needs only for an app it
 	// installs; an app it updates asks its method's needs alone.
 	cat := catalog.Catalog{Packages: []catalog.Placed{
 		placed(catalog.Package{Name: "manager", Needs: []catalog.Need{catalog.NeedSudo}}),

@@ -8,7 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
-// value: one identified block of ~/.zshrc as the plan judges it: the item
+// value: one identified block of ~/.zshrc as the plan judges it: the package
 // whose method writes it, its id, the zsh apply would write once the
 // variables are filled (for an extra, what the file holds), what the file
 // holds of it (present as it would be written, absent, outdated when it is
@@ -16,7 +16,7 @@ import (
 // changed since by hand, or extra when station wrote it for an extra of the
 // plan), its diff from the file to what apply writes, and what apply does
 // with it: set it, keep it, leave a changed one as it is, or, with
-// `--remove`, take it back with its item. An extra's Fate is what `apply
+// `--remove`, take it back with its package. An extra's Fate is what `apply
 // --remove` does with it.
 
 type Block struct {
@@ -35,12 +35,12 @@ func (b Block) Forgets() bool {
 	return b.Condition == Extra && b.Fate.Forgets()
 }
 
-// value: a block of ~/.zshrc apply wrote: its id, the item it was written
+// value: a block of ~/.zshrc apply wrote: its id, the package it was written
 // for, the digest of the text written between its markers, and when.
 
 type Written struct {
 	ID      string    `json:"id"`
-	Package string    `json:"item"`
+	Package string    `json:"package"`
 	Digest  string    `json:"digest"`
 	At      time.Time `json:"at"`
 }

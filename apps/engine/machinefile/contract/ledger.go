@@ -7,11 +7,11 @@ import (
 )
 
 type Ledger interface {
-	// invariant: what station installed for a Machinefile, by item name; an
-	// install recorded again replaces the earlier record of its item.
+	// invariant: what station installed for a Machinefile, by package name; an
+	// install recorded again replaces the earlier record of its package.
 	List(ctx context.Context) ([]machinefile.Installed, error)
 	Put(ctx context.Context, in machinefile.Installed) error
-	// invariant: deleting an item never recorded changes nothing.
+	// invariant: deleting a package never recorded changes nothing.
 	Delete(ctx context.Context, pkg string) error
 	// invariant: the last night the engine's upgrade recorded, as the last
 	// Write left it; none written reads as none (false) with no error.

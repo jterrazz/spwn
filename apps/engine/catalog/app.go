@@ -56,7 +56,7 @@ type App struct {
 	UpdatesSelf bool
 	Installs    []LivesOn
 	Provides    []string
-	// value: the absolute folders the item's methods land its commands in,
+	// value: the absolute folders the package's methods land its commands in,
 	// off the system's PATH, which station's own search adds so what it
 	// installs is found in the same run: its methods' `path:`.
 	Path     []string
@@ -64,7 +64,7 @@ type App struct {
 	Version  VersionRead
 	Requires []string
 	// value: what its install asks of the owner, said before it runs (the
-	// item key `needs:`).
+	// package key `needs:`).
 	Needs []Need
 	Then  []string
 	Live  Liveness
@@ -89,7 +89,7 @@ var MethodKinds = map[Method][]MachineKind{
 	MethodScript:        {Mac, Linux, MacOS},
 	MethodShell:         {Mac, Linux, MacOS},
 	MethodSkill:         {Mac, Linux, MacOS},
-	// invariant: a command another item brings lives wherever that item does.
+	// invariant: a command another package brings lives wherever that package does.
 	MethodProvidedBy: {Mac, Linux, MacOS},
 }
 
@@ -149,7 +149,7 @@ func (t App) InstallBy(k MachineKind, m Method) (Install, bool) {
 	return nil, false
 }
 
-// value: the items the code names: the hypervisor app and its launcher setting.
+// value: the packages the code names: the hypervisor app and its launcher setting.
 const (
 	HypervisorApp      = "tart"
 	HypervisorLauncher = HypervisorApp + "-launcher"

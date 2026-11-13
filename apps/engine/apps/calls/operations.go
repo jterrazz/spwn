@@ -433,7 +433,7 @@ func (s *Shelf) bundle(ctx context.Context, verb string, list []catalog.App, upd
 }
 
 // invariant: a script reports only its own exit code, so an install that left
-// none of the commands the item provides behind is a failure, never an OK.
+// none of the commands the package provides behind is a failure, never an OK.
 func (s *Shelf) landed(ctx context.Context, t catalog.App, o apps.Outcome) apps.Outcome {
 	if o.Result != catalog.StateOK || s.install(t).Method() != catalog.MethodScript || len(t.Provides) == 0 {
 		return o

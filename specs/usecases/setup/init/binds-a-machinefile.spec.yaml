@@ -30,7 +30,7 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	homebrew	script	present
           ●	jq	brew	present
           ●	fd	brew	present

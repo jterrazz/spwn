@@ -41,7 +41,7 @@ runs:
           ●	homebrew	5.0.1	script	the manager of mise
           ●	mise	2026.10.1	brew	the manager of fd
           ●	fd	10.2.0	mise
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.item, .method])'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.package, .method])'' world.json'
       exit: 0
       stdout: |
           [["fd","mise"]]
@@ -52,7 +52,7 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	homebrew	script	present
           ●	mise	brew	present
           ●	fd	mise	present

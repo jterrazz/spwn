@@ -68,7 +68,7 @@ type Options struct {
 	// value: the engine's own state folder: its socket and its children.
 	State       string
 	ThisMachine catalog.MachineKind
-	// value: the ports the catalog's items serve on: a reserved port's HTTP
+	// value: the ports the catalog's packages serve on: a reserved port's HTTP
 	// and label, the env a VM's run sets.
 	Ports []catalog.PackagePort
 	// value: the ports a VM's Machinefile says it may open, read by its

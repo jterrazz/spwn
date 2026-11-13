@@ -43,7 +43,7 @@ type Env struct {
 	// value: a name as this Mac's records hold it: a Mac by its full name,
 	// a VM of this Mac with On set; false for any other name.
 	Locate func(name string) (machine.Ref, bool)
-	// value: installs one catalogue item on the target and prints its
+	// value: installs one catalogue package on the target and prints its
 	// outcome, as apps install does; how a terminal answers a missing need.
 	Install func(ctx context.Context, pkg string, o IO) error
 }

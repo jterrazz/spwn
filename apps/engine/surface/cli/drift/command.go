@@ -20,7 +20,7 @@ type Input struct{ Machinefile string }
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "drift",
-		Short:   "How this machine differs from its Machinefile: each item present, absent, outdated, changed, not managed, extra",
+		Short:   "How this machine differs from its Machinefile: each package present, absent, outdated, changed, not managed, extra",
 		Example: "  station drift\n  station drift --json",
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
@@ -33,7 +33,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return io.Page(pagemachinefile.Drift(p, d.ThisMachine), pagemachinefile.PlanContract("station.machinefile.drift/v1", p))
+			return io.Page(pagemachinefile.Drift(p, d.ThisMachine), pagemachinefile.PlanContract(machinefilecalls.Drift.Schema(), p))
 		},
 	}, env)
 }

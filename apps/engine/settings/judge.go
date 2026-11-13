@@ -56,8 +56,8 @@ type Observation struct {
 func (o Observation) Present() bool { return o.State == catalog.StateOK }
 
 type Row struct {
-	// value: the setting's catalog name, and Item its whole entry as the
-	// machine that judged it reads it; a checked row's Item is empty.
+	// value: the setting's catalog name, and Package its whole entry as the
+	// machine that judged it reads it; a checked row's Package is empty.
 	Name    string
 	Package catalog.Setting
 	Group   Group
@@ -80,9 +80,9 @@ type Row struct {
 }
 
 func Known(rows []Row, local func(string) (catalog.Setting, bool)) []Row {
-	// invariant: a row a far station judged carries its item as that station
+	// invariant: a row a far station judged carries its package as that station
 	// reads it; one from an older station, whose wire has none, is shown with
-	// this station's item of the same name, and one it does not know keeps
+	// this station's package of the same name, and one it does not know keeps
 	// its name alone.
 	out := slices.Clone(rows)
 	for i, r := range out {

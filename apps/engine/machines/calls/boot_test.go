@@ -23,7 +23,7 @@ func (e *boundEngine) GuestExec(ctx context.Context, _, _, _ string) (GuestRan, 
 }
 
 func TestABootPhaseOutlastsItsPackagesAndItsLines(t *testing.T) {
-	// invariant: the boot phase's apply is given the items' share and the
+	// invariant: the boot phase's apply is given the packages' share and the
 	// lines' bound together, so lines that run long end as a broken
 	// run.boot step inside it, never as the apply cut short.
 	e := &boundEngine{}
@@ -37,6 +37,6 @@ func TestABootPhaseOutlastsItsPackagesAndItsLines(t *testing.T) {
 	}
 	if off := e.until[0].Sub(due); off < 0 || off > time.Minute {
 		left := e.until[0].Sub(due) + want
-		t.Fatalf("the boot phase had %v; want %v, the items' share and the lines' bound", left, want)
+		t.Fatalf("the boot phase had %v; want %v, the packages' share and the lines' bound", left, want)
 	}
 }

@@ -1,4 +1,4 @@
-description: 'an app''s Then item runs inside the install: apps install tmux writes the embedded tmux.conf'
+description: 'an app''s Then package runs inside the install: apps install tmux writes the embedded tmux.conf'
 fixture:
     - ../../__fixtures__/stubs/
     - ./__fixtures__/then-tmux/

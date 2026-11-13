@@ -15,7 +15,7 @@ runs:
       exit: 0
     - command: 'apply > /dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger |= map(if .item == "postgres" then .machinefile = "work" else . end)'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger |= map(if .package == "postgres" then .machinefile = "work" else . end)'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |
@@ -29,7 +29,7 @@ runs:
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger |= map(select(.item != "postgres"))'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger |= map(select(.package != "postgres"))'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 0

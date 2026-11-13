@@ -21,11 +21,11 @@ func ready() machines.ReadinessFacts {
 func TestAMacHasItsReadinessOnlyWhenItMacsAServerOrNeverSleeps(t *testing.T) {
 	f := ready()
 	if got := machines.Readiness(f); len(got) != 6 {
-		t.Fatalf("a Mac hosting a server has %d readiness items, want the six of SPEC 7.6", len(got))
+		t.Fatalf("a Mac hosting a server has %d readiness checks, want the six of SPEC 7.6", len(got))
 	}
 	f.MacsServer = false
 	if got := machines.Readiness(f); len(got) != 6 {
-		t.Fatalf("a Mac that never sleeps has %d readiness items, want six", len(got))
+		t.Fatalf("a Mac that never sleeps has %d readiness checks, want six", len(got))
 	}
 	f.NeverSleeps.State = catalog.StateAbsent
 	if got := machines.Readiness(f); got != nil {

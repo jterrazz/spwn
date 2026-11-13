@@ -111,7 +111,7 @@ func Named(adapter contract.Installer) world.Named {
 func (f *Installer) Can() contract.Abilities {
 	// invariant: what the real adapter of its method can do: a script's
 	// install and a shell line update by name and are removed by their
-	// `undo`, a command another item provides only installs, an app bundle
+	// `undo`, a command another package provides only installs, an app bundle
 	// is the owner's; a world that names its managers gives their
 	// abilities too.
 	if named, ok := f.w.Managers[f.method]; ok {
@@ -341,8 +341,8 @@ func (f *Installer) Newest(ctx context.Context, in catalog.Install) (string, err
 	return catalog.Newest(f.offered(in.Key())...), nil
 }
 
-// invariant: a command another item brings at its first launch is absent
-// while that item was never opened on this Mac, as on a fresh one.
+// invariant: a command another package brings at its first launch is absent
+// while that package was never opened on this Mac, as on a fresh one.
 func (f *Installer) unopened(installs []catalog.Install) error {
 	f.w.Lock()
 	defer f.w.Unlock()

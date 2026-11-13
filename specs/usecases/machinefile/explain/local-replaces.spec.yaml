@@ -1,4 +1,4 @@
-description: 'the owner''s jq item replaces the built-in one whole, and its method says so'
+description: 'the owner''s jq package replaces the built-in one whole, and its method says so'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'

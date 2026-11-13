@@ -369,7 +369,7 @@ case_pass
 
 # value: a Machinefile applied on a bare Mac: install.sh, then init --machinefile on a
 # terminal (script gives it one), interrupted by SIGINT while the cask installs, then a
-# bare apply that resumes it, drift with every item present, and the footprint test.
+# bare apply that resumes it, drift with every package present, and the footprint test.
 case_begin init-then-apply SU-12
 tart stop "$bare" >> "$log" 2>&1 || true
 applied="station-e2e-macos-$run_id-apply"
@@ -432,10 +432,10 @@ in_vm 'grep -q "station apply resumes" /tmp/station-e2e/first.log' || miss "the 
 in_vm 'grep -q "e2e-apply" ~/.config/station/preferences.json' || miss "init --machinefile bound no Machinefile"
 step "apply resumes" "$password | script -q /tmp/station-e2e/second.log $station apply > /dev/null"
 drift=$(in_vm "$station drift --json")
-say "   drift: $(jq -c '[.lines[] | [.item, .condition]]' <<< "$drift")"
+say "   drift: $(jq -c '[.lines[] | [.package, .condition]]' <<< "$drift")"
 [ "$(jq '[.lines[] | select(.condition != "present")] | length' <<< "$drift")" = 0 ] || miss "drift is not clean after the resumed apply"
 in_vm 'cat ~/.local/state/station/ledger.json' > "$fp/ledger.json" || miss "apply kept no ledger"
-[ "$(jq -r '[.installed[].item] | sort | join(" ")' "$fp/ledger.json")" = "ghostty homebrew jq" ] || miss "the ledger holds other than what apply installed"
+[ "$(jq -r '[.installed[].package] | sort | join(" ")' "$fp/ledger.json")" = "ghostty homebrew jq" ] || miss "the ledger holds other than what apply installed"
 in_vm "$station disk --json" > "$fp/disk.json" || fail "disk --json"
 footprint "$fp" "$fp/disk.json" "$suite/macos/os-noise.txt" || fail "the footprint test"
 case_pass

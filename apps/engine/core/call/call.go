@@ -51,8 +51,13 @@ type Call[D, In, Out any] struct {
 	Needs   []machine.Need
 	Confirm confirm.Action
 	Errors  []fail.Code
-	Run     func(ctx context.Context, d D, in In, p Progress) (Out, error)
+	// value: the version of the document its output is printed as,
+	// station.<name>/v<Document>; zero is 1.
+	Document int
+	Run      func(ctx context.Context, d D, in In, p Progress) (Out, error)
 }
+
+func (c Call[D, In, Out]) Schema() string { return schema(c.Name, c.Document) }
 
 type Update[Out any] struct {
 	Value Out
@@ -68,20 +73,25 @@ type Watch[D, In, Out any] struct {
 	Applies machine.Applies
 	Needs   []machine.Need
 	Errors  []fail.Code
-	Run     func(ctx context.Context, d D, in In, p Progress) (<-chan Update[Out], error)
+	// value: as a Call's.
+	Document int
+	Run      func(ctx context.Context, d D, in In, p Progress) (<-chan Update[Out], error)
 }
 
+func (w Watch[D, In, Out]) Schema() string { return schema(w.Name, w.Document) }
+
 type Meta struct {
-	Name    string
-	Section section.ID
-	Where   Where
-	Applies machine.Applies
-	Needs   []machine.Need
-	Confirm confirm.Action
-	Errors  []fail.Code
-	In      string
-	Out     string
-	Watch   bool
+	Name     string
+	Section  section.ID
+	Where    Where
+	Applies  machine.Applies
+	Needs    []machine.Need
+	Confirm  confirm.Action
+	Errors   []fail.Code
+	In       string
+	Out      string
+	Watch    bool
+	Document int
 }
 
 type Handler interface {
@@ -152,14 +162,14 @@ func valueOf[Out any](name string, v any) (Out, error) {
 func Bind[D, In, Out any](c Call[D, In, Out], d D) Handler {
 	return bound[D, In, Out]{meta: Meta{
 		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, Errors: c.Errors,
-		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(),
+		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), Document: c.Document,
 	}, runFn: c.Run, deps: d}
 }
 
 func BindWatch[D, In, Out any](w Watch[D, In, Out], d D) Handler {
 	return watched[D, In, Out]{meta: Meta{
 		Name: w.Name, Section: w.Section, Where: w.Where, Applies: w.Applies, Needs: w.Needs, Errors: w.Errors,
-		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), Watch: true,
+		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), Watch: true, Document: w.Document,
 	}, runFn: w.Run, deps: d}
 }
 
@@ -282,7 +292,7 @@ func gate(m Meta, target machine.Profile) error {
 	}
 	for _, n := range m.Needs {
 		if p, lacks := target.Caps.Lacks(n); lacks {
-			return fail.New(fail.Refused, NeedMissing, p.Name, map[string]string{"call": m.Name, "need": string(n), "item": p.Package})
+			return fail.New(fail.Refused, NeedMissing, p.Name, map[string]string{"call": m.Name, "need": string(n), "package": p.Package})
 		}
 	}
 	return nil

@@ -26,4 +26,4 @@ runs:
     - command: 'plan --diff --json | /usr/bin/jq -r .schema'
       exit: 0
       stdout: |
-          station.machinefile.plan/v1
+          station.machinefile.plan/v2

@@ -50,7 +50,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				return io.Page(pageapps.Show(out.Report, out.ThisMachine, d.ThisMachine), pageapps.ListContract(call.Schema(appscalls.Show.Name), []apps.Report{out.Report}, d.Apps))
+				return io.Page(pageapps.Show(out.Report, out.ThisMachine, d.ThisMachine), pageapps.ListContract(appscalls.Show.Schema(), []apps.Report{out.Report}, d.Apps))
 			}
 			thisMac := d.ThisMachine
 			if env.Far() {
@@ -72,7 +72,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return io.Page(pageapps.List(reports, d.Apps, thisMac, in.All), pageapps.ListContract(call.Schema(appscalls.List.Name), reports, d.Apps))
+			return io.Page(pageapps.List(reports, d.Apps, thisMac, in.All), pageapps.ListContract(appscalls.List.Schema(), reports, d.Apps))
 		},
 	}, env)
 	cmd.AddCommand(children...)

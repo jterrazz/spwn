@@ -18,14 +18,14 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	git-shortcuts	git-aliases	present · ~/.gitconfig [alias]
     - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/-m WIP/-m mine/'' .gitconfig'
       exit: 0
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ◐	git-shortcuts	git-aliases	changed · ~/.gitconfig [alias]
     - command: 'apply'
       exit: 0

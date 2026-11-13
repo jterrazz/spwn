@@ -1,4 +1,4 @@
-description: 'an item file of the owner''s in a newer schema is refused with update station'
+description: 'a package file of the owner''s in a newer schema is refused with update station'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'

@@ -7,7 +7,7 @@ import (
 )
 
 // value: one identified block of ~/.zshrc a method writes: its id, which is
-// stable for life (`station:<item>` or `station:<item>/<sub>`) and names the
+// stable for life (`station:<package>` or `station:<package>/<sub>`) and names the
 // block's markers, and its plain zsh, with station's variables between double
 // braces filled in when it is written.
 
@@ -113,9 +113,9 @@ func (it Package) shellValue(b ShellBlock, name string, v ShellVars) (string, er
 
 var shellID = regexp.MustCompile(`^station:([a-z0-9][a-z0-9.-]*)(/[a-z0-9][a-z0-9-]*)?$`)
 
-// invariant: a block's id names its own item, so two items never write the
+// invariant: a block's id names its own package, so two packages never write the
 // same block; its zsh says something, never holds a marker line, and names
-// only variables the machine or the item's non-secret options can fill (a
+// only variables the machine or the package's non-secret options can fill (a
 // setting's takes the machine's alone: options are an app's).
 func (it Package) checkShell(blocks []ShellBlock) string {
 	seen := map[string]bool{}
@@ -123,9 +123,9 @@ func (it Package) checkShell(blocks []ShellBlock) string {
 		m := shellID.FindStringSubmatch(b.ID)
 		switch {
 		case m == nil:
-			return fmt.Sprintf("shell id %q is `station:<item>` or `station:<item>/<sub>`", b.ID)
+			return fmt.Sprintf("shell id %q is `station:<package>` or `station:<package>/<sub>`", b.ID)
 		case m[1] != it.Name:
-			return fmt.Sprintf("shell id %q names another item than %s", b.ID, it.Name)
+			return fmt.Sprintf("shell id %q names another package than %s", b.ID, it.Name)
 		case seen[b.ID]:
 			return fmt.Sprintf("shell id %q is written twice", b.ID)
 		case strings.TrimSpace(b.Zsh) == "":
@@ -155,7 +155,7 @@ func (it Package) checkShellVars(b ShellBlock) string {
 			case it.Kind == KindSetting:
 				return fmt.Sprintf("shell %s: a setting's block takes the machine's variables, not %s", b.ID, m)
 			case !hasOption(it.Options, opt):
-				return fmt.Sprintf("shell %s: %s names no option of the item", b.ID, m)
+				return fmt.Sprintf("shell %s: %s names no option of the package", b.ID, m)
 			}
 			for _, o := range it.Options {
 				if o.Name == opt && o.Secret {

@@ -38,7 +38,7 @@ type TemplateFile struct {
 // value: what a workspace's first start did of its Machinefile: the boot
 // phase's apply (Failed, its first line, when it did not end well), each
 // account shared, and the image's drift from the Machinefile now, one
-// line an item (hard case 17).
+// line a package (hard case 17).
 
 type FirstStart struct {
 	Template string

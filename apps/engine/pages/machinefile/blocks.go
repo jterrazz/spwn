@@ -10,7 +10,7 @@ import (
 )
 
 // value: the method column of a block's row: what writes it is a shell
-// block, whatever manager installed its item.
+// block, whatever manager installed its package.
 const blockMethod = "shell"
 
 // value: where a block lives, as the plan and the run say it: the file and

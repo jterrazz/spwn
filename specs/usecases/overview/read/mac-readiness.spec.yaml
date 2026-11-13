@@ -1,4 +1,4 @@
-description: 'a Mac that never sleeps shows its six readiness items, FileVault''s unlock needing you'
+description: 'a Mac that never sleeps shows its six readiness checks, FileVault''s unlock needing you'
 env: two-macs
 runs:
     - command: 'overview --on mac-mini | /usr/bin/sed -n ''/^# Mac readiness/,/^# /p'''

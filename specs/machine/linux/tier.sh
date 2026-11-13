@@ -191,7 +191,7 @@ case_begin drift-clean ADR-044
 kind_inside=$(st overview --on ws1 --json | jq -r '.machine.kind')
 [ "$kind_inside" = workspace ] || fail "station inside ws1 reports $kind_inside, not workspace"
 for baked in mise git docker build-essential playwright-deps; do
-  state=$(st drift --on ws1 --json | jq -r --arg a "$baked" '[.. | objects | select(.item? == $a) | .condition] | first // "none"')
+  state=$(st drift --on ws1 --json | jq -r --arg a "$baked" '[.. | objects | select(.package? == $a) | .condition] | first // "none"')
   [ "$state" = present ] || fail "$baked, baked into the image, reads $state in ws1's drift"
 done
 in_vm ws1 'docker run --rm hello-world && docker image rm hello-world' >> "$log" 2>&1 || fail "docker run hello-world in ws1 failed"

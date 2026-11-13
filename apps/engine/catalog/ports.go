@@ -47,7 +47,7 @@ func MoreRows(n int) string { return strconv.Itoa(n) + " more" }
 // value: the one line that tells a VM's listeners no reservation holds and
 // a refusal kept from sharing.
 
-// value: the hint a row carries for a port the catalog's items label: what
+// value: the hint a row carries for a port the catalog's packages label: what
 // probably serves it, never a decision.
 
 const NotAllowedWord = "not allowed" // value: the flag of a listener outside its VM's rights.

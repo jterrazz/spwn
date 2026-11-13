@@ -26,11 +26,11 @@ runs:
     - command: 'overview | /usr/bin/grep "night"'
       exit: 0
       stdout: |
-          ✗	the night's upgrade of jterrazz-macbook-pro failed: the catalog has no item no-such-app (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)	station upgrade
+          ✗	the night's upgrade of jterrazz-macbook-pro failed: the catalog has no package no-such-app (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)	station upgrade
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.night | del(.at)'' world.json'
       exit: 0
       stdout: |
-          {"machinefile":"jterrazz-macbook-pro","error":"the catalog has no item no-such-app (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)"}
+          {"machinefile":"jterrazz-macbook-pro","error":"the catalog has no package no-such-app (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)"}
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |
           machinefile: station.machinefile/v1

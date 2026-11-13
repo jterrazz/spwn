@@ -365,7 +365,7 @@
     },
     {
       "name": "machinefile.apply",
-      "schema": "station.machinefile.apply/v1",
+      "schema": "station.machinefile.apply/v2",
       "where": "at-target",
       "confirm": "remove",
       "errors": [
@@ -381,7 +381,7 @@
     },
     {
       "name": "machinefile.drift",
-      "schema": "station.machinefile.drift/v1",
+      "schema": "station.machinefile.drift/v2",
       "where": "at-target",
       "errors": [
         "machinefile.not-found"
@@ -404,8 +404,8 @@
         "machinefile.no-method",
         "machinefile.not-found",
         "machinefile.source-unavailable",
-        "machinefile.unknown-item",
         "machinefile.unknown-key",
+        "machinefile.unknown-package",
         "machinefile.unpinnable",
         "machinefile.vm-on-a-computer"
       ],
@@ -421,7 +421,7 @@
     },
     {
       "name": "machinefile.plan",
-      "schema": "station.machinefile.plan/v1",
+      "schema": "station.machinefile.plan/v2",
       "where": "at-target",
       "errors": [
         "machinefile.bad-phase",
@@ -432,7 +432,7 @@
     },
     {
       "name": "machinefile.upgrade",
-      "schema": "station.machinefile.upgrade/v1",
+      "schema": "station.machinefile.upgrade/v2",
       "where": "at-target",
       "errors": [
         "machinefile.busy",

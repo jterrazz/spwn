@@ -46,7 +46,7 @@ runs:
       stdout: |
           ●	mas	1.0.0	brew
           ●	keynote	1.0.0	mas
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0
       stdout: |
           ["mas"]

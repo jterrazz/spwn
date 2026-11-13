@@ -95,7 +95,7 @@ type Mount struct {
 }
 
 // value: the owner's own shell lines, one block per phase, run as the
-// machine's user once its items are carried out: image, as the image is
+// machine's user once its packages are carried out: image, as the image is
 // built; boot, at a VM's first start; upgrade, at each upgrade, after its
 // apps. The plan shows them before they run.
 
@@ -105,7 +105,7 @@ type RunSpec struct {
 	Upgrade string `yaml:"upgrade,omitempty"`
 }
 
-// value: the bounds of a phase run inside a VM (image, boot): its items
+// value: the bounds of a phase run inside a VM (image, boot): its packages
 // carried out within their own share, then its owner's lines within
 // theirs, so the bound of the whole is the sum, and lines that run long
 // end as a broken run step, never as the phase cut short.
@@ -125,7 +125,7 @@ type Resources struct {
 	Disk   Size `yaml:"disk,omitempty"`
 }
 
-// value: the image a VM's disk is made from, and the items baked into it
+// value: the image a VM's disk is made from, and the packages baked into it
 // (their phase is image).
 
 type ImageSpec struct {
@@ -133,7 +133,7 @@ type ImageSpec struct {
 	Bake []string `yaml:"bake,omitempty"`
 }
 
-// value: an app a Machinefile lists: its catalog item, the range of
+// value: an app a Machinefile lists: its catalog package, the range of
 // versions it may move within (its method must hold it), optional (no method for the system skips it),
 // the manager it is installed by instead of the priority's, and its option
 // values. Written as its name alone, or as a mapping.

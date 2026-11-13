@@ -193,7 +193,7 @@ func (e *FunnelHeld) Error() string {
 }
 
 func HintOf(hints []catalog.PackagePort, port int) (catalog.PackagePort, bool) {
-	// value: the first item that serves on this port, the label a row of it
+	// value: the first package that serves on this port, the label a row of it
 	// is shown with.
 	for _, h := range hints {
 		if h.Port == port {
@@ -204,8 +204,8 @@ func HintOf(hints []catalog.PackagePort, port int) (catalog.PackagePort, bool) {
 }
 
 func Hinted(v SharedPort, hints []catalog.PackagePort) SharedPort {
-	// value: a shared port with what the catalog's items say of it: its
-	// label, and the item whose env sharing it sets (`profile`, v1's word).
+	// value: a shared port with what the catalog's packages say of it: its
+	// label, and the package whose env sharing it sets (`profile`, v1's word).
 	for _, h := range hints {
 		if h.Port != v.GuestPort {
 			continue
@@ -233,7 +233,7 @@ func CarriedFrom(s Share) int {
 }
 
 func EnvOf(h catalog.PortHint, url, name string) map[string]string {
-	// value: what sharing a port sets in its VM's environment, its item's
+	// value: what sharing a port sets in its VM's environment, its package's
 	// templates rendered: `{url}` its shared URL, `{host}` the name it is
 	// shared at.
 	env := map[string]string{}

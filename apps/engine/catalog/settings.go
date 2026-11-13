@@ -146,7 +146,7 @@ type Setting struct {
 	OrRequires []string `json:",omitempty"`
 	Inputs     []Input
 	// value: how this machine applies it; never on the wire, so a far
-	// Mac's report of the item decodes here (it holds an interface).
+	// Mac's report of the package decodes here (it holds an interface).
 	Effect      Effect `json:"-"`
 	Interactive bool
 	// value: it opens System Settings for the owner to finish it.

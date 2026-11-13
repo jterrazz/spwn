@@ -6,7 +6,7 @@ type Report struct {
 	App    catalog.App
 	Method catalog.Method
 	// value: the key `apps update --manager` reaches its method by: the
-	// first its manager item installs by (cask's is brew), else its own.
+	// first its manager package installs by (cask's is brew), else its own.
 	Manager string
 	State   catalog.State
 	Version string
@@ -97,7 +97,7 @@ type UpgradeRequest struct {
 	Names []string
 	All   bool
 	// value: the manager keys whose managers' apps are updated, each
-	// reaching every key its manager item manages (brew reaches cask).
+	// reaching every key its manager package manages (brew reaches cask).
 	Via []catalog.ManagerKey
 	// value: the range a Machinefile lets the one app named move within
 	// (`latest`, `24`, `=24.11.3`); given, a method that holds any range

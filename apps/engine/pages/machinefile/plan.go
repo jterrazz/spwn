@@ -281,7 +281,7 @@ func ranStep(r *machinefile.Ran) []pages.RunStep {
 func condition(c machinefile.Condition) string { return strings.ReplaceAll(string(c), "-", " ") }
 
 func Drift(p machinefile.Plan, thisMac page.Context) page.Page {
-	// invariant: drift is the plan as conditions, one row per item in the
+	// invariant: drift is the plan as conditions, one row per package in the
 	// plan's order, then what is extra; what is as the Machinefile asks
 	// counts as present, and anything else is drift.
 	rows := make([]page.Row, 0, len(p.Lines)+len(p.Extra))
@@ -311,7 +311,7 @@ func Drift(p machinefile.Plan, thisMac page.Context) page.Page {
 		mark, words = page.Attention, []string{counted(drifted, "drifted"), counted(len(rows)-drifted, "present")}
 		hints = []page.Hint{{Command: "station plan", Text: "what apply would do"}}
 	}
-	sections := []page.Section{head(p.Name, mark, words), section("items", "Items", rows)}
+	sections := []page.Section{head(p.Name, mark, words), section("packages", "Packages", rows)}
 	return page.Seal(page.Page{ID: ID, Command: "drift", Context: thisMac, Sections: sections, Hints: hints})
 }
 
@@ -325,7 +325,7 @@ type Worded struct {
 
 func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context) page.Page {
 	// invariant: apply reads as every run does (pages.RunPage): the line
-	// that sums it up, each item with its mark, its method and why it ran,
+	// that sums it up, each package with its mark, its method and why it ran,
 	// then each extra removed, the owner's lines of its phase, what has to
 	// happen once applied, each once, and what to do next.
 	steps := make([]pages.RunStep, 0, len(done)+len(removed))
@@ -391,7 +391,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 			changed++
 		}
 	}
-	r := pages.Run{Command: "apply", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "items in " + a.Plan.Name, Extra: restartsSection(a.Plan.Restarts)}
+	r := pages.Run{Command: "apply", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "packages in " + a.Plan.Name, Extra: restartsSection(a.Plan.Restarts)}
 	var words []string
 	switch {
 	case interrupted:

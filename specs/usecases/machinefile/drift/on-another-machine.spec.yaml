@@ -13,6 +13,6 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          # Items
+          # Packages
           ●	homebrew	script	present
           ○	jq	brew	absent

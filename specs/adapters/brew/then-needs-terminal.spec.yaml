@@ -1,4 +1,4 @@
-description: 'an interactive Then item is skipped off a terminal, as a row naming its command'
+description: 'an interactive Then package is skipped off a terminal, as a row naming its command'
 fixture:
     - ../../__fixtures__/stubs/
     - ./__fixtures__/then-gpg/

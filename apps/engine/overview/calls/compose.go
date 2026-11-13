@@ -16,6 +16,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -26,6 +27,16 @@ import (
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 )
+
+// value: the last nights as the Overview says them; a ledger an older
+// station wrote holds every night until station init, and says so.
+func nightsOf(night machinefilecalls.Nightly, err error, now time.Time) overview.Nights {
+	n := overview.NightOf(night.Night, night.Ran && err == nil, now)
+	if older := (*store.OlderError)(nil); errors.As(err, &older) {
+		n.Held = err.Error()
+	}
+	return n
+}
 
 type sectionRead func(ctx context.Context, r call.Router, self machine.Ref) (overview.Read, error)
 
@@ -43,7 +54,7 @@ func sectionReads(now time.Time) map[section.ID]sectionRead {
 			// invariant: a machine whose station has no night (an older one)
 			// reads its apps alone.
 			night, nerr := call.Invoke(ctx, r, thisMac, machinefilecalls.LastNight, machinefilecalls.NightlyIn{}, nil)
-			return overview.AppsRead(out, self, overview.NightOf(night.Night, night.Ran && nerr == nil, now)), err
+			return overview.AppsRead(out, self, nightsOf(night, nerr, now)), err
 		},
 		section.Settings: func(ctx context.Context, r call.Router, self machine.Ref) (overview.Read, error) {
 			out, err := call.Read(ctx, r, thisMac, settingscalls.List, settingscalls.ListIn{}, nil)

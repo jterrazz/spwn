@@ -177,7 +177,7 @@ func kinds() []catalog.MachineKind {
 
 func TestMiseInstallsOnlyARuntime(t *testing.T) {
 	// invariant: mise carries the language runtimes of the catalog alone; a
-	// command is the system manager's or a release's, so no item
+	// command is the system manager's or a release's, so no package
 	// names a mise runtime outside this list (ADR-003, ADR-040).
 	runtimes := []string{"node", "bun", "go", "python", "java", "rust"}
 	for _, a := range builtin(t).Apps {

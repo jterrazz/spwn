@@ -1,0 +1,44 @@
+description: 'a ledger an older station wrote is refused until init brings it to today, each package kept'
+fixture:
+    - ../__fixtures__/setup-stubs/
+    - ./__fixtures__/v1-ledger/
+env:
+    - USER=tester
+runs:
+    - command: 'plan --machinefile t.machine.yaml'
+      exit: 1
+      stderr: |
+          Error: cannot read "{{workdir}}/.local/state/station/ledger.json": written at version 1 by an older station, this one reads 2
+          Hint: run station init: it brings "{{workdir}}/.local/state/station/ledger.json" to version 2
+    - command: 'overview | /usr/bin/grep ledger'
+      exit: 0
+      stdout: |
+          ✗	no night's upgrade runs: cannot read {{workdir}}/.local/state/station/ledger.json: written at version 1 by an older station, this one reads 2	station init
+    - command: 'init --name t'
+      exit: 0
+      stdout: |
+          ●	name	t
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+    - command: 'plan --machinefile t.machine.yaml'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	thing	script	installed by station for t, present another way since station installed it: kept, and yours
+    - command: '--version >/dev/null; /bin/cat .local/state/station/ledger.json'
+      exit: 0
+      stdout: |
+          {
+            "v": 2,
+            "installed": [
+              {
+                "package": "thing",
+                "method": "script",
+                "machinefile": "t",
+                "at": "2026-11-01T09:00:00Z"
+              }
+            ]
+          }

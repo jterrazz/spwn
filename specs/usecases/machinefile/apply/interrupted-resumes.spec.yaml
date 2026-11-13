@@ -61,7 +61,7 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	homebrew	script	present
           ●	fd	brew	present
           ●	eza	brew	present

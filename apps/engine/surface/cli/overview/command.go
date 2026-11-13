@@ -70,7 +70,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, all bool, io kit.IO) error {
 	if err != nil {
 		return err
 	}
-	return io.Page(pagehome.Summary(out.Summary, d.ThisMachine, all), pagehome.SummaryContract(out.Summary, call.Schema(overviewcalls.Read.Name)))
+	return io.Page(pagehome.Summary(out.Summary, d.ThisMachine, all), pagehome.SummaryContract(out.Summary, overviewcalls.Read.Schema()))
 }
 
 // invariant: a VM's Overview is its Mac's view of it around what it reads
@@ -78,7 +78,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, all bool, io kit.IO) error {
 // does not answer or whose guest does not, is All machines' view alone, its
 // health saying which step fails.
 func far(ctx context.Context, d Deps, env kit.Env, vm pagemachines.VMOverview, all bool, io kit.IO) error {
-	schema := call.Schema(overviewcalls.Read.Name)
+	schema := overviewcalls.Read.Schema()
 	alone := func() error {
 		return io.Page(pagemachines.VMPage(vm, nil, d.ThisMachine, all), pagemachines.VMContract(vm, nil, schema))
 	}

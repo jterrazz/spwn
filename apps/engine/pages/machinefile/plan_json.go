@@ -7,7 +7,7 @@ import (
 )
 
 type LineJSON struct {
-	Package   string `json:"item"`
+	Package   string `json:"package"`
 	Kind      string `json:"kind"`
 	Method    string `json:"method"`
 	Condition string `json:"condition"`
@@ -20,14 +20,14 @@ type LineJSON struct {
 
 type NeedJSON struct {
 	Need     string   `json:"need"`
-	Packages []string `json:"items"`
+	Packages []string `json:"packages"`
 }
 
 type ExtraJSON struct {
-	Package     string `json:"item"`
+	Package     string `json:"package"`
 	Method      string `json:"method"`
 	Machinefile string `json:"machinefile"`
-	// value: what the item reads now, and what `apply --remove` does with
+	// value: what the package reads now, and what `apply --remove` does with
 	// it: `remove` (an extra already gone only leaves the ledger) or
 	// `leave` (present another way since, needed by another app there, or
 	// not readable now).
@@ -35,7 +35,7 @@ type ExtraJSON struct {
 	Action    string `json:"action"`
 }
 
-// value: one block of ~/.zshrc: its item and id, what the file holds of it
+// value: one block of ~/.zshrc: its package and id, what the file holds of it
 // (`present`, `absent`, `outdated`, `changed`, or `extra` for one station
 // wrote for an extra), what apply does with it (`set`, `keep`, `leave`,
 // `remove`), and what a run did (`ok`, `broken`...); a plan's block has no
@@ -43,7 +43,7 @@ type ExtraJSON struct {
 // in a run with `--remove` alone.
 
 type BlockJSON struct {
-	Package   string `json:"item"`
+	Package   string `json:"package"`
 	ID        string `json:"id"`
 	Condition string `json:"condition"`
 	Action    string `json:"action"`
@@ -99,7 +99,7 @@ func lineJSON(l machinefile.Line, result, detail string) LineJSON {
 }
 
 func PlanContract(schema string, p machinefile.Plan) PlanJSON {
-	// value: station.machinefile.plan/v1 and station.machinefile.drift/v1:
+	// value: station.machinefile.plan/v2 and station.machinefile.drift/v2:
 	// the plan's needs, its lines, what is extra and what follows an apply.
 	out := PlanJSON{Schema: schema, Machinefile: p.Name, Needs: []NeedJSON{}, Lines: []LineJSON{}, Extra: []ExtraJSON{}, AfterApply: []string{}}
 	for _, a := range p.Needs {
@@ -123,11 +123,11 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 	return out
 }
 
-func AppliedContract(a machinefile.Applied, done, removed []Worded) PlanJSON {
-	// value: station.machinefile.apply/v1: the plan's shape, each line with
+func AppliedContract(schema string, a machinefile.Applied, done, removed []Worded) PlanJSON {
+	// value: station.machinefile.apply/v2: the plan's shape, each line with
 	// what the run did with it, then each extra removed, and each block the
 	// run judged with what it did.
-	out := PlanContract("station.machinefile.apply/v1", a.Plan)
+	out := PlanContract(schema, a.Plan)
 	out.Lines, out.Bound, out.Run = []LineJSON{}, a.Bound, ranJSON(a.Ran)
 	blocks := out.Blocks
 	out.Blocks = nil

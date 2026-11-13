@@ -3,7 +3,7 @@ package machinefile
 import "strings"
 
 // value: where a refused entry is written, `<file>:<line>` (or its file
-// alone when the line is not known); empty for an item another one
+// alone when the line is not known); empty for a package another one
 // brings in.
 func within(at, by string) string {
 	if at != "" {
@@ -45,7 +45,7 @@ func (e *VMOnComputerError) Error() string {
 type CycleError struct {
 	// value: the names around the cycle, its first again at its end.
 	Path []string
-	// value: what the cycle is of: extends, or the items' requires and after.
+	// value: what the cycle is of: extends, or the packages' requires and after.
 	Of string
 }
 
@@ -63,9 +63,9 @@ func (e *CycleError) Said() string {
 
 type UnknownPackageError struct {
 	Name string
-	// value: the file that lists it, or the item that requires it.
+	// value: the file that lists it, or the package that requires it.
 	By string
-	// value: what it is when it is an item of the other kind.
+	// value: what it is when it is a package of the other kind.
 	Is string
 	At string
 }
@@ -74,14 +74,14 @@ func (e *UnknownPackageError) Error() string {
 	if e.Is != "" {
 		return e.Name + " is " + e.Is + " (" + within(e.At, e.By) + ")"
 	}
-	return "the catalog has no item " + e.Name + " (" + within(e.At, e.By) + ")"
+	return "the catalog has no package " + e.Name + " (" + within(e.At, e.By) + ")"
 }
 
 type NoMethodError struct {
 	Package, System string
 	// value: the manager the Machinefile asked, when it asked one.
 	Manager string
-	// value: why the item is in the plan: listed, or required by another.
+	// value: why the package is in the plan: listed, or required by another.
 	Why string
 	At  string
 }
@@ -102,7 +102,7 @@ func suffix(at string) string {
 }
 
 // value: a range the chosen method cannot hold: what it holds, and
-// another method of the item for this system that holds the range, or
+// another method of the package for this system that holds the range, or
 // empty.
 
 type UnpinnableError struct {

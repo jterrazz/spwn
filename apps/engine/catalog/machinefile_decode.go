@@ -61,7 +61,7 @@ func MachinefileOf(file string) (name string, overlay bool) {
 
 // invariant: one check per key, in the reading order, each saying the key
 // it judges. What needs the catalog or the files a Machinefile extends (an
-// item, an option, a method for the system, vm on a computer) is the
+// package, an option, a method for the system, vm on a computer) is the
 // resolution's, never the file's.
 func checkMachinefile(file string, doc *yaml.Node, mf Machinefile) error {
 	name, overlay := MachinefileOf(file)
@@ -180,7 +180,7 @@ func checkVM(v VMSpec) string {
 		}
 	}
 	if i := v.Image; i != nil && slices.Contains(i.Bake, "") {
-		return "bake lists items by name"
+		return "bake lists packages by name"
 	}
 	return checkMounts(v.Mounts)
 }
@@ -350,7 +350,7 @@ func checkApps(a AppList, overlay bool) string {
 	for _, e := range slices.Concat(a.List, a.Add) {
 		switch {
 		case e.Name == "":
-			return "an app names its item"
+			return "an app names its package"
 		case seen[e.Name]:
 			return "lists " + e.Name + " twice"
 		case e.Manager != "" && !known(e.Manager):

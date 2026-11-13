@@ -33,7 +33,7 @@ const (
 	gibibyte = 1 << 30
 )
 
-// value: the images station knows; an image is no item of the catalog's
+// value: the images station knows; an image is no package of the catalog's
 // files, and reaches its readers through Catalog.Images.
 var builtinImages = []Image{
 	{

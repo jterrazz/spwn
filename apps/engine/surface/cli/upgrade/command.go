@@ -37,7 +37,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				return err
 			}
 			done := worded(out.Done)
-			if shown := io.Page(pagemachinefile.Upgraded(out, done, d.ThisMachine), pagemachinefile.UpgradedContract(out, done)); shown != nil {
+			if shown := io.Page(pagemachinefile.Upgraded(out, done, d.ThisMachine), pagemachinefile.UpgradedContract(machinefilecalls.Upgrade.Schema(), out, done)); shown != nil {
 				return shown
 			}
 			if err != nil {

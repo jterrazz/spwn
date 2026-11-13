@@ -1,5 +1,5 @@
 #!/bin/sh
-# open, which the Spotlight item never needs once the folder is excluded.
+# open, which the Spotlight package never needs once the folder is excluded.
 printf 'open %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     *)

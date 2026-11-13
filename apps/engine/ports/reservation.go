@@ -22,7 +22,7 @@ type Reservation struct {
 	PublicPort int `json:"public_port,omitempty"`
 	// value: who made it: ByOwner, the owner's own share (`station ports
 	// share` on a Mac); ByRights, its VM's rights (a port that listened
-	// inside them, an item's port, a guest's share), which judge it again
+	// inside them, a package's port, a guest's share), which judge it again
 	// at each run of the VM and each adoption. Empty, made before this
 	// key, it is read as the owner's on a server, the rights' on a
 	// workspace (Rights.Judge).

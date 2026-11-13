@@ -284,7 +284,7 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 
 func TestAPackageIsLookedForAndReadOnTheOwnersPath(t *testing.T) {
 	// invariant: a manager command's PATH leaves nvm's versions out, so an
-	// item looked for there would read absent, never present another way.
+	// package looked for there would read absent, never present another way.
 	home := "/home/u"
 	own := home + "/.nvm/versions/node/v24.22.2/bin"
 	vars := map[string]string{"HOME": home, "PATH": own + ":/usr/bin"}

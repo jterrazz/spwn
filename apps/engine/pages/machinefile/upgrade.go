@@ -184,10 +184,10 @@ type WaitingJSON struct {
 	File   string `json:"file,omitempty"`
 }
 
-func UpgradedContract(u machinefile.Upgraded, done []Worded) UpgradedJSON {
-	// value: station.machinefile.upgrade/v1: each app as the upgrade left
+func UpgradedContract(schema string, u machinefile.Upgraded, done []Worded) UpgradedJSON {
+	// value: station.machinefile.upgrade/v2: each app as the upgrade left
 	// it, and what moved in the lock.
-	out := UpgradedJSON{Schema: "station.machinefile.upgrade/v1", Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Waiting: []WaitingJSON{}, Run: ranJSON(u.Ran), Interrupted: u.Interrupted, Unpulled: u.Unpulled}
+	out := UpgradedJSON{Schema: schema, Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Waiting: []WaitingJSON{}, Run: ranJSON(u.Ran), Interrupted: u.Interrupted, Unpulled: u.Unpulled}
 	for _, w := range u.Waiting {
 		out.Waiting = append(out.Waiting, WaitingJSON(w))
 	}

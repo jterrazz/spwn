@@ -1,7 +1,7 @@
 package: station.package/v1
 kind: app
 name: thing
-description: a command the owner's own item lands in its own folder
+description: a command the owner's own package lands in its own folder
 provides: [thing]
 methods:
     - { os: any, path: [/opt/thing/bin], script: { run: 'true' } }

@@ -664,9 +664,9 @@
       "items": [
         {
           "row": {
-            "id": "items",
+            "id": "packages",
             "mark": "pending",
-            "label": "items"
+            "label": "packages"
           }
         }
       ],

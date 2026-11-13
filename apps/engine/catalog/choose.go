@@ -15,7 +15,7 @@ func (m MethodSpec) Method() string {
 	return m.Key()
 }
 
-// value: a method's standing in the order one system tries an item's
+// value: a method's standing in the order one system tries a package's
 // methods: listed by prefer (its place there), ranked by its manager on
 // that system (its rank), any other manager, then a method no manager
 // runs (a script, a provider).

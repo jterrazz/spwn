@@ -1,4 +1,4 @@
-description: 'an owner''s item replaces the built-in one whole in every command: jq lives everywhere'
+description: 'an owner''s package replaces the built-in one whole in every command: jq lives everywhere'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'

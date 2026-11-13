@@ -71,7 +71,7 @@ func TestBundler(t *testing.T) {
 
 // invariant: the fake resolves a runtime's word as its real manager does
 // (gate probe, mise 2026.11.5), for the installs a Machinefile line makes
-// of the catalog's items: node's channel holds an even major, never a newer
+// of the catalog's packages: node's channel holds an even major, never a newer
 // odd one, latest every major, a vendor its own versions alone, and an
 // exact version it does not offer is held as it is written.
 func TestAVersionWordIsResolvedAsItsManagerResolvesIt(t *testing.T) {

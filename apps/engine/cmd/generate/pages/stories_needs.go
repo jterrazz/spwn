@@ -64,7 +64,7 @@ func sharesEndingSoon(f *Scene) {
 	}
 }
 
-// value: the owner's item file refused: the run reads the built-in items,
+// value: the owner's package file refused: the run reads the built-in packages,
 // and Needs you names the file and its line.
 func catalogRefused(f *Scene) {
 	f.Home.Needs = append(f.Home.Needs, overview.Need{Machine: f.Home.Head.Name, Section: "overview", Broken: true, Severity: "broken",

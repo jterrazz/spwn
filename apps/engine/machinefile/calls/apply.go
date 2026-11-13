@@ -33,8 +33,8 @@ const (
 )
 
 // value: how long the read past an interrupt waits for the interrupted
-// item's own answer: the owner asked to stop, so it is short, and an
-// overrun leaves the item unrecorded, which only keeps it from removal.
+// package's own answer: the owner asked to stop, so it is short, and an
+// overrun leaves the package unrecorded, which only keeps it from removal.
 const rereadBudget = 15 * time.Second
 
 type ApplyIn struct {
@@ -52,11 +52,11 @@ type ApplyIn struct {
 }
 
 var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
-	// value: the plan carried out: each item installed by apps.install,
+	// value: the plan carried out: each package installed by apps.install,
 	// by the method and at the version its step chose, or set by
 	// settings.apply, one at a time in the plan's order; then the owner's
 	// lines of its phase.
-	Name: "machinefile.apply", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
+	Name: "machinefile.apply", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
 	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
 		if bad := badPhase(in.Phase, in.Remove); bad != nil {
@@ -126,7 +126,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	},
 }
 
-// invariant: the owner's lines of a phase run once its items are carried
+// invariant: the owner's lines of a phase run once its packages are carried
 // out, as this machine's user from its home, and stop at the first line
 // that fails: their run ends broken, with the last words they said
 // (saidLines), and what was applied stays applied.
@@ -227,10 +227,10 @@ type run struct {
 	there map[string]bool
 }
 
-// invariant: the items are carried out one at a time in the plan's
+// invariant: the packages are carried out one at a time in the plan's
 // order; a phase run inside a VM (image, boot) gives them their own share
 // of its bound (catalog.ItemsBound), so the owner's lines after them keep
-// theirs: an item still running at the end of the share ends there, and
+// theirs: a package still running at the end of the share ends there, and
 // those after it are not run.
 func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile.Done {
 	if r.in.Phase == catalog.PhaseImage || r.in.Phase == catalog.PhaseBoot {
@@ -295,7 +295,7 @@ func (r *run) wayOut(l machinefile.Line, done machinefile.Done) machinefile.Done
 
 func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {
 	// invariant: what finished is in the ledger before the interrupt is
-	// read, so an item installed just before Ctrl-C is station's to take
+	// read, so a package installed just before Ctrl-C is station's to take
 	// back like any other.
 	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{l.Step.Package}, Interactive: r.in.Interactive, Method: l.Step.Method, Version: l.Step.InstallVersion()}, r.p)
 	if err != nil && ctx.Err() == nil {
@@ -327,8 +327,8 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 }
 
 // invariant: an install interrupted hands back nothing of what it did, so
-// when no outcome of the item came back, or only its interrupt, the apps
-// are read again past the interrupt, until the item's own row answers:
+// when no outcome of the package came back, or only its interrupt, the apps
+// are read again past the interrupt, until the package's own row answers:
 // one that reads there finished just before it, and is recorded by the
 // method that holds it, the one the plan chose and apps.install ran.
 func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {

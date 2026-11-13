@@ -1,4 +1,4 @@
-description: 'an option the item lacks or a secret written out is refused; a vault: reference is a secret'
+description: 'an option the package lacks or a secret written out is refused; a vault: reference is a secret'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'

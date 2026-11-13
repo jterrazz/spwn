@@ -61,8 +61,8 @@ func (m machine) machinefileSources() []machinefilecontract.Source {
 	return append(sources, builtinSource())
 }
 
-// invariant: the catalog every command reads is the owner's items over
-// the built-in ones, a same-name item replacing it whole. A file of the
+// invariant: the catalog every command reads is the owner's packages over
+// the built-in ones, a same-name package replacing it whole. A file of the
 // owner's the strict decoder refuses leaves the built-in catalog, and is
 // returned worded at its line for the gate to judge.
 func layerCatalog(user machinefilecontract.Source, builtin catalog.Catalog) (catalog.Catalog, error) {
@@ -107,9 +107,9 @@ func catalogFree() []string {
 	return []string{"help", "completion", cobra.ShellCompRequestCmd, cobra.ShellCompNoDescRequestCmd, "engine", "start", "stop", "world"}
 }
 
-// invariant: an owner's item file refused stops every command that reads
+// invariant: an owner's package file refused stops every command that reads
 // the catalog, at its file and line; a command that reads none runs on
-// the built-in items, and so do --version and --help, which cobra answers
+// the built-in packages, and so do --version and --help, which cobra answers
 // before any command runs: each says the file is refused on stderr, once.
 // The returned func says it after the run when nothing else did.
 func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reported func()) {
@@ -121,7 +121,7 @@ func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reporte
 	say := func() {
 		if !said {
 			said = true
-			out.Note(worded.Message, "this run reads the built-in items")
+			out.Note(worded.Message, "this run reads the built-in packages")
 		}
 	}
 	pre := root.PersistentPreRunE

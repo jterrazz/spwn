@@ -24,7 +24,7 @@ const (
 )
 
 func ReadFolders(dir folders, links Links, catalogAt, machinefilesAt string) ([]machinefile.File, error) {
-	// invariant: a source on folders holds its catalog's items one folder
+	// invariant: a source on folders holds its catalog's packages one folder
 	// down, `<category>/<name>.yaml`, and its Machinefiles at the top of
 	// theirs; a folder that is not there holds no file. The files come in
 	// path order.

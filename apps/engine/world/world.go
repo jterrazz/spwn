@@ -280,7 +280,7 @@ type Stores struct {
 	Applied      map[string]settings.Applied `json:"applied,omitempty"`
 	// value: each server's uptime record, by name.
 	Uptime map[string]machines.Uptime `json:"uptime,omitempty"`
-	// value: what station installed for a Machinefile, by item.
+	// value: what station installed for a Machinefile, by package.
 	Ledger []machinefile.Installed `json:"ledger,omitempty"`
 	// value: the last night the engine's upgrade recorded.
 	Night *machinefile.Night `json:"night,omitempty"`

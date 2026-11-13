@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.script = {installed: {"https://claude.ai/install.sh": "2.0.14"}} | .macs["jterrazz-macbook-pro"].stores.ledger = [{item: "claude", method: "script", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.script = {installed: {"https://claude.ai/install.sh": "2.0.14"}} | .macs["jterrazz-macbook-pro"].stores.ledger = [{package: "claude", method: "script", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 0

@@ -25,6 +25,6 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ○	apt	apt	absent
           ○	jq	apt	absent

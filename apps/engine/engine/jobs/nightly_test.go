@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -17,6 +18,7 @@ type nights struct {
 	records bool
 	cancel  bool
 	failure string
+	unread  error
 	reads   int
 	held    []func()
 }
@@ -27,6 +29,9 @@ func (n *nights) job(started time.Time) *Nightly {
 		Bound: func() (string, time.Time, bool) { return n.bound, n.since, n.bound != "" },
 		Last: func(context.Context) (machinefile.Night, bool, error) {
 			n.reads++
+			if n.unread != nil {
+				return machinefile.Night{}, false, n.unread
+			}
 			if n.last == nil {
 				return machinefile.Night{}, false, nil
 			}
@@ -154,5 +159,21 @@ func TestNoStepReadsTheLedgerBetweenTwoNights(t *testing.T) {
 	n.finish()
 	if len(n.ran) != 2 {
 		t.Errorf("ran %v at the next 03:00; want a second night", n.ran)
+	}
+}
+
+func TestALedgerThatCannotBeReadIsReadAgainAnHourLaterNotAtEveryStep(t *testing.T) {
+	// invariant: a ledger an older station wrote is refused until init
+	// brings it to today; meanwhile the steps read it once an hour, and no
+	// night runs over it.
+	n := &nights{clock: &clock{now: at(12, 3, 0)}, bound: "laptop", since: at(11, 10, 0), unread: errors.New("written at version 1 by an older station")}
+	job := n.job(at(11, 10, 0))
+	for now := at(12, 3, 0); !now.After(at(12, 4, 0)); now = now.Add(10 * time.Minute) {
+		n.clock.now = now
+		job.Run(context.Background())
+		n.finish()
+	}
+	if n.reads != 2 || len(n.ran) != 0 {
+		t.Errorf("read the ledger %d times and ran %v from 03:00 to 04:00; want two reads, at 03:00 and 04:00, and no night", n.reads, n.ran)
 	}
 }

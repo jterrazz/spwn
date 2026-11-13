@@ -874,7 +874,7 @@ func joinPort(ip string, port int) string {
 // invariant: a VM's environment is rendered at each of its runs, from its
 // rights and Serve's state read then, never at an adoption, so it holds for
 // the whole of a run, and a persistent VM picks up the public URLs at its
-// first start after Serve turns on. A port an item sets an env for, inside
+// first start after Serve turns on. A port a package sets an env for, inside
 // the rights, is reserved then, before anything listens, so the server
 // started on it reads its URL.
 func (d *Engine) renderEnv(ctx context.Context, v *vmState) {

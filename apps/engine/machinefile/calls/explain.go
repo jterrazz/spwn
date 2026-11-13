@@ -62,7 +62,7 @@ const (
 	Cycle          fail.Code = "machinefile.cycle"
 	NoMethod       fail.Code = "machinefile.no-method"
 	Unpinnable     fail.Code = "machinefile.unpinnable"
-	UnknownPackage fail.Code = "machinefile.unknown-item"
+	UnknownPackage fail.Code = "machinefile.unknown-package"
 	BadValue       fail.Code = "machinefile.bad-value"
 	UnknownKey     fail.Code = "machinefile.unknown-key"
 	Unavailable    fail.Code = "machinefile.source-unavailable"

@@ -1,4 +1,4 @@
-description: 'one install failing fails only what requires it: every independent item is still installed or set'
+description: 'one install failing fails only what requires it: every independent package is still installed or set'
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
@@ -25,7 +25,7 @@ runs:
           ✗	fd		brew	~/.local/state/station/logs/fd.log
           ●	eza	0.23.4	brew
       stderr: |
-          Error: 1 of 4 items failed
+          Error: 1 of 4 packages failed
           Hint: station apply
     - command: 'apps | /usr/bin/grep -e "	fd	" -e "	eza	"'
       exit: 0

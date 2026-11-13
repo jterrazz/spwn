@@ -75,9 +75,9 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		writer.Failure(kit.Translate(loaded, ""))
 		return int(fail.ExitFailure)
 	}
-	// invariant: the owner's items are layered before the search is built,
-	// so the folders an owner's item lands its commands in (`path:`) are
-	// searched as a built-in item's are.
+	// invariant: the owner's packages are layered before the search is built,
+	// so the folders an owner's package lands its commands in (`path:`) are
+	// searched as a built-in package's are.
 	unsearched := local.New(env, nil, nil, nil)
 	cat, broken := layerCatalog(userSource(world, unsearched.FS, pathsOf(unsearched.Env.Home(), vars).Prefs), builtin)
 	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars)), darwin.NewDoor(env), vars, world, cat)
@@ -278,7 +278,7 @@ func appData(home, moved string) string {
 }
 
 // value: the folders an install lands its commands in, declared by their
-// owners and handed to the platform's search: each catalogue item's Path, of
+// owners and handed to the platform's search: each catalogue package's Path, of
 // the system, and under home the bin a script installs into and the app
 // manager's shims.
 func landing(cat catalog.Catalog, vars map[string]string) local.Search {

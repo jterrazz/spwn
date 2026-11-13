@@ -11,7 +11,7 @@ import (
 )
 
 // value: a Machinefile a VM image is made from: its name (the image's),
-// the image its disk starts from, its system, the items it bakes, what its
+// the image its disk starts from, its system, the packages it bakes, what its
 // vm says of how a VM made from it runs (the folders it mounts included)
 // and the accounts it is shared
 // (each term as written), the files of its chain a build VM needs (every

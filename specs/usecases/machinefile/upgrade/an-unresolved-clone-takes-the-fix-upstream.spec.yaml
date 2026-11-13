@@ -7,7 +7,7 @@ runs:
     - command: 'upgrade'
       exit: 2
       stderr: |
-          Error: the catalog has no item no-such-app (studio@1a2b3c4/machinefiles/jterrazz-macbook-pro.yaml:4)
+          Error: the catalog has no package no-such-app (studio@1a2b3c4/machinefiles/jterrazz-macbook-pro.yaml:4)
           Hint: station apps
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].clones'' world.json'
       exit: 0

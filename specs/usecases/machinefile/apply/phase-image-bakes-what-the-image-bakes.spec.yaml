@@ -29,7 +29,7 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	apt	apt	present
           ●	jq	apt	present
           ○	mise	script	absent

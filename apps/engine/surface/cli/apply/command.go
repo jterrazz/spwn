@@ -64,13 +64,13 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 		return err
 	}
 	done, removed := worded(out.Done), worded(out.Removed)
-	if shown := io.Page(pagemachinefile.Applied(out, done, removed, d.ThisMachine), pagemachinefile.AppliedContract(out, done, removed)); shown != nil {
+	if shown := io.Page(pagemachinefile.Applied(out, done, removed, d.ThisMachine), pagemachinefile.AppliedContract(machinefilecalls.Apply.Schema(), out, done, removed)); shown != nil {
 		return shown
 	}
 	if err != nil {
 		return err
 	}
-	failed, total, noun := 0, len(out.Blocks), "items"
+	failed, total, noun := 0, len(out.Blocks), "packages"
 	for _, b := range out.Blocks {
 		if b.State == catalog.StateBroken {
 			failed++

@@ -3,7 +3,7 @@ package machines
 import "github.com/jterrazz/studio-station/apps/engine/catalog"
 
 type ReadinessSetting struct {
-	// value: the setting that makes the item true, its state on the Mac, and
+	// value: the setting that makes the check true, its state on the Mac, and
 	// whether it applies only as root.
 	Name  string
 	State catalog.State
@@ -27,7 +27,7 @@ type ReadinessItem struct {
 	Name  string
 	State catalog.State
 	Value string
-	// value: the command that makes the item true, when one does.
+	// value: the command that makes the check true, when one does.
 	Fix string
 }
 
@@ -42,7 +42,7 @@ const (
 
 func Readiness(f ReadinessFacts) []ReadinessItem {
 	// invariant: SPEC 7.6: a Mac that hosts a server, or holds Never sleeps,
-	// has its readiness, six items in the one order, each measured; any
+	// has its readiness, six checks in the one order, each measured; any
 	// other Mac has none. A disk that FileVault guards needs you after a
 	// power cut, however ready the rest is.
 	if !f.MacsServer && f.NeverSleeps.State != catalog.StateOK {

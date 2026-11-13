@@ -42,7 +42,7 @@ methods:
 
 func libPackage(t *testing.T) (catalog.Package, catalog.Catalog) {
 	t.Helper()
-	it, err := catalog.Decode("items/libs/lib.yaml", []byte(lib))
+	it, err := catalog.Decode("packages/libs/lib.yaml", []byte(lib))
 	if err != nil {
 		t.Fatal(err)
 	}

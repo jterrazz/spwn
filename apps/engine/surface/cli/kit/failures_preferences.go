@@ -14,6 +14,7 @@ const preferencesFile = "preferences.json"
 
 func preferencesFailure(err error) (*fail.Error, bool) {
 	var unreadable *store.UnreadableError
+	var older *store.OlderError
 	var unwritable *store.UnwritableError
 	var vault *accounts.VaultError
 	switch {
@@ -25,6 +26,8 @@ func preferencesFailure(err error) (*fail.Error, bool) {
 			where = "line " + strconv.Itoa(unreadable.Line) + ": " + where
 		}
 		return failed(unreadable.Path+" cannot be read: "+where, "fix that line: station never rewrites a file it cannot read", err), true
+	case errors.As(err, &unreadable) && errors.As(err, &older):
+		return failed("cannot read \""+unreadable.Path+"\": "+older.Error(), "run station init: it brings \""+unreadable.Path+"\" to version "+strconv.Itoa(older.Current), err), true
 	case errors.As(err, &unreadable):
 		return failed("cannot read \""+unreadable.Path+"\": "+unreadable.Cause.Error(), "repair the JSON of \""+unreadable.Path+"\", or move it away to start afresh", err), true
 	case errors.As(err, &unwritable):

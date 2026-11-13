@@ -91,7 +91,7 @@ func (s *Catalogue) List(ctx context.Context) ([]settings.Report, error) {
 }
 
 func (s *Catalogue) Watch(ctx context.Context) (<-chan []settings.Report, error) {
-	// invariant: the first value is every placed item, those with a check
+	// invariant: the first value is every placed package, those with a check
 	// pending; every check is a read of its own, so they run at once, each row
 	// fills as its check answers, and the list costs its slowest check.
 	placed := s.Placed()

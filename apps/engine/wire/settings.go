@@ -70,7 +70,7 @@ func settingsAliases(env kit.Env, m machine) []*cobra.Command {
 	), "settings")}
 }
 
-// value: an item's values asked in a form at the owner's terminal.
+// value: a package's values asked in a form at the owner's terminal.
 type settingsAsk struct {
 	settings *settingscalls.Catalogue
 	ask      kit.Asker

@@ -13,7 +13,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{item: "lazygit", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{package: "lazygit", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" apply --remove; "$STATION" apps lazygit | /usr/bin/head -1'
       stdin: |

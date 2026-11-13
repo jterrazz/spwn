@@ -65,7 +65,7 @@ type Templates interface {
 	// value: the Machinefile of that name, as a workspace is made from it.
 	Template(ctx context.Context, name string) (model.Template, error)
 	// value: what the image's version was baked from that its Machinefile
-	// no longer says, one line an item.
+	// no longer says, one line a package.
 	Drift(ctx context.Context, name, version string) ([]string, error)
 }
 
@@ -103,7 +103,7 @@ type Engine interface {
 	VMs(ctx context.Context) (map[string]EngineVM, error)
 	Do(ctx context.Context, op, vm string) error
 	// value: the ports a VM's engine reserved for the env its run set, each
-	// with the item that names it.
+	// with the package that names it.
 	EnvPorts(ctx context.Context, vm string) ([]model.Reserved, error)
 	// invariant: a command inside a VM of this Mac rides the engine's one
 	// connection to it; station reaches a VM no other way.

@@ -1,4 +1,4 @@
-description: 'drift reads each item as a condition, an app there by another way not managed'
+description: 'drift reads each package as a condition, an app there by another way not managed'
 fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
@@ -12,13 +12,13 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	homebrew	script	present
           ●	jq	brew	present
           ◐	gh	brew	outdated
           ○	fd	brew	absent
           ?	ripgrep	brew	not managed · on PATH, not managed by brew
-    - command: 'drift --json | /usr/bin/jq -c "[.lines[] | [.item, .condition]]"'
+    - command: 'drift --json | /usr/bin/jq -c "[.lines[] | [.package, .condition]]"'
       exit: 0
       stdout: |
           [["homebrew","present"],["jq","present"],["gh","outdated"],["fd","absent"],["ripgrep","not-managed"]]

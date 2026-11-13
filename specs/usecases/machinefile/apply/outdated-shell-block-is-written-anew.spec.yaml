@@ -43,7 +43,7 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	homebrew	script	present
           ●	served	brew	present · port 9090
           ○	served	shell	outdated · ~/.zshrc [station:served]

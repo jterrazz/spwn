@@ -19,7 +19,7 @@ func installed(pkg, method string) machinefile.Installed {
 
 func Ledger(t *testing.T, open func(t *testing.T) contract.Ledger) {
 	ctx := context.Background()
-	t.Run("an install recorded is listed by item, and recorded again replaces it", func(t *testing.T) {
+	t.Run("an install recorded is listed by package, and recorded again replaces it", func(t *testing.T) {
 		l := open(t)
 		for _, in := range []machinefile.Installed{installed("jq", "first"), installed("fd", "first"), installed("jq", "second")} {
 			if err := l.Put(ctx, in); err != nil {

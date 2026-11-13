@@ -11,7 +11,7 @@ type ValueJSON struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 	Layer string `json:"layer"`
-	// value: the Machinefile or the item that says it, and its file.
+	// value: the Machinefile or the package that says it, and its file.
 	From string `json:"from"`
 	File string `json:"file,omitempty"`
 }

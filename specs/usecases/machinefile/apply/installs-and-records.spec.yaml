@@ -21,7 +21,7 @@ runs:
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	fd	10.3.0	brew
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0
       stdout: |
           ["fd"]

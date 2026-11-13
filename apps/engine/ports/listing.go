@@ -36,10 +36,10 @@ type SharedPort struct {
 	// value: station.ports.list/v1's pinned, kept for its readers: always
 	// false, no reservation is pinned since ports are rights.
 	Pinned bool `json:"pinned"`
-	// value: station.ports.list/v1's profile: the catalog item whose env a
+	// value: station.ports.list/v1's profile: the catalog package whose env a
 	// share of this port sets (`vite`), empty for any other.
 	Profile string `json:"profile"`
-	// value: the label the catalog's items give this port ("Vite"), a hint
+	// value: the label the catalog's packages give this port ("Vite"), a hint
 	// of what probably serves it, never a decision.
 	Label string `json:"label,omitempty"`
 	// value: who it is shared with: local, private or public.

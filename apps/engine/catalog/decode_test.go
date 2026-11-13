@@ -21,7 +21,7 @@ methods:
 
 func decoded(t *testing.T, body string) error {
 	t.Helper()
-	_, err := catalog.Decode("items/git/gh.yaml", []byte(body))
+	_, err := catalog.Decode("packages/git/gh.yaml", []byte(body))
 	return err
 }
 
@@ -35,7 +35,7 @@ func refusedFor(t *testing.T, body, want string) {
 }
 
 func TestAPackageFileDecodesIntoItsPackage(t *testing.T) {
-	it, err := catalog.Decode("items/git/gh.yaml", []byte(gh))
+	it, err := catalog.Decode("packages/git/gh.yaml", []byte(gh))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,12 +71,12 @@ func TestANewerSchemaIsRefusedWithUpdateStation(t *testing.T) {
 	err := decoded(t, strings.Replace(gh, "station.package/v1", "station.package/v2", 1))
 	var newer *catalog.NewerSchemaError
 	if !errors.As(err, &newer) || !strings.HasSuffix(err.Error(), ": update station") {
-		t.Errorf("a v2 item decoded with %v, want a refusal ending update station", err)
+		t.Errorf("a v2 package decoded with %v, want a refusal ending update station", err)
 	}
 	refusedFor(t, strings.Replace(gh, "station.package/v1", "station.machinefile/v1", 1), `names the schema "station.machinefile/v1"`)
 	ahead := strings.Replace(strings.Replace(gh, "station.package/v1", "station.package/v2", 1), "provides: [gh]", "provides: &c [gh]\ntint: blue", 1)
 	if err := decoded(t, ahead); !errors.As(err, &newer) {
-		t.Errorf("a v2 item with keys v1 refuses decoded with %v, want update station first", err)
+		t.Errorf("a v2 package with keys v1 refuses decoded with %v, want update station first", err)
 	}
 	refusedFor(t, strings.Replace(gh, "package: station.package/v1\n", "", 1), "names no schema")
 }
@@ -96,7 +96,7 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 		strings.Replace(gh, "    - os: macos\n      brew: gh", "    - os: ubuntu\n      apt: {packages: []}", 1):       "apt names its packages",
 		strings.Replace(gh, "    - os: macos\n      brew: gh", "    - os: ubuntu\n      apt: {packages: [gh]}", 1):     "apt installs as root: its method says `needs: [sudo]`",
 		strings.Replace(gh, "brew: gh", "needs: [root]\n      brew: gh", 1):                                            `need "root" is none of`,
-		strings.Replace(gh, "brew: gh", "script: {run: 'gh --host ${option.host}'}", 1):                                "${option.host} names no option of the item",
+		strings.Replace(gh, "brew: gh", "script: {run: 'gh --host ${option.host}'}", 1):                                "${option.host} names no option of the package",
 		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nports: [{port: 0, label: GH}]", 1):                      "port 0: a port from 1 to 65535",
 		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nports: [{port: 80, label: GH, env: {A: '{path}'}}]", 1): "env A uses {path}, only {url} and",
 		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nports: [{port: 80, label: GH, env: {'A=B': x}}]", 1):    `env name "A=B" is no variable name`,
@@ -131,7 +131,7 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 	refusedFor(t, setting, "`bundle` is not a key of a setting")
 	refusedFor(t, strings.Replace(setting, "bundle: GH", "version-read: {args: [gh], pattern: x}", 1), "`version-read` is not a key of a setting")
 	withPort := strings.Replace(gh, "provides: [gh]", "provides: [gh]\nports: [{port: 5173, label: Vite, http: true, env: {A: '{url}', B: 'h={host}'}}]", 1)
-	if it, err := catalog.Decode("items/git/gh.yaml", []byte(withPort)); err != nil || !it.Ports[0].HTTP || it.Ports[0].Env["B"] != "h={host}" {
+	if it, err := catalog.Decode("packages/git/gh.yaml", []byte(withPort)); err != nil || !it.Ports[0].HTTP || it.Ports[0].Env["B"] != "h={host}" {
 		t.Errorf("a port with http and env decoded to %+v, %v", it.Ports, err)
 	}
 	if err := decoded(t, strings.Replace(setting, "bundle: GH\n", "", 1)+"    - os: macos\n      builtin: dns\n"); err != nil {
@@ -147,7 +147,7 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 	if err := decoded(t, defaults); err != nil {
 		t.Errorf("a macos-defaults setting reading its option is refused: %v", err)
 	}
-	refusedFor(t, strings.Replace(defaults, "option.size", "option.width", 1), "${option.width} names no option of the item")
+	refusedFor(t, strings.Replace(defaults, "option.size", "option.width", 1), "${option.width} names no option of the package")
 	refusedFor(t, strings.Replace(defaults, "os: macos", "os: any", 1), "macos-defaults is for os: macos")
 	refusedFor(t, defaults+"writes: [{path: ~/x, level: settings, os: macos, family: linux}]\n", "~/x: names an os and a family")
 }
@@ -224,7 +224,7 @@ methods:
     - os: any
       script: {check: command -v gh, run: 'curl -fsSL gh.sh | GH_HOST=${option.host} sh', undo: rm ~/.local/bin/gh}
 `
-	it, err := catalog.Decode("items/git/gh.yaml", []byte(full))
+	it, err := catalog.Decode("packages/git/gh.yaml", []byte(full))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -236,9 +236,9 @@ methods:
 func catalogOf(files map[string]string) (catalog.Catalog, error) {
 	fsys := fstest.MapFS{}
 	for name, body := range files {
-		fsys["items/"+name] = &fstest.MapFile{Data: []byte(body)}
+		fsys["packages/"+name] = &fstest.MapFile{Data: []byte(body)}
 	}
-	return catalog.Load(fsys, "items")
+	return catalog.Load(fsys, "packages")
 }
 
 func manager(name, manages, at string) string {
@@ -248,18 +248,18 @@ func manager(name, manages, at string) string {
 func TestThePackagesAreJudgedTogether(t *testing.T) {
 	dns := "package: station.package/v1\nkind: setting\nname: dns\ndescription: d\nrequires: [gpg]\nmethods:\n    - os: any\n      builtin: dns\n"
 	for files, want := range map[*map[string]string]string{
-		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "requires: [git]", 1)}: `items/git/gh.yaml: gh requires "git", which is no app`,
+		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "requires: [git]", 1)}: `packages/git/gh.yaml: gh requires "git", which is no app`,
 		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "then: [dns]", 1)}:     `gh proposes "dns", which is no setting`,
 		{"git/gh.yaml": strings.Replace(gh, "brew: gh", "provided-by: hub", 1)}:      `gh is provided by "hub", which is no app`,
-		{"security/dns.yaml": dns}: `items/security/dns.yaml: setting dns requires "gpg", which is no app`,
+		{"security/dns.yaml": dns}: `packages/security/dns.yaml: setting dns requires "gpg", which is no app`,
 		{"tools/gh.yaml": gh}:      "folder tools is no category of apps",
-		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "after: [tmux]", 1)}:                                                                              `items/git/gh.yaml: gh comes after "tmux", which is no item`,
-		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "renamed-from: [dns]", 1), "security/dns.yaml": strings.Replace(dns, "requires: [gpg]\n", "", 1)}: `gh is renamed from "dns", which names an item still`,
+		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "after: [tmux]", 1)}:                                                                              `packages/git/gh.yaml: gh comes after "tmux", which is no package`,
+		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "renamed-from: [dns]", 1), "security/dns.yaml": strings.Replace(dns, "requires: [gpg]\n", "", 1)}: `gh is renamed from "dns", which names a package still`,
 		{"git/gh.yaml": gh, "security/gh.yaml": strings.Replace(dns, "name: dns", "name: gh", 1)}:                                                               `"gh" names both a app and a setting`,
-		{"git/gh.yml": gh}: "is no item file",
+		{"git/gh.yml": gh}: "is no package file",
 		{"package-managers/brew.yaml": manager("brew", "[brew, cask]", "1"), "package-managers/tap.yaml": manager("tap", "[cask]", "2")}: "brew and tap both manage cask",
 		{"package-managers/brew.yaml": manager("brew", "[brew]", "1"), "package-managers/mas.yaml": manager("mas", "[mas]", "1")}:        "brew and mas both stand at 1 on macos",
-		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "deprecated: {why: gone, use: hub}", 1)}:                                   `gh says to use "hub", which is no item`,
+		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "deprecated: {why: gone, use: hub}", 1)}:                                   `gh says to use "hub", which is no package`,
 	} {
 		if _, err := catalogOf(*files); err == nil || !strings.Contains(err.Error(), want) {
 			t.Errorf("loaded with %v, want %q", err, want)

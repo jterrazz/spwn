@@ -22,7 +22,7 @@ func (v *boundVM) Run(ctx context.Context, _ Login, _, _ string) (Ran, error) {
 }
 
 func TestTheImagePhaseOutlastsItsPackagesAndItsLines(t *testing.T) {
-	// invariant: the bake is given the items' share and the run.image
+	// invariant: the bake is given the packages' share and the run.image
 	// lines' bound together, as a first start's boot phase is.
 	vm := &boundVM{}
 	s := &Builder{o: BuilderOptions{User: "admin"}}
@@ -35,6 +35,6 @@ func TestTheImagePhaseOutlastsItsPackagesAndItsLines(t *testing.T) {
 	}
 	if off := vm.until[0].Sub(due); off < 0 || off > time.Minute {
 		left := vm.until[0].Sub(due) + want
-		t.Fatalf("the bake had %v; want %v, the items' share and the lines' bound", left, want)
+		t.Fatalf("the bake had %v; want %v, the packages' share and the lines' bound", left, want)
 	}
 }

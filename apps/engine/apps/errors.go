@@ -87,8 +87,8 @@ func (e *SignedOutError) Error() string {
 	return e.Store + " did not answer in " + strconv.Itoa(int(e.Waited.Seconds())) + " s, as when it is signed out: " + e.Hint
 }
 
-// value: the item that provides a command is installed and the command is
-// not there yet: it comes when that item is first opened.
+// value: the package that provides a command is installed and the command is
+// not there yet: it comes when that package is first opened.
 
 type NotYetProvidedError struct{ Package, Command string }
 

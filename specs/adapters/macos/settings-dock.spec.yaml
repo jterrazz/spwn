@@ -1,4 +1,4 @@
-description: 'the run-once dock items change the dock, then restart it'
+description: 'the run-once dock packages change the dock, then restart it'
 fixture: ./__fixtures__/settings-dock/
 runs:
     - command: 'settings apply dock-reset dock-spacer'

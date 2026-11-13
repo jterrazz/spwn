@@ -46,6 +46,14 @@ func (e *NewerError) Error() string {
 	return "written at version " + strconv.Itoa(e.Version) + " by a newer station, this one knows " + strconv.Itoa(e.Known)
 }
 
+type OlderError struct {
+	Version, Current int
+}
+
+func (e *OlderError) Error() string {
+	return "written at version " + strconv.Itoa(e.Version) + " by an older station, this one reads " + strconv.Itoa(e.Current)
+}
+
 type Migrator interface {
 	// invariant: brings every record of the store to its current version and
 	// leaves a record already there byte for byte; run by setup's layout step

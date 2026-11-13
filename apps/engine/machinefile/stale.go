@@ -8,8 +8,8 @@ import (
 
 func ImageDrift(baked []byte, now Template) []string {
 	// invariant: an image is stale by what its build's lock (baked) says
-	// against its Machinefile now (hard case 17): an item the Machinefile
-	// bakes now that the image holds no lock line of, and an item the image
+	// against its Machinefile now (hard case 17): a package the Machinefile
+	// bakes now that the image holds no lock line of, and a package the image
 	// holds whose lock now asks another method or version. A lock either side
 	// cannot read says nothing: drift is only ever what can be named.
 	then, err := catalog.DecodeLock(machinefilesDir+"/"+now.Name+catalog.LockSuffix, baked)

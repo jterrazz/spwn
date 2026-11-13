@@ -8,7 +8,7 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu } }
           apps: [jq]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].apps.mise = {installed: {"node": "24.11.0"}} | .macs["linux-1"].apps.npm = {absent: true} | .macs["linux-1"].stores.ledger = [{item: "node", method: "mise", machinefile: "linux-1", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].apps.mise = {installed: {"node": "24.11.0"}} | .macs["linux-1"].apps.npm = {absent: true} | .macs["linux-1"].stores.ledger = [{package: "node", method: "mise", machinefile: "linux-1", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 0

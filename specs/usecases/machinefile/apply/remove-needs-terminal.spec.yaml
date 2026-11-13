@@ -20,7 +20,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.cask.installed["corp-vpn"] = "4.2.0" | .macs["jterrazz-macbook-pro"].stores.ledger = [{item: "corp-vpn", method: "cask", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.cask.installed["corp-vpn"] = "4.2.0" | .macs["jterrazz-macbook-pro"].stores.ledger = [{package: "corp-vpn", method: "cask", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 2

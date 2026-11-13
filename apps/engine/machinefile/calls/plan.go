@@ -26,9 +26,9 @@ type PlanIn struct {
 
 var Plan = call.Call[Deps, PlanIn, machinefile.Plan]{
 	// value: what apply would do here: what it asks of the owner, then
-	// each item to install, set, adopt or leave, what is extra, and what
+	// each package to install, set, adopt or leave, what is extra, and what
 	// has to happen once it is applied. It changes nothing.
-	Name: "machinefile.plan", Where: call.AtTarget, Applies: machine.Anywhere,
+	Name: "machinefile.plan", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, BadPhase},
 	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (machinefile.Plan, error) {
 		if bad := badPhase(in.Phase, false); bad != nil {
@@ -39,9 +39,9 @@ var Plan = call.Call[Deps, PlanIn, machinefile.Plan]{
 }
 
 var Drift = call.Call[Deps, PlanIn, machinefile.Plan]{
-	// value: the plan read as conditions: each item present, absent,
+	// value: the plan read as conditions: each package present, absent,
 	// outdated, changed, not managed, extra or unknown. It never acts.
-	Name: "machinefile.drift", Where: call.AtTarget, Applies: machine.Anywhere,
+	Name: "machinefile.drift", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound},
 	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (machinefile.Plan, error) {
 		return judged(ctx, d, in.Machinefile, in.Phase)
@@ -83,7 +83,7 @@ func judged(ctx context.Context, d Deps, asked string, phase catalog.Phase) (mac
 	return p, nil
 }
 
-// invariant: what each item reads is its family's own read, the one
+// invariant: what each package reads is its family's own read, the one
 // `station apps` and `station settings` print: apps' inventory and
 // settings' judge, through this machine's calls.
 func observe(ctx context.Context, d Deps, in appscalls.ListIn) (map[string]machinefile.Seen, error) {

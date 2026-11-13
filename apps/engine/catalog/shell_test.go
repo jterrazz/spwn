@@ -42,12 +42,12 @@ func refusedAt(t *testing.T, file, body, want string) {
 
 func refusedPg(t *testing.T, body, want string) {
 	t.Helper()
-	refusedAt(t, "items/databases/pg.yaml", body, want)
+	refusedAt(t, "packages/databases/pg.yaml", body, want)
 }
 
 func shelled(t *testing.T, body string) catalog.Package {
 	t.Helper()
-	it, err := catalog.Decode("items/databases/pg.yaml", []byte(body))
+	it, err := catalog.Decode("packages/databases/pg.yaml", []byte(body))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestAShellVariableIsFilledFromTheMachineAndTheOptions(t *testing.T) {
 
 func TestAnUnknownShellVariableIsRefusedAtDecodeAndAtRender(t *testing.T) {
 	refusedPg(t, strings.Replace(pg, "{{ option.port }}", "{{ brew.cellar }}", 1), "{{ brew.cellar }} is none of")
-	refusedPg(t, strings.Replace(pg, "{{ option.port }}", "{{ option.nope }}", 1), "names no option of the item")
+	refusedPg(t, strings.Replace(pg, "{{ option.port }}", "{{ option.nope }}", 1), "names no option of the package")
 	refusedPg(t, strings.Replace(pg, "{{ option.port }}", "{{ option.token }}", 1), "is secret")
 	refusedPg(t, strings.Replace(pg, "{{ option.port }}", "{{ {{ home }}", 1), "is no variable")
 	it := catalog.Package{Name: "x"}
@@ -98,9 +98,9 @@ func TestAnUnknownShellVariableIsRefusedAtDecodeAndAtRender(t *testing.T) {
 }
 
 func TestAShellIdNamesItsPackageAndIsWrittenOnce(t *testing.T) {
-	refusedPg(t, strings.Replace(pg, "station:pg/path", "station:other/path", 1), "names another item than pg")
-	refusedPg(t, strings.Replace(pg, "station:pg/path", "pg/path", 1), "is `station:<item>` or `station:<item>/<sub>`")
-	refusedPg(t, strings.Replace(pg, "station:pg/path", "station:pg/Path", 1), "is `station:<item>` or `station:<item>/<sub>`")
+	refusedPg(t, strings.Replace(pg, "station:pg/path", "station:other/path", 1), "names another package than pg")
+	refusedPg(t, strings.Replace(pg, "station:pg/path", "pg/path", 1), "is `station:<package>` or `station:<package>/<sub>`")
+	refusedPg(t, strings.Replace(pg, "station:pg/path", "station:pg/Path", 1), "is `station:<package>` or `station:<package>/<sub>`")
 	twice := pg + "          - id: station:pg/path\n            zsh: echo hi\n"
 	refusedPg(t, twice, "is written twice")
 }
@@ -111,11 +111,11 @@ func TestAShellBlockHoldsNoMarkerLine(t *testing.T) {
 
 func TestASettingsShellIsItsEffectAndTakesNoOptions(t *testing.T) {
 	setting := "package: station.package/v1\nkind: setting\nname: hello\ndescription: d\nmethods:\n    - os: any\n      shell:\n          - id: station:hello\n            zsh: echo {{ home }}\n"
-	if _, err := catalog.Decode("items/shell/hello.yaml", []byte(setting)); err != nil {
+	if _, err := catalog.Decode("packages/shell/hello.yaml", []byte(setting)); err != nil {
 		t.Fatal(err)
 	}
-	refusedAt(t, "items/shell/hello.yaml", strings.Replace(setting, "{{ home }}", "{{ option.x }}", 1), "a setting's block takes the machine's variables")
-	refusedAt(t, "items/shell/hello.yaml", strings.Replace(setting, "      shell:", "      builtin: dns\n      shell:", 1), "names 2 managers")
+	refusedAt(t, "packages/shell/hello.yaml", strings.Replace(setting, "{{ home }}", "{{ option.x }}", 1), "a setting's block takes the machine's variables")
+	refusedAt(t, "packages/shell/hello.yaml", strings.Replace(setting, "      shell:", "      builtin: dns\n      shell:", 1), "names 2 managers")
 }
 
 func TestAnAppsShellNeedsItsManager(t *testing.T) {

@@ -42,8 +42,9 @@ type Nightly struct {
 
 func (n *Nightly) Run(ctx context.Context) {
 	// invariant: one night at a time, never started again while one runs;
-	// a night that failed is tried again retryNight later, and between two
-	// NightHours with nothing due no step reads the binding or the ledger.
+	// a night that failed, or a ledger that cannot be read, is tried again
+	// retryNight later, and between two NightHours with nothing due no step
+	// reads the binding or the ledger.
 	now := n.Clock.Now()
 	if !n.begin(now) {
 		return
@@ -56,7 +57,7 @@ func (n *Nightly) Run(ctx context.Context) {
 	last, ran, err := n.Last(ctx)
 	switch {
 	case err != nil:
-		n.end(time.Time{}, time.Time{})
+		n.end(time.Time{}, now.Add(retryNight))
 		return
 	case !machinefile.NightDue(now, later(n.Started, bound), last, ran):
 		n.end(time.Time{}, machinefile.LastNight(now).AddDate(0, 0, 1))

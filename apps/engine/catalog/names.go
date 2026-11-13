@@ -5,9 +5,9 @@ import (
 	"strings"
 )
 
-// invariant: a name an item gives to a program run as root, or to a path
+// invariant: a name a package gives to a program run as root, or to a path
 // station writes or removes, is checked by one rule of its kind, here:
-// the decoder refuses an item that breaks it, and every installer that
+// the decoder refuses a package that breaks it, and every installer that
 // puts the name in an argv or a path checks it again before, since an
 // install also crosses the wire from a peer and a record is read back
 // from the disk.

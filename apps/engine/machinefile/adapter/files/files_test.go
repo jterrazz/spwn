@@ -66,7 +66,7 @@ func TestTheOwnersFoldersFollowALinkToAFileAlone(t *testing.T) {
 	}{
 		{"a link to a file", "machinefiles/laptop.yaml", fs.ModeSymlink, 0, false},
 		{"a link to a folder", "machinefiles/laptop.yaml", fs.ModeSymlink, fs.ModeDir, true},
-		{"a link to a folder named as an item", "catalog/apps/jq.yaml", fs.ModeSymlink, fs.ModeDir, true},
+		{"a link to a folder named as a package", "catalog/apps/jq.yaml", fs.ModeSymlink, fs.ModeDir, true},
 		{"a pipe", "catalog/apps/jq.yaml", fs.ModeNamedPipe, 0, true},
 		{"a device", "machinefiles/laptop.yaml", fs.ModeDevice, 0, true},
 	}

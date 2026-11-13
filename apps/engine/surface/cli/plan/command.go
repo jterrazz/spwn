@@ -77,7 +77,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					return io.Raw([]byte(text))
 				}
 			}
-			return io.Page(pagemachinefile.Plan(p, d.ThisMachine), pagemachinefile.PlanContract("station.machinefile.plan/v1", p))
+			return io.Page(pagemachinefile.Plan(p, d.ThisMachine), pagemachinefile.PlanContract(machinefilecalls.Plan.Schema(), p))
 		},
 	}, env)
 }

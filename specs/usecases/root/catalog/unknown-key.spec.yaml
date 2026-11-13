@@ -1,4 +1,4 @@
-description: 'an item file of the owner''s with an unknown key stops every command at its line'
+description: 'a package file of the owner''s with an unknown key stops every command at its line'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
@@ -15,4 +15,4 @@ runs:
       exit: 2
       stderr: |
           Error: ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package
-          Hint: fix that line: station never rewrites an item file
+          Hint: fix that line: station never rewrites a package file

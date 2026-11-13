@@ -13,7 +13,7 @@ Workspace    ◐ 2  ◌ 1 · disk, tart, bun
 Identity     ◌ 2 · git email, git signing
 Gateways     ◌ 1 · Tailscale Serve
 Apps         ◌ 1 · catalogue
-Settings     ◌ 1 · items
+Settings     ◌ 1 · packages
 
 → station overview --all  for every row
 → station overview | cat  for records

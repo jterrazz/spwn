@@ -33,7 +33,7 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 	// version a method holds no range around kept; then the owner's
 	// run.upgrade lines; then the lock written anew, its moves shown, and
 	// each newer version past a range said waiting.
-	Name: "machinefile.upgrade", Where: call.AtTarget, Applies: machine.Anywhere,
+	Name: "machinefile.upgrade", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, NeedsTerminal, Busy},
 	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
 		// invariant: every night is recorded, one that failed with its

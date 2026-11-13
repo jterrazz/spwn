@@ -1,4 +1,4 @@
-description: 'the other dotfile items land where their application reads them, the Ghostty themes with them'
+description: 'the other dotfile packages land where their application reads them, the Ghostty themes with them'
 runs:
     - command: 'settings apply ghostty-dotfiles starship-dotfiles'
       exit: 0

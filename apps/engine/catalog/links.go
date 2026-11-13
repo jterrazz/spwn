@@ -2,7 +2,7 @@ package catalog
 
 import "slices"
 
-// value: how an item installed by one method leans on another: it
+// value: how a package installed by one method leans on another: it
 // requires it, it requires one of a group (a setting's), its method is
 // provided by it, or its method's manager is it.
 
@@ -15,7 +15,7 @@ const (
 	LinkManager       LinkKind = "manager"
 )
 
-// value: one link of an item: its kind and the items it names, any one of
+// value: one link of a package: its kind and the packages it names, any one of
 // which serves; every kind but requires-one-of names one.
 
 type Link struct {
@@ -24,15 +24,15 @@ type Link struct {
 }
 
 func (l Link) Names(pkg string) bool {
-	// value: whether the link leans on that item.
+	// value: whether the link leans on that package.
 	return slices.Contains(l.Packages, pkg)
 }
 
 func (c Catalog) Links(it Package, method string, sys System) []Link {
-	// invariant: the one list of what an item by a method leans on, read by
-	// the resolution, which brings an item in and orders it, by what keeps
+	// invariant: the one list of what a package by a method leans on, read by
+	// the resolution, which brings a package in and orders it, by what keeps
 	// an extra another one there still needs, and, through InstallLinks,
-	// by apps.install; an item never leans on itself.
+	// by apps.install; a package never leans on itself.
 	return c.links(it.Name, it.Requires, it.RequiresOneOf, providerOf(it, method, sys), method)
 }
 
@@ -68,7 +68,7 @@ func (c Catalog) links(name string, requires, oneOf []string, by, method string)
 }
 
 func (c Catalog) ManagerKeys() []string {
-	// value: every method key a manager item of the catalog installs by,
+	// value: every method key a manager package of the catalog installs by,
 	// in the catalog's order: the words `--to` and `--manager` take.
 	var out []string
 	for _, p := range c.Packages {
@@ -80,7 +80,7 @@ func (c Catalog) ManagerKeys() []string {
 }
 
 func (c Catalog) Manager(method string) (string, bool) {
-	// value: the item that manages a method key, when one does.
+	// value: the package that manages a method key, when one does.
 	for _, p := range c.Packages {
 		if slices.Contains(p.Package.Manages, ManagerKey(method)) {
 			return p.Package.Name, true
@@ -89,7 +89,7 @@ func (c Catalog) Manager(method string) (string, bool) {
 	return "", false
 }
 
-// invariant: the provider is the one of the item's method by that key
+// invariant: the provider is the one of the package's method by that key
 // for this system, else of its first method by that key.
 func providerOf(it Package, method string, sys System) string {
 	by := ""

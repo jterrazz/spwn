@@ -10,7 +10,7 @@ import (
 )
 
 type Held struct {
-	// value: station's own release, by the key its manager item installs by.
+	// value: station's own release, by the key its manager package installs by.
 	Key string
 }
 

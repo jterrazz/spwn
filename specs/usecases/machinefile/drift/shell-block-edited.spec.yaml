@@ -18,7 +18,7 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	homebrew	script	present
           ●	postgres	brew	present
           ●	postgres	shell	present · ~/.zshrc [station:postgres/path]
@@ -27,7 +27,7 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	homebrew	script	present
           ●	postgres	brew	present
           ◐	postgres	shell	changed · ~/.zshrc [station:postgres/path]
@@ -61,7 +61,7 @@ runs:
     - command: 'drift'
       exit: 0
       stdout: |
-          # Items
+          # Packages
           ●	homebrew	script	present
           ●	postgres	brew	present
           ●	postgres	shell	present · ~/.zshrc [station:postgres/path]

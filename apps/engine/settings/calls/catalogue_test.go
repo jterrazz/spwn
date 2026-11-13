@@ -12,6 +12,6 @@ func TestAnEffectNobodyHandlesIsAnErrorNotASilentSuccess(t *testing.T) {
 		t.Fatalf("an unknown procedure dispatched with %v, want update station", err)
 	}
 	if _, err := svc.handler(catalog.Setting{Name: "y"}); err == nil {
-		t.Fatal("an item with no effect dispatched")
+		t.Fatal("a package with no effect dispatched")
 	}
 }

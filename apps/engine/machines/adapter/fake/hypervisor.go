@@ -52,7 +52,7 @@ func (h *Hypervisor) Name() string {
 }
 
 func (h *Hypervisor) Installed() bool {
-	// invariant: a Mac of no hypervisor has one once the catalogue's item
+	// invariant: a Mac of no hypervisor has one once the catalogue's package
 	// for it is installed in the world, as the real one lands on the path.
 	m := h.thisMac()
 	if m.Hypervisor != "none" {

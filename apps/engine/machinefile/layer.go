@@ -10,7 +10,7 @@ import (
 
 // value: where a value was read: the owner's overlay, the owner's own
 // files, a shared source, station's built-in files; this machine, for a
-// system a Machinefile does not say; the catalog, for an item a step
+// system a Machinefile does not say; the catalog, for a package a step
 // brings in; and the lock, for the method and version it holds an app by.
 
 type Layer string
@@ -73,10 +73,10 @@ type Library struct {
 }
 
 // invariant: a refusal of a file names which format it is in, so a
-// catalog item refused reads apart from a Machinefile refused.
+// catalog package refused reads apart from a Machinefile refused.
 
 type RefusedFileError struct {
-	// value: "catalog" for an item file, "machinefile" for a Machinefile.
+	// value: "catalog" for a package file, "machinefile" for a Machinefile.
 	Format string
 	Err    error
 }
@@ -110,7 +110,7 @@ func read(p string) bool {
 }
 
 func CatalogOf(trees []Tree) (catalog.Catalog, error) {
-	// invariant: the trees strongest first; a same-name item of a stronger
+	// invariant: the trees strongest first; a same-name package of a stronger
 	// layer replaces a weaker one whole, as a same-name Machinefile does.
 	layers := make([][]catalog.Placed, 0, len(trees))
 	for _, t := range trees {
@@ -125,7 +125,7 @@ func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 			}
 			folder, name, ok := strings.Cut(rest, "/")
 			if !ok || strings.Contains(name, "/") || !strings.HasSuffix(name, ".yaml") {
-				return catalog.Catalog{}, refusedFile(catalogDir, &catalog.FileError{File: t.display(f), Problem: "is no item file: an item is catalog/<category>/<name>.yaml"})
+				return catalog.Catalog{}, refusedFile(catalogDir, &catalog.FileError{File: t.display(f), Problem: "is no package file: a package is catalog/<category>/<name>.yaml"})
 			}
 			p, err := catalog.Read(t.display(f), folder, string(t.Layer), f.Body)
 			if err != nil {

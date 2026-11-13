@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{item: "fd", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}, {item: "ripgrep", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}, {item: "bat", method: "brew", machinefile: "old-laptop", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{package: "fd", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}, {package: "ripgrep", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}, {package: "bat", method: "brew", machinefile: "old-laptop", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'plan'
       exit: 0
@@ -27,7 +27,7 @@ runs:
           ●	jq	1.8.1	brew
           ○	fd		brew	already gone
           ◐	ripgrep		brew	present another way since station installed it: kept, and yours
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0
       stdout: |
           ["bat"]

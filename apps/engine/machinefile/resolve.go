@@ -11,7 +11,7 @@ import (
 )
 
 // value: where one value of a resolution was read: the Machinefile or the
-// item that says it, its layer and its file.
+// package that says it, its layer and its file.
 
 type Origin struct {
 	Name  string
@@ -27,7 +27,7 @@ type Value struct {
 	Origin    Origin
 }
 
-// value: one item of the plan: what it is, the method that installs or
+// value: one package of the plan: what it is, the method that installs or
 // sets it (its manager key) and why it was chosen, the version asked, its
 // phase and what it asks of the owner, why it is in the plan, and the
 // values it is given.
@@ -43,7 +43,7 @@ type Step struct {
 	// and whether the app updates itself, which no range moves.
 	Version     catalog.Range
 	UpdatesSelf bool
-	// value: the version the lock holds the item at, when the step is
+	// value: the version the lock holds the package at, when the step is
 	// carried by the method the lock names and that method pins it: the
 	// one the install takes; the lock's file when the lock names the
 	// method; and Recorded, the version the lock holds where the method
@@ -51,7 +51,7 @@ type Step struct {
 	Locked, Recorded, Lock string
 	Phase                  catalog.Phase
 	// value: the step is baked into the VM image (vm.image.bake, and what
-	// a baked item requires): `apply --phase image` runs it, and a bare
+	// a baked package requires): `apply --phase image` runs it, and a bare
 	// apply carries it as any other.
 	Baked bool
 	Needs []catalog.Need
@@ -62,12 +62,12 @@ type Step struct {
 	Why      string
 	Values   map[string]catalog.OptionValue
 	From     string
-	// value: where the step was asked (a Machinefile, or the item that
-	// brings it in), and where its item is defined.
+	// value: where the step was asked (a Machinefile, or the package that
+	// brings it in), and where its package is defined.
 	Origin, Defined Origin
 }
 
-// value: an item the Machinefile marks optional that has no method for the system.
+// value: a package the Machinefile marks optional that has no method for the system.
 
 type Skip struct {
 	Package, Why string
@@ -76,7 +76,7 @@ type Skip struct {
 
 // value: a Machinefile resolved: its name, the files read weakest first,
 // every value with its origin, the steps in the order they run, and the
-// optional items skipped.
+// optional packages skipped.
 
 type Resolved struct {
 	Name string
@@ -136,7 +136,7 @@ type merged struct {
 	order   []string
 	machine bool
 	vm      *Origin
-	// value: the items baked into the image, and the file that says so.
+	// value: the packages baked into the image, and the file that says so.
 	bake []listed[struct{}]
 	// value: the folders a VM made from it shares with its computer, as
 	// the strongest file that says them lists them.
@@ -364,7 +364,7 @@ func mergeSettings(m *merged, s catalog.SettingList, o Origin) {
 func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error) {
 	// invariant: a Machinefile resolves against the catalog and the system it
 	// says (this machine's where it says none): a mixin is never applied, a
-	// computer has no vm, each item's method is the first of its matching
+	// computer has no vm, each package's method is the first of its matching
 	// methods in prefer's order, then the system's priority, then the file's
 	// order; the steps run requires first, managers before what they install,
 	// `after` between two the plan holds; a cycle is refused. An app the
@@ -457,7 +457,7 @@ type planner struct {
 	skipped []Skip
 }
 
-// value: an item by its name, or by a name it was renamed from.
+// value: a package by its name, or by a name it was renamed from.
 func (p *planner) lookup(name string) (catalog.Placed, bool) {
 	it, ok := p.cat.Package(name)
 	if !ok {
@@ -471,7 +471,7 @@ func (p *planner) lookup(name string) (catalog.Placed, bool) {
 }
 
 // value: where an entry of a file is written, `<file>:<line>`, for a
-// refusal to point at; empty for an item another one brings in.
+// refusal to point at; empty for a package another one brings in.
 func at(o Origin, line int) string {
 	switch {
 	case o.File == "":
@@ -501,7 +501,7 @@ func packageOrigin(it catalog.Placed) Origin {
 
 // invariant: what the image bakes is its bake list and, step by step,
 // what a baked step requires (its requires, its provider, its manager),
-// so `apply --phase image` never runs an item whose requirement it left.
+// so `apply --phase image` never runs a package whose requirement it left.
 func (p *planner) baked(steps []Step, bake []listed[struct{}]) []Step {
 	at := make(map[string]int, len(steps))
 	for i, s := range steps {
@@ -573,9 +573,9 @@ func (p *planner) setting(name string, e catalog.SettingEntry, o Origin) error {
 	return nil
 }
 
-// value: why an optional item is skipped: no method for the system, or,
+// value: why an optional package is skipped: no method for the system, or,
 // when its entry asks a manager, none by that manager, with the methods
-// it has there, so a manager pinned by mistake reads apart from an item
+// it has there, so a manager pinned by mistake reads apart from a package
 // the system lacks.
 func (p *planner) skippedFor(it catalog.Placed, manager catalog.ManagerKey) string {
 	if manager == "" {
@@ -676,7 +676,7 @@ func (p *planner) because(m catalog.MethodSpec, of int) string {
 	return "first of its methods for " + p.system()
 }
 
-// invariant: an item of the plan brings in every item it leans on, each
+// invariant: a package of the plan brings in every package it leans on, each
 // resolved like a listed one: what it requires, its method's provider and
 // its method's manager; a setting's requires-one-of is met by any one the
 // plan holds, else by its first.
@@ -753,7 +753,7 @@ func (p *planner) ordered() ([]Step, error) {
 			}
 		}
 		if next < 0 {
-			return nil, &CycleError{Path: p.cycle(deps, done), Of: "the items' requires and after"}
+			return nil, &CycleError{Path: p.cycle(deps, done), Of: "the packages' requires and after"}
 		}
 		done[next] = true
 		out = append(out, p.steps[next])
@@ -783,7 +783,7 @@ func (p *planner) cycle(deps [][]int, done []bool) []string {
 	return append(names, names[0])
 }
 
-// invariant: every value names an option of its item and fits its type; a
+// invariant: every value names an option of its package and fits its type; a
 // secret's is a `vault:` reference, never the secret written out.
 func checkValues(it catalog.Package, values map[string]catalog.OptionValue, where string) error {
 	for _, k := range sortedNames(values) {

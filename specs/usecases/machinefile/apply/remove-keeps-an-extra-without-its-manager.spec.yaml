@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: []
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{item: "ripgrep", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}] | .macs["jterrazz-macbook-pro"].apps.brew.absent = true'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{package: "ripgrep", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}] | .macs["jterrazz-macbook-pro"].apps.brew.absent = true'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'plan'
       exit: 0
@@ -22,7 +22,7 @@ runs:
           # Extra
           ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, its manager homebrew is missing: kept
           ◐	ripgrep		brew	its manager homebrew is missing: kept, judged again next run
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0
       stdout: |
           ["ripgrep"]

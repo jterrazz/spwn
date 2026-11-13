@@ -117,7 +117,7 @@ func (l ledgerOf) Recorded(ctx context.Context, name string, m catalog.Method) (
 // file, never from the folder nor on the PATH station was started with: a
 // project there that pins another node would pick which npm lists what node
 // holds, while `mise unuse --global node` takes back the global one. Whether
-// an item is on this machine another way is no manager's answer: it is
+// a package is on this machine another way is no manager's answer: it is
 // looked for on the owner's PATH (appsMachine).
 func managing(m machine) local.System {
 	sys := m.sys
@@ -179,7 +179,7 @@ func own(cat catalog.Catalog, kind catalog.MachineKind) string {
 	return ""
 }
 
-// invariant: a Then item that asks values or a terminal is skipped off one, as a
+// invariant: a Then package that asks values or a terminal is skipped off one, as a
 // row naming the command that applies it later, never as a failure.
 type configurer struct {
 	settings *settingscalls.Catalogue
@@ -224,7 +224,7 @@ func appsMachineOf(m machine) appsMachine {
 }
 
 // value: h is the machine as station was started on it, whose PATH is
-// where an item is looked for (nvm's node is there and on no manager's
+// where a package is looked for (nvm's node is there and on no manager's
 // PATH); run is the runner of the commands station runs for apps.
 type appsMachine struct {
 	h   local.System
@@ -249,7 +249,7 @@ func (a appsMachine) Exists(p string) bool {
 func (a appsMachine) RunBriefly(ctx context.Context, name string, args []string, budget time.Duration) (output string, code int, ran bool) {
 	run, c := a.run, local.Cmd{Name: name, Args: args, Timeout: budget}
 	if _, ok := run.LookPath(name); !ok {
-		// invariant: a command the owner's PATH alone has, an item present
+		// invariant: a command the owner's PATH alone has, a package present
 		// another way, is read where it was found, from the owner's home.
 		run, c.Dir = a.h.Run, a.h.Env.Home()
 	}
