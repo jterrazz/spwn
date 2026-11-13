@@ -77,7 +77,7 @@ type settingsAsk struct {
 }
 
 func (a settingsAsk) Values(it catalog.Setting) (map[string]string, error) {
-	return a.ask.Form(pagesettings.InputsForm(it.Name, it.Inputs, a.settings.Defaults(it.Name)))
+	return askInputs(a.ask, it.Name, it.Inputs, a.settings.Defaults(it.Name))
 }
 
 func settingsOf(m machine) *settingscalls.Catalogue {
@@ -201,4 +201,22 @@ func settingsDefaults(m machine) map[string]map[string]string {
 		}
 	}
 	return defaults
+}
+
+func askInputs(ask kit.Asker, name string, inputs []catalog.Input, defaults map[string]string) (map[string]string, error) {
+	// invariant: a secret answered blank takes its default, the one the form
+	// never carries.
+	values, err := ask.Form(pagesettings.InputsForm(name, inputs, defaults))
+	if err != nil {
+		return nil, err
+	}
+	for _, in := range inputs {
+		if in.Kind == catalog.InputPassword && values[in.Name] == "" && defaults[in.Name] != "" {
+			if values == nil {
+				values = map[string]string{}
+			}
+			values[in.Name] = defaults[in.Name]
+		}
+	}
+	return values, nil
 }

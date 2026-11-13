@@ -32,7 +32,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/apps/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
-	pagesettings "github.com/jterrazz/studio-station/apps/engine/pages/settings"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	appscmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/apps"
@@ -197,7 +196,7 @@ func (c configurer) Configure(ctx context.Context, pkg string, interactive bool)
 	}
 	var values map[string]string
 	if len(it.Inputs) > 0 && c.ask != nil {
-		if values, err = c.ask.Form(pagesettings.InputsForm(pkg, it.Inputs, c.settings.Defaults(pkg))); err != nil {
+		if values, err = askInputs(c.ask, pkg, it.Inputs, c.settings.Defaults(pkg)); err != nil {
 			return apps.Step{}, err
 		}
 	}

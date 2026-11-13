@@ -166,7 +166,7 @@ An option is a value the owner gives a package, a form field in the menu bar. It
 | `boolean` | `default` alone: a boolean has no examples         |
 | `enum`    | `values` (required), `default`, `examples`         |
 
-Every type takes `required` and `default-env` (the environment variable whose value is the default). A default or an example is a value of its type, within an integer's bounds, one of an enum's values. A form asks a secret string hidden as it is typed, an enum as a choice, a boolean as a yes or no.
+Every type takes `required` and `default-env` (the environment variable whose value is the default). A default or an example is a value of its type, within an integer's bounds, one of an enum's values. A form asks a secret string hidden as it is typed, an enum as a choice, a boolean as a yes or no. A secret's default is never drawn nor sent in a form: a form is a page, `page.Check` refuses a secret field that carries one, and the terminal takes the default for a secret answered blank.
 
 A method's value reads an option as `${option.<name>}`, in any of its strings: a script's line, an env pair, a copied file's path, a defaults value. A reference that names no option of the package is refused at decode. The braces without a dollar (`{cache}`, `{state}`, `{os}`, `{arch}`) are station's own placeholders, never an option, and a shell's `${HOME}` stays the shell's.
 

@@ -66,12 +66,16 @@ func ReportRow(r settingsmodel.Report) page.Row {
 }
 
 func InputsForm(name string, inputs []catalog.Input, defaults map[string]string) page.Form {
+	// invariant: a secret field carries no Default: a form is a page, and a page
+	// leaves the engine; the default of a secret is applied to a blank
+	// answer by the caller that asks, never drawn.
 	f := page.Form{Title: "Configure " + name}
 	for _, in := range inputs {
 		field := page.Field{Key: in.Name, Label: in.Label, Note: in.Help, Default: defaults[in.Name], Required: in.Required, Kind: page.FieldText}
 		switch in.Kind {
 		case catalog.InputPassword:
 			field.Kind = page.FieldSecret
+			field.Default = ""
 		case catalog.InputSelect:
 			field.Kind = page.FieldSelect
 			for _, o := range in.Options {

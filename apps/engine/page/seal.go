@@ -385,6 +385,9 @@ func checkFields(fields []Field) error {
 		if f.Kind == FieldCommand && f.Hint == nil {
 			return errors.New("field " + f.Key + ": a command field carries its hint")
 		}
+		if f.Kind == FieldSecret && f.Default != "" {
+			return errors.New("field " + f.Key + ": a secret field carries no default")
+		}
 		if err := checkFields(f.Fields); err != nil {
 			return err
 		}

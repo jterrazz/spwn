@@ -21,19 +21,20 @@ func row(r page.Row) page.Item { return page.Item{Row: &r} }
 func TestSealRefusesWhatNoPageMayHold(t *testing.T) {
 	ok := page.Row{ID: "a", Mark: page.OK, Label: "a"}
 	cases := map[string]page.Page{
-		"an ID unique in the page":       {Sections: []page.Section{section(), section()}},
-		"a title is required":            {Sections: []page.Section{{ID: "s"}}},
-		"carries a mark":                 {Sections: []page.Section{section(row(page.Row{ID: "a"}))}},
-		"carries a reason":               {Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.Attention, Detail: page.Text("x")}))}},
-		"unique in its section":          {Sections: []page.Section{section(row(ok), row(ok))}},
-		"names its command":              {Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.Absent, Hint: &page.Hint{}}))}},
-		"is External":                    {Hints: []page.Hint{{Command: "sudo reboot"}}},
-		"exactly one node":               {Sections: []page.Section{section(page.Item{Row: &ok, Note: &page.Note{}})}},
-		"3 levels at most":               {Sections: []page.Section{section(nest(4))}},
-		"more cells than columns":        {Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.OK, Cells: []page.Value{page.None(), page.None()}}))}},
-		"labeled sizes of its column's":  {Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.OK, Cells: []page.Value{page.Levels(page.Labeled("kept", page.Size(1)))}}))}},
-		"an error carries a hint":        {Sections: []page.Section{section(page.Item{Error: &page.Error{Message: "x"}})}},
-		"a judged section's row carries": {Sections: []page.Section{section(row(page.Row{ID: "b"}))}},
+		"an ID unique in the page":          {Sections: []page.Section{section(), section()}},
+		"a title is required":               {Sections: []page.Section{{ID: "s"}}},
+		"carries a mark":                    {Sections: []page.Section{section(row(page.Row{ID: "a"}))}},
+		"carries a reason":                  {Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.Attention, Detail: page.Text("x")}))}},
+		"unique in its section":             {Sections: []page.Section{section(row(ok), row(ok))}},
+		"names its command":                 {Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.Absent, Hint: &page.Hint{}}))}},
+		"is External":                       {Hints: []page.Hint{{Command: "sudo reboot"}}},
+		"exactly one node":                  {Sections: []page.Section{section(page.Item{Row: &ok, Note: &page.Note{}})}},
+		"3 levels at most":                  {Sections: []page.Section{section(nest(4))}},
+		"more cells than columns":           {Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.OK, Cells: []page.Value{page.None(), page.None()}}))}},
+		"labeled sizes of its column's":     {Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.OK, Cells: []page.Value{page.Levels(page.Labeled("kept", page.Size(1)))}}))}},
+		"an error carries a hint":           {Sections: []page.Section{section(page.Item{Error: &page.Error{Message: "x"}})}},
+		"a secret field carries no default": {Actions: []page.Action{{ID: "a", Form: &page.Form{Fields: []page.Field{{Key: "password", Kind: page.FieldSecret, Default: "hunter2"}}}}}},
+		"a judged section's row carries":    {Sections: []page.Section{section(row(page.Row{ID: "b"}))}},
 	}
 	for want, p := range cases {
 		err := page.Check(p)
