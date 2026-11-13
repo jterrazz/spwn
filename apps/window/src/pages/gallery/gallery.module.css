@@ -1,0 +1,33 @@
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+.samples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-12);
+    align-items: center;
+}
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    width: 100%;
+}
+.nav {
+    width: 224px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-14);
+    width: 100%;
+}
+.meter {
+    width: 200px;
+    display: flex;
+}

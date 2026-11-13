@@ -1,0 +1,21 @@
+- main:
+  - heading "infra Unknown" [level=2]
+  - paragraph:
+    - text: server · always-on · on
+    - button "jterrazz-mac-mini"
+  - button "Start"
+  - button "Stop"
+  - button "Restart"
+  - button "Open in Terminal" [disabled]
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs" [selected]
+  - heading "No answer from the engine." [level=1]
+  - paragraph:
+    - img "no answer"
+    - text: No answer · mini-offline holds no answer

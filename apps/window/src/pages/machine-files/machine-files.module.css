@@ -1,0 +1,67 @@
+.file {
+    background: var(--panel);
+    border-radius: var(--radius-panel);
+    padding: var(--space-16);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    min-width: 0;
+}
+.head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+}
+.icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-control);
+    background: var(--raise);
+    color: var(--t2);
+    display: grid;
+    place-items: center;
+    flex: none;
+}
+.icon svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.4;
+}
+.named {
+    flex: 1 1 240px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.name {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-row);
+    font-weight: var(--weight-medium);
+    overflow-wrap: anywhere;
+}
+.path {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--t3);
+    overflow-wrap: anywhere;
+}
+.extends {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+}
+.extended {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    border-radius: var(--radius-icon);
+}
+.extended:hover > span {
+    background: var(--raise-2);
+}
+.extended:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 2px;
+}

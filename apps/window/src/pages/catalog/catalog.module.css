@@ -1,0 +1,30 @@
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-14);
+}
+.list {
+    background: var(--panel);
+    border-radius: var(--radius-panel);
+    padding: var(--space-14) var(--space-16) var(--space-10);
+    min-width: 0;
+}
+.group + .group {
+    margin-top: var(--space-10);
+    padding-top: var(--space-14);
+    border-top: 1px solid var(--line);
+}
+.head {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-10);
+    padding: var(--space-2) 0 var(--space-10);
+    color: var(--t3);
+    font-size: var(--text-label);
+}
+.none {
+    margin: 0;
+    color: var(--t3);
+    padding: var(--space-12) 0;
+}

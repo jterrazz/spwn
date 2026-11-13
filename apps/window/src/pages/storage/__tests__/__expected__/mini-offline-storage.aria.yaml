@@ -1,0 +1,20 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - group "Which Mac":
+    - button "jterrazz-macbook-pro"
+    - button "jterrazz-mac-mini" [pressed]
+  - heading "No answer from the engine." [level=1]
+  - paragraph:
+    - img "no answer"
+    - text: No answer · mini-offline holds no answer
+  - region "Images":
+    - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+    - button "Build a new one" [disabled]
+    - paragraph: No image on jterrazz-mac-mini.
+  - region "Machines":
+    - heading "Machines what is inside one is on its own Storage tab" [level=2]
+    - button "jterrazz-mac-mini the Mac itself"
+    - button "infra 8 CPU · 24 GB"

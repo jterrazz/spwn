@@ -1,0 +1,7 @@
+.command {
+    display: flex;
+    align-items: center;
+    gap: var(--space-10);
+    min-width: 0;
+    max-width: 320px;
+}

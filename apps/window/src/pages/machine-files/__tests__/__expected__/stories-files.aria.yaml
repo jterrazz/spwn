@@ -1,0 +1,31 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: A machine file is the recipe a machine is made from, and kept in line with
+  - group "Machine files":
+    - button "jterrazz-base"
+    - button "macbook-pro" [pressed]
+  - region "macbook-pro.machine.yaml":
+    - heading "macbook-pro.machine.yaml" [level=2]
+    - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
+    - term: Makes
+    - definition: a Mac
+    - term: System
+    - definition: macos
+    - term: Extends
+    - definition:
+      - button "jterrazz-base"
+  - region "Machines that follow it":
+    - heading "Machines that follow it" [level=2]
+    - paragraph: Not given yet The machines made from it, and whether each matches it
+  - region "What it puts on a machine":
+    - heading "What it puts on a machine the boxed values are the ones you set" [level=2]
+    - group "Chapter":
+      - button "Apps5" [pressed]
+      - button "Skills0"
+      - button "Settings1"
+      - button "Access"
+    - region "macbook-pro": macbook-pro 3 apps gh GitHub CLI for repository management any version lazygit Terminal UI for git any version ghostty GPU-accelerated terminal emulator any version
+    - region "jq": jq 1 app homebrew manager macOS package manager any version
+    - region "jterrazz-base": jterrazz-base 1 app jq Command-line JSON processor any version

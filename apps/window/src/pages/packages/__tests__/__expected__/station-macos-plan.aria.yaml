@@ -1,0 +1,13 @@
+- region "Its machine file":
+  - heading "Its machine file" [level=2]
+  - term: Its file
+  - definition: station-macos
+- region "To keep":
+  - heading "To keep" [level=2]
+  - text: homebrew listed Present
+- region "To install":
+  - heading "To install" [level=2]
+  - text: git listed Missing ohmyzsh listed Missing
+- region "To set":
+  - heading "To set" [level=2]
+  - text: git-shortcuts listed Missing hushlogin listed Missing

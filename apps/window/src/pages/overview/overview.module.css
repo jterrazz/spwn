@@ -1,0 +1,84 @@
+.columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: var(--space-14);
+    align-items: start;
+}
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-14);
+    min-width: 0;
+}
+.kv {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: var(--space-8) var(--space-12);
+    margin: 0;
+}
+.kv dt {
+    color: var(--t3);
+}
+.kv dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+.none {
+    margin: 0;
+    color: var(--t3);
+    padding: var(--space-8) 0 var(--space-12);
+}
+.process {
+    font-family: var(--font-mono);
+}
+.meta {
+    color: var(--t3);
+    font-size: var(--text-label);
+    text-align: right;
+}
+.steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-8);
+}
+.step {
+    background: var(--inset);
+    border-radius: var(--radius-well);
+    padding: var(--space-10) var(--space-12);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+    min-width: 0;
+}
+.stepLabel {
+    color: var(--t3);
+    font-size: var(--text-label);
+}
+.quiet {
+    color: var(--t3);
+}
+.strip {
+    display: grid;
+    gap: 3px;
+    height: 30px;
+}
+.strip i {
+    background: var(--raise-2);
+    border-radius: 3px;
+}
+.axis {
+    display: flex;
+    justify-content: space-between;
+    color: var(--t3);
+    font-size: var(--text-label);
+    margin-top: var(--space-6);
+}
+@media (width < 760px) {
+    .columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

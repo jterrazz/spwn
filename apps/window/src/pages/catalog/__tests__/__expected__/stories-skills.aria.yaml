@@ -1,0 +1,12 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: "Everything station knows how to install or set: apps, agent skills and settings, each one a package"
+  - searchbox "Search the catalog"
+  - group "Category":
+    - button "All skills17" [pressed]
+    - button "Agent skills17"
+  - region "Skills":
+    - paragraph: Agent skills 17
+    - text: agent-browser-skill Drive agent-browser, the browser automation CLI Not installed better-accessibility Accessibility review and fixes Not installed better-colors Color craft Not installed better-interface Interface polish Not installed better-layout Layout and spacing craft Not installed better-typography Typography craft Not installed better-ui UI review across the better-* skills Not installed better-writing Interface copy Not installed chrome-extensions Chrome extension authoring Not installed frontend-design Distinctive, polished frontend interfaces Not installed last30days Research what happened in the last 30 days Not installed modern-web-guidance Chrome's current web platform guidance Not installed qmd-skill Drive qmd, the local markdown search Not installed shadcn shadcn/ui components and patterns Not installed upgrading-expo Upgrade an Expo app across SDK versions Not installed vercel-react-best-practices React and Next.js performance practices Not installed vercel-react-native-skills React Native practices Not installed

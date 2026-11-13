@@ -1,0 +1,68 @@
+.sidebar {
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: var(--space-14) var(--space-10) var(--space-10);
+    min-width: 0;
+    overflow-y: auto;
+    background: var(--canvas);
+}
+.lights {
+    height: var(--space-14);
+    flex: none;
+}
+:global(html[data-chrome='overlay']) .lights {
+    height: var(--space-24);
+}
+.find {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 32px;
+    padding: 0 var(--space-10);
+    border-radius: var(--radius-well);
+    background: var(--panel);
+    color: var(--t3);
+    flex: none;
+    transition: background var(--motion-hover);
+}
+.find:hover {
+    background: var(--raise);
+}
+.find kbd {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.caption {
+    margin: 0;
+    font-size: var(--text-label);
+    font-weight: var(--weight-regular);
+    color: var(--t3);
+    padding: 0 var(--space-8) var(--space-6);
+}
+.foot {
+    margin-top: auto;
+    padding: var(--space-10) var(--space-8) var(--space-2);
+    border-top: 1px solid var(--line);
+    color: var(--t3);
+    font-size: var(--text-label);
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
+}
+.footText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

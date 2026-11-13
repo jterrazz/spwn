@@ -1,0 +1,72 @@
+.compare {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-16);
+    align-items: center;
+    min-height: 46px;
+    padding: var(--space-8) 0;
+    border-top: 1px solid var(--line);
+}
+.head {
+    min-height: 26px;
+    border-top: 0;
+    color: var(--t3);
+    font-size: var(--text-label);
+}
+.item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    min-width: 0;
+}
+.name {
+    color: var(--t1);
+    font-size: var(--text-row);
+}
+.muted {
+    color: var(--t3);
+    font-size: var(--text-label);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.will {
+    display: flex;
+    justify-content: flex-end;
+}
+.foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-12);
+    padding: var(--space-12) 0 var(--space-4);
+    border-top: 1px solid var(--line);
+    color: var(--t2);
+}
+.state {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    min-width: 0;
+}
+.fileLink {
+    all: unset;
+    cursor: pointer;
+    color: var(--t2);
+    text-decoration: underline;
+    text-decoration-color: var(--t4);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+}
+.fileLink:hover {
+    text-decoration-color: var(--t1);
+}
+.fileLink:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 2px;
+}
+.text {
+    margin: 0;
+    color: var(--t3);
+    padding: var(--space-8) 0 var(--space-12);
+}

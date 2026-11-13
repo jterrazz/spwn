@@ -1,0 +1,34 @@
+.trail {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+.shared {
+    border-top: 1px solid var(--line);
+    padding-bottom: var(--space-8);
+}
+.shared > :first-child {
+    border-top: 0;
+}
+.address {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-2) 0 var(--space-2) calc(56px + var(--space-12));
+}
+.links {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+.label {
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.empty {
+    margin: 0;
+    color: var(--t3);
+    padding: var(--space-8) 0 var(--space-12);
+    border-top: 1px solid var(--line);
+}

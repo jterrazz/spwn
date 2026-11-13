@@ -1,0 +1,38 @@
+- main:
+  - heading "linux-1 Running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "macbook-pro"
+  - button "Start"
+  - button "Stop"
+  - button "Open in Terminal" [disabled]
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts" [selected]
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: "A share is a copy, for a time: when the time ends macbook-pro takes it back · no secret is ever shown here"
+  - region "Shared with it":
+    - heading "Shared with it" [level=2]
+    - text: claude admin@jterrazz.com · max Ends in 24 min
+    - button "Extend claude by 12 h": Extend 12 h
+    - button "Take back claude": Take back
+    - text: github jterrazz · repo, workflow Ends in 4 h 0 min
+    - button "Extend github by 12 h": Extend 12 h
+    - button "Take back github": Take back
+  - region "Can be shared":
+    - heading "Can be shared from macbook-pro" [level=2]
+    - text: session:* Share for
+    - button "4 h" [disabled]
+    - button "12 h" [disabled]
+    - button "7 days" [disabled]
+    - text: operator:claude:oauth-token Share for
+    - button "4 h" [disabled]
+    - button "12 h" [disabled]
+    - button "7 days" [disabled]

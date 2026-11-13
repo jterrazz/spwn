@@ -1,0 +1,19 @@
+- main:
+  - heading "jterrazz-macbook-pro Online" [level=2]
+  - paragraph: This Mac · Engine running
+  - button "New machine"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs" [selected]
+  - heading "No log of this Mac from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: The engine reads the log of a VM, not yet the log of jterrazz-macbook-pro
+  - region "What station did on this Mac":
+    - heading "What station did on this Mac" [level=2]
+    - paragraph: Not given yet The engine's own lines and its setup runs.

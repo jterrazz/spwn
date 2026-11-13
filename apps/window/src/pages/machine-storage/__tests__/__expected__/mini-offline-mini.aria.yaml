@@ -1,0 +1,16 @@
+- main:
+  - heading "jterrazz-mac-mini Not seen" [level=2]
+  - paragraph
+  - button "New machine"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage" [selected]
+    - tab "Logs"
+  - heading "No answer from the engine." [level=1]
+  - paragraph:
+    - img "no answer"
+    - text: No answer · mini-offline holds no answer

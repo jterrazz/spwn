@@ -1,0 +1,132 @@
+import type { OverviewNeed } from '@jterrazz/station-api';
+import { describe, expect, test } from 'vitest';
+
+import { everything, matching } from '../finds';
+import type { Group, Held } from '../finds';
+import { machineRoute } from '../route';
+import type { PlainPage } from '../route';
+
+const TITLES: Record<PlainPage, string> = {
+    catalog: 'Catalog',
+    'catalog-apps': 'Apps',
+    'catalog-settings': 'Settings',
+    'catalog-skills': 'Skills',
+    gallery: 'Gallery',
+    home: 'Home',
+    inbox: 'Inbox',
+    'machine-files': 'Machine files',
+    storage: 'Storage',
+};
+
+const NEED: OverviewNeed = {
+    Args: null,
+    Broken: true,
+    Call: '',
+    Command: '',
+    Machine: 'linux-1',
+    Path: '',
+    Section: 'ports',
+    Severity: 'broken',
+    Subject: 'web',
+    Text: 'web does not answer on :3000',
+};
+
+const HELD: Held = {
+    apps: [
+        { category: 'editors', name: 'zed' },
+        { category: 'runtimes', name: 'node' },
+    ],
+    macs: [
+        { Name: 'mini', VMs: null },
+        {
+            Name: 'book',
+            VMs: [
+                { Lifetime: 'ephemeral', Name: 'linux-1' },
+                { Lifetime: 'always-on', Name: 'api' },
+            ],
+        },
+    ],
+    needs: [NEED],
+    routeOfNeed: (need) => machineRoute(need.Machine, 'Ports'),
+    settings: [{ category: 'dock', name: 'dock-autohide' }],
+    titles: TITLES,
+    withGallery: false,
+};
+
+function shown(groups: readonly Group[]) {
+    return groups.map((group) => [group.kind, group.results.map((result) => result.label)]);
+}
+
+describe('finds', () => {
+    test("an empty query lists what the sidebar holds, in the sidebar's order, by name in each kind", () => {
+        // Given - two Macs, two VMs, a need and three packages held
+        const groups = matching(everything(HELD), '');
+
+        // Then - places, needs, machines, the library and the actions; tabs and packages wait for a query
+        expect(shown(groups)).toStrictEqual([
+            ['Places', ['Home', 'Inbox', 'Storage']],
+            ['Needs', ['web does not answer on :3000']],
+            ['Machines', ['api', 'book', 'linux-1', 'mini']],
+            ['Library', ['Apps', 'Catalog', 'Machine files', 'Settings', 'Skills']],
+            ['Actions', ['New machine', 'Show or hide the sidebar']],
+        ]);
+    });
+
+    test('every word of a query is found in a name or its kind, in any case', () => {
+        // Given - a query naming a machine and a tab
+        const groups = matching(everything(HELD), 'LINUX logs');
+
+        // Then - the one tab of linux-1 it names, and no other result
+        expect(shown(groups)).toStrictEqual([['Tabs', ['linux-1 › Logs']]]);
+        expect(groups[0]?.results[0]?.to).toStrictEqual({
+            route: machineRoute('linux-1', 'Logs'),
+        });
+    });
+
+    test("a machine's tabs come in the tab bar's order, machine by machine, and no row repeats its group", () => {
+        // Given - a query every tab of linux-1 and of api answers
+        const groups = matching(everything(HELD), '›');
+
+        // Then - api's seven tabs, then linux-1's, each in the order of the tab bar, with no detail of their own
+        const tabs = groups.find((group) => group.kind === 'Tabs')?.results ?? [];
+        expect(tabs.slice(0, 7).map((result) => result.label)).toStrictEqual([
+            'api › Overview',
+            'api › Activity',
+            'api › Packages',
+            'api › Ports',
+            'api › Accounts',
+            'api › Storage',
+            'api › Logs',
+        ]);
+        expect(tabs[7]?.label).toBe('book › Overview');
+        expect(tabs.every((result) => result.detail === '')).toBe(true);
+    });
+
+    test("a package is found by its name and opens its shelf, a need opens where the need's row does", () => {
+        // Given - queries for a setting, an app's category, and a need's words
+        const setting = matching(everything(HELD), 'dock');
+        const runtime = matching(everything(HELD), 'runtimes');
+        const need = matching(everything(HELD), 'answer');
+
+        // Then - each lands where its page shows it
+        expect(setting[0]?.results[0]?.to).toStrictEqual({ route: { page: 'catalog-settings' } });
+        expect(shown(runtime)).toStrictEqual([['Packages', ['node']]]);
+        expect(need[0]?.results[0]?.to).toStrictEqual({ route: machineRoute('linux-1', 'Ports') });
+    });
+
+    test('the gallery is found only in a window that holds it', () => {
+        // Given - the same query in a production window, then a proof window
+        const production = matching(everything(HELD), 'gallery');
+        const proof = matching(everything({ ...HELD, withGallery: true }), 'gallery');
+
+        // Then - only the proof window finds it
+        expect(production).toStrictEqual([]);
+        expect(shown(proof)).toStrictEqual([['Library', ['Gallery']]]);
+    });
+
+    test('a query nothing holds finds nothing', () => {
+        // Given - a word no name carries
+        // Then - no group at all
+        expect(matching(everything(HELD), 'kubernetes')).toStrictEqual([]);
+    });
+});

@@ -1,0 +1,38 @@
+.toolbar {
+    height: 46px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-10);
+    padding: 0 var(--space-14) 0 var(--space-12);
+}
+:global(html[data-chrome='overlay']) .bare {
+    padding-left: 84px;
+}
+.title {
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+    min-width: 0;
+    color: var(--t3);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    margin: 0;
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+}
+.title b {
+    color: var(--t1);
+    font-weight: var(--weight-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.crumb {
+    all: unset;
+    cursor: pointer;
+    color: var(--t3);
+}
+.crumb:hover {
+    color: var(--t1);
+}

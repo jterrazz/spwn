@@ -1,0 +1,61 @@
+- main:
+  - heading "jterrazz-macbook-pro Online" [level=2]
+  - paragraph: This Mac · Engine running
+  - button "New machine"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity" [selected]
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - 'heading "Disk almost full: 4 % free" [level=1]'
+  - paragraph:
+    - img "broken"
+    - text: broken · disk
+  - text: station disk
+  - group "Window":
+    - button "6 min" [pressed]
+    - button "1 h"
+    - button "24 h"
+  - region "CPU":
+    - heading "CPU" [level=2]
+    - text: 10 CPUs · load 2.8 3.1 2.9 34%
+    - paragraph: "Not given yet No chart: no bar of this window holds a sample of the engine."
+  - region "Memory":
+    - heading "Memory" [level=2]
+    - text: pressure normal · swap 1.2 GB 12.4GB of 16 GB
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Disk":
+    - heading "Disk" [level=2]
+    - text: 1.3 MB/s written 4.1MB/s read
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Network":
+    - heading "Network" [level=2]
+    - text: 210 KB/s out 2.1MB/s in
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Busiest":
+    - heading "Busiest" [level=2]
+    - group "Busiest by":
+      - button "By CPU" [pressed]
+      - button "By memory"
+    - button "linux-1 a machine of this Mac 18 18 %":
+      - text: linux-1 a machine of this Mac
+      - meter "CPU of linux-1"
+      - text: 18 %
+    - text: Zed
+    - meter "CPU of Zed"
+    - text: 9 % WindowServer
+    - meter "CPU of WindowServer"
+    - text: 4 %
+  - region "This Mac":
+    - heading "This Mac" [level=2]
+    - term: Heat
+    - definition: Nominal
+    - term: Battery
+    - definition: 96 % · charging
+    - term: Battery health
+    - definition: 98 % · 112 cycles
+    - term: Up for
+    - definition: 3 d

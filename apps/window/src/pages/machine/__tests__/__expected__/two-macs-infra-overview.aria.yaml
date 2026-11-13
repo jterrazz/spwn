@@ -1,0 +1,43 @@
+- main:
+  - heading "infra Running" [level=2]
+  - paragraph:
+    - text: server · always-on · on
+    - button "jterrazz-mac-mini"
+  - button "Start"
+  - button "Stop"
+  - button "Restart"
+  - button "Open in Terminal" [disabled]
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No answer from the engine." [level=1]
+  - paragraph:
+    - img "no answer"
+    - text: No answer · two-macs holds no answer
+  - text: CPU no answer Memory no answer Disk no answer Check 41ms passing · at 10:00
+  - region "Health":
+    - heading "Health checked at 10:00" [level=2]
+    - text: Its state Running Its address 192.168.64.5 SSH Answers Its check Passing
+  - region "Check latency":
+    - heading "Check latency" [level=2]
+    - text: 41 ms now
+    - paragraph: The engine kept one check so far.
+  - region "Days it went down":
+    - heading "Days it went down" [level=2]
+    - paragraph: The engine kept no such day.
+  - region "Why it exists":
+    - heading "Why it exists" [level=2]
+    - term: Purpose
+    - definition: Not given yet
+    - term: Created
+    - definition: 23 Oct, by Not given yet
+    - term: Hold
+    - definition: Not given yet
+    - term: Check
+    - definition: https://infra:6443/readyz
+  - button "Delete infra…"

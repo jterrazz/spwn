@@ -1,0 +1,31 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: A machine file is the recipe a machine is made from, and kept in line with
+  - group "Machine files":
+    - button "jterrazz-base"
+    - button "jterrazz-macbook-pro" [pressed]
+  - region "jterrazz-macbook-pro.machine.yaml":
+    - heading "jterrazz-macbook-pro.machine.yaml" [level=2]
+    - text: ~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml
+    - term: Makes
+    - definition: a Mac
+    - term: System
+    - definition: macos
+    - term: Extends
+    - definition:
+      - button "jterrazz-base"
+  - region "Machines that follow it":
+    - heading "Machines that follow it" [level=2]
+    - paragraph: Not given yet The machines made from it, and whether each matches it
+  - region "What it puts on a machine":
+    - heading "What it puts on a machine the boxed values are the ones you set" [level=2]
+    - group "Chapter":
+      - button "Apps4" [pressed]
+      - button "Skills0"
+      - button "Settings0"
+      - button "Access"
+    - region "jq": jq 1 app homebrew manager macOS package manager any version
+    - region "jterrazz-base": jterrazz-base 1 app jq Command-line JSON processor any version
+    - region "jterrazz-macbook-pro": jterrazz-macbook-pro 2 apps lazygit Terminal UI for git any version bat Cat clone with syntax highlighting any version

@@ -1,0 +1,60 @@
+- main:
+  - heading "jterrazz-macbook-pro Online" [level=2]
+  - paragraph: This Mac · Engine running
+  - button "New machine"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity" [selected]
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No finding from the engine." [level=1]
+  - paragraph:
+    - img "No finding"
+    - text: Read live · two samples read now, 1 s apart · a point every 30 min · history kept since 1 Nov 10:00
+  - group "Window":
+    - button "6 min"
+    - button "1 h"
+    - button "24 h" [pressed]
+  - region "CPU":
+    - heading "CPU" [level=2]
+    - text: 10 CPUs · load 2.8 3.1 2.9 34%
+    - paragraph: "Not given yet No chart: no bar of this window holds a sample of the engine."
+  - region "Memory":
+    - heading "Memory" [level=2]
+    - text: pressure normal · swap 1.2 GB 12.4GB of 16 GB
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Disk":
+    - heading "Disk" [level=2]
+    - text: 1.3 MB/s written 4.1MB/s read
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Network":
+    - heading "Network" [level=2]
+    - text: 210 KB/s out 2.1MB/s in
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Busiest":
+    - heading "Busiest" [level=2]
+    - group "Busiest by":
+      - button "By CPU"
+      - button "By memory" [pressed]
+    - button "linux-1 a machine of this Mac 26 4.1 GB":
+      - text: linux-1 a machine of this Mac
+      - meter "Memory of linux-1"
+      - text: 4.1 GB
+    - text: Zed
+    - meter "Memory of Zed"
+    - text: 1.9 GB WindowServer
+    - meter "Memory of WindowServer"
+    - text: 0.6 GB
+  - region "This Mac":
+    - heading "This Mac" [level=2]
+    - term: Heat
+    - definition: Nominal
+    - term: Battery
+    - definition: 96 % · charging
+    - term: Battery health
+    - definition: 98 % · 112 cycles
+    - term: Up for
+    - definition: 3 d

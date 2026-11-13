@@ -1,0 +1,13 @@
+.meter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-8);
+    min-width: 0;
+}
+.figure {
+    color: var(--t2);
+    font-size: var(--text-label);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}

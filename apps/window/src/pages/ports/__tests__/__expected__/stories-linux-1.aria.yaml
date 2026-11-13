@@ -1,0 +1,42 @@
+- main:
+  - heading "linux-1 Running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "macbook-pro"
+  - button "Start"
+  - button "Stop"
+  - button "Open in Terminal" [disabled]
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports" [selected]
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: It may share ports 40000 to 40999 with your devices
+  - region "Shared":
+    - heading "Shared" [level=2]
+    - region "Port 3000":
+      - text: :3000 Node or Next node Shared Public
+      - button "Stop sharing"
+      - text: https://macbook-pro.tail77a797.ts.net:443
+      - button "Copy https://macbook-pro.tail77a797.ts.net:443": Copy
+      - button "Open" [disabled]
+      - button "QR code"
+    - region "Port 5173":
+      - text: :5173 Vite node Shared Private
+      - button "Stop sharing"
+      - text: https://macbook-pro.tail77a797.ts.net:40001
+      - button "Copy https://macbook-pro.tail77a797.ts.net:40001": Copy
+      - button "Open" [disabled]
+      - button "QR code"
+  - region "Listening, not shared":
+    - heading "Listening, not shared" [level=2]
+    - text: :4321 astro 0.0.0.0
+    - button "Share :4321": Share
+    - text: :9229 node 0.0.0.0
+    - button "Share :9229": Share

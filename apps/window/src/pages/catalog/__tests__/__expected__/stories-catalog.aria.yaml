@@ -1,0 +1,8 @@
+- main:
+  - heading "Catalog." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: Everything station knows how to install or set, 148 packages · choose what to browse
+  - button "Apps 97 in the catalog Programs, command-line tools, runtimes and the managers that install them Package Managers · Runtimes · Shell & Terminal · Command line · Git · Editors & IDEs · Containers & VMs · Deploy · AI Agents · AI Tooling · AI Apps · Browsers · Communication · Productivity · Media · Remote Access · Security · System Utilities"
+  - button "Skills 17 in the catalog What an agent knows how to do, added to it on a machine Agent skills"
+  - button "Settings 34 in the catalog What station writes or switches on a machine, each one undoable where it can be Shell · Terminal · Security · Editor · System · Headless · Network · Agents · No category given"

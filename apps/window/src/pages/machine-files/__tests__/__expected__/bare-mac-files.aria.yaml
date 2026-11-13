@@ -1,0 +1,5 @@
+- main:
+  - heading "no Machinefile named jterrazz-macbook-pro." [level=1]
+  - paragraph:
+    - img "not found"
+    - text: "Not found · give this machine one: station init --machinefile <name>"

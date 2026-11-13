@@ -1,0 +1,91 @@
+.hero {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    margin: 0 0 var(--space-14);
+}
+.hero > :last-child {
+    margin-left: auto;
+}
+.used {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-8);
+    margin: 0;
+    color: var(--t3);
+}
+.sub {
+    margin: calc(-1 * var(--space-10)) 0 var(--space-14);
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-12);
+    margin-top: var(--space-12);
+    padding: var(--space-14) 0 var(--space-2);
+    border-top: 1px solid var(--line);
+}
+.foot > p {
+    flex: 1 1 260px;
+    margin: 0;
+    color: var(--t2);
+}
+.quiet {
+    color: var(--t3);
+}
+.trail {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+.more {
+    margin: 0;
+    padding: var(--space-10) 0;
+    border-top: 1px solid var(--line);
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.figure {
+    color: var(--t1);
+    font-size: var(--text-metric);
+    font-weight: var(--weight-medium);
+    letter-spacing: -0.02em;
+}
+.legend {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-24);
+    margin: var(--space-16) 0 var(--space-4);
+    padding: 0;
+    list-style: none;
+    color: var(--t2);
+}
+.legend li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-10);
+    min-height: 32px;
+}
+.word {
+    flex: 1;
+    min-width: 0;
+}
+.size {
+    font-weight: var(--weight-regular);
+    color: var(--t3);
+    font-variant-numeric: tabular-nums;
+}
+.free .swatch {
+    background: var(--raise-2);
+}
+.swatch {
+    display: inline-block;
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-tick);
+    background: var(--c, var(--t3));
+}

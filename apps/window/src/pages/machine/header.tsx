@@ -1,0 +1,135 @@
+import type { MachinesMacView } from '@jterrazz/station-api';
+
+import { Button, identityOf, MachineIcon, StatePill, Switch } from '../../design/index';
+import { machineKindOf } from '../../engine/provisional';
+import { useWatch } from '../../engine/react';
+import { engineViewWord, macState, vmAbout, vmKindWord, vmState } from '../../engine/shown';
+import { AWAKE_WORDS, THIS_MAC_WORD } from '../../engine/words';
+import { clock, sentence } from '../../model/format';
+import { targetOf } from '../../model/machines';
+import type { Found } from '../../model/machines';
+import { machineRoute, TAB_PANEL, TABS } from '../../shell/route';
+import type { Route, Tab } from '../../shell/route';
+import { LifecycleGestures } from './gestures';
+
+import styles from './machine.module.css';
+
+const NO_TERMINAL = 'The window cannot open a terminal yet';
+
+type Props = {
+    found: Found;
+    tab: Tab;
+    go: (to: Route) => void;
+    onNewMachine?: (() => void) | undefined;
+};
+
+function useAwakeWord(mac: MachinesMacView): string | undefined {
+    const awake = useWatch('awake.read', {}, targetOf({ mac }));
+    if (awake.kind !== 'read') {
+        return undefined;
+    }
+    const { NeverSleeps, Session } = awake.out;
+    if (NeverSleeps) {
+        return AWAKE_WORDS.neverSleeps;
+    }
+    const until = clock(Session?.until) ?? Session?.run;
+    return until === undefined || until === '' ? undefined : `${AWAKE_WORDS.until} ${until}`;
+}
+
+function MacLine({ mac }: { mac: MachinesMacView }) {
+    const engine = engineViewWord(mac.Engine);
+    const awake = useAwakeWord(mac);
+    return (
+        <p className={styles.sentence}>
+            {sentence([
+                mac.ThisMac ? THIS_MAC_WORD : undefined,
+                engine === undefined ? undefined : `Engine ${engine}`,
+                awake,
+            ])}
+        </p>
+    );
+}
+
+function VmLine({ found, go }: { found: Found; go: Props['go'] }) {
+    const { mac, vm } = found;
+    if (!vm) {
+        return null;
+    }
+    return (
+        <p className={styles.sentence}>
+            {`${sentence([vmKindWord(vm), vmAbout(vm).lifetime])} · on `}
+            <button
+                className={styles.link}
+                onClick={() => {
+                    go(machineRoute(mac.Name));
+                }}
+                type="button"
+            >
+                {mac.Name}
+            </button>
+        </p>
+    );
+}
+
+function Actions({ found, onNewMachine }: Pick<Props, 'found' | 'onNewMachine'>) {
+    const { mac, vm } = found;
+    if (!vm) {
+        return (
+            <div className={styles.actions}>
+                <Button onClick={onNewMachine} variant="primary" yields>
+                    New machine
+                </Button>
+            </div>
+        );
+    }
+    return (
+        <LifecycleGestures
+            key={vm.Name}
+            mac={mac}
+            terminal={
+                <Button disabled title={NO_TERMINAL} variant="primary" yields>
+                    Open in Terminal
+                </Button>
+            }
+            vm={vm}
+        />
+    );
+}
+
+export function MachineHeader({ found, tab, go, onNewMachine }: Props) {
+    const { mac, vm } = found;
+    const name = vm?.Name ?? mac.Name;
+    return (
+        <div className={styles.header}>
+            <div className={styles.inner}>
+                <div className={styles.top}>
+                    <div className={styles.who}>
+                        <MachineIcon
+                            identity={vm ? identityOf(vm.Name) : undefined}
+                            kind={vm ? machineKindOf(vm) : 'mac'}
+                            size="large"
+                        />
+                        <div>
+                            <h2 className={styles.name}>
+                                {name}
+                                <StatePill {...(vm ? vmState(vm) : macState(mac))} />
+                            </h2>
+                            {vm ? <VmLine found={found} go={go} /> : <MacLine mac={mac} />}
+                        </div>
+                    </div>
+                    <Actions found={found} onNewMachine={onNewMachine} />
+                </div>
+                <Switch
+                    controls={TAB_PANEL}
+                    label="Tabs"
+                    onChange={(next) => {
+                        go(machineRoute(name, next));
+                    }}
+                    options={TABS.map((option) => ({ id: option, label: option }))}
+                    value={tab}
+                    variant="tabs"
+                />
+            </div>
+        </div>
+    );
+}

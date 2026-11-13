@@ -1,0 +1,19 @@
+- main:
+  - heading "mac-mini Online" [level=2]
+  - paragraph: Engine running
+  - button "New machine"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports" [selected]
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: The ports of its machines are on their own Ports tab
+  - region "What listens on this Mac":
+    - heading "What listens on this Mac" [level=2]
+    - text: :5900 screensharingd 100.98.133.20 · pid 500 Private

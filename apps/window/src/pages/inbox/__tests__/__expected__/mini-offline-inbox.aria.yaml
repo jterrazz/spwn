@@ -1,0 +1,24 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - group "Which machines":
+    - button "All machines" [pressed]
+    - button "jterrazz-macbook-pro"
+    - button "jterrazz-mac-mini"
+  - region "Needs you":
+    - heading "Needs you a gesture is due" [level=2]
+    - button "Broken npm sign-in expired jterrazz-macbook-pro · Accounts"
+    - text: npm login
+    - button "Copy npm login": Copy
+    - button "Needs a look 1 mise update waiting jterrazz-macbook-pro · Apps"
+    - button "Update mise": Update
+    - button "Needs a look 1 brew update waiting jterrazz-macbook-pro · Apps"
+    - button "Update brew": Update
+  - region "Can wait":
+    - heading "Can wait" [level=2]
+    - paragraph: Not given yet What can wait, apart from what needs you
+  - region "History":
+    - heading "History" [level=2]
+    - paragraph: Not given yet What happened, newest first

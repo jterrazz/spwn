@@ -1,0 +1,63 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: "Everything station knows how to install or set: apps, agent skills and settings, each one a package"
+  - searchbox "Search the catalog"
+  - group "Category":
+    - button "All apps97" [pressed]
+    - button "Package Managers8"
+    - button "Runtimes7"
+    - button "Shell & Terminal5"
+    - button "Command line12"
+    - button "Git4"
+    - button "Editors & IDEs5"
+    - button "Containers & VMs6"
+    - button "Deploy4"
+    - button "AI Agents8"
+    - button "AI Tooling5"
+    - button "AI Apps3"
+    - button "Browsers2"
+    - button "Communication4"
+    - button "Productivity7"
+    - button "Media5"
+    - button "Remote Access3"
+    - button "Security3"
+    - button "System Utilities6"
+  - region "Apps":
+    - paragraph: Package Managers 8
+    - text: "cocoapods Dependency manager for iOS and macOS projects · brew not installed Not installed github-release manager Commands from a project's GitHub releases, fetched and checked by station itself Installed homebrew manager macOS package manager Not installed mas manager Mac App Store command line · brew not installed Not installed mise manager Polyglot runtime manager: node, go, python, bun, rust, java · brew not installed Not installed pnpm Fast, disk space efficient Node package manager · brew not installed Not installed skills manager Agent skills package manager Not installed uv manager Fast Python package and project manager · brew not installed Not installed"
+    - paragraph: Runtimes 7
+    - text: bun manager Fast JavaScript runtime and package manager Not installed go Compiled systems programming language by Google Not installed java Java Development Kit (Temurin) Not installed node manager JavaScript runtime built on Chrome's V8 engine Not installed postgres Relational database server · brew not installed Not installed python Python programming language runtime Not installed rust Systems programming language for safety and speed Not installed
+    - paragraph: Shell & Terminal 5
+    - text: ghostty GPU-accelerated terminal emulator · brew not installed Not installed ohmyzsh Oh My Zsh shell framework Not installed starship Cross-shell prompt (path, git branch/status, versions) · brew not installed Not installed tmux Terminal multiplexer for persistent sessions · brew not installed Not installed zoxide Smarter cd command · brew not installed Not installed
+    - paragraph: Command line 12
+    - text: bat Cat clone with syntax highlighting · brew not installed Not installed difftastic Structural diff · brew not installed Not installed dust Intuitive disk usage viewer · brew not installed Not installed expo React Native framework and its dev server Not installed eza Modern ls replacement · brew not installed Not installed fd Fast find alternative · brew not installed Not installed jq Command-line JSON processor · brew not installed Not installed ripgrep Fast grep, the rg agents and editors shell out to · brew not installed Not installed sd Intuitive sed alternative · brew not installed Not installed tgrep Trigram-indexed grep for large codebases · brew not installed Not installed vite Frontend bundler and dev server Not installed yazi Terminal file manager · brew not installed Not installed
+    - paragraph: Git 4
+    - text: gh GitHub CLI for repository management · brew not installed Not installed git Distributed version control system Not installed gpg GNU Privacy Guard for encryption and signing · brew not installed Not installed lazygit Terminal UI for git · brew not installed Not installed
+    - paragraph: Editors & IDEs 5
+    - text: android-studio Android development IDE · brew not installed Not installed cursor AI-powered code editor · brew not installed Not installed xcode Apple development IDE Not installed xcodegen Generates Xcode projects from a spec · brew not installed Not installed zed Zed code editor · brew not installed Not installed
+    - paragraph: Containers & VMs 6
+    - text: "helm Kubernetes package manager · brew not installed Not installed helmfile Declarative deployments of Helm charts · brew not installed Not installed kubectl Kubernetes command line · brew not installed Not installed lens Kubernetes IDE for managing clusters · brew not installed Not installed orbstack Docker and Linux machines on the Mac, for exploration on a Mac · brew not installed Not installed tart Virtual machines on Apple silicon: the engine of station's VMs Not installed"
+    - paragraph: Deploy 4
+    - text: ansible Agentless IT automation and configuration management · brew not installed Not installed eas Expo's EAS CLI for app builds Not installed pulumi Infrastructure as code using real programming languages · brew not installed Not installed terraform Infrastructure as code provisioning · brew not installed Not installed
+    - paragraph: AI Agents 8
+    - text: claude Claude Code CLI for agentic coding Not installed codex OpenAI's CLI coding agent Not installed conductor Runs parallel AI coding agents in git worktrees · brew not installed Not installed gemini Google's CLI coding agent · brew not installed Not installed herdr Agent multiplexer that lives in your terminal · brew not installed Not installed herdr-app Desktop app that keeps coding agents running in the background · brew not installed Not installed herdr-core Herdr's agent engine, the hc command station drives Not installed opencode Open-source AI coding agent CLI · brew not installed Not installed
+    - paragraph: AI Tooling 5
+    - text: inferrs TurboQuant LLM inference server · brew not installed Not installed ollama Run large language models locally, on the Mac's GPU · brew not installed Not installed plannotator Review AI agent plans and code before committing Not installed qmd Local semantic search over markdown Not installed rtk Token-optimized CLI proxy for agents · brew not installed Not installed
+    - paragraph: AI Apps 3
+    - text: chatgpt OpenAI ChatGPT desktop app · brew not installed Not installed claude-desktop Anthropic Claude desktop app · brew not installed Not installed typewhisper Whisper-based dictation app · brew not installed Not installed
+    - paragraph: Browsers 2
+    - text: brave Privacy-focused web browser · brew not installed Not installed dia The Browser Company's AI-first browser Not installed
+    - paragraph: Communication 4
+    - text: discord Voice and text chat · brew not installed Not installed messenger Facebook Messenger Not installed slack Team communication · brew not installed Not installed whatsapp Messaging app · brew not installed Not installed
+    - paragraph: Productivity 7
+    - text: keynote Apple presentations Not installed linear Project management · brew not installed Not installed notion Workspace for notes and docs · brew not installed Not installed numbers Apple spreadsheets Not installed obsidian Knowledge base and note-taking · brew not installed Not installed pages Apple word processor Not installed raindrop Bookmark manager Not installed
+    - paragraph: Media 5
+    - text: broadcasts Internet radio and stream player Not installed compressor Apple video compression Not installed final-cut-pro Professional video editor Not installed lightroom Adobe photo editor Not installed logic-pro Professional music making Not installed
+    - paragraph: Remote Access 3
+    - text: "jump-desktop Jump Desktop viewer/client app · brew not installed Not installed jump-desktop-connect Remote GUI recovery for headless Macs · brew not installed Not installed tailscale The Tailscale app: each Mac is a node, and station reads it · brew not installed Not installed"
+    - paragraph: Security 3
+    - text: adguard Ad blocker for Safari Not installed bitwarden Password manager · brew not installed Not installed passepartout VPN client Not installed
+    - paragraph: System Utilities 6
+    - text: betterdisplay Flexible HiDPI scaling and display management · brew not installed Not installed mole Tidy, uninstall, analyze, and optimize macOS from the terminal · brew not installed Not installed pipifier Picture-in-Picture for Safari Not installed snippety Code snippet manager Not installed speedtest Internet speed test Not installed station-menubar Station's menu bar app, from the latest release Not installed

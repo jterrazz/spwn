@@ -1,0 +1,40 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - group "Which machines":
+    - button "All machines" [pressed]
+    - button "jterrazz-macbook-pro"
+    - button "jterrazz-mac-mini"
+  - region "Needs you":
+    - heading "Needs you a gesture is due" [level=2]
+    - button "Broken npm sign-in expired jterrazz-macbook-pro · Accounts"
+    - text: npm login
+    - button "Copy npm login": Copy
+    - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 jterrazz-macbook-pro · Background"
+    - button "Remove com.jterrazz.brain.x-snapshot": Remove
+    - button "Needs a look 1 mise update waiting jterrazz-macbook-pro · Apps"
+    - button "Update mise": Update
+    - button "Needs a look 1 brew update waiting jterrazz-macbook-pro · Apps"
+    - button "Update brew": Update
+    - 'button "Needs a look Firewall: off jterrazz-macbook-pro · Settings"'
+    - text: System Settings > Network > Firewall
+    - button "Copy System Settings > Network > Firewall": Copy
+    - button "Needs a look ~/.tart is misplaced jterrazz-macbook-pro · Disk"
+    - button "Move ~/.tart": Move
+    - button "Needs a look com.bjango.istatmenus.installer is left over jterrazz-macbook-pro · Background"
+    - text: sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
+    - button "Copy sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist": Copy
+    - button "Needs a look com.docker.socket is left over jterrazz-macbook-pro · Background"
+    - text: sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist
+    - button "Copy sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist": Copy
+    - button "Needs a look com.docker.vmnetd is left over jterrazz-macbook-pro · Background"
+    - text: sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
+    - button "Copy sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist": Copy
+  - region "Can wait":
+    - heading "Can wait" [level=2]
+    - paragraph: Not given yet What can wait, apart from what needs you
+  - region "History":
+    - heading "History" [level=2]
+    - paragraph: Not given yet What happened, newest first

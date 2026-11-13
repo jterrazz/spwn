@@ -1,0 +1,17 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - group "Which machines":
+    - button "All machines" [pressed]
+    - button "jterrazz-macbook-pro"
+  - region "Needs you":
+    - heading "Needs you a gesture is due" [level=2]
+    - paragraph: No need is listed.
+  - region "Can wait":
+    - heading "Can wait" [level=2]
+    - paragraph: Not given yet What can wait, apart from what needs you
+  - region "History":
+    - heading "History" [level=2]
+    - paragraph: Not given yet What happened, newest first

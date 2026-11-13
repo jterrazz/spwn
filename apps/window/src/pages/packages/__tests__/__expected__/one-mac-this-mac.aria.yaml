@@ -1,0 +1,23 @@
+- main:
+  - heading "jterrazz-macbook-pro Online" [level=2]
+  - paragraph: This Mac · Engine running
+  - button "New machine"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages" [selected]
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What the engine answered is below
+  - region "Upgrades":
+    - heading "Upgrades" [level=2]
+    - button "Upgrade now"
+    - paragraph: Not given yet When it upgrades by itself, and its last run
+  - region "Apps":
+    - heading "Apps by layer, a later one wins" [level=2]
+    - text: "Not found no Machinefile named jterrazz-macbook-pro. give this machine one: station init --machinefile <name>"

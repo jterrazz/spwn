@@ -1,0 +1,52 @@
+- main:
+  - heading "jterrazz-macbook-pro Online" [level=2]
+  - paragraph: This Mac · Engine running
+  - button "New machine"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity" [selected]
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No finding from the engine." [level=1]
+  - paragraph:
+    - img "No finding"
+    - text: Read live · two samples read now, 1 s apart · a point every 5 s · history kept since 4 Nov 10:00
+  - group "Window":
+    - button "6 min" [pressed]
+    - button "1 h"
+    - button "24 h"
+  - region "CPU":
+    - heading "CPU" [level=2]
+    - text: load 0 0 0 0%
+    - paragraph: "Not given yet No chart: no bar of this window holds a sample of the engine."
+  - region "Memory":
+    - heading "Memory" [level=2]
+    - text: pressure not given yet Not given yet
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Disk":
+    - heading "Disk" [level=2]
+    - text: 0 KB/s written 0KB/s read
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Network":
+    - heading "Network" [level=2]
+    - text: 0 KB/s out 0KB/s in
+    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+  - region "Busiest":
+    - heading "Busiest" [level=2]
+    - group "Busiest by":
+      - button "By CPU" [pressed]
+      - button "By memory"
+    - paragraph: The engine listed no process.
+  - region "This Mac":
+    - heading "This Mac" [level=2]
+    - term: Heat
+    - definition: Nominal
+    - term: Battery
+    - definition: 96 % · charging
+    - term: Battery health
+    - definition: Not given yet
+    - term: Up for
+    - definition: Not given yet

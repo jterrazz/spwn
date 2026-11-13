@@ -1,0 +1,45 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - group "Which Mac":
+    - button "jterrazz-macbook-pro" [pressed]
+    - button "jterrazz-mac-mini"
+  - region "Disk":
+    - heading "Disk" [level=2]
+    - paragraph: 606 GB of 994 GB used
+    - button "Rescan"
+    - img "What holds the disk of jterrazz-macbook-pro"
+    - list "The groups":
+      - listitem: Misplaced 73.3 GB
+      - listitem: Can rebuild 34.8 GB
+      - listitem: Your data 41.6 GB
+      - listitem: Never touched 300 KB
+      - listitem: Free 388 GB
+    - paragraph: What can be rebuilt holds 34.8 GB. Each app rebuilds its own when it needs it.
+    - button "Free 34.8 GB"
+  - region "Your data":
+    - heading "Your data 5" [level=2]
+    - text: xcode ~/Library/Developer/CoreSimulator/Devices 19.1 GB
+    - button "Erase… xcode": Erase…
+    - text: orbstack ~/Library/Group Containers/HUAQ24HBR6.dev.orbstack 15.8 GB
+    - button "Erase… orbstack": Erase…
+    - text: claude ~/.claude/projects 3.6 GB
+    - button "Erase… claude": Erase…
+    - text: ollama ~/.ollama/models 1.9 GB
+    - button "Erase… ollama": Erase…
+    - text: zed ~/Library/Application Support/Zed/db 1.2 GB
+    - button "Erase… zed": Erase…
+  - region "Images":
+    - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+    - button "Build a new one" [disabled]
+    - text: station-linux 2026.11.01 built 2026-11-01 · 4 GB · 2 machines made from it Newest
+    - button "Delete station-linux 2026.11.01": Delete
+    - text: station-linux 2026.10.20 built 2026-10-20 · 3 GB · no machine made from it
+    - button "Delete station-linux 2026.10.20": Delete
+  - region "Machines":
+    - heading "Machines what is inside one is on its own Storage tab" [level=2]
+    - button "jterrazz-macbook-pro the Mac itself"
+    - button "api 4 CPU · 8 GB · 50 GB disk 50 GB"
+    - button "linux-1 4 CPU · 8 GB · 50 GB disk 50 GB"

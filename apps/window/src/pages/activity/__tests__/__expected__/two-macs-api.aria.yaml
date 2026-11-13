@@ -1,0 +1,20 @@
+- main:
+  - heading "api Stopped" [level=2]
+  - paragraph:
+    - text: workspace · persistent · on
+    - button "jterrazz-macbook-pro"
+  - button "Start"
+  - button "Stop"
+  - button "Open in Terminal" [disabled]
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity" [selected]
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "api is stopped." [level=1]
+  - paragraph:
+    - img "refused"
+    - text: Refused · station machines start api

@@ -1,0 +1,62 @@
+- main:
+  - heading "linux-1 Running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "jterrazz-macbook-pro"
+  - button "Start"
+  - button "Stop"
+  - button "Open in Terminal" [disabled]
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Accounts"
+    - tab "Storage"
+    - tab "Logs"
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - text: CPU 8% 4 CPUs Memory 1.1GB
+  - meter "Memory used of its total"
+  - text: of 4 GB Disk 7.6GB
+  - meter "Disk used of its total"
+  - text: of 20 GB Uptime 2h since 4 Nov
+  - region "Its file":
+    - heading "Its file" [level=2]
+    - text: "Not found no Machinefile named linux-1. give this machine one: station init --machinefile <name>"
+  - region "Ports":
+    - heading "Ports" [level=2]
+    - button "All ports"
+    - region "Port 5173":
+      - text: :5173 Vite Private https://jterrazz-macbook-pro.tail1234.ts.net:40001 Shared
+      - button "Stop sharing"
+    - region "Port 7000":
+      - text: :7000 server Private jterrazz-macbook-pro.tail1234.ts.net:40002 Shared
+      - button "Stop sharing"
+  - region "Accounts shared with it":
+    - heading "Accounts shared with it" [level=2]
+    - button "All accounts"
+    - text: github Ends in 11 h 10 min
+    - button "Extend github by 12 h": Extend 12 h
+    - button "Take back github": Take back
+    - text: claude Ends in 11 h 10 min
+    - button "Extend claude by 12 h": Extend 12 h
+    - button "Take back claude": Take back
+  - region "Why it exists":
+    - heading "Why it exists" [level=2]
+    - term: Purpose
+    - definition: Not given yet
+    - term: Created
+    - definition: 4 Nov, by Not given yet
+    - term: Hold
+    - definition: Not given yet
+  - region "Busiest now":
+    - heading "Busiest now" [level=2]
+    - text: node
+    - meter "CPU of node"
+    - text: 6 % vite
+    - meter "CPU of vite"
+    - text: 2 %
+  - button "Delete linux-1…"

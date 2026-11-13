@@ -1,0 +1,33 @@
+.trail {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+.leads {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    min-width: 0;
+}
+.hint {
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.empty {
+    margin: 0;
+    color: var(--t3);
+    padding: var(--space-8) 0 var(--space-12);
+    border-top: 1px solid var(--line);
+}
+.sharedWith {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-6);
+    margin: calc(-1 * var(--space-4)) 0 0;
+    padding: 0 0 var(--space-8) calc(24px + var(--space-12));
+}
+.withheld {
+    font-size: var(--text-label);
+    color: var(--warn);
+}
