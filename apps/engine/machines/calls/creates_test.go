@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 	machines "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
@@ -35,8 +37,11 @@ func (i *images) Latest(_ context.Context, image string) (disk, version string, 
 func (*images) KeyPath() string { return "/home/.ssh/station" }
 
 // value: an engine that holds no VM and runs none; down, it does not
-// answer, as while it restarts.
-type idleEngine struct{ down bool }
+// answer, as while it restarts; run, when set, is called at each VM's run.
+type idleEngine struct {
+	down bool
+	run  func()
+}
 
 func (e *idleEngine) Ping(context.Context) (string, error) {
 	if e.down {
@@ -47,7 +52,12 @@ func (e *idleEngine) Ping(context.Context) (string, error) {
 func (*idleEngine) VMs(context.Context) (map[string]machines.EngineVM, error) {
 	return map[string]machines.EngineVM{}, nil
 }
-func (*idleEngine) Do(context.Context, string, string) error { return errNoRun }
+func (e *idleEngine) Do(_ context.Context, action, _ string) error {
+	if action == engine.VMRun && e.run != nil {
+		e.run()
+	}
+	return errNoRun
+}
 func (*idleEngine) EnvPorts(context.Context, string) ([]model.Reserved, error) {
 	return nil, nil
 }
@@ -375,6 +385,40 @@ func TestAVMIsNotDeletedWhileItsCreateRunsAndAGoneRecordIsNeverMadeAgain(t *test
 	}
 	if kept, err := b.store.Get(ctx, "web"); err == nil {
 		t.Errorf("a create whose record went away wrote it again: %+v", kept)
+	}
+}
+
+func TestWhatIsWrittenWhileACreateBootsStaysOrIsRefused(t *testing.T) {
+	ctx := context.Background()
+	b := creating(t, true)
+	var edited, kept, stopped error
+	var step model.BirthStep
+	b.engine.run = func() {
+		if rec, err := b.store.Get(ctx, "web"); err == nil && rec.Birth != nil {
+			step = rec.Birth.Step
+		}
+		_, edited = b.m.Edit(ctx, "web", model.Change{Resources: model.Resources{MemoryBytes: 8 << 30}})
+		kept = b.m.KeepAgents("web", []string{"docs-bot"})
+		stopped = b.m.StopDirect(ctx, "web")
+	}
+	if _, err := b.m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: "web", Lifetime: model.Persistent}, nil, nil); err == nil {
+		t.Fatalf("create of web: %v; want it to end at its run", err)
+	}
+	if step != model.BornBooting {
+		t.Fatalf("the writes ran at %q; want them while web boots", step)
+	}
+	if !errors.As(edited, new(*model.BeingCreatedError)) {
+		t.Errorf("machines edit web --memory 8G while web boots: %v; want it refused, being created", edited)
+	}
+	if kept != nil || stopped != nil {
+		t.Fatalf("keep-agents %v, stop %v while web boots; want both done", kept, stopped)
+	}
+	rec, err := b.store.Get(ctx, "web")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rec.MemoryBytes != 4<<30 || rec.Want != model.WantStopped || !slices.Equal(rec.Agents, []string{"docs-bot"}) || rec.Birth != nil {
+		t.Errorf("web after its create: %d bytes, want %q, agents %v, birth %+v; want its 4 GB, stopped, docs-bot kept, no birth", rec.MemoryBytes, rec.Want, rec.Agents, rec.Birth)
 	}
 }
 

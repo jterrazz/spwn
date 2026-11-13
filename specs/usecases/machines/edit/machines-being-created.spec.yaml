@@ -1,0 +1,12 @@
+description: 'an edit of a VM whose create still runs is refused, and its sizes stay its create''s'
+env: creating
+runs:
+    - command: 'machines edit linux-4 --memory 16G'
+      exit: 2
+      stderr: |
+          Error: linux-4 is being created on jterrazz-macbook-pro
+          Hint: wait for its create to end, or interrupt it where it runs
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[0].vms[] | select(.name == "linux-4") | {state, memory_bytes: .size.memory_bytes}'''
+      exit: 0
+      stdout: |
+          {"state":"creating","memory_bytes":8589934592}

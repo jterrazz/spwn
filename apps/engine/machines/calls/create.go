@@ -415,12 +415,11 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	born := func(step model.BirthStep, detail string) error {
 		rec.Birth = model.BirthAt(step, build != nil, s.h.Now())
 		rec.Birth.Detail = detail
-		return s.writeBirth(rec)
+		return s.writeBirth(r.Name, func(stored *model.Record) { stored.Birth = rec.Birth })
 	}
 	defer func() {
 		if made.record && !made.undone {
-			rec.Birth, rec.Owner = nil, nil
-			_ = s.writeBirth(rec)
+			_ = s.writeBirth(r.Name, func(stored *model.Record) { stored.Birth, stored.Owner = nil, nil })
 		}
 	}()
 	first := model.BornCloning
@@ -457,7 +456,6 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 		s.undoCreate(ctx, r.Name, made)
 		return failed(err)
 	}
-	rec.Version = version
 	say("cloning " + disk)
 	if err = born(model.BornCloning, ""); err != nil {
 		return fail("the record", err)
@@ -469,8 +467,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	if err = s.engine.Resize(ctx, r.Name, r.Size.Size()); err != nil {
 		return fail("the resize", err)
 	}
-	rec.Want = want
-	if err = s.writeBirth(rec); err != nil {
+	if err = s.writeBirth(r.Name, func(stored *model.Record) { stored.Version, stored.Want = version, want }); err != nil {
 		return fail("the record", err)
 	}
 	say(model.StepRunning)
@@ -597,16 +594,12 @@ func (s *Machinist) Save(r model.VMRecord) error {
 	})
 }
 
-// invariant: the env and the mounts are the engine's to write, at the
-// VM's run: each write of the create keeps the ones stored, read in the
-// same Amend as its write, so the create never writes back what the
-// engine replaced; a record gone is never made again.
-func (s *Machinist) writeBirth(r model.VMRecord) error {
-	return s.recs.Amend(context.Background(), r.Name, func(stored *model.Record) {
-		env, mounts := stored.Env, stored.Mounts
-		*stored = storedOf(r)
-		stored.Env, stored.Mounts = env, mounts
-	})
+// invariant: a create writes back only what it owns of its record: its
+// birth and its process, the version it cloned and what it wants, each
+// read in the same Amend as its write, so an edit, a stop or the engine's
+// env and mounts written meanwhile stay; a record gone is never made again.
+func (s *Machinist) writeBirth(name string, change func(r *model.Record)) error {
+	return s.recs.Amend(context.Background(), name, change)
 }
 
 func (s *Machinist) writeRecord(r model.VMRecord) error {

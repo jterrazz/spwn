@@ -717,6 +717,9 @@
       "name": "machines.edit",
       "schema": "station.machines.edit/v1",
       "where": "in-engine",
+      "errors": [
+        "machines.being-created"
+      ],
       "in": "EditIn",
       "out": "Edited"
     },

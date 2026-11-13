@@ -210,9 +210,14 @@ type EditIn struct {
 
 var Edit = call.Call[Deps, EditIn, machines.Edited]{
 	Name: "machines.edit", Where: call.InEngine, Applies: machine.Anywhere,
+	Errors: []fail.Code{BeingCreated},
 	Run: func(ctx context.Context, d Deps, in EditIn, _ call.Progress) (machines.Edited, error) {
 		change := machines.Change{Resources: in.Resources, Check: in.Check, NoCheck: in.NoCheck}
-		if err := d.Machines.CheckEdit(in.VM, change); err != nil {
+		err := d.Machines.CheckEdit(in.VM, change)
+		if errors.As(err, new(*machines.BeingCreatedError)) {
+			return machines.Edited{}, Worded(err)
+		}
+		if err != nil {
 			return machines.Edited{}, err
 		}
 		return d.Machines.Edit(ctx, in.VM, change)

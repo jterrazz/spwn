@@ -12,6 +12,11 @@ func (s *Machinist) CheckEdit(name string, c model.Change) error {
 	if err != nil {
 		return err
 	}
+	// invariant: a VM whose create still runs takes the sizes its create
+	// gives its disk: an edit meanwhile would be resized away.
+	if err := s.notBeingCreated(rec); err != nil {
+		return err
+	}
 	switch {
 	case c.None():
 		return &model.NothingToChangeError{Name: name}

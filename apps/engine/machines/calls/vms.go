@@ -148,8 +148,12 @@ func (s *Machinist) CheckDelete(name string) error {
 	if err != nil {
 		return err
 	}
+	return s.notBeingCreated(r)
+}
+
+func (s *Machinist) notBeingCreated(r model.VMRecord) error {
 	if r.Birth != nil && r.Birth.Known() && s.runs(r.Owner) {
-		return &model.BeingCreatedError{Name: name, Mac: s.ThisMacName()}
+		return &model.BeingCreatedError{Name: r.Name, Mac: s.ThisMacName()}
 	}
 	return nil
 }
