@@ -1,0 +1,109 @@
+:root {
+    color-scheme: dark;
+
+    --desk: #050505;
+    --canvas: #0c0c0c;
+    --panel: #191919;
+    --hover: #1e1e1e;
+    --inset: #101010;
+    --raise: #252525;
+    --raise-2: #2e2e2e;
+    --system: #45474b;
+
+    --line: rgb(255 255 255 / 6%);
+    --line-2: rgb(255 255 255 / 12%);
+
+    --t1: #f5f5f5;
+    --t2: #b9b9bc;
+    --t3: #98989b;
+    /* value: decoration only (a disabled label, a plain dot, a chart's mark): 2.7:1 on --panel, under the 4.5:1 text asks */
+    --t4: #5c5e62;
+
+    --ok: #30d158;
+    --warn: #ff9f0a;
+    --bad: #ff453a;
+    --bad-hover: #ff6259;
+    --new: #0a84ff;
+
+    --on-primary: #111111;
+    --primary-top: #ffffff;
+    --primary-bottom: #e2e2e2;
+    --scrim: rgb(0 0 0 / 60%);
+    --shadow-pop: 0 24px 64px rgb(0 0 0 / 60%);
+    --shadow-primary: 0 1px 0 rgb(255 255 255 / 50%) inset, 0 1px 2px rgb(0 0 0 / 40%);
+
+    --id-blue: #0a84ff;
+    --id-purple: #bf5af2;
+    --id-teal: #40c8e0;
+    --id-indigo: #5e5ce6;
+    --id-pink: #ff7ab2;
+    --id-sky: #79c0ff;
+    --id-lilac: #d08cf5;
+    --id-slate: #98a2b3;
+
+    --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --text-label: 12px;
+    --text-body: 13px;
+    --text-row: 14px;
+    --text-card: 17px;
+    --text-machine: 20px;
+    --text-tab-verdict: 24px;
+    --text-metric: 28px;
+    --text-page-verdict: 30px;
+
+    --weight-regular: 400;
+    --weight-medium: 500;
+    --weight-strong: 600;
+
+    --radius-hair: 1px;
+    --radius-tick: 2px;
+    --radius-cell: 3px;
+    --radius-icon: 6px;
+    --radius-control: 7px;
+    --radius-well: 10px;
+    --radius-panel: 16px;
+    --radius-window: 18px;
+    --radius-pill: 999px;
+
+    --space-2: 2px;
+    --space-4: 4px;
+    --space-6: 6px;
+    --space-8: 8px;
+    --space-10: 10px;
+    --space-12: 12px;
+    --space-14: 14px;
+    --space-16: 16px;
+    --space-24: 24px;
+
+    --motion-hover: 120ms ease-out;
+}
+
+[data-identity='blue'] {
+    --c: var(--id-blue);
+}
+[data-identity='purple'] {
+    --c: var(--id-purple);
+}
+[data-identity='teal'] {
+    --c: var(--id-teal);
+}
+[data-identity='indigo'] {
+    --c: var(--id-indigo);
+}
+[data-identity='pink'] {
+    --c: var(--id-pink);
+}
+[data-identity='sky'] {
+    --c: var(--id-sky);
+}
+[data-identity='lilac'] {
+    --c: var(--id-lilac);
+}
+[data-identity='slate'] {
+    --c: var(--id-slate);
+}
+[data-identity='system'] {
+    --c: var(--system);
+}

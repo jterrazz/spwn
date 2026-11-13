@@ -1,0 +1,81 @@
+.button {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    height: 28px;
+    padding: 0 var(--space-12);
+    border-radius: var(--radius-control);
+    background: var(--raise);
+    color: var(--t1);
+    font-size: var(--text-body);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    white-space: nowrap;
+    flex: none;
+    transition: background var(--motion-hover);
+}
+.button:hover {
+    background: var(--raise-2);
+}
+.primary {
+    background: linear-gradient(var(--primary-top), var(--primary-bottom));
+    color: var(--on-primary);
+    font-weight: var(--weight-medium);
+    box-shadow: var(--shadow-primary);
+}
+.primary:hover {
+    background: var(--primary-top);
+}
+.link,
+.danger {
+    background: none;
+    padding: 0 var(--space-6);
+}
+.link {
+    color: var(--new);
+}
+.danger {
+    color: var(--bad);
+}
+.destroy {
+    background: var(--bad);
+    color: var(--t1);
+    font-weight: var(--weight-medium);
+}
+.destroy:hover {
+    background: var(--bad-hover);
+}
+.link:hover,
+.danger:hover {
+    background: none;
+    text-decoration: underline;
+}
+.button:disabled {
+    background: none;
+    box-shadow: inset 0 0 0 1px var(--line-2);
+    color: var(--t4);
+    font-weight: var(--weight-regular);
+    cursor: default;
+    pointer-events: none;
+}
+.link:disabled,
+.danger:disabled {
+    box-shadow: none;
+}
+.busy:disabled {
+    color: var(--t2);
+}
+.spinner {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-2);
+    border-top-color: var(--t2);
+    animation: turn 0.8s linear infinite;
+}
+@keyframes turn {
+    to {
+        transform: rotate(1turn);
+    }
+}

@@ -12,3 +12,4 @@ jobs:
         uses: jterrazz/studio-actions/.github/workflows/check.yaml@main
         with:
             go-version-file: go.work
+            browsers: true

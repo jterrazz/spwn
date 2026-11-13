@@ -1,0 +1,12 @@
+{
+    "extends": ["//"],
+    "tasks": {
+        "build": {
+            "outputs": ["dist/**"]
+        },
+        "test": {
+            "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/api/index.d.ts"],
+            "passThroughEnv": ["HOME", "PLAYWRIGHT_BROWSERS_PATH"]
+        }
+    }
+}

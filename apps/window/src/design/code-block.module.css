@@ -1,0 +1,30 @@
+.code {
+    margin: 0;
+    background: var(--inset);
+    border-radius: var(--radius-well);
+    padding: var(--space-12) var(--space-14);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    line-height: 1.75;
+    color: var(--t2);
+    overflow: auto;
+    user-select: text;
+}
+.line {
+    display: flex;
+    gap: var(--space-14);
+    white-space: pre-wrap;
+}
+.number {
+    color: var(--t3);
+    min-width: 22px;
+    text-align: right;
+    user-select: none;
+    flex: none;
+}
+.added {
+    color: var(--ok);
+}
+.removed {
+    color: var(--bad);
+}

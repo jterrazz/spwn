@@ -1,0 +1,70 @@
+@import '@fontsource/geist/400.css';
+@import '@fontsource/geist/500.css';
+@import '@fontsource/geist/600.css';
+@import '@fontsource/geist-mono/400.css';
+@import '@fontsource/geist-mono/500.css';
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: var(--canvas);
+    color: var(--t1);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+}
+
+html :focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 1px;
+}
+
+main,
+[role='dialog'] {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* hazard: a control's module rule starts from `all: unset`, which outranks a selector of elements alone. */
+main :is(button, label, dt, th, kbd, header, [role='tab'], [role='option']),
+[role='dialog'] :is(button, label, [role='option']) {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+::selection {
+    background: color-mix(in srgb, var(--new) 32%, transparent);
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}

@@ -1,0 +1,12 @@
+.code {
+    display: block;
+    width: 124px;
+    height: 124px;
+    border-radius: var(--radius-well);
+    margin: var(--space-8) 0 var(--space-4);
+}
+.long {
+    margin: var(--space-4) 0;
+    font-size: var(--text-label);
+    color: var(--t3);
+}

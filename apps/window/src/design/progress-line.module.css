@@ -1,0 +1,34 @@
+.line {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    min-width: 0;
+    font-size: var(--text-label);
+    color: var(--t2);
+}
+.task {
+    white-space: nowrap;
+}
+.detail {
+    color: var(--t3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.failed .task {
+    color: var(--bad);
+}
+.spinner {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-2);
+    border-top-color: var(--new);
+    animation: turn 0.8s linear infinite;
+}
+@keyframes turn {
+    to {
+        transform: rotate(1turn);
+    }
+}

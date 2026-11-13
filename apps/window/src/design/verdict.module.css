@@ -1,0 +1,27 @@
+.verdict {
+    padding: var(--space-14) var(--space-4);
+}
+.title {
+    margin: 0;
+    line-height: 1.15;
+    font-weight: var(--weight-strong);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+}
+.page .title {
+    font-size: var(--text-page-verdict);
+}
+.tab .title {
+    font-size: var(--text-tab-verdict);
+}
+.line {
+    margin: var(--space-8) 0 0;
+    color: var(--t3);
+    font-size: var(--text-row);
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+.action {
+    margin-top: var(--space-14);
+}

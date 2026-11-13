@@ -1,0 +1,48 @@
+.item {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    height: 30px;
+    padding: 0 var(--space-8);
+    border-radius: var(--radius-control);
+    color: var(--t2);
+    min-width: 0;
+    transition: background var(--motion-hover);
+}
+.item:hover {
+    background: var(--panel);
+    color: var(--t1);
+}
+.item[aria-current='page'] {
+    background: var(--raise);
+    color: var(--t1);
+}
+.indent {
+    padding-left: 20px;
+}
+.item > svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    color: var(--t3);
+    stroke-width: 1.4;
+}
+.label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.count {
+    font-size: var(--text-label);
+    flex: none;
+    color: var(--t3);
+}
+.urgent {
+    font-weight: var(--weight-medium);
+    color: var(--warn);
+}

@@ -1,0 +1,25 @@
+.icon {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-control);
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: var(--raise-2);
+    color: var(--t1);
+}
+.icon svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.6;
+}
+.icon .mark {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+}
+.letters {
+    font: 500 10px var(--font-mono);
+    line-height: 1;
+    text-transform: uppercase;
+}

@@ -1,0 +1,51 @@
+.veil {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 88px var(--space-16) var(--space-16);
+    z-index: 5;
+}
+.pop {
+    width: min(540px, 100%);
+    max-height: 100%;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-window);
+    box-shadow: var(--shadow-pop);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.pop:focus {
+    outline: none;
+}
+.sheet {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    overflow-y: auto;
+}
+.head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+.title {
+    margin: 0;
+    font-size: var(--text-card);
+    font-weight: var(--weight-strong);
+}
+.consequence {
+    margin: 0;
+    color: var(--t3);
+    user-select: text;
+}
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-8);
+}

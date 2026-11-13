@@ -1,0 +1,25 @@
+.button {
+    all: unset;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-control);
+    display: grid;
+    place-items: center;
+    color: var(--t3);
+    flex: none;
+    transition: background var(--motion-hover);
+}
+.button:hover {
+    background: var(--panel);
+    color: var(--t1);
+}
+.button:disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+.button svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.5;
+}

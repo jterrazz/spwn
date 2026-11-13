@@ -1,0 +1,59 @@
+.pill {
+    --c: var(--t3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    height: 22px;
+    padding: 0 9px;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-label);
+    font-weight: var(--weight-medium);
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 16%, transparent);
+    white-space: nowrap;
+    flex: none;
+}
+.pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c);
+}
+.ok {
+    --c: var(--ok);
+}
+.new {
+    --c: var(--new);
+}
+.new::before {
+    animation: pulse 1.4s ease-in-out infinite;
+}
+.bad {
+    --c: var(--bad);
+}
+.bad::before {
+    border-radius: var(--radius-hair);
+}
+.warn {
+    --c: var(--warn);
+}
+.warn::before {
+    border-radius: var(--radius-hair);
+    transform: rotate(45deg);
+}
+.plain::before {
+    display: none;
+}
+@keyframes pulse {
+    50% {
+        opacity: 0.3;
+    }
+}
+.quiet {
+    font-size: var(--text-label);
+    color: var(--t3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

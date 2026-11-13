@@ -1,0 +1,30 @@
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    max-width: 100%;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--t2);
+    background: var(--raise);
+    border-radius: var(--radius-icon);
+    padding: 1px var(--space-6);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: none;
+}
+.boxed {
+    color: var(--t1);
+    background: var(--inset);
+    box-shadow: inset 0 0 0 1px var(--line-2);
+    border-radius: var(--radius-control);
+    padding: var(--space-2) 9px;
+}
+.square {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-tick);
+    background: var(--c);
+    flex: none;
+}

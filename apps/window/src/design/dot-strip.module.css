@@ -1,0 +1,12 @@
+.strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-left: auto;
+}
+.dot {
+    width: 11px;
+    height: 11px;
+    border-radius: var(--radius-cell);
+    background: var(--c);
+}

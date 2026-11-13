@@ -1,0 +1,81 @@
+.bar {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--radius-tick);
+    background: var(--raise-2);
+    overflow: hidden;
+    min-width: 20px;
+}
+.fill {
+    display: block;
+    height: 100%;
+    background: var(--c, var(--t3));
+    border-radius: var(--radius-tick);
+}
+.ok .fill {
+    background: var(--ok);
+}
+.warn .fill {
+    background: var(--warn);
+}
+.bad .fill {
+    background: var(--bad);
+}
+.new .fill {
+    background: var(--new);
+}
+.fixed {
+    flex: none;
+    width: 72px;
+}
+.share {
+    display: flex;
+    gap: var(--space-2);
+    height: 24px;
+    align-items: stretch;
+    width: 72px;
+    flex: none;
+}
+.part {
+    flex: var(--size) 1 0;
+    border-radius: var(--radius-tick);
+    background: var(--c, var(--raise-2));
+    min-width: 2px;
+}
+.whole {
+    width: auto;
+    height: 88px;
+    align-items: initial;
+    flex: initial;
+    border-radius: var(--radius-well);
+    background:
+        radial-gradient(circle, var(--line-2) 1.1px, transparent 1.6px) 3px 3px / 8px 8px,
+        var(--inset);
+    overflow: hidden;
+}
+.whole .part {
+    flex: initial;
+    width: var(--share);
+    min-width: 5px;
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--c, var(--t3)) 75%, transparent);
+    border-radius: var(--radius-cell);
+    background:
+        radial-gradient(circle, var(--c, var(--t3)) 1.1px, transparent 1.7px) 3px 3px / 8px 8px,
+        linear-gradient(
+            to top,
+            color-mix(in srgb, var(--c, var(--t3)) 34%, var(--inset)),
+            color-mix(in srgb, var(--c, var(--t3)) 9%, var(--inset))
+        );
+}
+.whole .part:first-child {
+    border-radius: var(--radius-well) var(--radius-cell) var(--radius-cell) var(--radius-well);
+}
+.whole .rest {
+    margin-left: auto;
+    border-color: transparent;
+    background: var(--raise-2);
+}
+.whole .rest:last-child {
+    border-radius: var(--radius-cell) var(--radius-well) var(--radius-well) var(--radius-cell);
+}
