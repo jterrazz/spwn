@@ -43,6 +43,16 @@ type Menubar struct {
 	// value: the readings the live ticks keep, which a page rebuilt for its
 	// content starts from; nil starts each page pending.
 	Live *Live
+	// value: the zone the pages say their times in; nil is the process's own
+	// local zone.
+	Zone *time.Location
+}
+
+func (o Menubar) zone() *time.Location {
+	if o.Zone == nil {
+		return time.Local
+	}
+	return o.Zone
 }
 
 type Clock interface {
@@ -70,7 +80,7 @@ func (o Menubar) Find() engine.Feed {
 	// invariant: SPEC B5.6: Find is drawn from home's own reading, read as
 	// home reads it, so it asks nothing home does not.
 	return o.feed(func(r pagemenubar.Reading) page.Page {
-		return pagemenubar.Find(pagemenubar.FindReading{Reading: r, Now: o.Clock.Now(), Zone: time.Local, Asks: levels}, o.ThisMachine)
+		return pagemenubar.Find(pagemenubar.FindReading{Reading: r, Now: o.Clock.Now(), Zone: o.zone(), Asks: levels}, o.ThisMachine)
 	})
 }
 
@@ -131,7 +141,7 @@ func fanOut(ctx context.Context, from <-chan struct{}, to []chan struct{}) {
 func (f *menubar) update(ctx context.Context, change func(*pagemenubar.Reading)) {
 	f.mu.Lock()
 	change(&f.r)
-	f.r.Now, f.r.Zone = f.o.Clock.Now(), time.Local
+	f.r.Now, f.r.Zone = f.o.Clock.Now(), f.o.zone()
 	f.r.Samples = f.o.Live.Readings(f.o.ThisMachine.Machine)
 	p := page.Document{Schema: page.Schema, Page: f.draw(f.r)}
 	f.mu.Unlock()

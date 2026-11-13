@@ -105,7 +105,7 @@ func (o Menubar) Needs() engine.Feed {
 			if err != nil {
 				return pagemenubar.Unread(pagemenubar.NeedsID, o.ThisMachine, err)
 			}
-			r := pagemenubar.NeedsReading{Now: o.Clock.Now(), Zone: time.Local, All: &listed.All}
+			r := pagemenubar.NeedsReading{Now: o.Clock.Now(), Zone: o.zone(), All: &listed.All}
 			if l, err := call.Invoke(ctx, o.Calls, machine.Ref{}, portscalls.List, portscalls.ListIn{AllMachines: true}, nil); err == nil {
 				r.Ports = &l.AllMachines
 			}

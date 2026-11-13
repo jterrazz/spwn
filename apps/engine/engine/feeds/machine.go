@@ -153,7 +153,7 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 			}
 		}
 		f.send(ctx, func(m *pagemenubar.Machine) {
-			m.Zone, m.Shares, m.Awake, m.Agents = time.Local, copies, held, hosted
+			m.Zone, m.Shares, m.Awake, m.Agents = f.o.zone(), copies, held, hosted
 			if ferr == nil {
 				m.All = &listed.All
 			}

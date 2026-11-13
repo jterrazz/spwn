@@ -42,6 +42,7 @@ const (
 type steps struct {
 	mu    sync.Mutex
 	wakes map[time.Duration]chan struct{}
+	zone  *time.Location
 }
 
 func newSteps() *steps {
@@ -227,7 +228,7 @@ func watchWith(t *testing.T, w *world, clock *steps, in engine.FeedInput, live .
 	t.Helper()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	o := feeds.Menubar{Calls: w, Clock: clock}
+	o := feeds.Menubar{Calls: w, Clock: clock, Zone: clock.zone}
 	if len(live) > 0 {
 		o.Live = live[0]
 	}
@@ -523,10 +524,8 @@ func nothing[T any](func() T) func() T { return func() T { var zero T; return ze
 // not another Mac's; its times
 // are in the owner's own clock.
 func TestTheMacMinisPageSaysItsAwakeTheCopiesEndingAndItsTimesInTheOwnersClock(t *testing.T) {
-	zone := time.Local
-	time.Local = time.FixedZone("CET", 3600)
-	t.Cleanup(func() { time.Local = zone })
 	clock := newSteps()
+	clock.zone = time.FixedZone("CET", 3600)
 	soon := accounts.Report{Machines: []accounts.Machine{{Name: mini}},
 		Shares: []accounts.Shared{{Account: catalog.ProviderGitHub, VM: "review-bot", At: clock.Now().Add(-time.Hour), Until: clock.Now().Add(20 * time.Minute)}}}
 	here := accounts.Report{Machines: []accounts.Machine{{Name: thisMac}},
