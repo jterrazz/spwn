@@ -230,11 +230,12 @@ func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) err
 	var feeds sync.WaitGroup
 	for _, id := range pages {
 		if id != engine.PageKeepAwake {
-			frames[id] = make(chan json.RawMessage, 1)
+			frame := make(chan json.RawMessage, 1)
+			frames[id] = frame
 			feeds.Add(1)
 			go func() {
 				defer feeds.Done()
-				d.feed(ctx, id, sub, fed, frames[id])
+				d.feed(ctx, id, sub, fed, frame)
 			}()
 		}
 	}
