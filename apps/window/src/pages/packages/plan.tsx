@@ -1,6 +1,6 @@
 import type { CallName, MachinefilePlan, Target } from '@jterrazz/station-api';
 
-import { AppIcon, Button, Facts, Panel, Row, Value } from '../../design/index';
+import { AppIcon, Button, Facts, Panel, Row, Tile, Value } from '../../design/index';
 import type { PlanLine } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import type { Reading as Read } from '../../engine/react';
@@ -9,8 +9,8 @@ import { useGesture } from '../../engine/use-gesture';
 import { ACTION_WORDS, CONDITION_WORDS, NEED_WORDS, RESTART_WORDS } from '../../engine/words';
 import { sentence } from '../../model/format';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
-import { NoVerdict, Reading, Unanswered } from '../kit/readings';
-import { Page } from '../page';
+import { Reading, Unanswered } from '../kit/readings';
+import { Page, Tiles } from '../page';
 import { byAction } from './model';
 
 import styles from './packages.module.css';
@@ -29,6 +29,7 @@ function Steps({ lines, title }: { lines: readonly PlanLine[]; title: string }) 
                         word: CONDITION_WORDS[line.Seen.Condition],
                     }}
                     title={line.Step.Package}
+                    trail={line.Step.Origin.Name === '' ? null : `from ${line.Step.Origin.Name}`}
                     value={line.Step.Version === '' ? null : <Value>{line.Step.Version}</Value>}
                 />
             ))}
@@ -143,9 +144,34 @@ function PlanBody({ plan, name }: { plan: Read<MachinefilePlan>; name: string })
     }
     return (
         <>
-            <NoVerdict size="tab" />
+            <div className={styles.planHead}>
+                <h1 className={styles.planTitle}>Plan for {name}</h1>
+                <p className={styles.planLine}>
+                    What applying {plan.out.Name} would change. Nothing has changed yet.
+                </p>
+            </div>
+            <PlanCounts plan={plan.out} />
             <PlanSteps plan={plan.out} />
         </>
+    );
+}
+
+function PlanCounts({ plan }: { plan: MachinefilePlan }) {
+    const groups = byAction(plan.Lines ?? []);
+    if (groups.length === 0) {
+        return null;
+    }
+    return (
+        <Tiles>
+            {groups.map(([action, lines]) => (
+                <Tile
+                    foot=""
+                    key={action}
+                    label={`To ${ACTION_WORDS[action]}`}
+                    value={lines.length}
+                />
+            ))}
+        </Tiles>
     );
 }
 

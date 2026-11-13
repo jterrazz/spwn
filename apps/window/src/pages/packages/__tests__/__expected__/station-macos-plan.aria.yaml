@@ -4,10 +4,10 @@
   - definition: station-macos
 - region "To keep":
   - heading "To keep" [level=2]
-  - text: homebrew listed Present
+  - text: homebrew listed Present from station-macos
 - region "To install":
   - heading "To install" [level=2]
-  - text: git listed Missing ohmyzsh listed Missing
+  - text: git listed Missing from station-macos ohmyzsh listed Missing from station-macos
 - region "To set":
   - heading "To set" [level=2]
-  - text: git-shortcuts listed Missing hushlogin listed Missing
+  - text: git-shortcuts listed Missing from station-macos hushlogin listed Missing from station-macos

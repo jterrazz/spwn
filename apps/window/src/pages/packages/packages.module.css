@@ -70,3 +70,18 @@
     color: var(--t3);
     padding: var(--space-8) 0 var(--space-12);
 }
+.planHead {
+    padding: var(--space-14) var(--space-4);
+}
+.planTitle {
+    margin: 0;
+    line-height: 1.15;
+    font-size: var(--text-tab-verdict);
+    font-weight: var(--weight-strong);
+    letter-spacing: -0.02em;
+}
+.planLine {
+    margin: var(--space-8) 0 0;
+    color: var(--t3);
+    font-size: var(--text-row);
+}
