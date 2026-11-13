@@ -10,7 +10,6 @@ import { findMachine, macsOf } from '../model/machines';
 import type { Found } from '../model/machines';
 import { Boundary } from './boundary';
 import { Find } from './find';
-import type { Action } from './finds';
 import { onTabKey, useShortcuts } from './keys';
 import { Lost, useLost } from './lost';
 import { IN_CATALOG, machineRoute, TAB_PANEL } from './route';
@@ -153,7 +152,6 @@ export function useStation() {
 type SheetsProps = {
     sheet: Sheet;
     onClose: () => void;
-    act: (action: Action) => void;
     go: Go;
     pages: Pages;
     macs: readonly MachinesMacView[];
@@ -161,11 +159,10 @@ type SheetsProps = {
     withGallery: boolean;
 };
 
-function Sheets({ sheet, onClose, act, go, pages, macs, needs, withGallery }: SheetsProps) {
+function Sheets({ sheet, onClose, go, pages, macs, needs, withGallery }: SheetsProps) {
     if (sheet === 'find') {
         return (
             <Find
-                act={act}
                 go={go}
                 macs={macs}
                 needs={needs}
@@ -189,14 +186,13 @@ function useSheets() {
     const close = useCallback(() => {
         setSheet('none');
     }, []);
-    const act = (action: Action) => {
-        if (action === 'new-machine') {
-            setSheet('new-machine');
-        } else {
-            setSidebar((open) => !open);
-        }
-    };
-    return { act, close, find, sheet, sidebar };
+    const newMachine = useCallback(() => {
+        setSheet('new-machine');
+    }, []);
+    const toggleSidebar = useCallback(() => {
+        setSidebar((open) => !open);
+    }, []);
+    return { close, find, newMachine, sheet, sidebar, toggleSidebar };
 }
 
 // value: while this Mac's engine is stopped, Start the engine leads Home and New machine stands back.
@@ -209,13 +205,10 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
     const router = useRouter();
     const { route, go, back, canGoBack } = router;
     const { home, listed, macs, needs, rail } = useStation();
-    const { act, close, find, sheet, sidebar } = useSheets();
+    const { close, find, newMachine, sheet, sidebar, toggleSidebar } = useSheets();
     useShortcuts(router, find, Gallery !== undefined);
     const { lost, dismiss } = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
-    const newMachine = () => {
-        act('new-machine');
-    };
     return (
         <Screen>
             <div className={`${styles.window} ${sidebar ? '' : styles.collapsed}`}>
@@ -228,9 +221,7 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                         onBack={back}
                         onFind={find}
                         onNewMachine={route.page === 'home' ? newMachine : undefined}
-                        onToggleSidebar={() => {
-                            act('sidebar');
-                        }}
+                        onToggleSidebar={toggleSidebar}
                         sidebar={sidebar}
                     />
                     {lost === undefined ? null : <Lost machine={lost} onDismiss={dismiss} />}
@@ -247,7 +238,6 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                 </main>
             </div>
             <Sheets
-                act={act}
                 go={go}
                 macs={macs}
                 needs={needs}

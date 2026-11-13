@@ -7,7 +7,7 @@ import { AppIcon, identityOf, MachineIcon, Modal } from '../design/index';
 import { isSkill } from '../engine/provisional';
 import { useWatch } from '../engine/react';
 import { everything, matching, resultKey } from './finds';
-import type { Action, Group, Result } from './finds';
+import type { Group, Result } from './finds';
 import type { PlainPage, Route } from './route';
 
 import styles from './find.module.css';
@@ -19,7 +19,6 @@ export type FindProps = {
     needs: readonly OverviewNeed[];
     routeOfNeed: (need: OverviewNeed) => Route;
     go: (to: Route) => void;
-    act: (action: Action) => void;
     onClose: () => void;
 };
 
@@ -161,7 +160,7 @@ function Query({ value, list, active, onChange, onKeyDown }: QueryProps) {
 }
 
 export function Find(props: FindProps) {
-    const { go, act, onClose } = props;
+    const { go, onClose } = props;
     const all = useHeld(props);
     const [query, setQuery] = useState('');
     const [chosen, setChosen] = useState(0);
@@ -178,11 +177,7 @@ export function Find(props: FindProps) {
     }, [at, id]);
     const pick = (result: Result) => {
         onClose();
-        if ('route' in result.to) {
-            go(result.to.route);
-        } else {
-            act(result.to.action);
-        }
+        go(result.to.route);
     };
     const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         const move = KEYS[event.key];

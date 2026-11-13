@@ -7,25 +7,15 @@ import { THIS_MAC_WORD } from '../engine/words';
 import { machineRoute, TABS } from './route';
 import type { PlainPage, Route } from './route';
 
-export const KINDS = [
-    'Places',
-    'Machines',
-    'Tabs',
-    'Library',
-    'Needs',
-    'Packages',
-    'Actions',
-] as const;
+export const KINDS = ['Places', 'Machines', 'Tabs', 'Library', 'Needs', 'Packages'] as const;
 
 export type Kind = (typeof KINDS)[number];
-
-export type Action = 'new-machine' | 'sidebar';
 
 export type Result = {
     kind: Kind;
     label: string;
     detail: string;
-    to: { action: Action } | { route: Route };
+    to: { route: Route };
     mark?: undefined | { name: string; kind: string };
     machine?: undefined | { name: string; kind: 'mac' | MachineKind };
 };
@@ -138,13 +128,6 @@ export function everything(held: Held): readonly Result[] {
         ...tabsOf(held),
         ...library.map((one) => page(held, 'Library', one)),
         ...packagesOf(held),
-        { detail: '', kind: 'Actions', label: 'New machine', to: { action: 'new-machine' } },
-        {
-            detail: '',
-            kind: 'Actions',
-            label: 'Show or hide the sidebar',
-            to: { action: 'sidebar' },
-        },
     ];
 }
 

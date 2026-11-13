@@ -62,12 +62,11 @@ describe('finds', () => {
         // Given - two Macs, two VMs, a need and three packages held
         const groups = matching(everything(HELD), '');
 
-        // Then - places, the machines each Mac then its VMs, the library and the actions; tabs, needs and packages wait for a query
+        // Then - places, the machines each Mac then its VMs, and the library, no action; tabs, needs and packages wait for a query
         expect(shown(groups)).toStrictEqual([
             ['Places', ['Home', 'Inbox', 'Storage']],
             ['Machines', ['mini', 'book', 'linux-1', 'api']],
             ['Library', ['Machine files', 'Catalog', 'Storage']],
-            ['Actions', ['New machine', 'Show or hide the sidebar']],
         ]);
     });
 
