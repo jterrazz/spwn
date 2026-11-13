@@ -190,6 +190,18 @@ func TestWorldMacStartThatDialsItsOwnMacIsRefusedNotWaited(t *testing.T) {
 	}
 }
 
+func TestWorldMacThatHoldsAnEngineBeginsNoStart(t *testing.T) {
+	m := coldMac(func(*worldMac) *process.Engine { return quietEngine(catalog.Mac, quietReservations{}) })
+	held := begunEngine(t)
+	m.hold(held, m.engineStarted())
+	if s, mine := m.beginStarting(); s != nil || mine {
+		t.Fatalf("a Mac that holds an engine gave a caller a start (mine %v): a start that ended as it looked leaves two engines", mine)
+	}
+	if d, ok := m.up(context.Background()); !ok || d != held {
+		t.Fatal("a caller of a Mac that holds an engine did not read that engine")
+	}
+}
+
 func TestWorldMacStartBegunInAnEnginesLifetimeLeapsTheClockItself(t *testing.T) {
 	started, release := make(chan struct{}), make(chan struct{})
 	m := coldMac(func(*worldMac) *process.Engine {

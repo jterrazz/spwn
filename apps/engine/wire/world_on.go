@@ -553,6 +553,9 @@ func (m *worldMac) up(ctx context.Context) (*process.Engine, bool) {
 		if mine {
 			return m.begin(context.WithoutCancel(ctx), s, start)
 		}
+		if s == nil {
+			continue
+		}
 		if ctx.Value(waits{}) != nil || ctx.Value(pooled{}) != nil {
 			return nil, false
 		}
@@ -664,9 +667,15 @@ type engineStart struct {
 	failed bool
 }
 
+// invariant: a start begins only while the Mac holds no engine, judged under
+// the lock that holds it: a start that ended since the caller looked left its
+// engine, and the caller reads that one (nil, false), never begins a second.
 func (m *worldMac) beginStarting() (*engineStart, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if m.engine != nil {
+		return nil, false
+	}
 	if m.starting != nil {
 		return m.starting, false
 	}
