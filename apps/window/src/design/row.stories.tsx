@@ -180,4 +180,18 @@ export const ROW_HEAD_STORIES: readonly Story<ComponentProps<typeof RowHead>>[] 
             template: 'catalog',
         },
     },
+    {
+        name: 'passwords, a lead',
+        props: {
+            columns: [
+                { label: 'Password' },
+                { label: 'Kind' },
+                { label: 'Account' },
+                { label: 'Added' },
+                { label: 'Granted to', numeric: true },
+            ],
+            lead: true,
+            template: 'passwords',
+        },
+    },
 ];
