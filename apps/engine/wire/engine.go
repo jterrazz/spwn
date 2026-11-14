@@ -127,6 +127,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		}
 		return false, nil
 	})
+	m.far.engine = d
 	d.ServeWith(m.engineServer(d, registry, calls))
 	return d
 }

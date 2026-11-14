@@ -1,0 +1,13 @@
+description: 'a paste prompt with no newline leaves the step sent and no file behind'
+fixture:
+    - ./__fixtures__/signins/
+env: engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/touch claude.out; /bin/mkdir tmp; TMPDIR=$PWD/tmp "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .error then .error.code elif .out.Step then [.out.Step.Kind, .out.Step.Code, .out.Step.Site] else [.out.Programs[0].State, .out.Programs[0].Who] end''; /bin/ls tmp | /usr/bin/wc -l | /usr/bin/tr -d " "'
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"claude"}}
+      exit: 0
+      stdout: |
+          ["paste",null,"claude.com"]
+          ["signed-in","admin@jterrazz.com"]
+          0

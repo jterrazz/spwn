@@ -16,7 +16,7 @@
 
 ## What is built
 
-This page is the target. Reading who is signed in, the redaction of what is read, and the list's pages are built. Everything else here is not: the login relay, the vault calls, grants, `accounts.logout`, Touch ID, the Passwords page and the Machinefile's `signins` and `grants`. Until those land, the code still has the tiers and `accounts share`, which the ADR deletes; [its consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
+This page is the target. Reading who is signed in, the redaction of what is read, the list's pages, the login relay and `accounts.logout` are built. Everything else here is not: the vault calls, grants, Touch ID, the Passwords page and the Machinefile's `signins` and `grants`. Until those land, the code still has the tiers and `accounts share`, which the ADR deletes; [its consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
 
 ## Three concepts
 
@@ -24,17 +24,17 @@ This page is the target. Reading who is signed in, the redaction of what is read
 - **Vault entry**: one secret on the owner's Mac, with a label, the program it is for, what kind it is and who it signs in as.
 - **Grant**: an entry given to a machine or an agent until a time.
 
-Per program, a machine is **signed in** (`How: here`), **granted** (`How: granted`, with its `Until`) or **signed out**. A machine's own sign-in is never a grant: a grant to a VM already signed in is refused.
+Per program, a machine is **signed in** (`How: own`), **granted** (`How: granted`, with its `Until`) or **signed out**. A machine's own sign-in is never a grant: a grant to a VM already signed in is refused.
 
 A row offers only an action the engine would accept: sign in, sign in again, remove, sign out, or none. For a VM of another Mac, a server or a stopped machine the action is none, and the row carries the engine's line (`Sign in from mac-mini`).
 
 ## Signing in
 
-A sign-in is a login the program runs inside the machine. The engine starts it over its one connection to the VM, reads the program's output as it arrives, and streams a step to the window:
+A sign-in is a login the program runs inside the machine. `accounts.login` is a call of the engine of the machine's own Mac, naming the VM in `Machine`: that engine starts the program over its one connection to the VM, reads its output and its errors as they arrive, and streams a step to the window. It runs the program found on the machine's `PATH`, never a version manager's shim, so cancelling the login stops the program itself (a SIGTERM, then the connection's close):
 
 - a **device code**: the window shows the code, and Open takes you to the provider's device page;
-- a **link**: the VM's own link, opened by the engine of the VM's Mac, only to a site the catalog allows;
-- a **paste**: the program asks for a code you copy back, which `accounts.answer` carries.
+- a **link**: the VM's own link, the first the program prints on its site or a subdomain of it (another link the program prints is skipped), opened by the engine of the VM's Mac, only to a site the catalog allows; a program that prints links only off its site is refused;
+- a **paste**: the program asks for a code you copy back, which `accounts.answer` writes to the program's input, one line, never to a command line. A program that would open a browser finds `true` as its browser, which opens nothing and leaves nothing behind.
 
 The window holds no URL. A step carries an `Exchange`, an opaque id of the login, and `accounts.open` and `accounts.answer` take it back. Link and code are the screened words of [ADR-048](../decisions/048-the-engine-withholds-a-secret-before-any-answer.md); the engine opens a link itself rather than send it. A login that ends says who signed in. A VM of another Mac is not signed in from this one in v1: do it from its Mac.
 
