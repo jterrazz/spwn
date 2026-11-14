@@ -10,8 +10,6 @@
     - tab "Sign-ins" [selected]
     - tab "Storage"
   - heading "Signed in to 3 of 4 programs." [level=1]
-  - paragraph:
-    - img "Signed in to 3 of 4 programs"
   - region "Sign-ins":
     - heading "Sign-ins 4" [level=2]
     - text: gh jterrazz · repo · signed in by itself Signed in
