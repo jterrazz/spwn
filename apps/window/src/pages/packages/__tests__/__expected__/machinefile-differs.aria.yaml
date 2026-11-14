@@ -7,7 +7,7 @@
     - tab "Activity"
     - tab "Packages" [selected]
     - tab "Ports"
-    - tab "Accounts"
+    - tab "Sign-ins"
     - tab "Storage"
   - heading "2 differences from jterrazz-macbook-pro." [level=1]:
     - text: 2 differences from

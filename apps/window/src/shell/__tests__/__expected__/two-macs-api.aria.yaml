@@ -46,7 +46,7 @@
     - tab "Activity"
     - tab "Packages"
     - tab "Ports"
-    - tab "Accounts"
+    - tab "Sign-ins"
     - tab "Storage"
   - tabpanel "Overview":
     - heading "No verdict from the engine." [level=1]
@@ -58,5 +58,5 @@
       - button "Plan"
       - button "Packages what is installed, and its settings"
       - button "Ports which ports are shared, and with whom"
-      - button "Accounts which accounts it borrows, and for how long"
+      - button "Sign-ins which accounts it borrows, and for how long"
     - button "Delete api…"

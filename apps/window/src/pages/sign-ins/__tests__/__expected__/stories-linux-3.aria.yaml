@@ -1,0 +1,21 @@
+- main:
+  - heading "linux-3 Running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "mac-mini"
+  - button "Start"
+  - button "Stop"
+  - button "Open in Terminal" [disabled]
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins" [selected]
+    - tab "Storage"
+  - heading "Signed in to no program." [level=1]
+  - paragraph:
+    - img "Signed in to no program"
+  - region "Sign-ins":
+    - heading "Sign-ins 4" [level=2]
+    - text: gh Signed out Sign in from mac-mini npm Signed out Sign in from mac-mini claude Signed out Sign in from mac-mini wrangler Signed out Sign in from mac-mini

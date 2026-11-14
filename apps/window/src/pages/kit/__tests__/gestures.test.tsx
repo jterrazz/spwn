@@ -88,28 +88,29 @@ function over(children: ReactNode) {
 
 describe('gestures', () => {
     test('a row the answer changes in place carries its mark beside its button at its height, and no Done here is drawn', async () => {
-        // Given - linux-1's Accounts over stories, its claude copy ending in 24 min
+        // Given - linux-1's Sign-ins over two-macs, claude signed in by itself
         let before = 0;
         let after = 0;
         const result = await component.render(
-            pageOver(recordingFor('stories'), {
+            pageOver(recordingFor('two-macs'), {
                 machine: 'linux-1',
                 page: 'machine',
-                tab: 'Accounts',
+                tab: 'Sign-ins',
             }),
             async (visitor) => {
-                const shared = region('Shared with it');
-                await visitor.see(within(shared, content('ends in 24 min')));
-                before = heightOf('Shared with it');
+                const signIns = region('Sign-ins');
+                await visitor.see(within(signIns, button('Sign out claude')));
+                before = heightOf('Sign-ins');
 
-                // When - Extend of claude is clicked and accounts.read read again
-                await visitor.click(within(shared, button('Extend claude by 12 h')));
-                await visitor.see(within(shared, content('ends in 11 h 59 min')));
+                // When - claude is signed out, the engine's question confirmed, and accounts.list read again
+                await visitor.click(within(signIns, button('Sign out claude')));
+                const asked = dialog('Sign out of Claude? The token stays valid at Claude.');
+                await visitor.click(within(asked, button('Sign out')));
 
                 // Then - the row says done where it stands, and no panel repeats it
-                await visitor.see(within(shared, content('Done')));
+                await visitor.see(within(signIns, content('Done')));
                 await visitor.gone(region('Done here'));
-                after = heightOf('Shared with it');
+                after = heightOf('Sign-ins');
             },
         );
         expect(result.errors.text).toBe('');

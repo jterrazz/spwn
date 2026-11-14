@@ -11,7 +11,7 @@ import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { lineOf } from '../../model/overview';
 import { SEPARATOR } from '../../separator';
-import { machineRoute, TAB_PANEL, TABS } from '../../shell/route';
+import { machineRoute, TAB_PANEL, tabsOf } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
 import type { Opening } from '../../shell/window';
 import { useIdentityOf } from '../kit/identity';
@@ -127,7 +127,9 @@ export function MachineHeader({ found, tab, go, onNewMachine }: Props) {
                     onChange={(next) => {
                         go(machineRoute(name, next));
                     }}
-                    options={TABS.map((option) => ({ id: option, label: option }))}
+                    options={tabsOf(vm !== undefined && machineKindOf(vm) === 'server').map(
+                        (option) => ({ id: option, label: option }),
+                    )}
                     value={tab}
                     variant="tabs"
                 />

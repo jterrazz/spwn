@@ -7,7 +7,7 @@
     - tab "Activity"
     - tab "Packages" [selected]
     - tab "Ports"
-    - tab "Accounts"
+    - tab "Sign-ins"
     - tab "Storage"
   - heading "No verdict from the engine." [level=1]
   - paragraph:

@@ -12,7 +12,6 @@
     - tab "Activity" [selected]
     - tab "Packages"
     - tab "Ports"
-    - tab "Accounts"
     - tab "Storage"
   - heading "No answer from the engine." [level=1]
   - paragraph:

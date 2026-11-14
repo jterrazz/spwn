@@ -11,7 +11,7 @@
     - tab "Activity"
     - tab "Packages"
     - tab "Ports"
-    - tab "Accounts"
+    - tab "Sign-ins"
     - tab "Storage"
   - heading "No verdict from the engine." [level=1]
   - paragraph:
@@ -36,13 +36,8 @@
       - button "Stop sharing"
   - region "Accounts shared with it":
     - heading "Accounts shared with it" [level=2]
-    - button "All accounts"
-    - text: github ends in 11 h 10 min
-    - button "Extend github by 12 h": Extend 12 h
-    - button "Take back github": Take back
-    - text: claude ends in 11 h 10 min
-    - button "Extend claude by 12 h": Extend 12 h
-    - button "Take back claude": Take back
+    - button "All sign-ins"
+    - text: github ends in 11 h 10 min claude ends in 11 h 10 min
   - region "Why it exists":
     - heading "Why it exists" [level=2]
     - term: Purpose

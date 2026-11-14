@@ -1,4 +1,4 @@
-import { Button, Panel } from '../../design/index';
+import { AppIcon, Button, Panel, Row } from '../../design/index';
 import { looksSecret } from '../../design/secret';
 import { useRead, useWatch } from '../../engine/react';
 import { holdsFor } from '../../engine/shown';
@@ -6,8 +6,6 @@ import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
-import { accountsOf } from '../accounts/accounts-of';
-import { ShareRow } from '../accounts/share-gestures';
 import { Unanswered } from '../kit/readings';
 import { portsOf } from '../ports/ports-of';
 import { SharedRow } from '../ports/shared-row';
@@ -68,7 +66,7 @@ export function SharedPorts({ found, vm, go }: Props) {
 export function SharedAccounts({ found, vm, go }: Props) {
     const target = targetOf({ mac: found.mac });
     const accounts = useWatch('accounts.read', { VMs: true }, target);
-    const all = <AllOf go={go} label="All accounts" tab="Accounts" vm={vm} />;
+    const all = <AllOf go={go} label="All sign-ins" tab="Sign-ins" vm={vm} />;
     if (accounts.kind === 'reading') {
         return null;
     }
@@ -80,27 +78,23 @@ export function SharedAccounts({ found, vm, go }: Props) {
         );
     }
     const report = accounts.out;
-    const { shares } = accountsOf(report, vm, true);
+    const shares = (report.Shares ?? []).filter((share) => share.vm === vm);
     return (
         <Panel action={all} title="Accounts shared with it">
             {shares.length === 0 ? (
                 <p className={styles.none}>No account is shared with it.</p>
             ) : null}
-            {shares.map((share) => (
-                <ShareRow
-                    account={share.account}
-                    holds={holdsFor(share.until, report.Now)}
-                    key={`${share.vm}/${share.account}`}
-                    lead={undefined}
-                    shown={
-                        looksSecret(share.account)
-                            ? 'a share whose name is withheld'
-                            : share.account
-                    }
-                    target={target}
-                    vm={share.vm}
-                />
-            ))}
+            {shares.map((share) => {
+                const withheld = looksSecret(share.account);
+                return (
+                    <Row
+                        key={`${share.vm}/${share.account}`}
+                        lead={<AppIcon name={withheld ? '' : share.account} />}
+                        state={{ ...holdsFor(share.until, report.Now), asWritten: true }}
+                        title={withheld ? 'a share whose name is withheld' : share.account}
+                    />
+                );
+            })}
         </Panel>
     );
 }

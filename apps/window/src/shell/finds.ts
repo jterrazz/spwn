@@ -5,7 +5,7 @@ import type { MachineKind } from '../engine/provisional';
 import { vmKindWord } from '../engine/shown';
 import { THIS_MAC_WORD } from '../engine/words';
 import { SEPARATOR } from '../separator';
-import { machineRoute, TABS } from './route';
+import { machineRoute, tabsOf } from './route';
 import type { PlainPage, Route } from './route';
 
 export const KINDS = [
@@ -97,10 +97,16 @@ function machinesOf(held: Held): readonly Result[] {
     ]);
 }
 
-function tabsOf(held: Held): readonly Result[] {
-    const names = held.macs.flatMap((mac) => [mac.Name, ...(mac.VMs ?? []).map((vm) => vm.Name)]);
-    return names.flatMap((name) =>
-        TABS.map((tab): Result => ({
+function tabsFound(held: Held): readonly Result[] {
+    const machines = held.macs.flatMap((mac) => [
+        { name: mac.Name, server: false },
+        ...(mac.VMs ?? []).map((vm) => ({
+            name: vm.Name,
+            server: machineKindOf(vm) === 'server',
+        })),
+    ]);
+    return machines.flatMap(({ name, server }) =>
+        tabsOf(server).map((tab): Result => ({
             detail: '',
             kind: 'Tabs',
             label: `${name} › ${tab}`,
@@ -151,7 +157,7 @@ export function everything(held: Held): readonly Result[] {
             to: { route: held.routeOfNeed(need) },
         })),
         ...machinesOf(held),
-        ...tabsOf(held),
+        ...tabsFound(held),
         page(held, 'Machine files', 'machine-files'),
         ...SHELVES.map((one) => page(held, 'Catalog', one)),
         ...packagesOf(held),
