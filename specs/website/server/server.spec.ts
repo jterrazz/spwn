@@ -62,8 +62,32 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test('S4 Restart asks for the name typed, and stays off until it matches', async () => {
+        // Given - the window on infra's page over two-macs
+        const result = await website.visit(
+            '/?world=two-macs&machine=infra&tab=Overview',
+            async (visitor) => {
+                // When - Restart is pressed
+                await visitor.click(button('Restart'));
+
+                // Then - the dialog asks for the name, and its Restart is off
+                const confirm = dialog('Restart infra?');
+                await visitor.see(confirm);
+                const restart = within(confirm, button('Restart'));
+                await visitor.see(disabled(restart));
+
+                // When - the name is typed
+                await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
+
+                // Then - Restart is on
+                await visitor.see(enabled(restart));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test.todo(
-        'S4 window differs: the Restart dialog of a server asks no name typed and says nothing of what stops, where the row asks both',
+        "S4 waits for the consequence sentence on the call's confirmation, saying what stops",
     );
 
     test.todo('S5 waits for a state per day on MachinesUptimeDay');

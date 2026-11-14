@@ -149,7 +149,7 @@ const CONFIRM_FORMS: Readonly<Record<ConfirmName, AskForm>> = {
     'machines.create-workspace': 'yes',
     'machines.delete': 'name',
     'machines.forget': 'yes',
-    'machines.restart': 'yes',
+    'machines.restart': 'name',
     'machines.restart-mac': 'yes',
     'machines.stop': 'yes',
     'ports.stop-sharing': 'yes',

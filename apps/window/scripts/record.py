@@ -206,7 +206,7 @@ GESTURES = {
         {"call": "machines.stop", "in": {"VM": "linux-1", "Confirm": "yes"}},
         {"call": "machines.start", "in": {"VM": "api"}},
         {"call": "machines.delete", "in": {"VM": "api", "Confirm": "api"}},
-        {"call": "machines.restart", "in": {"Name": "infra", "Confirm": "yes"}, **at("jterrazz-mac-mini")},
+        {"call": "machines.restart", "in": {"Name": "infra", "Confirm": "infra"}, **at("jterrazz-mac-mini")},
         {"call": "apps.update", "in": {"Managers": ["mise"]}},
         {"call": "disk.free", "in": {}},
         {"call": "disk.free", "in": {"Apps": ["go"]}},

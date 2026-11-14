@@ -258,9 +258,11 @@ describe('gestures', () => {
         const result = await component.render(machineOver('two-macs', 'infra'), async (visitor) => {
             await visitor.see(heading('infra', { exact: false }));
 
-            // When - Restart is clicked, then confirmed in its dialog
+            // When - Restart is clicked, then confirmed in its dialog by the server's name
             await visitor.click(button('Restart'));
-            await visitor.click(within(dialog('Restart infra?'), button('Restart')));
+            const confirm = dialog('Restart infra?');
+            await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
+            await visitor.click(within(confirm, button('Restart')));
 
             // Then - the world's engine refuses it, and the header says so
             await visitor.gone(dialog('Restart infra?'));

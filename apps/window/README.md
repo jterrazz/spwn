@@ -223,7 +223,7 @@ Each button below is disabled until it goes through `useGesture`. The confirmati
 | Disk and images    | Storage              | Build a new one       | `images.build`, whose input `docs/reference/api.md` does not give                         |              | `images.list`       |
 | Files and needs    | a catalog item       | Add to a machine      | no call adds a package to a machine's file                                                |              | `machinefile.drift` |
 | Files and needs    | a machine's Packages | Capture               | no call names it yet                                                                      |              | `machinefile.drift` |
-| Machines           | a server's header    | Restart               | `machines.restart`, wired; the world build refuses it, so it is unproved on a real server | yes          | `machines.list`     |
+| Machines           | a server's header    | Restart               | `machines.restart`, wired; the world build refuses it, so it is unproved on a real server | its name     | `machines.list`     |
 
 ## A machine's Activity holds its log
 

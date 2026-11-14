@@ -132,12 +132,22 @@ describe('provisional', () => {
         ).toStrictEqual([false, true]);
     });
 
-    test("a machine's delete and an erase are confirmed by their subject typed, a stop by a yes", () => {
-        // Given - three calls calls.json confirms
-        const calls = ['machines.delete', 'disk.erase', 'machines.stop'] as const;
+    test("a machine's delete, a server's restart and an erase are confirmed by their subject typed, a stop by a yes", () => {
+        // Given - four calls calls.json confirms
+        const calls = [
+            'machines.delete',
+            'machines.restart',
+            'disk.erase',
+            'machines.stop',
+        ] as const;
 
-        // Then - the name twice, then a yes
-        expect(calls.map((call) => confirmFormOf(call))).toStrictEqual(['name', 'name', 'yes']);
+        // Then - the name three times, then a yes
+        expect(calls.map((call) => confirmFormOf(call))).toStrictEqual([
+            'name',
+            'name',
+            'name',
+            'yes',
+        ]);
     });
 
     test('a server is the VM whose lifetime is always on, every other a workspace', () => {
