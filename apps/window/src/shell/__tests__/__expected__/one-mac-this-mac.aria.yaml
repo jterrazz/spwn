@@ -9,6 +9,7 @@
       - text: jterrazz-macbook-pro
       - img "online"
   - button "Machine files"
+  - button "Passwords"
   - group "Catalog":
     - heading "Catalog" [level=2]
     - button "Apps"

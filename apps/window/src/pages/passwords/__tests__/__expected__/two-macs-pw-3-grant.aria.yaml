@@ -1,0 +1,27 @@
+- main:
+  - heading "Claude Max" [level=1]
+  - paragraph: claude · OAuth token · admin@jterrazz.com · added 2 Oct
+  - button "Remove password"
+  - region "This password":
+    - heading "This password" [level=2]
+    - term: Value
+    - definition: Withheld
+    - term: Kind
+    - definition: OAuth token
+    - term: Program
+    - definition: claude
+    - term: Account
+    - definition: admin@jterrazz.com
+  - region "Granted to":
+    - heading "Granted to" [level=2]
+    - button "Grant…"
+  - dialog "Grant Claude Max":
+    - heading "Grant Claude Max" [level=3]
+    - paragraph: Machines
+    - group "Machines":
+      - button "api" [disabled]: api Start the machine first
+      - button "linux-1" [disabled]: linux-1 It has its own sign-in
+      - button "infra" [disabled]: infra A server keeps its own sign-ins
+    - paragraph: Touch ID will ask you to confirm before the password leaves this Mac
+    - button "Cancel"
+    - button "Grant" [disabled]

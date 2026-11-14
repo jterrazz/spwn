@@ -34,6 +34,12 @@ const PATHS = {
             <path d="M9 2.5v3h3" />
         </>
     ),
+    key: (
+        <>
+            <circle cx="5.5" cy="10.5" r="3" />
+            <path d="M7.6 8.4L13 3M11 5l1.5 1.5" />
+        </>
+    ),
     box: (
         <>
             <path d="M8 2l5.5 3v6L8 14l-5.5-3V5z" />

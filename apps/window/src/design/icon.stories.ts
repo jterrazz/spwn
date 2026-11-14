@@ -12,6 +12,7 @@ const NAMES: readonly IconName[] = [
     'inbox',
     'changes',
     'file',
+    'key',
     'box',
     'disc',
     'mac',

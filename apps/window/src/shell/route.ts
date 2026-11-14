@@ -21,15 +21,18 @@ export const PLAIN_PAGES = [
     'home',
     'inbox',
     'machine-files',
+    'passwords',
     'storage',
 ] as const;
 
 export type PlainPage = (typeof PLAIN_PAGES)[number];
 
-export const IN_CATALOG: ReadonlySet<PlainPage> = new Set<PlainPage>([
+// value: the pages that open on one of their items, a catalog item or a vault entry, named in the route's `item`.
+export const OPENS_AN_ITEM: ReadonlySet<PlainPage> = new Set<PlainPage>([
     'catalog-apps',
     'catalog-settings',
     'catalog-skills',
+    'passwords',
 ]);
 
 type PlainRoute = { page: PlainPage; file?: string | undefined; item?: string | undefined };
@@ -115,7 +118,7 @@ function named(value: unknown): string | undefined {
 export function plainRoute(page: PlainPage, file: unknown, item: unknown): Route {
     const route: PlainRoute = { page };
     const opened = named(file);
-    const chosen = IN_CATALOG.has(page) ? named(item) : undefined;
+    const chosen = OPENS_AN_ITEM.has(page) ? named(item) : undefined;
     if (opened !== undefined) {
         route.file = opened;
     }
