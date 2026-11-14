@@ -44,7 +44,9 @@ describe('home', () => {
         'H2 waits for a recording of lines that need me, counted by the verdict and above everything else on Home',
     );
 
-    test.todo('H3 waits for a recording of a server that fails its check, and its health verdict');
+    test.todo(
+        'H3 waits for a world whose server fails its check: the head and the Restart need are on the wire, no recorded world builds one',
+    );
 
     test('H4 Memory reads, per Mac, the GB left and who holds what', async () => {
         // Given - the window on Home over two-macs, where linux-1 holds 8 GB of one Mac's 16 and infra 24 of the other's 64

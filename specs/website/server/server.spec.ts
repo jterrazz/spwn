@@ -24,6 +24,7 @@ describe('server', () => {
                 await visitor.see(health);
 
                 // Then - its state, its address, SSH and its check each read their answer
+                await visitor.see(within(health, content('Healthy.', { exact: false })));
                 await visitor.see(within(health, content('Running')));
                 await visitor.see(within(health, content('192.168.64.5')));
                 await visitor.see(within(health, content('Answers')));
@@ -36,12 +37,10 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        "S1 waits for a verdict over a server's state, address, SSH and check on machines.list, and for 30 days of uptime on MachinesUptimeDay",
-    );
+    test.todo('S1 waits for 30 days of uptime on MachinesUptimeDay');
 
     test.todo(
-        "S2 waits for a verdict over a server's state, address, SSH and check on machines.list",
+        'S2 waits for a world whose server fails its check: the verdict and the Restart need are on the wire, no recorded world builds one',
     );
 
     test.todo(
@@ -96,9 +95,40 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        "S4 waits for the consequence sentence on the call's confirmation, saying what stops",
-    );
+    test("S4 the dialog of Restart and of Delete says what stops, in the engine's sentence", async () => {
+        // Given - the window on infra's page over two-macs
+        const result = await website.visit(
+            '/?world=two-macs&machine=infra&tab=Overview',
+            async (visitor) => {
+                // When - Restart is pressed
+                await visitor.click(button('Restart'));
+
+                // Then - its dialog says what the restart stops, then Cancel leaves it
+                const restart = dialog('Restart infra?');
+                await visitor.see(
+                    within(
+                        restart,
+                        content(
+                            'infra restarts: its VMs stop, and its servers start again once it is back.',
+                        ),
+                    ),
+                );
+                await visitor.click(within(restart, button('Cancel')));
+
+                // When - Delete is pressed
+                await visitor.click(button('Delete infra…'));
+
+                // Then - its dialog says what the delete ends
+                await visitor.see(
+                    within(
+                        dialog('Delete infra?'),
+                        content('infra and everything on its disk are deleted for good.'),
+                    ),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo('S5 waits for a state per day on MachinesUptimeDay');
 

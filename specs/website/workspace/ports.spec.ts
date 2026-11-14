@@ -28,6 +28,20 @@ describe('ports', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test("W7 the Ports tab is headed by the listing's verdict and its line", async () => {
+        // Given - linux-1's Ports over two-macs, two ports listening, both shared
+        const result = await website.visit(
+            '/?world=two-macs&machine=linux-1&tab=Ports',
+            async (visitor) => {
+                // When - the listing has been read
+                // Then - the engine's verdict heads it, with its line
+                await visitor.see(content('2 ports listen.'));
+                await visitor.see(content('2 are shared.'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test.todo('W7 waits for a call setting a share to Private, from a port that is Local');
 
     test.todo("W18 waits for a call setting a share's To");
