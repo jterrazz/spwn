@@ -69,6 +69,21 @@ fn answer(name: &str) -> Value {
     })
 }
 
+fn typed_password() -> Value {
+    json!({
+        "v": 2,
+        "id": "9",
+        "call": "vault.add",
+        "in": {
+            "From": "typed",
+            "Kind": "api-key",
+            "Label": "Cloudflare deploy",
+            "Program": "wrangler",
+            "Value": "good",
+        },
+    })
+}
+
 fn carries_the_code(messages: &[Message]) -> bool {
     messages.iter().any(|message| {
         serde_json::to_string(message)
@@ -439,6 +454,85 @@ fn a_refused_code_is_answered_without_its_input() {
         );
         assert!(!carries_the_code(messages));
     }
+}
+
+#[test]
+fn a_typed_password_reaches_the_engine_in_its_one_frame_and_never_the_window() {
+    // Given - an engine that adds the password, and one that refuses its label
+    let answers: [&[u8]; 2] = [
+        b"{\"v\":2,\"id\":\"9\",\"out\":{\"ID\":\"pw-4\"}}\n",
+        b"{\"v\":2,\"id\":\"9\",\"error\":{\"type\":\"refused\",\"code\":\"vault.label-taken\",\"field\":\"label\",\"message\":\"a password is already labeled\"}}\n",
+    ];
+    for answer in answers {
+        let (listener, path) = listening();
+        let exchanges = Arc::new(Exchanges::default());
+        let (sink, received, _) = heard();
+        exchanges
+            .open(&path, "main", typed_password(), sink, LIMITS)
+            .expect("vault.add opens");
+        let (engine, _) = listener.accept().expect("the engine accepts");
+        let mut asked = String::new();
+        BufReader::new(&engine)
+            .read_line(&mut asked)
+            .expect("the request arrives");
+
+        // When - the engine answers
+        std::io::Write::write_all(&mut &engine, answer).expect("the engine writes");
+
+        // Then - the engine read the value in the request's one frame, and the window hears the answer and the
+        // end without it
+        let heard: Vec<Message> = (0..2)
+            .filter_map(|_| received.recv_timeout(SOON).ok())
+            .collect();
+        assert!(asked.contains("\"Value\":\"good\""));
+        assert_eq!(heard.len(), 2);
+        assert_eq!(heard[1], Message::End("answered".into()));
+        assert!(!carries_the_code(&heard));
+        let _ = std::fs::remove_file(path);
+    }
+}
+
+#[test]
+fn a_typed_password_refused_or_unanswered_is_never_echoed() {
+    // Given - vault.add carrying a typed password with an extra key, one past the size limit, and one to no engine
+    let mut extra = typed_password();
+    extra["hello"] = json!({});
+    let refused = [
+        (extra, LIMITS),
+        (
+            typed_password(),
+            Limits {
+                request: 64,
+                ..LIMITS
+            },
+        ),
+    ];
+
+    // When - the window opens each
+    let answered: Vec<(Result<u32, String>, Vec<Message>)> = refused
+        .into_iter()
+        .map(|(request, limits)| {
+            let exchanges = Arc::new(Exchanges::default());
+            let (sink, received, _) = heard();
+            let handle = exchanges.open(&socket_path(), "main", request, sink, limits);
+            (handle, drained(&received))
+        })
+        .collect();
+    let (sink, received, _) = heard();
+    let unanswered =
+        Arc::new(Exchanges::default()).open(&socket_path(), "main", typed_password(), sink, LIMITS);
+
+    // Then - each refusal is under its id and the unanswered open names its socket, none carrying the value
+    for (handle, messages) in &answered {
+        assert_eq!(handle, &Ok(0));
+        assert_eq!(
+            error_of(&messages[0]).map(|(id, kind, _)| (id, kind)),
+            Some(("9".into(), "refused".into()))
+        );
+        assert!(!carries_the_code(messages));
+    }
+    assert!(unanswered.is_err_and(|reason| !reason.contains("good")));
+    assert!(!carries_the_code(&drained(&received)));
 }
 
 #[test]
