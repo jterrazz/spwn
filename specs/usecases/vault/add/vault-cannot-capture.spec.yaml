@@ -1,0 +1,11 @@
+description: 'wrangler''s sign-in cannot be taken into the vault'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"cf","Program":"wrangler","Kind":"token","From":"sign-in"}}
+      exit: 0
+      stdout: |
+          {"code":"vault.cannot-capture","field":null,"subject":"wrangler","message":"station cannot take Cloudflare's sign-in into the vault"}

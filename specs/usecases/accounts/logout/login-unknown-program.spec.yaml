@@ -1,0 +1,11 @@
+description: 'A sign-out of a name that is no sign-in is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Program, .State, .Action] else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"accounts.logout","in":{"Program":"zz","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"login.unknown-program","subject":"zz","message":"no program named \"zz\""}

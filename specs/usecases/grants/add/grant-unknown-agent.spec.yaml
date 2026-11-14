@@ -1,0 +1,11 @@
+description: 'An agent station does not know is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-1","ToKind":"agent","To":"ghost","Workspace":"linux-1","For":3600000000000}}
+      exit: 0
+      stdout: |
+          {"code":"grant.unknown-agent","field":null,"subject":"ghost","message":"no agent named \"ghost\"","hint":"station agents"}

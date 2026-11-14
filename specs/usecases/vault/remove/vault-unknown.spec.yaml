@@ -1,0 +1,11 @@
+description: 'A password that is not in the vault is refused before any question'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Removed[] | [.ToKind, .To, .State]] else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.remove","in":{"ID":"pw-404","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"vault.unknown","subject":"pw-404","message":"no password pw-404 in this Mac's vault"}

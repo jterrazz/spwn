@@ -1,0 +1,11 @@
+description: 'A name that is no sign-in is refused, exit 2 in the CLI shape'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, field, subject, message, hint}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"zz"}}
+      exit: 0
+      stdout: |
+          {"code":"login.unknown-program","field":null,"subject":"zz","message":"no program named \"zz\"","hint":"station signs in gh, npm, claude and wrangler"}

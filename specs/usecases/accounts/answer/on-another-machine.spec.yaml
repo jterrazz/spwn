@@ -1,0 +1,15 @@
+description: 'The mini takes the code for its own exchange'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].accounts.exchanges = {"ex-9": {"program": "claude", "kind": "paste", "site": "claude.com", "expires": "2026-11-04T10:30:00Z", "asking": true}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"accounts.answer","in":{"Exchange":"ex-9","Code":"good"}}
+      exit: 0
+      stdout: |
+          {}

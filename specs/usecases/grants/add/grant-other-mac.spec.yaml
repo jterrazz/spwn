@@ -1,0 +1,13 @@
+description: 'A workspace of the mini is granted from the mini''s vault, not this one'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].vms["ws-far"] = {"size": {"CPUs": 2, "Memory": 4294967296, "Disk": 20000000000}, "pid": 7} | .macs["ws-far"] = {"self": {"kind": "workspace", "system": {"OS": "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-2","ToKind":"machine","To":"ws-far","For":3600000000000}}
+      exit: 0
+      stdout: |
+          {"code":"grant.other-mac","field":null,"subject":"ws-far","message":"ws-far is on jterrazz-mac-mini: a grant is made from that Mac's vault","hint":"do it from jterrazz-mac-mini"}
