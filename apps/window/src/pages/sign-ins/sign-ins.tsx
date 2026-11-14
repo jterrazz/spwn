@@ -81,7 +81,7 @@ function RemoveGrant({ row, removeGrant, onEntry }: Omit<TrailProps, 'onSignIn' 
                 gesture={removeGrant}
                 label={word}
                 name={`${word} ${row.Program}`}
-                title={`${word} ${entry} from this machine?`}
+                title={row.Ask ?? `${word} ${entry} from this machine?`}
                 verb={word}
             />
         </>

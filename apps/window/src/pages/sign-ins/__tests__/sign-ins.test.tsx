@@ -102,11 +102,11 @@ describe('sign-ins', () => {
             async (visitor) => {
                 // When - Remove of npm is clicked and confirmed
                 await visitor.click(within(region('Sign-ins'), button('Remove npm')));
-                const asked = dialog('Remove pw-2 from this machine?');
+                const asked = dialog('Remove npm? The grant ends here; the token stays yours.');
                 await visitor.click(within(asked, button('Remove')));
 
-                // Then - the row no longer offers its Remove
-                await visitor.gone(within(region('Sign-ins'), button('Remove npm')));
+                // Then - the row offers a sign-in again
+                await visitor.see(within(region('Sign-ins'), button('Sign in npm')));
             },
         );
         expect(result.errors.text).toBe('');
