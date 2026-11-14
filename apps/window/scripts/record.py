@@ -15,7 +15,7 @@ again in the same door, one after the other, with the reads of a machine the ges
 those reads as they were after it. `--gestures` records the gestures alone, over the reads already recorded;
 `--call=<call>` records only that call's gestures, in the worlds named or every world GESTURES gives it, and rewrites
 no other file. `--only=<call>` asks again the reads of that one call, in the worlds named or every world that records
-it, and splices their answers into <world>/<call>.json in place; `--in=<json>` narrows it to the requests of that
+it, ASKS gives or FOLLOWS draws from the recorded answers, and splices their answers into <world>/<call>.json in place; `--in=<json>` narrows it to the requests of that
 input (of every target), or adds that request when none is recorded yet. No other exchange and no other file moves.
 
 The world build's clock moves when a watch waits on it (apps/engine/wire/world_on.go), so two runs do not write the same
@@ -30,7 +30,8 @@ target, and its VMs, by name, are asked. The worlds of world.py's SEEDS are reco
 
 A sign-in call names its VM in `Machine` to this Mac's engine and takes no target: accounts.list is asked for This Mac
 and once per VM of every Mac, accounts.login and accounts.logout carry their `Machine`, and the `sign-ins` world
-holds the login whose code is pasted back. A world is never recorded whole to change one call: `--call=` keeps the
+holds the login whose code is pasted back. The vault is This Mac's alone: vault.list is asked with no target, and
+grants.new once per entry it lists. A world is never recorded whole to change one call: `--call=` keeps the
 requests `--in=` added.
 """
 
@@ -190,6 +191,7 @@ def asks(listed):
         *[{"watch": "accounts.read", "in": {"VMs": True}} for _ in here],
         *[{"watch": "accounts.list", "in": {}} for _ in here],
         *[{"watch": "accounts.list", "in": {"Machine": name}} for name in vmsOf(listed)],
+        *[{"watch": "vault.list", "in": {}} for _ in here],
         *[{"watch": "awake.read", "in": {}} for _ in here],
         {"watch": "machines.new", "in": {}},
         *[{"watch": "machines.new", "in": {"On": mac}} for mac in macsOf(listed)],
@@ -197,12 +199,19 @@ def asks(listed):
 
 
 def follows(requests, answered):
+    """The reads asked of an answer: a drift per machine file explain names, and the grant picker's offer per
+    entry of this Mac's vault."""
     explained = [last_out(frames) for request, frames in zip(requests, answered)
                  if request.get("call") == "machinefile.explain" and "target" not in request]
     names = [file["Name"] for out in explained if out for file in out.get("Files") or [] if file.get("Name")]
+    vaults = [last_out(frames) for request, frames in zip(requests, answered) if request.get("watch") == "vault.list"]
+    entries = [entry["ID"] for out in vaults if out for entry in out.get("Entries") or [] if entry.get("ID")]
     asked_already = {keyOf(request) for request in requests}
-    drifts = [{"call": "machinefile.drift", "in": {"Machinefile": name}} for name in dict.fromkeys(names)]
-    return [drift for drift in drifts if keyOf(drift) not in asked_already]
+    more = [
+        *[{"call": "machinefile.drift", "in": {"Machinefile": name}} for name in dict.fromkeys(names)],
+        *[{"watch": "grants.new", "in": {"Entry": entry}} for entry in dict.fromkeys(entries)],
+    ]
+    return [request for request in more if keyOf(request) not in asked_already]
 
 
 def callOf(request):
@@ -240,6 +249,10 @@ GESTURES = {
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "persistent", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
+        {"call": "vault.remove", "in": {"ID": "pw-2", "Confirm": "yes"}},
+        {"call": "grants.remove", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine", "Confirm": "yes"}},
+        {"call": "grants.add", "in": {"Entry": "pw-1", "To": "linux-1", "ToKind": "machine", "For": 0}},
+        {"call": "grants.add", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine", "For": 0}},
     ],
     "presence-refused": [
         {"call": "grants.add", "in": {"Entry": "pw-1", "ToKind": "machine", "To": "linux-1"}},
@@ -454,7 +467,9 @@ def again(world):
     path = out_root / world / f"{only}.json"
     held = json.loads(path.read_text())["exchanges"] if path.exists() else []
     station, [listed] = serve(seed, [MACHINES], fixture)
-    known = [*[exchange["request"] for exchange in held], *asks(listed)]
+    requests, before = recorded(out_root / world)
+    answered = [before[keyOf(request)] for request in requests]
+    known = [*[exchange["request"] for exchange in held], *asks(listed), *follows(requests, answered)]
     of_call = [request for request in known if callOf(request) == only]
     wanted = list({keyOf(request): request for request in of_call
                    if given is None or request["in"] == given}.values())
