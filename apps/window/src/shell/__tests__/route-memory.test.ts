@@ -31,12 +31,12 @@ describe('route memory', () => {
         expect(route).toStrictEqual(machineRoute('linux-1', 'Storage'));
     });
 
-    test('a window left on the Logs tab reopens on Activity, which holds the log', () => {
-        // Given - a route a window wrote while a machine had a Logs tab
+    test('a route naming a tab the window has not is not recalled', () => {
+        // Given - a stored route on a Logs tab
         const memory = memoryOf('{"page":"machine","machine":"linux-1","tab":"Logs"}');
 
-        // Then - the next launch opens linux-1's Activity
-        expect(recalled(memory, false)).toStrictEqual(machineRoute('linux-1', 'Activity'));
+        // Then - nothing is recalled, so the window opens its default
+        expect(recalled(memory, false)).toBeUndefined();
     });
 
     test('a catalog item and a machine file are recalled with the page that holds them', () => {
@@ -51,12 +51,12 @@ describe('route memory', () => {
         expect(recalled(file, false)).toStrictEqual({ file: 'api', page: 'machine-files' });
     });
 
-    test('a route stored on the page catalog is recalled as the Apps shelf', () => {
-        // Given - the window left on the page catalog by an earlier version
+    test('a route stored on a page the window has not is not recalled', () => {
+        // Given - a stored route on the page catalog
         const memory = memoryOf('{"page":"catalog"}');
 
-        // Then - the next launch opens Apps, the catalog's first shelf
-        expect(recalled(memory, false)).toStrictEqual({ page: 'catalog-apps' });
+        // Then - nothing is recalled, so the window opens Home
+        expect(recalled(memory, false)).toBeUndefined();
     });
 
     test.each([

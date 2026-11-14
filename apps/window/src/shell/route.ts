@@ -2,13 +2,8 @@ export const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Accounts', 'S
 
 export type Tab = (typeof TABS)[number];
 
-const FOLDED: ReadonlyMap<string, Tab> = new Map([['Logs', 'Activity']]);
-
 export function tabOf(value: unknown): Tab | undefined {
-    if (typeof value !== 'string') {
-        return undefined;
-    }
-    return TABS.find((known) => known === value) ?? FOLDED.get(value);
+    return TABS.find((known) => known === value);
 }
 
 export const TAB_PANEL = 'machine-tab-panel';
@@ -104,9 +99,8 @@ export function startRoute(query: URLSearchParams): Route {
     return plainRoute(page, query.get('file'), query.get('item'));
 }
 
-// hazard: a route an earlier window stored or linked may name the page `catalog`; it opens the first shelf, Apps.
 export function plainPageOf(value: unknown): PlainPage | undefined {
-    return value === 'catalog' ? 'catalog-apps' : oneOf(PLAIN_PAGES, value);
+    return oneOf(PLAIN_PAGES, value);
 }
 
 function named(value: unknown): string | undefined {

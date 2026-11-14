@@ -135,14 +135,6 @@ describe('route', () => {
         });
     });
 
-    test('a start route to the Logs tab opens Activity, which holds the log', () => {
-        // Given - a link written while a machine had a Logs tab
-        const route = startOf('?machine=linux-1&tab=Logs');
-
-        // Then - it opens the machine's Activity
-        expect(route).toStrictEqual(machineRoute('linux-1', 'Activity'));
-    });
-
     test('a start route opens a catalog item on its shelf alone', () => {
         // Given - the queries a capture opens an item with
         // Then - a shelf opens on its item, and a page that holds none ignores it
@@ -153,14 +145,11 @@ describe('route', () => {
         expect(startOf('?page=inbox&item=node')).toStrictEqual({ page: 'inbox' });
     });
 
-    test('a link to the page catalog opens the Apps shelf', () => {
-        // Given - a start route an earlier window wrote
-        // Then - it opens Apps, the catalog's first shelf, with its item when it names one
-        expect(startOf('?page=catalog')).toStrictEqual({ page: 'catalog-apps' });
-        expect(startOf('?page=catalog&item=node')).toStrictEqual({
-            item: 'node',
-            page: 'catalog-apps',
-        });
+    test('a start route to a page or a tab the window has not opens Home or Overview', () => {
+        // Given - links naming the page catalog and the tab Logs
+        // Then - neither exists, so each falls to its default
+        expect(startOf('?page=catalog&item=node')).toStrictEqual({ page: 'home' });
+        expect(startOf('?machine=linux-1&tab=Logs')).toStrictEqual(machineRoute('linux-1'));
     });
 
     test('a catalog item is a navigation of its own, its shelf one step back', () => {
