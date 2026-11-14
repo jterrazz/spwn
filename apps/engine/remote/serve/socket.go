@@ -24,8 +24,8 @@ type Server struct {
 	// host's own.
 	Calls func(name string) (call.Handler, bool)
 	// value: what the server hosts under a watch name of its own: a stream
-	// sends each update and returns when it ends; an error before its first
-	// send is the watch's refusal.
+	// sends each update and returns when it ends; an error it returns is the
+	// watch's refusal, after an update as before.
 	Streams map[string]Feed
 	// value: the machine the calls run on: the gate of every call frame.
 	ThisMachine machine.Profile
@@ -124,20 +124,36 @@ func (s Server) watch(ctx context.Context, conn io.ReadWriteCloser, lines *bufio
 		}
 		return w.frame(api.Frame{ID: f.ID, Out: data})
 	})
-	sent := false
-	counted := func(out any) error {
-		sent = true
-		return send(out)
-	}
 	var err error
-	if stream, ok := s.Streams[f.Watch]; ok {
-		err = stream(ctx, f.In, counted)
+	if t := f.Target.Ref(); s.Far != nil && !s.thisMachine(t) {
+		err = s.far(ctx, t, w, f, send)
+	} else if stream, ok := s.Streams[f.Watch]; ok {
+		err = stream(ctx, f.In, send)
 	} else {
-		err = s.updates(ctx, f, counted)
+		err = s.updates(ctx, f, send)
 	}
-	if err != nil && !sent {
+	if err != nil {
 		_ = w.frame(api.Frame{ID: f.ID, Error: s.fault(err)})
 	}
+}
+
+// invariant: a watch whose target is another machine is that machine's
+// watch, found as a call's target is and relayed update by update; its end
+// there ends it here, and its end here ends it there.
+func (s Server) far(ctx context.Context, t machine.Ref, w *writer, f api.Frame, send func(any) error) error {
+	updates, err := s.Far.Watch(ctx, t, f.Watch, f.In, progress{id: f.ID, out: w, word: s.wording})
+	if err != nil {
+		return err
+	}
+	for u := range updates {
+		if u.Err != nil {
+			return u.Err
+		}
+		if err := send(u.Value); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s Server) updates(ctx context.Context, f api.Frame, send func(any) error) error {
