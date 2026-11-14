@@ -10,14 +10,14 @@
       "Tone": "plain"
     }
   },
-  "AccountsGrantState": {
-    "active": {
-      "Word": "active",
-      "Tone": "ok"
+  "AccountsEntryReach": {
+    "granted": {
+      "Word": "granted",
+      "Tone": "plain"
     },
-    "failing": {
-      "Word": "failing",
-      "Tone": "bad"
+    "not-granted": {
+      "Word": "not granted",
+      "Tone": "plain"
     }
   },
   "AccountsGrantTo": {
@@ -1496,6 +1496,12 @@
       "Other": "apps",
       "Tone": "plain"
     },
+    "grant": {
+      "Word": "Grants",
+      "One": "grant",
+      "Other": "grants",
+      "Tone": "plain"
+    },
     "line": {
       "Word": "Lines",
       "One": "line",
@@ -1518,6 +1524,12 @@
       "Word": "Packages",
       "One": "package",
       "Other": "packages",
+      "Tone": "plain"
+    },
+    "password": {
+      "Word": "Passwords",
+      "One": "password",
+      "Other": "passwords",
       "Tone": "plain"
     },
     "quiet-listener": {

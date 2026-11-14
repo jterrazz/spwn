@@ -3,12 +3,12 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Removed[] | [.ToKind, .To, .State]] else .error | {code, subject, message} end'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Removed[] | [.ToKind, .To]] else .error | {code, subject, message} end'''
       stdin: |
           {"v":2,"id":"1","call":"vault.remove","in":{"ID":"pw-2","Confirm":"yes"}}
       exit: 0
       stdout: |
-          [["machine","linux-1","active"]]
+          [["machine","linux-1"]]
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {verdict: .Verdict.Sentence, tone: .Verdict.Tone, rows: [.Programs[] | [.Program, .State, .How, .Action, .Line, .Ask]]}'''
       stdin: |
           {"v":2,"id":"1","watch":"accounts.list","in":{"Machine":"linux-1"}}

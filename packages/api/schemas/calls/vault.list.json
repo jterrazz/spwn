@@ -44,6 +44,16 @@
           ],
           "type": "string"
         },
+        "Reach": {
+          "enum": [
+            "granted",
+            "not-granted"
+          ],
+          "type": "string"
+        },
+        "RemoveSentence": {
+          "type": "string"
+        },
         "Who": {
           "type": "string"
         }
@@ -55,20 +65,15 @@
         "ID",
         "Kind",
         "Label",
-        "Program"
+        "Program",
+        "Reach",
+        "RemoveSentence"
       ],
       "type": "object"
     },
     "accounts.VaultGrant": {
       "additionalProperties": false,
       "properties": {
-        "State": {
-          "enum": [
-            "active",
-            "failing"
-          ],
-          "type": "string"
-        },
         "To": {
           "type": "string"
         },
@@ -84,7 +89,6 @@
         }
       },
       "required": [
-        "State",
         "To",
         "ToKind"
       ],

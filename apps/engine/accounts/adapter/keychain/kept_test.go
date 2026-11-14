@@ -306,8 +306,8 @@ func TestAGrantNeverEndsOnItsOwnAndTheExpiryRetriesOnlyWhatIsOwed(t *testing.T) 
 		t.Fatalf("a grant years old is due: %v", due)
 	}
 	read, _ := r.vault.Passwords().List(t.Context())
-	if len(read.Entries[0].Grants) != 1 || read.Entries[0].Grants[0].State != accounts.GrantActive {
-		t.Fatalf("grants %+v; want the one grant still active", read.Entries[0].Grants)
+	if len(read.Entries[0].Grants) != 1 {
+		t.Fatalf("grants %+v; want the one grant still held", read.Entries[0].Grants)
 	}
 	r.unreach = true
 	if _, err := r.vault.Passwords().Remove(t.Context(), id); err != nil {

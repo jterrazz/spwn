@@ -244,7 +244,7 @@ func (g *Grants) Add(ctx context.Context, in contract.GrantIn) (accounts.Granted
 		if !ok {
 			return accounts.Refusal(fail.NotFound, accounts.GrantUnknownEntry, e.ID)
 		}
-		kept.Grants = append(kept.Grants, accounts.VaultGrant{ToKind: accounts.ToMachine, To: in.To, State: accounts.GrantActive})
+		kept.Grants = append(kept.Grants, accounts.VaultGrant{ToKind: accounts.ToMachine, To: in.To})
 		return nil
 	})
 	return accounts.Granted{}, err

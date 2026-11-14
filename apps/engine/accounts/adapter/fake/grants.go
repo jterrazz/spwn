@@ -177,7 +177,7 @@ func (g *Grants) Add(_ context.Context, in contract.GrantIn) (accounts.Granted, 
 		return accounts.Granted{}, accounts.Refusal(fail.Failed, accounts.GrantCannotDeliver, in.To)
 	}
 	e.Grants = slices.DeleteFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == in.ToKind && v.To == in.To })
-	e.Grants = append(e.Grants, accounts.VaultGrant{ToKind: in.ToKind, To: in.To, Workspace: in.Workspace, State: accounts.GrantActive})
+	e.Grants = append(e.Grants, accounts.VaultGrant{ToKind: in.ToKind, To: in.To, Workspace: in.Workspace})
 	if in.ToKind == accounts.ToMachine {
 		target := state(mac(g.w, in.To))
 		if target.Programs == nil {

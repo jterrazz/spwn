@@ -7,7 +7,8 @@ environment: HOME, PATH and every station path in a temporary folder, never the 
 
 SEEDS adds to a world what the specs' worlds lack for a page: machinefiles on This Mac, and the fake binaries
 of a fixture of specs/usecases/__fixtures__/; a world of SEEDS may be a world of specs/usecases/worlds/ under
-another name, seeded otherwise.
+another name, seeded otherwise. SWITCHES sets, in a world's This Mac, the accounts switches the fake reads
+(apps/engine/world/accounts.go): the presence check a grant asks, or a delivery that fails.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
 """
@@ -119,17 +120,25 @@ SEEDS = {
     "two-macs": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"])),
     "machinefile-kept": ("two-macs", "homebrew", applied(["lazygit", "bat"])),
     "machinefile-differs": ("two-macs", "homebrew", applied(["lazygit", "bat", "ripgrep", "fd"])),
+    "presence-refused": ("two-macs", None, {}),
     "stories-file": ("stories", "homebrew", machine("macbook-pro", ["gh", "lazygit", "ghostty"], "settings: { git-shortcuts: {} }\n")),
+}
+
+SWITCHES = {
+    "presence-refused": {"presence": "refused"},
 }
 
 
 def seeded(world):
     base, fixture, files = SEEDS.get(world, (world, None, {}))
+    switches = SWITCHES.get(world, {})
     seed = ROOT / "specs" / "usecases" / "worlds" / f"{base}.json"
-    if not files:
+    if not files and not switches:
         return seed, fixture
     content = json.loads(seed.read_text())
-    content["macs"][content["this_mac"]].setdefault("files", {}).update(files)
+    this = content["macs"][content["this_mac"]]
+    this.setdefault("files", {}).update(files)
+    this.setdefault("accounts", {}).update(switches)
     copy = temporary("window-seed-") / seed.name
     copy.write_text(json.dumps(content))
     return copy, fixture

@@ -61,3 +61,25 @@ func TestAProgramOffersAddFromASignInExactlyWhenItsDeliveryPrintsItsToken(t *tes
 		}
 	}
 }
+
+func TestAnEntryCountsWhatItsRemovalEnds(t *testing.T) {
+	machine := accounts.VaultGrant{ToKind: accounts.ToMachine, To: "linux-1"}
+	other := accounts.VaultGrant{ToKind: accounts.ToMachine, To: "linux-2"}
+	agent := accounts.VaultGrant{ToKind: accounts.ToAgent, To: "docs-bot", Workspace: "linux-1"}
+	for name, c := range map[string]struct {
+		grants []accounts.VaultGrant
+		reach  accounts.EntryReach
+		want   string
+	}{
+		"none":              {nil, accounts.ReachNotGranted, "Nothing else ends"},
+		"one machine":       {[]accounts.VaultGrant{machine}, accounts.ReachGranted, "Its grants end: 1 machine"},
+		"machines":          {[]accounts.VaultGrant{machine, other}, accounts.ReachGranted, "Its grants end: 2 machines"},
+		"one agent":         {[]accounts.VaultGrant{agent}, accounts.ReachGranted, "Its grants end: 1 agent"},
+		"a machine, agents": {[]accounts.VaultGrant{machine, agent, agent}, accounts.ReachGranted, "Its grants end: 1 machine and 2 agents"},
+	} {
+		got := accounts.DescribeEntry(accounts.VaultEntry{Grants: c.grants})
+		if got.RemoveSentence != c.want || got.Reach != c.reach {
+			t.Errorf("%s: %q, %q; want %q, %q", name, got.RemoveSentence, got.Reach, c.want, c.reach)
+		}
+	}
+}

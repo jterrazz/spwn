@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].accounts.passwords = [{"ID": "pw-1", "Label": "ci", "Program": "npm", "Kind": "token", "Added": "2026-10-30T09:00:00Z", "AgentGrantable": false, "Grants": [{"ToKind": "machine", "To": "linux-9", "State": "active"}]}] | .macs["jterrazz-mac-mini"].vms["linux-9"] = {"size": {"CPUs": 2, "Memory": 4294967296, "Disk": 20000000000}, "pid": 8}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].accounts.passwords = [{"ID": "pw-1", "Label": "ci", "Program": "npm", "Kind": "token", "Added": "2026-10-30T09:00:00Z", "AgentGrantable": false, "Grants": [{"ToKind": "machine", "To": "linux-9"}]}] | .macs["jterrazz-mac-mini"].vms["linux-9"] = {"size": {"CPUs": 2, "Memory": 4294967296, "Disk": 20000000000}, "pid": 8}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0

@@ -226,6 +226,9 @@ GESTURES = {
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
     ],
+    "presence-refused": [
+        {"call": "grants.add", "in": {"Entry": "pw-1", "ToKind": "machine", "To": "linux-1"}},
+    ],
     "stories": [
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "4321"}},
         {"call": "ports.share", "in": {"VM": "linux-3", "Port": "5432"}, **at("mac-mini")},

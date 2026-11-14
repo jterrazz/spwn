@@ -3,15 +3,15 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Removed[] | [.ToKind, .To, .State]] else .error | {code, subject, message} end'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Removed[] | [.ToKind, .To]] else .error | {code, subject, message} end'''
       stdin: |
           {"v":2,"id":"1","call":"vault.remove","in":{"ID":"pw-2"}}
       exit: 0
       stdout: |
           {"code":"confirm.yes-needed","subject":"pw-2","message":"refusing without --yes: pw-2"}
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To, .State]]]]}'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To]]]]}'''
       stdin: |
           {"v":2,"id":"1","watch":"vault.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1","active"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}
+          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}

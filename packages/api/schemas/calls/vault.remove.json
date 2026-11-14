@@ -21,13 +21,6 @@
     "accounts.VaultGrant": {
       "additionalProperties": false,
       "properties": {
-        "State": {
-          "enum": [
-            "active",
-            "failing"
-          ],
-          "type": "string"
-        },
         "To": {
           "type": "string"
         },
@@ -43,7 +36,6 @@
         }
       },
       "required": [
-        "State",
         "To",
         "ToKind"
       ],
