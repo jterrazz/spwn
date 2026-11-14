@@ -34,6 +34,18 @@ function Shelf({
     );
 }
 
+function Files({
+    file,
+    go,
+    newMachine,
+}: {
+    file: string | undefined;
+    go: PageProps['go'];
+    newMachine: PageProps['newMachine'];
+}) {
+    return <MachineFilesPage go={go} key={file ?? ''} onNewMachine={newMachine} opened={file} />;
+}
+
 function Head({ route, found, go, newMachine }: PageProps) {
     return route.page === 'machine' && found ? (
         <MachineHeader found={found} go={go} onNewMachine={newMachine} tab={route.tab} />
@@ -72,13 +84,7 @@ function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps
             );
         }
         case 'machine-files': {
-            return (
-                <MachineFilesPage
-                    key={route.file ?? ''}
-                    onNewMachine={newMachine}
-                    opened={route.file}
-                />
-            );
+            return <Files file={route.file} go={go} newMachine={newMachine} />;
         }
         case 'catalog-apps': {
             return <Shelf go={go} item={route.item} macs={home.macs} shelf="apps" />;

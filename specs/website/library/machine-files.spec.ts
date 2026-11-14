@@ -84,9 +84,23 @@ describe('machine files', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'D12 window differs: a line of a chapter is plain text, where the mockup and the row open its catalog page (the chapter list has no route to give, a shell change)',
-    );
+    test('D12 every line of a chapter opens its catalog page', async () => {
+        // Given - the Settings chapter of the file macbook-pro over stories-file
+        const result = await website.visit(
+            '/?world=stories-file&page=machine-files&file=macbook-pro',
+            async (visitor) => {
+                const puts = region('What it puts on a machine');
+                await visitor.click(within(puts, button('Settings1')));
+
+                // When - its line git-shortcuts is pressed
+                await visitor.click(within(puts, button('git-shortcuts', { exact: false })));
+
+                // Then - the catalog page of that setting opens
+                await visitor.see(heading('git-shortcuts setting'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo(`D18 waits for ${FILES}`);
 

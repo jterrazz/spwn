@@ -9,6 +9,7 @@ import { makesAVm } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { machineKindWord } from '../../engine/shown';
+import type { Route } from '../../shell/route';
 import type { Opening } from '../../shell/window';
 import {
     Absent,
@@ -20,14 +21,16 @@ import {
 import { LayerList } from '../packages/layers';
 import { categoriesOf, countOn, layersOf, onShelf } from '../packages/model';
 import { Page } from '../page';
-import { CHAPTERS, descriptionsOf, extendedBy, factsOf, filesOf } from './model';
+import { catalogRouteOf, CHAPTERS, descriptionsOf, extendedBy, factsOf, filesOf } from './model';
 import type { Chapter, Extended } from './model';
 
 import styles from './machine-files.module.css';
 
 const RECIPE = 'A machine file is the recipe a machine is made from';
 
-function Chapters({ plan, file }: { plan: MachinefilePlan; file: string }) {
+type Go = (to: Route) => void;
+
+function Chapters({ plan, file, go }: { plan: MachinefilePlan; file: string; go: Go }) {
     const [chapter, setChapter] = useState<Chapter>('Apps');
     const apps = useWatch('apps.list', {});
     const reports = apps.kind === 'read' ? (apps.out ?? []) : [];
@@ -56,7 +59,14 @@ function Chapters({ plan, file }: { plan: MachinefilePlan; file: string }) {
             ) : (
                 <LayerList
                     layers={onShelf(layers, chapter, categories)}
-                    look={{ descriptions: descriptionsOf(reports), file, kind: 'file' }}
+                    look={{
+                        descriptions: descriptionsOf(reports),
+                        file,
+                        kind: 'file',
+                        open: (name) => {
+                            go(catalogRouteOf(chapter, name));
+                        },
+                    }}
                     shelf={chapter}
                 />
             )}
@@ -191,11 +201,13 @@ function File({
     bound,
     file,
     choose,
+    go,
     onNewMachine,
 }: {
     bound: MachinefileCallsExplainOut;
     file: string;
     choose: (file: string) => void;
+    go: Go;
     onNewMachine?: ((opening: Opening) => void) | undefined;
 }) {
     const input = { Machinefile: file };
@@ -221,7 +233,7 @@ function File({
                 what="The machines made from it, and whether each matches it"
             />
             {drift.kind === 'read' ? (
-                <Chapters file={file} plan={drift.out.Plan} />
+                <Chapters file={file} go={go} plan={drift.out.Plan} />
             ) : drift.kind === 'failed' ? (
                 <Unanswered error={drift.error} size="tab" />
             ) : (
@@ -232,9 +244,11 @@ function File({
 }
 
 export function MachineFilesPage({
+    go,
     opened,
     onNewMachine,
 }: {
+    go: Go;
     opened?: string | undefined;
     onNewMachine?: ((opening: Opening) => void) | undefined;
 }) {
@@ -259,7 +273,13 @@ export function MachineFilesPage({
     return (
         <Page>
             <NoVerdict line={RECIPE} size="page" />
-            <File bound={explain.out} choose={setChosen} file={file} onNewMachine={onNewMachine} />
+            <File
+                bound={explain.out}
+                choose={setChosen}
+                file={file}
+                go={go}
+                onNewMachine={onNewMachine}
+            />
         </Page>
     );
 }

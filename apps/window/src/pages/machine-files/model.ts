@@ -8,11 +8,23 @@ import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
 import { wordOfSent } from '../../engine/engine-words';
 import { SEPARATOR } from '../../separator';
+import type { PlainPage, Route } from '../../shell/route';
 import { SHELVES } from '../packages/model';
+import type { Shelf } from '../packages/model';
 
 export const CHAPTERS = [...SHELVES, 'Access'] as const;
 
 export type Chapter = (typeof CHAPTERS)[number];
+
+const CATALOG_PAGES: Readonly<Record<Shelf, PlainPage>> = {
+    Apps: 'catalog-apps',
+    Settings: 'catalog-settings',
+    Skills: 'catalog-skills',
+};
+
+export function catalogRouteOf(shelf: Shelf, name: string): Route {
+    return { item: name, page: CATALOG_PAGES[shelf] };
+}
 
 export type Extended = { name: string; identity: Identity };
 

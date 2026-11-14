@@ -28,7 +28,9 @@
       - button "Access"
     - region "jterrazz-base":
       - paragraph: jterrazz-base extended · 2
-      - text: homebrew manager macOS package manager any version jq Command-line JSON processor any version
+      - button "homebrew manager macOS package manager any version"
+      - button "jq Command-line JSON processor any version"
     - region "jterrazz-macbook-pro":
       - paragraph: jterrazz-macbook-pro this file · 2
-      - text: lazygit Terminal UI for git any version bat Cat clone with syntax highlighting any version
+      - button "lazygit Terminal UI for git any version"
+      - button "bat Cat clone with syntax highlighting any version"

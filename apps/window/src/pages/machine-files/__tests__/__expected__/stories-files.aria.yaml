@@ -28,7 +28,10 @@
       - button "Access"
     - region "macbook-pro":
       - paragraph: macbook-pro this file · 3
-      - text: gh GitHub CLI for repository management any version lazygit Terminal UI for git any version ghostty GPU-accelerated terminal emulator any version
+      - button "gh GitHub CLI for repository management any version"
+      - button "lazygit Terminal UI for git any version"
+      - button "ghostty GPU-accelerated terminal emulator any version"
     - region "jterrazz-base":
       - paragraph: jterrazz-base extended · 2
-      - text: homebrew manager macOS package manager any version jq Command-line JSON processor any version
+      - button "homebrew manager macOS package manager any version"
+      - button "jq Command-line JSON processor any version"

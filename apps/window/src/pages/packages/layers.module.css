@@ -21,6 +21,27 @@
     gap: var(--space-14);
     min-height: 40px;
 }
+.opens {
+    appearance: none;
+    background: none;
+    border: 0;
+    border-top: 1px solid var(--line);
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    width: calc(100% + 2 * var(--space-8));
+    margin: 0 calc(-1 * var(--space-8));
+    padding-inline: var(--space-8);
+    border-radius: var(--radius-well);
+    transition: background var(--motion-hover);
+}
+.opens:hover {
+    background: var(--raise);
+}
+.opens:active {
+    background: var(--raise-2);
+}
 .name {
     display: flex;
     align-items: center;

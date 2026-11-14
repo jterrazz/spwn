@@ -10,7 +10,12 @@ import type { Layer, Shelf } from './model';
 import styles from './layers.module.css';
 
 export type Look =
-    | { kind: 'file'; descriptions: ReadonlyMap<string, string>; file: string }
+    | {
+          kind: 'file';
+          descriptions: ReadonlyMap<string, string>;
+          file: string;
+          open: (name: string) => void;
+      }
     | { kind: 'machine'; differing: ReadonlySet<PlanLine> };
 
 const NO_LAYER_WORD = 'in no layer';
@@ -55,9 +60,17 @@ function MachineLine({ line, differs }: { line: PlanLine; differs: boolean }) {
     );
 }
 
-function FileLine({ line, description }: { line: PlanLine; description: string }) {
+type FileLineProps = { line: PlanLine; description: string; open: (name: string) => void };
+
+function FileLine({ line, description, open }: FileLineProps) {
     return (
-        <div className={`${styles.line} ${styles.file}`}>
+        <button
+            className={`${styles.line} ${styles.file} ${styles.opens}`}
+            onClick={() => {
+                open(line.Step.Package);
+            }}
+            type="button"
+        >
             <Name kinded line={line} />
             <span className={styles.description}>{description}</span>
             <span className={styles.end}>
@@ -65,7 +78,7 @@ function FileLine({ line, description }: { line: PlanLine; description: string }
                     {line.Step.Version === '' ? ANY_VERSION_WORD : line.Step.Version}
                 </Value>
             </span>
-        </div>
+        </button>
     );
 }
 
@@ -141,6 +154,7 @@ export function LayerList({
                                 description={look.descriptions.get(line.Step.Package) ?? ''}
                                 key={keyOf(line)}
                                 line={line}
+                                open={look.open}
                             />
                         ),
                     )}
