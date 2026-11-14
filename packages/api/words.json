@@ -1431,6 +1431,32 @@
       "Tone": "plain"
     }
   },
+  "MachinesHoldState": {
+    "always-on": {
+      "Word": "Always on",
+      "Tone": "plain"
+    },
+    "free": {
+      "Word": "Safe to delete",
+      "Tone": "ok"
+    },
+    "held": {
+      "Word": "Held",
+      "Tone": "warn"
+    },
+    "idle": {
+      "Word": "Idle",
+      "Tone": "plain"
+    },
+    "not-seen": {
+      "Word": "Not seen",
+      "Tone": "plain"
+    },
+    "yours": {
+      "Word": "Yours",
+      "Tone": "plain"
+    }
+  },
   "MachinesLifetime": {
     "always-on": {
       "Word": "always on",
@@ -1505,7 +1531,7 @@
       "Tone": "plain"
     },
     "unknown": {
-      "Word": "Unknown",
+      "Word": "Not seen",
       "Tone": "plain"
     }
   },

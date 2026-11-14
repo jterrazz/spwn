@@ -74,6 +74,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Laptop:      m.profile.Caps.Lid,
 		Asleep:      m.asleep,
 		LAN:         m.lanAddress,
+		Uses:        m.vmUses,
 		Uptime:      m.stores.uptime,
 		Waker:       m.waker(),
 		Terminals:   m.multiplexer(),
@@ -92,6 +93,26 @@ func (m machine) processes() contract.Processes {
 		return m.world.processes(kernel.Processes{})
 	}
 	return kernel.Processes{}
+}
+
+// value: the memory each VM's process holds on this Mac, as the meter
+// reads the process the engine runs it in; none on a machine that is not a
+// Mac, or while the engine does not answer.
+func (m machine) vmUses(ctx context.Context) map[string]int64 {
+	if m.profile.Kind != coremachine.Computer {
+		return nil
+	}
+	runs, err := engineRuns(m.engineAPI())(ctx)
+	if err != nil {
+		return nil
+	}
+	meter, out := m.meter(), map[string]int64{}
+	for _, run := range runs {
+		if u, err := meter.Process(ctx, run.Holder); err == nil {
+			out[run.VM] = u.Memory
+		}
+	}
+	return out
 }
 
 // value: engine start's own use case, run for a call that needs the engine

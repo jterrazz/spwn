@@ -222,13 +222,17 @@ func LatencyNote(vm VM) string {
 }
 
 func Judged(f AllMachines) AllMachines {
-	// value: f with each server's health verdict and latency note, on
-	// copies of its Macs and VMs.
+	// value: f with each server's health verdict and latency note, each
+	// VM's hold and sections, and each silent Mac's verdict, on copies of
+	// its Macs and VMs.
 	macs := slices.Clone(f.Macs)
 	for i := range macs {
+		macs[i].Unseen = UnseenVerdict(macs[i], f.Read)
 		vms := slices.Clone(macs[i].VMs)
 		for j := range vms {
 			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j]), LatencyNote(vms[j])
+			hold, sections := HoldOf(vms[j], f.Read), SectionsOf(vms[j])
+			vms[j].Hold, vms[j].Sections = &hold, &sections
 		}
 		macs[i].VMs = vms
 	}

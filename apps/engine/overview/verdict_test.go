@@ -86,16 +86,16 @@ func TestAWorkspaceIsIdleAnHourAfterItsAgentFinished(t *testing.T) {
 	if overview.UpkeepOf(f) != overview.CanWait {
 		t.Errorf("an idle workspace needs you; it can wait")
 	}
-	vm.Agent.Ended = now.Add(-overview.IdleAfter)
+	vm.Agent.Ended = now.Add(-machines.IdleAfter)
 	if _, ok := overview.Idle("macbook", vm, now); !ok {
-		t.Errorf("a workspace finished %s ago is not idle", overview.IdleAfter)
+		t.Errorf("a workspace finished %s ago is not idle", machines.IdleAfter)
 	}
-	vm.Agent.Ended = now.Add(-overview.IdleAfter + time.Minute)
+	vm.Agent.Ended = now.Add(-machines.IdleAfter + time.Minute)
 	if _, ok := overview.Idle("macbook", vm, now); ok {
-		t.Errorf("a workspace finished under %s ago is idle", overview.IdleAfter)
+		t.Errorf("a workspace finished under %s ago is idle", machines.IdleAfter)
 	}
-	if overview.IdleAfter != time.Hour {
-		t.Errorf("a workspace is idle after %s; the rule says an hour", overview.IdleAfter)
+	if machines.IdleAfter != time.Hour {
+		t.Errorf("a workspace is idle after %s; the rule says an hour", machines.IdleAfter)
 	}
 	vm.Agent.Ended = now.Add(-5 * time.Hour)
 	for name, other := range map[string]machines.VM{

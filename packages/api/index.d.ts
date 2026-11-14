@@ -1886,6 +1886,12 @@ export type MachinesFirstStartShare = {
     For: number;
 };
 
+export type MachinesHold = {
+    By?: string;
+    Sentence: string;
+    State: 'always-on' | 'held' | 'idle' | 'free' | 'yours' | 'not-seen';
+};
+
 export type MachinesIncident = {
     cause?: string;
     from: string;
@@ -1909,6 +1915,7 @@ export type MachinesMacView = {
     Reachable: boolean;
     StationVersion: string;
     ThisMac: boolean;
+    Unseen?: CoreVerdictVerdict;
     User: string;
     VMs: MachinesVM[] | null;
 };
@@ -1984,9 +1991,23 @@ export type MachinesSSHTarget = {
     User: string;
 };
 
+export type MachinesSections = {
+    Accounts: boolean;
+    Activity: boolean;
+    Apps: boolean;
+    Awake: boolean;
+    Background: boolean;
+    Disk: boolean;
+    Overview: boolean;
+    Ports: boolean;
+    SSH: boolean;
+    Settings: boolean;
+};
+
 export type MachinesShare = {
     Bytes: number;
     Name: string;
+    UsedBytes?: number;
 };
 
 export type MachinesUnlocked = {
@@ -2021,6 +2042,7 @@ export type MachinesVM = {
     Device: string;
     Guest: string;
     Health?: CoreVerdictVerdict;
+    Hold?: MachinesHold;
     IP: string;
     Image: string;
     Kind: 'mac' | 'linux' | 'macos';
@@ -2037,9 +2059,11 @@ export type MachinesVM = {
     Restart: MachinesRestartWalk | null;
     Restarts: MachinesRestarts;
     SSH: boolean;
+    Sections?: MachinesSections;
     SizeGB: number;
     State: 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
     Uptime: MachinesUptime;
+    UsedBytes?: number;
     Version: string;
     Want: string;
 };
@@ -3491,6 +3515,8 @@ export type MachinesCheckState = 'waiting' | 'passing' | 'failing';
 
 export type MachinesFit = 'fits' | 'no-room';
 
+export type MachinesHoldState = 'always-on' | 'held' | 'idle' | 'free' | 'yours' | 'not-seen';
+
 export type MachinesLifetime = 'ephemeral' | 'persistent' | 'always-on';
 
 export type MachinesPreset = 'small' | 'workspace' | 'gate';
@@ -3548,6 +3574,7 @@ export type StationWords = {
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
     MachinesCheckState: Record<MachinesCheckState, StationWord>;
     MachinesFit: Record<MachinesFit, StationWord>;
+    MachinesHoldState: Record<MachinesHoldState, StationWord>;
     MachinesLifetime: Record<MachinesLifetime, StationWord>;
     MachinesPreset: Record<MachinesPreset, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;

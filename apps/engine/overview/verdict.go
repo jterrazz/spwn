@@ -95,13 +95,13 @@ func NounOf(id section.ID) string {
 }
 
 func Idle(mac string, vm machines.VM, now time.Time) (finding.Finding, bool) {
-	// invariant: a workspace that runs on after its agent finished, for
-	// IdleAfter or longer, holds its memory for nothing: a need that can
-	// wait, its gesture the delete.
-	if vm.Lifetime == machines.AlwaysOn || vm.State != machines.Running || !vm.Finished() || vm.Agent.Ended.IsZero() || now.Sub(vm.Agent.Ended) < IdleAfter {
+	// invariant: a workspace idle by machines.IdleFor holds its memory for
+	// nothing: a need that can wait, its gesture the delete.
+	idle, ok := machines.IdleFor(vm, now)
+	if !ok {
 		return finding.Finding{}, false
 	}
-	hours := int(now.Sub(vm.Agent.Ended) / time.Hour)
+	hours := int(idle / time.Hour)
 	text := vm.Name + " has been idle for " + strconv.Itoa(hours) + " h and holds " + strconv.FormatInt(vm.Resources.MemoryBytes>>30, 10) + " GB"
 	return finding.Finding{Machine: machine.Ref{Name: vm.Name, On: mac}, Section: section.Overview, Severity: finding.NeedsALook, Subject: vm.Name, Text: text,
 		Fix: finding.Fix{Call: "machines.delete", Args: map[string]string{"VM": vm.Name}}}, true
@@ -109,12 +109,9 @@ func Idle(mac string, vm machines.VM, now time.Time) (finding.Finding, bool) {
 
 const (
 	SentenceEngineStopped = "The engine is stopped."
-	// value: how long a workspace's agent has been finished before the
-	// workspace is idle, a need that can wait.
-	IdleAfter         = time.Hour
-	LineEngineStopped = "Your VMs do not run and nothing is shared until it starts."
-	SentenceFine      = "Everything is fine."
-	SentenceReady     = "This Mac is ready."
+	LineEngineStopped     = "Your VMs do not run and nothing is shared until it starts."
+	SentenceFine          = "Everything is fine."
+	SentenceReady         = "This Mac is ready."
 )
 
 func VerdictOf(s Summary) verdict.Verdict {

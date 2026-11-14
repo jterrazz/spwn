@@ -69,7 +69,7 @@ func (s VMState) Word() string {
 		return "Creating"
 	case UnknownState:
 	}
-	return "Unknown"
+	return "Not seen"
 }
 
 type VM struct {
@@ -128,6 +128,14 @@ type VM struct {
 	// when there is too little of it to draw, empty otherwise.
 	Health      *verdict.Verdict `json:",omitempty"`
 	LatencyNote string           `json:",omitempty"`
+	// value: what keeps it, and so whether it is safe to delete; the
+	// sections its page has, by its kind; both judged by machines.list,
+	// nil in any other answer.
+	Hold     *Hold     `json:",omitempty"`
+	Sections *Sections `json:",omitempty"`
+	// value: the memory its process holds on its Mac now, in bytes, as that
+	// Mac's kernel measures it; zero when it does not run or is not measured.
+	UsedBytes int64 `json:",omitempty"`
 }
 
 type AgentView struct {
@@ -205,6 +213,10 @@ type MacView struct {
 	// value: SPEC B5.15: at its last answer it was on battery with its lid
 	// closed, so its silence since is sleep.
 	Asleep bool
+	// value: a Mac that does not answer, said in one verdict: since when
+	// it is not seen, and that nothing proves it is down; nil while it
+	// answers.
+	Unseen *verdict.Verdict `json:",omitempty"`
 }
 
 type AllMachines struct {

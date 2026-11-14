@@ -14,6 +14,9 @@ type Capacity struct {
 type Share struct {
 	Name  string
 	Bytes int64
+	// value: of Bytes, what the VM's process holds on its Mac now; zero
+	// when not measured.
+	UsedBytes int64 `json:",omitempty"`
 }
 
 // value: the least memory a VM is made with, in bytes: a create asking
@@ -141,7 +144,7 @@ func CapacityOf(h MacView) (Capacity, bool) {
 	free := c.Total - c.MacOS
 	for _, vm := range Ordered(h.VMs) {
 		if reserves(vm) {
-			c.VMs = append(c.VMs, Share{Name: vm.Name, Bytes: vm.Resources.MemoryBytes})
+			c.VMs = append(c.VMs, Share{Name: vm.Name, Bytes: vm.Resources.MemoryBytes, UsedBytes: min(vm.UsedBytes, vm.Resources.MemoryBytes)})
 			free -= vm.Resources.MemoryBytes
 		}
 	}
