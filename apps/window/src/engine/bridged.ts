@@ -54,6 +54,7 @@ export const BRIDGED = [
     'settings.matrix',
     'vault.add',
     'vault.list',
+    'vault.new',
     'vault.remove',
 ] as const satisfies readonly CallName[];
 

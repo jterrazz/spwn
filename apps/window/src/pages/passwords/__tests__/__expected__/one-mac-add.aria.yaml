@@ -1,0 +1,22 @@
+- heading "Passwords on jterrazz-macbook-pro" [level=1]
+- paragraph:
+  - img "No password kept yet"
+  - text: No password kept yet.
+- region "Passwords":
+  - heading "Passwords 0" [level=2]
+  - paragraph: "No value is shown, copied or revealed here: a password is only granted, and removed."
+- dialog "Add a password":
+  - heading "Add a password" [level=3]
+  - paragraph: It is kept in jterrazz-macbook-pro's Keychain; you can then grant it to a machine.
+  - region "From":
+    - text: From
+    - group "From":
+      - button "From a sign-in" [pressed]: From a sign-in Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.
+      - button "Typed": Typed A token you made yourself
+  - region "Sign-in":
+    - text: Sign-in
+    - paragraph: Sign in to a program on this Mac first; then its sign-in can be kept
+  - text: Label
+  - textbox "Label"
+  - button "Cancel"
+  - button "Add password" [disabled]

@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import type { ReactNode } from 'react';
 
 import styles from './picks.module.css';
 
@@ -6,6 +7,7 @@ export type Pick<T extends string> = {
     id: T;
     title: string;
     lines?: readonly string[];
+    lead?: ReactNode;
     disabled?: boolean;
 };
 
@@ -25,19 +27,8 @@ export function Picks<T extends string>({ label, look, options, value, onChange 
                 const lines = option.lines ?? [];
                 const described = `${id}-${option.id}-lines`;
                 const titled = `${id}-${option.id}-title`;
-                return (
-                    <button
-                        aria-describedby={lines.length > 0 ? described : undefined}
-                        aria-labelledby={titled}
-                        aria-pressed={option.id === value}
-                        className={styles.pick}
-                        disabled={option.disabled === true}
-                        key={option.id}
-                        onClick={() => {
-                            onChange(option.id);
-                        }}
-                        type="button"
-                    >
+                const text = (
+                    <>
                         <b className={styles.title} id={titled}>
                             {option.title}
                         </b>
@@ -48,6 +39,29 @@ export function Picks<T extends string>({ label, look, options, value, onChange 
                                 ))}
                             </span>
                         ) : null}
+                    </>
+                );
+                return (
+                    <button
+                        aria-describedby={lines.length > 0 ? described : undefined}
+                        aria-labelledby={titled}
+                        aria-pressed={option.id === value}
+                        className={`${styles.pick} ${option.lead === undefined ? '' : styles.led}`}
+                        disabled={option.disabled === true}
+                        key={option.id}
+                        onClick={() => {
+                            onChange(option.id);
+                        }}
+                        type="button"
+                    >
+                        {option.lead === undefined ? (
+                            text
+                        ) : (
+                            <>
+                                {option.lead}
+                                <span className={styles.text}>{text}</span>
+                            </>
+                        )}
                     </button>
                 );
             })}

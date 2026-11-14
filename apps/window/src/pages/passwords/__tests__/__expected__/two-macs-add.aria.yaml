@@ -11,27 +11,18 @@
   - paragraph: "No value is shown, copied or revealed here: a password is only granted, and removed."
 - dialog "Add a password":
   - heading "Add a password" [level=3]
-  - region "Program":
-    - text: Program
-    - group "Program":
-      - button "GitHub" [pressed]
-      - button "npm"
-      - button "Claude"
-      - button "Cloudflare"
+  - paragraph: It is kept in jterrazz-macbook-pro's Keychain; you can then grant it to a machine.
   - region "From":
     - text: From
     - group "From":
       - button "From a sign-in" [pressed]: From a sign-in Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.
-      - button "Typed"
-  - region "Kind":
-    - text: Kind
-    - group "Kind":
-      - button "API key"
-      - button "fine-grained token"
-      - button "OAuth token"
-      - button "password"
-      - button "token"
+      - button "Typed": Typed A token you made yourself
+  - region "Sign-in":
+    - text: Sign-in
+    - group "Sign-in":
+      - button "gh" [pressed]: gh jterrazz · repo
+    - paragraph: Kept as an OAuth token, the kind gh holds
   - text: Label
-  - textbox "Label"
+  - textbox "Label": GitHub · jterrazz
   - button "Cancel"
-  - button "Add password" [disabled]
+  - button "Add password"

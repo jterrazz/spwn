@@ -13,10 +13,11 @@ import { PAGES } from '../../registry';
 import { AddPasswordSheet } from '../add-sheet';
 import { PasswordsPage } from '../passwords';
 
-const recordingFor = await recordingsOf('two-macs');
+const recordingFor = await recordingsOf('two-macs', 'one-mac');
 
 const SHEET = dialog('Add a password');
 const VALUE = field('Value');
+const LABEL = field('Label');
 const TYPED = 'good';
 
 // value: what a test saw of the password field while the sheet was open: the element, and the page's markup then.
@@ -84,39 +85,40 @@ describe('add password sheet', () => {
                 // When - Add a password is pressed in the toolbar
                 await visitor.click(button('Add a password'));
 
-                // Then - the sheet opens on the programs the engine lists
-                await visitor.see(within(SHEET, button('Cloudflare')));
+                // Then - the sheet opens on the engine's offer, its intro under the title
+                await visitor.see(within(SHEET, content('It is kept in', { exact: false })));
+                await visitor.see(within(SHEET, button('Typed', { exact: false })));
             },
         );
         expect(result.errors.text).toBe('');
     });
 
-    test('the sheet draws the programs, the ways in, the kinds and the label, and no value from a sign-in', async () => {
-        // Given - the sheet over two-macs, gh the first program the engine lists
+    test('the sheet draws the two ways, the sign-in the Mac can keep with its sentence and a proposed label, and no value', async () => {
+        // Given - the sheet over two-macs, gh the one sign-in this Mac can keep
         const seen = unseen();
         const result = await component.render(vaultOver(), async (visitor) => {
             // When - it is drawn
-            await visitor.see(within(SHEET, content('Station takes the token', { exact: false })));
+            await visitor.see(within(SHEET, content('Kept as an OAuth token', { exact: false })));
             look(seen);
 
-            // Then - the sheet offers both ways for gh, and every kind
+            // Then - both ways, the sign-in's card, and no kind to choose
             await visitor.see(within(SHEET, button('Typed', { exact: false })));
-            await visitor.see(within(SHEET, button('fine-grained token')));
+            await visitor.see(within(SHEET, button('gh', { exact: false })));
+            await visitor.gone(within(SHEET, button('fine-grained token')));
         });
         expect(result.errors.text).toBe('');
         expect(seen.input).toBeNull();
         await expect(result.tree).toMatch(file('./__expected__/two-macs-add.aria.yaml'));
     });
 
-    test('a program that captures adds from its sign-in by default, and sends no value', async () => {
+    test('a sign-in kept adds with its program alone: no kind, no value', async () => {
         // Given - the sheet over two-macs
         const stage = stagedReplay(recordingFor('two-macs'));
         const result = await component.render(vaultOver(stage), async (visitor) => {
-            await visitor.see(within(SHEET, content('Station takes the token', { exact: false })));
+            await visitor.see(within(SHEET, content('Kept as an OAuth token', { exact: false })));
 
-            // When - its kind and label are given, and it is added
-            await visitor.click(within(SHEET, button('token')));
-            await visitor.fill(within(SHEET, field('Label')), 'GitHub sign-in');
+            // When - the label is typed over the proposal, and it is added
+            await visitor.fill(within(SHEET, LABEL), 'GitHub sign-in');
             await visitor.click(within(SHEET, button('Add password')));
 
             // Then - the sheet is gone, and the vault lists the new password
@@ -128,34 +130,66 @@ describe('add password sheet', () => {
         expect(result.errors.text).toBe('');
         expect(addsOf(stage)).toStrictEqual([
             expect.objectContaining({
-                in: { From: 'sign-in', Kind: 'token', Label: 'GitHub sign-in', Program: 'gh' },
+                in: { From: 'sign-in', Label: 'GitHub sign-in', Program: 'gh' },
             }),
         ]);
     });
 
-    test('a program that cannot be captured offers only the typed way', async () => {
+    test('with no sign-in to keep the way stays, says so, and Add stays off', async () => {
+        // Given - the sheet over one-mac, where no program is signed in
+        const stage = stagedReplay(recordingFor('one-mac'));
+        const result = await component.render(vaultOver(stage), async (visitor) => {
+            // When - it is drawn
+            await visitor.see(
+                within(SHEET, content('Sign in to a program on this Mac first', { exact: false })),
+            );
+
+            // Then - both ways are there
+            await visitor.see(within(SHEET, button('Typed', { exact: false })));
+        });
+        expect(result.errors.text).toBe('');
+        expect(addsOf(stage)).toStrictEqual([]);
+        await expect(result.tree).toMatch(file('./__expected__/one-mac-add.aria.yaml'));
+    });
+
+    test('a typed program offers its kinds, and none when it has one', async () => {
         // Given - the sheet over two-macs
         const result = await component.render(vaultOver(), async (visitor) => {
-            // When - npm is picked
+            // When - the typed way is picked, then npm
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
             await visitor.click(within(SHEET, button('npm')));
 
-            // Then - the typed way alone, and its password field
+            // Then - its kinds, and its password field
+            await visitor.see(within(SHEET, button('fine-grained token')));
             await visitor.see(within(SHEET, VALUE));
-            await visitor.gone(within(SHEET, button('From a sign-in', { exact: false })));
         });
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(file('./__expected__/two-macs-add-typed.aria.yaml'));
     });
 
+    test('a program with one kind draws no kind row', async () => {
+        // Given - the sheet over two-macs, the typed way
+        const result = await component.render(vaultOver(), async (visitor) => {
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
+
+            // When - Claude is picked
+            await visitor.click(within(SHEET, button('Claude')));
+
+            // Then - no kind to choose
+            await visitor.gone(within(SHEET, button('OAuth token')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     // invariant: the three conditions of a typed password: an uncontrolled password field, one request, emptied.
     test('a typed value lives in the field alone, leaves in one request, and the field is emptied', async () => {
-        // Given - the sheet over two-macs, Cloudflare picked as an API key, its value typed
+        // Given - the sheet over two-macs, Cloudflare typed under its default kind, its value typed
         const stage = stagedReplay(recordingFor('two-macs'));
         const seen = unseen();
         const result = await component.render(vaultOver(stage), async (visitor) => {
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
             await visitor.click(within(SHEET, button('Cloudflare')));
-            await visitor.click(within(SHEET, button('API key')));
-            await visitor.fill(within(SHEET, field('Label')), 'Cloudflare deploy');
+            await visitor.fill(within(SHEET, LABEL), 'Cloudflare deploy');
             await visitor.fill(within(SHEET, VALUE), TYPED);
             look(seen);
 
@@ -182,7 +216,7 @@ describe('add password sheet', () => {
             expect.objectContaining({
                 in: {
                     From: 'typed',
-                    Kind: 'api-key',
+                    Kind: 'token',
                     Label: 'Cloudflare deploy',
                     Program: 'wrangler',
                     Value: TYPED,
@@ -195,9 +229,9 @@ describe('add password sheet', () => {
         // Given - the sheet over two-macs, npm typed under a label the vault already holds
         const seen = unseen();
         const result = await component.render(vaultOver(), async (visitor) => {
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
             await visitor.click(within(SHEET, button('npm')));
-            await visitor.click(within(SHEET, button('token')));
-            await visitor.fill(within(SHEET, field('Label')), 'GitHub deploy');
+            await visitor.fill(within(SHEET, LABEL), 'GitHub deploy');
             await visitor.fill(within(SHEET, VALUE), TYPED);
             look(seen);
 
@@ -218,12 +252,34 @@ describe('add password sheet', () => {
         );
     });
 
+    test('an empty label is refused on the label, in the engine words', async () => {
+        // Given - the sheet over two-macs, npm typed with a value and no label
+        const seen = unseen();
+        const result = await component.render(vaultOver(), async (visitor) => {
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
+            await visitor.click(within(SHEET, button('npm')));
+            await visitor.fill(within(SHEET, VALUE), TYPED);
+            look(seen);
+
+            // When - it is added
+            await visitor.click(within(SHEET, button('Add password')));
+
+            // Then - the engine's refusal, in its words
+            await visitor.see(within(SHEET, content('a password needs a label', { exact: false })));
+        });
+        expect(result.errors.text).toBe('');
+        expect(seen.input?.value).toBe('');
+        await expect(result.tree).toMatch(
+            file('./__expected__/two-macs-add-empty-label.aria.yaml'),
+        );
+    });
+
     test('an empty value is refused on the value field', async () => {
         // Given - the sheet over two-macs, npm typed with nothing in its field
         const result = await component.render(vaultOver(), async (visitor) => {
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
             await visitor.click(within(SHEET, button('npm')));
-            await visitor.click(within(SHEET, button('token')));
-            await visitor.fill(within(SHEET, field('Label')), 'npm deploy');
+            await visitor.fill(within(SHEET, LABEL), 'npm deploy');
 
             // When - it is added
             await visitor.click(within(SHEET, button('Add password')));
@@ -240,10 +296,10 @@ describe('add password sheet', () => {
     });
 
     test('cancel empties the field before the sheet goes', async () => {
-        // Given - the sheet over two-macs, a value typed for npm
+        // Given - the sheet over two-macs, a value typed for the first program
         const seen = unseen();
         const result = await component.render(vaultOver(), async (visitor) => {
-            await visitor.click(within(SHEET, button('npm')));
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
             await visitor.fill(within(SHEET, VALUE), TYPED);
             look(seen);
 
@@ -258,7 +314,7 @@ describe('add password sheet', () => {
     });
 
     test('a way that sends no value empties the field it leaves', async () => {
-        // Given - the sheet over two-macs, a value typed for gh
+        // Given - the sheet over two-macs, a value typed
         const seen = unseen();
         const result = await component.render(vaultOver(), async (visitor) => {
             await visitor.click(within(SHEET, button('Typed', { exact: false })));

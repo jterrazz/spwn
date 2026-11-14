@@ -113,14 +113,14 @@ describe('passwords', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('D32 a password added from a sign-in asks no value, and joins the list', async () => {
-        // Given - the Passwords page over two-macs, gh the first program listed
+    test('D32 a password added from a sign-in asks no kind and no value, and joins the list', async () => {
+        // Given - the Passwords page over two-macs, gh signed in on this Mac
         const result = await website.visit('/?world=two-macs&page=passwords', async (visitor) => {
             await visitor.click(button('Add a password'));
 
-            // When - its kind and label are given, and it is added from the sign-in
-            await visitor.see(within(SHEET, content('Station takes the token', { exact: false })));
-            await visitor.click(within(SHEET, button('token')));
+            // When - its sentence is read, a label is given over the proposal, and it is added
+            await visitor.see(within(SHEET, content('Kept as an OAuth token', { exact: false })));
+            await visitor.gone(within(SHEET, button('fine-grained token')));
             await visitor.fill(within(SHEET, field('Label')), 'GitHub sign-in');
             await visitor.click(within(SHEET, button('Add password')));
 
@@ -137,8 +137,8 @@ describe('passwords', () => {
         // Given - the Add a password sheet over two-macs, on Cloudflare
         const result = await website.visit('/?world=two-macs&page=passwords', async (visitor) => {
             await visitor.click(button('Add a password'));
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
             await visitor.click(within(SHEET, button('Cloudflare')));
-            await visitor.click(within(SHEET, button('API key')));
             await visitor.fill(within(SHEET, field('Label')), 'Cloudflare deploy');
 
             // When - its value is typed, and it is added
@@ -155,17 +155,20 @@ describe('passwords', () => {
         expect(result.html.text).not.toContain('good');
     });
 
-    test('D34 a program that cannot be captured offers only the typed way', async () => {
-        // Given - the Add a password sheet over two-macs
+    test('D34 a typed program offers its kinds, and none when it has one', async () => {
+        // Given - the Add a password sheet over two-macs, the typed way
         const result = await website.visit('/?world=two-macs&page=passwords', async (visitor) => {
             await visitor.click(button('Add a password'));
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
 
-            // When - npm is picked
+            // When - npm is picked, then Claude
             await visitor.click(within(SHEET, button('npm')));
 
-            // Then - Typed alone, with its value field
+            // Then - npm offers its kinds, with its value field; Claude, with one kind, offers none
             await visitor.see(within(SHEET, field('Value')));
-            await visitor.gone(within(SHEET, button('From a sign-in', { exact: false })));
+            await visitor.see(within(SHEET, button('fine-grained token')));
+            await visitor.click(within(SHEET, button('Claude')));
+            await visitor.gone(within(SHEET, button('fine-grained token')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -176,8 +179,8 @@ describe('passwords', () => {
             '/?world=two-macs&page=passwords&pace=600',
             async (visitor) => {
                 await visitor.click(button('Add a password'));
+                await visitor.click(within(SHEET, button('Typed', { exact: false })));
                 await visitor.click(within(SHEET, button('npm')));
-                await visitor.click(within(SHEET, button('token')));
                 await visitor.fill(within(SHEET, field('Label')), 'GitHub deploy');
                 await visitor.fill(within(SHEET, field('Value')), 'good');
 
@@ -193,5 +196,45 @@ describe('passwords', () => {
         );
         expect(result.errors.text).toBe('');
         expect(result.html.text).not.toContain('good');
+    });
+
+    test('D36 an empty label is refused on the label, the sheet open and the value gone', async () => {
+        // Given - npm typed with a value and no label
+        const result = await website.visit(
+            '/?world=two-macs&page=passwords&pace=600',
+            async (visitor) => {
+                await visitor.click(button('Add a password'));
+                await visitor.click(within(SHEET, button('Typed', { exact: false })));
+                await visitor.click(within(SHEET, button('npm')));
+                await visitor.fill(within(SHEET, field('Value')), 'good');
+
+                // When - it is added
+                await visitor.click(within(SHEET, button('Add password')));
+
+                // Then - the engine's refusal, and the sheet still open
+                await visitor.see(
+                    within(SHEET, content('a password needs a label', { exact: false })),
+                );
+                await visitor.see(within(SHEET, field('Value')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+        expect(result.html.text).not.toContain('good');
+    });
+
+    test('D37 with no sign-in to keep on this Mac the way stays, says so, and Add stays off', async () => {
+        // Given - the Add a password sheet over one-mac, no program signed in
+        const result = await website.visit('/?world=one-mac&page=passwords', async (visitor) => {
+            await visitor.click(button('Add a password'));
+
+            // Then - the engine's line under the way, both ways drawn, and Add disabled
+            await visitor.see(
+                within(SHEET, content('Sign in to a program on this Mac first', { exact: false })),
+            );
+            await visitor.see(within(SHEET, button('Typed', { exact: false })));
+            const add = disabled(button('Add password'));
+            await visitor.see(within(SHEET, add));
+        });
+        expect(result.errors.text).toBe('');
     });
 });

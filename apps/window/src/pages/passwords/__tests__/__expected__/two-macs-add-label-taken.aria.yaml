@@ -11,6 +11,12 @@
   - paragraph: "No value is shown, copied or revealed here: a password is only granted, and removed."
 - dialog "Add a password":
   - heading "Add a password" [level=3]
+  - paragraph: It is kept in jterrazz-macbook-pro's Keychain; you can then grant it to a machine.
+  - region "From":
+    - text: From
+    - group "From":
+      - button "From a sign-in": From a sign-in Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.
+      - button "Typed" [pressed]: Typed A token you made yourself
   - region "Program":
     - text: Program
     - group "Program":
@@ -18,18 +24,11 @@
       - button "npm" [pressed]
       - button "Claude"
       - button "Cloudflare"
-  - region "From":
-    - text: From
-    - group "From":
-      - button "Typed" [pressed]
   - region "Kind":
     - text: Kind
     - group "Kind":
-      - button "API key"
-      - button "fine-grained token"
-      - button "OAuth token"
-      - button "password"
       - button "token" [pressed]
+      - button "fine-grained token"
   - text: Value
   - textbox "Value"
   - text: Label
