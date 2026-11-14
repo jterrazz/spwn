@@ -93,7 +93,7 @@ describe('machine', () => {
             overviewOver('stories', 'linux-1'),
             async (visitor) => {
                 // When - its overview and its file have been read
-                await visitor.see(content('No verdict from the engine.'));
+                await visitor.see(content('Everything is fine.'));
                 await visitor.see(content('Why it exists'));
                 await visitor.see(content('8 differences from linux-dev.'));
             },

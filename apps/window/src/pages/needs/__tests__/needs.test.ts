@@ -16,6 +16,8 @@ function need(Machine: string, change: Partial<OverviewNeed> = {}): OverviewNeed
         Severity: 'needs-a-look',
         Subject: Machine,
         Text: `${Machine} needs a look`,
+        Upkeep: 'needs-you',
+        Verb: 'fix',
         ...change,
     };
 }

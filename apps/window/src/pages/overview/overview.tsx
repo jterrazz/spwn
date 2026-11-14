@@ -5,12 +5,13 @@ import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { isStopped, targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
+import { needsYou } from '../../model/upkeep';
 import type { Route } from '../../shell/route';
 import { ActivityTiles } from '../activity/tiles';
 import { DiskTile } from '../disk/disk-tile';
 import { MemoryPanel } from '../home/memory';
 import { HeldOutcomes } from '../kit/gestures';
-import { NoVerdict, Reading, Unanswered } from '../kit/readings';
+import { NoVerdict, Reading, SummaryHead, Unanswered } from '../kit/readings';
 import { DeleteGesture } from '../machine/gestures';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
@@ -33,9 +34,9 @@ function Head({ overview, name }: { overview: Answer; name: string }) {
     if (overview.kind === 'reading') {
         return <Reading size="tab" what={name} />;
     }
-    const { Creating } = overview.out;
+    const { Creating, Summary } = overview.out;
     return Creating === null ? (
-        <NoVerdict size="tab" />
+        <SummaryHead size="tab" summary={Summary} />
     ) : (
         <NoVerdict line={Creating.sentence} size="tab" />
     );
@@ -57,7 +58,7 @@ function NeedsOf({ overview, mac, name, title, go }: NeedsOfProps) {
         <Needs
             go={go}
             macs={[mac]}
-            needs={overview.out.Summary.Needs ?? []}
+            needs={needsYou(overview.out.Summary.Needs ?? [])}
             note=""
             on={name}
             title={title}

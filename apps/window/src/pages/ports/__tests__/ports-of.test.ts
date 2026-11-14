@@ -65,6 +65,7 @@ const LISTING: PortsListing = {
         State: '',
         Variant: '',
     },
+    verdict: { Sentence: 'One port listens.', Tone: 'ok' },
 };
 
 describe('ports of', () => {

@@ -2,7 +2,7 @@ import type { CallName, MachinesMacView, OverviewNeed, Target } from '@jterrazz/
 import type { ReactNode } from 'react';
 
 import { CopyButton } from '../../design/copy-button';
-import { Button, Row, Value } from '../../design/index';
+import { Row, Value } from '../../design/index';
 import type { RowProps } from '../../design/row';
 import type { In, ReadName } from '../../engine/client';
 import { wordOf } from '../../engine/engine-words';
@@ -10,7 +10,6 @@ import { moveInputOf, removeInputOf, startInputOf, updateInputOf } from '../../e
 import type { NeedCall } from '../../engine/provisional';
 import { needState } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
-import { NEED_CALL_VERBS, NEED_UNWIRED_WORD } from '../../engine/words';
 import { sentence } from '../../model/format';
 import { findMachine, targetOf } from '../../model/machines';
 import { GestureButton, GestureRow } from '../kit/gestures';
@@ -40,6 +39,10 @@ function rowOf({ need, onOpen }: Props, gesture: ReactNode): RowProps {
     };
 }
 
+function verbOf(need: OverviewNeed): string {
+    return wordOf('OverviewVerb', need.Verb).Word;
+}
+
 function needTarget(need: OverviewNeed, macs: readonly MachinesMacView[]): Target | undefined {
     const found = findMachine(macs, need.Machine);
     return found ? targetOf(found) : { name: need.Machine };
@@ -59,7 +62,7 @@ function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
         subject: need.Subject,
         target: needTarget(need, macs),
     });
-    const verb = NEED_CALL_VERBS[call];
+    const verb = verbOf(need);
     return (
         <GestureRow
             gesture={fix}
@@ -94,7 +97,7 @@ function Call(props: Props) {
     if (start) {
         return <Fix {...props} call="engine.start" input={start} rereads={START_REREADS} />;
     }
-    return <Row {...rowOf(props, <Button disabled>{NEED_UNWIRED_WORD}</Button>)} />;
+    return <Said {...props} />;
 }
 
 function Command({ text }: { text: string }) {
@@ -106,14 +109,17 @@ function Command({ text }: { text: string }) {
     );
 }
 
-export function NeedLine(props: Props) {
+function Said(props: Props) {
     const gesture = gestureOf(props.need);
-    if (gesture === undefined) {
-        return <Row {...rowOf(props, undefined)} />;
-    }
-    return 'call' in gesture ? (
-        <Call {...props} />
-    ) : (
-        <Row {...rowOf(props, <Command text={gesture.text} />)} />
-    );
+    const said =
+        gesture !== undefined && 'text' in gesture ? (
+            <Command text={gesture.text} />
+        ) : (
+            <span className={styles.verb}>{verbOf(props.need)}</span>
+        );
+    return <Row {...rowOf(props, said)} />;
+}
+
+export function NeedLine(props: Props) {
+    return props.need.Call === '' ? <Said {...props} /> : <Call {...props} />;
 }

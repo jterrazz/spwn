@@ -44,14 +44,14 @@ function windowOver(world: string, initial: Route) {
 }
 
 describe('Window', () => {
-    test('a world with something broken lists what needs you, in the engine words', async () => {
-        // Given - the window on Home over two-macs, where npm's sign-in expired
+    test("a world whose needs can wait heads Home with the engine's verdict, in the engine words", async () => {
+        // Given - the window on Home over two-macs, where npm's sign-in expired and nothing presses
         const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
             // When - This Mac's overview has been read
-            await visitor.see(content('npm sign-in expired'));
+            await visitor.see(content('Everything is fine.'));
         });
 
-        // Then - Home holds the needs, the lines and the machines the engine answered
+        // Then - Home holds the verdict, the lines and the machines the engine answered
         await expect(result.tree).toMatch(file('./__expected__/two-macs-home.aria.yaml'));
     });
 
@@ -78,7 +78,7 @@ describe('Window', () => {
             }),
             async (visitor) => {
                 // When - its overview has been read
-                await visitor.see(content('No verdict from the engine.'));
+                await visitor.see(content('This Mac is ready.'));
                 await visitor.see(region('Packages'));
             },
         );
@@ -240,7 +240,7 @@ describe('Window', () => {
 
             // When - the mouse's back button is released, then its forward button
             globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 3 }));
-            await visitor.see(content('npm sign-in expired'));
+            await visitor.see(content('Everything is fine.'));
             globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 4 }));
 
             // Then - the window is on This Mac again
@@ -256,7 +256,7 @@ describe('Window', () => {
             windowOver('two-macs', { machine: 'gate9', page: 'machine', tab: 'Activity' }),
             async (visitor) => {
                 // When - machines.list has answered whole
-                await visitor.see(content('npm sign-in expired'));
+                await visitor.see(content('Everything is fine.'));
 
                 // Then - Home is shown, under the line that says why
                 await visitor.see(

@@ -8,7 +8,6 @@ import {
     field,
     heading,
     navigation,
-    region,
     waitUntil,
     within,
 } from '@jterrazz/test';
@@ -198,7 +197,7 @@ describe('gestures', () => {
 
             // Then - Home, and api is no machine of the sidebar any more
             const gone = within(sidebar, button('api Stopped'));
-            await visitor.see(region('Needs you'));
+            await visitor.see(content('Everything is fine.'));
             await visitor.gone(gone);
         });
         expect(result.errors.text).toBe('');

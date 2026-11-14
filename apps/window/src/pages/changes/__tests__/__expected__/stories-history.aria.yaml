@@ -1,8 +1,8 @@
 - main:
-  - heading "No verdict from the engine." [level=1]
+  - heading "Everything is fine." [level=1]
   - paragraph:
-    - img "Not given yet"
-    - text: What follows is what the engine answers, with no sentence that sums it up
+    - img "Everything is fine."
+    - text: 4 things can wait.
   - group "Which machines":
     - button "All machines" [pressed]
     - button "macbook-pro"
@@ -10,6 +10,9 @@
     - button "macbook-air"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
+    - paragraph: No need is listed.
+  - region "Can wait":
+    - heading "Can wait 4" [level=2]
     - button "Broken npm sign-in expired macbook-pro · Accounts"
     - text: npm login
     - button "Copy npm login": Copy
@@ -20,9 +23,6 @@
     - 'button "Needs a look Firewall: off macbook-pro · Settings"'
     - text: System Settings > Network > Firewall
     - button "Copy System Settings > Network > Firewall": Copy
-  - region "Can wait":
-    - heading "Can wait" [level=2]
-    - paragraph: Not given yet What can wait, apart from what needs you
   - region "History":
     - heading "History what happened, newest first" [level=2]
     - region "Today":

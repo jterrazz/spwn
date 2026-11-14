@@ -8,19 +8,23 @@ const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'two-macs');
 
 const needs = region('Needs you');
 
+const waiting = region('Can wait');
+
 function inboxOver(world: string) {
     return pageOver(recordingFor(world), { page: 'inbox' });
 }
 
 describe('Inbox', () => {
-    test('a world with something broken lists each need with its machine and its gesture', async () => {
-        // Given - the Inbox over two-macs, where npm's sign-in expired
+    test("a world whose needs can wait lists them under Can wait, in the engine's head", async () => {
+        // Given - the Inbox over two-macs, where npm's sign-in expired and nothing else presses
         const result = await component.render(inboxOver('two-macs'), async (visitor) => {
             // When - This Mac's overview has been read
-            await visitor.see(within(needs, content('npm sign-in expired')));
+            await visitor.see(heading('Everything is fine.'));
+            await visitor.see(within(waiting, content('npm sign-in expired')));
+            await visitor.see(within(needs, content('No need is listed.')));
         });
 
-        // Then - the needs in the engine's words, and what the engine does not give said as such
+        // Then - the engine's verdict heads the page, then Needs you empty and Can wait with each need and its verb
         await expect(result.tree).toMatch(file('./__expected__/two-macs-inbox.aria.yaml'));
     });
 
@@ -31,7 +35,7 @@ describe('Inbox', () => {
             await visitor.see(content('No need is listed.'));
         });
 
-        // Then - no verdict, an empty Needs you, and Can wait and History not given
+        // Then - the engine's verdict that this Mac is ready, an empty Needs you and an empty Can wait
         await expect(result.tree).toMatch(file('./__expected__/one-mac-inbox.aria.yaml'));
     });
 
@@ -39,8 +43,8 @@ describe('Inbox', () => {
         // Given - the Inbox over mini-offline
         const result = await component.render(inboxOver('mini-offline'), async (visitor) => {
             // When - its overview has been read
-            await visitor.see(heading('No verdict from the engine.'));
-            await visitor.see(within(needs, content('npm sign-in expired')));
+            await visitor.see(heading('Everything is fine.'));
+            await visitor.see(within(waiting, content('npm sign-in expired')));
         });
 
         // Then - the needs of This Mac, and the Mac mini only a choice of the switch

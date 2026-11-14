@@ -8,6 +8,8 @@ const recordingFor = await recordingsOf('engine-stopped', 'machinefile-differs',
 
 const needs = region('Needs you');
 
+const waiting = region('Can wait');
+
 const doneHere = region('Done here');
 
 describe('NeedLine', () => {
@@ -16,15 +18,15 @@ describe('NeedLine', () => {
         const result = await component.render(
             pageOver(recordingFor('two-macs'), { page: 'inbox' }),
             async (visitor) => {
-                await visitor.see(within(needs, content('1 mise update waiting')));
+                await visitor.see(within(waiting, content('1 mise update waiting')));
 
                 // When - its fix, apps.update, is clicked
-                await visitor.click(within(needs, button('Update mise')));
+                await visitor.click(within(waiting, button('Update mise')));
 
                 // Then - no dialog, the need read again is gone, and its outcome is held in Done here
                 await visitor.see(within(doneHere, content('1 mise update waiting')));
                 await visitor.see(within(doneHere, content('Done')));
-                await visitor.gone(within(needs, button('Update mise')));
+                await visitor.gone(within(waiting, button('Update mise')));
                 await visitor.gone(dialog());
             },
         );
@@ -32,23 +34,25 @@ describe('NeedLine', () => {
     });
 
     test('a background task the engine names is removed once its removal is confirmed', async () => {
-        // Given - Home over two-macs, where a background task is failing
+        // Given - the Inbox over two-macs, where a background task is failing
         const failing = 'com.jterrazz.brain.x-snapshot is failing, last exit 2';
         const asked = 'Remove com.jterrazz.brain.x-snapshot?';
         const result = await component.render(
-            pageOver(recordingFor('two-macs'), { page: 'home' }),
+            pageOver(recordingFor('two-macs'), { page: 'inbox' }),
             async (visitor) => {
-                await visitor.see(within(needs, content(failing)));
+                await visitor.see(within(waiting, content(failing)));
 
                 // When - its fix is clicked, then confirmed in the dialog calls.json asks
-                await visitor.click(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.click(
+                    within(waiting, button('Remove com.jterrazz.brain.x-snapshot')),
+                );
                 await visitor.see(dialog(asked));
                 await visitor.click(within(dialog(asked), button('Remove')));
 
                 // Then - overview.read, read again, no longer lists it, and Done here holds its outcome
                 await visitor.gone(dialog(asked));
                 await visitor.see(within(doneHere, content(failing)));
-                await visitor.gone(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.gone(within(waiting, button('Remove com.jterrazz.brain.x-snapshot')));
             },
         );
         expect(result.errors.text).toBe('');
@@ -60,14 +64,16 @@ describe('NeedLine', () => {
         const result = await component.render(
             pageOver(recordingFor('machinefile-differs'), { page: 'inbox' }),
             async (visitor) => {
-                await visitor.click(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.click(
+                    within(waiting, button('Remove com.jterrazz.brain.x-snapshot')),
+                );
 
                 // When - its dialog is cancelled
                 await visitor.click(within(dialog(asked), button('Cancel')));
 
                 // Then - the need and its button stay, and nothing is held as done
                 await visitor.gone(dialog(asked));
-                await visitor.see(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.see(within(waiting, button('Remove com.jterrazz.brain.x-snapshot')));
                 await visitor.gone(doneHere);
             },
         );
@@ -98,14 +104,14 @@ describe('NeedLine', () => {
         const result = await component.render(
             pageOver(recordingFor('two-macs'), { page: 'inbox' }),
             async (visitor) => {
-                await visitor.see(within(needs, content('~/.tart is misplaced')));
+                await visitor.see(within(waiting, content('~/.tart is misplaced')));
 
                 // When - its fix, disk.move, is clicked
-                await visitor.click(within(needs, button('Move ~/.tart')));
+                await visitor.click(within(waiting, button('Move ~/.tart')));
 
                 // Then - no dialog, and the need read again is held as done
                 await visitor.see(within(doneHere, content('~/.tart is misplaced')));
-                await visitor.gone(within(needs, button('Move ~/.tart')));
+                await visitor.gone(within(waiting, button('Move ~/.tart')));
                 await visitor.gone(dialog());
             },
         );
