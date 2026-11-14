@@ -5,8 +5,8 @@ machine:
     kind: workspace
     system: { os: ubuntu, version: '24.04', arch: arm64 }
 vm:
-    lifetime: persistent
-    resources: { cpus: 4, memory: 4G, disk: 20G }
+    lifetime: ephemeral
+    resources: { cpus: 4, memory: 8G, disk: 20G }
     network: nat
     image:
         {

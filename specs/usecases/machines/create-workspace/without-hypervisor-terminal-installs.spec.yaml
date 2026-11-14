@@ -7,7 +7,7 @@ env:
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].hypervisor = "none"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: '--version >/dev/null; terminal --size 120x30 "$STATION" machines create'
+    - command: '--version >/dev/null; terminal --size 120x30 "$STATION" machines create --memory 4G'
       stdin: |
           see Install tart now?
           send y

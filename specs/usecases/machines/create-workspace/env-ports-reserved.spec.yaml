@@ -1,7 +1,7 @@
 description: 'a create''s first run reserves its packages'' env ports, and the VM''s shell exports their URLs'
 env: two-macs
 runs:
-    - command: 'machines create | /usr/bin/grep -E "vite|expo"'
+    - command: 'machines create --memory 4G | /usr/bin/grep -E "vite|expo"'
       exit: 0
       stdout: |
           ●	vite	5173	{{url}}

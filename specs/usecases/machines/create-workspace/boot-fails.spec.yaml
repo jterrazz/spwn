@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: 'world fault Hypervisor.Boot'
       exit: 0
-    - command: 'machines create'
+    - command: 'machines create --memory 4G'
       exit: 1
       stderr: |
           Error: linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it

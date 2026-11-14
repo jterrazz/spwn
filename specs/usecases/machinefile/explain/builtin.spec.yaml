@@ -9,9 +9,9 @@ runs:
           	machine.system.os	ubuntu	built-in	station-linux
           	machine.system.version	24.04	built-in	station-linux
           	machine.system.arch	arm64	built-in	station-linux
-          	vm.lifetime	persistent	built-in	station-linux
+          	vm.lifetime	ephemeral	built-in	station-linux
           	vm.resources.cpus	4	built-in	station-linux
-          	vm.resources.memory	4G	built-in	station-linux
+          	vm.resources.memory	8G	built-in	station-linux
           	vm.resources.disk	20G	built-in	station-linux
           	vm.network	nat	built-in	station-linux
           	vm.image.from	ghcr.io/cirruslabs/ubuntu:24.04	built-in	station-linux

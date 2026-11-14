@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.new","in":{"From":"studio-linux"}}
       exit: 0
       stdout: |
-          ["studio-linux","persistent",4294967296]
+          ["studio-linux","ephemeral",8589934592]

@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-2"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'agents start "Build the landing page" --new'
+    - command: 'agents start "Build the landing page" --new --memory 4G'
       exit: 0
       stdout: |
           ●	linux-2	starts on linux-2, a new ephemeral workspace · claudecode · Build the landing page
