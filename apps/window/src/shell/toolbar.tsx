@@ -4,6 +4,9 @@ import styles from './toolbar.module.css';
 
 export type Crumb = { label: string; open?: (() => void) | undefined };
 
+// value: the one button at the toolbar's right: Home's New machine, the Passwords page's Add a password.
+export type ToolbarAction = { label: string; onClick: () => void; leads: boolean };
+
 export type ToolbarProps = {
     crumbs: readonly Crumb[];
     canGoBack: boolean;
@@ -11,8 +14,7 @@ export type ToolbarProps = {
     onBack: () => void;
     onForward: () => void;
     onToggleSidebar: () => void;
-    onNewMachine?: (() => void) | undefined;
-    newMachineLeads?: boolean;
+    action?: ToolbarAction | undefined;
     sidebar?: boolean;
 };
 
@@ -23,8 +25,7 @@ export function Toolbar({
     onBack,
     onForward,
     onToggleSidebar,
-    onNewMachine,
-    newMachineLeads = true,
+    action,
     sidebar = true,
 }: ToolbarProps) {
     const last = crumbs.at(-1);
@@ -59,9 +60,9 @@ export function Toolbar({
                 ))}
                 <b>{last?.label}</b>
             </div>
-            {onNewMachine === undefined ? null : (
-                <Button onClick={onNewMachine} variant={newMachineLeads ? 'primary' : 'plain'}>
-                    New machine
+            {action === undefined ? null : (
+                <Button onClick={action.onClick} variant={action.leads ? 'primary' : 'plain'}>
+                    {action.label}
                 </Button>
             )}
         </header>

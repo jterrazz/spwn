@@ -3,22 +3,25 @@ import { describe, expect, test } from 'vitest';
 
 import { Button, Screen } from '../../design/index';
 import { Toolbar } from '../toolbar';
+import type { ToolbarAction } from '../toolbar';
 
 const IDLE = () => undefined;
 
-function toolbar(onNewMachine: (() => void) | undefined) {
+function toolbar(action: ToolbarAction | undefined) {
     return (
         <Toolbar
+            action={action}
             canGoBack={false}
             canGoForward={false}
             crumbs={[{ label: 'Storage' }]}
             onBack={IDLE}
             onForward={IDLE}
-            onNewMachine={onNewMachine}
             onToggleSidebar={IDLE}
         />
     );
 }
+
+const NEW_MACHINE: ToolbarAction = { label: 'New machine', leads: true, onClick: IDLE };
 
 describe('Toolbar', () => {
     test('back and forward follow their history and name their shortcuts', async () => {
@@ -79,7 +82,7 @@ describe('Toolbar', () => {
         // Given - a screen asked to draw Home's toolbar and a page primary beside it
         const render = component.render(
             <Screen>
-                {toolbar(IDLE)}
+                {toolbar(NEW_MACHINE)}
                 <Button variant="primary">Free what can be rebuilt</Button>
             </Screen>,
         );

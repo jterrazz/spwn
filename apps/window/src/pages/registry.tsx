@@ -13,6 +13,7 @@ import { MachineHeader } from './machine/header';
 import { MachineTab } from './machine/machine';
 import { routeOfNeed } from './needs/needs';
 import { NewMachine } from './new-machine/new-machine';
+import { AddPasswordSheet } from './passwords/add-sheet';
 import { PasswordsPage } from './passwords/passwords';
 import { PlaceholderPage } from './placeholder';
 import { StoragePage } from './storage/storage';
@@ -113,6 +114,7 @@ function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps
 
 export const PAGES: Pages = {
     AddMac,
+    AddPassword: AddPasswordSheet,
     Body,
     Confirm: GestureConfirm,
     Head,
