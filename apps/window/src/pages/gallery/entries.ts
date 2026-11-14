@@ -34,12 +34,16 @@ import { MachineIcon } from '../../design/machine-icon';
 import { MACHINE_ICON_STORIES } from '../../design/machine-icon.stories';
 import { MemoryGrid } from '../../design/memory-grid';
 import { MEMORY_GRID_STORIES } from '../../design/memory-grid.stories';
+import { MemoryPick } from '../../design/memory-pick';
+import { MEMORY_PICK_STORIES } from '../../design/memory-pick.stories';
 import { Missing, MissingMark } from '../../design/missing';
 import { MISSING_MARK_STORIES, MISSING_STORIES } from '../../design/missing.stories';
 import { NavItem } from '../../design/nav-item';
 import { NAV_ITEM_STORIES } from '../../design/nav-item.stories';
 import { Panel } from '../../design/panel';
 import { PANEL_STORIES } from '../../design/panel.stories';
+import { Picks } from '../../design/picks';
+import { PICKS_STORIES } from '../../design/picks.stories';
 import { ProgressLine } from '../../design/progress-line';
 import { PROGRESS_LINE_STORIES } from '../../design/progress-line.stories';
 import { QrCode } from '../../design/qr-code';
@@ -93,6 +97,11 @@ export const ENTRIES: readonly Entry[] = [
         frame: 'block',
         stories: MEMORY_GRID_STORIES,
     }),
+    entry('MemoryPick', 'Measures', {
+        Component: MemoryPick,
+        frame: 'block',
+        stories: MEMORY_PICK_STORIES,
+    }),
     entry('ProgressLine', 'Measures', {
         Component: ProgressLine,
         frame: 'block',
@@ -103,6 +112,7 @@ export const ENTRIES: readonly Entry[] = [
     entry('CopyButton', 'Controls', { Component: CopyButton, stories: COPY_BUTTON_STORIES }),
     entry('OpenButton', 'Controls', { Component: OpenButtonSample, stories: OPEN_BUTTON_STORIES }),
     entry('Switch', 'Controls', { Component: Switch, frame: 'block', stories: SWITCH_STORIES }),
+    entry('Picks', 'Controls', { Component: Picks, frame: 'block', stories: PICKS_STORIES }),
     entry('NavItem', 'Controls', { Component: NavItem, frame: 'nav', stories: NAV_ITEM_STORIES }),
     entry('SearchField', 'Controls', {
         Component: SearchField,

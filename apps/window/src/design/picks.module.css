@@ -1,0 +1,69 @@
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--space-8);
+}
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+}
+.pick {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    transition: background var(--motion-hover);
+}
+.cards .pick {
+    gap: 2px;
+    padding: var(--space-10) var(--space-12);
+    border-radius: var(--radius-card);
+    background: var(--inset);
+    box-shadow: inset 0 0 0 1px transparent;
+}
+.chips .pick {
+    padding: 3px var(--space-10);
+    border-radius: 999px;
+    background: var(--raise);
+    color: var(--t2);
+    font-size: var(--text-label);
+}
+.pick:hover:not(:disabled) {
+    background: var(--raise);
+}
+.chips .pick:hover:not(:disabled) {
+    background: var(--raise-2);
+}
+.pick:active:not(:disabled) {
+    background: var(--raise-2);
+}
+.cards .pick[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--new) 14%, var(--inset));
+    box-shadow: inset 0 0 0 1.5px var(--new);
+}
+.chips .pick[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--new) 24%, var(--raise));
+    color: var(--t1);
+}
+.pick:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.title {
+    font-weight: var(--weight-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.chips .title {
+    font-weight: var(--weight-regular);
+}
+.lines {
+    display: flex;
+    flex-direction: column;
+    color: var(--t3);
+    font-size: var(--text-label);
+}

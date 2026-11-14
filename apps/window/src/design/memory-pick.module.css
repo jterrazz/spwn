@@ -1,0 +1,38 @@
+.pick {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+    padding: var(--space-12);
+    border-radius: var(--radius-card);
+    background: var(--inset);
+}
+.head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-12);
+}
+.head b {
+    font-weight: var(--weight-strong);
+}
+.head span {
+    color: var(--t3);
+    font-size: var(--text-label);
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(32, minmax(0, 1fr));
+    gap: 3px;
+}
+.cell {
+    aspect-ratio: 1;
+    border-radius: var(--radius-cell);
+    background: var(--c, var(--raise));
+}
+.cell.held {
+    background: color-mix(in srgb, var(--c, var(--raise)) 42%, var(--inset));
+}
+.cell.free {
+    background: var(--raise);
+}
