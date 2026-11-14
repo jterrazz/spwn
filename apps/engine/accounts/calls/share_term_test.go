@@ -28,7 +28,7 @@ func (s *touched) Share(context.Context, string, string, time.Duration) (account
 }
 
 func TestAShareOutsideItsSpanIsRefusedBeforeAnyEffect(t *testing.T) {
-	for _, term := range []time.Duration{31 * 365 * 24 * time.Hour, -time.Hour, accounts.LongestShare + time.Second, time.Second} {
+	for _, term := range []time.Duration{31 * 365 * 24 * time.Hour, -time.Hour, accounts.LongestGrant + time.Second, time.Second} {
 		held := &touched{}
 		_, err := Share.Run(context.Background(), Deps{Shares: held}, ShareIn{Account: "github", With: "linux-1", For: term}, nil)
 		var failed *fail.Error

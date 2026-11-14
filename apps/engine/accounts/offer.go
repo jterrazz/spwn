@@ -6,7 +6,11 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
 
-const DefaultGrantTerm = 12 * time.Hour
+const (
+	DefaultGrantTerm = 12 * time.Hour
+	ShortestGrant    = time.Minute
+	LongestGrant     = 7 * 24 * time.Hour
+)
 
 const (
 	lineServer  = "A server keeps its own sign-ins"
@@ -118,7 +122,7 @@ func Terms() []Term {
 		{4 * time.Hour, "4 hours"},
 		{DefaultGrantTerm, "12 hours"},
 		{24 * time.Hour, "1 day"},
-		{LongestShare, "7 days"},
+		{LongestGrant, "7 days"},
 	}
 	var out []Term
 	for _, to := range []GrantTo{ToMachine, ToAgent} {

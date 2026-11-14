@@ -199,7 +199,7 @@ func (s *Shares) sharedIn(vm string) (shares []accounts.Share, rest map[string]j
 		at = info.ModTime().UTC().Truncate(time.Second)
 	}
 	for _, n := range names {
-		shares = append(shares, accounts.Share{Name: n, At: at, Until: at.Add(accounts.DefaultShareTerm)})
+		shares = append(shares, accounts.Share{Name: n, At: at, Until: at.Add(accounts.DefaultGrantTerm)})
 	}
 	return shares, rest, true
 }

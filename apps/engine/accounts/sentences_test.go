@@ -10,8 +10,8 @@ import (
 )
 
 func TestTheTermRuleNamesTheLongestTerm(t *testing.T) {
-	if accounts.LongestShare != 7*24*time.Hour {
-		t.Fatalf("the longest term is %s; the term rule says 7 days", accounts.LongestShare)
+	if accounts.LongestGrant != 7*24*time.Hour {
+		t.Fatalf("the longest term is %s; the term rule says 7 days", accounts.LongestGrant)
 	}
 	if !strings.Contains(accounts.SentenceTermRule.Text(), "7 days") {
 		t.Errorf("the term rule %q does not name 7 days", accounts.SentenceTermRule.Text())
