@@ -94,27 +94,38 @@ func credentials(text string) string {
 	// no userinfo; and a password of digits that a URL's end follows (a path,
 	// a query, a fragment, a `,`, `;`, `}` or `]`, or a quote or `>` that
 	// closes a value before one of `,;})]>`) is a host's port, as in
-	// `localhost:4873/@scope` or `"https://h:8080","email":"a@b"`.
+	// `localhost:4873/@scope` or `"https://h:8080","email":"a@b"`. Each word's
+	// `@`s are read once, whatever number of `://` it holds, so the scan is
+	// linear in the text.
 	var b strings.Builder
-	last := 0
+	last, end, at, free := 0, -1, -1, -1
 	for from := 0; ; {
 		i := strings.Index(text[from:], "://")
 		if i < 0 {
 			break
 		}
 		start := from + i + len("://")
-		end := len(text)
-		if j := strings.IndexAny(text[start:], " \t\r\n"); j >= 0 {
-			end = start + j
-		}
-		at := lastAt(text[start:end])
 		from = start
-		if at < 0 || !userinfo(text[start:start+at]) {
+		if start > end {
+			end = len(text)
+			if j := strings.IndexAny(text[start:], " \t\r\n"); j >= 0 {
+				end = start + j
+			}
+			at, free = lastAts(text, start, end)
+		}
+		info := -1
+		switch {
+		case free >= start:
+			info = free
+		case at >= start:
+			info = at
+		}
+		if info < 0 || !userinfo(text[start:info]) {
 			continue
 		}
 		b.WriteString(text[last:start])
 		b.WriteString(Marker)
-		last, from = start+at, start+at
+		last, from = info, info
 	}
 	if last == 0 {
 		return text
@@ -123,21 +134,21 @@ func credentials(text string) string {
 	return b.String()
 }
 
-func lastAt(word string) int {
-	last, free := -1, -1
-	for i := range len(word) {
-		if word[i] != '@' {
+func lastAts(text string, start, end int) (at, free int) {
+	// value: a word's last `@`, and its last `@` that does not follow a `/`.
+	at, free = -1, -1
+	for i := end - 1; i >= start && free < 0; i-- {
+		if text[i] != '@' {
 			continue
 		}
-		last = i
-		if i > 0 && word[i-1] != '/' {
+		if at < 0 {
+			at = i
+		}
+		if text[i-1] != '/' {
 			free = i
 		}
 	}
-	if free >= 0 {
-		return free
-	}
-	return last
+	return at, free
 }
 
 func userinfo(info string) bool {

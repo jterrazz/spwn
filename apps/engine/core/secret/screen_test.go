@@ -176,3 +176,28 @@ func TestKeptIsScreensWordsWithoutTheFlag(t *testing.T) {
 		t.Errorf("Kept(%q) = %q, want %q", text, got, want)
 	}
 }
+
+func compactJSONOfURLs(n int) string {
+	var b strings.Builder
+	b.WriteString(`{"links":[`)
+	for range n {
+		b.WriteString(`{"url":"https://x.dev/a","by":"a@b.com"},`)
+	}
+	b.WriteString(`{}]}`)
+	return b.String()
+}
+
+func TestAWordOfManyURLsIsShownWhole(t *testing.T) {
+	text := compactJSONOfURLs(20000)
+	if got := secret.Kept(text); got != text {
+		t.Errorf("a compact JSON of %d bytes was changed by its screen", len(text))
+	}
+}
+
+func BenchmarkKeptOfAWordOfManyURLs(b *testing.B) {
+	text := compactJSONOfURLs(20000)
+	b.SetBytes(int64(len(text)))
+	for b.Loop() {
+		secret.Kept(text)
+	}
+}
