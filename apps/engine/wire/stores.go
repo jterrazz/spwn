@@ -55,6 +55,11 @@ type imageStore interface {
 	store.Migrator
 }
 
+type bookStore interface {
+	accountscontract.BookStore
+	store.Migrator
+}
+
 type shareStore interface {
 	accountscontract.ShareStore
 	store.Migrator
@@ -92,6 +97,7 @@ type stores struct {
 	machines     machineStore
 	images       imageStore
 	shares       shareStore
+	book         bookStore
 	reservations reservationStore
 	declarations declarationStore
 	applied      appliedStore
@@ -106,6 +112,7 @@ func newStores(files local.FS, p setup.Paths) *stores {
 		machines:     machinesjsonfile.New(lockable{files}, filepath.Join(p.State, "vms")),
 		images:       imagesjsonfile.New(files, filepath.Join(p.State, "images")),
 		shares:       accountsjsonfile.NewShares(files, filepath.Join(p.State, "shares.json"), filepath.Join(p.State, "vms")),
+		book:         accountsjsonfile.NewBook(lockable{files}, filepath.Join(p.State, "vault.json")),
 		reservations: portsjsonfile.NewReservations(files, filepath.Join(p.State, "leases.json")),
 		declarations: portsjsonfile.NewDeclarations(files, filepath.Join(p.Prefs, "public.json")),
 		applied:      settingsjsonfile.NewApplied(files, filepath.Join(p.State, "applied")),
@@ -124,7 +131,7 @@ func (lockable) Hold(ctx context.Context, path string) (func(), error) {
 }
 
 func (s *stores) migrators() []store.Migrator {
-	return []store.Migrator{s.prefs, s.ports(), s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}
+	return []store.Migrator{s.prefs, s.ports(), s.machines, s.images, s.shares, s.book, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}
 }
 
 func (s *stores) name() setupcontract.NamePrefs         { return setupcontract.Name(s.prefs) }

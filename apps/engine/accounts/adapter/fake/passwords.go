@@ -104,5 +104,5 @@ func (p *Passwords) Remove(_ context.Context, id string) ([]accounts.VaultGrant,
 		}
 	}
 	p.own().Passwords = slices.Delete(p.own().Passwords, i, i+1)
-	return slices.Clone(entry.Grants), nil
+	return append([]accounts.VaultGrant{}, entry.Grants...), nil
 }

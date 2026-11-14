@@ -16,7 +16,7 @@
 
 ## What is built
 
-This page is the target. Reading who is signed in, the redaction of what is read, the list's pages, the login relay and `accounts.logout` are built. Everything else here is not: the vault calls, grants, Touch ID, the Passwords page and the Machinefile's `signins` and `grants`. Until those land, the code still has the tiers and `accounts share`, which the ADR deletes; [its consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
+This page is the target. Reading who is signed in, the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine with their expiry, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone; an agent is no grant target yet, so a grant to one is refused `grant.unknown-agent` and the sheet lists none. Everything else here is not: the Passwords page and the Machinefile's `signins` and `grants`. Until those land, the code still has the tiers and `accounts share`, which the ADR deletes; [its consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
 
 ## Three concepts
 
@@ -42,11 +42,11 @@ Sign out runs the program's own logout (`accounts.logout`) after a confirmation 
 
 ## The vault
 
-The vault is the Keychain entries of one Mac under station's own Keychain name. It has no sync: each Mac has its own, and the Passwords page shows This Mac's (`Passwords on <mac>`), with no Mac picker. Station is the only owner of the Claude token and of every granted secret; the studio CLI's credential store is not read.
+The vault is the Keychain entries of one Mac under station's own Keychain name, each value under `vault:<id>`, and a book beside them, `~/.local/state/station/vault.json`, that lists each entry and its grants without a value. It has no sync: each Mac has its own, and the Passwords page shows This Mac's (`Passwords on <mac>`), with no Mac picker. Station is the only owner of the Claude token and of every granted secret; the studio CLI's credential store is not read.
 
 A secret enters in one of two ways:
 
-- **From a sign-in** done on This Mac, whose token goes to the vault. Claude's does.
+- **From a sign-in** done on This Mac, whose token goes to the vault: the token the program's own command prints (`gh auth token`), read from its output and never shown. Claude's waits on the login relay; until then it is refused `vault.cannot-capture`.
 - **Typed**, as a value. It travels as a write-only value, never in an argument list ([ADR-009](../decisions/009-one-bootstrap-verb-and-no-values-in-argv.md)); a native secure prompt asks for it where one can be drawn, and the window's password input is the last fallback, never reaching state, a log or a recording. Whether a native prompt can be drawn is open ([ADR](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).
 
 Each grant asks for Touch ID first, the engine's own `LAContext` with station's reason, from the window, the menu bar or the CLI, after the checks and before the Keychain is read. Removing an entry ends the grants made from it, after a confirmation that names them.

@@ -48,7 +48,17 @@ func (s *Block) Zsh(ctx context.Context, completion string) (string, error) {
 	if line, ok := s.token(ctx); ok {
 		script += "\n" + line + "\n"
 	}
-	return script + s.portsEnv(), nil
+	return script + s.grants() + s.portsEnv(), nil
+}
+
+// invariant: in a VM the shell sources the environment files of the
+// programs granted to it by their path, so the script itself never holds a
+// token; a Mac has none.
+func (s *Block) grants() string {
+	if s.o.ThisMachine != catalog.Linux && s.o.ThisMachine != catalog.MacOS {
+		return ""
+	}
+	return "\nfor f in \"$HOME/" + catalog.GrantsDir + "/\"*.env(N); do source \"$f\"; done\n"
 }
 
 // invariant: in a VM the profiles' exports the guest wrote are a file read, never
