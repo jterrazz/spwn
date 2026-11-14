@@ -99,7 +99,7 @@ export function AddMac({ go, onClose }: AddMacProps) {
                     onChange={(typed) => {
                         change({ name: typed });
                     }}
-                    placeholder="jterrazz-mac-mini"
+                    placeholder="mac-mini"
                     value={draft.name}
                 />
                 <Login change={change} draft={draft} />
