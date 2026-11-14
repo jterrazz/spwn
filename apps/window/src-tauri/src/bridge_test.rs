@@ -1,4 +1,4 @@
-use std::io::{Cursor, Read};
+use std::io::{BufRead, BufReader, Cursor, Read};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -58,6 +58,23 @@ fn call() -> Value {
 
 fn watch() -> Value {
     json!({ "v": 2, "id": "8", "watch": "engine.watch", "in": {} })
+}
+
+fn answer(name: &str) -> Value {
+    json!({
+        "v": 2,
+        "id": "6",
+        "call": name,
+        "in": { "Code": "good", "Exchange": "ex-1", "Machine": "linux-1" },
+    })
+}
+
+fn carries_the_code(messages: &[Message]) -> bool {
+    messages.iter().any(|message| {
+        serde_json::to_string(message)
+            .expect("a message serializes")
+            .contains("good")
+    })
 }
 
 fn error_of(message: &Message) -> Option<(String, String, String)> {
@@ -125,7 +142,7 @@ fn a_line_that_is_no_json_ends_the_exchange_with_the_bad_frame_error() {
     let lines = "{\"v\":2,\"id\":\"7\",\"progress\":{\"task\":\"t\"}}\nnot json\n{\"v\":2,\"id\":\"7\",\"out\":{}}\n";
 
     // When - the exchange is pumped
-    let reason = pump(Cursor::new(lines), &call(), &sink, 1024);
+    let reason = pump(Cursor::new(lines), "7", false, &sink, 1024);
 
     // Then - the progress came, then the engine's own error shape for a bad frame, and no out
     let messages = drained(&received);
@@ -147,7 +164,7 @@ fn a_line_longer_than_the_limit_ends_the_exchange_cleanly() {
     );
 
     // When - the exchange is pumped
-    let reason = pump(Cursor::new(long), &call(), &sink, 1024);
+    let reason = pump(Cursor::new(long), "7", false, &sink, 1024);
 
     // Then - one error frame says so, and nothing past it is read
     let messages = drained(&received);
@@ -167,7 +184,8 @@ fn a_peer_that_closes_mid_answer_ends_the_exchange_unanswered() {
     // When - the exchange is pumped
     let reason = pump(
         Cursor::new("{\"v\":2,\"id\":\"7\",\"ou"),
-        &call(),
+        "7",
+        false,
         &sink,
         1024,
     );
@@ -185,7 +203,7 @@ fn a_sink_that_stops_listening_ends_the_reader_at_its_next_frame() {
     let outs = "{\"v\":2,\"id\":\"8\",\"out\":{}}\n".repeat(3);
 
     // When - the exchange is pumped
-    let reason = pump(Cursor::new(outs), &watch(), &sink, 1024);
+    let reason = pump(Cursor::new(outs), "8", true, &sink, 1024);
 
     // Then - the reader stopped on the first frame it could not hand over
     assert_eq!(reason, "the window stopped listening");
@@ -351,6 +369,76 @@ fn a_call_the_window_does_not_send_is_refused_by_name_and_never_sent() {
     assert_eq!(messages[1], Message::End("answered".into()));
     assert!(listener.accept().is_err());
     let _ = std::fs::remove_file(path);
+}
+
+#[test]
+fn a_code_answered_reaches_the_engine_in_its_one_frame_and_never_the_window() {
+    // Given - an engine listening, and a call the bridge forwards carrying a sign-in's code
+    let (listener, path) = listening();
+    let exchanges = Arc::new(Exchanges::default());
+    let (sink, received, _) = heard();
+    exchanges
+        .open(&path, "main", answer("engine.read"), sink, LIMITS)
+        .expect("the call opens");
+    let (engine, _) = listener.accept().expect("the engine accepts");
+    let mut asked = String::new();
+    BufReader::new(&engine)
+        .read_line(&mut asked)
+        .expect("the request arrives");
+
+    // When - the engine answers its out
+    std::io::Write::write_all(&mut &engine, b"{\"v\":2,\"id\":\"6\",\"out\":{}}\n")
+        .expect("the engine writes");
+
+    // Then - the engine read the code in the request's frame, and the window hears the out and the end without it
+    let heard: Vec<Message> = (0..2)
+        .filter_map(|_| received.recv_timeout(SOON).ok())
+        .collect();
+    assert!(asked.contains("\"Code\":\"good\""));
+    assert_eq!(heard.len(), 2);
+    assert_eq!(heard[1], Message::End("answered".into()));
+    assert!(!carries_the_code(&heard));
+    let _ = std::fs::remove_file(path);
+}
+
+#[test]
+fn a_refused_code_is_answered_without_its_input() {
+    // Given - no engine at all, and a sign-in's code in a request with an extra key, one past the size limit,
+    // and one under a call the window does not send
+    let mut extra = answer("accounts.answer");
+    extra["hello"] = json!({});
+    let refused = [
+        (extra, LIMITS),
+        (
+            answer("accounts.answer"),
+            Limits {
+                request: 64,
+                ..LIMITS
+            },
+        ),
+        (answer("engine.guest-exec"), LIMITS),
+    ];
+
+    // When - the window opens each
+    let answered: Vec<(Result<u32, String>, Vec<Message>)> = refused
+        .into_iter()
+        .map(|(request, limits)| {
+            let exchanges = Arc::new(Exchanges::default());
+            let (sink, received, _) = heard();
+            let handle = exchanges.open(&socket_path(), "main", request, sink, limits);
+            (handle, drained(&received))
+        })
+        .collect();
+
+    // Then - each is refused under its id, and no message the window hears carries the code
+    for (handle, messages) in &answered {
+        assert_eq!(handle, &Ok(0));
+        assert_eq!(
+            error_of(&messages[0]).map(|(id, kind, _)| (id, kind)),
+            Some(("6".into(), "refused".into()))
+        );
+        assert!(!carries_the_code(messages));
+    }
 }
 
 #[test]
