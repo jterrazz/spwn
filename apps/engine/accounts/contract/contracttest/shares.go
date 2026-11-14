@@ -12,7 +12,7 @@ import (
 
 func share(name string) accounts.Share {
 	at := time.Date(2026, 11, 1, 9, 0, 0, 0, time.UTC)
-	return accounts.Share{Name: name, At: at, Until: at.Add(accounts.DefaultShareTerm)}
+	return accounts.Share{Name: name, At: at, Until: at.Add(accounts.DefaultGrantTerm)}
 }
 
 func ShareStore(t *testing.T, open func(t *testing.T, vms ...string) contract.ShareStore) {

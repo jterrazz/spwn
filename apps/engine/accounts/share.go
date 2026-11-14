@@ -9,12 +9,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
-const (
-	DefaultShareTerm = 12 * time.Hour
-	ShortestShare    = time.Minute
-	LongestShare     = 7 * 24 * time.Hour
-)
-
 func DefaultShareList() []string {
 	// value: the share list a Mac keeps when its preferences name none:
 	// every session secret and the Claude token (decision A4).
@@ -137,9 +131,9 @@ func CheckTerm(term time.Duration) (time.Duration, bool) {
 	// invariant: a share lasts 1 min to 7 d, and a term of 0 is the default:
 	// every surface and the engine judge a term by this one rule.
 	if term == 0 {
-		return DefaultShareTerm, true
+		return DefaultGrantTerm, true
 	}
-	return term, term >= ShortestShare && term <= LongestShare
+	return term, term >= ShortestGrant && term <= LongestGrant
 }
 
 func ParseTerm(text string) (time.Duration, bool) {

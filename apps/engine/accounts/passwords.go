@@ -106,7 +106,7 @@ func TermInBounds(to GrantTo, term time.Duration) bool {
 	if term == 0 {
 		return to == ToMachine
 	}
-	return term >= ShortestShare && term <= LongestShare
+	return term >= ShortestGrant && term <= LongestGrant
 }
 
 func Refusal(t fail.Type, code fail.Code, subject string) *fail.Error {

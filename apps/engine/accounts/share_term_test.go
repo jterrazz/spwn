@@ -10,10 +10,10 @@ import (
 func TestCheckTermHoldsTheSpanAndDefaultsZero(t *testing.T) {
 	for term, want := range map[time.Duration]bool{
 		0:                          true,
-		accounts.ShortestShare:     true,
-		accounts.LongestShare:      true,
-		accounts.ShortestShare - 1: false,
-		accounts.LongestShare + 1:  false,
+		accounts.ShortestGrant:     true,
+		accounts.LongestGrant:      true,
+		accounts.ShortestGrant - 1: false,
+		accounts.LongestGrant + 1:  false,
 		-time.Hour:                 false,
 		31 * 365 * 24 * time.Hour:  false,
 	} {
@@ -21,8 +21,8 @@ func TestCheckTermHoldsTheSpanAndDefaultsZero(t *testing.T) {
 		if ok != want {
 			t.Fatalf("CheckTerm(%s) ok = %v; want %v", term, ok, want)
 		}
-		if term == 0 && got != accounts.DefaultShareTerm {
-			t.Fatalf("CheckTerm(0) = %s; want the default %s", got, accounts.DefaultShareTerm)
+		if term == 0 && got != accounts.DefaultGrantTerm {
+			t.Fatalf("CheckTerm(0) = %s; want the default %s", got, accounts.DefaultGrantTerm)
 		}
 	}
 }
