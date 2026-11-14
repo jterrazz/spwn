@@ -1,13 +1,13 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
-import { engineViewStateOf } from '../engine/provisional';
+import { engineViewStopped } from '../engine/shown';
 import type { Route } from './route';
 import type { ToolbarAction } from './toolbar';
 
 // value: while this Mac's engine is stopped, Start the engine leads Home and New machine stands back.
 function engineStopped(macs: readonly MachinesMacView[]): boolean {
     const thisMac = macs.find((mac) => mac.ThisMac);
-    return thisMac !== undefined && engineViewStateOf(thisMac.Engine) === 'stopped';
+    return thisMac !== undefined && engineViewStopped(thisMac.Engine);
 }
 
 export type Opens = {

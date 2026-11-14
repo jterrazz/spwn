@@ -6,14 +6,12 @@ import type {
     DiskMoveInput,
     DiskReading,
     DiskRow,
-    EngineReadState,
     EngineStartInput,
     ImagesReport,
     MachinefileChapter,
     MachinefileDiffering,
     MachinefileExtraLine,
     MachinefileLine,
-    MachinesEngineView,
     MachinesFit,
     MachinesMacView,
     MachinesVM,
@@ -54,18 +52,6 @@ const CREATE_REFUSAL_PLACES: Readonly<Partial<Record<string, RefusalPlace>>> = {
 export function createRefusalPlaceOf(error: EngineError, macs: readonly string[]): RefusalPlace {
     const onAMac = macs.includes(error.wire?.subject ?? '');
     return CREATE_REFUSAL_PLACES[error.wire?.code ?? ''] ?? (onAMac ? 'on' : 'foot');
-}
-
-// outside: machines.list sends a Mac's engine as three booleans; this reads them as engine.read's State, until the
-// outside: view carries that code.
-export function engineViewStateOf(engine: MachinesEngineView): EngineReadState | undefined {
-    if (!engine.Known) {
-        return undefined;
-    }
-    if (engine.Running) {
-        return 'running';
-    }
-    return engine.Installed ? 'stopped' : 'not-installed';
 }
 
 export type MachineKind = 'server' | 'workspace';
@@ -185,11 +171,6 @@ export function isDeletable(image: Pick<ImagesReport, 'Newest' | 'VMs'>): boolea
 // outside: disk.read flags no volume as holding what can be rebuilt, only each row (apps/engine/disk/group.go).
 export function holdsRebuildable(reading: DiskReading): boolean {
     return (reading.Rows ?? []).some((row) => freesWhole(row.Group));
-}
-
-// outside: overview.read gives no urgency of the Inbox, only each need's Broken: one broken need makes it urgent.
-export function inboxIsUrgent(needs: readonly OverviewNeed[]): boolean {
-    return needs.some((need) => need.Broken);
 }
 
 export type ShareEnd =
