@@ -7,7 +7,12 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/finding"
+	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
+	"github.com/jterrazz/studio-station/apps/engine/disk"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
@@ -18,14 +23,16 @@ const (
 )
 
 // value: what a client draws for one value of a closed enum: its word, a
-// card's second line, the singular and plural noun it reads as after a
-// count, and its tone.
+// second wording (a card's second line, a shorter name of the same value),
+// what a list of the lines it names is headed, the singular and plural noun
+// it reads as after a count, and its tone.
 type word struct {
-	Word   string
-	Detail string `json:",omitempty"`
-	One    string `json:",omitempty"`
-	Other  string `json:",omitempty"`
-	Tone   verdict.Tone
+	Word    string
+	Detail  string `json:",omitempty"`
+	Heading string `json:",omitempty"`
+	One     string `json:",omitempty"`
+	Other   string `json:",omitempty"`
+	Tone    verdict.Tone
 }
 
 // value: the words of each closed enum a client draws, by the enum's
@@ -38,6 +45,8 @@ type worded struct {
 }
 
 func plain(w string) word { return word{Word: w, Tone: verdict.Plain} }
+
+func toned(t verdict.Tone, w string) word { return word{Word: w, Tone: t} }
 
 // invariant: every value of every enum here has its word, and no word names
 // a value its enum does not have; words_test.go holds both.
@@ -85,6 +94,95 @@ func wordedEnums() []worded {
 			string(machinefile.ChapterPorts):    {Word: "Ports", One: "port", Other: "ports", Tone: verdict.Plain},
 			string(machinefile.ChapterAccounts): {Word: "Accounts", One: "account", Other: "accounts", Tone: verdict.Plain},
 		}},
+		{machinefile.Condition(""), map[string]word{
+			string(machinefile.Present):    toned(verdict.OK, "present"),
+			string(machinefile.Absent):     toned(verdict.Warn, "not installed"),
+			string(machinefile.Outdated):   toned(verdict.Warn, "outdated"),
+			string(machinefile.Changed):    toned(verdict.Warn, "changed"),
+			string(machinefile.NotManaged): plain("not managed"),
+			string(machinefile.Extra):      plain("extra"),
+			string(machinefile.Unknown):    plain("not known"),
+		}},
+		{machinefile.Action(""), map[string]word{
+			string(machinefile.Install): {Word: "install it", Heading: "To install", Tone: verdict.New},
+			string(machinefile.Set):     {Word: "set it", Heading: "To set", Tone: verdict.New},
+			string(machinefile.Adopt):   {Word: "adopt it", Heading: "To adopt", Tone: verdict.New},
+			string(machinefile.Keep):    {Word: "keep it", Heading: "Unchanged", Tone: verdict.New},
+			string(machinefile.Leave):   {Word: "leave it", Heading: "Left as is", Tone: verdict.New},
+			string(machinefile.Remove):  {Word: "remove it", Heading: "To remove", Tone: verdict.New},
+		}},
+		{catalog.Level(""), map[string]word{
+			string(catalog.LevelCache):    {Word: "cache", Detail: "rebuilt when needed", Tone: verdict.Plain},
+			string(catalog.LevelData):     {Word: "data", Detail: "yours, kept", Tone: verdict.Plain},
+			string(catalog.LevelSettings): {Word: "settings", Detail: "your settings, kept", Tone: verdict.Plain},
+			string(catalog.LevelKept):     {Word: "kept", Detail: "kept", Tone: verdict.Plain},
+		}},
+		{catalog.Audience(""), map[string]word{
+			string(catalog.AudienceLocal):   plain("Local"),
+			string(catalog.AudiencePrivate): plain("Private"),
+			string(catalog.AudiencePublic):  plain("Public"),
+		}},
+		{catalog.Need(""), map[string]word{
+			string(catalog.NeedSudo):          plain("your password"),
+			string(catalog.NeedTerminal):      plain("a terminal"),
+			string(catalog.NeedLicense):       plain("a license accepted"),
+			string(catalog.NeedAppStoreLogin): plain("an App Store sign-in"),
+		}},
+		{catalog.AfterApply(""), map[string]word{
+			string(catalog.AfterLogout):    plain("a log out"),
+			string(catalog.AfterReboot):    plain("a restart of the machine"),
+			string(catalog.RestartDock):    plain("the Dock restarted"),
+			string(catalog.RestartFinder):  plain("the Finder restarted"),
+			string(catalog.RestartMenuBar): plain("the menu bar restarted"),
+		}},
+		{catalog.Kind(""), map[string]word{
+			string(catalog.KindApp):     plain("app"),
+			string(catalog.KindManager): plain("manager"),
+			string(catalog.KindSetting): plain("setting"),
+		}},
+		{disk.Group(""), map[string]word{
+			string(disk.Misplaced):    {Word: "Misplaced", Detail: "misplaced", Tone: verdict.Plain},
+			string(disk.CanRebuild):   {Word: "Can rebuild", Detail: "cache", Tone: verdict.Plain},
+			string(disk.YourData):     {Word: "Your data", Detail: "data", Tone: verdict.Plain},
+			string(disk.NeverTouched): {Word: "Never touched", Detail: "never touched", Tone: verdict.Plain},
+		}},
+		{machines.VMState(""), map[string]word{
+			string(machines.Running):      toned(verdict.OK, machines.Running.Word()),
+			string(machines.Stopped):      plain(machines.Stopped.Word()),
+			string(machines.Suspended):    plain(machines.Suspended.Word()),
+			string(machines.Stale):        toned(verdict.Warn, machines.Stale.Word()),
+			string(machines.Broken):       toned(verdict.Bad, machines.Broken.Word()),
+			string(machines.Creating):     toned(verdict.New, machines.Creating.Word()),
+			string(machines.UnknownState): plain(machines.UnknownState.Word()),
+		}},
+		{machines.CheckState(""), map[string]word{
+			string(machines.CheckFailing): toned(verdict.Bad, "fails"),
+			string(machines.CheckPassing): toned(verdict.OK, "passes"),
+			string(machines.CheckWaiting): toned(verdict.New, "waiting"),
+		}},
+		{engine.ReadState(""), map[string]word{
+			string(engine.EngineRunning):      toned(verdict.OK, "running"),
+			string(engine.EngineStopped):      plain("stopped"),
+			string(engine.EngineNotInstalled): plain("not installed"),
+		}},
+		{fail.Type(""), map[string]word{
+			string(fail.Refused):           toned(verdict.Bad, "refused"),
+			string(fail.NotFound):          plain("not found"),
+			string(fail.NotForThisMachine): plain("not for this machine"),
+			string(fail.NeedsConfirmation): toned(verdict.Warn, "needs confirmation"),
+			string(fail.NeedsTerminal):     toned(verdict.Warn, "needs a terminal"),
+			string(fail.Declined):          plain("declined"),
+			string(fail.Unreachable):       toned(verdict.Bad, "unreachable"),
+			string(fail.EngineStopped):     toned(verdict.Bad, "engine stopped"),
+			string(fail.FarTooOld):         toned(verdict.Bad, "far too old"),
+			string(fail.Failed):            toned(verdict.Bad, "failed"),
+			string(fail.Interrupted):       toned(verdict.Warn, "interrupted"),
+		}},
+		{finding.Severity(""), map[string]word{
+			string(finding.Broken):     toned(verdict.Bad, "broken"),
+			string(finding.NeedsALook): toned(verdict.Warn, "needs a look"),
+		}},
+		{section.ID(""), sectionWords()},
 		{catalog.OS(""), map[string]word{
 			string(catalog.OSMacOS):  plain("macOS"),
 			string(catalog.OSUbuntu): plain("Ubuntu"),
@@ -101,6 +199,14 @@ func wordedEnums() []worded {
 			string(catalog.ArchAMD64): plain(string(catalog.ArchAMD64)),
 		}},
 	}
+}
+
+func sectionWords() map[string]word {
+	out := map[string]word{}
+	for _, id := range section.Order() {
+		out[string(id)] = plain(id.Title())
+	}
+	return out
 }
 
 func wordsName(e enumerated) string { return tsName(qualified(reflect.TypeOf(e))) }

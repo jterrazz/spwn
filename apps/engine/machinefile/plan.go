@@ -27,6 +27,10 @@ const (
 	Unknown    Condition = "unknown"
 )
 
+func (Condition) Enum() []string {
+	return []string{string(Present), string(Absent), string(Outdated), string(Changed), string(NotManaged), string(Extra), string(Unknown)}
+}
+
 // value: what apply does with a package: install it, set it, adopt it as
 // it is (never reinstalled), keep it (already there), leave it as it is
 // (the owner's change, a read that did not answer), or remove it (an extra,
@@ -42,6 +46,10 @@ const (
 	Leave   Action = "leave"
 	Remove  Action = "remove"
 )
+
+func (Action) Enum() []string {
+	return []string{string(Install), string(Set), string(Adopt), string(Keep), string(Leave), string(Remove)}
+}
 
 // value: what a package reads on the machine, as its family read it: its
 // condition, its state, the method that holds it, the version there, the

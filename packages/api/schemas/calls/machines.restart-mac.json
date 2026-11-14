@@ -121,9 +121,9 @@
         },
         "state": {
           "enum": [
-            "failing",
+            "waiting",
             "passing",
-            "waiting"
+            "failing"
           ],
           "type": "string"
         }
@@ -411,7 +411,6 @@
         },
         "State": {
           "enum": [
-            "",
             "running",
             "stopped",
             "suspended",

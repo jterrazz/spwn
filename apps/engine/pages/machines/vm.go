@@ -73,11 +73,11 @@ func vmCaption(o VMOverview, s *overview.Summary) []page.Value {
 		if vm.State != model.Running {
 			mark = page.Absent
 		}
-		parts = append(parts, page.Labeled(string(mark), page.Text(stateWord(vm.State))))
+		parts = append(parts, page.Labeled(string(mark), page.Text(vm.State.Word())))
 	case vm.State == model.Running && head.Up > 0:
 		parts = append(parts, pagehome.Up(head.Up))
 	default:
-		parts = append(parts, page.Text(stateWord(vm.State)))
+		parts = append(parts, page.Text(vm.State.Word()))
 	}
 	return parts
 }
@@ -199,32 +199,13 @@ func Lifetime(l model.Lifetime) page.Value {
 	return page.Text(titled(lifetimeWord(l)))
 }
 
-func State(s model.VMState) page.Value { return page.Text(stateWord(s)) }
+func State(s model.VMState) page.Value { return page.Text(s.Word()) }
 
 func titled(word string) string {
 	if word == "" {
 		return word
 	}
 	return strings.ToUpper(word[:1]) + word[1:]
-}
-
-func stateWord(s model.VMState) string {
-	switch s {
-	case model.Running:
-		return "Running"
-	case model.Stopped:
-		return "Stopped"
-	case model.Suspended:
-		return "Suspended"
-	case model.Stale:
-		return "Ended unexpectedly"
-	case model.Broken:
-		return "In a loop"
-	case model.Creating:
-		return "Creating"
-	case model.UnknownState:
-	}
-	return "Unknown"
 }
 
 func DiskSize(n int64) page.Value {

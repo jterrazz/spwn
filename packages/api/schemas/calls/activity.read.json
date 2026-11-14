@@ -425,24 +425,22 @@
         },
         "Section": {
           "enum": [
-            "",
-            "accounts",
+            "overview",
             "activity",
             "apps",
-            "awake",
-            "background",
-            "disk",
-            "images",
-            "overview",
-            "ports",
             "settings",
-            "ssh"
+            "disk",
+            "ports",
+            "accounts",
+            "background",
+            "awake",
+            "ssh",
+            "images"
           ],
           "type": "string"
         },
         "Severity": {
           "enum": [
-            "",
             "broken",
             "needs-a-look"
           ],

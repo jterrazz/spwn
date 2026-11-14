@@ -303,7 +303,7 @@ func Back(b model.Back, thisMac page.Context) page.Page {
 	said := make([]string, 0, 1+len(b.VMs))
 	said = append(said, "back")
 	for _, vm := range b.VMs {
-		said = append(said, vm.Name+" "+strings.ToLower(stateWord(vm.State)))
+		said = append(said, vm.Name+" "+strings.ToLower(vm.State.Word()))
 	}
 	return pages.Outcome("machines restart "+b.Name, thisMac, nil, []page.Row{done(b.Name, catalog.StateOK, said...)}, "machines")
 }

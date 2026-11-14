@@ -41,11 +41,10 @@
         },
         "Group": {
           "enum": [
-            "",
-            "can-rebuild",
             "misplaced",
-            "never-touched",
-            "your-data"
+            "can-rebuild",
+            "your-data",
+            "never-touched"
           ],
           "type": "string"
         },

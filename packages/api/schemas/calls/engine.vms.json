@@ -129,9 +129,9 @@
         },
         "state": {
           "enum": [
-            "failing",
+            "waiting",
             "passing",
-            "waiting"
+            "failing"
           ],
           "type": "string"
         }

@@ -23,6 +23,15 @@ const (
 	Images     ID = "images"
 )
 
+func (ID) Enum() []string {
+	order := Order()
+	out := make([]string, len(order))
+	for i, id := range order {
+		out[i] = string(id)
+	}
+	return out
+}
+
 func Order() []ID {
 	// invariant: the one order of the sections, on every surface.
 	return []ID{Overview, Activity, Apps, Settings, Disk, Ports, Accounts, Background, Awake, SSH, Images}

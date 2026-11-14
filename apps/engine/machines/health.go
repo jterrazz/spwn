@@ -115,6 +115,10 @@ const (
 	CheckFailing CheckState = "failing"
 )
 
+func (CheckState) Enum() []string {
+	return []string{string(CheckWaiting), string(CheckPassing), string(CheckFailing)}
+}
+
 type CheckStatus struct {
 	State CheckState `json:"state,omitempty"`
 	// value: when the failing began; zero otherwise.

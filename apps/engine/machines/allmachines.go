@@ -51,6 +51,26 @@ func (VMState) Enum() []string {
 	return []string{string(Running), string(Stopped), string(Suspended), string(Stale), string(Broken), string(Creating), string(UnknownState)}
 }
 
+func (s VMState) Word() string {
+	// value: a VM's state as a page says it.
+	switch s {
+	case Running:
+		return "Running"
+	case Stopped:
+		return "Stopped"
+	case Suspended:
+		return "Suspended"
+	case Stale:
+		return "Ended unexpectedly"
+	case Broken:
+		return "In a loop"
+	case Creating:
+		return "Creating"
+	case UnknownState:
+	}
+	return "Unknown"
+}
+
 type VM struct {
 	Name, Image, Version, Mac  string
 	Kind                       catalog.MachineKind

@@ -15,6 +15,8 @@ const (
 	NeedsALook Severity = "needs-a-look"
 )
 
+func (Severity) Enum() []string { return []string{string(Broken), string(NeedsALook)} }
+
 type Urgency string
 
 const (

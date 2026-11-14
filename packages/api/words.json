@@ -1,4 +1,26 @@
 {
+  "CatalogAfterApply": {
+    "logout": {
+      "Word": "a log out",
+      "Tone": "plain"
+    },
+    "reboot": {
+      "Word": "a restart of the machine",
+      "Tone": "plain"
+    },
+    "restart-dock": {
+      "Word": "the Dock restarted",
+      "Tone": "plain"
+    },
+    "restart-finder": {
+      "Word": "the Finder restarted",
+      "Tone": "plain"
+    },
+    "restart-menu-bar": {
+      "Word": "the menu bar restarted",
+      "Tone": "plain"
+    }
+  },
   "CatalogArch": {
     "amd64": {
       "Word": "amd64",
@@ -6,6 +28,56 @@
     },
     "arm64": {
       "Word": "arm64",
+      "Tone": "plain"
+    }
+  },
+  "CatalogAudience": {
+    "local": {
+      "Word": "Local",
+      "Tone": "plain"
+    },
+    "private": {
+      "Word": "Private",
+      "Tone": "plain"
+    },
+    "public": {
+      "Word": "Public",
+      "Tone": "plain"
+    }
+  },
+  "CatalogKind": {
+    "app": {
+      "Word": "app",
+      "Tone": "plain"
+    },
+    "manager": {
+      "Word": "manager",
+      "Tone": "plain"
+    },
+    "setting": {
+      "Word": "setting",
+      "Tone": "plain"
+    }
+  },
+  "CatalogLevel": {
+    "cache": {
+      "Word": "cache",
+      "Detail": "rebuilt when needed",
+      "Tone": "plain"
+    },
+    "data": {
+      "Word": "data",
+      "Detail": "yours, kept",
+      "Tone": "plain"
+    },
+    "kept": {
+      "Word": "kept",
+      "Detail": "kept",
+      "Tone": "plain"
+    },
+    "settings": {
+      "Word": "settings",
+      "Detail": "your settings, kept",
       "Tone": "plain"
     }
   },
@@ -20,6 +92,24 @@
     },
     "macos": {
       "Word": "macOS VM",
+      "Tone": "plain"
+    }
+  },
+  "CatalogNeed": {
+    "app-store-login": {
+      "Word": "an App Store sign-in",
+      "Tone": "plain"
+    },
+    "license": {
+      "Word": "a license accepted",
+      "Tone": "plain"
+    },
+    "sudo": {
+      "Word": "your password",
+      "Tone": "plain"
+    },
+    "terminal": {
+      "Word": "a terminal",
       "Tone": "plain"
     }
   },
@@ -39,6 +129,176 @@
     "ubuntu": {
       "Word": "Ubuntu",
       "Tone": "plain"
+    }
+  },
+  "CoreFailType": {
+    "declined": {
+      "Word": "declined",
+      "Tone": "plain"
+    },
+    "engine-stopped": {
+      "Word": "engine stopped",
+      "Tone": "bad"
+    },
+    "failed": {
+      "Word": "failed",
+      "Tone": "bad"
+    },
+    "far-too-old": {
+      "Word": "far too old",
+      "Tone": "bad"
+    },
+    "interrupted": {
+      "Word": "interrupted",
+      "Tone": "warn"
+    },
+    "needs-confirmation": {
+      "Word": "needs confirmation",
+      "Tone": "warn"
+    },
+    "needs-terminal": {
+      "Word": "needs a terminal",
+      "Tone": "warn"
+    },
+    "not-for-this-machine": {
+      "Word": "not for this machine",
+      "Tone": "plain"
+    },
+    "not-found": {
+      "Word": "not found",
+      "Tone": "plain"
+    },
+    "refused": {
+      "Word": "refused",
+      "Tone": "bad"
+    },
+    "unreachable": {
+      "Word": "unreachable",
+      "Tone": "bad"
+    }
+  },
+  "CoreFindingSeverity": {
+    "broken": {
+      "Word": "broken",
+      "Tone": "bad"
+    },
+    "needs-a-look": {
+      "Word": "needs a look",
+      "Tone": "warn"
+    }
+  },
+  "CoreSectionID": {
+    "accounts": {
+      "Word": "Accounts",
+      "Tone": "plain"
+    },
+    "activity": {
+      "Word": "Activity",
+      "Tone": "plain"
+    },
+    "apps": {
+      "Word": "Apps",
+      "Tone": "plain"
+    },
+    "awake": {
+      "Word": "Awake",
+      "Tone": "plain"
+    },
+    "background": {
+      "Word": "Background",
+      "Tone": "plain"
+    },
+    "disk": {
+      "Word": "Disk",
+      "Tone": "plain"
+    },
+    "images": {
+      "Word": "Images",
+      "Tone": "plain"
+    },
+    "overview": {
+      "Word": "Overview",
+      "Tone": "plain"
+    },
+    "ports": {
+      "Word": "Ports",
+      "Tone": "plain"
+    },
+    "settings": {
+      "Word": "Settings",
+      "Tone": "plain"
+    },
+    "ssh": {
+      "Word": "SSH",
+      "Tone": "plain"
+    }
+  },
+  "DiskGroup": {
+    "can-rebuild": {
+      "Word": "Can rebuild",
+      "Detail": "cache",
+      "Tone": "plain"
+    },
+    "misplaced": {
+      "Word": "Misplaced",
+      "Detail": "misplaced",
+      "Tone": "plain"
+    },
+    "never-touched": {
+      "Word": "Never touched",
+      "Detail": "never touched",
+      "Tone": "plain"
+    },
+    "your-data": {
+      "Word": "Your data",
+      "Detail": "data",
+      "Tone": "plain"
+    }
+  },
+  "EngineReadState": {
+    "not-installed": {
+      "Word": "not installed",
+      "Tone": "plain"
+    },
+    "running": {
+      "Word": "running",
+      "Tone": "ok"
+    },
+    "stopped": {
+      "Word": "stopped",
+      "Tone": "plain"
+    }
+  },
+  "MachinefileAction": {
+    "adopt": {
+      "Word": "adopt it",
+      "Heading": "To adopt",
+      "Tone": "new"
+    },
+    "install": {
+      "Word": "install it",
+      "Heading": "To install",
+      "Tone": "new"
+    },
+    "keep": {
+      "Word": "keep it",
+      "Heading": "Unchanged",
+      "Tone": "new"
+    },
+    "leave": {
+      "Word": "leave it",
+      "Heading": "Left as is",
+      "Tone": "new"
+    },
+    "remove": {
+      "Word": "remove it",
+      "Heading": "To remove",
+      "Tone": "new"
+    },
+    "set": {
+      "Word": "set it",
+      "Heading": "To set",
+      "Tone": "new"
     }
   },
   "MachinefileChapter": {
@@ -64,6 +324,36 @@
       "Word": "Settings",
       "One": "setting",
       "Other": "settings",
+      "Tone": "plain"
+    }
+  },
+  "MachinefileCondition": {
+    "absent": {
+      "Word": "not installed",
+      "Tone": "warn"
+    },
+    "changed": {
+      "Word": "changed",
+      "Tone": "warn"
+    },
+    "extra": {
+      "Word": "extra",
+      "Tone": "plain"
+    },
+    "not-managed": {
+      "Word": "not managed",
+      "Tone": "plain"
+    },
+    "outdated": {
+      "Word": "outdated",
+      "Tone": "warn"
+    },
+    "present": {
+      "Word": "present",
+      "Tone": "ok"
+    },
+    "unknown": {
+      "Word": "not known",
       "Tone": "plain"
     }
   },
@@ -124,6 +414,20 @@
       "Tone": "new"
     }
   },
+  "MachinesCheckState": {
+    "failing": {
+      "Word": "fails",
+      "Tone": "bad"
+    },
+    "passing": {
+      "Word": "passes",
+      "Tone": "ok"
+    },
+    "waiting": {
+      "Word": "waiting",
+      "Tone": "new"
+    }
+  },
   "MachinesFit": {
     "fits": {
       "Word": "fits",
@@ -179,6 +483,36 @@
     },
     "workspace": {
       "Word": "room for one more workspace",
+      "Tone": "plain"
+    }
+  },
+  "MachinesVMState": {
+    "broken": {
+      "Word": "In a loop",
+      "Tone": "bad"
+    },
+    "creating": {
+      "Word": "Creating",
+      "Tone": "new"
+    },
+    "running": {
+      "Word": "Running",
+      "Tone": "ok"
+    },
+    "stale": {
+      "Word": "Ended unexpectedly",
+      "Tone": "warn"
+    },
+    "stopped": {
+      "Word": "Stopped",
+      "Tone": "plain"
+    },
+    "suspended": {
+      "Word": "Suspended",
+      "Tone": "plain"
+    },
+    "unknown": {
+      "Word": "Unknown",
       "Tone": "plain"
     }
   }

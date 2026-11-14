@@ -755,7 +755,7 @@ export type CatalogSkillMethod = {
 };
 
 export type CatalogStored = {
-    Level: '' | 'cache' | 'data' | 'settings' | 'kept';
+    Level: 'cache' | 'data' | 'settings' | 'kept';
     Memos: string[] | null;
     Note: string;
     On: ('mac' | 'linux' | 'macos')[] | null;
@@ -794,15 +794,15 @@ export type CoreCallWireError = {
     hint?: string;
     message: string;
     subject?: string;
-    type?: 'declined' | 'engine-stopped' | 'failed' | 'far-too-old' | 'interrupted' | 'needs-confirmation' | 'needs-terminal' | 'not-for-this-machine' | 'not-found' | 'refused' | 'unreachable';
+    type?: 'refused' | 'not-found' | 'not-for-this-machine' | 'needs-confirmation' | 'needs-terminal' | 'declined' | 'unreachable' | 'engine-stopped' | 'far-too-old' | 'failed' | 'interrupted';
 };
 
 export type CoreFindingFinding = {
     Ends: string;
     Fix: CoreFindingFix;
     Machine: CoreMachineRef;
-    Section: '' | 'accounts' | 'activity' | 'apps' | 'awake' | 'background' | 'disk' | 'images' | 'overview' | 'ports' | 'settings' | 'ssh';
-    Severity: '' | 'broken' | 'needs-a-look';
+    Section: 'overview' | 'activity' | 'apps' | 'settings' | 'disk' | 'ports' | 'accounts' | 'background' | 'awake' | 'ssh' | 'images';
+    Severity: 'broken' | 'needs-a-look';
     Subject: string;
     Text: string;
     Urgency: '' | 'blocking' | 'expiring' | 'red';
@@ -896,7 +896,7 @@ export type DiskReading = {
 export type DiskRow = {
     App: string;
     Bytes: number;
-    Group: '' | 'can-rebuild' | 'misplaced' | 'never-touched' | 'your-data';
+    Group: 'misplaced' | 'can-rebuild' | 'your-data' | 'never-touched';
     MoveTo: string;
     Paths: string[] | null;
     Pending: boolean;
@@ -1007,7 +1007,7 @@ export type EnginePagesIn = {
 
 export type EngineReading = {
     AwakeUntil: string | null;
-    State: '' | 'running' | 'stopped' | 'not-installed';
+    State: 'running' | 'stopped' | 'not-installed';
     Station: string;
     Stopped: EngineStopMark;
     Up: number;
@@ -1184,13 +1184,13 @@ export type MachinefileApplying = {
 };
 
 export type MachinefileAsked = {
-    Need: '' | 'sudo' | 'terminal' | 'license' | 'app-store-login';
+    Need: 'sudo' | 'terminal' | 'license' | 'app-store-login';
     Packages: string[] | null;
 };
 
 export type MachinefileBlock = {
-    Action: '' | 'adopt' | 'install' | 'keep' | 'leave' | 'remove' | 'set';
-    Condition: '' | 'absent' | 'changed' | 'extra' | 'not-managed' | 'outdated' | 'present' | 'unknown';
+    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
+    Condition: 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
     Diff: string;
     Fate: '' | 'gone' | 'kept-another-way' | 'kept-edited' | 'kept-holding' | 'kept-irreversible' | 'kept-manager-missing' | 'kept-required' | 'kept-unread' | 'taken';
     ID: string;
@@ -1199,8 +1199,8 @@ export type MachinefileBlock = {
 };
 
 export type MachinefileBlockDone = {
-    Action: '' | 'adopt' | 'install' | 'keep' | 'leave' | 'remove' | 'set';
-    Condition: '' | 'absent' | 'changed' | 'extra' | 'not-managed' | 'outdated' | 'present' | 'unknown';
+    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
+    Condition: 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
     Detail: string;
     Diff: string;
     Fate: '' | 'gone' | 'kept-another-way' | 'kept-edited' | 'kept-holding' | 'kept-irreversible' | 'kept-manager-missing' | 'kept-required' | 'kept-unread' | 'taken';
@@ -1265,7 +1265,7 @@ export type MachinefileDiffering = {
     Asked: string;
     AskedTo?: 'local' | 'private' | 'public';
     Block: string;
-    Condition: '' | 'absent' | 'changed' | 'extra' | 'not-managed' | 'outdated' | 'present' | 'unknown';
+    Condition: 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
     Package: string;
     Port: number;
     Seen: string;
@@ -1295,7 +1295,7 @@ export type MachinefileDrift = {
 };
 
 export type MachinefileExtraLine = {
-    Action: '' | 'adopt' | 'install' | 'keep' | 'leave' | 'remove' | 'set';
+    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
     Installed: MachinefileInstalled;
     RequiredBy: string[] | null;
     Seen: MachinefileSeen;
@@ -1310,7 +1310,7 @@ export type MachinefileInstalled = {
 };
 
 export type MachinefileLine = {
-    Action: '' | 'adopt' | 'install' | 'keep' | 'leave' | 'remove' | 'set';
+    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
     Seen: MachinefileSeen;
     Step: MachinefileStep;
 };
@@ -1388,7 +1388,7 @@ export type MachinefileScript = {
 };
 
 export type MachinefileSeen = {
-    Condition: '' | 'absent' | 'changed' | 'extra' | 'not-managed' | 'outdated' | 'present' | 'unknown';
+    Condition: 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
     Detail: string;
     Holds: string[] | null;
     HoldsUnread: boolean;
@@ -1410,7 +1410,7 @@ export type MachinefileStep = {
     Chosen: string;
     Defined: MachinefileOrigin;
     From: string;
-    Kind: '' | 'manager' | 'app' | 'setting';
+    Kind: 'manager' | 'app' | 'setting';
     Lock: string;
     Locked: string;
     Method: string;
@@ -1660,7 +1660,7 @@ export type MachinesCheckStatus = {
     answer?: string;
     at?: string;
     since?: string;
-    state?: 'failing' | 'passing' | 'waiting';
+    state?: 'waiting' | 'passing' | 'failing';
 };
 
 export type MachinesCleaned = {
@@ -1874,7 +1874,7 @@ export type MachinesVM = {
     Restarts: MachinesRestarts;
     SSH: boolean;
     SizeGB: number;
-    State: '' | 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
+    State: 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
     Uptime: MachinesUptime;
     Version: string;
     Want: string;
@@ -1924,7 +1924,7 @@ export type OverviewCheck = {
 
 export type OverviewDisk = {
     Bytes: number;
-    Level: '' | 'cache' | 'data' | 'settings' | 'kept';
+    Level: 'cache' | 'data' | 'settings' | 'kept';
     Name: string;
 };
 
@@ -1945,7 +1945,7 @@ export type OverviewHead = {
 export type OverviewLine = {
     Parts: OverviewPart[] | null;
     Pending: boolean;
-    Section: '' | 'accounts' | 'activity' | 'apps' | 'awake' | 'background' | 'disk' | 'images' | 'overview' | 'ports' | 'settings' | 'ssh';
+    Section: 'overview' | 'activity' | 'apps' | 'settings' | 'disk' | 'ports' | 'accounts' | 'background' | 'awake' | 'ssh' | 'images';
     Unread: string;
 };
 
@@ -1967,8 +1967,8 @@ export type OverviewNeed = {
     Command: string;
     Machine: string;
     Path: string;
-    Section: '' | 'accounts' | 'activity' | 'apps' | 'awake' | 'background' | 'disk' | 'images' | 'overview' | 'ports' | 'settings' | 'ssh';
-    Severity: '' | 'broken' | 'needs-a-look';
+    Section: 'overview' | 'activity' | 'apps' | 'settings' | 'disk' | 'ports' | 'accounts' | 'background' | 'awake' | 'ssh' | 'images';
+    Severity: 'broken' | 'needs-a-look';
     Subject: string;
     Text: string;
 };
@@ -3199,19 +3199,45 @@ export interface Calls {
 
 export type CallName = keyof Calls;
 
+export type CatalogAfterApply = 'restart-dock' | 'restart-finder' | 'restart-menu-bar' | 'logout' | 'reboot';
+
 export type CatalogArch = 'arm64' | 'amd64';
+
+export type CatalogAudience = 'local' | 'private' | 'public';
+
+export type CatalogKind = 'manager' | 'app' | 'setting';
+
+export type CatalogLevel = 'cache' | 'data' | 'settings' | 'kept';
 
 export type CatalogMachineKind = 'mac' | 'linux' | 'macos';
 
+export type CatalogNeed = 'sudo' | 'terminal' | 'license' | 'app-store-login';
+
 export type CatalogOS = 'macos' | 'ubuntu' | 'debian' | 'any';
+
+export type CoreFailType = 'refused' | 'not-found' | 'not-for-this-machine' | 'needs-confirmation' | 'needs-terminal' | 'declined' | 'unreachable' | 'engine-stopped' | 'far-too-old' | 'failed' | 'interrupted';
+
+export type CoreFindingSeverity = 'broken' | 'needs-a-look';
+
+export type CoreSectionID = 'overview' | 'activity' | 'apps' | 'settings' | 'disk' | 'ports' | 'accounts' | 'background' | 'awake' | 'ssh' | 'images';
 
 export type CoreVerdictTone = 'ok' | 'warn' | 'bad' | 'plain' | 'new';
 
+export type DiskGroup = 'misplaced' | 'can-rebuild' | 'your-data' | 'never-touched';
+
+export type EngineReadState = 'running' | 'stopped' | 'not-installed';
+
+export type MachinefileAction = 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
+
 export type MachinefileChapter = 'apps' | 'settings' | 'ports' | 'accounts';
+
+export type MachinefileCondition = 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
 
 export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
 
 export type MachinesBirthStep = 'building' | 'cloning' | 'booting' | 'address' | 'ssh';
+
+export type MachinesCheckState = 'waiting' | 'passing' | 'failing';
 
 export type MachinesFit = 'fits' | 'no-room';
 
@@ -3220,6 +3246,8 @@ export type MachinesLifetime = 'ephemeral' | 'persistent' | 'always-on';
 export type MachinesPreset = 'small' | 'workspace' | 'gate';
 
 export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
+
+export type MachinesVMState = 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
 
 export type StationWord = {
     Detail?: string;
@@ -3230,14 +3258,28 @@ export type StationWord = {
 };
 
 export type StationWords = {
+    CatalogAfterApply: Record<CatalogAfterApply, StationWord>;
     CatalogArch: Record<CatalogArch, StationWord>;
+    CatalogAudience: Record<CatalogAudience, StationWord>;
+    CatalogKind: Record<CatalogKind, StationWord>;
+    CatalogLevel: Record<CatalogLevel, StationWord>;
     CatalogMachineKind: Record<CatalogMachineKind, StationWord>;
+    CatalogNeed: Record<CatalogNeed, StationWord>;
     CatalogOS: Record<CatalogOS, StationWord>;
+    CoreFailType: Record<CoreFailType, StationWord>;
+    CoreFindingSeverity: Record<CoreFindingSeverity, StationWord>;
+    CoreSectionID: Record<CoreSectionID, StationWord>;
+    DiskGroup: Record<DiskGroup, StationWord>;
+    EngineReadState: Record<EngineReadState, StationWord>;
+    MachinefileAction: Record<MachinefileAction, StationWord>;
     MachinefileChapter: Record<MachinefileChapter, StationWord>;
+    MachinefileCondition: Record<MachinefileCondition, StationWord>;
     MachinefileLayer: Record<MachinefileLayer, StationWord>;
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
+    MachinesCheckState: Record<MachinesCheckState, StationWord>;
     MachinesFit: Record<MachinesFit, StationWord>;
     MachinesLifetime: Record<MachinesLifetime, StationWord>;
     MachinesPreset: Record<MachinesPreset, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
+    MachinesVMState: Record<MachinesVMState, StationWord>;
 };

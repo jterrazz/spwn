@@ -29,17 +29,17 @@
         },
         "type": {
           "enum": [
-            "declined",
-            "engine-stopped",
-            "failed",
-            "far-too-old",
-            "interrupted",
+            "refused",
+            "not-found",
+            "not-for-this-machine",
             "needs-confirmation",
             "needs-terminal",
-            "not-for-this-machine",
-            "not-found",
-            "refused",
-            "unreachable"
+            "declined",
+            "unreachable",
+            "engine-stopped",
+            "far-too-old",
+            "failed",
+            "interrupted"
           ],
           "type": "string"
         }
@@ -252,9 +252,9 @@
         },
         "state": {
           "enum": [
-            "failing",
+            "waiting",
             "passing",
-            "waiting"
+            "failing"
           ],
           "type": "string"
         }
@@ -730,7 +730,6 @@
         },
         "State": {
           "enum": [
-            "",
             "running",
             "stopped",
             "suspended",

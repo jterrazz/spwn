@@ -32,6 +32,10 @@ const (
 	Interrupted       Type = "interrupted"
 )
 
+func (Type) Enum() []string {
+	return []string{string(Refused), string(NotFound), string(NotForThisMachine), string(NeedsConfirmation), string(NeedsTerminal), string(Declined), string(Unreachable), string(EngineStopped), string(FarTooOld), string(Failed), string(Interrupted)}
+}
+
 func (t Type) Exit() Exit {
 	// invariant: SPEC §12.2, the exit code computed once from the type.
 	switch t {

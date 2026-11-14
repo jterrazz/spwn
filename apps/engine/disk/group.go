@@ -16,6 +16,15 @@ const (
 	NeverTouched Group = "never-touched"
 )
 
+func (Group) Enum() []string {
+	groups := Groups()
+	out := make([]string, len(groups))
+	for i, g := range groups {
+		out[i] = string(g)
+	}
+	return out
+}
+
 func Groups() []Group {
 	// value: the Disk groups in the order they are read: what is misplaced
 	// first, then by what an erase would lose.

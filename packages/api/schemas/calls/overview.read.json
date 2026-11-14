@@ -1033,7 +1033,6 @@
       "properties": {
         "Level": {
           "enum": [
-            "",
             "cache",
             "data",
             "settings",
@@ -1151,17 +1150,17 @@
         },
         "type": {
           "enum": [
-            "declined",
-            "engine-stopped",
-            "failed",
-            "far-too-old",
-            "interrupted",
+            "refused",
+            "not-found",
+            "not-for-this-machine",
             "needs-confirmation",
             "needs-terminal",
-            "not-for-this-machine",
-            "not-found",
-            "refused",
-            "unreachable"
+            "declined",
+            "unreachable",
+            "engine-stopped",
+            "far-too-old",
+            "failed",
+            "interrupted"
           ],
           "type": "string"
         }
@@ -1330,7 +1329,6 @@
         },
         "Level": {
           "enum": [
-            "",
             "cache",
             "data",
             "settings",
@@ -1438,18 +1436,17 @@
         },
         "Section": {
           "enum": [
-            "",
-            "accounts",
+            "overview",
             "activity",
             "apps",
-            "awake",
-            "background",
-            "disk",
-            "images",
-            "overview",
-            "ports",
             "settings",
-            "ssh"
+            "disk",
+            "ports",
+            "accounts",
+            "background",
+            "awake",
+            "ssh",
+            "images"
           ],
           "type": "string"
         },
@@ -1539,24 +1536,22 @@
         },
         "Section": {
           "enum": [
-            "",
-            "accounts",
+            "overview",
             "activity",
             "apps",
-            "awake",
-            "background",
-            "disk",
-            "images",
-            "overview",
-            "ports",
             "settings",
-            "ssh"
+            "disk",
+            "ports",
+            "accounts",
+            "background",
+            "awake",
+            "ssh",
+            "images"
           ],
           "type": "string"
         },
         "Severity": {
           "enum": [
-            "",
             "broken",
             "needs-a-look"
           ],

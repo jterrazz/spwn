@@ -719,7 +719,6 @@
       "properties": {
         "Need": {
           "enum": [
-            "",
             "sudo",
             "terminal",
             "license",
@@ -748,25 +747,23 @@
       "properties": {
         "Action": {
           "enum": [
-            "",
-            "adopt",
             "install",
+            "set",
+            "adopt",
             "keep",
             "leave",
-            "remove",
-            "set"
+            "remove"
           ],
           "type": "string"
         },
         "Condition": {
           "enum": [
-            "",
-            "absent",
-            "changed",
-            "extra",
-            "not-managed",
-            "outdated",
             "present",
+            "absent",
+            "outdated",
+            "changed",
+            "not-managed",
+            "extra",
             "unknown"
           ],
           "type": "string"
@@ -815,25 +812,23 @@
       "properties": {
         "Action": {
           "enum": [
-            "",
-            "adopt",
             "install",
+            "set",
+            "adopt",
             "keep",
             "leave",
-            "remove",
-            "set"
+            "remove"
           ],
           "type": "string"
         },
         "Condition": {
           "enum": [
-            "",
-            "absent",
-            "changed",
-            "extra",
-            "not-managed",
-            "outdated",
             "present",
+            "absent",
+            "outdated",
+            "changed",
+            "not-managed",
+            "extra",
             "unknown"
           ],
           "type": "string"
@@ -964,13 +959,12 @@
       "properties": {
         "Action": {
           "enum": [
-            "",
-            "adopt",
             "install",
+            "set",
+            "adopt",
             "keep",
             "leave",
-            "remove",
-            "set"
+            "remove"
           ],
           "type": "string"
         },
@@ -1032,13 +1026,12 @@
       "properties": {
         "Action": {
           "enum": [
-            "",
-            "adopt",
             "install",
+            "set",
+            "adopt",
             "keep",
             "leave",
-            "remove",
-            "set"
+            "remove"
           ],
           "type": "string"
         },
@@ -1304,13 +1297,12 @@
       "properties": {
         "Condition": {
           "enum": [
-            "",
-            "absent",
-            "changed",
-            "extra",
-            "not-managed",
-            "outdated",
             "present",
+            "absent",
+            "outdated",
+            "changed",
+            "not-managed",
+            "extra",
             "unknown"
           ],
           "type": "string"
@@ -1405,7 +1397,6 @@
         },
         "Kind": {
           "enum": [
-            "",
             "manager",
             "app",
             "setting"

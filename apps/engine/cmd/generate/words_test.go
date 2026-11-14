@@ -79,3 +79,53 @@ func TestAMachinesKindIsClosedInTheSchemasTheWindowReads(t *testing.T) {
 		}
 	}
 }
+
+func enumsOnTheWire(t *testing.T) map[string]bool {
+	t.Helper()
+	found := map[string]bool{}
+	var walk func(v any)
+	walk = func(v any) {
+		switch v := v.(type) {
+		case map[string]any:
+			if values, ok := v["enum"].([]any); ok {
+				names := make([]string, 0, len(values))
+				for _, value := range values {
+					if name, ok := value.(string); ok {
+						names = append(names, name)
+					}
+				}
+				slices.Sort(names)
+				found[strings.Join(names, "\x00")] = true
+			}
+			for _, child := range v {
+				walk(child)
+			}
+		case []any:
+			for _, child := range v {
+				walk(child)
+			}
+		}
+	}
+	for file, body := range apiFiles(root(t)) {
+		if !strings.HasSuffix(file, ".json") || file == wordsPath {
+			continue
+		}
+		var doc any
+		if err := json.Unmarshal(body, &doc); err != nil {
+			t.Fatalf("%s: %v", file, err)
+		}
+		walk(doc)
+	}
+	return found
+}
+
+func TestEveryWordedEnumIsAClosedEnumOfTheWire(t *testing.T) {
+	onTheWire := enumsOnTheWire(t)
+	for _, w := range wordedEnums() {
+		values := slices.Clone(w.of.Enum())
+		slices.Sort(values)
+		if !onTheWire[strings.Join(values, "\x00")] {
+			t.Errorf("%s: no schema of the wire closes a field to exactly its values %v, so its words reach no client", wordsName(w.of), values)
+		}
+	}
+}

@@ -572,7 +572,6 @@
       "properties": {
         "Level": {
           "enum": [
-            "",
             "cache",
             "data",
             "settings",
