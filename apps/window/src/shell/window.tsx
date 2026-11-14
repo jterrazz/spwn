@@ -12,7 +12,7 @@ import { Boundary } from './boundary';
 import { Find } from './find';
 import { onTabKey, useShortcuts } from './keys';
 import { Lost, useLost } from './lost';
-import { IN_CATALOG, machineRoute, TAB_PANEL } from './route';
+import { machineRoute, OPENS_AN_ITEM, TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
 import { Sidebar } from './sidebar';
@@ -26,6 +26,7 @@ export const TITLES: Record<PlainPage, string> = {
     inbox: 'Inbox',
     storage: 'Storage',
     'machine-files': 'Machine files',
+    passwords: 'Passwords',
     'catalog-apps': 'Apps',
     'catalog-skills': 'Skills',
     'catalog-settings': 'Settings',
@@ -85,7 +86,7 @@ type Sheet =
 function crumbsOf(route: Route, found: Found | undefined, go: Go): Crumb[] {
     if (route.page !== 'machine') {
         const { page, item } = route;
-        if (item === undefined || !IN_CATALOG.has(page)) {
+        if (item === undefined || !OPENS_AN_ITEM.has(page)) {
             return [{ label: TITLES[page] }];
         }
         const shelf = {

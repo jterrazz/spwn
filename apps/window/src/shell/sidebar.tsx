@@ -100,6 +100,7 @@ function MachineFiles({ place }: { place: Place }) {
     return (
         <div className={styles.group}>
             <NavItem {...place('machine-files')} icon="file" label="Machine files" />
+            <NavItem {...place('passwords')} icon="key" label="Passwords" />
         </div>
     );
 }

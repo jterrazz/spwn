@@ -48,7 +48,7 @@ export type Held = {
     settings: readonly { name: string; category: string }[];
 };
 
-const PLACES: readonly PlainPage[] = ['home', 'inbox', 'storage'];
+const PLACES: readonly PlainPage[] = ['home', 'inbox', 'storage', 'passwords'];
 const SHELVES: readonly PlainPage[] = ['catalog-apps', 'catalog-skills', 'catalog-settings'];
 const FOUND_BY_NAME: ReadonlySet<PlainPage> = new Set<PlainPage>(['gallery']);
 

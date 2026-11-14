@@ -13,6 +13,7 @@ import { MachineHeader } from './machine/header';
 import { MachineTab } from './machine/machine';
 import { routeOfNeed } from './needs/needs';
 import { NewMachine } from './new-machine/new-machine';
+import { PasswordsPage } from './passwords/passwords';
 import { PlaceholderPage } from './placeholder';
 import { StoragePage } from './storage/storage';
 
@@ -85,6 +86,9 @@ function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps
         }
         case 'machine-files': {
             return <Files file={route.file} go={go} newMachine={newMachine} />;
+        }
+        case 'passwords': {
+            return <PasswordsPage go={go} key={route.item ?? ''} opened={route.item} />;
         }
         case 'catalog-apps': {
             return <Shelf go={go} item={route.item} macs={home.macs} shelf="apps" />;

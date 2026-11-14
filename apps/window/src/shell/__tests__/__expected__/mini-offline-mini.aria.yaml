@@ -21,6 +21,7 @@
       - text: infra
       - img "Unknown"
   - button "Machine files"
+  - button "Passwords"
   - group "Catalog":
     - heading "Catalog" [level=2]
     - button "Apps"

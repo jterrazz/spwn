@@ -14,6 +14,7 @@ const TITLES: Record<PlainPage, string> = {
     home: 'Home',
     inbox: 'Inbox',
     'machine-files': 'Machine files',
+    passwords: 'Passwords',
     storage: 'Storage',
 };
 
@@ -63,7 +64,7 @@ describe('finds', () => {
 
         // Then - places, the machines each Mac then its VMs, Machine files, then the catalog's shelves, no action; tabs, needs and packages wait for a query
         expect(shown(groups)).toStrictEqual([
-            ['Places', ['Home', 'Inbox', 'Storage']],
+            ['Places', ['Home', 'Inbox', 'Storage', 'Passwords']],
             ['Machines', ['mini', 'book', 'linux-1', 'api']],
             ['Machine files', ['Machine files']],
             ['Catalog', ['Apps', 'Skills', 'Settings']],
@@ -77,7 +78,7 @@ describe('finds', () => {
         // Then - each row carries the trail of its section
         const details = (kind: string) =>
             groups.find((group) => group.kind === kind)?.results.map((result) => result.detail);
-        expect(details('Places')).toStrictEqual(['page', 'page', 'page']);
+        expect(details('Places')).toStrictEqual(['page', 'page', 'page', 'page']);
         expect(details('Machine files')).toStrictEqual(['setup']);
         expect(details('Catalog')).toStrictEqual(['catalog', 'catalog', 'catalog']);
     });
@@ -174,7 +175,10 @@ describe('finds', () => {
         // Then - only the proof window finds it, and its empty query does not list it
         expect(production).toStrictEqual([]);
         expect(shown(proof)).toStrictEqual([['Places', ['Gallery']]]);
-        expect(shown(unasked)).toContainEqual(['Places', ['Home', 'Inbox', 'Storage']]);
+        expect(shown(unasked)).toContainEqual([
+            'Places',
+            ['Home', 'Inbox', 'Storage', 'Passwords'],
+        ]);
     });
 
     test('a query nothing holds finds nothing', () => {

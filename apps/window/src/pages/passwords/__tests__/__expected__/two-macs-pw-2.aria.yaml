@@ -1,0 +1,17 @@
+- main:
+  - heading "npm publish" [level=1]
+  - paragraph: npm · token · added 12 Oct
+  - button "Remove password"
+  - region "This password":
+    - heading "This password" [level=2]
+    - term: Value
+    - definition: Withheld
+    - term: Kind
+    - definition: token
+    - term: Program
+    - definition: npm
+  - region "Granted to":
+    - heading "Granted to 1 machine" [level=2]
+    - button "Grant…"
+    - text: linux-1 machine Active
+    - button "Remove npm publish from linux-1": Remove

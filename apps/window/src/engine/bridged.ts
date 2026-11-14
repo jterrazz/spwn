@@ -24,6 +24,9 @@ export const BRIDGED = [
     'engine.read',
     'engine.start',
     'engine.watch',
+    'grants.add',
+    'grants.new',
+    'grants.remove',
     'images.delete',
     'images.list',
     'machinefile.apply',
@@ -49,6 +52,8 @@ export const BRIDGED = [
     'ports.stop-sharing',
     'settings.list',
     'settings.matrix',
+    'vault.list',
+    'vault.remove',
 ] as const satisfies readonly CallName[];
 
 export type Bridged = (typeof BRIDGED)[number];
