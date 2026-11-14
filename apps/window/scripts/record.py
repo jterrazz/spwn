@@ -30,7 +30,7 @@ target, and its VMs, by name, are asked. The worlds of world.py's SEEDS are reco
 
 A sign-in call names its VM in `Machine` to this Mac's engine and takes no target: accounts.list is asked for This Mac
 and once per VM of every Mac, accounts.login and accounts.logout carry their `Machine`, and the `sign-ins` world
-holds the login whose code is pasted back. The vault is This Mac's alone: vault.list is asked with no target, and
+holds the login whose code is pasted back. The vault is This Mac's alone: vault.list and vault.new are asked with no target, and
 grants.new once per entry it lists. A gesture's input is written with its recording, so a pasted code or a typed
 password is a plain word (`good`, `nope`), never one shaped like a token. A world is never recorded whole to change one call: `--call=` keeps the
 requests `--in=` added.
@@ -193,6 +193,7 @@ def asks(listed):
         *[{"watch": "accounts.list", "in": {}} for _ in here],
         *[{"watch": "accounts.list", "in": {"Machine": name}} for name in vmsOf(listed)],
         *[{"watch": "vault.list", "in": {}} for _ in here],
+        *[{"watch": "vault.new", "in": {}} for _ in here],
         *[{"watch": "awake.read", "in": {}} for _ in here],
         {"watch": "machines.new", "in": {}},
         *[{"watch": "machines.new", "in": {"On": mac}} for mac in macsOf(listed)],
@@ -254,8 +255,9 @@ GESTURES = {
         {"call": "grants.remove", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine", "Confirm": "yes"}},
         {"call": "grants.add", "in": {"Entry": "pw-1", "To": "linux-1", "ToKind": "machine"}},
         {"call": "grants.add", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine"}},
-        {"call": "vault.add", "in": {"Label": "GitHub sign-in", "Program": "gh", "Kind": "token", "From": "sign-in"}},
-        {"call": "vault.add", "in": {"Label": "Cloudflare deploy", "Program": "wrangler", "Kind": "api-key", "From": "typed", "Value": "good"}},
+        {"call": "vault.add", "in": {"Label": "GitHub sign-in", "Program": "gh", "From": "sign-in"}},
+        {"call": "vault.add", "in": {"Label": "Cloudflare deploy", "Program": "wrangler", "Kind": "token", "From": "typed", "Value": "good"}},
+        {"call": "vault.add", "in": {"Label": "", "Program": "npm", "Kind": "token", "From": "typed", "Value": "good"}},
         {"call": "vault.add", "in": {"Label": "GitHub deploy", "Program": "npm", "Kind": "token", "From": "typed", "Value": "good"}},
         {"call": "vault.add", "in": {"Label": "npm deploy", "Program": "npm", "Kind": "token", "From": "typed", "Value": ""}},
     ],

@@ -67,3 +67,16 @@
     color: var(--t3);
     font-size: var(--text-label);
 }
+
+.pick.led {
+    flex-direction: row;
+    gap: var(--space-10);
+    align-items: center;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
