@@ -125,7 +125,7 @@ func (h *Hypervisor) Clone(ctx context.Context, from imagescontract.ImageLocatio
 		v = &world.VM{}
 		m.VMs[vm] = v
 	}
-	v.Disk = true
+	v.Disk, v.Made = true, true
 	if fresh := m.Fresh; !fromDisk && fresh != nil {
 		v.Size = fresh.Size
 		if v.Guest == nil && fresh.Guest != nil {

@@ -23,13 +23,16 @@ runs:
       exit: 0
       stdout: |
           	On infra-2:
+          	Activity	? not measured
+          	Ports	Public 0 · Private 0
+          	SSH	ssh infra-2
+          	Apps, settings, accounts: not managed by station
           # Health
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
           ●	Restarts	↺ 0 · none since boot
           ●	Size	4 CPU · 8 GB · 50 GB
-          ●	SSH	ssh infra-2 · for debugging
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].tailnet | {peers: [.self.Peers[].Name], shares: .shares}'' world.json'
       exit: 0
       stdout: |

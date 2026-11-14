@@ -1,6 +1,8 @@
 description: 'an ephemeral workspace that is silent is kept, its agent not started, and how to start it is said'
 env: two-macs
 runs:
+    - command: 'world fault Guest.Serve'
+      exit: 0
     - command: 'agents start "Build the landing page" --new'
       exit: 1
       stderr: |

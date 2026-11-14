@@ -980,7 +980,8 @@
                         "lifetime": "always-on",
                         "want": "running",
                         "check": "https://jterrazz.com/healthz",
-                        "created_at": "2026-11-02T10:30:00Z"
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "purpose": "The cluster's control plane"
                     },
                     "disk": true,
                     "size": {
@@ -1032,7 +1033,9 @@
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
-                        "created_at": "2026-11-02T10:30:00Z"
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "purpose": "Refresh the auth token",
+                        "creator": "studio-os-fe"
                     },
                     "disk": true,
                     "size": {
@@ -1103,7 +1106,9 @@
                         "version": "3",
                         "lifetime": "persistent",
                         "want": "running",
-                        "created_at": "2026-11-02T10:30:00Z"
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "purpose": "Review every pull request of studio-station",
+                        "creator": "studio-os-43"
                     },
                     "disk": true,
                     "size": {
@@ -1413,7 +1418,8 @@
                 "machinefiles/jterrazz-base.machine.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
                 "machinefiles/linux-1.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-1\nmachine: { kind: workspace }\nextends: [linux-dev]\nports: { open: [3000], to: public }\n",
                 "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [jterrazz-base]\napps: [ripgrep]\n",
-                "machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [jterrazz-base]\napps: [lazygit]\n"
+                "machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [jterrazz-base]\napps: [lazygit]\n",
+                "machinefiles/studio-linux.machine.yaml": "machinefile: station.machinefile/v1\nname: studio-linux\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [station-linux]\napps: [jq, gh, ripgrep]\n"
             },
             "fresh": {
                 "size": {
@@ -1593,6 +1599,12 @@
                 },
                 "vm_user": "admin"
             },
+            "processes": [
+                {
+                    "pid": 4242,
+                    "start": "1794047380.000000"
+                }
+            ],
             "secrets": {
                 "operator:claude:oauth-token": "fake-operator:claude:oauth-token-of-macbook-pro",
                 "session:github": "fake-session:github-of-macbook-pro"
@@ -1701,7 +1713,9 @@
                         "lifetime": "ephemeral",
                         "want": "running",
                         "created_at": "2026-11-02T10:30:00Z",
-                        "template": "linux-dev"
+                        "template": "linux-dev",
+                        "purpose": "Write the changelog of v4",
+                        "creator": "studio-os-43"
                     },
                     "disk": true,
                     "size": {
@@ -1768,7 +1782,8 @@
                         "version": "3",
                         "lifetime": "persistent",
                         "want": "stopped",
-                        "created_at": "2026-11-02T10:30:00Z"
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "purpose": "The API's staging copy"
                     },
                     "disk": true,
                     "size": {
@@ -1784,7 +1799,9 @@
                         "lifetime": "ephemeral",
                         "want": "running",
                         "created_at": "2026-11-02T10:30:00Z",
-                        "template": "linux-dev"
+                        "template": "linux-dev",
+                        "purpose": "Lot L2.5, settings from a machine file",
+                        "creator": "studio-os-fe"
                     },
                     "disk": true,
                     "size": {
@@ -1884,6 +1901,32 @@
                         "[   12.540318] node[1203]: astro v5.1.2 dev server listening on 4321",
                         "[   31.774052] node[1190]: hmr update /src/pages/index.astro"
                     ]
+                },
+                "linux-2": {
+                    "kept": {
+                        "image": "station-linux",
+                        "lifetime": "persistent",
+                        "created_at": "2026-11-07T10:29:40Z",
+                        "purpose": "Lot L3, the Machines page",
+                        "creator": "studio-os-fe",
+                        "owner": {
+                            "pid": 4242,
+                            "start": "1794047380.000000"
+                        },
+                        "birth": {
+                            "progress": 20,
+                            "step": "building",
+                            "position": 1,
+                            "steps": 5,
+                            "at": "2026-11-07T10:29:55Z",
+                            "sentence": "Creating: image 1 of 5"
+                        }
+                    },
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 20000000000
+                    }
                 },
                 "station-image-station-linux-3": {
                     "disk": true,

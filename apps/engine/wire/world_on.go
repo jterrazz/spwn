@@ -47,6 +47,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	diskfake "github.com/jterrazz/studio-station/apps/engine/disk/adapter/fake"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -1061,8 +1062,8 @@ func (c worldClock) Sleep(ctx context.Context, d time.Duration) error {
 
 // invariant: a VM of the world whose own slice says what it is answers
 // station's API as `station guest serve --stdio` answers inside it: its calls
-// run over that slice, every value through the wire form; any other line is
-// the scripted guest's.
+// run over that slice, every value through the wire form; any other line,
+// and that one while a Guest.Serve fault is scripted, is the scripted guest's.
 type worldGuests struct {
 	contract.GuestDialer
 	r *worldRun
@@ -1086,6 +1087,10 @@ func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contra
 	g.r.w.Lock()
 	slice, ok := g.r.w.Macs[g.vm]
 	ok = ok && slice.Self != nil
+	if !ok {
+		slice, ok = madeSlice(g.r.w, g.vm)
+	}
+	ok = ok && (cmd.Line != unix.Guest || !g.r.w.Fails("Guest.Serve"))
 	g.r.w.Unlock()
 	if ok {
 		if res, handled, err := g.credentials(cmd); handled {
@@ -1106,6 +1111,30 @@ func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contra
 	g.r.w.Unlock()
 	err := serve.Stream(ctx, cmd.Stdin, w, serve.Local(far.registry, far.profile, version), func(err error) *fail.Error { return kit.Translate(err, "") })
 	return contract.GuestResult{Stdout: out.String()}, err
+}
+
+// value: the slice of a VM a create made in this world, made the first
+// time its guest is asked: a Linux workspace or server, sized as its disk
+// was, following the Machinefile it was made from; false for any other VM.
+// The caller holds the world's lock.
+func madeSlice(w *world.World, vm string) (*world.Mac, bool) {
+	holder := w.Holder(vm)
+	if holder == "" {
+		return nil, false
+	}
+	v := w.Macs[holder].VMs[vm]
+	if !v.Made || v.Kept == nil || v.Guest == nil || v.Guest.Replaced {
+		return nil, false
+	}
+	slice := w.Mac(vm)
+	slice.Self = &world.Self{Kind: v.Kept.Lifetime.Kind(), System: coremachine.System{OS: coremachine.Linux}, Hardware: coremachine.Hardware{Memory: v.Size.Memory, CPUs: v.Size.CPUs}}
+	if v.Kept.Template != "" && slice.Preferences == nil {
+		named, err := json.Marshal(map[string]string{"name": v.Kept.Template})
+		if err == nil {
+			slice.Preferences = map[string]json.RawMessage{"machinefile": named}
+		}
+	}
+	return slice, true
 }
 
 // value: a VM of the world as its guest's hello placed it: the Mac that

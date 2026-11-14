@@ -8,6 +8,7 @@ runs:
           ●	agent-7f	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
           ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          	linux-2	Workspace	macbook-pro	Creating · persistent	4 CPU	8 GB	image 1 of 5
           ●	mac-mini	Mac	mac-mini	Engine running
           ◐	infra	Server	mac-mini	Running · always on	8 CPU	24 GB	check failing since 10:18
           ●	linux-3	Workspace	mac-mini	Running · ephemeral	4 CPU	8 GB

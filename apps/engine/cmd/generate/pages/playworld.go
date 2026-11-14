@@ -55,6 +55,7 @@ type playMac struct {
 	Disk        *playDisk                      `json:"disk,omitempty"`
 	Stores      *playStores                    `json:"stores,omitempty"`
 	Files       map[string]string              `json:"files,omitempty"`
+	Processes   []model.Process                `json:"processes,omitempty"`
 }
 
 type playEngine struct {
@@ -121,6 +122,10 @@ type playKept struct {
 	Check     string         `json:"check,omitempty"`
 	CreatedAt time.Time      `json:"created_at,omitzero"`
 	Template  string         `json:"template,omitempty"`
+	Purpose   string         `json:"purpose,omitempty"`
+	Creator   string         `json:"creator,omitempty"`
+	Owner     *model.Process `json:"owner,omitempty"`
+	Birth     *model.Birth   `json:"birth,omitempty"`
 }
 
 type playAgents struct {
@@ -241,6 +246,9 @@ func PlayWorld(base []byte) []byte {
 			}
 		}
 		m.Stores.Shares = loansOf(f, h)
+		if h.ThisMac {
+			creating(m)
+		}
 		w.Macs[h.Name] = m
 	}
 	w.Macs[proName].Preferences["macs"] = known
@@ -387,13 +395,51 @@ func loansOf(f Scene, h model.MacView) map[string][]accounts.Share {
 	return out
 }
 
+// value: what each VM of the play world is for and the session that made
+// it, empty for the owner.
+func purposeOf(name string) (purpose, creator string) {
+	switch name {
+	case "linux-1":
+		return "Lot L2.5, settings from a machine file", "studio-os-fe"
+	case "agent-7f":
+		return "Write the changelog of v4", "studio-os-43"
+	case "api":
+		return "The API's staging copy", ""
+	case "infra":
+		return "The cluster's control plane", ""
+	case "linux-3":
+		return "Refresh the auth token", "studio-os-fe"
+	case "review-bot":
+		return "Review every pull request of studio-station", "studio-os-43"
+	case creatingVM:
+		return "Lot L3, the Machines page", "studio-os-fe"
+	}
+	return "", ""
+}
+
+const creatingVM = "linux-2"
+
+// value: a workspace This Mac is creating, its image being built, its
+// create's process alive: it reads Creating.
+func creating(m *playMac) {
+	owner := model.Process{PID: 4242, Start: strconv.FormatInt(storyNow.Add(-20*time.Second).Unix(), 10) + ".000000"}
+	m.Processes = append(m.Processes, owner)
+	purpose, creator := purposeOf(creatingVM)
+	m.VMs[creatingVM] = &playVM{
+		Kept: &playKept{Image: "station-linux", Lifetime: model.Persistent, CreatedAt: storyNow.Add(-20 * time.Second), Purpose: purpose, Creator: creator,
+			Owner: &owner, Birth: model.BirthAt(model.BornBuilding, true, storyNow.Add(-5*time.Second))},
+		Size: model.Size{CPUs: 4, Memory: 8 * gb, Disk: 20e9},
+	}
+}
+
 func playMachine(f Scene, mac string, vm model.VM, pid int) *playVM {
 	want := "stopped"
 	if vm.State == model.Running {
 		want = "running"
 	}
+	purpose, creator := purposeOf(vm.Name)
 	v := &playVM{
-		Kept: &playKept{Image: vm.Image, Version: vm.Version, Lifetime: vm.Lifetime, Want: want, Check: vm.Check, CreatedAt: vm.CreatedAt},
+		Kept: &playKept{Image: vm.Image, Version: vm.Version, Lifetime: vm.Lifetime, Want: want, Check: vm.Check, CreatedAt: vm.CreatedAt, Purpose: purpose, Creator: creator},
 		Disk: true, Size: model.Size{CPUs: vm.Resources.CPUs, Memory: vm.Resources.MemoryBytes, Disk: int64(vm.SizeGB) * 1e9},
 	}
 	if _, ok := devApps(vm.Name); ok {
