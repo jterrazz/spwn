@@ -68,7 +68,7 @@ var (
 	privateKey = regexp.MustCompile(`-----BEGIN [A-Z ]*PRIVATE KEY-----(?s:.*?)(?:-----END [A-Z ]*PRIVATE KEY-----|\z)`)
 	header     = regexp.MustCompile(`(?i)(authorization["']?\s*[:=]\s*["']?(?:bearer|basic|token)\s+)[^\s"',]+`)
 	port       = regexp.MustCompile(`^\d+(?:[/?#,;}\]]|["'>][,;})\]>])`)
-	query      = regexp.MustCompile(`(?i)([?&](?:[\w.-]*(?:token|secret|password|passwd|pwd|signature|sig|credential)s?|(?:x-(?:amz|goog)-)?(?:(?:api|access|auth|client|encryption|id|master|private|refresh|secret|security|session|signing)[_.-]?keys?|key))=)[^&\s#"']+`)
+	query      = regexp.MustCompile(`(?i)([?&](?:[\w.-]*(?:token|secret|password|passwd|pwd|signature|sig|credential)s?|(?:x-(?:amz-|goog-)?)?(?:(?:api|access|app|application|auth|client|encryption|id|license|master|private|refresh|secret|security|session|signing|subscription)[_.-]?keys?|key))=)[^&\s#"']+`)
 	identifier = regexp.MustCompile(`^(?:Test|Benchmark|Example|Fuzz)(?:[A-Z][a-z]+)+(?:\d{1,4}(?:[A-Z][a-z]+)*)?$`)
 	run        = regexp.MustCompile(runClass + `{` + strconv.Itoa(runMin) + `,}`)
 	uuid       = regexp.MustCompile(`[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}`)
