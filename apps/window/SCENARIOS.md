@@ -18,7 +18,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 
 A scenario is a test of `specs/website/`, a visit of the window's proof build over a recorded world ([Test](../../docs/guides/test.md#the-windows-scenarios)), and its id opens the test's title: `A4 back returns through the tab and the page I came from, then is disabled`. This page owns the scenario; the test owns how it is proved, and its title does not restate the row.
 
-- A scenario whose test has a body is proved by it, on every `make test`. A scenario may take several tests, each title opening on its id.
+- A scenario whose test has a body is proved by it, on every `make test`. A scenario may take several tests, each title opening on its id, and it is proved when every test opening on its id has a body: an id that keeps a pending test beside a passing one is partly proved, and its pending reason says what is missing.
 - A scenario not proved yet is declared all the same, a `test.todo` whose title is its id and why it waits: `lot <n>`, the lot of the window's scenario plan that writes its body, or `waits for <field>`, the field the engine owes for it, as the window's page names it ([What the engine owes](README.md#what-the-window-still-decides-and-what-the-engine-owes)).
 - A scenario only the Tauri window shows, which no visit of a page can (A5), is declared as such: the bench's `live-tauri.sh` captures it, outside `make test`.
 - An id is used once, and never given again to another scenario.
