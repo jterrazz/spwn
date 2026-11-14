@@ -11,7 +11,7 @@ import { ActivityTiles } from '../activity/tiles';
 import { DiskTile } from '../disk/disk-tile';
 import { MemoryPanel } from '../home/memory';
 import { HeldOutcomes } from '../kit/gestures';
-import { NoVerdict, Reading, SummaryHead, Unanswered } from '../kit/readings';
+import { NoVerdict, Reading, SummaryHead, Unanswered, VerdictHead } from '../kit/readings';
 import { DeleteGesture } from '../machine/gestures';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
@@ -100,7 +100,11 @@ type VmProps = { mac: MachinesMacView; vm: MachinesVM; go: Go };
 function StoppedOverview({ mac, vm, go }: VmProps) {
     return (
         <Page>
-            <NoVerdict size="tab" />
+            {vm.Health === undefined ? (
+                <NoVerdict size="tab" />
+            ) : (
+                <VerdictHead size="tab" verdict={vm.Health} />
+            )}
             <FileChapters drift={undefined} go={go} vm={vm.Name} />
             <DeleteGesture go={go} key={vm.Name} mac={mac} vm={vm} />
         </Page>
