@@ -1,7 +1,7 @@
 - navigation "Sidebar":
   - button "Find"
   - button "Home"
-  - button "Inbox 9"
+  - button "Inbox"
   - button "Storage"
   - group "Machines":
     - heading "Machines" [level=2]

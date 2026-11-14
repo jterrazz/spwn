@@ -2,11 +2,12 @@ import type { EngineReadOutput, MachinesMacView, OverviewNeed } from '@jterrazz/
 
 import { identityOf, MachineIcon, NavItem, StateDot } from '../design/index';
 import { failedState } from '../engine/failed';
-import { inboxIsUrgent, machineKindOf } from '../engine/provisional';
+import { machineKindOf } from '../engine/provisional';
 import { useReach } from '../engine/react';
 import type { Reading } from '../engine/react';
 import { engineState, macState, ownState, vmState } from '../engine/shown';
 import { machineNamesOf } from '../model/machines';
+import { needsYou } from '../model/upkeep';
 import { SEPARATOR } from '../separator';
 import { onListKey } from './keys';
 import { machineRoute } from './route';
@@ -35,14 +36,15 @@ function placeOf(route: Route, go: SidebarProps['go']): Place {
 }
 
 function Places({ needs, place }: { needs: readonly OverviewNeed[]; place: Place }) {
+    const owed = needsYou(needs);
     return (
         <div className={styles.group}>
             <NavItem {...place('home')} icon="home" label="Home" />
             <NavItem
                 {...place('inbox')}
                 count={
-                    needs.length > 0
-                        ? { urgent: inboxIsUrgent(needs), value: needs.length }
+                    owed.length > 0
+                        ? { urgent: owed.some((need) => need.Broken), value: owed.length }
                         : undefined
                 }
                 icon="inbox"

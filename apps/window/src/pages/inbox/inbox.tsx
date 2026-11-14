@@ -1,19 +1,15 @@
-import type { MachinesMacView, OverviewReadOutput } from '@jterrazz/station-api';
+import type { MachinesMacView, OverviewNeed, OverviewReadOutput } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { Switch } from '../../design/index';
+import { wordOf } from '../../engine/engine-words';
 import { useReach } from '../../engine/react';
 import type { Reading } from '../../engine/react';
+import { canWait, needsYou } from '../../model/upkeep';
 import type { Route } from '../../shell/route';
 import { History } from '../changes/changes';
 import { HeldOutcomes } from '../kit/gestures';
-import {
-    Absent,
-    NotGiven,
-    NoVerdict,
-    Reading as ReadingVerdict,
-    Unanswered,
-} from '../kit/readings';
+import { Absent, Reading as ReadingVerdict, SummaryHead, Unanswered } from '../kit/readings';
 import { needsOn } from '../needs/needs';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
@@ -25,6 +21,22 @@ type InboxProps = {
     overview: Reading<OverviewReadOutput>;
     go: Go;
 };
+
+function CanWait({
+    needs,
+    macs,
+    go,
+}: Pick<InboxProps, 'go' | 'macs'> & { needs: readonly OverviewNeed[] }) {
+    return (
+        <Needs
+            go={go}
+            macs={macs}
+            needs={needs}
+            none="Nothing can wait."
+            title={wordOf('OverviewUpkeep', 'can-wait').Word}
+        />
+    );
+}
 
 export function InboxPage({ macs, overview, go }: InboxProps) {
     const reach = useReach();
@@ -51,14 +63,14 @@ export function InboxPage({ macs, overview, go }: InboxProps) {
         );
     }
     const { Summary } = overview.out;
-    const needs = needsOn(Summary.Needs ?? [], macs, chosen);
+    const listed = needsOn(Summary.Needs ?? [], macs, chosen);
     const none =
         chosen === null
             ? 'No need is listed.'
             : `None of the needs listed concerns ${chosen} or its machines.`;
     return (
         <Page>
-            <NoVerdict size="page" />
+            <SummaryHead size="page" summary={Summary} />
             <Switch
                 all="All machines"
                 label="Which machines"
@@ -70,13 +82,13 @@ export function InboxPage({ macs, overview, go }: InboxProps) {
                 <Needs
                     go={go}
                     macs={macs}
-                    needs={needs}
+                    needs={needsYou(listed)}
                     none={none}
                     note="a gesture is due"
-                    title="Needs you"
+                    title={wordOf('OverviewUpkeep', 'needs-you').Word}
                 />
+                <CanWait go={go} macs={macs} needs={canWait(listed)} />
             </HeldOutcomes>
-            <NotGiven title="Can wait" what="What can wait, apart from what needs you" />
             <History chosen={chosen} go={go} macs={macs} />
         </Page>
     );

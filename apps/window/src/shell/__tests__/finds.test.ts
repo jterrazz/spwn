@@ -29,6 +29,8 @@ const NEED: OverviewNeed = {
     Severity: 'broken',
     Subject: 'web',
     Text: 'web does not answer on :3000',
+    Upkeep: 'needs-you',
+    Verb: 'review',
 };
 
 const HELD: Held = {

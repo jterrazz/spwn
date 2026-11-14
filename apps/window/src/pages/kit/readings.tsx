@@ -1,3 +1,4 @@
+import type { OverviewSummary } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { CopyButton } from '../../design/copy-button';
@@ -14,8 +15,8 @@ import { shownOrWithheld } from '../../design/secret';
 import type { EngineError } from '../../engine/engine-error';
 import { failedState } from '../../engine/failed';
 import type { Reach } from '../../engine/reach';
-import { ownState } from '../../engine/shown';
-import { fixLine, sentence } from '../../model/format';
+import { ownState, verdictShown } from '../../engine/shown';
+import { clock, fixLine, sentence } from '../../model/format';
 import { SEPARATOR } from '../../separator';
 import type { Tone } from '../../tone';
 
@@ -30,6 +31,25 @@ export function NoVerdict({ size, line }: { size: 'page' | 'tab'; line?: ReactNo
             size={size}
             title="No verdict from the engine."
             {...ownState('not-given')}
+        />
+    );
+}
+
+export function SummaryHead({
+    summary,
+    size,
+}: {
+    summary: Pick<OverviewSummary, 'Engine' | 'Read' | 'Verdict'>;
+    size: 'page' | 'tab';
+}) {
+    const { Engine, Read, Verdict: verdict } = summary;
+    const read = Engine === 'stopped' ? clock(Read) : undefined;
+    return (
+        <Verdict
+            line={sentence([verdict.Line, read === undefined ? undefined : `Last read at ${read}`])}
+            size={size}
+            title={asSentence(verdict.Sentence)}
+            {...verdictShown(verdict)}
         />
     );
 }

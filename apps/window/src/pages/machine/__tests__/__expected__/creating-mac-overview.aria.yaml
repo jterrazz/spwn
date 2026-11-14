@@ -9,10 +9,7 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "No verdict from the engine." [level=1]
-  - paragraph:
-    - img "Not given yet"
-    - text: What follows is what the engine answers, with no sentence that sums it up
+  - heading "Everything is fine." [level=1]
   - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 2machines Not given yet
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]

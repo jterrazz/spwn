@@ -8,7 +8,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import { SEPARATOR } from '../separator';
-import type { AccountSide, DiskCall, MacState, NeedCall } from './provisional';
+import type { AccountSide, DiskCall, MacState } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
 
@@ -74,19 +74,6 @@ export const AWAKE_WORDS = {
 } as const;
 
 export const POWER_SOURCE_WORDS: WordsOfAnOpenCode = { ac: 'on power', battery: 'on battery' };
-
-// outside: a need names its fix by its call and no verb; until OverviewNeed carries the button's word, this is
-// outside: the word of each call the window makes from a need, the README listing it as owed.
-export const NEED_CALL_VERBS: Words<NeedCall> = {
-    'apps.update': 'Update',
-    'background.remove': 'Remove',
-    'disk.move': 'Move',
-    'engine.start': 'Start the engine',
-};
-
-// outside: a need whose call the window does not make yet is drawn by this word on a disabled button, its call
-// outside: never named to the owner.
-export const NEED_UNWIRED_WORD = 'Fix';
 
 export const SSH_WORDS = { answers: 'answers', silent: 'does not answer' } as const;
 

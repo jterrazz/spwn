@@ -200,7 +200,7 @@ describe('react', () => {
                 <Window initial={{ page: 'home' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
-                await visitor.see(content('npm sign-in expired'));
+                await visitor.see(content('Everything is fine.'));
                 before = document.body.innerHTML;
                 watcher.observe(document.body, CHANGES);
 
