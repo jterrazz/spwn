@@ -16,6 +16,32 @@
       ],
       "type": "object"
     },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
     "ports.AllMachines": {
       "additionalProperties": false,
       "properties": {
@@ -112,11 +138,15 @@
         },
         "tailnet": {
           "$ref": "#/$defs/ports.Status"
+        },
+        "verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
         }
       },
       "required": [
         "all",
-        "tailnet"
+        "tailnet",
+        "verdict"
       ],
       "type": "object"
     },

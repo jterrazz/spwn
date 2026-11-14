@@ -8,6 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 type ReadIn struct{}
@@ -34,7 +35,7 @@ var Start = call.Call[Deps, StartIn, engine.StartReport]{
 			if err != nil {
 				return engine.StartReport{}, err
 			}
-			if reading.State == engine.EngineNotInstalled || reading.Skewed() {
+			if reading.State == machines.EngineNotInstalled || reading.Skewed() {
 				if installed, err = d.Installer.Install(ctx); err != nil {
 					return engine.StartReport{}, startError(err)
 				}

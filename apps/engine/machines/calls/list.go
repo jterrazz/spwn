@@ -60,7 +60,7 @@ var List = call.Watch[Deps, ListIn, ListOut]{
 }
 
 func listOut(f machines.AllMachines) ListOut {
-	return ListOut{All: f, Rooms: machines.Rooms(f), Roomiest: machines.Roomiest(f)}
+	return ListOut{All: machines.Judged(f), Rooms: machines.Rooms(f), Roomiest: machines.Roomiest(f)}
 }
 
 type CreateIn struct {

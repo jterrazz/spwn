@@ -1,23 +1,15 @@
 package engine
 
-import "time"
+import (
+	"time"
+
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
+)
 
 const ReadSchema = "station.engine.read/v1"
 
-type ReadState string
-
-const (
-	EngineRunning      ReadState = "running"
-	EngineStopped      ReadState = "stopped"
-	EngineNotInstalled ReadState = "not-installed"
-)
-
-func (ReadState) Enum() []string {
-	return []string{string(EngineRunning), string(EngineStopped), string(EngineNotInstalled)}
-}
-
 type Reading struct {
-	State ReadState
+	State model.EngineState
 	// value: the version the engine runs, and the one this station is.
 	Version, Station string
 	Up               time.Duration
@@ -30,7 +22,7 @@ type Reading struct {
 }
 
 func (r Reading) Skewed() bool {
-	return r.State == EngineRunning && r.Version != "" && r.Station != "" && r.Version != r.Station
+	return r.State == model.EngineRunning && r.Version != "" && r.Station != "" && r.Version != r.Station
 }
 
 type StopMark struct {
@@ -66,11 +58,11 @@ func (r Reading) JSON() ReadingJSON {
 	if r.Version != "" {
 		e.Version = &r.Version
 	}
-	if r.State == EngineRunning {
+	if r.State == model.EngineRunning {
 		up := int64(r.Up / time.Second)
 		e.UpS = &up
 	}
-	if r.State == EngineStopped && !r.Stopped.At.IsZero() {
+	if r.State == model.EngineStopped && !r.Stopped.At.IsZero() {
 		at, by := r.Stopped.At.UTC(), r.Stopped.By
 		e.StoppedAt, e.StoppedBy = &at, &by
 	}

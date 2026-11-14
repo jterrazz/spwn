@@ -1,5 +1,31 @@
 {
   "$defs": {
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
     "machines.AgentView": {
       "additionalProperties": false,
       "properties": {
@@ -335,6 +361,9 @@
         "Guest": {
           "type": "string"
         },
+        "Health": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
         "IP": {
           "type": "string"
         },
@@ -366,6 +395,9 @@
             "array",
             "null"
           ]
+        },
+        "LatencyNote": {
+          "type": "string"
         },
         "Lifetime": {
           "enum": [

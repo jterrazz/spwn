@@ -17,4 +17,6 @@ func (Tone) Enum() []string {
 type Verdict struct {
 	Tone     Tone
 	Sentence string
+	// value: the sentence a page draws under it; empty for none.
+	Line string `json:",omitempty"`
 }

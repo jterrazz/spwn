@@ -71,7 +71,7 @@ func sceneVM(name, mac string, life model.Lifetime, state model.VMState, cpus in
 }
 
 func sceneMachines() model.AllMachines {
-	engine := model.EngineView{Known: true, Running: true, Version: stationVer}
+	engine := model.EngineView{State: model.EngineRunning, Version: stationVer}
 	infra := sceneVM("infra", miniMac, model.AlwaysOn, model.Running, 8, 24, "192.168.64.7")
 	infra.SizeGB, infra.Resources.DiskBytes = 80, 80*gb
 	infra.Want, infra.Check, infra.Device = "running", "https://infra:6443/readyz", "infra"

@@ -6,6 +6,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 const SuperviseRetired = "supervise is retired: the engine supervises VMs (station engine start)"
@@ -122,6 +123,11 @@ type VM struct {
 	// nothing; who made it, the session its create named, else you.
 	Purpose string
 	Creator string
+	// value: a server's health in one verdict over its state, address, SSH
+	// and check, nil for a workspace; and what the engine kept of its check
+	// when there is too little of it to draw, empty otherwise.
+	Health      *verdict.Verdict `json:",omitempty"`
+	LatencyNote string           `json:",omitempty"`
 }
 
 type AgentView struct {
@@ -153,13 +159,34 @@ func Pausing(vms []VM) []string {
 	return out
 }
 
-type EngineView struct {
-	Known, Running bool
-	// value: the agent's plist is on this host: a daemon not running is
-	// stopped, not missing (R9.D3); unknown for another host.
-	Installed bool
-	Version   string
+type EngineState string
+
+const (
+	EngineRunning      EngineState = "running"
+	EngineStopped      EngineState = "stopped"
+	EngineNotInstalled EngineState = "not-installed"
+)
+
+func (EngineState) Enum() []string {
+	return []string{string(EngineRunning), string(EngineStopped), string(EngineNotInstalled)}
 }
+
+func (EngineState) TSName() string {
+	// value: the words' name of the engine's state, which engine.read and
+	// a Mac's view share.
+	return "EngineReadState"
+}
+
+type EngineView struct {
+	// value: the engine's state as this Mac reads it, stopped when its
+	// launchd job is on disk and it does not answer (R9.D3); empty where it
+	// is not known (another Mac, a Mac with no hypervisor).
+	State   EngineState `json:",omitempty"`
+	Version string
+}
+
+func (e EngineView) Known() bool   { return e.State != "" }
+func (e EngineView) Running() bool { return e.State == EngineRunning }
 
 type MacView struct {
 	Name, User, StationVersion string

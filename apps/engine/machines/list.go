@@ -137,9 +137,9 @@ func Findings(f AllMachines) []finding.Finding {
 			add(mac, finding.Broken, label, label+" does not answer", "station machines unlock "+label)
 		case !h.Reachable:
 			add(mac, finding.Broken, label, label+" does not answer", "")
-		case h.Engine.Known && !h.Engine.Running && !h.Engine.Installed && h.ThisMac:
+		case h.Engine.Known() && !h.Engine.Running() && h.Engine.State == EngineNotInstalled && h.ThisMac:
 			add(mac, finding.Broken, label, label+" has no engine installed", "station engine start")
-		case h.Engine.Known && !h.Engine.Running:
+		case h.Engine.Known() && !h.Engine.Running():
 			add(mac, finding.Broken, label, label+" has its engine stopped", "station engine start"+on)
 		}
 		if fix, ok := Behind(h, thisMac); ok && h.Reachable {

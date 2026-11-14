@@ -176,6 +176,14 @@
     "catalog.App": {
       "additionalProperties": false,
       "properties": {
+        "AppKind": {
+          "enum": [
+            "app",
+            "manager",
+            "skill"
+          ],
+          "type": "string"
+        },
         "AppStore": {
           "type": "boolean"
         },
@@ -301,6 +309,7 @@
         }
       },
       "required": [
+        "AppKind",
         "AppStore",
         "Bundle",
         "Category",

@@ -3,6 +3,9 @@
     "core.verdict.Verdict": {
       "additionalProperties": false,
       "properties": {
+        "Line": {
+          "type": "string"
+        },
         "Sentence": {
           "type": "string"
         },

@@ -650,6 +650,7 @@ export type CatalogAgentHooks = {
 };
 
 export type CatalogApp = {
+    AppKind: 'app' | 'manager' | 'skill';
     AppStore: boolean;
     Bundle: string;
     Category: '' | 'AI Agents' | 'AI Apps' | 'AI Tooling' | 'Agent skills' | 'Browsers' | 'Command line' | 'Communication' | 'Containers & VMs' | 'Deploy' | 'Editors & IDEs' | 'Git' | 'Media' | 'Package Managers' | 'Productivity' | 'Remote Access' | 'Runtimes' | 'Security' | 'Shell & Terminal' | 'System Utilities';
@@ -992,6 +993,7 @@ export type CoreMachineRefInput = {
 };
 
 export type CoreVerdictVerdict = {
+    Line?: string;
     Sentence: string;
     Tone: 'ok' | 'warn' | 'bad' | 'plain' | 'new';
 };
@@ -1867,9 +1869,7 @@ export type MachinesEdited = {
 };
 
 export type MachinesEngineView = {
-    Installed: boolean;
-    Known: boolean;
-    Running: boolean;
+    State?: 'running' | 'stopped' | 'not-installed';
     Version: string;
 };
 
@@ -2020,11 +2020,13 @@ export type MachinesVM = {
     Detail: string;
     Device: string;
     Guest: string;
+    Health?: CoreVerdictVerdict;
     IP: string;
     Image: string;
     Kind: 'mac' | 'linux' | 'macos';
     LastLines: string[] | null;
     Latency: MachinesLatencyPoint[] | null;
+    LatencyNote?: string;
     Lifetime: 'ephemeral' | 'persistent' | 'always-on';
     Mac: string;
     Name: string;
@@ -2133,6 +2135,8 @@ export type OverviewNeed = {
     Severity: 'broken' | 'needs-a-look';
     Subject: string;
     Text: string;
+    Upkeep: 'needs-you' | 'can-wait';
+    Verb: 'review' | 'restart' | 'start' | 'delete' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
 };
 
 export type OverviewPart = {
@@ -2196,8 +2200,10 @@ export type OverviewSummary = {
     Lines: OverviewLine[] | null;
     Needs: OverviewNeed[] | null;
     Pending: boolean;
+    Read?: string;
     Readiness: OverviewCheck[] | null;
     VMs: OverviewVM[] | null;
+    Verdict: CoreVerdictVerdict;
 };
 
 export type OverviewSystem = {
@@ -2716,6 +2722,7 @@ export type PortsListener = {
 export type PortsListing = {
     all: PortsAllMachines;
     tailnet: PortsStatus;
+    verdict: CoreVerdictVerdict;
 };
 
 export type PortsMacPorts = {
@@ -3300,11 +3307,11 @@ export interface Calls {
     'accounts.answer': { in: AccountsAnswerInput; out: AccountsAnswerOutput; watch: false };
     'accounts.list': { in: AccountsListInput; out: AccountsListOutput; watch: true };
     'accounts.login': { in: AccountsLoginInput; out: AccountsLoginOutput; watch: true };
-    'accounts.logout': { in: AccountsLogoutInput; out: AccountsLogoutOutput; watch: false; confirm: 'sign-out' };
+    'accounts.logout': { in: AccountsLogoutInput; out: AccountsLogoutOutput; watch: false; confirm: 'sign-out'; consequence: '%s is signed out on this machine; its token stays valid at its provider.' };
     'accounts.open': { in: AccountsOpenInput; out: AccountsOpenOutput; watch: false };
     'accounts.read': { in: AccountsReadInput; out: AccountsReadOutput; watch: true };
     'accounts.share': { in: AccountsShareInput; out: AccountsShareOutput; watch: false };
-    'accounts.take-back': { in: AccountsTakeBackInput; out: AccountsTakeBackOutput; watch: false; confirm: 'take-back' };
+    'accounts.take-back': { in: AccountsTakeBackInput; out: AccountsTakeBackOutput; watch: false; confirm: 'take-back'; consequence: 'The account leaves %s; it stays signed in on this Mac.' };
     'activity.read': { in: ActivityReadInput; out: ActivityReadOutput; watch: true };
     'activity.sample': { in: ActivitySampleInput; out: ActivitySampleOutput; watch: false };
     'agents.forget': { in: AgentsForgetInput; out: AgentsForgetOutput; watch: false };
@@ -3313,19 +3320,19 @@ export interface Calls {
     'agents.record': { in: AgentsRecordInput; out: AgentsRecordOutput; watch: false };
     'agents.reply': { in: AgentsReplyInput; out: AgentsReplyOutput; watch: false };
     'agents.start': { in: AgentsStartInput; out: AgentsStartOutput; watch: false };
-    'agents.stop': { in: AgentsStopInput; out: AgentsStopOutput; watch: false; confirm: 'stop-agent' };
+    'agents.stop': { in: AgentsStopInput; out: AgentsStopOutput; watch: false; confirm: 'stop-agent'; consequence: 'The agent in %s stops where it is; its work so far stays.' };
     'apps.install': { in: AppsInstallInput; out: AppsInstallOutput; watch: false };
     'apps.list': { in: AppsListInput; out: AppsListOutput; watch: true };
     'apps.move': { in: AppsMoveInput; out: AppsMoveOutput; watch: false };
-    'apps.remove': { in: AppsRemoveInput; out: AppsRemoveOutput; watch: false; confirm: 'remove' };
+    'apps.remove': { in: AppsRemoveInput; out: AppsRemoveOutput; watch: false; confirm: 'remove'; consequence: '%s leaves this machine; its data stays.' };
     'apps.show': { in: AppsShowInput; out: AppsShowOutput; watch: false };
     'apps.update': { in: AppsUpdateInput; out: AppsUpdateOutput; watch: false };
     'awake.keep': { in: AwakeKeepInput; out: AwakeKeepOutput; watch: false };
     'awake.off': { in: AwakeOffInput; out: AwakeOffOutput; watch: false };
     'awake.read': { in: AwakeReadInput; out: AwakeReadOutput; watch: true };
     'background.list': { in: BackgroundListInput; out: BackgroundListOutput; watch: false };
-    'background.remove': { in: BackgroundRemoveInput; out: BackgroundRemoveOutput; watch: false; confirm: 'remove' };
-    'disk.erase': { in: DiskEraseInput; out: DiskEraseOutput; watch: false; confirm: 'erase' };
+    'background.remove': { in: BackgroundRemoveInput; out: BackgroundRemoveOutput; watch: false; confirm: 'remove'; consequence: '%s leaves this machine; its data stays.' };
+    'disk.erase': { in: DiskEraseInput; out: DiskEraseOutput; watch: false; confirm: 'erase'; consequence: 'The data of %s is deleted for good.' };
     'disk.free': { in: DiskFreeInput; out: DiskFreeOutput; watch: false };
     'disk.move': { in: DiskMoveInput; out: DiskMoveOutput; watch: false };
     'disk.read': { in: DiskReadInput; out: DiskReadOutput; watch: true };
@@ -3346,7 +3353,7 @@ export interface Calls {
     'engine.settings-keep': { in: EngineSettingsKeepInput; out: EngineSettingsKeepOutput; watch: false; own: true };
     'engine.settings-last': { in: EngineSettingsLastInput; out: EngineSettingsLastOutput; watch: false; own: true };
     'engine.start': { in: EngineStartInput; out: EngineStartOutput; watch: false };
-    'engine.stop': { in: EngineStopInput; out: EngineStopOutput; watch: false; confirm: 'stop-engine' };
+    'engine.stop': { in: EngineStopInput; out: EngineStopOutput; watch: false; confirm: 'stop-engine'; consequence: 'Every VM of this Mac stops, and nothing is shared until the engine starts again.' };
     'engine.stop-all': { in: EngineStopAllInput; out: EngineStopAllOutput; watch: false; own: true };
     'engine.vm-delete': { in: EngineVmDeleteInput; out: EngineVmDeleteOutput; watch: false; own: true };
     'engine.vm-forget': { in: EngineVmForgetInput; out: EngineVmForgetOutput; watch: false; own: true };
@@ -3359,33 +3366,33 @@ export interface Calls {
     'engine.watch': { in: EngineWatchInput; out: EngineWatchOutput; watch: true; own: true };
     'grants.add': { in: GrantsAddInput; out: GrantsAddOutput; watch: false };
     'grants.new': { in: GrantsNewInput; out: GrantsNewOutput; watch: true };
-    'grants.remove': { in: GrantsRemoveInput; out: GrantsRemoveOutput; watch: false; confirm: 'remove-grant' };
+    'grants.remove': { in: GrantsRemoveInput; out: GrantsRemoveOutput; watch: false; confirm: 'remove-grant'; consequence: 'The grant of %s ends now, before its term.' };
     'images.build': { in: ImagesBuildInput; out: ImagesBuildOutput; watch: false };
-    'images.delete': { in: ImagesDeleteInput; out: ImagesDeleteOutput; watch: false; confirm: 'delete-image' };
+    'images.delete': { in: ImagesDeleteInput; out: ImagesDeleteOutput; watch: false; confirm: 'delete-image'; consequence: '%s is deleted; the next create that needs it builds it again.' };
     'images.list': { in: ImagesListInput; out: ImagesListOutput; watch: false };
     'images.update': { in: ImagesUpdateInput; out: ImagesUpdateOutput; watch: false };
-    'machinefile.apply': { in: MachinefileApplyInput; out: MachinefileApplyOutput; watch: false; confirm: 'remove' };
+    'machinefile.apply': { in: MachinefileApplyInput; out: MachinefileApplyOutput; watch: false; confirm: 'remove'; consequence: '%s leaves this machine; its data stays.' };
     'machinefile.drift': { in: MachinefileDriftInput; out: MachinefileDriftOutput; watch: false };
     'machinefile.explain': { in: MachinefileExplainInput; out: MachinefileExplainOutput; watch: false };
     'machinefile.nightly': { in: MachinefileNightlyInput; out: MachinefileNightlyOutput; watch: false };
     'machinefile.plan': { in: MachinefilePlanInput; out: MachinefilePlanOutput; watch: false };
     'machinefile.upgrade': { in: MachinefileUpgradeInput; out: MachinefileUpgradeOutput; watch: false };
     'machines.add': { in: MachinesAddInput; out: MachinesAddOutput; watch: false };
-    'machines.cleanup': { in: MachinesCleanupInput; out: MachinesCleanupOutput; watch: false; confirm: 'cleanup' };
-    'machines.create-server': { in: MachinesCreateServerInput; out: MachinesCreateServerOutput; watch: false; confirm: 'build-image' };
-    'machines.create-workspace': { in: MachinesCreateWorkspaceInput; out: MachinesCreateWorkspaceOutput; watch: false; confirm: 'build-image' };
-    'machines.delete': { in: MachinesDeleteInput; out: MachinesDeleteOutput; watch: false; confirm: 'delete' };
+    'machines.cleanup': { in: MachinesCleanupInput; out: MachinesCleanupOutput; watch: false; confirm: 'cleanup'; consequence: 'Every ephemeral workspace whose agent finished is deleted.' };
+    'machines.create-server': { in: MachinesCreateServerInput; out: MachinesCreateServerOutput; watch: false; confirm: 'build-image'; consequence: '%s is built first, which takes several minutes.' };
+    'machines.create-workspace': { in: MachinesCreateWorkspaceInput; out: MachinesCreateWorkspaceOutput; watch: false; confirm: 'build-image'; consequence: '%s is built first, which takes several minutes.' };
+    'machines.delete': { in: MachinesDeleteInput; out: MachinesDeleteOutput; watch: false; confirm: 'delete'; consequence: '%s and everything on its disk are deleted for good.' };
     'machines.edit': { in: MachinesEditInput; out: MachinesEditOutput; watch: false };
-    'machines.forget': { in: MachinesForgetInput; out: MachinesForgetOutput; watch: false; confirm: 'forget' };
+    'machines.forget': { in: MachinesForgetInput; out: MachinesForgetOutput; watch: false; confirm: 'forget'; consequence: '%s leaves your machines; nothing on it changes.' };
     'machines.list': { in: MachinesListInput; out: MachinesListOutput; watch: true };
     'machines.log': { in: MachinesLogInput; out: MachinesLogOutput; watch: false };
     'machines.new': { in: MachinesNewInput; out: MachinesNewOutput; watch: true };
     'machines.remind': { in: MachinesRemindInput; out: MachinesRemindOutput; watch: false };
-    'machines.restart': { in: MachinesRestartInput; out: MachinesRestartOutput; watch: false; confirm: 'restart-mac' };
-    'machines.restart-mac': { in: MachinesRestartMacInput; out: MachinesRestartMacOutput; watch: false; confirm: 'restart-mac' };
+    'machines.restart': { in: MachinesRestartInput; out: MachinesRestartOutput; watch: false; confirm: 'restart-mac'; consequence: '%s restarts: its VMs stop, and its servers start again once it is back.' };
+    'machines.restart-mac': { in: MachinesRestartMacInput; out: MachinesRestartMacOutput; watch: false; confirm: 'restart-mac'; consequence: '%s restarts: its VMs stop, and its servers start again once it is back.' };
     'machines.ssh': { in: MachinesSshInput; out: MachinesSshOutput; watch: false };
     'machines.start': { in: MachinesStartInput; out: MachinesStartOutput; watch: false };
-    'machines.stop': { in: MachinesStopInput; out: MachinesStopOutput; watch: false; confirm: 'stop' };
+    'machines.stop': { in: MachinesStopInput; out: MachinesStopOutput; watch: false; confirm: 'stop'; consequence: '%s stops: what it serves stops until you start it again.' };
     'machines.unlock': { in: MachinesUnlockInput; out: MachinesUnlockOutput; watch: false };
     'machines.wake': { in: MachinesWakeInput; out: MachinesWakeOutput; watch: false };
     'overview.read': { in: OverviewReadInput; out: OverviewReadOutput; watch: true };
@@ -3394,14 +3401,14 @@ export interface Calls {
     'ports.list': { in: PortsListInput; out: PortsListOutput; watch: false };
     'ports.set-https': { in: PortsSetHttpsInput; out: PortsSetHttpsOutput; watch: false };
     'ports.share': { in: PortsShareInput; out: PortsShareOutput; watch: false };
-    'ports.stop-sharing': { in: PortsStopSharingInput; out: PortsStopSharingOutput; watch: false; confirm: 'stop-sharing' };
-    'ports.undeclare': { in: PortsUndeclareInput; out: PortsUndeclareOutput; watch: false; confirm: 'undeclare' };
-    'settings.apply': { in: SettingsApplyInput; out: SettingsApplyOutput; watch: false; confirm: 'overwrite' };
+    'ports.stop-sharing': { in: PortsStopSharingInput; out: PortsStopSharingOutput; watch: false; confirm: 'stop-sharing'; consequence: '%s is no longer shared, and its reserved port is released.' };
+    'ports.undeclare': { in: PortsUndeclareInput; out: PortsUndeclareOutput; watch: false; confirm: 'undeclare'; consequence: '%s is no longer declared, so a listener on it is flagged again.' };
+    'settings.apply': { in: SettingsApplyInput; out: SettingsApplyOutput; watch: false; confirm: 'overwrite'; consequence: 'Your value of %s is replaced by the one the file asks.' };
     'settings.diff': { in: SettingsDiffInput; out: SettingsDiffOutput; watch: false };
     'settings.list': { in: SettingsListInput; out: SettingsListOutput; watch: true };
     'settings.matrix': { in: SettingsMatrixInput; out: SettingsMatrixOutput; watch: false };
-    'settings.off': { in: SettingsOffInput; out: SettingsOffOutput; watch: false; confirm: 'off-here' };
-    'settings.run-containers': { in: SettingsRunContainersInput; out: SettingsRunContainersOutput; watch: false; confirm: 'remove' };
+    'settings.off': { in: SettingsOffInput; out: SettingsOffOutput; watch: false; confirm: 'off-here'; consequence: 'station stops applying %s on this machine; its value now stays.' };
+    'settings.run-containers': { in: SettingsRunContainersInput; out: SettingsRunContainersOutput; watch: false; confirm: 'remove'; consequence: '%s leaves this machine; its data stays.' };
     'settings.run-git': { in: SettingsRunGitInput; out: SettingsRunGitOutput; watch: false };
     'settings.show': { in: SettingsShowInput; out: SettingsShowOutput; watch: false };
     'settings.zsh-block': { in: SettingsZshBlockInput; out: SettingsZshBlockOutput; watch: false };
@@ -3409,7 +3416,7 @@ export interface Calls {
     'vault.add': { in: VaultAddInput; out: VaultAddOutput; watch: false };
     'vault.list': { in: VaultListInput; out: VaultListOutput; watch: true };
     'vault.new': { in: VaultNewInput; out: VaultNewOutput; watch: true };
-    'vault.remove': { in: VaultRemoveInput; out: VaultRemoveOutput; watch: false; confirm: 'remove-password' };
+    'vault.remove': { in: VaultRemoveInput; out: VaultRemoveOutput; watch: false; confirm: 'remove-password'; consequence: '%s leaves this Mac\'s vault, and every grant made from it ends.' };
 }
 
 export type CallName = keyof Calls;
@@ -3435,6 +3442,8 @@ export type AccountsStepKind = 'device-code' | 'link' | 'paste';
 export type AccountsTargetFit = 'fits' | 'no';
 
 export type CatalogAfterApply = 'restart-dock' | 'restart-finder' | 'restart-menu-bar' | 'logout' | 'reboot';
+
+export type CatalogAppKind = 'app' | 'manager' | 'skill';
 
 export type CatalogArch = 'arm64' | 'amd64';
 
@@ -3488,10 +3497,15 @@ export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
 export type MachinesVMState = 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
 
+export type OverviewUpkeep = 'needs-you' | 'can-wait';
+
+export type OverviewVerb = 'review' | 'restart' | 'start' | 'delete' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
+
 export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant';
 
 export type StationWord = {
     Detail?: string;
+    Heading?: string;
     One?: string;
     Other?: string;
     Tone: CoreVerdictTone;
@@ -3510,6 +3524,7 @@ export type StationWords = {
     AccountsStepKind: Record<AccountsStepKind, StationWord>;
     AccountsTargetFit: Record<AccountsTargetFit, StationWord>;
     CatalogAfterApply: Record<CatalogAfterApply, StationWord>;
+    CatalogAppKind: Record<CatalogAppKind, StationWord>;
     CatalogArch: Record<CatalogArch, StationWord>;
     CatalogAudience: Record<CatalogAudience, StationWord>;
     CatalogKind: Record<CatalogKind, StationWord>;
@@ -3535,5 +3550,7 @@ export type StationWords = {
     MachinesPreset: Record<MachinesPreset, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
     MachinesVMState: Record<MachinesVMState, StationWord>;
+    OverviewUpkeep: Record<OverviewUpkeep, StationWord>;
+    OverviewVerb: Record<OverviewVerb, StationWord>;
     PageNoun: Record<PageNoun, StationWord>;
 };

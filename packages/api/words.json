@@ -188,6 +188,20 @@
       "Tone": "plain"
     }
   },
+  "CatalogAppKind": {
+    "app": {
+      "Word": "app",
+      "Tone": "plain"
+    },
+    "manager": {
+      "Word": "manager",
+      "Tone": "plain"
+    },
+    "skill": {
+      "Word": "agent skill",
+      "Tone": "plain"
+    }
+  },
   "CatalogArch": {
     "amd64": {
       "Word": "amd64",
@@ -1492,6 +1506,54 @@
     },
     "unknown": {
       "Word": "Unknown",
+      "Tone": "plain"
+    }
+  },
+  "OverviewUpkeep": {
+    "can-wait": {
+      "Word": "Can wait",
+      "Tone": "plain"
+    },
+    "needs-you": {
+      "Word": "Needs you",
+      "Tone": "warn"
+    }
+  },
+  "OverviewVerb": {
+    "delete": {
+      "Word": "Delete",
+      "Tone": "plain"
+    },
+    "fix": {
+      "Word": "Fix",
+      "Tone": "plain"
+    },
+    "move": {
+      "Word": "Move",
+      "Tone": "plain"
+    },
+    "remove": {
+      "Word": "Remove",
+      "Tone": "plain"
+    },
+    "restart": {
+      "Word": "Restart",
+      "Tone": "plain"
+    },
+    "review": {
+      "Word": "Review",
+      "Tone": "plain"
+    },
+    "start": {
+      "Word": "Start",
+      "Tone": "plain"
+    },
+    "start-engine": {
+      "Word": "Start the engine",
+      "Tone": "plain"
+    },
+    "update": {
+      "Word": "Update",
       "Tone": "plain"
     }
   },

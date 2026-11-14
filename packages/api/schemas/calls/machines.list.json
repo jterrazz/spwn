@@ -276,6 +276,32 @@
       ],
       "type": "object"
     },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
     "machines.AgentView": {
       "additionalProperties": false,
       "properties": {
@@ -440,23 +466,19 @@
     "machines.EngineView": {
       "additionalProperties": false,
       "properties": {
-        "Installed": {
-          "type": "boolean"
-        },
-        "Known": {
-          "type": "boolean"
-        },
-        "Running": {
-          "type": "boolean"
+        "State": {
+          "enum": [
+            "running",
+            "stopped",
+            "not-installed"
+          ],
+          "type": "string"
         },
         "Version": {
           "type": "string"
         }
       },
       "required": [
-        "Installed",
-        "Known",
-        "Running",
         "Version"
       ],
       "type": "object"
@@ -826,6 +848,9 @@
         "Guest": {
           "type": "string"
         },
+        "Health": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
         "IP": {
           "type": "string"
         },
@@ -857,6 +882,9 @@
             "array",
             "null"
           ]
+        },
+        "LatencyNote": {
+          "type": "string"
         },
         "Lifetime": {
           "enum": [

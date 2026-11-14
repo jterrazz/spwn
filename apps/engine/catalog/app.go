@@ -42,10 +42,25 @@ type Liveness struct {
 	Command []string `yaml:"command,omitempty"`
 }
 
+type AppKind string
+
+const (
+	AppKindApp     AppKind = "app"
+	AppKindManager AppKind = "manager"
+	AppKindSkill   AppKind = "skill"
+)
+
+func (AppKind) Enum() []string {
+	return []string{string(AppKindApp), string(AppKindManager), string(AppKindSkill)}
+}
+
 type App struct {
 	Name string
 	// value: manager for an app that installs other apps, app otherwise.
-	Kind        Kind `json:",omitempty"`
+	Kind Kind `json:",omitempty"`
+	// value: what a list draws it as: an agent skill (every method of it a
+	// skill), a manager, else an app.
+	AppKind     AppKind
 	Description string
 	Category    Category
 	Replaces    string
