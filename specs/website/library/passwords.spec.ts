@@ -3,6 +3,7 @@ import {
     content,
     dialog,
     disabled,
+    field,
     heading,
     navigation,
     region,
@@ -11,6 +12,8 @@ import {
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
+
+const SHEET = dialog('Add a password');
 
 describe('passwords', () => {
     test("D27 the sidebar's Passwords lists this Mac's vault under the engine's verdict", async () => {
@@ -108,5 +111,87 @@ describe('passwords', () => {
             },
         );
         expect(result.errors.text).toBe('');
+    });
+
+    test('D32 a password added from a sign-in asks no value, and joins the list', async () => {
+        // Given - the Passwords page over two-macs, gh the first program listed
+        const result = await website.visit('/?world=two-macs&page=passwords', async (visitor) => {
+            await visitor.click(button('Add a password'));
+
+            // When - its kind and label are given, and it is added from the sign-in
+            await visitor.see(within(SHEET, content('Station takes the token', { exact: false })));
+            await visitor.click(within(SHEET, button('token')));
+            await visitor.fill(within(SHEET, field('Label')), 'GitHub sign-in');
+            await visitor.click(within(SHEET, button('Add password')));
+
+            // Then - the sheet is gone, and the vault lists it
+            await visitor.gone(SHEET);
+            await visitor.see(
+                within(region('Passwords'), button('GitHub sign-in', { exact: false })),
+            );
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('D33 a typed password leaves in its request, and is drawn nowhere', async () => {
+        // Given - the Add a password sheet over two-macs, on Cloudflare
+        const result = await website.visit('/?world=two-macs&page=passwords', async (visitor) => {
+            await visitor.click(button('Add a password'));
+            await visitor.click(within(SHEET, button('Cloudflare')));
+            await visitor.click(within(SHEET, button('API key')));
+            await visitor.fill(within(SHEET, field('Label')), 'Cloudflare deploy');
+
+            // When - its value is typed, and it is added
+            await visitor.fill(within(SHEET, field('Value')), 'good');
+            await visitor.click(within(SHEET, button('Add password')));
+
+            // Then - the sheet is gone, and the vault lists it
+            await visitor.gone(SHEET);
+            await visitor.see(
+                within(region('Passwords'), button('Cloudflare deploy', { exact: false })),
+            );
+        });
+        expect(result.errors.text).toBe('');
+        expect(result.html.text).not.toContain('good');
+    });
+
+    test('D34 a program that cannot be captured offers only the typed way', async () => {
+        // Given - the Add a password sheet over two-macs
+        const result = await website.visit('/?world=two-macs&page=passwords', async (visitor) => {
+            await visitor.click(button('Add a password'));
+
+            // When - npm is picked
+            await visitor.click(within(SHEET, button('npm')));
+
+            // Then - Typed alone, with its value field
+            await visitor.see(within(SHEET, field('Value')));
+            await visitor.gone(within(SHEET, button('From a sign-in', { exact: false })));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('D35 a refused label is said under the label, the sheet open and the value gone', async () => {
+        // Given - npm typed under GitHub deploy, a label the vault already holds
+        const result = await website.visit(
+            '/?world=two-macs&page=passwords&pace=600',
+            async (visitor) => {
+                await visitor.click(button('Add a password'));
+                await visitor.click(within(SHEET, button('npm')));
+                await visitor.click(within(SHEET, button('token')));
+                await visitor.fill(within(SHEET, field('Label')), 'GitHub deploy');
+                await visitor.fill(within(SHEET, field('Value')), 'good');
+
+                // When - it is added
+                await visitor.click(within(SHEET, button('Add password')));
+
+                // Then - the engine's refusal, and the sheet still open
+                await visitor.see(
+                    within(SHEET, content('a password is already labeled', { exact: false })),
+                );
+                await visitor.see(within(SHEET, field('Value')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+        expect(result.html.text).not.toContain('good');
     });
 });
