@@ -902,14 +902,16 @@ func Own(lib Library, name string) (Resolved, error) {
 	for _, a := range m.apps {
 		r.Values = append(r.Values, Value{Key: "apps." + a.name, Text: "listed", Origin: a.origin})
 		for _, k := range sortedNames(a.entry.Options) {
-			r.Values = append(r.Values, Value{Key: "apps." + a.name + "." + k, Text: string(a.entry.Options[k]), Origin: a.origin})
+			text, withheld := withhold(string(a.entry.Options[k]))
+			r.Values = append(r.Values, Value{Key: "apps." + a.name + "." + k, Text: text, Origin: a.origin, Withheld: withheld})
 		}
 	}
 	for _, n := range m.setting {
 		l := m.set[n]
 		r.Values = append(r.Values, Value{Key: "settings." + n, Text: "listed", Origin: l.origin})
 		for _, k := range sortedNames(l.entry.Values) {
-			r.Values = append(r.Values, Value{Key: "settings." + n + "." + k, Text: string(l.entry.Values[k]), Origin: l.origin})
+			text, withheld := withhold(string(l.entry.Values[k]))
+			r.Values = append(r.Values, Value{Key: "settings." + n + "." + k, Text: text, Origin: l.origin, Withheld: withheld})
 		}
 		if l.entry.From != "" {
 			r.Values = append(r.Values, Value{Key: "settings." + n + ".from", Text: l.entry.From, Origin: l.origin})

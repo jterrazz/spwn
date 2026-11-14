@@ -343,3 +343,22 @@ func TestAMixinAnswersItsOwnChainsValuesAndIsNeverResolved(t *testing.T) {
 		t.Errorf("a mixin holds steps %+v, want none judged", r.Steps)
 	}
 }
+
+func TestAMixinsOwnValuesLeaveWithAnyTokenWithheld(t *testing.T) {
+	token := "sk-" + strings.Repeat("station-", 4) + "key"
+	top := "machinefile: station.machinefile/v1\nname: top\napps: [{ name: served, options: { endpoint: " + token + " } }]\nsettings: { editor: { api: " + token + " } }\nrun:\n  boot: export KEY=" + token + "\n"
+	lib := library(t, map[string]string{"machinefiles/top.machine.yaml": top}, nil)
+	r, err := machinefile.Own(lib, "top")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]machinefile.Value{}
+	for _, v := range r.Values {
+		got[v.Key] = v
+	}
+	for _, key := range []string{"apps.served.endpoint", "settings.editor.api", "run.boot"} {
+		if v := got[key]; !v.Withheld || strings.Contains(v.Text, token) {
+			t.Errorf("%s reads %+v, want the token withheld", key, v)
+		}
+	}
+}
