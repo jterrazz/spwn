@@ -1,0 +1,13 @@
+description: 'A stopped machine refuses the sign-in'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["jterrazz-macbook-pro"].accounts.programs.gh) | .macs["jterrazz-macbook-pro"].accounts.logins = {"gh": {"refuse": "login.machine-stopped"}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, field, subject, message, hint}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"gh"}}
+      exit: 0
+      stdout: |
+          {"code":"login.machine-stopped","field":null,"subject":"gh","message":"GitHub cannot sign in: its machine is stopped","hint":"start the machine, then sign in"}

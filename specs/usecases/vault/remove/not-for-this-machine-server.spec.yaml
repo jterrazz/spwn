@@ -1,0 +1,13 @@
+description: 'A server keeps no vault'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "infra"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Removed[] | [.ToKind, .To, .State]] else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.remove","in":{"ID":"pw-1","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"section.not-for-this-machine","subject":"infra","message":"infra is a server: station does not manage its accounts"}

@@ -1,0 +1,15 @@
+description: 'A stopped machine refuses the sign-out'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].vms["linux-1"].pid = 0'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "linux-1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Program, .State, .Action] else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"accounts.logout","in":{"Program":"claude","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"login.machine-stopped","subject":"claude","message":"Claude cannot sign in: its machine is stopped"}

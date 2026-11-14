@@ -1,0 +1,11 @@
+description: 'A password taken from a sign-in that is not there is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"np","Program":"npm","Kind":"token","From":"sign-in"}}
+      exit: 0
+      stdout: |
+          {"code":"vault.not-signed-in","field":null,"subject":"npm","message":"npm is not signed in on this Mac: there is nothing to add"}

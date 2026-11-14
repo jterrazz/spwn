@@ -1,0 +1,11 @@
+description: 'This Mac reads a row per sign-in with the action each takes'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {verdict: .Verdict.Sentence, tone: .Verdict.Tone, rows: [.Programs[] | [.Program, .State, .How, .Action, .Line, .Ask]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{}}
+      exit: 0
+      stdout: |
+          {"verdict":"Signed in to 3 of 4 programs","tone":"plain","rows":[["gh","signed-in","own","sign-out",null,"Sign out of GitHub? The token stays valid at GitHub."],["npm","signed-out",null,"sign-in",null,null],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","signed-in","own","sign-out",null,"Sign out of Cloudflare? The token stays valid at Cloudflare."]]}

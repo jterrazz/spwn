@@ -1,0 +1,17 @@
+description: 'A typed password is kept and its id returned; the value is never echoed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"docs deploy","Program":"gh","Kind":"fine-grained","From":"typed","Value":"correct horse"}}
+      exit: 0
+      stdout: |
+          {"ID":"pw-4"}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To, .Until, .State]]]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[["machine","linux-1","2026-11-04T14:00:00Z","active"]]],["pw-2","npm publish","npm","token",false,[]],["pw-3","Claude Max","claude","oauth-token",false,[]],["pw-4","docs deploy","gh","fine-grained",true,[]]]}

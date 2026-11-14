@@ -1,0 +1,13 @@
+description: 'The mini reads its own sign-ins: none are signed in'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {verdict: .Verdict.Sentence, tone: .Verdict.Tone, rows: [.Programs[] | [.Program, .State, .How, .Action, .Line, .Ask]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{}}
+      exit: 0
+      stdout: |
+          {"verdict":"Signed in to no program","tone":"plain","rows":[["gh","signed-out",null,"sign-in",null,null],["npm","signed-out",null,"sign-in",null,null],["claude","signed-out",null,"sign-in",null,null],["wrangler","signed-out",null,"sign-in",null,null]]}
