@@ -5,6 +5,7 @@ import type {
     GrantsAddInput,
 } from '@jterrazz/station-api';
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { Button, Dialog, Picks } from '../../design/index';
 import { wordOf } from '../../engine/engine-words';
@@ -37,9 +38,14 @@ function grantOf(entry: AccountsVaultEntry, target: AccountsTarget): GrantsAddIn
     };
 }
 
-type GrantProps = { entry: AccountsVaultEntry; target: AccountsTarget; onDone: () => void };
+type GrantProps = {
+    entry: AccountsVaultEntry;
+    target: AccountsTarget;
+    onDone: () => void;
+    cancel: ReactNode;
+};
 
-function Grant({ entry, target, onDone }: GrantProps) {
+function Grant({ entry, target, onDone, cancel }: GrantProps) {
     const grant = useGesture('grants.add', {
         input: grantOf(entry, target),
         onDone,
@@ -48,10 +54,18 @@ function Grant({ entry, target, onDone }: GrantProps) {
     });
     const label = `Grant to ${target.To}`;
     return (
-        <>
+        <div className={styles.foot}>
             <GestureOutcome gesture={grant} />
-            <GestureButton gesture={grant} label={label} title={`${label}?`} variant="primary" />
-        </>
+            <div className={styles.buttons}>
+                {cancel}
+                <GestureButton
+                    gesture={grant}
+                    label={label}
+                    title={`${label}?`}
+                    variant="primary"
+                />
+            </div>
+        </div>
     );
 }
 
@@ -118,18 +132,17 @@ export function GrantSheet({ entry, onClose }: { entry: AccountsVaultEntry; onCl
         );
     }
     const target = (offered.out.Targets ?? []).find((one) => targetId(one) === chosen);
-    const actions = (
-        <>
-            {cancel}
-            {target === undefined ? (
+    const actions =
+        target === undefined ? (
+            <>
+                {cancel}
                 <Button disabled variant="primary">
                     Grant
                 </Button>
-            ) : (
-                <Grant entry={entry} key={chosen} onDone={onClose} target={target} />
-            )}
-        </>
-    );
+            </>
+        ) : (
+            <Grant cancel={cancel} entry={entry} key={chosen} onDone={onClose} target={target} />
+        );
     return (
         <Dialog actions={actions} onClose={onClose} title={title}>
             <Offer chosen={chosen} offer={offered.out} onChoose={setChosen} />
