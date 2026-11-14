@@ -94,4 +94,36 @@ describe('sign-ins', () => {
         );
         expect(result.errors.text).toBe('');
     });
+
+    test("a granted program's Remove ends its grant, and the row asks the engine again", async () => {
+        // Given - linux-1's Sign-ins over two-macs, npm granted from pw-2
+        const result = await component.render(
+            signInsOver('two-macs', 'linux-1'),
+            async (visitor) => {
+                // When - Remove of npm is clicked and confirmed
+                await visitor.click(within(region('Sign-ins'), button('Remove npm')));
+                const asked = dialog('Remove pw-2 from this machine?');
+                await visitor.click(within(asked, button('Remove')));
+
+                // Then - the row no longer offers its Remove
+                await visitor.gone(within(region('Sign-ins'), button('Remove npm')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a granted program opens its password on the Passwords page', async () => {
+        // Given - linux-1's Sign-ins over two-macs, npm granted from pw-2
+        const result = await component.render(
+            signInsOver('two-macs', 'linux-1'),
+            async (visitor) => {
+                // When - the password of npm's row is opened
+                await visitor.click(within(region('Sign-ins'), button('Open the password pw-2')));
+
+                // Then - its page, with its grant to linux-1
+                await visitor.see(heading('npm publish'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 });
