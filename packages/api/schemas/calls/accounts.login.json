@@ -116,6 +116,9 @@
         },
         "Site": {
           "type": "string"
+        },
+        "Title": {
+          "type": "string"
         }
       },
       "required": [
@@ -123,7 +126,8 @@
         "Expires",
         "Kind",
         "Line",
-        "Now"
+        "Now",
+        "Title"
       ],
       "type": "object"
     },

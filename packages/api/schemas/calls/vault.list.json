@@ -94,32 +94,6 @@
       ],
       "type": "object"
     },
-    "accounts.VaultProgram": {
-      "additionalProperties": false,
-      "properties": {
-        "Captures": {
-          "type": "boolean"
-        },
-        "Label": {
-          "type": "string"
-        },
-        "Program": {
-          "enum": [
-            "gh",
-            "npm",
-            "claude",
-            "wrangler"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "Captures",
-        "Label",
-        "Program"
-      ],
-      "type": "object"
-    },
     "accounts.VaultRead": {
       "additionalProperties": false,
       "properties": {
@@ -135,15 +109,6 @@
         "Mac": {
           "type": "string"
         },
-        "Programs": {
-          "items": {
-            "$ref": "#/$defs/accounts.VaultProgram"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
         "Verdict": {
           "$ref": "#/$defs/core.verdict.Verdict"
         }
@@ -151,7 +116,6 @@
       "required": [
         "Entries",
         "Mac",
-        "Programs",
         "Verdict"
       ],
       "type": "object"

@@ -8,6 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/docker"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/gitaliases"
+	"github.com/jterrazz/studio-station/apps/engine/ui/token"
 
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
@@ -58,7 +59,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		overviewcalls.All(sections),
 		agentscalls.All(agentscalls.Deps{Hooks: []agentscontract.Hooks{m.agentHooks(claudecode.ID), m.agentHooks(codex.ID)}, Journal: m.journal(), Session: m.agentSession(), Forge: m.forge(), Now: m.sys.Clock.Now, Machine: m.profile.Ref.Name, Held: m.heldOnEveryMachine(kind), Kind: kind, Calls: farRouter{m}}),
 		accountscalls.All(accountscalls.Deps{Accounts: m.accounts(), Shares: m.secrets(), SignIns: m.signIns(), Kind: kind}),
-		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), Kind: kind}),
+		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),
 		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Known: m.cat.Apps, Kind: kind}),
 		awakecalls.All(m.awakeDeps()),

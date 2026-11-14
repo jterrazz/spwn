@@ -1140,6 +1140,7 @@
       "where": "in-engine",
       "errors": [
         "vault.cannot-capture",
+        "vault.empty-label",
         "vault.empty-value",
         "vault.label-taken",
         "vault.not-signed-in"
@@ -1154,6 +1155,15 @@
       "where": "at-target",
       "in": "VaultListIn",
       "out": "VaultRead",
+      "watch": true
+    },
+    {
+      "name": "vault.new",
+      "schema": "station.vault.new/v1",
+      "section": "accounts",
+      "where": "in-engine",
+      "in": "VaultNewIn",
+      "out": "VaultOffer",
       "watch": true
     },
     {

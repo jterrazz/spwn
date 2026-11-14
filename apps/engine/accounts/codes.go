@@ -21,6 +21,7 @@ const (
 
 const (
 	VaultLabelTaken    fail.Code = "vault.label-taken"
+	VaultEmptyLabel    fail.Code = "vault.empty-label"
 	VaultEmptyValue    fail.Code = "vault.empty-value"
 	VaultNotSignedIn   fail.Code = "vault.not-signed-in"
 	VaultCannotCapture fail.Code = "vault.cannot-capture"

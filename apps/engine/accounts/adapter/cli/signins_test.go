@@ -100,6 +100,8 @@ func (s *scripted) Open(_ context.Context, page string) error {
 	return nil
 }
 
+func (s *scripted) Mac() string { return "this-mac" }
+
 func (s *scripted) Now() time.Time { return time.Date(2026, 11, 14, 9, 0, 0, 0, time.UTC) }
 
 func flowed(f catalog.Flow) catalog.LoginProgram {
@@ -194,6 +196,15 @@ func TestAPastedCodeReachesTheProgramOnItsInputNeverItsLine(t *testing.T) {
 	}
 	if len(m.opened) != 1 || !strings.HasPrefix(m.opened[0], "https://"+paste.Site+"/oauth/authorize") {
 		t.Errorf("opened %v; want the program's own link", m.opened)
+	}
+}
+
+func TestALoginOfThisMacTitlesItsStepWithTheProgramAndTheMacsName(t *testing.T) {
+	code := flowed(catalog.FlowDeviceCode)
+	s := cli.NewSignIns(machineOf("Open this URL to continue in your web browser: https://" + code.Site + "/login/device?x=1\n" + deviceCode))
+	step, err := firstOf(t, s, code)
+	if err != nil || step == nil || step.Title != "Sign in to "+code.Name+" on this-mac" {
+		t.Fatalf("step = %+v, %v; want a title naming %s and this-mac", step, err, code.Name)
 	}
 }
 

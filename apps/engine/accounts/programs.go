@@ -73,6 +73,29 @@ func (t Program) Captures() bool {
 	return ok && len(d.Capture) > 0
 }
 
+func (t Program) CaptureKind() KeyKind {
+	// invariant: the kind of the token a sign-in leaves is the delivery's
+	// to say, empty for a program that leaves none to take.
+	d, _ := t.Delivery()
+	return KeyKind(d.CaptureKind)
+}
+
+func (t Program) Kinds() []KeyKind {
+	// value: the kinds a token typed for the program may be, the first the default.
+	d, _ := t.Delivery()
+	kinds := make([]KeyKind, 0, len(d.Kinds))
+	for _, k := range d.Kinds {
+		kinds = append(kinds, KeyKind(k))
+	}
+	return kinds
+}
+
+func LoginTitle(p Program, on string) string {
+	// value: the heading of a login step, the program's wire name and the
+	// machine it signs in on.
+	return "Sign in to " + string(p) + " on " + on
+}
+
 func (t Program) StepLine(kind StepKind, site string) string {
 	// value: the status line under the code of a login step, worded for
 	// the program and the site the owner is sent to.
@@ -173,6 +196,8 @@ type Step struct {
 	Now time.Time
 	// value: the status line under the code, worded for the program.
 	Line string
+	// value: the heading of the step: which program signs in on which machine.
+	Title string
 }
 
 type LoginRead struct {

@@ -46,22 +46,6 @@ func TestARemovalSaysAnEnvironmentFileProgramLeavesNewShellsOnly(t *testing.T) {
 	}
 }
 
-func TestAProgramOffersAddFromASignInExactlyWhenItsDeliveryPrintsItsToken(t *testing.T) {
-	offered := accounts.VaultPrograms()
-	if len(offered) != len(catalog.Deliveries) {
-		t.Fatalf("%d programs offered; the catalog delivers to %d", len(offered), len(catalog.Deliveries))
-	}
-	for _, p := range offered {
-		d, _ := p.Program.Delivery()
-		if p.Captures != (len(d.Capture) > 0) {
-			t.Errorf("%s captures = %v; its delivery prints a token: %v", p.Program, p.Captures, len(d.Capture) > 0)
-		}
-		if p.Label == "" {
-			t.Errorf("%s has no label", p.Program)
-		}
-	}
-}
-
 func TestAnEntryCountsWhatItsRemovalEnds(t *testing.T) {
 	machine := accounts.VaultGrant{ToKind: accounts.ToMachine, To: "linux-1"}
 	other := accounts.VaultGrant{ToKind: accounts.ToMachine, To: "linux-2"}
