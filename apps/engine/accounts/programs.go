@@ -28,21 +28,47 @@ func Programs() []Program {
 }
 
 func (t Program) Label() string {
-	for _, known := range catalog.LoginPrograms {
-		if known.Name == string(t) {
-			return known.Label
-		}
+	if known, ok := t.login(); ok {
+		return known.Label
 	}
 	return string(t)
 }
 
 func (t Program) Known() bool {
+	_, ok := t.login()
+	return ok
+}
+
+func (t Program) login() (catalog.LoginProgram, bool) {
 	for _, known := range catalog.LoginPrograms {
 		if known.Name == string(t) {
-			return true
+			return known, true
 		}
 	}
-	return false
+	return catalog.LoginProgram{}, false
+}
+
+func (t Program) Flow() StepKind {
+	known, _ := t.login()
+	switch known.Flow {
+	case catalog.FlowDeviceCode:
+		return StepDeviceCode
+	case catalog.FlowLink:
+		return StepLink
+	case catalog.FlowPaste:
+		return StepPaste
+	}
+	return StepLink
+}
+
+func (t Program) Site() string {
+	known, _ := t.login()
+	return known.Site
+}
+
+func (t Program) Captures() bool {
+	known, _ := t.login()
+	return known.Captures
 }
 
 type ProgramState string

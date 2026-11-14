@@ -79,14 +79,23 @@ func (*worldMac) managers(map[catalog.Method]appscontract.Installer)     {}
 func (*worldMac) budgets() lanes.Clock                                   { return nil }
 func (*worldMac) poolContext(ctx context.Context) context.Context        { return ctx }
 func (*worldMac) vault() accountscontract.Vault                          { return nil }
-func (*worldMac) identities() accountscontract.Identities                { return nil }
-func (*worldMac) secretSource() accountscontract.SecretSource            { return nil }
-func (*worldMac) userSource() machinefilecontract.Source                 { return nil }
-func (*worldMac) owned() machinefilecontract.Owned                       { return nil }
-func (*worldMac) locks() machinefilecontract.Locks                       { return nil }
-func (*worldMac) password() machinefilecontract.Password                 { return nil }
-func (*worldMac) turn() machinefilecontract.Turn                         { return nil }
-func (*worldMac) phaseShell() machinefilecontract.Shell                  { return nil }
+func (*worldMac) signIns(func() time.Time, func(context.Context, time.Duration) error) accountscontract.SignIns {
+	return nil
+}
+func (*worldMac) passwords(func() time.Time, func(context.Context, time.Duration) error) accountscontract.Passwords {
+	return nil
+}
+func (*worldMac) grants(func() time.Time, func(context.Context, time.Duration) error) accountscontract.Grants {
+	return nil
+}
+func (*worldMac) identities() accountscontract.Identities     { return nil }
+func (*worldMac) secretSource() accountscontract.SecretSource { return nil }
+func (*worldMac) userSource() machinefilecontract.Source      { return nil }
+func (*worldMac) owned() machinefilecontract.Owned            { return nil }
+func (*worldMac) locks() machinefilecontract.Locks            { return nil }
+func (*worldMac) password() machinefilecontract.Password      { return nil }
+func (*worldMac) turn() machinefilecontract.Turn              { return nil }
+func (*worldMac) phaseShell() machinefilecontract.Shell       { return nil }
 func (*worldMac) sharedSource(machinefilecontract.SharedSource) machinefilecontract.Source {
 	return nil
 }

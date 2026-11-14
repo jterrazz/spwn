@@ -346,7 +346,16 @@ func (m *worldMac) managers(adapters map[catalog.Method]appscontract.Installer) 
 	}
 	m.run.w.Managers = named
 }
-func (m *worldMac) vault() accountscontract.Vault   { return accountsfake.NewVault(m.run.w, m.name) }
+func (m *worldMac) vault() accountscontract.Vault { return accountsfake.NewVault(m.run.w, m.name) }
+func (m *worldMac) signIns(now func() time.Time, sleep func(context.Context, time.Duration) error) accountscontract.SignIns {
+	return accountsfake.NewSignIns(m.run.w, m.name, accountsfake.Clock{Now: now, Sleep: sleep})
+}
+func (m *worldMac) passwords(now func() time.Time, sleep func(context.Context, time.Duration) error) accountscontract.Passwords {
+	return accountsfake.NewPasswords(m.run.w, m.name, accountsfake.Clock{Now: now, Sleep: sleep})
+}
+func (m *worldMac) grants(now func() time.Time, sleep func(context.Context, time.Duration) error) accountscontract.Grants {
+	return accountsfake.NewGrants(m.run.w, m.name, accountsfake.Clock{Now: now, Sleep: sleep})
+}
 func (m *worldMac) journal() agentscontract.Journal { return agentsfake.JournalOf(m.run.w, m.name) }
 func (m *worldMac) agentSession() agentscontract.Session {
 	return agentsfake.SessionOf(m.run.w, m.name)
