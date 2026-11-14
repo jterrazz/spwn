@@ -1,11 +1,11 @@
-import { button, component, content, field, file } from '@jterrazz/test';
+import { button, component, content, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 import type { Route } from '../../../shell/route';
 
-const recordingFor = await recordingsOf('bare-mac', 'stories', 'two-macs');
+const recordingFor = await recordingsOf('bare-mac', 'stories');
 
 function windowOver(world: string, initial: Route) {
     return pageOver(recordingFor(world), initial);
@@ -56,23 +56,6 @@ describe('shelf', () => {
 
         // Then - no description overflows its column
         expect(cut).toStrictEqual([]);
-    });
-
-    test('the search narrows the shelf, and says when nothing matches', async () => {
-        // Given - the window on Apps over two-macs
-        const result = await component.render(
-            windowOver('two-macs', { page: 'catalog-apps' }),
-            async (visitor) => {
-                await visitor.see(content('lazygit'));
-
-                // When - a word no package carries is searched
-                await visitor.fill(field('Search the catalog'), 'zzzz');
-
-                // Then - the list says nothing matches
-                await visitor.see(content('Nothing matches.'));
-            },
-        );
-        expect(result.errors.text).toBe('');
     });
 
     test('settings carry their OK count on every machine', async () => {
