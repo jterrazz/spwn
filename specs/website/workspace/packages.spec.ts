@@ -96,9 +96,7 @@ describe('packages', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'W14 window differs: a layer shows its count as a word and no square per app, hollow where one is missing, and a line carries no icon and no rule in plain words',
-    );
+    test.todo("W14 waits for each line's version rule on machinefile.drift");
 
     test.todo("W15 waits for a call capturing a machine's Packages");
 

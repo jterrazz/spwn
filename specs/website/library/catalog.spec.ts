@@ -37,7 +37,7 @@ describe('catalog', () => {
     });
 
     test.todo(
-        'D13 window differs: the list shows every package by default, where the mockup and the row show what my machines carry, with an Everything switch and a filter by kind (a switch and a count of carriers, more than a sentence)',
+        'D13 waits for which machines carry each app, joined as settings.matrix joins settings',
     );
 
     test('D14 an app page reads how it is installed and the commands it puts on the path', async () => {

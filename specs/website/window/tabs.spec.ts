@@ -67,7 +67,5 @@ describe('tabs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'A6 window differs: the head of a tab with nothing in it reads No verdict from the engine, where the row has it say the tab holds nothing',
-    );
+    test.todo('A6 waits for a verdict and its line on ports.list, saying the tab holds nothing');
 });

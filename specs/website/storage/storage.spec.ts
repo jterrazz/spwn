@@ -9,7 +9,7 @@ describe('storage', () => {
     test.todo('D8 waits for what each kind holds, on disk.read');
 
     test.todo(
-        'D9 window differs: Storage frees the caches (Free 34.8 GB) and lists no leftovers of deleted VMs, and its verdict is not given, where the row frees leftovers and reads "Nothing to clean."',
+        "D9 waits for what nothing uses on disk.read, the leftovers of deleted VMs among it, and the page's verdict",
     );
 
     test.todo('D10 waits for a recording of the disk of the other Mac');
