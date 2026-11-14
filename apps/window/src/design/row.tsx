@@ -20,13 +20,13 @@ type RowState = { tone: Tone; word: string; asWritten?: boolean; calm?: Calm };
 // value: the sentence when it is an address, cut in the middle.
 export type RowProps = {
     title: string;
-    titleLook?: 'mono' | 'plain';
+    titleLook?: 'mono' | 'plain' | 'strong';
     tag?: string;
     tagLook?: 'chip' | 'hint' | 'type';
     sentence?: ReactNode;
     below?: ReactNode;
     lead?: ReactNode;
-    leadSize?: 'chip' | 'dot' | 'icon' | 'machine' | 'value';
+    leadSize?: 'chip' | 'clock' | 'dot' | 'icon' | 'machine' | 'value';
     state?: null | RowState;
     stateAt?: 'end' | 'start';
     cells?: readonly ReactNode[];
@@ -59,6 +59,7 @@ type Columns = Pick<
 
 const LEAD_SIZES = {
     chip: styles.leadChip,
+    clock: styles.leadClock,
     dot: styles.leadDot,
     icon: styles.leadIcon,
     machine: styles.leadMachine,
@@ -139,9 +140,11 @@ function titledIfCut(event: MouseEvent<HTMLSpanElement>): void {
     span.title = span.scrollWidth > span.clientWidth ? (span.textContent ?? '') : '';
 }
 
+const TITLE_LOOKS = { mono: styles.mono, plain: '', strong: styles.strong };
+
 type NameProps = {
     title: string;
-    titleLook: 'mono' | 'plain' | undefined;
+    titleLook: 'mono' | 'plain' | 'strong' | undefined;
     tag: string | undefined;
     tagLook: 'chip' | 'hint' | 'type';
     sentence: ReactNode;
@@ -151,7 +154,7 @@ type NameProps = {
 function Name({ title, titleLook, tag, tagLook, sentence, below }: NameProps) {
     const titled = (
         <span
-            className={`${styles.title} ${titleLook === 'mono' ? styles.mono : ''}`}
+            className={`${styles.title} ${TITLE_LOOKS[titleLook ?? 'plain']}`}
             onMouseEnter={titledIfCut}
         >
             {title}

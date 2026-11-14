@@ -126,6 +126,18 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
         },
     },
     {
+        name: 'a time lead, a strong title, slim',
+        props: {
+            lead: <Value>03:12</Value>,
+            leadSize: 'clock',
+            size: 'slim',
+            tag: '24.11.0 → 24.11.1',
+            title: 'node',
+            titleLook: 'strong',
+            value: '6 machines',
+        },
+    },
+    {
         name: 'missing',
         props: { sentence: '', state: null, title: 'process not given yet', value: null },
     },

@@ -26,6 +26,9 @@
 .leadValue {
     --column-lead: 56px;
 }
+.leadClock {
+    --column-lead: 44px;
+}
 .leadDot {
     --column-lead: 43px;
 }
@@ -156,6 +159,9 @@
 }
 .slim .title {
     font-size: var(--text-body);
+}
+.title.strong {
+    font-weight: var(--weight-medium);
 }
 .title.mono {
     font-family: var(--font-mono);
