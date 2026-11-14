@@ -1,4 +1,4 @@
-# ADR-0xx: A VM signs itself in, and the vault grants the rest
+# ADR-049: A VM signs itself in, and the vault grants the rest
 
 **Status:** Proposed
 **Date:** 2026-11-14

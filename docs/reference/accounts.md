@@ -1,76 +1,94 @@
 # Accounts
 
-`station accounts` is who is signed in on a machine, and what is shared with its VMs: names and scopes, never a token. A secret travels only as far as its tier allows: kept on the Mac, shared with a VM as a copy for a time, or bound inside one VM.
+`station accounts` is who is signed in on a machine, and what the vault granted it: names and scopes, never a token. A VM signs itself in by default; a grant, a secret of the Mac's vault given for a time, covers only what a VM cannot do itself. The decision is [the accounts ADR](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md).
 
-| Section          | Answers                                                             |
-| ---------------- | ------------------------------------------------------------------- |
-| The three tiers  | What each tier holds and what delete does to it                     |
-| Sharing accounts | The share list, `accounts share` and `take-back`, and when one ends |
-| Where to revoke  | Where each provider lets you invalidate a token                     |
-| Studio in a VM   | What a share needs inside the VM                                    |
-| Claude in a VM   | Logging Claude Code in on a VM                                      |
-| Accounts         | Who has access to what, and where each right comes from             |
+| Section          | Answers                                                              |
+| ---------------- | -------------------------------------------------------------------- |
+| What is built    | What this page describes that the code does not do yet               |
+| Three concepts   | Sign-in, vault entry and grant, and what a machine shows per program |
+| Signing in       | A login run inside the VM, and how its link and code reach you       |
+| The vault        | One per Mac: what it holds, how a secret enters, Touch ID            |
+| Grants           | What a grant gives, how it arrives, how it ends                      |
+| Agents           | Why an agent's grant is the narrowest                                |
+| Where to revoke  | Where each provider lets you invalidate a token                      |
+| Reading accounts | How a machine's sign-ins are read, and what never leaves it          |
+| Windows          | Where each of these shows                                            |
 
-## The three tiers
+## What is built
 
-| Tier   | Lives                                        | Examples                                                       | What `machines delete` does                                         |
-| ------ | -------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------- |
-| kept   | the Mac only                                 | the owner's GitHub token, Apple ID, `AGENT_PASSWORD`           | nothing: it never leaves                                            |
-| shared | the Mac; a copy in the VM's credential store | `session:*` browser sessions; the Claude token                 | the copy goes with the disk; the secret stays valid at its provider |
-| bound  | inside one VM                                | its ssh host keys, its `github-login` token, a `claude /login` | the disk goes; a token stays valid at its provider until revoked    |
+This page is the target. Reading who is signed in, the redaction of what is read, and the list's pages are built. Everything else here is not: the login relay, the vault calls, grants, `accounts.logout`, Touch ID, the Passwords page and the Machinefile's `signins` and `grants`. Until those land, the code still has the tiers and `accounts share`, which the ADR deletes; [its consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
 
-Deleting a VM is not revoking a token. Use fine-grained, expiring tokens in a VM, and revoke at the provider.
+## Three concepts
 
-## Sharing accounts
+- **Sign-in**: a program's login on one machine, done by the program itself. The catalog owns how each program is read, logged in and logged out (`apps/engine/catalog/accounts.go`); a Machinefile names only which programs a machine signs in to.
+- **Vault entry**: one secret on the owner's Mac, with a label, the program it is for, what kind it is and who it signs in as.
+- **Grant**: an entry given to a machine or an agent until a time.
 
-`share_list` in `~/.config/station/preferences.json` names the secrets whose accounts may be shared, written by hand: a name, or a family as `session:*`. A Mac whose preferences name none shares `session:*` and `operator:claude:oauth-token`; a v2 `lend_list` is read while no `share_list` is written. An account whose secret the list does not hold is refused (`npm is not on the share list`, exit 2). `station secrets allow` and `disallow` are retired: they exit 2 with the share list as their hint.
+Per program, a machine is **signed in** (`How: here`), **granted** (`How: granted`, with its `Until`) or **signed out**. A machine's own sign-in is never a grant: a grant to a VM already signed in is refused.
 
-```sh
-station accounts share github --with api            # for 12h; sharing again resets the term
-station accounts share claude --with api --for 4h   # a term from 1m to 7d
-station accounts take-back github --from api        # delete the VM's copy, after a y/n (--yes off a terminal)
-station accounts                                    # names and scopes, never a value
-```
+A row offers only an action the engine would accept: sign in, sign in again, remove, sign out, or none. For a VM of another Mac, a server or a stopped machine the action is none, and the row carries the engine's line (`Sign in from mac-mini`).
 
-A share is refused before anything is read or copied: a term outside 1 min to 7 d, from the CLI or from any client of the engine's socket (`a share lasts 1 min to 7 d, not 192h0m0s`, code `account.term-out-of-bounds`), a Mac without the studio CLI on its search path (`studio is required by account sharing`, exit 2, hint `install studio, then run it again`), an unknown account or VM, a stopped VM (`api is stopped`, hint `station machines start api`), a server (`infra is a server: station shares no account with it`), a VM of another Mac (`ci-1 is on mac-mini: share from mac-mini's accounts`, its hint the same command `--on mac-mini`), an account not signed in on this Mac. An export the studio CLI fails is `GitHub could not be read on This Mac` (exit 1): nothing is copied, no share is kept, and the studio CLI's own words go to `~/.local/state/station/logs/accounts.log`, the file the hint names.
+## Signing in
 
-A shared copy is a snapshot: later captures on the Mac do not reach it until you share again. Every share ends by itself: `~/.local/state/station/shares.json` keeps, per VM, each secret shared, when and until when (`accounts --json` lists them under `shares`), and at its until the engine takes the copy back from a VM whose guest is connected (at its start and every minute; a VM still connecting, or stopped past its until, has it taken back as its guest connects, before it is reported ready), with no notification. A take-back that fails keeps its share and is told once an hour. `machines delete` drops the VM's shares with its disk. The shares a v2 VM record held move into `shares.json` once, at `station init`. Values pass between the credential stores through a pipe, never through argv and never to disk on the Mac. A share and a take-back run inside the VM over the engine's one connection to it, so they need the engine up and the VM's guest connected.
+A sign-in is a login the program runs inside the machine. The engine starts it over its one connection to the VM, reads the program's output as it arrives, and streams a step to the window:
 
-`station secrets`, `secrets lend --to <vm>` and `secrets recall --from <vm>` are hidden aliases for one release: they run `accounts`, `accounts share` (each account the share list holds, or each secret named) and `accounts take-back`, naming the v3 command on stderr; `secrets --json` is `station.accounts.list/v1`.
+- a **device code**: the window shows the code, and Open takes you to the provider's device page;
+- a **link**: the VM's own link, opened by the engine of the VM's Mac, only to a site the catalog allows;
+- a **paste**: the program asks for a code you copy back, which `accounts.answer` carries.
+
+The window holds no URL. A step carries an `Exchange`, an opaque id of the login, and `accounts.open` and `accounts.answer` take it back. Link and code are the screened words of [ADR-048](../decisions/048-the-engine-withholds-a-secret-before-any-answer.md); the engine opens a link itself rather than send it. A login that ends says who signed in. A VM of another Mac is not signed in from this one in v1: do it from its Mac.
+
+Sign out runs the program's own logout (`accounts.logout`) after a confirmation the engine words: the token stays valid at its provider.
+
+## The vault
+
+The vault is the Keychain entries of one Mac under station's own Keychain name. It has no sync: each Mac has its own, and the Passwords page shows This Mac's (`Passwords on <mac>`), with no Mac picker. Station is the only owner of the Claude token and of every granted secret; the studio CLI's credential store is not read.
+
+A secret enters in one of two ways:
+
+- **From a sign-in** done on This Mac, whose token goes to the vault. Claude's does.
+- **Typed**, as a value. It travels as a write-only value, never in an argument list ([ADR-009](../decisions/009-one-bootstrap-verb-and-no-values-in-argv.md)); a native secure prompt asks for it where one can be drawn, and the window's password input is the last fallback, never reaching state, a log or a recording. Whether a native prompt can be drawn is open ([ADR](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).
+
+Each grant asks for Touch ID first, the engine's own `LAContext` with station's reason, from the window, the menu bar or the CLI, after the checks and before the Keychain is read. Removing an entry ends the grants made from it, after a confirmation that names them.
+
+## Grants
+
+A grant gives one entry to one machine or one agent, for a term. Granting again starts the term over.
+
+- **It arrives** over stdin, never an argument: a login with the token for `gh`, a `~/.npmrc` line (mode 0600) for npm, an env file under `~/.config/station/grants/` that the shell block sources for Claude and wrangler.
+- **It leaves** at `grants.remove`, at its `Until`, or when the VM's guest connects after it, by the program's own Remove: a logout, or the deletion of the line or file that holds the secret. A program that reads an env file stops in new shells only, and the sentence of `grants.remove` says so.
+- **It is refused**, before anything is read, for a server, a VM of another Mac, a stopped VM, a VM already signed in, a term out of bounds, and a secret that cannot be delivered. The refusals of `vault.add` and `grants.add` carry `Field` (`label`, `value` or `term`) so a form marks the input at fault.
+
+Deleting a VM ends its grants with its disk. It is not a revocation: see below.
+
+## Agents
+
+An agent's grant reaches the environment of its own terminal, not the VM's shell, and ends when that terminal stops or at its `Until`. It is the narrowest:
+
+- only an entry marked agent-grantable, a fine-grained, expiring token, never the owner's own GitHub login;
+- a term from 1 minute to 7 days, never until removed;
+- Touch ID at each grant.
+
+An agent, or a prompt injected into it, can send a token it reads anywhere; station screens its own answers, not an agent's traffic.
 
 ## Where to revoke
 
-| Secret                               | Revoke at                                                                                      |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| A VM's GitHub token                  | github.com, your account page for developer tokens and authorized apps                         |
-| A shared `session:*` browser session | log out of that provider in the Mac's browser; the provider's session list shows the others    |
-| The Claude token                     | claude.ai, your account page for sessions and tokens; then `station settings off claude-token` |
+A grant's end undoes it inside the VM; a token stays valid at its provider until revoked there. Use fine-grained, expiring tokens, and revoke at the provider.
 
-## Studio in a VM
+| Secret              | Revoke at                                                              |
+| ------------------- | ---------------------------------------------------------------------- |
+| A VM's GitHub token | github.com, your account page for developer tokens and authorized apps |
+| The Claude token    | claude.ai, your account page for sessions and tokens                   |
 
-A share uses the studio CLI's credential store on both ends (`studio credentials export`, `import`, `delete`), because that store has one owner. A VM without `studio` on its PATH makes `accounts share` fail with a hint to this section. How the studio CLI reaches a VM is not designed yet ([TODO](../../TODO.md)); until then, sharing is judged with stubs.
+## Reading accounts
 
-## Claude in a VM
+`station accounts` shows who has access to what: each provider's identity on this Mac, then on each of its VMs, and where it comes from, `here` (a sign-in done on that machine), `granted` (with its `until`), or both. A grant in its last hour is `◐ expiring`; one whose end the engine could not carry out is `✗ failing`. A VM is read by its own guest over the engine's session, so no provider's output leaves the VM: only the parsed identities and scopes do. Each read is an allowlist of named fields (`apps/engine/accounts/adapter/cli/parse.go`), and any kept value shaped like a secret is replaced by `?`; the shapes are `apps/engine/core/secret`'s, owned by ADR-048.
 
-A VM cannot open a browser on your Mac to log in, so the Mac shares it a token.
+## Windows
 
-1. On the Mac, once: `claude setup-token`. It opens a browser OAuth and prints a long-lived subscription token.
-2. `station settings apply claude-token`. A form asks for the token, the OS credential store keeps it as `operator:claude:oauth-token` (in the keychain on a Mac), and the name joins the share list.
-3. `station accounts share claude --with <vm>` copies it.
-4. Inside the VM, `station shell zsh` exports `CLAUDE_CODE_OAUTH_TOKEN` from the VM's credential store at every shell start. With no `studio`, no name or any failure it prints nothing: a shell start never fails.
-
-`station accounts take-back claude --from <vm>`, the share's end and `machines delete` remove the VM's copy; `station settings off claude-token` deletes the Mac's and takes the name off the share list. Revoke the token itself at claude.ai.
-
-The alternative is a bound login: run `claude /login` inside a persistent workspace. The login lives and dies with that VM and is never shared.
-
-## Accounts
-
-`station accounts` shows who has access to what: each provider's identity on this Mac, then on each of its VMs, and where the right comes from: `own` (a login done on that machine), `lent` (a shared copy, with its `until`), or both; then `# Shared with VMs`, each share with its VM and its time left. A share in its last hour is `◐ expiring` with the `accounts share` command that renews it; an ended one the engine could not take back is `✗ failing` with the `accounts take-back` command. A VM is read by its own guest over the engine's session, so no provider's output ever leaves the VM: only the parsed identities and scopes do. Each provider's read is an allowlist of named fields (`apps/engine/accounts/adapter/cli/parse.go`), and every kept value that looks like a secret is replaced by `?`. The shapes are `apps/engine/core/secret`'s: an issuer's prefix (`gh*_`, `github_pat_`, `sk-`, `sk_live_`, `npm_`, `xox*-`, `xapp-`, `AKIA`, a JWT, a private key), a credential in a URL or an `Authorization` header, a UUID, or a run of 32 and more characters holding a segment (between `-`, `_` and `/`) of 20 and more letters and digits that lies in no path from a root, follows no digest named by its algorithm (`sha256:`, an ssh key's `SHA256:`) and is no 40 or 64 characters of lowercase hex.
-
-The menu bar's Accounts page (`menubar.accounts`, [API](api.md)) reads every Mac that answers through its own engine. Its facts say how many accounts are signed in somewhere and how many copies are shared. It lists what needs you first: each copy with less than 30 min left, the one ending first first, with Extend (shared again for 4 hours from now), then each sign-in a Mac is out of, This Mac's first, with Sign in, which opens Terminal on the login and reads `Waiting…` while it runs: the menu bar holds its own watch of the page Sign in was pressed on and reads it again every 2 s, for at most 5 min, so the panel closing as Terminal opens, or another page shown, never ends the wait, and the need goes once the read says signed in. Then every copy shared with a VM with its time left over its total, and every account signed in somewhere, once, with the Macs that hold it. git's identity and ssh's keys are no sign-in, so the page leaves them out. Its footer opens the full list in Terminal (`station accounts --all-machines`) and shares one (Lend an account). A Mac's page has the same as its Accounts segment, that Mac's alone: its copies shared with Lend an account under them, then what it is signed in to, under its name, each with the words its provider's read printed, as `apps/engine/catalog/accounts.go` orders them: GitHub's login and scopes (`jterrazz · repo, workflow`), Claude's plan (`Max plan`). A part the read did not print is left out, never guessed. A running workspace's page has them as its Accounts segment: the copies its Mac shared with it (`Lent to linux-1`), each with what it lets the workspace do, its time left, Extend and Take back, both run on that Mac, then Lend an account; with none, `No account lent to review-bot`; the footnote names whose accounts they are. Lend an account is a sheet over the page: To the running workspace of an awake Mac (said, not asked, on a workspace's own page; from Accounts of all machines a popup that opens that workspace's sheet), From its Mac, whose accounts it may share are picked from a list (one signed out there is disabled, `needs sign-in on mac-mini`), For 4 hr, 12 hr or 7 days, each saying when it ends by day (`Ends at 14:30, then taken back`, `Ends tomorrow at 03:30`, `Ends Saturday 14 Nov`); its button names the account and the time (`Lend GitHub for 4 hr`) and runs `accounts.share` on that Mac.
+The window's Accounts view has a Sign-ins tab per machine, the login sheet, the Passwords page and the grant picker. The menu bar's Accounts page, which lists what needs you first, offers Grant. Their screens are the window's and the menu bar's own; this page owns the words they show.
 
 ## Related
 
 - [Machines](machines.md): `delete`.
-- [Settings](settings.md): `claude-token`.
-- [Preferences](preferences.md): `share_list`.
+- [Machinefiles](machinefiles.md): the `signins` and `grants` keys.
