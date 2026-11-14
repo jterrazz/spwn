@@ -54,8 +54,11 @@ type ChapterDrift struct {
 
 // value: one line that differs from the Machinefile: the package, the
 // block of ~/.zshrc, the port or the account it is, what it reads as, and
-// what the machine holds of it against what the file asks (a version, an
-// audience, shared or not).
+// what the machine holds of it against what the file asks: a package's
+// version in Seen and Asked, a port's audience in SeenTo and AskedTo, left
+// out where it is not shared or not asked; an account's is its Condition
+// alone, absent where the file shares it and the Mac holds no copy, extra
+// where the Mac holds a copy the file does not share.
 
 type Differing struct {
 	Package   string
@@ -65,6 +68,8 @@ type Differing struct {
 	Condition Condition
 	Seen      string
 	Asked     string
+	SeenTo    catalog.Audience `json:",omitempty"`
+	AskedTo   catalog.Audience `json:",omitempty"`
 }
 
 // value: what apply would do with the lines that differ, by its verb, and
@@ -184,19 +189,13 @@ func (a Access) ports() *ChapterDrift {
 			}
 			continue
 		}
-		c.Differing = append(c.Differing, Differing{Port: h.Port, Condition: held(h.Seen != "", h.Asked != ""), Seen: string(h.Seen), Asked: string(h.Asked)})
+		c.Differing = append(c.Differing, Differing{Port: h.Port, Condition: held(h.Seen != "", h.Asked != ""), SeenTo: h.Seen, AskedTo: h.Asked})
 	}
 	return c
 }
 
 func (a Access) accounts() *ChapterDrift {
 	c := &ChapterDrift{Chapter: ChapterAccounts}
-	word := func(shared bool) string {
-		if shared {
-			return "shared"
-		}
-		return ""
-	}
 	for _, h := range a.Accounts {
 		if h.Asked {
 			c.Listed++
@@ -207,7 +206,7 @@ func (a Access) accounts() *ChapterDrift {
 			}
 			continue
 		}
-		c.Differing = append(c.Differing, Differing{Account: h.Account, Condition: held(h.Seen, h.Asked), Seen: word(h.Seen), Asked: word(h.Asked)})
+		c.Differing = append(c.Differing, Differing{Account: h.Account, Condition: held(h.Seen, h.Asked)})
 	}
 	return c
 }

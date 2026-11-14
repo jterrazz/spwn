@@ -4,14 +4,20 @@ import "time"
 
 const ReadSchema = "station.engine.read/v1"
 
+type ReadState string
+
 const (
-	EngineRunning      = "running"
-	EngineStopped      = "stopped"
-	EngineNotInstalled = "not-installed"
+	EngineRunning      ReadState = "running"
+	EngineStopped      ReadState = "stopped"
+	EngineNotInstalled ReadState = "not-installed"
 )
 
+func (ReadState) Enum() []string {
+	return []string{string(EngineRunning), string(EngineStopped), string(EngineNotInstalled)}
+}
+
 type Reading struct {
-	State string
+	State ReadState
 	// value: the version the engine runs, and the one this station is.
 	Version, Station string
 	Up               time.Duration
@@ -56,7 +62,7 @@ type EngineJSON struct {
 func (r Reading) JSON() ReadingJSON {
 	// invariant: SPEC §11.1: a version or an uptime the engine did not say
 	// is null, never "" or 0.
-	e := EngineJSON{State: r.State, VMs: r.VMs}
+	e := EngineJSON{State: string(r.State), VMs: r.VMs}
 	if r.Version != "" {
 		e.Version = &r.Version
 	}

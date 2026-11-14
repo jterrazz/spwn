@@ -575,6 +575,16 @@
           "type": "integer"
         },
         "State": {
+          "enum": [
+            "",
+            "running",
+            "stopped",
+            "suspended",
+            "stale",
+            "broken",
+            "creating",
+            "unknown"
+          ],
           "type": "string"
         },
         "Uptime": {

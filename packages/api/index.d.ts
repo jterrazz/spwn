@@ -1007,7 +1007,7 @@ export type EnginePagesIn = {
 
 export type EngineReading = {
     AwakeUntil: string | null;
-    State: string;
+    State: '' | 'running' | 'stopped' | 'not-installed';
     Station: string;
     Stopped: EngineStopMark;
     Up: number;
@@ -1263,11 +1263,13 @@ export type MachinefileChapterDrift = {
 export type MachinefileDiffering = {
     Account: string;
     Asked: string;
+    AskedTo?: 'local' | 'private' | 'public';
     Block: string;
     Condition: '' | 'absent' | 'changed' | 'extra' | 'not-managed' | 'outdated' | 'present' | 'unknown';
     Package: string;
     Port: number;
     Seen: string;
+    SeenTo?: 'local' | 'private' | 'public';
 };
 
 export type MachinefileDone = {
@@ -1872,7 +1874,7 @@ export type MachinesVM = {
     Restarts: MachinesRestarts;
     SSH: boolean;
     SizeGB: number;
-    State: string;
+    State: '' | 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
     Uptime: MachinesUptime;
     Version: string;
     Want: string;

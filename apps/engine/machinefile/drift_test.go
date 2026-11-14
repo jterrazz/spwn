@@ -126,14 +126,14 @@ func TestDriftReadsAVMsPortsAndAccountsAgainstItsFile(t *testing.T) {
 	if ports.Listed != 2 || ports.Matching != 1 || len(ports.Differing) != 1 {
 		t.Fatalf("ports: %+v", ports)
 	}
-	if got := ports.Differing[0]; got.Port != 3000 || got.Condition != machinefile.Changed || got.Seen != "public" || got.Asked != "private" {
+	if got := ports.Differing[0]; got.Port != 3000 || got.Condition != machinefile.Changed || got.SeenTo != catalog.AudiencePublic || got.AskedTo != catalog.AudiencePrivate {
 		t.Errorf("port 3000 reads %+v; want changed, public against private", got)
 	}
 	accounts := chapter(t, d, machinefile.ChapterAccounts)
 	if accounts.Listed != 2 || accounts.Matching != 1 || len(accounts.Differing) != 2 {
 		t.Fatalf("accounts: %+v", accounts)
 	}
-	if got := accounts.Differing[0]; got.Account != "forge" || got.Condition != machinefile.Absent || got.Seen != "" || got.Asked != "shared" {
+	if got := accounts.Differing[0]; got.Account != "forge" || got.Condition != machinefile.Absent {
 		t.Errorf("forge reads %+v; want absent, shared by the file", got)
 	}
 	if got := accounts.Differing[1]; got.Account != "notes" || got.Condition != machinefile.Extra {

@@ -849,6 +849,14 @@
         "Asked": {
           "type": "string"
         },
+        "AskedTo": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
+          "type": "string"
+        },
         "Block": {
           "type": "string"
         },
@@ -872,6 +880,14 @@
           "type": "integer"
         },
         "Seen": {
+          "type": "string"
+        },
+        "SeenTo": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
           "type": "string"
         }
       },

@@ -151,10 +151,10 @@ func TestAVMsDriftJudgesItsPackagesOnItAndItsSharesOnItsMac(t *testing.T) {
 		t.Errorf("machine %q", d.Machine)
 	}
 	p := chapterOf(t, d, machinefile.ChapterPorts)
-	if p.Listed != 3 || p.Matching != 1 || len(p.Differing) != 2 || p.Differing[0].Port != 3000 || p.Differing[0].Seen != "public" || p.Differing[0].Asked != "private" {
+	if p.Listed != 3 || p.Matching != 1 || len(p.Differing) != 2 || p.Differing[0].Port != 3000 || p.Differing[0].SeenTo != catalog.AudiencePublic || p.Differing[0].AskedTo != catalog.AudiencePrivate {
 		t.Errorf("ports %+v; want 3000 shared public where the file opens it to private", p)
 	}
-	if absent := p.Differing[1]; absent.Port != 3500 || absent.Condition != machinefile.Absent || absent.Seen != "" || absent.Asked != "private" {
+	if absent := p.Differing[1]; absent.Port != 3500 || absent.Condition != machinefile.Absent || absent.SeenTo != "" || absent.AskedTo != catalog.AudiencePrivate {
 		t.Errorf("ports differ as %+v; want 3500, listened inside the file's ports and not shared, absent", p.Differing)
 	}
 	a := chapterOf(t, d, machinefile.ChapterAccounts)

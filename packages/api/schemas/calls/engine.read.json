@@ -11,6 +11,12 @@
           ]
         },
         "State": {
+          "enum": [
+            "",
+            "running",
+            "stopped",
+            "not-installed"
+          ],
           "type": "string"
         },
         "Station": {

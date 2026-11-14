@@ -318,9 +318,13 @@ func accessRows(d machinefile.Drift) []page.Row {
 		for _, f := range c.Differing {
 			switch c.Chapter {
 			case machinefile.ChapterPorts:
-				rows = append(rows, accessRow("ports/"+strconv.Itoa(f.Port), "port "+strconv.Itoa(f.Port), f, held(f.Seen, "shared "+f.Seen, "not shared"), held(f.Asked, "its file opens it to "+f.Asked, "its file does not open it")))
+				rows = append(rows, accessRow("ports/"+strconv.Itoa(f.Port), "port "+strconv.Itoa(f.Port), f, held(string(f.SeenTo), "shared "+string(f.SeenTo), "not shared"), held(string(f.AskedTo), "its file opens it to "+string(f.AskedTo), "its file does not open it")))
 			case machinefile.ChapterAccounts:
-				rows = append(rows, accessRow("accounts/"+f.Account, f.Account, f, held(f.Seen, "copied", "not copied"), held(f.Asked, "its file shares it", "its file does not share it")))
+				seen, asked := "not copied", "its file shares it"
+				if f.Condition == machinefile.Extra {
+					seen, asked = "copied", "its file does not share it"
+				}
+				rows = append(rows, accessRow("accounts/"+f.Account, f.Account, f, seen, asked))
 			case machinefile.ChapterApps, machinefile.ChapterSettings:
 			}
 		}

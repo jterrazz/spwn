@@ -47,6 +47,10 @@ const (
 	UnknownState VMState = "unknown"
 )
 
+func (VMState) Enum() []string {
+	return []string{string(Running), string(Stopped), string(Suspended), string(Stale), string(Broken), string(Creating), string(UnknownState)}
+}
+
 type VM struct {
 	Name, Image, Version, Mac  string
 	Kind                       catalog.MachineKind
