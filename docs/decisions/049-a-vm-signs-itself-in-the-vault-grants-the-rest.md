@@ -23,18 +23,18 @@ The owner decided five things on 2026-11-14.
 1. **A VM signs itself in by default.** A per-tool detector says whether a machine is signed in; a login script runs the tool's own OAuth or device-code flow inside the VM and relays its link and code to the window. A grant covers only what a VM cannot do itself.
 2. **Station's vault is the only owner of the Claude token and of every granted secret.** The dependency on the studio CLI's credential store ends.
 3. **There is one vault per Mac, and no sync.** A lost vault is made again, not recovered.
-4. **An agent gets only expiring tokens, at most 7 days, and Touch ID is asked for each grant**, whoever asks: the window, the menu bar or the CLI.
+4. **An agent gets only expiring tokens, at most 7 days, and Touch ID is asked for each grant**, whoever asks: the window, the menu bar or the CLI. The expiry half is superseded on 2026-11-14 ("Amended", below); Touch ID per grant stands.
 5. **The `session:*` browser sessions go**, provided `gh` signs in directly. The probe saw its login print a one-time code and wait for it; a completed login is still open, below.
 
-Three concepts replace the three tiers: a **sign-in** (a tool's login on a machine), a **vault entry** (one secret on the owner's Mac) and a **grant** (an entry given to a machine or an agent until a time). A machine is, per tool, signed in, granted or signed out.
+Three concepts replace the three tiers: a **sign-in** (a tool's login on a machine), a **vault entry** (one secret on the owner's Mac) and a **grant** (an entry given to a machine or an agent, until it is removed). A machine is, per tool, signed in, granted or signed out.
 
 The window owner's review of the same day is binding on the wire's words, and the calls' shapes are the owner of the rest (`apps/engine/remote/api/calls.json`, once the shapes land).
 
 - **`Exchange`, never `Handle`.** A login's steps, `accounts.open` and `accounts.answer` carry an `Exchange`: an opaque id of the login exchange, never a URL. The window holds no URL; the engine of the VM's own Mac opens the link, from an allowlist of hosts.
 - **A row never offers what the engine would refuse.** `accounts.list` answers `Action: none` with the engine's own line (`Sign in from mac-mini`) for a VM of another Mac, for a server and for a stopped machine. The refusals stay as guards beneath it.
 - **`accounts.logout` exists**, and `Action` gains `sign-out`. The engine words the confirmation: the token stays valid at its provider.
-- **`Field` on a refusal.** The declared refusals of `vault.add` and `grants.add` name the input at fault in `Field`: `label`, `value` or `term`.
-- **A step carries the engine's sentence** for each kind of step and for an expiry, and `Now` beside `Expires`; on success the sheet shows who signed in.
+- **`Field` on a refusal.** The declared refusals of `vault.add` and `grants.add` name the input at fault in `Field`: `label` or `value`.
+- **A step carries the engine's status line** for its program, and `Now` beside `Expires`; a code that expires is the `login.expired` refusal alone; on success the sheet shows who signed in.
 - **A login for a VM of another Mac is refused in v1.** The Mac that owns the VM does it.
 - **A sign-in runs in the engine of the machine's own Mac, which attaches to the VM**, because a VM-targeted call is a one-shot guest-exec whose frames arrive at its exit: `accounts.login` and `accounts.logout` are in-engine calls that name the VM in `Machine`.
 - **One Passwords page shows this Mac's vault**, with no Mac picker.
@@ -56,12 +56,21 @@ Still open, and decided by none of this record:
 - **The Tauri secure prompt.** No plugin draws a native secure text field; a native alert from Rust or a small helper process are untested routes, and the webview input above is the fallback.
 - **The Keychain access-control route**, and **a real login completed** for each tool, which need the owner's browser.
 
+## Amended
+
+On 2026-11-14 the owner decided: "simplifions: aucune logique d'expiration de timing, on laisse le compte actif tout le teps". It supersedes decision 4's expiring tokens, 7 days at most.
+
+- **No grant expires**, for a machine or an agent. A grant stays until `grants.remove`, the removal of its password or the deletion of its VM. `grants.add` has no `For`, a grant has no `Until` and no `ending` state (it is `active` or `failing`), and the refusal `grant.term-out-of-bounds` and the `term` field are gone.
+- **The expiry job no longer removes grants.** It only retries a removal a machine could not receive.
+- **Kept:** Touch ID at each grant, a device code's own `Expires` and the `login.expired` refusal.
+- **A grant's reach is the owner's to narrow**, by choosing a fine-grained token and revoking it at its provider.
+
 ## Consequences
 
 - **Deleted, in the lots that build this:** `accounts.share` and `accounts.take-back` with their nine codes, the settings `claude-token` and `github-login`, `share_list` and `lend_list`, `shares.json`, the studio CLI adapter, `secrets lend` and `recall`, and the share scopes of the catalog. `engine.accounts` stays, reshaped. There is no alias and no reader for what goes (the owner's rule of 2026-11-12: no legacy).
 - **Station's Keychain is the one store.** It holds the vault, and the studio CLI's store is read by station no more.
 - **Not built.** This record changes no code. `docs/reference/accounts.md` describes the target; until the lots land, the code still has the tiers and the share calls. Other pages that name the share list, `claude-token` or the studio CLI's store (Preferences, Settings, Commands, Machinefiles, API, Architecture) change with the lot that deletes what they describe.
-- **A revocation is a cleanup, never a guarantee.** At a grant's end, or at `grants.remove`, station runs the tool's own Remove inside the VM, and an env-file tool leaves new shells only. A token stays valid at its provider; only a short-lived token truly ends.
-- **An agent's grant is the riskiest.** An agent, or a prompt injected into it, can send a token it reads anywhere, and [ADR-048](048-the-engine-withholds-a-secret-before-any-answer.md) screens station's answers, not an agent's traffic. Hence an expiring token for an agent (1 minute to 7 days, never until removed), only an entry marked agent-grantable, and Touch ID at each grant.
+- **A revocation is a cleanup, never a guarantee.** At `grants.remove`, station runs the tool's own Remove inside the VM, and an env-file tool leaves new shells only. A token stays valid at its provider; only a short-lived token truly ends.
+- **An agent's grant is the riskiest.** An agent, or a prompt injected into it, can send a token it reads anywhere, and [ADR-048](048-the-engine-withholds-a-secret-before-any-answer.md) screens station's answers, not an agent's traffic. Hence only an entry marked agent-grantable, a fine-grained token, and Touch ID at each grant.
 - **The Machinefile's `accounts.share` and `accounts.keep` become `grants` and `signins`**; which tool's login and injection is the catalog's data (`apps/engine/catalog/accounts.go`), which tools a machine names is the Machinefile's.
 - **The vault is lost with its Mac.** The cost of no sync is accepted; every entry is a token that can be minted again.

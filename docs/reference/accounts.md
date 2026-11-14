@@ -1,6 +1,6 @@
 # Accounts
 
-`station accounts` is who is signed in on a machine, and what the vault granted it: names and scopes, never a token. A VM signs itself in by default; a grant, a secret of the Mac's vault given for a time, covers only what a VM cannot do itself. The decision is [the accounts ADR](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md).
+`station accounts` is who is signed in on a machine, and what the vault granted it: names and scopes, never a token. A VM signs itself in by default; a grant, a secret of the Mac's vault given until you remove it, covers only what a VM cannot do itself. The decision is [the accounts ADR](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md).
 
 | Section          | Answers                                                              |
 | ---------------- | -------------------------------------------------------------------- |
@@ -16,15 +16,15 @@
 
 ## What is built
 
-This page is the target. Reading who is signed in, the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine with their expiry, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone; an agent is no grant target yet, so a grant to one is refused `grant.unknown-agent` and the sheet lists none. Everything else here is not: the Passwords page and the Machinefile's `signins` and `grants`. Until those land, the code still has the tiers and `accounts share`, which the ADR deletes; [its consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
+This page is the target. Reading who is signed in, the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone; an agent is no grant target yet, so a grant to one is refused `grant.unknown-agent` and the sheet lists none. Everything else here is not: the Passwords page and the Machinefile's `signins` and `grants`. Until those land, the code still has the tiers and `accounts share`, which the ADR deletes; [its consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
 
 ## Three concepts
 
 - **Sign-in**: a program's login on one machine, done by the program itself. The catalog owns how each program is read, logged in and logged out (`apps/engine/catalog/accounts.go`); a Machinefile names only which programs a machine signs in to.
 - **Vault entry**: one secret on the owner's Mac, with a label, the program it is for, what kind it is and who it signs in as.
-- **Grant**: an entry given to a machine or an agent until a time.
+- **Grant**: an entry given to a machine or an agent, until it is removed.
 
-Per program, a machine is **signed in** (`How: own`), **granted** (`How: granted`, with its `Until`) or **signed out**. A machine's own sign-in is never a grant: a grant to a VM already signed in is refused.
+Per program, a machine is **signed in** (`How: own`), **granted** (`How: granted`, with `Entry` and `EntryLabel` naming the password) or **signed out**. A machine's own sign-in is never a grant: a grant to a VM already signed in is refused.
 
 A row offers only an action the engine would accept: sign in, sign in again, remove, sign out, or none. For a VM of another Mac, a server or a stopped machine the action is none, and the row carries the engine's line (`Sign in from mac-mini`).
 
@@ -46,34 +46,33 @@ The vault is the Keychain entries of one Mac under station's own Keychain name, 
 
 A secret enters in one of two ways:
 
-- **From a sign-in** done on This Mac, whose token goes to the vault: the token the program's own command prints (`gh auth token`), read from its output and never shown. Claude's waits on the login relay; until then it is refused `vault.cannot-capture`.
+- **From a sign-in** done on This Mac, whose token goes to the vault: the token the program's own command prints (`gh auth token`), read from its output and never shown. Only `gh` has such a command; any other program is refused `vault.cannot-capture`, and `vault.list` answers in `Programs` which programs offer this, so a sheet never learns it from a refusal.
 - **Typed**, as a value. It travels as a write-only value, never in an argument list ([ADR-009](../decisions/009-one-bootstrap-verb-and-no-values-in-argv.md)); a native secure prompt asks for it where one can be drawn, and the window's password input is the last fallback, never reaching state, a log or a recording. Whether a native prompt can be drawn is open ([ADR](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).
 
 Each grant asks for Touch ID first, the engine's own `LAContext` with station's reason, from the window, the menu bar or the CLI, after the checks and before the Keychain is read. Removing an entry ends the grants made from it, after a confirmation that names them.
 
 ## Grants
 
-A grant gives one entry to one machine or one agent, for a term. Granting again starts the term over.
+A grant gives one entry to one machine or one agent. It has no end of its own: the owner decided on 2026-11-14 that no timing logic expires an account, so a grant stays until `grants.remove`, the removal of its password or the deletion of its VM. Granting again replaces it.
 
 - **It arrives** over stdin, never an argument: a login with the token for `gh`, a `~/.npmrc` line (mode 0600) for npm, an env file under `~/.config/station/grants/` that the shell block sources for Claude and wrangler.
-- **It leaves** at `grants.remove`, at its `Until`, or when the VM's guest connects after it, by the program's own Remove: a logout, or the deletion of the line or file that holds the secret. A program that reads an env file stops in new shells only, and the sentence of `grants.remove` says so.
-- **It is refused**, before anything is read, for a server, a VM of another Mac, a stopped VM, a VM already signed in, a term out of bounds, and a secret that cannot be delivered. The refusals of `vault.add` and `grants.add` carry `Field` (`label`, `value` or `term`) so a form marks the input at fault.
+- **It leaves** at `grants.remove`, or when the VM's guest connects after a removal it could not receive, by the program's own Remove: a logout, or the deletion of the line or file that holds the secret. A program that reads an env file stops in new shells only, and the sentence of `grants.remove` says so.
+- **It is refused**, before anything is read, for a server, a VM of another Mac, a stopped VM, a VM already signed in, and a secret that cannot be delivered. The refusals of `vault.add` and `grants.add` carry `Field` (`label` or `value`) so a form marks the input at fault.
 
 Deleting a VM ends its grants with its disk. It is not a revocation: see below.
 
 ## Agents
 
-An agent's grant reaches the environment of its own terminal, not the VM's shell, and ends when that terminal stops or at its `Until`. It is the narrowest:
+An agent's grant reaches the environment of its own terminal, not the VM's shell, and ends when that terminal stops or at `grants.remove`. It is the narrowest:
 
-- only an entry marked agent-grantable, a fine-grained, expiring token, never the owner's own GitHub login;
-- a term from 1 minute to 7 days, never until removed;
+- only an entry marked agent-grantable, a fine-grained token, never the owner's own GitHub login;
 - Touch ID at each grant.
 
 An agent, or a prompt injected into it, can send a token it reads anywhere; station screens its own answers, not an agent's traffic.
 
 ## Where to revoke
 
-A grant's end undoes it inside the VM; a token stays valid at its provider until revoked there. Use fine-grained, expiring tokens, and revoke at the provider.
+A grant's removal undoes it inside the VM; a token stays valid at its provider until revoked there. A grant never ends on its own, so keep fine-grained tokens and revoke at the provider.
 
 | Secret              | Revoke at                                                              |
 | ------------------- | ---------------------------------------------------------------------- |
