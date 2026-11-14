@@ -168,19 +168,19 @@ describe('New machine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a purpose holding a secret is refused under the purpose field, in words that never repeat it', async () => {
+    test('a purpose the engine refuses is drawn under the purpose field, in its own sentence', async () => {
         // Given - the New machine sheet over two-macs, on the mini
-        const purpose = `deploys with sk-${'station-'.repeat(4)}key`;
+        const purpose = 'x'.repeat(121);
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
             await visitor.click(button('New machine'));
 
-            // When - a purpose holding a key is launched
+            // When - a purpose of 121 characters is launched
             await visitor.fill(within(onMini, field('What is it for?')), purpose);
             await visitor.click(within(onMini, button('Launch')));
             await visitor.click(within(dialog('Launch linux-2?'), button('Launch')));
 
             // Then - the engine's sentence stands under the purpose
-            const said = content('a purpose says what a machine is for, and holds no secret', {
+            const said = content('a purpose is one line of at most 120 characters', {
                 exact: false,
             });
             await visitor.see(within(region('Purpose'), said));

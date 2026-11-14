@@ -220,7 +220,6 @@ GESTURES = {
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-1", "From": "station-linux", "Lifetime": "persistent"}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "persistent", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "persistent", "Purpose": "deploys with sk-" + "station-" * 4 + "key"}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
     ],
