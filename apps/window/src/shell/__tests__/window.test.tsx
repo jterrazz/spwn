@@ -100,6 +100,51 @@ describe('Window', () => {
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-mini.aria.yaml'));
     });
 
+    test("a far Mac's overview the engine finds unreachable is the page's refusal, in the engine's sentence", async () => {
+        // Given - mini-offline, whose mini's overview.read answers remote.unreachable
+        const recording = recordingFor('mini-offline');
+        const unreachable: Recording = {
+            ...recording,
+            exchanges: [
+                ...recording.exchanges,
+                {
+                    answers: [
+                        {
+                            error: {
+                                code: 'remote.unreachable',
+                                message: 'mac-mini does not answer',
+                                subject: 'jterrazz-mac-mini',
+                                type: 'unreachable',
+                            },
+                            v: 2,
+                        },
+                    ],
+                    request: {
+                        in: {},
+                        target: { name: 'jterrazz-mac-mini' },
+                        watch: 'overview.read',
+                    },
+                },
+            ],
+        };
+        const client = new Client(replayTransport(unreachable));
+
+        // When - the mini is opened
+        const result = await component.render(
+            <EngineProvider client={client}>
+                <Window initial={HOME} pages={PAGES} />
+            </EngineProvider>,
+            async (visitor) => {
+                await visitor.click(within(sidebar, button('jterrazz-mac-mini not seen')));
+
+                // Then - its Overview stands on the engine's refusal, worded by its type
+                await visitor.see(heading('mac-mini does not answer.'));
+                await visitor.see(content('Unreachable', { exact: false }));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test('no engine listening is a state of the window, not a crash', async () => {
         // Given - a transport whose socket answers nothing
         const client = new Client(
