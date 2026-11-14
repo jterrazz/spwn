@@ -82,6 +82,9 @@
         "progress": {
           "type": "integer"
         },
+        "sentence": {
+          "type": "string"
+        },
         "step": {
           "enum": [
             "building",
@@ -100,6 +103,7 @@
         "at",
         "position",
         "progress",
+        "sentence",
         "step",
         "steps"
       ],

@@ -1487,6 +1487,7 @@ export type MachinesBirth = {
     detail?: string;
     position: number;
     progress: number;
+    sentence: string;
     step: 'building' | 'cloning' | 'booting' | 'address' | 'ssh';
     steps: number;
 };
@@ -3251,6 +3252,8 @@ export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
 export type MachinesVMState = 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
 
+export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting';
+
 export type StationWord = {
     Detail?: string;
     One?: string;
@@ -3285,4 +3288,5 @@ export type StationWords = {
     MachinesPreset: Record<MachinesPreset, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
     MachinesVMState: Record<MachinesVMState, StationWord>;
+    PageNoun: Record<PageNoun, StationWord>;
 };

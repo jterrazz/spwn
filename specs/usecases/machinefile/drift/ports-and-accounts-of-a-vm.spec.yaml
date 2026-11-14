@@ -3,12 +3,12 @@ env:
     - stories
     - engine
 runs:
-    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {machine: .Machine, chapters: [.Chapters[] | [.Chapter, .Listed, .Matching, .Verdict.Sentence]], access: [.Chapters[] | select(.Chapter == "ports" or .Chapter == "accounts") | .Differing[] | [.Port, .Account, .Condition, .Seen, .Asked]], verdict: .Verdict}'''
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {machine: .Machine, chapters: [.Chapters[] | [.Chapter, .Listed, .Matching, .Verdict.Sentence]], access: [.Chapters[] | select(.Chapter == "ports" or .Chapter == "accounts") | .Differing[] | [.Port, .Account, .Condition, .SeenTo, .AskedTo]], verdict: .Verdict}'''
       stdin: |
           {"v":2,"id":"1","call":"machinefile.drift","in":{"Machine":"linux-1"}}
       exit: 0
       stdout: |
-          {"machine":"linux-1","chapters":[["apps",4,1,"3 differences"],["settings",0,0,"Matches"],["ports",4,1,"3 differences"],["accounts",0,0,"2 differences"]],"access":[[3000,"","changed","public","private"],[4321,"","absent","","private"],[9229,"","absent","","private"],[0,"claude","extra","shared",""],[0,"github","extra","shared",""]],"verdict":{"Tone":"warn","Sentence":"8 differences from linux-dev."}}
+          {"machine":"linux-1","chapters":[["apps",4,1,"3 differences"],["settings",0,0,"Matches"],["ports",4,1,"3 differences"],["accounts",0,0,"2 differences"]],"access":[[3000,"","changed","public","private"],[4321,"","absent",null,"private"],[9229,"","absent",null,"private"],[0,"claude","extra",null,null],[0,"github","extra",null,null]],"verdict":{"Tone":"warn","Sentence":"8 differences from linux-dev."}}
     - command: 'drift --on linux-1'
       exit: 0
       stdout: |

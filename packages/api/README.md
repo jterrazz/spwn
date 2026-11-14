@@ -2,14 +2,14 @@
 
 The wire contract of `station.api/v2`, machine-readable: a JSON Schema per call and the TypeScript a client types its calls with, all written by `make generate` from station's Go types.
 
-| File                   | Holds                                                                                                                    |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `schemas/calls/*.json` | One schema per call or watch of `apps/engine/remote/api/calls.json`: its `in`, and the `out` of each answer              |
-| `schemas/frame.json`   | The frame every line is: a request (`hello`, `call`, `watch`) or an answer (`hello`, `progress`, `out`, `error`, `done`) |
-| `schemas/event.json`   | The `out` of the watches `page` and `engine.events`: their opening, then `page`, `sample`, `tick`, `notice`              |
-| `index.d.ts`           | Every schema as a TypeScript type, and `Calls`, the map from a call's name to its input and output                       |
+| File                   | Holds                                                                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `schemas/calls/*.json` | One schema per call or watch of `apps/engine/remote/api/calls.json`: its `in`, and the `out` of each answer                       |
+| `schemas/frame.json`   | The frame every line is: a request (`hello`, `call`, `watch`) or an answer (`hello`, `progress`, `out`, `error`, `done`)          |
+| `schemas/event.json`   | The `out` of the watches `page` and `engine.events`: their opening, then `page`, `sample`, `tick`, `notice`                       |
+| `index.d.ts`           | Every schema as a TypeScript type, and `Calls`, the map from a call's name to its input and output                                |
 | `words.json`           | The words a client draws for each value of a closed enum (word, detail, heading, nouns after a count, tone), typed `StationWords` |
-| `words.d.ts`           | The type of `words.json`, `StationWords`, which the `./words.json` export resolves to                                    |
+| `words.d.ts`           | The type of `words.json`, `StationWords`, which the `./words.json` export resolves to                                             |
 
 Nothing here is written by hand but this page and `package.json`: the generator is `apps/engine/cmd/generate/` (`api.go`, `schema.go`, `ts.go`, and `words.go`, the words table), and its drift test fails `make test` when a file and the Go types differ.
 

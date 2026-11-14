@@ -22,6 +22,6 @@ runs:
       stdout: |
           frames while open: 2
           ["1",null,true]
-          ["1",{"progress":20,"step":"building","position":1,"steps":5,"detail":"image 2 of 3","at":"{{iso8601}}"},null]
+          ["1",{"progress":20,"step":"building","position":1,"steps":5,"detail":"image 2 of 3","at":"{{iso8601}}","sentence":"Creating: image 1 of 5"},null]
           ["2",null,true]
-          ["2",{"progress":400,"step":"booting","position":2,"steps":4,"at":"{{iso8601}}"},null]
+          ["2",{"progress":400,"step":"booting","position":2,"steps":4,"at":"{{iso8601}}","sentence":"Creating: boot 2 of 4"},null]

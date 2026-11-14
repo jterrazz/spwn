@@ -119,9 +119,16 @@ func enumsOnTheWire(t *testing.T) map[string]bool {
 	return found
 }
 
+// value: the enums whose words are nouns a client says after a number it
+// holds, so no field of the wire carries them.
+func countedWithoutAField(name string) bool { return name == "PageNoun" }
+
 func TestEveryWordedEnumIsAClosedEnumOfTheWire(t *testing.T) {
 	onTheWire := enumsOnTheWire(t)
 	for _, w := range wordedEnums() {
+		if countedWithoutAField(wordsName(w.of)) {
+			continue
+		}
 		values := slices.Clone(w.of.Enum())
 		slices.Sort(values)
 		if !onTheWire[strings.Join(values, "\x00")] {

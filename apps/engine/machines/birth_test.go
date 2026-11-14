@@ -1,6 +1,7 @@
 package machines
 
 import (
+	"strconv"
 	"testing"
 	"time"
 )
@@ -14,6 +15,9 @@ func TestACreateMovesOnStepByStepToItsEnd(t *testing.T) {
 			t.Errorf("%q: progress %d after %d, %d of %d: each step moves the create on, short of done", step, b.Progress, last, b.Position, b.Steps)
 		}
 		last = b.Progress
+		if want := "Creating: " + step.Noun() + " " + strconv.Itoa(i+1) + " of 5"; b.Sentence != want {
+			t.Errorf("%q: sentence %q, want %q", step, b.Sentence, want)
+		}
 	}
 	for i, step := range []BirthStep{BornCloning, BornBooting, BornAddress, BornSSH} {
 		if b := BirthAt(step, false, at); b.Position != i+1 || b.Steps != 4 || !b.Known() {

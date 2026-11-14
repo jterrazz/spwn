@@ -19,6 +19,9 @@ type Birth struct {
 	Steps    int       `json:"steps"`
 	Detail   string    `json:"detail,omitempty"`
 	At       time.Time `json:"at"`
+	// value: the create's sentence a client shows as it stands: `Creating:
+	// image 1 of 5`, its step's noun and position after the VM's state.
+	Sentence string `json:"sentence"`
 }
 
 type BirthStep string
@@ -85,7 +88,9 @@ func BirthAt(step BirthStep, builds bool, at time.Time) *Birth {
 		steps++
 	}
 	progress := map[BirthStep]int{BornBuilding: 20, BornCloning: 50, BornBooting: 400, BornAddress: 600, BornSSH: 800}[step]
-	return &Birth{Progress: progress, Step: step, Position: positionOf(step, steps), Steps: steps, At: at.UTC().Truncate(time.Second)}
+	b := &Birth{Progress: progress, Step: step, Position: positionOf(step, steps), Steps: steps, At: at.UTC().Truncate(time.Second)}
+	b.Sentence = step.Word() + ": " + b.Doing()
+	return b
 }
 
 const HalfMade = "was left half made"

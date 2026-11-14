@@ -15,6 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
 
@@ -185,6 +186,17 @@ func wordedEnums() []worded {
 		}},
 		{section.ID(""), sectionWords()},
 		{refusalCode{}, refusalWords()},
+		{page.Noun(""), map[string]word{
+			string(page.NounMachine):       {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},
+			string(page.NounSkill):         {Word: "Skills", One: "skill", Other: "skills", Tone: verdict.Plain},
+			string(page.NounListener):      {Word: "Listeners", One: "listener", Other: "listeners", Tone: verdict.Plain},
+			string(page.NounQuietListener): {Word: "Short-lived listeners", One: "short-lived listener not listed", Other: "short-lived listeners not listed", Tone: verdict.Plain},
+			string(page.NounRestart):       {Word: "Restarts", One: "restart", Other: "restarts", Tone: verdict.Plain},
+			string(page.NounLine):          {Word: "Lines", One: "line", Other: "lines", Tone: verdict.Plain},
+			string(page.NounPackage):       {Word: "Packages", One: "package", Other: "packages", Tone: verdict.Plain},
+			string(page.NounApp):           {Word: "Apps", One: "app", Other: "apps", Tone: verdict.Plain},
+			string(page.NounSetting):       {Word: "Settings", One: "setting", Other: "settings", Tone: verdict.Plain},
+		}},
 		{catalog.OS(""), map[string]word{
 			string(catalog.OSMacOS):  plain("macOS"),
 			string(catalog.OSUbuntu): plain("Ubuntu"),

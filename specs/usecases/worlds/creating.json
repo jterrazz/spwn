@@ -53,7 +53,8 @@
                             "step": "booting",
                             "position": 2,
                             "steps": 4,
-                            "at": "2026-11-04T10:00:03Z"
+                            "at": "2026-11-04T10:00:03Z",
+                            "sentence": "Creating: boot 2 of 4"
                         }
                     },
                     "disk": true,
@@ -80,7 +81,8 @@
                             "position": 1,
                             "steps": 5,
                             "detail": "image 2 of 3",
-                            "at": "2026-11-04T10:00:04Z"
+                            "at": "2026-11-04T10:00:04Z",
+                            "sentence": "Creating: image 1 of 5"
                         }
                     },
                     "size": {

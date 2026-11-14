@@ -1157,5 +1157,61 @@
       "Word": "Unknown",
       "Tone": "plain"
     }
+  },
+  "PageNoun": {
+    "app": {
+      "Word": "Apps",
+      "One": "app",
+      "Other": "apps",
+      "Tone": "plain"
+    },
+    "line": {
+      "Word": "Lines",
+      "One": "line",
+      "Other": "lines",
+      "Tone": "plain"
+    },
+    "listener": {
+      "Word": "Listeners",
+      "One": "listener",
+      "Other": "listeners",
+      "Tone": "plain"
+    },
+    "machine": {
+      "Word": "Machines",
+      "One": "machine",
+      "Other": "machines",
+      "Tone": "plain"
+    },
+    "package": {
+      "Word": "Packages",
+      "One": "package",
+      "Other": "packages",
+      "Tone": "plain"
+    },
+    "quiet-listener": {
+      "Word": "Short-lived listeners",
+      "One": "short-lived listener not listed",
+      "Other": "short-lived listeners not listed",
+      "Tone": "plain"
+    },
+    "restart": {
+      "Word": "Restarts",
+      "One": "restart",
+      "Other": "restarts",
+      "Tone": "plain"
+    },
+    "setting": {
+      "Word": "Settings",
+      "One": "setting",
+      "Other": "settings",
+      "Tone": "plain"
+    },
+    "skill": {
+      "Word": "Skills",
+      "One": "skill",
+      "Other": "skills",
+      "Tone": "plain"
+    }
   }
 }
