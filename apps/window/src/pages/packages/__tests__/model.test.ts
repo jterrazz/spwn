@@ -55,16 +55,16 @@ describe('model', () => {
         ]);
     });
 
-    test('each shelf holds the lines of its kind, a skill told by its category', () => {
-        // Given - This Mac's drift over stories-file, its one setting, and gh filed as an agent skill
+    test('each shelf holds the lines of its kind, a skill told by its app kind', () => {
+        // Given - This Mac's drift over stories-file, its one setting, and gh of the app kind skill
         const layers = layersOf(
             answered('stories-file', { name: 'machinefile.drift', watch: false }).Plan,
         );
-        const categories = new Map([['gh', 'Agent skills' as const]]);
+        const kinds = new Map([['gh', 'skill' as const]]);
 
         // When - the lines are counted on each shelf, and the settings drawn
-        const counts = SHELVES.map((shelf) => countOn(layers, shelf, categories));
-        const settings = onShelf(layers, 'Settings', categories);
+        const counts = SHELVES.map((shelf) => countOn(layers, shelf, kinds));
+        const settings = onShelf(layers, 'Settings', kinds);
 
         // Then - five apps less the skill, one skill, one setting in the layer that sets it
         expect(counts).toStrictEqual([4, 1, 1]);

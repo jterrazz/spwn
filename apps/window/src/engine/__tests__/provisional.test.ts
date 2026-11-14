@@ -11,7 +11,6 @@ import {
     freesWhole,
     holdsRebuildable,
     isPortShared,
-    isSkill,
     machineKindOf,
     portsMacOf,
     shareEndOf,
@@ -179,17 +178,6 @@ describe('provisional', () => {
             { kind: 'ended' },
             { kind: 'unread' },
         ]);
-    });
-
-    test('a catalog entry is a skill when the catalog files it under Agent skills, and no other is', () => {
-        // Given - the category of a skill, of an app, and none
-        const categories = ['Agent skills', 'Git', ''] as const;
-
-        // When - each is asked whether it makes a skill
-        const skills = categories.map((category) => isSkill(category));
-
-        // Then - the skills' category alone
-        expect(skills).toStrictEqual([true, false, false]);
     });
 
     test("this Mac's ports are found by its name, or by the flag when ports.list names it otherwise", () => {

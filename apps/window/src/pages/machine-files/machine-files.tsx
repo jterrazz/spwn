@@ -19,7 +19,7 @@ import {
     Unanswered,
 } from '../kit/readings';
 import { LayerList } from '../packages/layers';
-import { categoriesOf, countOn, layersOf, onShelf } from '../packages/model';
+import { countOn, kindsOf, layersOf, onShelf } from '../packages/model';
 import { Page } from '../page';
 import { catalogRouteOf, CHAPTERS, descriptionsOf, extendedBy, factsOf, filesOf } from './model';
 import type { Chapter, Extended } from './model';
@@ -34,7 +34,7 @@ function Chapters({ plan, file, go }: { plan: MachinefilePlan; file: string; go:
     const [chapter, setChapter] = useState<Chapter>('Apps');
     const apps = useWatch('apps.list', {});
     const reports = apps.kind === 'read' ? (apps.out ?? []) : [];
-    const categories = categoriesOf(reports);
+    const kinds = kindsOf(reports);
     const layers = layersOf(plan);
     return (
         <Panel
@@ -43,7 +43,7 @@ function Chapters({ plan, file, go }: { plan: MachinefilePlan; file: string; go:
                     label="Chapter"
                     onChange={setChapter}
                     options={CHAPTERS.map((id) => ({
-                        count: id === 'Access' ? undefined : countOn(layers, id, categories),
+                        count: id === 'Access' ? undefined : countOn(layers, id, kinds),
                         id,
                         label: id,
                     }))}
@@ -58,7 +58,7 @@ function Chapters({ plan, file, go }: { plan: MachinefilePlan; file: string; go:
                 <Missing>The accounts it shares and the ports it opens</Missing>
             ) : (
                 <LayerList
-                    layers={onShelf(layers, chapter, categories)}
+                    layers={onShelf(layers, chapter, kinds)}
                     look={{
                         descriptions: descriptionsOf(reports),
                         file,

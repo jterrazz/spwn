@@ -98,9 +98,6 @@ export const APP_WHY_WORDS: Words<AppsReport['Why']> = {
     unmanaged: 'not managed',
 };
 
-// outside: apps.list marks no entry a skill (provisional.ts, isSkill), so no kind of the engine's names one.
-export const SKILL_KIND_NAME = 'agent skill';
-
 export const REVERSIBLE_WORD = 'Can be undone';
 
 export function newestOutWord(newest: string): string {

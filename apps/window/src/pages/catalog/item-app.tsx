@@ -2,10 +2,9 @@ import type { AppsReport } from '@jterrazz/station-api';
 
 import { Button, Facts, MissingMark, Panel, Row, StatePill, Value } from '../../design/index';
 import { detailOf, wordOf } from '../../engine/engine-words';
-import { isSkill } from '../../engine/provisional';
 import { appUpdate, kindChipWord } from '../../engine/shown';
 import { APP_STATE_TONES } from '../../engine/tones';
-import { APP_STATE_WORDS, SKILL_KIND_NAME } from '../../engine/words';
+import { APP_STATE_WORDS } from '../../engine/words';
 import { sentence } from '../../model/format';
 import { installLinesOf, usedBy } from './item-model';
 import { factOf, Installs, ItemChips, ItemHead, Rail, Two } from './item-parts';
@@ -129,10 +128,7 @@ function OnDisk({ report, go }: Pick<ItemProps, 'go'> & { report: AppsReport }) 
 }
 
 function kindName(report: AppsReport): string {
-    if (isSkill(report.App.Category)) {
-        return SKILL_KIND_NAME;
-    }
-    return wordOf('CatalogKind', report.App.Kind ?? 'app').Word;
+    return wordOf('CatalogAppKind', report.App.AppKind).Word;
 }
 
 export function AppItem({
