@@ -1,5 +1,7 @@
 import { useId } from 'react';
 
+import { Field } from './field';
+
 import styles from './form-field.module.css';
 
 export type FormFieldProps = {
@@ -10,6 +12,7 @@ export type FormFieldProps = {
     placeholder?: string;
     hint?: string;
     labelInside?: boolean;
+    look?: 'boxed' | 'plain';
 };
 
 export function FormField({
@@ -20,8 +23,39 @@ export function FormField({
     placeholder,
     hint,
     labelInside = false,
+    look = 'plain',
 }: FormFieldProps) {
     const id = useId();
+    const boxed = look === 'boxed' && !labelInside;
+    const input = (
+        <input
+            aria-label={labelInside ? label : undefined}
+            autoComplete="off"
+            className={styles.input}
+            id={id}
+            onChange={(event) => {
+                onChange(event.target.value);
+            }}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.nativeEvent.isComposing && onEnter) {
+                    event.preventDefault();
+                    onEnter();
+                }
+            }}
+            placeholder={labelInside ? label : placeholder}
+            spellCheck={false}
+            type="text"
+            value={value}
+        />
+    );
+    const hinted = (hint ?? '') === '' ? null : <span className={styles.hint}>{hint}</span>;
+    if (boxed) {
+        return (
+            <Field after={hinted} label={label} labelFor={id}>
+                {input}
+            </Field>
+        );
+    }
     return (
         <div className={styles.form}>
             {labelInside ? null : (
@@ -29,26 +63,8 @@ export function FormField({
                     {label}
                 </label>
             )}
-            <input
-                aria-label={labelInside ? label : undefined}
-                autoComplete="off"
-                className={styles.input}
-                id={id}
-                onChange={(event) => {
-                    onChange(event.target.value);
-                }}
-                onKeyDown={(event) => {
-                    if (event.key === 'Enter' && !event.nativeEvent.isComposing && onEnter) {
-                        event.preventDefault();
-                        onEnter();
-                    }
-                }}
-                placeholder={labelInside ? label : placeholder}
-                spellCheck={false}
-                type="text"
-                value={value}
-            />
-            {(hint ?? '') === '' ? null : <span className={styles.hint}>{hint}</span>}
+            {input}
+            {hinted}
         </div>
     );
 }

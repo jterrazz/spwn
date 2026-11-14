@@ -3,10 +3,6 @@
     flex-direction: column;
     gap: var(--space-6);
 }
-.label {
-    color: var(--t3);
-    font-size: var(--text-label);
-}
 .range {
     width: 100%;
     margin: 0;

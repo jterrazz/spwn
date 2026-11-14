@@ -20,7 +20,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import type { MachinesFit, MachinesPreset, MachinesRoomFor } from './machines-new';
+import type { MachinesFit, MachinesPreset } from './machines-new';
 import type { DiskCall, EngineState, MacState, NeedCall, VmState } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
@@ -103,13 +103,6 @@ export const PRESET_WORDS: Words<MachinesPreset> = {
     gate: 'gate',
     small: 'small',
     workspace: 'workspace',
-};
-
-export const ROOM_FOR_WORDS: Words<MachinesRoomFor> = {
-    gate: 'room for one more gate',
-    none: 'no room for another machine',
-    small: 'room for a small machine',
-    workspace: 'room for one more workspace',
 };
 
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;

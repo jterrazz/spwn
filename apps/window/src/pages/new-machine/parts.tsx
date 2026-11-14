@@ -1,34 +1,30 @@
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 
-import { capitalised, identityOf, MemoryPick, Missing, Picks, Switch } from '../../design/index';
+import {
+    capitalised,
+    Field,
+    identityOf,
+    MemoryPick,
+    Missing,
+    Picks,
+    Switch,
+} from '../../design/index';
 import type { MemoryHolder, Pick as Option } from '../../design/index';
 import { wordOf } from '../../engine/engine-words';
 import type { MachinesCallsNewMachine, MachinesCallsNewOn } from '../../engine/machines-new';
 import { FIT_ALLOWS } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { machineKindWord } from '../../engine/shown';
-import { FIT_WORDS, PRESET_WORDS, ROOM_FOR_WORDS } from '../../engine/words';
+import { FIT_WORDS, PRESET_WORDS } from '../../engine/words';
 import { bytes } from '../../model/format';
 import { machineNamesOf, macsOf } from '../../model/machines';
 import { useIdentityOf } from '../kit/identity';
-import { GB, gbOf } from './model';
+import { GB, gbOf, leavesFreeOf } from './model';
 import type { Draft, Kind } from './model';
 
 import styles from './new-machine.module.css';
 
 export type Change = (next: Partial<Draft>) => void;
-
-type FieldProps = { label: string; children: ReactNode; after?: ReactNode };
-
-export function Field({ label, children, after }: FieldProps) {
-    return (
-        <section aria-label={label} className={styles.field}>
-            <span className={styles.label}>{label}</span>
-            {children}
-            {after}
-        </section>
-    );
-}
 
 function onPick(on: MachinesCallsNewOn): Option<string> {
     const free = on.Room === null ? [] : [`${String(gbOf(on.Room.Capacity.Free))} GB free`];
@@ -143,18 +139,19 @@ export function Memory(props: MemoryProps) {
     ];
     const chosen = memory === undefined ? 0 : gbOf(memory);
     return (
-        <MemoryPick
-            chosen={chosen}
-            free={Math.max(0, gbOf(Capacity.Free) - chosen)}
-            holders={holders}
-            identity={identity}
-            line={ROOM_FOR_WORDS[on.Room.RoomFor]}
-            name={on.Mac}
-            title={memory === undefined ? 'Memory' : `Memory · ${String(chosen)} GB`}
-        >
-            <Range {...props} />
-            <Presets {...props} />
-        </MemoryPick>
+        <Field label="Memory">
+            <MemoryPick
+                chosen={chosen}
+                free={Math.max(0, gbOf(Capacity.Free) - chosen)}
+                holders={holders}
+                identity={identity}
+                line={leavesFreeOf(on, memory)}
+                name={on.Mac}
+            >
+                <Range {...props} />
+                <Presets {...props} />
+            </MemoryPick>
+        </Field>
     );
 }
 

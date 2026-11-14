@@ -22,7 +22,7 @@
     box-shadow: inset 0 0 0 1.5px var(--new);
 }
 .input::placeholder {
-    color: var(--t3);
+    color: var(--t4);
 }
 .hint {
     color: var(--t3);

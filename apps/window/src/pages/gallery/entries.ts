@@ -22,6 +22,8 @@ import { DotStrip } from '../../design/dot-strip';
 import { DOT_STRIP_STORIES } from '../../design/dot-strip.stories';
 import { Facts } from '../../design/facts';
 import { FACTS_STORIES } from '../../design/facts.stories';
+import { Field } from '../../design/field';
+import { FIELD_STORIES } from '../../design/field.stories';
 import { FormField } from '../../design/form-field';
 import { FORM_FIELD_STORIES } from '../../design/form-field.stories';
 import { Icon } from '../../design/icon';
@@ -119,6 +121,7 @@ export const ENTRIES: readonly Entry[] = [
         frame: 'block',
         stories: SEARCH_FIELD_STORIES,
     }),
+    entry('Field', 'Controls', { Component: Field, frame: 'block', stories: FIELD_STORIES }),
     entry('FormField', 'Controls', {
         Component: FormField,
         frame: 'block',

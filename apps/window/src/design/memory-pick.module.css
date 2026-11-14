@@ -13,10 +13,21 @@
     align-items: baseline;
     gap: var(--space-12);
 }
-.head b {
+.size {
+    font-size: var(--text-metric);
     font-weight: var(--weight-strong);
+    letter-spacing: -0.02em;
+    line-height: 1;
 }
-.head span {
+.unit {
+    margin-left: var(--space-4);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    letter-spacing: 0;
+    color: var(--t3);
+}
+.line {
+    margin-left: auto;
     color: var(--t3);
     font-size: var(--text-label);
 }

@@ -7,7 +7,6 @@ import styles from './memory-pick.module.css';
 
 export type MemoryPickProps = {
     name: string;
-    title: string;
     line: string;
     holders: readonly MemoryHolder[];
     chosen: number;
@@ -23,7 +22,6 @@ function keysOf(prefix: string, squares: number): readonly string[] {
 
 export function MemoryPick({
     name,
-    title,
     line,
     holders,
     chosen,
@@ -34,8 +32,13 @@ export function MemoryPick({
     return (
         <div className={styles.pick}>
             <div className={styles.head}>
-                <b>{title}</b>
-                <span>{line}</span>
+                {chosen > 0 ? (
+                    <b className={styles.size}>
+                        {String(chosen)}
+                        <small className={styles.unit}>GB</small>
+                    </b>
+                ) : null}
+                {line === '' ? null : <span className={styles.line}>{line}</span>}
             </div>
             <div
                 aria-label={`Memory of ${name}, one square per GB`}

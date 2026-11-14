@@ -133,6 +133,7 @@ function Purpose({ draft, change, refusal }: PurposeProps) {
         <section aria-label="Purpose" className={styles.field}>
             <FormField
                 label="What is it for?"
+                look="boxed"
                 onChange={(purpose) => {
                     change({ purpose });
                 }}
@@ -168,6 +169,7 @@ function Sheet(props: SheetProps) {
             <Purpose change={change} draft={draft} refusal={outcome('purpose')} />
             <FormField
                 label="Name"
+                look="boxed"
                 onChange={(typed) => {
                     change({ name: typed });
                 }}

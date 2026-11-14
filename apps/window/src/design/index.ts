@@ -10,6 +10,7 @@ export { CodeBlock } from './code-block';
 export { aDialogIsOpen, Dialog, Modal } from './dialog';
 export { DotStrip } from './dot-strip';
 export { Facts } from './facts';
+export { Field } from './field';
 export { FormField } from './form-field';
 export { IconButton } from './icon-button';
 export { IDENTITIES, type Identity, identityOf } from './identity';

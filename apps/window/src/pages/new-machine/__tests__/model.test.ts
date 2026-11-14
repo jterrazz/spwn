@@ -7,6 +7,7 @@ import {
     chosenOnOf,
     EMPTY_DRAFT,
     GB,
+    leavesFreeOf,
     memoryOf,
     serverInputOf,
     targetOfOn,
@@ -102,6 +103,51 @@ describe('model', () => {
         // Then - both are held to the 4 GB offered
         expect(wanted).toBe(4 * GB);
         expect(server).toBe(4 * GB);
+    });
+
+    test('the room left is the Mac free less the memory chosen, drawn only when it is not below zero', () => {
+        // Given - a Mac with 10 GB free, this Mac or another
+        const mini = onOf(answerOn(MINI));
+        const room = mini.Room;
+        if (room === null) {
+            throw new Error('the mini measures its room');
+        }
+        const withFree = (free: number, ThisMac: boolean) => ({
+            ...mini,
+            Room: { ...room, Capacity: { ...room.Capacity, Free: free * GB } },
+            ThisMac,
+        });
+
+        // When - 8 GB and 10 GB are chosen
+        const here = leavesFreeOf(withFree(10, true), 8 * GB);
+        const there = leavesFreeOf(withFree(10, false), 8 * GB);
+        const exact = leavesFreeOf(withFree(10, true), 10 * GB);
+
+        // Then - the rest is told by Mac
+        expect(here).toBe('leaves 2 GB free on this Mac');
+        expect(there).toBe(`leaves 2 GB free on ${mini.Mac}`);
+        expect(exact).toBe('leaves 0 GB free on this Mac');
+    });
+
+    test('no room left is drawn when the size is over the free, unchosen, or the Mac measures no room', () => {
+        // Given - a Mac with 10 GB free
+        const mini = onOf(answerOn(MINI));
+        const room = mini.Room;
+        if (room === null) {
+            throw new Error('the mini measures its room');
+        }
+        const tenFree = {
+            ...mini,
+            Room: { ...room, Capacity: { ...room.Capacity, Free: 10 * GB } },
+        };
+
+        // When - 12 GB is chosen, then nothing, then on a Mac with no room measured
+        const over = leavesFreeOf(tenFree, 12 * GB);
+        const unchosen = leavesFreeOf(tenFree, undefined);
+        const unmeasured = leavesFreeOf({ ...mini, Room: null }, 8 * GB);
+
+        // Then - nothing is drawn, never a negative
+        expect([over, unchosen, unmeasured]).toStrictEqual(['', '', '']);
     });
 
     test('this Mac is asked with no target, another Mac by its name', () => {

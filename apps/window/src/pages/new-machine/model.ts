@@ -74,6 +74,14 @@ export function memoryOf(
     return on.MaxMemory >= answer.MinMemory ? on.MaxMemory : undefined;
 }
 
+export function leavesFreeOf(on: MachinesCallsNewOn, memory: number | undefined): string {
+    if (on.Room === null || memory === undefined) {
+        return '';
+    }
+    const left = gbOf(on.Room.Capacity.Free) - gbOf(memory);
+    return left < 0 ? '' : `leaves ${String(left)} GB free on ${on.ThisMac ? 'this Mac' : on.Mac}`;
+}
+
 export function nameOf(answer: MachinesCallsNewMachine, draft: Draft): string {
     return (draft.name ?? answer.Name).trim();
 }
