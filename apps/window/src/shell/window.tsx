@@ -60,6 +60,7 @@ export type Pages = {
     NewMachine: ComponentType<{ go: Go; onClose: () => void; opening: Opening }>;
     AddMac: ComponentType<{ go: Go; onClose: () => void }>;
     AddPassword: ComponentType<{ onClose: () => void }>;
+    ItemName: ComponentType<{ page: PlainPage; item: string }>;
     routeOfNeed: (need: OverviewNeed) => Route;
 };
 
@@ -85,7 +86,9 @@ type Sheet =
     | { kind: 'new-machine'; opening: Opening }
     | { kind: 'none' };
 
-function crumbsOf(route: Route, found: Found | undefined, go: Go): Crumb[] {
+type Crumbed = { route: Route; found: Found | undefined; go: Go; ItemName: Pages['ItemName'] };
+
+function crumbsOf({ route, found, go, ItemName }: Crumbed): Crumb[] {
     if (route.page !== 'machine') {
         const { page, item } = route;
         if (item === undefined || !OPENS_AN_ITEM.has(page)) {
@@ -97,7 +100,7 @@ function crumbsOf(route: Route, found: Found | undefined, go: Go): Crumb[] {
                 go({ page });
             },
         };
-        return [shelf, { label: item }];
+        return [shelf, { label: item, shown: <ItemName item={item} page={page} /> }];
     }
     if (found?.vm) {
         const mac = found.mac.Name;
@@ -252,7 +255,7 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                         })}
                         canGoBack={canGoBack}
                         canGoForward={canGoForward}
-                        crumbs={crumbsOf(route, found, go)}
+                        crumbs={crumbsOf({ found, go, ItemName: pages.ItemName, route })}
                         onBack={back}
                         onForward={forward}
                         onToggleSidebar={toggleSidebar}

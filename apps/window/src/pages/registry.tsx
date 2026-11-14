@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 
+import type { PlainPage } from '../shell/route';
 import { TITLES } from '../shell/window';
 import type { PageProps, Pages } from '../shell/window';
 import { AddMac } from './add-mac/add-mac';
@@ -14,6 +15,7 @@ import { MachineTab } from './machine/machine';
 import { routeOfNeed } from './needs/needs';
 import { NewMachine } from './new-machine/new-machine';
 import { AddPasswordSheet } from './passwords/add-sheet';
+import { PasswordName } from './passwords/name';
 import { PasswordsPage } from './passwords/passwords';
 import { PlaceholderPage } from './placeholder';
 import { StoragePage } from './storage/storage';
@@ -46,6 +48,10 @@ function Files({
     newMachine: PageProps['newMachine'];
 }) {
     return <MachineFilesPage go={go} key={file ?? ''} onNewMachine={newMachine} opened={file} />;
+}
+
+function ItemName({ page, item }: { page: PlainPage; item: string }) {
+    return page === 'passwords' ? <PasswordName id={item} /> : item;
 }
 
 function Head({ route, found, go, newMachine }: PageProps) {
@@ -118,6 +124,7 @@ export const PAGES: Pages = {
     Body,
     Confirm: GestureConfirm,
     Head,
+    ItemName,
     NewMachine,
     routeOfNeed,
 };

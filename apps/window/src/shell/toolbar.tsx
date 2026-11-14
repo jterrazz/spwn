@@ -1,8 +1,11 @@
+import type { ReactNode } from 'react';
+
 import { Button, IconButton } from '../design/index';
 
 import styles from './toolbar.module.css';
 
-export type Crumb = { label: string; open?: (() => void) | undefined };
+// value: `shown` draws the last crumb when a page names its item from the engine's answer.
+export type Crumb = { label: string; shown?: ReactNode; open?: (() => void) | undefined };
 
 // value: the one button at the toolbar's right: Home's New machine, the Passwords page's Add a password.
 export type ToolbarAction = { label: string; onClick: () => void; leads: boolean };
@@ -58,7 +61,7 @@ export function Toolbar({
                         <span aria-hidden="true"> › </span>
                     </span>
                 ))}
-                <b>{last?.label}</b>
+                <b>{last?.shown ?? last?.label}</b>
             </div>
             {action === undefined ? null : (
                 <Button onClick={action.onClick} variant={action.leads ? 'primary' : 'plain'}>
