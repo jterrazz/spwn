@@ -149,6 +149,9 @@
         },
         "Name": {
           "type": "string"
+        },
+        "UsedBytes": {
+          "type": "integer"
         }
       },
       "required": [

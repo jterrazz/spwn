@@ -483,6 +483,33 @@
       ],
       "type": "object"
     },
+    "machines.Hold": {
+      "additionalProperties": false,
+      "properties": {
+        "By": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "always-on",
+            "held",
+            "idle",
+            "free",
+            "yours",
+            "not-seen"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "State"
+      ],
+      "type": "object"
+    },
     "machines.Incident": {
       "additionalProperties": false,
       "properties": {
@@ -556,6 +583,9 @@
         },
         "ThisMac": {
           "type": "boolean"
+        },
+        "Unseen": {
+          "$ref": "#/$defs/core.verdict.Verdict"
         },
         "User": {
           "type": "string"
@@ -733,6 +763,54 @@
       ],
       "type": "object"
     },
+    "machines.Sections": {
+      "additionalProperties": false,
+      "properties": {
+        "Accounts": {
+          "type": "boolean"
+        },
+        "Activity": {
+          "type": "boolean"
+        },
+        "Apps": {
+          "type": "boolean"
+        },
+        "Awake": {
+          "type": "boolean"
+        },
+        "Background": {
+          "type": "boolean"
+        },
+        "Disk": {
+          "type": "boolean"
+        },
+        "Overview": {
+          "type": "boolean"
+        },
+        "Ports": {
+          "type": "boolean"
+        },
+        "SSH": {
+          "type": "boolean"
+        },
+        "Settings": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Accounts",
+        "Activity",
+        "Apps",
+        "Awake",
+        "Background",
+        "Disk",
+        "Overview",
+        "Ports",
+        "SSH",
+        "Settings"
+      ],
+      "type": "object"
+    },
     "machines.Share": {
       "additionalProperties": false,
       "properties": {
@@ -741,6 +819,9 @@
         },
         "Name": {
           "type": "string"
+        },
+        "UsedBytes": {
+          "type": "integer"
         }
       },
       "required": [
@@ -850,6 +931,9 @@
         "Health": {
           "$ref": "#/$defs/core.verdict.Verdict"
         },
+        "Hold": {
+          "$ref": "#/$defs/machines.Hold"
+        },
         "IP": {
           "type": "string"
         },
@@ -928,6 +1012,9 @@
         "SSH": {
           "type": "boolean"
         },
+        "Sections": {
+          "$ref": "#/$defs/machines.Sections"
+        },
         "SizeGB": {
           "type": "integer"
         },
@@ -945,6 +1032,9 @@
         },
         "Uptime": {
           "$ref": "#/$defs/machines.Uptime"
+        },
+        "UsedBytes": {
+          "type": "integer"
         },
         "Version": {
           "type": "string"

@@ -43,6 +43,9 @@ type Options struct {
 	Asleep func(ctx context.Context) bool
 	// value: this Mac's address on your LAN; empty when it cannot say.
 	LAN func(ctx context.Context) string
+	// value: the memory each VM's process holds on this Mac now, in bytes,
+	// by VM; nil measures none.
+	Uses func(ctx context.Context) map[string]int64
 	// value: its servers' uptime records; nil keeps none.
 	Uptime contract.UptimeStore
 	// value: what sends a Wake-on-LAN packet from this Mac; nil sends none.

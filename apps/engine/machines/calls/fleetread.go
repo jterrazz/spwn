@@ -29,9 +29,16 @@ func (s *Machinist) AllMachinesAsItFills(ctx context.Context, thisMacOnly bool, 
 	if err != nil {
 		return model.AllMachines{}, err
 	}
+	var uses map[string]int64
+	if s.o.Uses != nil {
+		uses = s.o.Uses(ctx)
+	}
 	for i, vm := range vms {
 		if _, own := nodes[vm.Name]; own && vm.Lifetime == model.AlwaysOn {
 			vms[i].Device = vm.Name
+		}
+		if vm.State == model.Running {
+			vms[i].UsedBytes = uses[vm.Name]
 		}
 	}
 	user := cfg.Macs[cfg.ThisMachine].User

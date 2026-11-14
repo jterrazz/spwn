@@ -152,7 +152,7 @@ func listVMRow(mac string, vm model.VM) page.Row {
 		row.Mark, row.Reason, state = page.Broken, page.Failing, page.List(page.Text("In a loop"), lifetime)
 		detail = page.List(page.Text(vm.Detail), page.Text("stopped"))
 	case model.UnknownState:
-		row.Mark, row.Reason, state = page.NotKnown, page.Unreachable, page.List(page.Text("Unknown"), lifetime)
+		row.Mark, row.Reason, state = page.NotKnown, page.Unreachable, page.List(page.Text(model.UnknownState.Word()), lifetime)
 	case model.Creating:
 		row.Mark, state = page.Unjudged, page.List(page.Text("Creating"), lifetime)
 		if vm.Birth != nil {

@@ -158,6 +158,14 @@ func wordedEnums() []worded {
 			string(machines.Creating):     toned(verdict.New, machines.Creating.Word()),
 			string(machines.UnknownState): plain(machines.UnknownState.Word()),
 		}},
+		{machines.HoldState(""), map[string]word{
+			string(machines.HoldAlwaysOn): plain("Always on"),
+			string(machines.HoldHeld):     toned(verdict.Warn, "Held"),
+			string(machines.HoldIdle):     plain("Idle"),
+			string(machines.HoldFree):     toned(verdict.OK, "Safe to delete"),
+			string(machines.HoldYours):    plain("Yours"),
+			string(machines.HoldNotSeen):  plain(machines.UnknownState.Word()),
+		}},
 		{machines.CheckState(""), map[string]word{
 			string(machines.CheckFailing): toned(verdict.Bad, "fails"),
 			string(machines.CheckPassing): toned(verdict.OK, "passes"),
