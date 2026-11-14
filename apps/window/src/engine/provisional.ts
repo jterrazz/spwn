@@ -178,8 +178,7 @@ export function freesWhole(group: DiskRow['Group']): boolean {
     return group === 'can-rebuild';
 }
 
-// outside: images.list gives an image its Newest and the machines made from it, and no field saying it can be
-// outside: deleted: the newest one, and one a machine uses, are not offered, until each image carries that answer.
+// outside: images.list carries no "can be deleted": not the newest, and none a machine uses, until each image does.
 export function isDeletable(image: Pick<ImagesReport, 'Newest' | 'VMs'>): boolean {
     return !image.Newest && (image.VMs ?? []).length === 0;
 }
