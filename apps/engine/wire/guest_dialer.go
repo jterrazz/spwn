@@ -52,12 +52,16 @@ func (g engineGuest) Forward(ctx context.Context, ip string, port int) (process.
 }
 
 // invariant: the session runs until its command, the connection or ctx
-// ends; its output then ends too, so the engine's reader stops.
-func (g engineGuest) Attach(ctx context.Context, line string) (process.Stream, error) {
+// ends; its output then ends too, so the engine's reader stops, and Wait
+// answers the command's exit code.
+func (g engineGuest) Attach(ctx context.Context, line string) (process.Session, error) {
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
+	s := &session{out: outR, in: inW, ended: make(chan struct{})}
 	go func() {
-		_, _ = g.Guest.Exec(ctx, contract.GuestCommand{Line: line, Stdin: inR, Stdout: outW, Stderr: io.Discard})
+		res, err := g.Guest.Exec(ctx, contract.GuestCommand{Line: line, Stdin: inR, Stdout: outW, Stderr: io.Discard})
+		s.code, s.err = res.Code, err
+		close(s.ended)
 		_ = outW.Close()
 		_ = inR.Close()
 	}()
@@ -65,20 +69,29 @@ func (g engineGuest) Attach(ctx context.Context, line string) (process.Stream, e
 		select {
 		case <-ctx.Done():
 		case <-g.Done():
+		case <-s.ended:
 		}
 		_ = outW.Close()
 	}()
-	return session{out: outR, in: inW}, nil
+	return s, nil
 }
 
 type session struct {
-	out *io.PipeReader
-	in  *io.PipeWriter
+	out   *io.PipeReader
+	in    *io.PipeWriter
+	ended chan struct{}
+	code  int
+	err   error
 }
 
-func (s session) Read(p []byte) (int, error)  { return s.out.Read(p) }
-func (s session) Write(p []byte) (int, error) { return s.in.Write(p) }
-func (s session) Close() error                { return s.in.Close() }
+func (s *session) Read(p []byte) (int, error)  { return s.out.Read(p) }
+func (s *session) Write(p []byte) (int, error) { return s.in.Write(p) }
+func (s *session) Close() error                { return s.in.Close() }
+
+func (s *session) Wait() (int, error) {
+	<-s.ended
+	return s.code, s.err
+}
 
 type buildGuests struct{ dialer contract.GuestDialer }
 

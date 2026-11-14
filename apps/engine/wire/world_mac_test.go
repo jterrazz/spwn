@@ -455,7 +455,7 @@ func (greetingGuest) Exec(context.Context, string, string) (engine.GuestRan, err
 	return engine.GuestRan{}, nil
 }
 
-func (g greetingGuest) Attach(ctx context.Context, _ string) (process.Stream, error) {
+func (g greetingGuest) Attach(ctx context.Context, _ string) (process.Session, error) {
 	out, said := io.Pipe()
 	go func() {
 		if g.says {
@@ -476,6 +476,7 @@ func (g greetingGuest) Done() <-chan struct{} { return g.done }
 type guestSession struct{ *io.PipeReader }
 
 func (guestSession) Write(p []byte) (int, error) { return len(p), nil }
+func (guestSession) Wait() (int, error)          { return 0, nil }
 
 // value: the real time a settling may wait on its guests' greetings, in all.
 const greetWait = 2 * time.Second
