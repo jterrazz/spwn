@@ -3,7 +3,7 @@ import type { PortsPort, Target } from '@jterrazz/station-api';
 import { Panel, Row, StatePill, Value } from '../../design/index';
 import { isDeclarable, isPortShared } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
-import { portReach } from '../../engine/shown';
+import { portReach, shareToWord } from '../../engine/shown';
 import { PORT_ANSWER_TONES } from '../../engine/tones';
 import { PORT_ANSWER_WORDS } from '../../engine/words';
 import { targetOf } from '../../model/machines';
@@ -71,6 +71,7 @@ function macPortRow(port: PortsPort) {
 
 function DeclarableRow({ port, mac, target }: MacPortProps) {
     const declare = usePortDeclare({ machine: port.Machine.Name, port: port.Port, target });
+    const audience = shareToWord('public').toLowerCase();
     return (
         <GestureRow
             {...macPortRow(port)}
@@ -81,9 +82,9 @@ function DeclarableRow({ port, mac, target }: MacPortProps) {
                     <StatePill {...portReach(port)} />
                     <GestureButton
                         gesture={declare}
-                        label="Declare it public"
-                        name={`Declare :${port.Port} public`}
-                        title={`Declare ${port.Machine.Name === '' ? mac : port.Machine.Name}:${port.Port} public?`}
+                        label={`Declare it ${audience}`}
+                        name={`Declare :${port.Port} ${audience}`}
+                        title={`Declare ${port.Machine.Name === '' ? mac : port.Machine.Name}:${port.Port} ${audience}?`}
                     />
                 </span>
             }
