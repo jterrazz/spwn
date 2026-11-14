@@ -4,6 +4,7 @@ import { useEffect, useRef, useSyncExternalStore } from 'react';
 import type { Client, In, Out, ReadName } from './client';
 import { isConfirmed } from './confirms';
 import { EngineError } from './engine-error';
+import { consequenceOf } from './engine-words';
 import { keyOf } from './frame';
 import { IDLE, step } from './gesture';
 import type { Ask, GestureEvent, GestureState } from './gesture';
@@ -24,6 +25,7 @@ const GESTURE_WITHIN = 10 * 60_000;
 
 export type Gesture<O> = {
     key: string;
+    consequence: string | undefined;
     state: GestureState<O>;
     start: () => void;
     confirm: (typed: string) => void;
@@ -106,6 +108,7 @@ export function useGesture<N extends ReadName>(name: N, spec: GestureSpec<N>): G
         confirm: (typed) => {
             send({ answer: typed, kind: 'confirm' });
         },
+        consequence: isConfirmed(name) ? consequenceOf(name, spec.subject) : undefined,
         dismiss: () => {
             send({ kind: 'dismiss' });
         },

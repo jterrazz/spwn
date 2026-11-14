@@ -8,14 +8,7 @@ import type { Route } from '../../shell/route';
 import { GestureButton, GestureOutcome, GestureRow, HeldOutcomes } from '../kit/gestures';
 import { Page } from '../page';
 import { GrantSheet } from './grant-sheet';
-import {
-    aboutEntry,
-    grantedTo,
-    grantLine,
-    kindWord,
-    removeQuestion,
-    VAULT_REREADS,
-} from './passwords-of';
+import { aboutEntry, grantedTo, grantLine, kindWord, VAULT_REREADS } from './passwords-of';
 
 import styles from './passwords.module.css';
 
@@ -59,9 +52,10 @@ function RemoveEntry({ entry, go }: { entry: AccountsVaultEntry; go: Go }) {
     return (
         <div className={styles.destructive}>
             <GestureButton
+                consequence={entry.RemoveSentence}
                 gesture={remove}
                 label="Remove password"
-                title={removeQuestion(entry)}
+                title={`Remove ${entry.Label}?`}
                 variant="danger"
                 verb="Remove"
             />

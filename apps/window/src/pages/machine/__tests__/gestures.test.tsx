@@ -60,6 +60,12 @@ describe('gestures', () => {
                 // When - Stop is clicked, then confirmed in its dialog
                 await visitor.click(button('Stop'));
                 await visitor.see(dialog('Stop linux-1?'));
+                await visitor.see(
+                    within(
+                        dialog('Stop linux-1?'),
+                        content('linux-1 stops: what it serves stops until you start it again.'),
+                    ),
+                );
                 await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
 
                 // Then - the engine's machines.list, read again, says it is stopped

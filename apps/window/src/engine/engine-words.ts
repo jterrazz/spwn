@@ -7,6 +7,8 @@ import type {
 } from '@jterrazz/station-api';
 import words from '@jterrazz/station-api/words.json';
 
+import calls from '../../../engine/remote/api/calls.json';
+
 export type Worded = keyof StationWords;
 
 export type CodeOf<E extends Worded> = keyof StationWords[E];
@@ -52,6 +54,16 @@ export function stepHeadingOf(kind: AccountsStepKind): string {
 export function nounOf(noun: PageNoun, count: number): string {
     const { One, Other } = wordOf('PageNoun', noun);
     return (count === 1 ? One : Other) ?? noun;
+}
+
+const CONSEQUENCES: ReadonlyMap<string, string> = new Map(
+    calls.calls.flatMap((call) =>
+        'consequence' in call ? [[call.name, call.consequence] as const] : [],
+    ),
+);
+
+export function consequenceOf(call: string, subject: string): string | undefined {
+    return CONSEQUENCES.get(call)?.replace('%s', () => subject);
 }
 
 export function countOf(noun: PageNoun, count: number): string {
