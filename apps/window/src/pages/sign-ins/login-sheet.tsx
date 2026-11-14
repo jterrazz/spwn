@@ -73,7 +73,12 @@ function StepBody({ found, step, machine }: { found: Found; step: AccountsStep; 
                 <>
                     <div className={styles.well}>
                         <span className={styles.code}>{step.Code ?? ''}</span>
-                        <CopyButton label="Copy code" name="Copy code" text={step.Code ?? ''} />
+                        <CopyButton
+                            label="Copy code"
+                            name="Copy code"
+                            text={step.Code ?? ''}
+                            variant="plain"
+                        />
                     </div>
                     <Status left={left} word={`${waiting}: ${site}`} />
                 </>
@@ -139,7 +144,13 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
     });
     const cancel = <Button onClick={onClose}>Cancel</Button>;
     const sheet = (body: ReactNode, actions: ReactNode, consequence?: string) => (
-        <Dialog actions={actions} consequence={consequence} onClose={onClose} title={title}>
+        <Dialog
+            actions={actions}
+            consequence={consequence}
+            lead={<AppIcon name={program} />}
+            onClose={onClose}
+            title={title}
+        >
             {body}
         </Dialog>
     );

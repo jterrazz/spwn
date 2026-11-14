@@ -7,7 +7,7 @@ export type CopyButtonProps = {
     text: string;
     name?: string | undefined;
     label?: string;
-    variant?: 'inline' | 'link';
+    variant?: 'inline' | 'link' | 'plain';
 };
 
 type Said = 'copied' | 'idle' | 'refused';

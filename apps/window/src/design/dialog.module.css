@@ -35,6 +35,9 @@
     gap: var(--space-4);
 }
 .title {
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
     margin: 0;
     font-size: var(--text-card);
     font-weight: var(--weight-strong);
