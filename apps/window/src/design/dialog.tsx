@@ -101,6 +101,7 @@ export function Modal({
 
 export type DialogProps = {
     title: string;
+    lead?: ReactNode;
     onClose: () => void;
     children: ReactNode;
     actions: ReactNode;
@@ -108,13 +109,22 @@ export type DialogProps = {
     opensOn?: OpensOn;
 };
 
-export function Dialog({ title, onClose, children, actions, consequence, opensOn }: DialogProps) {
+export function Dialog({
+    title,
+    lead,
+    onClose,
+    children,
+    actions,
+    consequence,
+    opensOn,
+}: DialogProps) {
     const titleId = useId();
     return (
         <Modal labelledBy={titleId} onClose={onClose} opensOn={opensOn}>
             <div className={styles.sheet}>
                 <div className={styles.head}>
                     <h3 className={styles.title} id={titleId}>
+                        {lead}
                         {title}
                     </h3>
                     {(consequence ?? '') === '' ? null : (
