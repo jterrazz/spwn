@@ -136,3 +136,12 @@ func TestEveryWordedEnumIsAClosedEnumOfTheWire(t *testing.T) {
 		}
 	}
 }
+
+func TestAWordsTypeCarriesEveryFieldTheWordsDo(t *testing.T) {
+	types := wordsTypes()
+	for _, field := range []string{"Detail?: string;", "Heading?: string;", "One?: string;", "Other?: string;", "Tone: CoreVerdictTone;", "Word: string;"} {
+		if !strings.Contains(types, field) {
+			t.Errorf("StationWord lacks %q, which words.json carries", field)
+		}
+	}
+}

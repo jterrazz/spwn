@@ -2,6 +2,7 @@ package confirm_test
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
@@ -98,5 +99,19 @@ func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
 		if got := confirm.Of(c.action, c.kind, c.facts...); got != c.want {
 			t.Errorf("%s asks %s, want %s", c.alert, got, c.want)
 		}
+	}
+}
+
+func TestEveryConfirmationSaysWhatItsGestureDoes(t *testing.T) {
+	for _, a := range []confirm.Action{confirm.Install, confirm.Share, confirm.Start, confirm.Restart, confirm.Edit, confirm.Remove, confirm.TakeBack,
+		confirm.StopSharing, confirm.SignOut, confirm.RemovePassword, confirm.RemoveGrant, confirm.Undeclare, confirm.OffHere, confirm.Overwrite,
+		confirm.Forget, confirm.DeleteImage, confirm.RestartMac, confirm.StopEngine, confirm.Stop, confirm.StopAgent, confirm.Delete, confirm.Erase,
+		confirm.BuildImage, confirm.Cleanup} {
+		if c := a.Consequence(); c == "" || !strings.HasSuffix(c, ".") {
+			t.Errorf("%s says %q: every confirmation says what it does, in one sentence", a, c)
+		}
+	}
+	if got := confirm.Restart.Consequence(); !strings.Contains(got, "what it serves stops") {
+		t.Errorf("a server's restart says %q: it says what stops while it restarts", got)
 	}
 }

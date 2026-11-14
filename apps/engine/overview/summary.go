@@ -7,6 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 type Summary struct {
@@ -23,6 +24,10 @@ type Summary struct {
 	Pending bool
 	// value: SPEC §7.6's Mac readiness, empty on a Mac that needs none.
 	Readiness []Check
+	// value: the head of the page, from the engine, the needs and the
+	// machines; and when this reading was made.
+	Verdict verdict.Verdict
+	Read    time.Time `json:",omitzero"`
 }
 
 type Head struct {
@@ -63,6 +68,10 @@ type Need struct {
 	Command  string
 	Path     string
 	Severity finding.Severity
+	// value: whether it needs the owner now or can wait, and the word of
+	// its gesture.
+	Upkeep Upkeep
+	Verb   Verb
 }
 
 type Line struct {
@@ -122,10 +131,15 @@ func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms [
 			all = append(all, r.Findings...)
 		}
 	}
+	for i := range all {
+		all[i].Urgency = urgencyOf(all[i])
+	}
 	for _, f := range finding.Rank(all) {
 		s.Needs = append(s.Needs, Need{Machine: f.Machine.Name, Section: f.Section, Broken: f.Severity == finding.Broken, Severity: f.Severity,
-			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, Command: f.Fix.Command, Path: f.Fix.Path})
+			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, Command: f.Fix.Command, Path: f.Fix.Path,
+			Upkeep: UpkeepOf(f), Verb: VerbOf(f)})
 	}
+	s.Verdict = VerdictOf(s)
 	return s
 }
 

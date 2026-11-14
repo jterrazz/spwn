@@ -13,14 +13,17 @@ const CatalogueSchema = "station.calls/v1"
 type Entry struct {
 	Name string `json:"name"`
 	// value: the schema of the call's output, `station.<name>/v<n>`.
-	Schema  string   `json:"schema"`
-	Section string   `json:"section,omitempty"`
-	Where   string   `json:"where"`
-	Confirm string   `json:"confirm,omitempty"`
-	Errors  []string `json:"errors,omitempty"`
-	In      string   `json:"in,omitempty"`
-	Out     string   `json:"out,omitempty"`
-	Watch   bool     `json:"watch,omitempty"`
+	Schema  string `json:"schema"`
+	Section string `json:"section,omitempty"`
+	Where   string `json:"where"`
+	Confirm string `json:"confirm,omitempty"`
+	// value: the confirmation's consequence, the action's own sentence; a
+	// %s is the subject it names.
+	Consequence string   `json:"consequence,omitempty"`
+	Errors      []string `json:"errors,omitempty"`
+	In          string   `json:"in,omitempty"`
+	Out         string   `json:"out,omitempty"`
+	Watch       bool     `json:"watch,omitempty"`
 	// value: served by the engine itself beside the registry, so never named
 	// in a hello's calls.
 	Own bool `json:"own,omitempty"`
@@ -52,7 +55,7 @@ func (r *Registry) Catalogue(own ...Meta) ([]byte, error) {
 	metas = append(metas, own...)
 	slices.SortFunc(metas, func(a, b Meta) int { return strings.Compare(a.Name, b.Name) })
 	for _, m := range metas {
-		e := Entry{Name: m.Name, Schema: schema(m.Name, m.Document), Section: string(m.Section), Where: string(m.Where), Confirm: string(m.Confirm), In: m.In, Out: m.Out, Watch: m.Watch, Own: slices.ContainsFunc(own, func(o Meta) bool { return o.Name == m.Name })}
+		e := Entry{Name: m.Name, Schema: schema(m.Name, m.Document), Section: string(m.Section), Where: string(m.Where), Confirm: string(m.Confirm), Consequence: m.Confirm.Consequence(), In: m.In, Out: m.Out, Watch: m.Watch, Own: slices.ContainsFunc(own, func(o Meta) bool { return o.Name == m.Name })}
 		for _, code := range m.Errors {
 			e.Errors = append(e.Errors, string(code))
 		}

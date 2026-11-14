@@ -485,6 +485,14 @@
     "catalog.App": {
       "additionalProperties": false,
       "properties": {
+        "AppKind": {
+          "enum": [
+            "app",
+            "manager",
+            "skill"
+          ],
+          "type": "string"
+        },
         "AppStore": {
           "type": "boolean"
         },
@@ -610,6 +618,7 @@
         }
       },
       "required": [
+        "AppKind",
         "AppStore",
         "Bundle",
         "Category",
@@ -1372,6 +1381,32 @@
       ],
       "type": "object"
     },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
     "disk.MisplacedReport": {
       "additionalProperties": false,
       "properties": {
@@ -1738,6 +1773,27 @@
         },
         "Text": {
           "type": "string"
+        },
+        "Upkeep": {
+          "enum": [
+            "needs-you",
+            "can-wait"
+          ],
+          "type": "string"
+        },
+        "Verb": {
+          "enum": [
+            "review",
+            "restart",
+            "start",
+            "delete",
+            "update",
+            "remove",
+            "move",
+            "start-engine",
+            "fix"
+          ],
+          "type": "string"
         }
       },
       "required": [
@@ -1750,7 +1806,9 @@
         "Section",
         "Severity",
         "Subject",
-        "Text"
+        "Text",
+        "Upkeep",
+        "Verb"
       ],
       "type": "object"
     },
@@ -2062,6 +2120,10 @@
         "Pending": {
           "type": "boolean"
         },
+        "Read": {
+          "format": "date-time",
+          "type": "string"
+        },
         "Readiness": {
           "items": {
             "$ref": "#/$defs/overview.Check"
@@ -2079,6 +2141,9 @@
             "array",
             "null"
           ]
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
         }
       },
       "required": [
@@ -2088,7 +2153,8 @@
         "Needs",
         "Pending",
         "Readiness",
-        "VMs"
+        "VMs",
+        "Verdict"
       ],
       "type": "object"
     },

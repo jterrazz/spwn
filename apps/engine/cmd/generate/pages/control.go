@@ -5,6 +5,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 	pageengine "github.com/jterrazz/studio-station/apps/engine/pages/engine"
 )
 
@@ -19,8 +20,8 @@ func controlPages() []Fixture {
 	}}
 	started := engine.StartReport{Version: "v3.1.0", PID: 812}
 	until := time.Date(2026, 11, 3, 18, 0, 0, 0, time.UTC)
-	running := engine.Reading{State: engine.EngineRunning, Version: "v3.1.0", Station: "v3.1.0", Up: 74 * time.Hour, VMs: 2, AwakeUntil: &until}
-	halted := engine.Reading{State: engine.EngineStopped, Station: "v3.1.0", Stopped: engine.StopMark{At: time.Date(2026, 11, 3, 13, 40, 0, 0, time.UTC), By: "station engine stop"}}
+	running := engine.Reading{State: machines.EngineRunning, Version: "v3.1.0", Station: "v3.1.0", Up: 74 * time.Hour, VMs: 2, AwakeUntil: &until}
+	halted := engine.Reading{State: machines.EngineStopped, Station: "v3.1.0", Stopped: engine.StopMark{At: time.Date(2026, 11, 3, 13, 40, 0, 0, time.UTC), By: "station engine stop"}}
 	out := states("engine",
 		pending(pageengine.Read(running, time.UTC, thisMacContext())),
 		pageengine.Read(halted, time.UTC, thisMacContext()),

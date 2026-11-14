@@ -150,6 +150,7 @@ func (it Package) app(category Category) App {
 			}
 		}
 	}
+	t.AppKind = appKindOf(it)
 	if it.Version != nil {
 		t.Version = *it.Version
 	}
@@ -204,4 +205,19 @@ func (o Option) input() InputKind {
 	case OptionInteger:
 	}
 	return InputText
+}
+
+func appKindOf(it Package) AppKind {
+	if it.Kind == KindManager {
+		return AppKindManager
+	}
+	for _, m := range it.Methods {
+		if m.Skill == nil {
+			return AppKindApp
+		}
+	}
+	if len(it.Methods) == 0 {
+		return AppKindApp
+	}
+	return AppKindSkill
 }

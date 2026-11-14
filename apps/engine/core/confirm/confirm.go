@@ -157,3 +157,59 @@ func Answer(err error) (string, bool) {
 	}
 	return Yes, true
 }
+
+func (a Action) Consequence() string {
+	// value: what the gesture does beyond its verb, the line under its
+	// confirmation's title; a %s is the subject the question names.
+	switch a {
+	case Install:
+		return "%s is installed on this machine."
+	case Share:
+		return "%s is reached from your other machines."
+	case Start:
+		return "%s starts, and its ports are shared again."
+	case Restart:
+		return "%s stops, then starts again: what it serves stops while it restarts."
+	case Edit:
+		return "%s changes on this machine."
+	case Remove:
+		return "%s leaves this machine; its data stays."
+	case TakeBack:
+		return "The account leaves %s; it stays signed in on this Mac."
+	case StopSharing:
+		return "%s is no longer shared, and its reserved port is released."
+	case SignOut:
+		return "%s is signed out on this machine; its token stays valid at its provider."
+	case RemovePassword:
+		return "%s leaves this Mac's vault, and every grant made from it ends."
+	case RemoveGrant:
+		return "The grant of %s ends now, before its term."
+	case Undeclare:
+		return "%s is no longer declared, so a listener on it is flagged again."
+	case OffHere:
+		return "station stops applying %s on this machine; its value now stays."
+	case Overwrite:
+		return "Your value of %s is replaced by the one the file asks."
+	case Forget:
+		return "%s leaves your machines; nothing on it changes."
+	case DeleteImage:
+		return "%s is deleted; the next create that needs it builds it again."
+	case RestartMac:
+		return "%s restarts: its VMs stop, and its servers start again once it is back."
+	case StopEngine:
+		return "Every VM of this Mac stops, and nothing is shared until the engine starts again."
+	case Stop:
+		return "%s stops: what it serves stops until you start it again."
+	case StopAgent:
+		return "The agent in %s stops where it is; its work so far stays."
+	case Delete:
+		return "%s and everything on its disk are deleted for good."
+	case Erase:
+		return "The data of %s is deleted for good."
+	case BuildImage:
+		return "%s is built first, which takes several minutes."
+	case Cleanup:
+		return "Every ephemeral workspace whose agent finished is deleted."
+	}
+	return ""
+}

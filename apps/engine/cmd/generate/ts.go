@@ -78,7 +78,7 @@ func typescript(calls []wireCall, docs map[string]map[string]any, more ...map[st
 		}
 		entry := "    '" + c.meta.Name + "': { in: " + base + "Input; out: " + base + "Output; watch: " + boolean(c.meta.Watch)
 		if c.meta.Confirm != "" {
-			entry += "; confirm: '" + string(c.meta.Confirm) + "'"
+			entry += "; confirm: '" + string(c.meta.Confirm) + "'; consequence: " + literal(c.meta.Confirm.Consequence())
 		}
 		if c.own {
 			entry += "; own: true"

@@ -21,7 +21,7 @@ var List = call.Call[Deps, ListIn, ports.Listing]{
 	Run: func(ctx context.Context, d Deps, in ListIn, _ call.Progress) (ports.Listing, error) {
 		allMachines, err := d.Ports.List(ctx, !in.AllMachines && in.Of == "")
 		if _, inside := d.Ports.Placed(); err != nil || inside {
-			return ports.Listing{AllMachines: allMachines}, err
+			return ports.Listing{AllMachines: allMachines, Verdict: ports.VerdictOf(allMachines)}, err
 		}
 		node, err := d.Tailnet.Status(ctx)
 		l := ports.Listing{AllMachines: ports.OwnDevices(allMachines, node.Peers), Tailnet: node}
@@ -31,6 +31,7 @@ var List = call.Call[Deps, ListIn, ports.Listing]{
 				l.Tailnet = ports.Status{}
 			}
 		}
+		l.Verdict = ports.VerdictOf(l.AllMachines)
 		return l, err
 	},
 }

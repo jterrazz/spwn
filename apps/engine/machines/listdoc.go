@@ -276,11 +276,11 @@ func engineState(h MacView) string {
 	switch {
 	case !h.Reachable:
 		return "unknown"
-	case !h.Engine.Known:
+	case !h.Engine.Known():
 		return "none"
-	case h.Engine.Running:
+	case h.Engine.Running():
 		return "running"
-	case !h.Engine.Installed && h.ThisMac:
+	case h.Engine.State == EngineNotInstalled && h.ThisMac:
 		return "not-set-up"
 	}
 	return "stopped"

@@ -154,8 +154,8 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 		var all *machines.AllMachines
 		var readiness []overview.Check
 		send := func() bool {
-			sum := summarize(head, ids, got, reading, all, r.d.Refused)
-			sum.Readiness = readiness
+			sum := summarize(head, ids, got, reading, all, r.d.Refused, now)
+			sum.Readiness, sum.Read = readiness, now
 			select {
 			case out <- sum:
 				return true
@@ -189,7 +189,7 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 	return out
 }
 
-func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, reading *engine.Reading, all *machines.AllMachines, refused *Refusal) overview.Summary {
+func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, reading *engine.Reading, all *machines.AllMachines, refused *Refusal, now time.Time) overview.Summary {
 	state, own := engineOf(head, reading)
 	if refused != nil {
 		// invariant: a file of the owner's refused is never silent where the
@@ -201,7 +201,7 @@ func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, 
 	var vms []overview.VM
 	if all != nil {
 		var found []finding.Finding
-		found, vms = thisMacsVMs(*all)
+		found, vms = thisMacsVMs(*all, now)
 		own = append(own, found...)
 	}
 	reads := make([]overview.Read, 0, len(ids))
@@ -231,20 +231,20 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 	}
 	mac := machine.Ref{Name: head.Name}
 	switch r.State {
-	case engine.EngineStopped:
-		return overview.EngineStopped, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: "engine",
+	case machines.EngineStopped:
+		return overview.EngineStopped, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: "engine",
 			Text: "Engine stopped", Fix: finding.Fix{Call: "engine.start"}}}
-	case engine.EngineNotInstalled:
-		return overview.EngineStopped, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: "engine",
+	case machines.EngineNotInstalled:
+		return overview.EngineStopped, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: "engine",
 			Text: "Engine not installed", Fix: finding.Fix{Call: "engine.start"}}}
-	case engine.EngineRunning:
+	case machines.EngineRunning:
 	}
 	return overview.EngineRunning, nil
 }
 
-// value: what a Mac's Overview reads of All machines: its VMs and their
-// findings; the other Macs are All machines' own.
-func thisMacsVMs(f machines.AllMachines) ([]finding.Finding, []overview.VM) {
+// value: what a Mac's Overview reads of All machines: its VMs, their
+// findings and the idle ones; the other Macs are All machines' own.
+func thisMacsVMs(f machines.AllMachines, now time.Time) ([]finding.Finding, []overview.VM) {
 	i := slices.IndexFunc(f.Macs, func(h machines.MacView) bool { return h.ThisMac })
 	if i < 0 {
 		return nil, nil
@@ -259,6 +259,9 @@ func thisMacsVMs(f machines.AllMachines) ([]finding.Finding, []overview.VM) {
 	vms := []overview.VM{}
 	for _, vm := range machines.Ordered(h.VMs) {
 		vms = append(vms, overview.VM{Name: vm.Name, Running: vm.State == machines.Running})
+		if idle, ok := overview.Idle(h.Name, vm, now); ok {
+			own = append(own, idle)
+		}
 	}
 	return own, vms
 }

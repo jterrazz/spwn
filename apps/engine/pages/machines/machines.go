@@ -107,13 +107,13 @@ func macHeadRow(h model.MacView, thisVersion string) page.Row {
 	case h.StationVersion != "" && h.StationVersion != thisVersion:
 		row.Mark, row.Reason = page.Attention, page.Mismatch
 		detail = page.Text("station " + h.StationVersion + ", This Mac " + thisVersion)
-	case h.Engine.Known && !h.Engine.Running:
+	case h.Engine.Known() && !h.Engine.Running():
 		row.Mark, row.Reason = page.Attention, page.Stopped
 		word, fix := "engine stopped", "station engine start"
 		switch {
 		case !h.ThisMac:
 			fix = catalog.SSHCommand("", h.Name) + " station engine start"
-		case !h.Engine.Installed:
+		case h.Engine.State == model.EngineNotInstalled:
 			row.Reason, word, fix = page.Missing, "engine not installed", "station engine start"
 		}
 		detail = page.List(page.Text(word), page.Command(fix))

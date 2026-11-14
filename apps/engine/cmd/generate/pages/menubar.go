@@ -69,7 +69,7 @@ func twoMacs() model.AllMachines {
 	infra := sized(model.VM{Name: "infra", Image: "station-linux", Version: "3", Mac: miniName, Kind: catalog.Linux, Lifetime: model.AlwaysOn, State: model.Running, SizeGB: 80, IP: "192.168.64.7", Guest: "connected", Want: "running",
 		Check: "https://infra:6443/readyz", Device: "infra", CreatedAt: built, CheckStatus: model.CheckStatus{State: model.CheckPassing, At: keepAwakeNow.Add(-40 * time.Second), Answer: "200"}}, 8, 24)
 	infra.Resources.DiskBytes = 80 * gb
-	running := model.EngineView{Known: true, Running: true, Version: "v3.0.0"}
+	running := model.EngineView{State: model.EngineRunning, Version: "v3.0.0"}
 	infra.BootAt = keepAwakeNow.Add(-(12*24*time.Hour + 4*time.Hour))
 	return model.AllMachines{Read: keepAwakeNow, Macs: []model.MacView{
 		{Name: thisMacName, User: "jterrazz", StationVersion: "v3.0.0", ThisMac: true, Reachable: true, Engine: running, Node: model.Node{Online: true, IP: "100.98.133.14"}, VMs: []model.VM{linux1, api}},

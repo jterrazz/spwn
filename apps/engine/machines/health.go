@@ -3,9 +3,12 @@ package machines
 import (
 	"net/netip"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 const (
@@ -160,4 +163,75 @@ func Health(was CheckStatus, passed bool, now time.Time) (CheckStatus, CheckChan
 
 func (s CheckStatus) Due(now time.Time) bool {
 	return s.At.IsZero() || now.Sub(s.At) >= CheckEvery
+}
+
+const (
+	SentenceHealthy    = "Healthy."
+	SentenceRestarting = "Restarting."
+	SentenceDown       = "Down."
+	SentenceNoAddress  = "It has no address yet."
+	SentenceNoSSH      = "SSH does not answer."
+	SentenceCheckFails = "Its check fails."
+	SentenceCheckWaits = "Its check has not answered yet."
+	LineNoCheck        = "No check is set: its health stops at SSH."
+)
+
+func HealthVerdict(vm VM) *verdict.Verdict {
+	// invariant: SPEC §7.2: a server's health is its first step that does
+	// not pass, in the steps' order, a restart that runs said first; a
+	// workspace has none.
+	if vm.Lifetime != AlwaysOn {
+		return nil
+	}
+	steps := HealthOf(vm)
+	v := verdict.Verdict{Tone: verdict.OK, Sentence: SentenceHealthy}
+	switch {
+	case vm.Restart != nil:
+		v = verdict.Verdict{Tone: verdict.New, Sentence: SentenceRestarting}
+	case Down(vm):
+		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceDown, Line: vm.Cause}
+	case !steps.Running:
+		v = verdict.Verdict{Tone: verdict.Plain, Sentence: vm.State.Word() + "."}
+	case !steps.Address:
+		v = verdict.Verdict{Tone: verdict.Warn, Sentence: SentenceNoAddress}
+	case !steps.SSH:
+		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceNoSSH}
+	case vm.Check == "":
+		v.Line = LineNoCheck
+	case vm.CheckStatus.State == CheckFailing:
+		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceCheckFails}
+	case vm.CheckStatus.State == CheckWaiting:
+		v = verdict.Verdict{Tone: verdict.New, Sentence: SentenceCheckWaits}
+	}
+	return &v
+}
+
+func LatencyNote(vm VM) string {
+	// value: what the engine kept of a server's check while it is too
+	// little to draw as a chart: none, or a single answer.
+	if vm.Lifetime != AlwaysOn || vm.Check == "" {
+		return ""
+	}
+	switch len(vm.Latency) {
+	case 0:
+		return "The engine kept no check so far."
+	case 1:
+		return "The engine kept one check so far."
+	}
+	return ""
+}
+
+func Judged(f AllMachines) AllMachines {
+	// value: f with each server's health verdict and latency note, on
+	// copies of its Macs and VMs.
+	macs := slices.Clone(f.Macs)
+	for i := range macs {
+		vms := slices.Clone(macs[i].VMs)
+		for j := range vms {
+			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j]), LatencyNote(vms[j])
+		}
+		macs[i].VMs = vms
+	}
+	f.Macs = macs
+	return f
 }

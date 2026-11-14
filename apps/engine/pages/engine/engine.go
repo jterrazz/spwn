@@ -7,6 +7,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/pages"
 )
@@ -52,7 +53,7 @@ func Read(r engine.Reading, zone *time.Location, thisMac page.Context) page.Page
 	// value: an engine's reading as one row: its state, then what it runs.
 	row := page.Row{ID: Row, Label: Row, Mark: page.OK}
 	switch r.State {
-	case engine.EngineRunning:
+	case machines.EngineRunning:
 		parts := []string{"running", r.Version, "up " + uptime(r.Up), count(r.VMs, "VM")}
 		if r.AwakeUntil != nil {
 			parts = append(parts, "Awake until "+clock(*r.AwakeUntil, zone))
@@ -63,7 +64,7 @@ func Read(r engine.Reading, zone *time.Location, thisMac page.Context) page.Page
 			row.Cells = append(row.Cells, page.Text("the engine runs "+r.Version+", station is "+r.Station))
 			row.Hint = page.Cmd("station engine start")
 		}
-	case engine.EngineStopped:
+	case machines.EngineStopped:
 		row.Mark, row.Reason = page.Attention, page.Stopped
 		parts := []string{"stopped"}
 		if !r.Stopped.At.IsZero() {

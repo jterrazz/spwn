@@ -114,11 +114,11 @@ func (w *world) machines(here bool) machines.AllMachines {
 		w.infra = w.infra[1:]
 	}
 	if here {
-		return machines.AllMachines{Macs: []machines.MacView{{Name: thisMac, ThisMac: true, Reachable: true, Engine: machines.EngineView{Known: true, Running: true}, VMs: w.here}}}
+		return machines.AllMachines{Macs: []machines.MacView{{Name: thisMac, ThisMac: true, Reachable: true, Engine: machines.EngineView{State: machines.EngineRunning}, VMs: w.here}}}
 	}
 	return machines.AllMachines{Macs: append([]machines.MacView{
-		{Name: thisMac, ThisMac: true, Reachable: true, Engine: machines.EngineView{Known: true, Running: true}, VMs: w.here},
-		{Name: mini, Reachable: true, Engine: machines.EngineView{Known: true, Running: true}, VMs: append([]machines.VM{infra}, w.beside...)},
+		{Name: thisMac, ThisMac: true, Reachable: true, Engine: machines.EngineView{State: machines.EngineRunning}, VMs: w.here},
+		{Name: mini, Reachable: true, Engine: machines.EngineView{State: machines.EngineRunning}, VMs: append([]machines.VM{infra}, w.beside...)},
 	}, w.added...)}
 }
 

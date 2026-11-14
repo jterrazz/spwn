@@ -80,16 +80,16 @@ func (c *Control) Read(ctx context.Context) (engine.Reading, error) {
 	r := engine.Reading{Station: c.o.Version}
 	hello, err := c.c.Hello(ctx)
 	if err != nil {
-		r.State = engine.EngineNotInstalled
+		r.State = model.EngineNotInstalled
 		if c.installed() {
-			r.State = engine.EngineStopped
+			r.State = model.EngineStopped
 			if c.o.Marks != nil {
 				r.Stopped, _ = c.o.Marks.Read()
 			}
 		}
 		return r, nil
 	}
-	r.State, r.Version = engine.EngineRunning, hello.Version
+	r.State, r.Version = model.EngineRunning, hello.Version
 	if !hello.StartedAt.IsZero() {
 		r.Up = c.h.Now().Sub(hello.StartedAt)
 	}

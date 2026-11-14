@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 type Phase string
@@ -121,4 +122,7 @@ type Listing struct {
 	// value: this Mac's node on the tailnet, zero inside a VM: its Mac's
 	// sharing is said by each of its rows.
 	Tailnet Status `json:"tailnet"`
+	// value: the head of the Ports page: what is exposed, else what
+	// listens and what is shared, or that nothing listens.
+	Verdict verdict.Verdict `json:"verdict"`
 }

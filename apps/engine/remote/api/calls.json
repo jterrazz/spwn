@@ -49,6 +49,7 @@
       "section": "accounts",
       "where": "in-engine",
       "confirm": "sign-out",
+      "consequence": "%s is signed out on this machine; its token stays valid at its provider.",
       "errors": [
         "confirm.yes-needed",
         "login.granted",
@@ -107,6 +108,7 @@
       "section": "accounts",
       "where": "in-engine",
       "confirm": "take-back",
+      "consequence": "The account leaves %s; it stays signed in on this Mac.",
       "errors": [
         "account.not-shared",
         "account.unknown",
@@ -200,6 +202,7 @@
       "schema": "station.agents.stop/v1",
       "where": "at-target",
       "confirm": "stop-agent",
+      "consequence": "The agent in %s stops where it is; its work so far stays.",
       "errors": [
         "agents.ended",
         "agents.unknown-agent",
@@ -246,6 +249,7 @@
       "section": "apps",
       "where": "at-target",
       "confirm": "remove",
+      "consequence": "%s leaves this machine; its data stays.",
       "errors": [
         "apps.lives-elsewhere",
         "apps.not-installed",
@@ -312,6 +316,7 @@
       "section": "background",
       "where": "at-target",
       "confirm": "remove",
+      "consequence": "%s leaves this machine; its data stays.",
       "errors": [
         "background.is-the-engine",
         "background.root-scope",
@@ -327,6 +332,7 @@
       "section": "disk",
       "where": "at-target",
       "confirm": "erase",
+      "consequence": "The data of %s is deleted for good.",
       "errors": [
         "confirm.mismatch",
         "confirm.needed",
@@ -506,6 +512,7 @@
       "schema": "station.engine.stop/v1",
       "where": "at-target",
       "confirm": "stop-engine",
+      "consequence": "Every VM of this Mac stops, and nothing is shared until the engine starts again.",
       "errors": [
         "confirm.yes-needed"
       ],
@@ -622,6 +629,7 @@
       "section": "accounts",
       "where": "in-engine",
       "confirm": "remove-grant",
+      "consequence": "The grant of %s ends now, before its term.",
       "errors": [
         "confirm.yes-needed",
         "grant.not-granted",
@@ -649,6 +657,7 @@
       "schema": "station.images.delete/v1",
       "where": "in-engine",
       "confirm": "delete-image",
+      "consequence": "%s is deleted; the next create that needs it builds it again.",
       "errors": [
         "confirm.yes-needed",
         "image.unknown"
@@ -675,6 +684,7 @@
       "schema": "station.machinefile.apply/v2",
       "where": "at-target",
       "confirm": "remove",
+      "consequence": "%s leaves this machine; its data stays.",
       "errors": [
         "confirm.yes-needed",
         "machinefile.bad-phase",
@@ -766,6 +776,7 @@
       "schema": "station.machines.cleanup/v1",
       "where": "in-engine",
       "confirm": "cleanup",
+      "consequence": "Every ephemeral workspace whose agent finished is deleted.",
       "errors": [
         "confirm.yes-needed",
         "machines.not-finished"
@@ -778,6 +789,7 @@
       "schema": "station.machines.create-server/v1",
       "where": "in-engine",
       "confirm": "build-image",
+      "consequence": "%s is built first, which takes several minutes.",
       "errors": [
         "confirm.yes-needed",
         "image.no-linux-binary",
@@ -803,6 +815,7 @@
       "schema": "station.machines.create-workspace/v1",
       "where": "in-engine",
       "confirm": "build-image",
+      "consequence": "%s is built first, which takes several minutes.",
       "errors": [
         "confirm.yes-needed",
         "image.no-linux-binary",
@@ -828,6 +841,7 @@
       "schema": "station.machines.delete/v1",
       "where": "in-engine",
       "confirm": "delete",
+      "consequence": "%s and everything on its disk are deleted for good.",
       "errors": [
         "confirm.mismatch",
         "confirm.needed",
@@ -851,6 +865,7 @@
       "schema": "station.machines.forget/v1",
       "where": "in-process",
       "confirm": "forget",
+      "consequence": "%s leaves your machines; nothing on it changes.",
       "errors": [
         "confirm.yes-needed"
       ],
@@ -896,6 +911,7 @@
       "schema": "station.machines.restart/v1",
       "where": "at-target",
       "confirm": "restart-mac",
+      "consequence": "%s restarts: its VMs stop, and its servers start again once it is back.",
       "errors": [
         "confirm.yes-needed"
       ],
@@ -907,6 +923,7 @@
       "schema": "station.machines.restart-mac/v1",
       "where": "in-process",
       "confirm": "restart-mac",
+      "consequence": "%s restarts: its VMs stop, and its servers start again once it is back.",
       "errors": [
         "confirm.yes-needed"
       ],
@@ -932,6 +949,7 @@
       "schema": "station.machines.stop/v1",
       "where": "in-engine",
       "confirm": "stop",
+      "consequence": "%s stops: what it serves stops until you start it again.",
       "errors": [
         "confirm.mismatch",
         "confirm.needed",
@@ -1010,6 +1028,7 @@
       "section": "ports",
       "where": "in-engine",
       "confirm": "stop-sharing",
+      "consequence": "%s is no longer shared, and its reserved port is released.",
       "errors": [
         "confirm.yes-needed"
       ],
@@ -1022,6 +1041,7 @@
       "section": "ports",
       "where": "at-target",
       "confirm": "undeclare",
+      "consequence": "%s is no longer declared, so a listener on it is flagged again.",
       "errors": [
         "confirm.yes-needed"
       ],
@@ -1034,6 +1054,7 @@
       "section": "settings",
       "where": "at-target",
       "confirm": "overwrite",
+      "consequence": "Your value of %s is replaced by the one the file asks.",
       "errors": [
         "confirm.yes-needed",
         "setting.checked",
@@ -1078,6 +1099,7 @@
       "section": "settings",
       "where": "at-target",
       "confirm": "off-here",
+      "consequence": "station stops applying %s on this machine; its value now stays.",
       "errors": [
         "confirm.yes-needed",
         "setting.needs-admin",
@@ -1092,6 +1114,7 @@
       "section": "settings",
       "where": "at-target",
       "confirm": "remove",
+      "consequence": "%s leaves this machine; its data stays.",
       "errors": [
         "confirm.yes-needed"
       ],
@@ -1172,6 +1195,7 @@
       "section": "accounts",
       "where": "in-engine",
       "confirm": "remove-password",
+      "consequence": "%s leaves this Mac's vault, and every grant made from it ends.",
       "errors": [
         "confirm.yes-needed",
         "vault.unknown"
