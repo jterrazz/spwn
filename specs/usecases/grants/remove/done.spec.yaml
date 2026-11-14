@@ -1,4 +1,4 @@
-description: 'Removing a grant, confirmed, ends it and says where to revoke the token'
+description: 'removing a grant, confirmed, ends it and says where to revoke the token'
 env:
     - two-macs
     - engine

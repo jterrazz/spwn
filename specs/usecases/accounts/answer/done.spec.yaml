@@ -1,4 +1,4 @@
-description: 'The right code answers the exchange and is never echoed'
+description: 'the right code answers the exchange and is never echoed'
 env:
     - two-macs
     - engine

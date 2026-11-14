@@ -10,10 +10,10 @@ runs:
           {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-1","ToKind":"agent","To":"review-bot","Workspace":"linux-1","For":14400000000000}}
       exit: 0
       stdout: |
-          {"Until":"2026-11-04T14:00:25Z"}
+          {"Until":"{{iso8601}}"}
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To, .Until, .State]]]]}'''
       stdin: |
           {"v":2,"id":"1","watch":"vault.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[["agent","review-bot","2026-11-04T14:00:25Z","active"]]],["pw-2","npm publish","npm","token",false,[["machine","linux-1","2026-11-04T14:00:00Z","active"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}
+          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[["agent","review-bot","{{iso8601}}","active"]]],["pw-2","npm publish","npm","token",false,[["machine","linux-1","{{iso8601}}","active"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}

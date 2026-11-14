@@ -1,4 +1,4 @@
-description: 'The mini grants from its own vault and reads its own machines'
+description: 'the mini grants from its own vault and reads its own machines'
 env:
     - two-macs
     - engine

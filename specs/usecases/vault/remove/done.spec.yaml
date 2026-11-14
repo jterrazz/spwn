@@ -1,4 +1,4 @@
-description: 'Removing a password, confirmed, ends the grants made from it'
+description: 'removing a password, confirmed, ends the grants made from it'
 env:
     - two-macs
     - engine

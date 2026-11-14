@@ -1,4 +1,4 @@
-description: 'An agent station does not know is refused'
+description: 'an agent station does not know is refused'
 env:
     - two-macs
     - engine

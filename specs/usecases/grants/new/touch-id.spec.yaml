@@ -1,4 +1,4 @@
-description: 'The sheet carries the sentence about confirming on this Mac'
+description: 'the sheet carries the sentence about confirming on this Mac'
 env:
     - two-macs
     - engine

@@ -1,4 +1,4 @@
-description: 'Signing out gh, confirmed, leaves the row signed out'
+description: 'signing out gh, confirmed, leaves the row signed out'
 env:
     - two-macs
     - engine

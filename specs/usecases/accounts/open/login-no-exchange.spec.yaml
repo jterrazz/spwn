@@ -1,4 +1,4 @@
-description: 'An exchange that does not exist is refused'
+description: 'an exchange that does not exist is refused'
 env:
     - two-macs
     - engine

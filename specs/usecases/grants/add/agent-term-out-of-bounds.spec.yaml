@@ -1,4 +1,4 @@
-description: 'An agent''s grant never lasts until removed: a term of 0 is refused'
+description: 'an agent''s grant never lasts until removed: a term of 0 is refused'
 env:
     - two-macs
     - engine

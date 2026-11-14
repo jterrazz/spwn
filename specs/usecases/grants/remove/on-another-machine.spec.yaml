@@ -1,4 +1,4 @@
-description: 'The mini removes a grant of its own vault'
+description: 'the mini removes a grant of its own vault'
 env:
     - two-macs
     - engine
