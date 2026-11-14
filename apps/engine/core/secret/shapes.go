@@ -69,7 +69,9 @@ var (
 	issued     = regexp.MustCompile(strings.Join(issuers(), "|"))
 	privateKey = regexp.MustCompile(`-----BEGIN [A-Z ]*PRIVATE KEY-----(?s:.*?)(?:-----END [A-Z ]*PRIVATE KEY-----|\z)`)
 	header     = regexp.MustCompile(`(?i)(authorization["']?\s*[:=]\s*["']?(?:bearer|basic|token)\s+)[^\s"',]+`)
-	port       = regexp.MustCompile(`^\d+(?:[/?#,;}\]]|["'>][,;})\]>])`)
+	port       = regexp.MustCompile(`^\d+(?:/|["'>][,;})\]>])`)
+	listPort   = regexp.MustCompile(`^\d+,`)
+	dottedName = regexp.MustCompile(`^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$`)
 	query      = regexp.MustCompile(`(?i)([?&](?:[\w.-]*(?:token|secret|password|passwd|pwd|signature|sig|credential)s?|(?:x-(?:amz-|goog-)?)?(?:(?:api|access|app|application|auth|client|encryption|id|license|master|private|refresh|secret|security|session|signing|subscription)[_.-]?keys?|key))=)[^&\s#"']+`)
 	identifier = regexp.MustCompile(`^(?:Test|Benchmark|Example|Fuzz)(?:[A-Z][a-z]+)+(?:\d{1,4}(?:[A-Z][a-z]+)*)?$`)
 	run        = regexp.MustCompile(runClass + `{` + strconv.Itoa(runMin) + `,}`)
@@ -93,10 +95,11 @@ func credentials(text string) string {
 	// or a `/`, or ending in one, is withheld whole. It is withheld when it
 	// holds a password, or when its user alone is token-shaped. A user holds
 	// none of userEnds, so a URL followed by data (a JSON value, a CSV row) is
-	// no userinfo; and a password of digits that a URL's end follows (a path,
-	// a query, a fragment, a `,`, `;`, `}` or `]`, or a quote or `>` that
-	// closes a value before one of `,;})]>`) is a host's port, as in
-	// `localhost:4873/@scope` or `"https://h:8080","email":"a@b"`. Each word's
+	// no userinfo. A password of digits is a host's port when a path or a
+	// quote or `>` that closes a value before one of `,;})]>` follows it
+	// (`localhost:4873/@scope`, `"https://h:8080","email":"a@b"`), or a `,`
+	// after a dotted host name (a CSV row, `https://x.io:8080,me@x.io`); any
+	// other password that opens with digits is withheld. Each word's
 	// `@`s are read once, whatever number of `://` it holds, so the scan is
 	// linear in the text.
 	var b strings.Builder
@@ -159,7 +162,7 @@ func userinfo(info string) bool {
 	case strings.ContainsAny(user, userEnds):
 		return false
 	case password != "":
-		return !port.MatchString(password)
+		return !port.MatchString(password) && (!listPort.MatchString(password) || !dottedName.MatchString(user))
 	}
 	return tokenUser(user)
 }
