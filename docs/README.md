@@ -33,7 +33,7 @@
 | [Commands](reference/commands.md)                    | Every command and flag, the hidden aliases, the plumbing, the exit codes                      |
 | [Machines](reference/machines.md)                    | Macs, servers and workspaces, lifetimes, `--on` and `station use`, Tailscale, ssh, the engine |
 | [Ports](reference/ports.md)                          | Private and Public, rights and audiences, reserved ports, sharing, HTTPS                      |
-| [Accounts](reference/accounts.md)                    | Who is signed in, sharing an account with a VM, kept and bound secrets, Claude in a VM        |
+| [Accounts](reference/accounts.md)                    | Who is signed in, the vault, a grant to a VM or an agent, Claude in a VM                      |
 | [Disk](reference/disk.md)                            | The Disk groups, the relocation rule, free, erase and move                                    |
 | [Activity](reference/activity.md)                    | What a machine is doing, where each value comes from, the history and its graphs              |
 | [Awake](reference/awake.md)                          | Every Mac's mode, keeping a Mac awake, the guards, Never sleeps                               |
@@ -100,5 +100,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [046 The repository is a monorepo of members](decisions/046-the-repository-is-a-monorepo-of-members.md) (Proposed)
 - [047 A catalog entry is a package, and a machine file is `<name>.machine.yaml`](decisions/047-a-catalog-entry-is-a-package-a-machine-file-is-name-machine-yaml.md) (Accepted)
 - [048 The engine withholds a secret before any answer](decisions/048-the-engine-withholds-a-secret-before-any-answer.md) (Proposed)
+- [049 A VM signs itself in, and the vault grants the rest](decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

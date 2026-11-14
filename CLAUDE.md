@@ -29,7 +29,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | Every command and flag                               | `docs/reference/commands.md`        |
 | Macs, servers, workspaces, `--on`, `use`, the engine | `docs/reference/machines.md`        |
 | Ports: rights, audiences, sharing, HTTPS             | `docs/reference/ports.md`           |
-| Accounts, sharing with a VM, secrets                 | `docs/reference/accounts.md`        |
+| Accounts, sign-ins, the vault, grants                | `docs/reference/accounts.md`        |
 | The Disk groups, free, erase, move                   | `docs/reference/disk.md`            |
 | Activity, its history and graphs                     | `docs/reference/activity.md`        |
 | Awake, the guards, Never sleeps                      | `docs/reference/awake.md`           |
