@@ -77,9 +77,18 @@ describe('needs', () => {
         'N7 waits for a recording of an account signed in again, and for the Tauri window, the only one that opens Terminal',
     );
 
-    test.todo(
-        'N8 window bug: an empty Needs you reads "No need is listed.", where the scenario says "Nothing here."',
-    );
+    test('N8 an empty Needs you says no need is listed, and draws no table', async () => {
+        // Given - the Inbox over one-mac, where no line waits
+        const result = await website.visit('/?world=one-mac&page=inbox', async (visitor) => {
+            // When - Needs you is read
+            await visitor.see(needs);
+
+            // Then - it says so in a line, with no button to press
+            await visitor.see(within(needs, content('No need is listed.')));
+            await visitor.gone(within(needs, button('Update mise')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo('N9 waits for a kept journal, read by day');
 
