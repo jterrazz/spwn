@@ -135,6 +135,9 @@
     "accounts.calls.LoginIn": {
       "additionalProperties": false,
       "properties": {
+        "Machine": {
+          "type": "string"
+        },
         "Program": {
           "enum": [
             "gh",

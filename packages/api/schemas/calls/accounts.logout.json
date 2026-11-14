@@ -78,6 +78,9 @@
         "Confirm": {
           "type": "string"
         },
+        "Machine": {
+          "type": "string"
+        },
         "Program": {
           "enum": [
             "gh",

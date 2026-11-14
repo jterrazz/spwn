@@ -119,16 +119,21 @@ func (s *SignIns) Read(_ context.Context, name string) (accounts.ProgramsRead, e
 	return accounts.ProgramsRead{Verdict: accounts.Summarize(rows, target, stand), Programs: rows}, nil
 }
 
-func (s *SignIns) Login(ctx context.Context, program accounts.Program) (<-chan contract.LoginUpdate, error) {
+func (s *SignIns) Login(ctx context.Context, name string, program accounts.Program) (<-chan contract.LoginUpdate, error) {
 	now := s.clock.Now()
 	s.w.Lock()
-	own := state(mac(s.w, s.mac))
+	if parent, ok := s.far(name); ok {
+		s.w.Unlock()
+		return nil, accounts.Refusal(fail.Refused, accounts.LoginOtherMac, parent)
+	}
+	target := s.target(name)
+	own := state(mac(s.w, target))
 	script := own.Logins[program]
 	if script.Refuse != "" {
 		s.w.Unlock()
 		return nil, accounts.Refusal(fail.Refused, scripted(script.Refuse), string(program))
 	}
-	if s.stopped() {
+	if stand, ok := s.standOf(target); ok && stand.Stopped {
 		s.w.Unlock()
 		return nil, accounts.Refusal(fail.Refused, accounts.LoginMachineStopped, string(program))
 	}
@@ -160,17 +165,24 @@ func (s *SignIns) Login(ctx context.Context, program accounts.Program) (<-chan c
 		if !send(contract.LoginUpdate{Read: accounts.LoginRead{Step: &sent}}) {
 			return
 		}
-		if err := s.finish(ctx, program, id, script); err != nil {
+		if err := s.finish(ctx, target, program, id, script); err != nil {
 			send(contract.LoginUpdate{Err: err})
 			return
 		}
-		row, _ := s.row(program)
+		row, _ := s.row(target, program)
 		send(contract.LoginUpdate{Read: accounts.LoginRead{Programs: []accounts.ProgramRow{row}}})
 	}()
 	return out, nil
 }
 
-func (s *SignIns) finish(ctx context.Context, program accounts.Program, id string, script world.Login) error {
+func (s *SignIns) target(name string) string {
+	if name == "" {
+		return s.mac
+	}
+	return name
+}
+
+func (s *SignIns) finish(ctx context.Context, target string, program accounts.Program, id string, script world.Login) error {
 	takes := script.Takes
 	if takes == 0 {
 		takes = usualTakes
@@ -179,7 +191,7 @@ func (s *SignIns) finish(ctx context.Context, program accounts.Program, id strin
 		if err := s.clock.Sleep(ctx, loginTick); err != nil {
 			return err
 		}
-		if s.given(id) {
+		if s.given(target, id) {
 			break
 		}
 	}
@@ -193,7 +205,7 @@ func (s *SignIns) finish(ctx context.Context, program accounts.Program, id strin
 	}
 	s.w.Lock()
 	defer s.w.Unlock()
-	own := state(mac(s.w, s.mac))
+	own := state(mac(s.w, target))
 	if ex := own.Exchanges[id]; ex.Asking && !ex.Given {
 		return accounts.Refusal(fail.Failed, accounts.LoginExpired, string(program))
 	}
@@ -205,28 +217,36 @@ func (s *SignIns) finish(ctx context.Context, program accounts.Program, id strin
 	return nil
 }
 
-func (s *SignIns) given(id string) bool {
+func (s *SignIns) given(target, id string) bool {
 	s.w.Lock()
 	defer s.w.Unlock()
-	ex := state(mac(s.w, s.mac)).Exchanges[id]
+	ex := state(mac(s.w, target)).Exchanges[id]
 	return ex != nil && ex.Asking && ex.Given
 }
 
-func (s *SignIns) row(program accounts.Program) (accounts.ProgramRow, error) {
+func (s *SignIns) row(target string, program accounts.Program) (accounts.ProgramRow, error) {
 	s.w.Lock()
 	defer s.w.Unlock()
-	stand, _ := s.standOf(s.mac)
-	facts := state(mac(s.w, s.mac)).Programs[program]
+	stand, _ := s.standOf(target)
+	facts, ok := state(mac(s.w, target)).Programs[program]
+	if !ok {
+		facts = accounts.Facts{State: accounts.ProgramSignedOut}
+	}
 	facts.Program = program
 	return accounts.Describe(facts, stand), nil
 }
 
-func (s *SignIns) CheckSignOut(_ context.Context, program accounts.Program) error {
+func (s *SignIns) CheckSignOut(_ context.Context, name string, program accounts.Program) error {
 	s.w.Lock()
 	defer s.w.Unlock()
-	facts, ok := state(mac(s.w, s.mac)).Programs[program]
+	if parent, ok := s.far(name); ok {
+		return accounts.Refusal(fail.Refused, accounts.LoginOtherMac, parent)
+	}
+	target := s.target(name)
+	facts, ok := state(mac(s.w, target)).Programs[program]
+	stand, _ := s.standOf(target)
 	switch {
-	case s.stopped():
+	case stand.Stopped:
 		return accounts.Refusal(fail.Refused, accounts.LoginMachineStopped, string(program))
 	case !ok || facts.State != accounts.ProgramSignedIn && facts.State != accounts.ProgramBroken:
 		return accounts.Refusal(fail.Refused, accounts.LoginNotSignedIn, string(program))
@@ -236,12 +256,12 @@ func (s *SignIns) CheckSignOut(_ context.Context, program accounts.Program) erro
 	return nil
 }
 
-func (s *SignIns) SignOut(_ context.Context, program accounts.Program) (accounts.ProgramRow, error) {
+func (s *SignIns) SignOut(_ context.Context, name string, program accounts.Program) (accounts.ProgramRow, error) {
+	target := s.target(name)
 	s.w.Lock()
-	own := state(mac(s.w, s.mac))
-	delete(own.Programs, program)
+	delete(state(mac(s.w, target)).Programs, program)
 	s.w.Unlock()
-	return s.row(program)
+	return s.row(target, program)
 }
 
 func (s *SignIns) Open(_ context.Context, name, exchange string) (string, error) {
@@ -278,11 +298,6 @@ func (s *SignIns) Answer(_ context.Context, name, exchange string, code secret.S
 	}
 	ex.Given = true
 	return nil
-}
-
-func (s *SignIns) stopped() bool {
-	stand, ok := s.standOf(s.mac)
-	return ok && stand.Stopped
 }
 
 func (s *SignIns) far(name string) (string, bool) {

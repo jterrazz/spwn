@@ -43,11 +43,13 @@ type (
 func (unbuiltSignIns) Read(context.Context, string) (accounts.ProgramsRead, error) {
 	return accounts.ProgramsRead{}, errUnbuilt
 }
-func (unbuiltSignIns) Login(context.Context, accounts.Program) (<-chan contract.LoginUpdate, error) {
+func (unbuiltSignIns) Login(context.Context, string, accounts.Program) (<-chan contract.LoginUpdate, error) {
 	return nil, errUnbuilt
 }
-func (unbuiltSignIns) CheckSignOut(context.Context, accounts.Program) error { return errUnbuilt }
-func (unbuiltSignIns) SignOut(context.Context, accounts.Program) (accounts.ProgramRow, error) {
+func (unbuiltSignIns) CheckSignOut(context.Context, string, accounts.Program) error {
+	return errUnbuilt
+}
+func (unbuiltSignIns) SignOut(context.Context, string, accounts.Program) (accounts.ProgramRow, error) {
 	return accounts.ProgramRow{}, errUnbuilt
 }
 func (unbuiltSignIns) Open(context.Context, string, string) (string, error) { return "", errUnbuilt }

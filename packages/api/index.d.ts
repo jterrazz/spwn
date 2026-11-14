@@ -27,11 +27,13 @@ export type AccountsCallsAnswerIn = {
 };
 
 export type AccountsCallsLoginIn = {
+    Machine?: string;
     Program?: 'gh' | 'npm' | 'claude' | 'wrangler';
 };
 
 export type AccountsCallsLogoutIn = {
     Confirm?: string;
+    Machine?: string;
     Program?: 'gh' | 'npm' | 'claude' | 'wrangler';
 };
 
