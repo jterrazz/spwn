@@ -45,8 +45,9 @@ func bare() catalog.Delivery {
 
 type sent struct{ vm, line, stdin string }
 
-// value: a Mac with a login keychain, two VMs (linux-1 running, linux-2
-// stopped) and a presence check, each step it took recorded in order.
+// value: a Mac with a login keychain, three VMs (linux-1 and linux-3
+// running, linux-2 stopped) and a presence check, each step it took
+// recorded in order.
 type rig struct {
 	login    *login
 	steps    []string
@@ -57,6 +58,8 @@ type rig struct {
 	now      time.Time
 	vault    *keychain.Kept
 	kept     *memBook
+	// value: the VMs whose own read finds the program of own() signed in.
+	signedIn map[string]bool
 }
 
 // value: the book's store in memory, each change on a copy kept only when
@@ -96,7 +99,7 @@ func (m *memBook) Change(_ context.Context, edit func(*accounts.Book) error) err
 }
 
 func newRig(_ *testing.T) *rig {
-	r := &rig{login: &login{items: map[string]string{}}, now: time.Date(2026, 11, 14, 10, 0, 0, 0, time.UTC)}
+	r := &rig{login: &login{items: map[string]string{}}, signedIn: map[string]bool{}, now: time.Date(2026, 11, 14, 10, 0, 0, 0, time.UTC)}
 	run := local.Played(func(c local.Cmd) (local.Output, error) {
 		r.steps = append(r.steps, c.Name+" "+strings.Join(c.Args, " "))
 		if c.Name != "security" {
@@ -111,9 +114,17 @@ func newRig(_ *testing.T) *rig {
 	r.vault = keychain.NewKept(run, r.kept, keychain.Options{Mac: "mac-mini", Now: func() time.Time { return r.now }}, keychain.GrantDeps{
 		Guest: r,
 		Machines: func(context.Context) ([]keychain.Machine, error) {
+			read := func(vm string) map[accounts.Program]accounts.Facts {
+				if !r.signedIn[vm] {
+					return nil
+				}
+				p := accounts.Program(own().Program)
+				return map[accounts.Program]accounts.Facts{p: {Program: p, State: accounts.ProgramSignedIn, Who: "docs-bot", How: accounts.HowOwn}}
+			}
 			return []keychain.Machine{
 				{Name: "linux-2", Where: accounts.Where{Kind: machine.Workspace, Stopped: true}},
-				{Name: "linux-1", Where: accounts.Where{Kind: machine.Workspace}},
+				{Name: "linux-1", Where: accounts.Where{Kind: machine.Workspace}, Programs: read("linux-1")},
+				{Name: "linux-3", Where: accounts.Where{Kind: machine.Workspace}, Programs: read("linux-3")},
 				{Name: "infra", Where: accounts.Where{Kind: machine.Server}},
 			}, nil
 		},
@@ -351,5 +362,37 @@ func TestAPasswordFromASignInIsTheTokenItsCommandPrints(t *testing.T) {
 	}
 	if _, err := r.vault.Passwords().Add(t.Context(), contract.PasswordIn{Label: "no capture", Program: accounts.Program(bare().Program), Kind: accounts.KeyToken, From: accounts.FromSignIn}); codeOf(err) != accounts.VaultCannotCapture {
 		t.Fatalf("Add = %v; want %s", err, accounts.VaultCannotCapture)
+	}
+}
+
+func TestAGrantGivenAgainIsNoSignInOfTheMachinesOwn(t *testing.T) {
+	r := newRig(t)
+	r.answer = keychain.Given
+	id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1", For: time.Hour}); err != nil {
+		t.Fatalf("grant: %v", err)
+	}
+	r.signedIn["linux-1"], r.signedIn["linux-3"] = true, true
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"}); err != nil {
+		t.Fatalf("a grant given again = %v; want it given", err)
+	}
+	found, err := r.vault.Grants().Candidates(t.Context(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range found.List {
+		switch c.To {
+		case "linux-1":
+			if c.Facts.How != accounts.HowGranted || c.Facts.Entry != id {
+				t.Errorf("linux-1 facts %+v; want granted from %s", c.Facts, id)
+			}
+		case "linux-3":
+			if c.Facts.How != accounts.HowOwn {
+				t.Errorf("linux-3 facts %+v; want its own sign-in", c.Facts)
+			}
+		}
+	}
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-3"}); codeOf(err) != accounts.GrantSignedInHere {
+		t.Fatalf("a grant over the machine's own sign-in = %v; want %s", err, accounts.GrantSignedInHere)
 	}
 }
