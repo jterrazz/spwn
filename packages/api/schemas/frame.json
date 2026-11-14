@@ -43,6 +43,26 @@
       ],
       "type": "object"
     },
+    "CancelFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "cancel": {
+          "const": true
+        },
+        "id": {
+          "type": "string"
+        },
+        "v": {
+          "const": 2
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "cancel"
+      ],
+      "type": "object"
+    },
     "DoneFrame": {
       "additionalProperties": false,
       "properties": {
@@ -197,6 +217,9 @@
         },
         {
           "$ref": "#/$defs/WatchFrame"
+        },
+        {
+          "$ref": "#/$defs/CancelFrame"
         }
       ]
     },

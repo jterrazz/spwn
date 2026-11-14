@@ -38,9 +38,14 @@ func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word cal
 	s := bufio.NewScanner(r)
 	s.Buffer(make([]byte, 0, 64<<10), maxFrame)
 	caller := ""
+	answering := requests{ends: map[string]*request{}}
 	for s.Scan() {
 		var f api.Frame
 		if err := json.Unmarshal(s.Bytes(), &f); err != nil {
+			continue
+		}
+		if f.Cancel {
+			answering.end(f.ID)
 			continue
 		}
 		if f.Hello != nil && api.BeforeFloor(f.Hello.Version) {
@@ -50,9 +55,47 @@ func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word cal
 			out.write(api.Frame{ID: f.ID, Error: call.ToWire(tooOld(caller), word)})
 			continue
 		}
-		running.Go(func() { answer(ctx, f, out, calls, word) })
+		rctx, done := answering.begin(ctx, f.ID)
+		running.Go(func() {
+			defer done()
+			answer(rctx, f, out, calls, word)
+		})
 	}
 	return s.Err()
+}
+
+// invariant: the requests of one stream still answering, by id, each ended
+// by a cancel that names it; a request that ended is no longer there.
+type requests struct {
+	mu   sync.Mutex
+	ends map[string]*request
+}
+
+type request struct{ cancel context.CancelFunc }
+
+func (r *requests) begin(ctx context.Context, id string) (answering context.Context, done func()) {
+	answering, cancel := context.WithCancel(ctx)
+	this := &request{cancel: cancel}
+	r.mu.Lock()
+	r.ends[id] = this
+	r.mu.Unlock()
+	return answering, func() {
+		r.mu.Lock()
+		if r.ends[id] == this {
+			delete(r.ends, id)
+		}
+		r.mu.Unlock()
+		cancel()
+	}
+}
+
+func (r *requests) end(id string) {
+	r.mu.Lock()
+	this := r.ends[id]
+	r.mu.Unlock()
+	if this != nil {
+		this.cancel()
+	}
 }
 
 func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word call.Wording) {
@@ -86,12 +129,12 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 		for u := range updates {
 			if u.Err != nil {
 				reply(api.Frame{Error: call.ToWire(u.Err, word)})
-				continue
+				return
 			}
 			raw, err := call.Encode(u.Value, word)
 			if err != nil {
 				reply(api.Frame{Error: call.ToWire(err, word)})
-				continue
+				return
 			}
 			reply(api.Frame{Out: orNull(raw)})
 		}

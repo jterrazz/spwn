@@ -223,11 +223,13 @@ func (c *Conn) Watch(ctx context.Context, target machine.Ref, name string, in js
 					u.Value = f.Out
 				}
 			case <-ctx.Done():
+				c.cancel(id)
 				return
 			}
 			select {
 			case out <- u:
 			case <-ctx.Done():
+				c.cancel(id)
 				return
 			}
 			if u.Err != nil {
@@ -236,6 +238,20 @@ func (c *Conn) Watch(ctx context.Context, target machine.Ref, name string, in js
 		}
 	}()
 	return out, nil
+}
+
+// invariant: a watch its caller let go of is ended on the far side too, so
+// its producer there stops; a connection already gone has nothing to end.
+func (c *Conn) cancel(id string) {
+	data, err := json.Marshal(Frame{V: Version, ID: id, Cancel: true})
+	if err != nil {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.gone == nil {
+		_, _ = c.w.Write(append(data, '\n'))
+	}
 }
 
 func Report(p call.Progress, f *Progress) {

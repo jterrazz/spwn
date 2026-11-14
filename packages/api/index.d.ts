@@ -487,6 +487,12 @@ export type CallFrame = {
     v: 2;
 };
 
+export type CancelFrame = {
+    cancel: true;
+    id: string;
+    v: 2;
+};
+
 export type CatalogAction = {
     Delete: string[] | null;
     Env: string[] | null;
@@ -2689,7 +2695,7 @@ export type ProgressFrame = {
     v: 2;
 };
 
-export type Request = HelloFrame | CallFrame | WatchFrame;
+export type Request = HelloFrame | CallFrame | WatchFrame | CancelFrame;
 
 export type SampleEvent = {
     at: string;

@@ -315,7 +315,8 @@ func frameSchema(w *wireRules) map[string]any {
 	r.defs["OutFrame"] = head(map[string]any{"out": map[string]any{}}, "out")
 	r.defs["ErrorFrame"] = head(map[string]any{"error": wireError}, "error")
 	r.defs["DoneFrame"] = head(map[string]any{"done": map[string]any{"const": true}}, "done")
-	r.defs["Request"] = map[string]any{"anyOf": []any{ref("HelloFrame"), ref("CallFrame"), ref("WatchFrame")}}
+	r.defs["CancelFrame"] = head(map[string]any{"cancel": map[string]any{"const": true}}, "cancel")
+	r.defs["Request"] = map[string]any{"anyOf": []any{ref("HelloFrame"), ref("CallFrame"), ref("WatchFrame"), ref("CancelFrame")}}
 	r.defs["Answer"] = map[string]any{"anyOf": []any{ref("HelloFrame"), ref("ProgressFrame"), ref("OutFrame"), ref("ErrorFrame"), ref("DoneFrame")}}
 	return map[string]any{
 		"$schema":     draft,

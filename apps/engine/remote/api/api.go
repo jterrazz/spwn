@@ -44,7 +44,8 @@ type Progress struct {
 type Frame struct {
 	// invariant: one JSON object per line. A request carries call or watch
 	// (or hello); its answers carry the same id: progress frames, then one
-	// out or error for a call, out frames then done for a watch.
+	// out or error for a call, out frames then done for a watch. A cancel
+	// carries the id of a request still answering and ends it.
 	V        int             `json:"v"`
 	ID       string          `json:"id"`
 	Hello    *Hello          `json:"hello,omitempty"`
@@ -56,6 +57,7 @@ type Frame struct {
 	Out      json.RawMessage `json:"out,omitempty"`
 	Error    *call.WireError `json:"error,omitempty"`
 	Done     bool            `json:"done,omitempty"`
+	Cancel   bool            `json:"cancel,omitempty"`
 }
 
 type Down struct{}
