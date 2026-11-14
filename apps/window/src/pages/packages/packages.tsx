@@ -1,5 +1,6 @@
 import type {
     CallName,
+    MachinefileChapterDrift,
     MachinefileDrift,
     MachinefileDriftInput,
     Target,
@@ -9,7 +10,7 @@ import { useState } from 'react';
 import { Screen, Verdict } from '../../design/index';
 import type { Reading as Read } from '../../engine/react';
 import { useRead } from '../../engine/react';
-import { chapterNoun, verdictShown } from '../../engine/shown';
+import { chapterNoun, fileJoinOf, verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import { useRouter } from '../../shell/router';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
@@ -22,20 +23,37 @@ import { PlanView } from './plan';
 
 import styles from './packages.module.css';
 
-function FileLink({ file }: { file: string }) {
+function FileName({ file }: { file: string }) {
     const { go } = useRouter();
     return (
+        <button
+            className={styles.fileLink}
+            onClick={() => {
+                go({ file, page: 'machine-files' });
+            }}
+            type="button"
+        >
+            {file}
+        </button>
+    );
+}
+
+function FileLink({ file }: { file: string }) {
+    return (
         <>
-            Its machine file is{' '}
-            <button
-                className={styles.fileLink}
-                onClick={() => {
-                    go({ file, page: 'machine-files' });
-                }}
-                type="button"
-            >
-                {file}
-            </button>
+            Its machine file is <FileName file={file} />
+        </>
+    );
+}
+
+function HeadTitle({ apps, file }: { apps: MachinefileChapterDrift; file: string }) {
+    return file === '' ? (
+        apps.Verdict.Sentence
+    ) : (
+        <>
+            {apps.Verdict.Sentence}
+            {fileJoinOf(apps.Verdict.Tone)}
+            <FileName file={file} />.
         </>
     );
 }
@@ -71,7 +89,7 @@ function FileState({ drift, name }: { drift: Read<MachinefileDrift>; name: strin
         <Verdict
             line={line}
             size="tab"
-            title={apps.Verdict.Sentence}
+            title={<HeadTitle apps={apps} file={drift.out.Plan.Name} />}
             {...verdictShown(apps.Verdict)}
         />
     );

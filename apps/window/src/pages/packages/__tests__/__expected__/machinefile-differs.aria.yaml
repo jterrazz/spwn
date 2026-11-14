@@ -9,7 +9,10 @@
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage"
-  - heading "2 differences" [level=1]
+  - heading "2 differences from jterrazz-macbook-pro." [level=1]:
+    - text: 2 differences from
+    - button "jterrazz-macbook-pro"
+    - text: .
   - paragraph:
     - img "2 differences"
     - text: 4 of 6 apps match · Its machine file is

@@ -148,7 +148,10 @@ describe('Packages', () => {
 
                 // When - the name of its file is clicked in the head
                 await visitor.click(
-                    within(main(), button('jterrazz-macbook-pro', { exact: true })),
+                    within(
+                        heading('jterrazz-macbook-pro.', { exact: false }),
+                        button('jterrazz-macbook-pro', { exact: true }),
+                    ),
                 );
 
                 // Then - Machine files opens on that file

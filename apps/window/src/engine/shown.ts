@@ -157,6 +157,10 @@ export function verdictShown(verdict: CoreVerdictVerdict): Shown {
     return { tone: verdict.Tone, word: verdict.Sentence };
 }
 
+export function fileJoinOf(tone: Tone): string {
+    return tone === 'ok' ? ' ' : ' from ';
+}
+
 export function chapterNoun(chapter: MachinefileChapter, count: number): string {
     const { One, Other } = wordOf('MachinefileChapter', chapter);
     return (count === 1 ? One : Other) ?? chapter;

@@ -6,7 +6,7 @@ import { StateDot } from './state-dot';
 import styles from './verdict.module.css';
 
 export type VerdictProps = {
-    title: string;
+    title: ReactNode;
     line: ReactNode;
     tone: Tone;
     word: string;

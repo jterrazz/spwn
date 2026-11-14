@@ -9,7 +9,10 @@
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage"
-  - heading "1 difference" [level=1]
+  - heading "1 difference from macbook-pro." [level=1]:
+    - text: 1 difference from
+    - button "macbook-pro"
+    - text: .
   - paragraph:
     - img "1 difference"
     - text: 4 of 5 apps match · 0 of 1 setting match · Its machine file is
