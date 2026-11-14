@@ -11,7 +11,10 @@ export default defineConfig({
                 {
                     name: 'design-knows-no-app',
                     from: { path: '^src/design/', pathNot: '/__tests__/' },
-                    to: { path: '^src/', pathNot: ['^src/design/', '^src/tone[.]ts$'] },
+                    to: {
+                        path: '^src/',
+                        pathNot: ['^src/design/', '^src/tone[.]ts$', '^src/separator[.]ts$'],
+                    },
                     why: 'the design kit draws what it is handed and knows nothing of the engine, the shell or a page',
                     fix: 'take the value as a prop, or move the code that needs the app out of src/design/ (apps/window/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',
@@ -19,7 +22,7 @@ export default defineConfig({
                 {
                     name: 'model-is-pure',
                     from: { path: '^src/model/', pathNot: '/__tests__/' },
-                    to: { path: '^src/', pathNot: '^src/model/' },
+                    to: { path: '^src/', pathNot: ['^src/model/', '^src/separator[.]ts$'] },
                     why: 'the model is plain functions over values: no word, no tone, no drawing, no link',
                     fix: 'move the code that reads the engine to src/engine/, or the drawing to src/design/ (apps/window/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',

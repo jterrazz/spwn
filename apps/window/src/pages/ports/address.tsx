@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { CopyButton } from '../../design/copy-button';
 import { Button } from '../../design/index';
 import { QrCode } from '../../design/qr-code';
-import { SEPARATOR } from '../../design/separator';
 import type { Openable } from '../../engine/opener';
+import { SEPARATOR } from '../../separator';
 import { OpenButton } from '../kit/opens';
 
 import styles from './ports.module.css';

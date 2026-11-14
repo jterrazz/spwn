@@ -20,6 +20,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
+import { SEPARATOR } from '../separator';
 import type { MachinesFit, MachinesPreset } from './machines-new';
 import type { DiskCall, EngineState, MacState, NeedCall, VmState } from './provisional';
 
@@ -108,7 +109,7 @@ export const PRESET_WORDS: Words<MachinesPreset> = {
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;
 
 export const SILENT_METER_WORDS = {
-    line: 'The meter did not answer in time · no value is known',
+    line: `The meter did not answer in time${SEPARATOR}no value is known`,
     title: 'No value is known.',
 } as const;
 

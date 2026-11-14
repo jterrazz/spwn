@@ -8,9 +8,9 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../../design/separator';
 import { portsMacOf } from '../../engine/provisional';
 import { sentence } from '../../model/format';
+import { SEPARATOR } from '../../separator';
 import { tabOf } from '../needs/needs';
 
 export type PortsOf = {

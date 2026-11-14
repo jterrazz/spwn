@@ -1,7 +1,6 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
 import { Button, MachineIcon, StatePill, Switch } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { engineViewWord, macState, vmKindWord, vmLifetimeWord, vmState } from '../../engine/shown';
@@ -9,6 +8,7 @@ import { AWAKE_WORDS, THIS_MAC_WORD } from '../../engine/words';
 import { clock, sentence } from '../../model/format';
 import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
+import { SEPARATOR } from '../../separator';
 import { machineRoute, TAB_PANEL, TABS } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
 import type { Opening } from '../../shell/window';

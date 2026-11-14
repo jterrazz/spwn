@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { SEPARATOR } from '../separator';
 import type { Tone } from '../tone';
-import { SEPARATOR } from './separator';
 
 import styles from './tile.module.css';
 

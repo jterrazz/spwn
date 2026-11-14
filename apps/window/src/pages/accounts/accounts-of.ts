@@ -7,13 +7,13 @@ import type {
 
 import { screen } from '../../design/secret';
 import type { Screened } from '../../design/secret';
-import { SEPARATOR } from '../../design/separator';
 import { identitiesOf } from '../../engine/provisional';
 import {
     ACCOUNT_ORIGIN_WORDS,
     ACCOUNT_REASON_WORDS,
     ACCOUNT_STATE_WORDS,
 } from '../../engine/words';
+import { SEPARATOR } from '../../separator';
 
 export type AccountsOf = {
     machine: AccountsMachine | undefined;

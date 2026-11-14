@@ -13,6 +13,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
+import { SEPARATOR } from '../separator';
 import type { Tone } from '../tone';
 import { wordOf } from './engine-words';
 import {
@@ -79,7 +80,7 @@ export function vmState(vm: MachinesVM): Shown {
 
 export function birthSentence(birth: MachinesBirth): string {
     const { Word, Detail = '' } = wordOf('MachinesBirthStep', birth.step);
-    return `${Word} · ${Detail} ${birth.position} of ${birth.steps}`;
+    return `${Word}${SEPARATOR}${Detail} ${birth.position} of ${birth.steps}`;
 }
 
 export function vmCheck(vm: MachinesVM): Shown {

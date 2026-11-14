@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { CodeBlock } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
+import { SEPARATOR } from '../../separator';
 import { countOf, filtered, numbered } from './lines';
 
 type LineListProps = { lines: readonly string[]; query: string; memory: string; foot?: string };

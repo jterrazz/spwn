@@ -3,11 +3,11 @@ import type { ReactElement, ReactNode } from 'react';
 
 import { Bar, Chart, MissingMark, Tile } from '../../design/index';
 import type { Identity } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import { ownState } from '../../engine/shown';
 import type { OwnState } from '../../engine/words';
 import { bytes, duration, memory, percent } from '../../model/format';
 import type { Found } from '../../model/machines';
+import { SEPARATOR } from '../../separator';
 import type { Tone } from '../../tone';
 import { useIdentityOf } from '../kit/identity';
 import { Tiles } from '../page';

@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 
 import { AppIcon, Button, Panel, ShareBar, TypeTag } from '../../design/index';
 import type { SharePart } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import { diskGestureOf, freesWhole, holdsRebuildable } from '../../engine/provisional';
 import { useReread } from '../../engine/react';
 import { DISK_GROUP_WORDS, DISK_KIND_WORDS, DISK_PENDING_WORD } from '../../engine/words';
 import { bytes, sentence } from '../../model/format';
+import { SEPARATOR } from '../../separator';
 import { byApp, groupsOf, partsOf, rebuildableOf, sizeOf } from './disk';
 import type { AppRow, Group, Part } from './disk';
 import { DiskLine, EraseLink, FreeAllButton } from './disk-gestures';

@@ -2,9 +2,9 @@ import type { ActivityReport, ActivitySample } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { Chart, Missing, MissingMark, Panel } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import { PRESSURE_WORDS } from '../../engine/words';
 import { memory, rate, sentence } from '../../model/format';
+import { SEPARATOR } from '../../separator';
 import { countedMarks, keptOver, memoryMarks, strided } from './history';
 import { chartedOf, cpuOf, marksOf, memoryOf, spanOf } from './measures';
 import type { Marks, Span } from './measures';

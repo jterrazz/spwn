@@ -3,9 +3,9 @@ import type { ReactNode } from 'react';
 
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
 import type { Measured } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import { vmCheck, vmSsh, vmState } from '../../engine/shown';
 import { clock, duration, seconds, sentence } from '../../model/format';
+import { SEPARATOR } from '../../separator';
 import { between, shortDay } from '../activity/when';
 
 import styles from './overview.module.css';

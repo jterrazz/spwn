@@ -11,12 +11,12 @@ import {
     Verdict,
 } from '../../design/index';
 import { shownOrWithheld } from '../../design/secret';
-import { SEPARATOR } from '../../design/separator';
 import type { EngineError } from '../../engine/engine-error';
 import { failedState } from '../../engine/failed';
 import type { Reach } from '../../engine/reach';
 import { ownState } from '../../engine/shown';
 import { fixLine, sentence } from '../../model/format';
+import { SEPARATOR } from '../../separator';
 import type { Tone } from '../../tone';
 
 import styles from '../page.module.css';

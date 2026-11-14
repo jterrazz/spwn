@@ -8,11 +8,11 @@ import type {
 import { useState } from 'react';
 
 import { Screen, Verdict } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import type { Reading as Read } from '../../engine/react';
 import { useRead } from '../../engine/react';
 import { chapterNoun, fileJoinOf, verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
+import { SEPARATOR } from '../../separator';
 import { useRouter } from '../../shell/router';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { NotGiven, NoVerdict, Reading } from '../kit/readings';

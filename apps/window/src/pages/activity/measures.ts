@@ -7,8 +7,8 @@ import type {
     MachinesMacView,
 } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../../design/separator';
 import { clock, memory, percent } from '../../model/format';
+import { SEPARATOR } from '../../separator';
 
 export type Span = '1h' | '6m' | '24h';
 

@@ -1,10 +1,10 @@
 import type { MachinesVM, OverviewNeed } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../design/separator';
 import { machineKindOf } from '../engine/provisional';
 import type { MachineKind } from '../engine/provisional';
 import { vmKindWord } from '../engine/shown';
 import { THIS_MAC_WORD } from '../engine/words';
+import { SEPARATOR } from '../separator';
 import { machineRoute, TABS } from './route';
 import type { PlainPage, Route } from './route';
 

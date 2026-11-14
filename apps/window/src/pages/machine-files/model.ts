@@ -6,8 +6,8 @@ import type {
 
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import { wordOfSent } from '../../engine/engine-words';
+import { SEPARATOR } from '../../separator';
 import { SHELVES } from '../packages/model';
 
 export const CHAPTERS = [...SHELVES, 'Access'] as const;

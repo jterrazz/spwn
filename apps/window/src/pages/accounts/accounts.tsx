@@ -8,7 +8,6 @@ import type {
 import { CopyButton } from '../../design/copy-button';
 import { AppIcon, Button, MachineChip, Panel, Row, StatePill, Value } from '../../design/index';
 import { looksSecret } from '../../design/secret';
-import { SEPARATOR } from '../../design/separator';
 import { Openable } from '../../engine/opener';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
@@ -17,6 +16,7 @@ import { ACCOUNT_STATE_TONES } from '../../engine/tones';
 import { sentence } from '../../model/format';
 import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
+import { SEPARATOR } from '../../separator';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { ChapterDiffers } from '../kit/chapter-differs';

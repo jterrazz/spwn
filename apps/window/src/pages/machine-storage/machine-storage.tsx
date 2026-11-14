@@ -1,8 +1,8 @@
 import type { DiskReading, Target } from '@jterrazz/station-api';
 
 import { Screen } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import { useWatch } from '../../engine/react';
+import { SEPARATOR } from '../../separator';
 import type { Route } from '../../shell/route';
 import { Freed, useFreeAll } from '../disk/disk-gestures';
 import { ByApp, DiskPanel } from '../disk/disk-view';

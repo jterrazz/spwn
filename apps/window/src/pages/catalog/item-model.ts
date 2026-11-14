@@ -1,6 +1,6 @@
 import type { AppsReport, CatalogLivesOn, CatalogSetting } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../../design/separator';
+import { SEPARATOR } from '../../separator';
 
 export type System = NonNullable<CatalogLivesOn['Kinds']>[number];
 

@@ -1,8 +1,8 @@
 import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../design/index';
-import { SEPARATOR } from '../../design/separator';
 import type { PlanLine } from '../../engine/provisional';
 import { CONDITION_TONES } from '../../engine/tones';
 import { ANY_VERSION_WORD, CATALOG_KIND_WORDS, CONDITION_WORDS } from '../../engine/words';
+import { SEPARATOR } from '../../separator';
 import type { Tone } from '../../tone';
 import { countWord } from './model';
 import type { Layer, Shelf } from './model';
