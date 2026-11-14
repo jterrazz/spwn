@@ -347,7 +347,11 @@ type VM struct {
 	// value: what station keeps of the VM; nil for a disk it has no record of.
 	Kept *Kept `json:"kept,omitempty"`
 	// value: the hypervisor holds its disk.
-	Disk bool          `json:"disk,omitempty"`
+	Disk bool `json:"disk,omitempty"`
+	// value: a create cloned it from an image in this world: once its
+	// guest serves station's API it is a machine of its own, a workspace or
+	// a server on Linux, sized as it was made.
+	Made bool          `json:"made,omitempty"`
 	Size machines.Size `json:"size"`
 	// value: the pid of its run; zero when it does not run.
 	PID int `json:"pid,omitempty"`

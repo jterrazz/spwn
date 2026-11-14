@@ -1,0 +1,13 @@
+description: 'a VM just made answers as a machine of its own: its Overview reads it, a workspace'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create gate5 >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.Summary.Head.Name, .out.Summary.Head.Kind]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{},"target":{"name":"gate5"}}
+      exit: 0
+      stdout: |
+          ["gate5","workspace"]
