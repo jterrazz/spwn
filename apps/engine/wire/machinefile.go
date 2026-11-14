@@ -96,7 +96,7 @@ func refusalOf(broken error) *overviewcalls.Refusal {
 	if errors.As(broken, &named) {
 		file = named.File
 	}
-	return &overviewcalls.Refusal{Text: kit.Translate(broken, "").Message, File: file}
+	return &overviewcalls.Refusal{Text: kit.Screened(broken, "").Message, File: file}
 }
 
 // value: the commands that read no catalog, by their word under the root:
@@ -116,7 +116,7 @@ func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reporte
 	if broken == nil {
 		return func() {}
 	}
-	worded := kit.Translate(broken, "")
+	worded := kit.Screened(broken, "")
 	said := false
 	say := func() {
 		if !said {

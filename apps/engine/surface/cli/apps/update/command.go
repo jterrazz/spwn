@@ -76,7 +76,7 @@ func everyMachine(ctx context.Context, env kit.Env, d Deps, req appscalls.Update
 		case errors.As(err, &refused) && refused.Type == fail.NotForThisMachine:
 			u.Skipped = "server"
 		case err != nil:
-			u.Err = kit.Translate(err, "").Message
+			u.Err = kit.Screened(err, "").Message
 			failed++
 		}
 		if n, _ := apps.FailedOf(outcomes); n > 0 {

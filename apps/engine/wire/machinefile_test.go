@@ -19,3 +19,11 @@ func TestABrokenCatalogFileIsRefusedAtItsFileAndLineForNeedsYou(t *testing.T) {
 		t.Errorf("refusal %+v, want the file and its line", got)
 	}
 }
+
+func TestARefusedCatalogFileSaysItsProblemWithItsTokenWithheld(t *testing.T) {
+	bad := &machinefile.RefusedFileError{Format: "catalog", Err: &catalog.FileError{File: "~/.config/station/catalog/apps/jq.yaml", Line: 3, Problem: "unknown key https://bot:hunter2@proxy.example/x"}}
+	got := refusalOf(machinefilecalls.Worded(bad))
+	if got == nil || strings.Contains(got.Text, "hunter2") || !strings.Contains(got.Text, "https://withheld@proxy.example/x") {
+		t.Errorf("refusal %+v, want its credential withheld", got)
+	}
+}

@@ -98,9 +98,9 @@ func everyMachine(ctx context.Context, env kit.Env, d Deps, in *Input, io kit.IO
 			var refused *fail.Error
 			switch {
 			case errors.As(err, &refused) && refused.Type == fail.NotForThisMachine:
-				a.Skipped = kit.Translate(err, "settings apply").Message
+				a.Skipped = kit.Screened(err, "settings apply").Message
 			case err != nil:
-				a.Err = kit.Translate(err, "settings apply").Message
+				a.Err = kit.Screened(err, "settings apply").Message
 				failed++
 			}
 			if brokenOf(a.Changes) > 0 {
@@ -137,7 +137,7 @@ func applyLiving(ctx context.Context, env kit.Env, p settings.LivesOn, names []s
 		if !errors.As(err, &refused) || refused.Code != settingscalls.NotForThisMachine || !slices.Contains(names, refused.Subject) {
 			return err
 		}
-		a.Elsewhere = append(a.Elsewhere, pagesettings.Elsewhere{Name: refused.Subject, Why: kit.Translate(err, "settings apply").Message})
+		a.Elsewhere = append(a.Elsewhere, pagesettings.Elsewhere{Name: refused.Subject, Why: kit.Screened(err, "settings apply").Message})
 		names = slices.DeleteFunc(slices.Clone(names), func(n string) bool { return n == refused.Subject })
 		if len(names) == 0 {
 			return nil

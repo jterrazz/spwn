@@ -41,7 +41,7 @@ func (f settingsAllMachines) Read(ctx context.Context, refs []coremachine.Ref) m
 	out := make(map[coremachine.Ref]settingscalls.Answer, len(refs))
 	for name, a := range got {
 		if a.Err != nil {
-			out[by[name]] = settingscalls.Answer{Why: kit.Translate(a.Err, "settings").Message}
+			out[by[name]] = settingscalls.Answer{Why: kit.Screened(a.Err, "settings").Message}
 			continue
 		}
 		out[by[name]] = settingscalls.Answer{Rows: settings.Known(a.Value, f.m.cat.Setting)}

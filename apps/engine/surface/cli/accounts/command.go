@@ -162,7 +162,7 @@ func everyMachine(ctx context.Context, env kit.Env, io kit.IO) error {
 }
 
 func faulted(b pageaccounts.MachineBlock, err error) pageaccounts.MachineBlock {
-	worded := kit.Translate(err, "")
+	worded := kit.Screened(err, "")
 	b.Note = worded.Message
 	b.Fault = pageaccounts.Fault{Type: string(worded.Type), Code: string(worded.Code)}
 	if b.Fault.Type == "" {

@@ -16,7 +16,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
-	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	pageawake "github.com/jterrazz/studio-station/apps/engine/pages/awake"
 	"github.com/jterrazz/studio-station/apps/engine/remote/each"
 	awakecmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/awake"
@@ -109,7 +108,7 @@ func (m machine) everyMacAwake(ctx context.Context, env kit.Env) (pageawake.AllM
 	})
 	for _, mac := range others {
 		if err := got[mac].Err; err != nil {
-			f.Silent = append(f.Silent, silentAwake(known, mac, kit.Translate(err, "awake").Message))
+			f.Silent = append(f.Silent, silentAwake(known.Seen, mac, err))
 			continue
 		}
 		f.Reports = append(f.Reports, got[mac].Value)
@@ -118,10 +117,11 @@ func (m machine) everyMacAwake(ctx context.Context, env kit.Env) (pageawake.AllM
 }
 
 // value: a Mac that did not answer, as it last did: asleep or not, when,
-// and the servers it then hosted.
-func silentAwake(known *machinescalls.Machinist, mac, why string) pageawake.Silent {
-	s := pageawake.Silent{Mac: mac, Why: why}
-	h, ok := known.Seen(mac)
+// and the servers it then hosted; why it did not answer is screened, as a
+// page draws it as text.
+func silentAwake(seen func(string) (model.MacRecord, bool), mac string, err error) pageawake.Silent {
+	s := pageawake.Silent{Mac: mac, Why: kit.Screened(err, "awake").Message}
+	h, ok := seen(mac)
 	if !ok {
 		return s
 	}
