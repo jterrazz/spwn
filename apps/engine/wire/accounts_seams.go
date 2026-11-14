@@ -10,14 +10,23 @@ import (
 )
 
 func (m machine) signIns() contract.SignIns {
+	if m.world != nil {
+		return m.world.signIns(m.sys.Clock.Now, m.sys.Clock.Sleep)
+	}
 	return unbuiltSignIns{}
 }
 
 func (m machine) passwords() contract.Passwords {
+	if m.world != nil {
+		return m.world.passwords(m.sys.Clock.Now, m.sys.Clock.Sleep)
+	}
 	return unbuiltPasswords{}
 }
 
 func (m machine) grants() contract.Grants {
+	if m.world != nil {
+		return m.world.grants(m.sys.Clock.Now, m.sys.Clock.Sleep)
+	}
 	return unbuiltGrants{}
 }
 

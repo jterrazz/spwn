@@ -149,6 +149,8 @@ type Mac struct {
 	// value: who each provider says is signed in, by provider; a provider
 	// absent here has no row on this Mac.
 	Identities map[string]accounts.Identity `json:"identities,omitempty"`
+	// value: what this machine's programs, sign-ins, passwords and grants are.
+	Accounts *Accounts `json:"accounts,omitempty"`
 	// value: the facts this Mac answers, by fact; a fact absent here is one
 	// it cannot look at.
 	Facts map[catalog.Fact]settings.Fact `json:"facts,omitempty"`

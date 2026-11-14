@@ -45,13 +45,26 @@ type LoginProgram struct {
 	// value: a program station signs in for the owner: the name its wire calls
 	// it by, which is the command it runs, and its label.
 	Name, Label string
+	// value: how its login asks the owner, and the site it sends them to.
+	Flow Flow
+	Site string
+	// value: whether the token of its sign-in can be taken into the vault.
+	Captures bool
 }
 
+type Flow string
+
+const (
+	FlowDeviceCode Flow = "device-code"
+	FlowLink       Flow = "link"
+	FlowPaste      Flow = "paste"
+)
+
 var LoginPrograms = []LoginProgram{
-	{Name: "gh", Label: "GitHub"},
-	{Name: "npm", Label: "npm"},
-	{Name: "claude", Label: "Claude"},
-	{Name: "wrangler", Label: "Cloudflare"},
+	{Name: "gh", Label: "GitHub", Flow: FlowDeviceCode, Site: "github.com", Captures: true},
+	{Name: "npm", Label: "npm", Flow: FlowLink, Site: "www.npmjs.com"},
+	{Name: "claude", Label: "Claude", Flow: FlowPaste, Site: "claude.com", Captures: true},
+	{Name: "wrangler", Label: "Cloudflare", Flow: FlowLink, Site: "dash.cloudflare.com"},
 }
 
 type ProviderHint struct {
