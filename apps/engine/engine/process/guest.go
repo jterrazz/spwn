@@ -22,7 +22,7 @@ type Guest interface {
 	// invariant: what the engine writes to the session is the command's
 	// input, what it reads its output; the output ends with the command, the
 	// connection or ctx.
-	Attach(ctx context.Context, line string) (Stream, error)
+	Attach(ctx context.Context, line string) (Session, error)
 	Forward(ctx context.Context, ip string, port int) (Stream, error)
 	Close() error
 	Done() <-chan struct{}
@@ -43,6 +43,24 @@ func (d *Engine) GuestExec(ctx context.Context, vm, line, stdin string) (engine.
 		return engine.GuestRan{}, fault(enginecalls.GuestAbsent, vm+"'s guest is not connected", "station machines start "+vm)
 	}
 	return client.Exec(ctx, line, stdin)
+}
+
+func (d *Engine) GuestAttach(ctx context.Context, vm, line string) (Session, error) {
+	// invariant: a command attached inside a VM rides the engine's own
+	// connection to it, as GuestExec does; it ends with its command, the
+	// connection or ctx, and the ctx's end stops the command first.
+	v, err := d.find(vm)
+	if err != nil {
+		return nil, err
+	}
+	client, state := d.dialed(ctx, v)
+	if client == nil && state == engine.StateStopped {
+		return nil, fault(enginecalls.VMStopped, vm+" is stopped", "station machines start "+vm)
+	}
+	if client == nil {
+		return nil, fault(enginecalls.GuestAbsent, vm+"'s guest is not connected", "station machines start "+vm)
+	}
+	return client.Attach(ctx, line)
 }
 
 const guestWait = 10 * time.Second

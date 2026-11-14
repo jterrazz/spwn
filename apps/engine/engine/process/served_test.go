@@ -36,7 +36,7 @@ func (speaksFirst) Exec(context.Context, string, string) (engine.GuestRan, error
 	return engine.GuestRan{}, errors.New("no exec in a module test")
 }
 
-func (speaksFirst) Attach(context.Context, string) (Stream, error) {
+func (speaksFirst) Attach(context.Context, string) (Session, error) {
 	return nil, errors.New("no session in a module test")
 }
 

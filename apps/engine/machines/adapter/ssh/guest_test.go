@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"context"
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/binary"
@@ -15,6 +16,7 @@ import (
 	"strconv"
 	"sync"
 	"testing"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 
@@ -35,6 +37,11 @@ type sshd struct {
 	mu       sync.Mutex
 	answers  map[string]contracttest.Answer
 	received map[string][]byte
+	// value: a line that runs until the client ends it, and what the guest
+	// heard of that end, in order: a signal by its name, or the session's close.
+	held  string
+	began chan struct{}
+	heard chan string
 }
 
 func newHostKey(t *testing.T) ssh.Signer {
@@ -109,12 +116,31 @@ func (s *sshd) session(nc ssh.NewChannel) {
 		}
 		_ = req.Reply(true, nil)
 		line := string(req.Payload[4:])
+		if line == s.held && line != "" {
+			s.hold(ch, reqs)
+			return
+		}
 		code := s.run(line, ch)
 		status := make([]byte, 4)
 		binary.BigEndian.PutUint32(status, uint32(code)) //nolint:gosec // outside: an exit code is 0-255.
 		_, _ = ch.SendRequest("exit-status", false, status)
 		return
 	}
+}
+
+func (s *sshd) hold(ch ssh.Channel, reqs <-chan *ssh.Request) {
+	close(s.began)
+	for req := range reqs {
+		if req.Type != "signal" || len(req.Payload) <= 4 {
+			continue
+		}
+		s.heard <- "signal " + string(req.Payload[4:])
+		status := make([]byte, 4)
+		binary.BigEndian.PutUint32(status, 143)
+		_, _ = ch.SendRequest("exit-status", false, status)
+		return
+	}
+	s.heard <- "closed"
 }
 
 var putLine = regexp.MustCompile(`^/bin/cat > '([^']+)' && /bin/chmod ([0-7]+) '([^']+)'$`)
@@ -262,6 +288,47 @@ func TestABuildVMIsReachedByItsImagePassword(t *testing.T) {
 	defer func() { _ = g.Close() }()
 	if res, err := g.Exec(t.Context(), contract.GuestCommand{Line: "true"}); err != nil || res.Code != 0 {
 		t.Errorf("a command over the password session came back %+v (%v)", res, err)
+	}
+}
+
+func TestACommandEndedByItsContextIsToldToStopBeforeItsSessionCloses(t *testing.T) {
+	// invariant: with no terminal, a guest's command outlives its closed
+	// session (the probe of 2026-11-14 left a login polling), so the
+	// session's end is a SIGTERM first.
+	s := startSSHD(t, newHostKey(t))
+	s.held, s.began, s.heard = "wait-for-approval", make(chan struct{}), make(chan string, 2)
+	g, err := dial(t).Dial(t.Context(), target(t, s, filepath.Join(t.TempDir(), "known_hosts", "dev")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = g.Close() }()
+	ctx, cancel := context.WithCancel(t.Context())
+	ran := make(chan error, 1)
+	go func() {
+		_, err := g.Exec(ctx, contract.GuestCommand{Line: s.held, Stdout: io.Discard, Stderr: io.Discard})
+		ran <- err
+	}()
+	select {
+	case <-s.began:
+	case <-time.NewTimer(10 * time.Second).C:
+		t.Fatal("the command never began")
+	}
+	cancel()
+	select {
+	case heard := <-s.heard:
+		if heard != "signal TERM" {
+			t.Errorf("the guest heard %q first; want the SIGTERM before the session closes", heard)
+		}
+	case <-time.NewTimer(10 * time.Second).C:
+		t.Fatal("the guest heard nothing of the end")
+	}
+	select {
+	case err := <-ran:
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("Exec = %v; want the context's end", err)
+		}
+	case <-time.NewTimer(10 * time.Second).C:
+		t.Fatal("Exec never returned")
 	}
 }
 

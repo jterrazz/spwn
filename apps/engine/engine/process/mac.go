@@ -13,6 +13,14 @@ type Stream interface {
 	Close() error
 }
 
+type Session interface {
+	// value: a command attached inside a VM: its output, its input, and its
+	// exit code once it ended; an error when the connection or ctx ended it
+	// first.
+	Stream
+	Wait() (int, error)
+}
+
 type Listener interface {
 	Accept() (Stream, error)
 	Close() error
