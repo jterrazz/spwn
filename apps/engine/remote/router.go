@@ -29,6 +29,11 @@ type Reach struct {
 	Version string
 	// value: a Mac's name as the owner reads it (mac-mini); nil keeps it whole.
 	Label func(mac string) string
+	// value: the answers to a watch of one of this Mac's VMs that has no
+	// guest to ask yet, its create still running, one for each step the
+	// create reaches, closed when the create ends; false sends the watch
+	// to its guest.
+	Unborn func(ctx context.Context, vm, call string) (<-chan any, bool)
 }
 
 type Router struct {
@@ -115,17 +120,23 @@ func (r *Router) Watch(ctx context.Context, target machine.Ref, name string, in 
 	if err != nil {
 		return nil, err
 	}
-	l, err := r.endpoint(ctx, t, name)
-	if err != nil {
-		return nil, r.named(t, err)
+	guest := func() (<-chan call.Update[any], error) {
+		l, err := r.endpoint(ctx, t, name)
+		if err != nil {
+			return nil, r.named(t, err)
+		}
+		updates, err := l.ep.Watch(ctx, t, name, raw, p)
+		if err != nil {
+			r.broke(t.Mac(), l, err)
+			r.release(l)
+			return nil, err
+		}
+		return wire(ctx, updates, func() { r.release(l) }), nil
 	}
-	updates, err := l.ep.Watch(ctx, t, name, raw, p)
-	if err != nil {
-		r.broke(t.Mac(), l, err)
-		r.release(l)
-		return nil, err
+	if born, ok := r.unborn(ctx, t, name, guest); ok {
+		return born, nil
 	}
-	return wire(ctx, updates, func() { r.release(l) }), nil
+	return guest()
 }
 
 func wire(ctx context.Context, updates <-chan call.Update[json.RawMessage], ended func()) <-chan call.Update[any] {
@@ -355,17 +366,68 @@ func (r *Router) ServeWatch(ctx context.Context, target machine.Ref, name string
 	if !ok {
 		return serve.Local(r.registry, r.thisMac, r.reach.Version).Watch(ctx, target, name, in, p)
 	}
-	l, err := r.endpoint(ctx, vm, name)
-	if err != nil {
-		return nil, err
+	guest := func() (<-chan call.Update[any], error) {
+		l, err := r.endpoint(ctx, vm, name)
+		if err != nil {
+			return nil, err
+		}
+		updates, err := l.ep.Watch(ctx, vm, name, in, p)
+		if err != nil {
+			r.broke(vm.Mac(), l, err)
+			r.release(l)
+			return nil, err
+		}
+		return wire(ctx, updates, func() { r.release(l) }), nil
 	}
-	updates, err := l.ep.Watch(ctx, vm, name, in, p)
-	if err != nil {
-		r.broke(vm.Mac(), l, err)
-		r.release(l)
-		return nil, err
+	if born, ok := r.unborn(ctx, vm, name, guest); ok {
+		return born, nil
 	}
-	return wire(ctx, updates, func() { r.release(l) }), nil
+	return guest()
+}
+
+// invariant: a watch of a VM of this Mac whose create still runs stays
+// open through it: one update for each step the create reaches, then, the
+// create ended, the watch of its guest, whose first answer is the first
+// normal one; a guest that cannot be reached ends it with that refusal.
+func (r *Router) unborn(ctx context.Context, vm machine.Ref, name string, guest func() (<-chan call.Update[any], error)) (<-chan call.Update[any], bool) {
+	if r.reach.Unborn == nil || vm.On == "" || vm.On != r.thisMac.Ref.Name {
+		return nil, false
+	}
+	births, ok := r.reach.Unborn(ctx, vm.Name, name)
+	if !ok {
+		return nil, false
+	}
+	out := make(chan call.Update[any])
+	send := func(u call.Update[any]) bool {
+		select {
+		case out <- u:
+			return true
+		case <-ctx.Done():
+			return false
+		}
+	}
+	go func() {
+		defer close(out)
+		for v := range births {
+			if !send(call.Update[any]{Value: v}) {
+				return
+			}
+		}
+		if ctx.Err() != nil {
+			return
+		}
+		updates, err := guest()
+		if err != nil {
+			send(call.Update[any]{Err: err})
+			return
+		}
+		for u := range updates {
+			if !send(u) {
+				return
+			}
+		}
+	}()
+	return out, true
 }
 
 func (r *Router) vm(target machine.Ref) (machine.Ref, bool) {

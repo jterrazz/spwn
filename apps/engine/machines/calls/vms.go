@@ -152,10 +152,55 @@ func (s *Machinist) CheckDelete(name string) error {
 }
 
 func (s *Machinist) notBeingCreated(r model.VMRecord) error {
-	if r.Birth != nil && r.Birth.Known() && s.runs(r.Owner) {
+	if s.beingCreated(r) {
 		return &model.BeingCreatedError{Name: r.Name, Mac: s.ThisMacName()}
 	}
 	return nil
+}
+
+func (s *Machinist) beingCreated(r model.VMRecord) bool {
+	return r.Birth != nil && r.Birth.Known() && s.runs(r.Owner)
+}
+
+func (s *Machinist) Creating(name string) (model.Birth, bool) {
+	// value: how far the create of a VM of this Mac is while it still
+	// runs; false once it ended, or for a name no VM of this Mac holds.
+	r, err := s.VM(name, "")
+	if err != nil || !s.beingCreated(r) {
+		return model.Birth{}, false
+	}
+	return *r.Birth, true
+}
+
+func (s *Machinist) Births(ctx context.Context, name string) (<-chan model.Birth, bool) {
+	// invariant: every step a VM's create reaches, the one it is at first,
+	// read from the record machines.list reads its Birth from; closed when
+	// the create ends or ctx does. False for a VM no create of this Mac is
+	// making.
+	birth, ok := s.Creating(name)
+	if !ok {
+		return nil, false
+	}
+	out := make(chan model.Birth)
+	go func() {
+		defer close(out)
+		var sent *model.Birth
+		for ; ok; birth, ok = s.Creating(name) {
+			if sent == nil || *sent != birth {
+				select {
+				case out <- birth:
+				case <-ctx.Done():
+					return
+				}
+				at := birth
+				sent = &at
+			}
+			if s.h.Sleep(ctx, pollEvery) != nil {
+				return
+			}
+		}
+	}()
+	return out, true
 }
 
 func (s *Machinist) Delete(ctx context.Context, name string) (model.DeleteReport, error) {

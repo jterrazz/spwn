@@ -1,0 +1,27 @@
+description: 'a VM being created answers its Overview with how far it is, and the watch stays open'
+env:
+    - creating
+    - engine
+runs:
+    - command: |
+          --version >/dev/null
+          /usr/bin/mkfifo requests
+          "$STATION" guest serve --stdio <requests >answers &
+          server=$!
+          exec 3>requests
+          /usr/bin/printf '%s\n' '{"v":2,"id":"1","watch":"overview.read","target":{"name":"linux-5"},"in":{}}' '{"v":2,"id":"2","watch":"overview.read","target":{"name":"linux-4"},"in":{}}' >&3
+          waited=0
+          until [ "$(/usr/bin/wc -l <answers)" -ge 2 ] || [ "$waited" -ge 300 ]; do /bin/sleep 0.1; waited=$((waited + 1)); done
+          /bin/sleep 1
+          echo "frames while open: $(/usr/bin/wc -l <answers)"
+          /usr/bin/printf '%s\n' '{"v":2,"id":"1","cancel":true}' '{"v":2,"id":"2","cancel":true}' >&3
+          exec 3>&-
+          wait "$server"
+          /usr/bin/jq -c 'select(.out or .done) | [.id, .out.Creating, .done]' answers | /usr/bin/sort
+      exit: 0
+      stdout: |
+          frames while open: 2
+          ["1",null,true]
+          ["1",{"progress":20,"step":"building","position":1,"steps":5,"detail":"image 2 of 3","at":"{{iso8601}}"},null]
+          ["2",null,true]
+          ["2",{"progress":400,"step":"booting","position":2,"steps":4,"at":"{{iso8601}}"},null]

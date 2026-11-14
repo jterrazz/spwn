@@ -3,14 +3,30 @@ package calls_test
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"time"
 )
 
-// value: a Mac with no files, whose clock moves only by what is slept.
-type stillMac struct{ at time.Time }
+// value: a Mac with no files, whose clock moves only by what is slept; a
+// sleep first calls pause, when set, with how long it was asked for.
+type stillMac struct {
+	mu    sync.Mutex
+	at    time.Time
+	pause func(d time.Duration)
+}
 
-func (m *stillMac) Now() time.Time { return m.at }
+func (m *stillMac) Now() time.Time {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.at
+}
+
 func (m *stillMac) Sleep(_ context.Context, d time.Duration) error {
+	if m.pause != nil {
+		m.pause(d)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.at = m.at.Add(d)
 	return nil
 }

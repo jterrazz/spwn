@@ -88,6 +88,7 @@ type bench struct {
 	engine *idleEngine
 	procs  *processes
 	prefs  machines.Prefs
+	mac    *stillMac
 }
 
 // value: a Mac of 16 GB whose clock reads 10:00 and whose engine answers,
@@ -106,11 +107,12 @@ func creating(t *testing.T, built bool, hardware ...func(context.Context) corema
 	e := &idleEngine{}
 	procs := &processes{self: model.Process{PID: 100, Start: "1763024400.5"}, runs: map[model.Process]bool{}}
 	linux := catalog.Image{Name: "station-linux", Kind: catalog.Linux, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
-	m := machines.New(&stillMac{at: time.Date(2026, 11, 13, 10, 0, 0, 0, time.UTC)}, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, store, noTailnet{}, img, e, nil, machines.Options{
+	mac := &stillMac{at: time.Date(2026, 11, 13, 10, 0, 0, 0, time.UTC)}
+	m := machines.New(mac, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, store, noTailnet{}, img, e, nil, machines.Options{
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux}, KnownHosts: "/state/known_hosts", Logs: "/state/logs",
 		Hardware: hardware[0], Processes: procs,
 	})
-	return bench{m: m, store: store, img: img, engine: e, procs: procs, prefs: p}
+	return bench{m: m, store: store, img: img, engine: e, procs: procs, prefs: p, mac: mac}
 }
 
 func TestAVMKeepsWhatItIsForAndWhoMadeIt(t *testing.T) {
@@ -562,5 +564,84 @@ func TestAVMASilentMacHoldsWithNoKindKeepsItsName(t *testing.T) {
 	_, err := b.m.CheckCreate(context.Background(), model.CreateRequest{Image: "station-linux", Name: "old"})
 	if taken := new(model.NameTakenError); !errors.As(err, &taken) || !taken.VM || taken.On != "studio" {
 		t.Errorf("a create named after the VM silent studio holds with no kind: %v; want the name taken, on studio", err)
+	}
+}
+
+func TestTheBirthsOfACreateAreEveryStepItReachesAsMachinesListReadsThem(t *testing.T) {
+	ctx := t.Context()
+	b := beingMade(t, model.BornCloning, true)
+	moved := make(chan struct{})
+	var asked []time.Duration
+	b.mac.pause = func(d time.Duration) {
+		asked = append(asked, d)
+		moved <- struct{}{}
+		<-moved
+	}
+	births, ok := b.m.Births(ctx, "web")
+	if !ok {
+		t.Fatal("web's create runs; want its births")
+	}
+	bound, stop := context.WithTimeout(ctx, 5*time.Second)
+	defer stop()
+	next := func() (model.Birth, bool) {
+		select {
+		case v, open := <-births:
+			return v, open
+		case <-bound.Done():
+			t.Fatal("no birth, and the channel still open")
+			return model.Birth{}, false
+		}
+	}
+	listed := func() model.Birth {
+		vm, _ := readVM(t, b, "web")
+		if vm.Birth == nil {
+			t.Fatal("machines.list gives web no birth")
+		}
+		return *vm.Birth
+	}
+	rewrite := func(step model.BirthStep) {
+		rec, err := b.store.Get(ctx, "web")
+		if err != nil {
+			t.Fatal(err)
+		}
+		rec.Birth = model.BirthAt(step, true, rec.CreatedAt.Add(time.Hour))
+		if err := b.store.Put(ctx, rec); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first, _ := next()
+	<-moved
+	if want := listed(); first != want {
+		t.Errorf("the first birth is %+v; machines.list gives %+v", first, want)
+	}
+	moved <- struct{}{}
+	<-moved
+	rewrite(model.BornBooting)
+	moved <- struct{}{}
+	second, _ := next()
+	<-moved
+	if want := listed(); second != want || second.Step != model.BornBooting {
+		t.Errorf("the next birth is %+v; machines.list gives %+v, booting", second, want)
+	}
+	rec, err := b.store.Get(ctx, "web")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec.Birth, rec.Owner = nil, nil
+	if err := b.store.Put(ctx, rec); err != nil {
+		t.Fatal(err)
+	}
+	moved <- struct{}{}
+	if _, open := next(); open {
+		t.Error("a birth after the create ended; want the channel closed")
+	}
+	if len(asked) != 3 || asked[0] != 2*time.Second {
+		t.Errorf("polled after %v; want 2 s between reads", asked)
+	}
+}
+
+func TestNoBirthsForAVMWhoseCreateDoesNotRun(t *testing.T) {
+	if _, ok := beingMade(t, model.BornCloning, false).m.Births(t.Context(), "web"); ok {
+		t.Error("web's create does not run; want no births")
 	}
 }

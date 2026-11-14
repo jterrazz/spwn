@@ -1229,6 +1229,45 @@
       ],
       "type": "object"
     },
+    "machines.Birth": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer"
+        },
+        "progress": {
+          "type": "integer"
+        },
+        "step": {
+          "enum": [
+            "building",
+            "cloning",
+            "booting",
+            "address",
+            "ssh"
+          ],
+          "type": "string"
+        },
+        "steps": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "position",
+        "progress",
+        "step",
+        "steps"
+      ],
+      "type": "object"
+    },
     "overview.AwakeState": {
       "additionalProperties": false,
       "properties": {
@@ -1973,6 +2012,16 @@
     "overview.calls.ReadOut": {
       "additionalProperties": false,
       "properties": {
+        "Creating": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.Birth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "Summary": {
           "$ref": "#/$defs/overview.Summary"
         },
@@ -1988,6 +2037,7 @@
         }
       },
       "required": [
+        "Creating",
         "Summary",
         "V2"
       ],

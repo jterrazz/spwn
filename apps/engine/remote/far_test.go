@@ -6,6 +6,7 @@ import (
 	"errors"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -233,3 +234,87 @@ func withPortsDeclare(t *testing.T) *call.Registry {
 var errNoMachine = errors.New(`no machine named "nope"`)
 
 var farInstall = call.Call[struct{}, contracttest.InstallIn, contracttest.InstallOut]{Name: "apps.install"}
+
+func TestAWatchOfAVMBeingCreatedStaysOpenThroughItsCreateThenIsItsGuests(t *testing.T) {
+	for _, how := range []string{"served", "routed"} {
+		engine := fake.New()
+		engine.Serve(laptop.Ref.Name, fake.Mac{Registry: contracttest.Far(), Profile: linux1, Version: "v3.3.0"})
+		registry, err := call.NewRegistry(installs(new(int)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		births := make(chan any)
+		r := remote.NewRouter(registry, laptop, remote.Reach{
+			Engine: engine, Version: "v3.3.0",
+			Locate: func(name string) (machine.Ref, bool) { return machine.Ref{Name: name, On: laptop.Ref.Name}, true },
+			Unborn: func(_ context.Context, vm, name string) (<-chan any, bool) {
+				return births, vm == "linux-4" && name == "activity.read"
+			},
+		})
+		bound, stop := context.WithTimeout(t.Context(), 5*time.Second)
+		var updates <-chan call.Update[any]
+		if how == "served" {
+			updates, err = r.ServeWatch(bound, machine.Ref{Name: "linux-4"}, "activity.read", nil, nil)
+		} else {
+			updates, err = r.Watch(bound, machine.Ref{Name: "linux-4"}, "activity.read", struct{}{}, nil)
+		}
+		if err != nil {
+			t.Fatalf("%s: %v", how, err)
+		}
+		next := func() string {
+			select {
+			case u, open := <-updates:
+				if !open {
+					return "ended"
+				}
+				if u.Err != nil {
+					return "error: " + u.Err.Error()
+				}
+				raw, _ := json.Marshal(u.Value)
+				return string(raw)
+			case <-bound.Done():
+				return "silent"
+			}
+		}
+		give := func(v string) {
+			select {
+			case births <- v:
+			case <-bound.Done():
+				t.Fatalf("%s: the watch stopped reading births before %q", how, v)
+			}
+		}
+		give("booting 2 of 4")
+		if got := next(); got != `"booting 2 of 4"` {
+			t.Errorf("%s: first update %s; want the first birth", how, got)
+		}
+		give("address 3 of 4")
+		if got := next(); got != `"address 3 of 4"` {
+			t.Errorf("%s: second update %s; want the next birth, the watch still open", how, got)
+		}
+		if dialed := engine.Dialed(); len(dialed) != 0 {
+			t.Errorf("%s: dialed %v while its create runs; want its guest never asked", how, dialed)
+		}
+		close(births)
+		for _, want := range []string{`{"CPU":12}`, `{"CPU":40}`, "ended"} {
+			if got := next(); got != want {
+				t.Errorf("%s: after the create %s; want %s, its guest's answers", how, got, want)
+			}
+		}
+		stop()
+		r.Close()
+	}
+	engine := fake.New()
+	registry, err := call.NewRegistry(installs(new(int)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := remote.NewRouter(registry, laptop, remote.Reach{
+		Engine: engine, Version: "v3.3.0",
+		Locate: func(name string) (machine.Ref, bool) { return machine.Ref{Name: name, On: laptop.Ref.Name}, true },
+		Unborn: func(context.Context, string, string) (<-chan any, bool) { return nil, false },
+	})
+	t.Cleanup(r.Close)
+	if _, err := r.ServeWatch(t.Context(), machine.Ref{Name: "linux-1"}, "activity.read", nil, nil); err == nil || !slices.Equal(engine.Dialed(), []string{laptop.Ref.Name}) {
+		t.Errorf("a VM with no create running: %v, dialed %v; want its guest asked over the engine", err, engine.Dialed())
+	}
+}

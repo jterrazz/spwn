@@ -23,6 +23,7 @@ import (
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
+	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
 	"github.com/jterrazz/studio-station/apps/engine/remote"
@@ -54,9 +55,35 @@ func (m machine) router(env kit.Env) *remote.Router {
 		Holder:  m.holder,
 		Version: Version(),
 		Label:   m.label,
+		Unborn:  m.unborn,
 	})
 	m.far.router = r
 	return r
+}
+
+// invariant: a VM whose create still runs answers its Overview from its
+// Mac's record, one update for each step of its create, the birth
+// machines.list gives; any other call waits for its guest.
+func (m machine) unborn(ctx context.Context, vm, name string) (<-chan any, bool) {
+	if name != overviewcalls.Read.Name {
+		return nil, false
+	}
+	births, ok := m.machines(false).Births(ctx, vm)
+	if !ok {
+		return nil, false
+	}
+	out := make(chan any)
+	go func() {
+		defer close(out)
+		for birth := range births {
+			select {
+			case out <- overviewcalls.ReadOut{Creating: &birth}:
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+	return out, true
 }
 
 func (m machine) label(mac string) string {

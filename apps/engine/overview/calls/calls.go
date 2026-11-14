@@ -7,6 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/disk"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
@@ -33,6 +34,10 @@ type ReadIn struct {
 type ReadOut struct {
 	Summary overview.Summary
 	V2      *Snapshot
+	// value: a VM whose create still runs, read from its Mac's record
+	// since its guest does not answer yet: how far its create is, its
+	// Summary empty.
+	Creating *machines.Birth
 }
 
 var Read = call.Watch[*Overview, ReadIn, ReadOut]{
