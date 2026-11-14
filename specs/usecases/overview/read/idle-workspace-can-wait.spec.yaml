@@ -1,0 +1,13 @@
+description: 'a workspace idle an hour after its agent finished is a need that can wait, its verb delete'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'world advance 5h'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Needs[] | select(.Subject == "agent-7f") | [.Text, .Upkeep, .Verb, .Call, .Args]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          [["agent-7f has been idle for 5 h and holds 8 GB","can-wait","delete","machines.delete",{"VM":"agent-7f"}]]
