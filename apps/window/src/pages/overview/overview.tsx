@@ -27,17 +27,19 @@ type Go = (to: Route) => void;
 
 type Answer = Answered<OverviewReadOutput>;
 
-function Head({ overview, name, birth }: { overview: Answer; name: string; birth?: string }) {
-    if (birth !== undefined) {
-        return <NoVerdict line={birth} size="tab" />;
-    }
+function Head({ overview, name }: { overview: Answer; name: string }) {
     if (overview.kind === 'failed') {
         return <Unanswered error={overview.error} size="tab" />;
     }
     if (overview.kind === 'reading') {
         return <Reading size="tab" what={name} />;
     }
-    return <NoVerdict size="tab" />;
+    const { Creating } = overview.out;
+    return Creating === null ? (
+        <NoVerdict size="tab" />
+    ) : (
+        <NoVerdict line={birthSentence(Creating)} size="tab" />
+    );
 }
 
 type NeedsOfProps = {
@@ -112,11 +114,7 @@ function VmOverview({ mac, vm, go }: VmProps) {
     const server = machineKindOf(vm) === 'server';
     return (
         <Page>
-            {vm.Birth === null ? (
-                <Head name={vm.Name} overview={overview} />
-            ) : (
-                <Head birth={birthSentence(vm.Birth)} name={vm.Name} overview={overview} />
-            )}
+            <Head name={vm.Name} overview={overview} />
             <ActivityTiles
                 disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}
                 found={found}
