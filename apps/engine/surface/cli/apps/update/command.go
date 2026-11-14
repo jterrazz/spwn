@@ -70,13 +70,8 @@ func everyMachine(ctx context.Context, env kit.Env, d Deps, req appscalls.Update
 	failed := 0
 	run := func(name string, target machine.Ref) {
 		outcomes, err := call.Invoke(ctx, env.Calls, target, appscalls.Update, req, nil)
-		u := pageapps.MachineUpdate{Machine: name, Outcomes: kit.Worded(outcomes)}
-		var refused *fail.Error
-		switch {
-		case errors.As(err, &refused) && refused.Type == fail.NotForThisMachine:
-			u.Skipped = "server"
-		case err != nil:
-			u.Err = kit.Screened(err, "").Message
+		u, refused := updatedOn(name, outcomes, err)
+		if refused {
 			failed++
 		}
 		if n, _ := apps.FailedOf(outcomes); n > 0 {
@@ -147,4 +142,20 @@ func ran(env kit.Env, took time.Duration) pageapps.Run {
 		run.On = env.Target().Name
 	}
 	return run
+}
+
+// value: one machine's update as its page row says it: its outcomes, a
+// server skipped, or why it failed, screened, as the row draws it as text;
+// and whether it failed.
+func updatedOn(name string, outcomes []apps.Outcome, err error) (pageapps.MachineUpdate, bool) {
+	u := pageapps.MachineUpdate{Machine: name, Outcomes: kit.Worded(outcomes)}
+	var refused *fail.Error
+	switch {
+	case errors.As(err, &refused) && refused.Type == fail.NotForThisMachine:
+		u.Skipped = "server"
+	case err != nil:
+		u.Err = kit.Screened(err, "").Message
+		return u, true
+	}
+	return u, false
 }

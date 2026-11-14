@@ -94,13 +94,7 @@ func everyMachine(ctx context.Context, env kit.Env, d Deps, in *Input, io kit.IO
 			if len(names) == 0 && len(in.Names) > 0 {
 				break
 			}
-			err := applyLiving(ctx, env, p, names, io, &a)
-			var refused *fail.Error
-			switch {
-			case errors.As(err, &refused) && refused.Type == fail.NotForThisMachine:
-				a.Skipped = kit.Screened(err, "settings apply").Message
-			case err != nil:
-				a.Err = kit.Screened(err, "settings apply").Message
+			if refusedOn(&a, applyLiving(ctx, env, p, names, io, &a)) {
 				failed++
 			}
 			if brokenOf(a.Changes) > 0 {
@@ -184,4 +178,19 @@ func partial(changes []settings.Change, verb string) error {
 		return nil
 	}
 	return kit.PartialFailure{Failed: failed, Total: len(changes), Noun: "settings", FirstHint: hint}
+}
+
+// value: a machine's apply refused, as its page row says it: skipped where
+// no setting lives, else failed; the words screened, as the row draws them
+// as text. Whether it counts as a failure.
+func refusedOn(a *pagesettings.MachineApply, err error) bool {
+	var refused *fail.Error
+	switch {
+	case errors.As(err, &refused) && refused.Type == fail.NotForThisMachine:
+		a.Skipped = kit.Screened(err, "settings apply").Message
+	case err != nil:
+		a.Err = kit.Screened(err, "settings apply").Message
+		return true
+	}
+	return false
 }
