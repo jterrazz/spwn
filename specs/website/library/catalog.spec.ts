@@ -1,4 +1,4 @@
-import { button, content, field, heading, navigation, region, within } from '@jterrazz/test';
+import { button, content, field, heading, main, navigation, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -153,9 +153,19 @@ describe('catalog', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'D25 window bug: the toolbar of a catalog page reads Apps, where the scenario says Catalog › Apps',
-    );
+    test('D25 the toolbar of a catalog page names its nature', async () => {
+        // Given - the window on Skills over stories
+        const result = await website.visit(
+            '/?world=stories&page=catalog-skills',
+            async (visitor) => {
+                // When - the toolbar is read
+                // Then - it reads Skills, and no Catalog page stands above it
+                await visitor.see(within(main(), content('Skills')));
+                await visitor.gone(content('Catalog ›'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('D26 a category keeps only its packages, and each category shows its count', async () => {
         // Given - the window on Apps over stories
