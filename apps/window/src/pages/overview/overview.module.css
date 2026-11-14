@@ -36,6 +36,16 @@
     font-size: var(--text-label);
     text-align: right;
 }
+.healthHead {
+    display: flex;
+    align-items: center;
+    gap: var(--space-10);
+    margin-bottom: var(--space-8);
+}
+.healthLine {
+    color: var(--t3);
+    font-size: var(--text-label);
+}
 .steps {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));

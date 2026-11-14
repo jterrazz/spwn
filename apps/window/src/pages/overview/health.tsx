@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
 import type { Measured } from '../../design/index';
 import { countOf } from '../../engine/engine-words';
-import { vmCheck, vmSsh, vmState } from '../../engine/shown';
+import { verdictShown, vmCheck, vmSsh, vmState } from '../../engine/shown';
 import { clock, duration, seconds, sentence } from '../../model/format';
 import { SEPARATOR } from '../../separator';
 import { between, shortDay } from '../activity/when';
@@ -41,6 +41,14 @@ export function Health({ vm }: { vm: MachinesVM }) {
     const age = ageOf(vm.CheckStatus.at);
     return (
         <Panel note={age === undefined ? '' : `checked ${age}`} padded title="Health">
+            {vm.Health === undefined ? null : (
+                <div className={styles.healthHead}>
+                    <StatePill {...verdictShown(vm.Health)} />
+                    {vm.Health.Line === undefined || vm.Health.Line === '' ? null : (
+                        <span className={styles.healthLine}>{vm.Health.Line}</span>
+                    )}
+                </div>
+            )}
             <div className={styles.steps}>
                 <Step label="Its state">
                     <StatePill {...vmState(vm)} />
@@ -125,10 +133,8 @@ export function CheckLatency({ vm }: { vm: MachinesVM }) {
                         <span>Now</span>
                     </div>
                 </div>
-            ) : (
-                <p className={styles.none}>
-                    {`The engine kept ${points.length === 1 ? 'one check' : 'no check'} so far.`}
-                </p>
+            ) : vm.LatencyNote === undefined ? null : (
+                <p className={styles.none}>{vm.LatencyNote}</p>
             )}
         </Panel>
     );
