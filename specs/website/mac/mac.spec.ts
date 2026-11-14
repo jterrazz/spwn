@@ -1,6 +1,7 @@
-import { describe, test } from 'vitest';
+import { button, dialog } from '@jterrazz/test';
+import { describe, expect, test } from 'vitest';
 
-import '../website.specification.js';
+import { website } from '../website.specification.js';
 
 describe('mac', () => {
     test.todo('M1 lot 6');
@@ -9,7 +10,20 @@ describe('mac', () => {
 
     test.todo('M3 lot 6');
 
-    test.todo('M4 lot 5');
+    test('M4 New machine on a Mac opens the sheet with that Mac chosen', async () => {
+        // Given - the window on the mini's page over two-macs, which is not This Mac
+        const result = await website.visit(
+            '/?world=two-macs&machine=jterrazz-mac-mini',
+            async (visitor) => {
+                // When - its New machine is pressed
+                await visitor.click(button('New machine on jterrazz-mac-mini'));
+
+                // Then - the sheet opens on the mini
+                await visitor.see(dialog('New machine on jterrazz-mac-mini'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo('M5 lot 6');
 

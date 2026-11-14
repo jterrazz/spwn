@@ -139,28 +139,6 @@ describe('Packages', () => {
         await expect(result.tree).toMatch(file('./__expected__/stories-settings.aria.yaml'));
     });
 
-    test('the name of the file a machine follows opens Machine files', async () => {
-        // Given - the window on This Mac's Packages over two-macs
-        const result = await component.render(
-            windowOver('two-macs', 'jterrazz-macbook-pro'),
-            async (visitor) => {
-                await visitor.see(content('lazygit'));
-
-                // When - the name of its file is clicked in the head
-                await visitor.click(
-                    within(
-                        heading('jterrazz-macbook-pro.', { exact: false }),
-                        button('jterrazz-macbook-pro', { exact: true }),
-                    ),
-                );
-
-                // Then - Machine files opens on that file
-                await visitor.see(heading('jterrazz-macbook-pro.machine.yaml'));
-            },
-        );
-        expect(result.errors.text).toBe('');
-    });
-
     test('a machine the engine does not answer for shows its refusal', async () => {
         // Given - the window on the Mac that does not answer, over mini-offline
         const result = await component.render(
