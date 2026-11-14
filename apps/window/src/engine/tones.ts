@@ -1,5 +1,4 @@
 import type {
-    AccountsAccount,
     AppsReport,
     DiskOutcome,
     DiskRow,
@@ -111,14 +110,4 @@ export const SHARE_END_TONES: Tones<ShareEnd['kind']> = {
     ended: 'plain',
     'ends-in': 'warn',
     unread: 'plain',
-};
-
-export const ACCOUNT_STATE_TONES: Tones<AccountsAccount['state']> = {
-    '': 'plain',
-    absent: 'plain',
-    broken: 'bad',
-    degraded: 'warn',
-    ok: 'ok',
-    pending: 'new',
-    unknown: 'plain',
 };

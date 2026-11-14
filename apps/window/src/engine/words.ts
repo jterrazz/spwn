@@ -1,5 +1,4 @@
 import type {
-    AccountsAccount,
     ActivityReport,
     ActivitySample,
     AppsReport,
@@ -187,33 +186,6 @@ export const SHARE_STATE_WORDS: Words<PortsSharedPort['state']> = {
     shared: 'shared',
     unknown: 'unknown',
     waiting: 'waiting',
-};
-
-export const ACCOUNT_STATE_WORDS: Words<AccountsAccount['state']> = {
-    '': NO_STATE_WORD,
-    absent: 'signed out',
-    broken: 'broken',
-    degraded: 'needs a look',
-    ok: 'signed in',
-    pending: 'reading',
-    unknown: 'unknown',
-};
-
-export const ACCOUNT_REASON_WORDS: WordsOfAnOpenCode = {
-    expiring: 'ends soon',
-    failing: 'failing',
-    late: 'late',
-    missing: 'missing',
-    refused: 'refused',
-    unreachable: 'unreachable',
-    unset: 'not set',
-};
-
-export const ACCOUNT_ORIGIN_WORDS: WordsOfAnOpenCode = {
-    '?': 'origin unknown',
-    own: 'kept here',
-    'own+shared': 'kept here, and a copy',
-    shared: 'a copy, shared',
 };
 
 // outside: machinefile.drift words a port's audience and no side left out, nor an account's (provisional.ts,

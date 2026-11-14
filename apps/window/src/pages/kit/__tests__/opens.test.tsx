@@ -31,14 +31,16 @@ function shell(refuses = false) {
     return { invoked, opener };
 }
 
-function signIn(hint: string, opener: ReturnType<typeof shell>['opener']) {
+const HELD = 'The engine gives no command to reach linux-1';
+
+function reach(command: string, opener: ReturnType<typeof shell>['opener']) {
     const client = new Client(replayTransport(recordingFor('two-macs')));
     return (
         <EngineProvider client={client} opener={opener}>
             <OpenButton
-                held="The engine gives no command that signs in"
-                label="Sign in"
-                openable={Openable.ofFix({ hint, provider: 'npm', state: 'broken' })}
+                held={HELD}
+                label="Open in Terminal"
+                openable={Openable.ofSsh({ Address: 'linux-1', Command: command, User: 'admin' })}
             />
         </EngineProvider>
     );
@@ -52,14 +54,17 @@ function titleOf(label: string): null | string | undefined {
 
 describe('opens', () => {
     test('a value shaped like a secret is never opened, and says why', async () => {
-        // Given - a fix command that holds a token
+        // Given - a command that holds a token
         const { invoked, opener } = shell();
         let title: null | string | undefined;
-        await component.render(signIn(`npm login --token ${TOKEN}`, opener), async (visitor) => {
-            // When - its button is drawn
-            await visitor.see(disabled(button('Sign in')));
-            title = titleOf('Sign in');
-        });
+        await component.render(
+            reach(`ssh -o IdentityAgent=${TOKEN} admin@linux-1`, opener),
+            async (visitor) => {
+                // When - its button is drawn
+                await visitor.see(disabled(button('Open in Terminal')));
+                title = titleOf('Open in Terminal');
+            },
+        );
 
         // Then - held, its title naming the guard and never the value, and the shell never asked
         expect(title).toBe(WITHHELD_OPENS);
@@ -67,37 +72,40 @@ describe('opens', () => {
     });
 
     test('no value from the engine holds the button with its reason', async () => {
-        // Given - an account with no fix command
+        // Given - a machine with no command to reach it
         const { invoked, opener } = shell();
         let title: null | string | undefined;
-        await component.render(signIn('', opener), async (visitor) => {
+        await component.render(reach('', opener), async (visitor) => {
             // When - its button is drawn
-            await visitor.see(disabled(button('Sign in')));
-            title = titleOf('Sign in');
+            await visitor.see(disabled(button('Open in Terminal')));
+            title = titleOf('Open in Terminal');
         });
 
         // Then - held, saying the engine gives none
-        expect(title).toBe('The engine gives no command that signs in');
+        expect(title).toBe(HELD);
         expect(invoked).toStrictEqual([]);
     });
 
     test("a refusal of the shell is drawn like the engine's, and nothing is marked done", async () => {
-        // Given - npm's fix, and a shell that refuses it
+        // Given - linux-1's command, and a shell that refuses it
         const { invoked, opener } = shell(true);
-        const result = await component.render(signIn('npm login', opener), async (visitor) => {
-            // When - Sign in is clicked
-            await visitor.click(button('Sign in'));
+        const result = await component.render(
+            reach('ssh admin@linux-1', opener),
+            async (visitor) => {
+                // When - Open in Terminal is clicked
+                await visitor.click(button('Open in Terminal'));
 
-            // Then - the refusal, in its words, with a way to dismiss it
-            await visitor.see(content('Refused'));
-            await visitor.see(
-                content('The window runs no command holding a line break', { exact: false }),
-            );
-            await visitor.click(button('Dismiss'));
-            await visitor.gone(button('Dismiss'));
-        });
+                // Then - the refusal, in its words, with a way to dismiss it
+                await visitor.see(content('Refused'));
+                await visitor.see(
+                    content('The window runs no command holding a line break', { exact: false }),
+                );
+                await visitor.click(button('Dismiss'));
+                await visitor.gone(button('Dismiss'));
+            },
+        );
         expect(invoked).toStrictEqual([
-            { args: { command: 'npm login' }, command: 'open_in_terminal' },
+            { args: { command: 'ssh admin@linux-1' }, command: 'open_in_terminal' },
         ]);
         expect(result.content.text).not.toContain('Done');
     });
