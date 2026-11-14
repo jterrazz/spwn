@@ -74,11 +74,17 @@ export function CheckTile({ vm }: { vm: MachinesVM }) {
     );
 }
 
-function spanOf(points: readonly MachinesLatencyPoint[]): string | undefined {
+const NS_PER_HOUR = 3600 * NS_PER_SECOND;
+
+function spanOf(points: readonly MachinesLatencyPoint[]): number | undefined {
     const [first, second] = points;
     const kept = between(first?.at, points.at(-1)?.at);
     const step = between(first?.at, second?.at);
-    return kept === undefined || step === undefined ? undefined : seconds(kept + step);
+    return kept === undefined || step === undefined ? undefined : kept + step;
+}
+
+function lastNote(span: number): string {
+    return span >= NS_PER_HOUR && span < 1.5 * NS_PER_HOUR ? 'last hour' : `last ${seconds(span)}`;
 }
 
 export function CheckLatency({ vm }: { vm: MachinesVM }) {
@@ -93,7 +99,7 @@ export function CheckLatency({ vm }: { vm: MachinesVM }) {
                     <span className={styles.meta}>{`${millis(last.took)} ms now`}</span>
                 ) : undefined
             }
-            note={span === undefined ? '' : `last ${span === '1 h' ? 'hour' : span}`}
+            note={span === undefined ? '' : lastNote(span)}
             padded
             title="Check latency"
         >
@@ -112,7 +118,7 @@ export function CheckLatency({ vm }: { vm: MachinesVM }) {
                         )}
                     />
                     <div className={styles.axis}>
-                        <span>{`${span} ago`}</span>
+                        <span>{`${seconds(span)} ago`}</span>
                         <span>Now</span>
                     </div>
                 </div>
