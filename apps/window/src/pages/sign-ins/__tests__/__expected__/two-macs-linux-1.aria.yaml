@@ -21,7 +21,8 @@
     - text: gh Signed out
     - button "Sign in gh": Sign in
     - text: npm from the password pw-2 until 14:00 Signed in
-    - button "Remove npm" [disabled]: Remove
+    - button "Open the password pw-2": pw-2
+    - button "Remove npm": Remove
     - text: claude admin@jterrazz.com · Max plan · signed in by itself Signed in
     - button "Sign out claude": Sign out
     - text: wrangler Refused at the provider Needs signing in again

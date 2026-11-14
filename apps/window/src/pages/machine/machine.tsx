@@ -33,7 +33,7 @@ export function MachineTab({ found, tab, go }: Props) {
             return <PortsTab found={found} go={go} />;
         }
         case 'Sign-ins': {
-            return <SignInsTab found={found} key={name} />;
+            return <SignInsTab found={found} go={go} key={name} />;
         }
         case 'Storage': {
             return (
