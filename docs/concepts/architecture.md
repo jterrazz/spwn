@@ -69,7 +69,7 @@ Between machines, and the machine's own door:
   platform/
     local/   Runner, FS, Env, Net, Sockets, Clock: the only importer of os/exec, files, the network;
              localtest/, its scripted fakes
-    darwin/  the only cgo: IOKit (battery, lid, thermal, assertions) and the kernel tables, with their spec seams
+    darwin/  the only cgo: IOKit (battery, lid, thermal, assertions), the kernel tables and LocalAuthentication (the owner's presence before a grant), with their spec seams
 ```
 
 The data, the presentation and the surfaces:
