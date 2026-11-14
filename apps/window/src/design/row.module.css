@@ -104,6 +104,17 @@
 .fleet.nested.leadMachine {
     --column-lead: calc(34px + var(--space-10) - var(--space-16));
 }
+.passwords {
+    --column-lead: 24px;
+    --column-name: minmax(0, 1.4fr);
+    --column-kind: 132px;
+    --column-cells: minmax(0, 1fr) 72px;
+    --column-trail: 190px;
+    column-gap: var(--space-16);
+}
+.passwords.head > :last-child {
+    padding-inline-end: calc(14px + var(--space-10));
+}
 .hasStart.hasTrail {
     --column-trail: minmax(0, 260px);
 }

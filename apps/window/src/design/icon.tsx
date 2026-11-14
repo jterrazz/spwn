@@ -83,6 +83,13 @@ const PATHS = {
     ),
     check: <path d="M3.5 8.5l3 3 6-7" />,
     close: <path d="M4 4l8 8M12 4l-8 8" />,
+    chevron: <path d="M6 3.5L10.5 8 6 12.5" />,
+    lock: (
+        <>
+            <rect height="6" rx="1.5" width="9" x="3.5" y="7" />
+            <path d="M5.5 7V5a2.5 2.5 0 015 0v2" />
+        </>
+    ),
 } satisfies Record<string, ReactElement>;
 
 export type IconName = keyof typeof PATHS;

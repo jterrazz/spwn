@@ -1,35 +1,63 @@
 import type { AccountsVaultEntry, AccountsVaultRead } from '@jterrazz/station-api';
 
-import { AppIcon, asSentence, Panel, Row, Verdict } from '../../design/index';
+import { Icon } from '../../design/icon';
+import { AppIcon, asSentence, Panel, Row, RowHead, Verdict } from '../../design/index';
 import { useWatch } from '../../engine/react';
 import { verdictShown } from '../../engine/shown';
-import { sentence } from '../../model/format';
 import type { Route } from '../../shell/route';
 import { HeldOutcomes } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { EntryPage } from './entry';
-import { addedOn, grantedTo, kindWord } from './passwords-of';
+import { addedDay, grantedTo, kindWord } from './passwords-of';
 
 import styles from './passwords.module.css';
 
 type Go = (to: Route) => void;
 
+const COLUMNS = [
+    { label: 'Password' },
+    { label: 'Kind' },
+    { label: 'Account' },
+    { label: 'Added' },
+    { label: 'Granted to', numeric: true },
+];
+
+const NO_VALUE_SHOWN =
+    'No value is shown, copied or revealed here: a password is only granted, and removed.';
+
 function EntryRow({ entry, go }: { entry: AccountsVaultEntry; go: Go }) {
     return (
         <Row
+            cells={[entry.Who ?? '', addedDay(entry)]}
             kind={kindWord(entry)}
             lead={<AppIcon name={entry.Program} />}
             onOpen={() => {
                 go({ item: entry.ID, page: 'passwords' });
             }}
             sentence={entry.Program}
+            template="passwords"
             title={entry.Label}
-            trail={<span className={styles.granted}>{grantedTo(entry)}</span>}
-            trailSize="wide"
-            value={sentence([entry.Who, addedOn(entry)])}
-            valueSize="long"
+            trail={
+                <>
+                    <span className={styles.granted}>{grantedTo(entry)}</span>
+                    <span className={styles.chevron}>
+                        <Icon name="chevron" />
+                    </span>
+                </>
+            }
         />
+    );
+}
+
+function NoValueShown() {
+    return (
+        <p className={styles.note}>
+            <span className={styles.lock}>
+                <Icon name="lock" />
+            </span>
+            {NO_VALUE_SHOWN}
+        </p>
     );
 }
 
@@ -45,9 +73,13 @@ function Vault({ read, go }: { read: AccountsVaultRead; go: Go }) {
             />
             <HeldOutcomes>
                 <Panel note={String(entries.length)} title="Passwords">
+                    {entries.length === 0 ? null : (
+                        <RowHead columns={COLUMNS} lead template="passwords" />
+                    )}
                     {entries.map((entry) => (
                         <EntryRow entry={entry} go={go} key={entry.ID} />
                     ))}
+                    <NoValueShown />
                 </Panel>
             </HeldOutcomes>
         </Page>

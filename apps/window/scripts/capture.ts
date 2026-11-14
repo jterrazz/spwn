@@ -72,6 +72,25 @@ const OPENED: Readonly<Record<string, readonly Shot[]>> = {
             steps: [{ button: 'Plan' }],
         },
     ],
+    'two-macs': [
+        { name: 'passwords', query: 'page=passwords' },
+        { name: 'password-entry', query: 'page=passwords&item=pw-1' },
+        {
+            name: 'password-grant',
+            query: 'page=passwords&item=pw-1',
+            steps: [{ button: 'Grant…' }],
+        },
+        {
+            name: 'password-remove',
+            query: 'page=passwords&item=pw-2',
+            steps: [{ button: 'Remove password' }],
+        },
+        {
+            name: 'login-device-code',
+            query: 'machine=linux-1&tab=Sign-ins&pace=2000',
+            steps: [{ button: 'Sign in gh' }],
+        },
+    ],
     'bare-mac': [
         {
             name: 'dialog-new-machine-start-here',

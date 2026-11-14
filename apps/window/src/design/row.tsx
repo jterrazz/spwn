@@ -7,7 +7,7 @@ import { Value } from './value';
 
 import styles from './row.module.css';
 
-export type RowTemplate = 'catalog' | 'fleet' | 'flow' | 'meters';
+export type RowTemplate = 'catalog' | 'fleet' | 'flow' | 'meters' | 'passwords';
 
 // value: `calm: 'unsaid'` draws no word for a calm state, where the panel's title already says it ("Shared");
 // value: `calm: 'pill'` draws it as a pill of its own tone, where the mockup lists calm and deviating rows alike.
