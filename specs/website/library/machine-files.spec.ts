@@ -85,7 +85,7 @@ describe('machine files', () => {
     });
 
     test.todo(
-        'D12 window bug: a line of a chapter is plain text, where the scenario opens its catalog page',
+        'D12 window differs: a line of a chapter is plain text, where the mockup and the row open its catalog page (the chapter list has no route to give, a shell change)',
     );
 
     test.todo(`D18 waits for ${FILES}`);

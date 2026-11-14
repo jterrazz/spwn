@@ -37,7 +37,7 @@ describe('catalog', () => {
     });
 
     test.todo(
-        'D13 window bug: the list shows every package by default, where the scenario shows only what my machines carry, with a switch to Everything and a filter by kind',
+        'D13 window differs: the list shows every package by default, where the mockup and the row show what my machines carry, with an Everything switch and a filter by kind (a switch and a count of carriers, more than a sentence)',
     );
 
     test('D14 an app page reads how it is installed and the commands it puts on the path', async () => {
