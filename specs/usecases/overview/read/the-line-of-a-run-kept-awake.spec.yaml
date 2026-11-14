@@ -1,0 +1,13 @@
+description: 'the Awake line of a session that follows a run says until that run is done'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'awake --until-done linux-1 >/dev/null'
+      exit: 0
+    - command: 'overview | /usr/bin/grep Awake'
+      exit: 0
+      stdout: |
+          	Awake	● until linux-1 is done

@@ -1,0 +1,13 @@
+description: 'a port reachable on the local network and declared nowhere needs you, its verb review'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world listen jterrazz-macbook-pro "*:5000" ControlCenter'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Verdict.Sentence, [.Needs[] | select(.Section == "ports") | [.Text, .Upkeep, .Verb, .Path]]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          ["One thing needs you.",[["port 5000 is reachable outside Tailscale","needs-you","review","System Settings > General > AirDrop & Handoff > AirPlay Receiver"]]]
