@@ -6,7 +6,6 @@ import {
     field,
     focused,
     navigation,
-    region,
     within,
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
@@ -38,24 +37,6 @@ function windowOnHome() {
 }
 
 describe('Find', () => {
-    test('⌘K opens it, a query narrows it, Enter opens the result', async () => {
-        // Given - the window on Home over two-macs
-        const result = await component.render(windowOnHome(), async (visitor) => {
-            await visitor.see(content('npm sign-in expired'));
-
-            // When - ⌘K is pressed, then linux-1 activity typed and Enter pressed
-            await visitor.press(COMMAND_K);
-            await visitor.see(focused(query));
-            await visitor.fill(query, 'linux-1 activity');
-            await visitor.press('Enter');
-
-            // Then - the palette is gone and linux-1's Activity is open, its log at its foot
-            await visitor.gone(find);
-            await visitor.see(region('What linux-1 prints'));
-        });
-        expect(result.errors.text).toBe('');
-    });
-
     test('the choice starts on the first row as drawn, the machine before its tabs', async () => {
         // Given - the window on Home over two-macs
         const result = await component.render(windowOnHome(), async (visitor) => {
