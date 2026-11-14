@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 
-const recordingFor = await recordingsOf('one-mac', 'stories', 'two-macs');
+const recordingFor = await recordingsOf('mini-workspace', 'one-mac', 'stories', 'two-macs');
 
 const history = region('History');
 const lastNight = region('Last night');
@@ -125,5 +125,26 @@ describe('changes', () => {
 
         // Then - no day is drawn
         expect(result.html.text).not.toContain('Last night');
+    });
+
+    test('machines no journal is written for read History and Last night as not given yet, never as a failure', async () => {
+        // Given - mini-workspace, whose machines no answer is written for, as every real engine's
+        const world = recordingFor('mini-workspace');
+
+        // When - Home, then the Inbox, are drawn once the listing is done
+        const home = await component.render(pageOver(world, { page: 'home' }), async (visitor) => {
+            await visitor.see(within(lastNight, content('Not given yet')));
+        });
+        const inbox = await component.render(
+            pageOver(world, { page: 'inbox' }),
+            async (visitor) => {
+                await visitor.see(within(history, content('Not given yet')));
+            },
+        );
+
+        // Then - each panel says what it would hold, and nothing is an error
+        expect(home.html.text).toContain('What moved, held or failed overnight');
+        expect(inbox.html.text).toContain('What happened, kept by day');
+        expect([home.errors.text, inbox.errors.text]).toStrictEqual(['', '']);
     });
 });

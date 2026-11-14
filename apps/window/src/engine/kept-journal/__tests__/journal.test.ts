@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { recordingsOf } from '../../../fixtures/recordings';
 import type { Out } from '../../client';
 import { keyOf } from '../../frame';
-import { answerFor } from '../journal';
+import { answerFor, journalOf } from '../journal';
 
 const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'stories', 'two-macs');
 
@@ -19,6 +19,14 @@ function listingOf(world: string): Out<'machines.list'> {
         throw new Error(`${world} records no machines.list.`);
     }
     return listing;
+}
+
+function renamed(known: Out<'machines.list'>): Out<'machines.list'> {
+    const macs = (known.All.Macs ?? []).map((mac) => ({
+        ...mac,
+        VMs: (mac.VMs ?? []).map((vm) => ({ ...vm, Name: `${vm.Name}-elsewhere` })),
+    }));
+    return { ...known, All: { ...known.All, Macs: macs } };
 }
 
 function titlesOf(world: string): readonly string[] | undefined {
@@ -65,16 +73,24 @@ describe('journal', () => {
 
     test('a fleet no journal is written for is answered by nothing', () => {
         // Given - two-macs with its VMs renamed, so no answer is written for them
-        const known = listingOf('two-macs');
-        const macs = (known.All.Macs ?? []).map((mac) => ({
-            ...mac,
-            VMs: (mac.VMs ?? []).map((vm) => ({ ...vm, Name: `${vm.Name}-elsewhere` })),
-        }));
+        const listing = renamed(listingOf('two-macs'));
 
         // When - it is asked
-        const answer = answerFor({ ...known, All: { ...known.All, Macs: macs } }, {});
+        const answer = answerFor(listing, {});
 
         // Then - nothing, which a page draws as not given
         expect(answer).toBeUndefined();
+    });
+
+    test('a fleet no journal is written for reads as unwritten once its listing is done, never as failed', () => {
+        // Given - two-macs with its VMs renamed
+        const listing = renamed(listingOf('two-macs'));
+
+        // When - the journal is read while the listing is still coming, then once it is done
+        const coming = journalOf({ done: false, kind: 'read', out: listing }, {});
+        const done = journalOf({ done: true, kind: 'read', out: listing }, {});
+
+        // Then - still reading, then unwritten
+        expect([coming.kind, done.kind]).toStrictEqual(['reading', 'unwritten']);
     });
 });

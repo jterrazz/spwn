@@ -43,8 +43,8 @@ export function History({ macs, go, chosen }: HistoryProps) {
     if (journal.kind === 'reading') {
         return null;
     }
-    if (journal.kind === 'failed') {
-        return <NotGiven title="History" what="What happened, newest first" />;
+    if (journal.kind !== 'read') {
+        return <NotGiven title="History" what="What happened, kept by day" />;
     }
     const groups = journal.out.Groups ?? [];
     const none =
@@ -69,7 +69,7 @@ export function LastNight({ macs, go }: NightProps) {
     if (journal.kind === 'reading') {
         return null;
     }
-    if (journal.kind === 'failed') {
+    if (journal.kind !== 'read') {
         return <NotGiven title="Last night" what="What moved, held or failed overnight" />;
     }
     const night = (journal.out.Groups ?? []).find((group) => group.Night);

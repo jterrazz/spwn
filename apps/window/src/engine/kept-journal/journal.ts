@@ -5,7 +5,6 @@ import type {
     StationWord,
 } from '@jterrazz/station-api';
 
-import { EngineError } from '../engine-error';
 import { READING } from '../entry';
 import type { Reading } from '../entry';
 import { useWatch } from '../react';
@@ -78,11 +77,6 @@ export type JournalAnswer = {
     out: (macs: readonly MachinesMacView[]) => JournalReadOutput;
 };
 
-const NOT_ON_THE_WIRE = new EngineError(
-    undefined,
-    'the kept journal is not on the wire yet, and no answer is written for these machines',
-);
-
 // outside: an answer is chosen by the machines machines.list lists, each Mac's VMs in turn, one not seen marked `?`,
 // outside: so no Mac's own name is written in it; the Mac asked is applied as the engine would apply it, keeping the
 // outside: lines of that Mac and its machines, each line's machines narrowed to them, and no group's sum.
@@ -124,14 +118,24 @@ export function answerFor(
     return narrowedTo(out, new Set(names));
 }
 
-export function useJournal(input: JournalReadInput): Reading<JournalReadOutput> {
-    const listing = useWatch('machines.list', {});
+// value: `unwritten` is a fleet no answer is written for, every real one until the engine keeps its journal: the
+// value: read is not given, which is no failure of the engine.
+export type JournalReading = Reading<JournalReadOutput> | { kind: 'unwritten' };
+
+export function journalOf(
+    listing: Reading<MachinesListOutput>,
+    input: JournalReadInput,
+): JournalReading {
     if (listing.kind !== 'read') {
         return listing;
     }
     const out = answerFor(listing.out, input);
     if (out === undefined) {
-        return listing.done ? { error: NOT_ON_THE_WIRE, kind: 'failed' } : READING;
+        return listing.done ? { kind: 'unwritten' } : READING;
     }
     return { done: listing.done, kind: 'read', out };
+}
+
+export function useJournal(input: JournalReadInput): JournalReading {
+    return journalOf(useWatch('machines.list', {}), input);
 }
