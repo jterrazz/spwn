@@ -142,7 +142,7 @@ func shares(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.Acc
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	updates, err := call.Follow(ctx, d.Far, machine.Ref{Name: mac}, accountscalls.List, accountscalls.ListIn{}, nil)
+	updates, err := call.Follow(ctx, d.Far, machine.Ref{Name: mac}, accountscalls.Read, accountscalls.ReadIn{}, nil)
 	if err != nil {
 		return nil, err
 	}

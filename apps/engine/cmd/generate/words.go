@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
@@ -186,6 +187,55 @@ func wordedEnums() []worded {
 		}},
 		{section.ID(""), sectionWords()},
 		{refusalCode{}, refusalWords()},
+		{accounts.Program(""), programWords()},
+		{accounts.ProgramState(""), map[string]word{
+			string(accounts.ProgramSignedIn):  toned(verdict.OK, "signed in"),
+			string(accounts.ProgramSignedOut): plain("signed out"),
+			string(accounts.ProgramBroken):    toned(verdict.Bad, "needs signing in again"),
+			string(accounts.ProgramReading):   toned(verdict.New, "reading"),
+			string(accounts.ProgramWaiting):   toned(verdict.New, "waiting"),
+		}},
+		{accounts.ProgramHow(""), map[string]word{
+			string(accounts.HowOwn):     plain("signed in here"),
+			string(accounts.HowGranted): plain("granted"),
+		}},
+		{accounts.ProgramAction(""), map[string]word{
+			string(accounts.ActionSignIn):      plain("Sign in"),
+			string(accounts.ActionSignInAgain): plain("Sign in again"),
+			string(accounts.ActionSignOut):     plain("Sign out"),
+			string(accounts.ActionRemove):      plain("Remove"),
+			string(accounts.ActionNone):        plain("nothing to do"),
+		}},
+		{accounts.StepKind(""), map[string]word{
+			string(accounts.StepDeviceCode): plain("a code to enter"),
+			string(accounts.StepLink):       plain("a link to open"),
+			string(accounts.StepPaste):      plain("a code to paste back"),
+		}},
+		{accounts.KeyKind(""), map[string]word{
+			string(accounts.KeyToken):       plain("token"),
+			string(accounts.KeyFineGrained): plain("fine-grained token"),
+			string(accounts.KeyAPIKey):      plain("API key"),
+			string(accounts.KeyOAuth):       plain("OAuth token"),
+			string(accounts.KeyPassword):    plain("password"),
+		}},
+		{accounts.AddFrom(""), map[string]word{
+			string(accounts.FromSignIn): plain("from a sign-in"),
+			string(accounts.FromTyped):  plain("typed"),
+		}},
+		{accounts.GrantTo(""), map[string]word{
+			string(accounts.ToMachine): {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},
+			string(accounts.ToAgent):   {Word: "Agents", One: "agent", Other: "agents", Tone: verdict.Plain},
+		}},
+		{accounts.GrantState(""), map[string]word{
+			string(accounts.GrantActive):  toned(verdict.OK, "active"),
+			string(accounts.GrantEnding):  toned(verdict.Warn, "ending soon"),
+			string(accounts.GrantFailing): toned(verdict.Bad, "failing"),
+		}},
+		{fail.Field(""), map[string]word{
+			string(fail.FieldLabel): plain("label"),
+			string(fail.FieldValue): plain("value"),
+			string(fail.FieldTerm):  plain("term"),
+		}},
 		{page.Noun(""), map[string]word{
 			string(page.NounMachine):       {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},
 			string(page.NounSkill):         {Word: "Skills", One: "skill", Other: "skills", Tone: verdict.Plain},
@@ -235,6 +285,14 @@ func refusalWords() map[string]word {
 	for _, code := range words.CodesSorted() {
 		name, family := words.Title(code)
 		out[string(code)] = word{Word: name, Detail: family, Tone: verdict.Plain}
+	}
+	return out
+}
+
+func programWords() map[string]word {
+	out := map[string]word{}
+	for _, t := range catalog.LoginPrograms {
+		out[t.Name] = word{Word: t.Label, Detail: t.Name, Tone: verdict.Plain}
 	}
 	return out
 }

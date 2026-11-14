@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
+	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
@@ -17,6 +18,7 @@ import (
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
+	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
 
 const callsPath = "apps/engine/remote/api/calls.json"
@@ -27,7 +29,7 @@ func registry() *call.Registry {
 		accountscalls.All(accountscalls.Deps{}), activitycalls.All(activitycalls.Deps{}), appscalls.All(appscalls.Deps{}),
 		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}), agentscalls.All(agentscalls.Deps{}),
 		imagescalls.All(imagescalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
-		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}),
+		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),
 	)
 	if err != nil {
 		panic(err)

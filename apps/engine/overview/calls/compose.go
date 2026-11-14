@@ -69,7 +69,7 @@ func sectionReads(now time.Time) map[section.ID]sectionRead {
 			return overview.PortsRead(out), err
 		},
 		section.Accounts: func(ctx context.Context, r call.Router, self machine.Ref) (overview.Read, error) {
-			out, err := call.Read(ctx, r, thisMac, accountscalls.List, accountscalls.ListIn{}, nil)
+			out, err := call.Read(ctx, r, thisMac, accountscalls.Read, accountscalls.ReadIn{}, nil)
 			return overview.AccountsRead(out, self), err
 		},
 		section.Background: func(ctx context.Context, r call.Router, self machine.Ref) (overview.Read, error) {

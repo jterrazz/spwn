@@ -15,6 +15,7 @@ type WireError struct {
 	Type    fail.Type         `json:"type,omitempty"`
 	Code    fail.Code         `json:"code,omitempty"`
 	Subject string            `json:"subject,omitempty"`
+	Field   fail.Field        `json:"field,omitempty"`
 	Detail  map[string]string `json:"detail,omitempty"`
 	Message string            `json:"message"`
 	Hint    string            `json:"hint,omitempty"`
@@ -35,7 +36,7 @@ func ToWire(err error, word Wording) *WireError {
 	if f == nil {
 		f = &fail.Error{Message: err.Error(), Exit: fail.ExitFailure}
 	}
-	w := &WireError{Type: f.Type, Code: f.Code, Subject: secret.Kept(f.Subject), Detail: screenedAll(f.Detail), Message: secret.Kept(f.Message), Hint: secret.Kept(f.Hint), Exit: f.Exit}
+	w := &WireError{Type: f.Type, Code: f.Code, Subject: secret.Kept(f.Subject), Field: f.Field, Detail: screenedAll(f.Detail), Message: secret.Kept(f.Message), Hint: secret.Kept(f.Hint), Exit: f.Exit}
 	if w.Message == "" {
 		w.Message = secret.Kept(f.Error())
 	}
@@ -62,7 +63,7 @@ func (w *WireError) Err() *fail.Error {
 	if w == nil {
 		return nil
 	}
-	e := &fail.Error{Type: w.Type, Code: w.Code, Subject: w.Subject, Detail: w.Detail, Exit: w.Exit}
+	e := &fail.Error{Type: w.Type, Code: w.Code, Subject: w.Subject, Field: w.Field, Detail: w.Detail, Exit: w.Exit}
 	if w.Fix != nil {
 		e.Fix = *w.Fix
 	}

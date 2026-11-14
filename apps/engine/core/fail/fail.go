@@ -50,6 +50,18 @@ func (t Type) Exit() Exit {
 
 type Code string
 
+type Field string
+
+const (
+	FieldLabel Field = "label"
+	FieldValue Field = "value"
+	FieldTerm  Field = "term"
+)
+
+func (Field) Enum() []string {
+	return []string{string(FieldLabel), string(FieldValue), string(FieldTerm)}
+}
+
 type Error struct {
 	// invariant: an error carries its Type and Code (v3), or its Message, Hint
 	// and Exit (the errors kit.Translate words today); Type, when set, decides
@@ -57,6 +69,8 @@ type Error struct {
 	Type    Type
 	Code    Code
 	Subject string
+	// value: the input of the request the refusal is about, when it is about one.
+	Field   Field
 	Detail  map[string]string
 	Fix     finding.Fix
 	Message string

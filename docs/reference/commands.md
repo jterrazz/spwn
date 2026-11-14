@@ -158,7 +158,7 @@ station accounts share <account> --with <vm> [--for <duration>] # 12h by default
 station accounts take-back <account> --from <vm> [--yes]
 ```
 
-This Mac's GitHub, npm, Claude, Tailscale, Cloudflare, git, ssh and Docker sign-ins, then `# Shared with VMs`: each share with its VM and its time left. `--on <vm>` reads a workspace's own sign-ins, by its guest; `--all-machines` prints one block per Mac and workspace, a server named and not listed, a stopped workspace and a Mac that does not answer each its own line. Identities and scopes only: no token, cookie or key body is ever read into a value, and anything shaped like one reads `?`. `--json` is `station.accounts.list/v1`: `{schema, machine, accounts, shares, share_list}`. A share is asked of the VM's own Mac. `station secrets`, `secrets lend --to` and `secrets recall --from` are hidden aliases of `accounts`, `accounts share` and `accounts take-back` for one release; `secrets allow` and `disallow` are retired (exit 2). See [Accounts](accounts.md#grants).
+This Mac's GitHub, npm, Claude, Tailscale, Cloudflare, git, ssh and Docker sign-ins, then `# Shared with VMs`: each share with its VM and its time left. `--on <vm>` reads a workspace's own sign-ins, by its guest; `--all-machines` prints one block per Mac and workspace, a server named and not listed, a stopped workspace and a Mac that does not answer each its own line. Identities and scopes only: no token, cookie or key body is ever read into a value, and anything shaped like one reads `?`. `--json` is `station.accounts.read/v1`: `{schema, machine, accounts, shares, share_list}`. A share is asked of the VM's own Mac. `station secrets`, `secrets lend --to` and `secrets recall --from` are hidden aliases of `accounts`, `accounts share` and `accounts take-back` for one release; `secrets allow` and `disallow` are retired (exit 2). See [Accounts](accounts.md#grants).
 
 ### `station background`
 
@@ -265,7 +265,7 @@ A v2 word, or a v3.0 one (`setup`), runs its new command with the same arguments
 | `station run git <shortcut>`          | `git <alias>`, the [Git shortcuts](settings.md#the-packages) setting's alias (`log`, `push`, `status` are `lg`, `pushup`, `st`); refused with `station settings apply git-shortcuts` while it is not applied |
 | `station run docker rm\|rmi\|reset`   | the steps of `dclean`, `dclean-images`, `dreset`, the [Docker shortcuts](settings.md#the-packages), asking as before (`--yes` off a terminal)                                                                |
 
-The words of a kind and a lifetime are not aliased in `--json`: `station.machines.list/v1`, `station.accounts.list/v1` and `station.overview.read/v1` say `computer`, `ephemeral` and `persistent`, and `station.status/v1` keeps its words ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)).
+The words of a kind and a lifetime are not aliased in `--json`: `station.machines.list/v1`, `station.accounts.read/v1` and `station.overview.read/v1` say `computer`, `ephemeral` and `persistent`, and `station.status/v1` keeps its words ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)).
 
 ## Plumbing
 

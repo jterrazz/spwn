@@ -66,6 +66,8 @@ func carried(e *fail.Error, generic, advice string) (message, hint string) {
 	return generic, advice
 }
 
+func programLabel(e *fail.Error) string { return accounts.Program(e.Subject).Label() }
+
 func Codes() map[fail.Code]Wording {
 	// invariant: the one table of every error code's words (rule
 	// every-code-worded): a code raised anywhere is worded here once.
@@ -292,6 +294,105 @@ func Codes() map[fail.Code]Wording {
 		},
 		appscalls.Unpinnable: func(e *fail.Error) (string, string) {
 			return e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " holds " + cmp.Or(e.Detail["holds"], "only its newest") + ", never " + e.Detail["version"], "ask " + e.Subject + " with no version, or by a method that holds it"
+		},
+		accounts.LoginUnknownProgram: func(e *fail.Error) (string, string) {
+			return "no program named \"" + e.Subject + "\"", "station signs in gh, npm, claude and wrangler"
+		},
+		accounts.LoginNotInstalled: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " is not installed here", "install it first: station apps"
+		},
+		accounts.LoginAlreadySignedIn: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " is already signed in here", "sign out first to sign in again"
+		},
+		accounts.LoginMachineStopped: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " cannot sign in: its machine is stopped", "start the machine, then sign in"
+		},
+		accounts.LoginBusy: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " is already signing in", "finish that sign-in or wait for it to expire"
+		},
+		accounts.LoginSiteRefused: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " asked to open a site station does not know", "nothing was opened"
+		},
+		accounts.LoginExpired: func(e *fail.Error) (string, string) {
+			return "the sign-in expired before " + programLabel(e) + " was approved", "start the sign-in again"
+		},
+		accounts.LoginFailed: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " could not sign in", "start the sign-in again"
+		},
+		accounts.LoginNotSignedIn: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " is not signed in here", "there is nothing to sign out of"
+		},
+		accounts.LoginGranted: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " is granted here, not signed in here", "remove the grant instead"
+		},
+		accounts.LoginNoExchange: func(e *fail.Error) (string, string) {
+			return "no sign-in " + e.Subject + " is in progress", "start the sign-in again"
+		},
+		accounts.LoginOtherMac: func(e *fail.Error) (string, string) {
+			return "this sign-in runs on " + e.Subject + ", which another Mac holds", "open it from " + e.Subject
+		},
+		accounts.LoginNotAsking: func(e *fail.Error) (string, string) {
+			return "sign-in " + e.Subject + " waits for no code", "finish it in the browser"
+		},
+		accounts.LoginCodeRefused: func(*fail.Error) (string, string) {
+			return "the code was refused", "copy it again from the page"
+		},
+		accounts.VaultLabelTaken: func(e *fail.Error) (string, string) {
+			return "a password is already labeled \"" + e.Subject + "\"", "label it another way"
+		},
+		accounts.VaultEmptyValue: func(*fail.Error) (string, string) {
+			return "a typed password cannot be empty", "type it, or add it from a sign-in"
+		},
+		accounts.VaultNotSignedIn: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " is not signed in on this Mac: there is nothing to add", "sign in first"
+		},
+		accounts.VaultCannotCapture: func(e *fail.Error) (string, string) {
+			return "station cannot take " + programLabel(e) + "'s sign-in into the vault", "type its token instead"
+		},
+		accounts.VaultUnknown: func(e *fail.Error) (string, string) {
+			return "no password " + e.Subject + " in this Mac's vault", "read the vault for what it keeps"
+		},
+		accounts.GrantUnknownEntry: func(e *fail.Error) (string, string) {
+			return "no password " + e.Subject + " in this Mac's vault", "read the vault for what it keeps"
+		},
+		accounts.GrantUnknownMachine: func(e *fail.Error) (string, string) {
+			return "no machine named \"" + e.Subject + "\"", "station machines"
+		},
+		accounts.GrantUnknownAgent: func(e *fail.Error) (string, string) {
+			return "no agent named \"" + e.Subject + "\"", "station agents"
+		},
+		accounts.GrantToServer: func(e *fail.Error) (string, string) {
+			return e.Subject + " is a server: a grant never reaches it", "give it its secrets with your own tooling"
+		},
+		accounts.GrantOtherMac: func(e *fail.Error) (string, string) {
+			return e.Subject + " is on " + e.Detail["mac"] + ": a grant is made from that Mac's vault", "do it from " + e.Detail["mac"]
+		},
+		accounts.GrantMachineStopped: func(e *fail.Error) (string, string) {
+			return e.Subject + " is stopped: a grant has nowhere to land", "start it first"
+		},
+		accounts.GrantSignedInHere: func(e *fail.Error) (string, string) {
+			return "that program is already signed in on " + e.Subject, "sign it out there first"
+		},
+		accounts.GrantTermOutOfBounds: func(e *fail.Error) (string, string) {
+			if e.Detail["to"] == string(accounts.ToAgent) {
+				return "an agent's grant lasts 1 min to 7 d, never until removed, not " + e.Subject, "ask for a term of 4h"
+			}
+			return "a grant lasts 1 min to 7 d, or until it is removed, not " + e.Subject, "ask for a term of 4h"
+		},
+		accounts.GrantNotAgentGrantable: func(e *fail.Error) (string, string) {
+			return "password " + e.Subject + " is not one an agent may hold", "an agent holds a fine-grained, expiring token only"
+		},
+		accounts.GrantPresenceRefused: func(*fail.Error) (string, string) {
+			return "this Mac did not confirm you are there: nothing was granted", "grant again and confirm on this Mac"
+		},
+		accounts.GrantNoPresence: func(*fail.Error) (string, string) {
+			return "this Mac cannot ask you to confirm: nothing was granted", "unlock this Mac's screen and grant again"
+		},
+		accounts.GrantCannotDeliver: func(e *fail.Error) (string, string) {
+			return "the grant could not reach " + e.Subject + ": nothing was granted", "check that " + e.Subject + " answers, then grant again"
+		},
+		accounts.GrantNotGranted: func(e *fail.Error) (string, string) {
+			return "that password is not granted to " + e.Subject, "read the vault for its grants"
 		},
 		accountscalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no account named \"" + e.Subject + "\"", "station accounts"

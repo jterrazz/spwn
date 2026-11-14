@@ -75,7 +75,7 @@ func rowIDs(p page.Page, section string) []string {
 func TestEveryMacsAccountsAreReadThroughItsOwnEngineWhatNeedsYouFirst(t *testing.T) {
 	w := twoMacsSignedIn()
 	p := watchAccounts(t, w, "")
-	if got := w.askedOf(accountscalls.List.Name); !slices.Equal(got, []string{thisMac, mini}) {
+	if got := w.askedOf(accountscalls.Read.Name); !slices.Equal(got, []string{thisMac, mini}) {
 		t.Errorf("accounts read on %v, want This Mac then the mini, the asleep air not asked", got)
 	}
 	if got, want := sectionIDs(p), []string{"summary", "needs-you", "shared", "signed-in", "silent"}; !slices.Equal(got, want) {
@@ -153,7 +153,7 @@ func TestEverySharedCopyCarriesItsTimeLeftAndTotalTheOneUnder30MinOrange(t *test
 func TestOneMacsAccountsAreThatMacsAloneReadThroughItsEngine(t *testing.T) {
 	w := twoMacsSignedIn()
 	p := watchAccounts(t, w, "mac-mini")
-	if got := w.askedOf(accountscalls.List.Name); !slices.Equal(got, []string{mini}) {
+	if got := w.askedOf(accountscalls.Read.Name); !slices.Equal(got, []string{mini}) {
 		t.Errorf("accounts read on %v, want the mini alone", got)
 	}
 	if got, want := sectionIDs(p), []string{"summary", "shared", "signed-in:" + mini}; !slices.Equal(got, want) {

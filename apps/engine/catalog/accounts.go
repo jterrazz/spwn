@@ -41,6 +41,19 @@ const (
 
 var ClaudePlans = map[string]string{"max": "Max plan", "pro": "Pro plan", "team": "Team plan", "enterprise": "Enterprise plan"} // value: Claude's plan in words, by the subscription `claude auth status` prints; one it does not list is said as printed.
 
+type LoginProgram struct {
+	// value: a program station signs in for the owner: the name its wire calls
+	// it by, which is the command it runs, and its label.
+	Name, Label string
+}
+
+var LoginPrograms = []LoginProgram{
+	{Name: "gh", Label: "GitHub"},
+	{Name: "npm", Label: "npm"},
+	{Name: "claude", Label: "Claude"},
+	{Name: "wrangler", Label: "Cloudflare"},
+}
+
 type ProviderHint struct {
 	Reason, ThisMachine, InVM string
 }

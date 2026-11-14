@@ -90,7 +90,7 @@ func LendAlias(d Deps, env kit.Env) *cobra.Command {
 		Run: func(ctx context.Context, in *ShareInput, io kit.IO) error {
 			names := in.Names
 			if len(names) == 0 {
-				r, err := call.Read(ctx, env.Calls, env.Target(), accountscalls.List, accountscalls.ListIn{}, nil)
+				r, err := call.Read(ctx, env.Calls, env.Target(), accountscalls.Read, accountscalls.ReadIn{}, nil)
 				if err != nil {
 					return err
 				}

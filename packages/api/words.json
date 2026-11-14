@@ -1,4 +1,154 @@
 {
+  "AccountsAddFrom": {
+    "sign-in": {
+      "Word": "from a sign-in",
+      "Tone": "plain"
+    },
+    "typed": {
+      "Word": "typed",
+      "Tone": "plain"
+    }
+  },
+  "AccountsGrantState": {
+    "active": {
+      "Word": "active",
+      "Tone": "ok"
+    },
+    "ending": {
+      "Word": "ending soon",
+      "Tone": "warn"
+    },
+    "failing": {
+      "Word": "failing",
+      "Tone": "bad"
+    }
+  },
+  "AccountsGrantTo": {
+    "agent": {
+      "Word": "Agents",
+      "One": "agent",
+      "Other": "agents",
+      "Tone": "plain"
+    },
+    "machine": {
+      "Word": "Machines",
+      "One": "machine",
+      "Other": "machines",
+      "Tone": "plain"
+    }
+  },
+  "AccountsKeyKind": {
+    "api-key": {
+      "Word": "API key",
+      "Tone": "plain"
+    },
+    "fine-grained": {
+      "Word": "fine-grained token",
+      "Tone": "plain"
+    },
+    "oauth-token": {
+      "Word": "OAuth token",
+      "Tone": "plain"
+    },
+    "password": {
+      "Word": "password",
+      "Tone": "plain"
+    },
+    "token": {
+      "Word": "token",
+      "Tone": "plain"
+    }
+  },
+  "AccountsProgram": {
+    "claude": {
+      "Word": "Claude",
+      "Detail": "claude",
+      "Tone": "plain"
+    },
+    "gh": {
+      "Word": "GitHub",
+      "Detail": "gh",
+      "Tone": "plain"
+    },
+    "npm": {
+      "Word": "npm",
+      "Detail": "npm",
+      "Tone": "plain"
+    },
+    "wrangler": {
+      "Word": "Cloudflare",
+      "Detail": "wrangler",
+      "Tone": "plain"
+    }
+  },
+  "AccountsProgramAction": {
+    "none": {
+      "Word": "nothing to do",
+      "Tone": "plain"
+    },
+    "remove": {
+      "Word": "Remove",
+      "Tone": "plain"
+    },
+    "sign-in": {
+      "Word": "Sign in",
+      "Tone": "plain"
+    },
+    "sign-in-again": {
+      "Word": "Sign in again",
+      "Tone": "plain"
+    },
+    "sign-out": {
+      "Word": "Sign out",
+      "Tone": "plain"
+    }
+  },
+  "AccountsProgramHow": {
+    "granted": {
+      "Word": "granted",
+      "Tone": "plain"
+    },
+    "own": {
+      "Word": "signed in here",
+      "Tone": "plain"
+    }
+  },
+  "AccountsProgramState": {
+    "broken": {
+      "Word": "needs signing in again",
+      "Tone": "bad"
+    },
+    "reading": {
+      "Word": "reading",
+      "Tone": "new"
+    },
+    "signed-in": {
+      "Word": "signed in",
+      "Tone": "ok"
+    },
+    "signed-out": {
+      "Word": "signed out",
+      "Tone": "plain"
+    },
+    "waiting": {
+      "Word": "waiting",
+      "Tone": "new"
+    }
+  },
+  "AccountsStepKind": {
+    "device-code": {
+      "Word": "a code to enter",
+      "Tone": "plain"
+    },
+    "link": {
+      "Word": "a link to open",
+      "Tone": "plain"
+    },
+    "paste": {
+      "Word": "a code to paste back",
+      "Tone": "plain"
+    }
+  },
   "CatalogAfterApply": {
     "logout": {
       "Word": "a log out",
@@ -407,6 +557,71 @@
       "Word": "Engine did not start",
       "Tone": "plain"
     },
+    "grant.cannot-deliver": {
+      "Word": "cannot deliver",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.machine-stopped": {
+      "Word": "machine stopped",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.no-presence": {
+      "Word": "no presence",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.not-agent-grantable": {
+      "Word": "not agent grantable",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.not-granted": {
+      "Word": "not granted",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.other-mac": {
+      "Word": "other Mac",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.presence-refused": {
+      "Word": "presence refused",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.signed-in-here": {
+      "Word": "signed in here",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.term-out-of-bounds": {
+      "Word": "term out of bounds",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.to-server": {
+      "Word": "to server",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.unknown-agent": {
+      "Word": "unknown agent",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.unknown-entry": {
+      "Word": "unknown entry",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.unknown-machine": {
+      "Word": "unknown machine",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
     "guest_absent": {
       "Word": "Guest not connected",
       "Tone": "plain"
@@ -446,6 +661,76 @@
     },
     "internal": {
       "Word": "Engine failure",
+      "Tone": "plain"
+    },
+    "login.already-signed-in": {
+      "Word": "already signed in",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.busy": {
+      "Word": "busy",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.code-refused": {
+      "Word": "code refused",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.expired": {
+      "Word": "expired",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.failed": {
+      "Word": "failed",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.granted": {
+      "Word": "granted",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.machine-stopped": {
+      "Word": "machine stopped",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.no-exchange": {
+      "Word": "no exchange",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.not-asking": {
+      "Word": "not asking",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.not-installed": {
+      "Word": "not installed",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.not-signed-in": {
+      "Word": "not signed in",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.other-mac": {
+      "Word": "other Mac",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.site-refused": {
+      "Word": "site refused",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.unknown-program": {
+      "Word": "unknown program",
+      "Detail": "login",
       "Tone": "plain"
     },
     "machinefile.bad-phase": {
@@ -768,8 +1053,47 @@
       "Detail": "usage",
       "Tone": "plain"
     },
+    "vault.cannot-capture": {
+      "Word": "cannot capture",
+      "Detail": "vault",
+      "Tone": "plain"
+    },
+    "vault.empty-value": {
+      "Word": "empty value",
+      "Detail": "vault",
+      "Tone": "plain"
+    },
+    "vault.label-taken": {
+      "Word": "label taken",
+      "Detail": "vault",
+      "Tone": "plain"
+    },
+    "vault.not-signed-in": {
+      "Word": "not signed in",
+      "Detail": "vault",
+      "Tone": "plain"
+    },
+    "vault.unknown": {
+      "Word": "unknown",
+      "Detail": "vault",
+      "Tone": "plain"
+    },
     "vm_stopped": {
       "Word": "Machine stopped",
+      "Tone": "plain"
+    }
+  },
+  "CoreFailField": {
+    "label": {
+      "Word": "label",
+      "Tone": "plain"
+    },
+    "term": {
+      "Word": "term",
+      "Tone": "plain"
+    },
+    "value": {
+      "Word": "value",
       "Tone": "plain"
     }
   },

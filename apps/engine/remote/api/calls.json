@@ -2,11 +2,81 @@
   "schema": "station.calls/v1",
   "calls": [
     {
+      "name": "accounts.answer",
+      "schema": "station.accounts.answer/v1",
+      "section": "accounts",
+      "where": "in-engine",
+      "errors": [
+        "login.code-refused",
+        "login.no-exchange",
+        "login.not-asking"
+      ],
+      "in": "AnswerIn",
+      "out": "Answered"
+    },
+    {
       "name": "accounts.list",
       "schema": "station.accounts.list/v1",
       "section": "accounts",
       "where": "at-target",
-      "in": "ListIn",
+      "in": "ProgramsIn",
+      "out": "ProgramsRead",
+      "watch": true
+    },
+    {
+      "name": "accounts.login",
+      "schema": "station.accounts.login/v1",
+      "section": "accounts",
+      "where": "at-target",
+      "errors": [
+        "login.already-signed-in",
+        "login.busy",
+        "login.expired",
+        "login.failed",
+        "login.machine-stopped",
+        "login.not-installed",
+        "login.site-refused",
+        "login.unknown-program"
+      ],
+      "in": "LoginIn",
+      "out": "LoginRead",
+      "watch": true
+    },
+    {
+      "name": "accounts.logout",
+      "schema": "station.accounts.logout/v1",
+      "section": "accounts",
+      "where": "at-target",
+      "confirm": "sign-out",
+      "errors": [
+        "confirm.yes-needed",
+        "login.granted",
+        "login.machine-stopped",
+        "login.not-signed-in",
+        "login.unknown-program"
+      ],
+      "in": "LogoutIn",
+      "out": "ProgramRow"
+    },
+    {
+      "name": "accounts.open",
+      "schema": "station.accounts.open/v1",
+      "section": "accounts",
+      "where": "in-engine",
+      "errors": [
+        "login.expired",
+        "login.no-exchange",
+        "login.other-mac"
+      ],
+      "in": "OpenIn",
+      "out": "Opened"
+    },
+    {
+      "name": "accounts.read",
+      "schema": "station.accounts.read/v1",
+      "section": "accounts",
+      "where": "at-target",
+      "in": "ReadIn",
       "out": "Report",
       "watch": true
     },
@@ -512,6 +582,44 @@
       "own": true
     },
     {
+      "name": "grants.add",
+      "schema": "station.grants.add/v1",
+      "section": "accounts",
+      "where": "in-engine",
+      "errors": [
+        "grant.cannot-deliver",
+        "grant.machine-stopped",
+        "grant.no-presence",
+        "grant.not-agent-grantable",
+        "grant.other-mac",
+        "grant.presence-refused",
+        "grant.signed-in-here",
+        "grant.term-out-of-bounds",
+        "grant.to-server",
+        "grant.unknown-agent",
+        "grant.unknown-entry",
+        "grant.unknown-machine"
+      ],
+      "in": "GrantAddIn",
+      "out": "Granted"
+    },
+    {
+      "name": "grants.remove",
+      "schema": "station.grants.remove/v1",
+      "section": "accounts",
+      "where": "in-engine",
+      "confirm": "remove-grant",
+      "errors": [
+        "confirm.yes-needed",
+        "grant.not-granted",
+        "grant.unknown-agent",
+        "grant.unknown-entry",
+        "grant.unknown-machine"
+      ],
+      "in": "GrantRemoveIn",
+      "out": "Revoked"
+    },
+    {
       "name": "images.build",
       "schema": "station.images.build/v1",
       "where": "in-engine",
@@ -1011,6 +1119,42 @@
       "where": "at-target",
       "in": "InitIn",
       "out": "Report"
+    },
+    {
+      "name": "vault.add",
+      "schema": "station.vault.add/v1",
+      "section": "accounts",
+      "where": "in-engine",
+      "errors": [
+        "vault.cannot-capture",
+        "vault.empty-value",
+        "vault.label-taken",
+        "vault.not-signed-in"
+      ],
+      "in": "VaultAddIn",
+      "out": "Added"
+    },
+    {
+      "name": "vault.list",
+      "schema": "station.vault.list/v1",
+      "section": "accounts",
+      "where": "at-target",
+      "in": "VaultListIn",
+      "out": "VaultRead",
+      "watch": true
+    },
+    {
+      "name": "vault.remove",
+      "schema": "station.vault.remove/v1",
+      "section": "accounts",
+      "where": "in-engine",
+      "confirm": "remove-password",
+      "errors": [
+        "confirm.yes-needed",
+        "vault.unknown"
+      ],
+      "in": "VaultRemoveIn",
+      "out": "Removed"
     }
   ]
 }

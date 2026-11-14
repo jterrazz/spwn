@@ -76,7 +76,7 @@ func (o Menubar) everyMacAccounts(ctx context.Context, listed machines.AllMachin
 			all.Macs = append(all.Macs, m)
 			continue
 		}
-		r, err := call.Read(ctx, o.Calls, macRef(h), accountscalls.List, accountscalls.ListIn{}, nil)
+		r, err := call.Read(ctx, o.Calls, macRef(h), accountscalls.Read, accountscalls.ReadIn{}, nil)
 		if err != nil {
 			m.Silent = err.Error()
 		} else if len(r.Machines) > 0 {

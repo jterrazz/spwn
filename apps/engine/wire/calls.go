@@ -23,6 +23,7 @@ import (
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
+	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
@@ -32,6 +33,7 @@ import (
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
+	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
 
 // invariant: the one registry of this process, every family's All with its
@@ -55,7 +57,9 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		activitycalls.All(m.activityDeps(sections.Meter)),
 		overviewcalls.All(sections),
 		agentscalls.All(agentscalls.Deps{Hooks: []agentscontract.Hooks{m.agentHooks(claudecode.ID), m.agentHooks(codex.ID)}, Journal: m.journal(), Session: m.agentSession(), Forge: m.forge(), Now: m.sys.Clock.Now, Machine: m.profile.Ref.Name, Held: m.heldOnEveryMachine(kind), Kind: kind, Calls: farRouter{m}}),
-		accountscalls.All(accountscalls.Deps{Accounts: m.accounts(), Shares: m.secrets(), Kind: kind}),
+		accountscalls.All(accountscalls.Deps{Accounts: m.accounts(), Shares: m.secrets(), SignIns: m.signIns(), Kind: kind}),
+		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), Kind: kind}),
+		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),
 		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Known: m.cat.Apps, Kind: kind}),
 		awakecalls.All(m.awakeDeps()),
 		backgroundcalls.All(m.backgroundDeps()),

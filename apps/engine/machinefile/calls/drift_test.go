@@ -144,7 +144,7 @@ func TestAVMsDriftJudgesItsPackagesOnItAndItsSharesOnItsMac(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if f.asked["machinefile.plan"] != (machine.Ref{Name: "linux-1"}) || f.asked["ports.list"] != (machine.Ref{}) || f.asked["accounts.list"] != (machine.Ref{Name: "mini"}) {
+	if f.asked["machinefile.plan"] != (machine.Ref{Name: "linux-1"}) || f.asked["ports.list"] != (machine.Ref{}) || f.asked["accounts.read"] != (machine.Ref{Name: "mini"}) {
 		t.Errorf("asked %v; want the plan of linux-1, the ports with no target, the accounts of the mini", f.asked)
 	}
 	if d.Machine != "linux-1" {

@@ -320,6 +320,19 @@
             "disk.nothing-to-free",
             "disk.unknown",
             "engine.start-failed",
+            "grant.cannot-deliver",
+            "grant.machine-stopped",
+            "grant.no-presence",
+            "grant.not-agent-grantable",
+            "grant.not-granted",
+            "grant.other-mac",
+            "grant.presence-refused",
+            "grant.signed-in-here",
+            "grant.term-out-of-bounds",
+            "grant.to-server",
+            "grant.unknown-agent",
+            "grant.unknown-entry",
+            "grant.unknown-machine",
             "guest_absent",
             "guest_timeout",
             "ignored_port",
@@ -329,6 +342,20 @@
             "image.no-recipe",
             "image.unknown",
             "internal",
+            "login.already-signed-in",
+            "login.busy",
+            "login.code-refused",
+            "login.expired",
+            "login.failed",
+            "login.granted",
+            "login.machine-stopped",
+            "login.no-exchange",
+            "login.not-asking",
+            "login.not-installed",
+            "login.not-signed-in",
+            "login.other-mac",
+            "login.site-refused",
+            "login.unknown-program",
             "machinefile.bad-phase",
             "machinefile.bad-value",
             "machinefile.busy",
@@ -394,6 +421,11 @@
             "usage.missing-argument",
             "usage.needs-terminal",
             "usage.unknown-command",
+            "vault.cannot-capture",
+            "vault.empty-value",
+            "vault.label-taken",
+            "vault.not-signed-in",
+            "vault.unknown",
             "vm_stopped"
           ],
           "type": "string"
@@ -406,6 +438,14 @@
         },
         "exit": {
           "type": "integer"
+        },
+        "field": {
+          "enum": [
+            "label",
+            "value",
+            "term"
+          ],
+          "type": "string"
         },
         "fix": {
           "$ref": "#/$defs/core.finding.Fix"
