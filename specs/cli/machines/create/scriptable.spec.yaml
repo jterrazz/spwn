@@ -5,11 +5,11 @@ fixture:
 env: engine
 serve: sshd
 runs:
-    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create | /usr/bin/tail -1 | /usr/bin/cut -f2; kill $d; wait $d'
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --memory 4G | /usr/bin/tail -1 | /usr/bin/cut -f2; kill $d; wait $d'
       exit: 0
       stdout: |
           linux-1
-    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --json | /usr/bin/jq -r ''.schema, .name, .mac, .lifetime, .version, .memory_bytes, .ip''; kill $d; wait $d'
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --memory 4G --json | /usr/bin/jq -r ''.schema, .name, .mac, .lifetime, .version, .memory_bytes, .ip''; kill $d; wait $d'
       exit: 0
       stdout: |
           station.machines.create-workspace/v1

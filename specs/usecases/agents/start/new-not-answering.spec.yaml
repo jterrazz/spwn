@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: 'world fault Guest.Serve'
       exit: 0
-    - command: 'agents start "Build the landing page" --new'
+    - command: 'agents start "Build the landing page" --new --memory 4G'
       exit: 1
       stderr: |
           Error: linux-2 is ready, but its agent did not start: linux-2 does not answer

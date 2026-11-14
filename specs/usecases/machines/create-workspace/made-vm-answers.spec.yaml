@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: 'machines create gate5 >/dev/null'
+    - command: 'machines create gate5 --memory 4G >/dev/null'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.Summary.Head.Name, .out.Summary.Head.Kind]'' | /usr/bin/tail -1'
       stdin: |

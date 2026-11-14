@@ -1,7 +1,7 @@
 description: 'on a Mac whose engine was never installed, the first create installs and starts it, then the VM'
 env: no-engine
 runs:
-    - command: 'machines create'
+    - command: 'machines create --memory 4G'
       exit: 0
       stdout: |
           ●	Running

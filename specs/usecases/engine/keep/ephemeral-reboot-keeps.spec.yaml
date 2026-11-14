@@ -1,7 +1,7 @@
 description: 'an ephemeral workspace whose guest reboots boots again, kept, on the same reserved ports'
 env: two-macs
 runs:
-    - command: 'machines create linux-2 | /usr/bin/tail -1'
+    - command: 'machines create --memory 4G linux-2 | /usr/bin/tail -1'
       exit: 0
       stdout: |
           ●	linux-2	Created	Ephemeral · 4 CPU · 4 GB · 20 GB

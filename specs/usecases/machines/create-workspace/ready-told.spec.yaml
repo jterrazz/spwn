@@ -1,7 +1,7 @@
 description: 'a created workspace is told ready, its engine keeps when, and its birth leaves its record'
 env: two-macs
 runs:
-    - command: 'machines create >/dev/null'
+    - command: 'machines create --memory 4G >/dev/null'
       exit: 0
     - command: 'machines create linux-4 --on mac-mini >/dev/null'
       exit: 0

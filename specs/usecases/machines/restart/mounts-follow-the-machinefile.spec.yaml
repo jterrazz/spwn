@@ -11,6 +11,7 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
           extends: [station-linux]
           vm:
+            resources: { memory: 4G }
             lifetime: persistent
             mounts:
               - { computer: ~/Developer/notes, guest: ~/notes, read-only: true }
@@ -27,6 +28,7 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
           extends: [station-linux]
           vm:
+            resources: { memory: 4G }
             lifetime: persistent
             mounts:
               - { computer: ~/data, guest: /data }

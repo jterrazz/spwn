@@ -7,7 +7,7 @@ env:
 runs:
     - command: 'world hold Hypervisor.Clone'
       exit: 0
-    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" machines create linux-4'
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" machines create --memory 4G linux-4'
       stdin: |
           see On which Mac?
           settle
