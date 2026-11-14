@@ -1,15 +1,13 @@
 import type {
+    MachinesCallsNewIn,
+    MachinesCallsNewMachine,
+    MachinesCallsNewOn,
     MachinesCreateServerInput,
     MachinesCreateWorkspaceInput,
     MachinesResourcesInput,
     Target,
 } from '@jterrazz/station-api';
 
-import type {
-    MachinesCallsNewIn,
-    MachinesCallsNewMachine,
-    MachinesCallsNewOn,
-} from '../../engine/machines-new';
 import type { Opening } from '../../shell/window';
 
 export type Kind = 'server' | 'workspace';

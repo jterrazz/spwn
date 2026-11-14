@@ -30,9 +30,11 @@ target, and its VMs, by name, are asked. The worlds of world.py's SEEDS are reco
 
 import concurrent.futures
 import json
+import queue
 import shutil
 import subprocess
 import sys
+import threading
 
 from world import ROOT, SEEDS, sandbox, seeded, world_binary
 
@@ -42,6 +44,7 @@ SETTLED = {"apps.list", "settings.list"}
 TIMED = {"activity.read", "engine.watch"}
 NOISE = {"engine.start": "PID"}
 MACHINES = {"watch": "machines.list", "in": {}}
+QUIET = 10
 binary = world_binary()
 
 
@@ -54,20 +57,39 @@ class Door:
             [str(binary), "guest", "serve", "--stdio"], cwd=self.home, env=env,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
         )
+        self.lines = queue.Queue()
+        threading.Thread(target=self.pump, daemon=True).start()
         self.next = 0
         self.station = self.ask([{"hello": {"version": "dev", "calls": None}}])[0][0]["hello"]["version"]
 
-    def ask(self, requests):
-        """Sends every request at once and returns, in their order, the answers of each, once all have ended."""
-        ids = [str(self.next + index) for index in range(len(requests))]
-        self.next += len(requests)
-        frames = [{"v": 2, "id": id, **request} for id, request in zip(ids, requests)]
+    def pump(self):
+        for line in self.process.stdout:
+            self.lines.put(line)
+        self.lines.put("")
+
+    def send(self, frames):
         self.process.stdin.write("".join(json.dumps(frame) + "\n" for frame in frames))
         self.process.stdin.flush()
+
+    def ask(self, requests):
+        """Sends every request at once and returns, in their order, the answers of each, once all have ended. A watch
+        the engine holds open (a VM's Overview through its birth) is let go of after QUIET seconds of silence by a
+        cancel frame, as the window lets go of it, and its answers end on the engine's done."""
+        ids = [str(self.next + index) for index in range(len(requests))]
+        self.next += len(requests)
+        self.send([{"v": 2, "id": id, **request} for id, request in zip(ids, requests)])
         watches = {id for id, request in zip(ids, requests) if "watch" in request}
-        answers, ended = {}, set()
+        answers, ended, cancelled = {}, set(), set()
         while len(ended) < len(ids):
-            line = self.process.stdout.readline()
+            try:
+                line = self.lines.get(timeout=QUIET)
+            except queue.Empty:
+                held = watches - ended - cancelled
+                if not held:
+                    break
+                self.send([{"v": 2, "id": id, "cancel": True} for id in sorted(held)])
+                cancelled |= held
+                continue
             if not line:
                 break
             frame = json.loads(line)
@@ -108,10 +130,18 @@ def at(name):
     return {"target": {"name": name}}
 
 
-def asks(here):
+def macsOf(listed):
+    out = last_out(listed) or {}
+    return [mac["Name"] for mac in (out.get("All") or {}).get("Macs") or [] if mac.get("Name")]
+
+
+def asks(listed):
     """The reads the window asks of this Mac and its VMs. This Mac's engine is the socket's own, so a read of it
     names no target, as targetOf (src/model/machines.ts) sends it, and a read two pages ask is asked once. A drift
-    names its machine in its input and no target, as driftAsked sends it."""
+    names its machine in its input and no target, as driftAsked sends it. The New machine sheet watches machines.new
+    of the socket's engine, opened anywhere or on one Mac machines.list lists, as askedOf sends it; a sheet opened
+    from a machine file names it in From, a request `--only=machines.new --in=<json>` adds."""
+    here = thisMac(listed)
     vms = [(mac, vm) for mac in here for vm in mac.get("VMs") or []]
     targets = [{} for _ in here] + [at(vm["Name"]) for _, vm in vms]
     return list({keyOf(request): request for request in [
@@ -143,6 +173,8 @@ def asks(here):
         *[{"call": "machines.ssh", "in": {"Name": vm["Name"]}} for _, vm in vms],
         *[{"watch": "accounts.list", "in": {"VMs": True}} for _ in here],
         *[{"watch": "awake.read", "in": {}} for _ in here],
+        {"watch": "machines.new", "in": {}},
+        *[{"watch": "machines.new", "in": {"On": mac}} for mac in macsOf(listed)],
     ]}.values())
 
 
@@ -186,6 +218,7 @@ GESTURES = {
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-1", "From": "station-linux", "Lifetime": "persistent"}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "persistent", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "persistent", "Purpose": "deploys with sk-" + "station-" * 4 + "key"}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
     ],
@@ -259,7 +292,7 @@ def gesture(seed, fixture, request, reads, before):
     door = Door(seed, fixture)
     [answers] = door.ask([request])
     [listed] = door.ask([MACHINES])
-    born = [read for read in asks(thisMac(listed)) if keyOf(read) not in before]
+    born = [read for read in asks(listed) if keyOf(read) not in before]
     changed = []
     for read in [*reads, *born]:
         if callOf(read) in TIMED:
@@ -321,7 +354,7 @@ def record(world):
         made = gestures(world, seed, fixture, folder, requests, before)
         return f"{world}: {made} gestures over {len(requests)} recorded requests -> {folder}"
     station, [listed] = serve(seed, [MACHINES], fixture)
-    requests = asks(thisMac(listed))
+    requests = asks(listed)
     answered = asked(seed, requests, fixture)
     more = follows(requests, answered)
     if more:
@@ -347,7 +380,7 @@ def again(world):
     path = out_root / world / f"{only}.json"
     held = json.loads(path.read_text())["exchanges"] if path.exists() else []
     station, [listed] = serve(seed, [MACHINES], fixture)
-    known = [*[exchange["request"] for exchange in held], *asks(thisMac(listed))]
+    known = [*[exchange["request"] for exchange in held], *asks(listed)]
     of_call = [request for request in known if callOf(request) == only]
     wanted = list({keyOf(request): request for request in of_call
                    if given is None or request["in"] == given}.values())

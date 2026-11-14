@@ -14,6 +14,7 @@ import type {
     MachinefileExtraLine,
     MachinefileLine,
     MachinesEngineView,
+    MachinesFit,
     MachinesMacView,
     MachinesVM,
     OverviewNeed,
@@ -27,36 +28,39 @@ import { duration } from '../model/format';
 import type { ConfirmName } from './confirms';
 import type { EngineError } from './engine-error';
 import type { AskForm } from './gesture';
-import type { MachinesFit } from './machines-new';
 
-// outside: machines.list sends a Mac's reach as two booleans and no state code, and packages/api types a VM's
-// outside: State as a plain string though station's Go gives it seven codes (apps/engine/machines/allmachines.go);
-// outside: its creating is drawn from Birth, the engine's words. This file is the one place either becomes a code;
-// outside: it goes when the wire carries both.
+// outside: machines.list sends a Mac's reach as two booleans and no state code, and packages/api types a VM's State
+// outside: as a plain string though station's Go gives it seven codes (apps/engine/machines/allmachines.go), its
+// outside: creating drawn from Birth; this file alone makes either a code, until the wire carries both.
 
 export type MacState = 'asleep' | 'reachable' | 'unreachable';
 
 export const VM_STATES = ['broken', 'running', 'stale', 'stopped', 'suspended', 'unknown'] as const;
-
 export type VmState = (typeof VM_STATES)[number];
 
-// outside: a preset's Fit is the engine's verdict on whether it can be asked; machines.new names no gesture, so the
-// outside: one it allows is read here.
-export const FIT_ALLOWS: Readonly<Record<MachinesFit, boolean>> = { fits: true, 'no-room': false };
-
-export type RefusalPlace = 'foot' | 'on' | 'purpose';
-
-// outside: a create's refusal names no field of the sheet it is about: machines.bad-purpose is the purpose's, a
-// outside: refusal whose subject is a Mac the sheet offers is that Mac's, and any other is the sheet's own.
-export function createRefusalPlaceOf(error: EngineError, macs: readonly string[]): RefusalPlace {
-    if (error.wire?.code === 'machines.bad-purpose') {
-        return 'purpose';
-    }
-    return macs.includes(error.wire?.subject ?? '') ? 'on' : 'foot';
+// outside: a preset's Fit is the engine's verdict on whether it can be asked, and machines.new names no gesture.
+export function fitAllows(fit: MachinesFit): boolean {
+    return fit === 'fits';
 }
 
-// outside: packages/api types engine.read's State as a plain string though station's Go gives it three codes
-// outside: (apps/engine/engine/reading.go).
+export type RefusalPlace = 'file' | 'foot' | 'memory' | 'on' | 'purpose';
+
+// outside: a create's refusal names no field of the sheet it is about, so its code places it (purpose, memory, file);
+// outside: one of another code whose subject is a Mac the sheet offers is that Mac's, any other the sheet's own.
+const CREATE_REFUSAL_PLACES: Readonly<Partial<Record<string, RefusalPlace>>> = {
+    'machinefile.not-a-template': 'file',
+    'machinefile.not-found': 'file',
+    'machines.bad-purpose': 'purpose',
+    'machines.server-template': 'file',
+    'machines.too-little-memory': 'memory',
+};
+
+export function createRefusalPlaceOf(error: EngineError, macs: readonly string[]): RefusalPlace {
+    const onAMac = macs.includes(error.wire?.subject ?? '');
+    return CREATE_REFUSAL_PLACES[error.wire?.code ?? ''] ?? (onAMac ? 'on' : 'foot');
+}
+
+// outside: packages/api types engine.read's State as a string, though Go gives it three (apps/engine/engine/reading.go).
 export const ENGINE_STATES = ['not-installed', 'running', 'stopped'] as const;
 
 export type EngineState = (typeof ENGINE_STATES)[number];
@@ -98,10 +102,9 @@ export function vmStateOf(vm: MachinesVM): undefined | VmState {
     return VM_STATES.find((state) => state === vm.State);
 }
 
-// outside: a need's fix names its call and a few words (`Args`), not the call's input: the menu bar's page
-// outside: composes that input in Go (apps/engine/pages/menubar/menubar.go, Update all). Until a need carries its `in`,
-// outside: this is the one place the window does it, one function per call, each word to its field by name;
-// outside: disk.move's folder is the one path its finding names (apps/engine/disk/findings.go).
+// outside: a need's fix names its call and a few words (`Args`), not its input, which the menu bar composes in Go
+// outside: (apps/engine/pages/menubar/menubar.go, Update all); until a need carries its `in`, the window does it here,
+// outside: each word to its field by name, disk.move's folder the path its finding names (apps/engine/disk/findings.go).
 export function updateInputOf(need: OverviewNeed): AppsUpdateInput | undefined {
     if (need.Call !== 'apps.update') {
         return undefined;

@@ -27,6 +27,7 @@ Every job the window's makers run, one script each, in the Linux VM only, `look.
 Two runs of `record.py` write the same requests, the same gestures and the same plain call answers.
 They do not write the same watches: the world build has no fixed clock (`apps/engine/wire/world_on.go`), so a watch the engine ends before a check settles (`accounts.list`, `disk.read`) answers pending in one run and settled in the other, and a gesture's reads follow.
 The recorder keeps a watch's first and last answers, skips the reads of `TIMED` after a gesture, and carries `engine.start`'s process number over from the last recording: nothing else is rewritten, since the rest is the engine's answer.
+A watch the engine never ends (a VM being created streams its overview for as long as the birth lasts) is cancelled by its id after `QUIET` seconds of silence, as the window cancels a watch it lets go of, and its answers are those that came before.
 So record only what your lot changed, `--call=<call>` for a gesture and `--only=<call> --in=<json>` for one read, and leave a churned file you did not mean to touch out of your commit.
 
 ## Starting a lot

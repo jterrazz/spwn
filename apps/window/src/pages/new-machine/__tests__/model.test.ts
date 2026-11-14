@@ -1,7 +1,8 @@
+import type { MachinesCallsNewMachine } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import type { MachinesCallsNewMachine } from '../../../engine/machines-new';
-import { ANSWERS } from '../../../engine/machines-new-answers';
+import { keyOf } from '../../../engine/frame';
+import { recordingsOf } from '../../../fixtures/recordings';
 import {
     askedOf,
     chosenOnOf,
@@ -17,12 +18,20 @@ import {
 const PRO = 'jterrazz-macbook-pro';
 const MINI = 'jterrazz-mac-mini';
 
+const recordingFor = await recordingsOf('two-macs');
+
+function isAnswer(answer: unknown): answer is { out: MachinesCallsNewMachine } {
+    return typeof answer === 'object' && answer !== null && 'out' in answer;
+}
+
 function answerOn(mac: string): MachinesCallsNewMachine {
-    const answer = ANSWERS.find((one) => one.fleet === `${PRO} ${MINI}`);
-    if (answer === undefined) {
-        throw new Error('two-macs has an answer');
+    const asked = keyOf({ in: { On: mac }, watch: 'machines.new' });
+    const exchange = recordingFor('two-macs').exchanges.find((one) => keyOf(one.request) === asked);
+    const last = (exchange?.answers ?? []).findLast(isAnswer);
+    if (last === undefined) {
+        throw new Error(`two-macs records no answer to ${asked}.`);
     }
-    return { ...answer.out, Mac: mac };
+    return last.out;
 }
 
 function onOf(answer: MachinesCallsNewMachine) {

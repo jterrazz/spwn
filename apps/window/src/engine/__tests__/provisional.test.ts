@@ -240,13 +240,29 @@ describe('provisional', () => {
     });
 
     test("a create's refusal is placed by its code, then by whether its subject is a Mac the sheet offers", () => {
-        // Given - a bad purpose, a refusal naming an offered Mac, one naming a machine, and no answer at all
+        // Given - a refusal of each placed code, one naming an offered Mac, one naming a machine, and no answer
         const macs = ['jterrazz-macbook-pro', 'jterrazz-mac-mini'];
         const refusals = [
             new EngineError({
                 code: 'machines.bad-purpose',
                 message: 'a purpose is one line',
                 subject: 'x',
+            }),
+            new EngineError({
+                code: 'machines.too-little-memory',
+                message: 'too little',
+                subject: 'jterrazz-mac-mini',
+            }),
+            new EngineError({
+                code: 'machinefile.not-a-template',
+                message: 'makes no image',
+                subject: 'linux-dev',
+            }),
+            new EngineError({ code: 'machinefile.not-found', message: 'none', subject: 'x' }),
+            new EngineError({
+                code: 'machines.server-template',
+                message: 'no server',
+                subject: 'jterrazz-macbook-pro',
             }),
             new EngineError({
                 code: 'machines.not-enough-memory',
@@ -260,7 +276,16 @@ describe('provisional', () => {
         // When - each is placed
         const places = refusals.map((error) => createRefusalPlaceOf(error, macs));
 
-        // Then - under the purpose, on the On row, then the foot twice
-        expect(places).toStrictEqual(['purpose', 'on', 'foot', 'foot']);
+        // Then - by code first, even when the subject is an offered Mac; then on the On row, then the foot twice
+        expect(places).toStrictEqual([
+            'purpose',
+            'memory',
+            'file',
+            'file',
+            'file',
+            'on',
+            'foot',
+            'foot',
+        ]);
     });
 });

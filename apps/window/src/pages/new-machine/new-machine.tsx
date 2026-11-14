@@ -1,13 +1,17 @@
-import type { CallName, MachinesCreated } from '@jterrazz/station-api';
+import type {
+    CallName,
+    MachinesCallsNewIn,
+    MachinesCallsNewMachine,
+    MachinesCreated,
+} from '@jterrazz/station-api';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 
 import { Button, Dialog, FormField, Screen } from '../../design/index';
-import { useMachinesNew } from '../../engine/machines-new';
-import type { MachinesCallsNewMachine } from '../../engine/machines-new';
+import type { Reading as Answered } from '../../engine/entry';
 import { createRefusalPlaceOf } from '../../engine/provisional';
 import type { RefusalPlace } from '../../engine/provisional';
-import { useReread } from '../../engine/react';
+import { useReread, useWatch } from '../../engine/react';
 import { useGesture } from '../../engine/use-gesture';
 import type { Gesture } from '../../engine/use-gesture';
 import { machineRoute } from '../../shell/route';
@@ -152,6 +156,7 @@ function Sheet(props: SheetProps) {
     const place = placeOf(gesture, answer);
     const outcome = (at: RefusalPlace) =>
         place === at ? <GestureOutcome gesture={gesture} /> : null;
+    const file = outcome('file');
     return (
         <Dialog
             actions={
@@ -166,6 +171,7 @@ function Sheet(props: SheetProps) {
             onClose={onClose}
             title={`New machine on ${answer.Mac}`}
         >
+            {file === null ? null : <div className={styles.outcome}>{file}</div>}
             <Purpose change={change} draft={draft} refusal={outcome('purpose')} />
             <FormField
                 label="Name"
@@ -177,7 +183,14 @@ function Sheet(props: SheetProps) {
             />
             <OnRow answer={answer} change={change} refusal={outcome('on')} />
             {on === undefined ? null : (
-                <Memory answer={answer} change={change} memory={memory} name={name} on={on} />
+                <Memory
+                    answer={answer}
+                    change={change}
+                    memory={memory}
+                    name={name}
+                    on={on}
+                    refusal={outcome('memory')}
+                />
             )}
             <Lifetimes answer={answer} change={change} draft={draft} />
             <Options
@@ -189,15 +202,32 @@ function Sheet(props: SheetProps) {
                 }}
                 open={open}
             />
-            <div className={styles.outcome}>{outcome('foot')}</div>
+            <div className={styles.outcome}>
+                {outcome('foot')}
+                {on === undefined ? outcome('memory') : null}
+            </div>
         </Dialog>
     );
+}
+
+// invariant: a Mac picked asks machines.new again with its On, and the answer drawn stays until the engine's next
+// invariant: one comes, so the sheet is never redrawn as reading in between.
+function useAnswer(input: MachinesCallsNewIn): Answered<MachinesCallsNewMachine> {
+    const reading = useWatch('machines.new', input);
+    const [held, setHeld] = useState<MachinesCallsNewMachine | undefined>(undefined);
+    if (reading.kind === 'read' && reading.out !== held) {
+        setHeld(reading.out);
+    }
+    if (reading.kind !== 'reading' || held === undefined) {
+        return reading;
+    }
+    return { done: false, kind: 'read', out: held };
 }
 
 export function NewMachine(props: NewMachineProps) {
     const { opening, onClose } = props;
     const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
-    const reading = useMachinesNew(askedOf(opening, draft));
+    const reading = useAnswer(askedOf(opening, draft));
     const change: Change = (next) => {
         setDraft((before) => ({ ...before, ...next }));
     };

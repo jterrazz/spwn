@@ -1,3 +1,4 @@
+import type { MachinesCallsNewMachine, MachinesCallsNewOn } from '@jterrazz/station-api';
 import type { ReactElement } from 'react';
 
 import {
@@ -11,11 +12,9 @@ import {
 } from '../../design/index';
 import type { MemoryHolder, Pick as Option } from '../../design/index';
 import { wordOf } from '../../engine/engine-words';
-import type { MachinesCallsNewMachine, MachinesCallsNewOn } from '../../engine/machines-new';
-import { FIT_ALLOWS } from '../../engine/provisional';
+import { fitAllows } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { machineKindWord } from '../../engine/shown';
-import { FIT_WORDS, PRESET_WORDS } from '../../engine/words';
 import { bytes } from '../../model/format';
 import { machineNamesOf, macsOf } from '../../model/machines';
 import { useIdentityOf } from '../kit/identity';
@@ -70,6 +69,7 @@ type MemoryProps = {
     memory: number | undefined;
     name: string;
     change: Change;
+    refusal: null | ReactElement;
 };
 
 function Presets({ on, memory, change }: Pick<MemoryProps, 'change' | 'memory' | 'on'>) {
@@ -85,10 +85,12 @@ function Presets({ on, memory, change }: Pick<MemoryProps, 'change' | 'memory' |
                 }
             }}
             options={presets.map((preset) => ({
-                disabled: !FIT_ALLOWS[preset.Fit],
+                disabled: !fitAllows(preset.Fit),
                 id: preset.Preset,
                 title: `${String(gbOf(preset.MemoryBytes))} GB · ${
-                    FIT_ALLOWS[preset.Fit] ? PRESET_WORDS[preset.Preset] : FIT_WORDS[preset.Fit]
+                    fitAllows(preset.Fit)
+                        ? wordOf('MachinesPreset', preset.Preset).Word
+                        : wordOf('MachinesFit', preset.Fit).Word
                 }`,
             }))}
             value={presets.find((preset) => preset.MemoryBytes === memory)?.Preset ?? null}
@@ -96,7 +98,7 @@ function Presets({ on, memory, change }: Pick<MemoryProps, 'change' | 'memory' |
     );
 }
 
-function Range({ answer, on, memory, change }: Omit<MemoryProps, 'name'>) {
+function Range({ answer, on, memory, change }: Omit<MemoryProps, 'name' | 'refusal'>) {
     if (memory === undefined) {
         return null;
     }
@@ -117,13 +119,17 @@ function Range({ answer, on, memory, change }: Omit<MemoryProps, 'name'>) {
 }
 
 export function Memory(props: MemoryProps) {
-    const { on, memory, name } = props;
+    const { on, memory, name, refusal } = props;
     const identityOfListed = useIdentityOf();
     const identity = useNewIdentity(name);
     if (on.Room === null) {
         return (
-            <Field label="Memory">
-                <Missing>machines.new measures no memory on this Mac.</Missing>
+            <Field after={refusal} label="Memory">
+                <Missing>
+                    {on.Verdict.Sentence === ''
+                        ? 'machines.new measures no memory on this Mac.'
+                        : on.Verdict.Sentence}
+                </Missing>
             </Field>
         );
     }
@@ -139,7 +145,7 @@ export function Memory(props: MemoryProps) {
     ];
     const chosen = memory === undefined ? 0 : gbOf(memory);
     return (
-        <Field label="Memory">
+        <Field after={refusal} label="Memory">
             <MemoryPick
                 chosen={chosen}
                 free={Math.max(0, gbOf(Capacity.Free) - chosen)}

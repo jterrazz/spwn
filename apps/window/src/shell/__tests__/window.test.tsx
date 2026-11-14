@@ -312,8 +312,8 @@ describe('Window', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("a workspace's machine file offers New machine, which opens the dialog", async () => {
-        // Given - stories, where the engine explains linux-dev by name as a file whose machine.kind is workspace
+    test("a workspace's machine file offers New machine, whose dialog draws the engine's refusal of a file that is no template", async () => {
+        // Given - stories, where the engine explains linux-dev as a workspace's file that says no image to make
         const result = await component.render(
             windowOver('stories', { file: 'linux-dev', page: 'machine-files' }),
             async (visitor) => {
@@ -322,11 +322,9 @@ describe('Window', () => {
                     within(region('linux-dev.machine.yaml'), button('New machine')),
                 );
 
-                // Then - the New machine sheet opens, following that file
-                const sheet = dialog('New machine on macbook-pro');
-                await visitor.see(
-                    within(sheet, content('It will follow the machine file linux-dev')),
-                );
+                // Then - the dialog opens on machines.new's refusal, in the engine's words
+                const said = content('linux-dev makes no image', { exact: false });
+                await visitor.see(within(dialog('New machine'), said));
             },
         );
         expect(result.errors.text).toBe('');

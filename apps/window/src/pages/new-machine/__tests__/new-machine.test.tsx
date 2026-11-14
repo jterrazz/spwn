@@ -153,20 +153,37 @@ describe('New machine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('with one Mac there is no On row, and a refusal of the create is drawn in the foot', async () => {
-        // Given - the window over one-mac, a dev build that cannot make an image
+    test("with one Mac there is no On row, and a Mac the engine finds not ready holds Launch with the engine's words", async () => {
+        // Given - the window over one-mac, whose Mac has said no memory
         const result = await component.render(windowOver('one-mac'), async (visitor) => {
+            // When - New machine is opened
             await visitor.click(button('New machine'));
 
-            // When - gate5 is launched
-            await visitor.fill(within(onThisMac, field('Name')), 'gate5');
+            // Then - no On row, the engine's sentence stands under Memory, and Launch cannot be pressed
             await visitor.gone(region('On'));
-            await visitor.click(within(onThisMac, button('Launch')));
-            await visitor.click(within(dialog('Launch gate5?'), button('Launch')));
+            await visitor.see(within(onThisMac, content('This Mac has not said its memory')));
+            const held = disabled(button('Launch'));
+            await visitor.see(within(onThisMac, held));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
-            // Then - the engine's refusal stands in the sheet
-            const said = content('there is no release binary', { exact: false });
-            await visitor.see(within(onThisMac, said));
+    test('a purpose holding a secret is refused under the purpose field, in words that never repeat it', async () => {
+        // Given - the New machine sheet over two-macs, on the mini
+        const purpose = `deploys with sk-${'station-'.repeat(4)}key`;
+        const result = await component.render(windowOver('two-macs'), async (visitor) => {
+            await visitor.click(button('New machine'));
+
+            // When - a purpose holding a key is launched
+            await visitor.fill(within(onMini, field('What is it for?')), purpose);
+            await visitor.click(within(onMini, button('Launch')));
+            await visitor.click(within(dialog('Launch linux-2?'), button('Launch')));
+
+            // Then - the engine's sentence stands under the purpose
+            const said = content('a purpose says what a machine is for, and holds no secret', {
+                exact: false,
+            });
+            await visitor.see(within(region('Purpose'), said));
         });
         expect(result.errors.text).toBe('');
     });
