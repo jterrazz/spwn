@@ -1,6 +1,7 @@
 import type { AccountsAccount, MachinesSSHTarget, PortsSharedPort } from '@jterrazz/station-api';
 
-import { EngineError } from './engine-error';
+import { EngineError, WINDOW_FAIL_CODES } from './engine-error';
+import type { WindowFailCode } from './engine-error';
 import { isRecord } from './frame';
 import { shareOpensFromHere } from './provisional';
 import type { Ipc } from './tauri';
@@ -46,10 +47,15 @@ const COMMANDS = {
     url: { argument: 'url', command: 'open_url' },
 } as const satisfies Record<Opens, { argument: string; command: string }>;
 
+function windowCodeOf(code: unknown): undefined | WindowFailCode {
+    return WINDOW_FAIL_CODES.find((one) => one === code);
+}
+
 function refusalOf(error: unknown): EngineError {
-    if (isRecord(error) && typeof error.code === 'string' && typeof error.message === 'string') {
+    const code = isRecord(error) ? windowCodeOf(error.code) : undefined;
+    if (isRecord(error) && code !== undefined && typeof error.message === 'string') {
         return new EngineError({
-            code: error.code,
+            code,
             message: error.message,
             subject: 'window',
             type: 'refused',
