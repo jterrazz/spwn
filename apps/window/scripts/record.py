@@ -27,6 +27,11 @@ recording holds it.
 
 A far Mac's machine, asked through that door, is answered with This Mac's overview: only This Mac, with no
 target, and its VMs, by name, are asked. The worlds of world.py's SEEDS are recorded too.
+
+A sign-in call names its VM in `Machine` to this Mac's engine and takes no target: accounts.list is asked for This Mac
+and once per VM of every Mac, accounts.login and accounts.logout carry their `Machine`, and the `sign-ins` world
+holds the login whose code is pasted back. A world is never recorded whole to change one call: `--call=` keeps the
+requests `--in=` added.
 """
 
 import concurrent.futures
@@ -140,6 +145,12 @@ def macsOf(listed):
     return [mac["Name"] for mac in (out.get("All") or {}).get("Macs") or [] if mac.get("Name")]
 
 
+def vmsOf(listed):
+    """Every VM of every Mac: their sign-ins are asked of this Mac's engine, which says what a far Mac's VM allows."""
+    out = last_out(listed) or {}
+    return [vm["Name"] for mac in (out.get("All") or {}).get("Macs") or [] for vm in mac.get("VMs") or []]
+
+
 def asks(listed):
     """The reads the window asks of this Mac and its VMs. This Mac's engine is the socket's own, so a read of it
     names no target, as targetOf (src/model/machines.ts) sends it, and a read two pages ask is asked once. A drift
@@ -177,6 +188,8 @@ def asks(listed):
         *[{"call": "machines.log", "in": {"VM": vm["Name"]}} for _, vm in vms],
         *[{"call": "machines.ssh", "in": {"Name": vm["Name"]}} for _, vm in vms],
         *[{"watch": "accounts.read", "in": {"VMs": True}} for _ in here],
+        *[{"watch": "accounts.list", "in": {}} for _ in here],
+        *[{"watch": "accounts.list", "in": {"Machine": name}} for name in vmsOf(listed)],
         *[{"watch": "awake.read", "in": {}} for _ in here],
         {"watch": "machines.new", "in": {}},
         *[{"watch": "machines.new", "in": {"On": mac}} for mac in macsOf(listed)],
@@ -216,8 +229,10 @@ GESTURES = {
         {"call": "disk.erase", "in": {"App": "orbstack", "Confirm": "orbstack"}},
         {"call": "images.delete", "in": {"Image": "station-linux", "Version": "2026.10.20", "Confirm": "yes"}},
         {"call": "ports.stop-sharing", "in": {"VM": "linux-1", "Port": "5173", "Confirm": "yes"}},
-        {"call": "accounts.share", "in": {"Account": "github", "With": "linux-1", "For": 12 * 3600 * 10**9}},
-        {"call": "accounts.take-back", "in": {"Account": "github", "From": "linux-1", "Confirm": "yes"}},
+        {"watch": "accounts.login", "in": {"Program": "gh", "Machine": "linux-1"}},
+        {"watch": "accounts.login", "in": {"Program": "npm"}},
+        {"call": "accounts.open", "in": {"Machine": "linux-1", "Exchange": "ex-1"}},
+        {"call": "accounts.logout", "in": {"Program": "claude", "Machine": "linux-1", "Confirm": "yes"}},
         {"call": "background.remove", "in": {"Label": "com.jterrazz.brain.x-snapshot", "Confirm": "yes"}},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "persistent", "Size": {"MemoryBytes": 8589934592}}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
@@ -232,8 +247,13 @@ GESTURES = {
     "stories": [
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "4321"}},
         {"call": "ports.share", "in": {"VM": "linux-3", "Port": "5432"}, **at("mac-mini")},
-        {"call": "accounts.share", "in": {"Account": "claude", "With": "linux-1", "For": 12 * 3600 * 10**9}},
         {"call": "ports.declare", "in": {"Machine": "", "Port": "5000", "Via": "lan"}},
+    ],
+    "sign-ins": [
+        {"watch": "accounts.login", "in": {"Program": "claude", "Machine": "linux-1"}},
+        {"call": "accounts.open", "in": {"Machine": "linux-1", "Exchange": "ex-1"}},
+        {"call": "accounts.answer", "in": {"Machine": "linux-1", "Exchange": "ex-1", "Code": "good"}},
+        {"call": "accounts.answer", "in": {"Machine": "linux-1", "Exchange": "ex-1", "Code": "nope"}},
     ],
     "engine-stopped": [
         {"call": "machines.stop", "in": {"VM": "linux-1", "Confirm": "yes"}},

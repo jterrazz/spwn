@@ -15,10 +15,10 @@ mkdir -p "$out"
 PAIRS=(
     a0-first-home:../bare-mac/home a1-home:home a2-inbox:inbox a3-storage:storage
     b1-wsov:linux-1-overview b2-wsact:linux-1-activity b3-wspkg:linux-1-packages
-    b4-wsports:linux-1-ports b5-wsacc:linux-1-accounts b6-wsstor:linux-1-storage
+    b4-wsports:linux-1-ports b5-wsacc:linux-1-sign-ins b6-wsstor:linux-1-storage
     c1-macov:"$mac"-overview
     c2-macact:"$mac"-activity c3-macpkg:"$mac"-packages
-    c4-macports:"$mac"-ports c5-macacc:"$mac"-accounts
+    c4-macports:"$mac"-ports c5-macacc:"$mac"-sign-ins
     c6-macstor:"$mac"-storage
     d1-files:machine-files d3-catapps:catalog-apps d4-catset:catalog-settings
     d5-itemapp:catalog-item-node d6-itemset:catalog-item-agent-hooks
