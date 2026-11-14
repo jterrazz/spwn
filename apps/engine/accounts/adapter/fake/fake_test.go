@@ -40,6 +40,10 @@ func TestIdentities(t *testing.T) {
 	})
 }
 
+func TestBookStore(t *testing.T) {
+	contracttest.BookStore(t, func(*testing.T) contract.BookStore { return fake.NewBook() })
+}
+
 func TestShareStore(t *testing.T) {
 	contracttest.ShareStore(t, func(_ *testing.T, vms ...string) contract.ShareStore { return fake.NewShares(vms...) })
 }
@@ -56,5 +60,24 @@ func TestSignIns(t *testing.T) {
 			return ctx.Err()
 		}}
 		return contracttest.SignInsSubject{SignIns: fake.NewSignIns(w, "mac-mini", clock), SignedIn: in, SignedOut: out}
+	})
+}
+
+func fixed() time.Time { return time.Date(2026, 11, 14, 10, 0, 0, 0, time.UTC) }
+
+func TestPasswords(t *testing.T) {
+	contracttest.Passwords(t, func(*testing.T) contract.Passwords {
+		return fake.NewPasswords(&world.World{}, "mac-mini", fake.Clock{Now: fixed})
+	})
+}
+
+func TestGrants(t *testing.T) {
+	contracttest.Grants(t, func(*testing.T) contracttest.GrantsSubject {
+		w := &world.World{Macs: map[string]*world.Mac{"mac-mini": {VMs: map[string]*world.VM{
+			"linux-1": {PID: 12, Kept: &world.Kept{}},
+			"linux-2": {Kept: &world.Kept{}},
+		}}}}
+		c := fake.Clock{Now: fixed}
+		return contracttest.GrantsSubject{Grants: fake.NewGrants(w, "mac-mini", c), Passwords: fake.NewPasswords(w, "mac-mini", c), Running: "linux-1", Stopped: "linux-2"}
 	})
 }

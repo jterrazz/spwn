@@ -2,8 +2,10 @@ package accounts
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
@@ -126,4 +128,24 @@ func SummarizeVault(entries []VaultEntry) verdict.Verdict {
 		}
 	}
 	return verdict.Verdict{Tone: verdict.Plain, Sentence: fmt.Sprintf(SentencePasswordsSome.Text(), len(entries), granted)}
+}
+
+func (t Program) Delivery() (catalog.Delivery, bool) {
+	// value: how a password granted for the program reaches it in a VM.
+	i := slices.IndexFunc(catalog.Deliveries, func(d catalog.Delivery) bool { return d.Program == string(t) })
+	if i < 0 {
+		return catalog.Delivery{}, false
+	}
+	return catalog.Deliveries[i], true
+}
+
+func RevokedSentence(t Program) string {
+	// invariant: a removal says where the token itself is revoked, which
+	// station cannot do; a program that reads it from an environment file
+	// loses it in new shells only, and the sentence says so.
+	line := "The token stays valid at " + t.Label() + "; revoke it there to end it everywhere"
+	if d, ok := t.Delivery(); ok && d.Env != "" {
+		line += ". New shells no longer see it; a shell open now keeps it until it closes"
+	}
+	return line
 }

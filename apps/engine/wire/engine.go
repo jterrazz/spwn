@@ -15,6 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/page"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -119,6 +120,10 @@ func (m machine) engine(env kit.Env) *process.Engine {
 			return agentscalls.HeldEverywhere(ctx, calls)
 		},
 	})
+	shares.now = m.sys.Clock.Now
+	if m.world == nil && m.kind == catalog.Mac {
+		shares.g = m.vaultKept(d).Grants()
+	}
 	shares.s = m.secretsVia(d, func(_ context.Context, vm string) (bool, error) {
 		for _, v := range d.VMs() {
 			if v.Name == vm {
@@ -194,17 +199,60 @@ func retiredEngineCommand(env kit.Env, m machine) *cobra.Command {
 	return cmd
 }
 
-type engineShares struct{ s *accountscalls.Sharing }
+// invariant: the expiry job takes back the shares and the grants past
+// their term alike: a grant is due as grant:<program>, and is taken out by
+// its program's Remove.
+type engineShares struct {
+	s   *accountscalls.Sharing
+	g   *keychain.Grants
+	now func() time.Time
+}
 
 func (l *engineShares) Held() (map[string][]accounts.Share, error) {
-	return l.s.Shares(context.Background())
+	held, err := l.s.Shares(context.Background())
+	if err != nil || l.g == nil {
+		return held, err
+	}
+	due, err := l.g.Due(context.Background(), l.now())
+	if err != nil {
+		return nil, err
+	}
+	if held == nil {
+		held = map[string][]accounts.Share{}
+	}
+	for vm, list := range due {
+		held[vm] = append(held[vm], list...)
+	}
+	return held, nil
 }
 
 func (l *engineShares) Expire(ctx context.Context, vm string, names []string) error {
-	return l.s.Expire(ctx, vm, names)
+	var shared []string
+	var granted []accounts.Program
+	for _, n := range names {
+		if p, ok := keychain.Due(n); ok && l.g != nil {
+			granted = append(granted, p)
+		} else {
+			shared = append(shared, n)
+		}
+	}
+	var errs []error
+	if len(shared) > 0 {
+		errs = append(errs, l.s.Expire(ctx, vm, shared))
+	}
+	if len(granted) > 0 {
+		errs = append(errs, l.g.Expire(ctx, vm, granted))
+	}
+	return errors.Join(errs...)
 }
 
-func (l *engineShares) Forget(ctx context.Context, vm string) error { return l.s.Forget(ctx, vm) }
+func (l *engineShares) Forget(ctx context.Context, vm string) error {
+	err := l.s.Forget(ctx, vm)
+	if l.g != nil {
+		err = errors.Join(err, l.g.Forget(ctx, vm))
+	}
+	return err
+}
 
 type macEngine struct{ c engineAPI }
 

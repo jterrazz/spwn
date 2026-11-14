@@ -3,7 +3,7 @@ fixture: ../../__fixtures__/studio-cli/
 env:
     - STATION_MACHINE_KIND=linux
 runs:
-    - command: 'shell zsh | /usr/bin/tail -n 1'
+    - command: 'shell zsh | /usr/bin/grep CLAUDE_CODE_OAUTH_TOKEN'
       exit: 0
       stdout: |
           export CLAUDE_CODE_OAUTH_TOKEN='tok'\''en'

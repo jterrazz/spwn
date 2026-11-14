@@ -205,5 +205,5 @@ func (g *Grants) Remove(_ context.Context, id string, to accounts.GrantTo, targe
 	if to == accounts.ToMachine {
 		delete(state(mac(g.w, target)).Programs, e.Program)
 	}
-	return accounts.Revoked{Sentence: "The token stays valid at " + e.Program.Label() + "; revoke it there to end it everywhere"}, nil
+	return accounts.Revoked{Sentence: accounts.RevokedSentence(e.Program)}, nil
 }
