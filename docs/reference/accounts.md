@@ -44,6 +44,8 @@ Sign out runs the program's own logout (`accounts.logout`) after a confirmation 
 
 The vault is the Keychain entries of one Mac under station's own Keychain name, each value under `vault:<id>`, and a book beside them, `~/.local/state/station/vault.json`, that lists each entry and its grants without a value. It has no sync: each Mac has its own, and the Passwords page shows This Mac's (`Passwords on <mac>`), with no Mac picker. Station is the only owner of the Claude token and of every granted secret; the studio CLI's credential store is not read.
 
+Each entry `vault.list` answers says what its removal ends, so the confirmation can word it: `RemoveSentence`, counted from its grants (`Its grants end: 1 machine and 1 agent`, or `Nothing else ends` with none), and `Reach`, `granted` or `not granted`. A grant is only its target; it has no state, since it stays until it is removed.
+
 A secret enters in one of two ways:
 
 - **From a sign-in** done on This Mac, whose token goes to the vault: the token the program's own command prints (`gh auth token`), read from its output and never shown. Only `gh` has such a command; any other program is refused `vault.cannot-capture`, and `vault.list` answers in `Programs` which programs offer this, so a sheet never learns it from a refusal.
@@ -57,7 +59,7 @@ A grant gives one entry to one machine or one agent. It has no end of its own: t
 
 - **It arrives** over stdin, never an argument: a login with the token for `gh`, a `~/.npmrc` line (mode 0600) for npm, an env file under `~/.config/station/grants/` that the shell block sources for Claude and wrangler.
 - **It leaves** at `grants.remove`, or when the VM's guest connects after a removal it could not receive, by the program's own Remove: a logout, or the deletion of the line or file that holds the secret. A program that reads an env file stops in new shells only, and the sentence of `grants.remove` says so.
-- **It is refused**, before anything is read, for a server, a VM of another Mac, a stopped VM, a VM already signed in, and a secret that cannot be delivered. The refusals of `vault.add` and `grants.add` carry `Field` (`label` or `value`) so a form marks the input at fault.
+- **It is refused**, before anything is read, for a server, a VM of another Mac, a stopped VM, a VM already signed in, and a secret that cannot be delivered. The refusals of `vault.add` carry `Field` (`label` or `value`) so a form marks the input at fault; those of `grants.add` name none.
 
 Deleting a VM ends its grants with its disk. It is not a revocation: see below.
 

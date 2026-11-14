@@ -1,0 +1,13 @@
+description: 'each password says what removing it ends, counted from its grants'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Entries[] | [.ID, .Reach, .RemoveSentence]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          ["pw-1","not-granted","Nothing else ends"]
+          ["pw-2","granted","Its grants end: 1 machine"]
+          ["pw-3","not-granted","Nothing else ends"]
