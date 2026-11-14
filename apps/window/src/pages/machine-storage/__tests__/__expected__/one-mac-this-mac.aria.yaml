@@ -1,6 +1,6 @@
 - main:
   - heading "jterrazz-macbook-pro Online" [level=2]
-  - paragraph: This Mac · Engine running
+  - paragraph: "This Mac · Engine running · Awake: sleeps normally"
   - button "New machine on jterrazz-macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview"

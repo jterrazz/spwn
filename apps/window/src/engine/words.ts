@@ -118,7 +118,6 @@ export const AWAKE_WORDS = {
     neverSleeps: 'never sleeps',
     off: 'Off',
     on: 'On',
-    until: 'awake until',
 } as const;
 
 export const POWER_SOURCE_WORDS: WordsOfAnOpenCode = { ac: 'on power', battery: 'on battery' };

@@ -1,6 +1,6 @@
 - main:
   - heading "macbook-pro Online" [level=2]
-  - paragraph: This Mac · Engine running · awake until 18:00
+  - paragraph: "This Mac · Engine running · Awake: until 18:00 · lid closed"
   - button "New machine on macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview"

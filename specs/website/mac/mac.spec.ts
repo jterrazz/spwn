@@ -14,7 +14,7 @@ describe('mac', () => {
                 // When - the page is read
                 // Then - its name and state head it, and its three measures follow
                 await visitor.see(heading('jterrazz-macbook-pro Online'));
-                await visitor.see(content('This Mac · Engine running'));
+                await visitor.see(content('This Mac · Engine running', { exact: false }));
                 await visitor.see(content('34%'));
                 await visitor.see(content('12.4GB'));
                 await visitor.see(content('606GB'));
@@ -23,9 +23,27 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'M1 window differs: the page does not say whether the Mac stays awake, nor until when',
-    );
+    test('M1 a Mac says whether it stays awake, and until when', async () => {
+        // Given - This Mac over two-macs, which sleeps as usual, then over stories, kept awake until 18:00
+        const sleeps = await website.visit(
+            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Overview',
+            async (visitor) => {
+                // When - the page is read
+                // Then - its line says it sleeps normally
+                await visitor.see(content('This Mac · Engine running · Awake: sleeps normally'));
+            },
+        );
+        const awake = await website.visit(
+            '/?world=stories&machine=macbook-pro&tab=Overview',
+            async (visitor) => {
+                // When - the page is read
+                // Then - its line says until when it stays awake
+                await visitor.see(content('Awake: until 18:00', { exact: false }));
+            },
+        );
+        expect(sleeps.errors.text).toBe('');
+        expect(awake.errors.text).toBe('');
+    });
 
     test.todo('M2 waits for the choices awake.keep takes, worded');
 

@@ -4,10 +4,11 @@ import { Button, MachineIcon, StatePill, Switch } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { engineViewWord, macState, vmKindWord, vmLifetimeWord, vmState } from '../../engine/shown';
-import { AWAKE_WORDS, THIS_MAC_WORD } from '../../engine/words';
-import { clock, sentence } from '../../model/format';
+import { SECTION_WORDS, THIS_MAC_WORD } from '../../engine/words';
+import { sentence } from '../../model/format';
 import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
+import { lineOf } from '../../model/overview';
 import { SEPARATOR } from '../../separator';
 import { machineRoute, TAB_PANEL, TABS } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
@@ -26,16 +27,17 @@ type Props = {
 };
 
 function useAwakeWord(mac: MachinesMacView): string | undefined {
-    const awake = useWatch('awake.read', {}, targetOf({ mac }));
-    if (awake.kind !== 'read') {
+    const overview = useWatch('overview.read', {}, targetOf({ mac }));
+    if (overview.kind !== 'read') {
         return undefined;
     }
-    const { NeverSleeps, Session } = awake.out;
-    if (NeverSleeps) {
-        return AWAKE_WORDS.neverSleeps;
+    const line = lineOf(overview.out.Summary, 'awake');
+    if (line === undefined) {
+        return undefined;
     }
-    const until = clock(Session?.until) ?? Session?.run;
-    return until === undefined || until === '' ? undefined : `${AWAKE_WORDS.until} ${until}`;
+    const words =
+        line.Unread === '' ? sentence((line.Parts ?? []).map((part) => part.Word)) : line.Unread;
+    return words === '' ? undefined : `${SECTION_WORDS.awake}: ${words}`;
 }
 
 function MacLine({ mac }: { mac: MachinesMacView }) {

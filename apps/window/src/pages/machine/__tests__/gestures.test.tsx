@@ -301,7 +301,7 @@ describe('gestures', () => {
                 await visitor.see(heading('jterrazz-macbook-pro', { exact: false }));
 
                 // Then - its line is the engine's, and New machine is its one action
-                await visitor.see(content('This Mac · Engine running'));
+                await visitor.see(content('This Mac · Engine running', { exact: false }));
                 await visitor.see(enabled(button('New machine on jterrazz-macbook-pro')));
             },
         );
