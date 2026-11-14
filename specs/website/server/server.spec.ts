@@ -68,7 +68,5 @@ describe('server', () => {
 
     test.todo('S5 waits for a state per day on MachinesUptimeDay');
 
-    test.todo(
-        'S6 window differs: the Accounts tab of a server reads No answer from the engine, with no sentence on why it borrows no account and no list of the Mac accounts that stay on the Mac',
-    );
+    test.todo('S6 waits for the accounts redesign');
 });
