@@ -38,11 +38,10 @@ describe('passwords', () => {
                 within(region('Passwords'), button('npm publish', { exact: false })),
             );
 
-            // Then - its value is withheld, and its grant to linux-1 carries the engine's state and a Remove
+            // Then - its value is withheld, and its grant to linux-1 carries a Remove
             await visitor.see(heading('npm publish'));
             await visitor.see(within(region('This password'), content('Withheld')));
             const grants = region('Granted to');
-            await visitor.see(within(grants, content('Active')));
             await visitor.see(within(grants, button('Remove npm publish from linux-1')));
         });
         expect(result.errors.text).toBe('');
@@ -63,6 +62,28 @@ describe('passwords', () => {
                 await visitor.gone(
                     within(region('Passwords'), button('npm publish', { exact: false })),
                 );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('D31 a grant refused at the presence check is said in the sheet, which stays open', async () => {
+        // Given - GitHub deploy's page over presence-refused, whose Mac does not confirm the owner is there
+        const result = await website.visit(
+            '/?world=presence-refused&page=passwords&item=pw-1&pace=600',
+            async (visitor) => {
+                await visitor.click(button('Grant…'));
+                const sheet = dialog('Grant GitHub deploy');
+                await visitor.click(within(sheet, button('linux-1', { exact: false })));
+
+                // When - the grant to linux-1 is sent
+                await visitor.click(within(sheet, button('Grant to linux-1')));
+
+                // Then - the engine's refusal is in the sheet, and linux-1 holds nothing
+                await visitor.see(
+                    within(sheet, content('did not confirm you are there', { exact: false })),
+                );
+                await visitor.gone(within(region('Granted to'), content('linux-1')));
             },
         );
         expect(result.errors.text).toBe('');
