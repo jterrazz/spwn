@@ -42,7 +42,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 			if in.AllMachines {
 				return everyMachine(ctx, env, io)
 			}
-			updates, err := call.Follow(ctx, env.Calls, env.Target(), accountscalls.List, accountscalls.ListIn{VMs: io.CanLive() || io.PageJSON}, nil)
+			updates, err := call.Follow(ctx, env.Calls, env.Target(), accountscalls.Read, accountscalls.ReadIn{VMs: io.CanLive() || io.PageJSON}, nil)
 			if err != nil {
 				return err
 			}
@@ -62,7 +62,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 				return err
 			}
 			shared := held(ctx, env, last)
-			return io.PageRecords(pageaccounts.Page(last, d.ThisMachine), pageaccounts.List(last, shared), pageaccounts.ListContract(accountscalls.List.Schema(), last, shared))
+			return io.PageRecords(pageaccounts.Page(last, d.ThisMachine), pageaccounts.List(last, shared), pageaccounts.ListContract(accountscalls.Read.Schema(), last, shared))
 		},
 	}, env)
 	cmd.AddCommand(children...)
@@ -84,7 +84,7 @@ func held(ctx context.Context, env kit.Env, r accounts.Report) []accounts.Shared
 }
 
 func sharesOf(ctx context.Context, env kit.Env, mac machine.Ref, vm string) []accounts.Shared {
-	r, err := call.Read(ctx, env.Calls, mac, accountscalls.List, accountscalls.ListIn{}, nil)
+	r, err := call.Read(ctx, env.Calls, mac, accountscalls.Read, accountscalls.ReadIn{}, nil)
 	if err != nil {
 		return nil
 	}
@@ -113,7 +113,7 @@ func everyMachine(ctx context.Context, env kit.Env, io kit.IO) error {
 			blocks = append(blocks, mac)
 			continue
 		}
-		read, err := call.Read(ctx, env.Calls, machine.Ref{Name: h.Name}, accountscalls.List, accountscalls.ListIn{}, nil)
+		read, err := call.Read(ctx, env.Calls, machine.Ref{Name: h.Name}, accountscalls.Read, accountscalls.ReadIn{}, nil)
 		if err != nil {
 			blocks = append(blocks, faulted(mac, err))
 			continue
@@ -134,7 +134,7 @@ func everyMachine(ctx context.Context, env kit.Env, io kit.IO) error {
 				blocks = append(blocks, b)
 				continue
 			}
-			r, err := call.Read(ctx, env.Calls, machine.Ref{Name: vm.Name, On: h.Name}, accountscalls.List, accountscalls.ListIn{}, nil)
+			r, err := call.Read(ctx, env.Calls, machine.Ref{Name: vm.Name, On: h.Name}, accountscalls.Read, accountscalls.ReadIn{}, nil)
 			var refused *fail.Error
 			if errors.As(err, &refused) && refused.Type == fail.NotForThisMachine {
 				b.Note, b.Server = vm.Name+" is a server: not listed", true
@@ -158,7 +158,7 @@ func everyMachine(ctx context.Context, env kit.Env, io kit.IO) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	return io.Page(pageaccounts.EveryMachine(blocks), pageaccounts.EveryMachineContract(accountscalls.List.Schema(), blocks))
+	return io.Page(pageaccounts.EveryMachine(blocks), pageaccounts.EveryMachineContract(accountscalls.Read.Schema(), blocks))
 }
 
 func faulted(b pageaccounts.MachineBlock, err error) pageaccounts.MachineBlock {

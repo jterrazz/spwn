@@ -203,7 +203,7 @@ func (w *wireRules) learnAnswers(calls []wireCall) {
 			walk(form)
 			return
 		}
-		if w.custom[t] != nil {
+		if _, ok := wireSchemaOf(t); ok || w.custom[t] != nil {
 			return
 		}
 		seen[t] = true

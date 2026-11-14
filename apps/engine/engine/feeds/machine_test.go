@@ -136,7 +136,7 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 		return machinescalls.ListOut{All: w.machines(listed.ThisMac)}
 	case portscalls.List.Name:
 		return ports.Listing{}
-	case accountscalls.List.Name:
+	case accountscalls.Read.Name:
 		w.mu.Lock()
 		defer w.mu.Unlock()
 		if r, ok := w.signedIn[at]; ok {

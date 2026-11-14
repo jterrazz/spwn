@@ -1,203 +1,129 @@
 {
   "$defs": {
-    "accounts.Account": {
+    "accounts.ProgramRow": {
       "additionalProperties": false,
       "properties": {
-        "detail": {
-          "type": "string"
-        },
-        "hint": {
-          "type": "string"
-        },
-        "identity": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "notes": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "origin": {
-          "type": "string"
-        },
-        "provider": {
-          "type": "string"
-        },
-        "reason": {
-          "type": "string"
-        },
-        "scopes": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "shared": {
-          "$ref": "#/$defs/accounts.Loan"
-        },
-        "source": {
-          "type": "string"
-        },
-        "state": {
+        "Action": {
           "enum": [
-            "",
-            "absent",
+            "sign-in",
+            "sign-in-again",
+            "sign-out",
+            "remove",
+            "none"
+          ],
+          "type": "string"
+        },
+        "Ask": {
+          "type": "string"
+        },
+        "Entry": {
+          "type": "string"
+        },
+        "How": {
+          "enum": [
+            "own",
+            "granted"
+          ],
+          "type": "string"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "Plan": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        },
+        "Scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "State": {
+          "enum": [
+            "signed-in",
+            "signed-out",
             "broken",
-            "degraded",
+            "reading",
+            "waiting"
+          ],
+          "type": "string"
+        },
+        "Until": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Who": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Action",
+        "Program",
+        "State"
+      ],
+      "type": "object"
+    },
+    "accounts.ProgramsRead": {
+      "additionalProperties": false,
+      "properties": {
+        "Programs": {
+          "items": {
+            "$ref": "#/$defs/accounts.ProgramRow"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Programs",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "accounts.calls.ProgramsIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Machine": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
             "ok",
-            "pending",
-            "unknown"
+            "warn",
+            "bad",
+            "plain",
+            "new"
           ],
           "type": "string"
         }
       },
       "required": [
-        "provider",
-        "state"
+        "Sentence",
+        "Tone"
       ],
-      "type": "object"
-    },
-    "accounts.Loan": {
-      "additionalProperties": false,
-      "properties": {
-        "at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "until": {
-          "format": "date-time",
-          "type": "string"
-        }
-      },
-      "required": [
-        "at",
-        "name",
-        "until"
-      ],
-      "type": "object"
-    },
-    "accounts.Machine": {
-      "additionalProperties": false,
-      "properties": {
-        "accounts": {
-          "items": {
-            "$ref": "#/$defs/accounts.Account"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "guest": {
-          "type": "string"
-        },
-        "kind": {
-          "type": "string"
-        },
-        "lifetime": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "this_mac": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "accounts",
-        "kind",
-        "name"
-      ],
-      "type": "object"
-    },
-    "accounts.Report": {
-      "additionalProperties": false,
-      "properties": {
-        "Engine": {
-          "type": "string"
-        },
-        "Machines": {
-          "items": {
-            "$ref": "#/$defs/accounts.Machine"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "Now": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "ShareList": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "Shares": {
-          "items": {
-            "$ref": "#/$defs/accounts.Shared"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "Engine",
-        "Machines",
-        "Now",
-        "ShareList",
-        "Shares"
-      ],
-      "type": "object"
-    },
-    "accounts.Shared": {
-      "additionalProperties": false,
-      "properties": {
-        "account": {
-          "type": "string"
-        },
-        "at": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "until": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "vm": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "account",
-        "at",
-        "until",
-        "vm"
-      ],
-      "type": "object"
-    },
-    "accounts.calls.ListIn": {
-      "additionalProperties": false,
-      "properties": {
-        "VMs": {
-          "type": "boolean"
-        }
-      },
       "type": "object"
     }
   },
@@ -207,10 +133,10 @@
   "description": "The watch accounts.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
   "properties": {
     "in": {
-      "$ref": "#/$defs/accounts.calls.ListIn"
+      "$ref": "#/$defs/accounts.calls.ProgramsIn"
     },
     "out": {
-      "$ref": "#/$defs/accounts.Report"
+      "$ref": "#/$defs/accounts.ProgramsRead"
     }
   },
   "required": [

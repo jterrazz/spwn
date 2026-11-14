@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/accounts/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
@@ -12,6 +13,7 @@ import (
 type Deps struct {
 	Accounts Accounts
 	Shares   Shares
+	SignIns  contract.SignIns
 	Kind     machine.Kind
 }
 
@@ -31,5 +33,8 @@ type Shares interface {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.BindWatch(List, d), call.Bind(Share, d), call.Bind(TakeBack, d)}
+	return []call.Handler{
+		call.BindWatch(Read, d), call.Bind(Share, d), call.Bind(TakeBack, d),
+		call.BindWatch(Programs, d), call.BindWatch(Login, d), call.Bind(Logout, d), call.Bind(Open, d), call.Bind(Answer, d),
+	}
 }

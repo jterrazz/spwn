@@ -1,0 +1,57 @@
+{
+  "$defs": {
+    "accounts.Granted": {
+      "additionalProperties": false,
+      "properties": {
+        "Until": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "grants.calls.GrantAddIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Entry": {
+          "type": "string"
+        },
+        "For": {
+          "type": "integer"
+        },
+        "To": {
+          "type": "string"
+        },
+        "ToKind": {
+          "enum": [
+            "machine",
+            "agent"
+          ],
+          "type": "string"
+        },
+        "Workspace": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/grants.add.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call grants.add of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/grants.calls.GrantAddIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.Granted"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "grants.add",
+  "type": "object"
+}

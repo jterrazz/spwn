@@ -9,14 +9,14 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 )
 
-type ListIn struct {
+type ReadIn struct {
 	// value: each VM's own accounts too, as the pages draw them.
 	VMs bool
 }
 
-var List = call.Watch[Deps, ListIn, accounts.Report]{
-	Name: "accounts.list", Section: section.Accounts, Where: call.AtTarget, Applies: accounts.Applies,
-	Run: func(ctx context.Context, d Deps, in ListIn, _ call.Progress) (<-chan call.Update[accounts.Report], error) {
+var Read = call.Watch[Deps, ReadIn, accounts.Report]{
+	Name: "accounts.read", Section: section.Accounts, Where: call.AtTarget, Applies: accounts.Applies,
+	Run: func(ctx context.Context, d Deps, in ReadIn, _ call.Progress) (<-chan call.Update[accounts.Report], error) {
 		// invariant: a Mac's reading carries the shares it holds and its share
 		// list with every update; a workspace's carries none of its own.
 		var shared []accounts.Shared

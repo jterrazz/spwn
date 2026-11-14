@@ -24,6 +24,18 @@ type enumerated interface{ Enum() []string }
 // schema itself (a kind written as one word or a list).
 type schematic interface{ JSONSchema() map[string]any }
 
+// value: a type the wire reads by its own UnmarshalJSON, which says its wire
+// form itself (a secret sent as a string, never echoed back).
+type wireSchematic interface{ WireSchema() map[string]any }
+
+func wireSchemaOf(t reflect.Type) (map[string]any, bool) {
+	s, ok := reflect.Zero(t).Interface().(wireSchematic)
+	if !ok || t.Kind() == reflect.Pointer {
+		return nil, false
+	}
+	return s.WireSchema(), true
+}
+
 // invariant: the JSON Schema of a file is projected from the Go types the
 // decoder reads, so an editor's check and station's own refusal agree: a
 // key without omitempty is required, every struct refuses a key it does not
@@ -163,11 +175,14 @@ func (r *reflector) wireOf(t reflect.Type) map[string]any {
 	if s, ok := r.wire.custom[t]; ok {
 		return s(r)
 	}
+	if s, ok := wireSchemaOf(t); ok {
+		return s
+	}
 	if t.Kind() == reflect.Pointer {
 		return r.wireOf(t.Elem())
 	}
 	if marshals(t, jsonMarshaler) {
-		panic("the wire schema has no rule for " + t.String() + ", which writes itself with MarshalJSON: name its form in wireRules.custom")
+		panic("the wire schema has no rule for " + t.String() + ", which writes itself with MarshalJSON: name its form in wireRules.custom or give it a WireSchema")
 	}
 	if marshals(t, textMarshaler) {
 		return map[string]any{"type": "string"}

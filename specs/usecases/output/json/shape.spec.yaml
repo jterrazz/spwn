@@ -12,7 +12,7 @@ runs:
           settings  station.settings.list/v1  schema generated_at machine findings  array
           disk  station.disk.read/v1  schema generated_at machine findings  array
           ports  station.ports.list/v1  schema generated_at machine findings  array
-          accounts  station.accounts.list/v1  schema generated_at machine findings  array
+          accounts  station.accounts.read/v1  schema generated_at machine findings  array
           background  station.background.list/v1  schema generated_at machine findings  array
           awake  station.awake.read/v1  schema generated_at machine findings  array
           machines  station.machines.list/v1  schema generated_at machine findings  array

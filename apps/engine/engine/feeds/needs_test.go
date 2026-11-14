@@ -46,7 +46,7 @@ func TestTheNeedsPageReadsEveryMacThroughItsEngineAndRanksWhatNeedsYou(t *testin
 	if got := rowIDs(p, pagemenubar.SectionUpkeep); len(got) != 1 {
 		t.Errorf("upkeep %v, want This Mac's updates alone", got)
 	}
-	for _, read := range []string{accountscalls.List.Name, overviewcalls.Read.Name} {
+	for _, read := range []string{accountscalls.Read.Name, overviewcalls.Read.Name} {
 		if got := w.askedOf(read); !slices.Equal(got, []string{thisMac, mini}) {
 			t.Errorf("%s asked %v, want This Mac then mac-mini, never the silent air", read, got)
 		}

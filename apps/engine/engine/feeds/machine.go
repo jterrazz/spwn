@@ -123,7 +123,7 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 	for {
 		listed, ferr := call.Read(ctx, f.o.Calls, machine.Ref{}, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil)
 		shared, serr := call.Invoke(ctx, f.o.Calls, machine.Ref{}, portscalls.List, portscalls.ListIn{AllMachines: true}, nil)
-		shares, aerr := call.Read(ctx, f.o.Calls, machine.Ref{}, accountscalls.List, accountscalls.ListIn{VMs: true}, nil)
+		shares, aerr := call.Read(ctx, f.o.Calls, machine.Ref{}, accountscalls.Read, accountscalls.ReadIn{VMs: true}, nil)
 		read, oerr := call.Read(ctx, f.o.Calls, at, overviewcalls.Read, overviewcalls.ReadIn{}, nil)
 		kept, kerr := call.Read(ctx, f.o.Calls, at, activitycalls.Read, activitycalls.ReadIn{History: true, Graph: 6 * time.Minute, Quick: true}, nil)
 		var copies *accounts.AllMachines

@@ -16,6 +16,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
+	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
@@ -23,6 +24,7 @@ import (
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
+	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
 
 // value: every call of the binary, bound with zero Deps: its Meta only.
@@ -31,7 +33,7 @@ func allCalls(t *testing.T) *call.Registry {
 	registry, err := call.NewRegistry(
 		accountscalls.All(accountscalls.Deps{}), appscalls.All(appscalls.Deps{}), awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}),
 		diskcalls.All(diskcalls.Deps{}), imagescalls.All(imagescalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}),
-		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}),
+		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),
 		activitycalls.All(activitycalls.Deps{}), enginecalls.All(enginecalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}), agentscalls.All(agentscalls.Deps{}),
 	)
 	if err != nil {

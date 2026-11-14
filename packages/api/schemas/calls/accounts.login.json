@@ -1,0 +1,169 @@
+{
+  "$defs": {
+    "accounts.LoginRead": {
+      "additionalProperties": false,
+      "properties": {
+        "Programs": {
+          "items": {
+            "$ref": "#/$defs/accounts.ProgramRow"
+          },
+          "type": "array"
+        },
+        "Step": {
+          "$ref": "#/$defs/accounts.Step"
+        }
+      },
+      "type": "object"
+    },
+    "accounts.ProgramRow": {
+      "additionalProperties": false,
+      "properties": {
+        "Action": {
+          "enum": [
+            "sign-in",
+            "sign-in-again",
+            "sign-out",
+            "remove",
+            "none"
+          ],
+          "type": "string"
+        },
+        "Ask": {
+          "type": "string"
+        },
+        "Entry": {
+          "type": "string"
+        },
+        "How": {
+          "enum": [
+            "own",
+            "granted"
+          ],
+          "type": "string"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "Plan": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        },
+        "Scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "State": {
+          "enum": [
+            "signed-in",
+            "signed-out",
+            "broken",
+            "reading",
+            "waiting"
+          ],
+          "type": "string"
+        },
+        "Until": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Who": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Action",
+        "Program",
+        "State"
+      ],
+      "type": "object"
+    },
+    "accounts.Step": {
+      "additionalProperties": false,
+      "properties": {
+        "Code": {
+          "type": "string"
+        },
+        "Exchange": {
+          "type": "string"
+        },
+        "Expired": {
+          "type": "string"
+        },
+        "Expires": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "device-code",
+            "link",
+            "paste"
+          ],
+          "type": "string"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "Now": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Site": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Exchange",
+        "Expired",
+        "Expires",
+        "Kind",
+        "Line",
+        "Now"
+      ],
+      "type": "object"
+    },
+    "accounts.calls.LoginIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/accounts.login.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch accounts.login of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/accounts.calls.LoginIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.LoginRead"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "accounts.login",
+  "type": "object"
+}
