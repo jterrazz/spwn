@@ -1020,7 +1020,8 @@
                     },
                     "wrangler": {
                         "Program": "wrangler",
-                        "State": "broken"
+                        "State": "broken",
+                        "Reason": "Refused at the provider"
                     }
                 }
             }

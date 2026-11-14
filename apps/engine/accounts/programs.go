@@ -119,7 +119,8 @@ type ProgramRow struct {
 	Entry string    `json:",omitempty"`
 	Until time.Time `json:",omitzero"`
 	// invariant: a row never offers an action the engine would refuse: where
-	// it would, the action is none and Line says what to do instead.
+	// it would, the action is none and Line says what to do instead; a
+	// broken sign-in that can be signed in again says why in Line.
 	Action ProgramAction
 	Line   string `json:",omitempty"`
 	// value: the question the engine asks before sign-out or remove.
@@ -183,6 +184,8 @@ type Facts struct {
 	How     ProgramHow
 	Entry   string
 	Until   time.Time
+	// value: why a broken sign-in no longer works, in the engine's short words.
+	Reason string
 }
 
 type Where struct {
@@ -197,6 +200,12 @@ func Describe(f Facts, w Where) ProgramRow {
 	// invariant: Action and Line follow from the facts and the place alone,
 	// the one rule every surface reads.
 	row := ProgramRow{Program: f.Program, State: f.State, Who: f.Who, Scopes: f.Scopes, Plan: f.Plan, How: f.How, Entry: f.Entry, Until: f.Until}
+	if f.State == ProgramBroken {
+		row.Line = f.Reason
+		if row.Line == "" {
+			row.Line = "The sign-in no longer works"
+		}
+	}
 	switch {
 	case w.Kind == machine.Server:
 		row.Action, row.Line = ActionNone, "A server keeps its own sign-ins"
