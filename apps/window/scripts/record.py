@@ -45,6 +45,7 @@ TIMED = {"activity.read", "engine.watch"}
 NOISE = {"engine.start": "PID"}
 MACHINES = {"watch": "machines.list", "in": {}}
 QUIET = 10
+UNENDED = {"overview.read"}
 binary = world_binary()
 
 
@@ -73,22 +74,23 @@ class Door:
 
     def ask(self, requests):
         """Sends every request at once and returns, in their order, the answers of each, once all have ended. A watch
-        the engine holds open (a VM's Overview through its birth) is let go of after QUIET seconds of silence by a
-        cancel frame, as the window lets go of it, and its answers end on the engine's done."""
+        of UNENDED the engine holds open (a VM's Overview through its birth) is let go of after QUIET seconds of
+        silence by a cancel frame, as the window lets go of it, and its answers end on the engine's done; any other
+        is waited for to its end, as a watch that settles (accounts.list) may be silent longer than QUIET."""
         ids = [str(self.next + index) for index in range(len(requests))]
         self.next += len(requests)
         self.send([{"v": 2, "id": id, **request} for id, request in zip(ids, requests)])
         watches = {id for id, request in zip(ids, requests) if "watch" in request}
+        unended = {id for id, request in zip(ids, requests) if "watch" in request and callOf(request) in UNENDED}
         answers, ended, cancelled = {}, set(), set()
         while len(ended) < len(ids):
             try:
                 line = self.lines.get(timeout=QUIET)
             except queue.Empty:
-                held = watches - ended - cancelled
-                if not held:
-                    break
-                self.send([{"v": 2, "id": id, "cancel": True} for id in sorted(held)])
-                cancelled |= held
+                held = unended - ended - cancelled
+                if held:
+                    self.send([{"v": 2, "id": id, "cancel": True} for id in sorted(held)])
+                    cancelled |= held
                 continue
             if not line:
                 break
