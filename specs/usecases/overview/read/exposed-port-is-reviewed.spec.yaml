@@ -1,4 +1,4 @@
-description: 'a port reachable on the local network and declared nowhere needs you, its verb review'
+description: 'a port reachable on the network and declared nowhere is the verdict, verb review'
 env:
     - two-macs
     - engine
@@ -10,4 +10,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          ["One thing needs you.",[["port 5000 is reachable outside Tailscale","needs-you","review","System Settings > General > AirDrop & Handoff > AirPlay Receiver"]]]
+          ["port 5000 is reachable outside Tailscale",[["port 5000 is reachable outside Tailscale","needs-you","review","System Settings > General > AirDrop & Handoff > AirPlay Receiver"]]]

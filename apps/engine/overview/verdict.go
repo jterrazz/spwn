@@ -107,7 +107,8 @@ const (
 
 func VerdictOf(s Summary) verdict.Verdict {
 	// invariant: the head of an Overview and of Home: the engine stopped
-	// first, then what needs you counted with the first of it as its line,
+	// first, then what needs you: the one need's own text, or the count with
+	// the first of them as its line,
 	// then a reading still running, then a Mac with no machine yet ready,
 	// else all is well, what can wait counted as its line.
 	if s.Engine == EngineStopped {
@@ -128,12 +129,12 @@ func VerdictOf(s Summary) verdict.Verdict {
 		if broken {
 			tone = verdict.Bad
 		}
+		if len(urgent) == 1 {
+			return verdict.Verdict{Tone: tone, Sentence: urgent[0].Text, Line: waitLine(waits)}
+		}
 		return verdict.Verdict{Tone: tone, Sentence: things(len(urgent), "needs", "need") + " you.", Line: urgent[0].Text}
 	}
-	line := ""
-	if waits > 0 {
-		line = things(waits, "can", "can") + " wait."
-	}
+	line := waitLine(waits)
 	switch {
 	case s.Pending:
 		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Reading " + s.Head.Name + ".", Line: line}
@@ -141,6 +142,13 @@ func VerdictOf(s Summary) verdict.Verdict {
 		return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceReady, Line: line}
 	}
 	return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceFine, Line: line}
+}
+
+func waitLine(waits int) string {
+	if waits == 0 {
+		return ""
+	}
+	return things(waits, "can", "can") + " wait."
 }
 
 func things(n int, one, other string) string {
