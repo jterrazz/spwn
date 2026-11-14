@@ -5,6 +5,7 @@ import { Switch } from '../../design/index';
 import { useReach } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import type { Route } from '../../shell/route';
+import { History } from '../changes/changes';
 import { HeldOutcomes } from '../kit/gestures';
 import {
     Absent,
@@ -76,7 +77,7 @@ export function InboxPage({ macs, overview, go }: InboxProps) {
                 />
             </HeldOutcomes>
             <NotGiven title="Can wait" what="What can wait, apart from what needs you" />
-            <NotGiven title="History" what="What happened, newest first" />
+            <History chosen={chosen} go={go} macs={macs} />
         </Page>
     );
 }

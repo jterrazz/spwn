@@ -36,5 +36,14 @@
     - heading "Can wait" [level=2]
     - paragraph: Not given yet What can wait, apart from what needs you
   - region "History":
-    - heading "History" [level=2]
-    - paragraph: Not given yet What happened, newest first
+    - heading "History what happened, newest first" [level=2]
+    - region "Last night":
+      - heading "Last night 2 moved, 1 failed" [level=3]
+      - button "03:15 mise download timed out Failed jterrazz-macbook-pro"
+      - button "Retry mise": Retry
+      - button "03:12 node 24.11.0 → 24.11.1 4 machines"
+      - button "03:13 gh 2.97.0 → 2.98.0 jterrazz-macbook-pro"
+    - region "Yesterday":
+      - heading "Yesterday" [level=3]
+      - button "18:02 linux-1 created by agent-7f · run the docs lot"
+      - button "11:30 infra restarted by you"

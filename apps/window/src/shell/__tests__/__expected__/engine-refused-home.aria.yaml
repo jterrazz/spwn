@@ -92,5 +92,9 @@
     - button "infra"
     - button "Add a Mac"
   - region "Last night":
-    - heading "Last night" [level=2]
-    - paragraph: Not given yet What moved, held or failed overnight
+    - heading "Last night 2 moved, 1 failed" [level=2]
+    - button "All history"
+    - button "03:15 mise download timed out Failed jterrazz-macbook-pro"
+    - button "Retry mise": Retry
+    - button "03:12 node 24.11.0 → 24.11.1 4 machines"
+    - button "03:13 gh 2.97.0 → 2.98.0 jterrazz-macbook-pro"

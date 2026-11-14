@@ -1,0 +1,37 @@
+.at {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--t3);
+    font-variant-numeric: tabular-nums;
+}
+.tail {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-12);
+    min-width: 0;
+}
+.end {
+    font-size: var(--text-label);
+    color: var(--t3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dayHead {
+    margin: 0;
+    display: flex;
+    gap: var(--space-8);
+    align-items: baseline;
+    padding: var(--space-14) 0 var(--space-6);
+    border-top: 1px solid var(--line);
+    font-size: var(--text-label);
+    font-weight: var(--weight-regular);
+    color: var(--t2);
+}
+.sum {
+    color: var(--t3);
+}
+.dayHead + * {
+    border-top: 0;
+}

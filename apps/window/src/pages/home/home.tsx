@@ -3,14 +3,9 @@ import type { MachinesMacView, OverviewReadOutput } from '@jterrazz/station-api'
 import { useReach } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import type { Route } from '../../shell/route';
+import { LastNight } from '../changes/changes';
 import { HeldOutcomes } from '../kit/gestures';
-import {
-    Absent,
-    NotGiven,
-    NoVerdict,
-    Reading as ReadingVerdict,
-    Unanswered,
-} from '../kit/readings';
+import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
 import { HomeMachines } from './home-machines';
@@ -63,9 +58,7 @@ export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomePro
             </HeldOutcomes>
             <MemoryPanel macs={macs} />
             {macs.length > 0 ? <HomeMachines go={go} macs={macs} onAddMac={onAddMac} /> : null}
-            {holdsNoMachine(macs) ? null : (
-                <NotGiven title="Last night" what="What moved, held or failed overnight" />
-            )}
+            {holdsNoMachine(macs) ? null : <LastNight go={go} macs={macs} />}
         </Page>
     );
 }

@@ -20,5 +20,11 @@
     - heading "Can wait" [level=2]
     - paragraph: Not given yet What can wait, apart from what needs you
   - region "History":
-    - heading "History" [level=2]
-    - paragraph: Not given yet What happened, newest first
+    - heading "History what happened, newest first" [level=2]
+    - region "Last night":
+      - heading "Last night 2 moved" [level=3]
+      - button "03:12 node 24.11.0 → 24.11.1 3 machines"
+      - button "03:13 jq 1.7 → 1.7.1 2 machines"
+    - region "Yesterday":
+      - heading "Yesterday" [level=3]
+      - button "16:20 infra stopped by you"

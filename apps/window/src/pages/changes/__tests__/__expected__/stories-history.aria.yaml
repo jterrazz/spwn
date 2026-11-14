@@ -1,0 +1,44 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - group "Which machines":
+    - button "All machines" [pressed]
+    - button "macbook-pro"
+    - button "mac-mini"
+    - button "macbook-air"
+  - region "Needs you":
+    - heading "Needs you a gesture is due" [level=2]
+    - button "Broken npm sign-in expired macbook-pro · Accounts"
+    - text: npm login
+    - button "Copy npm login": Copy
+    - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.jterrazz.brain.x-snapshot": Remove
+    - button "Needs a look 1 brew update waiting macbook-pro · Apps"
+    - button "Update brew": Update
+    - 'button "Needs a look Firewall: off macbook-pro · Settings"'
+    - text: System Settings > Network > Firewall
+    - button "Copy System Settings > Network > Firewall": Copy
+  - region "Can wait":
+    - heading "Can wait" [level=2]
+    - paragraph: Not given yet What can wait, apart from what needs you
+  - region "History":
+    - heading "History what happened, newest first" [level=2]
+    - region "Today":
+      - heading "Today" [level=3]
+      - text: 14:07 gate-2 deleted 8 GB freed by you
+      - button "14:06 infra restarted by you"
+    - region "Last night":
+      - heading "Last night 3 moved, 1 held, 1 failed" [level=3]
+      - button "03:15 ripgrep download timed out Failed linux-1"
+      - button "Retry ripgrep": Retry
+      - button "03:12 node 24.11.0 → 24.11.1 6 machines"
+      - button "03:12 gh 2.97.0 → 2.98.0 macbook-pro"
+      - button "03:13 uv 0.9.7 → 0.9.9 5 machines"
+      - button "03:14 orbstack updates itself Held macbook-pro"
+    - region "Yesterday":
+      - heading "Yesterday" [level=3]
+      - button "18:02 linux-3 created by agent-7f · review the docs lot"
+      - button "17:40 Port 3000 shared, private by you"
+      - button "09:15 infra restarted after an update by its Mac"

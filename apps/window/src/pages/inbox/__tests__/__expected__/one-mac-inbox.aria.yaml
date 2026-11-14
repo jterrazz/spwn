@@ -13,5 +13,5 @@
     - heading "Can wait" [level=2]
     - paragraph: Not given yet What can wait, apart from what needs you
   - region "History":
-    - heading "History" [level=2]
-    - paragraph: Not given yet What happened, newest first
+    - heading "History what happened, newest first" [level=2]
+    - paragraph: No change is kept yet.

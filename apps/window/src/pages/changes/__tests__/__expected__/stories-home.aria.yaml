@@ -1,0 +1,69 @@
+- main:
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What follows is what the engine answers, with no sentence that sums it up
+  - text: Memory free 72GB
+  - img "Memory each machine holds, and what is free"
+  - text: of 136 CPU, this Mac 22%
+  - img "CPU of macbook-pro, its last bars"
+  - text: Peak 48 % · 25 min ago Awake, this Mac On 7h 29 min left until 18:00 · on power Disk free, this Mac 388GB
+  - 'meter "Disk free, this Mac: used of its total"'
+  - text: of 994 GB · machines hold 120 GB
+  - region "Needs you":
+    - heading "Needs you 4" [level=2]
+    - button "Broken npm sign-in expired macbook-pro · Accounts"
+    - text: npm login
+    - button "Copy npm login": Copy
+    - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.jterrazz.brain.x-snapshot": Remove
+    - button "Needs a look 1 brew update waiting macbook-pro · Apps"
+    - button "Update brew": Update
+    - 'button "Needs a look Firewall: off macbook-pro · Settings"'
+    - text: System Settings > Network > Firewall
+    - button "Copy System Settings > Network > Firewall": Copy
+  - region "Memory":
+    - heading "Memory one square, one GB" [level=2]
+    - text: macbook-pro
+    - emphasis: 28 GB free
+    - text: of 48
+    - img "Memory of macbook-pro, one square per GB"
+    - text: 4 macOS 8 agent-7f 8 linux-1 28 free mac-mini
+    - emphasis: 24 GB free
+    - text: of 64
+    - img "Memory of mac-mini, one square per GB"
+    - text: 4 macOS 24 infra 8 linux-3 4 review-bot 24 free macbook-air
+    - emphasis: 20 GB free
+    - text: of 24
+    - img "Memory of macbook-air, one square per GB"
+    - text: 4 macOS 20 free
+  - region "Machines":
+    - heading "Machines" [level=2]
+    - text: Machine What it is for CPU Memory, GB
+    - button "macbook-pro CPU of macbook-pro, its last bars 22 % 67 32 / 48":
+      - text: macbook-pro
+      - img "CPU of macbook-pro, its last bars"
+      - text: 22 %
+      - meter "Memory of macbook-pro, used of its total"
+      - text: 32 / 48
+    - button "agent-7f 1 % 67 5.3 / 8":
+      - text: agent-7f 1 %
+      - meter "Memory of agent-7f, used of its total"
+      - text: 5.3 / 8
+    - button "api"
+    - button "linux-1 9 % 67 5.3 / 8":
+      - text: linux-1 9 %
+      - meter "Memory of linux-1, used of its total"
+      - text: 5.3 / 8
+    - button "mac-mini"
+    - button "infra"
+    - button "linux-3"
+    - button "review-bot"
+    - button "macbook-air"
+  - region "Last night":
+    - heading "Last night 3 moved, 1 held, 1 failed" [level=2]
+    - button "All history"
+    - button "03:15 ripgrep download timed out Failed linux-1"
+    - button "Retry ripgrep": Retry
+    - button "03:12 node 24.11.0 → 24.11.1 6 machines"
+    - button "03:12 gh 2.97.0 → 2.98.0 macbook-pro"
