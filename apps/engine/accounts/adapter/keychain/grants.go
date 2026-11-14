@@ -73,7 +73,7 @@ func (k *Kept) machines(ctx context.Context) ([]Machine, error) {
 			f, held := programs[e.Program]
 			i := slices.IndexFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == m.Name })
 			if held && i >= 0 && f.State == accounts.ProgramSignedIn {
-				f.How, f.Entry = accounts.HowGranted, e.ID
+				f.How, f.Entry, f.EntryLabel = accounts.HowGranted, e.ID, e.Label
 				programs[e.Program] = f
 			}
 		}
@@ -233,10 +233,6 @@ func (g *Grants) Add(ctx context.Context, in contract.GrantIn) (accounts.Granted
 	if err != nil || code != 0 {
 		return accounts.Granted{}, accounts.Refusal(fail.Failed, accounts.GrantCannotDeliver, in.To)
 	}
-	var until time.Time
-	if in.For != 0 {
-		until = g.k.o.Now().UTC().Truncate(time.Second).Add(in.For)
-	}
 	err = g.k.book.Change(ctx, func(b *accounts.Book) error {
 		for i := range b.Entries {
 			if b.Entries[i].Program == e.Program {
@@ -248,16 +244,16 @@ func (g *Grants) Add(ctx context.Context, in contract.GrantIn) (accounts.Granted
 		if !ok {
 			return accounts.Refusal(fail.NotFound, accounts.GrantUnknownEntry, e.ID)
 		}
-		kept.Grants = append(kept.Grants, accounts.VaultGrant{ToKind: accounts.ToMachine, To: in.To, Until: until, State: accounts.GrantActive})
+		kept.Grants = append(kept.Grants, accounts.VaultGrant{ToKind: accounts.ToMachine, To: in.To, State: accounts.GrantActive})
 		return nil
 	})
-	return accounts.Granted{Until: until}, err
+	return accounts.Granted{}, err
 }
 
 func (g *Grants) Remove(ctx context.Context, id string, to accounts.GrantTo, target string) (accounts.Revoked, error) {
 	// invariant: a removal takes the token out of the machine by its
-	// program's Remove; a machine that cannot be reached keeps the grant past
-	// due and failing, so the expiry takes it out when the machine is back.
+	// program's Remove; a machine that cannot be reached owes the removal,
+	// so the expiry takes it out when the machine is back.
 	if err := g.Check(ctx, id, to, target); err != nil {
 		return accounts.Revoked{}, err
 	}
@@ -280,21 +276,14 @@ func (g *Grants) Remove(ctx context.Context, id string, to accounts.GrantTo, tar
 	return accounts.Revoked{Sentence: accounts.RevokedSentence(e.Program)}, err
 }
 
-func (g *Grants) Due(ctx context.Context, now time.Time) (map[string][]accounts.Share, error) {
-	// value: what the expiry owes each machine: a grant past its term and a
-	// removal that could not reach it, by machine, each named grant:<program>.
+func (g *Grants) Due(ctx context.Context) (map[string][]accounts.Share, error) {
+	// value: what the expiry owes each machine: a removal that could not
+	// reach it, by machine, each named grant:<program>.
 	b, err := g.k.book.Read(ctx)
 	if err != nil {
 		return nil, err
 	}
 	due := map[string][]accounts.Share{}
-	for _, e := range b.Entries {
-		for _, v := range e.Grants {
-			if v.ToKind == accounts.ToMachine && !v.Until.IsZero() && !now.Before(v.Until) {
-				due[v.To] = append(due[v.To], accounts.Share{Name: duePrefix + string(e.Program), Until: v.Until})
-			}
-		}
-	}
 	for _, o := range b.Owed {
 		due[o.To] = append(due[o.To], accounts.Share{Name: duePrefix + string(o.Program)})
 	}
@@ -307,33 +296,17 @@ func Due(name string) (accounts.Program, bool) {
 }
 
 func (g *Grants) Expire(ctx context.Context, vm string, programs []accounts.Program) error {
-	// invariant: the expiry takes each program due out of the machine; one
-	// taken out ends its past grants and the removal owed there, one that
-	// fails stays due and its grants read failing.
-	now := g.k.o.Now()
+	// invariant: the expiry retries each removal owed to the machine; one
+	// that is taken out is no longer owed, one that fails stays owed.
 	var failed []error
 	return errors.Join(g.k.book.Change(ctx, func(b *accounts.Book) error {
 		for _, p := range programs {
 			err := g.k.takeBack(ctx, p, vm)
 			if err != nil {
 				failed = append(failed, err)
+				continue
 			}
-			for i := range b.Entries {
-				if b.Entries[i].Program != p {
-					continue
-				}
-				b.Entries[i].Grants = slices.DeleteFunc(b.Entries[i].Grants, func(v accounts.VaultGrant) bool {
-					return err == nil && v.To == vm && !v.Until.IsZero() && !now.Before(v.Until)
-				})
-				for j := range b.Entries[i].Grants {
-					if v := &b.Entries[i].Grants[j]; err != nil && v.To == vm && !v.Until.IsZero() && !now.Before(v.Until) {
-						v.State = accounts.GrantFailing
-					}
-				}
-			}
-			if err == nil {
-				b.Owed = slices.DeleteFunc(b.Owed, func(o accounts.Owed) bool { return o.Program == p && o.To == vm })
-			}
+			b.Owed = slices.DeleteFunc(b.Owed, func(o accounts.Owed) bool { return o.Program == p && o.To == vm })
 		}
 		return nil
 	}), errors.Join(failed...))

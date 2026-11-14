@@ -88,7 +88,7 @@ func (s *Shares) Migrate(context.Context) error {
 		}
 		for _, name := range v.Kept.Shared {
 			if !slices.ContainsFunc(s.kept()[vm], func(have accounts.Share) bool { return have.Name == name }) {
-				s.kept()[vm] = append(s.kept()[vm], accounts.Share{Name: name, At: s.w.Now, Until: s.w.Now.Add(accounts.DefaultGrantTerm)})
+				s.kept()[vm] = append(s.kept()[vm], accounts.Share{Name: name, At: s.w.Now, Until: s.w.Now.Add(accounts.DefaultShareTerm)})
 			}
 		}
 		v.Kept.Shared = nil

@@ -120,7 +120,6 @@ func (m machine) engine(env kit.Env) *process.Engine {
 			return agentscalls.HeldEverywhere(ctx, calls)
 		},
 	})
-	shares.now = m.sys.Clock.Now
 	if m.world == nil && m.kind == catalog.Mac {
 		shares.g = m.vaultKept(d).Grants()
 	}
@@ -199,13 +198,12 @@ func retiredEngineCommand(env kit.Env, m machine) *cobra.Command {
 	return cmd
 }
 
-// invariant: the expiry job takes back the shares and the grants past
-// their term alike: a grant is due as grant:<program>, and is taken out by
-// its program's Remove.
+// invariant: the expiry job takes back the shares past their term and the
+// removals a grant still owes a machine alike: a removal owed is due as
+// grant:<program>, and is taken out by its program's Remove.
 type engineShares struct {
-	s   *accountscalls.Sharing
-	g   *keychain.Grants
-	now func() time.Time
+	s *accountscalls.Sharing
+	g *keychain.Grants
 }
 
 func (l *engineShares) Held() (map[string][]accounts.Share, error) {
@@ -213,7 +211,7 @@ func (l *engineShares) Held() (map[string][]accounts.Share, error) {
 	if err != nil || l.g == nil {
 		return held, err
 	}
-	due, err := l.g.Due(context.Background(), l.now())
+	due, err := l.g.Due(context.Background())
 	if err != nil {
 		return nil, err
 	}

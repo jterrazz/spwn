@@ -1,4 +1,4 @@
-description: 'A fine-grained password granted to an agent ends at its term'
+description: 'A fine-grained password granted to an agent stays granted'
 env:
     - two-macs
     - engine
@@ -7,13 +7,13 @@ runs:
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
       stdin: |
-          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-1","ToKind":"agent","To":"review-bot","Workspace":"linux-1","For":14400000000000}}
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-1","ToKind":"agent","To":"review-bot","Workspace":"linux-1"}}
       exit: 0
       stdout: |
-          {"Until":"{{iso8601}}"}
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To, .Until, .State]]]]}'''
+          {}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To, .State]]]]}'''
       stdin: |
           {"v":2,"id":"1","watch":"vault.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[["agent","review-bot","{{iso8601}}","active"]]],["pw-2","npm publish","npm","token",false,[["machine","linux-1","{{iso8601}}","active"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}
+          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[["agent","review-bot","active"]]],["pw-2","npm publish","npm","token",false,[["machine","linux-1","active"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}

@@ -35,7 +35,6 @@ const (
 	GrantOtherMac          fail.Code = "grant.other-mac"
 	GrantMachineStopped    fail.Code = "grant.machine-stopped"
 	GrantSignedInHere      fail.Code = "grant.signed-in-here"
-	GrantTermOutOfBounds   fail.Code = "grant.term-out-of-bounds"
 	GrantNotAgentGrantable fail.Code = "grant.not-agent-grantable"
 	GrantPresenceRefused   fail.Code = "grant.presence-refused"
 	GrantNoPresence        fail.Code = "grant.no-presence"

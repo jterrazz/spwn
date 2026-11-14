@@ -150,7 +150,7 @@ func (s *SignIns) Login(ctx context.Context, name string, program accounts.Progr
 	own.Exchanges[id] = &world.Exchange{Program: program, Kind: step.Kind, Site: step.Site, Expires: now.Add(exchangeLife), Asking: step.Kind == accounts.StepPaste, Answer: script.Answer}
 	s.w.Unlock()
 
-	sent := accounts.Step{Kind: step.Kind, Code: step.Code, Site: step.Site, Exchange: id, Expires: now.Add(exchangeLife), Now: now, Line: lineOf(step), Expired: "The code expired"}
+	sent := accounts.Step{Kind: step.Kind, Code: step.Code, Site: step.Site, Exchange: id, Expires: now.Add(exchangeLife), Now: now, Line: program.StepLine(step.Kind, step.Site)}
 	out := make(chan contract.LoginUpdate)
 	go func() {
 		defer close(out)
@@ -335,18 +335,6 @@ func usual(program accounts.Program, script world.Login) world.Login {
 		by.Site = script.Site
 	}
 	return by
-}
-
-func lineOf(l world.Login) string {
-	switch l.Kind {
-	case accounts.StepDeviceCode:
-		return "Enter this code at " + l.Site
-	case accounts.StepLink:
-		return "Open the link to sign in at " + l.Site
-	case accounts.StepPaste:
-		return "Sign in at " + l.Site + ", then paste the code it gives you here"
-	}
-	return "Sign in at " + l.Site
 }
 
 func unknownMachine(name string) verdict.Verdict {

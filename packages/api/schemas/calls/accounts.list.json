@@ -19,6 +19,9 @@
         "Entry": {
           "type": "string"
         },
+        "EntryLabel": {
+          "type": "string"
+        },
         "How": {
           "enum": [
             "own",
@@ -55,10 +58,6 @@
             "reading",
             "waiting"
           ],
-          "type": "string"
-        },
-        "Until": {
-          "format": "date-time",
           "type": "string"
         },
         "Who": {

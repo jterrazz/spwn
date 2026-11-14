@@ -67,8 +67,23 @@ func (t Program) Site() string {
 }
 
 func (t Program) Captures() bool {
-	known, _ := t.login()
-	return known.Captures
+	// invariant: a program's sign-in can be taken into the vault exactly
+	// when its delivery names the command that prints its token.
+	d, ok := t.Delivery()
+	return ok && len(d.Capture) > 0
+}
+
+func (t Program) StepLine(kind StepKind, site string) string {
+	// value: the status line under the code of a login step, worded for
+	// the program and the site the owner is sent to.
+	switch kind {
+	case StepDeviceCode:
+		return "Waiting for you to enter the " + t.Label() + " code at " + site
+	case StepPaste:
+		return "Waiting for the " + t.Label() + " code from " + site
+	case StepLink:
+	}
+	return "Waiting for you to approve " + t.Label() + " at " + site
 }
 
 type ProgramState string
@@ -115,9 +130,9 @@ type ProgramRow struct {
 	Scopes  []string   `json:",omitempty"`
 	Plan    string     `json:",omitempty"`
 	How     ProgramHow `json:",omitempty"`
-	// value: the vault entry a granted sign-in came from.
-	Entry string    `json:",omitempty"`
-	Until time.Time `json:",omitzero"`
+	// value: the vault entry a granted sign-in came from, and its label.
+	Entry      string `json:",omitempty"`
+	EntryLabel string `json:",omitempty"`
 	// invariant: a row never offers an action the engine would refuse: where
 	// it would, the action is none and Line says what to do instead; a
 	// broken sign-in that can be signed in again says why in Line.
@@ -156,10 +171,8 @@ type Step struct {
 	// value: the engine's clock when the step was sent, so a client counts
 	// down to Expires without its own.
 	Now time.Time
-	// value: the engine's sentence for this kind of step.
+	// value: the status line under the code, worded for the program.
 	Line string
-	// value: the engine's sentence once Expires has passed.
-	Expired string
 }
 
 type LoginRead struct {
@@ -176,14 +189,14 @@ type Answered struct{}
 type Facts struct {
 	// value: what a machine's own read says of one program, and what the engine
 	// itself knows of how it got there.
-	Program Program
-	State   ProgramState
-	Who     string
-	Scopes  []string
-	Plan    string
-	How     ProgramHow
-	Entry   string
-	Until   time.Time
+	Program    Program
+	State      ProgramState
+	Who        string
+	Scopes     []string
+	Plan       string
+	How        ProgramHow
+	Entry      string
+	EntryLabel string
 	// value: why a broken sign-in no longer works, in the engine's short words.
 	Reason string
 }
@@ -199,7 +212,7 @@ type Where struct {
 func Describe(f Facts, w Where) ProgramRow {
 	// invariant: Action and Line follow from the facts and the place alone,
 	// the one rule every surface reads.
-	row := ProgramRow{Program: f.Program, State: f.State, Who: f.Who, Scopes: f.Scopes, Plan: f.Plan, How: f.How, Entry: f.Entry, Until: f.Until}
+	row := ProgramRow{Program: f.Program, State: f.State, Who: f.Who, Scopes: f.Scopes, Plan: f.Plan, How: f.How, Entry: f.Entry, EntryLabel: f.EntryLabel}
 	if f.State == ProgramBroken {
 		row.Line = f.Reason
 		if row.Line == "" {

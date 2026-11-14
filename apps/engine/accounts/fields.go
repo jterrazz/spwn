@@ -18,8 +18,6 @@ func Fielded(err error) error {
 		e.Field = fail.FieldLabel
 	case VaultEmptyValue:
 		e.Field = fail.FieldValue
-	case GrantTermOutOfBounds:
-		e.Field = fail.FieldTerm
 	}
 	return e
 }

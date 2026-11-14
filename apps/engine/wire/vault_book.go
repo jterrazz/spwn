@@ -50,7 +50,7 @@ func (m machine) grantMachines(ctx context.Context) ([]keychain.Machine, error) 
 		if !where.Stopped {
 			if read, err := m.signIns().Read(ctx, r.Name); err == nil {
 				for _, row := range read.Programs {
-					programs[row.Program] = accounts.Facts{Program: row.Program, State: row.State, Who: row.Who, Scopes: row.Scopes, Plan: row.Plan, How: row.How, Entry: row.Entry, Until: row.Until}
+					programs[row.Program] = accounts.Facts{Program: row.Program, State: row.State, Who: row.Who, Scopes: row.Scopes, Plan: row.Plan, How: row.How, Entry: row.Entry, EntryLabel: row.EntryLabel}
 				}
 			}
 		}

@@ -1,0 +1,14 @@
+description: 'the add sheet learns which programs offer add from a sign-in'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Programs[] | [.Program, .Label, .Captures]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          ["gh","GitHub",true]
+          ["npm","npm",false]
+          ["claude","Claude",false]
+          ["wrangler","Cloudflare",false]

@@ -1,8 +1,6 @@
 package contract
 
 import (
-	"time"
-
 	"context"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
@@ -59,5 +57,4 @@ type GrantIn struct {
 	ToKind    accounts.GrantTo
 	To        string
 	Workspace string
-	For       time.Duration
 }

@@ -15,10 +15,6 @@
       "Word": "active",
       "Tone": "ok"
     },
-    "ending": {
-      "Word": "ending soon",
-      "Tone": "warn"
-    },
     "failing": {
       "Word": "failing",
       "Tone": "bad"
@@ -142,14 +138,20 @@
   "AccountsStepKind": {
     "device-code": {
       "Word": "a code to enter",
+      "Detail": "Type it on the page that opened; it works once",
+      "Heading": "Enter the code",
       "Tone": "plain"
     },
     "link": {
       "Word": "a link to open",
+      "Detail": "Approve the sign-in in your browser",
+      "Heading": "Open the link",
       "Tone": "plain"
     },
     "paste": {
       "Word": "a code to paste back",
+      "Detail": "Sign in on the page that opened, then paste the code it gives you",
+      "Heading": "Paste the code",
       "Tone": "plain"
     }
   },
@@ -608,11 +610,6 @@
     },
     "grant.signed-in-here": {
       "Word": "signed in here",
-      "Detail": "grant",
-      "Tone": "plain"
-    },
-    "grant.term-out-of-bounds": {
-      "Word": "term out of bounds",
       "Detail": "grant",
       "Tone": "plain"
     },
@@ -1100,11 +1097,6 @@
   "CoreFailField": {
     "label": {
       "Word": "label",
-      "Tone": "plain"
-    },
-    "term": {
-      "Word": "term",
-      "Detail": "An agent keeps it up to 7 days. A machine may keep it until you remove it.",
       "Tone": "plain"
     },
     "value": {

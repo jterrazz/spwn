@@ -9,9 +9,9 @@ runs:
       exit: 0
       stdout: |
           {"code":"confirm.yes-needed","subject":"linux-1","message":"refusing without --yes: linux-1"}
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To, .Until, .State]]]]}'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To, .State]]]]}'''
       stdin: |
           {"v":2,"id":"1","watch":"vault.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1","{{iso8601}}","active"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}
+          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1","active"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}

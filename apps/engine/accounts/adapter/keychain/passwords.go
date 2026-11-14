@@ -13,8 +13,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
 
-const endingWithin = 15 * time.Minute
-
 type Passwords struct{ k *Kept }
 
 var _ contract.Passwords = (*Passwords)(nil)
@@ -24,16 +22,9 @@ func (p *Passwords) List(ctx context.Context) (accounts.VaultRead, error) {
 	if err != nil {
 		return accounts.VaultRead{}, err
 	}
-	now := p.k.o.Now()
 	for i := range b.Entries {
 		if b.Entries[i].Grants == nil {
 			b.Entries[i].Grants = []accounts.VaultGrant{}
-		}
-		for j := range b.Entries[i].Grants {
-			g := &b.Entries[i].Grants[j]
-			if g.State == accounts.GrantActive && !g.Until.IsZero() && g.Until.Sub(now) <= endingWithin {
-				g.State = accounts.GrantEnding
-			}
 		}
 	}
 	return accounts.VaultRead{Mac: p.k.o.Mac, Entries: b.Entries}, nil

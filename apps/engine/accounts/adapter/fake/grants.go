@@ -5,7 +5,6 @@ import (
 	"context"
 	"maps"
 	"slices"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/accounts/contract"
@@ -152,7 +151,6 @@ func (g *Grants) Candidates(_ context.Context, id string) (accounts.Candidates, 
 }
 
 func (g *Grants) Add(_ context.Context, in contract.GrantIn) (accounts.Granted, error) {
-	now := g.clock.Now()
 	g.w.Lock()
 	defer g.w.Unlock()
 	e, err := g.entry(in.Entry)
@@ -178,20 +176,16 @@ func (g *Grants) Add(_ context.Context, in contract.GrantIn) (accounts.Granted, 
 	if slices.Contains(own.Undeliverable, in.To) {
 		return accounts.Granted{}, accounts.Refusal(fail.Failed, accounts.GrantCannotDeliver, in.To)
 	}
-	var until time.Time
-	if in.For != 0 {
-		until = now.Add(in.For)
-	}
 	e.Grants = slices.DeleteFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == in.ToKind && v.To == in.To })
-	e.Grants = append(e.Grants, accounts.VaultGrant{ToKind: in.ToKind, To: in.To, Workspace: in.Workspace, Until: until, State: accounts.GrantActive})
+	e.Grants = append(e.Grants, accounts.VaultGrant{ToKind: in.ToKind, To: in.To, Workspace: in.Workspace, State: accounts.GrantActive})
 	if in.ToKind == accounts.ToMachine {
 		target := state(mac(g.w, in.To))
 		if target.Programs == nil {
 			target.Programs = map[accounts.Program]accounts.Facts{}
 		}
-		target.Programs[e.Program] = accounts.Facts{Program: e.Program, State: accounts.ProgramSignedIn, Who: e.Who, How: accounts.HowGranted, Entry: e.ID, Until: until}
+		target.Programs[e.Program] = accounts.Facts{Program: e.Program, State: accounts.ProgramSignedIn, Who: e.Who, How: accounts.HowGranted, Entry: e.ID, EntryLabel: e.Label}
 	}
-	return accounts.Granted{Until: until}, nil
+	return accounts.Granted{}, nil
 }
 
 func (g *Grants) Remove(_ context.Context, id string, to accounts.GrantTo, target string) (accounts.Revoked, error) {

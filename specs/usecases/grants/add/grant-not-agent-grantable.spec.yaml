@@ -7,7 +7,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
       stdin: |
-          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-2","ToKind":"agent","To":"review-bot","Workspace":"linux-1","For":3600000000000}}
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-2","ToKind":"agent","To":"review-bot","Workspace":"linux-1"}}
       exit: 0
       stdout: |
-          {"code":"grant.not-agent-grantable","field":null,"subject":"pw-2","message":"password pw-2 is not one an agent may hold","hint":"an agent holds a fine-grained, expiring token only"}
+          {"code":"grant.not-agent-grantable","field":null,"subject":"pw-2","message":"password pw-2 is not one an agent may hold","hint":"an agent holds a fine-grained token only"}
