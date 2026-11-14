@@ -270,18 +270,6 @@ describe('Window', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a Mac with no machine yet opens on Start here, whose New machine opens the dialog', async () => {
-        // Given - the window on Home over bare-mac, which lists no VM
-        const result = await component.render(windowOver('bare-mac', HOME), async (visitor) => {
-            // When - Start here's New machine is clicked
-            await visitor.click(button('New machine, a workspace'));
-
-            // Then - the New machine sheet opens on This Mac, the only Mac
-            await visitor.see(dialog('New machine on jterrazz-macbook-pro'));
-        });
-        expect(result.errors.text).toBe('');
-    });
-
     test('a Mac with no machine yet draws no Last night, as no night ran on a machine', async () => {
         // Given - the window on Home over bare-mac, which lists no VM
         const result = await component.render(windowOver('bare-mac', HOME), async (visitor) => {
