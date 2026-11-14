@@ -66,7 +66,7 @@ describe('needs', () => {
                 await visitor.click(within(region('Sign-ins'), button('Sign in gh')));
 
                 // Then - the sheet shows the code to copy and the site to open
-                const sheet = dialog('Enter the code');
+                const sheet = dialog('Sign in to gh on linux-1');
                 await visitor.see(within(sheet, content('WDJB-MJHT')));
                 await visitor.see(within(sheet, button('Copy code')));
                 await visitor.see(within(sheet, button('Open github.com')));

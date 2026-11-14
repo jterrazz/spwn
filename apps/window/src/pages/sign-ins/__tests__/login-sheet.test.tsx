@@ -19,8 +19,8 @@ function signInsOver(world: string) {
     );
 }
 
-const PASTE = 'Paste the code';
-const DEVICE_CODE = 'Enter the code';
+const PASTE = 'Sign in to claude on linux-1';
+const DEVICE_CODE = 'Sign in to gh on linux-1';
 
 describe('login sheet', () => {
     test('a device code is shown with its copy, and the sheet closes once the engine signs in', async () => {
@@ -31,6 +31,7 @@ describe('login sheet', () => {
 
             // Then - the engine's step: its heading and detail, its status line, its code to copy, its site to open, then the sheet goes
             const sheet = dialog(DEVICE_CODE);
+            await visitor.see(within(sheet, content('Enter the code')));
             await visitor.see(
                 within(sheet, content('Type it on the page that opened', { exact: false })),
             );
@@ -51,6 +52,7 @@ describe('login sheet', () => {
         const result = await component.render(signInsOver('sign-ins'), async (visitor) => {
             await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
             const sheet = dialog(PASTE);
+            await visitor.see(within(sheet, content('Paste the code')));
             await visitor.see(
                 within(sheet, content('then paste the code it gives you', { exact: false })),
             );
