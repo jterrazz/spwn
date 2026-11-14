@@ -109,11 +109,27 @@ describe('Find', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test('the Add a Mac action opens its dialog in place of the palette', async () => {
+        // Given - the window on Home over two-macs
+        const result = await component.render(windowOnHome(), async (visitor) => {
+            await visitor.press(COMMAND_K);
+
+            // When - add is typed and Enter pressed
+            await visitor.fill(query, 'add a mac');
+            await visitor.press('Enter');
+
+            // Then - the palette gave way to the Add a Mac dialog
+            await visitor.gone(find);
+            await visitor.see(within(dialog('Add a Mac'), field('Its Tailscale name')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test('while a dialog is open, ⌘K and ⌘[ do nothing, so the draft stays', async () => {
         // Given - New machine opened from Home, a name typed in it
         const result = await component.render(windowOnHome(), async (visitor) => {
             await visitor.click(button('New machine'));
-            const sheet = dialog('New machine on this Mac');
+            const sheet = dialog('New machine on jterrazz-mac-mini');
             await visitor.see(sheet);
             await visitor.fill(within(sheet, field('Name')), 'gate5');
 

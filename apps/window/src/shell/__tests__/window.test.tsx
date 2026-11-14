@@ -294,8 +294,8 @@ describe('Window', () => {
             // When - Start here's New machine is clicked
             await visitor.click(button('New machine, a workspace'));
 
-            // Then - the New machine dialog opens
-            await visitor.see(dialog('New machine on this Mac'));
+            // Then - the New machine sheet opens on This Mac, the only Mac
+            await visitor.see(dialog('New machine on jterrazz-macbook-pro'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -322,8 +322,11 @@ describe('Window', () => {
                     within(region('linux-dev.machine.yaml'), button('New machine')),
                 );
 
-                // Then - the New machine dialog opens
-                await visitor.see(dialog('New machine on this Mac'));
+                // Then - the New machine sheet opens, following that file
+                const sheet = dialog('New machine on macbook-pro');
+                await visitor.see(
+                    within(sheet, content('It will follow the machine file linux-dev')),
+                );
             },
         );
         expect(result.errors.text).toBe('');

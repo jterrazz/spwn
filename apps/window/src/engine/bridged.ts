@@ -28,6 +28,7 @@ export const BRIDGED = [
     'machinefile.explain',
     'machinefile.plan',
     'machinefile.upgrade',
+    'machines.add',
     'machines.create-server',
     'machines.create-workspace',
     'machines.delete',

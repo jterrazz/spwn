@@ -1,211 +1,223 @@
 import type { CallName, MachinesCreated } from '@jterrazz/station-api';
-import { useState } from 'react';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
 
-import { Button, Dialog, FormField, Missing, Screen, Switch } from '../../design/index';
-import { wordOf } from '../../engine/engine-words';
-import { LIFETIMES } from '../../engine/provisional';
-import type { Lifetime } from '../../engine/provisional';
-import { useRead } from '../../engine/react';
+import { Button, Dialog, FormField, Screen } from '../../design/index';
+import { useMachinesNew } from '../../engine/machines-new';
+import type { MachinesCallsNewMachine } from '../../engine/machines-new';
+import { createRefusalPlaceOf } from '../../engine/provisional';
+import type { RefusalPlace } from '../../engine/provisional';
+import { useReread } from '../../engine/react';
 import { useGesture } from '../../engine/use-gesture';
+import type { Gesture } from '../../engine/use-gesture';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
-import { EMPTY_DRAFT, imagesOf, serverInputOf, sizeIsWhole, workspaceInputOf } from './model';
-import type { Draft, Kind } from './model';
+import { Reading, Unanswered } from '../kit/readings';
+import {
+    askedOf,
+    chosenOnOf,
+    EMPTY_DRAFT,
+    memoryOf,
+    nameOf,
+    serverInputOf,
+    targetOfOn,
+    workspaceInputOf,
+} from './model';
+import type { Draft, Opening } from './model';
+import { Lifetimes, Memory, OnRow, Options } from './parts';
+import type { Change } from './parts';
 
 import styles from './new-machine.module.css';
 
 const CREATE_REREADS: readonly CallName[] = ['machines.list', 'overview.read'];
-const KINDS: readonly { id: Kind; label: string }[] = [
-    { id: 'workspace', label: 'Workspace' },
-    { id: 'server', label: 'Server' },
-];
 
-const LIFETIME_OPTIONS = LIFETIMES.map((id) => ({
-    id,
-    label: wordOf('MachinesLifetime', id).Word,
-}));
+const LISTED: readonly CallName[] = ['machines.list'];
+export type NewMachineProps = { go: (to: Route) => void; onClose: () => void; opening: Opening };
 
-type Change = (next: Partial<Draft>) => void;
+type SheetProps = NewMachineProps & {
+    answer: MachinesCallsNewMachine;
+    draft: Draft;
+    change: Change;
+};
 
-function Choice({ label, children }: { label: string; children: ReactNode }) {
-    return (
-        <div className={styles.field}>
-            <span className={styles.label}>{label}</span>
-            {children}
-        </div>
-    );
+function placeOf(gesture: Gesture<unknown>, answer: MachinesCallsNewMachine): RefusalPlace {
+    const macs = (answer.On ?? []).map((on) => on.Mac);
+    return gesture.state.kind === 'failed'
+        ? createRefusalPlaceOf(gesture.state.error, macs)
+        : 'foot';
 }
 
-type ImagesProps = { images: readonly string[] | undefined; draft: Draft; change: Change };
-
-function Images({ images, draft, change }: ImagesProps) {
-    if (images === undefined) {
-        return null;
-    }
-    if (images.length === 0) {
-        return (
-            <Choice label="Image">
-                <Missing>
-                    images.list names no image on this Mac: the engine is asked with none.
-                </Missing>
-            </Choice>
-        );
-    }
-    return (
-        <Choice label="Image">
-            <Switch
-                label="Image"
-                onChange={(image) => {
-                    change({ image });
-                }}
-                options={images.map((id) => ({ id, label: id }))}
-                surface="panel"
-                value={draft.image ?? images[0] ?? ''}
-            />
-        </Choice>
-    );
-}
-
-function Lifetimes({ draft, change }: { draft: Draft; change: Change }) {
-    if (draft.kind === 'server') {
-        return null;
-    }
-    return (
-        <Choice label="Lifetime">
-            <Switch
-                all="The engine's default"
-                label="Lifetime"
-                onChange={(lifetime: Lifetime | null) => {
-                    change({ lifetime });
-                }}
-                options={LIFETIME_OPTIONS}
-                surface="panel"
-                value={draft.lifetime}
-            />
-        </Choice>
-    );
-}
-
-function Size({ draft, change }: { draft: Draft; change: Change }) {
-    return (
-        <div className={styles.size}>
-            <FormField
-                label="CPUs"
-                onChange={(cpus) => {
-                    change({ cpus });
-                }}
-                placeholder="its default"
-                value={draft.cpus}
-            />
-            <FormField
-                label="Memory, GB"
-                onChange={(memoryGB) => {
-                    change({ memoryGB });
-                }}
-                placeholder="its default"
-                value={draft.memoryGB}
-            />
-            <FormField
-                label="Disk, GB"
-                onChange={(diskGB) => {
-                    change({ diskGB });
-                }}
-                placeholder="its default"
-                value={draft.diskGB}
-            />
-        </div>
-    );
-}
-
-function Fields({ draft, images, change }: ImagesProps) {
-    return (
-        <>
-            <Choice label="Kind">
-                <Switch
-                    label="Kind"
-                    onChange={(kind) => {
-                        change({ kind });
-                    }}
-                    options={KINDS}
-                    surface="panel"
-                    value={draft.kind}
-                />
-            </Choice>
-            <FormField
-                {...(draft.kind === 'workspace'
-                    ? { hint: 'Left empty, the engine names it.' }
-                    : {})}
-                label="Name"
-                onChange={(name) => {
-                    change({ name });
-                }}
-                placeholder="gate5"
-                value={draft.name}
-            />
-            <Images change={change} draft={draft} images={images} />
-            <Lifetimes change={change} draft={draft} />
-            <Size change={change} draft={draft} />
-            <Choice label="Its machine file">
-                <Missing>
-                    Not asked here yet: a workspace can be made from a machine file, a server cannot
-                    be given one.
-                </Missing>
-            </Choice>
-        </>
-    );
-}
-
-export type NewMachineProps = { go: (to: Route) => void; onClose: () => void };
-
-export function NewMachine({ go, onClose }: NewMachineProps) {
-    const images = useRead('images.list', {});
-    const listed = images.kind === 'read' ? imagesOf(images.out) : undefined;
-    const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
-    const asked: Draft = { ...draft, image: draft.image ?? listed?.[0] ?? null };
-    const onDone = (out: MachinesCreated) => {
+// invariant: Launch hands the owner to the new machine's page once the engine has begun making it (its first
+// invariant: progress frame) or answered, whichever comes first, and only once: a refusal comes before either, so
+// invariant: it is drawn in the sheet.
+function useLaunch({ go, onClose }: Pick<NewMachineProps, 'go' | 'onClose'>) {
+    const reread = useReread();
+    const launched = useRef(false);
+    return (name: string) => {
+        if (launched.current || name === '') {
+            return;
+        }
+        launched.current = true;
         onClose();
-        go(machineRoute(out.VM.Name));
+        go(machineRoute(name));
+        reread(LISTED);
     };
-    const shared = { onDone, rereads: CREATE_REREADS, subject: asked.name.trim() };
+}
+
+function useCreate(props: SheetProps) {
+    const { answer, draft } = props;
+    const on = chosenOnOf(answer);
+    const memory = on === undefined ? undefined : memoryOf(answer, on, draft);
+    const name = nameOf(answer, draft);
+    const launch = useLaunch(props);
+    const shared = {
+        onDone: (out: MachinesCreated) => {
+            launch(out.VM.Name);
+        },
+        rereads: CREATE_REREADS,
+        subject: name,
+        target: on === undefined ? undefined : targetOfOn(on),
+    };
+    const asked = { answer, draft, memory };
     const workspace = useGesture('machines.create-workspace', {
         ...shared,
         input: workspaceInputOf(asked),
     });
     const server = useGesture('machines.create-server', { ...shared, input: serverInputOf(asked) });
     const gesture = draft.kind === 'server' ? server : workspace;
+    const begun = gesture.state.kind === 'running' && gesture.state.progress.length > 0;
+    useEffect(() => {
+        if (begun) {
+            launch(name);
+        }
+    });
+    const ready =
+        on?.Ready === true &&
+        memory !== undefined &&
+        (draft.kind === 'workspace' || answer.Server !== null);
+    return { gesture, memory, name, on, ready };
+}
+
+type ActionsProps = {
+    gesture: Gesture<unknown>;
+    onClose: () => void;
+    ready: boolean;
+    shown: string;
+};
+
+function Actions({ gesture, onClose, ready, shown }: ActionsProps) {
+    return (
+        <>
+            <Button onClick={onClose}>Cancel</Button>
+            {ready ? (
+                <GestureButton
+                    gesture={gesture}
+                    label="Launch"
+                    title={`Launch ${shown}?`}
+                    variant="primary"
+                />
+            ) : (
+                <Button disabled variant="primary">
+                    Launch
+                </Button>
+            )}
+        </>
+    );
+}
+
+type PurposeProps = { draft: Draft; change: Change; refusal: null | ReactElement };
+
+function Purpose({ draft, change, refusal }: PurposeProps) {
+    return (
+        <section aria-label="Purpose" className={styles.field}>
+            <FormField
+                label="What is it for?"
+                onChange={(purpose) => {
+                    change({ purpose });
+                }}
+                placeholder="Lot L6 · machine file views"
+                value={draft.purpose}
+            />
+            {refusal}
+        </section>
+    );
+}
+
+function Sheet(props: SheetProps) {
+    const { answer, draft, change, onClose } = props;
+    const [open, setOpen] = useState(false);
+    const { gesture, memory, name, on, ready } = useCreate(props);
+    const place = placeOf(gesture, answer);
+    const outcome = (at: RefusalPlace) =>
+        place === at ? <GestureOutcome gesture={gesture} /> : null;
+    return (
+        <Dialog
+            actions={
+                <Actions
+                    gesture={gesture}
+                    onClose={onClose}
+                    ready={ready}
+                    shown={name === '' ? `a ${draft.kind}` : name}
+                />
+            }
+            consequence={`It will follow the machine file ${answer.From}`}
+            onClose={onClose}
+            title={`New machine on ${answer.Mac}`}
+        >
+            <Purpose change={change} draft={draft} refusal={outcome('purpose')} />
+            <FormField
+                label="Name"
+                onChange={(typed) => {
+                    change({ name: typed });
+                }}
+                value={draft.name ?? answer.Name}
+            />
+            <OnRow answer={answer} change={change} refusal={outcome('on')} />
+            {on === undefined ? null : (
+                <Memory answer={answer} change={change} memory={memory} name={name} on={on} />
+            )}
+            <Lifetimes answer={answer} change={change} draft={draft} />
+            <Options
+                answer={answer}
+                change={change}
+                draft={draft}
+                onToggle={() => {
+                    setOpen((before) => !before);
+                }}
+                open={open}
+            />
+            <div className={styles.outcome}>{outcome('foot')}</div>
+        </Dialog>
+    );
+}
+
+export function NewMachine(props: NewMachineProps) {
+    const { opening, onClose } = props;
+    const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
+    const reading = useMachinesNew(askedOf(opening, draft));
     const change: Change = (next) => {
         setDraft((before) => ({ ...before, ...next }));
     };
-    const shown = asked.name.trim() === '' ? `a ${draft.kind}` : asked.name.trim();
+    if (reading.kind === 'read') {
+        return (
+            <Screen>
+                <Sheet {...props} answer={reading.out} change={change} draft={draft} />
+            </Screen>
+        );
+    }
     return (
         <Screen>
             <Dialog
-                actions={
-                    <>
-                        <Button onClick={onClose}>Cancel</Button>
-                        {sizeIsWhole(draft) ? (
-                            <GestureButton
-                                gesture={gesture}
-                                label="Create"
-                                title={`Create ${shown}?`}
-                                variant="primary"
-                            />
-                        ) : (
-                            <Button disabled variant="primary">
-                                Create
-                            </Button>
-                        )}
-                    </>
-                }
+                actions={<Button onClick={onClose}>Cancel</Button>}
                 onClose={onClose}
-                title="New machine on this Mac"
+                title="New machine"
             >
-                <Fields change={change} draft={draft} images={listed} />
-                <div className={styles.outcome}>
-                    <GestureOutcome gesture={gesture} />
-                </div>
+                {reading.kind === 'failed' ? (
+                    <Unanswered error={reading.error} size="panel" />
+                ) : (
+                    <Reading size="tab" what="What a new machine can be" />
+                )}
             </Dialog>
         </Screen>
     );

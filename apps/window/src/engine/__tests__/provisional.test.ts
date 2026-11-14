@@ -3,9 +3,11 @@ import { describe, expect, test } from 'vitest';
 
 import { recordingsOf } from '../../fixtures/recordings';
 import type { Out } from '../client';
+import { EngineError } from '../engine-error';
 import { keyOf } from '../frame';
 import {
     confirmFormOf,
+    createRefusalPlaceOf,
     diskGestureOf,
     engineStateOf,
     freesWhole,
@@ -235,5 +237,30 @@ describe('provisional', () => {
 
         // Then - by name in the first; by the flag in the second, and only when it is This Mac
         expect(found).toStrictEqual(['jterrazz-macbook-pro', true, undefined]);
+    });
+
+    test("a create's refusal is placed by its code, then by whether its subject is a Mac the sheet offers", () => {
+        // Given - a bad purpose, a refusal naming an offered Mac, one naming a machine, and no answer at all
+        const macs = ['jterrazz-macbook-pro', 'jterrazz-mac-mini'];
+        const refusals = [
+            new EngineError({
+                code: 'machines.bad-purpose',
+                message: 'a purpose is one line',
+                subject: 'x',
+            }),
+            new EngineError({
+                code: 'machines.not-enough-memory',
+                message: 'not enough',
+                subject: 'jterrazz-macbook-pro',
+            }),
+            new EngineError({ code: 'machines.name-taken', message: 'taken', subject: 'linux-1' }),
+            new EngineError(undefined),
+        ];
+
+        // When - each is placed
+        const places = refusals.map((error) => createRefusalPlaceOf(error, macs));
+
+        // Then - under the purpose, on the On row, then the foot twice
+        expect(places).toStrictEqual(['purpose', 'on', 'foot', 'foot']);
     });
 });

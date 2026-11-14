@@ -25,9 +25,10 @@ export type HomeProps = {
     overview: Reading<OverviewReadOutput>;
     go: Go;
     onNewMachine?: (() => void) | undefined;
+    onAddMac?: (() => void) | undefined;
 };
 
-export function HomePage({ macs, overview, go, onNewMachine }: HomeProps) {
+export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomeProps) {
     const reach = useReach();
     if (reach.kind === 'unanswered') {
         return (
@@ -61,7 +62,7 @@ export function HomePage({ macs, overview, go, onNewMachine }: HomeProps) {
                 <Needs go={go} macs={macs} needs={Summary.Needs ?? []} title="Needs you" />
             </HeldOutcomes>
             <MemoryPanel macs={macs} />
-            {macs.length > 0 ? <HomeMachines go={go} macs={macs} /> : null}
+            {macs.length > 0 ? <HomeMachines go={go} macs={macs} onAddMac={onAddMac} /> : null}
             {holdsNoMachine(macs) ? null : (
                 <NotGiven title="Last night" what="What moved, held or failed overnight" />
             )}

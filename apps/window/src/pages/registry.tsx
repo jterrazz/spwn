@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 
 import { TITLES } from '../shell/window';
 import type { PageProps, Pages } from '../shell/window';
+import { AddMac } from './add-mac/add-mac';
 import { ItemPage } from './catalog/item';
 import { ShelfPage } from './catalog/shelf';
 import { HomePage } from './home/home';
@@ -39,10 +40,23 @@ function Head({ route, found, go, newMachine }: PageProps) {
     ) : null;
 }
 
-function Body({ route, found, home, go, Gallery, newMachine }: PageProps) {
+function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps) {
     switch (route.page) {
         case 'home': {
-            return <HomePage go={go} onNewMachine={newMachine} {...home} />;
+            return (
+                <HomePage
+                    go={go}
+                    onAddMac={addMac}
+                    onNewMachine={
+                        newMachine === undefined
+                            ? undefined
+                            : () => {
+                                  newMachine();
+                              }
+                    }
+                    {...home}
+                />
+            );
         }
         case 'inbox': {
             return <InboxPage go={go} {...home} />;
@@ -87,4 +101,11 @@ function Body({ route, found, home, go, Gallery, newMachine }: PageProps) {
     }
 }
 
-export const PAGES: Pages = { Body, Confirm: GestureConfirm, Head, NewMachine, routeOfNeed };
+export const PAGES: Pages = {
+    AddMac,
+    Body,
+    Confirm: GestureConfirm,
+    Head,
+    NewMachine,
+    routeOfNeed,
+};

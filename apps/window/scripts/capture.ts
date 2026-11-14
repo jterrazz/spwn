@@ -41,9 +41,10 @@ const OPENED: Readonly<Record<string, readonly Shot[]>> = {
         { name: 'dialog-new-machine-home', query: 'page=home', steps: [{ button: 'New machine' }] },
         {
             name: 'dialog-new-machine-mac',
-            query: 'machine=macbook-pro&tab=Overview',
-            steps: [{ button: 'New machine' }],
+            query: 'machine=mac-mini&tab=Overview',
+            steps: [{ button: 'New machine on mac-mini' }],
         },
+        { name: 'dialog-add-mac', query: 'page=home', steps: [{ button: 'Add a Mac' }] },
         {
             name: 'dialog-new-machine-file',
             query: 'page=machine-files&file=linux-dev',

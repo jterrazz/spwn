@@ -1,6 +1,6 @@
 import type { ActivityReport, MachinesMacView, MachinesVM } from '@jterrazz/station-api';
 
-import { Bar, Chart, MachineIcon, Panel, Row, RowHead } from '../../design/index';
+import { Bar, Button, Chart, MachineIcon, Panel, Row, RowHead } from '../../design/index';
 import type { Identity } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { memory, percent } from '../../model/format';
@@ -145,13 +145,26 @@ function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
     );
 }
 
-export function HomeMachines({ macs, go }: { macs: readonly MachinesMacView[]; go: Go }) {
+type HomeMachinesProps = {
+    macs: readonly MachinesMacView[];
+    go: Go;
+    onAddMac?: (() => void) | undefined;
+};
+
+export function HomeMachines({ macs, go, onAddMac }: HomeMachinesProps) {
     return (
         <Panel title="Machines">
             <RowHead columns={COLUMNS} lead template="fleet" />
             {macs.map((mac) => (
                 <MacRows go={go} key={mac.Name} mac={mac} />
             ))}
+            {onAddMac === undefined ? null : (
+                <div className={styles.addMac}>
+                    <Button onClick={onAddMac} variant="link">
+                        Add a Mac
+                    </Button>
+                </div>
+            )}
         </Panel>
     );
 }

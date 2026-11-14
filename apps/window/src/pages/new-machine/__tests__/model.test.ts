@@ -1,78 +1,118 @@
 import { describe, expect, test } from 'vitest';
 
-import { EMPTY_DRAFT, imagesOf, serverInputOf, sizeIsWhole, workspaceInputOf } from '../model';
+import type { MachinesCallsNewMachine } from '../../../engine/machines-new';
+import { ANSWERS } from '../../../engine/machines-new-answers';
+import {
+    askedOf,
+    chosenOnOf,
+    EMPTY_DRAFT,
+    GB,
+    memoryOf,
+    serverInputOf,
+    targetOfOn,
+    workspaceInputOf,
+} from '../model';
 
-function record(name: string, version: string) {
-    return {
-        Mac: 'jterrazz-macbook-pro',
-        Newest: true,
-        Record: { base: '', built_at: '', name, recipe_sha: '', size_gb: 4, station: '', version },
-        VMs: null,
-    };
+const PRO = 'jterrazz-macbook-pro';
+const MINI = 'jterrazz-mac-mini';
+
+function answerOn(mac: string): MachinesCallsNewMachine {
+    const answer = ANSWERS.find((one) => one.fleet === `${PRO} ${MINI}`);
+    if (answer === undefined) {
+        throw new Error('two-macs has an answer');
+    }
+    return { ...answer.out, Mac: mac };
+}
+
+function onOf(answer: MachinesCallsNewMachine) {
+    const on = chosenOnOf(answer);
+    if (on === undefined) {
+        throw new Error('the answer lists its Mac');
+    }
+    return on;
 }
 
 describe('model', () => {
-    test('an untouched draft asks the engine with no field, so each is its default', () => {
-        // Given - the empty draft
+    test('the Mac asked is the one picked, else the one the sheet was opened on, and a file opened from is kept', () => {
+        // Given - a sheet opened on the mini from the station-linux file
 
-        // When - the inputs of both calls are made of it
-        const workspace = workspaceInputOf(EMPTY_DRAFT);
-        const server = serverInputOf(EMPTY_DRAFT);
+        // When - it asks before and after This Mac is picked
+        const opened = askedOf({ from: 'station-linux', on: MINI }, EMPTY_DRAFT);
+        const picked = askedOf({ from: 'station-linux', on: MINI }, { ...EMPTY_DRAFT, on: PRO });
 
-        // Then - neither carries a field the owner did not give
-        expect(workspace).toStrictEqual({ Request: {} });
-        expect(server).toStrictEqual({});
+        // Then - the pick wins, and an opening with neither asks nothing
+        expect(opened).toStrictEqual({ From: 'station-linux', On: MINI });
+        expect(picked).toStrictEqual({ From: 'station-linux', On: PRO });
+        expect(askedOf({}, EMPTY_DRAFT)).toStrictEqual({});
     });
 
-    test('a filled draft carries its name, image, lifetime and size in the units of the input', () => {
-        // Given - a persistent workspace of 2 CPUs, 6 GB of memory and 40 GB of disk
-        const draft = {
-            ...EMPTY_DRAFT,
-            cpus: '2',
-            diskGB: '40',
-            image: 'station-linux',
-            lifetime: 'persistent' as const,
-            memoryGB: ' 6 ',
-            name: ' gate5 ',
-        };
+    test('an untouched draft asks the default of each field, its machine file and lifetime given', () => {
+        // Given - the answer on the mini, and the empty draft
+        const answer = answerOn(MINI);
+        const memory = memoryOf(answer, onOf(answer), EMPTY_DRAFT);
 
-        // When - its inputs are made
-        const workspace = workspaceInputOf(draft);
-        const server = serverInputOf({ ...draft, kind: 'server' });
-
-        // Then - sizes are bytes, and a server never carries a lifetime
-        const Size = { CPUs: 2, DiskBytes: 40 * 2 ** 30, MemoryBytes: 6 * 2 ** 30 };
-        expect(workspace).toStrictEqual({
-            Request: { Image: 'station-linux', Lifetime: 'persistent', Name: 'gate5', Size },
+        // When - both inputs are made
+        const workspace = workspaceInputOf({ answer, draft: EMPTY_DRAFT, memory });
+        const server = serverInputOf({
+            answer,
+            draft: { ...EMPTY_DRAFT, kind: 'server' },
+            memory: 8 * GB,
         });
-        expect(server).toStrictEqual({ Image: 'station-linux', Name: 'gate5', Size });
+
+        // Then - the name and file the engine names, no size, and a server carries its image and no lifetime
+        expect(workspace).toStrictEqual({
+            Request: { From: 'station-linux', Lifetime: 'persistent', Name: 'linux-2' },
+        });
+        expect(server).toStrictEqual({ Image: 'station-linux', Name: 'linux-2' });
     });
 
-    test('a size that is not a whole count is not sent', () => {
-        // Given - drafts whose memory is a word, a fraction and zero
-        const words = ['eight', '1.5', '0'];
+    test('a purpose and a memory off the default are sent, trimmed and in bytes', () => {
+        // Given - a draft for the mini with a purpose and 8 GB
+        const answer = answerOn(MINI);
+        const draft = { ...EMPTY_DRAFT, memory: 8 * GB, name: ' gate5 ', purpose: ' Lot L6 ' };
 
-        // When - each is judged sendable
-        const sendable = words.map((memoryGB) => sizeIsWhole({ ...EMPTY_DRAFT, memoryGB }));
+        // When - its input is made
+        const workspace = workspaceInputOf({
+            answer,
+            draft,
+            memory: memoryOf(answer, onOf(answer), draft),
+        });
 
-        // Then - none is, while an empty one is
-        expect(sendable).toStrictEqual([false, false, false]);
-        expect(sizeIsWhole(EMPTY_DRAFT)).toBe(true);
+        // Then - every field the owner gave is carried
+        expect(workspace).toStrictEqual({
+            Request: {
+                From: 'station-linux',
+                Lifetime: 'persistent',
+                Name: 'gate5',
+                Purpose: 'Lot L6',
+                Size: { MemoryBytes: 8 * GB },
+            },
+        });
     });
 
-    test('the images offered are the names images.list gives, each once', () => {
-        // Given - two versions of station-linux and one of macos, then no answer
-        const reports = [
-            record('station-linux', '2'),
-            record('station-linux', '1'),
-            record('macos', '1'),
-        ];
+    test('the memory asked stays within what the engine offers on the Mac', () => {
+        // Given - This Mac, where at most 4 GB is offered
+        const answer = answerOn(PRO);
+        const on = onOf(answer);
 
-        // When - the names are read
-        const names = imagesOf(reports);
+        // When - 8 GB is wanted, and a server's default of 8 GB
+        const wanted = memoryOf(answer, on, { ...EMPTY_DRAFT, memory: 8 * GB });
+        const server = memoryOf(answer, on, { ...EMPTY_DRAFT, kind: 'server' });
 
-        // Then - each name once, in the engine's order
-        expect(names).toStrictEqual(['station-linux', 'macos']);
-        expect(imagesOf(null)).toStrictEqual([]);
+        // Then - both are held to the 4 GB offered
+        expect(wanted).toBe(4 * GB);
+        expect(server).toBe(4 * GB);
+    });
+
+    test('this Mac is asked with no target, another Mac by its name', () => {
+        // Given - the answers on This Mac and on the mini
+
+        // When - each is targeted
+        const here = targetOfOn(onOf(answerOn(PRO)));
+        const there = targetOfOn(onOf(answerOn(MINI)));
+
+        // Then - only the mini is named
+        expect(here).toBeUndefined();
+        expect(there).toStrictEqual({ name: MINI });
     });
 });

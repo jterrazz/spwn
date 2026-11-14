@@ -14,7 +14,6 @@ import type {
     MachinefileExtraLine,
     MachinefileLine,
     MachinesEngineView,
-    MachinesLifetime,
     MachinesMacView,
     MachinesVM,
     OverviewNeed,
@@ -26,7 +25,9 @@ import type {
 
 import { duration } from '../model/format';
 import type { ConfirmName } from './confirms';
+import type { EngineError } from './engine-error';
 import type { AskForm } from './gesture';
+import type { MachinesFit } from './machines-new';
 
 // outside: machines.list sends a Mac's reach as two booleans and no state code, and packages/api types a VM's
 // outside: State as a plain string though station's Go gives it seven codes (apps/engine/machines/allmachines.go);
@@ -39,11 +40,20 @@ export const VM_STATES = ['broken', 'running', 'stale', 'stopped', 'suspended', 
 
 export type VmState = (typeof VM_STATES)[number];
 
-// outside: the lifetimes a workspace may be created with are the window's list until machines.new offers them; a
-// outside: server's is always on, set by the engine.
-export const LIFETIMES = ['ephemeral', 'persistent'] as const satisfies readonly MachinesLifetime[];
+// outside: a preset's Fit is the engine's verdict on whether it can be asked; machines.new names no gesture, so the
+// outside: one it allows is read here.
+export const FIT_ALLOWS: Readonly<Record<MachinesFit, boolean>> = { fits: true, 'no-room': false };
 
-export type Lifetime = (typeof LIFETIMES)[number];
+export type RefusalPlace = 'foot' | 'on' | 'purpose';
+
+// outside: a create's refusal names no field of the sheet it is about: machines.bad-purpose is the purpose's, a
+// outside: refusal whose subject is a Mac the sheet offers is that Mac's, and any other is the sheet's own.
+export function createRefusalPlaceOf(error: EngineError, macs: readonly string[]): RefusalPlace {
+    if (error.wire?.code === 'machines.bad-purpose') {
+        return 'purpose';
+    }
+    return macs.includes(error.wire?.subject ?? '') ? 'on' : 'foot';
+}
 
 // outside: packages/api types engine.read's State as a plain string though station's Go gives it three codes
 // outside: (apps/engine/engine/reading.go).

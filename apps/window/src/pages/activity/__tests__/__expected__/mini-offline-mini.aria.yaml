@@ -1,7 +1,7 @@
 - main:
   - heading "jterrazz-mac-mini Not seen" [level=2]
   - paragraph
-  - button "New machine"
+  - button "New machine on jterrazz-mac-mini": New machine
   - tablist "Tabs":
     - tab "Overview"
     - tab "Activity" [selected]

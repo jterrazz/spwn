@@ -95,6 +95,19 @@ describe('finds', () => {
         ]);
     });
 
+    test('the Add a Mac action is found, shown only to a query', () => {
+        // Given - every result Find holds
+
+        // When - it is asked with no query, then for add a mac
+        const unasked = matching(everything(HELD), '');
+        const asked = matching(everything(HELD), 'add a mac');
+
+        // Then - the action waits for a query, and acts instead of opening a page
+        expect(shown(unasked).map(([kind]) => kind)).not.toContain('Actions');
+        expect(shown(asked)).toStrictEqual([['Actions', ['Add a Mac']]]);
+        expect(asked[0]?.results[0]?.to).toStrictEqual({ act: 'add-mac' });
+    });
+
     test('this Mac is named so, any other Mac is a Mac', () => {
         // Given - book as the Mac the window runs on
         const groups = matching(

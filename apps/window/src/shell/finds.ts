@@ -16,15 +16,18 @@ export const KINDS = [
     'Catalog',
     'Needs',
     'Packages',
+    'Actions',
 ] as const;
 
 export type Kind = (typeof KINDS)[number];
+
+export type Act = 'add-mac';
 
 export type Result = {
     kind: Kind;
     label: string;
     detail: string;
-    to: { route: Route };
+    to: { act: Act } | { route: Route };
     mark?: undefined | { name: string; kind: string };
     machine?: undefined | { name: string; kind: 'mac' | MachineKind };
 };
@@ -49,7 +52,11 @@ const PLACES: readonly PlainPage[] = ['home', 'inbox', 'storage'];
 const SHELVES: readonly PlainPage[] = ['catalog-apps', 'catalog-skills', 'catalog-settings'];
 const FOUND_BY_NAME: ReadonlySet<PlainPage> = new Set<PlainPage>(['gallery']);
 
-const WITH_A_QUERY: ReadonlySet<Kind> = new Set<Kind>(['Needs', 'Packages', 'Tabs']);
+const WITH_A_QUERY: ReadonlySet<Kind> = new Set<Kind>(['Actions', 'Needs', 'Packages', 'Tabs']);
+
+const ACTIONS: readonly Result[] = [
+    { detail: 'action', kind: 'Actions', label: 'Add a Mac', to: { act: 'add-mac' } },
+];
 const PAGE_DETAILS: Partial<Record<Kind, string>> = {
     Catalog: 'catalog',
     'Machine files': 'setup',
@@ -148,6 +155,7 @@ export function everything(held: Held): readonly Result[] {
         page(held, 'Machine files', 'machine-files'),
         ...SHELVES.map((one) => page(held, 'Catalog', one)),
         ...packagesOf(held),
+        ...ACTIONS,
     ];
 }
 

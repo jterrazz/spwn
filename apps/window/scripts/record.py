@@ -182,10 +182,12 @@ GESTURES = {
         {"call": "accounts.share", "in": {"Account": "github", "With": "linux-1", "For": 12 * 3600 * 10**9}},
         {"call": "accounts.take-back", "in": {"Account": "github", "From": "linux-1", "Confirm": "yes"}},
         {"call": "background.remove", "in": {"Label": "com.jterrazz.brain.x-snapshot", "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "Image": "station-linux", "Lifetime": "persistent"}, "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-1", "Image": "station-linux"}, "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "big", "Image": "station-linux", "Size": {"MemoryBytes": 68719476736}}, "Confirm": "yes"}},
-        {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "persistent", "Size": {"MemoryBytes": 8589934592}}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-1", "From": "station-linux", "Lifetime": "persistent"}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "persistent", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
+        {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
+        {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
     ],
     "stories": [
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "4321"}},
@@ -198,7 +200,8 @@ GESTURES = {
         {"call": "engine.start", "in": {}},
     ],
     "one-mac": [
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5"}, "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "persistent"}, "Confirm": "yes"}},
+        {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
     ],
     "creating": [
         {"call": "machines.delete", "in": {"VM": "linux-5", "Confirm": "linux-5"}},

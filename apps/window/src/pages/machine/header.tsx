@@ -11,6 +11,7 @@ import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { machineRoute, TAB_PANEL, TABS } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
+import type { Opening } from '../../shell/window';
 import { useIdentityOf } from '../kit/identity';
 import { LifecycleGestures } from './gestures';
 import { TerminalButton } from './terminal';
@@ -21,7 +22,7 @@ type Props = {
     found: Found;
     tab: Tab;
     go: (to: Route) => void;
-    onNewMachine?: (() => void) | undefined;
+    onNewMachine?: ((opening: Opening) => void) | undefined;
 };
 
 function useAwakeWord(mac: MachinesMacView): string | undefined {
@@ -77,7 +78,14 @@ function Actions({ found, onNewMachine }: Pick<Props, 'found' | 'onNewMachine'>)
     if (!vm) {
         return (
             <div className={styles.actions}>
-                <Button onClick={onNewMachine}>New machine</Button>
+                <Button
+                    name={`New machine on ${mac.Name}`}
+                    onClick={() => {
+                        onNewMachine?.({ on: mac.Name });
+                    }}
+                >
+                    New machine
+                </Button>
             </div>
         );
     }

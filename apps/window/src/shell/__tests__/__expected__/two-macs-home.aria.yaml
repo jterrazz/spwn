@@ -90,6 +90,7 @@
     - button "linux-1"
     - button "jterrazz-mac-mini"
     - button "infra"
+    - button "Add a Mac"
   - region "Last night":
     - heading "Last night" [level=2]
     - paragraph: Not given yet What moved, held or failed overnight

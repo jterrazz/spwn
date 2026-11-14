@@ -21,6 +21,7 @@ export type FindProps = {
     routeOfNeed: (need: OverviewNeed) => Route;
     go: (to: Route) => void;
     onClose: () => void;
+    onAddMac: () => void;
 };
 
 function useHeld(props: FindProps) {
@@ -157,8 +158,19 @@ function Query({ value, list, active, onChange, onKeyDown }: QueryProps) {
     );
 }
 
+function pickerOf({ go, onClose, onAddMac }: FindProps) {
+    return (result: Result) => {
+        if ('act' in result.to) {
+            onAddMac();
+            return;
+        }
+        onClose();
+        go(result.to.route);
+    };
+}
+
 export function Find(props: FindProps) {
-    const { go, onClose } = props;
+    const { onClose } = props;
     const all = useHeld(props);
     const [query, setQuery] = useState('');
     const [chosen, setChosen] = useState(0);
@@ -173,10 +185,7 @@ export function Find(props: FindProps) {
             ?.querySelector(`[id="${id}-${String(at)}"]`)
             ?.scrollIntoView({ block: 'nearest' });
     }, [at, id]);
-    const pick = (result: Result) => {
-        onClose();
-        go(result.to.route);
-    };
+    const pick = pickerOf(props);
     const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         const move = KEYS[event.key];
         if (move !== undefined) {

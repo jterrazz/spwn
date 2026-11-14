@@ -11,3 +11,6 @@
     font-size: var(--text-label);
     white-space: nowrap;
 }
+.addMac {
+    padding: var(--space-8) var(--space-12) var(--space-4);
+}

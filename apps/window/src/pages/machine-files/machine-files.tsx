@@ -9,6 +9,7 @@ import { makesAVm } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { machineKindWord } from '../../engine/shown';
+import type { Opening } from '../../shell/window';
 import {
     Absent,
     NotGiven,
@@ -133,7 +134,7 @@ function Head({
     file: string;
     choose: (file: string) => void;
     identities: Identities;
-    onNewMachine?: (() => void) | undefined;
+    onNewMachine?: ((opening: Opening) => void) | undefined;
 }) {
     const origin = filesOf(explain).find((candidate) => candidate.Name === file);
     const path = origin?.File ?? '';
@@ -163,7 +164,12 @@ function Head({
                 </div>
                 {makesAVm(makes) && onNewMachine !== undefined ? (
                     <span className={styles.actions}>
-                        <Button onClick={onNewMachine} variant="primary">
+                        <Button
+                            onClick={() => {
+                                onNewMachine({ from: file });
+                            }}
+                            variant="primary"
+                        >
                             New machine
                         </Button>
                     </span>
@@ -190,7 +196,7 @@ function File({
     bound: MachinefileCallsExplainOut;
     file: string;
     choose: (file: string) => void;
-    onNewMachine?: (() => void) | undefined;
+    onNewMachine?: ((opening: Opening) => void) | undefined;
 }) {
     const input = { Machinefile: file };
     const drift = useRead('machinefile.drift', input);
@@ -230,7 +236,7 @@ export function MachineFilesPage({
     onNewMachine,
 }: {
     opened?: string | undefined;
-    onNewMachine?: (() => void) | undefined;
+    onNewMachine?: ((opening: Opening) => void) | undefined;
 }) {
     const reach = useReach();
     const explain = useRead('machinefile.explain', {});

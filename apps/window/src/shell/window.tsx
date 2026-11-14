@@ -45,14 +45,19 @@ export type PageProps = {
     home: Station;
     go: Go;
     Gallery?: ComponentType | undefined;
-    newMachine?: (() => void) | undefined;
+    newMachine?: ((opening?: Opening) => void) | undefined;
+    addMac?: (() => void) | undefined;
 };
+
+// value: where New machine was opened from: a Mac's page names that Mac, a machine file's page that file.
+export type Opening = { on?: string | undefined; from?: string | undefined };
 
 export type Pages = {
     Head: ComponentType<PageProps>;
     Body: ComponentType<PageProps>;
     Confirm: ComponentType;
-    NewMachine: ComponentType<{ go: Go; onClose: () => void }>;
+    NewMachine: ComponentType<{ go: Go; onClose: () => void; opening: Opening }>;
+    AddMac: ComponentType<{ go: Go; onClose: () => void }>;
     routeOfNeed: (need: OverviewNeed) => Route;
 };
 
@@ -71,7 +76,11 @@ export function Window({ initial, pages, Gallery, onRoute }: WindowProps) {
     );
 }
 
-type Sheet = 'find' | 'new-machine' | 'none';
+type Sheet =
+    | { kind: 'add-mac' }
+    | { kind: 'find' }
+    | { kind: 'new-machine'; opening: Opening }
+    | { kind: 'none' };
 
 function crumbsOf(route: Route, found: Found | undefined, go: Go): Crumb[] {
     if (route.page !== 'machine') {
@@ -151,6 +160,7 @@ export function useStation() {
 type SheetsProps = {
     sheet: Sheet;
     onClose: () => void;
+    onAddMac: () => void;
     go: Go;
     pages: Pages;
     macs: readonly MachinesMacView[];
@@ -158,40 +168,54 @@ type SheetsProps = {
     withGallery: boolean;
 };
 
-function Sheets({ sheet, onClose, go, pages, macs, needs, withGallery }: SheetsProps) {
-    if (sheet === 'find') {
-        return (
-            <Find
-                go={go}
-                macs={macs}
-                needs={needs}
-                onClose={onClose}
-                routeOfNeed={pages.routeOfNeed}
-                titles={TITLES}
-                withGallery={withGallery}
-            />
-        );
+function Sheets({ sheet, onClose, onAddMac, go, pages, macs, needs, withGallery }: SheetsProps) {
+    const { NewMachine, AddMac } = pages;
+    switch (sheet.kind) {
+        case 'find': {
+            return (
+                <Find
+                    go={go}
+                    macs={macs}
+                    needs={needs}
+                    onAddMac={onAddMac}
+                    onClose={onClose}
+                    routeOfNeed={pages.routeOfNeed}
+                    titles={TITLES}
+                    withGallery={withGallery}
+                />
+            );
+        }
+        case 'new-machine': {
+            return <NewMachine go={go} onClose={onClose} opening={sheet.opening} />;
+        }
+        case 'add-mac': {
+            return <AddMac go={go} onClose={onClose} />;
+        }
+        case 'none': {
+            return null;
+        }
     }
-    const { NewMachine } = pages;
-    return sheet === 'new-machine' ? <NewMachine go={go} onClose={onClose} /> : null;
 }
 
 function useSheets() {
     const [sidebar, setSidebar] = useState(true);
-    const [sheet, setSheet] = useState<Sheet>('none');
+    const [sheet, setSheet] = useState<Sheet>({ kind: 'none' });
     const find = useCallback(() => {
-        setSheet('find');
+        setSheet({ kind: 'find' });
     }, []);
     const close = useCallback(() => {
-        setSheet('none');
+        setSheet({ kind: 'none' });
     }, []);
-    const newMachine = useCallback(() => {
-        setSheet('new-machine');
+    const newMachine = useCallback((opening: Opening = {}) => {
+        setSheet({ kind: 'new-machine', opening });
+    }, []);
+    const addMac = useCallback(() => {
+        setSheet({ kind: 'add-mac' });
     }, []);
     const toggleSidebar = useCallback(() => {
         setSidebar((open) => !open);
     }, []);
-    return { close, find, newMachine, sheet, sidebar, toggleSidebar };
+    return { addMac, close, find, newMachine, sheet, sidebar, toggleSidebar };
 }
 
 // value: while this Mac's engine is stopped, Start the engine leads Home and New machine stands back.
@@ -204,7 +228,7 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
     const router = useRouter();
     const { route, go, back, forward, canGoBack, canGoForward } = router;
     const { home, listed, macs, needs, rail } = useStation();
-    const { close, find, newMachine, sheet, sidebar, toggleSidebar } = useSheets();
+    const { addMac, close, find, newMachine, sheet, sidebar, toggleSidebar } = useSheets();
     useShortcuts(router, find, Gallery !== undefined);
     const { lost, dismiss } = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
@@ -220,12 +244,19 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                         newMachineLeads={!engineStopped(macs)}
                         onBack={back}
                         onForward={forward}
-                        onNewMachine={route.page === 'home' ? newMachine : undefined}
+                        onNewMachine={
+                            route.page === 'home'
+                                ? () => {
+                                      newMachine();
+                                  }
+                                : undefined
+                        }
                         onToggleSidebar={toggleSidebar}
                         sidebar={sidebar}
                     />
                     {lost === undefined ? null : <Lost machine={lost} onDismiss={dismiss} />}
                     <PageArea
+                        addMac={addMac}
                         found={found}
                         Gallery={Gallery}
                         go={go}
@@ -241,6 +272,7 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                 go={go}
                 macs={macs}
                 needs={needs}
+                onAddMac={addMac}
                 onClose={close}
                 pages={pages}
                 sheet={sheet}

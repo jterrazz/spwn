@@ -20,6 +20,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
+import type { MachinesFit, MachinesPreset, MachinesRoomFor } from './machines-new';
 import type { DiskCall, EngineState, MacState, NeedCall, VmState } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
@@ -93,6 +94,23 @@ export const DISK_PENDING_WORD = 'reading';
 export const THIS_MAC_WORD = 'This Mac';
 
 export const NO_PURPOSE_WORD = 'No purpose given';
+
+// outside: the engine words these three in words.json from a71316035 on; they are its words, copied until this
+// outside: tree's packages/api carries them, and wordOf reads them then.
+export const FIT_WORDS: Words<MachinesFit> = { fits: 'fits', 'no-room': 'no room' };
+
+export const PRESET_WORDS: Words<MachinesPreset> = {
+    gate: 'gate',
+    small: 'small',
+    workspace: 'workspace',
+};
+
+export const ROOM_FOR_WORDS: Words<MachinesRoomFor> = {
+    gate: 'room for one more gate',
+    none: 'no room for another machine',
+    small: 'room for a small machine',
+    workspace: 'room for one more workspace',
+};
 
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;
 

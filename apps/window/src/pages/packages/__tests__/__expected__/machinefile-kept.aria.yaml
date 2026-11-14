@@ -1,7 +1,7 @@
 - main:
   - heading "jterrazz-macbook-pro Online" [level=2]
   - paragraph: This Mac · Engine running
-  - button "New machine"
+  - button "New machine on jterrazz-macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview"
     - tab "Activity"
