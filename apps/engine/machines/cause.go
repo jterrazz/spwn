@@ -23,6 +23,15 @@ func Meaningful(line string) bool {
 	}) != ""
 }
 
+func ShownCheck(url string) string {
+	// invariant: a health check's URL is the owner's words and may carry a
+	// token in its query or its userinfo; a VM and an edit carry it screened
+	// as the machinist answers them, so every frame, a far Mac's answer and
+	// every page show it screened, and so does the engine's log; only the
+	// record keeps it as given, since the check runs it.
+	return secret.Kept(url)
+}
+
 func LastLines(lines []string) []string {
 	// invariant: the last three lines, unless the line that tells the cause
 	// came before them: then that line and the two after it, so the cause

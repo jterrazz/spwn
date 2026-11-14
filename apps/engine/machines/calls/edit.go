@@ -68,5 +68,5 @@ func (s *Machinist) Edit(ctx context.Context, name string, c model.Change) (mode
 	if err := s.writeRecord(rec); err != nil {
 		return model.Edited{}, err
 	}
-	return model.Edited{Name: name, Changed: r, Check: c.Check, NoCheck: c.NoCheck, Running: s.engineState(ctx, name) == contract.DiskRunning}, nil
+	return model.Edited{Name: name, Changed: r, Check: model.ShownCheck(c.Check), NoCheck: c.NoCheck, Running: s.engineState(ctx, name) == contract.DiskRunning}, nil
 }

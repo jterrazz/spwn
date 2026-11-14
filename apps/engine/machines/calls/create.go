@@ -401,7 +401,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	return model.Created{
 		VM: model.VM{
 			Name: r.Name, Image: r.Image, Version: version, Mac: s.thisMac(cfg), Kind: img.Kind, Lifetime: r.Lifetime,
-			State: model.Running, Resources: r.Size, Network: r.Network, IP: ip, Check: r.Check, CreatedAt: rec.CreatedAt,
+			State: model.Running, Resources: r.Size, Network: r.Network, IP: ip, Check: model.ShownCheck(r.Check), CreatedAt: rec.CreatedAt,
 		},
 		Ports: reserved,
 		Env:   env,

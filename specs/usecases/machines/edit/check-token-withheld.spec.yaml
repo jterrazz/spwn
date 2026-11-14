@@ -1,0 +1,16 @@
+description: 'a health check set by edit is answered with its token withheld; the record keeps it'
+env: two-macs
+runs:
+    - command: 'machines edit infra --on mac-mini --check ''https://infra:6443/readyz?token=hunter2hunter2'''
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	infra	health check https://infra:6443/readyz?token=withheld, from its next health run
+    - command: 'machines infra --json | /usr/bin/jq -c ''.health.check.url'''
+      exit: 0
+      stdout: |
+          "https://infra:6443/readyz?token=withheld"
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra.kept.check'' world.json'
+      exit: 0
+      stdout: |
+          "https://infra:6443/readyz?token=hunter2hunter2"

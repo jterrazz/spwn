@@ -82,7 +82,7 @@ func (d *Engine) keep(ctx context.Context, v *vmState) {
 		d.mu.Unlock()
 		switch change {
 		case model.CheckFails:
-			d.logf(v.name, "its check fails: "+rec.Check)
+			d.logf(v.name, "its check fails: "+model.ShownCheck(rec.Check))
 			lines, _ := d.hv.Console(ctx, v.name, model.ConsoleWindow)
 			kept := model.LastLines(lines)
 			d.wentDown(ctx, v, model.CheckCause(kept), kept, false, now)

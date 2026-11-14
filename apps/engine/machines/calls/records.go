@@ -75,7 +75,7 @@ func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineV
 		vm := model.VM{
 			Name: r.Name, Image: r.Image, Version: r.Version, Mac: mac, Kind: s.kindOfImage(r.Image),
 			Lifetime: r.Lifetime, State: stateOf(info), Resources: r.Resources, SizeGB: int(info.Bytes / 1e9),
-			Network: networkOf(r), Guest: "unknown", Want: r.Want, Check: r.Check, CreatedAt: r.CreatedAt, Agents: r.Agents,
+			Network: networkOf(r), Guest: "unknown", Want: r.Want, Check: model.ShownCheck(r.Check), CreatedAt: r.CreatedAt, Agents: r.Agents,
 		}
 		if d, ok := live[r.Name]; ok && live != nil {
 			if d.State != "" {

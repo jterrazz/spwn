@@ -55,7 +55,9 @@ type VM struct {
 	IP, Network, Guest, Detail string
 	// value: the state its record asks for, running or stopped.
 	Want string
-	// value: a server's health check; empty for none.
+	// value: a server's health check as an answer shows it, its token
+	// withheld; empty for none. The record keeps it as given, for the
+	// check to run.
 	Check string
 	// value: a server's own tailnet device, by its name on the tailnet,
 	// which the owner's tooling installed; empty for none.
@@ -250,7 +252,8 @@ type Edited struct {
 	Name string
 	// value: the sizes the edit asked, the others zero.
 	Changed Resources
-	// value: the health check it set, or that it removed one.
+	// value: the health check it set, its token withheld, or that it
+	// removed one.
 	Check   string
 	NoCheck bool
 	// value: the VM runs, so the change waits for its next start.

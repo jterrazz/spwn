@@ -1,0 +1,11 @@
+description: 'a server made with a health check holding a token answers it withheld; its record keeps it'
+env: two-macs
+runs:
+    - command: 'machines create infra-2 --server --cpus 8 --memory 24G --disk 80G --check ''https://infra-2:6443/readyz?token=hunter2hunter2'' --on mac-mini --json | /usr/bin/jq -c ''.check'''
+      exit: 0
+      stdout: |
+          "https://infra-2:6443/readyz?token=withheld"
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms["infra-2"].kept.check'' world.json'
+      exit: 0
+      stdout: |
+          "https://infra-2:6443/readyz?token=hunter2hunter2"
