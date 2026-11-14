@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
+	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	"io"
 	"slices"
 	"strconv"
@@ -38,7 +39,11 @@ import (
 
 // value: the Router of this run, set once it is built, for what reaches
 // another machine from inside a call (the fleet's fan-out, a release there).
-type late struct{ router *remote.Router }
+type late struct {
+	router *remote.Router
+	// value: this run's engine, when it is one: a sign-in attaches inside a VM through it.
+	engine *process.Engine
+}
 
 func (m machine) router(env kit.Env) *remote.Router {
 	var macs contract.EndpointDialer

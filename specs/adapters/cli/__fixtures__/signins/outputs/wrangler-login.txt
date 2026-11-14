@@ -1,0 +1,15 @@
+
+ ⛅️ wrangler 4.162.0
+────────────────────
+Attempting to login via OAuth Device Authorization Grant...
+To authorize Wrangler, please visit:
+
+  https://dash.cloudflare.com/oauth2/device/verify
+
+and enter the code:
+
+  FAKE0000
+
+You have 5 minutes to approve this request.
+
+Opening a link in your default browser: https://dash.cloudflare.com/oauth2/device/verify?x=FAKE000

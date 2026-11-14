@@ -1,7 +1,9 @@
 package fake_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/fake"
@@ -40,4 +42,19 @@ func TestIdentities(t *testing.T) {
 
 func TestShareStore(t *testing.T) {
 	contracttest.ShareStore(t, func(_ *testing.T, vms ...string) contract.ShareStore { return fake.NewShares(vms...) })
+}
+
+func TestSignIns(t *testing.T) {
+	contracttest.SignIns(t, func(*testing.T) contracttest.SignInsSubject {
+		in, out := accounts.Programs()[1], accounts.Programs()[0]
+		w := &world.World{Macs: map[string]*world.Mac{"mac-mini": {Accounts: &world.Accounts{Programs: map[accounts.Program]accounts.Facts{
+			in: {State: accounts.ProgramSignedIn, Who: "jterrazz", How: accounts.HowOwn},
+		}}}}}
+		at := time.Date(2026, 11, 14, 9, 0, 0, 0, time.UTC)
+		clock := fake.Clock{Now: func() time.Time { return at }, Sleep: func(ctx context.Context, _ time.Duration) error {
+			<-ctx.Done()
+			return ctx.Err()
+		}}
+		return contracttest.SignInsSubject{SignIns: fake.NewSignIns(w, "mac-mini", clock), SignedIn: in, SignedOut: out}
+	})
 }

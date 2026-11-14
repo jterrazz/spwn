@@ -1,0 +1,14 @@
+#!/bin/sh
+# A sign-in's lines as npm answers them with no terminal; $HOME/npm.out says
+# signed out, and a login prints its links as npm does, then signs in.
+printf 'npm %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    whoami)
+        if [ -f "$HOME/npm.out" ]; then echo "npm error code ENEEDAUTH" >&2; exit 1; fi
+        echo "jterrazz" ;;
+    "login --auth-type=web")
+        /bin/cat "$HOME/outputs/npm-login.txt" >&2
+        /bin/sleep 1
+        /bin/rm -f "$HOME/npm.out" ;;
+    *) echo "stub npm: unexpected invocation: $*" >&2; exit 97 ;;
+esac
