@@ -5,10 +5,10 @@ the Go sources and kept as <STATION_BENCH or the temp folder>/worlds/station-wor
 copy of the repository whose sources hash the same. In a Linux VM only, as the door asks the spec build's
 environment: HOME, PATH and every station path in a temporary folder, never the user's.
 
-SEEDS adds to a world what the specs' worlds lack for a page: machinefiles on This Mac, and the fake binaries
-of a fixture of specs/usecases/__fixtures__/; a world of SEEDS may be a world of specs/usecases/worlds/ under
-another name, seeded otherwise. SWITCHES sets, in a world's This Mac, the accounts switches the fake reads
-(apps/engine/world/accounts.go): the presence check a grant asks, or a delivery that fails.
+SEEDS adds to a world what the specs' worlds lack for a page: machinefiles on This Mac, the fake binaries
+of a fixture of specs/usecases/__fixtures__/, and edits of its machines (a sign-in in progress, a program signed
+out, an accounts switch the fake reads in apps/engine/world/accounts.go, as the presence check a grant asks); a
+world of SEEDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
 """
@@ -116,29 +116,50 @@ def applied(apps):
     return {**machine("jterrazz-macbook-pro", apps), "machinefiles/jterrazz-macbook-pro.lock": LOCK}
 
 
-SEEDS = {
-    "two-macs": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"])),
-    "machinefile-kept": ("two-macs", "homebrew", applied(["lazygit", "bat"])),
-    "machinefile-differs": ("two-macs", "homebrew", applied(["lazygit", "bat", "ripgrep", "fd"])),
-    "presence-refused": ("two-macs", None, {}),
-    "stories-file": ("stories", "homebrew", machine("macbook-pro", ["gh", "lazygit", "ghostty"], "settings: { git-shortcuts: {} }\n")),
-}
+EXPIRES = "2026-11-04T11:00:00Z"
 
-SWITCHES = {
-    "presence-refused": {"presence": "refused"},
+
+def exchange(name, id, program, kind, site, asking=False):
+    """A sign-in in progress on a machine, so an accounts.open or accounts.answer of `id` has one to reach."""
+    def edit(content):
+        held = content["macs"][name].setdefault("accounts", {}).setdefault("exchanges", {})
+        held[id] = {"program": program, "kind": kind, "site": site, "expires": EXPIRES, **({"asking": True} if asking else {})}
+    return edit
+
+
+def signed_out(name, program):
+    def edit(content):
+        content["macs"][name].get("accounts", {}).get("programs", {}).pop(program, None)
+    return edit
+
+
+def switched(name, value):
+    def edit(content):
+        content["macs"][content["this_mac"]].setdefault("accounts", {})[name] = value
+    return edit
+
+
+SEEDS = {
+    "two-macs": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
+                 [exchange("linux-1", "ex-1", "gh", "device-code", "github.com")]),
+    "sign-ins": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
+                 [signed_out("linux-1", "claude"), exchange("linux-1", "ex-1", "claude", "paste", "claude.com", asking=True)]),
+    "machinefile-kept": ("two-macs", "homebrew", applied(["lazygit", "bat"]), []),
+    "machinefile-differs": ("two-macs", "homebrew", applied(["lazygit", "bat", "ripgrep", "fd"]), []),
+    "presence-refused": ("two-macs", None, {}, [switched("presence", "refused")]),
+    "stories-file": ("stories", "homebrew", machine("macbook-pro", ["gh", "lazygit", "ghostty"], "settings: { git-shortcuts: {} }\n"), []),
 }
 
 
 def seeded(world):
-    base, fixture, files = SEEDS.get(world, (world, None, {}))
-    switches = SWITCHES.get(world, {})
+    base, fixture, files, edits = SEEDS.get(world, (world, None, {}, []))
     seed = ROOT / "specs" / "usecases" / "worlds" / f"{base}.json"
-    if not files and not switches:
+    if not files and not edits:
         return seed, fixture
     content = json.loads(seed.read_text())
-    this = content["macs"][content["this_mac"]]
-    this.setdefault("files", {}).update(files)
-    this.setdefault("accounts", {}).update(switches)
+    content["macs"][content["this_mac"]].setdefault("files", {}).update(files)
+    for edit in edits:
+        edit(content)
     copy = temporary("window-seed-") / seed.name
     copy.write_text(json.dumps(content))
     return copy, fixture
