@@ -33,7 +33,9 @@ describe('Storage', () => {
             await visitor.see(within(region('Machines'), content('linux-1')));
 
             // When - linux-1 is opened from the Machines panel
-            await visitor.click(within(region('Machines'), button('linux-1 50 GB')));
+            await visitor.click(
+                within(region('Machines'), button('linux-1 1.5 GB of caches inside 50 GB')),
+            );
 
             // Then - its own Storage tab is shown, with its disk
             await visitor.see(heading('linux-1 Running'));

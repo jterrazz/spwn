@@ -1,15 +1,23 @@
-import type { DiskReading, ImagesReport, MachinesMacView, Target } from '@jterrazz/station-api';
+import type {
+    DiskReading,
+    ImagesReport,
+    MachinesMacView,
+    MachinesVM,
+    Target,
+} from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { Button, MachineIcon, Panel, Row, Switch } from '../../design/index';
 import { diskGestureOf, machineKindOf } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
-import { sentence } from '../../model/format';
+import { bytes, sentence } from '../../model/format';
 import { targetOf } from '../../model/machines';
+import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { shortDay } from '../activity/when';
+import { rebuildableOf } from '../disk/disk';
 import { Freed, useFreeAll } from '../disk/disk-gestures';
 import { DiskPanel, groupOf, GroupPanel } from '../disk/disk-view';
 import { HeldOutcomes } from '../kit/gestures';
@@ -102,30 +110,54 @@ function Images({ images, mac }: ImagesProps) {
     );
 }
 
-function Machines({ mac, go }: { mac: MachinesMacView; go: Go }) {
+function useCachesInside(found: Found): null | string {
+    const disk = useWatch('disk.read', {}, targetOf(found));
+    if (disk.kind !== 'read') {
+        return null;
+    }
+    const caches = rebuildableOf(disk.out.Rows ?? []);
+    return caches > 0 ? `${bytes(caches)} of caches inside` : null;
+}
+
+function MacLine({ mac, go }: { mac: MachinesMacView; go: Go }) {
+    const caches = useCachesInside({ mac });
+    return (
+        <Row
+            kind={caches}
+            lead={<MachineIcon kind="mac" />}
+            onOpen={() => {
+                go(machineRoute(mac.Name, 'Storage'));
+            }}
+            sentence="the Mac itself"
+            title={mac.Name}
+            value={null}
+        />
+    );
+}
+
+function VmLine({ mac, vm, go }: { mac: MachinesMacView; vm: MachinesVM; go: Go }) {
     const identityOf = useIdentityOf();
+    const caches = useCachesInside({ mac, vm });
+    return (
+        <Row
+            kind={caches}
+            lead={<MachineIcon identity={identityOf(vm.Name)} kind={machineKindOf(vm)} />}
+            onOpen={() => {
+                go(machineRoute(vm.Name, 'Storage'));
+            }}
+            sentence={vm.Purpose}
+            title={vm.Name}
+            value={vm.SizeGB > 0 ? `${vm.SizeGB} GB` : null}
+        />
+    );
+}
+
+function Machines({ mac, go }: { mac: MachinesMacView; go: Go }) {
     return (
         <Panel note="what is inside one is on its own Storage tab" title="Machines">
-            <Row
-                lead={<MachineIcon kind="mac" />}
-                onOpen={() => {
-                    go(machineRoute(mac.Name, 'Storage'));
-                }}
-                sentence="the Mac itself"
-                title={mac.Name}
-                value={null}
-            />
+            <MacLine go={go} mac={mac} />
             {(mac.VMs ?? []).map((vm) => (
-                <Row
-                    key={vm.Name}
-                    lead={<MachineIcon identity={identityOf(vm.Name)} kind={machineKindOf(vm)} />}
-                    onOpen={() => {
-                        go(machineRoute(vm.Name, 'Storage'));
-                    }}
-                    sentence={vm.Purpose}
-                    title={vm.Name}
-                    value={vm.SizeGB > 0 ? `${vm.SizeGB} GB` : null}
-                />
+                <VmLine go={go} key={vm.Name} mac={mac} vm={vm} />
             ))}
         </Panel>
     );

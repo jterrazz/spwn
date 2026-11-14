@@ -38,6 +38,6 @@
     - button "Delete station-linux 2026.10.20": Delete · frees 3 GB
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
-    - button "jterrazz-macbook-pro the Mac itself"
+    - button "jterrazz-macbook-pro the Mac itself 34.8 GB of caches inside"
     - button "api 50 GB"
-    - button "linux-1 50 GB"
+    - button "linux-1 1.5 GB of caches inside 50 GB"
