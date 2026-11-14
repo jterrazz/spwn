@@ -16,9 +16,6 @@ import { targetId, targetLines, VAULT_REREADS } from './passwords-of';
 
 import styles from './passwords.module.css';
 
-// value: the term of every grant the window sends: a grant stays until it is removed.
-const UNTIL_REMOVED = 0;
-
 function canPick({ Fit }: Pick<AccountsTarget, 'Fit'>): boolean {
     switch (Fit) {
         case 'fits': {
@@ -34,7 +31,6 @@ function grantOf(entry: AccountsVaultEntry, target: AccountsTarget): GrantsAddIn
     const workspace = target.Workspace ?? '';
     return {
         Entry: entry.ID,
-        For: UNTIL_REMOVED,
         To: target.To,
         ToKind: target.ToKind,
         ...(workspace === '' ? {} : { Workspace: workspace }),

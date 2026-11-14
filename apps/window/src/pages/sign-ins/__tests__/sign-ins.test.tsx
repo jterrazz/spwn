@@ -25,7 +25,7 @@ describe('sign-ins', () => {
                 await visitor.see(within(signIns, button('Sign out claude')));
                 await visitor.see(within(signIns, button('Sign in again wrangler')));
                 await visitor.see(
-                    within(signIns, content('from the password pw-2', { exact: false })),
+                    within(signIns, content('from the password npm publish', { exact: false })),
                 );
             },
         );
@@ -118,7 +118,9 @@ describe('sign-ins', () => {
             signInsOver('two-macs', 'linux-1'),
             async (visitor) => {
                 // When - the password of npm's row is opened
-                await visitor.click(within(region('Sign-ins'), button('Open the password pw-2')));
+                await visitor.click(
+                    within(region('Sign-ins'), button('Open the password npm publish')),
+                );
 
                 // Then - its page, with its grant to linux-1
                 await visitor.see(heading('npm publish'));

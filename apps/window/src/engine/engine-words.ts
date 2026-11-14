@@ -1,4 +1,10 @@
-import type { MachinefileAction, PageNoun, StationWord, StationWords } from '@jterrazz/station-api';
+import type {
+    AccountsStepKind,
+    MachinefileAction,
+    PageNoun,
+    StationWord,
+    StationWords,
+} from '@jterrazz/station-api';
 import words from '@jterrazz/station-api/words.json';
 
 export type Worded = keyof StationWords;
@@ -30,11 +36,17 @@ export function detailOf<E extends Worded>(of: E, code: CodeOf<E>): string {
     return wordOf(of, code).Detail ?? '';
 }
 
-// outside: words.json gives each action the heading of the lines it names, which the generated StationWord does not
-// outside: type (apps/engine/cmd/generate/words.go): it is read here, and an action sent without one is shown as it came.
+// outside: words.json gives an action and a step kind a Heading the generated StationWord does not type.
+function headingFrom(said: StationWord, code: string): string {
+    return 'Heading' in said && typeof said.Heading === 'string' ? said.Heading : code;
+}
+
 export function headingOf(action: MachinefileAction): string {
-    const said = wordOf('MachinefileAction', action);
-    return 'Heading' in said && typeof said.Heading === 'string' ? said.Heading : action;
+    return headingFrom(wordOf('MachinefileAction', action), action);
+}
+
+export function stepHeadingOf(kind: AccountsStepKind): string {
+    return headingFrom(wordOf('AccountsStepKind', kind), kind);
 }
 
 export function nounOf(noun: PageNoun, count: number): string {

@@ -3,7 +3,6 @@ import { useState } from 'react';
 
 import { AppIcon, Button, Facts, Panel } from '../../design/index';
 import { WITHHELD } from '../../design/secret';
-import { engineShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import type { Route } from '../../shell/route';
 import { GestureButton, GestureOutcome, GestureRow, HeldOutcomes } from '../kit/gestures';
@@ -34,7 +33,6 @@ function GrantRow({ entry, grant }: { entry: AccountsVaultEntry; grant: Accounts
             gesture={remove}
             lead={<AppIcon name={entry.Program} />}
             sentence={grantLine(grant)}
-            state={engineShown('AccountsGrantState', grant.State)}
             title={grant.To}
             trail={
                 <GestureButton

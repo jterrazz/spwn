@@ -19,7 +19,8 @@ function signInsOver(world: string) {
     );
 }
 
-const PASTE = 'Sign in to claude on linux-1';
+const PASTE = 'Paste the code';
+const DEVICE_CODE = 'Enter the code';
 
 describe('login sheet', () => {
     test('a device code is shown with its copy, and the sheet closes once the engine signs in', async () => {
@@ -28,9 +29,14 @@ describe('login sheet', () => {
             // When - Sign in of gh is clicked
             await visitor.click(within(region('Sign-ins'), button('Sign in gh')));
 
-            // Then - the engine's step: its line, its code to copy, its site to open, then the sheet goes
-            const sheet = dialog('Sign in to gh on linux-1');
-            await visitor.see(within(sheet, content('Enter this code at github.com')));
+            // Then - the engine's step: its heading and detail, its status line, its code to copy, its site to open, then the sheet goes
+            const sheet = dialog(DEVICE_CODE);
+            await visitor.see(
+                within(sheet, content('Type it on the page that opened', { exact: false })),
+            );
+            await visitor.see(
+                within(sheet, content('Waiting for you to enter the', { exact: false })),
+            );
             await visitor.see(within(sheet, content('WDJB-MJHT')));
             await visitor.see(within(sheet, button('Copy code')));
             await visitor.see(within(sheet, button('Open github.com')));
@@ -46,7 +52,7 @@ describe('login sheet', () => {
             await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
             const sheet = dialog(PASTE);
             await visitor.see(
-                within(sheet, content('paste the code it gives you here', { exact: false })),
+                within(sheet, content('then paste the code it gives you', { exact: false })),
             );
 
             // When - the code is pasted and sent
@@ -85,7 +91,9 @@ describe('login sheet', () => {
             const sheet = dialog(PASTE);
 
             // Then - the engine's expired word and line, and a way to start again
-            await visitor.see(within(sheet, content('The code expired')));
+            await visitor.see(
+                within(sheet, content('expired before Claude was approved', { exact: false })),
+            );
             await visitor.see(within(sheet, button('New code')));
             await visitor.click(within(sheet, button('New code')));
             await visitor.see(within(sheet, button('Open claude.com')));
@@ -97,7 +105,7 @@ describe('login sheet', () => {
         // Given - gh's sign-in on linux-1 over two-macs, its code shown
         const result = await component.render(signInsOver('two-macs'), async (visitor) => {
             await visitor.click(within(region('Sign-ins'), button('Sign in gh')));
-            const sheet = dialog('Sign in to gh on linux-1');
+            const sheet = dialog(DEVICE_CODE);
             await visitor.see(within(sheet, content('WDJB-MJHT')));
 
             // When - Cancel is clicked

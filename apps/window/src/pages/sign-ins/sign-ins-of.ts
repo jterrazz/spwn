@@ -3,10 +3,10 @@ import type { AccountsProgramRow, AccountsStep } from '@jterrazz/station-api';
 import { detailOf } from '../../engine/engine-words';
 import { sentence } from '../../model/format';
 
-function howOf({ How, Entry }: AccountsProgramRow): string | undefined {
+function howOf({ How, EntryLabel }: AccountsProgramRow): string | undefined {
     return How === undefined
         ? undefined
-        : detailOf('AccountsProgramHow', How).replace('%s', Entry ?? '');
+        : detailOf('AccountsProgramHow', How).replace('%s', EntryLabel ?? '');
 }
 
 // invariant: the row's one line of the window's own: the engine's fields joined, and its Line where the row's

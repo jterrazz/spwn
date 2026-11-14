@@ -2,9 +2,9 @@ import type { AccountsProgramRow, CallName } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { AppIcon, asSentence, Button, Panel, Verdict } from '../../design/index';
-import { wordOf } from '../../engine/engine-words';
+import { countOf, wordOf } from '../../engine/engine-words';
 import { useWatch } from '../../engine/react';
-import { engineShown, grantedCount, grantEndOf, verdictShown } from '../../engine/shown';
+import { engineShown, grantedCount, verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import type { Gesture } from '../../engine/use-gesture';
 import type { Found } from '../../model/machines';
@@ -43,7 +43,6 @@ function rowShown(row: AccountsProgramRow, withLine: boolean) {
         state: { ...engineShown('AccountsProgramState', row.State), calm: 'pill' as const },
         title: row.Program,
         trailSize: 'wide' as const,
-        value: grantEndOf(row.Until),
     };
 }
 
@@ -69,19 +68,19 @@ type TrailProps = Omit<RowProps, 'found' | 'go'> & {
 
 function RemoveGrant({ row, removeGrant, onEntry }: Omit<TrailProps, 'onSignIn' | 'signOut'>) {
     const word = actionWord(row);
-    const entry = row.Entry ?? '';
+    const label = row.EntryLabel ?? row.Entry ?? '';
     return (
         <>
             {onEntry === undefined ? null : (
-                <Button name={`Open the password ${entry}`} onClick={onEntry} variant="link">
-                    {entry}
+                <Button name={`Open the password ${label}`} onClick={onEntry} variant="link">
+                    {label}
                 </Button>
             )}
             <GestureButton
                 gesture={removeGrant}
                 label={word}
                 name={`${word} ${row.Program}`}
-                title={row.Ask ?? `${word} ${entry} from this machine?`}
+                title={row.Ask ?? `${word} ${label} from this machine?`}
                 verb={word}
             />
         </>
@@ -202,7 +201,7 @@ function GrantedFoot({
     const name = found.vm?.Name ?? found.mac.Name;
     return (
         <p className={styles.foot}>
-            {`${String(count)} ${one ? 'password' : 'passwords'} from this Mac ${one ? 'is' : 'are'} granted to ${name} · `}
+            {`${countOf('password', count)} from this Mac ${one ? 'is' : 'are'} granted to ${name} · `}
             <Button
                 onClick={() => {
                     go({ page: 'passwords' });

@@ -23,11 +23,11 @@ function countTo(to: GrantTo, count: number): string {
 }
 
 // invariant: a count of the entry's grant rows by the kind of what holds them, worded by the engine's nouns; an
-// invariant: entry with no row says so in the window's own words.
-export function grantedTo(entry: Pick<AccountsVaultEntry, 'Grants'>): string {
+// invariant: entry with no row says its Reach in the engine's word.
+export function grantedTo(entry: Pick<AccountsVaultEntry, 'Grants' | 'Reach'>): string {
     const grants = grantsOf(entry);
     if (grants.length === 0) {
-        return 'not granted';
+        return wordOf('AccountsEntryReach', entry.Reach).Word;
     }
     return sentence(
         codesOf('AccountsGrantTo')
@@ -41,21 +41,23 @@ export function kindWord(entry: Pick<AccountsVaultEntry, 'Kind'>): string {
     return wordOf('AccountsKeyKind', entry.Kind).Word;
 }
 
+export function addedDay(entry: Pick<AccountsVaultEntry, 'Added'>): string {
+    return shortDay(entry.Added) ?? '';
+}
+
 export function addedOn(entry: Pick<AccountsVaultEntry, 'Added'>): string | undefined {
-    const day = shortDay(entry.Added);
-    return day === undefined ? undefined : `added ${day}`;
+    const day = addedDay(entry);
+    return day === '' ? undefined : `added ${day}`;
 }
 
 export function aboutEntry(entry: AccountsVaultEntry): string {
     return sentence([entry.Program, kindWord(entry), entry.Who, addedOn(entry)]);
 }
 
-// invariant: the question asked before a password is removed names how many grants end with it, a count of its rows.
-export function removeQuestion(entry: AccountsVaultEntry): string {
-    const grants = grantsOf(entry);
-    const ends =
-        grants.length === 0 ? 'No grant ends with it.' : `Its grants end: ${grantedTo(entry)}.`;
-    return `Remove ${entry.Label}? ${ends}`;
+export function removeQuestion(
+    entry: Pick<AccountsVaultEntry, 'Label' | 'RemoveSentence'>,
+): string {
+    return `Remove ${entry.Label}? ${entry.RemoveSentence}.`;
 }
 
 // invariant: a grant's line joins the engine's noun for what holds it, the workspace an agent works in, and the

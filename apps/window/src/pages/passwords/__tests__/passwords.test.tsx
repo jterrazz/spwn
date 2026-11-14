@@ -46,11 +46,10 @@ describe('passwords', () => {
                 within(region('Passwords'), button('npm publish', { exact: false })),
             );
 
-            // Then - its facts, its value withheld, and its one grant with the engine's state
+            // Then - its facts, its value withheld, and its one grant
             await visitor.see(heading('npm publish'));
             await visitor.see(within(region('This password'), content('Withheld')));
             await visitor.see(within(region('Granted to'), content('linux-1')));
-            await visitor.see(within(region('Granted to'), content('Active')));
         });
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(file('./__expected__/two-macs-pw-2.aria.yaml'));

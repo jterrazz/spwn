@@ -56,11 +56,6 @@ export function createRefusalPlaceOf(error: EngineError, macs: readonly string[]
     return CREATE_REFUSAL_PLACES[error.wire?.code ?? ''] ?? (onAMac ? 'on' : 'foot');
 }
 
-// outside: an accounts.login Step never says its code ran out; the watch's `login.expired` says it, until the Step does.
-export function loginExpired(error: EngineError): boolean {
-    return error.wire?.code === 'login.expired';
-}
-
 // outside: machines.list sends a Mac's engine as three booleans; this reads them as engine.read's State, until the
 // outside: view carries that code.
 export function engineViewStateOf(engine: MachinesEngineView): EngineReadState | undefined {
