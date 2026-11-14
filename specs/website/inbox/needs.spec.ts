@@ -90,7 +90,7 @@ describe('needs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('N9 waits for a kept journal, read by day');
+    test.todo("N9 waits for the engine's kept journal (drawn on a provisional copy)");
 
     test("N10 a Mac chosen above the list keeps only that Mac's needs, and All brings them back", async () => {
         // Given - the Inbox over two-macs, where every need is on the first Mac
@@ -115,7 +115,9 @@ describe('needs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('N10 waits for what can wait, and for a kept journal, each read for one Mac alone');
+    test.todo(
+        "N10 waits for what can wait, read for one Mac alone, and for the engine's kept journal (drawn on a provisional copy)",
+    );
 
     test('N11 the sidebar holds Home, Inbox with its count, Storage, the machines, Machine files and the Catalog', async () => {
         // Given - the window over two-macs

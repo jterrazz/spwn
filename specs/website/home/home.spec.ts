@@ -88,7 +88,7 @@ describe('home', () => {
 
     test.todo('H8 waits for a verb that drags across the free squares of a grid');
 
-    test.todo('H9 waits for a kept journal, read by day');
+    test.todo("H9 waits for the engine's kept journal (drawn on a provisional copy)");
 
     test('H10 Home offers no Stop and no Delete, only a line may offer one', async () => {
         // Given - the window on Home over two-macs, a running workspace on it
