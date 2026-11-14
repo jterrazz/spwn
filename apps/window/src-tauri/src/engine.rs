@@ -99,6 +99,19 @@ pub async fn engine_open(
 }
 
 #[tauri::command(async)]
+pub fn engine_cancel(
+    bridge: State<'_, Arc<Bridge>>,
+    webview: Webview,
+    handle: u32,
+    frame: Value,
+) -> Result<(), String> {
+    bridge
+        .exchanges
+        .cancel(handle, webview.label(), &frame)
+        .map_err(|refused| format!("{}: {}", refused.code, refused.message))
+}
+
+#[tauri::command(async)]
 pub fn engine_close(bridge: State<'_, Arc<Bridge>>, handle: u32) {
     bridge.exchanges.close(handle);
 }

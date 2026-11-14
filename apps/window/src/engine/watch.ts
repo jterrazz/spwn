@@ -12,7 +12,7 @@ export type Stream = {
     done: () => void;
 };
 
-type Run = { ended: boolean; exchange: Exchange | undefined };
+type Run = { id: string; ended: boolean; exchange: Exchange | undefined };
 
 function receiverOf(id: string, run: Run, stream: Stream, heard: () => void): Receiver {
     return {
@@ -49,7 +49,7 @@ export type Plan = {
 };
 
 export class Watching {
-    private run: Run = { ended: true, exchange: undefined };
+    private run: Run = { ended: true, exchange: undefined, id: '' };
     private timer: ReturnType<typeof setTimeout> | undefined;
     private silence: ReturnType<typeof setTimeout> | undefined;
     private backoff: number;
@@ -74,7 +74,7 @@ export class Watching {
 
     private open(): void {
         const id = this.plan.next();
-        const current: Run = { ended: false, exchange: undefined };
+        const current: Run = { ended: false, exchange: undefined, id };
         this.run = current;
         this.heard();
         const guarded: Stream = {
@@ -111,10 +111,17 @@ export class Watching {
         }
     }
 
+    // invariant: a watch let go of while its link still answers (closed, asked again, gone silent) is cancelled by
+    // invariant: its id before its exchange closes, so the far side's producer stops; one the engine ended, or whose
+    // invariant: link is gone, sends nothing.
     private stop(): void {
         clearTimeout(this.silence);
-        this.run.ended = true;
-        this.run.exchange?.close();
+        const { run } = this;
+        if (!run.ended) {
+            run.exchange?.cancel({ cancel: true, id: run.id, v: 2 });
+        }
+        run.ended = true;
+        run.exchange?.close();
     }
 
     private again(): void {

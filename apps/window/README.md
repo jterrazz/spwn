@@ -179,6 +179,8 @@ A watch the engine ends (`done`) and a plain read are an answer of one moment, s
 
 `src/engine/bridged.ts` lists the calls the window sends, and it is the one list. `src-tauri/build.rs` reads it into the Rust bridge, which refuses any other name before it reaches the engine: `refused`, code `bridge.not-bridged`, drawn like any refusal. `ReadName` and `WatchName` admit only its names, so a page that reads or makes a call off the list fails the compile, and `bridged.test.ts` fails a name of the list no source sends. A call joins the list in the commit that first sends it.
 
+A watch the window lets go of while the link still answers (closed, asked again, gone silent) is cancelled: `Watching` in `src/engine/watch.ts` sends `{"v":2,"cancel":true,"id":<id>}` on its exchange before closing it, so the engine stops what it streams; one the engine ended, or whose link is gone, sends nothing. The bridge's `engine_cancel` writes that frame only on an exchange this window opened with that id, and refuses any other as `bridge.not-opened`, a frame of any other shape as `call.bad-frame`.
+
 ## What the window opens outside itself
 
 Three buttons hand something to the Mac rather than to the engine: a VM header's Open in Terminal, a shared port's Open and an account's Sign in. They go through two Tauri commands of the shell, `open_url` and `open_in_terminal` (`src-tauri/src/opener.rs`), and nothing else in the window starts a program.

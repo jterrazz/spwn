@@ -43,6 +43,7 @@ function fakeEngine(hello: EngineHello) {
             const entry = { closed: false, receiver, request };
             opened.push(entry);
             return {
+                cancel: () => undefined,
                 close: () => {
                     entry.closed = true;
                 },

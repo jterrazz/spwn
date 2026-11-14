@@ -35,6 +35,7 @@ export function holdingCall(stage: Stage, call: string): HeldCall {
                 const opened: Held = { id: request.id, receiver };
                 held = opened;
                 return {
+                    cancel: () => undefined,
                     close: () => {
                         if (held === opened) {
                             held = undefined;

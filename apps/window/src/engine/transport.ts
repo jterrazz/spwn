@@ -1,4 +1,4 @@
-import type { CoreCallWireError, EngineHello, Request } from '@jterrazz/station-api';
+import type { CancelFrame, CoreCallWireError, EngineHello, Request } from '@jterrazz/station-api';
 
 export type Link =
     | { kind: 'absent'; socket: string; reason: string; retryIn: number }
@@ -10,7 +10,8 @@ export type Link =
           refused: CoreCallWireError | undefined;
       };
 
-export type Exchange = { close: () => void };
+// invariant: a cancel is sent on the exchange whose request it names, before that exchange closes.
+export type Exchange = { cancel: (frame: CancelFrame) => void; close: () => void };
 
 export type Receiver = {
     frame: (frame: unknown) => void;

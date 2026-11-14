@@ -1,4 +1,4 @@
-import type { Request } from '@jterrazz/station-api';
+import type { CancelFrame, Request } from '@jterrazz/station-api';
 import { clock } from '@jterrazz/test';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -6,7 +6,13 @@ import { Client } from '../client';
 import { EngineError } from '../engine-error';
 import type { Link, Receiver, Transport } from '../transport';
 
-type Opened = { request: Request; receiver: Receiver; closed: boolean };
+type Opened = {
+    request: Request;
+    receiver: Receiver;
+    closed: boolean;
+    cancelled: CancelFrame[];
+    sentBeforeClose: boolean;
+};
 
 function fakeTransport() {
     const opened: Opened[] = [];
@@ -19,9 +25,19 @@ function fakeTransport() {
             };
         },
         open: (request, receiver) => {
-            const entry = { closed: false, receiver, request };
+            const entry: Opened = {
+                cancelled: [],
+                closed: false,
+                receiver,
+                request,
+                sentBeforeClose: false,
+            };
             opened.push(entry);
             return {
+                cancel: (frame) => {
+                    entry.cancelled.push(frame);
+                    entry.sentBeforeClose = !entry.closed;
+                },
                 close: () => {
                     entry.closed = true;
                 },
@@ -325,5 +341,48 @@ describe('Client', () => {
 
         // Then - nothing is opened again
         expect(opened).toHaveLength(1);
+    });
+
+    test('a watch let go of while its link answers is cancelled by its id before its exchange closes', () => {
+        // Given - a watch of machines.new still answering
+        const { opened, transport } = fakeTransport();
+        const watch = new Client(transport).watch(
+            'machines.new',
+            {},
+            { error: vi.fn<(error: EngineError) => void>(), out: vi.fn<(out: unknown) => void>() },
+        );
+        const { request, receiver } = last(opened);
+        receiver.frame({ id: request.id, out: { Name: 'linux-2' }, v: 2 });
+
+        // When - its page lets go of it
+        watch.close();
+
+        // Then - one cancel frame named its id, sent while the exchange was still open, then it closed
+        expect(last(opened).cancelled).toStrictEqual([{ cancel: true, id: request.id, v: 2 }]);
+        expect(last(opened).sentBeforeClose).toBe(true);
+        expect(last(opened).closed).toBe(true);
+    });
+
+    test('a watch whose link is gone, or that the engine ended, sends no cancel', () => {
+        // Given - one watch whose connection drops, and one the engine ends with done
+        const { opened, transport } = fakeTransport();
+        const client = new Client(transport);
+        const handlers = {
+            error: vi.fn<(error: EngineError) => void>(),
+            out: vi.fn<(out: unknown) => void>(),
+        };
+        const lost = client.watch('machines.list', {}, handlers);
+        const dropped = last(opened);
+        const ended = client.watch('overview.read', {}, handlers);
+        const done = last(opened);
+
+        // When - the link of the first goes, the second ends, then both are let go of
+        dropped.receiver.end('the engine closed the connection', true);
+        done.receiver.frame({ done: true, id: done.request.id, v: 2 });
+        lost.close();
+        ended.close();
+
+        // Then - no cancel was sent on any exchange
+        expect(opened.flatMap((entry) => entry.cancelled)).toStrictEqual([]);
     });
 });

@@ -1,3 +1,4 @@
+import type { CancelFrame } from '@jterrazz/station-api';
 import { Channel, invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 
@@ -57,7 +58,15 @@ async function opened(ipc: Ipc, request: unknown, channel: unknown, receiver: Re
     }
 }
 
-async function closed(ipc: Ipc, handle: Promise<null | number>) {
+async function cancelled(ipc: Ipc, handle: Promise<null | number>, frame: CancelFrame) {
+    const open = await handle;
+    if (open !== null) {
+        await ipc.invoke('engine_cancel', { frame, handle: open }).catch(() => undefined);
+    }
+}
+
+async function closed(ipc: Ipc, handle: Promise<null | number>, after: Promise<void>) {
+    await after;
     const open = await handle;
     if (open !== null) {
         await ipc.invoke('engine_close', { handle: open }).catch(() => undefined);
@@ -118,10 +127,14 @@ export function tauriTransport(ipc: Ipc = TAURI): Transport {
                 }
             });
             const handle = opened(ipc, request, channel, receiver);
+            let cancelling: Promise<void> = Promise.resolve();
             return {
+                cancel: (frame) => {
+                    cancelling = cancelled(ipc, handle, frame);
+                },
                 close: () => {
                     shut = true;
-                    void closed(ipc, handle);
+                    void closed(ipc, handle, cancelling);
                 },
             };
         },

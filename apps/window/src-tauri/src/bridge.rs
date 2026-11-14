@@ -16,6 +16,7 @@ include!(concat!(env!("OUT_DIR"), "/bridged.rs"));
 const API: &str = "station.api/v2";
 const BAD_FRAME: &str = "call.bad-frame";
 pub const NOT_BRIDGED: &str = "bridge.not-bridged";
+pub const NOT_OPENED: &str = "bridge.not-opened";
 const REQUEST_KEYS: [&str; 6] = ["v", "id", "call", "watch", "target", "in"];
 
 #[derive(Debug, PartialEq)]
@@ -232,7 +233,22 @@ pub fn pump(reader: impl Read, request: &Value, sink: &impl Sink, limit: usize) 
 
 struct Open {
     owner: String,
+    id: String,
     stream: UnixStream,
+}
+
+// invariant: a cancel frame is exactly `{v: 2, id, cancel: true}` (`CancelFrame`, packages/api/schemas/frame.json).
+fn cancel_id(frame: &Value) -> Option<&str> {
+    let Value::Object(fields) = frame else {
+        return None;
+    };
+    let shaped = fields.len() == 3
+        && fields.get("v") == Some(&json!(2))
+        && fields.get("cancel") == Some(&json!(true));
+    if !shaped {
+        return None;
+    }
+    fields.get("id").and_then(Value::as_str)
 }
 
 #[derive(Default)]
@@ -282,11 +298,17 @@ impl Exchanges {
         let reader = stream.try_clone().map_err(unanswered)?;
         write_line(&mut stream, &request).map_err(unanswered)?;
         let handle = self.next.fetch_add(1, Ordering::SeqCst) + 1;
+        let id = request
+            .get("id")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned();
         if let Ok(mut open) = self.open.lock() {
             open.insert(
                 handle,
                 Open {
                     owner: owner.to_owned(),
+                    id,
                     stream,
                 },
             );
@@ -298,6 +320,31 @@ impl Exchanges {
             sink.send(Message::End(reason));
         });
         Ok(handle)
+    }
+
+    // invariant: a cancel reaches the engine only on the exchange it names, opened by the same webview, and only
+    // invariant: for the id of the request that exchange carries; any other frame, id or exchange is refused unsent.
+    pub fn cancel(&self, handle: u32, owner: &str, frame: &Value) -> Result<(), Refusal> {
+        let Some(id) = cancel_id(frame) else {
+            return Err(Refusal::bad_frame(
+                "a cancel is v 2, a string id and cancel true",
+            ));
+        };
+        let held = self.open.lock().ok().and_then(|open| {
+            open.get(&handle)
+                .filter(|held| held.owner == owner && held.id == id)
+                .and_then(|held| held.stream.try_clone().ok())
+        });
+        let Some(mut stream) = held else {
+            return Err(Refusal {
+                code: NOT_OPENED,
+                message: format!("the window has no request {id} open to cancel"),
+            });
+        };
+        write_line(&mut stream, frame).map_err(|error| Refusal {
+            code: NOT_OPENED,
+            message: format!("the cancel of {id} was not sent: {error}"),
+        })
     }
 
     pub fn close(&self, handle: u32) {

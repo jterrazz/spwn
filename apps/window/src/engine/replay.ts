@@ -223,6 +223,9 @@ class Staging {
               ];
         this.live.add(held);
         return {
+            cancel: (frame) => {
+                this.requests.push(frame);
+            },
             close: () => {
                 stopped(held);
                 this.live.delete(held);

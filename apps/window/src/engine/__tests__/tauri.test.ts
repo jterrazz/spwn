@@ -175,6 +175,44 @@ describe('tauri transport', () => {
         });
     });
 
+    test('a cancel is handed to the bridge on its exchange, and the exchange closes after it', async () => {
+        // Given - a watch the bridge opened as exchange 5, whose cancel the bridge sends only when released
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const bridge = fakeBridge();
+        bridge.answers.set('engine_open', async () => await Promise.resolve(5));
+        const cancel: { release?: (value: unknown) => void } = {};
+        bridge.answers.set(
+            'engine_cancel',
+            async () =>
+                await new Promise((resolve) => {
+                    cancel.release = resolve;
+                }),
+        );
+        const exchange = tauriTransport(bridge.ipc).open(
+            { id: '3', in: {}, v: 2, watch: 'machines.new' },
+            { end: () => {}, frame: () => {} },
+        );
+        await clock.advance(1);
+
+        // When - it is cancelled then closed at once
+        exchange.cancel({ cancel: true, id: '3', v: 2 });
+        exchange.close();
+        await clock.advance(10);
+        const whileCancelling = bridge.invoked.map((one) => one.command);
+        cancel.release?.(undefined);
+        await clock.advance(1);
+
+        // Then - the cancel named exchange 5 and its id, and the close was asked only once it was sent
+        expect(whileCancelling).toStrictEqual(['engine_open', 'engine_cancel']);
+        expect(bridge.invoked.slice(1)).toStrictEqual([
+            {
+                args: { frame: { cancel: true, id: '3', v: 2 }, handle: 5 },
+                command: 'engine_cancel',
+            },
+            { args: { handle: 5 }, command: 'engine_close' },
+        ]);
+    });
+
     test('an exchange the bridge cannot open ends unsent, and closing it closes nothing', async () => {
         // Given - a bridge whose engine_open rejects as no engine answering
         using _ = clock.run('2026-11-13T10:00:00Z');

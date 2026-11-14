@@ -10,6 +10,7 @@ use serde_json::{json, Value};
 
 use super::{
     connect_within, pump, refusal, Exchanges, Limits, Message, Sink, BRIDGED, LIMITS, NOT_BRIDGED,
+    NOT_OPENED,
 };
 
 const SOON: Duration = Duration::from_secs(2);
@@ -219,6 +220,57 @@ fn a_quiet_watch_ends_its_reader_and_socket_when_its_webview_goes() {
     let mut rest = Vec::new();
     assert!(engine.read_to_end(&mut rest).is_ok());
     assert_eq!(exchanges.count(), 0);
+    let _ = std::fs::remove_file(path);
+}
+
+#[test]
+fn a_cancel_reaches_the_engine_for_a_request_this_window_opened_and_no_other() {
+    // Given - a watch of id 8 opened by the webview main, held by its engine
+    let (listener, path) = listening();
+    let exchanges = Arc::new(Exchanges::default());
+    let (sink, _received, _) = heard();
+    let handle = exchanges
+        .open(&path, "main", watch(), sink, LIMITS)
+        .expect("the watch opens");
+    let (mut engine, _) = listener.accept().expect("the engine accepts");
+    let cancel = |id: &str| json!({ "v": 2, "id": id, "cancel": true });
+
+    // When - main cancels id 8, then an unknown id, another webview id 8, and a frame of another shape
+    let passed = exchanges.cancel(handle, "main", &cancel("8"));
+    let refused = [
+        exchanges.cancel(handle, "main", &cancel("9")),
+        exchanges.cancel(handle, "other", &cancel("8")),
+        exchanges.cancel(handle + 1, "main", &cancel("8")),
+        exchanges.cancel(
+            handle,
+            "main",
+            &json!({ "v": 2, "id": "8", "cancel": true, "in": {} }),
+        ),
+    ];
+
+    // Then - the engine reads the watch then its cancel, and each other one is refused unsent
+    assert_eq!(passed, Ok(()));
+    let codes: Vec<&str> = refused
+        .iter()
+        .map(|one| one.as_ref().map_or_else(|refusal| refusal.code, |_| "sent"))
+        .collect();
+    assert_eq!(
+        codes,
+        [NOT_OPENED, NOT_OPENED, NOT_OPENED, "call.bad-frame"]
+    );
+    exchanges.close(handle);
+    engine
+        .set_read_timeout(Some(SOON))
+        .expect("a read timeout sets");
+    let mut lines = String::new();
+    engine
+        .read_to_string(&mut lines)
+        .expect("the engine reads to the end");
+    let read: Vec<Value> = lines
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("each line is JSON"))
+        .collect();
+    assert_eq!(read, vec![watch(), cancel("8")]);
     let _ = std::fs::remove_file(path);
 }
 

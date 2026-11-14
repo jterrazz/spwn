@@ -17,6 +17,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             engine::engine_link,
             engine::engine_open,
+            engine::engine_cancel,
             engine::engine_close,
             opener::open_url,
             opener::open_in_terminal
