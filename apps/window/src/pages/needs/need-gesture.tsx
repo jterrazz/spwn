@@ -6,7 +6,14 @@ import { Row, Value } from '../../design/index';
 import type { RowProps } from '../../design/row';
 import type { In, ReadName } from '../../engine/client';
 import { wordOf } from '../../engine/engine-words';
-import { moveInputOf, removeInputOf, startInputOf, updateInputOf } from '../../engine/provisional';
+import {
+    deleteInputOf,
+    moveInputOf,
+    removeInputOf,
+    restartInputOf,
+    startInputOf,
+    updateInputOf,
+} from '../../engine/provisional';
 import type { NeedCall } from '../../engine/provisional';
 import { needState } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
@@ -22,8 +29,11 @@ const REMOVE_REREADS: readonly CallName[] = ['overview.read', 'background.list']
 const MOVE_REREADS: readonly CallName[] = ['overview.read', 'disk.read'];
 const START_REREADS: readonly CallName[] = ['engine.read', 'machines.list', 'overview.read'];
 
+const LIFECYCLE_REREADS: readonly CallName[] = ['machines.list', 'overview.read'];
+
 type Props = {
     need: OverviewNeed;
+    primary: boolean;
     macs: readonly MachinesMacView[];
     onOpen: () => void;
 };
@@ -52,15 +62,18 @@ type FixProps<N extends NeedCall & ReadName> = Props & {
     call: N;
     input: In<N>;
     rereads: readonly CallName[];
+    subject?: string | undefined;
+    target?: Target | undefined;
 };
 
 function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
-    const { need, macs, call, input, rereads } = props;
+    const { need, macs, call, input, rereads, primary } = props;
+    const subject = props.subject ?? need.Subject;
     const fix = useGesture(call, {
         input,
         rereads,
-        subject: need.Subject,
-        target: needTarget(need, macs),
+        subject,
+        target: 'target' in props ? props.target : needTarget(need, macs),
     });
     const verb = verbOf(need);
     return (
@@ -71,16 +84,53 @@ function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
                 <GestureButton
                     gesture={fix}
                     label={verb}
-                    name={`${verb} ${need.Subject}`}
-                    title={`${verb} ${need.Subject}?`}
+                    name={`${verb} ${subject}`}
+                    title={`${verb} ${subject}?`}
+                    variant={primary ? 'primary' : 'plain'}
                 />,
             )}
         />
     );
 }
 
+function Lifecycle(props: Props) {
+    const { need, macs } = props;
+    const found = findMachine(macs, need.Machine);
+    const target = found === undefined ? undefined : targetOf({ mac: found.mac });
+    const remove = deleteInputOf(need);
+    if (found?.vm && remove) {
+        return (
+            <Fix
+                {...props}
+                call="machines.delete"
+                input={remove}
+                rereads={LIFECYCLE_REREADS}
+                subject={remove.VM}
+                target={target}
+            />
+        );
+    }
+    const restart = restartInputOf(need);
+    if (found?.vm && restart) {
+        return (
+            <Fix
+                {...props}
+                call="machines.restart"
+                input={restart}
+                rereads={LIFECYCLE_REREADS}
+                subject={restart.Name}
+                target={target}
+            />
+        );
+    }
+    return <Said {...props} />;
+}
+
 function Call(props: Props) {
     const { need } = props;
+    if (deleteInputOf(need) || restartInputOf(need)) {
+        return <Lifecycle {...props} />;
+    }
     const update = updateInputOf(need);
     if (update) {
         return <Fix {...props} call="apps.update" input={update} rereads={UPDATE_REREADS} />;
