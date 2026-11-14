@@ -131,6 +131,648 @@
       "Tone": "plain"
     }
   },
+  "CoreFailCode": {
+    "account.not-shareable": {
+      "Word": "not shareable",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.not-shared": {
+      "Word": "not shared",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.not-signed-in": {
+      "Word": "not signed in",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.other-mac": {
+      "Word": "other Mac",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.term-out-of-bounds": {
+      "Word": "term out of bounds",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.to-server": {
+      "Word": "to server",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.unknown": {
+      "Word": "unknown",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.unknown-vm": {
+      "Word": "unknown VM",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.unreadable": {
+      "Word": "unreadable",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "account.vm-stopped": {
+      "Word": "VM stopped",
+      "Detail": "account",
+      "Tone": "plain"
+    },
+    "agents.ambiguous": {
+      "Word": "ambiguous",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.bad-name": {
+      "Word": "bad name",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.ended": {
+      "Word": "ended",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.live": {
+      "Word": "live",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.name-taken": {
+      "Word": "name taken",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.no-pr": {
+      "Word": "no pr",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.no-terminal": {
+      "Word": "no terminal",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.no-text": {
+      "Word": "no text",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.no-where": {
+      "Word": "no where",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.not-stopped": {
+      "Word": "not stopped",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.unknown-agent": {
+      "Word": "unknown agent",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.unknown-app": {
+      "Word": "unknown app",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "apps.lives-elsewhere": {
+      "Word": "lives elsewhere",
+      "Detail": "apps",
+      "Tone": "plain"
+    },
+    "apps.no-method": {
+      "Word": "no method",
+      "Detail": "apps",
+      "Tone": "plain"
+    },
+    "apps.not-installed": {
+      "Word": "not installed",
+      "Detail": "apps",
+      "Tone": "plain"
+    },
+    "apps.unknown": {
+      "Word": "unknown",
+      "Detail": "apps",
+      "Tone": "plain"
+    },
+    "apps.unpinnable": {
+      "Word": "unpinnable",
+      "Detail": "apps",
+      "Tone": "plain"
+    },
+    "awake.no-battery": {
+      "Word": "no battery",
+      "Detail": "awake",
+      "Tone": "plain"
+    },
+    "awake.no-lid": {
+      "Word": "no lid",
+      "Detail": "awake",
+      "Tone": "plain"
+    },
+    "awake.out-of-bounds": {
+      "Word": "out of bounds",
+      "Detail": "awake",
+      "Tone": "plain"
+    },
+    "awake_guard": {
+      "Word": "Awake held back",
+      "Tone": "plain"
+    },
+    "awake_range": {
+      "Word": "Awake duration out of range",
+      "Tone": "plain"
+    },
+    "awake_run": {
+      "Word": "Awake cannot run",
+      "Tone": "plain"
+    },
+    "awake_unsupported": {
+      "Word": "Awake not supported",
+      "Tone": "plain"
+    },
+    "background.is-the-engine": {
+      "Word": "is the engine",
+      "Detail": "background",
+      "Tone": "plain"
+    },
+    "background.root-scope": {
+      "Word": "root scope",
+      "Detail": "background",
+      "Tone": "plain"
+    },
+    "background.unknown": {
+      "Word": "unknown",
+      "Detail": "background",
+      "Tone": "plain"
+    },
+    "call.bad-frame": {
+      "Word": "bad frame",
+      "Detail": "call",
+      "Tone": "plain"
+    },
+    "call.bad-input": {
+      "Word": "bad input",
+      "Detail": "call",
+      "Tone": "plain"
+    },
+    "call.bad-output": {
+      "Word": "bad output",
+      "Detail": "call",
+      "Tone": "plain"
+    },
+    "call.needs": {
+      "Word": "needs",
+      "Detail": "call",
+      "Tone": "plain"
+    },
+    "call.unknown": {
+      "Word": "unknown",
+      "Detail": "call",
+      "Tone": "plain"
+    },
+    "catalog.invalid": {
+      "Word": "invalid",
+      "Detail": "catalog",
+      "Tone": "plain"
+    },
+    "catalog.newer-schema": {
+      "Word": "newer schema",
+      "Detail": "catalog",
+      "Tone": "plain"
+    },
+    "confirm.declined": {
+      "Word": "declined",
+      "Detail": "confirm",
+      "Tone": "plain"
+    },
+    "confirm.mismatch": {
+      "Word": "mismatch",
+      "Detail": "confirm",
+      "Tone": "plain"
+    },
+    "confirm.needed": {
+      "Word": "needed",
+      "Detail": "confirm",
+      "Tone": "plain"
+    },
+    "confirm.yes-needed": {
+      "Word": "yes needed",
+      "Detail": "confirm",
+      "Tone": "plain"
+    },
+    "disk.app-running": {
+      "Word": "app running",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "disk.lives-elsewhere": {
+      "Word": "lives elsewhere",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "disk.never-touched": {
+      "Word": "never touched",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "disk.not-misplaced": {
+      "Word": "not misplaced",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "disk.nothing-to-erase": {
+      "Word": "nothing to erase",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "disk.nothing-to-free": {
+      "Word": "nothing to free",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "disk.unknown": {
+      "Word": "unknown",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "engine.start-failed": {
+      "Word": "Engine did not start",
+      "Tone": "plain"
+    },
+    "guest_absent": {
+      "Word": "Guest not connected",
+      "Tone": "plain"
+    },
+    "guest_timeout": {
+      "Word": "Guest did not answer",
+      "Tone": "plain"
+    },
+    "ignored_port": {
+      "Word": "Port never shared",
+      "Tone": "plain"
+    },
+    "image.binary-not-found": {
+      "Word": "binary not found",
+      "Detail": "image",
+      "Tone": "plain"
+    },
+    "image.no-hypervisor": {
+      "Word": "no hypervisor",
+      "Detail": "image",
+      "Tone": "plain"
+    },
+    "image.no-linux-binary": {
+      "Word": "no linux binary",
+      "Detail": "image",
+      "Tone": "plain"
+    },
+    "image.no-recipe": {
+      "Word": "no recipe",
+      "Detail": "image",
+      "Tone": "plain"
+    },
+    "image.unknown": {
+      "Word": "unknown",
+      "Detail": "image",
+      "Tone": "plain"
+    },
+    "internal": {
+      "Word": "Engine failure",
+      "Tone": "plain"
+    },
+    "machinefile.bad-phase": {
+      "Word": "bad phase",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.bad-value": {
+      "Word": "bad value",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.busy": {
+      "Word": "busy",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.cycle": {
+      "Word": "cycle",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.invalid": {
+      "Word": "invalid",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.mixin": {
+      "Word": "mixin",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.name-taken": {
+      "Word": "name taken",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.needs-terminal": {
+      "Word": "needs terminal",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.newer-schema": {
+      "Word": "newer schema",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.no-method": {
+      "Word": "no method",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.not-a-template": {
+      "Word": "not a template",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.not-found": {
+      "Word": "not found",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.source-unavailable": {
+      "Word": "source unavailable",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.unknown-key": {
+      "Word": "unknown key",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.unknown-package": {
+      "Word": "unknown package",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.unpinnable": {
+      "Word": "unpinnable",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machinefile.vm-on-a-computer": {
+      "Word": "VM on a computer",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
+    "machines.bad-check": {
+      "Word": "bad check",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.bad-creator": {
+      "Word": "bad creator",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.bad-lifetime": {
+      "Word": "bad lifetime",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.bad-name": {
+      "Word": "bad name",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.bad-network": {
+      "Word": "bad network",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.bad-purpose": {
+      "Word": "bad purpose",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.being-created": {
+      "Word": "being created",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.check-for-servers": {
+      "Word": "check for servers",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.engine-down": {
+      "Word": "engine down",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.name-taken": {
+      "Word": "name taken",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.no-hypervisor": {
+      "Word": "no hypervisor",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.no-image": {
+      "Word": "no image",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.not-enough-memory": {
+      "Word": "not enough memory",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.not-finished": {
+      "Word": "not finished",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.server-bridged": {
+      "Word": "server bridged",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.server-needs-name": {
+      "Word": "server needs name",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.server-template": {
+      "Word": "server template",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.too-little-memory": {
+      "Word": "too little memory",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "machines.unknown-image": {
+      "Word": "unknown image",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
+    "not_allowed": {
+      "Word": "Port outside its rights",
+      "Tone": "plain"
+    },
+    "port.needs-route": {
+      "Word": "needs route",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.needs-vm": {
+      "Word": "needs VM",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.not-declared": {
+      "Word": "not declared",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.not-found": {
+      "Word": "not found",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.on-another-mac": {
+      "Word": "on another Mac",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.range-full": {
+      "Word": "range full",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.signed-out": {
+      "Word": "signed out",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.unknown-route": {
+      "Word": "unknown route",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "range_full": {
+      "Word": "No free port",
+      "Tone": "plain"
+    },
+    "remote.caller-too-old": {
+      "Word": "caller too old",
+      "Detail": "remote",
+      "Tone": "plain"
+    },
+    "remote.far-too-old": {
+      "Word": "far too old",
+      "Detail": "remote",
+      "Tone": "plain"
+    },
+    "remote.no-station": {
+      "Word": "no station",
+      "Detail": "remote",
+      "Tone": "plain"
+    },
+    "remote.unreachable": {
+      "Word": "unreachable",
+      "Detail": "remote",
+      "Tone": "plain"
+    },
+    "remote.vm-mac-unreachable": {
+      "Word": "VM Mac unreachable",
+      "Detail": "remote",
+      "Tone": "plain"
+    },
+    "section.not-for-this-machine": {
+      "Word": "not for this machine",
+      "Detail": "section",
+      "Tone": "plain"
+    },
+    "setting.checked": {
+      "Word": "checked",
+      "Detail": "setting",
+      "Tone": "plain"
+    },
+    "setting.needs-admin": {
+      "Word": "needs admin",
+      "Detail": "setting",
+      "Tone": "plain"
+    },
+    "setting.needs-terminal": {
+      "Word": "needs terminal",
+      "Detail": "setting",
+      "Tone": "plain"
+    },
+    "setting.not-applied": {
+      "Word": "not applied",
+      "Detail": "setting",
+      "Tone": "plain"
+    },
+    "setting.not-for-this-machine": {
+      "Word": "not for this machine",
+      "Detail": "setting",
+      "Tone": "plain"
+    },
+    "setting.unknown": {
+      "Word": "unknown",
+      "Detail": "setting",
+      "Tone": "plain"
+    },
+    "unknown_op": {
+      "Word": "Unknown operation",
+      "Tone": "plain"
+    },
+    "unknown_page": {
+      "Word": "Unknown page",
+      "Tone": "plain"
+    },
+    "unknown_vm": {
+      "Word": "Unknown machine",
+      "Tone": "plain"
+    },
+    "usage.entry-without-verb": {
+      "Word": "entry without verb",
+      "Detail": "usage",
+      "Tone": "plain"
+    },
+    "usage.missing-argument": {
+      "Word": "missing argument",
+      "Detail": "usage",
+      "Tone": "plain"
+    },
+    "usage.needs-terminal": {
+      "Word": "needs terminal",
+      "Detail": "usage",
+      "Tone": "plain"
+    },
+    "usage.unknown-command": {
+      "Word": "unknown command",
+      "Detail": "usage",
+      "Tone": "plain"
+    },
+    "vm_stopped": {
+      "Word": "Machine stopped",
+      "Tone": "plain"
+    }
+  },
   "CoreFailType": {
     "declined": {
       "Word": "declined",

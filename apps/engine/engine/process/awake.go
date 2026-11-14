@@ -10,6 +10,7 @@ import (
 
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 )
 
 func (d *Engine) newAwake() *awakecalls.Keeper {
@@ -72,17 +73,17 @@ func (d *Engine) keepAwake(r engine.AwakeIn) (awake.Awoken, error) {
 	var run *awake.RunError
 	switch {
 	case errors.As(err, &run):
-		return s, fault("awake_run", run.Error(), "station awake 4h")
+		return s, fault(enginecalls.AwakeRun, run.Error(), "station awake 4h")
 	case errors.As(err, &rng):
-		return s, fault("awake_range", rng.Error(), "station awake 4h")
+		return s, fault(enginecalls.AwakeRange, rng.Error(), "station awake 4h")
 	case errors.As(err, &guard):
 		hint := "station awake"
 		if guard.Guard == awake.ReasonLid {
 			hint = "station awake 4h --lid --battery"
 		}
-		return s, fault("awake_guard", guard.Error(), hint)
+		return s, fault(enginecalls.AwakeGuard, guard.Error(), hint)
 	case errors.As(err, &none):
-		return s, fault("awake_unsupported", none.Error(), catalog.AwakeOnItsMac)
+		return s, fault(enginecalls.AwakeUnsupported, none.Error(), catalog.AwakeOnItsMac)
 	}
 	return s, err
 }

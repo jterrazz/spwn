@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 )
 
 const (
@@ -150,11 +151,11 @@ func (d *Engine) known(id string) bool {
 func (d *Engine) CheckPages(pages []string) error {
 	hint := "watch page with the pages menubar, menubar.machine:<name>, menubar.ports[:<mac>], menubar.awake, menubar.activity[:<window>], menubar.accounts[:<machine>], menubar.needs[:<machine>], menubar.find or keep-awake"
 	if len(pages) == 0 {
-		return fault("unknown_page", "the watch names no page", hint)
+		return fault(enginecalls.UnknownPage, "the watch names no page", hint)
 	}
 	for _, id := range pages {
 		if !d.known(id) {
-			return fault("unknown_page", "unknown page \""+id+"\"", hint)
+			return fault(enginecalls.UnknownPage, "unknown page \""+id+"\"", hint)
 		}
 	}
 	return nil

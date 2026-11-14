@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 )
@@ -68,11 +69,11 @@ func asOp(err error) error {
 	var perVM *ports.VMFull
 	switch {
 	case errors.As(err, &full):
-		return fault("range_full", err.Error(), "station ports stop-sharing <vm> <port>")
+		return fault(enginecalls.RangeFull, err.Error(), "station ports stop-sharing <vm> <port>")
 	case errors.As(err, &perVM):
 		return perVM.Refusal()
 	}
-	return fault("internal", err.Error(), "station ports")
+	return fault(enginecalls.Internal, err.Error(), "station ports")
 }
 
 // invariant: the shares act in the order of their reservations, the ones with

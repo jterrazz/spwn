@@ -6,6 +6,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 
 	"github.com/jterrazz/studio-station/apps/engine/awake"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -19,7 +20,7 @@ type Peer interface {
 	AwakeView(ctx context.Context) (awake.View, error)
 }
 
-func fault(code, message, hint string) *enginecalls.OpError {
+func fault(code fail.Code, message, hint string) *enginecalls.OpError {
 	// value: a code the caller got wrong (a VM, a verb, a page it named), not
 	// one the engine failed at.
 	return &enginecalls.OpError{Code: code, Message: message, Hint: hint}
@@ -91,7 +92,7 @@ func (d *Engine) VM(ctx context.Context, verb, vm string) error {
 	case engine.VMReady:
 		return d.ready(ctx, vm)
 	}
-	return fault("unknown_op", "unknown verb \""+verb+"\" for a VM", "station machines")
+	return fault(enginecalls.UnknownOp, "unknown verb \""+verb+"\" for a VM", "station machines")
 }
 
 func (d *Engine) Accounts(ctx context.Context) engine.AccountsView { return d.accounts(ctx) }

@@ -182,7 +182,7 @@ func (d *Engine) find(vm string) (*vmState, error) {
 		d.mu.Unlock()
 		return v, nil
 	}
-	return nil, fault("unknown_vm", "unknown VM \""+vm+"\"", "station machines")
+	return nil, fault(enginecalls.UnknownVM, "unknown VM \""+vm+"\"", "station machines")
 }
 
 func (d *Engine) start(ctx context.Context, v *vmState) error {
@@ -391,7 +391,7 @@ func (d *Engine) awaitGuest(ctx context.Context, vm string) error {
 			return err
 		}
 	}
-	return fault("guest_timeout", vm+"'s guest did not connect in "+strconv.Itoa(int(guestReady.Seconds()))+" s", "station machines "+vm)
+	return fault(enginecalls.GuestTimeout, vm+"'s guest did not connect in "+strconv.Itoa(int(guestReady.Seconds()))+" s", "station machines "+vm)
 }
 
 func (d *Engine) opStart(ctx context.Context, vm string) error {
@@ -821,7 +821,7 @@ func (d *Engine) answerGuest(ctx context.Context, v *vmState, m guestMessage) {
 	if err != nil {
 		var op *enginecalls.OpError
 		if !errors.As(err, &op) {
-			op = fault("internal", err.Error(), "station ports")
+			op = fault(enginecalls.Internal, err.Error(), "station ports")
 		}
 		reply["error"] = op
 	} else {
@@ -838,13 +838,13 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 		// invariant: a guest's share is checked as the owner's is, on the
 		// engine's side: its own binary is not trusted to have done it.
 		if err := ports.Shareable(m.Port); err != nil {
-			return nil, fault("ignored_port", err.Error(), "station never shares port 22 nor a port below 1024")
+			return nil, fault(enginecalls.IgnoredPort, err.Error(), "station never shares port 22 nor a port below 1024")
 		}
 		// invariant: a guest's share is judged by its VM's rights, never
 		// made as the owner's: one they do not open is refused, one they
 		// open takes their audience and is theirs to judge again.
 		if r := d.rightsOf(ctx, vm); !r.Allows(m.Port) {
-			return nil, fault("not_allowed", "port "+strconv.Itoa(m.Port)+" is outside the rights of "+vm+" ("+r.Said()+")", "on its Mac: station ports share "+vm+" "+strconv.Itoa(m.Port))
+			return nil, fault(enginecalls.NotAllowed, "port "+strconv.Itoa(m.Port)+" is outside the rights of "+vm+" ("+r.Said()+")", "on its Mac: station ports share "+vm+" "+strconv.Itoa(m.Port))
 		}
 		return d.shareOf(ctx, vm, m.Port, ports.ByRights)
 	case "release":
@@ -852,7 +852,7 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 	case opAgentsHeld:
 		return d.AgentsHeld(ctx)
 	}
-	return nil, fault("unknown_op", "unknown op \""+m.Op+"\"", "station ports")
+	return nil, fault(enginecalls.UnknownOp, "unknown op \""+m.Op+"\"", "station ports")
 }
 
 func (d *Engine) askGuest(ctx context.Context, v *vmState, op string, budget time.Duration) (json.RawMessage, error) {
@@ -879,11 +879,11 @@ func (d *Engine) askGuest(ctx context.Context, v *vmState, op string, budget tim
 			if m.Error != nil {
 				return nil, m.Error
 			}
-			return nil, fault("internal", v.name+"'s guest refused "+op, "station machines "+v.name)
+			return nil, fault(enginecalls.Internal, v.name+"'s guest refused "+op, "station machines "+v.name)
 		}
 		return m.Result, nil
 	case <-wait.Done():
-		return nil, fault("guest_timeout", v.name+"'s guest did not answer "+op+" in "+budget.String(), "station machines "+v.name)
+		return nil, fault(enginecalls.GuestTimeout, v.name+"'s guest did not answer "+op+" in "+budget.String(), "station machines "+v.name)
 	}
 }
 

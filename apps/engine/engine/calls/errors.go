@@ -5,9 +5,25 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 )
 
-const VMStopped = "vm_stopped"
+const (
+	VMStopped        fail.Code = "vm_stopped"
+	UnknownVM        fail.Code = "unknown_vm"
+	UnknownOp        fail.Code = "unknown_op"
+	UnknownPage      fail.Code = "unknown_page"
+	GuestAbsent      fail.Code = "guest_absent"
+	GuestTimeout     fail.Code = "guest_timeout"
+	IgnoredPort      fail.Code = "ignored_port"
+	NotAllowed       fail.Code = "not_allowed"
+	RangeFull        fail.Code = "range_full"
+	AwakeRun         fail.Code = "awake_run"
+	AwakeRange       fail.Code = "awake_range"
+	AwakeGuard       fail.Code = "awake_guard"
+	AwakeUnsupported fail.Code = "awake_unsupported"
+	Internal         fail.Code = "internal"
+)
 
 type NotInstalledError struct{}
 
@@ -57,11 +73,13 @@ func (e *MacOnlyError) Error() string {
 type OpError struct {
 	// value: an engine refusal worded where it is raised: its code travels
 	// in the error frame, its words are the engine's.
-	Code    string `json:"code"`
-	Message string `json:"message"`
-	Hint    string `json:"hint"`
+	Code    fail.Code `json:"code"`
+	Message string    `json:"message"`
+	Hint    string    `json:"hint"`
 }
 
 func (e *OpError) Error() string { return e.Message }
 
-func (e *OpError) Refused() bool { return strings.HasPrefix(e.Code, "unknown_") || e.Code == VMStopped }
+func (e *OpError) Refused() bool {
+	return strings.HasPrefix(string(e.Code), "unknown_") || e.Code == VMStopped
+}

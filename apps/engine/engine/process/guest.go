@@ -40,7 +40,7 @@ func (d *Engine) GuestExec(ctx context.Context, vm, line, stdin string) (engine.
 		return engine.GuestRan{}, fault(enginecalls.VMStopped, vm+" is stopped", "station machines start "+vm)
 	}
 	if client == nil {
-		return engine.GuestRan{}, fault("guest_absent", vm+"'s guest is not connected", "station machines start "+vm)
+		return engine.GuestRan{}, fault(enginecalls.GuestAbsent, vm+"'s guest is not connected", "station machines start "+vm)
 	}
 	return client.Exec(ctx, line, stdin)
 }

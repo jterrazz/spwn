@@ -52,7 +52,7 @@ func worded(err error) error {
 	if op.Refused() {
 		t = fail.Refused
 	}
-	return &fail.Error{Type: t, Code: fail.Code(op.Code), Message: op.Message, Hint: op.Hint}
+	return &fail.Error{Type: t, Code: op.Code, Message: op.Message, Hint: op.Hint}
 }
 
 func calls(d *Engine, served []string) []call.Handler {

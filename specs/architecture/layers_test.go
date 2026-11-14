@@ -54,7 +54,7 @@ func importTable() map[string][]string {
 	template := append(slices.Clone(organism), "ui/organism")
 	return map[string][]string{
 		"cmd/station":                {"wire", "os"},
-		"cmd/generate":               append([]string{"catalog", "disk", "core/verdict", "core/fail", "core/finding", "core/section", "cmd/generate/pages", "page", "ui/render/json", "os", "flag", std}, calls...),
+		"cmd/generate":               append([]string{"catalog", "disk", "core/verdict", "core/fail", "core/finding", "core/section", "surface/cli/words", "cmd/generate/pages", "page", "ui/render/json", "os", "flag", std}, calls...),
 		"cmd/generate/pages":         {"page", "pages", "pages/*", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "agents", "machinefile", "core/machine", "catalog", "ui/token", std},
 		"wire":                       {"*", fang, cobra, "os", "os/signal", "syscall", "runtime/debug", "net/netip", std},
 		"surface/cli":                {"surface/cli/kit", cobra, std},

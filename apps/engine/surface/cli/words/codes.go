@@ -2,6 +2,7 @@ package words
 
 import (
 	"cmp"
+	"errors"
 	"strconv"
 	"strings"
 
@@ -52,6 +53,17 @@ func agentsFirst(e *fail.Error) string {
 		return " (its agents stop first: " + names + ")"
 	}
 	return ""
+}
+
+func carried(e *fail.Error, generic, advice string) (message, hint string) {
+	// value: the engine words its own refusals where it raises them, naming
+	// the VM, the port or the duration at hand; a caller prints those
+	// words, and its own only where the refusal carries none.
+	var said *fail.Said
+	if errors.As(e.Cause, &said) && said.Message != "" {
+		return said.Message, cmp.Or(said.Hint, advice)
+	}
+	return generic, advice
 }
 
 func Codes() map[fail.Code]Wording {
@@ -111,6 +123,48 @@ func Codes() map[fail.Code]Wording {
 		},
 		enginecalls.StartFailed: func(e *fail.Error) (string, string) {
 			return "the engine did not start: " + e.Detail["last"], "station engine"
+		},
+		enginecalls.VMStopped: func(e *fail.Error) (string, string) {
+			return carried(e, "the VM is stopped", "station machines")
+		},
+		enginecalls.UnknownVM: func(e *fail.Error) (string, string) {
+			return carried(e, "the engine knows no VM of that name", "station machines")
+		},
+		enginecalls.UnknownOp: func(e *fail.Error) (string, string) {
+			return carried(e, "the engine knows no such operation", "station machines")
+		},
+		enginecalls.UnknownPage: func(e *fail.Error) (string, string) {
+			return carried(e, "the engine serves no such page", "station overview")
+		},
+		enginecalls.GuestAbsent: func(e *fail.Error) (string, string) {
+			return carried(e, "the VM's guest is not connected", "station machines")
+		},
+		enginecalls.GuestTimeout: func(e *fail.Error) (string, string) {
+			return carried(e, "the VM's guest did not answer in time", "station machines")
+		},
+		enginecalls.IgnoredPort: func(e *fail.Error) (string, string) {
+			return carried(e, "station never shares port 22 nor a port below 1024", "station ports")
+		},
+		enginecalls.NotAllowed: func(e *fail.Error) (string, string) {
+			return carried(e, "the port is outside the rights of its VM", "station ports")
+		},
+		enginecalls.RangeFull: func(e *fail.Error) (string, string) {
+			return carried(e, "no port of the range is free", "station ports")
+		},
+		enginecalls.AwakeRun: func(e *fail.Error) (string, string) {
+			return carried(e, "the awake session cannot run", "station awake 4h")
+		},
+		enginecalls.AwakeRange: func(e *fail.Error) (string, string) {
+			return carried(e, "the awake duration is out of its range", "station awake 4h")
+		},
+		enginecalls.AwakeGuard: func(e *fail.Error) (string, string) {
+			return carried(e, "a guard holds the awake session back", "station awake")
+		},
+		enginecalls.AwakeUnsupported: func(e *fail.Error) (string, string) {
+			return carried(e, "this Mac cannot be kept awake", "station awake")
+		},
+		enginecalls.Internal: func(e *fail.Error) (string, string) {
+			return carried(e, "the engine failed on its own", "station overview")
 		},
 		machinefilecalls.NotFound: func(e *fail.Error) (string, string) {
 			if by := e.Detail["by"]; by != "" {

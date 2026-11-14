@@ -15,6 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
 
 const (
@@ -183,6 +184,7 @@ func wordedEnums() []worded {
 			string(finding.NeedsALook): toned(verdict.Warn, "needs a look"),
 		}},
 		{section.ID(""), sectionWords()},
+		{refusalCode{}, refusalWords()},
 		{catalog.OS(""), map[string]word{
 			string(catalog.OSMacOS):  plain("macOS"),
 			string(catalog.OSUbuntu): plain("Ubuntu"),
@@ -201,6 +203,30 @@ func wordedEnums() []worded {
 	}
 }
 
+// value: the refusal codes, worded by surface/cli/words, the one owner of
+// them: each is called by its name read as words, and carries its family.
+type refusalCode struct{}
+
+func (refusalCode) Enum() []string {
+	codes := words.CodesSorted()
+	out := make([]string, len(codes))
+	for i, code := range codes {
+		out[i] = string(code)
+	}
+	return out
+}
+
+func (refusalCode) TSName() string { return "CoreFailCode" }
+
+func refusalWords() map[string]word {
+	out := map[string]word{}
+	for _, code := range words.CodesSorted() {
+		name, family := words.Title(code)
+		out[string(code)] = word{Word: name, Detail: family, Tone: verdict.Plain}
+	}
+	return out
+}
+
 func sectionWords() map[string]word {
 	out := map[string]word{}
 	for _, id := range section.Order() {
@@ -209,7 +235,12 @@ func sectionWords() map[string]word {
 	return out
 }
 
-func wordsName(e enumerated) string { return tsName(qualified(reflect.TypeOf(e))) }
+func wordsName(e enumerated) string {
+	if named, ok := e.(interface{ TSName() string }); ok {
+		return named.TSName()
+	}
+	return tsName(qualified(reflect.TypeOf(e)))
+}
 
 func wordsTable() wordTable {
 	out := wordTable{}
