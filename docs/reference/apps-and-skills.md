@@ -106,6 +106,8 @@ mise owns the language runtimes on every machine ([ADR-003](../decisions/003-mis
 
 ## Skills as apps
 
+The engine says each app's `AppKind` (`app`, `manager` or `skill`: a skill when every method is `skill`), so a client words it and never reads the methods.
+
 An agent skill is an app whose method is `skill`, in the category "Agent skills", installed through the `skills` CLI, which `station` requires like it requires Homebrew for a cask. There is no separate family:
 
 ```sh

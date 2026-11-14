@@ -49,6 +49,8 @@ station ports share api 3000         # reserve 3000's URL now and print it; in a
 station ports stop-sharing api 3000  # on a Mac; in a VM: station ports stop-sharing 3000
 ```
 
+The list's `verdict` heads it: `Port 5432 is exposed.` or `N ports are exposed.` (with how to declare or close it), `Nothing listens on this machine.`, otherwise `One port listens.` / `N ports listen.` with how many are shared.
+
 The list begins with the Tailscale line, then every port that listens on a Mac or a VM, in the class of who reaches it, piped tab-separated, each row saying its class in words, so a `grep` of one port still tells Private from Public:
 
 | Section                     | Holds                                                                                                                      | Columns                                                                      |
