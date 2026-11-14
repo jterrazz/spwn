@@ -4,14 +4,11 @@ import type {
     PortsMacPorts,
     PortsNotShared,
     PortsPort,
-    PortsQuiet,
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import { countOf } from '../../engine/engine-words';
 import { portsMacOf } from '../../engine/provisional';
 import { sentence } from '../../model/format';
-import { SEPARATOR } from '../../separator';
 import { tabOf } from '../needs/needs';
 
 export type PortsOf = {
@@ -19,7 +16,6 @@ export type PortsOf = {
     ports: readonly PortsPort[];
     shared: readonly PortsSharedPort[];
     notShared: readonly PortsNotShared[];
-    quiet: readonly PortsQuiet[];
 };
 
 export type Asked = { mac: string; thisMac: boolean; vm?: string | undefined };
@@ -34,7 +30,6 @@ export function portsOf(listing: PortsListing, { mac: macName, thisMac, vm }: As
         ports: (mac?.ports ?? []).filter((port) =>
             vm === undefined ? port.Machine.On === '' : port.Machine.Name === vm,
         ),
-        quiet: mine(mac?.quiet),
         shared: mine(mac?.shared),
     };
 }
@@ -47,20 +42,6 @@ export function aboutPort(port: PortsPort): string {
         port.Verified?.Missing,
         port.PID > 0 ? `pid ${port.PID}` : undefined,
     ]);
-}
-
-const MAC_LINE = 'The ports of its machines are on their own Ports tab';
-
-export function lineOf(of: PortsOf, vm: string | undefined): string {
-    const range = of.mac?.range;
-    if (vm === undefined) {
-        return MAC_LINE;
-    }
-    const line = range
-        ? `It may share ports ${range.low} to ${range.high} with your devices`
-        : 'Its ports are shared from its Mac';
-    const quiet = of.quiet.reduce((sum, row) => sum + row.count, 0);
-    return quiet > 0 ? `${line}${SEPARATOR}${countOf('quiet-listener', quiet)}` : line;
 }
 
 export function needsOf(needs: readonly OverviewNeed[], name: string): OverviewNeed[] {

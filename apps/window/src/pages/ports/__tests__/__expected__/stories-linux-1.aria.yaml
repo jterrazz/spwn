@@ -13,10 +13,10 @@
     - tab "Ports" [selected]
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "No verdict from the engine." [level=1]
+  - heading "12 ports listen." [level=1]
   - paragraph:
-    - img "Not given yet"
-    - text: It may share ports 40000 to 40999 with your devices
+    - img "12 ports listen."
+    - text: 3 are shared.
   - region "Shared":
     - heading "Shared" [level=2]
     - region "Port 3000":

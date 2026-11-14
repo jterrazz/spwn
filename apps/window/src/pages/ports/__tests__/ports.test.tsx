@@ -71,7 +71,7 @@ describe('ports', () => {
         await expect(result.tree).toMatch(file('./__expected__/stories-linux-1.aria.yaml'));
     });
 
-    test("a workspace whose ports are all shared draws no listener panel, and its Mac's range heads it", async () => {
+    test("a workspace whose ports are all shared draws no listener panel, and the engine's verdict heads it", async () => {
         // Given - linux-1's Ports over mini-workspace, both of its listeners shared
         const result = await component.render(
             portsOver('mini-workspace', 'linux-1'),
@@ -81,10 +81,9 @@ describe('ports', () => {
             },
         );
 
-        // Then - the range of its Mac, and no panel of listeners
-        expect(result.content.text).toContain(
-            'It may share ports 40000 to 40999 with your devices',
-        );
+        // Then - the listing's verdict and its line, and no panel of listeners
+        expect(result.content.text).toContain('2 ports listen.');
+        expect(result.content.text).toContain('2 are shared.');
         expect(result.content.text).not.toContain('Listening, not shared');
     });
 
