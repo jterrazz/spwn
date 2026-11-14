@@ -2,6 +2,7 @@ import type { CallName, ImagesReport, MachinesMacView } from '@jterrazz/station-
 
 import { Icon } from '../../design/icon';
 import { StatePill } from '../../design/index';
+import { isDeletable } from '../../engine/provisional';
 import { newestState } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import { targetOf } from '../../model/machines';
@@ -41,18 +42,20 @@ export function ImageLine({ image, mac, sentence }: ImageLineProps) {
             trail={
                 <span className={styles.trail}>
                     {newest === null ? null : <StatePill {...newest} />}
-                    <GestureButton
-                        destroys
-                        gesture={remove}
-                        label={
-                            image.Record.size_gb > 0
-                                ? `Delete · frees ${String(image.Record.size_gb)} GB`
-                                : 'Delete'
-                        }
-                        name={`Delete ${shown}`}
-                        title={`Delete ${shown}?`}
-                        verb="Delete"
-                    />
+                    {isDeletable(image) ? (
+                        <GestureButton
+                            destroys
+                            gesture={remove}
+                            label={
+                                image.Record.size_gb > 0
+                                    ? `Delete · frees ${String(image.Record.size_gb)} GB`
+                                    : 'Delete'
+                            }
+                            name={`Delete ${shown}`}
+                            title={`Delete ${shown}?`}
+                            verb="Delete"
+                        />
+                    ) : null}
                 </span>
             }
             trailSize="wide"

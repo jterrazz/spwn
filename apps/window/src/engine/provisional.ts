@@ -8,6 +8,7 @@ import type {
     DiskRow,
     EngineReading,
     EngineStartInput,
+    ImagesReport,
     MachinefileChapter,
     MachinefileDiffering,
     MachinefileExtraLine,
@@ -175,6 +176,12 @@ export function diskGestureOf(group: DiskRow['Group']): DiskGesture | undefined 
 // outside: disk.read gives no gesture of a whole group: freeing every rebuildable row at once is the one there is.
 export function freesWhole(group: DiskRow['Group']): boolean {
     return group === 'can-rebuild';
+}
+
+// outside: images.list gives an image its Newest and the machines made from it, and no field saying it can be
+// outside: deleted: the newest one, and one a machine uses, are not offered, until each image carries that answer.
+export function isDeletable(image: Pick<ImagesReport, 'Newest' | 'VMs'>): boolean {
+    return !image.Newest && (image.VMs ?? []).length === 0;
 }
 
 // outside: disk.read flags no volume as holding what can be rebuilt, only each row (apps/engine/disk/group.go).
