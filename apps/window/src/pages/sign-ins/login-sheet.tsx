@@ -145,18 +145,12 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
         onClose();
     });
     const cancel = <Button onClick={onClose}>Cancel</Button>;
-    const sheet = (
-        body: ReactNode,
-        actions: ReactNode,
-        step?: AccountsStep,
-        consequence?: string,
-    ) => (
+    const sheet = (body: ReactNode, actions: ReactNode, step?: AccountsStep) => (
         <Dialog
             actions={actions}
-            consequence={consequence}
             lead={<AppIcon name={program} />}
             onClose={onClose}
-            title={step === undefined ? title : stepHeadingOf(step.Kind)}
+            title={step === undefined ? title : step.Title}
         >
             {body}
         </Dialog>
@@ -186,6 +180,10 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
     const { step } = seen;
     return sheet(
         <div className={styles.body}>
+            <p className={styles.instruction}>
+                <b>{stepHeadingOf(step.Kind)}</b>
+                <span>{detailOf('AccountsStepKind', step.Kind)}</span>
+            </p>
             <StepBody found={found} step={step} />
         </div>,
         <>
@@ -193,7 +191,6 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
             <StepOpens found={found} step={step} />
         </>,
         step,
-        detailOf('AccountsStepKind', step.Kind),
     );
 }
 

@@ -124,7 +124,7 @@ describe('workspace', () => {
             '/?world=sign-ins&machine=linux-1&tab=Sign-ins&pace=600',
             async (visitor) => {
                 await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
-                const sheet = dialog('Paste the code');
+                const sheet = dialog('Sign in to claude on linux-1');
                 await visitor.see(
                     within(sheet, content('then paste the code it gives you', { exact: false })),
                 );
@@ -147,7 +147,7 @@ describe('workspace', () => {
             '/?world=sign-ins&machine=linux-1&tab=Sign-ins&pace=600',
             async (visitor) => {
                 await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
-                const sheet = dialog('Paste the code');
+                const sheet = dialog('Sign in to claude on linux-1');
 
                 // When - the engine lets the code run out
                 await visitor.see(
