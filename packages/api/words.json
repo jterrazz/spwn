@@ -2,6 +2,7 @@
   "AccountsAddFrom": {
     "sign-in": {
       "Word": "from a sign-in",
+      "Detail": "Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.",
       "Tone": "plain"
     },
     "typed": {
@@ -26,6 +27,7 @@
   "AccountsGrantTo": {
     "agent": {
       "Word": "Agents",
+      "Detail": "Only its terminal sees it",
       "One": "agent",
       "Other": "agents",
       "Tone": "plain"
@@ -106,10 +108,12 @@
   "AccountsProgramHow": {
     "granted": {
       "Word": "granted",
+      "Detail": "from the password %s",
       "Tone": "plain"
     },
     "own": {
       "Word": "signed in here",
+      "Detail": "signed in by itself",
       "Tone": "plain"
     }
   },
@@ -1090,6 +1094,7 @@
     },
     "term": {
       "Word": "term",
+      "Detail": "An agent keeps it up to 7 days. A machine may keep it until you remove it.",
       "Tone": "plain"
     },
     "value": {

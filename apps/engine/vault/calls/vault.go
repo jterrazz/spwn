@@ -22,6 +22,7 @@ var VaultList = call.Watch[Deps, VaultListIn, accounts.VaultRead]{
 		if err != nil {
 			return nil, err
 		}
+		read.Verdict = accounts.SummarizeVault(read.Entries)
 		out := make(chan accounts.VaultRead, 1)
 		out <- read
 		close(out)

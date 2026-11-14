@@ -196,8 +196,8 @@ func wordedEnums() []worded {
 			string(accounts.ProgramWaiting):   toned(verdict.New, "waiting"),
 		}},
 		{accounts.ProgramHow(""), map[string]word{
-			string(accounts.HowOwn):     plain("signed in here"),
-			string(accounts.HowGranted): plain("granted"),
+			string(accounts.HowOwn):     {Word: "signed in here", Detail: accounts.SentenceRowSignedByItself.Text(), Tone: verdict.Plain},
+			string(accounts.HowGranted): {Word: "granted", Detail: accounts.SentenceRowFromPassword.Text(), Tone: verdict.Plain},
 		}},
 		{accounts.ProgramAction(""), map[string]word{
 			string(accounts.ActionSignIn):      plain("Sign in"),
@@ -219,12 +219,12 @@ func wordedEnums() []worded {
 			string(accounts.KeyPassword):    plain("password"),
 		}},
 		{accounts.AddFrom(""), map[string]word{
-			string(accounts.FromSignIn): plain("from a sign-in"),
+			string(accounts.FromSignIn): {Word: "from a sign-in", Detail: accounts.SentenceCaptureNote.Text(), Tone: verdict.Plain},
 			string(accounts.FromTyped):  plain("typed"),
 		}},
 		{accounts.GrantTo(""), map[string]word{
 			string(accounts.ToMachine): {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},
-			string(accounts.ToAgent):   {Word: "Agents", One: "agent", Other: "agents", Tone: verdict.Plain},
+			string(accounts.ToAgent):   {Word: "Agents", Detail: accounts.SentenceAgentReach.Text(), One: "agent", Other: "agents", Tone: verdict.Plain},
 		}},
 		{accounts.GrantState(""), map[string]word{
 			string(accounts.GrantActive):  toned(verdict.OK, "active"),
@@ -234,7 +234,7 @@ func wordedEnums() []worded {
 		{fail.Field(""), map[string]word{
 			string(fail.FieldLabel): plain("label"),
 			string(fail.FieldValue): plain("value"),
-			string(fail.FieldTerm):  plain("term"),
+			string(fail.FieldTerm):  {Word: "term", Detail: accounts.SentenceTermRule.Text(), Tone: verdict.Plain},
 		}},
 		{page.Noun(""), map[string]word{
 			string(page.NounMachine):       {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},

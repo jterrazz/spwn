@@ -164,6 +164,7 @@ export type AccountsVaultGrant = {
 export type AccountsVaultRead = {
     Entries: AccountsVaultEntry[] | null;
     Mac: string;
+    Verdict: CoreVerdictVerdict;
 };
 
 export type ActivityBattery = {

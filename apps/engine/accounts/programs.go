@@ -1,7 +1,7 @@
 package accounts
 
 import (
-	"strconv"
+	"fmt"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -243,9 +243,9 @@ func Summarize(rows []ProgramRow, name string, w Where) verdict.Verdict {
 	}
 	switch {
 	case in == len(rows):
-		return verdict.Verdict{Tone: verdict.OK, Sentence: "Signed in to every program"}
+		return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceSignInsAll.Text()}
 	case in == 0:
-		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Signed in to no program"}
+		return verdict.Verdict{Tone: verdict.Plain, Sentence: SentenceSignInsNone.Text()}
 	}
-	return verdict.Verdict{Tone: verdict.Plain, Sentence: "Signed in to " + strconv.Itoa(in) + " of " + strconv.Itoa(len(rows)) + " programs"}
+	return verdict.Verdict{Tone: verdict.Plain, Sentence: fmt.Sprintf(SentenceSignInsSome.Text(), in, len(rows))}
 }

@@ -109,11 +109,38 @@
         },
         "Mac": {
           "type": "string"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
         }
       },
       "required": [
         "Entries",
-        "Mac"
+        "Mac",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
       ],
       "type": "object"
     },
