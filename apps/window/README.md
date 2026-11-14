@@ -252,6 +252,8 @@ The route (page, machine, tab, the file Machine files opens on and the catalog i
 
 All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `record.py` writes the worlds, `node scripts/capture.ts <out>` photographs every page of every world, and `check.sh` is the proof, `recordings-check.py` among it, failing a recording the engine of the tree no longer answers so, with `check-quick.sh` for the seconds between two edits. A page opens directly in a dev or proof build by its start route, `?world=<world>&page=<page>` (Machine files on one file by `&file=<name>`, a catalog item on its shelf by `&item=<name>`) or `?world=<world>&machine=<name>&tab=<Tab>`.
 
+In the world build the only door is `station guest serve --stdio`, whose Router runs any target that is not a VM in this process. So a call aimed at a far Mac answers with This Mac's data, and a capture of a far Mac's page proves its layout only, never what it shows.
+
 ## The design rules
 
 - No inline style. A size computed from data is the one accepted form: a CSS custom property set on the element, typed `Measured` (`src/design/measure.ts`), which the module's CSS draws (`width: var(--fill)`). A colour, a spacing or a tone is a class, never a value written inline.
