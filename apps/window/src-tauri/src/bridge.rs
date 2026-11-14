@@ -197,12 +197,7 @@ fn line_of(reader: &mut impl BufRead, limit: usize) -> io::Result<Line> {
 // invariant: one exchange's answers in order, until its last: a line that is no JSON or is longer than the limit
 // invariant: ends it with the engine's own bad-frame error, a connection that ends mid-line or early ends it
 // invariant: unanswered, and a sink that no longer listens ends it at once.
-pub fn pump(reader: impl Read, request: &Value, sink: &impl Sink, limit: usize) -> String {
-    let id = request
-        .get("id")
-        .and_then(Value::as_str)
-        .unwrap_or_default();
-    let watch = request.get("watch").is_some();
+pub fn pump(reader: impl Read, id: &str, watch: bool, sink: &impl Sink, limit: usize) -> String {
     let mut reader = BufReader::new(reader);
     loop {
         let refused = match line_of(&mut reader, limit) {
@@ -267,6 +262,8 @@ impl Exchanges {
     }
 
     // value: 0 names no exchange: a request the bridge refused, answered on the sink alone.
+    // invariant: a request's `in` (a pasted code among them) lives in the one frame written to the engine: the
+    // invariant: request is dropped once written, the reader holds its id alone, and a refusal never echoes it.
     pub fn open<S: Sink>(
         self: &Arc<Self>,
         path: &Path,
@@ -296,26 +293,29 @@ impl Exchanges {
             .set_write_timeout(Some(limits.write))
             .map_err(unanswered)?;
         let reader = stream.try_clone().map_err(unanswered)?;
-        write_line(&mut stream, &request).map_err(unanswered)?;
-        let handle = self.next.fetch_add(1, Ordering::SeqCst) + 1;
         let id = request
             .get("id")
             .and_then(Value::as_str)
             .unwrap_or_default()
             .to_owned();
+        let watch = request.get("watch").is_some();
+        let written = write_line(&mut stream, &request);
+        drop(request);
+        written.map_err(unanswered)?;
+        let handle = self.next.fetch_add(1, Ordering::SeqCst) + 1;
         if let Ok(mut open) = self.open.lock() {
             open.insert(
                 handle,
                 Open {
                     owner: owner.to_owned(),
-                    id,
+                    id: id.clone(),
                     stream,
                 },
             );
         }
         let exchanges = Arc::clone(self);
         thread::spawn(move || {
-            let reason = pump(reader, &request, &sink, limits.answer);
+            let reason = pump(reader, &id, watch, &sink, limits.answer);
             exchanges.close(handle);
             sink.send(Message::End(reason));
         });
