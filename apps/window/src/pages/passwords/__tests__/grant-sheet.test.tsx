@@ -4,10 +4,14 @@ import { describe, expect, test } from 'vitest';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 
-const recordingFor = await recordingsOf('two-macs');
+const recordingFor = await recordingsOf('two-macs', 'presence-refused');
 
 function entryOver(item: string) {
     return pageOver(recordingFor('two-macs'), { item, page: 'passwords' });
+}
+
+function refusedEntry(item: string) {
+    return pageOver(recordingFor('presence-refused'), { item, page: 'passwords' });
 }
 
 describe('grant sheet', () => {
@@ -42,6 +46,25 @@ describe('grant sheet', () => {
             // Then - the sheet is gone, and the password is granted to linux-1
             await visitor.gone(sheet);
             await visitor.see(within(region('Granted to'), content('linux-1')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test("a grant refused at the presence check is said in the sheet's foot, and nothing is granted", async () => {
+        // Given - GitHub deploy's picker over presence-refused, whose Mac does not confirm the owner is there
+        const result = await component.render(refusedEntry('pw-1'), async (visitor) => {
+            await visitor.click(button('Grant…'));
+            const sheet = dialog('Grant GitHub deploy');
+            await visitor.click(within(sheet, button('linux-1', { exact: false })));
+
+            // When - the grant to linux-1 is sent
+            await visitor.click(within(sheet, button('Grant to linux-1')));
+
+            // Then - the engine's refusal is said in the sheet, which stays open, and the password is granted to nothing
+            await visitor.see(
+                within(sheet, content('did not confirm you are there', { exact: false })),
+            );
+            await visitor.gone(within(region('Granted to'), content('linux-1')));
         });
         expect(result.errors.text).toBe('');
     });
