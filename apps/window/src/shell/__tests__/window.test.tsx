@@ -4,7 +4,6 @@ import {
     content,
     dialog,
     disabled,
-    enabled,
     file,
     heading,
     navigation,
@@ -231,68 +230,6 @@ describe('Window', () => {
 
         // Then - the foot's dot is labelled by the error's word, not as a read under way
         await expect(result.tree).toMatch(file('./__expected__/engine-refused-home.aria.yaml'));
-    });
-
-    test('back returns through tabs and pages, then is disabled', async () => {
-        // Given - the window on Home over two-macs, nothing behind it
-        const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
-            await visitor.see(disabled(back));
-
-            // When - This Mac is opened, its Ports tab chosen, then back is taken twice
-            await visitor.click(within(sidebar, button('jterrazz-macbook-pro online')));
-            await visitor.click(content('Ports'));
-            await visitor.see(region('What listens on this Mac'));
-            await visitor.see(enabled(back));
-            await visitor.click(back);
-            await visitor.see(region('Its machines'));
-            await visitor.click(back);
-
-            // Then - the window is back on Home, back disabled
-            await visitor.see(disabled(back));
-            await visitor.see(content('npm sign-in expired'));
-        });
-        expect(result.errors.text).toBe('');
-    });
-
-    test('forward retraces what back undid, and is disabled at the last place', async () => {
-        // Given - the window on Home over two-macs, nothing behind it nor ahead
-        const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
-            await visitor.see(disabled(back));
-            await visitor.see(disabled(forward));
-
-            // When - This Mac is opened, then back taken
-            await visitor.click(within(sidebar, button('jterrazz-macbook-pro online')));
-            await visitor.see(heading('jterrazz-macbook-pro Online'));
-            await visitor.see(disabled(forward));
-            await visitor.click(back);
-            await visitor.see(disabled(back));
-            await visitor.see(enabled(forward));
-            await visitor.click(forward);
-
-            // Then - the window is on This Mac again, back enabled and nothing ahead
-            await visitor.see(heading('jterrazz-macbook-pro Online'));
-            await visitor.see(enabled(back));
-            await visitor.see(disabled(forward));
-        });
-        expect(result.errors.text).toBe('');
-    });
-
-    test('⌘[ and ⌘] walk the history as the buttons do', async () => {
-        // Given - the window on Home over two-macs
-        const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
-            // When - This Mac is opened, then ⌘[ and ⌘] pressed
-            await visitor.click(within(sidebar, button('jterrazz-macbook-pro online')));
-            await visitor.see(heading('jterrazz-macbook-pro Online'));
-            await visitor.press('Control>}[BracketLeft]{/Control');
-            await visitor.see(content('npm sign-in expired'));
-            await visitor.see(enabled(forward));
-            await visitor.press('Control>}[BracketRight]{/Control');
-
-            // Then - the window is on This Mac again, back enabled
-            await visitor.see(heading('jterrazz-macbook-pro Online'));
-            await visitor.see(enabled(back));
-        });
-        expect(result.errors.text).toBe('');
     });
 
     test("the mouse's back and forward buttons walk the history", async () => {

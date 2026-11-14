@@ -1,31 +1,32 @@
 # Testing
 
-Three tiers prove station, each with one purpose, and a fourth rig runs the menu bar's gate where this Mac has no Xcode. Tier 1 is `make check`: the Go tests (the architecture rules, the contract suites, the few module tests a spec cannot reach), the use-case stories over a fake world, the adapter documents against stub programs, and the menu bar's stories, every state of its panel drawn against its goldens. Tiers 2 and 3 run the real binary on real VMs of this Mac, outside the gate. Every use case of the product is proved by a story in the owner's words, and a test exists only because a real regression would turn it red.
+Three tiers prove station, each with one purpose, and a fourth rig runs the menu bar's gate where this Mac has no Xcode. Tier 1 is `make check`: the Go tests (the architecture rules, the contract suites, the few module tests a spec cannot reach), the use-case stories over a fake world, the adapter documents against stub programs, the desktop window's scenarios in Chromium, and the menu bar's stories, every state of its panel drawn against its goldens. Tiers 2 and 3 run the real binary on real VMs of this Mac, outside the gate. Every use case of the product is proved by a story in the owner's words, and a test exists only because a real regression would turn it red.
 
-| Section                  | Answers                                               |
-| ------------------------ | ----------------------------------------------------- |
-| The three tiers          | What each tier proves, and where it runs              |
-| The two suites           | What `make test` runs, and in which order             |
-| A scenario is a document | The `<case>.spec.yaml` form and how it is regenerated |
-| The fenced run           | Why no spec reaches the real machine                  |
-| A use case over a world  | `specs/usecases/`, the spec build and its fake world  |
-| The stubs                | How a spec scripts a system program                   |
-| The menu bar's stories   | Every state of the panel as a story and its goldens   |
-| What CI runs             | The gate a pull request passes                        |
+| Section                  | Answers                                                |
+| ------------------------ | ------------------------------------------------------ |
+| The three tiers          | What each tier proves, and where it runs               |
+| The two suites           | What `make test` runs, and in which order              |
+| A scenario is a document | The `<case>.spec.yaml` form and how it is regenerated  |
+| The fenced run           | Why no spec reaches the real machine                   |
+| A use case over a world  | `specs/usecases/`, the spec build and its fake world   |
+| The stubs                | How a spec scripts a system program                    |
+| The window's scenarios   | `specs/website/`, the window's proof build in Chromium |
+| The menu bar's stories   | Every state of the panel as a story and its goldens    |
+| What CI runs             | The gate a pull request passes                         |
 
 ## The three tiers
 
-| Tier | Runs                                                                                                                | Proves                                                                                                                                                                           | Where                          |
-| ---- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| 1    | `go test`, then `specs/usecases/`, `specs/adapters/`, `specs/cli/` on Vitest, then `swift test` over `apps/menubar` | the tree and its rules; every contract's adapters and fake alike; every outcome of every call over a world; each adapter's argv; every story of the menu bar against its goldens | `make check`, CI, every commit |
-| 2    | `make e2e-machine KIND=linux`                                                                                       | a Linux workspace made, set up and reached for real, by this build's engine                                                                                                      | this Mac, by hand              |
-| 3    | `make e2e-machine KIND=macos`                                                                                       | a fresh macOS VM playing a new Mac: install, init, every method, the footprint                                                                                                   | this Mac, by hand              |
-| 4    | `specs/machine/menubar/run.sh <label>`                                                                              | the menu bar in a VM with Xcode: `make menubar-check`, `STATION_REQUIRE_MENUBAR=1`, and the golden rewrite                                                                       | this Mac, by hand, in a VM     |
+| Tier | Runs                                                                                                                                     | Proves                                                                                                                                                                                                                            | Where                          |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| 1    | `go test`, then `specs/usecases/`, `specs/adapters/`, `specs/cli/` and `specs/website/` on Vitest, then `swift test` over `apps/menubar` | the tree and its rules; every contract's adapters and fake alike; every outcome of every call over a world; each adapter's argv; the window's scenarios over its recorded worlds; every story of the menu bar against its goldens | `make check`, CI, every commit |
+| 2    | `make e2e-machine KIND=linux`                                                                                                            | a Linux workspace made, set up and reached for real, by this build's engine                                                                                                                                                       | this Mac, by hand              |
+| 3    | `make e2e-machine KIND=macos`                                                                                                            | a fresh macOS VM playing a new Mac: install, init, every method, the footprint                                                                                                                                                    | this Mac, by hand              |
+| 4    | `specs/machine/menubar/run.sh <label>`                                                                                                   | the menu bar in a VM with Xcode: `make menubar-check`, `STATION_REQUIRE_MENUBAR=1`, and the golden rewrite                                                                                                                        | this Mac, by hand, in a VM     |
 
 ## The two suites
 
 ```sh
-make test      # go test ./apps/engine/... ./specs/..., the spec build's world under -race, then the specs of `specs/` on Vitest: the specs against a fresh build of station, then the machines and engine/keep use cases again over vz
+make test      # go test ./apps/engine/... ./specs/..., the spec build's world under -race, the window's proof build, then the specs of `specs/` on Vitest: the specs against a fresh build of station and the window's scenarios against its proof build, then the machines and engine/keep use cases again over vz
 npm --workspace specs test   # the specs alone, once `make test` built the binary
 ```
 
@@ -33,7 +34,7 @@ The Go tests come first. The module tests are `*_test.go` files next to the code
 
 Then `make test` runs the CLI specs under `specs/cli/` on Vitest, through `@jterrazz/test`. There is exactly one runner, and every spec drives one binary, `.artifacts/go/station-test`, stamped with the version `git describe` prints: the spec build (`-tags world`), which runs the real adapters unless a document hands it a world ([below](#a-use-case-over-a-world)). `make test` builds it once before the runner starts, so no worker links it while another drives a session (with one build per worker, nine links ran beside the first sessions), and tells the runner so (`STATION_SPEC_BUILT=1`): a gate runs that one binary to its end, even when `apps/engine/` changes under it, rather than documents rebuilding it in every worker and half the run testing other code. Run directly, `specs/cli/cli.specification.ts` rebuilds it when it is missing or when any file under `apps/engine/` is newer than it, beside the binary and renamed into its own file, so a worker never executes a half-written file. It is an mtime check, so editing the CLI and re-running the suite always exercises the change instead of a stale build.
 
-`specs/vitest.config.ts` is the one line `@jterrazz/test` derives from `specs/studio.config.ts`, the declaration of the `studio-station-specs` workspace member: its `cli` project collects `cli/`, `adapters/`, and `usecases/` of that folder, and every `*.spec.yaml` there becomes a one-test module driving that runner. A document of `specs/adapters/<tech>/` proves one adapter speaks its program (its argv, its parsing, against the stub CLIs a fixture carries): `.calls` assertions belong there, and nowhere else once a family has moved. The runner's defaults are [the fenced run](#the-fenced-run).
+`specs/vitest.config.ts` is the one line `@jterrazz/test` derives from `specs/studio.config.ts`, the declaration of the `studio-station-specs` workspace member: its `cli` project collects `cli/`, `adapters/`, and `usecases/` of that folder, and every `*.spec.yaml` there becomes a one-test module driving that runner; its `website` project collects `website/` ([below](#the-windows-scenarios)). A document of `specs/adapters/<tech>/` proves one adapter speaks its program (its argv, its parsing, against the stub CLIs a fixture carries): `.calls` assertions belong there, and nowhere else once a family has moved. The runner's defaults are [the fenced run](#the-fenced-run).
 
 ## A scenario is a document
 
@@ -98,6 +99,16 @@ The full grammar is `@jterrazz/test`'s [Spec documents](https://github.com/jterr
 ## The stubs
 
 A spec copies one `fixture:` directory into its working directory, so stubs live beside the command word that uses them: `specs/cli/<noun>/__fixtures__/<case>/bin/<tool>`. A fixture both suites read (the VMs `vms/`, the running VM `engine-vm/`, what Tailscale serves `serving/`, the two Tailscale apps) lives in `specs/__fixtures__/`, the lowest folder `specs/cli/` and `specs/adapters/` share. A stub answers by argv from a table, appends `<tool> <argv>` (and the stdin of `brew bundle --file=-`) to `$HOME/.calls`, and exits 97 on anything unscripted. A document asserts `.calls` through `files:` to prove which installer line ran. The GitHub API is a stub backend the runner serves, reached through `STATION_GITHUB_API_URL`; a VM's sshd is the stub `vm-sshd` (`specs/cli/__fixtures__/vm-sshd/`), served to the documents that declare `serve: sshd` and reached through `STATION_GUEST_SSH_PORT`.
+
+## The window's scenarios
+
+The desktop window's scenarios, the rows of [its scenarios page](../../apps/window/SCENARIOS.md), are website specs of `@jterrazz/test` ([Website specs](https://github.com/jterrazz/package-test/blob/main/docs/guides/website-specs.md)) under `specs/website/`: one `<domain>/<aspect>.spec.ts` per journey, each test's title opening on its scenario's id.
+
+- `specs/website/website.specification.ts` serves the window's proof build, `apps/window/.artifacts/proof`, with `vite preview`; a visit opens a page by its start route, `/?world=<world>&page=<page>`, so the shipped entry draws it over that world's recorded answers in headless Chromium ([the window's page](../../apps/window/README.md#recording-capturing-proving)).
+- `make test` builds the proof build first (`turbo run build:proof`, cached on the window's sources and `packages/api`), and the runner of `specs/` runs the `website` project with the others. The window's `check.sh` runs it after its own builds, in the Linux VM.
+- A scenario proved in Chromium is what crosses pages or needs the entry (`main.tsx`): a gesture here and its count in the sidebar, the history, the route a window keeps across a relaunch. One page's states over a world stay its component spec under `apps/window/src/**/__tests__/`.
+- A scenario not proved yet is a `test.todo` of its journey's file, its title the id and why it waits; `specs/architecture/scenarios_test.go` fails an id the page holds twice, an id no test declares, and a test naming an id the page does not hold.
+- What a page visit cannot show (the Rust bridge, the opener, the Mac's chrome, a live engine) stays the bench's: `live-tauri.sh` for the Tauri window, `recordings-check.py` for the recordings against the engine of the tree ([the bench](../../apps/window/scripts/README.md)).
 
 ## The menu bar's stories
 

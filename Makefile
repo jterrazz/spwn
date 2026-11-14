@@ -66,10 +66,11 @@ fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 # second time over the fake vz once every spec has passed over tart's.
 VZ_SUITES    := usecases/machines usecases/engine/keep
 
-test: node_modules/.install ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station, then the VM suites again over vz
+test: node_modules/.install ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station and the window's scenarios against its proof build, then the VM suites again over vz
 	@$(TURBO) run test --filter='!go-workspace' --filter='!studio-station-specs'
 	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./apps/engine/wire
 	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./apps/engine/cmd/station && touch $(TEST_PATH)
+	@$(TURBO) run build:proof --filter=station-window
 	@STATION_SPEC_BUILT=1 npm --workspace specs exec -- vitest --run
 	@STATION_SPEC_BUILT=1 STATION_SPEC_HYPERVISOR=vz npm --workspace specs exec -- vitest --run $(VZ_SUITES)
 

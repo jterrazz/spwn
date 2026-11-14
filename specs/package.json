@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "devDependencies": {
-        "@types/node": "^25.9.9"
+        "@types/node": "^25.9.9",
+        "playwright": "1.63.0"
     }
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # outside: a Linux VM only.
 # value: the full proof of the window, after bench-setup.sh:
-# value: the window's tests in Chromium, `typescript check` over the repository, the release and proof builds, then
+# value: the window's tests in Chromium, `typescript check` over the repository, the release and proof builds, the
+# value: scenarios of specs/website/ in Chromium against that proof build, then
 # value: the bridge's Rust tests (`cargo test`, in the shared Tauri target, WINDOW_CARGO_JOBS jobs, 3 by default),
 # value: `cargo fmt --check` and `cargo clippy --all-targets` with warnings denied (the rustfmt and clippy components),
 # value: then recordings-check.py, which fails a recording the world build of this tree no longer answers so.
@@ -39,6 +40,8 @@ LD_PRELOAD=$NORESERVE timeout 520 npx typescript check >"$logs/check.log" 2>&1
 check=$?
 (cd "$window" && npm run build && npm run build:proof) >"$logs/build.log" 2>&1
 build=$?
+timeout 520 npm --workspace specs exec -- vitest --run --project website >"$logs/scenarios.log" 2>&1
+scenarios=$?
 if [ -s "$HOME/.cargo/env" ]; then
     # shellcheck disable=SC1091
     source "$HOME/.cargo/env"
@@ -67,12 +70,14 @@ summary "$logs/check.log"
 window_clean=$?
 echo "tests: exit $test, $(sed 's/\x1b\[[0-9;]*m//g' "$logs/test.log" | grep -aE '^ +Tests ' | tr -s ' ')"
 echo "builds: exit $build"
+echo "scenarios: exit $scenarios, $(sed 's/\x1b\[[0-9;]*m//g' "$logs/scenarios.log" | grep -aE '^ +Tests ' | tr -s ' ')"
 echo "rust tests: exit $rust, $(grep -aE '^test result' "$logs/rust.log" | tail -1)"
 echo "rustfmt: exit $rustfmt, $(grep -ac '^Diff in' "$logs/rustfmt.log") files to format"
 echo "clippy: exit $clippy, $(grep -acE '^(warning|error)' "$logs/clippy.log") findings"
 echo "recordings: exit $recordings, $(tail -1 "$logs/recordings.log")"
 status=0
-[ "$check" -ne 124 ] && [ "$window_clean" -eq 0 ] && [ "$test" -eq 0 ] && [ "$build" -eq 0 ] && [ "$rust" -eq 0 ] \
+[ "$check" -ne 124 ] && [ "$window_clean" -eq 0 ] && [ "$test" -eq 0 ] && [ "$build" -eq 0 ] \
+    && [ "$scenarios" -eq 0 ] && [ "$rust" -eq 0 ] \
     && [ "$rustfmt" -eq 0 ] && [ "$clippy" -eq 0 ] && [ "$recordings" -eq 0 ] || status=1
 skipped=
 [ "$replay" -eq 1 ] || skipped=" · recordings skipped (--no-replay): not the proof"
