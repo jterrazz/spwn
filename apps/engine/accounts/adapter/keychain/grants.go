@@ -3,6 +3,7 @@ package keychain
 import (
 	"context"
 	"errors"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -53,8 +54,37 @@ var _ contract.Grants = (*Grants)(nil)
 
 const duePrefix = "grant:"
 
-func (k *Kept) lookup(ctx context.Context, name string) (Machine, bool, error) {
+// invariant: a program a machine's own read finds signed in came from a
+// grant when the book holds that grant: the facts say so and name its
+// entry, so a grant given again is never refused as signed in by itself.
+func (k *Kept) machines(ctx context.Context) ([]Machine, error) {
 	all, err := k.d.Machines(ctx)
+	if err != nil {
+		return nil, err
+	}
+	b, err := k.book.Read(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Machine, 0, len(all))
+	for _, m := range all {
+		programs := maps.Clone(m.Programs)
+		for _, e := range b.Entries {
+			f, held := programs[e.Program]
+			i := slices.IndexFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == m.Name })
+			if held && i >= 0 && f.State == accounts.ProgramSignedIn {
+				f.How, f.Entry = accounts.HowGranted, e.ID
+				programs[e.Program] = f
+			}
+		}
+		m.Programs = programs
+		out = append(out, m)
+	}
+	return out, nil
+}
+
+func (k *Kept) lookup(ctx context.Context, name string) (Machine, bool, error) {
+	all, err := k.machines(ctx)
 	if err != nil {
 		return Machine{}, false, err
 	}
@@ -131,11 +161,10 @@ func (g *Grants) Candidates(ctx context.Context, id string) (accounts.Candidates
 	if err != nil {
 		return accounts.Candidates{}, err
 	}
-	all, err := g.k.d.Machines(ctx)
+	all, err := g.k.machines(ctx)
 	if err != nil {
 		return accounts.Candidates{}, err
 	}
-	all = slices.Clone(all)
 	slices.SortFunc(all, func(a, b Machine) int { return strings.Compare(a.Name, b.Name) })
 	found := accounts.Candidates{AgentGrantable: e.AgentGrantable, List: []accounts.Candidate{}}
 	for _, m := range all {
