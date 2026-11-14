@@ -21,7 +21,6 @@ import type { CodeOf, Worded } from './engine-words';
 import {
     accountSideOf,
     chapterOfKind,
-    engineViewStateOf,
     machineKindOf,
     macStateOf,
     shareEndOf,
@@ -157,11 +156,13 @@ export function chapterNoun(chapter: MachinefileChapter, count: number): string 
     return (count === 1 ? One : Other) ?? chapter;
 }
 
-export function engineViewWord(engine: MachinesEngineView): string | undefined {
-    const state = engineViewStateOf(engine);
-    return state === undefined ? undefined : wordOf('EngineReadState', state).Word;
+export function engineViewWord({ State }: MachinesEngineView): string | undefined {
+    return State === undefined ? undefined : wordOf('EngineReadState', State).Word;
 }
 
+export function engineViewStopped({ State }: MachinesEngineView): boolean {
+    return State === 'stopped';
+}
 export type SharedChapter = Extract<MachinefileChapter, 'accounts' | 'ports'>;
 
 export type DifferingSide = 'asked' | 'seen';

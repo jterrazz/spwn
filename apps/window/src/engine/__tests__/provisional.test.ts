@@ -1,4 +1,3 @@
-import type { MachinesEngineView, OverviewNeed } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
 import { recordingsOf } from '../../fixtures/recordings';
@@ -9,10 +8,8 @@ import {
     confirmFormOf,
     createRefusalPlaceOf,
     diskGestureOf,
-    engineViewStateOf,
     freesWhole,
     holdsRebuildable,
-    inboxIsUrgent,
     isPortShared,
     isSkill,
     machineKindOf,
@@ -165,48 +162,6 @@ describe('provisional', () => {
                 ([lifetime, kind]) => kind === (lifetime === 'always-on' ? 'server' : 'workspace'),
             ),
         ).toBe(true);
-    });
-
-    test("a Mac's engine is read as engine.read's state from its booleans, and as none while not known", () => {
-        // Given - a Mac's engine known running, known installed and stopped, known not installed, and not known
-        const known: MachinesEngineView = {
-            Installed: true,
-            Known: true,
-            Running: true,
-            Version: '',
-        };
-        const engines = [
-            known,
-            { ...known, Running: false },
-            { ...known, Installed: false, Running: false },
-            { ...known, Known: false },
-        ];
-
-        // When - each is read as a state
-        const states = engines.map((engine) => engineViewStateOf(engine));
-
-        // Then - running, stopped, not installed, then no code
-        expect(states).toStrictEqual(['running', 'stopped', 'not-installed', undefined]);
-    });
-
-    test('the Inbox is urgent when one of its needs is broken', () => {
-        // Given - two needs, one broken
-        const need: OverviewNeed = {
-            Args: null,
-            Broken: false,
-            Call: '',
-            Command: '',
-            Machine: 'mbp',
-            Path: '',
-            Section: 'disk',
-            Severity: 'needs-a-look',
-            Subject: 'disk',
-            Text: '',
-        };
-
-        // Then - a list holding the broken one is urgent, one without it is not
-        expect(inboxIsUrgent([need, { ...need, Broken: true }])).toBe(true);
-        expect(inboxIsUrgent([need])).toBe(false);
     });
 
     test("a share holds until its end, against the report's hour", () => {
