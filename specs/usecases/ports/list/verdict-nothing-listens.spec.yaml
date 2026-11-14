@@ -1,0 +1,11 @@
+description: 'an empty listing says in its head that nothing listens'
+env:
+    - bare-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.verdict'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{}}
+      exit: 0
+      stdout: |
+          {"Tone":"plain","Sentence":"Nothing listens on this machine.","Line":"A port is listed as soon as something listens on it."}

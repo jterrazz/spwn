@@ -1,0 +1,19 @@
+description: 'ports.list heads its listing with a verdict: what listens and what is shared, then what is exposed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.verdict'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{"AllMachines":true}}
+      exit: 0
+      stdout: |
+          {"Tone":"ok","Sentence":"2 ports listen.","Line":"2 are shared."}
+    - command: 'world listen jterrazz-macbook-pro "*:5000" ControlCenter'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.verdict'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{"AllMachines":true}}
+      exit: 0
+      stdout: |
+          {"Tone":"bad","Sentence":"Port 5000 is exposed.","Line":"Declare it public, or turn it off in the app that opens it."}
