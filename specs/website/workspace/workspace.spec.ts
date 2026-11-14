@@ -1,4 +1,13 @@
-import { button, content, dialog, heading, navigation, region, within } from '@jterrazz/test';
+import {
+    button,
+    content,
+    dialog,
+    disabled,
+    heading,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -6,9 +15,28 @@ import { website } from '../website.specification.js';
 const sidebar = navigation('Sidebar');
 
 describe('workspace', () => {
-    test.todo('W1 lot 6');
+    test.todo(
+        'W1 waits for the Tauri window, the only one that opens Terminal, and for the ssh command to be copied beside Open in Terminal',
+    );
 
-    test.todo('W2 lot 6');
+    test('W2 a workspace says what it is for, who created it and when', async () => {
+        // Given - the window on linux-5 over creating, made by a session
+        const result = await website.visit(
+            '/?world=creating&machine=linux-5&tab=Overview',
+            async (visitor) => {
+                // When - Why it exists is read
+                const why = region('Why it exists');
+                await visitor.see(why);
+
+                // Then - its purpose, its creator and its date are there
+                await visitor.see(within(why, content('Lot shell, one block per package')));
+                await visitor.see(within(why, content('4 Nov, by studio-os-fe')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo('W2 waits for the hold on MachinesVM, which says whether it is safe to delete');
 
     test.todo('W3 waits for the hold on MachinesVM');
 
@@ -51,7 +79,22 @@ describe('workspace', () => {
         'W4 waits for a recording of activity.read after a Stop, and of a Start after it on the same machine',
     );
 
-    test.todo('W5 lot 6');
+    test('W5 a VM being created reads Creating, with its step', async () => {
+        // Given - the window on linux-4 over creating, which is booting
+        const result = await website.visit(
+            '/?world=creating&machine=linux-4&tab=Overview',
+            async (visitor) => {
+                // When - the page is read
+                // Then - it reads Creating and names the step it is at
+                await visitor.see(heading('linux-4 Creating'));
+                await visitor.see(content('Creating · boot 2 of 4'));
+                await visitor.see(disabled(button('Open in Terminal')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo('W5 waits for a recording of a failed creation, its step and its log');
 
     test.todo('W6 waits for an id on accounts.share');
 });
