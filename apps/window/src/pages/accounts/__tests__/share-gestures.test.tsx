@@ -39,7 +39,7 @@ describe('share gestures', () => {
                 await visitor.see(asked);
                 await visitor.click(within(asked, button('Take back')));
 
-                // Then - accounts.list, read again, holds claude's share alone
+                // Then - accounts.read, read again, holds claude's share alone
                 await visitor.gone(asked);
                 await visitor.gone(within(shared, button('Take back github')));
                 await visitor.see(within(shared, button('Take back claude')));

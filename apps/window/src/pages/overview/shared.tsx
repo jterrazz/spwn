@@ -67,7 +67,7 @@ export function SharedPorts({ found, vm, go }: Props) {
 
 export function SharedAccounts({ found, vm, go }: Props) {
     const target = targetOf({ mac: found.mac });
-    const accounts = useWatch('accounts.list', { VMs: true }, target);
+    const accounts = useWatch('accounts.read', { VMs: true }, target);
     const all = <AllOf go={go} label="All accounts" tab="Accounts" vm={vm} />;
     if (accounts.kind === 'reading') {
         return null;

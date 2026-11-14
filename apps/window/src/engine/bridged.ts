@@ -5,7 +5,7 @@ import type { CallName } from '@jterrazz/station-api';
 // invariant: other name, so a call sent off the list fails the compile, and `bridged.test.ts` fails a name no
 // invariant: source sends.
 export const BRIDGED = [
-    'accounts.list',
+    'accounts.read',
     'accounts.share',
     'accounts.take-back',
     'activity.read',

@@ -13,7 +13,7 @@ import { GestureButton, GestureOutcome, GestureRow, marked } from '../kit/gestur
 
 import styles from './accounts.module.css';
 
-const ACCOUNTS_REREADS: readonly CallName[] = ['accounts.list'];
+const ACCOUNTS_REREADS: readonly CallName[] = ['accounts.read'];
 
 // value: accounts.share's For is a Go time.Duration, nanoseconds on the wire.
 const TWELVE_HOURS = 12 * 3600 * 1_000_000_000;

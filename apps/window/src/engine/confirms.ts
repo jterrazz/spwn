@@ -11,12 +11,14 @@ export type ConfirmName = {
 }[CallName];
 
 export const CONFIRMED: Readonly<Record<ConfirmName, true>> = {
+    'accounts.logout': true,
     'accounts.take-back': true,
     'agents.stop': true,
     'apps.remove': true,
     'background.remove': true,
     'disk.erase': true,
     'engine.stop': true,
+    'grants.remove': true,
     'images.delete': true,
     'machinefile.apply': true,
     'machines.cleanup': true,
@@ -32,6 +34,7 @@ export const CONFIRMED: Readonly<Record<ConfirmName, true>> = {
     'settings.apply': true,
     'settings.off': true,
     'settings.run-containers': true,
+    'vault.remove': true,
 };
 
 export function isConfirmed(name: CallName): name is ConfirmName {
