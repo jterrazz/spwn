@@ -1,4 +1,4 @@
-import type { OverviewSummary } from '@jterrazz/station-api';
+import type { CoreVerdictVerdict, OverviewSummary } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { CopyButton } from '../../design/copy-button';
@@ -31,6 +31,23 @@ export function NoVerdict({ size, line }: { size: 'page' | 'tab'; line?: ReactNo
             size={size}
             title="No verdict from the engine."
             {...ownState('not-given')}
+        />
+    );
+}
+
+export function VerdictHead({
+    verdict,
+    size,
+}: {
+    verdict: CoreVerdictVerdict;
+    size: 'page' | 'tab';
+}) {
+    return (
+        <Verdict
+            line={verdict.Line}
+            size={size}
+            title={asSentence(verdict.Sentence)}
+            {...verdictShown(verdict)}
         />
     );
 }

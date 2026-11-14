@@ -1,9 +1,9 @@
 import type { PortsPort, Target } from '@jterrazz/station-api';
 
-import { asSentence, Panel, Row, StatePill, Value, Verdict } from '../../design/index';
+import { Panel, Row, StatePill, Value } from '../../design/index';
 import { isDeclarable, isPortShared } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
-import { portReach, shareToWord, verdictShown } from '../../engine/shown';
+import { portReach, shareToWord } from '../../engine/shown';
 import { PORT_ANSWER_TONES } from '../../engine/tones';
 import { PORT_ANSWER_WORDS } from '../../engine/words';
 import { targetOf } from '../../model/machines';
@@ -11,7 +11,7 @@ import type { Found } from '../../model/machines';
 import type { Route } from '../../shell/route';
 import { ChapterDiffers } from '../kit/chapter-differs';
 import { GestureButton, GestureRow, HeldOutcomes } from '../kit/gestures';
-import { Reading, Unanswered } from '../kit/readings';
+import { Reading, Unanswered, VerdictHead } from '../kit/readings';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
 import { usePortDeclare, usePortShare } from './port-gestures';
@@ -217,12 +217,7 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
     const of = portsOf(listing.out, { mac: found.mac.Name, thisMac: found.mac.ThisMac, vm });
     return (
         <Page>
-            <Verdict
-                line={listing.out.verdict.Line}
-                size="tab"
-                title={asSentence(listing.out.verdict.Sentence)}
-                {...verdictShown(listing.out.verdict)}
-            />
+            <VerdictHead size="tab" verdict={listing.out.verdict} />
             <Alarm found={found} go={go} name={name} />
             <HeldOutcomes>
                 {vm === undefined ? (
