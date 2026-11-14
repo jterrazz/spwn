@@ -4,8 +4,8 @@ import type { KeyboardEvent, MouseEvent } from 'react';
 
 import { moved } from '../design/focus';
 import { AppIcon, identityOf, MachineIcon, Modal } from '../design/index';
-import { isSkill } from '../engine/provisional';
 import { useWatch } from '../engine/react';
+import { isSkill } from '../model/apps';
 import { machineNamesOf } from '../model/machines';
 import { everything, matching, resultKey } from './finds';
 import type { Group, Result } from './finds';
@@ -34,7 +34,7 @@ function useHeld(props: FindProps) {
                 ? (apps.out ?? []).map(({ App }) => ({
                       category: App.Category,
                       name: App.Name,
-                      skill: isSkill(App.Category),
+                      skill: isSkill(App),
                   }))
                 : [],
         settings:

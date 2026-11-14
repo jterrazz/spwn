@@ -1,10 +1,10 @@
 import type { AppsReport, MachinesMacView, SettingsRow } from '@jterrazz/station-api';
 
 import { Verdict } from '../../design/index';
-import { isSkill } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading as Answer } from '../../engine/react';
 import { ownState } from '../../engine/shown';
+import { isSkill } from '../../model/apps';
 import type { Route } from '../../shell/route';
 import { Absent, Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
@@ -19,7 +19,7 @@ function routeOfName(reports: readonly AppsReport[], settings: readonly Settings
             return { item: name, page: 'catalog-settings' };
         }
         const report = reports.find((one) => one.App.Name === name);
-        const skill = report !== undefined && isSkill(report.App.Category);
+        const skill = report !== undefined && isSkill(report.App);
         return { item: name, page: skill ? 'catalog-skills' : 'catalog-apps' };
     };
 }

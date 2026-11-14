@@ -6,7 +6,7 @@ import { useWatch } from '../../engine/react';
 import type { Reading as Read } from '../../engine/react';
 import { Unanswered } from '../kit/readings';
 import { LayerList } from './layers';
-import { categoriesOf, countOn, differingLinesOf, layersOf, onShelf, SHELVES } from './model';
+import { countOn, differingLinesOf, kindsOf, layersOf, onShelf, SHELVES } from './model';
 import type { Shelf } from './model';
 
 import styles from './packages.module.css';
@@ -25,7 +25,7 @@ function Lines({
     setShelf: (shelf: Shelf) => void;
 }) {
     const apps = useWatch('apps.list', {}, target);
-    const categories = categoriesOf(apps.kind === 'read' ? (apps.out ?? []) : []);
+    const kinds = kindsOf(apps.kind === 'read' ? (apps.out ?? []) : []);
     const layers = layersOf(drift.Plan);
     return (
         <>
@@ -33,7 +33,7 @@ function Lines({
                 label="Which packages"
                 onChange={setShelf}
                 options={SHELVES.map((id) => ({
-                    count: countOn(layers, id, categories),
+                    count: countOn(layers, id, kinds),
                     id,
                     label: id,
                 })).filter((option) => option.id !== 'Skills' || option.count > 0)}
@@ -41,7 +41,7 @@ function Lines({
             />
             <Panel note={BY_LAYER} title={shelf}>
                 <LayerList
-                    layers={onShelf(layers, shelf, categories)}
+                    layers={onShelf(layers, shelf, kinds)}
                     look={{ differing: differingLinesOf(drift), kind: 'machine' }}
                     shelf={shelf}
                 />

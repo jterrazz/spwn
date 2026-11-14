@@ -1,6 +1,6 @@
 import type { AppsReport, SettingsRow } from '@jterrazz/station-api';
 
-import { isSkill } from '../../engine/provisional';
+import { isSkill } from '../../model/apps';
 import { matchesQuery } from '../../model/search';
 
 export type Shelf = 'apps' | 'settings' | 'skills';
@@ -24,7 +24,7 @@ export function categoriesOf(packages: readonly Package[]): readonly string[] {
 }
 
 export function appsOn(shelf: 'apps' | 'skills', reports: readonly AppsReport[]): AppsReport[] {
-    return reports.filter((report) => isSkill(report.App.Category) === (shelf === 'skills'));
+    return reports.filter((report) => isSkill(report.App) === (shelf === 'skills'));
 }
 
 export function packageOfApp(report: AppsReport): Package {

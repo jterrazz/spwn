@@ -12,7 +12,7 @@ import type {
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
 import { countOf } from '../../engine/engine-words';
-import { isSkill, layerOf } from '../../engine/provisional';
+import { layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
 import { shelfWord } from '../../engine/shown';
 
@@ -20,7 +20,7 @@ export const SHELVES = ['Apps', 'Skills', 'Settings'] as const;
 
 export type Shelf = (typeof SHELVES)[number];
 
-export type Categories = ReadonlyMap<string, CatalogApp['Category']>;
+export type Kinds = ReadonlyMap<string, CatalogApp['AppKind']>;
 
 export type Layer = { name: string; identity: Identity; lines: readonly PlanLine[] };
 
@@ -34,13 +34,12 @@ export function byAction(lines: readonly PlanLine[]): readonly [PlanLine['Action
     return [...groups.entries()];
 }
 
-export function categoriesOf(reports: readonly AppsReport[]): Categories {
-    return new Map(reports.map((report) => [report.App.Name, report.App.Category]));
+export function kindsOf(reports: readonly AppsReport[]): Kinds {
+    return new Map(reports.map((report) => [report.App.Name, report.App.AppKind]));
 }
 
-export function shelfOf(line: PlanLine, categories: Categories): string {
-    const category = categories.get(line.Step.Package);
-    return category !== undefined && isSkill(category) ? 'Skills' : shelfWord(line.Step.Kind);
+export function shelfOf(line: PlanLine, kinds: Kinds): string {
+    return kinds.get(line.Step.Package) === 'skill' ? 'Skills' : shelfWord(line.Step.Kind);
 }
 
 export function layersOf(plan: MachinefilePlan): readonly Layer[] {
@@ -61,21 +60,17 @@ export function layersOf(plan: MachinefilePlan): readonly Layer[] {
         : [...layers, { identity: NO_LAYER, lines: extra, name: '' }];
 }
 
-export function onShelf(
-    layers: readonly Layer[],
-    shelf: Shelf,
-    categories: Categories,
-): readonly Layer[] {
+export function onShelf(layers: readonly Layer[], shelf: Shelf, kinds: Kinds): readonly Layer[] {
     return layers
         .map((layer) => ({
             ...layer,
-            lines: layer.lines.filter((line) => shelfOf(line, categories) === shelf),
+            lines: layer.lines.filter((line) => shelfOf(line, kinds) === shelf),
         }))
         .filter((layer) => layer.lines.length > 0);
 }
 
-export function countOn(layers: readonly Layer[], shelf: Shelf, categories: Categories): number {
-    return onShelf(layers, shelf, categories).reduce((sum, layer) => sum + layer.lines.length, 0);
+export function countOn(layers: readonly Layer[], shelf: Shelf, kinds: Kinds): number {
+    return onShelf(layers, shelf, kinds).reduce((sum, layer) => sum + layer.lines.length, 0);
 }
 
 const COUNTED_AS: Readonly<Record<Shelf, PageNoun>> = {
