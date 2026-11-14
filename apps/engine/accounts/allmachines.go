@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 const ShortShare = 30 * time.Minute // value: a share with less time left than this needs the owner (SPEC B5.8).
@@ -66,7 +67,7 @@ func (a AllMachines) Read() Reading {
 	var r Reading
 	for _, m := range a.Macs {
 		if m.Silent != "" {
-			r.Silent = append(r.Silent, Silent{Mac: m.Name, Why: m.Silent})
+			r.Silent = append(r.Silent, Silent{Mac: m.Name, Why: secret.Kept(m.Silent)})
 			continue
 		}
 		on := SignedInOn{Mac: m.Name, ThisMac: m.ThisMac}

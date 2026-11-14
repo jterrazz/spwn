@@ -7,8 +7,22 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
+
+func Screened(err error, path string) *fail.Error {
+	// invariant: an error worded for a surface that draws its words itself,
+	// outside page.Error and the error block, leaves with its message
+	// screened.
+	worded := Translate(err, path)
+	if worded == nil {
+		return nil
+	}
+	said := *worded
+	said.Message = secret.Kept(said.Message)
+	return &said
+}
 
 func Translate(err error, path string) *fail.Error {
 	if err == nil {

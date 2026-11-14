@@ -2,6 +2,7 @@ package accounts_test
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -105,5 +106,13 @@ func TestAVMsAccountsAreTheCopiesItsMacSharedWithIt(t *testing.T) {
 	mini := twoMacs().Of("jterrazz-mac-mini", "").Read()
 	if len(mini.SignedOut) != 1 || len(mini.SignedIn) != 1 || mini.SignedIn[0].Mac != "jterrazz-mac-mini" || len(mini.Shared) != 1 {
 		t.Fatalf("the mini's accounts: %+v", mini)
+	}
+}
+
+func TestAMacNotReadSaysItsErrorWithItsTokenWithheld(t *testing.T) {
+	token := "s" + "k-" + strings.Repeat("Ab3dE", 8)
+	r := accounts.AllMachines{Macs: []accounts.MacAccounts{{Name: "jterrazz-mac-mini", Silent: "refused: token " + token}}}.Read()
+	if len(r.Silent) != 1 || r.Silent[0].Why != "refused: token withheld" {
+		t.Errorf("silent: %+v", r.Silent)
 	}
 }

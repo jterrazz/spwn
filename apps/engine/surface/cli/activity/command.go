@@ -170,7 +170,7 @@ func silenced(v pageactivity.View, err error) pageactivity.View {
 	if err == nil {
 		return v
 	}
-	worded := kit.Translate(err, "")
+	worded := kit.Screened(err, "")
 	v.Silent, v.SilentType, v.SilentCode = worded.Message, string(worded.Type), string(worded.Code)
 	if v.SilentType == "" {
 		v.SilentType = string(fail.Failed)

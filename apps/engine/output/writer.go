@@ -58,7 +58,13 @@ func (w *Writer) Failure(err error) {
 }
 
 func (w *Writer) Finding(m page.Mark, parts ...string) error {
-	line := tty.FindingLine(m, parts...)
+	// invariant: a finding may carry an error's words (a read that did not
+	// answer), so each part is screened as it is written.
+	kept := make([]string, len(parts))
+	for i, p := range parts {
+		kept[i] = secret.Kept(p)
+	}
+	line := tty.FindingLine(m, kept...)
 	secret.Tripwire([]byte(line))
 	w.settle()
 	_, err := io.WriteString(w.stdout.W, line)
