@@ -54,30 +54,8 @@ describe('ports', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('W20 Take back removes the copy of an account from the machine', async () => {
-        // Given - linux-1's Accounts over two-macs, github and claude shared with it
-        const result = await website.visit(
-            '/?world=two-macs&machine=linux-1&tab=Accounts',
-            async (visitor) => {
-                const shared = region('Shared with it');
-                await visitor.see(within(shared, button('Take back github')));
-
-                // When - Take back is pressed on github and confirmed
-                await visitor.click(within(shared, button('Take back github')));
-                await visitor.click(
-                    within(dialog('Take back github from linux-1?'), button('Take back')),
-                );
-
-                // Then - the copy is gone, and claude's stays
-                await visitor.gone(within(shared, button('Take back github')));
-                await visitor.see(within(shared, button('Take back claude')));
-            },
-        );
-        expect(result.errors.text).toBe('');
-    });
-
     test.todo(
-        'W20 waits for a recording of accounts.read after a Take back, where the account is offered again under Can be shared',
+        'W20 waits for grants.remove in the window and a recording of accounts.list after it, where the row offers a sign-in again (the K5b lot)',
     );
 
     test.todo(

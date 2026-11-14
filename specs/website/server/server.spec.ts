@@ -1,4 +1,14 @@
-import { button, content, dialog, disabled, enabled, field, region, within } from '@jterrazz/test';
+import {
+    button,
+    content,
+    dialog,
+    disabled,
+    enabled,
+    field,
+    main,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -92,5 +102,17 @@ describe('server', () => {
 
     test.todo('S5 waits for a state per day on MachinesUptimeDay');
 
-    test.todo('S6 waits for the accounts redesign');
+    test('S6 a server has no Sign-ins tab: it keeps its own sign-ins', async () => {
+        // Given - the window on infra's page over two-macs, a server
+        const result = await website.visit(
+            '/?world=two-macs&machine=infra&tab=Overview',
+            async (visitor) => {
+                // When - its tabs are read
+                // Then - Overview is there and Sign-ins is not
+                await visitor.see(within(main(), content('Overview')));
+                await visitor.gone(within(main(), content('Sign-ins')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 });

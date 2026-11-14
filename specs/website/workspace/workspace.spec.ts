@@ -3,6 +3,7 @@ import {
     content,
     dialog,
     disabled,
+    field,
     heading,
     navigation,
     region,
@@ -96,5 +97,66 @@ describe('workspace', () => {
 
     test.todo('W5 waits for a recording of a failed creation, its step and its log');
 
-    test.todo('W6 waits for an id on accounts.share');
+    test.todo(
+        'W6 waits for grants.add and the vault in the window: a grant is added from the vault for a term (the K5b lot)',
+    );
+
+    test('W30 a pasted code goes through a field the page never holds, and a refused one is said', async () => {
+        // Given - linux-1's Sign-ins over sign-ins, claude signed out and its login asking a code back
+        const result = await website.visit(
+            '/?world=sign-ins&machine=linux-1&tab=Sign-ins&pace=600',
+            async (visitor) => {
+                await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
+                const sheet = dialog('Sign in to claude on linux-1');
+                await visitor.see(
+                    within(sheet, content('paste the code it gives you here', { exact: false })),
+                );
+
+                // When - a code the provider refuses is sent
+                await visitor.fill(within(sheet, field('Code from claude.com')), 'nope');
+                await visitor.click(within(sheet, button('Continue')));
+
+                // Then - the engine's refusal in its words, and the field is empty for another
+                await visitor.see(within(sheet, content('the code was refused', { exact: false })));
+            },
+        );
+        expect(result.errors.text).toBe('');
+        expect(result.html.text).not.toContain('nope');
+    });
+
+    test('W31 an expired code is said, and New code starts the sign-in again', async () => {
+        // Given - linux-1's Sign-ins over sign-ins, claude's sign-in opened and its code never pasted
+        const result = await website.visit(
+            '/?world=sign-ins&machine=linux-1&tab=Sign-ins&pace=600',
+            async (visitor) => {
+                await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
+                const sheet = dialog('Sign in to claude on linux-1');
+
+                // When - the engine lets the code run out
+                await visitor.see(within(sheet, content('The code expired')));
+
+                // Then - New code starts again, and the site is offered
+                await visitor.click(within(sheet, button('New code')));
+                await visitor.see(within(sheet, button('Open claude.com')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("W32 a far Mac's VM says to sign in from its Mac and offers no Sign in", async () => {
+        // Given - linux-3's Sign-ins over stories, a VM of the Mac mini
+        const result = await website.visit(
+            '/?world=stories&machine=linux-3&tab=Sign-ins',
+            async (visitor) => {
+                // When - its rows are read
+                const rows = region('Sign-ins');
+                await visitor.see(within(rows, heading('Sign-ins 4')));
+
+                // Then - no row offers Sign in, whichever the program
+                await visitor.gone(within(rows, button('Sign in gh')));
+                await visitor.gone(within(rows, button('Sign in claude')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 });
