@@ -5,6 +5,7 @@ export type Confirmation = {
     key: string;
     title: string;
     verb: string;
+    consequence: string | undefined;
     destroys: boolean;
     confirm: (typed: string) => void;
     cancel: () => void;

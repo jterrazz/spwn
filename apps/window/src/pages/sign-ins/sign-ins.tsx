@@ -77,6 +77,7 @@ function RemoveGrant({ row, removeGrant, onEntry }: Omit<TrailProps, 'onSignIn' 
                 </Button>
             )}
             <GestureButton
+                consequence={row.Ask === undefined ? undefined : ''}
                 gesture={removeGrant}
                 label={word}
                 name={`${word} ${row.Program}`}
@@ -94,6 +95,7 @@ function Trail({ row, signOut, removeGrant, onSignIn, onEntry }: TrailProps) {
         case 'sign-out': {
             return (
                 <GestureButton
+                    consequence={row.Ask === undefined ? undefined : ''}
                     gesture={signOut}
                     label={word}
                     name={name}

@@ -62,8 +62,9 @@ describe('passwords', () => {
             async (visitor) => {
                 // When - Remove password is clicked and confirmed
                 await visitor.click(button('Remove password'));
-                const asked = dialog('Remove npm publish? Its grants end: 1 machine.');
+                const asked = dialog('Remove npm publish?');
                 await visitor.see(asked);
+                await visitor.see(within(asked, content('Its grants end: 1 machine.')));
                 await visitor.click(within(asked, button('Remove')));
 
                 // Then - the vault is listed again, without it

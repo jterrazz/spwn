@@ -54,12 +54,6 @@ export function aboutEntry(entry: AccountsVaultEntry): string {
     return sentence([entry.Program, kindWord(entry), entry.Who, addedOn(entry)]);
 }
 
-export function removeQuestion(
-    entry: Pick<AccountsVaultEntry, 'Label' | 'RemoveSentence'>,
-): string {
-    return `Remove ${entry.Label}? ${entry.RemoveSentence}.`;
-}
-
 // invariant: a grant's line joins the engine's noun for what holds it, the workspace an agent works in, and the
 // invariant: engine's own sentence of an agent's reach.
 export function grantLine(grant: Pick<AccountsVaultGrant, 'ToKind' | 'Workspace'>): string {

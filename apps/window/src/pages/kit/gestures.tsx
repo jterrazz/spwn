@@ -27,6 +27,7 @@ type GestureButtonProps = {
     label: string;
     title: string;
     verb?: string;
+    consequence?: string | undefined;
     variant?: ButtonVariant;
     name?: string;
     destroys?: boolean;
@@ -47,6 +48,7 @@ export function GestureButton({
     label,
     title,
     verb = label,
+    consequence = gesture.consequence,
     variant = 'plain',
     name,
     destroys = variant === 'danger',
@@ -56,6 +58,7 @@ export function GestureButton({
         gestures.askedBy({
             cancel: gesture.cancel,
             confirm: gesture.confirm,
+            consequence,
             destroys,
             key: gesture.key,
             title,
@@ -88,7 +91,7 @@ export function GestureConfirm() {
             key={asked.key}
             onCancel={asked.cancel}
             onConfirm={asked.confirm}
-            said={ask.refusal?.wire?.message}
+            said={asked.consequence ?? ask.refusal?.wire?.message}
             title={asked.title}
             typed={ask.form === 'name' ? ask.name : undefined}
             verb={asked.verb}

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { recordingsOf } from '../../fixtures/recordings';
 import type { Out } from '../client';
-import { codesOf, countOf, headingOf, wordOf } from '../engine-words';
+import { codesOf, consequenceOf, countOf, headingOf, wordOf } from '../engine-words';
 import { keyOf } from '../frame';
 import { vmLifetimeWord } from '../shown';
 
@@ -54,6 +54,24 @@ describe('engine words', () => {
         // Then - each has the engine's heading, install's To install
         expect(headings).toContainEqual(['install', 'To install']);
         expect(headings.every(([action, heading]) => heading !== action)).toBe(true);
+    });
+
+    test("a confirmed call's consequence is the engine's sentence, its subject put where the engine marks it", () => {
+        // Given - machines.stop, which names its subject, engine.stop, which names none, and a call that asks nothing
+
+        // When - each consequence is asked
+        const said = [
+            consequenceOf('machines.stop', 'linux-1'),
+            consequenceOf('engine.stop', 'linux-1'),
+            consequenceOf('machines.start', 'linux-1'),
+        ];
+
+        // Then - the sentence with the subject filled, the sentence as it is, and nothing
+        expect(said).toStrictEqual([
+            'linux-1 stops: what it serves stops until you start it again.',
+            'Every VM of this Mac stops, and nothing is shared until the engine starts again.',
+            undefined,
+        ]);
     });
 
     test("a count is said by the engine's noun, one and other alike", () => {
