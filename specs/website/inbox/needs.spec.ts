@@ -1,4 +1,4 @@
-import { button, content, heading, main, navigation, region, within } from '@jterrazz/test';
+import { button, content, dialog, heading, main, navigation, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -31,24 +31,9 @@ describe('needs', () => {
 
     test.todo('N3 waits for a recording of an exposed port and the Review verb of its line');
 
-    test('N4 Extend gives a share about to end 12 h more, and the machine page says so', async () => {
-        // Given - linux-1's Accounts over stories, its claude copy ending in 24 min
-        const result = await website.visit(
-            '/?world=stories&machine=linux-1&tab=Accounts',
-            async (visitor) => {
-                const shared = region('Shared with it');
-                await visitor.see(within(shared, content('ends in 24 min')));
-
-                // When - Extend of claude is pressed
-                await visitor.click(within(shared, button('Extend claude by 12 h')));
-
-                // Then - the copy holds 12 h from now, on the page of the machine
-                await visitor.see(within(shared, content('ends in 11 h 59 min')));
-                await visitor.gone(within(shared, content('ends in 24 min')));
-            },
-        );
-        expect(result.errors.text).toBe('');
-    });
+    test.todo(
+        'N4 waits for the Now of accounts.list, so a grant reads as the time it has left, and a world where a grant ends within the hour',
+    );
 
     test.todo("N5 waits for each line's version rule on machinefile.drift");
 
@@ -56,26 +41,23 @@ describe('needs', () => {
         'N6 waits for a recording of an idle VM among the needs, and a kept journal for Changes',
     );
 
-    test('N7 a refused account offers Sign in on the Mac, with its own login command', async () => {
-        // Given - This Mac's Accounts over two-macs, where npm's token was refused
+    test('N7 a program signed out offers Sign in, and its sheet shows the engine code and the site to open', async () => {
+        // Given - linux-1's Sign-ins over two-macs, gh signed out
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Accounts',
+            '/?world=two-macs&machine=linux-1&tab=Sign-ins&pace=600',
             async (visitor) => {
-                // When - I read the Accounts tab
-                const accounts = region('Accounts on this Mac');
-                await visitor.see(accounts);
+                // When - Sign in of gh is pressed
+                await visitor.click(within(region('Sign-ins'), button('Sign in gh')));
 
-                // Then - the row offers Sign in and the command it runs
-                await visitor.see(within(accounts, button('Sign in')));
-                await visitor.see(within(accounts, button('Copy npm login')));
+                // Then - the sheet shows the code to copy and the site to open
+                const sheet = dialog('Sign in to gh on linux-1');
+                await visitor.see(within(sheet, content('WDJB-MJHT')));
+                await visitor.see(within(sheet, button('Copy code')));
+                await visitor.see(within(sheet, button('Open github.com')));
             },
         );
         expect(result.errors.text).toBe('');
     });
-
-    test.todo(
-        'N7 waits for a recording of an account signed in again, and for the Tauri window, the only one that opens Terminal',
-    );
 
     test('N8 an empty Needs you says no need is listed, and draws no table', async () => {
         // Given - the Inbox over one-mac, where no line waits

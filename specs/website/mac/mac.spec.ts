@@ -196,9 +196,22 @@ describe('mac', () => {
         'M9 waits for a recording of a Mac that lists what listens on it, each with its word',
     );
 
-    test.todo(
-        'M10 waits for a verb that picks one of several equal targets: github and claude both show the chip linux-1',
-    );
+    test("M10 a Mac's Sign-ins tab lists each program with its state and the action the engine names", async () => {
+        // Given - the Sign-ins tab of This Mac over two-macs
+        const result = await website.visit(
+            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Sign-ins',
+            async (visitor) => {
+                // When - its rows are read
+                const rows = region('Sign-ins');
+                await visitor.see(rows);
+
+                // Then - each program is a row, and a signed-in one offers its sign-out
+                await visitor.see(within(rows, content('gh')));
+                await visitor.see(within(rows, button('Sign out claude')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('M11 Activity reads its four measures, its machines among the busiest, its heat and battery', async () => {
         // Given - the Activity tab of This Mac over two-macs
