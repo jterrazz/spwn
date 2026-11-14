@@ -1,4 +1,4 @@
-import type { AccountsAccount, MachinesSSHTarget, PortsSharedPort } from '@jterrazz/station-api';
+import type { MachinesSSHTarget, PortsSharedPort } from '@jterrazz/station-api';
 
 import { EngineError, WINDOW_FAIL_CODES } from './engine-error';
 import type { WindowFailCode } from './engine-error';
@@ -8,7 +8,7 @@ import type { Ipc } from './tauri';
 
 type Opens = 'terminal' | 'url';
 
-// invariant: an Openable is made from an engine answer alone, by the three functions below: its constructor is
+// invariant: an Openable is made from an engine answer alone, by the two functions below: its constructor is
 // invariant: private, so no text a page holds can reach a terminal or a browser.
 export class Openable {
     readonly opens: Opens;
@@ -21,11 +21,6 @@ export class Openable {
 
     static ofSsh(target: MachinesSSHTarget): Openable | undefined {
         return target.Command === '' ? undefined : new Openable('terminal', target.Command);
-    }
-
-    static ofFix(account: AccountsAccount): Openable | undefined {
-        const hint = account.hint ?? '';
-        return hint === '' ? undefined : new Openable('terminal', hint);
     }
 
     static ofShare(share: PortsSharedPort, onThisMac: boolean): Openable | undefined {

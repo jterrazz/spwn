@@ -1,4 +1,4 @@
-import type { AccountsAccount, PortsSharedPort } from '@jterrazz/station-api';
+import type { PortsSharedPort } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
 import { NO_OPENER, Openable, shareAddressOf, tauriOpener } from '../opener';
@@ -31,8 +31,6 @@ const SHARE: PortsSharedPort = {
     vm: 'linux-1',
 };
 
-const NPM: AccountsAccount = { hint: 'npm login', provider: 'npm', state: 'broken' };
-
 describe('opener', () => {
     test("a terminal is handed the engine's command, and nothing else", async () => {
         // Given - machines.ssh's answer for linux-1, and the shell's invoke
@@ -53,33 +51,27 @@ describe('opener', () => {
         ]);
     });
 
-    test("a share's address and an account's fix are the engine's fields as sent", async () => {
-        // Given - a shared port with a public address, and npm's fix
+    test("a share's address is the engine's field as sent", async () => {
+        // Given - a shared port with a public address
         const { invoked, ipc } = fakeInvoke();
         const share = Openable.ofShare(SHARE, true);
-        const fix = Openable.ofFix(NPM);
 
-        // When - each is opened
-        const opener = tauriOpener(ipc);
-        for (const one of [share, fix]) {
-            if (one !== undefined) {
-                await opener(one);
-            }
+        // When - it is opened
+        if (share !== undefined) {
+            await tauriOpener(ipc)(share);
         }
 
-        // Then - the public address in a browser, the fix in a terminal
+        // Then - the public address, in a browser
         expect(invoked).toStrictEqual([
             { args: { url: 'https://mac.tail1234.ts.net:40001' }, command: 'open_url' },
-            { args: { command: 'npm login' }, command: 'open_in_terminal' },
         ]);
         expect(shareAddressOf(SHARE)).toBe('https://mac.tail1234.ts.net:40001');
     });
 
     test('an answer that gives no value makes nothing to open', () => {
-        // Given - no command, no fix, a raw TCP share and a share with no address
+        // Given - no command, a raw TCP share and a share with no address
         const answers = [
             Openable.ofSsh({ Address: 'api', Command: '', User: 'admin' }),
-            Openable.ofFix({ provider: 'npm', state: 'ok' }),
             Openable.ofShare({ ...SHARE, http: false }, true),
             Openable.ofShare({ ...SHARE, urls: { local: '', public: '' } }, true),
         ];
@@ -137,11 +129,15 @@ describe('opener', () => {
     });
 
     test('outside the Tauri shell nothing is opened', async () => {
-        // Given - a proof build's opener and npm's fix
-        const fix = Openable.ofFix(NPM);
+        // Given - a proof build's opener and machines.ssh's answer for linux-1
+        const ssh = Openable.ofSsh({
+            Address: 'linux-1',
+            Command: 'ssh admin@linux-1',
+            User: 'admin',
+        });
 
         // When - it is opened
-        const opened = fix ? await NO_OPENER(fix) : undefined;
+        const opened = ssh ? await NO_OPENER(ssh) : undefined;
 
         // Then - refused, saying why
         expect(opened?.kind).toBe('refused');

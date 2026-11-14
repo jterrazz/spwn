@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { looksSecret, screen, shownOrWithheld, WITHHELD } from '../secret';
+import { looksSecret, shownOrWithheld, WITHHELD } from '../secret';
 
 const GITHUB_TOKEN = ['ghp', '0123456789abcdefghijABCDEFGHIJ'].join('_');
 
@@ -76,17 +76,5 @@ describe('secret', () => {
             '2026.10.20',
             `ghcr.io/jterrazz/station-base@sha256:${digest}`,
         ]);
-    });
-
-    test('a field that holds a secret is named, never its value', () => {
-        // Given - an account whose detail carries a token
-        const result = screen([
-            ['identity', 'jterrazz'],
-            ['detail', GITHUB_TOKEN],
-            ['hint', undefined],
-        ]);
-
-        // Then - the identity is shown, the detail is reported by its name alone
-        expect(result).toStrictEqual({ shown: ['jterrazz'], withheld: ['detail'] });
     });
 });
