@@ -52,6 +52,7 @@ export const BRIDGED = [
     'ports.stop-sharing',
     'settings.list',
     'settings.matrix',
+    'vault.add',
     'vault.list',
     'vault.remove',
 ] as const satisfies readonly CallName[];

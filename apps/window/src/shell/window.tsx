@@ -3,7 +3,6 @@ import { useCallback, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { Screen } from '../design/index';
-import { engineViewStateOf } from '../engine/provisional';
 import { useRead, useWatch } from '../engine/react';
 import type { Reading } from '../engine/react';
 import { findMachine, macsOf } from '../model/machines';
@@ -18,6 +17,7 @@ import { RouterProvider, useRouter } from './router';
 import { Sidebar } from './sidebar';
 import { Toolbar } from './toolbar';
 import type { Crumb } from './toolbar';
+import { actionOf } from './toolbar-action';
 
 import styles from './window.module.css';
 
@@ -59,6 +59,7 @@ export type Pages = {
     Confirm: ComponentType;
     NewMachine: ComponentType<{ go: Go; onClose: () => void; opening: Opening }>;
     AddMac: ComponentType<{ go: Go; onClose: () => void }>;
+    AddPassword: ComponentType<{ onClose: () => void }>;
     routeOfNeed: (need: OverviewNeed) => Route;
 };
 
@@ -79,6 +80,7 @@ export function Window({ initial, pages, Gallery, onRoute }: WindowProps) {
 
 type Sheet =
     | { kind: 'add-mac' }
+    | { kind: 'add-password' }
     | { kind: 'find' }
     | { kind: 'new-machine'; opening: Opening }
     | { kind: 'none' };
@@ -170,7 +172,7 @@ type SheetsProps = {
 };
 
 function Sheets({ sheet, onClose, onAddMac, go, pages, macs, needs, withGallery }: SheetsProps) {
-    const { NewMachine, AddMac } = pages;
+    const { NewMachine, AddMac, AddPassword } = pages;
     switch (sheet.kind) {
         case 'find': {
             return (
@@ -191,6 +193,9 @@ function Sheets({ sheet, onClose, onAddMac, go, pages, macs, needs, withGallery 
         }
         case 'add-mac': {
             return <AddMac go={go} onClose={onClose} />;
+        }
+        case 'add-password': {
+            return <AddPassword onClose={onClose} />;
         }
         case 'none': {
             return null;
@@ -213,23 +218,21 @@ function useSheets() {
     const addMac = useCallback(() => {
         setSheet({ kind: 'add-mac' });
     }, []);
+    const addPassword = useCallback(() => {
+        setSheet({ kind: 'add-password' });
+    }, []);
     const toggleSidebar = useCallback(() => {
         setSidebar((open) => !open);
     }, []);
-    return { addMac, close, find, newMachine, sheet, sidebar, toggleSidebar };
-}
-
-// value: while this Mac's engine is stopped, Start the engine leads Home and New machine stands back.
-function engineStopped(macs: readonly MachinesMacView[]): boolean {
-    const thisMac = macs.find((mac) => mac.ThisMac);
-    return thisMac !== undefined && engineViewStateOf(thisMac.Engine) === 'stopped';
+    return { addMac, addPassword, close, find, newMachine, sheet, sidebar, toggleSidebar };
 }
 
 function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages: Pages }) {
     const router = useRouter();
     const { route, go, back, forward, canGoBack, canGoForward } = router;
     const { home, listed, macs, needs, rail } = useStation();
-    const { addMac, close, find, newMachine, sheet, sidebar, toggleSidebar } = useSheets();
+    const { addMac, addPassword, close, find, newMachine, sheet, sidebar, toggleSidebar } =
+        useSheets();
     useShortcuts(router, find, Gallery !== undefined);
     const { lost, dismiss } = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
@@ -239,19 +242,19 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                 {sidebar ? <Sidebar {...rail} go={go} onFind={find} route={route} /> : null}
                 <main className={styles.main}>
                     <Toolbar
+                        action={actionOf({
+                            addPassword,
+                            macs,
+                            newMachine: () => {
+                                newMachine();
+                            },
+                            route,
+                        })}
                         canGoBack={canGoBack}
                         canGoForward={canGoForward}
                         crumbs={crumbsOf(route, found, go)}
-                        newMachineLeads={!engineStopped(macs)}
                         onBack={back}
                         onForward={forward}
-                        onNewMachine={
-                            route.page === 'home'
-                                ? () => {
-                                      newMachine();
-                                  }
-                                : undefined
-                        }
                         onToggleSidebar={toggleSidebar}
                         sidebar={sidebar}
                     />
