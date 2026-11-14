@@ -251,8 +251,8 @@ GESTURES = {
         {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
         {"call": "vault.remove", "in": {"ID": "pw-2", "Confirm": "yes"}},
         {"call": "grants.remove", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine", "Confirm": "yes"}},
-        {"call": "grants.add", "in": {"Entry": "pw-1", "To": "linux-1", "ToKind": "machine", "For": 0}},
-        {"call": "grants.add", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine", "For": 0}},
+        {"call": "grants.add", "in": {"Entry": "pw-1", "To": "linux-1", "ToKind": "machine"}},
+        {"call": "grants.add", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine"}},
     ],
     "presence-refused": [
         {"call": "grants.add", "in": {"Entry": "pw-1", "ToKind": "machine", "To": "linux-1"}},

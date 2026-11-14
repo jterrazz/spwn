@@ -18,8 +18,8 @@
     - heading "Sign-ins 4" [level=2]
     - text: gh Signed out
     - button "Sign in gh": Sign in
-    - text: npm from the password pw-2 until 14:00 Signed in
-    - button "Open the password pw-2": pw-2
+    - text: npm from the password npm publish Signed in
+    - button "Open the password npm publish": npm publish
     - button "Remove npm": Remove
     - text: claude admin@jterrazz.com · Max plan · signed in by itself Signed in
     - button "Sign out claude": Sign out

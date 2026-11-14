@@ -31,9 +31,25 @@ describe('needs', () => {
 
     test.todo('N3 waits for a recording of an exposed port and the Review verb of its line');
 
-    test.todo(
-        'N4 waits for the Now of accounts.list, so a grant reads as the time it has left, and a world where a grant ends within the hour',
-    );
+    test('N4 a program held by a grant says which password holds it, gives no end, and opens that password', async () => {
+        // Given - linux-1's Sign-ins over two-macs, npm held by a grant of npm publish
+        const result = await website.visit(
+            '/?world=two-macs&machine=linux-1&tab=Sign-ins',
+            async (visitor) => {
+                const rows = region('Sign-ins');
+
+                // When - the row is read
+                // Then - it names the password, and its link opens that password's page
+                await visitor.see(
+                    within(rows, content('from the password npm publish', { exact: false })),
+                );
+                await visitor.click(within(rows, button('Open the password npm publish')));
+                await visitor.see(heading('npm publish'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+        expect(result.content.text).not.toContain('until');
+    });
 
     test.todo("N5 waits for each line's version rule on machinefile.drift");
 
@@ -50,7 +66,7 @@ describe('needs', () => {
                 await visitor.click(within(region('Sign-ins'), button('Sign in gh')));
 
                 // Then - the sheet shows the code to copy and the site to open
-                const sheet = dialog('Sign in to gh on linux-1');
+                const sheet = dialog('Enter the code');
                 await visitor.see(within(sheet, content('WDJB-MJHT')));
                 await visitor.see(within(sheet, button('Copy code')));
                 await visitor.see(within(sheet, button('Open github.com')));

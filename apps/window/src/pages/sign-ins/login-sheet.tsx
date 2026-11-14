@@ -5,8 +5,7 @@ import type { ReactNode } from 'react';
 import { CopyButton } from '../../design/copy-button';
 import { AppIcon, Button, Dialog, StateDot, StatePill } from '../../design/index';
 import type { EngineError } from '../../engine/engine-error';
-import { wordOf } from '../../engine/engine-words';
-import { loginExpired } from '../../engine/provisional';
+import { detailOf, stepHeadingOf, wordOf } from '../../engine/engine-words';
 import { useReread } from '../../engine/react';
 import { engineShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
@@ -22,11 +21,11 @@ import styles from './sign-ins.module.css';
 
 type Program = AccountsProgramRow['Program'];
 
-function Status({ word, left }: { word: string; left: string }) {
+function Status({ line, left }: { line: string; left: string }) {
     return (
         <p className={styles.status}>
             <span>
-                <StateDot {...engineShown('AccountsProgramState', 'waiting')} /> {word}
+                <StateDot {...engineShown('AccountsProgramState', 'waiting')} /> {line}
             </span>
             <span>
                 expires in <span className={styles.left}>{left}</span>
@@ -63,10 +62,9 @@ function OpenSite({
     );
 }
 
-function StepBody({ found, step, machine }: { found: Found; step: AccountsStep; machine: string }) {
+function StepBody({ found, step }: { found: Found; step: AccountsStep }) {
     const site = step.Site ?? '';
     const left = codeLeft(step);
-    const waiting = wordOf('AccountsProgramState', 'waiting').Word;
     switch (step.Kind) {
         case 'device-code': {
             return (
@@ -80,12 +78,12 @@ function StepBody({ found, step, machine }: { found: Found; step: AccountsStep; 
                             variant="plain"
                         />
                     </div>
-                    <Status left={left} word={`${waiting}: ${site}`} />
+                    <Status left={left} line={step.Line} />
                 </>
             );
         }
         case 'link': {
-            return <Status left={left} word={`${waiting}: ${site}`} />;
+            return <Status left={left} line={step.Line} />;
         }
         case 'paste': {
             return (
@@ -95,7 +93,7 @@ function StepBody({ found, step, machine }: { found: Found; step: AccountsStep; 
                         <OpenSite found={found} primary={false} step={step} />
                     </div>
                     <PasteCode found={found} step={step} />
-                    <Status left={left} word={`${waiting}: ${machine}`} />
+                    <Status left={left} line={step.Line} />
                 </>
             );
         }
@@ -112,6 +110,10 @@ function StepOpens({ found, step }: { found: Found; step: AccountsStep }) {
             return null;
         }
     }
+}
+
+function loginExpired(error: EngineError): boolean {
+    return error.wire?.code === 'login.expired';
 }
 
 function Expired({ step, error }: { step: AccountsStep; error: EngineError }) {
@@ -143,13 +145,18 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
         onClose();
     });
     const cancel = <Button onClick={onClose}>Cancel</Button>;
-    const sheet = (body: ReactNode, actions: ReactNode, consequence?: string) => (
+    const sheet = (
+        body: ReactNode,
+        actions: ReactNode,
+        step?: AccountsStep,
+        consequence?: string,
+    ) => (
         <Dialog
             actions={actions}
             consequence={consequence}
             lead={<AppIcon name={program} />}
             onClose={onClose}
-            title={title}
+            title={step === undefined ? title : stepHeadingOf(step.Kind)}
         >
             {body}
         </Dialog>
@@ -173,20 +180,20 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
                 {cancel}
                 {again}
             </>,
-            step.Expired,
+            step,
         );
     }
     const { step } = seen;
-    const machine = found.vm?.Name ?? found.mac.Name;
     return sheet(
         <div className={styles.body}>
-            <StepBody found={found} machine={machine} step={step} />
+            <StepBody found={found} step={step} />
         </div>,
         <>
             {cancel}
             <StepOpens found={found} step={step} />
         </>,
-        step.Line,
+        step,
+        detailOf('AccountsStepKind', step.Kind),
     );
 }
 
@@ -199,7 +206,6 @@ type SheetProps = {
 
 export function LoginSheet({ found, program, action, onClose }: SheetProps) {
     const [round, setRound] = useState(0);
-    const machine = found.vm?.Name ?? found.mac.Name;
     return (
         <Round
             found={found}
@@ -209,7 +215,7 @@ export function LoginSheet({ found, program, action, onClose }: SheetProps) {
                 setRound(round + 1);
             }}
             program={program}
-            title={`${wordOf('AccountsProgramAction', action).Word} to ${program} on ${machine}`}
+            title={`${wordOf('AccountsProgramAction', action).Word} ${program}`}
         />
     );
 }

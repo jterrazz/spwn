@@ -124,9 +124,9 @@ describe('workspace', () => {
             '/?world=sign-ins&machine=linux-1&tab=Sign-ins&pace=600',
             async (visitor) => {
                 await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
-                const sheet = dialog('Sign in to claude on linux-1');
+                const sheet = dialog('Paste the code');
                 await visitor.see(
-                    within(sheet, content('paste the code it gives you here', { exact: false })),
+                    within(sheet, content('then paste the code it gives you', { exact: false })),
                 );
 
                 // When - a code the provider refuses is sent
@@ -147,10 +147,12 @@ describe('workspace', () => {
             '/?world=sign-ins&machine=linux-1&tab=Sign-ins&pace=600',
             async (visitor) => {
                 await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
-                const sheet = dialog('Sign in to claude on linux-1');
+                const sheet = dialog('Paste the code');
 
                 // When - the engine lets the code run out
-                await visitor.see(within(sheet, content('The code expired')));
+                await visitor.see(
+                    within(sheet, content('expired before Claude was approved', { exact: false })),
+                );
 
                 // Then - New code starts again, and the site is offered
                 await visitor.click(within(sheet, button('New code')));
