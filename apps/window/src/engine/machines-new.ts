@@ -20,8 +20,6 @@ export type MachinesFit = 'fits' | 'no-room';
 
 export type MachinesPreset = 'gate' | 'small' | 'workspace';
 
-export type MachinesRoomFor = 'gate' | 'none' | 'small' | 'workspace';
-
 export type MachinesCallsNewIn = {
     From?: string;
     On?: string;
