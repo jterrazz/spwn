@@ -19,7 +19,7 @@ it, and splices their answers into <world>/<call>.json in place; `--in=<json>` n
 input (of every target), or adds that request when none is recorded yet. No other exchange and no other file moves.
 
 The world build's clock moves when a watch waits on it (apps/engine/wire/world_on.go), so two runs do not write the same
-files: a watch the engine ends before a check settles (accounts.list, disk.read) answers pending in one run and
+files: a watch the engine ends before a check settles (accounts.read, disk.read) answers pending in one run and
 settled in the other. The recorder keeps of a watch its first answer and its last (what streams between comes in the
 scheduler's order), never counts a read of TIMED as changed by a gesture, and keeps the NOISE field of a gesture's
 last recording: the process number the host gave, which no world decides, and the CLOCKED field of an answer (settings.matrix's Read, the world's clock) as its last
@@ -79,7 +79,7 @@ class Door:
         """Sends every request at once and returns, in their order, the answers of each, once all have ended. A watch
         of UNENDED the engine holds open (a VM's Overview through its birth) is let go of after QUIET seconds of
         silence by a cancel frame, as the window lets go of it, and its answers end on the engine's done; any other
-        is waited for to its end, as a watch that settles (accounts.list) may be silent longer than QUIET."""
+        is waited for to its end, as a watch that settles (accounts.read) may be silent longer than QUIET."""
         ids = [str(self.next + index) for index in range(len(requests))]
         self.next += len(requests)
         self.send([{"v": 2, "id": id, **request} for id, request in zip(ids, requests)])
@@ -176,7 +176,7 @@ def asks(listed):
           for mac, vm in vms],
         *[{"call": "machines.log", "in": {"VM": vm["Name"]}} for _, vm in vms],
         *[{"call": "machines.ssh", "in": {"Name": vm["Name"]}} for _, vm in vms],
-        *[{"watch": "accounts.list", "in": {"VMs": True}} for _ in here],
+        *[{"watch": "accounts.read", "in": {"VMs": True}} for _ in here],
         *[{"watch": "awake.read", "in": {}} for _ in here],
         {"watch": "machines.new", "in": {}},
         *[{"watch": "machines.new", "in": {"On": mac}} for mac in macsOf(listed)],

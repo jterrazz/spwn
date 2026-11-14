@@ -77,7 +77,7 @@ describe('ports', () => {
     });
 
     test.todo(
-        'W20 waits for a recording of accounts.list after a Take back, where the account is offered again under Can be shared',
+        'W20 waits for a recording of accounts.read after a Take back, where the account is offered again under Can be shared',
     );
 
     test.todo(

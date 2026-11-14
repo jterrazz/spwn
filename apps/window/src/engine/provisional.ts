@@ -122,12 +122,14 @@ export type NeedCall = 'apps.update' | 'background.remove' | 'disk.move' | 'engi
 // outside: calls.json declares that a call asks a confirmation, not how: which gestures are confirmed by their
 // outside: subject typed rather than a yes is this table's, one entry per confirmed call, until the call says it.
 const CONFIRM_FORMS: Readonly<Record<ConfirmName, AskForm>> = {
+    'accounts.logout': 'yes',
     'accounts.take-back': 'yes',
     'agents.stop': 'yes',
     'apps.remove': 'yes',
     'background.remove': 'yes',
     'disk.erase': 'name',
     'engine.stop': 'yes',
+    'grants.remove': 'yes',
     'images.delete': 'yes',
     'machinefile.apply': 'yes',
     'machines.cleanup': 'yes',
@@ -143,6 +145,7 @@ const CONFIRM_FORMS: Readonly<Record<ConfirmName, AskForm>> = {
     'settings.apply': 'yes',
     'settings.off': 'yes',
     'settings.run-containers': 'yes',
+    'vault.remove': 'yes',
 };
 
 export function confirmFormOf(call: ConfirmName): AskForm {
@@ -155,7 +158,6 @@ export function isPortShared(port: PortsPort, shares: readonly PortsSharedPort[]
 }
 
 export type DiskCall = 'disk.erase' | 'disk.free' | 'disk.move';
-
 export type DiskGesture = { call: DiskCall; danger: boolean };
 
 // outside: a disk.read row carries no gesture: what each group allows, and whether it destroys, is this table's
@@ -198,7 +200,7 @@ export type ShareEnd =
 
 const NS_PER_MS = 1_000_000;
 
-// outside: accounts.list gives a share its end and the report its hour, and no state of the share: whether it still
+// outside: accounts.read gives a share its end and the report its hour, and no state of the share: whether it still
 // outside: holds, and how long, is read from the two until the share carries both.
 export function shareEndOf(until: string, now: string): ShareEnd {
     const left = Date.parse(until) - Date.parse(now);
@@ -208,7 +210,7 @@ export function shareEndOf(until: string, now: string): ShareEnd {
     return left > 0 ? { kind: 'ends-in', nanoseconds: left * NS_PER_MS } : { kind: 'ended' };
 }
 
-// outside: accounts.list sends an identity it could not read as "?", not as no identity, until it leaves it out.
+// outside: accounts.read sends an identity it could not read as "?", not as no identity, until it leaves it out.
 export function identitiesOf(account: AccountsAccount): readonly string[] {
     return (account.identity ?? []).filter((one) => one !== '?');
 }

@@ -102,7 +102,7 @@ describe('gestures', () => {
                 await visitor.see(within(shared, content('ends in 24 min')));
                 before = heightOf('Shared with it');
 
-                // When - Extend of claude is clicked and accounts.list read again
+                // When - Extend of claude is clicked and accounts.read read again
                 await visitor.click(within(shared, button('Extend claude by 12 h')));
                 await visitor.see(within(shared, content('ends in 11 h 59 min')));
 

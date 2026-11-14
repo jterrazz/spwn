@@ -249,7 +249,7 @@ function ShareList({ report, mac }: { report: AccountsReport; mac: string }) {
 export function AccountsTab({ found, go }: { found: Found; go: Go }) {
     const name = found.vm?.Name ?? found.mac.Name;
     const target = targetOf({ mac: found.mac });
-    const accounts = useWatch('accounts.list', { VMs: true }, target);
+    const accounts = useWatch('accounts.read', { VMs: true }, target);
     if (accounts.kind === 'failed') {
         return (
             <Page>
