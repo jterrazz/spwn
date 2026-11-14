@@ -1,6 +1,9 @@
 package apps
 
-import "github.com/jterrazz/studio-station/apps/engine/catalog"
+import (
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
+)
 
 type Report struct {
 	App    catalog.App
@@ -74,6 +77,40 @@ type Outcome struct {
 	// value: the folders its install just put on station's search path,
 	// which a shell opened before it does not search.
 	Path []string
+}
+
+func Answered(outcomes []Outcome) []Outcome {
+	// invariant: an outcome leaves its call as an answer, screened once and
+	// only here: its detail, its reasons and each step's detail (a tool's
+	// words, its argv, a setting's error), word by word.
+	if outcomes == nil {
+		return nil
+	}
+	out := make([]Outcome, len(outcomes))
+	for i, o := range outcomes {
+		o.Detail, o.Reasons = secret.Kept(o.Detail), keptAll(o.Reasons)
+		if o.Steps != nil {
+			steps := make([]Step, len(o.Steps))
+			for j, st := range o.Steps {
+				st.Detail = secret.Kept(st.Detail)
+				steps[j] = st
+			}
+			o.Steps = steps
+		}
+		out[i] = o
+	}
+	return out
+}
+
+func keptAll(words []string) []string {
+	if words == nil {
+		return nil
+	}
+	out := make([]string, len(words))
+	for i, w := range words {
+		out[i] = secret.Kept(w)
+	}
+	return out
 }
 
 type Step struct {

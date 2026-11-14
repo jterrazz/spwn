@@ -26,7 +26,8 @@ type ApplyIn struct {
 var Apply = call.Call[Deps, ApplyIn, []settings.Change]{
 	Name: "settings.apply", Section: section.Settings, Where: call.AtTarget, Applies: settings.Applies, Confirm: confirm.Overwrite,
 	Errors: []fail.Code{Unknown, IsChecked, NotForThisMachine, NeedsAdmin, NeedsTerminal, confirm.YesNeeded},
-	Run: func(ctx context.Context, d Deps, in ApplyIn, _ call.Progress) ([]settings.Change, error) {
+	Run: func(ctx context.Context, d Deps, in ApplyIn, _ call.Progress) (answer []settings.Change, err error) {
+		defer func() { answer = settings.Answered(answer) }()
 		// invariant: every setting is judged before any question and any
 		// effect; one over a change of the owner's asks first, as it is lost.
 		off := offThisMac(d)

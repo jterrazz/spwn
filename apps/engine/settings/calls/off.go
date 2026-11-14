@@ -22,7 +22,8 @@ type OffIn struct {
 var Off = call.Call[Deps, OffIn, []settings.Change]{
 	Name: "settings.off", Section: section.Settings, Where: call.AtTarget, Applies: settings.Applies, Confirm: confirm.OffHere,
 	Errors: []fail.Code{Unknown, NotForThisMachine, NeedsAdmin, confirm.YesNeeded},
-	Run: func(ctx context.Context, d Deps, in OffIn, _ call.Progress) ([]settings.Change, error) {
+	Run: func(ctx context.Context, d Deps, in OffIn, _ call.Progress) (answer []settings.Change, err error) {
+		defer func() { answer = settings.Answered(answer) }()
 		// invariant: off never destroys a change of the owner's: only a
 		// setting still exactly as station applied it is undone; any other
 		// is left as it is, and every one is Off here after. A checked

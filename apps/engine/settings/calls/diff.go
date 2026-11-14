@@ -31,6 +31,7 @@ var Diff = call.Call[Deps, DiffIn, DiffOut]{
 			return DiffOut{}, err
 		}
 		row, now := judge(ctx, d, it, map[string]bool{})
+		now = now.Answered()
 		return DiffOut{Row: row, Diff: now.Diff, Before: now.Before, After: now.After}, nil
 	},
 }

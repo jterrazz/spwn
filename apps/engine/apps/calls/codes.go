@@ -64,8 +64,9 @@ func updating(in UpdateIn) string {
 func interrupted(ctx context.Context, out []apps.Outcome, err error) ([]apps.Outcome, error) {
 	// invariant: an interrupted run is the interrupt, never a list of
 	// failures: what finished stays done, and nothing is printed after it.
+	// Every outcome an apps call answers leaves here, screened.
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
 	}
-	return out, coded(err)
+	return apps.Answered(out), coded(err)
 }
