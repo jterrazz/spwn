@@ -1,7 +1,9 @@
 package fake
 
 import (
+	"cmp"
 	"context"
+	"maps"
 	"slices"
 	"time"
 
@@ -105,6 +107,48 @@ func (g *Grants) Check(_ context.Context, id string, to accounts.GrantTo, target
 		return accounts.Refusal(fail.NotFound, accounts.GrantNotGranted, target)
 	}
 	return nil
+}
+
+func rank(name, first string) int {
+	if name == first {
+		return 0
+	}
+	return 1
+}
+
+func (g *Grants) Candidates(_ context.Context, id string) (accounts.Candidates, error) {
+	g.w.Lock()
+	defer g.w.Unlock()
+	e, err := g.entry(id)
+	if err != nil {
+		return accounts.Candidates{}, err
+	}
+	found := accounts.Candidates{AgentGrantable: e.AgentGrantable, List: []accounts.Candidate{}}
+	parents := slices.SortedFunc(maps.Keys(g.w.Macs), func(a, b string) int {
+		return cmp.Or(cmp.Compare(rank(a, g.mac), rank(b, g.mac)), cmp.Compare(a, b))
+	})
+	for _, parent := range parents {
+		for _, name := range slices.Sorted(maps.Keys(g.w.Macs[parent].VMs)) {
+			vm := g.w.Macs[parent].VMs[name]
+			if vm.Kept == nil {
+				continue
+			}
+			stand, _ := g.reads.standOf(name)
+			facts := state(mac(g.w, name)).Programs[e.Program]
+			granted := slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == name })
+			found.List = append(found.List, accounts.Candidate{ToKind: accounts.ToMachine, To: name, Where: stand, Facts: facts, Granted: granted})
+		}
+	}
+	for _, name := range slices.Sorted(maps.Keys(mac(g.w, g.mac).VMs)) {
+		vm := mac(g.w, g.mac).VMs[name]
+		if vm.Agents == nil {
+			continue
+		}
+		for _, key := range slices.Sorted(maps.Keys(vm.Agents.Journal)) {
+			found.List = append(found.List, accounts.Candidate{ToKind: accounts.ToAgent, To: vm.Agents.Journal[key].Name, Workspace: name})
+		}
+	}
+	return found, nil
 }
 
 func (g *Grants) Add(_ context.Context, in contract.GrantIn) (accounts.Granted, error) {

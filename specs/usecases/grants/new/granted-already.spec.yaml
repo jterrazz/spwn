@@ -1,0 +1,13 @@
+description: 'A machine already granted this password can be picked again'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | [.ToKind, .To, .Workspace, .Fit, .Line]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"grants.new","in":{"Entry":"pw-2"}}
+      exit: 0
+      stdout: |
+          ["machine","api",null,"no","Start the machine first"]
+          ["machine","linux-1",null,"fits","Granted already; granting again starts a new term"]
+          ["machine","infra",null,"no","A server keeps its own sign-ins"]

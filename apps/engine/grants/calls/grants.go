@@ -38,6 +38,28 @@ var GrantAdd = call.Call[Deps, GrantAddIn, accounts.Granted]{
 	},
 }
 
+type GrantNewIn struct {
+	Entry string
+}
+
+var GrantNew = call.Watch[Deps, GrantNewIn, accounts.GrantOffer]{
+	// invariant: the sheet of a grant is read from this Mac's vault and
+	// machines: each target says whether the password can go there and why
+	// not when it cannot.
+	Name: "grants.new", Section: section.Accounts, Where: call.InEngine, Applies: accounts.OnAMac,
+	Errors: []fail.Code{accounts.GrantUnknownEntry},
+	Run: func(ctx context.Context, d Deps, in GrantNewIn, _ call.Progress) (<-chan call.Update[accounts.GrantOffer], error) {
+		found, err := d.Grants.Candidates(ctx, in.Entry)
+		if err != nil {
+			return nil, err
+		}
+		out := make(chan accounts.GrantOffer, 1)
+		out <- accounts.Offer(found)
+		close(out)
+		return call.Updates(ctx, out), nil
+	},
+}
+
 type GrantRemoveIn struct {
 	Entry   string
 	ToKind  accounts.GrantTo
@@ -67,5 +89,5 @@ type Deps struct {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(GrantAdd, d), call.Bind(GrantRemove, d)}
+	return []call.Handler{call.Bind(GrantAdd, d), call.Bind(GrantRemove, d), call.BindWatch(GrantNew, d)}
 }

@@ -153,6 +153,16 @@
       "Tone": "plain"
     }
   },
+  "AccountsTargetFit": {
+    "fits": {
+      "Word": "fits",
+      "Tone": "plain"
+    },
+    "no": {
+      "Word": "cannot be picked",
+      "Tone": "plain"
+    }
+  },
   "CatalogAfterApply": {
     "logout": {
       "Word": "a log out",

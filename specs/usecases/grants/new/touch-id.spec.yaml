@@ -1,0 +1,11 @@
+description: 'The sheet carries the sentence about confirming on this Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Presence'''
+      stdin: |
+          {"v":2,"id":"1","watch":"grants.new","in":{"Entry":"pw-1"}}
+      exit: 0
+      stdout: |
+          "Touch ID will ask you to confirm before the password leaves this Mac"

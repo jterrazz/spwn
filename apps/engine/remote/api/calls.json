@@ -604,6 +604,18 @@
       "out": "Granted"
     },
     {
+      "name": "grants.new",
+      "schema": "station.grants.new/v1",
+      "section": "accounts",
+      "where": "in-engine",
+      "errors": [
+        "grant.unknown-entry"
+      ],
+      "in": "GrantNewIn",
+      "out": "GrantOffer",
+      "watch": true
+    },
+    {
       "name": "grants.remove",
       "schema": "station.grants.remove/v1",
       "section": "accounts",

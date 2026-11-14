@@ -61,6 +61,12 @@ export type AccountsCallsTakeBackIn = {
     From?: string;
 };
 
+export type AccountsGrantOffer = {
+    Presence: string;
+    Targets: AccountsTarget[] | null;
+    Terms: AccountsTerm[] | null;
+};
+
 export type AccountsGranted = {
     Until?: string;
 };
@@ -140,6 +146,21 @@ export type AccountsStep = {
     Line: string;
     Now: string;
     Site?: string;
+};
+
+export type AccountsTarget = {
+    Fit: 'fits' | 'no';
+    Line: string;
+    To: string;
+    ToKind: 'machine' | 'agent';
+    Workspace?: string;
+};
+
+export type AccountsTerm = {
+    Default: boolean;
+    For: number;
+    Label: string;
+    ToKind: 'machine' | 'agent';
 };
 
 export type AccountsVaultEntry = {
@@ -1218,6 +1239,10 @@ export type GrantsCallsGrantAddIn = {
     To?: string;
     ToKind?: 'machine' | 'agent';
     Workspace?: string;
+};
+
+export type GrantsCallsGrantNewIn = {
+    Entry?: string;
 };
 
 export type GrantsCallsGrantRemoveIn = {
@@ -3150,6 +3175,8 @@ export type EngineWatchInput = EngineWatchIn;
 export type EngineWatchOutput = EngineWatching;
 export type GrantsAddInput = GrantsCallsGrantAddIn;
 export type GrantsAddOutput = AccountsGranted;
+export type GrantsNewInput = GrantsCallsGrantNewIn;
+export type GrantsNewOutput = AccountsGrantOffer;
 export type GrantsRemoveInput = GrantsCallsGrantRemoveIn;
 export type GrantsRemoveOutput = AccountsRevoked;
 export type ImagesBuildInput = ImagesCallsBuildIn;
@@ -3313,6 +3340,7 @@ export interface Calls {
     'engine.vms': { in: EngineVmsInput; out: EngineVmsOutput; watch: false; own: true };
     'engine.watch': { in: EngineWatchInput; out: EngineWatchOutput; watch: true; own: true };
     'grants.add': { in: GrantsAddInput; out: GrantsAddOutput; watch: false };
+    'grants.new': { in: GrantsNewInput; out: GrantsNewOutput; watch: true };
     'grants.remove': { in: GrantsRemoveInput; out: GrantsRemoveOutput; watch: false; confirm: 'remove-grant' };
     'images.build': { in: ImagesBuildInput; out: ImagesBuildOutput; watch: false };
     'images.delete': { in: ImagesDeleteInput; out: ImagesDeleteOutput; watch: false; confirm: 'delete-image' };
@@ -3384,6 +3412,8 @@ export type AccountsProgramHow = 'own' | 'granted';
 export type AccountsProgramState = 'signed-in' | 'signed-out' | 'broken' | 'reading' | 'waiting';
 
 export type AccountsStepKind = 'device-code' | 'link' | 'paste';
+
+export type AccountsTargetFit = 'fits' | 'no';
 
 export type CatalogAfterApply = 'restart-dock' | 'restart-finder' | 'restart-menu-bar' | 'logout' | 'reboot';
 
@@ -3459,6 +3489,7 @@ export type StationWords = {
     AccountsProgramHow: Record<AccountsProgramHow, StationWord>;
     AccountsProgramState: Record<AccountsProgramState, StationWord>;
     AccountsStepKind: Record<AccountsStepKind, StationWord>;
+    AccountsTargetFit: Record<AccountsTargetFit, StationWord>;
     CatalogAfterApply: Record<CatalogAfterApply, StationWord>;
     CatalogArch: Record<CatalogArch, StationWord>;
     CatalogAudience: Record<CatalogAudience, StationWord>;

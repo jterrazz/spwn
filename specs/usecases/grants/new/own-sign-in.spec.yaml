@@ -1,0 +1,13 @@
+description: 'A machine signed in by itself cannot be picked'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | [.ToKind, .To, .Workspace, .Fit, .Line]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"grants.new","in":{"Entry":"pw-3"}}
+      exit: 0
+      stdout: |
+          ["machine","api",null,"no","Start the machine first"]
+          ["machine","linux-1",null,"no","It has its own sign-in"]
+          ["machine","infra",null,"no","A server keeps its own sign-ins"]
