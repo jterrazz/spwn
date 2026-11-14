@@ -72,6 +72,10 @@ func TestEachShapeIsWithheldAndTheWordsAroundIt(t *testing.T) {
 		{"a capitalised run of digits", "pass Sk918273645091827364509182736450 now", "pass withheld now"},
 		{"a passphrase of capitalised words", "pass CorrectHorseBatteryStapleZebraLimeTango2024 now", "pass withheld now"},
 		{"a capitalised run with a digit", "pass XkcdPasswordAbcDefGhiJklMnoPqrStu9 now", "pass withheld now"},
+		{"a password of digits before a quote that closes no value", `https://bob:1234"x@host/x`, "https://withheld@host/x"},
+		{"a password holding a comma", "https://bob:pa,ss@host/x", "https://withheld@host/x"},
+		{"a password holding a quote before a comma", `https://bob:pa",ss@host/x`, "https://withheld@host/x"},
+		{"a password in compact JSON before an email", `{"url":"https://bob:hunter2@host","email":"a@b.com"}`, `{"url":"https://withheld@b.com"}`},
 	} {
 		got, withheld := secret.Screen(c.text)
 		if got != c.want || !withheld {
@@ -125,6 +129,14 @@ func TestTheMachinesOwnDataIsShown(t *testing.T) {
 		"GET /x?designs=a&cwd=/tmp&monkeys=3&keyword=go&sorting=asc",
 		"clone git://github.com/AcmeLabs/widgets/tree/release-4",
 		"open https://github.com/AcmeLabs/widgets/blob/v2/docs/install-10.md",
+		`{"url":"https://example.com","email":"a@b.com"}`,
+		`{"url":"https://example.com:8080","email":"a@b.com"}`,
+		`"homepage":"https://x.dev","devDependencies":{"@types/node":"^20"}`,
+		`"homepage":"https://x.dev:8080/docs","devDependencies":{"@types/node":"^20"}`,
+		"https://x.io,2024-01-01T10:00:00,me@x.io",
+		`{'url':'https://x.dev','owner':'a@b.com'}`,
+		`<a href="https://x.dev:8080">a@b.com</a>`,
+		"http://[fe80::1]:80/a@b",
 	} {
 		if got, withheld := secret.Screen(text); got != text || withheld {
 			t.Errorf("Screen(%q) = %q, %v: the machine's own data was withheld", text, got, withheld)

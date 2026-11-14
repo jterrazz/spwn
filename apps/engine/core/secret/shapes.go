@@ -31,6 +31,10 @@ const (
 // is no word of the path.
 const urlSegmentMin = 16
 
+// value: the characters no URL's user holds: the authority's own ends
+// (`/?#`) and the punctuation data puts after a URL.
+const userEnds = "/?#\",;<>[]{}"
+
 // value: the characters a word of a path from a root starts after.
 const wordEdges = " \t\r\n\"'`([{<,;=:"
 
@@ -63,7 +67,7 @@ var (
 	issued     = regexp.MustCompile(strings.Join(issuers(), "|"))
 	privateKey = regexp.MustCompile(`-----BEGIN [A-Z ]*PRIVATE KEY-----(?s:.*?)(?:-----END [A-Z ]*PRIVATE KEY-----|\z)`)
 	header     = regexp.MustCompile(`(?i)(authorization["']?\s*[:=]\s*["']?(?:bearer|basic|token)\s+)[^\s"',]+`)
-	port       = regexp.MustCompile(`^\d+/`)
+	port       = regexp.MustCompile(`^\d+(?:[/?#,;}\]]|["'>][,;})\]>])`)
 	query      = regexp.MustCompile(`(?i)([?&](?:[\w.-]*(?:token|secret|password|passwd|pwd|signature|sig|credential)s?|(?:x-(?:amz|goog)-)?(?:(?:api|access|auth|client|encryption|id|master|private|refresh|secret|security|session|signing)[_.-]?keys?|key))=)[^&\s#"']+`)
 	identifier = regexp.MustCompile(`^(?:Test|Benchmark|Example|Fuzz)(?:[A-Z][a-z]+)+(?:\d{1,4}(?:[A-Z][a-z]+)*)?$`)
 	run        = regexp.MustCompile(runClass + `{` + strconv.Itoa(runMin) + `,}`)
@@ -85,9 +89,12 @@ func credentials(text string) string {
 	// does not follow a `/` (its last `@` when each one does), whatever it
 	// holds short of whitespace, so a password holding an `@`, a quote, a `<`
 	// or a `/`, or ending in one, is withheld whole. It is withheld when it
-	// holds a password, or when its user alone is token-shaped; a user holds
-	// no `/`, and a host and its port before a path (`localhost:4873/@scope`)
-	// is no userinfo.
+	// holds a password, or when its user alone is token-shaped. A user holds
+	// none of userEnds, so a URL followed by data (a JSON value, a CSV row) is
+	// no userinfo; and a password of digits that a URL's end follows (a path,
+	// a query, a fragment, a `,`, `;`, `}` or `]`, or a quote or `>` that
+	// closes a value before one of `,;})]>`) is a host's port, as in
+	// `localhost:4873/@scope` or `"https://h:8080","email":"a@b"`.
 	var b strings.Builder
 	last := 0
 	for from := 0; ; {
@@ -136,7 +143,7 @@ func lastAt(word string) int {
 func userinfo(info string) bool {
 	user, password, _ := strings.Cut(info, ":")
 	switch {
-	case strings.Contains(user, "/"):
+	case strings.ContainsAny(user, userEnds):
 		return false
 	case password != "":
 		return !port.MatchString(password)
