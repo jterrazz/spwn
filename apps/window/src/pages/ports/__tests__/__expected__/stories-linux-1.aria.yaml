@@ -11,7 +11,7 @@
     - tab "Activity"
     - tab "Packages"
     - tab "Ports" [selected]
-    - tab "Accounts"
+    - tab "Sign-ins"
     - tab "Storage"
   - heading "No verdict from the engine." [level=1]
   - paragraph:

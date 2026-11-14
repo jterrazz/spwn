@@ -1,6 +1,11 @@
-export const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Accounts', 'Storage'] as const;
+export const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Sign-ins', 'Storage'] as const;
 
 export type Tab = (typeof TABS)[number];
+
+// invariant: a server keeps its own sign-ins (`section.not-for-this-machine`), so it offers no Sign-ins tab.
+export function tabsOf(server: boolean): readonly Tab[] {
+    return server ? TABS.filter((tab) => tab !== 'Sign-ins') : TABS;
+}
 
 export function tabOf(value: unknown): Tab | undefined {
     return TABS.find((known) => known === value);

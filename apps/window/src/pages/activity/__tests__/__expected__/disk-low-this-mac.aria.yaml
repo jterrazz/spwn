@@ -7,7 +7,7 @@
     - tab "Activity" [selected]
     - tab "Packages"
     - tab "Ports"
-    - tab "Accounts"
+    - tab "Sign-ins"
     - tab "Storage"
   - 'heading "Disk almost full: 4 % free" [level=1]'
   - paragraph:

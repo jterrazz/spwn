@@ -1,0 +1,28 @@
+- main:
+  - heading "linux-1 Running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "jterrazz-macbook-pro"
+  - button "Start"
+  - button "Stop"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins" [selected]
+    - tab "Storage"
+  - heading "Signed in to 2 of 4 programs." [level=1]
+  - paragraph:
+    - img "Signed in to 2 of 4 programs"
+  - region "Sign-ins":
+    - heading "Sign-ins 4" [level=2]
+    - text: gh Signed out
+    - button "Sign in gh": Sign in
+    - text: npm from the password pw-2 until 14:00 Signed in
+    - button "Remove npm" [disabled]: Remove
+    - text: claude admin@jterrazz.com · Max plan · signed in by itself Signed in
+    - button "Sign out claude": Sign out
+    - text: wrangler Refused at the provider Needs signing in again
+    - button "Sign in again wrangler": Sign in again

@@ -7,7 +7,7 @@
     - tab "Activity"
     - tab "Packages"
     - tab "Ports"
-    - tab "Accounts"
+    - tab "Sign-ins"
     - tab "Storage" [selected]
   - region "Storage":
     - heading "Storage" [level=2]

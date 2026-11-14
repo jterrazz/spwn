@@ -137,17 +137,17 @@ describe('finds', () => {
         // Given - a query every tab of linux-1 and of api answers
         const groups = matching(everything(HELD), '›');
 
-        // Then - api's six tabs, then linux-1's, each in the order of the tab bar, with no detail of their own
+        // Then - api's five tabs, none Sign-ins, then book's, in the tab bar's order, with no detail
         const tabs = groups.find((group) => group.kind === 'Tabs')?.results ?? [];
-        expect(tabs.slice(0, 6).map((result) => result.label)).toStrictEqual([
+        expect(tabs.slice(0, 5).map((result) => result.label)).toStrictEqual([
             'api › Overview',
             'api › Activity',
             'api › Packages',
             'api › Ports',
-            'api › Accounts',
             'api › Storage',
         ]);
-        expect(tabs[6]?.label).toBe('book › Overview');
+        expect(tabs[5]?.label).toBe('book › Overview');
+        expect(tabs[9]?.label).toBe('book › Sign-ins');
         expect(tabs.every((result) => result.detail === '')).toBe(true);
     });
 

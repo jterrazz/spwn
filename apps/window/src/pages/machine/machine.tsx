@@ -1,12 +1,12 @@
 import { driftAsked, targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import type { Route, Tab } from '../../shell/route';
-import { AccountsTab } from '../accounts/accounts';
 import { ActivityTab } from '../activity/activity';
 import { StorageTab } from '../machine-storage/machine-storage';
 import { OverviewTab } from '../overview/overview';
 import { PackagesTab } from '../packages/packages';
 import { PortsTab } from '../ports/ports';
+import { SignInsTab } from '../sign-ins/sign-ins';
 
 type Props = { found: Found; tab: Tab; go: (to: Route) => void };
 
@@ -32,8 +32,8 @@ export function MachineTab({ found, tab, go }: Props) {
         case 'Ports': {
             return <PortsTab found={found} go={go} />;
         }
-        case 'Accounts': {
-            return <AccountsTab found={found} go={go} />;
+        case 'Sign-ins': {
+            return <SignInsTab found={found} key={name} />;
         }
         case 'Storage': {
             return (

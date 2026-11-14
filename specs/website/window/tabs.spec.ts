@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Accounts', 'Storage'];
+const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Sign-ins', 'Storage'];
 
 describe('tabs', () => {
     test('A6 a Mac carries the six tabs', async () => {
@@ -36,16 +36,17 @@ describe('tabs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('A6 a server carries the six tabs', async () => {
+    test('A6 a server carries every tab but Sign-ins', async () => {
         // Given - the window on infra's page over two-macs
         const result = await website.visit(
             '/?world=two-macs&machine=infra&tab=Activity',
             async (visitor) => {
                 // When - its tabs are read
-                // Then - the six are there
-                for (const tab of TABS) {
+                // Then - five are there, and no Sign-ins: a server keeps its own
+                for (const tab of TABS.filter((one) => one !== 'Sign-ins')) {
                     await visitor.see(within(main(), content(tab)));
                 }
+                await visitor.gone(within(main(), content('Sign-ins')));
             },
         );
         expect(result.errors.text).toBe('');

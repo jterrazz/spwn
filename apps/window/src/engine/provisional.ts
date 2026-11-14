@@ -1,5 +1,4 @@
 import type {
-    AccountsAccount,
     AppsUpdateInput,
     BackgroundRemoveInput,
     CatalogApp,
@@ -55,6 +54,11 @@ const CREATE_REFUSAL_PLACES: Readonly<Partial<Record<string, RefusalPlace>>> = {
 export function createRefusalPlaceOf(error: EngineError, macs: readonly string[]): RefusalPlace {
     const onAMac = macs.includes(error.wire?.subject ?? '');
     return CREATE_REFUSAL_PLACES[error.wire?.code ?? ''] ?? (onAMac ? 'on' : 'foot');
+}
+
+// outside: an accounts.login Step never says its code ran out; the watch's `login.expired` says it, until the Step does.
+export function loginExpired(error: EngineError): boolean {
+    return error.wire?.code === 'login.expired';
 }
 
 // outside: machines.list sends a Mac's engine as three booleans; this reads them as engine.read's State, until the
@@ -208,11 +212,6 @@ export function shareEndOf(until: string, now: string): ShareEnd {
         return { kind: 'unread' };
     }
     return left > 0 ? { kind: 'ends-in', nanoseconds: left * NS_PER_MS } : { kind: 'ended' };
-}
-
-// outside: accounts.read sends an identity it could not read as "?", not as no identity, until it leaves it out.
-export function identitiesOf(account: AccountsAccount): readonly string[] {
-    return (account.identity ?? []).filter((one) => one !== '?');
 }
 
 export function shareEndWordOf(end: ShareEnd, until: string): string {

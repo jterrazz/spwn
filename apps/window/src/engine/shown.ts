@@ -14,6 +14,7 @@ import type {
     StationWord,
 } from '@jterrazz/station-api';
 
+import { clock } from '../model/format';
 import type { Tone } from '../tone';
 import { wordOf } from './engine-words';
 import type { CodeOf, Worded } from './engine-words';
@@ -128,6 +129,13 @@ export function reversibleState(reversible: boolean): null | Shown {
 export function holdsFor(until: string, now: string): Shown {
     const end = shareEndOf(until, now);
     return { tone: SHARE_END_TONES[end.kind], word: shareEndWordOf(end, until) };
+}
+
+// outside: accounts.list gives a grant its end and no hour of its own answer, so the time left cannot be read from
+// outside: the wire: a grant says when it ends, until the list carries its Now.
+export function grantEndOf(until: string | undefined): string | undefined {
+    const at = clock(until);
+    return at === undefined ? undefined : `until ${at}`;
 }
 
 export function vmLifetimeWord(vm: Pick<MachinesVM, 'Lifetime'>): string {

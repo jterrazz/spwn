@@ -1,0 +1,74 @@
+.said {
+    color: var(--t3);
+    font-size: var(--text-body);
+}
+
+.well {
+    display: flex;
+    gap: var(--space-12);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-16);
+    background: var(--inset);
+    border-radius: var(--radius-well);
+}
+
+.code {
+    font-family: var(--font-mono);
+    font-size: var(--text-metric);
+    font-weight: var(--weight-strong);
+    letter-spacing: 0.25em;
+    color: var(--t1);
+}
+
+.struck {
+    color: var(--t3);
+    text-decoration: line-through;
+}
+
+.status {
+    display: flex;
+    gap: var(--space-12);
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--text-body);
+    color: var(--t2);
+}
+
+.left {
+    font-family: var(--font-mono);
+    color: var(--t1);
+}
+
+.paste {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.input {
+    width: 100%;
+    padding: var(--space-10) var(--space-12);
+    font-family: var(--font-mono);
+    font-size: var(--text-body);
+    color: var(--t1);
+    background: var(--inset);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-control);
+}
+
+.input:focus-visible {
+    border-color: var(--new);
+    outline: none;
+}
+
+.label {
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+}
