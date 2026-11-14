@@ -46,7 +46,29 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('M3 window differs: a machine of Its machines carries no purpose beside its creator');
+    test('M3 a machine of Its machines carries its purpose beside its creator', async () => {
+        // Given - the window on This Mac's page over creating, where a session made linux-5 for a purpose
+        const result = await website.visit(
+            '/?world=creating&machine=jterrazz-macbook-pro&tab=Overview',
+            async (visitor) => {
+                // When - Its machines is read
+                const machines = region('Its machines');
+                await visitor.see(machines);
+
+                // Then - linux-5 says what it is for and who made it, linux-4 who made it alone
+                await visitor.see(
+                    within(
+                        machines,
+                        button('linux-5 Lot shell, one block per package · by studio-os-fe', {
+                            exact: false,
+                        }),
+                    ),
+                );
+                await visitor.see(within(machines, button('linux-4 by you', { exact: false })));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('M4 New machine on a Mac opens the sheet with that Mac chosen', async () => {
         // Given - the window on the mini's page over two-macs, which is not This Mac
@@ -79,7 +101,7 @@ describe('mac', () => {
     });
 
     test.todo(
-        'M5 window differs: the head draws no sentence saying nothing proves the Mac is down, and its VM reads Unknown where the row says Not seen',
+        'M5 waits for the state of a VM whose Mac is not seen, and a sentence saying nothing proves that Mac is down, on machines.list',
     );
 
     test.todo('M5 waits for the values of an Activity page of a Mac not seen, said unknown');
@@ -102,7 +124,7 @@ describe('mac', () => {
     });
 
     test.todo(
-        'M6 window differs: the verdict of Home is not given, where the row has the head say the engine stopped, in red, with when the page was last read',
+        "M6 waits for Home's verdict on overview.read saying the engine stopped, and when its page was last read",
     );
 
     test('M7 Free on one app frees its cache, and the bar and the verdict follow', async () => {
@@ -127,9 +149,7 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'M7 window differs: the bar holds Misplaced, Can rebuild, Your data, Never touched and Free, where the row says system, apps, my data and caches',
-    );
+    test.todo("M7 waits for a kind per disk row and the machine's own share, on disk.read");
 
     test.todo('M7 waits for a kept journal that records a Free, read in Changes');
 
