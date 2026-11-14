@@ -1,9 +1,11 @@
 package accounts
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 type KeyKind string
@@ -75,6 +77,8 @@ type VaultRead struct {
 	// value: the Mac whose vault this is: a vault is one Mac's.
 	Mac     string
 	Entries []VaultEntry
+	// value: the head of the Passwords page, from the entries and their grants.
+	Verdict verdict.Verdict
 }
 
 type Added struct {
@@ -107,4 +111,19 @@ func TermInBounds(to GrantTo, term time.Duration) bool {
 
 func Refusal(t fail.Type, code fail.Code, subject string) *fail.Error {
 	return fail.New(t, code, subject, nil)
+}
+
+func SummarizeVault(entries []VaultEntry) verdict.Verdict {
+	// invariant: the head of a Mac's passwords, one sentence and one tone,
+	// from its entries alone.
+	if len(entries) == 0 {
+		return verdict.Verdict{Tone: verdict.Plain, Sentence: SentencePasswordsNone.Text()}
+	}
+	granted := 0
+	for _, e := range entries {
+		if len(e.Grants) > 0 {
+			granted++
+		}
+	}
+	return verdict.Verdict{Tone: verdict.Plain, Sentence: fmt.Sprintf(SentencePasswordsSome.Text(), len(entries), granted)}
 }
