@@ -1,0 +1,11 @@
+description: 'machines.list says the sections of each VM, on either Mac: a server four, a workspace all but two'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[] | .ThisMac as $here | .VMs[]? | [$here, .Name, .Sections]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [[true,"api",{"Overview":true,"Activity":true,"Apps":true,"Settings":true,"Disk":true,"Ports":true,"Accounts":true,"Background":true,"Awake":false,"SSH":false}],[true,"linux-1",{"Overview":true,"Activity":true,"Apps":true,"Settings":true,"Disk":true,"Ports":true,"Accounts":true,"Background":true,"Awake":false,"SSH":false}],[false,"infra",{"Overview":true,"Activity":true,"Apps":false,"Settings":false,"Disk":false,"Ports":true,"Accounts":false,"Background":false,"Awake":false,"SSH":true}]]
