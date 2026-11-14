@@ -12,6 +12,8 @@ const (
 	SentenceCaptureNote       Sentence = "capture-note"
 	SentenceRowSignedByItself Sentence = "row-signed-by-itself"
 	SentenceRowFromPassword   Sentence = "row-from-password"
+	SentenceRemoveEnds        Sentence = "remove-ends"
+	SentenceRemoveNothing     Sentence = "remove-nothing"
 )
 
 func (s Sentence) Text() string {
@@ -36,6 +38,10 @@ func (s Sentence) Text() string {
 		return "signed in by itself"
 	case SentenceRowFromPassword:
 		return "from the password %s"
+	case SentenceRemoveEnds:
+		return "Its grants end: %s"
+	case SentenceRemoveNothing:
+		return "Nothing else ends"
 	}
 	return string(s)
 }

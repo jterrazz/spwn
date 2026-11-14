@@ -5,7 +5,7 @@ env:
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "linux-1"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Removed[] | [.ToKind, .To, .State]] else .error | {code, subject, message} end'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Removed[] | [.ToKind, .To]] else .error | {code, subject, message} end'''
       stdin: |
           {"v":2,"id":"1","call":"vault.remove","in":{"ID":"pw-1","Confirm":"yes"}}
       exit: 0

@@ -162,11 +162,12 @@ export type AccountsVaultEntry = {
     Kind: 'token' | 'fine-grained' | 'api-key' | 'oauth-token' | 'password';
     Label: string;
     Program: 'gh' | 'npm' | 'claude' | 'wrangler';
+    Reach: 'granted' | 'not-granted';
+    RemoveSentence: string;
     Who?: string;
 };
 
 export type AccountsVaultGrant = {
-    State: 'active' | 'failing';
     To: string;
     ToKind: 'machine' | 'agent';
     Workspace?: string;
@@ -3393,7 +3394,7 @@ export type CallName = keyof Calls;
 
 export type AccountsAddFrom = 'sign-in' | 'typed';
 
-export type AccountsGrantState = 'active' | 'failing';
+export type AccountsEntryReach = 'granted' | 'not-granted';
 
 export type AccountsGrantTo = 'machine' | 'agent';
 
@@ -3465,7 +3466,7 @@ export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
 export type MachinesVMState = 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
 
-export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting';
+export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant';
 
 export type StationWord = {
     Detail?: string;
@@ -3477,7 +3478,7 @@ export type StationWord = {
 
 export type StationWords = {
     AccountsAddFrom: Record<AccountsAddFrom, StationWord>;
-    AccountsGrantState: Record<AccountsGrantState, StationWord>;
+    AccountsEntryReach: Record<AccountsEntryReach, StationWord>;
     AccountsGrantTo: Record<AccountsGrantTo, StationWord>;
     AccountsKeyKind: Record<AccountsKeyKind, StationWord>;
     AccountsProgram: Record<AccountsProgram, StationWord>;

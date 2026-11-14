@@ -67,8 +67,8 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 			t.Fatalf("Check: %v", refused)
 		}
 		e, _ := listed(t, s.Passwords, id)
-		if len(e.Grants) != 1 || e.Grants[0].To != s.Running || e.Grants[0].State != accounts.GrantActive {
-			t.Fatalf("grants %+v; want the one active grant to %s", e.Grants, s.Running)
+		if len(e.Grants) != 1 || e.Grants[0].To != s.Running {
+			t.Fatalf("grants %+v; want the one grant to %s", e.Grants, s.Running)
 		}
 		found, err := s.Grants.Candidates(ctx, id)
 		if err != nil {

@@ -230,9 +230,9 @@ func wordedEnums() []worded {
 			string(accounts.TargetFits): plain("fits"),
 			string(accounts.TargetNo):   plain("cannot be picked"),
 		}},
-		{accounts.GrantState(""), map[string]word{
-			string(accounts.GrantActive):  toned(verdict.OK, "active"),
-			string(accounts.GrantFailing): toned(verdict.Bad, "failing"),
+		{accounts.EntryReach(""), map[string]word{
+			string(accounts.ReachGranted):    plain("granted"),
+			string(accounts.ReachNotGranted): plain("not granted"),
 		}},
 		{fail.Field(""), map[string]word{
 			string(fail.FieldLabel): plain("label"),
@@ -248,6 +248,8 @@ func wordedEnums() []worded {
 			string(page.NounPackage):       {Word: "Packages", One: "package", Other: "packages", Tone: verdict.Plain},
 			string(page.NounApp):           {Word: "Apps", One: "app", Other: "apps", Tone: verdict.Plain},
 			string(page.NounSetting):       {Word: "Settings", One: "setting", Other: "settings", Tone: verdict.Plain},
+			string(page.NounPassword):      {Word: "Passwords", One: "password", Other: "passwords", Tone: verdict.Plain},
+			string(page.NounGrant):         {Word: "Grants", One: "grant", Other: "grants", Tone: verdict.Plain},
 		}},
 		{catalog.OS(""), map[string]word{
 			string(catalog.OSMacOS):  plain("macOS"),

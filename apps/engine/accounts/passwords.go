@@ -3,6 +3,7 @@ package accounts
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -42,15 +43,15 @@ const (
 
 func (GrantTo) Enum() []string { return []string{string(ToMachine), string(ToAgent)} }
 
-type GrantState string
+type EntryReach string
 
 const (
-	GrantActive  GrantState = "active"
-	GrantFailing GrantState = "failing"
+	ReachGranted    EntryReach = "granted"
+	ReachNotGranted EntryReach = "not-granted"
 )
 
-func (GrantState) Enum() []string {
-	return []string{string(GrantActive), string(GrantFailing)}
+func (EntryReach) Enum() []string {
+	return []string{string(ReachGranted), string(ReachNotGranted)}
 }
 
 type VaultGrant struct {
@@ -58,7 +59,6 @@ type VaultGrant struct {
 	To     string
 	// value: the workspace an agent's grant is for, empty for a machine's.
 	Workspace string `json:",omitempty"`
-	State     GrantState
 }
 
 type VaultEntry struct {
@@ -71,6 +71,10 @@ type VaultEntry struct {
 	// value: whether an agent may be granted it: a fine-grained token, never the owner's own login.
 	AgentGrantable bool
 	Grants         []VaultGrant
+	// value: whether any grant was made from it, from its grants.
+	Reach EntryReach
+	// value: the engine's consequence of removing it, counted from its grants.
+	RemoveSentence string
 }
 
 type VaultProgram struct {
@@ -116,6 +120,40 @@ func VaultPrograms() []VaultProgram {
 
 func Refusal(t fail.Type, code fail.Code, subject string) *fail.Error {
 	return fail.New(t, code, subject, nil)
+}
+
+func DescribeEntry(e VaultEntry) VaultEntry {
+	// invariant: an entry's reach and its removal sentence come from its
+	// grants alone, so every adapter answers the same words.
+	e.Reach, e.RemoveSentence = ReachNotGranted, SentenceRemoveNothing.Text()
+	if len(e.Grants) == 0 {
+		return e
+	}
+	e.Reach = ReachGranted
+	machines, agents := 0, 0
+	for _, g := range e.Grants {
+		if g.ToKind == ToAgent {
+			agents++
+		} else {
+			machines++
+		}
+	}
+	parts := make([]string, 0, 2)
+	if machines > 0 {
+		parts = append(parts, counted(machines, "machine", "machines"))
+	}
+	if agents > 0 {
+		parts = append(parts, counted(agents, "agent", "agents"))
+	}
+	e.RemoveSentence = fmt.Sprintf(SentenceRemoveEnds.Text(), strings.Join(parts, " and "))
+	return e
+}
+
+func counted(n int, one, other string) string {
+	if n == 1 {
+		return "1 " + one
+	}
+	return fmt.Sprintf("%d %s", n, other)
 }
 
 func SummarizeVault(entries []VaultEntry) verdict.Verdict {
