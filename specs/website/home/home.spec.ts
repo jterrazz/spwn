@@ -6,34 +6,45 @@ import { website } from '../website.specification.js';
 const FIRST_RUN = '/?world=bare-mac&page=home';
 const TWO_MACS = '/?world=two-macs&page=home';
 const needsYou = region('Needs you');
+const canWait = region('Can wait');
 const memory = region('Memory');
 const startHere = region('Start here');
 
 describe('home', () => {
-    test.todo('H1 waits for a verdict and its line on overview.read');
-
-    test('H2 every line that needs me is counted and offers its one verb', async () => {
-        // Given - the window on Home over two-macs, whose engine lists nine lines that need a gesture
+    test('H1 the verdict reads Everything is fine., its line counts what can wait, and no Needs you is drawn', async () => {
+        // Given - the window on Home over two-macs, whose nine lines can all wait
         const result = await website.visit(TWO_MACS, async (visitor) => {
             // When - I open the window
-            await visitor.see(needsYou);
+            // Then - the engine's verdict and its line head the page, and nothing is owed
+            await visitor.see(heading('Everything is fine.'));
+            await visitor.see(content('9 things can wait.'));
+            await visitor.gone(needsYou);
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('H2 every line the engine says can wait is counted in the Inbox and offers its one verb', async () => {
+        // Given - the Inbox over two-macs, whose engine lists nine lines that can wait
+        const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
+            // When - I open the window on the Inbox
+            await visitor.see(canWait);
 
             // Then - the panel counts the lines, and each offers one verb of its own
-            await visitor.see(heading('Needs you 9'));
-            await visitor.see(within(needsYou, button('Copy npm login')));
-            await visitor.see(within(needsYou, button('Remove com.jterrazz.brain.x-snapshot')));
-            await visitor.see(within(needsYou, button('Update mise')));
-            await visitor.see(within(needsYou, button('Update brew')));
-            await visitor.see(within(needsYou, button('Move ~/.tart')));
+            await visitor.see(heading('Can wait 9'));
+            await visitor.see(within(canWait, button('Copy npm login')));
+            await visitor.see(within(canWait, button('Remove com.jterrazz.brain.x-snapshot')));
+            await visitor.see(within(canWait, button('Update mise')));
+            await visitor.see(within(canWait, button('Update brew')));
+            await visitor.see(within(canWait, button('Move ~/.tart')));
         });
         expect(result.errors.text).toBe('');
     });
 
     test.todo(
-        'H2 waits for a verdict and its line on overview.read, and for a verb that reads where a region sits',
+        'H2 waits for a recording of lines that need me, counted by the verdict and above everything else on Home',
     );
 
-    test.todo("H3 waits for a server's health verdict on machines.list");
+    test.todo('H3 waits for a recording of a server that fails its check, and its health verdict');
 
     test('H4 Memory reads, per Mac, the GB left and who holds what', async () => {
         // Given - the window on Home over two-macs, where linux-1 holds 8 GB of one Mac's 16 and infra 24 of the other's 64
@@ -96,15 +107,25 @@ describe('home', () => {
             await visitor.see(within(region('Machines'), button('linux-1')));
 
             // When - I look for Stop or Delete on Home
-            // Then - there is none, while a line of Needs you offers its own verb
+            // Then - there is none
             await visitor.gone(button('Stop'));
             await visitor.gone(button('Delete'));
-            await visitor.see(within(needsYou, button('Remove com.jterrazz.brain.x-snapshot')));
         });
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('H11 waits for a verdict and its line on overview.read');
+    test('H11 the head says this Mac is ready, with a Start here of three ways in', async () => {
+        // Given - the window on Home over one-mac, a Mac with no machine yet
+        const result = await website.visit('/?world=one-mac&page=home', async (visitor) => {
+            // When - I open Home
+            // Then - the engine's verdict says it, and Start here offers its three ways
+            await visitor.see(heading('This Mac is ready.'));
+            await visitor.see(within(startHere, button('New machine, a workspace')));
+            await visitor.see(within(startHere, button('Open the file')));
+            await visitor.see(within(startHere, button('Open Catalog')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test('H11 Start here opens the New machine sheet on this Mac, the only Mac', async () => {
         // Given - the window on Home over bare-mac, which lists no machine

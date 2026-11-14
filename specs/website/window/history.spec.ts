@@ -33,7 +33,7 @@ describe('history', () => {
             await visitor.see(region('Its machines'));
             await visitor.click(back);
             await visitor.see(disabled(back));
-            await visitor.see(content('npm sign-in expired'));
+            await visitor.see(content('Everything is fine.'));
         });
 
         // Then - the window is back on Home, with nothing broken on the way
@@ -70,7 +70,7 @@ describe('history', () => {
             await visitor.click(thisMac);
             await visitor.see(heading('jterrazz-macbook-pro Online'));
             await visitor.press('Control+BracketLeft');
-            await visitor.see(content('npm sign-in expired'));
+            await visitor.see(content('Everything is fine.'));
             await visitor.see(enabled(forward));
             await visitor.press('Control+BracketRight');
             await visitor.see(heading('jterrazz-macbook-pro Online'));

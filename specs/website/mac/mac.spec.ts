@@ -141,9 +141,21 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        "M6 waits for Home's verdict on overview.read saying the engine stopped, and when its page was last read",
-    );
+    test('M6 the head says the engine is stopped, with when the page was last read', async () => {
+        // Given - the window on Home over engine-stopped
+        const result = await website.visit('/?world=engine-stopped&page=home', async (visitor) => {
+            // When - the window opens
+            // Then - the engine's verdict heads the page in red, its line says what stops, and when it was read
+            await visitor.see(heading('The engine is stopped.'));
+            await visitor.see(
+                content('Your VMs do not run and nothing is shared until it starts.', {
+                    exact: false,
+                }),
+            );
+            await visitor.see(content('Last read at', { exact: false }));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test('M7 Free on one app frees its cache, and the bar and the verdict follow', async () => {
         // Given - the Storage tab of This Mac over two-macs, 34.8 GB of caches
