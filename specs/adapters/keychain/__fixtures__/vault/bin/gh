@@ -1,0 +1,7 @@
+#!/bin/sh
+# gh as the vault reads it: `auth token` prints this Mac's token on stdout.
+printf 'gh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "auth token -h github.com") echo "FAKE000" ;;
+    *) echo "stub gh: unexpected invocation: $*" >&2; exit 97 ;;
+esac

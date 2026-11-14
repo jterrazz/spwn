@@ -1,0 +1,19 @@
+description: 'a password removed is deleted from station''s Keychain by its name alone'
+fixture:
+    - ../__fixtures__/setup-stubs/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error.code'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"docs deploy","Program":"gh","Kind":"fine-grained","From":"typed","Value":"FAKE000"}}
+      exit: 0
+      stdout: |
+          {"ID":"pw-1"}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error.code''; /usr/bin/tail -1 .calls; /usr/bin/jq -c .entries .local/state/station/vault.json'
+      stdin: |
+          {"v":2,"id":"1","call":"vault.remove","in":{"ID":"pw-1","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"Removed":[]}
+          security delete-generic-password -s station -a vault:pw-1
+          []
