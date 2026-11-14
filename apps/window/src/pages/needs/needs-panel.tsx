@@ -1,6 +1,8 @@
 import type { MachinesMacView, OverviewNeed } from '@jterrazz/station-api';
 
 import { Panel } from '../../design/index';
+import { needState } from '../../engine/shown';
+import { isNeedsYou } from '../../model/upkeep';
 import type { Route } from '../../shell/route';
 import { NeedLine } from './need-gesture';
 import { routeOfNeed } from './needs';
@@ -29,12 +31,13 @@ export function Needs({ needs, title, macs, go, none, note }: NeedsProps) {
     if (needs.length === 0 && none === undefined) {
         return null;
     }
+    const bright = needs.findIndex((need) => isNeedsYou(need) && needState(need).tone === 'bad');
     return (
         <Panel note={note ?? String(needs.length)} title={title}>
             {needs.length === 0 ? (
                 <p className={pageStyles.missing}>{none}</p>
             ) : (
-                needs.map((need) => (
+                needs.map((need, index) => (
                     <NeedLine
                         key={keyOf(need)}
                         macs={macs}
@@ -42,6 +45,7 @@ export function Needs({ needs, title, macs, go, none, note }: NeedsProps) {
                         onOpen={() => {
                             go(routeOfNeed(need));
                         }}
+                        primary={index === bright}
                     />
                 ))
             )}

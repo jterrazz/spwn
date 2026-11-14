@@ -1,7 +1,6 @@
 import type {
     AppsUpdateInput,
     BackgroundRemoveInput,
-    CatalogApp,
     CatalogKind,
     DiskMoveInput,
     DiskReading,
@@ -12,8 +11,10 @@ import type {
     MachinefileDiffering,
     MachinefileExtraLine,
     MachinefileLine,
+    MachinesDeleteInput,
     MachinesFit,
     MachinesMacView,
+    MachinesRestartInput,
     MachinesVM,
     OverviewNeed,
     PortsListing,
@@ -98,11 +99,27 @@ export function removeInputOf(need: OverviewNeed): BackgroundRemoveInput | undef
     return need.Call !== 'background.remove' || label === '' ? undefined : { Label: label };
 }
 
+export function deleteInputOf(need: OverviewNeed): MachinesDeleteInput | undefined {
+    const vm = need.Args?.VM ?? '';
+    return need.Call !== 'machines.delete' || vm === '' ? undefined : { VM: vm };
+}
+
+export function restartInputOf(need: OverviewNeed): MachinesRestartInput | undefined {
+    const name = need.Args?.Name ?? '';
+    return need.Call !== 'machines.restart' || name === '' ? undefined : { Name: name };
+}
+
 export function startInputOf(need: OverviewNeed): EngineStartInput | undefined {
     return need.Call === 'engine.start' ? {} : undefined;
 }
 
-export type NeedCall = 'apps.update' | 'background.remove' | 'disk.move' | 'engine.start';
+export type NeedCall =
+    | 'apps.update'
+    | 'background.remove'
+    | 'disk.move'
+    | 'engine.start'
+    | 'machines.delete'
+    | 'machines.restart';
 
 // outside: calls.json declares that a call asks a confirmation, not how: which gestures are confirmed by their
 // outside: subject typed rather than a yes is this table's, one entry per confirmed call, until the call says it.
@@ -235,11 +252,6 @@ export function accountSideOf(
 // outside: a drift's line names its kind, not its chapter: a setting's is Settings, any other Apps, until it does.
 export function chapterOfKind(kind: CatalogKind): Extract<MachinefileChapter, 'apps' | 'settings'> {
     return kind === 'setting' ? 'settings' : 'apps';
-}
-
-// outside: apps.list marks no entry a skill; the catalog files skills under one category, until each carries a kind.
-export function isSkill(category: CatalogApp['Category']): boolean {
-    return category === 'Agent skills';
 }
 
 // outside: ports.list may name this Mac otherwise than machines.list does (the stories world names it ''), and

@@ -2,6 +2,10 @@ import type { OverviewNeed } from '@jterrazz/station-api';
 
 type Upkeep = OverviewNeed['Upkeep'];
 
+export function isNeedsYou({ Upkeep }: Pick<OverviewNeed, 'Upkeep'>): boolean {
+    return Upkeep === 'needs-you';
+}
+
 function withUpkeep(needs: readonly OverviewNeed[], wanted: Upkeep): readonly OverviewNeed[] {
     return needs.filter(({ Upkeep }) => Upkeep === wanted);
 }
