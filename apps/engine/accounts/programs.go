@@ -208,9 +208,9 @@ func Describe(f Facts, w Where) ProgramRow {
 	}
 	switch {
 	case w.Kind == machine.Server:
-		row.Action, row.Line = ActionNone, "A server keeps its own sign-ins"
+		row.Action, row.Line = ActionNone, lineServer
 	case w.Stopped:
-		row.Action, row.Line = ActionNone, "Start the machine first"
+		row.Action, row.Line = ActionNone, lineStopped
 	case w.FarMac != "":
 		row.Action, row.Line = ActionNone, "Sign in from "+w.FarMac
 	case f.State == ProgramReading || f.State == ProgramWaiting:

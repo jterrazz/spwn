@@ -1,0 +1,16 @@
+description: 'An agent takes a fine-grained password and sees it only in its terminal'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents = {"journal": {"s1": {"name": "review-bot", "vm": "linux-1", "app": "claude-code", "session": "s1", "state": "working"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | [.ToKind, .To, .Workspace, .Fit, .Line]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"grants.new","in":{"Entry":"pw-1"}}
+      exit: 0
+      stdout: |
+          ["machine","api",null,"no","Start the machine first"]
+          ["machine","linux-1",null,"fits","Signed out here"]
+          ["machine","infra",null,"no","A server keeps its own sign-ins"]
+          ["agent","review-bot","linux-1","fits","Only its terminal sees it"]

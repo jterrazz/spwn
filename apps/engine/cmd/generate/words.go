@@ -226,6 +226,10 @@ func wordedEnums() []worded {
 			string(accounts.ToMachine): {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},
 			string(accounts.ToAgent):   {Word: "Agents", Detail: accounts.SentenceAgentReach.Text(), One: "agent", Other: "agents", Tone: verdict.Plain},
 		}},
+		{accounts.TargetFit(""), map[string]word{
+			string(accounts.TargetFits): plain("fits"),
+			string(accounts.TargetNo):   plain("cannot be picked"),
+		}},
 		{accounts.GrantState(""), map[string]word{
 			string(accounts.GrantActive):  toned(verdict.OK, "active"),
 			string(accounts.GrantEnding):  toned(verdict.Warn, "ending soon"),

@@ -75,3 +75,6 @@ func (unbuiltGrants) Add(context.Context, contract.GrantIn) (accounts.Granted, e
 func (unbuiltGrants) Remove(context.Context, string, accounts.GrantTo, string) (accounts.Revoked, error) {
 	return accounts.Revoked{}, errUnbuilt
 }
+func (unbuiltGrants) Candidates(context.Context, string) (accounts.Candidates, error) {
+	return accounts.Candidates{}, errUnbuilt
+}
