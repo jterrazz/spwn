@@ -1,4 +1,4 @@
-description: 'The mini reads its own sign-ins: none are signed in'
+description: 'the mini reads its own sign-ins: none are signed in'
 env:
     - two-macs
     - engine

@@ -1,4 +1,4 @@
-description: 'The mini opens the site of its own exchange'
+description: 'the mini opens the site of its own exchange'
 env:
     - two-macs
     - engine

@@ -1,4 +1,4 @@
-description: 'An agent is refused a password that is not fine-grained'
+description: 'an agent is refused a password that is not fine-grained'
 env:
     - two-macs
     - engine

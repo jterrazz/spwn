@@ -1,4 +1,4 @@
-description: 'When this Mac cannot ask the owner to confirm, nothing is granted'
+description: 'when this Mac cannot ask the owner to confirm, nothing is granted'
 env:
     - two-macs
     - engine

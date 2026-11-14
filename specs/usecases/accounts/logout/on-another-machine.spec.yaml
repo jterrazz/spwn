@@ -1,4 +1,4 @@
-description: 'The mini signs out its own gh'
+description: 'the mini signs out its own gh'
 env:
     - two-macs
     - engine

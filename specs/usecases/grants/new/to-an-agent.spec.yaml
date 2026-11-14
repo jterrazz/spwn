@@ -1,4 +1,4 @@
-description: 'An agent takes a fine-grained password and sees it only in its terminal'
+description: 'an agent takes a fine-grained password and sees it only in its terminal'
 env:
     - two-macs
     - engine

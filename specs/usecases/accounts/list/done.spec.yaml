@@ -1,4 +1,4 @@
-description: 'This Mac reads a row per sign-in with the action each takes'
+description: 'this Mac reads a row per sign-in with the action each takes'
 env:
     - two-macs
     - engine

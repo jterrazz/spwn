@@ -1,4 +1,4 @@
-description: 'The passwords verdict counts the passwords kept and those granted somewhere'
+description: 'the passwords verdict counts the passwords kept and those granted somewhere'
 env:
     - two-macs
     - engine

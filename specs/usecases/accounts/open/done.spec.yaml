@@ -1,4 +1,4 @@
-description: 'Opening an exchange records its site in the world, never a URL'
+description: 'opening an exchange records its site in the world, never a URL'
 env:
     - two-macs
     - engine

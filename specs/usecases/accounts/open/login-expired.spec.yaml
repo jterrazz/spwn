@@ -1,4 +1,4 @@
-description: 'An exchange past its time is refused and opens nothing'
+description: 'an exchange past its time is refused and opens nothing'
 env:
     - two-macs
     - engine

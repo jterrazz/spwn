@@ -1,4 +1,4 @@
-description: 'The mini takes the code for its own exchange'
+description: 'the mini takes the code for its own exchange'
 env:
     - two-macs
     - engine

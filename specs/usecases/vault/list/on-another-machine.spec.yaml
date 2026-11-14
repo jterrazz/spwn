@@ -1,4 +1,4 @@
-description: 'The mini lists its own vault: it keeps none'
+description: 'the mini lists its own vault: it keeps none'
 env:
     - two-macs
     - engine

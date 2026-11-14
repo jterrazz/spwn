@@ -1,4 +1,4 @@
-description: 'The exchange of another Mac''s VM is opened by that Mac, not this one'
+description: 'the exchange of another Mac''s VM is opened by that Mac, not this one'
 env:
     - two-macs
     - engine

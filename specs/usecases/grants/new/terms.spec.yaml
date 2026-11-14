@@ -1,4 +1,4 @@
-description: 'An agent stops at 7 days; a machine may also pick until removed'
+description: 'an agent stops at 7 days; a machine may also pick until removed'
 env:
     - two-macs
     - engine
