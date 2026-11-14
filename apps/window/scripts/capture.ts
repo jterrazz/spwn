@@ -45,6 +45,7 @@ const OPENED: Readonly<Record<string, readonly Shot[]>> = {
             steps: [{ button: 'New machine on mac-mini' }],
         },
         { name: 'dialog-add-mac', query: 'page=home', steps: [{ button: 'Add a Mac' }] },
+        { name: 'inbox-mac-mini', query: 'page=inbox', steps: [{ button: 'mac-mini' }] },
         {
             name: 'dialog-new-machine-file',
             query: 'page=machine-files&file=linux-dev',
