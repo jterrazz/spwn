@@ -31,19 +31,25 @@ var Programs = call.Watch[Deps, ProgramsIn, accounts.ProgramsRead]{
 }
 
 type LoginIn struct {
+	// value: a VM of this Mac signed in through it; empty signs in this machine.
+	Machine string `json:",omitempty"`
 	Program accounts.Program
 }
 
 var Login = call.Watch[Deps, LoginIn, accounts.LoginRead]{
-	Name: "accounts.login", Section: section.Accounts, Where: call.AtTarget, Applies: accounts.Applies,
-	Errors: []fail.Code{accounts.LoginUnknownProgram, accounts.LoginNotInstalled, accounts.LoginAlreadySignedIn, accounts.LoginMachineStopped, accounts.LoginBusy, accounts.LoginSiteRefused, accounts.LoginExpired, accounts.LoginFailed},
+	Name: "accounts.login", Section: section.Accounts, Where: call.InEngine, Applies: accounts.Applies,
+	Errors: []fail.Code{accounts.LoginUnknownProgram, accounts.LoginNotInstalled, accounts.LoginAlreadySignedIn, accounts.LoginMachineStopped, accounts.LoginBusy, accounts.LoginSiteRefused, accounts.LoginExpired, accounts.LoginFailed, accounts.LoginOtherMac},
 	Run: func(ctx context.Context, d Deps, in LoginIn, _ call.Progress) (<-chan call.Update[accounts.LoginRead], error) {
-		// invariant: a program station does not know is refused, before
+		// invariant: a sign-in runs in the engine of the machine's own Mac,
+		// which holds the program's run, its link and its input until the
+		// exchange ends, so a later accounts.open or accounts.answer finds
+		// them; a VM's own station answers a call at its exit, too late for
+		// a step. A program station does not know is refused, before
 		// anything runs.
 		if !in.Program.Known() {
 			return nil, accounts.Refusal(fail.NotFound, accounts.LoginUnknownProgram, string(in.Program))
 		}
-		started, err := d.SignIns.Login(ctx, in.Program)
+		started, err := d.SignIns.Login(ctx, in.Machine, in.Program)
 		if err != nil {
 			return nil, err
 		}
@@ -63,26 +69,29 @@ var Login = call.Watch[Deps, LoginIn, accounts.LoginRead]{
 }
 
 type LogoutIn struct {
+	// value: a VM of this Mac signed out through it; empty signs out this machine.
+	Machine string `json:",omitempty"`
 	Program accounts.Program
 	Confirm string
 }
 
 var Logout = call.Call[Deps, LogoutIn, accounts.ProgramRow]{
-	Name: "accounts.logout", Section: section.Accounts, Where: call.AtTarget, Applies: accounts.Applies, Confirm: confirm.SignOut,
-	Errors: []fail.Code{accounts.LoginUnknownProgram, accounts.LoginNotSignedIn, accounts.LoginGranted, accounts.LoginMachineStopped, confirm.YesNeeded},
+	Name: "accounts.logout", Section: section.Accounts, Where: call.InEngine, Applies: accounts.Applies, Confirm: confirm.SignOut,
+	Errors: []fail.Code{accounts.LoginUnknownProgram, accounts.LoginNotSignedIn, accounts.LoginGranted, accounts.LoginMachineStopped, accounts.LoginOtherMac, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in LogoutIn, _ call.Progress) (accounts.ProgramRow, error) {
 		// invariant: a sign-out asks first, since the sign-in ends; what
-		// cannot be signed out is refused before the question.
+		// cannot be signed out is refused before the question. It runs in
+		// the engine of the machine's own Mac, as a sign-in does.
 		if !in.Program.Known() {
 			return accounts.ProgramRow{}, accounts.Refusal(fail.NotFound, accounts.LoginUnknownProgram, string(in.Program))
 		}
-		if err := d.SignIns.CheckSignOut(ctx, in.Program); err != nil {
+		if err := d.SignIns.CheckSignOut(ctx, in.Machine, in.Program); err != nil {
 			return accounts.ProgramRow{}, err
 		}
 		if err := confirm.Require(confirm.For(confirm.SignOut, d.Kind), in.Program.Label(), in.Confirm); err != nil {
 			return accounts.ProgramRow{}, err
 		}
-		return d.SignIns.SignOut(ctx, in.Program)
+		return d.SignIns.SignOut(ctx, in.Machine, in.Program)
 	},
 }
 

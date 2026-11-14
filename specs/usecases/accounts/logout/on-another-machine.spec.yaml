@@ -12,4 +12,4 @@ runs:
           {"v":2,"id":"1","call":"accounts.logout","in":{"Program":"gh","Confirm":"yes"}}
       exit: 0
       stdout: |
-          ["gh","","sign-out"]
+          ["gh","signed-out","sign-in"]

@@ -36,6 +36,7 @@ The window owner's review of the same day is binding on the wire's words, and th
 - **`Field` on a refusal.** The declared refusals of `vault.add` and `grants.add` name the input at fault in `Field`: `label`, `value` or `term`.
 - **A step carries the engine's sentence** for each kind of step and for an expiry, and `Now` beside `Expires`; on success the sheet shows who signed in.
 - **A login for a VM of another Mac is refused in v1.** The Mac that owns the VM does it.
+- **A sign-in runs in the engine of the machine's own Mac, which attaches to the VM**, because a VM-targeted call is a one-shot guest-exec whose frames arrive at its exit: `accounts.login` and `accounts.logout` are in-engine calls that name the VM in `Machine`.
 - **One Passwords page shows this Mac's vault**, with no Mac picker.
 - **Claude reaches the vault from a sign-in** done on This Mac, whose token goes to the vault. A typed `setup-token` is the fallback only if a capture cannot work.
 - **The webview password input is the last fallback** for a typed value, under three conditions: an input that never reaches state, a log or a recording; one frame that is never logged; cleared on send and on close.

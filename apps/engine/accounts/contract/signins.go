@@ -12,13 +12,15 @@ import (
 type SignIns interface {
 	// value: the programs of the machine named, empty for this one, each row with its action.
 	Read(ctx context.Context, machine string) (accounts.ProgramsRead, error)
-	// invariant: Start answers the refusals before it returns; the channel
+	// invariant: Login answers the refusals before it returns; the channel
 	// then carries the step, then the signed-in row, and closes when the
-	// exchange ends or ctx does. A failure after Start rides as a refusal.
-	Login(ctx context.Context, program accounts.Program) (<-chan LoginUpdate, error)
-	// invariant: what cannot be signed out is refused here, before the question.
-	CheckSignOut(ctx context.Context, program accounts.Program) error
-	SignOut(ctx context.Context, program accounts.Program) (accounts.ProgramRow, error)
+	// exchange ends or ctx does. A failure after it rides as a refusal. The
+	// machine is a VM of this Mac, empty for this one.
+	Login(ctx context.Context, machine string, program accounts.Program) (<-chan LoginUpdate, error)
+	// invariant: what cannot be signed out is refused here, before the
+	// question; the machine is a VM of this Mac, empty for this one.
+	CheckSignOut(ctx context.Context, machine string, program accounts.Program) error
+	SignOut(ctx context.Context, machine string, program accounts.Program) (accounts.ProgramRow, error)
 	// value: the site the owner is sent to for an exchange of the machine named, opened by this Mac's engine.
 	Open(ctx context.Context, machine, exchange string) (string, error)
 	Answer(ctx context.Context, machine, exchange string, code secret.Sent) error

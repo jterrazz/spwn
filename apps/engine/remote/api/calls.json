@@ -27,7 +27,7 @@
       "name": "accounts.login",
       "schema": "station.accounts.login/v1",
       "section": "accounts",
-      "where": "at-target",
+      "where": "in-engine",
       "errors": [
         "login.already-signed-in",
         "login.busy",
@@ -35,6 +35,7 @@
         "login.failed",
         "login.machine-stopped",
         "login.not-installed",
+        "login.other-mac",
         "login.site-refused",
         "login.unknown-program"
       ],
@@ -46,13 +47,14 @@
       "name": "accounts.logout",
       "schema": "station.accounts.logout/v1",
       "section": "accounts",
-      "where": "at-target",
+      "where": "in-engine",
       "confirm": "sign-out",
       "errors": [
         "confirm.yes-needed",
         "login.granted",
         "login.machine-stopped",
         "login.not-signed-in",
+        "login.other-mac",
         "login.unknown-program"
       ],
       "in": "LogoutIn",
