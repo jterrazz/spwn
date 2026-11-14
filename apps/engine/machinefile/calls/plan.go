@@ -61,7 +61,8 @@ var Drift = call.Call[Deps, DriftIn, machinefile.Drift]{
 	// and the verdict. It never acts.
 	Name: "machinefile.drift", Document: 3, Where: call.InProcess, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound},
-	Run: func(ctx context.Context, d Deps, in DriftIn, _ call.Progress) (machinefile.Drift, error) {
+	Run: func(ctx context.Context, d Deps, in DriftIn, _ call.Progress) (answer machinefile.Drift, err error) {
+		defer func() { answer = answer.Answered() }()
 		// invariant: the machine is the input's, never a target, since a
 		// call with a target runs inside it, where its Mac's shares do not
 		// read: its packages are judged on it, and a VM's ports and

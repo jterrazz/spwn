@@ -88,3 +88,12 @@ func TestANightKeepsNoTokenInItsLedger(t *testing.T) {
 		t.Errorf("the night keeps %q, want the token withheld", n.Error)
 	}
 }
+
+func TestADriftLeavesItsCallScreenedThroughItsPlan(t *testing.T) {
+	line, script := carried()
+	drift := machinefile.Drift{Plan: machinefile.Plan{Lines: []machinefile.Line{line}, Scripts: []machinefile.Script{script}}}
+	leaked(t, "the drift's answer", drift.Answered())
+	if drift.Plan.Lines[0].Step.Values["endpoint"] != catalog.OptionValue(planted) {
+		t.Error("answering the drift changed the plan its call carries out")
+	}
+}

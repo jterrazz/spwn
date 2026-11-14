@@ -3,7 +3,9 @@ package calls
 import (
 	"cmp"
 	"context"
+	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
@@ -53,6 +55,7 @@ type fleet struct {
 	unanswered bool
 	macs       func([]ports.MacPorts) []ports.MacPorts
 	macOf      string
+	plan       []machinefile.Line
 }
 
 var errSilent = errors.New("mini does not answer")
@@ -67,7 +70,7 @@ func (f *fleet) Invoke(_ context.Context, target machine.Ref, name string, _, ou
 		if f.silent {
 			return errSilent
 		}
-		*out = machinefile.Plan{Name: cmp.Or(f.file, "linux-dev")}
+		*out = machinefile.Plan{Name: cmp.Or(f.file, "linux-dev"), Lines: f.plan}
 	case *ports.Listing:
 		if f.bare || f.silent {
 			return f.ports
@@ -269,5 +272,28 @@ func TestAVMWhoseMacIsSilentIsNotRead(t *testing.T) {
 	_, err := Drift.Run(context.Background(), fleetDeps(f, machine.Computer), DriftIn{Machine: "linux-1"}, nil)
 	if !errors.Is(err, errSilent) {
 		t.Errorf("drift of a VM of a silent Mac = %v; want its Mac's silence", err)
+	}
+}
+
+func TestADriftLeavesItsCallWithTheTokensOfItsPlanWithheld(t *testing.T) {
+	token := "sk-" + strings.Repeat("station-", 4) + "key"
+	line := machinefile.Line{
+		Step: machinefile.Step{Package: "served", Values: map[string]catalog.OptionValue{"endpoint": catalog.OptionValue(token)}},
+		Seen: machinefile.Seen{Condition: machinefile.Present, Detail: "read refused: " + token},
+	}
+	f := &fleet{asked: map[string]machine.Ref{}, plan: []machinefile.Line{line}}
+	d, err := Drift.Run(context.Background(), fleetDeps(f, machine.Computer), DriftIn{Machine: "linux-1"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), token) {
+		t.Errorf("the drift carries the token: %s", data)
+	}
+	if got := d.Plan.Lines[0].Step.Values["endpoint"]; got != "withheld" {
+		t.Errorf("the drift's plan reads the endpoint %q, want it withheld", got)
 	}
 }

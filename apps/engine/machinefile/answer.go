@@ -7,7 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
-// invariant: a plan, a run, an upgrade and a night leave their call as an
+// invariant: a plan, a drift, a run, an upgrade and a night leave their call as an
 // answer, screened once and only here: an option's value withheld whole,
 // the owner's lines, a block's text and every word a package, a run or a
 // source said screened word by word. What the call carries out keeps its
@@ -23,6 +23,11 @@ func (p Plan) Answered() Plan {
 	p.Blocks = each(p.Blocks, Block.answered)
 	p.Scripts = each(p.Scripts, Script.answered)
 	return p
+}
+
+func (d Drift) Answered() Drift {
+	d.Plan = d.Plan.Answered()
+	return d
 }
 
 func (a Applied) Answered() Applied {
