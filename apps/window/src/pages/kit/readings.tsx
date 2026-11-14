@@ -46,20 +46,13 @@ export function Reading({ size, what }: { size: 'page' | 'tab'; what: string }) 
 
 type Said = { word: string; tone: Tone; message: string; hint: string; fix: string };
 
-// invariant: a reason that names its request ends on it, `… to call <name> {…}` or `… to watch <name> {…}`
-// invariant: (src/engine/replay.ts); a page names no call to the owner, so the reason is drawn up to it.
-function requestCutFrom(reason: string): string {
-    const named = reason.search(/ to (?:call|watch) /u);
-    return named === -1 ? reason : reason.slice(0, named);
-}
-
 function saidOf(error: EngineError): Said {
     const { wire, message } = error;
     if (!wire) {
         return {
             ...failedState(error),
             fix: '',
-            hint: shownOrWithheld(requestCutFrom(message)),
+            hint: shownOrWithheld(message),
             message: 'No answer from the engine',
         };
     }
