@@ -4,7 +4,7 @@ answers so.
 Usage: recordings-check.py [<world>...], every recorded world when none is named, in a Linux VM only. Each exchange of
 <world>/<call>.json is asked again in a fresh door, as record.py asks it, and each gesture of <world>/gestures/ is made
 again by record.py's own `gesture`, in a fresh world, every read asked after it in the recorder's order. An answer is compared once reduced
-as the recorder keeps it: a watch by its settled answer, a gesture's NOISE field left out, and a gesture's reads of
+as the recorder keeps it: a watch by its settled answer, a gesture's NOISE field and the CLOCKED field of a call left out, and a gesture's reads of
 RACING left out, the watches whose settling races the engine's end. A leaf that differs is asked
 once more, and a leaf two fresh answers disagree on is the world's clock, never a meaning: it is ignored. So a recording
 is stale when the engine of this tree gives another answer, every time: a word, a field, a refusal it no longer gives.
@@ -19,7 +19,7 @@ import json
 import sys
 import time
 
-from record import NOISE, Door, callOf, gesture, keyOf, kept, out_root, recorded, seeded, settled
+from record import NOISE, Door, callOf, gesture, keyOf, kept, out_root, recorded, seeded, settled, unclocked
 
 MISSING = object()
 RACING = {"accounts.list", "disk.read"}
@@ -29,6 +29,7 @@ SHOWN = 4
 def reduced(request, frames):
     frames = kept(request, frames)
     frames = settled(frames) if "watch" in request else frames
+    frames = unclocked(request, frames)
     field = NOISE.get(callOf(request))
     if not field:
         return frames

@@ -22,7 +22,8 @@ The world build's clock moves when a watch waits on it (apps/engine/wire/world_o
 files: a watch the engine ends before a check settles (accounts.list, disk.read) answers pending in one run and
 settled in the other. The recorder keeps of a watch its first answer and its last (what streams between comes in the
 scheduler's order), never counts a read of TIMED as changed by a gesture, and keeps the NOISE field of a gesture's
-last recording: the process number the host gave, which no world decides.
+last recording: the process number the host gave, which no world decides, and the CLOCKED field of an answer (settings.matrix's Read, the world's clock) as its last
+recording holds it.
 
 A far Mac's machine, asked through that door, is answered with This Mac's overview: only This Mac, with no
 target, and its VMs, by name, are asked. The worlds of world.py's SEEDS are recorded too.
@@ -43,6 +44,8 @@ GRAPHS = (360 * 10**9, 3600 * 10**9, 86400 * 10**9)
 SETTLED = {"apps.list", "settings.list"}
 TIMED = {"activity.read", "engine.watch"}
 NOISE = {"engine.start": "PID"}
+CLOCKED = {"settings.matrix": "Read"}
+PRIOR = {}
 MACHINES = {"watch": "machines.list", "in": {}}
 QUIET = 10
 UNENDED = {"overview.read"}
@@ -279,7 +282,53 @@ def thisMac(listed):
     return [mac for mac in (out.get("All") or {}).get("Macs") or [] if mac.get("ThisMac")]
 
 
+def without(value, field):
+    if isinstance(value, dict):
+        return {key: without(item, field) for key, item in value.items() if key != field}
+    if isinstance(value, list):
+        return [without(item, field) for item in value]
+    return value
+
+
+def unclocked(request, frames):
+    """The frames of a call whose answer carries the world's clock, that field left out wherever it sits."""
+    field = CLOCKED.get(callOf(request))
+    return without(frames, field) if field else frames
+
+
+def carry(new, old, field):
+    if isinstance(new, dict) and isinstance(old, dict):
+        for key in new:
+            if key == field and key in old:
+                new[key] = old[key]
+            elif key in old:
+                carry(new[key], old[key], field)
+    elif isinstance(new, list) and isinstance(old, list):
+        for one, was in zip(new, old):
+            carry(one, was, field)
+
+
+def steadied(path, key, items):
+    """An answer of CLOCKED keeps the clock field its last recording holds, so a recording again moves no file for
+    time that passed."""
+    was = PRIOR.get(path) or (json.loads(path.read_text()) if path.exists() else {})
+    held = {keyOf(item["request"]): item for item in was.get(key, [])}
+    for item in items:
+        before = held.get(keyOf(item["request"]))
+        if not before:
+            continue
+        field = CLOCKED.get(callOf(item["request"]))
+        if field:
+            carry(item["answers"], before["answers"], field)
+        reads = {keyOf(read["request"]): read for read in before.get("after", [])}
+        for read in item.get("after", []):
+            field, one = CLOCKED.get(callOf(read["request"])), reads.get(keyOf(read["request"]))
+            if field and one:
+                carry(read["answers"], one["answers"], field)
+
+
 def write(path, world, station, key, items):
+    steadied(path, key, items)
     head = json.dumps({"world": world, "station": station})[:-1]
     lines = ",\n".join(json.dumps(item, separators=(",", ":")) for item in items)
     rest = '"exchanges": [], "gestures"' if key == "gestures" else '"exchanges"'
@@ -366,6 +415,7 @@ def record(world):
         by_call.setdefault(callOf(request), []).append({"request": request, "answers": kept(request, frames)})
         before[keyOf(request)] = kept(request, frames)
     folder.mkdir(parents=True, exist_ok=True)
+    PRIOR.update({path: json.loads(path.read_text()) for path in folder.rglob("*.json")})
     for stale in folder.glob("*.json"):
         stale.unlink()
     for call, exchanges in by_call.items():
