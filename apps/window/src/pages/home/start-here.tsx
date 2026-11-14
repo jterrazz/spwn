@@ -21,7 +21,7 @@ export function StartHere({ macs, go, onNewMachine }: StartHereProps) {
     return (
         <Panel title="Start here">
             <Row
-                sentence="A Linux machine of its own for an agent, made from an image: its tools are installed, and this Mac stays untouched"
+                sentence="A Linux machine of its own for an agent, made from an image: its packages are installed, and this Mac stays untouched"
                 title="Create a workspace"
                 trail={
                     <Button
