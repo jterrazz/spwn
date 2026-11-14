@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"accounts.list","in":{"Machine":"linux-1"}}
       exit: 0
       stdout: |
-          {"verdict":"Signed in to 2 of 4 programs","tone":"plain","rows":[["gh","signed-in","granted","remove",null,"Remove GitHub? The grant ends here; the token stays yours."],["npm","signed-out",null,"sign-in",null,null],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","broken",null,"sign-in-again","Refused at the provider",null]]}
+          {"verdict":"Signed in to 2 of 4 programs","tone":"plain","rows":[["gh","signed-out",null,"sign-in",null,null],["npm","signed-in","granted","remove",null,"Remove npm? The grant ends here; the token stays yours."],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","broken",null,"sign-in-again","Refused at the provider",null]]}

@@ -1,4 +1,4 @@
-description: 'This Mac lists its three passwords and the grant made from the first'
+description: 'This Mac lists its three passwords and the grant made from the second'
 env:
     - two-macs
     - engine
@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"vault.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[["machine","linux-1","2026-11-04T14:00:00Z","active"]]],["pw-2","npm publish","npm","token",false,[]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}
+          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1","2026-11-04T14:00:00Z","active"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}

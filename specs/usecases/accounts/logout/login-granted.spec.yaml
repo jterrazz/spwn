@@ -1,4 +1,4 @@
-description: 'A granted gh is removed by its grant, never signed out'
+description: 'A granted npm is removed by its grant, never signed out'
 env:
     - two-macs
     - engine
@@ -7,7 +7,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Program, .State, .Action] else .error | {code, subject, message} end'''
       stdin: |
-          {"v":2,"id":"1","call":"accounts.logout","in":{"Program":"gh","Confirm":"yes"}}
+          {"v":2,"id":"1","call":"accounts.logout","in":{"Program":"npm","Confirm":"yes"}}
       exit: 0
       stdout: |
-          {"code":"login.granted","subject":"gh","message":"GitHub is granted here, not signed in here"}
+          {"code":"login.granted","subject":"npm","message":"npm is granted here, not signed in here"}

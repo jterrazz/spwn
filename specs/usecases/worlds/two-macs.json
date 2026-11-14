@@ -623,14 +623,7 @@
                         "Who": "jterrazz",
                         "Added": "2026-10-30T09:00:00Z",
                         "AgentGrantable": true,
-                        "Grants": [
-                            {
-                                "ToKind": "machine",
-                                "To": "linux-1",
-                                "Until": "2026-11-04T14:00:00Z",
-                                "State": "active"
-                            }
-                        ]
+                        "Grants": []
                     },
                     {
                         "ID": "pw-2",
@@ -639,7 +632,14 @@
                         "Kind": "token",
                         "Added": "2026-10-12T09:00:00Z",
                         "AgentGrantable": false,
-                        "Grants": []
+                        "Grants": [
+                            {
+                                "ToKind": "machine",
+                                "To": "linux-1",
+                                "Until": "2026-11-04T14:00:00Z",
+                                "State": "active"
+                            }
+                        ]
                     },
                     {
                         "ID": "pw-3",
@@ -1003,12 +1003,11 @@
             },
             "accounts": {
                 "programs": {
-                    "gh": {
-                        "Program": "gh",
+                    "npm": {
+                        "Program": "npm",
                         "State": "signed-in",
-                        "Who": "jterrazz",
                         "How": "granted",
-                        "Entry": "pw-1",
+                        "Entry": "pw-2",
                         "Until": "2026-11-04T14:00:00Z"
                     },
                     "claude": {
