@@ -5,9 +5,11 @@ import { describe, expect, test } from 'vitest';
 
 import { Client } from '../../../engine/client';
 import { EngineProvider } from '../../../engine/react';
-import { stagedReplay } from '../../../engine/replay';
+import { replayTransport, stagedReplay } from '../../../engine/replay';
 import type { Stage } from '../../../engine/replay';
 import { recordingsOf } from '../../../fixtures/recordings';
+import { Window } from '../../../shell/window';
+import { PAGES } from '../../registry';
 import { AddPasswordSheet } from '../add-sheet';
 import { PasswordsPage } from '../passwords';
 
@@ -71,6 +73,24 @@ function fieldOf({ input, drawn }: Seen) {
 }
 
 describe('add password sheet', () => {
+    test("the vault's toolbar offers Add a password, which opens its sheet", async () => {
+        // Given - the window on Passwords over two-macs
+        const client = new Client(replayTransport(recordingFor('two-macs')));
+        const result = await component.render(
+            <EngineProvider client={client}>
+                <Window initial={{ page: 'passwords' }} pages={PAGES} />
+            </EngineProvider>,
+            async (visitor) => {
+                // When - Add a password is pressed in the toolbar
+                await visitor.click(button('Add a password'));
+
+                // Then - the sheet opens on the programs the engine lists
+                await visitor.see(within(SHEET, button('Cloudflare')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test('the sheet draws the programs, the ways in, the kinds and the label, and no value from a sign-in', async () => {
         // Given - the sheet over two-macs, gh the first program the engine lists
         const seen = unseen();
