@@ -24,7 +24,6 @@
         "State": {
           "enum": [
             "active",
-            "ending",
             "failing"
           ],
           "type": "string"
@@ -37,10 +36,6 @@
             "machine",
             "agent"
           ],
-          "type": "string"
-        },
-        "Until": {
-          "format": "date-time",
           "type": "string"
         },
         "Workspace": {

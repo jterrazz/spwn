@@ -295,7 +295,7 @@ func (s *SignIns) step(ctx context.Context, session io.Reader, p catalog.LoginPr
 		code = regexp.MustCompile(p.Code)
 	}
 	armed := p.CodeAfter == ""
-	step := accounts.Step{Kind: ex.kind, Site: p.Site, Exchange: id, Expires: ex.expires, Now: now, Expired: "The code expired"}
+	step := accounts.Step{Kind: ex.kind, Site: p.Site, Exchange: id, Expires: ex.expires, Now: now}
 	texts := make(chan string)
 	go func() {
 		defer close(texts)
@@ -347,7 +347,7 @@ func (s *SignIns) step(ctx context.Context, session io.Reader, p catalog.LoginPr
 			}
 		}
 		if ex.kind == accounts.StepDeviceCode && step.Code != "" || ex.kind != accounts.StepDeviceCode && s.linkOf(id) != "" {
-			step.Line = lineOf(step)
+			step.Line = ex.program.StepLine(ex.kind, p.Site)
 			return step, nil
 		}
 	}
@@ -367,17 +367,6 @@ func onSite(link, site string) bool {
 	}
 	name := u.Hostname()
 	return name == site || strings.HasSuffix(name, "."+site)
-}
-
-func lineOf(step accounts.Step) string {
-	switch step.Kind {
-	case accounts.StepDeviceCode:
-		return "Enter this code at " + step.Site
-	case accounts.StepPaste:
-		return "Sign in at " + step.Site + ", then paste the code it gives you here"
-	case accounts.StepLink:
-	}
-	return "Open the link to sign in at " + step.Site
 }
 
 func (s *SignIns) busy(machine string, program accounts.Program) bool {

@@ -1,15 +1,7 @@
 package accounts
 
 import (
-	"time"
-
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
-)
-
-const (
-	DefaultGrantTerm = 12 * time.Hour
-	ShortestGrant    = time.Minute
-	LongestGrant     = 7 * 24 * time.Hour
 )
 
 const (
@@ -37,20 +29,8 @@ type Target struct {
 	Line string
 }
 
-type Term struct {
-	// value: the kind of target that may pick this term.
-	ToKind GrantTo
-	// value: how long the grant lasts; zero lasts until it is removed.
-	For     time.Duration
-	Label   string
-	Default bool
-}
-
 type GrantOffer struct {
 	Targets []Target
-	// value: every term, each tagged with the kind of target that takes it;
-	// an agent's stop at the longest grant, a machine's may be until removed.
-	Terms []Term
 	// value: the sentence about the owner's presence the Mac asks for before a grant leaves it.
 	Presence string
 }
@@ -79,7 +59,7 @@ func Offer(c Candidates) GrantOffer {
 	for _, k := range c.List {
 		targets = append(targets, targetOf(k, c.AgentGrantable))
 	}
-	return GrantOffer{Targets: targets, Terms: Terms(), Presence: presenceSentence}
+	return GrantOffer{Targets: targets, Presence: presenceSentence}
 }
 
 func targetOf(k Candidate, agentGrantable bool) Target {
@@ -102,36 +82,11 @@ func targetOf(k Candidate, agentGrantable bool) Target {
 	case k.Facts.State == ProgramSignedIn && k.Facts.How == HowOwn:
 		t.Line = "It has its own sign-in"
 	case k.Granted:
-		t.Fit, t.Line = TargetFits, "Granted already; granting again starts a new term"
+		t.Fit, t.Line = TargetFits, "Granted already; granting again replaces it"
 	case k.Facts.State == ProgramBroken:
 		t.Fit, t.Line = TargetFits, "Its sign-in needs signing in again"
 	default:
 		t.Fit, t.Line = TargetFits, "Signed out here"
 	}
 	return t
-}
-
-func Terms() []Term {
-	// invariant: every term offered is inside TermInBounds for the kind that
-	// takes it, and one term of each kind is the default.
-	spans := []struct {
-		For   time.Duration
-		Label string
-	}{
-		{time.Hour, "1 hour"},
-		{4 * time.Hour, "4 hours"},
-		{DefaultGrantTerm, "12 hours"},
-		{24 * time.Hour, "1 day"},
-		{LongestGrant, "7 days"},
-	}
-	var out []Term
-	for _, to := range []GrantTo{ToMachine, ToAgent} {
-		for _, s := range spans {
-			out = append(out, Term{ToKind: to, For: s.For, Label: s.Label, Default: s.For == DefaultGrantTerm})
-		}
-		if to == ToMachine {
-			out = append(out, Term{ToKind: to, Label: "Until removed"})
-		}
-	}
-	return out
 }

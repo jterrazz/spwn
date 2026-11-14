@@ -3,7 +3,6 @@ package accounts_test
 import (
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -26,26 +25,6 @@ func TestThePasswordsVerdictCountsWhatIsGranted(t *testing.T) {
 	}
 }
 
-func TestAGrantLastsAMinuteToSevenDaysAndOnlyAMachineKeepsItUntilRemoved(t *testing.T) {
-	for _, c := range []struct {
-		to   accounts.GrantTo
-		term time.Duration
-		want bool
-	}{
-		{accounts.ToAgent, 0, false},
-		{accounts.ToMachine, 0, true},
-		{accounts.ToAgent, time.Minute, true},
-		{accounts.ToAgent, time.Minute - time.Second, false},
-		{accounts.ToAgent, 7 * 24 * time.Hour, true},
-		{accounts.ToMachine, 7*24*time.Hour + time.Second, false},
-		{accounts.ToMachine, -time.Hour, false},
-	} {
-		if got := accounts.TermInBounds(c.to, c.term); got != c.want {
-			t.Errorf("TermInBounds(%s, %s) = %v; want %v", c.to, c.term, got, c.want)
-		}
-	}
-}
-
 func TestEveryProgramStationSignsInHasAWayInAndOutOfAVM(t *testing.T) {
 	for _, p := range accounts.Programs() {
 		d, ok := p.Delivery()
@@ -63,6 +42,22 @@ func TestARemovalSaysAnEnvironmentFileProgramLeavesNewShellsOnly(t *testing.T) {
 		got := accounts.RevokedSentence(accounts.Program(d.Program))
 		if strings.Contains(got, "New shells no longer see it") != (d.Env != "") {
 			t.Errorf("%s (variable %q): %q", d.Program, d.Env, got)
+		}
+	}
+}
+
+func TestAProgramOffersAddFromASignInExactlyWhenItsDeliveryPrintsItsToken(t *testing.T) {
+	offered := accounts.VaultPrograms()
+	if len(offered) != len(catalog.Deliveries) {
+		t.Fatalf("%d programs offered; the catalog delivers to %d", len(offered), len(catalog.Deliveries))
+	}
+	for _, p := range offered {
+		d, _ := p.Program.Delivery()
+		if p.Captures != (len(d.Capture) > 0) {
+			t.Errorf("%s captures = %v; its delivery prints a token: %v", p.Program, p.Captures, len(d.Capture) > 0)
+		}
+		if p.Label == "" {
+			t.Errorf("%s has no label", p.Program)
 		}
 	}
 }

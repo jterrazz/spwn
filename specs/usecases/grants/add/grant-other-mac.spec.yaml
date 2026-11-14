@@ -7,7 +7,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
       stdin: |
-          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-2","ToKind":"machine","To":"ws-far","For":3600000000000}}
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-2","ToKind":"machine","To":"ws-far"}}
       exit: 0
       stdout: |
           {"code":"grant.other-mac","field":null,"subject":"ws-far","message":"ws-far is on jterrazz-mac-mini: a grant is made from that Mac's vault","hint":"do it from jterrazz-mac-mini"}

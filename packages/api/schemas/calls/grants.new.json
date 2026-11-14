@@ -14,21 +14,11 @@
             "array",
             "null"
           ]
-        },
-        "Terms": {
-          "items": {
-            "$ref": "#/$defs/accounts.Term"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
         }
       },
       "required": [
         "Presence",
-        "Targets",
-        "Terms"
+        "Targets"
       ],
       "type": "object"
     },
@@ -63,34 +53,6 @@
         "Fit",
         "Line",
         "To",
-        "ToKind"
-      ],
-      "type": "object"
-    },
-    "accounts.Term": {
-      "additionalProperties": false,
-      "properties": {
-        "Default": {
-          "type": "boolean"
-        },
-        "For": {
-          "type": "integer"
-        },
-        "Label": {
-          "type": "string"
-        },
-        "ToKind": {
-          "enum": [
-            "machine",
-            "agent"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "Default",
-        "For",
-        "Label",
         "ToKind"
       ],
       "type": "object"

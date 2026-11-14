@@ -29,7 +29,7 @@ func bind(in *Input, args []string) error {
 	if in.With == "" {
 		return kit.Refuse("station accounts share needs a VM", "station accounts share "+in.Account+" --with <vm>")
 	}
-	in.Term = accounts.DefaultGrantTerm
+	in.Term = accounts.DefaultShareTerm
 	if in.For == "" {
 		return nil
 	}

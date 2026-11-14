@@ -2,12 +2,7 @@
   "$defs": {
     "accounts.Granted": {
       "additionalProperties": false,
-      "properties": {
-        "Until": {
-          "format": "date-time",
-          "type": "string"
-        }
-      },
+      "properties": {},
       "type": "object"
     },
     "grants.calls.GrantAddIn": {
@@ -15,9 +10,6 @@
       "properties": {
         "Entry": {
           "type": "string"
-        },
-        "For": {
-          "type": "integer"
         },
         "To": {
           "type": "string"

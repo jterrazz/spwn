@@ -50,8 +50,6 @@ type LoginProgram struct {
 	Site string
 	// value: the page a device code is entered at, opened on the owner's Mac.
 	Page string
-	// value: whether the token of its sign-in can be taken into the vault.
-	Captures bool
 	// value: the read that says whether it is signed in, which never prints
 	// a secret, and how its answer reads.
 	Detect []string
@@ -91,7 +89,7 @@ const (
 
 var LoginPrograms = []LoginProgram{
 	{
-		Name: "gh", Label: "GitHub", Flow: FlowDeviceCode, Site: "github.com", Page: "https://github.com/login/device", Captures: true,
+		Name: "gh", Label: "GitHub", Flow: FlowDeviceCode, Site: "github.com", Page: "https://github.com/login/device",
 		Detect: []string{"auth", "status", "--hostname", "github.com"}, Reads: SignInRead{Who: `account (\S+)`},
 		Login:  []string{"auth", "login", "--web", "--hostname", "github.com", "--git-protocol", "https", "--skip-ssh-key"},
 		Code:   `one-time code: ([0-9A-F]{4}-[0-9A-F]{4})`,
@@ -104,7 +102,7 @@ var LoginPrograms = []LoginProgram{
 		Remove: []string{"logout"},
 	},
 	{
-		Name: "claude", Label: "Claude", Flow: FlowPaste, Site: "claude.com", Captures: true,
+		Name: "claude", Label: "Claude", Flow: FlowPaste, Site: "claude.com",
 		Detect: []string{"auth", "status"}, Reads: SignInRead{JSON: "loggedIn", WhoKey: "email", PlanKey: "subscriptionType", Plans: ClaudePlans},
 		Login:  []string{"auth", "login", "--claudeai"},
 		Remove: []string{"auth", "logout"},

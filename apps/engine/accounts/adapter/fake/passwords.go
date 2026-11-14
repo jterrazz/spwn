@@ -4,15 +4,12 @@ import (
 	"context"
 	"slices"
 	"strconv"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/accounts/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
-
-const endingWithin = 15 * time.Minute
 
 type Passwords struct {
 	w     *world.World
@@ -29,7 +26,6 @@ func NewPasswords(w *world.World, mac string, clock Clock) *Passwords {
 func (p *Passwords) own() *world.Accounts { return state(mac(p.w, p.mac)) }
 
 func (p *Passwords) List(context.Context) (accounts.VaultRead, error) {
-	now := p.clock.Now()
 	p.w.Lock()
 	defer p.w.Unlock()
 	entries := make([]accounts.VaultEntry, 0, len(p.own().Passwords))
@@ -37,11 +33,6 @@ func (p *Passwords) List(context.Context) (accounts.VaultRead, error) {
 		e.Grants = slices.Clone(e.Grants)
 		if e.Grants == nil {
 			e.Grants = []accounts.VaultGrant{}
-		}
-		for i := range e.Grants {
-			if !e.Grants[i].Until.IsZero() && e.Grants[i].Until.Sub(now) <= endingWithin {
-				e.Grants[i].State = accounts.GrantEnding
-			}
 		}
 		entries = append(entries, e)
 	}
@@ -74,12 +65,12 @@ func (p *Passwords) Add(_ context.Context, in contract.PasswordIn) (string, erro
 	}
 	who := ""
 	if in.From == accounts.FromSignIn {
+		if !in.Program.Captures() {
+			return "", accounts.Refusal(fail.Failed, accounts.VaultCannotCapture, string(in.Program))
+		}
 		facts, signed := own.Programs[in.Program]
 		if !signed || facts.State != accounts.ProgramSignedIn {
 			return "", accounts.Refusal(fail.Refused, accounts.VaultNotSignedIn, string(in.Program))
-		}
-		if !in.Program.Captures() {
-			return "", accounts.Refusal(fail.Failed, accounts.VaultCannotCapture, string(in.Program))
 		}
 		who = facts.Who
 	}

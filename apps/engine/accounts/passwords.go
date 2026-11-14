@@ -46,20 +46,18 @@ type GrantState string
 
 const (
 	GrantActive  GrantState = "active"
-	GrantEnding  GrantState = "ending"
 	GrantFailing GrantState = "failing"
 )
 
 func (GrantState) Enum() []string {
-	return []string{string(GrantActive), string(GrantEnding), string(GrantFailing)}
+	return []string{string(GrantActive), string(GrantFailing)}
 }
 
 type VaultGrant struct {
 	ToKind GrantTo
 	To     string
 	// value: the workspace an agent's grant is for, empty for a machine's.
-	Workspace string    `json:",omitempty"`
-	Until     time.Time `json:",omitzero"`
+	Workspace string `json:",omitempty"`
 	State     GrantState
 }
 
@@ -70,15 +68,24 @@ type VaultEntry struct {
 	Kind    KeyKind
 	Who     string `json:",omitempty"`
 	Added   time.Time
-	// value: whether an agent may be granted it: a fine-grained, expiring token, never the owner's own login.
+	// value: whether an agent may be granted it: a fine-grained token, never the owner's own login.
 	AgentGrantable bool
 	Grants         []VaultGrant
+}
+
+type VaultProgram struct {
+	Program Program
+	Label   string
+	// value: whether "add from a sign-in" is offered for it: its sign-in leaves a token this Mac can take.
+	Captures bool
 }
 
 type VaultRead struct {
 	// value: the Mac whose vault this is: a vault is one Mac's.
 	Mac     string
 	Entries []VaultEntry
+	// value: every program a password can be kept for, from the catalog.
+	Programs []VaultProgram
 	// value: the head of the Passwords page, from the entries and their grants.
 	Verdict verdict.Verdict
 }
@@ -92,23 +99,19 @@ type Removed struct {
 	Removed []VaultGrant
 }
 
-type Granted struct {
-	// value: when the grant ends; zero for one that lasts until it is removed.
-	Until time.Time `json:",omitzero"`
-}
+type Granted struct{}
 
 type Revoked struct {
 	// value: where the owner revokes the token itself, which station cannot.
 	Sentence string
 }
 
-func TermInBounds(to GrantTo, term time.Duration) bool {
-	// invariant: a grant lasts 1 min to 7 d; a machine's alone may last until
-	// it is removed, which is a term of 0.
-	if term == 0 {
-		return to == ToMachine
+func VaultPrograms() []VaultProgram {
+	out := make([]VaultProgram, 0, len(Programs()))
+	for _, p := range Programs() {
+		out = append(out, VaultProgram{Program: p, Label: p.Label(), Captures: p.Captures()})
 	}
-	return term >= ShortestGrant && term <= LongestGrant
+	return out
 }
 
 func Refusal(t fail.Type, code fail.Code, subject string) *fail.Error {

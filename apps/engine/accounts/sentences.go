@@ -10,7 +10,6 @@ const (
 	SentencePasswordsSome     Sentence = "passwords-some"
 	SentenceAgentReach        Sentence = "agent-reach"
 	SentenceCaptureNote       Sentence = "capture-note"
-	SentenceTermRule          Sentence = "term-rule"
 	SentenceRowSignedByItself Sentence = "row-signed-by-itself"
 	SentenceRowFromPassword   Sentence = "row-from-password"
 )
@@ -33,8 +32,6 @@ func (s Sentence) Text() string {
 		return "Only its terminal sees it"
 	case SentenceCaptureNote:
 		return "Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is."
-	case SentenceTermRule:
-		return "An agent keeps it up to 7 days. A machine may keep it until you remove it."
 	case SentenceRowSignedByItself:
 		return "signed in by itself"
 	case SentenceRowFromPassword:

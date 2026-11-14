@@ -9,7 +9,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
       stdin: |
-          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-1","ToKind":"machine","To":"ghost","For":3600000000000}}
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-1","ToKind":"machine","To":"ghost"}}
       exit: 0
       stdout: |
           {"code":"grant.unknown-machine","field":null,"subject":"ghost","message":"no machine named \"ghost\"","hint":"station machines"}

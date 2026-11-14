@@ -1190,7 +1190,6 @@
             "grant.other-mac",
             "grant.presence-refused",
             "grant.signed-in-here",
-            "grant.term-out-of-bounds",
             "grant.to-server",
             "grant.unknown-agent",
             "grant.unknown-entry",
@@ -1304,8 +1303,7 @@
         "field": {
           "enum": [
             "label",
-            "value",
-            "term"
+            "value"
           ],
           "type": "string"
         },

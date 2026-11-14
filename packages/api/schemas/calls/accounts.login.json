@@ -34,6 +34,9 @@
         "Entry": {
           "type": "string"
         },
+        "EntryLabel": {
+          "type": "string"
+        },
         "How": {
           "enum": [
             "own",
@@ -72,10 +75,6 @@
           ],
           "type": "string"
         },
-        "Until": {
-          "format": "date-time",
-          "type": "string"
-        },
         "Who": {
           "type": "string"
         }
@@ -94,9 +93,6 @@
           "type": "string"
         },
         "Exchange": {
-          "type": "string"
-        },
-        "Expired": {
           "type": "string"
         },
         "Expires": {
@@ -124,7 +120,6 @@
       },
       "required": [
         "Exchange",
-        "Expired",
         "Expires",
         "Kind",
         "Line",

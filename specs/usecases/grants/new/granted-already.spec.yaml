@@ -9,5 +9,5 @@ runs:
       exit: 0
       stdout: |
           ["machine","api",null,"no","Start the machine first"]
-          ["machine","linux-1",null,"fits","Granted already; granting again starts a new term"]
+          ["machine","linux-1",null,"fits","Granted already; granting again replaces it"]
           ["machine","infra",null,"no","A server keeps its own sign-ins"]

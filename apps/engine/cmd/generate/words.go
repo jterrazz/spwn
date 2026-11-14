@@ -207,9 +207,9 @@ func wordedEnums() []worded {
 			string(accounts.ActionNone):        plain("nothing to do"),
 		}},
 		{accounts.StepKind(""), map[string]word{
-			string(accounts.StepDeviceCode): plain("a code to enter"),
-			string(accounts.StepLink):       plain("a link to open"),
-			string(accounts.StepPaste):      plain("a code to paste back"),
+			string(accounts.StepDeviceCode): {Word: "a code to enter", Heading: "Enter the code", Detail: "Type it on the page that opened; it works once", Tone: verdict.Plain},
+			string(accounts.StepLink):       {Word: "a link to open", Heading: "Open the link", Detail: "Approve the sign-in in your browser", Tone: verdict.Plain},
+			string(accounts.StepPaste):      {Word: "a code to paste back", Heading: "Paste the code", Detail: "Sign in on the page that opened, then paste the code it gives you", Tone: verdict.Plain},
 		}},
 		{accounts.KeyKind(""), map[string]word{
 			string(accounts.KeyToken):       plain("token"),
@@ -232,13 +232,11 @@ func wordedEnums() []worded {
 		}},
 		{accounts.GrantState(""), map[string]word{
 			string(accounts.GrantActive):  toned(verdict.OK, "active"),
-			string(accounts.GrantEnding):  toned(verdict.Warn, "ending soon"),
 			string(accounts.GrantFailing): toned(verdict.Bad, "failing"),
 		}},
 		{fail.Field(""), map[string]word{
 			string(fail.FieldLabel): plain("label"),
 			string(fail.FieldValue): plain("value"),
-			string(fail.FieldTerm):  {Word: "term", Detail: accounts.SentenceTermRule.Text(), Tone: verdict.Plain},
 		}},
 		{page.Noun(""), map[string]word{
 			string(page.NounMachine):       {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},

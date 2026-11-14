@@ -373,14 +373,8 @@ func Codes() map[fail.Code]Wording {
 		accounts.GrantSignedInHere: func(e *fail.Error) (string, string) {
 			return "that program is already signed in on " + e.Subject, "sign it out there first"
 		},
-		accounts.GrantTermOutOfBounds: func(e *fail.Error) (string, string) {
-			if e.Detail["to"] == string(accounts.ToAgent) {
-				return "an agent's grant lasts 1 min to 7 d, never until removed, not " + e.Subject, "ask for a term of 4h"
-			}
-			return "a grant lasts 1 min to 7 d, or until it is removed, not " + e.Subject, "ask for a term of 4h"
-		},
 		accounts.GrantNotAgentGrantable: func(e *fail.Error) (string, string) {
-			return "password " + e.Subject + " is not one an agent may hold", "an agent holds a fine-grained, expiring token only"
+			return "password " + e.Subject + " is not one an agent may hold", "an agent holds a fine-grained token only"
 		},
 		accounts.GrantPresenceRefused: func(*fail.Error) (string, string) {
 			return "this Mac did not confirm you are there: nothing was granted", "grant again and confirm on this Mac"

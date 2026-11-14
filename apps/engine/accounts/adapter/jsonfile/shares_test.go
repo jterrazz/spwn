@@ -94,8 +94,8 @@ func TestAV2RecordsPlainNamesMoveOutAsSharedAtTheRecordsTimeForTheDefaultTerm(t 
 	}
 	held, err := s.Get(context.Background(), "api")
 	want := []accounts.Share{
-		{Name: "session:a", At: written, Until: written.Add(accounts.DefaultGrantTerm)},
-		{Name: "operator:claude:oauth-token", At: written, Until: written.Add(accounts.DefaultGrantTerm)},
+		{Name: "session:a", At: written, Until: written.Add(accounts.DefaultShareTerm)},
+		{Name: "operator:claude:oauth-token", At: written, Until: written.Add(accounts.DefaultShareTerm)},
 	}
 	if err != nil || !reflect.DeepEqual(held, want) {
 		t.Fatalf("Get = %+v, %v; want %+v", held, err, want)

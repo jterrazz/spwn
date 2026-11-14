@@ -2,7 +2,6 @@ package calls
 
 import (
 	"context"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/accounts/contract"
@@ -18,22 +17,13 @@ type GrantAddIn struct {
 	ToKind    accounts.GrantTo
 	To        string
 	Workspace string
-	// value: how long the grant lasts; zero lasts until it is removed, a machine's alone.
-	For time.Duration
 }
 
 var GrantAdd = call.Call[Deps, GrantAddIn, accounts.Granted]{
 	Name: "grants.add", Section: section.Accounts, Where: call.InEngine, Applies: accounts.OnAMac,
-	Errors: []fail.Code{accounts.GrantUnknownEntry, accounts.GrantUnknownMachine, accounts.GrantUnknownAgent, accounts.GrantToServer, accounts.GrantOtherMac, accounts.GrantMachineStopped, accounts.GrantSignedInHere, accounts.GrantTermOutOfBounds, accounts.GrantNotAgentGrantable, accounts.GrantPresenceRefused, accounts.GrantNoPresence, accounts.GrantCannotDeliver},
+	Errors: []fail.Code{accounts.GrantUnknownEntry, accounts.GrantUnknownMachine, accounts.GrantUnknownAgent, accounts.GrantToServer, accounts.GrantOtherMac, accounts.GrantMachineStopped, accounts.GrantSignedInHere, accounts.GrantNotAgentGrantable, accounts.GrantPresenceRefused, accounts.GrantNoPresence, accounts.GrantCannotDeliver},
 	Run: func(ctx context.Context, d Deps, in GrantAddIn, _ call.Progress) (accounts.Granted, error) {
-		// invariant: a term outside the bounds is refused before any read or
-		// effect, whichever surface sent it.
-		if !accounts.TermInBounds(in.ToKind, in.For) {
-			e := accounts.Refusal(fail.Refused, accounts.GrantTermOutOfBounds, in.For.String())
-			e.Detail = map[string]string{"to": string(in.ToKind)}
-			return accounts.Granted{}, accounts.Fielded(e)
-		}
-		granted, err := d.Grants.Add(ctx, contract.GrantIn{Entry: in.Entry, ToKind: in.ToKind, To: in.To, Workspace: in.Workspace, For: in.For})
+		granted, err := d.Grants.Add(ctx, contract.GrantIn{Entry: in.Entry, ToKind: in.ToKind, To: in.To, Workspace: in.Workspace})
 		return granted, accounts.Fielded(err)
 	},
 }

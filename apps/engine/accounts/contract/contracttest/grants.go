@@ -3,7 +3,6 @@ package contracttest
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/accounts/contract"
@@ -27,13 +26,13 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 		}
 		return id
 	}
-	to := func(id, vm string, term time.Duration) contract.GrantIn {
-		return contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: vm, For: term}
+	to := func(id, vm string) contract.GrantIn {
+		return contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: vm}
 	}
 
 	t.Run("a password the vault does not keep is an unknown entry", func(t *testing.T) {
 		s := subject(t)
-		if _, err := s.Grants.Add(ctx, to("pw-404", s.Running, time.Hour)); codeOf(err) != accounts.GrantUnknownEntry {
+		if _, err := s.Grants.Add(ctx, to("pw-404", s.Running)); codeOf(err) != accounts.GrantUnknownEntry {
 			t.Fatalf("Add = %v; want %s", err, accounts.GrantUnknownEntry)
 		}
 		if _, err := s.Grants.Candidates(ctx, "pw-404"); codeOf(err) != accounts.GrantUnknownEntry {
@@ -48,9 +47,9 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 			in   contract.GrantIn
 			want string
 		}{
-			{to(id, "nowhere", time.Hour), string(accounts.GrantUnknownMachine)},
-			{to(id, s.Stopped, time.Hour), string(accounts.GrantMachineStopped)},
-			{contract.GrantIn{Entry: id, ToKind: accounts.ToAgent, To: "nobody", Workspace: s.Running, For: time.Hour}, string(accounts.GrantUnknownAgent)},
+			{to(id, "nowhere"), string(accounts.GrantUnknownMachine)},
+			{to(id, s.Stopped), string(accounts.GrantMachineStopped)},
+			{contract.GrantIn{Entry: id, ToKind: accounts.ToAgent, To: "nobody", Workspace: s.Running}, string(accounts.GrantUnknownAgent)},
 		} {
 			if _, err := s.Grants.Add(ctx, c.in); string(codeOf(err)) != c.want {
 				t.Errorf("Add to %s = %v; want %s", c.in.To, err, c.want)
@@ -58,19 +57,18 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 		}
 	})
 
-	t.Run("a grant for a term ends then, is listed and is offered as granted", func(t *testing.T) {
+	t.Run("a grant is listed and is offered as granted", func(t *testing.T) {
 		s := subject(t)
 		id := entry(t, s)
-		granted, err := s.Grants.Add(ctx, to(id, s.Running, 4*time.Hour))
-		if err != nil || granted.Until.IsZero() {
-			t.Fatalf("Add = %+v, %v; want an end", granted, err)
+		if _, err := s.Grants.Add(ctx, to(id, s.Running)); err != nil {
+			t.Fatalf("Add: %v", err)
 		}
 		if refused := s.Grants.Check(ctx, id, accounts.ToMachine, s.Running); refused != nil {
 			t.Fatalf("Check: %v", refused)
 		}
 		e, _ := listed(t, s.Passwords, id)
-		if len(e.Grants) != 1 || e.Grants[0].To != s.Running || !e.Grants[0].Until.Equal(granted.Until) {
-			t.Fatalf("grants %+v; want the one to %s until %s", e.Grants, s.Running, granted.Until)
+		if len(e.Grants) != 1 || e.Grants[0].To != s.Running || e.Grants[0].State != accounts.GrantActive {
+			t.Fatalf("grants %+v; want the one active grant to %s", e.Grants, s.Running)
 		}
 		found, err := s.Grants.Candidates(ctx, id)
 		if err != nil {
@@ -85,17 +83,10 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 		}
 	})
 
-	t.Run("a grant until removed has no end", func(t *testing.T) {
-		s := subject(t)
-		if granted, err := s.Grants.Add(ctx, to(entry(t, s), s.Running, 0)); err != nil || !granted.Until.IsZero() {
-			t.Fatalf("Add = %+v, %v; want no end", granted, err)
-		}
-	})
-
 	t.Run("a grant removed is no longer granted, and the sentence says where to revoke", func(t *testing.T) {
 		s := subject(t)
 		id := entry(t, s)
-		if _, err := s.Grants.Add(ctx, to(id, s.Running, time.Hour)); err != nil {
+		if _, err := s.Grants.Add(ctx, to(id, s.Running)); err != nil {
 			t.Fatalf("Add: %v", err)
 		}
 		revoked, err := s.Grants.Remove(ctx, id, accounts.ToMachine, s.Running)
@@ -110,7 +101,7 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 	t.Run("a password removed ends its grants", func(t *testing.T) {
 		s := subject(t)
 		id := entry(t, s)
-		if _, err := s.Grants.Add(ctx, to(id, s.Running, time.Hour)); err != nil {
+		if _, err := s.Grants.Add(ctx, to(id, s.Running)); err != nil {
 			t.Fatalf("Add: %v", err)
 		}
 		ended, err := s.Passwords.Remove(ctx, id)

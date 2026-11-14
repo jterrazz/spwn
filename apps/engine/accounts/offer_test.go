@@ -19,7 +19,7 @@ func TestATargetThatCannotBePickedSaysWhy(t *testing.T) {
 		"stopped":     {accounts.Candidate{ToKind: accounts.ToMachine, To: "api", Where: accounts.Where{Stopped: true}}, accounts.TargetNo, "Start the machine first"},
 		"its own":     {accounts.Candidate{ToKind: accounts.ToMachine, To: "linux-1", Facts: signedInHere}, accounts.TargetNo, "It has its own sign-in"},
 		"signed out":  {accounts.Candidate{ToKind: accounts.ToMachine, To: "linux-1"}, accounts.TargetFits, "Signed out here"},
-		"granted":     {accounts.Candidate{ToKind: accounts.ToMachine, To: "linux-1", Granted: true, Facts: accounts.Facts{State: accounts.ProgramSignedIn, How: accounts.HowGranted}}, accounts.TargetFits, "Granted already; granting again starts a new term"},
+		"granted":     {accounts.Candidate{ToKind: accounts.ToMachine, To: "linux-1", Granted: true, Facts: accounts.Facts{State: accounts.ProgramSignedIn, How: accounts.HowGranted}}, accounts.TargetFits, "Granted already; granting again replaces it"},
 		"an agent":    {accounts.Candidate{ToKind: accounts.ToAgent, To: "bot", Workspace: "linux-1"}, accounts.TargetFits, "Only its terminal sees it"},
 	} {
 		got := accounts.Offer(accounts.Candidates{AgentGrantable: true, List: []accounts.Candidate{c.in}}).Targets[0]
@@ -30,25 +30,5 @@ func TestATargetThatCannotBePickedSaysWhy(t *testing.T) {
 	got := accounts.Offer(accounts.Candidates{List: []accounts.Candidate{{ToKind: accounts.ToAgent, To: "bot"}}}).Targets[0]
 	if got.Fit != accounts.TargetNo {
 		t.Errorf("an agent took a password that is not fine-grained: %q", got.Fit)
-	}
-}
-
-func TestEveryTermOfferedIsInBoundsAndOneIsTheDefault(t *testing.T) {
-	defaults := map[accounts.GrantTo]int{}
-	for _, term := range accounts.Terms() {
-		if !accounts.TermInBounds(term.ToKind, term.For) {
-			t.Errorf("%s offers %s, out of bounds", term.ToKind, term.Label)
-		}
-		if term.Default {
-			defaults[term.ToKind]++
-		}
-	}
-	if defaults[accounts.ToMachine] != 1 || defaults[accounts.ToAgent] != 1 {
-		t.Errorf("defaults = %v; want one of each kind", defaults)
-	}
-	for _, term := range accounts.Terms() {
-		if term.ToKind == accounts.ToAgent && term.For == 0 {
-			t.Errorf("an agent is offered until removed")
-		}
 	}
 }

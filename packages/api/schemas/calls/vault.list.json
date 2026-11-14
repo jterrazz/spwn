@@ -65,7 +65,6 @@
         "State": {
           "enum": [
             "active",
-            "ending",
             "failing"
           ],
           "type": "string"
@@ -80,10 +79,6 @@
           ],
           "type": "string"
         },
-        "Until": {
-          "format": "date-time",
-          "type": "string"
-        },
         "Workspace": {
           "type": "string"
         }
@@ -92,6 +87,32 @@
         "State",
         "To",
         "ToKind"
+      ],
+      "type": "object"
+    },
+    "accounts.VaultProgram": {
+      "additionalProperties": false,
+      "properties": {
+        "Captures": {
+          "type": "boolean"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Captures",
+        "Label",
+        "Program"
       ],
       "type": "object"
     },
@@ -110,6 +131,15 @@
         "Mac": {
           "type": "string"
         },
+        "Programs": {
+          "items": {
+            "$ref": "#/$defs/accounts.VaultProgram"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Verdict": {
           "$ref": "#/$defs/core.verdict.Verdict"
         }
@@ -117,6 +147,7 @@
       "required": [
         "Entries",
         "Mac",
+        "Programs",
         "Verdict"
       ],
       "type": "object"
