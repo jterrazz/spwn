@@ -14,8 +14,6 @@
     - tab "Sign-ins" [selected]
     - tab "Storage"
   - heading "Signed in to 2 of 4 programs." [level=1]
-  - paragraph:
-    - img "Signed in to 2 of 4 programs"
   - region "Sign-ins":
     - heading "Sign-ins 4" [level=2]
     - text: gh Signed out
@@ -27,3 +25,6 @@
     - button "Sign out claude": Sign out
     - text: wrangler Refused at the provider Needs signing in again
     - button "Sign in again wrangler": Sign in again
+    - paragraph:
+      - text: 1 password from this Mac is granted to linux-1 ·
+      - button "Passwords"

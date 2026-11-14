@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AppIcon, asSentence, Button, Panel, Verdict } from '../../design/index';
 import { wordOf } from '../../engine/engine-words';
 import { useWatch } from '../../engine/react';
-import { engineShown, grantEndOf, verdictShown } from '../../engine/shown';
+import { engineShown, grantedCount, grantEndOf, verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import type { Gesture } from '../../engine/use-gesture';
 import type { Found } from '../../model/machines';
@@ -183,6 +183,38 @@ function ProgramRow({ row, found, go, onSignIn }: RowProps) {
     );
 }
 
+// value: the count of rows the wire says are granted, joined with fixed words; the vault is This Mac's, so a far
+// value: Mac's machine offers no Passwords page to open.
+function GrantedFoot({
+    found,
+    go,
+    programs,
+}: {
+    found: Found;
+    go: Go;
+    programs: readonly AccountsProgramRow[];
+}) {
+    const count = grantedCount(programs);
+    if (count === 0 || !found.mac.ThisMac) {
+        return null;
+    }
+    const one = count === 1;
+    const name = found.vm?.Name ?? found.mac.Name;
+    return (
+        <p className={styles.foot}>
+            {`${String(count)} ${one ? 'password' : 'passwords'} from this Mac ${one ? 'is' : 'are'} granted to ${name} · `}
+            <Button
+                onClick={() => {
+                    go({ page: 'passwords' });
+                }}
+                variant="link"
+            >
+                Passwords
+            </Button>
+        </p>
+    );
+}
+
 export function SignInsTab({ found, go }: { found: Found; go: Go }) {
     const name = found.vm?.Name ?? found.mac.Name;
     const { input, target } = aimed(found, {});
@@ -223,6 +255,7 @@ export function SignInsTab({ found, go }: { found: Found; go: Go }) {
                             row={row}
                         />
                     ))}
+                    <GrantedFoot found={found} go={go} programs={programs} />
                 </Panel>
             </HeldOutcomes>
             {asked === undefined ? null : (

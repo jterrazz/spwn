@@ -1,4 +1,5 @@
 import type {
+    AccountsProgramRow,
     AppsReport,
     CatalogAudience,
     CatalogKind,
@@ -136,6 +137,11 @@ export function holdsFor(until: string, now: string): Shown {
 export function grantEndOf(until: string | undefined): string | undefined {
     const at = clock(until);
     return at === undefined ? undefined : `until ${at}`;
+}
+
+// value: a count of the wire's own rows, the ones whose How the engine says is granted; no judgement is made here.
+export function grantedCount(programs: readonly Pick<AccountsProgramRow, 'How'>[]): number {
+    return programs.filter((row) => row.How === 'granted').length;
 }
 
 export function vmLifetimeWord(vm: Pick<MachinesVM, 'Lifetime'>): string {
