@@ -193,8 +193,10 @@ func Down(vm VM) bool {
 	return false
 }
 
-// invariant: a server in a loop or powered off from inside needs you (red);
-// one whose check fails since it passed needs a look, never a restart.
+// invariant: a server in a loop, powered off from inside, or whose check
+// fails since it passed needs you (red); a check that has not answered yet
+// is no finding. The engine never restarts it by itself: the restart is the
+// owner's gesture.
 func serverFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 	if vm.Lifetime != AlwaysOn {
 		return finding.Finding{}, false
@@ -206,7 +208,8 @@ func serverFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 	case vm.State == Stopped && vm.Detail == PoweredOffInside:
 		f.Severity, f.Text, f.Fix = finding.Broken, vm.Name+" "+PoweredOffInside, finding.Fix{Command: "station machines start " + vm.Name + on}
 	case vm.State == Running && vm.CheckStatus.State == CheckFailing:
-		f.Severity, f.Text = finding.NeedsALook, vm.Name+" check failing since "+vm.CheckStatus.Since.Local().Format("15:04")
+		f.Severity, f.Text = finding.Broken, vm.Name+" check failing since "+vm.CheckStatus.Since.Local().Format("15:04")
+		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}}
 	default:
 		return finding.Finding{}, false
 	}
