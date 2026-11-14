@@ -54,9 +54,28 @@ describe('ports', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'W20 waits for grants.remove in the window and a recording of accounts.list after it, where the row offers a sign-in again (the K5b lot)',
-    );
+    test("W20 a granted program's Remove ends its grant, and the row offers a sign-in again", async () => {
+        // Given - linux-1's Sign-ins over two-macs, npm held by a grant of pw-2
+        const result = await website.visit(
+            '/?world=two-macs&machine=linux-1&tab=Sign-ins',
+            async (visitor) => {
+                const rows = region('Sign-ins');
+
+                // When - Remove of npm is pressed and confirmed
+                await visitor.click(within(rows, button('Remove npm')));
+                await visitor.click(
+                    within(
+                        dialog('Remove npm? The grant ends here; the token stays yours.'),
+                        button('Remove'),
+                    ),
+                );
+
+                // Then - the row offers a sign-in again
+                await visitor.see(within(rows, button('Sign in npm')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo(
         'W21 waits for a recording of a VM that differs from its file in packages, ports and accounts, and for the count of its differences per chapter on machinefile.drift',

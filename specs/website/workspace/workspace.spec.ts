@@ -97,9 +97,26 @@ describe('workspace', () => {
 
     test.todo('W5 waits for a recording of a failed creation, its step and its log');
 
-    test.todo(
-        'W6 waits for grants.add and the vault in the window: a grant is added from the vault for a term (the K5b lot)',
-    );
+    test('W6 a password granted to a VM is listed among its grants', async () => {
+        // Given - GitHub deploy's page over two-macs, granted nowhere, linux-1 signed out of gh
+        const result = await website.visit(
+            '/?world=two-macs&page=passwords&item=pw-1&pace=600',
+            async (visitor) => {
+                await visitor.click(button('Grant…'));
+                const sheet = dialog('Grant GitHub deploy');
+
+                // When - linux-1 is picked and granted
+                await visitor.click(within(sheet, button('linux-1', { exact: false })));
+                await visitor.click(within(sheet, button('Grant to linux-1')));
+
+                // Then - the sheet goes, and linux-1 holds it
+                await visitor.gone(sheet);
+                await visitor.see(within(region('Granted to'), content('linux-1')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+        expect(result.content.text).not.toContain('until');
+    });
 
     test('W30 a pasted code goes through a field the page never holds, and a refused one is said', async () => {
         // Given - linux-1's Sign-ins over sign-ins, claude signed out and its login asking a code back
