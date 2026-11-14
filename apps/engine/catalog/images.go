@@ -1,6 +1,13 @@
 package catalog
 
-import "embed"
+import (
+	"embed"
+	"io/fs"
+	"path"
+	"slices"
+	"strconv"
+	"strings"
+)
 
 type ImageDefaults struct {
 	CPUs                   int
@@ -43,7 +50,6 @@ var builtinImages = []Image{
 		Bake:        "images/linux-bake.sh",
 		Cleanup:     "images/linux-cleanup.sh",
 		Firstboot:   "images/linux-firstboot.sh",
-		Defaults:    ImageDefaults{CPUs: 4, MemoryBytes: 4 * gibibyte, DiskBytes: 20 * gigabyte},
 		Kind:        Linux,
 	},
 	{
@@ -51,6 +57,48 @@ var builtinImages = []Image{
 		Defaults: ImageDefaults{CPUs: 4, MemoryBytes: 8 * gibibyte, DiskBytes: 80 * gigabyte},
 		Kind:     MacOS,
 	},
+}
+
+func sizedImages(files fs.FS) ([]Image, error) {
+	// invariant: a built-in image made from a Machinefile is sized by that
+	// file alone, its vm's resources; an image only fetched carries its own.
+	out := slices.Clone(builtinImages)
+	for i, img := range out {
+		if img.Machinefile == "" {
+			continue
+		}
+		file := path.Join("machines", img.Machinefile+MachinefileSuffix)
+		body, err := fs.ReadFile(files, file)
+		if err != nil {
+			return nil, err
+		}
+		mf, err := DecodeMachinefile(file, body)
+		if err != nil {
+			return nil, err
+		}
+		if mf.VM == nil || mf.VM.Resources == nil {
+			return nil, &FileError{File: file, Problem: "says no vm resources: a built-in image is sized by its Machinefile"}
+		}
+		r := mf.VM.Resources
+		out[i].Defaults = ImageDefaults{CPUs: r.CPUs, MemoryBytes: r.Memory.bytes(1024), DiskBytes: r.Disk.bytes(1000)}
+	}
+	return out, nil
+}
+
+// value: the bytes of a size its file's check let through, memory counted
+// in base 1024 and a disk in base 1000; none is zero.
+func (s Size) bytes(base int64) int64 {
+	if s == "" {
+		return 0
+	}
+	n, err := strconv.ParseInt(string(s[:len(s)-1]), 10, 64)
+	if err != nil {
+		return 0
+	}
+	for range strings.IndexByte("KMGT", s[len(s)-1]) + 1 {
+		n *= base
+	}
+	return n
 }
 
 func (c Catalog) Image(name string) (Image, bool) {

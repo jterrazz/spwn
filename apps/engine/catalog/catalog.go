@@ -145,7 +145,11 @@ func Assemble(pkgs []Placed) (Catalog, error) {
 	// value: the catalog of the packages given, judged whole.
 	pkgs = slices.Clone(pkgs)
 	slices.SortFunc(pkgs, byCategory)
-	c := Catalog{Images: builtinImages, Packages: pkgs}
+	images, err := sizedImages(builtin)
+	if err != nil {
+		return Catalog{}, err
+	}
+	c := Catalog{Images: images, Packages: pkgs}
 	files := map[string]string{}
 	for _, p := range pkgs {
 		files[p.Package.Name] = p.File
