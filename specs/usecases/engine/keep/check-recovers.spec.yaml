@@ -13,14 +13,14 @@ runs:
       exit: 0
       stdout: |
           # Needs you
-          ◐	infra	check failing since 10:01
+          ✗	infra	check failing since 10:01
     - command: 'world advance 60s'
       exit: 0
     - command: 'machines | /usr/bin/grep infra'
       exit: 0
       stdout: |
           ◐	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB	check failing since 10:01
-          ◐	infra	check failing since 10:01
+          ✗	infra	check failing since 10:01
     - command: 'world advance 60s'
       exit: 0
     - command: 'machines'

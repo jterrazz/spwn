@@ -1,4 +1,4 @@
-description: 'a health check that passed then fails is failing since then, orange, and never restarts the server'
+description: 'a health check that passed then fails is red and needs you, no restart'
 env: two-macs
 runs:
     - command: 'machines infra | /usr/bin/grep Check'
@@ -18,7 +18,7 @@ runs:
           ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running
           ◐	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB	check failing since 10:01
           # Needs you
-          ◐	infra	check failing since 10:01
+          ✗	infra	check failing since 10:01
     - command: 'machines infra | /usr/bin/grep -E "Check|Restarts"'
       exit: 0
       stdout: |
