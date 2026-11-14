@@ -5,8 +5,7 @@ import { AppIcon, Button, Panel, StatePill, Switch, Value } from '../../design/i
 import type { Identity } from '../../design/index';
 import { layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
-import { ACTION_TONES, CONDITION_TONES } from '../../engine/tones';
-import { ACTION_WORDS, CONDITION_WORDS } from '../../engine/words';
+import { engineShown } from '../../engine/shown';
 import { differencesOf, layersOf } from './model';
 
 import styles from './packages.module.css';
@@ -35,10 +34,7 @@ function DiffRow({ line, layer, toFile }: { line: PlanLine; layer: Layered; toFi
                 )}
             </div>
             <div className={styles.state}>
-                <StatePill
-                    tone={CONDITION_TONES[Seen.Condition]}
-                    word={CONDITION_WORDS[Seen.Condition]}
-                />
+                <StatePill {...engineShown('MachinefileCondition', Seen.Condition)} />
                 {Seen.Version === '' ? (
                     <span className={styles.muted}>{Seen.Detail}</span>
                 ) : (
@@ -49,11 +45,7 @@ function DiffRow({ line, layer, toFile }: { line: PlanLine; layer: Layered; toFi
                 {toFile ? (
                     <span className={styles.muted}>not given</span>
                 ) : (
-                    <StatePill
-                        dotted={false}
-                        tone={ACTION_TONES[line.Action]}
-                        word={ACTION_WORDS[line.Action]}
-                    />
+                    <StatePill dotted={false} {...engineShown('MachinefileAction', line.Action)} />
                 )}
             </div>
         </div>
@@ -69,10 +61,7 @@ function BlockRow({ differing }: { differing: MachinefileDiffering }) {
                 <Value look="raised">{differing.Block}</Value>
             </div>
             <div className={styles.state}>
-                <StatePill
-                    tone={CONDITION_TONES[differing.Condition]}
-                    word={CONDITION_WORDS[differing.Condition]}
-                />
+                <StatePill {...engineShown('MachinefileCondition', differing.Condition)} />
             </div>
             <div className={styles.will} />
         </div>

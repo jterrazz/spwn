@@ -1,18 +1,11 @@
 import type { AppsReport } from '@jterrazz/station-api';
 
 import { Button, Facts, MissingMark, Panel, Row, StatePill, Value } from '../../design/index';
+import { detailOf, wordOf } from '../../engine/engine-words';
 import { isSkill } from '../../engine/provisional';
-import { appUpdate } from '../../engine/shown';
+import { appUpdate, kindChipWord } from '../../engine/shown';
 import { APP_STATE_TONES } from '../../engine/tones';
-import {
-    APP_STATE_WORDS,
-    CATALOG_KIND_NAMES,
-    CATALOG_KIND_WORDS,
-    CATALOG_LEVEL_LINES,
-    CATALOG_LEVEL_WORDS,
-    NEED_WORDS,
-    SKILL_KIND_NAME,
-} from '../../engine/words';
+import { APP_STATE_WORDS, SKILL_KIND_NAME } from '../../engine/words';
 import { sentence } from '../../model/format';
 import { installLinesOf, usedBy } from './item-model';
 import { factOf, Installs, ItemChips, ItemHead, Rail, Two } from './item-parts';
@@ -35,7 +28,7 @@ function Tags({ names }: { names: readonly string[] }) {
 
 function HowInstalled({ report, go, routeOf }: ItemProps & { report: AppsReport }) {
     const { App } = report;
-    const needs = (App.Needs ?? []).map((need) => NEED_WORDS[need]);
+    const needs = (App.Needs ?? []).map((need) => wordOf('CatalogNeed', need).Word);
     const provides = App.Provides ?? [];
     const requires = App.Requires ?? [];
     const facts = [
@@ -124,8 +117,8 @@ function OnDisk({ report, go }: Pick<ItemProps, 'go'> & { report: AppsReport }) 
                 {paths.map((stored) => (
                     <Row
                         key={stored.Path}
-                        kind={CATALOG_LEVEL_WORDS[stored.Level]}
-                        sentence={sentence([CATALOG_LEVEL_LINES[stored.Level], stored.Note])}
+                        kind={wordOf('CatalogLevel', stored.Level).Word}
+                        sentence={sentence([detailOf('CatalogLevel', stored.Level), stored.Note])}
                         size="slim"
                         title={stored.Path}
                     />
@@ -139,7 +132,7 @@ function kindName(report: AppsReport): string {
     if (isSkill(report.App.Category)) {
         return SKILL_KIND_NAME;
     }
-    return CATALOG_KIND_NAMES[report.App.Kind ?? 'app'];
+    return wordOf('CatalogKind', report.App.Kind ?? 'app').Word;
 }
 
 export function AppItem({
@@ -154,7 +147,7 @@ export function AppItem({
             <ItemHead
                 about={App.Description}
                 kind={App.Kind ?? 'app'}
-                kindWord={App.Kind === undefined ? '' : CATALOG_KIND_WORDS[App.Kind]}
+                kindWord={App.Kind === undefined ? '' : kindChipWord(App.Kind)}
                 name={App.Name}
                 version={report.Version}
             />

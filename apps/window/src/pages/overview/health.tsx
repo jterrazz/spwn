@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
 import type { Measured } from '../../design/index';
+import { countOf } from '../../engine/engine-words';
 import { vmCheck, vmSsh, vmState } from '../../engine/shown';
 import { clock, duration, seconds, sentence } from '../../model/format';
 import { SEPARATOR } from '../../separator';
@@ -138,7 +139,7 @@ function dayOf(day: MachinesUptimeDay): string {
     const down = day.down_s ?? 0;
     return sentence([
         shortDay(day.date) ?? day.date,
-        restarts > 0 ? `${String(restarts)} ${restarts === 1 ? 'restart' : 'restarts'}` : undefined,
+        restarts > 0 ? countOf('restart', restarts) : undefined,
         down > 0 ? `down ${seconds(down * NS_PER_SECOND)}` : undefined,
     ]);
 }

@@ -2,9 +2,10 @@ import type { MachinesVM } from '@jterrazz/station-api';
 
 import { Icon } from '../../design/icon';
 import { MachineIcon, MissingMark, Panel, Row, Tile } from '../../design/index';
+import { nounOf } from '../../engine/engine-words';
 import { machineKindOf } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
-import { birthSentence, verdictShown, vmState } from '../../engine/shown';
+import { verdictShown, vmState } from '../../engine/shown';
 import { duration, sentence } from '../../model/format';
 import { driftAsked } from '../../model/machines';
 import type { Found } from '../../model/machines';
@@ -24,7 +25,7 @@ export function MachinesTile({ found }: { found: Found }) {
         <Tile
             foot={<MissingMark />}
             label="Its machines"
-            unit={count === 1 ? 'machine' : 'machines'}
+            unit={nounOf('machine', count)}
             value={count}
         />
     );
@@ -43,7 +44,7 @@ function upFor(vm: MachinesVM, read: string | undefined): string | undefined {
 function stateUp(vm: MachinesVM, read: string | undefined) {
     const shown = vmState(vm);
     if (vm.Birth !== null) {
-        return { ...shown, word: birthSentence(vm.Birth) };
+        return { ...shown, word: vm.Birth.sentence };
     }
     return { ...shown, word: sentence([shown.word, upFor(vm, read)]) };
 }

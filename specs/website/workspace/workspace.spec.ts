@@ -44,7 +44,7 @@ describe('workspace', () => {
         // Given - the window on Home over two-macs, where linux-1 runs and holds 8 GB of its Mac's 16
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
             await visitor.see(within(region('Memory'), content('4 GB free')));
-            await visitor.click(within(sidebar, button('linux-1 running')));
+            await visitor.click(within(sidebar, button('linux-1 Running')));
             await visitor.see(heading('linux-1 Running'));
 
             // When - Stop is pressed and confirmed
@@ -53,7 +53,7 @@ describe('workspace', () => {
 
             // Then - it reads Stopped, and Home counts its memory free
             await visitor.see(heading('linux-1 Stopped'));
-            await visitor.see(within(sidebar, button('linux-1 stopped')));
+            await visitor.see(within(sidebar, button('linux-1 Stopped')));
             await visitor.click(within(sidebar, button('Home')));
             await visitor.see(within(region('Memory'), content('12 GB free')));
         });
@@ -70,7 +70,7 @@ describe('workspace', () => {
 
             // Then - it reads Running
             await visitor.see(heading('api Running'));
-            await visitor.see(within(sidebar, button('api running')));
+            await visitor.see(within(sidebar, button('api Running')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -87,7 +87,7 @@ describe('workspace', () => {
                 // When - the page is read
                 // Then - it reads Creating and names the step it is at
                 await visitor.see(heading('linux-4 Creating'));
-                await visitor.see(content('Creating · boot 2 of 4'));
+                await visitor.see(content('Creating: boot 2 of 4'));
                 await visitor.see(disabled(button('Open in Terminal')));
             },
         );

@@ -1,19 +1,14 @@
 import type {
     AccountsAccount,
     AppsReport,
-    CoreCallWireError,
-    CoreFindingFinding,
     DiskOutcome,
     DiskRow,
-    MachinefileLine,
-    MachinefileSeen,
-    MachinesCheckStatus,
     PortsPort,
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
 import type { Tone } from '../tone';
-import type { EngineState, MacState, ShareEnd, VmState } from './provisional';
+import type { MacState, ShareEnd } from './provisional';
 import type { OwnState } from './words';
 
 type Tones<T extends PropertyKey> = Readonly<Record<T, Tone>>;
@@ -29,6 +24,7 @@ export const OWN_STATE_TONES: Tones<OwnState> = {
     'not-wired': 'plain',
     reading: 'new',
     unknown: 'warn',
+    untyped: 'bad',
     'window-error': 'plain',
 };
 
@@ -43,7 +39,6 @@ export const REVERSIBLE_TONE: Tone = 'ok';
 type GroupColour = 'pink' | 'purple' | 'slate' | 'system' | 'teal';
 
 export const DISK_GROUP_COLOURS: Readonly<Record<DiskRow['Group'], GroupColour>> = {
-    '': 'system',
     'can-rebuild': 'teal',
     misplaced: 'pink',
     'never-touched': 'slate',
@@ -75,63 +70,10 @@ export const APP_WHY_TONES: Tones<AppsReport['Why']> = {
     unmanaged: 'warn',
 };
 
-export const ACTION_TONES: Tones<MachinefileLine['Action']> = {
-    '': 'new',
-    adopt: 'new',
-    install: 'new',
-    keep: 'new',
-    leave: 'new',
-    remove: 'new',
-    set: 'new',
-};
-
-export const ERROR_TYPE_TONES: Tones<'' | NonNullable<CoreCallWireError['type']>> = {
-    '': 'bad',
-    declined: 'plain',
-    'engine-stopped': 'bad',
-    failed: 'bad',
-    'far-too-old': 'bad',
-    interrupted: 'warn',
-    'needs-confirmation': 'warn',
-    'needs-terminal': 'warn',
-    'not-for-this-machine': 'plain',
-    'not-found': 'plain',
-    refused: 'bad',
-    unreachable: 'bad',
-};
-
-export const SEVERITY_TONES: Tones<CoreFindingFinding['Severity']> = {
-    '': 'plain',
-    broken: 'bad',
-    'needs-a-look': 'warn',
-};
-
-export const ENGINE_STATE_TONES: Tones<EngineState> = {
-    'not-installed': 'plain',
-    running: 'ok',
-    stopped: 'plain',
-};
-
 export const MAC_STATE_TONES: Tones<MacState> = {
     asleep: 'plain',
     reachable: 'ok',
     unreachable: 'plain',
-};
-
-export const VM_STATE_TONES: Tones<VmState> = {
-    broken: 'bad',
-    running: 'ok',
-    stale: 'warn',
-    stopped: 'plain',
-    suspended: 'plain',
-    unknown: 'plain',
-};
-
-export const VM_CHECK_TONES: Tones<'' | NonNullable<MachinesCheckStatus['state']>> = {
-    '': 'plain',
-    failing: 'bad',
-    passing: 'ok',
-    waiting: 'new',
 };
 
 export const APP_STATE_TONES: Tones<AppsReport['State']> = {
@@ -141,17 +83,6 @@ export const APP_STATE_TONES: Tones<AppsReport['State']> = {
     degraded: 'warn',
     ok: 'ok',
     pending: 'new',
-    unknown: 'plain',
-};
-
-export const CONDITION_TONES: Tones<MachinefileSeen['Condition']> = {
-    '': 'plain',
-    absent: 'warn',
-    changed: 'warn',
-    extra: 'plain',
-    'not-managed': 'plain',
-    outdated: 'warn',
-    present: 'ok',
     unknown: 'plain',
 };
 

@@ -1,11 +1,12 @@
 import type { AppsReport, SettingsMatrixRow, SettingsRow } from '@jterrazz/station-api';
 
 import { AppIcon, Row, StatePill, Value } from '../../design/index';
+import { countOf } from '../../engine/engine-words';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
-import { appUpdate } from '../../engine/shown';
+import { appUpdate, kindChipWord } from '../../engine/shown';
 import { APP_STATE_TONES } from '../../engine/tones';
-import { APP_STATE_WORDS, CATALOG_KIND_WORDS } from '../../engine/words';
+import { APP_STATE_WORDS } from '../../engine/words';
 import { sentence } from '../../model/format';
 import type { Route } from '../../shell/route';
 import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
@@ -33,7 +34,7 @@ function AppRow({ report, open }: { report: AppsReport; open: Open }) {
     return (
         <Row
             cells={[App.Description]}
-            {...(App.Kind === undefined ? {} : kindOf(CATALOG_KIND_WORDS[App.Kind]))}
+            {...(App.Kind === undefined ? {} : kindOf(kindChipWord(App.Kind)))}
             lead={<AppIcon kind={App.Kind} name={App.Name} />}
             onOpen={() => {
                 open(App.Name);
@@ -63,7 +64,7 @@ function AppRow({ report, open }: { report: AppsReport; open: Open }) {
 
 function settingValue(row: SettingsRow, held: SettingsMatrixRow | undefined): null | string {
     if (held !== undefined) {
-        return `${held.OK} of ${held.Of} ${held.Of === 1 ? 'machine' : 'machines'} OK`;
+        return `${held.OK} of ${countOf('machine', held.Of)} OK`;
     }
     const reading = sentence([row.Value, row.Why]);
     return reading === '' ? null : reading;
@@ -81,7 +82,7 @@ function SettingRow({
     return (
         <Row
             cells={[row.Package.Description]}
-            {...kindOf(CATALOG_KIND_WORDS.setting)}
+            {...kindOf(kindChipWord('setting'))}
             lead={<AppIcon kind="setting" name={row.Name} />}
             onOpen={() => {
                 open(row.Name);

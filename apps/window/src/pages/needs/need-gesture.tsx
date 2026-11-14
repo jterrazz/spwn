@@ -5,11 +5,12 @@ import { CopyButton } from '../../design/copy-button';
 import { Button, Row, Value } from '../../design/index';
 import type { RowProps } from '../../design/row';
 import type { In, ReadName } from '../../engine/client';
+import { wordOf } from '../../engine/engine-words';
 import { moveInputOf, removeInputOf, startInputOf, updateInputOf } from '../../engine/provisional';
 import type { NeedCall } from '../../engine/provisional';
 import { needState } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
-import { NEED_CALL_VERBS, NEED_UNWIRED_WORD, SECTION_WORDS } from '../../engine/words';
+import { NEED_CALL_VERBS, NEED_UNWIRED_WORD } from '../../engine/words';
 import { sentence } from '../../model/format';
 import { findMachine, targetOf } from '../../model/machines';
 import { GestureButton, GestureRow } from '../kit/gestures';
@@ -32,7 +33,7 @@ function rowOf({ need, onOpen }: Props, gesture: ReactNode): RowProps {
     return {
         link: gesture,
         onOpen,
-        sentence: sentence([need.Machine, SECTION_WORDS[need.Section]]),
+        sentence: sentence([need.Machine, wordOf('CoreSectionID', need.Section).Word]),
         state: needState(need),
         stateAt: 'start',
         title: need.Text,

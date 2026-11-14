@@ -1,49 +1,43 @@
 import type {
     AppsReport,
+    CatalogAudience,
+    CatalogKind,
     CoreVerdictVerdict,
     EngineReading,
     MachinefileChapter,
     MachinefileDiffering,
-    MachinesBirth,
     MachinesEngineView,
     MachinesMacView,
     MachinesVM,
     OverviewNeed,
     PortsPort,
-    PortsSharedPort,
+    StationWord,
 } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../separator';
 import type { Tone } from '../tone';
 import { wordOf } from './engine-words';
+import type { CodeOf, Worded } from './engine-words';
 import {
-    engineStateOf,
+    accountSideOf,
+    chapterOfKind,
     engineViewStateOf,
     machineKindOf,
     macStateOf,
     shareEndOf,
     shareEndWordOf,
-    vmStateOf,
 } from './provisional';
 import {
     APP_WHY_TONES,
-    ENGINE_STATE_TONES,
     MAC_STATE_TONES,
     NEWEST_TONE,
     OWN_STATE_TONES,
     PORT_REACH_TONES,
     REVERSIBLE_TONE,
-    SEVERITY_TONES,
     SHARE_END_TONES,
-    VM_CHECK_TONES,
-    VM_STATE_TONES,
 } from './tones';
 import {
     APP_WHY_WORDS,
-    DIFFERING_ACCOUNT_ASKED_WORDS,
-    DIFFERING_ACCOUNT_SEEN_WORDS,
-    DIFFERING_PORT_WORDS,
-    ENGINE_STATE_WORDS,
+    DIFFERING_WORDS,
     MAC_STATE_WORDS,
     MACHINE_KIND_WORDS,
     NEWEST_WORD,
@@ -52,11 +46,7 @@ import {
     OWN_STATE_WORDS,
     PORT_REACH_WORDS,
     REVERSIBLE_WORD,
-    SEVERITY_WORDS,
-    SHARE_TO_WORDS,
     SSH_WORDS,
-    VM_CHECK_WORDS,
-    VM_STATE_WORDS,
 } from './words';
 import type { OwnState } from './words';
 
@@ -66,26 +56,27 @@ export function ownState(state: OwnState): Shown {
     return { tone: OWN_STATE_TONES[state], word: OWN_STATE_WORDS[state] };
 }
 
-export function vmState(vm: MachinesVM): Shown {
-    if (vm.Birth !== null) {
-        const { Tone, Word } = wordOf('MachinesBirthStep', vm.Birth.step);
-        return { tone: Tone, word: Word };
-    }
-    const state = vmStateOf(vm);
-    if (state === undefined) {
-        return { tone: 'plain', word: vm.State === '' ? NO_STATE_WORD : vm.State };
-    }
-    return { tone: VM_STATE_TONES[state], word: VM_STATE_WORDS[state] };
+// invariant: the one place an engine's tone becomes a tone the design draws: the five are the design's own five.
+function toneOf(said: StationWord): Tone {
+    return said.Tone;
 }
 
-export function birthSentence(birth: MachinesBirth): string {
-    const { Word, Detail = '' } = wordOf('MachinesBirthStep', birth.step);
-    return `${Word}${SEPARATOR}${Detail} ${birth.position} of ${birth.steps}`;
+export function engineShown<E extends Worded>(of: E, code: CodeOf<E>): Shown {
+    const said = wordOf(of, code);
+    return { tone: toneOf(said), word: said.Word };
+}
+
+export function vmState(vm: MachinesVM): Shown {
+    return vm.Birth === null
+        ? engineShown('MachinesVMState', vm.State)
+        : engineShown('MachinesBirthStep', vm.Birth.step);
 }
 
 export function vmCheck(vm: MachinesVM): Shown {
-    const state = vm.CheckStatus.state ?? '';
-    return { tone: VM_CHECK_TONES[state], word: VM_CHECK_WORDS[state] };
+    const { state } = vm.CheckStatus;
+    return state === undefined
+        ? { tone: 'plain', word: NO_STATE_WORD }
+        : engineShown('MachinesCheckState', state);
 }
 
 export function vmSsh(vm: MachinesVM): Shown {
@@ -98,18 +89,11 @@ export function macState(mac: MachinesMacView): Shown {
 }
 
 export function needState(need: OverviewNeed): Shown {
-    return {
-        tone: SEVERITY_TONES[need.Severity],
-        word: SEVERITY_WORDS[need.Severity],
-    };
+    return engineShown('CoreFindingSeverity', need.Severity);
 }
 
 export function engineState(reading: EngineReading): Shown {
-    const state = engineStateOf(reading);
-    if (state === undefined) {
-        return { tone: 'plain', word: reading.State === '' ? NO_STATE_WORD : reading.State };
-    }
-    return { tone: ENGINE_STATE_TONES[state], word: ENGINE_STATE_WORDS[state] };
+    return engineShown('EngineReadState', reading.State);
 }
 
 export function portReach(port: PortsPort): Shown {
@@ -169,18 +153,17 @@ export function chapterNoun(chapter: MachinefileChapter, count: number): string 
 
 export function engineViewWord(engine: MachinesEngineView): string | undefined {
     const state = engineViewStateOf(engine);
-    return state === undefined ? undefined : ENGINE_STATE_WORDS[state];
+    return state === undefined ? undefined : wordOf('EngineReadState', state).Word;
 }
 
 export type SharedChapter = Extract<MachinefileChapter, 'accounts' | 'ports'>;
 
 export type DifferingSide = 'asked' | 'seen';
 
-function differingWordsOf(chapter: SharedChapter, side: DifferingSide) {
-    if (chapter === 'ports') {
-        return DIFFERING_PORT_WORDS;
-    }
-    return side === 'asked' ? DIFFERING_ACCOUNT_ASKED_WORDS : DIFFERING_ACCOUNT_SEEN_WORDS;
+function portSide(to: CatalogAudience | undefined): Shown {
+    return to === undefined
+        ? { tone: 'plain', word: DIFFERING_WORDS['not-shared'] }
+        : engineShown('CatalogAudience', to);
 }
 
 export function differingSide(
@@ -188,10 +171,21 @@ export function differingSide(
     side: DifferingSide,
     differing: MachinefileDiffering,
 ): Shown {
-    const code = side === 'asked' ? differing.Asked : differing.Seen;
-    return { tone: 'plain', word: differingWordsOf(chapter, side)[code] ?? code };
+    if (chapter === 'ports') {
+        return portSide(side === 'asked' ? differing.AskedTo : differing.SeenTo);
+    }
+    return { tone: 'plain', word: DIFFERING_WORDS[accountSideOf(side, differing)] };
 }
 
-export function shareToWord(to: NonNullable<PortsSharedPort['to']>): string {
-    return SHARE_TO_WORDS[to];
+export function shareToWord(to: CatalogAudience): string {
+    return wordOf('CatalogAudience', to).Word;
+}
+
+// value: an app is the plain kind, drawn by no chip: a row draws the kind of a manager or a setting alone.
+export function kindChipWord(kind: CatalogKind): string {
+    return kind === 'app' ? '' : wordOf('CatalogKind', kind).Word;
+}
+
+export function shelfWord(kind: CatalogKind): string {
+    return wordOf('MachinefileChapter', chapterOfKind(kind)).Word;
 }

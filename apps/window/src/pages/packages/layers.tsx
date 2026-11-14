@@ -1,7 +1,7 @@
 import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../design/index';
 import type { PlanLine } from '../../engine/provisional';
-import { CONDITION_TONES } from '../../engine/tones';
-import { ANY_VERSION_WORD, CATALOG_KIND_WORDS, CONDITION_WORDS } from '../../engine/words';
+import { engineShown, kindChipWord } from '../../engine/shown';
+import { ANY_VERSION_WORD } from '../../engine/words';
 import { SEPARATOR } from '../../separator';
 import type { Tone } from '../../tone';
 import { countWord } from './model';
@@ -28,7 +28,7 @@ function keyOf(line: PlanLine): string {
 
 function Name({ line, kinded }: { line: PlanLine; kinded: boolean }) {
     const { Step } = line;
-    const kind = !kinded || Step.Kind === '' ? '' : CATALOG_KIND_WORDS[Step.Kind];
+    const kind = kinded ? kindChipWord(Step.Kind) : '';
     return (
         <span className={styles.name}>
             <AppIcon kind={Step.Kind} name={Step.Package} />
@@ -44,14 +44,15 @@ function notOnTheMachine(line: PlanLine, differing: ReadonlySet<PlanLine>): bool
 
 function MachineLine({ line, differs }: { line: PlanLine; differs: boolean }) {
     const { Seen } = line;
+    const condition = engineShown('MachinefileCondition', Seen.Condition);
     return (
         <div className={`${styles.line} ${styles.machine}`}>
             <Name kinded={false} line={line} />
             <span className={styles.chip}>
                 {Seen.Version === '' ? null : <Value look="raised">{Seen.Version}</Value>}
                 {Seen.Version === '' && differs ? (
-                    <Value look="raised" tone={CONDITION_TONES[Seen.Condition]}>
-                        {CONDITION_WORDS[Seen.Condition]}
+                    <Value look="raised" tone={condition.tone}>
+                        {condition.word}
                     </Value>
                 ) : null}
             </span>
@@ -91,7 +92,10 @@ function hollowOf(layer: Layer, look: Look): ReadonlyMap<string, Tone> {
     return new Map(
         layer.lines
             .filter((line) => notOnTheMachine(line, look.differing))
-            .map((line) => [line.Step.Package, CONDITION_TONES[line.Seen.Condition]]),
+            .map((line) => [
+                line.Step.Package,
+                engineShown('MachinefileCondition', line.Seen.Condition).tone,
+            ]),
     );
 }
 

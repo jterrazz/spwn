@@ -3,25 +3,13 @@ import type {
     ActivityReport,
     ActivitySample,
     AppsReport,
-    CatalogApp,
-    CatalogStored,
-    CoreCallWireError,
-    CoreFindingFinding,
     DiskOutcome,
-    DiskRow,
-    MachinefileAsked,
-    MachinefileLine,
-    MachinefilePlan,
-    MachinefileSeen,
-    MachinefileStep,
-    MachinesCheckStatus,
-    OverviewNeed,
     PortsPort,
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
 import { SEPARATOR } from '../separator';
-import type { DiskCall, EngineState, MacState, NeedCall, VmState } from './provisional';
+import type { AccountSide, DiskCall, MacState, NeedCall } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
 
@@ -29,48 +17,13 @@ type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
 // outside: one; the README lists them as owed a closed type, and a code they do not word is shown as it came.
 type WordsOfAnOpenCode = Readonly<Partial<Record<number | string, string>>>;
 
-export const ERROR_TYPE_WORDS: Words<'' | NonNullable<CoreCallWireError['type']>> = {
-    '': 'error',
-    declined: 'declined',
-    'engine-stopped': 'engine stopped',
-    failed: 'failed',
-    'far-too-old': 'far too old',
-    interrupted: 'interrupted',
-    'needs-confirmation': 'needs confirmation',
-    'needs-terminal': 'needs a terminal',
-    'not-for-this-machine': 'not for this machine',
-    'not-found': 'not found',
-    refused: 'refused',
-    unreachable: 'unreachable',
-};
-
-export const SEVERITY_WORDS: Words<CoreFindingFinding['Severity']> = {
-    '': 'no severity given',
-    broken: 'broken',
-    'needs-a-look': 'needs a look',
-};
-
-export const SECTION_WORDS: Words<OverviewNeed['Section']> = {
-    '': 'no section given',
-    accounts: 'Accounts',
-    activity: 'Activity',
-    apps: 'Apps',
-    awake: 'Awake',
-    background: 'Background',
-    disk: 'Disk',
-    images: 'Images',
-    overview: 'Overview',
-    ports: 'Ports',
-    settings: 'Settings',
-    ssh: 'SSH',
-};
-
 export const NO_STATE_WORD = 'no state given';
 
 export const ANY_VERSION_WORD = 'any version';
 
 // value: what the window says of its own reading of a call or of a gesture's fate, never of an engine code: an
-// value: answer not yet come, none at all, a slot no call fills, a gesture done or of unknown outcome.
+// value: answer not yet come, none at all, a refusal sent with no type, a slot no call fills, a gesture done or of
+// value: unknown outcome.
 export const OWN_STATE_WORDS = {
     connecting: 'Connecting',
     done: 'done',
@@ -82,6 +35,7 @@ export const OWN_STATE_WORDS = {
     'not-wired': 'Not wired',
     reading: 'Reading',
     unknown: 'unknown',
+    untyped: 'error',
     'window-error': 'Error',
 } as const;
 
@@ -135,28 +89,6 @@ export const NEED_CALL_VERBS: Words<NeedCall> = {
 // outside: never named to the owner.
 export const NEED_UNWIRED_WORD = 'Fix';
 
-export const VM_STATE_WORDS: Words<VmState> = {
-    broken: 'broken',
-    running: 'running',
-    stale: 'stale',
-    stopped: 'stopped',
-    suspended: 'suspended',
-    unknown: 'unknown',
-};
-
-export const ENGINE_STATE_WORDS: Words<EngineState> = {
-    'not-installed': 'not installed',
-    running: 'running',
-    stopped: 'stopped',
-};
-
-export const VM_CHECK_WORDS: Words<'' | NonNullable<MachinesCheckStatus['state']>> = {
-    '': NO_STATE_WORD,
-    failing: 'fails',
-    passing: 'passes',
-    waiting: 'waiting',
-};
-
 export const SSH_WORDS = { answers: 'answers', silent: 'does not answer' } as const;
 
 export const APP_STATE_WORDS: Words<AppsReport['State']> = {
@@ -180,112 +112,14 @@ export const APP_WHY_WORDS: Words<AppsReport['Why']> = {
     unmanaged: 'not managed',
 };
 
-// value: an app is the plain kind, worded by nothing: a row draws the kind of a manager or a setting alone.
-export const CATALOG_KIND_WORDS: Words<NonNullable<CatalogApp['Kind']>> = {
-    app: '',
-    manager: 'manager',
-    setting: 'setting',
-};
-
-export const CATALOG_KIND_NAMES: Words<NonNullable<CatalogApp['Kind']>> = {
-    app: 'app',
-    manager: 'manager',
-    setting: 'setting',
-};
-
+// outside: apps.list marks no entry a skill (provisional.ts, isSkill), so no kind of the engine's names one.
 export const SKILL_KIND_NAME = 'agent skill';
-
-export const CATALOG_SHELF_WORDS: Words<MachinefileStep['Kind']> = {
-    '': 'Apps',
-    app: 'Apps',
-    manager: 'Apps',
-    setting: 'Settings',
-};
-
-export const CATALOG_LEVEL_WORDS: Words<CatalogStored['Level']> = {
-    '': 'no level given',
-    cache: 'cache',
-    data: 'data',
-    kept: 'kept',
-    settings: 'settings',
-};
-
-export const CATALOG_LEVEL_LINES: Words<CatalogStored['Level']> = {
-    '': '',
-    cache: 'rebuilt when needed',
-    data: 'yours, kept',
-    kept: 'kept',
-    settings: 'your settings, kept',
-};
 
 export const REVERSIBLE_WORD = 'Can be undone';
 
 export function newestOutWord(newest: string): string {
     return `${newest} is out`;
 }
-
-export const CONDITION_WORDS: Words<MachinefileSeen['Condition']> = {
-    '': 'no condition given',
-    absent: 'not installed',
-    changed: 'changed',
-    extra: 'extra',
-    'not-managed': 'not managed',
-    outdated: 'outdated',
-    present: 'present',
-    unknown: 'not known',
-};
-
-export const ACTION_WORDS: Words<MachinefileLine['Action']> = {
-    '': 'no action given',
-    adopt: 'adopt it',
-    install: 'install it',
-    keep: 'keep it',
-    leave: 'leave it',
-    remove: 'remove it',
-    set: 'set it',
-};
-
-export const PLAN_GROUP_WORDS: Words<MachinefileLine['Action']> = {
-    '': 'No action given',
-    adopt: 'To adopt',
-    install: 'To install',
-    keep: 'Unchanged',
-    leave: 'Left as is',
-    remove: 'To remove',
-    set: 'To set',
-};
-
-export const NEED_WORDS: Words<MachinefileAsked['Need']> = {
-    '': 'no need given',
-    'app-store-login': 'an App Store sign-in',
-    license: 'a licence accepted',
-    sudo: 'your password',
-    terminal: 'a terminal',
-};
-
-export const RESTART_WORDS: Words<NonNullable<MachinefilePlan['Restarts']>[number]> = {
-    logout: 'a log out',
-    reboot: 'a restart of the machine',
-    'restart-dock': 'the Dock restarted',
-    'restart-finder': 'the Finder restarted',
-    'restart-menu-bar': 'the menu bar restarted',
-};
-
-export const DISK_GROUP_WORDS: Words<DiskRow['Group']> = {
-    '': 'No group given',
-    'can-rebuild': 'Can rebuild',
-    misplaced: 'Misplaced',
-    'never-touched': 'Never touched',
-    'your-data': 'Your data',
-};
-
-export const DISK_KIND_WORDS: Words<DiskRow['Group']> = {
-    '': 'not grouped',
-    'can-rebuild': 'cache',
-    misplaced: 'misplaced',
-    'never-touched': 'never touched',
-    'your-data': 'data',
-};
 
 export const DISK_GESTURE_VERBS: Words<DiskCall> = {
     'disk.erase': 'Erase',
@@ -355,19 +189,6 @@ export const SHARE_STATE_WORDS: Words<PortsSharedPort['state']> = {
     waiting: 'waiting',
 };
 
-export const SHARE_TO_WORDS: Words<NonNullable<PortsSharedPort['to']>> = {
-    local: 'Local',
-    private: 'Private',
-    public: 'Public',
-};
-
-export const DIFFERING_PORT_WORDS: WordsOfAnOpenCode = {
-    '': 'Not shared',
-    local: 'Local',
-    private: 'Private',
-    public: 'Public',
-};
-
 export const ACCOUNT_STATE_WORDS: Words<AccountsAccount['state']> = {
     '': NO_STATE_WORD,
     absent: 'signed out',
@@ -395,12 +216,10 @@ export const ACCOUNT_ORIGIN_WORDS: WordsOfAnOpenCode = {
     shared: 'a copy, shared',
 };
 
-export const DIFFERING_ACCOUNT_ASKED_WORDS: WordsOfAnOpenCode = {
-    '': 'Not in the file',
-    shared: 'Shared',
-};
-
-export const DIFFERING_ACCOUNT_SEEN_WORDS: WordsOfAnOpenCode = {
-    '': 'Not shared',
+// outside: machinefile.drift words a port's audience and no side left out, nor an account's (provisional.ts,
+// outside: accountSideOf): these are the words of what it leaves unsaid, until each side carries its own.
+export const DIFFERING_WORDS: Words<AccountSide> = {
+    'not-in-the-file': 'Not in the file',
+    'not-shared': 'Not shared',
     shared: 'Shared',
 };

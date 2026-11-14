@@ -1,9 +1,8 @@
 import type { ActivityReport, CoreFindingFinding } from '@jterrazz/station-api';
 
 import { Panel, Row, Value, Verdict } from '../../design/index';
-import { ownState } from '../../engine/shown';
-import { SEVERITY_TONES } from '../../engine/tones';
-import { ACTIVITY_SOURCE_WORDS, SEVERITY_WORDS, SILENT_METER_WORDS } from '../../engine/words';
+import { engineShown, ownState } from '../../engine/shown';
+import { ACTIVITY_SOURCE_WORDS, SILENT_METER_WORDS } from '../../engine/words';
 import { clock, fixLine, seconds, sentence } from '../../model/format';
 import { shortDay } from './when';
 
@@ -43,14 +42,14 @@ export function Head({ report }: { report: ActivityReport }) {
         return <Calm report={report} />;
     }
     const fix = fixLine(first.Fix);
+    const severity = engineShown('CoreFindingSeverity', first.Severity);
     return (
         <Verdict
             action={fix === '' ? undefined : <Value>{fix}</Value>}
-            line={sentence([SEVERITY_WORDS[first.Severity], first.Subject])}
+            line={sentence([severity.word, first.Subject])}
             size="tab"
             title={first.Text}
-            tone={SEVERITY_TONES[first.Severity]}
-            word={SEVERITY_WORDS[first.Severity]}
+            {...severity}
         />
     );
 }
@@ -66,10 +65,7 @@ export function Findings({ findings }: { findings: readonly CoreFindingFinding[]
                 return (
                     <Row
                         key={finding.Subject}
-                        state={{
-                            tone: SEVERITY_TONES[finding.Severity],
-                            word: SEVERITY_WORDS[finding.Severity],
-                        }}
+                        state={engineShown('CoreFindingSeverity', finding.Severity)}
                         stateAt="start"
                         title={finding.Text}
                         value={fix === '' ? null : <Value>{fix}</Value>}

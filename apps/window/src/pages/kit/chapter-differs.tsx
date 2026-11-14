@@ -1,7 +1,7 @@
 import type { MachinefileDiffering } from '@jterrazz/station-api';
 
 import { AppIcon, Panel, StatePill, Value } from '../../design/index';
-import { absentFromFile } from '../../engine/provisional';
+import { accountSideOf } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import { differingSide } from '../../engine/shown';
 import type { DifferingSide, SharedChapter } from '../../engine/shown';
@@ -45,7 +45,8 @@ function Side({
     side: DifferingSide;
 }) {
     const shown = differingSide(chapter, side, differing);
-    if (side === 'asked' && absentFromFile(chapter, differing)) {
+    const absent = chapter === 'accounts' && accountSideOf(side, differing) === 'not-in-the-file';
+    if (absent) {
         return <span className={styles.hint}>{shown.word}</span>;
     }
     return (

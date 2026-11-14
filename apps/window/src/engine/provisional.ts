@@ -3,10 +3,11 @@ import type {
     AppsUpdateInput,
     BackgroundRemoveInput,
     CatalogApp,
+    CatalogKind,
     DiskMoveInput,
     DiskReading,
     DiskRow,
-    EngineReading,
+    EngineReadState,
     EngineStartInput,
     ImagesReport,
     MachinefileChapter,
@@ -29,14 +30,10 @@ import type { ConfirmName } from './confirms';
 import type { EngineError } from './engine-error';
 import type { AskForm } from './gesture';
 
-// outside: machines.list sends a Mac's reach as two booleans and no state code, and packages/api types a VM's State
-// outside: as a plain string though station's Go gives it seven codes (apps/engine/machines/allmachines.go), its
-// outside: creating drawn from Birth; this file alone makes either a code, until the wire carries both.
+// outside: machines.list sends a Mac's reach as two booleans and no state code; this file alone makes it a code, until
+// outside: the wire carries one.
 
 export type MacState = 'asleep' | 'reachable' | 'unreachable';
-
-export const VM_STATES = ['broken', 'running', 'stale', 'stopped', 'suspended', 'unknown'] as const;
-export type VmState = (typeof VM_STATES)[number];
 
 // outside: a preset's Fit is the engine's verdict on whether it can be asked, and machines.new names no gesture.
 export function fitAllows(fit: MachinesFit): boolean {
@@ -60,16 +57,9 @@ export function createRefusalPlaceOf(error: EngineError, macs: readonly string[]
     return CREATE_REFUSAL_PLACES[error.wire?.code ?? ''] ?? (onAMac ? 'on' : 'foot');
 }
 
-// outside: packages/api types engine.read's State as a string, though Go gives it three (apps/engine/engine/reading.go).
-export const ENGINE_STATES = ['not-installed', 'running', 'stopped'] as const;
-
-export type EngineState = (typeof ENGINE_STATES)[number];
-
-export function engineStateOf(reading: EngineReading): EngineState | undefined {
-    return ENGINE_STATES.find((state) => state === reading.State);
-}
-
-export function engineViewStateOf(engine: MachinesEngineView): EngineState | undefined {
+// outside: machines.list sends a Mac's engine as three booleans; this reads them as engine.read's State, until the
+// outside: view carries that code.
+export function engineViewStateOf(engine: MachinesEngineView): EngineReadState | undefined {
     if (!engine.Known) {
         return undefined;
     }
@@ -96,10 +86,6 @@ export function macStateOf(mac: MachinesMacView): MacState {
         return 'asleep';
     }
     return mac.Reachable ? 'reachable' : 'unreachable';
-}
-
-export function vmStateOf(vm: MachinesVM): undefined | VmState {
-    return VM_STATES.find((state) => state === vm.State);
 }
 
 // outside: a need's fix names its call and a few words (`Args`), not its input, which the menu bar composes in Go
@@ -175,7 +161,6 @@ export type DiskGesture = { call: DiskCall; danger: boolean };
 // outside: a disk.read row carries no gesture: what each group allows, and whether it destroys, is this table's
 // outside: until DiskRow names its gesture (apps/engine/disk/group.go).
 const DISK_GESTURES: Readonly<Record<DiskRow['Group'], DiskGesture | undefined>> = {
-    '': undefined,
     'can-rebuild': { call: 'disk.free', danger: false },
     misplaced: { call: 'disk.move', danger: false },
     'never-touched': undefined,
@@ -254,12 +239,25 @@ export function layerOf(line: PlanLine, all: readonly PlanLine[], seen = new Set
         : layerOf(by, all, seen);
 }
 
-// outside: an account's empty Asked on machinefile.drift is one the file does not name, until Asked is a closed enum.
-export function absentFromFile(
-    chapter: MachinefileChapter,
+export type AccountSide = 'not-in-the-file' | 'not-shared' | 'shared';
+
+// outside: machinefile.drift says an account's difference by its Condition alone, extra where the Mac holds a copy the
+// outside: file does not share, absent where the file shares one the Mac does not hold: each side is read from it,
+// outside: until a difference carries the word of each side.
+export function accountSideOf(
+    side: 'asked' | 'seen',
     differing: MachinefileDiffering,
-): boolean {
-    return chapter === 'accounts' && differing.Asked === '';
+): AccountSide {
+    const extra = differing.Condition === 'extra';
+    if (side === 'asked') {
+        return extra ? 'not-in-the-file' : 'shared';
+    }
+    return extra ? 'shared' : 'not-shared';
+}
+
+// outside: a drift's line names its kind, not its chapter: a setting's is Settings, any other Apps, until it does.
+export function chapterOfKind(kind: CatalogKind): Extract<MachinefileChapter, 'apps' | 'settings'> {
+    return kind === 'setting' ? 'settings' : 'apps';
 }
 
 // outside: apps.list marks no entry a skill; the catalog files skills under one category, until each carries a kind.

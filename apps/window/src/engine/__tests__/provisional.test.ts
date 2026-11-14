@@ -1,4 +1,4 @@
-import type { EngineReading, OverviewNeed } from '@jterrazz/station-api';
+import type { MachinesEngineView, OverviewNeed } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
 import { recordingsOf } from '../../fixtures/recordings';
@@ -9,7 +9,7 @@ import {
     confirmFormOf,
     createRefusalPlaceOf,
     diskGestureOf,
-    engineStateOf,
+    engineViewStateOf,
     freesWhole,
     holdsRebuildable,
     inboxIsUrgent,
@@ -76,8 +76,8 @@ describe('provisional', () => {
         // Then - each reads the words and tones tables, never its raw field
         expect(shown).toStrictEqual([
             { tone: 'ok', word: 'online' },
-            { tone: 'plain', word: 'stopped' },
-            { tone: 'ok', word: 'running' },
+            { tone: 'plain', word: 'Stopped' },
+            { tone: 'ok', word: 'Running' },
         ]);
     });
 
@@ -167,23 +167,26 @@ describe('provisional', () => {
         ).toBe(true);
     });
 
-    test("the engine's state is one of its three codes, and an unknown one is none of them", () => {
-        // Given - a reading of a running engine, and one whose state no code names
-        const running: EngineReading = {
-            AwakeUntil: null,
-            State: 'running',
-            Station: '',
-            Stopped: { at: '', by: '' },
-            Up: 0,
-            VMs: 0,
+    test("a Mac's engine is read as engine.read's state from its booleans, and as none while not known", () => {
+        // Given - a Mac's engine known running, known installed and stopped, known not installed, and not known
+        const known: MachinesEngineView = {
+            Installed: true,
+            Known: true,
+            Running: true,
             Version: '',
         };
+        const engines = [
+            known,
+            { ...known, Running: false },
+            { ...known, Installed: false, Running: false },
+            { ...known, Known: false },
+        ];
 
-        // When - each state is read
-        const states = [engineStateOf(running), engineStateOf({ ...running, State: 'dozing' })];
+        // When - each is read as a state
+        const states = engines.map((engine) => engineViewStateOf(engine));
 
-        // Then - running, then no code
-        expect(states).toStrictEqual(['running', undefined]);
+        // Then - running, stopped, not installed, then no code
+        expect(states).toStrictEqual(['running', 'stopped', 'not-installed', undefined]);
     });
 
     test('the Inbox is urgent when one of its needs is broken', () => {

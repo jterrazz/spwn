@@ -1,10 +1,9 @@
 import type { MachinesMacView, MachinesVM, OverviewReadOutput } from '@jterrazz/station-api';
 
 import type { Reading as Answered } from '../../engine/entry';
-import { machineKindOf, vmStateOf } from '../../engine/provisional';
+import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
-import { birthSentence } from '../../engine/shown';
-import { targetOf } from '../../model/machines';
+import { isStopped, targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import type { Route } from '../../shell/route';
 import { ActivityTiles } from '../activity/tiles';
@@ -38,7 +37,7 @@ function Head({ overview, name }: { overview: Answer; name: string }) {
     return Creating === null ? (
         <NoVerdict size="tab" />
     ) : (
-        <NoVerdict line={birthSentence(Creating)} size="tab" />
+        <NoVerdict line={Creating.sentence} size="tab" />
     );
 }
 
@@ -154,7 +153,7 @@ export function OverviewTab({ found, go }: { found: Found; go: Go }) {
     if (!vm) {
         return <MacOverview found={found} go={go} />;
     }
-    if (vmStateOf(vm) === 'stopped') {
+    if (isStopped(vm)) {
         return <StoppedOverview go={go} key={vm.Name} mac={mac} vm={vm} />;
     }
     return <VmOverview go={go} key={vm.Name} mac={mac} vm={vm} />;

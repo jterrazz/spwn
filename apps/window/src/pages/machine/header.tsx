@@ -1,10 +1,11 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
 import { Button, MachineIcon, StatePill, Switch } from '../../design/index';
+import { wordOf } from '../../engine/engine-words';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { engineViewWord, macState, vmKindWord, vmLifetimeWord, vmState } from '../../engine/shown';
-import { SECTION_WORDS, THIS_MAC_WORD } from '../../engine/words';
+import { THIS_MAC_WORD } from '../../engine/words';
 import { sentence } from '../../model/format';
 import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
@@ -37,7 +38,7 @@ function useAwakeWord(mac: MachinesMacView): string | undefined {
     }
     const words =
         line.Unread === '' ? sentence((line.Parts ?? []).map((part) => part.Word)) : line.Unread;
-    return words === '' ? undefined : `${SECTION_WORDS.awake}: ${words}`;
+    return words === '' ? undefined : `${wordOf('CoreSectionID', 'awake').Word}: ${words}`;
 }
 
 function MacLine({ mac }: { mac: MachinesMacView }) {

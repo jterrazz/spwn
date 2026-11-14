@@ -8,6 +8,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
+import { countOf } from '../../engine/engine-words';
 import { portsMacOf } from '../../engine/provisional';
 import { sentence } from '../../model/format';
 import { SEPARATOR } from '../../separator';
@@ -59,7 +60,7 @@ export function lineOf(of: PortsOf, vm: string | undefined): string {
         ? `It may share ports ${range.low} to ${range.high} with your devices`
         : 'Its ports are shared from its Mac';
     const quiet = of.quiet.reduce((sum, row) => sum + row.count, 0);
-    return quiet > 0 ? `${line}${SEPARATOR}${quiet} short-lived listeners not listed` : line;
+    return quiet > 0 ? `${line}${SEPARATOR}${countOf('quiet-listener', quiet)}` : line;
 }
 
 export function needsOf(needs: readonly OverviewNeed[], name: string): OverviewNeed[] {

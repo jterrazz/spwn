@@ -24,9 +24,9 @@ describe('machine', () => {
             await visitor.see(content('linux-5'));
         });
 
-        // Then - each row says the engine's word and its birth's numbers, no state of the window's own
-        expect(result.content.text).toContain('Creating · image 1 of 5');
-        expect(result.content.text).toContain('Creating · boot 2 of 4');
+        // Then - each row says the engine's sentence of its birth, no state of the window's own
+        expect(result.content.text).toContain('Creating: image 1 of 5');
+        expect(result.content.text).toContain('Creating: boot 2 of 4');
         await expect(result.tree).toMatch(file('./__expected__/creating-mac-overview.aria.yaml'));
     });
 
@@ -39,7 +39,7 @@ describe('machine', () => {
                 await visitor.see(content('Why it exists'));
 
                 // Then - the head's line is its birth
-                await visitor.see(content('Creating · image 1 of 5'));
+                await visitor.see(content('Creating: image 1 of 5'));
             },
         );
 

@@ -3,9 +3,10 @@ import type { ReactNode } from 'react';
 
 import { AppIcon, Button, Panel, ShareBar, TypeTag } from '../../design/index';
 import type { SharePart } from '../../design/index';
+import { detailOf, wordOf } from '../../engine/engine-words';
 import { diskGestureOf, freesWhole, holdsRebuildable } from '../../engine/provisional';
 import { useReread } from '../../engine/react';
-import { DISK_GROUP_WORDS, DISK_KIND_WORDS, DISK_PENDING_WORD } from '../../engine/words';
+import { DISK_PENDING_WORD } from '../../engine/words';
 import { bytes, sentence } from '../../model/format';
 import { SEPARATOR } from '../../separator';
 import { byApp, groupsOf, partsOf, rebuildableOf, sizeOf } from './disk';
@@ -136,7 +137,7 @@ type GroupProps = { group: Group; target: Target | undefined };
 
 export function GroupPanel({ group, target }: GroupProps) {
     return (
-        <Panel note={String(group.rows.length)} title={DISK_GROUP_WORDS[group.group]}>
+        <Panel note={String(group.rows.length)} title={wordOf('DiskGroup', group.group).Word}>
             {group.rows.map((row) => (
                 <DiskLine
                     key={`${row.App}/${(row.Paths ?? []).join(':')}`}
@@ -177,7 +178,7 @@ function Chips({ rows }: { rows: readonly DiskRow[] }) {
         <>
             {groupsOf(rows).map((group) => (
                 <TypeTag key={group.group}>
-                    {`${DISK_KIND_WORDS[group.group]} ${chipSize(group.rows)}`}
+                    {`${detailOf('DiskGroup', group.group)} ${chipSize(group.rows)}`}
                 </TypeTag>
             ))}
         </>

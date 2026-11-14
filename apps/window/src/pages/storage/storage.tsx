@@ -8,6 +8,7 @@ import type {
 import { useState } from 'react';
 
 import { Button, MachineIcon, Panel, Row, Switch } from '../../design/index';
+import { countOf } from '../../engine/engine-words';
 import { diskGestureOf, machineKindOf } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
@@ -66,9 +67,7 @@ function imageSentence(image: ImagesReport): string {
     return sentence([
         `built ${shortDay(image.Record.built_at) ?? image.Record.built_at}`,
         `${image.Record.size_gb} GB`,
-        made === 0
-            ? 'no machine made from it'
-            : `${made} ${made === 1 ? 'machine' : 'machines'} made from it`,
+        made === 0 ? 'no machine made from it' : `${countOf('machine', made)} made from it`,
     ]);
 }
 

@@ -4,7 +4,6 @@ import { machineRoute } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
 
 const TAB_OF_SECTION: Readonly<Record<OverviewNeed['Section'], Tab>> = {
-    '': 'Overview',
     accounts: 'Accounts',
     activity: 'Activity',
     apps: 'Overview',

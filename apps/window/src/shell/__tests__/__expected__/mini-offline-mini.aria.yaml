@@ -8,18 +8,18 @@
     - button "jterrazz-macbook-pro online":
       - text: jterrazz-macbook-pro
       - img "online"
-    - button "api stopped":
+    - button "api Stopped":
       - text: api
-      - img "stopped"
-    - button "linux-1 running":
+      - img "Stopped"
+    - button "linux-1 Running":
       - text: linux-1
-      - img "running"
+      - img "Running"
     - button "jterrazz-mac-mini not seen":
       - text: jterrazz-mac-mini
       - img "not seen"
-    - button "infra unknown":
+    - button "infra Unknown":
       - text: infra
-      - img "unknown"
+      - img "Unknown"
   - button "Machine files"
   - group "Catalog":
     - heading "Catalog" [level=2]

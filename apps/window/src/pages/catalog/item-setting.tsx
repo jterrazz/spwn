@@ -1,8 +1,8 @@
 import type { SettingsMatrix, SettingsRow } from '@jterrazz/station-api';
 
 import { Facts, Panel, Row, StatePill, Value } from '../../design/index';
-import { reversibleState } from '../../engine/shown';
-import { CATALOG_KIND_NAMES, CATALOG_KIND_WORDS, CATALOG_LEVEL_WORDS } from '../../engine/words';
+import { countOf, wordOf } from '../../engine/engine-words';
+import { kindChipWord, reversibleState } from '../../engine/shown';
 import { needsOf } from './item-model';
 import { factOf, ItemChips, ItemHead, MachineChips, Rail, systemsWord, Two } from './item-parts';
 import type { ItemProps } from './item-parts';
@@ -51,7 +51,7 @@ function Changes({ row }: { row: SettingsRow }) {
                 {writes.map((stored) => (
                     <Row
                         key={stored.Path}
-                        kind={CATALOG_LEVEL_WORDS[stored.Level]}
+                        kind={wordOf('CatalogLevel', stored.Level).Word}
                         sentence={<Marked>{stored.Note}</Marked>}
                         size="slim"
                         title={stored.Path}
@@ -75,10 +75,6 @@ function Changes({ row }: { row: SettingsRow }) {
             </div>
         </Panel>
     );
-}
-
-function machinesWord(count: number): string {
-    return count === 1 ? '1 machine' : `${count} machines`;
 }
 
 function countedOn(name: string, matrix: SettingsMatrix | undefined): string[] | undefined {
@@ -105,7 +101,7 @@ export function SettingItem({
             <ItemHead
                 about={setting.Description}
                 kind="setting"
-                kindWord={CATALOG_KIND_WORDS.setting}
+                kindWord={kindChipWord('setting')}
                 name={row.Name}
                 version=""
             />
@@ -119,11 +115,11 @@ export function SettingItem({
                 rail={
                     <Rail
                         facts={[
-                            factOf('Kind', CATALOG_KIND_NAMES.setting),
+                            factOf('Kind', wordOf('CatalogKind', 'setting').Word),
                             factOf('Category', categoryWord(setting.Category)),
                             factOf('Declared in', null),
                             factOf(
-                                on === undefined ? 'Machines' : machinesWord(on.length),
+                                on === undefined ? 'Machines' : countOf('machine', on.length),
                                 on === undefined ? null : (
                                     <MachineChips go={props.go} macs={props.macs} names={on} />
                                 ),

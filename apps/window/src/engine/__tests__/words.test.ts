@@ -109,10 +109,13 @@ function fieldsOf(enums: Enums, declared: string): string[] {
     return fields;
 }
 
+// value: a Words or Tones of such an enum, or a Record of it to a word or a tone; a Record to a colour, a gesture or
+// value: a tab says nothing of the code, so it is the README's to list, not this rule's.
 function tableOfAWordedEnum(enums: Enums, declared: string): RegExp {
     const keys = [...enums.keys(), ...fieldsOf(enums, declared)].join('|');
+    const key = String.raw`\s*(?:''\s*\|\s*)?(?:NonNullable<\s*)?(?:${keys})(?!\w)`;
     return new RegExp(
-        String.raw`(?:Words|Tones|Record)<\s*(?:''\s*\|\s*)?(?:NonNullable<\s*)?(?:${keys})(?!\w)`,
+        String.raw`(?:Words|Tones)<${key}|Record<${key}\s*>?\s*,\s*(?:string|Tone|StationWord)\b`,
         'gu',
     );
 }
@@ -195,10 +198,14 @@ describe('words', () => {
             "const C: Words<MachinesBirth['step']> = {};",
             "const P: Tones<MachinefileChapterDrift['Chapter']> = {};",
             "const K: Readonly<Record<NonNullable<CatalogMethodSpec['OS']>, string>> = {};",
-        ];
-        const lawful = [
             "const S: Words<MachinesVM['State']> = {};",
             "const K: Words<NonNullable<CatalogApp['Kind']>> = {};",
+            "const G: Readonly<Record<DiskRow['Group'], Tone>> = {};",
+        ];
+        const lawful = [
+            "const S: Words<AppsReport['State']> = {};",
+            "const P: Words<NonNullable<ActivitySample['pressure']>> = {};",
+            "const C: Readonly<Record<DiskRow['Group'], GroupColour>> = {};",
             "export const LIFETIMES = ['ephemeral', 'persistent'] as const satisfies readonly MachinesLifetime[];",
         ];
 
@@ -209,8 +216,8 @@ describe('words', () => {
 
         // Then - every forbidden line is found once, no lawful one
         expect(found).toStrictEqual([
-            [1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0],
         ]);
     });
 });

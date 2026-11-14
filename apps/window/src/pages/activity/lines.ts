@@ -1,3 +1,4 @@
+import { countOf as counted, nounOf } from '../../engine/engine-words';
 import { matchesQuery } from '../../model/search';
 
 export type Line = { number: number; text: string };
@@ -11,8 +12,7 @@ export function filtered(lines: readonly Line[], query: string): readonly Line[]
 }
 
 export function countOf(shown: number, all: number, query: string): string {
-    const lines = all === 1 ? 'line' : 'lines';
     return query.trim() === ''
-        ? `${String(all)} ${lines}`
-        : `${String(shown)} of ${String(all)} ${lines}`;
+        ? counted('line', all)
+        : `${String(shown)} of ${String(all)} ${nounOf('line', all)}`;
 }

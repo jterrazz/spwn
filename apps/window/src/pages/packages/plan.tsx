@@ -1,12 +1,12 @@
-import type { CallName, MachinefilePlan, Target } from '@jterrazz/station-api';
+import type { CallName, MachinefilePlan, PageNoun, Target } from '@jterrazz/station-api';
 
 import { AppIcon, Button, Panel, Row, Tile } from '../../design/index';
-import { layerOf } from '../../engine/provisional';
+import { headingOf, nounOf, wordOf } from '../../engine/engine-words';
+import { chapterOfKind, layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import type { Reading as Read } from '../../engine/react';
 import { useGesture } from '../../engine/use-gesture';
-import { CATALOG_SHELF_WORDS, PLAN_GROUP_WORDS, RESTART_WORDS } from '../../engine/words';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page, Tiles } from '../page';
@@ -71,7 +71,11 @@ function Afterwards({ plan }: { plan: MachinefilePlan }) {
             {restarts.length === 0 ? null : (
                 <Panel title="Once applied, it needs">
                     {restarts.map((restart) => (
-                        <Row key={restart} size="slim" title={RESTART_WORDS[restart]} />
+                        <Row
+                            key={restart}
+                            size="slim"
+                            title={wordOf('CatalogAfterApply', restart).Word}
+                        />
                     ))}
                 </Panel>
             )}
@@ -88,7 +92,7 @@ export function PlanSteps({ plan }: { plan: MachinefilePlan }) {
             {byAction(plan.Lines ?? [])
                 .filter(([action]) => action !== UNCHANGED)
                 .map(([action, lines]) => (
-                    <Steps all={all} key={action} lines={lines} title={PLAN_GROUP_WORDS[action]} />
+                    <Steps all={all} key={action} lines={lines} title={headingOf(action)} />
                 ))}
             {byAction(plan.Extra ?? [])
                 .filter(([action]) => action !== UNCHANGED)
@@ -98,7 +102,7 @@ export function PlanSteps({ plan }: { plan: MachinefilePlan }) {
                         key={`extra/${action}`}
                         lines={lines}
                         note="not in the file"
-                        title={PLAN_GROUP_WORDS[action]}
+                        title={headingOf(action)}
                     />
                 ))}
             <Afterwards plan={plan} />
@@ -158,11 +162,15 @@ function PlanBody({ plan, name }: { plan: Read<MachinefilePlan>; name: string })
 }
 
 export function unitOf(lines: readonly PlanLine[]): string {
-    const shelves = new Set(lines.map((line) => CATALOG_SHELF_WORDS[line.Step.Kind]));
+    const shelves = new Set(lines.map((line) => chapterOfKind(line.Step.Kind)));
     const [shelf] = shelves;
-    const plural = shelves.size === 1 && shelf !== undefined ? shelf.toLowerCase() : 'packages';
-    return lines.length === 1 ? plural.slice(0, -1) : plural;
+    const noun = shelves.size === 1 && shelf !== undefined ? COUNTED_AS[shelf] : 'package';
+    return nounOf(noun, lines.length);
 }
+
+const COUNTED_AS = { apps: 'app', settings: 'setting' } as const satisfies Readonly<
+    Record<ReturnType<typeof chapterOfKind>, PageNoun>
+>;
 
 const COUNTED: readonly { action: PlanLine['Action']; foot: string }[] = [
     { action: 'install', foot: 'from the file' },
@@ -181,7 +189,7 @@ function PlanCounts({ plan }: { plan: MachinefilePlan }) {
                         action === UNCHANGED ? `${unitOf(groups.get(action) ?? [])} ${foot}` : foot
                     }
                     key={action}
-                    label={PLAN_GROUP_WORDS[action]}
+                    label={headingOf(action)}
                     value={groups.get(action)?.length ?? 0}
                 />
             ))}

@@ -66,7 +66,7 @@ describe('gestures', () => {
                 // Then - the engine's machines.list, read again, says it is stopped
                 await visitor.gone(dialog('Stop linux-1?'));
                 await visitor.see(heading('linux-1 Stopped'));
-                await visitor.see(within(sidebar, button('linux-1 stopped')));
+                await visitor.see(within(sidebar, button('linux-1 Stopped')));
                 await visitor.see(content('Done'));
             },
         );
@@ -197,7 +197,7 @@ describe('gestures', () => {
             await visitor.click(within(asked, button('Delete')));
 
             // Then - Home, and api is no machine of the sidebar any more
-            const gone = within(sidebar, button('api stopped'));
+            const gone = within(sidebar, button('api Stopped'));
             await visitor.see(region('Needs you'));
             await visitor.gone(gone);
         });
@@ -209,7 +209,7 @@ describe('gestures', () => {
         const result = await component.render(
             machineOver('creating', 'linux-5'),
             async (visitor) => {
-                await visitor.see(content('Creating · image 1 of 5'));
+                await visitor.see(content('Creating: image 1 of 5'));
 
                 // When - its delete is confirmed by its name
                 await visitor.click(button('Delete linux-5…'));

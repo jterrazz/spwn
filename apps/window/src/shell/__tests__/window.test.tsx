@@ -59,7 +59,7 @@ describe('Window', () => {
         // Given - the window on Home over two-macs
         const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
             // When - api, which is stopped, is chosen in the sidebar
-            await visitor.click(within(sidebar, button('api stopped')));
+            await visitor.click(within(sidebar, button('api Stopped')));
 
             // Then - its header is the engine's, and its Overview asks nothing a stopped machine refuses
             await visitor.see(heading('api Stopped'));

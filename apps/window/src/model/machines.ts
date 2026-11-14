@@ -29,6 +29,10 @@ export function findMachine(macs: readonly MachinesMacView[], name: string): Fou
     return undefined;
 }
 
+export function isStopped(vm: Pick<MachinesVM, 'State'>): boolean {
+    return vm.State === 'stopped';
+}
+
 // invariant: the engine a read or a gesture is sent to: a VM's own, else a Mac's by name; this Mac's is the one the
 // invariant: socket reaches, so it takes no target, and a read of it is the same request whichever page asks it.
 export function targetOf(found: Found): Target | undefined {

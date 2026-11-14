@@ -6,13 +6,15 @@ import type {
     MachinefileDiffering,
     MachinefileDrift,
     MachinefilePlan,
+    PageNoun,
 } from '@jterrazz/station-api';
 
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
+import { countOf } from '../../engine/engine-words';
 import { isSkill, layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
-import { CATALOG_SHELF_WORDS } from '../../engine/words';
+import { shelfWord } from '../../engine/shown';
 
 export const SHELVES = ['Apps', 'Skills', 'Settings'] as const;
 
@@ -38,9 +40,7 @@ export function categoriesOf(reports: readonly AppsReport[]): Categories {
 
 export function shelfOf(line: PlanLine, categories: Categories): string {
     const category = categories.get(line.Step.Package);
-    return category !== undefined && isSkill(category)
-        ? 'Skills'
-        : CATALOG_SHELF_WORDS[line.Step.Kind];
+    return category !== undefined && isSkill(category) ? 'Skills' : shelfWord(line.Step.Kind);
 }
 
 export function layersOf(plan: MachinefilePlan): readonly Layer[] {
@@ -78,14 +78,14 @@ export function countOn(layers: readonly Layer[], shelf: Shelf, categories: Cate
     return onShelf(layers, shelf, categories).reduce((sum, layer) => sum + layer.lines.length, 0);
 }
 
-const SINGULAR: Readonly<Record<Shelf, string>> = {
+const COUNTED_AS: Readonly<Record<Shelf, PageNoun>> = {
     Apps: 'app',
     Settings: 'setting',
     Skills: 'skill',
 };
 
 export function countWord(count: number, shelf: Shelf): string {
-    return `${count} ${SINGULAR[shelf]}${count === 1 ? '' : 's'}`;
+    return countOf(COUNTED_AS[shelf], count);
 }
 
 const PACKAGE_CHAPTERS: readonly MachinefileChapter[] = ['apps', 'settings'];

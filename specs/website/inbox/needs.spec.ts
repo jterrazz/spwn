@@ -128,10 +128,10 @@ describe('needs', () => {
             await visitor.see(within(sidebar, button('Inbox 9')));
             await visitor.see(within(sidebar, button('Storage')));
             await visitor.see(within(sidebar, button('jterrazz-macbook-pro online')));
-            await visitor.see(within(sidebar, button('api stopped')));
-            await visitor.see(within(sidebar, button('linux-1 running')));
+            await visitor.see(within(sidebar, button('api Stopped')));
+            await visitor.see(within(sidebar, button('linux-1 Running')));
             await visitor.see(within(sidebar, button('jterrazz-mac-mini online')));
-            await visitor.see(within(sidebar, button('infra running')));
+            await visitor.see(within(sidebar, button('infra Running')));
             await visitor.see(within(sidebar, button('Machine files')));
             await visitor.see(within(sidebar, button('Apps')));
             await visitor.see(within(sidebar, button('Skills')));

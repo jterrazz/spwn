@@ -23,8 +23,8 @@
     - text: 4 macOS 8 linux-4 4 linux-5 8 free
   - region "Its machines":
     - heading "Its machines" [level=2]
-    - button "linux-4 by you Creating · boot 2 of 4"
-    - button "linux-5 Lot shell, one block per package · by studio-os-fe Creating · image 1 of 5"
+    - 'button "linux-4 by you Creating: boot 2 of 4"'
+    - 'button "linux-5 Lot shell, one block per package · by studio-os-fe Creating: image 1 of 5"'
   - region "Packages":
     - heading "Packages" [level=2]
     - text: "Not found no Machinefile named jterrazz-macbook-pro. give this machine one: station init --machinefile <name>"

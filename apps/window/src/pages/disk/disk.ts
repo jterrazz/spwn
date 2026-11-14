@@ -1,9 +1,10 @@
 import type { DiskReading, DiskRow } from '@jterrazz/station-api';
 
 import type { Identity } from '../../design/index';
+import { wordOf } from '../../engine/engine-words';
 import { diskGestureOf, freesWhole } from '../../engine/provisional';
 import { DISK_GROUP_COLOURS } from '../../engine/tones';
-import { DISK_GROUP_WORDS, DISK_PENDING_WORD } from '../../engine/words';
+import { DISK_PENDING_WORD } from '../../engine/words';
 import { bytes } from '../../model/format';
 
 export type Group = { group: DiskRow['Group']; rows: readonly DiskRow[] };
@@ -73,6 +74,6 @@ export function partsOf(reading: DiskReading): readonly Part[] {
         bytes: readOf(rows),
         group,
         identity: identityOfGroup(group),
-        label: DISK_GROUP_WORDS[group],
+        label: wordOf('DiskGroup', group).Word,
     }));
 }
