@@ -16,6 +16,8 @@ func Fielded(err error) error {
 	switch e.Code {
 	case VaultLabelTaken:
 		e.Field = fail.FieldLabel
+	case VaultEmptyLabel:
+		e.Field = fail.FieldLabel
 	case VaultEmptyValue:
 		e.Field = fail.FieldValue
 	}

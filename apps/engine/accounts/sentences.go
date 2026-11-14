@@ -14,6 +14,10 @@ const (
 	SentenceRowFromPassword   Sentence = "row-from-password"
 	SentenceRemoveEnds        Sentence = "remove-ends"
 	SentenceRemoveNothing     Sentence = "remove-nothing"
+	SentenceKeptIn            Sentence = "kept-in"
+	SentenceKeptAs            Sentence = "kept-as"
+	SentenceNoCapture         Sentence = "no-capture"
+	SentenceTypedWay          Sentence = "typed-way"
 )
 
 func (s Sentence) Text() string {
@@ -42,6 +46,14 @@ func (s Sentence) Text() string {
 		return "Its grants end: %s"
 	case SentenceRemoveNothing:
 		return "Nothing else ends"
+	case SentenceKeptIn:
+		return "It is kept in %s's Keychain; you can then grant it to a machine."
+	case SentenceKeptAs:
+		return "Kept as %s, the kind %s holds"
+	case SentenceNoCapture:
+		return "Sign in to a program on this Mac first; then its sign-in can be kept"
+	case SentenceTypedWay:
+		return "A token you made yourself"
 	}
 	return string(s)
 }

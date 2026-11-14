@@ -340,6 +340,9 @@ func Codes() map[fail.Code]Wording {
 		accounts.VaultLabelTaken: func(e *fail.Error) (string, string) {
 			return "a password is already labeled \"" + e.Subject + "\"", "label it another way"
 		},
+		accounts.VaultEmptyLabel: func(*fail.Error) (string, string) {
+			return "a password needs a label", "name it so you can tell it apart"
+		},
 		accounts.VaultEmptyValue: func(*fail.Error) (string, string) {
 			return "a typed password cannot be empty", "type it, or add it from a sign-in"
 		},

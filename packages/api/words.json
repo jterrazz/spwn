@@ -7,6 +7,7 @@
     },
     "typed": {
       "Word": "typed",
+      "Detail": "A token you made yourself",
       "Tone": "plain"
     }
   },
@@ -1066,6 +1067,11 @@
     },
     "vault.cannot-capture": {
       "Word": "cannot capture",
+      "Detail": "vault",
+      "Tone": "plain"
+    },
+    "vault.empty-label": {
+      "Word": "empty label",
       "Detail": "vault",
       "Tone": "plain"
     },

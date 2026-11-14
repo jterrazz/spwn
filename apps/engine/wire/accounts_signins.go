@@ -33,6 +33,8 @@ func (s signInMachines) local(name string) bool {
 	return name == "" || name == s.m.profile.Ref.Name
 }
 
+func (s signInMachines) Mac() string { return s.m.profile.Ref.Name }
+
 func (s signInMachines) Exec(ctx context.Context, name, line, stdin string) (cli.Ran, error) {
 	if s.local(name) {
 		out, err := s.m.sys.Run.Output(ctx, local.Cmd{Name: "/bin/sh", Args: []string{"-c", line}, Stdin: stdin})

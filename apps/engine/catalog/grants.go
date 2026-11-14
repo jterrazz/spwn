@@ -19,15 +19,22 @@ type Delivery struct {
 	// value: the command on this Mac that prints the token its sign-in left,
 	// empty when that token cannot be taken.
 	Capture []string
+	// value: the kind of the token Capture prints, by the wire name of a
+	// key kind; empty when nothing can be captured.
+	CaptureKind string
+	// value: the kinds a token typed for the program may be, the first the
+	// one offered by default, by the wire name of a key kind.
+	Kinds []string
 }
 
 const npmRegistryLine = `^//registry.npmjs.org/:_authToken=`
 
 var Deliveries = []Delivery{
-	{Program: "gh", Inject: GuestPath + "; gh auth login --with-token -h github.com", Remove: GuestPath + "; gh auth logout -h github.com", Capture: []string{"gh", "auth", "token", "-h", "github.com"}},
+	{Program: "gh", Inject: GuestPath + "; gh auth login --with-token -h github.com", Remove: GuestPath + "; gh auth logout -h github.com", Capture: []string{"gh", "auth", "token", "-h", "github.com"}, CaptureKind: "oauth-token", Kinds: []string{"fine-grained", "token"}},
 	{Program: "npm",
 		Inject: `umask 077; IFS= read -r t; f="$HOME/.npmrc"; touch "$f"; { grep -v '` + npmRegistryLine + `' "$f"; printf '//registry.npmjs.org/:_authToken=%s\n' "$t"; } > "$f.station" && mv "$f.station" "$f"`,
-		Remove: `f="$HOME/.npmrc"; [ -f "$f" ] || exit 0; umask 077; grep -v '` + npmRegistryLine + `' "$f" > "$f.station"; mv "$f.station" "$f"`},
-	{Program: "claude", Env: "CLAUDE_CODE_OAUTH_TOKEN"},
-	{Program: "wrangler", Env: "CLOUDFLARE_API_TOKEN"},
+		Remove: `f="$HOME/.npmrc"; [ -f "$f" ] || exit 0; umask 077; grep -v '` + npmRegistryLine + `' "$f" > "$f.station"; mv "$f.station" "$f"`,
+		Kinds:  []string{"token", "fine-grained"}},
+	{Program: "claude", Env: "CLAUDE_CODE_OAUTH_TOKEN", Kinds: []string{"oauth-token"}},
+	{Program: "wrangler", Env: "CLOUDFLARE_API_TOKEN", Kinds: []string{"token", "fine-grained"}},
 }

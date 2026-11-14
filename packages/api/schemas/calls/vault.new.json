@@ -1,0 +1,160 @@
+{
+  "$defs": {
+    "accounts.Capture": {
+      "additionalProperties": false,
+      "properties": {
+        "Kind": {
+          "enum": [
+            "token",
+            "fine-grained",
+            "api-key",
+            "oauth-token",
+            "password"
+          ],
+          "type": "string"
+        },
+        "KindSentence": {
+          "type": "string"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        },
+        "Scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Who": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Kind",
+        "KindSentence",
+        "Label",
+        "Program",
+        "Who"
+      ],
+      "type": "object"
+    },
+    "accounts.TypedProgram": {
+      "additionalProperties": false,
+      "properties": {
+        "Kind": {
+          "enum": [
+            "token",
+            "fine-grained",
+            "api-key",
+            "oauth-token",
+            "password"
+          ],
+          "type": "string"
+        },
+        "Kinds": {
+          "items": {
+            "enum": [
+              "token",
+              "fine-grained",
+              "api-key",
+              "oauth-token",
+              "password"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Kind",
+        "Kinds",
+        "Label",
+        "Program"
+      ],
+      "type": "object"
+    },
+    "accounts.VaultOffer": {
+      "additionalProperties": false,
+      "properties": {
+        "CaptureLine": {
+          "type": "string"
+        },
+        "Captures": {
+          "items": {
+            "$ref": "#/$defs/accounts.Capture"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Intro": {
+          "type": "string"
+        },
+        "Programs": {
+          "items": {
+            "$ref": "#/$defs/accounts.TypedProgram"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "CaptureLine",
+        "Captures",
+        "Intro",
+        "Programs"
+      ],
+      "type": "object"
+    },
+    "vault.calls.VaultNewIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/vault.new.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch vault.new of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/vault.calls.VaultNewIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.VaultOffer"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "vault.new",
+  "type": "object"
+}

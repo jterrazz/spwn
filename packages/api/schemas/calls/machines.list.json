@@ -162,6 +162,7 @@
             "usage.needs-terminal",
             "usage.unknown-command",
             "vault.cannot-capture",
+            "vault.empty-label",
             "vault.empty-value",
             "vault.label-taken",
             "vault.not-signed-in",

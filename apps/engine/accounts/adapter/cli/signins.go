@@ -59,6 +59,8 @@ type Machines interface {
 	// value: opens a page in the owner's browser on this Mac.
 	Open(ctx context.Context, page string) error
 	Now() time.Time
+	// value: this Mac's name, which a login of this Mac names.
+	Mac() string
 }
 
 type SignIns struct {
@@ -203,6 +205,13 @@ func who(r catalog.SignInRead, out string) (name, plan string) {
 	return screen(first), ""
 }
 
+func (s *SignIns) named(machine string) string {
+	if machine == "" {
+		return s.m.Mac()
+	}
+	return machine
+}
+
 func (s *SignIns) Login(ctx context.Context, machine string, program accounts.Program) (<-chan contract.LoginUpdate, error) {
 	refuse := func(code fail.Code) error { return accounts.Refusal(fail.Refused, code, string(program)) }
 	where, ok := s.m.Where(ctx, machine)
@@ -295,7 +304,7 @@ func (s *SignIns) step(ctx context.Context, session io.Reader, p catalog.LoginPr
 		code = regexp.MustCompile(p.Code)
 	}
 	armed := p.CodeAfter == ""
-	step := accounts.Step{Kind: ex.kind, Site: p.Site, Exchange: id, Expires: ex.expires, Now: now}
+	step := accounts.Step{Kind: ex.kind, Site: p.Site, Exchange: id, Expires: ex.expires, Now: now, Title: accounts.LoginTitle(ex.program, s.named(ex.machine))}
 	texts := make(chan string)
 	go func() {
 		defer close(texts)

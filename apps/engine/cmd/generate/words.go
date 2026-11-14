@@ -220,7 +220,7 @@ func wordedEnums() []worded {
 		}},
 		{accounts.AddFrom(""), map[string]word{
 			string(accounts.FromSignIn): {Word: "from a sign-in", Detail: accounts.SentenceCaptureNote.Text(), Tone: verdict.Plain},
-			string(accounts.FromTyped):  plain("typed"),
+			string(accounts.FromTyped):  {Word: "typed", Detail: accounts.SentenceTypedWay.Text(), Tone: verdict.Plain},
 		}},
 		{accounts.GrantTo(""), map[string]word{
 			string(accounts.ToMachine): {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},

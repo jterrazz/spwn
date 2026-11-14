@@ -77,19 +77,10 @@ type VaultEntry struct {
 	RemoveSentence string
 }
 
-type VaultProgram struct {
-	Program Program
-	Label   string
-	// value: whether "add from a sign-in" is offered for it: its sign-in leaves a token this Mac can take.
-	Captures bool
-}
-
 type VaultRead struct {
 	// value: the Mac whose vault this is: a vault is one Mac's.
 	Mac     string
 	Entries []VaultEntry
-	// value: every program a password can be kept for, from the catalog.
-	Programs []VaultProgram
 	// value: the head of the Passwords page, from the entries and their grants.
 	Verdict verdict.Verdict
 }
@@ -108,14 +99,6 @@ type Granted struct{}
 type Revoked struct {
 	// value: where the owner revokes the token itself, which station cannot.
 	Sentence string
-}
-
-func VaultPrograms() []VaultProgram {
-	out := make([]VaultProgram, 0, len(Programs()))
-	for _, p := range Programs() {
-		out = append(out, VaultProgram{Program: p, Label: p.Label(), Captures: p.Captures()})
-	}
-	return out
 }
 
 func Refusal(t fail.Type, code fail.Code, subject string) *fail.Error {
