@@ -3,10 +3,10 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | if .Step then {step: [.Step.Kind, .Step.Site, .Step.Line]} elif .Programs then {signed: [.Programs[] | select(.Program == "gh") | .State, .Action]} else . end'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | if .Step then {step: [.Step.Kind, .Step.Site, .Step.Line, .Step.Title]} elif .Programs then {signed: [.Programs[] | select(.Program == "gh") | .State, .Action]} else . end'''
       stdin: |
           {"v":2,"id":"1","watch":"accounts.login","in":{"Machine":"linux-1","Program":"gh"}}
       exit: 0
       stdout: |
-          {"step":["device-code","github.com","Waiting for you to enter the GitHub code at github.com"]}
+          {"step":["device-code","github.com","Waiting for you to enter the GitHub code at github.com","Sign in to gh on linux-1"]}
           {"signed":["signed-in","sign-out"]}
