@@ -6,6 +6,7 @@ import type {
 
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import { wordOfSent } from '../../engine/engine-words';
 import { SHELVES } from '../packages/model';
 
@@ -46,7 +47,7 @@ export function factsOf(
     const arch = wordOfSent('CatalogArch', text.get('machine.system.arch') ?? '');
     return {
         makes: text.get('machine.kind') ?? '',
-        system: [named, arch].filter((part) => part !== '').join(' · '),
+        system: [named, arch].filter((part) => part !== '').join(SEPARATOR),
     };
 }
 

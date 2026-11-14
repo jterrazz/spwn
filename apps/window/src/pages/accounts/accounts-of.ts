@@ -7,6 +7,7 @@ import type {
 
 import { screen } from '../../design/secret';
 import type { Screened } from '../../design/secret';
+import { SEPARATOR } from '../../design/separator';
 import { identitiesOf } from '../../engine/provisional';
 import {
     ACCOUNT_ORIGIN_WORDS,
@@ -44,7 +45,7 @@ export function aboutOf(account: AccountsAccount): Screened {
         ['origin', origin === '' ? undefined : (ACCOUNT_ORIGIN_WORDS[origin] ?? origin)],
         ['source', account.source],
         ['detail', account.detail],
-        ['notes', (account.notes ?? []).join(' · ')],
+        ['notes', (account.notes ?? []).join(SEPARATOR)],
     ]);
 }
 

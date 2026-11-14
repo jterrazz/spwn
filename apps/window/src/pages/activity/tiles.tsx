@@ -3,6 +3,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 import { Bar, Chart, MissingMark, Tile } from '../../design/index';
 import type { Identity } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import { ownState } from '../../engine/shown';
 import type { OwnState } from '../../engine/words';
 import { bytes, duration, memory, percent } from '../../model/format';
@@ -41,7 +42,7 @@ export function cpuFootOf(report: ActivityReport): string {
     const peak = chart === undefined || chart.peak < 0 ? undefined : chart.buckets?.[chart.peak];
     if (chart !== undefined && peak !== undefined) {
         const ago = agoOf(chart.peak_at, at);
-        return `Peak ${percent(peak.max)} %${ago === undefined ? '' : ` · ${ago}`}`;
+        return `Peak ${percent(peak.max)} %${ago === undefined ? '' : `${SEPARATOR}${ago}`}`;
     }
     return cpus > 0 ? `${String(cpus)} CPUs` : '';
 }

@@ -1,5 +1,6 @@
 import type { MachinesVM, OverviewNeed } from '@jterrazz/station-api';
 
+import { SEPARATOR } from '../design/separator';
 import { machineKindOf } from '../engine/provisional';
 import type { MachineKind } from '../engine/provisional';
 import { vmKindWord } from '../engine/shown';
@@ -129,7 +130,7 @@ function packagesOf(held: Held): readonly Result[] {
 }
 
 function sentenceOf(parts: readonly string[]): string {
-    return parts.filter((part) => part !== '').join(' · ');
+    return parts.filter((part) => part !== '').join(SEPARATOR);
 }
 
 export function everything(held: Held): readonly Result[] {

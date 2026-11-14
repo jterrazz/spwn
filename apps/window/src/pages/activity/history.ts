@@ -1,5 +1,6 @@
 import type { ActivitySample } from '@jterrazz/station-api';
 
+import { SEPARATOR } from '../../design/separator';
 import { bytes, clock, memory } from '../../model/format';
 import type { Marks } from './measures';
 
@@ -31,7 +32,7 @@ export function strided<T>(samples: readonly T[], most: number): readonly T[] {
 export function memoryMarks(samples: readonly ActivitySample[]): Marks {
     return {
         labels: samples.map(
-            (sample) => `${clock(sample.at) ?? sample.at} · ${memory(sample.mem_used)}`,
+            (sample) => `${clock(sample.at) ?? sample.at}${SEPARATOR}${memory(sample.mem_used)}`,
         ),
         values: samples.map((sample) =>
             sample.mem_total > 0 ? (sample.mem_used / sample.mem_total) * 100 : null,
@@ -52,8 +53,8 @@ export function countedMarks(
     return {
         labels: steps.map(({ at, step }) =>
             step === undefined
-                ? `${clock(at) ?? at} · no count`
-                : `${clock(at) ?? at} · ${bytes(step)}`,
+                ? `${clock(at) ?? at}${SEPARATOR}no count`
+                : `${clock(at) ?? at}${SEPARATOR}${bytes(step)}`,
         ),
         values: steps.map(({ step }) =>
             step === undefined ? null : tallest > 0 ? (step / tallest) * 100 : 0,

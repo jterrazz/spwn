@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { AppIcon, Button, Panel, ShareBar, TypeTag } from '../../design/index';
 import type { SharePart } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import { diskGestureOf, freesWhole, holdsRebuildable } from '../../engine/provisional';
 import { useReread } from '../../engine/react';
 import { DISK_GROUP_WORDS, DISK_KIND_WORDS, DISK_PENDING_WORD } from '../../engine/words';
@@ -46,14 +47,18 @@ function DiskBar({
         .map((part) => ({
             identity: part.identity,
             key: part.group,
-            label: `${part.label} · ${bytes(part.bytes)}`,
+            label: `${part.label}${SEPARATOR}${bytes(part.bytes)}`,
             size: part.bytes,
         }));
     const unsorted = Total - Free - held.reduce((sum, part) => sum + part.size, 0);
     const used: SharePart[] =
-        unsorted > 0 ? [{ key: 'used', label: `Used · ${bytes(unsorted)}`, size: unsorted }] : [];
+        unsorted > 0
+            ? [{ key: 'used', label: `Used${SEPARATOR}${bytes(unsorted)}`, size: unsorted }]
+            : [];
     const free: SharePart[] =
-        Free > 0 ? [{ key: 'free', label: `Free · ${bytes(Free)}`, rest: true, size: Free }] : [];
+        Free > 0
+            ? [{ key: 'free', label: `Free${SEPARATOR}${bytes(Free)}`, rest: true, size: Free }]
+            : [];
     return <ShareBar label={label} of={Total} parts={[...held, ...used, ...free]} />;
 }
 
@@ -138,7 +143,7 @@ export function GroupPanel({ group, target }: GroupProps) {
                     lead={<AppIcon name={row.App} />}
                     row={row}
                     sentence={sentence([
-                        (row.Paths ?? []).join(' · '),
+                        (row.Paths ?? []).join(SEPARATOR),
                         row.MoveTo === '' ? undefined : `to ${row.MoveTo}`,
                     ])}
                     size={sizeOf(row)}
@@ -199,7 +204,7 @@ function AppLine({ app, target }: { app: AppRow; target: Target | undefined }) {
             lead={<AppIcon name={app.app} />}
             row={row}
             sentence={sentence([
-                app.rows.flatMap((one) => one.Paths ?? []).join(' · '),
+                app.rows.flatMap((one) => one.Paths ?? []).join(SEPARATOR),
                 ...moves.map((to) => `to ${to}`),
             ])}
             target={target}

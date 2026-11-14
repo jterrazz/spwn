@@ -7,6 +7,7 @@ import type {
     MachinesMacView,
 } from '@jterrazz/station-api';
 
+import { SEPARATOR } from '../../design/separator';
 import { clock, memory, percent } from '../../model/format';
 
 export type Span = '1h' | '6m' | '24h';
@@ -29,8 +30,8 @@ export function marksOf(buckets: readonly ActivityBucket[]): Marks {
     return {
         labels: buckets.map((bucket) =>
             bucket.points > 0
-                ? `${clock(bucket.at) ?? bucket.at} · ${percent(bucket.mean)} %`
-                : `${clock(bucket.at) ?? bucket.at} · no point`,
+                ? `${clock(bucket.at) ?? bucket.at}${SEPARATOR}${percent(bucket.mean)} %`
+                : `${clock(bucket.at) ?? bucket.at}${SEPARATOR}no point`,
         ),
         values: buckets.map((bucket) => (bucket.points > 0 ? bucket.mean : null)),
     };

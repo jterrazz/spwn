@@ -2,6 +2,7 @@ import type { CallName, ImagesReport, MachinesMacView } from '@jterrazz/station-
 
 import { Icon } from '../../design/icon';
 import { StatePill } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import { isDeletable } from '../../engine/provisional';
 import { newestState } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
@@ -48,7 +49,7 @@ export function ImageLine({ image, mac, sentence }: ImageLineProps) {
                             gesture={remove}
                             label={
                                 image.Record.size_gb > 0
-                                    ? `Delete · frees ${String(image.Record.size_gb)} GB`
+                                    ? `Delete${SEPARATOR}frees ${String(image.Record.size_gb)} GB`
                                     : 'Delete'
                             }
                             name={`Delete ${shown}`}

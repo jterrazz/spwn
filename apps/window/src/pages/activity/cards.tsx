@@ -2,6 +2,7 @@ import type { ActivityReport, ActivitySample } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { Chart, Missing, MissingMark, Panel } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import { PRESSURE_WORDS } from '../../engine/words';
 import { memory, rate, sentence } from '../../model/format';
 import { countedMarks, keptOver, memoryMarks, strided } from './history';
@@ -122,7 +123,7 @@ function MemoryFigure({ report }: { report: ActivityReport }) {
     }
     const { value, unit } = split(memory(held.used));
     if (held.total === undefined) {
-        return <Figure unit={`${unit} · its process`} value={value} />;
+        return <Figure unit={`${unit}${SEPARATOR}its process`} value={value} />;
     }
     const total = split(memory(held.total));
     const of = total.unit === unit ? total.value : memory(held.total);

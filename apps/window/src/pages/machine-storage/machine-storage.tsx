@@ -1,6 +1,7 @@
 import type { DiskReading, Target } from '@jterrazz/station-api';
 
 import { Screen } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import { useWatch } from '../../engine/react';
 import type { Route } from '../../shell/route';
 import { Freed, useFreeAll } from '../disk/disk-gestures';
@@ -18,7 +19,7 @@ type Go = (to: Route) => void;
 function Inside({ go }: { go: Go | undefined }) {
     return (
         <>
-            {'Inside this machine · on its Mac the whole disk is one file, read in '}
+            {`Inside this machine${SEPARATOR}on its Mac the whole disk is one file, read in `}
             {go === undefined ? (
                 'Storage'
             ) : (

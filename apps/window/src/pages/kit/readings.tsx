@@ -11,6 +11,7 @@ import {
     Verdict,
 } from '../../design/index';
 import { shownOrWithheld } from '../../design/secret';
+import { SEPARATOR } from '../../design/separator';
 import type { EngineError } from '../../engine/engine-error';
 import { failedState } from '../../engine/failed';
 import type { Reach } from '../../engine/reach';
@@ -110,7 +111,7 @@ export function Unanswered({
 export function Absent({ reach }: { reach: Extract<Reach, { kind: 'unanswered' }> }) {
     return (
         <Verdict
-            line={`${reach.reason} · trying again in ${Math.round(reach.retryIn / 1000)} s`}
+            line={`${reach.reason}${SEPARATOR}trying again in ${Math.round(reach.retryIn / 1000)} s`}
             size="page"
             title={asSentence(reach.said)}
             {...ownState('engine-absent')}

@@ -8,6 +8,7 @@ import type {
 import { CopyButton } from '../../design/copy-button';
 import { AppIcon, Button, MachineChip, Panel, Row, StatePill, Value } from '../../design/index';
 import { looksSecret } from '../../design/secret';
+import { SEPARATOR } from '../../design/separator';
 import { Openable } from '../../engine/opener';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
@@ -37,8 +38,7 @@ function elsewhere(mac: string): string {
     return `Sign in on ${mac} itself: the terminal the window opens is this Mac's`;
 }
 
-const MAC_LINE =
-    'An account lives on this Mac; a machine gets a copy for a time, never the account itself · no secret is ever shown here';
+const MAC_LINE = `An account lives on this Mac; a machine gets a copy for a time, never the account itself${SEPARATOR}no secret is ever shown here`;
 
 type Go = (to: Route) => void;
 
@@ -278,7 +278,7 @@ export function AccountsTab({ found, go }: { found: Found; go: Go }) {
     return (
         <Page>
             <NoVerdict
-                line={`A share is a copy, for a time: when the time ends ${found.mac.Name} takes it back · no secret is ever shown here`}
+                line={`A share is a copy, for a time: when the time ends ${found.mac.Name} takes it back${SEPARATOR}no secret is ever shown here`}
                 size="tab"
             />
             <HeldOutcomes>

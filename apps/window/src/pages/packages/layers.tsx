@@ -1,4 +1,5 @@
 import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import type { PlanLine } from '../../engine/provisional';
 import { CONDITION_TONES } from '../../engine/tones';
 import { ANY_VERSION_WORD, CATALOG_KIND_WORDS, CONDITION_WORDS } from '../../engine/words';
@@ -86,7 +87,7 @@ function countOf(layer: Layer, shelf: Shelf, look: Look): string {
         return countWord(layer.lines.length, shelf);
     }
     const relation = layer.name === look.file ? THIS_FILE_WORD : EXTENDED_WORD;
-    return `${relation} · ${String(layer.lines.length)}`;
+    return `${relation}${SEPARATOR}${String(layer.lines.length)}`;
 }
 
 function LayerHead({ layer, shelf, look }: LayerHeadProps) {

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { CopyButton } from '../../design/copy-button';
 import { Button } from '../../design/index';
 import { QrCode } from '../../design/qr-code';
+import { SEPARATOR } from '../../design/separator';
 import type { Openable } from '../../engine/opener';
 import { OpenButton } from '../kit/opens';
 
@@ -17,8 +18,6 @@ type AddressProps = {
     opens?: Opens | undefined;
 };
 
-const JOINED = ' · ';
-
 export function Address({ label = '', url, qr, opens }: AddressProps) {
     const [open, setOpen] = useState(false);
     if (url === '') {
@@ -27,11 +26,11 @@ export function Address({ label = '', url, qr, opens }: AddressProps) {
     return (
         <div className={styles.address}>
             <span className={styles.links}>
-                {label === '' ? null : `${label}${JOINED}`}
+                {label === '' ? null : `${label}${SEPARATOR}`}
                 <CopyButton name={`Copy ${url}`} text={url} variant="inline" />
                 {opens === undefined ? null : (
                     <>
-                        {JOINED}
+                        {SEPARATOR}
                         <OpenButton
                             held={opens.held}
                             label="Open"
@@ -42,7 +41,7 @@ export function Address({ label = '', url, qr, opens }: AddressProps) {
                 )}
                 {qr ? (
                     <>
-                        {JOINED}
+                        {SEPARATOR}
                         <Button
                             onClick={() => {
                                 setOpen(!open);

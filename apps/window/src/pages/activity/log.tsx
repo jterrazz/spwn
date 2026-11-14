@@ -2,6 +2,7 @@ import type { MachinesLogInput, MachinesLogOutput, Target } from '@jterrazz/stat
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button, Missing, Panel, SearchField, Switch } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import type { EngineError } from '../../engine/engine-error';
 import { useRead } from '../../engine/react';
 import { clock } from '../../model/format';
@@ -81,7 +82,7 @@ function Console({ vm, lines, at, onRefresh }: ConsoleProps) {
                 </Button>
             </div>
             <LineList
-                foot={`read at ${clock(at) ?? ''} · ${FOOT}`}
+                foot={`read at ${clock(at) ?? ''}${SEPARATOR}${FOOT}`}
                 lines={lines}
                 memory={vm}
                 query={query}

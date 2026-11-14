@@ -1,6 +1,7 @@
 import type { EngineReadOutput, MachinesMacView, OverviewNeed } from '@jterrazz/station-api';
 
 import { identityOf, MachineIcon, NavItem, StateDot } from '../design/index';
+import { SEPARATOR } from '../design/separator';
 import { failedState } from '../engine/failed';
 import { inboxIsUrgent, machineKindOf } from '../engine/provisional';
 import { useReach } from '../engine/react';
@@ -158,7 +159,7 @@ function Engine({ engine }: Pick<SidebarProps, 'engine'>) {
         <div className={styles.foot}>
             <StateDot tone={tone} word={word} />
             <span className={styles.footText}>
-                {Version === '' ? `Engine ${word}` : `Engine ${word} · ${Version}`}
+                {Version === '' ? `Engine ${word}` : `Engine ${word}${SEPARATOR}${Version}`}
             </span>
         </div>
     );

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { Tone } from '../tone';
+import { SEPARATOR } from './separator';
 
 import styles from './tile.module.css';
 
@@ -13,8 +14,6 @@ export type TileProps = {
     viz?: ReactNode;
     aside?: { text: string; tone: 'ok' | 'plain' };
 };
-
-const JOINED = ' · ';
 
 export function Tile({ label, value, unit, foot, footState, viz, aside }: TileProps) {
     return (
@@ -40,7 +39,7 @@ export function Tile({ label, value, unit, foot, footState, viz, aside }: TilePr
                         {footState.word}
                     </span>
                 )}
-                {footState === undefined || foot === '' ? null : JOINED}
+                {footState === undefined || foot === '' ? null : SEPARATOR}
                 {foot}
             </div>
         </div>

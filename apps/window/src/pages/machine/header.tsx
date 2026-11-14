@@ -1,6 +1,7 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
 import { Button, MachineIcon, StatePill, Switch } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { engineViewWord, macState, vmKindWord, vmLifetimeWord, vmState } from '../../engine/shown';
@@ -57,7 +58,7 @@ function VmLine({ found, go }: { found: Found; go: Props['go'] }) {
     }
     return (
         <p className={styles.sentence}>
-            {`${sentence([vmKindWord(vm), vmLifetimeWord(vm)])} · on `}
+            {`${sentence([vmKindWord(vm), vmLifetimeWord(vm)])}${SEPARATOR}on `}
             <button
                 className={styles.link}
                 onClick={() => {

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
 import type { Measured } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import { vmCheck, vmSsh, vmState } from '../../engine/shown';
 import { clock, duration, seconds, sentence } from '../../model/format';
 import { between, shortDay } from '../activity/when';
@@ -109,7 +110,8 @@ export function CheckLatency({ vm }: { vm: MachinesVM }) {
                         accent="last"
                         label="Latency of the check"
                         marks={points.map(
-                            (point) => `${clock(point.at) ?? point.at} · ${millis(point.took)} ms`,
+                            (point) =>
+                                `${clock(point.at) ?? point.at}${SEPARATOR}${millis(point.took)} ms`,
                         )}
                         size="activity"
                         tone="new"

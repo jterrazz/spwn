@@ -8,6 +8,7 @@ import type {
 import { useState } from 'react';
 
 import { Screen, Verdict } from '../../design/index';
+import { SEPARATOR } from '../../design/separator';
 import type { Reading as Read } from '../../engine/react';
 import { useRead } from '../../engine/react';
 import { chapterNoun, fileJoinOf, verdictShown } from '../../engine/shown';
@@ -63,7 +64,7 @@ function chaptersMatch(drift: MachinefileDrift): string {
         .filter((chapter) => chapter.Listed > 0)
         .map(
             (chapter) =>
-                `${chapter.Matching} of ${chapter.Listed} ${chapterNoun(chapter.Chapter, chapter.Listed)} match · `,
+                `${chapter.Matching} of ${chapter.Listed} ${chapterNoun(chapter.Chapter, chapter.Listed)} match${SEPARATOR}`,
         )
         .join('');
 }

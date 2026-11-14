@@ -1,5 +1,7 @@
 import type { AppsReport, CatalogLivesOn, CatalogSetting } from '@jterrazz/station-api';
 
+import { SEPARATOR } from '../../design/separator';
+
 export type System = NonNullable<CatalogLivesOn['Kinds']>[number];
 
 export type InstallLine = { systems: System[]; method: string; target: string };
@@ -23,7 +25,7 @@ export function targetOf(install: unknown): string {
     return values
         .map(textOf)
         .filter((text) => text !== '')
-        .join(' · ');
+        .join(SEPARATOR);
 }
 
 export function installLinesOf(installs: null | readonly CatalogLivesOn[]): InstallLine[] {
