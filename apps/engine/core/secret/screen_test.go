@@ -76,6 +76,8 @@ func TestEachShapeIsWithheldAndTheWordsAroundIt(t *testing.T) {
 		{"a password of digits before a quote that closes no value", `https://bob:1234"x@host/x`, "https://withheld@host/x"},
 		{"a password holding a comma", "https://bob:pa,ss@host/x", "https://withheld@host/x"},
 		{"a password holding a quote before a comma", `https://bob:pa",ss@host/x`, "https://withheld@host/x"},
+		{"a password after a domain's user", "open smb://CORP;bob:hunter2@nas/share", "open smb://withheld@nas/share"},
+		{"a password after a user's mechanism", "imap://bob;AUTH=PLAIN:pw@mail", "imap://withheld@mail"},
 		{"a password in compact JSON before an email", `{"url":"https://bob:hunter2@host","email":"a@b.com"}`, `{"url":"https://withheld@b.com"}`},
 	} {
 		got, withheld := secret.Screen(c.text)
@@ -136,6 +138,7 @@ func TestTheMachinesOwnDataIsShown(t *testing.T) {
 		`"homepage":"https://x.dev","devDependencies":{"@types/node":"^20"}`,
 		`"homepage":"https://x.dev:8080/docs","devDependencies":{"@types/node":"^20"}`,
 		"https://x.io,2024-01-01T10:00:00,me@x.io",
+		"|https://x.io|10:30|a@b|",
 		`{'url':'https://x.dev','owner':'a@b.com'}`,
 		`<a href="https://x.dev:8080">a@b.com</a>`,
 		"http://[fe80::1]:80/a@b",

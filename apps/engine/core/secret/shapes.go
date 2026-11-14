@@ -32,8 +32,10 @@ const (
 const urlSegmentMin = 16
 
 // value: the characters no URL's user holds: the authority's own ends
-// (`/?#`) and the punctuation data puts after a URL.
-const userEnds = "/?#\",;<>[]{}"
+// (`/?#`), and the punctuation data puts after a URL that RFC 3986 keeps
+// out of a userinfo, with the comma of a CSV row. A `;` is a user's own
+// (`smb://CORP;bob`, `imap://bob;AUTH=PLAIN`).
+const userEnds = "/?#\",<>[]{}|"
 
 // value: the characters a word of a path from a root starts after.
 const wordEdges = " \t\r\n\"'`([{<,;=:"
