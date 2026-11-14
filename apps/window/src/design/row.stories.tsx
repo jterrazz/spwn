@@ -37,7 +37,7 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
         },
     },
     {
-        name: 'a calm state as a plain pill',
+        name: 'a calm state as a pill',
         props: {
             sentence: 'what is installed, and its settings',
             size: 'slim',
