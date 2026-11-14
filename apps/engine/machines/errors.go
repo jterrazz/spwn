@@ -57,9 +57,15 @@ func (e *BadCreatorError) Error() string {
 	return "STATION_SESSION \"" + e.Session + "\" is not a session's name"
 }
 
-type BadPurposeError struct{ Purpose string }
+type BadPurposeError struct {
+	Purpose string
+	Secret  bool
+}
 
 func (e *BadPurposeError) Error() string {
+	if e.Secret {
+		return "a purpose says what a machine is for, and holds no secret"
+	}
 	return "a purpose is one line of at most " + strconv.Itoa(PurposeMax) + " characters"
 }
 

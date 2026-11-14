@@ -15,6 +15,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 )
@@ -147,6 +148,8 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 		return r, claims{}, &model.BadCreatorError{Session: r.Creator}
 	case !validPurpose(r.Purpose):
 		return r, claims{}, &model.BadPurposeError{Purpose: r.Purpose}
+	case secret.Shaped(r.Purpose):
+		return r, claims{}, &model.BadPurposeError{Secret: true}
 	}
 	img, ok := s.imageOf(ctx, r.Image)
 	if !ok {

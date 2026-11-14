@@ -32,6 +32,7 @@ func TestARefusalOfACreateCarriesItsCodeAndItsMac(t *testing.T) {
 		{&model.NoEngineError{Hypervisor: "hv"}, NoHypervisor, "hv", nil},
 		{&model.BadNameError{Name: "Bad_Name"}, BadName, "Bad_Name", nil},
 		{&model.BadPurposeError{Purpose: "one\ntwo"}, BadPurpose, "one\ntwo", nil},
+		{&model.BadPurposeError{Secret: true}, BadPurpose, "", map[string]string{"secret": "yes"}},
 		{&model.TooLittleMemoryError{AskedBytes: 1 << 30}, TooLittle, "1073741824", nil},
 		{&model.BeingCreatedError{Name: "linux-4", Mac: "jterrazz-mac-mini"}, BeingCreated, "linux-4", map[string]string{"mac": "jterrazz-mac-mini"}},
 		{&model.NameTakenError{Name: "infra", VM: true, On: "jterrazz-mac-mini"}, NameTaken, "infra", map[string]string{"by": "vm", "on": "jterrazz-mac-mini", "agent": ""}},

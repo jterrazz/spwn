@@ -548,6 +548,8 @@ func TestAPurposeIsOneLineOfAtMostItsLimit(t *testing.T) {
 		{"Lot 1\u202f000", true},
 		{"Shell \U0001F468\u200d\U0001F4BB", true},
 		{"bad \xff byte", false},
+		{"deploys with sk-" + strings.Repeat("station-", 4) + "key", false},
+		{"Lot shell, the token lives in the vault", true},
 	} {
 		_, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "station-linux", Purpose: c.purpose})
 		if refused := errors.As(err, new(*model.BadPurposeError)); refused == c.ok {

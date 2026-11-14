@@ -109,6 +109,9 @@ func Worded(err error) error {
 	case errors.As(err, &little):
 		return refused(fail.Refused, TooLittle, strconv.FormatInt(little.AskedBytes, 10), nil)
 	case errors.As(err, &why):
+		if why.Secret {
+			return refused(fail.Refused, BadPurpose, "", map[string]string{"secret": "yes"})
+		}
 		return refused(fail.Refused, BadPurpose, why.Purpose, nil)
 	case errors.As(err, &born):
 		return refused(fail.Refused, BeingCreated, born.Name, map[string]string{"mac": born.Mac})

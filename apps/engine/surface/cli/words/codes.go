@@ -358,6 +358,9 @@ func Codes() map[fail.Code]Wording {
 			return (&machines.TooLittleMemoryError{}).Error(), "ask for " + strconv.Itoa(machines.MinMemoryBytes>>30) + " GB or more: --memory " + strconv.Itoa(machines.MinMemoryBytes>>30) + "G"
 		},
 		machinescalls.BadPurpose: func(e *fail.Error) (string, string) {
+			if e.Detail["secret"] == "yes" {
+				return (&machines.BadPurposeError{Secret: true}).Error(), "keep the secret in the vault and say what the machine is for"
+			}
 			return (&machines.BadPurposeError{Purpose: e.Subject}).Error(), "say what it is for in one shorter line"
 		},
 		machinescalls.BeingCreated: func(e *fail.Error) (string, string) {
