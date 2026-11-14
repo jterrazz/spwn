@@ -53,15 +53,46 @@ describe('machine files', () => {
         'D3 waits for a recording of machines.new from a file that makes a workspace with an image, which names the file the VM follows',
     );
 
-    test.todo('D7 lot 6');
+    test.todo(
+        'D7 waits for a recording of a change applied from the window, and of the file it wrote',
+    );
 
     test.todo("D11 waits for the file's description and its VM's resources on machinefile.explain");
 
-    test.todo('D12 lot 6');
+    test('D12 each chapter lists its lines grouped by the file that declares them', async () => {
+        // Given - the window on the file macbook-pro over stories-file, which extends jterrazz-base
+        const result = await website.visit(
+            '/?world=stories-file&page=machine-files&file=macbook-pro',
+            async (visitor) => {
+                const puts = region('What it puts on a machine');
+                const own = within(puts, region('macbook-pro'));
+                const base = within(puts, region('jterrazz-base'));
+
+                // When - Apps is read
+                // Then - each line sits under the file that declares it
+                await visitor.see(within(own, content('lazygit')));
+                await visitor.see(within(base, content('homebrew')));
+
+                // When - Settings is chosen
+                await visitor.click(within(puts, button('Settings1')));
+
+                // Then - its lines are listed under their file
+                await visitor.see(within(own, content('git-shortcuts')));
+                await visitor.gone(base);
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo(
+        'D12 window bug: a line of a chapter is plain text, where the scenario opens its catalog page',
+    );
 
     test.todo(`D18 waits for ${FILES}`);
 
-    test.todo('D19 lot 6');
+    test.todo(
+        "D19 waits for a recording of a setting's options with their values and defaults, and the file that set each, on machinefile.explain",
+    );
 
     test.todo(
         "D20 waits for the local file's additions, removals and values on machinefile.explain",
