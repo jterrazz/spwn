@@ -1,9 +1,9 @@
 import { button, clock, component, content, file, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import type { Recording } from '../../../engine/replay';
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 
 const recordingFor = await recordingsOf('disk-low', 'mini-offline', 'one-mac', 'two-macs');
 

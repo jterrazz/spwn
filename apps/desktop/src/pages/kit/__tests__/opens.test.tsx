@@ -1,11 +1,11 @@
 import { button, component, content, disabled } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../../engine/client';
-import { Openable, tauriOpener } from '../../../engine/opener';
+import { composeReplay } from '../../../composition/compose';
+import { Openable } from '../../../engine/openable';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport } from '../../../engine/replay';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { tauriOpener } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
 import { OpenButton, WITHHELD_OPENS } from '../opens';
 
 const recordingFor = await recordingsOf('two-macs');
@@ -34,9 +34,9 @@ function shell(refuses = false) {
 const HELD = 'The engine gives no command to reach linux-1';
 
 function reach(command: string, opener: ReturnType<typeof shell>['opener']) {
-    const client = new Client(replayTransport(recordingFor('two-macs')));
+    const dependencies = composeReplay({ opener, recording: recordingFor('two-macs') });
     return (
-        <EngineProvider client={client} opener={opener}>
+        <EngineProvider dependencies={dependencies}>
             <OpenButton
                 held={HELD}
                 label="Open in Terminal"

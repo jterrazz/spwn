@@ -10,10 +10,9 @@ import {
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../engine/client';
+import { composeReplay } from '../../composition/compose';
 import { EngineProvider } from '../../engine/react';
-import { replayTransport } from '../../engine/replay';
-import { recordingsOf } from '../../fixtures/recordings';
+import { recordingsOf } from '../../infrastructure/outbound/engine-replay/recordings';
 import { PAGES } from '../../pages/registry';
 import { Window } from '../window';
 
@@ -28,9 +27,9 @@ const find = dialog('Find');
 const query = within(find, field('Find'));
 
 function windowOnHome() {
-    const client = new Client(replayTransport(recordingFor('two-macs')));
+    const dependencies = composeReplay({ recording: recordingFor('two-macs') });
     return (
-        <EngineProvider client={client}>
+        <EngineProvider dependencies={dependencies}>
             <Window initial={{ page: 'home' }} pages={PAGES} />
         </EngineProvider>
     );

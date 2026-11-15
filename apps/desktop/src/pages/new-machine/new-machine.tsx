@@ -7,8 +7,8 @@ import type {
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 
+import type { Reading as Answered } from '../../application/use-cases/entry';
 import { Button, Dialog, FormField, Screen } from '../../design/index';
-import type { Reading as Answered } from '../../engine/entry';
 import { createRefusalPlaceOf } from '../../engine/provisional';
 import type { RefusalPlace } from '../../engine/provisional';
 import { useReread, useWatch } from '../../engine/react';

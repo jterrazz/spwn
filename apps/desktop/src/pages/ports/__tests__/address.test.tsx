@@ -1,11 +1,11 @@
 import { button, component, content, disabled, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { tauriOpener } from '../../../engine/opener';
-import { recordingOf } from '../../../engine/replay';
-import type { Recording } from '../../../engine/replay';
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { recordingOf } from '../../../infrastructure/outbound/engine-replay/replay';
+import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
+import { tauriOpener } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
 import type { Route } from '../../../shell/route';
 import { LOCAL_ELSEWHERE } from '../shared-row';
 

@@ -3,11 +3,14 @@ import { button, component, content, dialog, field, file, region, within } from 
 import { useState } from 'react';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../../engine/client';
+import { composeReplay } from '../../../composition/compose';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport, stagedReplay } from '../../../engine/replay';
-import type { Stage } from '../../../engine/replay';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
+import { Client } from '../../../infrastructure/outbound/engine-link/client';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
+import type { Stage } from '../../../infrastructure/outbound/engine-replay/replay';
+import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
 import { Window } from '../../../shell/window';
 import { PAGES } from '../../registry';
 import { AddPasswordSheet } from '../add-sheet';
@@ -41,7 +44,13 @@ function Vault() {
 
 function vaultOver(stage: Stage = stagedReplay(recordingFor('two-macs'))) {
     return (
-        <EngineProvider client={new Client(stage.transport)}>
+        <EngineProvider
+            dependencies={{
+                engine: new Client(stage.transport),
+                opener: NO_OPENER,
+                presence: documentPresence(),
+            }}
+        >
             <Vault />
         </EngineProvider>
     );
@@ -76,9 +85,9 @@ function fieldOf({ input, drawn }: Seen) {
 describe('add password sheet', () => {
     test("the vault's toolbar offers Add a password, which opens its sheet", async () => {
         // Given - the window on Passwords over two-macs
-        const client = new Client(replayTransport(recordingFor('two-macs')));
+        const dependencies = composeReplay({ recording: recordingFor('two-macs') });
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Window initial={{ page: 'passwords' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {

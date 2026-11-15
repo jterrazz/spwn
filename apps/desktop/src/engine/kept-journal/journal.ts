@@ -5,8 +5,8 @@ import type {
     StationWord,
 } from '@jterrazz/station-api';
 
-import { READING } from '../entry';
-import type { Reading } from '../entry';
+import { READING } from '../../application/use-cases/entry';
+import type { Reading } from '../../application/use-cases/entry';
 import { useWatch } from '../react';
 import type { Shown } from '../shown';
 import { ANSWERS } from './answers';

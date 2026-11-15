@@ -1,8 +1,8 @@
 import { button, component, content, file, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import type { Route } from '../../../shell/route';
 
 const recordingFor = await recordingsOf('bare-mac', 'stories');

@@ -1,6 +1,7 @@
 import { component, region } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { composeGallerySample } from '../../../composition/compose';
 import { ENTRIES } from '../entries';
 import Gallery from '../gallery';
 
@@ -26,10 +27,13 @@ describe('Gallery', () => {
 
     test('the gallery draws every entry, grouped by layer, and nothing fails', async () => {
         // Given - the gallery page
-        const result = await component.render(<Gallery />, async (visitor) => {
-            // When - it has drawn its last layer
-            await visitor.see(region('Dialogs'));
-        });
+        const result = await component.render(
+            <Gallery sample={composeGallerySample()} />,
+            async (visitor) => {
+                // When - it has drawn its last layer
+                await visitor.see(region('Dialogs'));
+            },
+        );
 
         // Then - one section per entry, and no error on the way
         expect(result.html.text.match(/data-entry="/gu)).toHaveLength(ENTRIES.length);

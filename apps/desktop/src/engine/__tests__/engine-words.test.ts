@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
+import type { Out } from '../../application/ports/engine.port';
 import { keyOf } from '../../domain/request-key';
-import { recordingsOf } from '../../fixtures/recordings';
-import type { Out } from '../client';
+import { recordingsOf } from '../../infrastructure/outbound/engine-replay/recordings';
 import { codesOf, countOf, headingOf, wordOf } from '../engine-words';
 import { vmLifetimeWord } from '../shown';
 

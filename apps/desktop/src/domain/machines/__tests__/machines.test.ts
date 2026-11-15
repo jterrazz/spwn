@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import type { Out } from '../../../engine/client';
-import { recordingsOf } from '../../../fixtures/recordings';
+import type { Out } from '../../../application/ports/engine.port';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { keyOf } from '../../request-key';
 import { targetOf } from '../machines';
 

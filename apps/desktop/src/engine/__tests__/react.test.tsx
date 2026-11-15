@@ -3,15 +3,17 @@ import { component, content, waitUntil } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { keyOf } from '../../domain/request-key';
-import { holdingCall } from '../../fixtures/held-call';
-import { recordingsOf } from '../../fixtures/recordings';
+import { documentPresence } from '../../infrastructure/outbound/document-presence/document-presence';
+import { Client } from '../../infrastructure/outbound/engine-link/client';
+import type { Receiver, Transport } from '../../infrastructure/outbound/engine-link/transport';
+import { holdingCall } from '../../infrastructure/outbound/engine-replay/__tests__/held-call';
+import { recordingsOf } from '../../infrastructure/outbound/engine-replay/recordings';
+import { stagedReplay } from '../../infrastructure/outbound/engine-replay/replay';
+import type { Recording } from '../../infrastructure/outbound/engine-replay/replay';
+import { NO_OPENER } from '../../infrastructure/outbound/opener-tauri/tauri-opener';
 import { PAGES } from '../../pages/registry';
 import { Window } from '../../shell/window';
-import { Client } from '../client';
 import { EngineProvider, useRead } from '../react';
-import { stagedReplay } from '../replay';
-import type { Recording } from '../replay';
-import type { Receiver, Transport } from '../transport';
 import { useGesture } from '../use-gesture';
 
 const recordingFor = await recordingsOf('two-macs');
@@ -105,11 +107,15 @@ describe('react', () => {
     test('two components reading the same call with their own inputs share one request', async () => {
         // Given - two components that each pass a fresh input object on every render
         const stage = opened(recordingFor('two-macs'));
-        const client = new Client(stage.transport);
+        const dependencies = {
+            engine: new Client(stage.transport),
+            opener: NO_OPENER,
+            presence: documentPresence(),
+        };
 
         // When - both are rendered and have read the engine
         await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <EngineState label="sidebar" />
                 <EngineState label="page" />
             </EngineProvider>,
@@ -130,11 +136,15 @@ describe('react', () => {
         // Given - the window over two-macs, its engine read as dev
         const recording = recordingFor('two-macs');
         const stage = opened(recording);
-        const client = new Client(stage.transport);
+        const dependencies = {
+            engine: new Client(stage.transport),
+            opener: NO_OPENER,
+            presence: documentPresence(),
+        };
 
         // When - the engine restarts with another pid and answers as v9
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Window initial={{ page: 'home' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
@@ -157,11 +167,15 @@ describe('react', () => {
             socket: 'replay',
         });
         const start = holdingCall(stage, 'engine.start');
-        const client = new Client(start.transport);
+        const dependencies = {
+            engine: new Client(start.transport),
+            opener: NO_OPENER,
+            presence: documentPresence(),
+        };
 
         // When - it is started, sends its progress, and its connection drops while it runs
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Start />
                 <EngineState label="engine" />
             </EngineProvider>,
@@ -196,7 +210,13 @@ describe('react', () => {
         let before = '';
         let after = '';
         await component.render(
-            <EngineProvider client={new Client(counted.transport)}>
+            <EngineProvider
+                dependencies={{
+                    engine: new Client(counted.transport),
+                    opener: NO_OPENER,
+                    presence: documentPresence(),
+                }}
+            >
                 <Window initial={{ page: 'home' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {

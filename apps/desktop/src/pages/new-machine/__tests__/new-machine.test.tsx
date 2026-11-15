@@ -11,10 +11,9 @@ import {
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../../engine/client';
+import { composeReplay } from '../../../composition/compose';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport } from '../../../engine/replay';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { machineRoute } from '../../../shell/route';
 import type { Route } from '../../../shell/route';
 import { Window } from '../../../shell/window';
@@ -29,9 +28,9 @@ const onMini = dialog('New machine on mac-mini');
 const HOME: Route = { page: 'home' };
 
 function windowOver(world: string, initial: Route = HOME) {
-    const client = new Client(replayTransport(recordingFor(world)));
+    const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
-        <EngineProvider client={client}>
+        <EngineProvider dependencies={dependencies}>
             <Window initial={initial} pages={PAGES} />
         </EngineProvider>
     );

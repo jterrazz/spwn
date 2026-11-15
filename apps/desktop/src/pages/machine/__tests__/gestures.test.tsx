@@ -13,12 +13,15 @@ import {
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../../engine/client';
+import { composeReplay } from '../../../composition/compose';
 import { EngineProvider } from '../../../engine/react';
-import { recordingOf, replayTransport, stagedReplay } from '../../../engine/replay';
-import type { Recording } from '../../../engine/replay';
-import { holdingCall } from '../../../fixtures/held-call';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
+import { Client } from '../../../infrastructure/outbound/engine-link/client';
+import { holdingCall } from '../../../infrastructure/outbound/engine-replay/__tests__/held-call';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { recordingOf, stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
+import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
+import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
 import type { Route } from '../../../shell/route';
 import { Window } from '../../../shell/window';
 import { PAGES } from '../../registry';
@@ -29,9 +32,9 @@ const sidebar = navigation('Sidebar');
 
 function machineOver(world: string, machine: string) {
     const initial: Route = { machine, page: 'machine', tab: 'Overview' };
-    const client = new Client(replayTransport(recordingFor(world)));
+    const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
-        <EngineProvider client={client}>
+        <EngineProvider dependencies={dependencies}>
             <Window initial={initial} pages={PAGES} />
         </EngineProvider>
     );
@@ -135,7 +138,13 @@ describe('gestures', () => {
         // Given - linux-1's page over two-macs, where machines.stop is held unanswered once sent
         const stop = holdingCall(stagedReplay(recordingFor('two-macs')), 'machines.stop');
         const result = await component.render(
-            <EngineProvider client={new Client(stop.transport)}>
+            <EngineProvider
+                dependencies={{
+                    engine: new Client(stop.transport),
+                    opener: NO_OPENER,
+                    presence: documentPresence(),
+                }}
+            >
                 <Window
                     initial={{ machine: 'linux-1', page: 'machine', tab: 'Overview' }}
                     pages={PAGES}
@@ -288,7 +297,7 @@ describe('gestures', () => {
         // Given - infra's page over two-macs, once as recorded and once with its health verdict worded bad
         const sick = unhealthy(recordingFor('two-macs'));
         const result = await component.render(
-            <EngineProvider client={new Client(replayTransport(sick))}>
+            <EngineProvider dependencies={composeReplay({ recording: sick })}>
                 <Window
                     initial={{ machine: 'infra', page: 'machine', tab: 'Overview' }}
                     pages={PAGES}

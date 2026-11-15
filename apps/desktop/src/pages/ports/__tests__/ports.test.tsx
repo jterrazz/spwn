@@ -2,12 +2,11 @@ import type { PortsPort } from '@jterrazz/station-api';
 import { button, component, content, file, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { composeReplay } from '../../../composition/compose';
 import { Screen } from '../../../design/index';
-import { Client } from '../../../engine/client';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport } from '../../../engine/replay';
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { GestureConfirm } from '../../kit/gestures';
 import { MacPortRow } from '../ports';
 
@@ -31,9 +30,9 @@ const EXPOSED: PortsPort = {
 };
 
 function macPortOver(port: PortsPort) {
-    const client = new Client(replayTransport(recordingFor('stories')));
+    const dependencies = composeReplay({ recording: recordingFor('stories') });
     return (
-        <EngineProvider client={client}>
+        <EngineProvider dependencies={dependencies}>
             <Screen>
                 <MacPortRow mac="macbook-pro" port={port} target={undefined} />
             </Screen>

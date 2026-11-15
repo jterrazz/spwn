@@ -5,10 +5,10 @@ import type {
     OverviewReadOutput,
 } from '@jterrazz/station-api';
 
+import type { Reading as Answered } from '../../application/use-cases/entry';
 import { isStopped, targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { needsYou } from '../../domain/overview/upkeep';
-import type { Reading as Answered } from '../../engine/entry';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import type { Route } from '../../shell/route';

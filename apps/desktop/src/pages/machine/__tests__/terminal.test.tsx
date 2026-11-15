@@ -1,9 +1,9 @@
 import { button, component, disabled, enabled, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { tauriOpener } from '../../../engine/opener';
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { tauriOpener } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
 
 const recordingFor = await recordingsOf('two-macs');
 

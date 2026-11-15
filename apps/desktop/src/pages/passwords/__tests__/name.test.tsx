@@ -1,10 +1,9 @@
 import { component, content, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../../engine/client';
+import { composeReplay } from '../../../composition/compose';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport } from '../../../engine/replay';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { Window } from '../../../shell/window';
 import { PAGES } from '../../registry';
 
@@ -13,9 +12,9 @@ const recordingFor = await recordingsOf('two-macs');
 describe('name', () => {
     test("a password's crumb is its label, never its id", async () => {
         // Given - the window opened on npm publish, whose id is pw-2
-        const client = new Client(replayTransport(recordingFor('two-macs')));
+        const dependencies = composeReplay({ recording: recordingFor('two-macs') });
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Window initial={{ item: 'pw-2', page: 'passwords' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {

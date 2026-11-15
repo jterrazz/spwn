@@ -12,11 +12,10 @@ import {
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../engine/client';
+import { composeReplay } from '../../composition/compose';
 import { EngineProvider } from '../../engine/react';
-import { replayTransport } from '../../engine/replay';
-import type { Recording } from '../../engine/replay';
-import { recordingsOf } from '../../fixtures/recordings';
+import { recordingsOf } from '../../infrastructure/outbound/engine-replay/recordings';
+import type { Recording } from '../../infrastructure/outbound/engine-replay/replay';
 import { PAGES } from '../../pages/registry';
 import type { Route } from '../route';
 import { Window } from '../window';
@@ -35,9 +34,9 @@ const forward = button('Forward');
 const HOME: Route = { page: 'home' };
 
 function windowOver(world: string, initial: Route) {
-    const client = new Client(replayTransport(recordingFor(world)));
+    const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
-        <EngineProvider client={client}>
+        <EngineProvider dependencies={dependencies}>
             <Window initial={initial} pages={PAGES} />
         </EngineProvider>
     );
@@ -126,11 +125,11 @@ describe('Window', () => {
                 },
             ],
         };
-        const client = new Client(replayTransport(unreachable));
+        const dependencies = composeReplay({ recording: unreachable });
 
         // When - the mini is opened
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Window initial={HOME} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
@@ -151,19 +150,17 @@ describe('Window', () => {
 
     test('no engine listening is a state of the window, not a crash', async () => {
         // Given - a transport whose socket answers nothing
-        const client = new Client(
-            replayTransport(
-                { exchanges: [], station: '', world: 'none' },
-                {
-                    kind: 'absent',
-                    reason: 'connection refused',
-                    retryIn: 4000,
-                    socket: '/run/engine.sock',
-                },
-            ),
-        );
+        const dependencies = composeReplay({
+            link: {
+                kind: 'absent',
+                reason: 'connection refused',
+                retryIn: 4000,
+                socket: '/run/engine.sock',
+            },
+            recording: { exchanges: [], station: '', world: 'none' },
+        });
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Window initial={{ page: 'home' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
@@ -178,14 +175,12 @@ describe('Window', () => {
 
     test('a link still connecting says so in the foot line, never a read under way', async () => {
         // Given - a transport still connecting to its socket
-        const client = new Client(
-            replayTransport(
-                { exchanges: [], station: '', world: 'none' },
-                { kind: 'connecting', socket: '/run/engine.sock' },
-            ),
-        );
+        const dependencies = composeReplay({
+            link: { kind: 'connecting', socket: '/run/engine.sock' },
+            recording: { exchanges: [], station: '', world: 'none' },
+        });
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Window initial={HOME} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
@@ -221,11 +216,11 @@ describe('Window', () => {
                     : exchange,
             ),
         };
-        const client = new Client(replayTransport(refused));
+        const dependencies = composeReplay({ recording: refused });
 
         // When - the window has read it
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Window initial={HOME} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {

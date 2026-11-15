@@ -1,18 +1,17 @@
 import { component, content, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../../engine/client';
+import { composeReplay } from '../../../composition/compose';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport } from '../../../engine/replay';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { MemoryFreeTile, MemoryPanel } from '../memory';
 
 const recordingFor = await recordingsOf('creating', 'one-mac', 'two-macs');
 
 function over(world: string, only?: string) {
-    const client = new Client(replayTransport(recordingFor(world)));
+    const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
-        <EngineProvider client={client}>
+        <EngineProvider dependencies={dependencies}>
             <MemoryFreeTile />
             {only === undefined ? <MemoryPanel macs={[]} /> : <MemoryPanel macs={[]} only={only} />}
         </EngineProvider>
