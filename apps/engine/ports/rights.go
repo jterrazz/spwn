@@ -18,6 +18,66 @@ type Rights struct {
 	// value: the machine is a server, whose reservations made before they
 	// said who made them are the owner's.
 	Server bool
+	// value: the Machinefile that says them (`station-linux`,
+	// `web.local`); empty when no Machinefile names the machine.
+	By string
+}
+
+type VMRights struct {
+	VM string `json:"vm"`
+	// value: what the VM may share and with whom, as its Ports page says it
+	// under its head.
+	Line string `json:"line"`
+	// value: the Machinefile that sets them, to open; empty when none does.
+	By string `json:"by,omitempty"`
+}
+
+func (r Rights) Line() string {
+	// value: the rights in the owner's words: `It may share ports 1024 to
+	// 65535 with your devices`, its spans, what they except and their
+	// audience; a machine that opens nothing shares only what the owner
+	// shares.
+	switch {
+	case r.Refused != "":
+		return "It shares nothing: " + r.Refused
+	case len(r.Open) == 0:
+		return "It shares nothing by itself; you share a port when you need it"
+	}
+	spans := make([]string, 0, len(r.Open))
+	for _, s := range r.Open {
+		if s.From == s.To {
+			spans = append(spans, strconv.Itoa(s.From))
+		} else {
+			spans = append(spans, strconv.Itoa(s.From)+" to "+strconv.Itoa(s.To))
+		}
+	}
+	noun := "ports "
+	if len(r.Open) == 1 && r.Open[0].From == r.Open[0].To {
+		noun = "port "
+	}
+	line := "It may share " + noun + joinAnd(spans)
+	if len(r.Except) > 0 {
+		except := make([]string, 0, len(r.Except))
+		for _, e := range r.Except {
+			except = append(except, strconv.Itoa(e))
+		}
+		line += " except " + joinAnd(except)
+	}
+	switch r.Audience() {
+	case catalog.AudienceLocal:
+		return line + " with this Mac only"
+	case catalog.AudiencePublic:
+		return line + " with the internet"
+	case catalog.AudiencePrivate:
+	}
+	return line + " with your devices"
+}
+
+func joinAnd(words []string) string {
+	if len(words) < 2 {
+		return strings.Join(words, "")
+	}
+	return strings.Join(words[:len(words)-1], ", ") + " and " + words[len(words)-1]
 }
 
 func RightsOf(said *catalog.PortRights, server bool) Rights {

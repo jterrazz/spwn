@@ -80,7 +80,7 @@ func restartedOver(t *testing.T, l ports.Reservation, mode string, rights *catal
 	h.d.tn = tn
 	mac := &busyMac{fakeMac: h.mac, busy: map[int]bool{}}
 	h.d.h = mac
-	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) { return rights, nil }
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, string, error) { return rights, "", nil }
 	ctx := t.Context()
 	h.d.reservations = []ports.Reservation{l}
 	h.d.servedMode = mode
@@ -297,11 +297,11 @@ func TestAPublicShareJudgedAheadOfTheModeTickIsServedAtIt(t *testing.T) {
 	h.d.st.Ports = pol
 	tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
 	h.d.tn = tn
-	h.d.o.Rights = func(_ context.Context, vm string) (*catalog.PortRights, error) {
+	h.d.o.Rights = func(_ context.Context, vm string) (*catalog.PortRights, string, error) {
 		if vm == "pub" {
-			return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, nil
+			return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, "", nil
 		}
-		return &catalog.PortRights{Open: catalog.PortSet{{From: 5173, To: 5173}}, To: catalog.AudiencePrivate}, nil
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 5173, To: 5173}}, To: catalog.AudiencePrivate}, "", nil
 	}
 	ctx := t.Context()
 	yes := true
@@ -376,7 +376,7 @@ func TestAGuestHeardBeforeTheStartsReconciliationKeepsItsPortThroughAModeSwitch(
 		h.d.listen(t.Context(), "api", 5173, "0.0.0.0", "node")
 	}
 	h.d.tn = tn
-	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) { return &rights, nil }
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, string, error) { return &rights, "", nil }
 	h.d.st.Reservations = &memReservations{all: []ports.Reservation{l}}
 	if err := h.d.Begin(t.Context(), nil); err != nil {
 		t.Fatal(err)

@@ -136,6 +136,12 @@
         "reachable": {
           "type": "boolean"
         },
+        "rights": {
+          "items": {
+            "$ref": "#/$defs/ports.VMRights"
+          },
+          "type": "array"
+        },
         "serve": {
           "type": "string"
         },
@@ -440,6 +446,25 @@
       "required": [
         "local",
         "public"
+      ],
+      "type": "object"
+    },
+    "ports.VMRights": {
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "type": "string"
+        },
+        "line": {
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "line",
+        "vm"
       ],
       "type": "object"
     },

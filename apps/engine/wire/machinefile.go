@@ -149,13 +149,13 @@ func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reporte
 // explain reads them; nil when there is none or it says none. A source
 // that cannot be read, or a refused file of its chain, is the error: the
 // VM then opens nothing.
-func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights, error) {
+func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights, string, error) {
 	trees := make([]machinefile.Tree, 0, 3)
 	named := false
 	for _, s := range m.machinefileSources() {
 		t, err := s.Read(ctx)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 		trees = append(trees, t)
 		for _, f := range t.Files {
@@ -166,11 +166,11 @@ func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights
 	if rec, err := m.stores.machines.Get(ctx, vm); !named && err == nil && rec.Template != "" {
 		name = rec.Template
 	}
-	rights, err := machinefile.RightsOf(trees, name)
+	rights, by, err := machinefile.RightsOf(trees, name)
 	if err != nil {
-		return nil, machinefilecalls.Worded(err)
+		return nil, "", machinefilecalls.Worded(err)
 	}
-	return rights, nil
+	return rights, by, nil
 }
 
 func judgeEach(ctx context.Context, keys []string, ask func(ctx context.Context, key string) (machinefile.Drift, error)) map[string]machinefilecalls.Judged {

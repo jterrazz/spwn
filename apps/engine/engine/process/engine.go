@@ -72,9 +72,9 @@ type Options struct {
 	// and label, the env a VM's run sets.
 	Ports []catalog.PackagePort
 	// value: the ports a VM's Machinefile says it may open, read by its
-	// name; nil when it says none (or there is none), and nil Rights reads
-	// none for every VM.
-	Rights func(ctx context.Context, vm string) (*catalog.PortRights, error)
+	// name, and the file that says them; nil when it says none (or there is
+	// none), and nil Rights reads none for every VM.
+	Rights func(ctx context.Context, vm string) (*catalog.PortRights, string, error)
 	// value: the folders of this Mac a VM shares, read at each of its
 	// starts, with why they are not its Machinefile's; an error refuses the
 	// start, and nil Mounts shares none.

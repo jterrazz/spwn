@@ -22,13 +22,14 @@ func (d *Engine) loadRights(ctx context.Context, vm string) ports.Rights {
 	d.mu.Unlock()
 	r := ports.RightsOf(nil, server)
 	if d.o.Rights != nil {
-		said, err := d.o.Rights(ctx, vm)
+		said, by, err := d.o.Rights(ctx, vm)
 		switch {
 		case err != nil:
 			r = ports.Rights{Refused: err.Error(), Server: server}
 		case said != nil:
 			r = ports.RightsOf(said, server)
 		}
+		r.By = by
 	}
 	mode := d.policy().HTTPS
 	d.mu.Lock()
