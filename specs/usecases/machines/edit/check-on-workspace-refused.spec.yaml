@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: a health check is for servers
           Hint: a workspace's health is three steps: station machines linux-1
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].kept | {lifetime, check}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].kept | {lifetime, check}'' world.json'
       exit: 0
       stdout: |
           {"lifetime":"ephemeral","check":null}

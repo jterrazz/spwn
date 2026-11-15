@@ -5,12 +5,12 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: 'settings off never-sleeps --on jterrazz-mac-mini'
+    - command: 'settings off never-sleeps --on mac-mini'
       exit: 2
       stderr: |
           Error: refusing to off without --yes
           Hint: re-run with --yes
-    - command: '--version >/dev/null; terminal "$STATION" settings off never-sleeps --on jterrazz-mac-mini'
+    - command: '--version >/dev/null; terminal "$STATION" settings off never-sleeps --on mac-mini'
       stdin: |
           see off here?
           screen
@@ -25,8 +25,8 @@ runs:
     - command: 'awake | /usr/bin/grep mac-mini'
       exit: 0
       stdout: |
-          ○	jterrazz-mac-mini	Sleeps normally
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].power.holds'' world.json'
+          ○	mac-mini	Sleeps normally
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power.holds'' world.json'
       exit: 0
       stdout: |
           null

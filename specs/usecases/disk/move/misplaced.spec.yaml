@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           ●	~/.tart	moved to ~/.local/share/station/vms
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].disk.files | keys | map(select(test("linux-dev")))'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | keys | map(select(test("linux-dev")))'' world.json'
       exit: 0
       stdout: |
           ["~/.local/share/station/vms/vms/linux-dev/disk.img"]

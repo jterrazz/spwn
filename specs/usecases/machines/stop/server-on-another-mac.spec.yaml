@@ -11,7 +11,7 @@ runs:
       stdout: |
           	On mac-mini:
           ●	infra	stopped · wanted state: Stopped
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | {running: (.pid > 0), want: .kept.want}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {running: (.pid > 0), want: .kept.want}'' world.json'
       exit: 0
       stdout: |
           {"running":false,"want":"stopped"}

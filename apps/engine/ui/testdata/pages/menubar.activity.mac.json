@@ -3,7 +3,7 @@
   "id": "menubar.activity",
   "command": "activity",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer"
   },
   "state": "ready",

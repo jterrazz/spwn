@@ -87,8 +87,8 @@ func kitchen(edit func(*page.Page)) page.Page {
 			it(row("until", page.OK, page.Until(now.Add(11*time.Hour+40*time.Minute+20*time.Second), now), page.Duration(42))),
 			it(row("soon", page.OK, page.Until(now.Add(40*time.Second), now))),
 			it(row("expired", page.OK, page.Until(now.Add(-time.Minute), now))),
-			it(row("url", page.OK, page.URL("https://jterrazz-macbook-pro.tail1234.ts.net:40001"))),
-			it(row("identity", page.OK, page.Identity("admin@jterrazz.com"))),
+			it(row("url", page.OK, page.URL("https://macbook-pro.tail1234.ts.net:40001"))),
+			it(row("identity", page.OK, page.Identity("you@example.com"))),
 			it(row("file", page.OK, page.Path("/Applications/Tailscale.app/Contents/MacOS/Tailscale"))),
 			it(row("command", page.OK, page.Command("station apps update --manager brew"))),
 			it(row("list", page.OK, page.Texts("brew", "system"))),
@@ -147,16 +147,16 @@ func kitchen(edit func(*page.Page)) page.Page {
 		ID: "all-machines", Title: "All machines",
 		Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "kind", Kind: page.KindText, Keep: 40}, {Key: "mac", Kind: page.KindText, Keep: 10, Show: page.PipeOnly}},
 		Items: []page.Item{{Group: &page.Group{
-			Head: row("jterrazz-mac-mini", page.OK, page.Text("Mac"), page.Text("jterrazz-mac-mini")),
+			Head: row("mac-mini", page.OK, page.Text("Mac"), page.Text("mac-mini")),
 			Items: []page.Item{
 				{Group: &page.Group{
-					Head: row("linux-1", page.OK, page.Text("persistent"), page.Text("jterrazz-mac-mini")),
+					Head: row("linux-1", page.OK, page.Text("persistent"), page.Text("mac-mini")),
 					Items: []page.Item{
-						{Link: &page.Link{Label: "8081", Lead: page.PortMap(8081, 40002), Value: page.URL("https://jterrazz-mac-mini.ts.net:40002"), Detail: page.Text("vite"), Page: "ports", Row: "api"}},
-						it(row("web", page.OK, page.Text("server"), page.Text("jterrazz-mac-mini"))),
+						{Link: &page.Link{Label: "8081", Lead: page.PortMap(8081, 40002), Value: page.URL("https://mac-mini.ts.net:40002"), Detail: page.Text("vite"), Page: "ports", Row: "api"}},
+						it(row("web", page.OK, page.Text("server"), page.Text("mac-mini"))),
 					},
 				}},
-				it(row("linux-2", page.Absent, page.Text("persistent"), page.Text("jterrazz-mac-mini"))),
+				it(row("linux-2", page.Absent, page.Text("persistent"), page.Text("mac-mini"))),
 			},
 		}}},
 	}
@@ -171,7 +171,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 	prose := page.Section{
 		ID: "prose", Title: "Prose",
 		Items: []page.Item{
-			{Fact: &page.Fact{Key: "machine", Value: page.Text("jterrazz-macbook-pro")}},
+			{Fact: &page.Fact{Key: "machine", Value: page.Text("macbook-pro")}},
 			{Fact: &page.Fact{Key: "uptime", Value: page.Duration(1951200)}},
 			{Note: &page.Note{Text: "Serve is off on Tailscale, so no shared port is reachable from another machine until it is turned on in the admin console."}},
 			{Error: &page.Error{Message: "defaults is not installed", Hint: "run station init"}},
@@ -192,7 +192,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 		Items: []page.Item{it(page.Row{ID: "marks", Mark: page.Broken, Label: "Marks", Reason: page.Failing, Detail: page.Count(4, "broken")})},
 	}
 	p := page.Page{
-		ID: "home", Command: "status", Context: page.Context{Machine: "jterrazz-macbook-pro", Kind: "computer", Registered: true},
+		ID: "home", Command: "status", Context: page.Context{Machine: "macbook-pro", Kind: "computer", Registered: true},
 		Strip: &page.Strip{
 			CPU: page.Percent(340), Spark: []int{3, 10, 25, 40, 60, 80, 100, 50, 34, 20, 10, 5, 0, 15, 30, 34},
 			Memory: page.Ratio(12400000000, 17200000000), Battery: page.Percent(1000), Awake: page.Texts("awake", "3h 12m"),

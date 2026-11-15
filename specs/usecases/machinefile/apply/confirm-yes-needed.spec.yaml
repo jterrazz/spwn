@@ -2,10 +2,10 @@ description: 'off a terminal, apply --remove without --yes removes nothing and s
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [fd]
       exit: 0
@@ -16,10 +16,10 @@ runs:
           ○	fd	brew
           ●	homebrew	5.0.1	script	the manager of fd
           ●	fd	10.3.0	brew
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
@@ -27,7 +27,7 @@ runs:
       exit: 2
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for jterrazz-macbook-pro, listed no longer
+          ?	fd	brew	installed by station for macbook-pro, listed no longer
       stderr: |
           Error: refusing to remove what the Machinefile lists no longer without --yes
           Hint: re-run with --yes

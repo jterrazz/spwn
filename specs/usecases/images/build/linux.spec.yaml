@@ -6,7 +6,7 @@ runs:
       exit: 0
       stdout: |
           ●	station-linux	2026.11.04	built
-    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "jterrazz-macbook-pro") | "\(.version) \(.newest) \(.size_bytes) \(.vms | join(","))"'''
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | "\(.version) \(.newest) \(.size_bytes) \(.vms | join(","))"'''
       exit: 0
       stdout: |
           2026.11.04 true 4000000000 

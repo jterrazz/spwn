@@ -5,13 +5,13 @@ runs:
       exit: 0
       stdout: |
           "answers"
-    - command: 'world offline jterrazz-macbook-air'
+    - command: 'world offline macbook-air'
       exit: 0
     - command: 'machines wake macbook-air'
       exit: 0
       stdout: |
           ●	macbook-air	wake sent · it answers in a minute or so
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].wake_sent'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].wake_sent'' world.json'
       exit: 0
       stdout: |
           ["a4:83:e7:1c:20:9f"]

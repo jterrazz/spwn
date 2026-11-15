@@ -2,7 +2,7 @@ description: a block naming an option with no value is a plan error, never an em
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/served.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/served.yaml'
       stdin: |
           package: station.package/v1
           kind: app
@@ -22,22 +22,22 @@ runs:
                       zsh: |
                           export SERVED_PORT={{ option.port }}
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [served]
       exit: 0
     - command: 'plan'
       exit: 2
       stderr: |
-          Error: served's shell: station:served: option port has no value (~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml)
+          Error: served's shell: station:served: option port has no value (~/.config/station/machinefiles/macbook-pro.machine.yaml)
           Hint: station explain
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: served, options: { port: 8080 } }]
       exit: 0

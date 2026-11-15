@@ -1,11 +1,11 @@
 {
     "now": "2026-11-04T10:00:00Z",
-    "this_mac": "jterrazz-macbook-pro",
+    "this_mac": "macbook-pro",
     "macs": {
-        "jterrazz-macbook-pro": {
+        "macbook-pro": {
             "engine": {},
             "preferences": {
-                "here": "jterrazz-macbook-pro",
+                "here": "macbook-pro",
                 "vm_user": "admin"
             },
             "hypervisor": "none"

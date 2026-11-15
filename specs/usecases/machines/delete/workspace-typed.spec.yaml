@@ -1,20 +1,20 @@
 description: 'a delete with its name typed takes the workspace whole, nothing of it left in the world'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {disk: .vms["linux-1"].disk, record: .vms["linux-1"].kept.lifetime, ports: [.stores.reservations[]? | select(.vm == "linux-1") | .host_port], tailscale: [.tailnet.shares[]?.Reserved], accounts: [.stores.shares["linux-1"][]?.name], ssh: .ssh.blocks["linux-1"].behind}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {disk: .vms["linux-1"].disk, record: .vms["linux-1"].kept.lifetime, ports: [.stores.reservations[]? | select(.vm == "linux-1") | .host_port], tailscale: [.tailnet.shares[]?.Reserved], accounts: [.stores.shares["linux-1"][]?.name], ssh: .ssh.blocks["linux-1"].behind}'' world.json'
       exit: 0
       stdout: |
-          {"disk":true,"record":"ephemeral","ports":[40001,40002],"tailscale":[40001,40002],"accounts":["session:github","operator:claude:oauth-token"],"ssh":"jterrazz-macbook-pro"}
+          {"disk":true,"record":"ephemeral","ports":[40001,40002],"tailscale":[40001,40002],"accounts":["session:github","operator:claude:oauth-token"],"ssh":"macbook-pro"}
     - command: 'machines delete linux-1 --confirm=linux-1'
       exit: 0
       stdout: |
           ●	linux-1	deleted
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {disk: .vms["linux-1"].disk, record: .vms["linux-1"].kept.lifetime, ports: [.stores.reservations[]? | select(.vm == "linux-1") | .host_port], tailscale: [.tailnet.shares[]?.Reserved], accounts: [.stores.shares["linux-1"][]?.name], ssh: .ssh.blocks["linux-1"].behind}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {disk: .vms["linux-1"].disk, record: .vms["linux-1"].kept.lifetime, ports: [.stores.reservations[]? | select(.vm == "linux-1") | .host_port], tailscale: [.tailnet.shares[]?.Reserved], accounts: [.stores.shares["linux-1"][]?.name], ssh: .ssh.blocks["linux-1"].behind}'' world.json'
       exit: 0
       stdout: |
           {"disk":null,"record":null,"ports":[],"tailscale":[],"accounts":[],"ssh":null}
     - command: 'machines --this-mac'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB

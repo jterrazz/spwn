@@ -9,12 +9,12 @@ runs:
       exit: 0
       stdout: |
           ●	443 on infra	declared public (Cloudflare Tunnel)
-    - command: 'ports --on jterrazz-mac-mini | /usr/bin/grep -e 443 -e "^# Public"'
+    - command: 'ports --on mac-mini | /usr/bin/grep -e 443 -e "^# Public"'
       exit: 0
       stdout: |
           # Public: reachable from anywhere else, internet or LAN, declared	1 ●
           ●	infra	443	public	traefik	*:443 all interfaces	Cloudflare Tunnel · tunnel seen
-    - command: 'ports --on jterrazz-mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 443) | .declared]'''
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 443) | .declared]'''
       exit: 0
       stdout: |
           [{"via":"cloudflare-tunnel","seen":true}]

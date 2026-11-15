@@ -1,8 +1,8 @@
 description: 'agents start --on a Mac is refused: an agent starts on a workspace'
 env: two-macs
 runs:
-    - command: 'agents start "Build the landing page" --on jterrazz-mac-mini'
+    - command: 'agents start "Build the landing page" --on mac-mini'
       exit: 2
       stderr: |
-          Error: jterrazz-mac-mini is a Mac: agents are recorded inside the workspace they work in
-          Hint: run station overview for what jterrazz-mac-mini has
+          Error: mac-mini is a Mac: agents are recorded inside the workspace they work in
+          Hint: run station overview for what mac-mini has

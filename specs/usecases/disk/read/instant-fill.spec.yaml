@@ -7,7 +7,7 @@ env:
 runs:
     - command: 'disk > /dev/null'
       exit: 0
-    - command: 'world slow jterrazz-macbook-pro 5s'
+    - command: 'world slow macbook-pro 5s'
       exit: 0
     - command: '--version >/dev/null; terminal --size 120x80 /usr/bin/env -u NO_COLOR COLUMNS=120 "$STATION" disk --all'
       stdin: |

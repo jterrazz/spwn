@@ -17,7 +17,7 @@ runs:
       exit: 1
       stdout: |
           0
-    - command: 'settings --on jterrazz-mac-mini | /usr/bin/grep -w firewall'
+    - command: 'settings --on mac-mini | /usr/bin/grep -w firewall'
       exit: 0
       stdout: |
           ●	firewall	as expected · on

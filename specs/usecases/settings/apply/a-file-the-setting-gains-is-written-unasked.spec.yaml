@@ -1,7 +1,7 @@
 description: a setting as station last wrote it that gains a file reads not applied, and apply writes it unasked
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/terminal/prompt.yaml'
+    - command: 'world edit macbook-pro catalog/terminal/prompt.yaml'
       stdin: |
           package: station.package/v1
           kind: setting
@@ -16,7 +16,7 @@ runs:
       exit: 0
     - command: 'settings apply prompt >/dev/null'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro catalog/terminal/prompt.yaml'
+    - command: 'world edit macbook-pro catalog/terminal/prompt.yaml'
       stdin: |
           package: station.package/v1
           kind: setting

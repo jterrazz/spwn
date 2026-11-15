@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           ●	preferences	moved settings.json to preferences.json
-          ●	name	jterrazz-macbook-pro
+          ●	name	macbook-pro
           ●	zshrc
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc
@@ -14,7 +14,7 @@ runs:
     - command: 'init'
       exit: 0
       stdout: |
-          ●	name	jterrazz-macbook-pro
+          ●	name	macbook-pro
           ●	zshrc
           ●	layout	nothing to retire
           ●	relocate	nothing to do

@@ -23,12 +23,12 @@ runs:
     - command: '--version >/dev/null; "$STATION" machines infra --json | /usr/bin/jq ''del(.generated_at)'' > noun.json; "$STATION" overview --on infra --json | /usr/bin/jq ''del(.generated_at)'' > on.json; /usr/bin/cmp noun.json on.json && /usr/bin/jq -c ''{schema, machine}'' noun.json'
       exit: 0
       stdout: |
-          {"schema":"station.overview.read/v1","machine":{"name":"infra","label":"infra","kind":"server","on":"jterrazz-mac-mini","this_mac":false,"reachable":true}}
-    - command: 'machines jterrazz-mac-mini --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
+          {"schema":"station.overview.read/v1","machine":{"name":"infra","label":"infra","kind":"server","on":"mac-mini","this_mac":false,"reachable":true}}
+    - command: 'machines mac-mini --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
       exit: 0
       stdout: |
-          {"schema":"station.overview.read/v1","machine":"jterrazz-mac-mini"}
-    - command: 'overview --on jterrazz-mac-mini --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
+          {"schema":"station.overview.read/v1","machine":"mac-mini"}
+    - command: 'overview --on mac-mini --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
       exit: 0
       stdout: |
-          {"schema":"station.overview.read/v1","machine":"jterrazz-mac-mini"}
+          {"schema":"station.overview.read/v1","machine":"mac-mini"}

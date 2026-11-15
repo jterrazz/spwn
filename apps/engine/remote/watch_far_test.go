@@ -20,7 +20,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/remote/serve"
 )
 
-const fullMini = "jterrazz-mac-mini"
+const fullMini = "sam-mac-mini"
 
 // value: a machine's activity that says whose it is by its CPU alone.
 func sampled(cpu ...int) *call.Registry {
@@ -57,7 +57,7 @@ func laptopSocketOver(t *testing.T, minis *call.Registry) (s serve.Server, macs,
 	engine.Serve(laptop.Ref.Name, fake.Mac{Registry: sampled(7), Profile: linux1, Version: "v3.3.0"})
 	r := remote.NewRouter(here, laptop, remote.Reach{
 		Macs: macs, Engine: engine, Version: "v3.3.0",
-		Label: func(mac string) string { return strings.TrimPrefix(mac, "jterrazz-") },
+		Label: func(mac string) string { return strings.TrimPrefix(mac, "sam-") },
 		Locate: func(name string) (machine.Ref, bool) {
 			switch name {
 			case linux1.Ref.Name:

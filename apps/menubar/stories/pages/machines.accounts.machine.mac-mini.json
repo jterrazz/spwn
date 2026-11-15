@@ -2263,7 +2263,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "jterrazz-bot"
+                  "text": "ci-bot"
                 },
                 {
                   "kind": "text",
@@ -2286,7 +2286,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "admin@jterrazz.com"
+                  "text": "you@example.com"
                 },
                 {
                   "kind": "text",

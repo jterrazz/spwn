@@ -17,7 +17,7 @@ runs:
       exit: 0
       stdout: |
           [99.73,"powered off from inside"]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].stores.uptime.infra | [.days, (.incidents[] | [.from[0:16], .to[0:16]])]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.uptime.infra | [.days, (.incidents[] | [.from[0:16], .to[0:16]])]'' world.json'
       exit: 0
       stdout: |
           [[{"date":"2026-11-06","down_s":455,"restarts":1}],["2026-11-06T10:00","2026-11-06T10:08"]]

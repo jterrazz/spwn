@@ -10,7 +10,7 @@ runs:
           does	The macOS firewall refuses unasked connections
           lives on	Macs
           fix	System Settings > Network > Firewall
-    - command: 'world reads jterrazz-macbook-pro remote-login on'
+    - command: 'world reads macbook-pro remote-login on'
       exit: 0
     - command: 'settings remote-login'
       exit: 0
@@ -22,7 +22,7 @@ runs:
           lives on	Macs
           fix	System Settings > General > Sharing > Remote Login
           expected	not expected on a laptop
-    - command: 'settings remote-login --on jterrazz-mac-mini | /usr/bin/sed -n 2p'
+    - command: 'settings remote-login --on mac-mini | /usr/bin/sed -n 2p'
       exit: 0
       stdout: |
           ●	remote-login	as expected · on

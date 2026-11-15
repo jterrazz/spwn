@@ -17,7 +17,7 @@ runs:
           ✓ Known to station · 3 steps changed
 
           Changes
-            ● name      jterrazz-macbook-pro
+            ● name      macbook-pro
             ● zshrc
             ● layout    nothing to retire
             ● relocate  bunfig, go env, mise settings, npmrc
@@ -25,9 +25,9 @@ runs:
 
           → exec zsh                           so this shell reads the station block
           → station init --machinefile <name>  binds a Machinefile, then applies it
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.name, (.jobs // {} | keys), .engine.stopped]'' world.json; /usr/bin/grep -c "^# >>> station >>>$" .zshrc; /bin/test -f .hushlogin || echo no setting applied'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.preferences.name, (.jobs // {} | keys), .engine.stopped]'' world.json; /usr/bin/grep -c "^# >>> station >>>$" .zshrc; /bin/test -f .hushlogin || echo no setting applied'
       exit: 0
       stdout: |
-          ["jterrazz-macbook-pro",[],null]
+          ["macbook-pro",[],null]
           1
           no setting applied

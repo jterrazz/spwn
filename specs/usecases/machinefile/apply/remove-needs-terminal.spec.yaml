@@ -2,7 +2,7 @@ description: 'off a terminal, an extra whose uninstall asks your password refuse
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/system-utilities/corp-vpn.yaml'
+    - command: 'world edit macbook-pro catalog/system-utilities/corp-vpn.yaml'
       stdin: |
           package: station.package/v1
           kind: app
@@ -13,14 +13,14 @@ runs:
                 cask: corp-vpn
                 needs: [sudo]
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.cask.installed["corp-vpn"] = "4.2.0" | .macs["jterrazz-macbook-pro"].stores.ledger = [{package: "corp-vpn", method: "cask", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.cask.installed["corp-vpn"] = "4.2.0" | .macs["macbook-pro"].stores.ledger = [{package: "corp-vpn", method: "cask", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 2
@@ -28,7 +28,7 @@ runs:
           # To install
           ○	fd	brew
           # Extra
-          ?	corp-vpn	cask	installed by station for jterrazz-macbook-pro, listed no longer · asks your password once
+          ?	corp-vpn	cask	installed by station for macbook-pro, listed no longer · asks your password once
       stderr: |
           Error: corp-vpn asks your password: apply asks it on a terminal, and this run has none
           Hint: run station apply on a terminal

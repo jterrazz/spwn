@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].meter = {"sample": {}, "top": {"cpu": [{"pid": 1001, "name": "tart", "value": 18}, {"pid": 4100, "name": "Zed", "value": 9}], "memory": [{"pid": 1001, "name": "tart", "value": 4400000000}, {"pid": 4100, "name": "Zed", "value": 2000000000}]}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].engine.activity["jterrazz-macbook-pro"].last.top | [(.cpu[] | [.name, .vm]), (.memory[] | [.name, .vm])]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].meter = {"sample": {}, "top": {"cpu": [{"pid": 1001, "name": "tart", "value": 18}, {"pid": 4100, "name": "Zed", "value": 9}], "memory": [{"pid": 1001, "name": "tart", "value": 4400000000}, {"pid": 4100, "name": "Zed", "value": 2000000000}]}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; /usr/bin/jq -c ''.macs["macbook-pro"].engine.activity["macbook-pro"].last.top | [(.cpu[] | [.name, .vm]), (.memory[] | [.name, .vm])]'' world.json'
       exit: 0
       stdout: |
           [["tart","linux-1"],["Zed",null],["tart","linux-1"],["Zed",null]]

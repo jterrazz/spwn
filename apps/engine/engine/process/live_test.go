@@ -13,7 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
-const here = "jterrazz-macbook-pro"
+const here = "macbook-pro"
 
 type ticks struct {
 	mu    sync.Mutex
@@ -84,7 +84,7 @@ func TestOneTickCarriesHomesTheMacPagesAndTheVMPagesKeysAtTheSameValueAndNoPage(
 			t.Errorf("%s's watch sent a %s on the tick, want the sample alone: no page is resent unchanged", name, got[name].Event)
 		}
 	}
-	if want := [][]string{{"cpu:" + here, "cpu:linux-1", "net:" + here}}; !slices.EqualFunc(s.asked, want, slices.Equal) {
+	if want := [][]string{{"cpu:linux-1", "cpu:" + here, "net:" + here}}; !slices.EqualFunc(s.asked, want, slices.Equal) {
 		t.Errorf("the tick read %q, want every open page's keys read once, together", s.asked)
 	}
 	for name, want := range map[string][]string{"home": {"cpu:" + here, "net:" + here}, "the Mac page": {"cpu:" + here}, "the VM page": {"cpu:linux-1"}} {

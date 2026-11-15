@@ -22,7 +22,7 @@ runs:
             "schema": "station.machines.ssh/v1",
             "generated_at": "{{iso8601}}",
             "machine": {
-              "name": "jterrazz-macbook-pro",
+              "name": "macbook-pro",
               "label": "This Mac",
               "kind": "computer",
               "on": null,

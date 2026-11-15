@@ -4,8 +4,8 @@ runs:
     - command: 'awake --json | /usr/bin/jq -c ''.macs[] | {name, hosts_servers, pauses}'''
       exit: 0
       stdout: |
-          {"name":"jterrazz-macbook-pro","hosts_servers":[],"pauses":["linux-1"]}
-          {"name":"jterrazz-mac-mini","hosts_servers":["infra"],"pauses":[]}
+          {"name":"macbook-pro","hosts_servers":[],"pauses":["linux-1"]}
+          {"name":"mac-mini","hosts_servers":["infra"],"pauses":[]}
     - command: 'machines stop linux-1 --yes'
       exit: 0
       stdout: |
@@ -13,5 +13,5 @@ runs:
     - command: 'awake --json | /usr/bin/jq -c ''.macs[] | {name, hosts_servers, pauses}'''
       exit: 0
       stdout: |
-          {"name":"jterrazz-macbook-pro","hosts_servers":[],"pauses":[]}
-          {"name":"jterrazz-mac-mini","hosts_servers":["infra"],"pauses":[]}
+          {"name":"macbook-pro","hosts_servers":[],"pauses":[]}
+          {"name":"mac-mini","hosts_servers":["infra"],"pauses":[]}

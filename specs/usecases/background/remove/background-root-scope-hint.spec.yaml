@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: com.docker.vmnetd runs as root: station never runs sudo
           Hint: sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].jobs["com.docker.vmnetd"] | [.Loaded, .File]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs["com.docker.vmnetd"] | [.Loaded, .File]'' world.json'
       exit: 0
       stdout: |
           [true,"/Library/LaunchDaemons/com.docker.vmnetd.plist"]

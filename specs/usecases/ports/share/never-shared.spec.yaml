@@ -16,7 +16,7 @@ runs:
       stderr: |
           Error: "x" is not a port
           Hint: a port is a number from 1 to 65535
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].stores.reservations[].guest_port]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[].guest_port]'' world.json'
       exit: 0
       stdout: |
           [5173,7000]

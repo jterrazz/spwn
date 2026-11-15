@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: refusing to undeclare 443 on infra without --yes
           Hint: re-run with --yes
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].stores.declarations'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.declarations'' world.json'
       exit: 0
       stdout: |
           [{"machine":"infra","port":443,"via":"cloudflare-tunnel"}]

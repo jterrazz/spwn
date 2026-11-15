@@ -1,7 +1,7 @@
 description: 'inside a server, add is refused: Macs are added from a Mac'
 env: in-server
 runs:
-    - command: 'machines add jterrazz-mac-mini'
+    - command: 'machines add mac-mini'
       exit: 2
       stderr: |
           Error: infra is a server: Macs are added from a Mac

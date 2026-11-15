@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           ●	station-linux	2026.11.03	fetched
-    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "jterrazz-macbook-pro") | "\(.version) \(.newest) \(.vms | join(","))"'''
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | "\(.version) \(.newest) \(.vms | join(","))"'''
       exit: 0
       stdout: |
           2026.11.03 true 

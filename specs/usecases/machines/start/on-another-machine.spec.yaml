@@ -1,17 +1,17 @@
 description: 'a start sent with --on starts the workspace of that Mac'
 env: mini-workspace
 runs:
-    - command: 'machines stop ci-1 --yes --on jterrazz-mac-mini'
+    - command: 'machines stop ci-1 --yes --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	ci-1	stopped, kept
-    - command: 'machines start ci-1 --on jterrazz-mac-mini'
+    - command: 'machines start ci-1 --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	ci-1	started
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms["ci-1"] | {running: (.pid > 0), want: .kept.want}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms["ci-1"] | {running: (.pid > 0), want: .kept.want}'' world.json'
       exit: 0
       stdout: |
           {"running":true,"want":"running"}

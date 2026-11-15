@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs.infra.disk = {"total": 80000000000, "free": 3200000000}'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3; do "$STATION" world advance 1m; done; /usr/bin/jq -c ''[.macs["jterrazz-mac-mini"].engine.activity.infra.last.sample | .disk_free, .disk_total], [.told[] | select(.Kind == "disk_low") | .Text]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs.infra.disk = {"total": 80000000000, "free": 3200000000}'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3; do "$STATION" world advance 1m; done; /usr/bin/jq -c ''[.macs["mac-mini"].engine.activity.infra.last.sample | .disk_free, .disk_total], [.told[] | select(.Kind == "disk_low") | .Text]'' world.json'
       exit: 0
       stdout: |
           [3200000000,80000000000]

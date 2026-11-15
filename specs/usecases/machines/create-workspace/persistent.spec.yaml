@@ -8,4 +8,4 @@ runs:
     - command: 'machines --this-mac | /usr/bin/grep api-2'
       exit: 0
       stdout: |
-          ●	api-2	Workspace	jterrazz-macbook-pro	Running · persistent	4 CPU	4 GB
+          ●	api-2	Workspace	macbook-pro	Running · persistent	4 CPU	4 GB

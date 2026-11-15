@@ -5,7 +5,7 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: 'world offline jterrazz-mac-mini'
+    - command: 'world offline mac-mini'
       exit: 0
     - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines unlock mac-mini'
       stdin: |

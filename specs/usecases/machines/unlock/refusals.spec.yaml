@@ -1,10 +1,10 @@
 description: 'unlock refuses This Mac, a VM and a name station does not know, exit 2, before any session'
 env: two-macs
 runs:
-    - command: 'machines unlock jterrazz-macbook-pro'
+    - command: 'machines unlock macbook-pro'
       exit: 2
       stderr: |
-          Error: "jterrazz-macbook-pro" is this machine
+          Error: "macbook-pro" is this machine
           Hint: pick another machine: station machines lists them all
     - command: 'machines unlock linux-1'
       exit: 2

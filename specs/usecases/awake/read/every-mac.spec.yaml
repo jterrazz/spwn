@@ -4,8 +4,8 @@ runs:
     - command: 'awake'
       exit: 0
       stdout: |
-          ○	jterrazz-macbook-pro	Sleeps normally
-          ●	jterrazz-mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
           # This Mac
           lid	open
           power source	AC · 96 % · charging

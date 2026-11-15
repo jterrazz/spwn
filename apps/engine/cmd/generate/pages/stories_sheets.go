@@ -44,7 +44,7 @@ func miniTight(f *Scene) {
 
 func miniSignedIn(f *Scene) {
 	f.Accounts.Machines = append(f.Accounts.Machines, accounts.Machine{Name: miniMac, Kind: accounts.KindComputer, Accounts: []accounts.Account{
-		own(catalog.ProviderGitHub, []string{"jterrazz-bot"}, []string{"repo"}, "", "github.com"),
-		own(catalog.ProviderClaude, []string{"bot@jterrazz.com"}, []string{"max"}, "", "claude.ai"),
+		own(catalog.ProviderGitHub, []string{"ci-bot"}, []string{"repo"}, "", "github.com"),
+		own(catalog.ProviderClaude, []string{"bot@example.com"}, []string{"max"}, "", "claude.ai"),
 	}})
 }

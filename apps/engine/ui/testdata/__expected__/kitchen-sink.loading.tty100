@@ -48,16 +48,16 @@ Marks
   ◌ not-for-this-machine
   ◌ not-known
 All machines
-  ◌ jterrazz-mac-mini
+  ◌ mac-mini
   ├─ ◌ linux-1
-  │  ├─ 8081 → 40002   https://jterrazz-mac-mini.ts.net:40002  vite
+  │  ├─ 8081 → 40002  https://mac-mini.ts.net:40002  vite
   │  └─ ◌ web
   └─ ◌ linux-2
 Disk
   ◌ station
   ◌ tart
 Prose
-  machine  jterrazz-macbook-pro
+  machine  macbook-pro
   uptime   22d 14h
   Serve is off on Tailscale, so no shared port is reachable from another machine until it is turned
   on in the admin console.

@@ -210,7 +210,7 @@ func TestASubscriberThatDoesNotReadNeverHoldsAnotherBack(t *testing.T) {
 }
 
 // invariant: MB-14: a machine's page is watched by its name after the
-// page's (`menubar.machine:jterrazz-mac-mini`): the machine feed streams it
+// page's (`menubar.machine:mac-mini`): the machine feed streams it
 // for that machine; an unknown page is still refused.
 func TestAMachinesPageIsWatchedByItsName(t *testing.T) {
 	h := &fakeMac{clock: newManualClock()}
@@ -223,23 +223,23 @@ func TestAMachinesPageIsWatchedByItsName(t *testing.T) {
 			close(out)
 			return out
 		}}})
-	if err := d.CheckPages([]string{"menubar.machine:jterrazz-mac-mini"}); err != nil {
+	if err := d.CheckPages([]string{"menubar.machine:mac-mini"}); err != nil {
 		t.Fatalf("the machine's page is refused: %v", err)
 	}
-	if err := d.CheckPages([]string{"menubar.nothing:jterrazz-mac-mini"}); err == nil {
+	if err := d.CheckPages([]string{"menubar.nothing:mac-mini"}); err == nil {
 		t.Fatal("an unknown page is watched")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	var pages []string
-	_ = d.Stream(ctx, []string{"menubar.machine:jterrazz-mac-mini"}, func(v any) error {
+	_ = d.Stream(ctx, []string{"menubar.machine:mac-mini"}, func(v any) error {
 		if ev, ok := v.(engine.Event); ok && ev.Event == "page" {
 			pages = append(pages, string(ev.Page))
 			cancel()
 		}
 		return nil
 	})
-	if got := <-subjects; got != "jterrazz-mac-mini" {
+	if got := <-subjects; got != "mac-mini" {
 		t.Fatalf("the feed was asked for %q", got)
 	}
 	if len(pages) != 1 || pages[0] != `{"infra":"restarting"}` {

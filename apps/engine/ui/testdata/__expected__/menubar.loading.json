@@ -3,18 +3,18 @@
   "id": "menubar",
   "command": "menubar",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer"
   },
   "state": "loading",
   "strip": {
     "cpu": {
       "kind": "pending",
-      "live": "cpu:jterrazz-macbook-pro"
+      "live": "cpu:macbook-pro"
     },
     "memory": {
       "kind": "pending",
-      "live": "memory:jterrazz-macbook-pro"
+      "live": "memory:macbook-pro"
     }
   },
   "sections": [
@@ -204,7 +204,7 @@
     }
   ],
   "live": [
-    "cpu:jterrazz-macbook-pro",
-    "memory:jterrazz-macbook-pro"
+    "cpu:macbook-pro",
+    "memory:macbook-pro"
   ]
 }

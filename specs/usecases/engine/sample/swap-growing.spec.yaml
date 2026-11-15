@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].meter.per_second.swap_used = 100000'' world.json > w.json && /bin/mv w.json world.json; for i in $(/usr/bin/seq 12); do "$STATION" world advance 1m; done; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind == "activity") | .Text]'' world.json; "$STATION" activity | /usr/bin/grep "Swap growing"'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].meter.per_second.swap_used = 100000'' world.json > w.json && /bin/mv w.json world.json; for i in $(/usr/bin/seq 12); do "$STATION" world advance 1m; done; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind == "activity") | .Text]'' world.json; "$STATION" activity | /usr/bin/grep "Swap growing"'
       exit: 0
       stdout: |
           []

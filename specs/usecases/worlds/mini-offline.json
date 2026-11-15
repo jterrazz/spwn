@@ -1,8 +1,8 @@
 {
     "now": "2026-11-04T10:00:00Z",
-    "this_mac": "jterrazz-macbook-pro",
+    "this_mac": "macbook-pro",
     "macs": {
-        "jterrazz-macbook-pro": {
+        "macbook-pro": {
             "engine": {
                 "started_at": "2026-11-01T10:00:00Z"
             },
@@ -14,9 +14,9 @@
                 "Charging": true
             },
             "preferences": {
-                "here": "jterrazz-macbook-pro",
+                "here": "macbook-pro",
                 "macs": {
-                    "jterrazz-mac-mini": {
+                    "mac-mini": {
                         "user": "jterrazz.agent",
                         "answered": "2026-11-04T03:12:00Z",
                         "lan": "192.168.1.20",
@@ -135,7 +135,7 @@
                 },
                 "claude": {
                     "State": "ok",
-                    "Who": ["admin@jterrazz.com"],
+                    "Who": ["you@example.com"],
                     "Scopes": ["max"]
                 },
                 "tailscale": {
@@ -143,17 +143,17 @@
                 },
                 "cloudflare": {
                     "State": "ok",
-                    "Who": ["admin@jterrazz.com"],
+                    "Who": ["you@example.com"],
                     "Source": "wrangler"
                 },
                 "git": {
                     "State": "ok",
-                    "Who": ["Jean-Baptiste Terrazzoni", "admin@jterrazz.com"]
+                    "Who": ["Jean-Baptiste Terrazzoni", "you@example.com"]
                 },
                 "ssh": {
                     "State": "ok",
                     "Who": ["1 key"],
-                    "Scopes": ["admin@jterrazz.com"]
+                    "Scopes": ["you@example.com"]
                 },
                 "docker": {
                     "State": "absent",
@@ -166,7 +166,7 @@
                 "operator:claude:oauth-token": "fake-claude-token-of-this-mac"
             }
         },
-        "jterrazz-mac-mini": {
+        "mac-mini": {
             "engine": {
                 "started_at": "2026-10-23T09:00:00Z"
             },
@@ -174,7 +174,7 @@
                 "Source": "ac"
             },
             "preferences": {
-                "here": "jterrazz-mac-mini",
+                "here": "mac-mini",
                 "never_sleeps": true,
                 "vm_user": "admin"
             },
@@ -235,7 +235,7 @@
             "identities": {
                 "github": {
                     "State": "ok",
-                    "Who": ["jterrazz-agent"],
+                    "Who": ["ci-agent"],
                     "Scopes": ["repo"]
                 }
             },

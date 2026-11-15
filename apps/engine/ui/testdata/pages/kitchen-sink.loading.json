@@ -3,7 +3,7 @@
   "id": "home",
   "command": "status",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer",
     "registered": true
   },
@@ -793,9 +793,9 @@
         {
           "group": {
             "head": {
-              "id": "jterrazz-mac-mini",
+              "id": "mac-mini",
               "mark": "pending",
-              "label": "jterrazz-mac-mini",
+              "label": "mac-mini",
               "cells": [
                 {
                   "kind": "pending"
@@ -838,7 +838,7 @@
                         },
                         "value": {
                           "kind": "url",
-                          "text": "https://jterrazz-mac-mini.ts.net:40002"
+                          "text": "https://mac-mini.ts.net:40002"
                         },
                         "detail": {
                           "kind": "text",
@@ -966,7 +966,7 @@
             "key": "machine",
             "value": {
               "kind": "text",
-              "text": "jterrazz-macbook-pro"
+              "text": "macbook-pro"
             }
           }
         },

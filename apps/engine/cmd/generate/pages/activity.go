@@ -22,15 +22,15 @@ func thisMacActivity() pageactivity.View {
 	}
 	r := activity.Report{Source: activity.FromEngine, Since: at.Add(-3 * time.Hour), Last: activity.Reading{Sample: last, Top: top}, Window: activity.RateWindow,
 		Rates: activity.Rates{CPU: 34, DiskRead: 4.1e6, DiskWrite: 1.3e6, NetIn: 2.1e6, NetOut: 210e3}}
-	return pageactivity.View{Name: "jterrazz-macbook-pro", Label: "This Mac", Kind: "computer", ThisMac: true, Report: r}
+	return pageactivity.View{Name: "macbook-pro", Label: "This Mac", Kind: "computer", ThisMac: true, Report: r}
 }
 
 func activityPages() []Fixture {
-	stopped := pageactivity.View{Name: "api", Label: "api", Kind: "workspace", Mac: "jterrazz-macbook-pro", On: "This Mac", Stopped: true}
+	stopped := pageactivity.View{Name: "api", Label: "api", Kind: "workspace", Mac: "macbook-pro", On: "This Mac", Stopped: true}
 	return states("activity",
 		pending(pageactivity.Page(thisMacActivity(), thisMacContext())),
 		pageactivity.Page(stopped, thisMacContext()),
-		failure("activity", "activity", "jterrazz-mac-mini does not answer", "station machines"),
+		failure("activity", "activity", "mac-mini does not answer", "station machines"),
 		pageactivity.Page(thisMacActivity(), thisMacContext()),
 	)
 }

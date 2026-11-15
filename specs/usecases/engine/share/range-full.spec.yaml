@@ -7,8 +7,8 @@ runs:
       exit: 0
       stdout: |
           ◐	linux-1		private		1 port not shared · linux-1 has 20 shared ports, the most a VM may
-          ●	linux-1	9100	private		behind jterrazz-macbook-pro, not shared	node
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: (.stores.reservations | length), nine: [.stores.reservations[] | select(.guest_port == 9100)], shared: (.tailnet.shares | length)}'' world.json'
+          ●	linux-1	9100	private		behind macbook-pro, not shared	node
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: (.stores.reservations | length), nine: [.stores.reservations[] | select(.guest_port == 9100)], shared: (.tailnet.shares | length)}'' world.json'
       exit: 0
       stdout: |
           {"reserved":20,"nine":[],"shared":20}

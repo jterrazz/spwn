@@ -1,7 +1,7 @@
 description: 'a plain .yaml file in machinefiles/ is refused with its path, never read as a Machinefile'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/laptop.yaml'
+    - command: 'world edit macbook-pro machinefiles/laptop.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: laptop

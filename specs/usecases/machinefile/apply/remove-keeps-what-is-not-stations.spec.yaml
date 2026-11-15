@@ -2,32 +2,32 @@ description: 'apply --remove forgets an extra gone, keeps one held another way, 
 fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{package: "fd", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}, {package: "ripgrep", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}, {package: "bat", method: "brew", machinefile: "old-laptop", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger = [{package: "fd", method: "brew", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}, {package: "ripgrep", method: "brew", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}, {package: "bat", method: "brew", machinefile: "old-laptop", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'plan'
       exit: 0
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for jterrazz-macbook-pro, already gone
-          ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, present another way since station installed it: kept, and yours
+          ?	fd	brew	installed by station for macbook-pro, already gone
+          ?	ripgrep	brew	installed by station for macbook-pro, present another way since station installed it: kept, and yours
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for jterrazz-macbook-pro, already gone
-          ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, present another way since station installed it: kept, and yours
+          ?	fd	brew	installed by station for macbook-pro, already gone
+          ?	ripgrep	brew	installed by station for macbook-pro, present another way since station installed it: kept, and yours
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ○	fd		brew	already gone
           ◐	ripgrep		brew	present another way since station installed it: kept, and yours
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.package)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0
       stdout: |
           ["bat"]

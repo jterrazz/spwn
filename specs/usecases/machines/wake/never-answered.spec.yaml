@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: mac-mini never said its hardware address: it answers once first
           Hint: wake it by hand once; station keeps its address at its next answer
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].wake_sent'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].wake_sent'' world.json'
       exit: 0
       stdout: |
           null

@@ -4,8 +4,8 @@ runs:
     - command: 'settings apply dns --all-machines'
       exit: 1
       stdout: |
-          ●	jterrazz-macbook-pro	dns · dns: applied
-          ✗	jterrazz-mac-mini	jterrazz-mac-mini does not answer
+          ●	macbook-pro	dns · dns: applied
+          ✗	mac-mini	mac-mini does not answer
           –	linux-1	skipped (dns is for Macs only)
           –	api	skipped (stopped)
           –	infra	skipped (server)

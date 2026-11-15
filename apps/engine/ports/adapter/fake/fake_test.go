@@ -9,9 +9,9 @@ import (
 )
 
 func signedIn() *Tailnet {
-	host := "jterrazz-macbook-pro.tail1234.ts.net"
+	host := "macbook-pro.tail1234.ts.net"
 	return NewTailnet(ports.Self{
-		Node:    ports.Node{Name: "jterrazz-macbook-pro", DNSName: host, IP: "100.98.133.14", Online: true},
+		Node:    ports.Node{Name: "macbook-pro", DNSName: host, IP: "100.98.133.14", Online: true},
 		Sharing: ports.SharingState{Backend: ports.Running, On: true, DNSName: host},
 	})
 }

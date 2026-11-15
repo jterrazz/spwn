@@ -13,4 +13,4 @@ runs:
     - command: 'machines --this-mac | /usr/bin/grep box'
       exit: 0
       stdout: |
-          ●	box	Server	jterrazz-macbook-pro	Running · always on	4 CPU	2 GB
+          ●	box	Server	macbook-pro	Running · always on	4 CPU	2 GB

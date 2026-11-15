@@ -6,7 +6,7 @@ runs:
       stdout: |
           	On linux-1:
           ●	linux-1	starts · claudecode · in /home/admin/app · Build the landing page
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {opened, typed}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents | {opened, typed}'' world.json'
       exit: 0
       stdout: |
           {"opened":["/home/admin/app claudecode"],"typed":["Build the landing page"]}

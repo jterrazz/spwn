@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].engine.menubar = "open"'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5 6; do "$STATION" world advance 2s; done; "$STATION" activity'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].engine.menubar = "open"'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5 6; do "$STATION" world advance 2s; done; "$STATION" activity'
       exit: 0
       stdout: |
           ●	This Mac	up 3d 4h · rates over the last 10 s
@@ -20,7 +20,7 @@ runs:
           # Top processes
           	Top by CPU	tart (linux-1) 18 % · Zed 9 % · WindowServer 4 %
           	Top by memory	tart (linux-1) 4.1 GB · Zed 1.9 GB · WindowServer 0.6 GB
-    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["jterrazz-macbook-pro"].engine.menubar)'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5; do "$STATION" world advance 1m; done; "$STATION" world advance 20s; "$STATION" activity | /usr/bin/head -1; "$STATION" activity --json | /usr/bin/jq -c ''{source, window_s, kept: (.history_since_at != null), sampled_now: (((.generated_at | fromdate) - (.boot_at | fromdate) - .up_s) | fabs <= 3)}'''
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["macbook-pro"].engine.menubar)'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5; do "$STATION" world advance 1m; done; "$STATION" world advance 20s; "$STATION" activity | /usr/bin/head -1; "$STATION" activity --json | /usr/bin/jq -c ''{source, window_s, kept: (.history_since_at != null), sampled_now: (((.generated_at | fromdate) - (.boot_at | fromdate) - .up_s) | fabs <= 3)}'''
       exit: 0
       stdout: |
           ●	This Mac	up 3d 4h · rates over 1 s

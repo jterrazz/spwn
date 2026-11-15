@@ -5,7 +5,7 @@ runs:
       exit: 1
       stdout: |
           0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].disk.files["~/go/pkg/mod/cache/x"] = 2300000000'' world.json > next.json && /bin/mv next.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/go/pkg/mod/cache/x"] = 2300000000'' world.json > next.json && /bin/mv next.json world.json'
       exit: 0
     - command: 'disk | /usr/bin/grep -e "^◐" -e "^# Misplaced"'
       exit: 0

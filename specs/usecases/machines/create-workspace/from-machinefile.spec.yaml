@@ -2,7 +2,7 @@ description: 'create --from makes its image, sized and kept as its vm says, reco
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -19,11 +19,11 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	vite	5173	https://jterrazz-macbook-pro.tail1234.ts.net:40003
-          ●	expo	8081	https://jterrazz-macbook-pro.tail1234.ts.net:40000
+          ●	vite	5173	https://macbook-pro.tail1234.ts.net:40003
+          ●	expo	8081	https://macbook-pro.tail1234.ts.net:40000
           ●	Boot phase	studio-linux
           ●	web	Created	Persistent · 6 CPU · 3 GB · 30 GB
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {image: .kept.image, template: .kept.template, lifetime: .kept.lifetime, size, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["web"] | {image: .kept.image, template: .kept.template, lifetime: .kept.lifetime, size, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
       exit: 0
       stdout: |
           {"image":"studio-linux","template":"studio-linux","lifetime":"persistent","size":{"CPUs":6,"Memory":3221225472,"Disk":30000000000},"ran":["sudo bash -s -- \"$HOME\" \"$(id -un)\"","sudo bash -s","bash -s","/usr/local/bin/station apply --machinefile 'studio-linux' --phase boot </dev/null"]}

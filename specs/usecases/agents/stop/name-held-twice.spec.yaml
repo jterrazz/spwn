@@ -11,7 +11,7 @@ runs:
       stderr: |
           Error: an agent is already named docs-bot
           Hint: name it another way: --name <name>
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].vms["ci-1"].agents.journal["station-docs-bot"] = (.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal["station-docs-bot"] | .vm = "ci-1" | .task = "Write the release notes")'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].vms["ci-1"].agents.journal["station-docs-bot"] = (.macs["macbook-pro"].vms["linux-1"].agents.journal["station-docs-bot"] | .vm = "ci-1" | .task = "Write the release notes")'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'agents stop docs-bot --yes'
       exit: 2
@@ -23,7 +23,7 @@ runs:
       stdout: |
           	On ci-1:
           ●	docs-bot	stopped · its workspace keeps running
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal, .macs["jterrazz-mac-mini"].vms["ci-1"].agents.journal] | map(map_values(.state))'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].vms["linux-1"].agents.journal, .macs["mac-mini"].vms["ci-1"].agents.journal] | map(map_values(.state))'' world.json'
       exit: 0
       stdout: |
           [{"station-docs-bot":"working"},{"station-docs-bot":"finished"}]

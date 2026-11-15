@@ -2,7 +2,7 @@ description: 'prefer puts a manager first: the plan names it, apply installs by 
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/fd.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/fd.yaml'
       stdin: |
           package: station.package/v1
           kind: app
@@ -13,10 +13,10 @@ runs:
               - { os: macos, brew: fd }
               - { os: macos, mise: { name: fd, version: latest } }
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           prefer: [mise]
           apps: [{ name: fd, version: '10.2.0' }]
@@ -24,8 +24,8 @@ runs:
     - command: 'explain apps.fd'
       exit: 0
       stdout: |
-          # jterrazz-macbook-pro
-          	apps.fd	10.2.0	user	jterrazz-macbook-pro
+          # macbook-pro
+          	apps.fd	10.2.0	user	macbook-pro
           	apps.fd.method	mise	user	fd
           	apps.fd.because	preferred	user	fd
     - command: 'plan'
@@ -41,7 +41,7 @@ runs:
           ●	homebrew	5.0.1	script	the manager of mise
           ●	mise	2026.10.1	brew	the manager of fd
           ●	fd	10.2.0	mise
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.package, .method])'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map([.package, .method])'' world.json'
       exit: 0
       stdout: |
           [["fd","mise"]]

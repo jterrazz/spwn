@@ -25,7 +25,7 @@ func TestAPortFollowsItsVMsState(t *testing.T) {
 			t.Errorf("halt %d: %q listed %v, want %q listed %v", c.halt, a, listed, c.answer, c.listed)
 		}
 	}
-	vm := ports.VMOf("infra", "jterrazz-mac-mini", true, []ports.Listener{{Port: 9100, Bind: "*", Process: "node_exporter"}})
+	vm := ports.VMOf("infra", "mac-mini", true, []ports.Listener{{Port: 9100, Bind: "*", Process: "node_exporter"}})
 	if p := ports.Classify(vm, nil)[0]; !p.Red() {
 		t.Fatalf("a bridged server's wildcard port is not red while it runs")
 	}

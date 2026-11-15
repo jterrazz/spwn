@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           ["This Mac: 4 % of its disk is free"]
-    - command: '--version >/dev/null; /usr/bin/jq ''.told = [] | .macs["jterrazz-macbook-pro"].disk.free = 79520000000 | .macs["jterrazz-macbook-pro"].engine.activity = {}'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3; do "$STATION" world advance 1m; done; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind == "disk_low") | .Text]'' world.json; "$STATION" activity | /usr/bin/grep "Disk almost full"'
+    - command: '--version >/dev/null; /usr/bin/jq ''.told = [] | .macs["macbook-pro"].disk.free = 79520000000 | .macs["macbook-pro"].engine.activity = {}'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3; do "$STATION" world advance 1m; done; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind == "disk_low") | .Text]'' world.json; "$STATION" activity | /usr/bin/grep "Disk almost full"'
       exit: 0
       stdout: |
           []

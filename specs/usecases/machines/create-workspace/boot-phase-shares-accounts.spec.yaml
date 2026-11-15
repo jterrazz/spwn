@@ -2,7 +2,7 @@ description: 'a first start shares each account its Machinefile shares; one it c
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -22,7 +22,7 @@ runs:
           ●	github	shared for 12 h
           ◐	npm	not shared: npm is not on the share list
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.shares["web"] | map([.name, (((.until|fromdate) - (.at|fromdate)) / 3600)])'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.shares["web"] | map([.name, (((.until|fromdate) - (.at|fromdate)) / 3600)])'' world.json'
       exit: 0
       stdout: |
           [["session:github",12]]

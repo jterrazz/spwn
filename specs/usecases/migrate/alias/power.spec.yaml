@@ -4,26 +4,26 @@ runs:
     - command: 'power | /usr/bin/sed -n 1,2p'
       exit: 0
       stdout: |
-          ○	jterrazz-macbook-pro	Sleeps normally
-          ●	jterrazz-mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
       stderr: |
           → now: station awake
     - command: 'power awake --for 2h'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	stays awake until 12:00
+          ●	macbook-pro	stays awake until 12:00
       stderr: |
           → now: station awake 2h
     - command: 'power awake --lid'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	now stays awake until 14:00 · lid closed
+          ●	macbook-pro	now stays awake until 14:00 · lid closed
       stderr: |
           → now: station awake 4h --lid
     - command: 'power sleep'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	sleeps normally again
+          ●	macbook-pro	sleeps normally again
       stderr: |
           → now: station awake off
     - command: 'power --json | /usr/bin/jq -r .schema'

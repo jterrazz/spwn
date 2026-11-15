@@ -5,7 +5,7 @@ runs:
       exit: 0
     - command: 'agents attach linux-1 --on linux-1'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].attached'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].attached'' world.json'
       exit: 0
       stdout: |
           ["linux-1/t1"]

@@ -6,7 +6,7 @@ printf 'claude %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     "auth status")
         if [ -f "$HOME/claude.out" ]; then echo '{"loggedIn":false,"authMethod":"none"}'; exit 1; fi
-        echo '{"loggedIn":true,"email":"admin@jterrazz.com","subscriptionType":"max"}' ;;
+        echo '{"loggedIn":true,"email":"you@example.com","subscriptionType":"max"}' ;;
     "auth login --claudeai")
         /bin/cat "$HOME/outputs/claude-login.txt" "$HOME/outputs/claude-prompt.txt"
         /bin/sleep 1

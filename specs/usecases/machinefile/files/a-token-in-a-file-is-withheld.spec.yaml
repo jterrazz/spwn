@@ -1,18 +1,18 @@
 description: 'a token written in a machine file reads withheld in its text, the rest of the line kept'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           run:
               upgrade: |
                   curl -H "Authorization: Bearer ghp_aB3dE5fG7hJ9kL1mN3pQ5rS7tU9vW1xY3zA5" https://example.com
       exit: 0
-    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Files[] | select(.Name == "jterrazz-macbook-pro") | .Text'''
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Files[] | select(.Name == "macbook-pro") | .Text'''
       stdin: |
           {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
       exit: 0
       stdout: |
-          "machinefile: station.machinefile/v1\nname: jterrazz-macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nrun:\n    upgrade: |\n        curl -H \"Authorization: Bearer withheld\" https://example.com\n"
+          "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nrun:\n    upgrade: |\n        curl -H \"Authorization: Bearer withheld\" https://example.com\n"

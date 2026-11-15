@@ -12,13 +12,13 @@ Needs a look
     → System Settings > Network > Firewall
   ◐ This Mac  screen-lock    locks after 10 min · expected 5 min  → System Settings > Lock Screen
   ◐ mac-mini  git-shortcuts  changed since 2 d ago
-    → station settings diff git-shortcuts --on jterrazz-mac-mini
+    → station settings diff git-shortcuts --on mac-mini
   ◐ mac-mini  claude-token   changed since 2 d ago
-    → station settings diff claude-token --on jterrazz-mac-mini
+    → station settings diff claude-token --on mac-mini
   ◐ mac-mini  ssh-key        changed since 2 d ago
-    → station settings diff ssh-key --on jterrazz-mac-mini
+    → station settings diff ssh-key --on mac-mini
   ◐ mac-mini  tart-launcher  changed since 2 d ago
-    → station settings diff tart-launcher --on jterrazz-mac-mini
+    → station settings diff tart-launcher --on mac-mini
   ◐ mac-mini  firewall       off
     → System Settings > Network > Firewall
   ◐ mac-mini  screen-lock    locks after 10 min · expected 5 min  → System Settings > Lock Screen

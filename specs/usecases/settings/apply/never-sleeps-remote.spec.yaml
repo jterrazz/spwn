@@ -1,7 +1,7 @@
 description: 'never-sleeps applies on another Mac without admin: that Mac''s engine holds it, and Awake says so'
 env: two-macs
 runs:
-    - command: 'settings off never-sleeps --on jterrazz-mac-mini --yes'
+    - command: 'settings off never-sleeps --on mac-mini --yes'
       exit: 0
       stdout: |
           	On mac-mini:
@@ -9,8 +9,8 @@ runs:
     - command: 'awake | /usr/bin/grep mac-mini'
       exit: 0
       stdout: |
-          ○	jterrazz-mac-mini	Sleeps normally
-    - command: 'settings apply never-sleeps --on jterrazz-mac-mini'
+          ○	mac-mini	Sleeps normally
+    - command: 'settings apply never-sleeps --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
@@ -22,8 +22,8 @@ runs:
     - command: 'awake | /usr/bin/grep mac-mini'
       exit: 0
       stdout: |
-          ●	jterrazz-mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-mac-mini"].power.holds, .macs["jterrazz-mac-mini"].preferences.never_sleeps, .as_root]'' world.json'
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["mac-mini"].power.holds, .macs["mac-mini"].preferences.never_sleeps, .as_root]'' world.json'
       exit: 0
       stdout: |
           [["station: never sleeps"],true,null]

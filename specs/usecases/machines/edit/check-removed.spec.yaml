@@ -6,7 +6,7 @@ runs:
       stdout: |
           	On mac-mini:
           ●	infra	no health check: health has three steps
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | {check: .kept.check, running: (.pid > 0)}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {check: .kept.check, running: (.pid > 0)}'' world.json'
       exit: 0
       stdout: |
           {"check":null,"running":true}

@@ -8,20 +8,20 @@ runs:
     - command: 'awake 4h --lid'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	stays awake until 14:00 · lid closed
+          ●	macbook-pro	stays awake until 14:00 · lid closed
     - command: 'awake off'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	sleeps normally again
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power | {holds, clamshell}'' world.json'
+          ●	macbook-pro	sleeps normally again
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power | {holds, clamshell}'' world.json'
       exit: 0
       stdout: |
           {"holds":null,"clamshell":null}
     - command: 'awake | /usr/bin/sed -n 1,2p'
       exit: 0
       stdout: |
-          ○	jterrazz-macbook-pro	Sleeps normally
-          ●	jterrazz-mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
     - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" awake 4h --lid'
       stdin: |
           within 20 exit 0

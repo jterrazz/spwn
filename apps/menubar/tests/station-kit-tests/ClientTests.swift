@@ -138,7 +138,7 @@ final class ClientTests: XCTestCase {
             case .down: "down"
             }
         }
-        let keys = "cpu:jterrazz-mac-mini cpu:jterrazz-macbook-pro memory:jterrazz-macbook-pro net:jterrazz-macbook-pro"
+        let keys = "cpu:mac-mini cpu:macbook-pro memory:macbook-pro net:macbook-pro"
         XCTAssertEqual(kinds, ["connected", "page loading", "page ready", "sample 2026-11-03T10:30:02Z \(keys)", "sample 2026-11-03T10:30:04Z \(keys) stale", "tick",
                                "notice awake_ended moon: Awake stopped on This Mac: battery 20 %"])
         XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar"]},"v":2,"watch":"page"}"#])

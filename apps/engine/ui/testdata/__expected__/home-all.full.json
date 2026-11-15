@@ -286,7 +286,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "jterrazz-macbook-pro"
+                    "text": "macbook-pro"
                   },
                   {
                     "kind": "text",
@@ -308,7 +308,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "admin@jterrazz.com"
+                    "text": "you@example.com"
                   },
                   {
                     "kind": "text",
@@ -732,7 +732,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "jterrazz-macbook-pro.tail1234.ts.net"
+                    "text": "macbook-pro.tail1234.ts.net"
                   },
                   {
                     "kind": "text",
@@ -868,7 +868,7 @@
             "cells": [
               {
                 "kind": "text",
-                "text": "admin@jterrazz.com"
+                "text": "you@example.com"
               }
             ],
             "detail": {

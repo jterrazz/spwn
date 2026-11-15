@@ -185,9 +185,9 @@ func serve(t *testing.T, bin, world, seed string, reads []string) [][]byte {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	if world == machinefileWorld {
-		edit := exec.CommandContext(ctx, bin, "world", "edit", "jterrazz-macbook-pro", "machinefiles/jterrazz-macbook-pro.machine.yaml")
+		edit := exec.CommandContext(ctx, bin, "world", "edit", "macbook-pro", "machinefiles/macbook-pro.machine.yaml")
 		edit.Dir, edit.Env = dir, env
-		edit.Stdin = strings.NewReader("machinefile: station.machinefile/v1\nname: jterrazz-macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq, node, ghostty]\n")
+		edit.Stdin = strings.NewReader("machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq, node, ghostty]\n")
 		if out, err := edit.CombinedOutput(); err != nil {
 			t.Fatalf("world edit: %v\n%s", err, out)
 		}

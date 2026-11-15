@@ -7,5 +7,5 @@ runs:
       exit: 0
     - command: 'world close-lid'
       exit: 0
-    - command: 'awake | /usr/bin/sed -n ''/^# jterrazz-macbook-pro/,$p'''
+    - command: 'awake | /usr/bin/sed -n ''/^# macbook-pro/,$p'''
       exit: 0

@@ -4,7 +4,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /bin/mkdir -p Developer/notes data'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -24,11 +24,11 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	vite	5173	https://jterrazz-macbook-pro.tail1234.ts.net:40003
-          ●	expo	8081	https://jterrazz-macbook-pro.tail1234.ts.net:40000
+          ●	vite	5173	https://macbook-pro.tail1234.ts.net:40003
+          ●	expo	8081	https://macbook-pro.tail1234.ts.net:40000
           ●	Boot phase	studio-linux
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {folders: .booted.folders, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["web"] | {folders: .booted.folders, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
       exit: 0
       stdout: |
           {"folders":["{{workdir}}/Developer/notes:ro,tag=station-1","{{workdir}}/data:tag=station-2"],"ran":["sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '~/notes' ro 'station-2' '/data' rw","sudo bash -s","sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '~/notes' ro 'station-2' '/data' rw","bash -s","/usr/local/bin/station apply --machinefile 'studio-linux' --phase boot </dev/null"]}

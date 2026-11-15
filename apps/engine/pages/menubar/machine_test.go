@@ -18,9 +18,9 @@ import (
 var macNow = time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
 
 const (
-	proMac  = "jterrazz-macbook-pro"
-	miniMac = "jterrazz-mac-mini"
-	airMac  = "jterrazz-macbook-air"
+	proMac  = "macbook-pro"
+	miniMac = "mac-mini"
+	airMac  = "macbook-air"
 )
 
 func macFleet() *model.AllMachines {

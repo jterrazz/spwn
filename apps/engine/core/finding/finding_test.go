@@ -11,8 +11,8 @@ import (
 )
 
 func TestNeedsYouListsBrokenFirstThenBySectionThenMacBeforeItsVMs(t *testing.T) {
-	this := machine.Ref{Name: "jterrazz-macbook-pro"}
-	mini := machine.Ref{Name: "jterrazz-mac-mini"}
+	this := machine.Ref{Name: "macbook-pro"}
+	mini := machine.Ref{Name: "mac-mini"}
 	infra := machine.Ref{Name: "infra", On: mini.Name}
 	linux1 := machine.Ref{Name: "linux-1", On: this.Name}
 	line := func(m machine.Ref, s section.ID, sev finding.Severity, subject string) finding.Finding {
@@ -35,14 +35,14 @@ func TestNeedsYouListsBrokenFirstThenBySectionThenMacBeforeItsVMs(t *testing.T) 
 	}
 
 	want := []string{
-		"jterrazz-mac-mini engine",
+		"mac-mini engine",
 		"infra health",
-		"jterrazz-mac-mini airplay-5000",
-		"jterrazz-macbook-pro node",
+		"mac-mini airplay-5000",
+		"macbook-pro node",
 		"linux-1 jq",
-		"jterrazz-macbook-pro starship",
-		"jterrazz-macbook-pro firewall",
-		"jterrazz-macbook-pro github",
+		"macbook-pro starship",
+		"macbook-pro firewall",
+		"macbook-pro github",
 	}
 	if !slices.Equal(got, want) {
 		t.Errorf("Needs you ranks\n%v\nwant\n%v", got, want)
@@ -53,8 +53,8 @@ func TestNeedsYouListsBrokenFirstThenBySectionThenMacBeforeItsVMs(t *testing.T) 
 }
 
 func TestNeedsYouListsEachMacFollowedByItsOwnVMsThenTheNextMac(t *testing.T) {
-	this := machine.Ref{Name: "jterrazz-macbook-pro"}
-	mini := machine.Ref{Name: "jterrazz-mac-mini"}
+	this := machine.Ref{Name: "macbook-pro"}
+	mini := machine.Ref{Name: "mac-mini"}
 	infra := machine.Ref{Name: "infra", On: mini.Name}
 	linux1 := machine.Ref{Name: "linux-1", On: this.Name}
 	line := func(m machine.Ref, subject string) finding.Finding {
@@ -73,9 +73,9 @@ func TestNeedsYouListsEachMacFollowedByItsOwnVMsThenTheNextMac(t *testing.T) {
 	}
 
 	want := []string{
-		"jterrazz-macbook-pro node",
+		"macbook-pro node",
 		"linux-1 jq",
-		"jterrazz-mac-mini fd",
+		"mac-mini fd",
 		"infra curl",
 	}
 	if !slices.Equal(got, want) {

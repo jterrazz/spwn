@@ -227,7 +227,7 @@
                         },
                         "value": {
                           "kind": "url",
-                          "text": "https://jterrazz-macbook-pro.tail1234.ts.net:40001"
+                          "text": "https://macbook-pro.tail1234.ts.net:40001"
                         },
                         "detail": {
                           "kind": "text",
@@ -444,7 +444,7 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/station-linux@2026.11.01",
+            "id": "macbook-pro/station-linux@2026.11.01",
             "mark": "ok",
             "label": "station-linux",
             "cells": [
@@ -458,11 +458,11 @@
               },
               {
                 "kind": "text",
-                "text": "jterrazz-macbook-pro"
+                "text": "macbook-pro"
               },
               {
                 "kind": "text",
-                "text": "jterrazz-macbook-pro"
+                "text": "macbook-pro"
               }
             ],
             "detail": {
@@ -482,7 +482,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/station-linux@2026.10.20",
+            "id": "macbook-pro/station-linux@2026.10.20",
             "mark": "absent",
             "label": "station-linux",
             "cells": [
@@ -496,11 +496,11 @@
               },
               {
                 "kind": "text",
-                "text": "jterrazz-macbook-pro"
+                "text": "macbook-pro"
               },
               {
                 "kind": "text",
-                "text": "jterrazz-macbook-pro"
+                "text": "macbook-pro"
               }
             ],
             "detail": {
@@ -515,7 +515,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/station-linux@2026.11.01",
+            "id": "mac-mini/station-linux@2026.11.01",
             "mark": "ok",
             "label": "station-linux",
             "cells": [
@@ -529,11 +529,11 @@
               },
               {
                 "kind": "text",
-                "text": "jterrazz-mac-mini"
+                "text": "mac-mini"
               },
               {
                 "kind": "text",
-                "text": "jterrazz-mac-mini"
+                "text": "mac-mini"
               }
             ],
             "detail": {
@@ -616,7 +616,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "jterrazz-macbook-pro.tail1234.ts.net"
+                    "text": "macbook-pro.tail1234.ts.net"
                   }
                 ]
               }

@@ -3,7 +3,7 @@
   "id": "menubar",
   "command": "menubar",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer"
   },
   "state": "ready",
@@ -11,7 +11,7 @@
     "cpu": {
       "kind": "percent",
       "n": 340,
-      "live": "cpu:jterrazz-macbook-pro"
+      "live": "cpu:macbook-pro"
     },
     "spark": [
       12,
@@ -35,7 +35,7 @@
       "kind": "ratio",
       "n": 14119704985,
       "of": 17179869184,
-      "live": "memory:jterrazz-macbook-pro"
+      "live": "memory:macbook-pro"
     },
     "memory_spark": [
       77,
@@ -78,7 +78,7 @@
         "kind": "size",
         "n": 1780000,
         "unit": "/s",
-        "live": "net:jterrazz-macbook-pro"
+        "live": "net:macbook-pro"
       }
     ]
   },
@@ -289,7 +289,7 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro",
+            "id": "macbook-pro",
             "mark": "ok",
             "label": "This Mac",
             "detail": {
@@ -304,22 +304,22 @@
             },
             "glyph": {
               "kind": "desktop",
-              "ring": "cpu:jterrazz-macbook-pro"
+              "ring": "cpu:macbook-pro"
             },
             "trail": "value",
-            "quick": "new-vm:jterrazz-macbook-pro",
-            "nav": "menubar.machine:jterrazz-macbook-pro",
+            "quick": "new-vm:macbook-pro",
+            "nav": "menubar.machine:macbook-pro",
             "menu": [
-              "title:jterrazz-macbook-pro",
-              "open:jterrazz-macbook-pro",
-              "new-vm:jterrazz-macbook-pro@menu",
-              "open-station@jterrazz-macbook-pro"
+              "title:macbook-pro",
+              "open:macbook-pro",
+              "new-vm:macbook-pro@menu",
+              "open-station@macbook-pro"
             ]
           }
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini",
+            "id": "mac-mini",
             "mark": "ok",
             "label": "mac-mini",
             "detail": {
@@ -328,16 +328,16 @@
             },
             "glyph": {
               "kind": "desktop",
-              "ring": "cpu:jterrazz-mac-mini"
+              "ring": "cpu:mac-mini"
             },
             "trail": "value",
-            "quick": "new-vm:jterrazz-mac-mini",
-            "nav": "menubar.machine:jterrazz-mac-mini",
+            "quick": "new-vm:mac-mini",
+            "nav": "menubar.machine:mac-mini",
             "menu": [
-              "title:jterrazz-mac-mini",
-              "open:jterrazz-mac-mini",
-              "new-vm:jterrazz-mac-mini@menu",
-              "open-station@jterrazz-mac-mini"
+              "title:mac-mini",
+              "open:mac-mini",
+              "new-vm:mac-mini@menu",
+              "open-station@mac-mini"
             ]
           }
         }
@@ -501,7 +501,7 @@
         {
           "group": {
             "head": {
-              "id": "jterrazz-macbook-pro",
+              "id": "macbook-pro",
               "mark": "attention",
               "label": "This Mac",
               "cells": [
@@ -530,7 +530,7 @@
               {
                 "group": {
                   "head": {
-                    "id": "jterrazz-macbook-pro/workspaces",
+                    "id": "macbook-pro/workspaces",
                     "label": "Workspaces"
                   },
                   "items": [
@@ -597,7 +597,7 @@
         {
           "group": {
             "head": {
-              "id": "jterrazz-mac-mini",
+              "id": "mac-mini",
               "mark": "broken",
               "label": "mac-mini",
               "cells": [
@@ -630,7 +630,7 @@
               {
                 "group": {
                   "head": {
-                    "id": "jterrazz-mac-mini/servers",
+                    "id": "mac-mini/servers",
                     "label": "Servers"
                   },
                   "items": [
@@ -722,7 +722,7 @@
                 "label": "This Mac"
               },
               {
-                "value": "new-vm:jterrazz-mac-mini",
+                "value": "new-vm:mac-mini",
                 "label": "mac-mini"
               }
             ],
@@ -745,7 +745,7 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
@@ -818,9 +818,9 @@
                 "taken": [
                   "api",
                   "infra",
-                  "jterrazz-mac-mini",
-                  "jterrazz-macbook-pro",
-                  "linux-1"
+                  "linux-1",
+                  "mac-mini",
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -892,7 +892,7 @@
                 "label": "This Mac"
               },
               {
-                "value": "new-vm:jterrazz-mac-mini",
+                "value": "new-vm:mac-mini",
                 "label": "mac-mini"
               }
             ],
@@ -915,7 +915,7 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
@@ -988,9 +988,9 @@
                 "taken": [
                   "api",
                   "infra",
-                  "jterrazz-mac-mini",
-                  "jterrazz-macbook-pro",
-                  "linux-1"
+                  "linux-1",
+                  "mac-mini",
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -1034,11 +1034,11 @@
       "label": "New VM",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ],
       "priority": 1,
       "mutates": true,
-      "id": "new-vm:jterrazz-macbook-pro",
+      "id": "new-vm:macbook-pro",
       "run": {
         "call": "machines.create-workspace",
         "in": {
@@ -1058,7 +1058,7 @@
                 "label": "This Mac"
               },
               {
-                "value": "new-vm:jterrazz-mac-mini",
+                "value": "new-vm:mac-mini",
                 "label": "mac-mini"
               }
             ],
@@ -1081,11 +1081,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-macbook-pro",
+                "default": "new-vm:macbook-pro",
                 "swaps": true
               },
               {
@@ -1154,9 +1154,9 @@
                 "taken": [
                   "api",
                   "infra",
-                  "jterrazz-mac-mini",
-                  "jterrazz-macbook-pro",
-                  "linux-1"
+                  "linux-1",
+                  "mac-mini",
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -1187,7 +1187,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-macbook-pro"
+          "open-new:new-vm:macbook-pro"
         ]
       },
       "icon": "plus",
@@ -1202,7 +1202,7 @@
       "label": "Create and Open in Terminal",
       "priority": 4,
       "mutates": true,
-      "id": "open-new:new-vm:jterrazz-macbook-pro",
+      "id": "open-new:new-vm:macbook-pro",
       "run": {
         "call": "machines.create-workspace",
         "in": {
@@ -1229,7 +1229,7 @@
                 "label": "This Mac"
               },
               {
-                "value": "new-vm:jterrazz-mac-mini",
+                "value": "new-vm:mac-mini",
                 "label": "mac-mini"
               }
             ],
@@ -1252,11 +1252,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-macbook-pro",
+                "default": "new-vm:macbook-pro",
                 "swaps": true
               },
               {
@@ -1325,9 +1325,9 @@
                 "taken": [
                   "api",
                   "infra",
-                  "jterrazz-mac-mini",
-                  "jterrazz-macbook-pro",
-                  "linux-1"
+                  "linux-1",
+                  "mac-mini",
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -1358,7 +1358,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-macbook-pro"
+          "open-new:new-vm:macbook-pro"
         ]
       },
       "icon": "terminal",
@@ -1371,7 +1371,7 @@
       "label": "New VM",
       "priority": 1,
       "mutates": true,
-      "id": "new-server:jterrazz-macbook-pro",
+      "id": "new-server:macbook-pro",
       "run": {
         "call": "machines.create-server"
       },
@@ -1384,15 +1384,15 @@
             "kind": "select",
             "options": [
               {
-                "value": "new-server:jterrazz-macbook-pro",
+                "value": "new-server:macbook-pro",
                 "label": "This Mac"
               },
               {
-                "value": "new-server:jterrazz-mac-mini",
+                "value": "new-server:mac-mini",
                 "label": "mac-mini"
               }
             ],
-            "default": "new-server:jterrazz-macbook-pro",
+            "default": "new-server:macbook-pro",
             "swaps": true
           },
           {
@@ -1404,9 +1404,9 @@
             "taken": [
               "api",
               "infra",
-              "jterrazz-mac-mini",
-              "jterrazz-macbook-pro",
-              "linux-1"
+              "linux-1",
+              "mac-mini",
+              "macbook-pro"
             ],
             "taken_hud": "{Name} already exists"
           },
@@ -1425,11 +1425,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-server:jterrazz-macbook-pro",
+                "default": "new-server:macbook-pro",
                 "swaps": true
               },
               {
@@ -1500,7 +1500,7 @@
           }
         ],
         "split": [
-          "open-new:new-server:jterrazz-macbook-pro"
+          "open-new:new-server:macbook-pro"
         ]
       },
       "icon": "plus",
@@ -1515,7 +1515,7 @@
       "label": "Create and Open in Terminal",
       "priority": 4,
       "mutates": true,
-      "id": "open-new:new-server:jterrazz-macbook-pro",
+      "id": "open-new:new-server:macbook-pro",
       "run": {
         "call": "machines.create-server",
         "then": {
@@ -1535,15 +1535,15 @@
             "kind": "select",
             "options": [
               {
-                "value": "new-server:jterrazz-macbook-pro",
+                "value": "new-server:macbook-pro",
                 "label": "This Mac"
               },
               {
-                "value": "new-server:jterrazz-mac-mini",
+                "value": "new-server:mac-mini",
                 "label": "mac-mini"
               }
             ],
-            "default": "new-server:jterrazz-macbook-pro",
+            "default": "new-server:macbook-pro",
             "swaps": true
           },
           {
@@ -1555,9 +1555,9 @@
             "taken": [
               "api",
               "infra",
-              "jterrazz-mac-mini",
-              "jterrazz-macbook-pro",
-              "linux-1"
+              "linux-1",
+              "mac-mini",
+              "macbook-pro"
             ],
             "taken_hud": "{Name} already exists"
           },
@@ -1576,11 +1576,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-server:jterrazz-macbook-pro",
+                "default": "new-server:macbook-pro",
                 "swaps": true
               },
               {
@@ -1651,7 +1651,7 @@
           }
         ],
         "split": [
-          "open-new:new-server:jterrazz-macbook-pro"
+          "open-new:new-server:macbook-pro"
         ]
       },
       "icon": "terminal",
@@ -1664,18 +1664,18 @@
       "label": "New VM",
       "on": "row",
       "rows": [
-        "jterrazz-mac-mini"
+        "mac-mini"
       ],
       "priority": 1,
       "mutates": true,
-      "id": "new-vm:jterrazz-mac-mini",
+      "id": "new-vm:mac-mini",
       "run": {
         "call": "machines.create-workspace",
         "in": {
           "Request.Network": "nat"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       },
       "form": {
@@ -1691,11 +1691,11 @@
                 "label": "This Mac"
               },
               {
-                "value": "new-vm:jterrazz-mac-mini",
+                "value": "new-vm:mac-mini",
                 "label": "mac-mini"
               }
             ],
-            "default": "new-vm:jterrazz-mac-mini",
+            "default": "new-vm:mac-mini",
             "swaps": true
           },
           {
@@ -1710,15 +1710,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "new-vm:jterrazz-mac-mini",
+                    "value": "new-vm:mac-mini",
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-mac-mini",
+                    "value": "new-server:mac-mini",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-mac-mini",
+                "default": "new-vm:mac-mini",
                 "swaps": true
               },
               {
@@ -1787,9 +1787,9 @@
                 "taken": [
                   "api",
                   "infra",
-                  "jterrazz-mac-mini",
-                  "jterrazz-macbook-pro",
-                  "linux-1"
+                  "linux-1",
+                  "mac-mini",
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -1820,7 +1820,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-mac-mini"
+          "open-new:new-vm:mac-mini"
         ]
       },
       "icon": "plus",
@@ -1835,14 +1835,14 @@
       "label": "Create and Open in Terminal",
       "priority": 4,
       "mutates": true,
-      "id": "open-new:new-vm:jterrazz-mac-mini",
+      "id": "open-new:new-vm:mac-mini",
       "run": {
         "call": "machines.create-workspace",
         "in": {
           "Request.Network": "nat"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         },
         "then": {
           "terminal": true,
@@ -1851,7 +1851,7 @@
             "{Request.Name}"
           ],
           "target": {
-            "name": "jterrazz-mac-mini"
+            "name": "mac-mini"
           }
         }
       },
@@ -1868,11 +1868,11 @@
                 "label": "This Mac"
               },
               {
-                "value": "new-vm:jterrazz-mac-mini",
+                "value": "new-vm:mac-mini",
                 "label": "mac-mini"
               }
             ],
-            "default": "new-vm:jterrazz-mac-mini",
+            "default": "new-vm:mac-mini",
             "swaps": true
           },
           {
@@ -1887,15 +1887,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "new-vm:jterrazz-mac-mini",
+                    "value": "new-vm:mac-mini",
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-mac-mini",
+                    "value": "new-server:mac-mini",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-mac-mini",
+                "default": "new-vm:mac-mini",
                 "swaps": true
               },
               {
@@ -1964,9 +1964,9 @@
                 "taken": [
                   "api",
                   "infra",
-                  "jterrazz-mac-mini",
-                  "jterrazz-macbook-pro",
-                  "linux-1"
+                  "linux-1",
+                  "mac-mini",
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -1997,7 +1997,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-mac-mini"
+          "open-new:new-vm:mac-mini"
         ]
       },
       "icon": "terminal",
@@ -2010,11 +2010,11 @@
       "label": "New VM",
       "priority": 1,
       "mutates": true,
-      "id": "new-server:jterrazz-mac-mini",
+      "id": "new-server:mac-mini",
       "run": {
         "call": "machines.create-server",
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       },
       "form": {
@@ -2026,15 +2026,15 @@
             "kind": "select",
             "options": [
               {
-                "value": "new-server:jterrazz-macbook-pro",
+                "value": "new-server:macbook-pro",
                 "label": "This Mac"
               },
               {
-                "value": "new-server:jterrazz-mac-mini",
+                "value": "new-server:mac-mini",
                 "label": "mac-mini"
               }
             ],
-            "default": "new-server:jterrazz-mac-mini",
+            "default": "new-server:mac-mini",
             "swaps": true
           },
           {
@@ -2046,9 +2046,9 @@
             "taken": [
               "api",
               "infra",
-              "jterrazz-mac-mini",
-              "jterrazz-macbook-pro",
-              "linux-1"
+              "linux-1",
+              "mac-mini",
+              "macbook-pro"
             ],
             "taken_hud": "{Name} already exists"
           },
@@ -2063,15 +2063,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "new-vm:jterrazz-mac-mini",
+                    "value": "new-vm:mac-mini",
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-mac-mini",
+                    "value": "new-server:mac-mini",
                     "label": "Server"
                   }
                 ],
-                "default": "new-server:jterrazz-mac-mini",
+                "default": "new-server:mac-mini",
                 "swaps": true
               },
               {
@@ -2142,7 +2142,7 @@
           }
         ],
         "split": [
-          "open-new:new-server:jterrazz-mac-mini"
+          "open-new:new-server:mac-mini"
         ]
       },
       "icon": "plus",
@@ -2157,11 +2157,11 @@
       "label": "Create and Open in Terminal",
       "priority": 4,
       "mutates": true,
-      "id": "open-new:new-server:jterrazz-mac-mini",
+      "id": "open-new:new-server:mac-mini",
       "run": {
         "call": "machines.create-server",
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         },
         "then": {
           "terminal": true,
@@ -2170,7 +2170,7 @@
             "{Name}"
           ],
           "target": {
-            "name": "jterrazz-mac-mini"
+            "name": "mac-mini"
           }
         }
       },
@@ -2183,15 +2183,15 @@
             "kind": "select",
             "options": [
               {
-                "value": "new-server:jterrazz-macbook-pro",
+                "value": "new-server:macbook-pro",
                 "label": "This Mac"
               },
               {
-                "value": "new-server:jterrazz-mac-mini",
+                "value": "new-server:mac-mini",
                 "label": "mac-mini"
               }
             ],
-            "default": "new-server:jterrazz-mac-mini",
+            "default": "new-server:mac-mini",
             "swaps": true
           },
           {
@@ -2203,9 +2203,9 @@
             "taken": [
               "api",
               "infra",
-              "jterrazz-mac-mini",
-              "jterrazz-macbook-pro",
-              "linux-1"
+              "linux-1",
+              "mac-mini",
+              "macbook-pro"
             ],
             "taken_hud": "{Name} already exists"
           },
@@ -2220,15 +2220,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "new-vm:jterrazz-mac-mini",
+                    "value": "new-vm:mac-mini",
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-mac-mini",
+                    "value": "new-server:mac-mini",
                     "label": "Server"
                   }
                 ],
-                "default": "new-server:jterrazz-mac-mini",
+                "default": "new-server:mac-mini",
                 "swaps": true
               },
               {
@@ -2299,7 +2299,7 @@
           }
         ],
         "split": [
-          "open-new:new-server:jterrazz-mac-mini"
+          "open-new:new-server:mac-mini"
         ]
       },
       "icon": "terminal",
@@ -2421,7 +2421,7 @@
           "infra"
         ],
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       },
       "icon": "terminal",
@@ -2514,13 +2514,13 @@
     {
       "label": "This Mac",
       "on": "menu",
-      "id": "title:jterrazz-macbook-pro"
+      "id": "title:macbook-pro"
     },
     {
       "key": "enter",
       "label": "Open",
       "on": "menu",
-      "id": "open:jterrazz-macbook-pro",
+      "id": "open:macbook-pro",
       "icon": "arrow.up.forward.square"
     },
     {
@@ -2529,7 +2529,7 @@
       "on": "menu",
       "priority": 1,
       "mutates": true,
-      "id": "new-vm:jterrazz-macbook-pro@menu",
+      "id": "new-vm:macbook-pro@menu",
       "run": {
         "call": "machines.create-workspace",
         "in": {
@@ -2549,7 +2549,7 @@
                 "label": "This Mac"
               },
               {
-                "value": "new-vm:jterrazz-mac-mini",
+                "value": "new-vm:mac-mini",
                 "label": "mac-mini"
               }
             ],
@@ -2572,11 +2572,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-macbook-pro",
+                "default": "new-vm:macbook-pro",
                 "swaps": true
               },
               {
@@ -2645,9 +2645,9 @@
                 "taken": [
                   "api",
                   "infra",
-                  "jterrazz-mac-mini",
-                  "jterrazz-macbook-pro",
-                  "linux-1"
+                  "linux-1",
+                  "mac-mini",
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -2678,7 +2678,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-macbook-pro"
+          "open-new:new-vm:macbook-pro"
         ]
       },
       "icon": "plus",
@@ -2693,7 +2693,7 @@
       "label": "Open in Terminal",
       "on": "menu",
       "priority": 2,
-      "id": "open-station@jterrazz-macbook-pro",
+      "id": "open-station@macbook-pro",
       "run": {
         "terminal": true
       },
@@ -2702,13 +2702,13 @@
     {
       "label": "mac-mini",
       "on": "menu",
-      "id": "title:jterrazz-mac-mini"
+      "id": "title:mac-mini"
     },
     {
       "key": "enter",
       "label": "Open",
       "on": "menu",
-      "id": "open:jterrazz-mac-mini",
+      "id": "open:mac-mini",
       "icon": "arrow.up.forward.square"
     },
     {
@@ -2717,14 +2717,14 @@
       "on": "menu",
       "priority": 1,
       "mutates": true,
-      "id": "new-vm:jterrazz-mac-mini@menu",
+      "id": "new-vm:mac-mini@menu",
       "run": {
         "call": "machines.create-workspace",
         "in": {
           "Request.Network": "nat"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       },
       "form": {
@@ -2740,11 +2740,11 @@
                 "label": "This Mac"
               },
               {
-                "value": "new-vm:jterrazz-mac-mini",
+                "value": "new-vm:mac-mini",
                 "label": "mac-mini"
               }
             ],
-            "default": "new-vm:jterrazz-mac-mini",
+            "default": "new-vm:mac-mini",
             "swaps": true
           },
           {
@@ -2759,15 +2759,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "new-vm:jterrazz-mac-mini",
+                    "value": "new-vm:mac-mini",
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-mac-mini",
+                    "value": "new-server:mac-mini",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-mac-mini",
+                "default": "new-vm:mac-mini",
                 "swaps": true
               },
               {
@@ -2836,9 +2836,9 @@
                 "taken": [
                   "api",
                   "infra",
-                  "jterrazz-mac-mini",
-                  "jterrazz-macbook-pro",
-                  "linux-1"
+                  "linux-1",
+                  "mac-mini",
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -2869,7 +2869,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-mac-mini"
+          "open-new:new-vm:mac-mini"
         ]
       },
       "icon": "plus",
@@ -2884,7 +2884,7 @@
       "label": "Open in Terminal",
       "on": "menu",
       "priority": 2,
-      "id": "open-station@jterrazz-mac-mini",
+      "id": "open-station@mac-mini",
       "run": {
         "terminal": true,
         "argv": [
@@ -2991,9 +2991,9 @@
     ]
   },
   "live": [
-    "cpu:jterrazz-macbook-pro",
-    "memory:jterrazz-macbook-pro",
-    "net:jterrazz-macbook-pro",
-    "cpu:jterrazz-mac-mini"
+    "cpu:macbook-pro",
+    "memory:macbook-pro",
+    "net:macbook-pro",
+    "cpu:mac-mini"
   ]
 }

@@ -1,12 +1,12 @@
 {
     "now": "2026-11-04T10:00:00Z",
-    "this_mac": "jterrazz-macbook-pro",
+    "this_mac": "macbook-pro",
     "user": "jterrazz",
     "macs": {
-        "jterrazz-macbook-pro": {
+        "macbook-pro": {
             "engine": {},
             "preferences": {
-                "here": "jterrazz-macbook-pro",
+                "here": "macbook-pro",
                 "vm_user": "admin"
             },
             "power": {
@@ -17,7 +17,7 @@
                 "Charging": true
             }
         },
-        "jterrazz-mac-mini": {
+        "mac-mini": {
             "engine": {
                 "started_at": "2026-10-23T09:00:00Z"
             },
@@ -25,7 +25,7 @@
                 "Source": "ac"
             },
             "preferences": {
-                "here": "jterrazz-mac-mini",
+                "here": "mac-mini",
                 "vm_user": "admin"
             }
         }

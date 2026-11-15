@@ -56,8 +56,8 @@ var Levels pagemenubar.Levels // value: the confirmation rule the machine pages 
 func menubarHere() page.Context { return page.Context{Machine: thisMacName, Kind: "computer"} }
 
 const (
-	thisMacName = "jterrazz-macbook-pro"
-	miniName    = "jterrazz-mac-mini"
+	thisMacName = "macbook-pro"
+	miniName    = "mac-mini"
 )
 
 // value: the two-macs world of USE-CASES §0.2 as the menu bar reads it:
@@ -78,7 +78,7 @@ func twoMacs() model.AllMachines {
 }
 
 func twoMacsPorts() ports.AllMachines {
-	public := "jterrazz-macbook-pro.tail77a797.ts.net"
+	public := "macbook-pro.tail77a797.ts.net"
 	return ports.AllMachines{Schema: ports.AllMachinesSchema, Macs: []ports.MacPorts{
 		{Name: thisMacName, ThisMac: true, Reachable: true, Engine: ports.EngineInfo{Running: true}, PublicName: public, Serve: "on", HTTPS: "port",
 			Shared: []ports.SharedPort{

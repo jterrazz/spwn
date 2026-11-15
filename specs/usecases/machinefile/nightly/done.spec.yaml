@@ -2,14 +2,14 @@ description: 'past 03:00 the engine moves each app within its range; the apps li
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [gh, { name: node, version: '22' }]
       exit: 0
-    - command: 'apply --machinefile jterrazz-macbook-pro'
+    - command: 'apply --machinefile macbook-pro'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of gh
@@ -42,7 +42,7 @@ runs:
       stdout: |
           # Needs you
           ✗	com.jterrazz.brain.x-snapshot is failing, last exit 2	station background remove com.jterrazz.brain.x-snapshot
-          ◐	node 25.1.0 available: change '22' to '25'	~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml
+          ◐	node 25.1.0 available: change '22' to '25'	~/.config/station/machinefiles/macbook-pro.machine.yaml
           ◐	Firewall: off	System Settings > Network > Firewall
           ◐	~/.tart is misplaced	station disk move ~/.tart
           ◐	com.bjango.istatmenus.installer is left over	sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
@@ -56,10 +56,10 @@ runs:
           	Background	● 10 · ✗ 1 failing · ◐ 3 orphans
           	Awake	○ sleeps normally
           	VMs	○ api stopped · ● linux-1 running
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.night | del(.at)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.night | del(.at)'' world.json'
       exit: 0
       stdout: |
-          {"machinefile":"jterrazz-macbook-pro","moved":[{"app":"node","was":"22.11.0","now":"22.14.0","range":"22"},{"app":"gh","was":"2.97.0","now":"2.98.0","range":"latest"}],"waiting":[{"app":"node","newest":"25.1.0","range":"22","moved":"25","file":"~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml"}]}
+          {"machinefile":"macbook-pro","moved":[{"app":"node","was":"22.11.0","now":"22.14.0","range":"22"},{"app":"gh","was":"2.97.0","now":"2.98.0","range":"latest"}],"waiting":[{"app":"node","newest":"25.1.0","range":"22","moved":"25","file":"~/.config/station/machinefiles/macbook-pro.machine.yaml"}]}
     - command: 'upgrade'
       exit: 0
       stdout: |
@@ -68,4 +68,4 @@ runs:
           ●	node	22.14.0	mise	within 22
           ●	gh	2.98.0	brew
           # Waiting
-          ◐	node		25.1.0 available: change '22' to '25' in ~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml
+          ◐	node		25.1.0 available: change '22' to '25' in ~/.config/station/machinefiles/macbook-pro.machine.yaml

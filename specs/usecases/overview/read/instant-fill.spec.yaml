@@ -7,7 +7,7 @@ env:
 runs:
     - command: 'disk > /dev/null'
       exit: 0
-    - command: 'world slow jterrazz-macbook-pro 3s'
+    - command: 'world slow macbook-pro 3s'
       exit: 0
     - command: '--version >/dev/null; terminal --size 120x40 /usr/bin/env -u NO_COLOR COLUMNS=120 "$STATION" overview'
       stdin: |
@@ -17,7 +17,7 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · jterrazz-macbook-pro · 8 things need you · Engine running
+          This Mac · macbook-pro · 8 things need you · Engine running
 
           Needs you
             ✗ com.jterrazz.brain.x-snapshot is failing, last exit 2

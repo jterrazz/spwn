@@ -6,7 +6,7 @@ runs:
       stdout: |
           	On mac-mini:
           ●	HTTPS links off	shared ports get an http:// link
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-mac-mini"].preferences.ports.https, .macs["jterrazz-macbook-pro"].preferences.ports.https]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["mac-mini"].preferences.ports.https, .macs["macbook-pro"].preferences.ports.https]'' world.json'
       exit: 0
       stdout: |
           ["off",null]

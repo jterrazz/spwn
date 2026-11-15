@@ -7,7 +7,7 @@
   },
   "state": "failed",
   "error": {
-    "message": "no Machinefile named jterrazz-macbook-pro",
+    "message": "no Machinefile named macbook-pro",
     "hint": "station explain --machinefile <name>"
   }
 }

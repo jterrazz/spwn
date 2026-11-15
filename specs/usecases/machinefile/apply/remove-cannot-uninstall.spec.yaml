@@ -2,20 +2,20 @@ description: 'an extra station cannot uninstall, a script install, is said and k
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.script = {installed: {"https://claude.ai/install.sh": "2.0.14"}} | .macs["jterrazz-macbook-pro"].stores.ledger = [{package: "claude", method: "script", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.script = {installed: {"https://claude.ai/install.sh": "2.0.14"}} | .macs["macbook-pro"].stores.ledger = [{package: "claude", method: "script", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	claude	script	installed by station for jterrazz-macbook-pro, station cannot uninstall it: kept, and yours: remove it by hand if you want
+          ?	claude	script	installed by station for macbook-pro, station cannot uninstall it: kept, and yours: remove it by hand if you want
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	claude	2.0.14	script	station cannot uninstall it: kept, and yours: remove it by hand if you want

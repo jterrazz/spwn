@@ -9,7 +9,7 @@ runs:
       exit: 0
       stdout: |
           {"Tone":"ok","Sentence":"2 ports listen.","Line":"2 are shared."}
-    - command: 'world listen jterrazz-macbook-pro "*:5000" ControlCenter'
+    - command: 'world listen macbook-pro "*:5000" ControlCenter'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.verdict'''
       stdin: |

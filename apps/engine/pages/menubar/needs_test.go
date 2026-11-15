@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	needsPro  = "jterrazz-macbook-pro"
-	needsMini = "jterrazz-mac-mini"
+	needsPro  = "macbook-pro"
+	needsMini = "mac-mini"
 )
 
 var needsNow = time.Date(2026, 11, 7, 14, 10, 0, 0, time.UTC)

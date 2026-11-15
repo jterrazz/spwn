@@ -4,7 +4,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /bin/mkdir -p Developer/notes data'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -21,7 +21,7 @@ runs:
       exit: 0
     - command: 'machines create web --from studio-linux >/dev/null'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -40,7 +40,7 @@ runs:
           ●	Has an address	192.168.64.5
           ●	SSH answers
           ●	web	restarted
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {folders: .booted.folders, mounted: [.guest.ran[]? | select(startswith("sudo bash -s -- "))] | last}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["web"] | {folders: .booted.folders, mounted: [.guest.ran[]? | select(startswith("sudo bash -s -- "))] | last}'' world.json'
       exit: 0
       stdout: |
           {"folders":["{{workdir}}/data:tag=station-1"],"mounted":"sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '/data' rw"}

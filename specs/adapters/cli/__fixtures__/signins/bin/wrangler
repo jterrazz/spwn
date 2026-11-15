@@ -6,7 +6,7 @@ printf 'wrangler %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     "whoami --json")
         echo ' ⛅️ wrangler 4.162.0'
-        if [ -f "$HOME/wrangler.in" ]; then echo '{"loggedIn":true,"email":"admin@jterrazz.com"}'; else echo '{"loggedIn":false}'; fi ;;
+        if [ -f "$HOME/wrangler.in" ]; then echo '{"loggedIn":true,"email":"you@example.com"}'; else echo '{"loggedIn":false}'; fi ;;
     "login --device")
         /bin/cat "$HOME/outputs/wrangler-login.txt"
         /bin/sleep 1

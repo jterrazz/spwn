@@ -265,7 +265,7 @@ func PlayWorld(base []byte) []byte {
 	if err != nil {
 		panic(err)
 	}
-	out, err = inherit(out, base, map[string]string{proName: "", miniMac: "jterrazz-mac-mini"})
+	out, err = inherit(out, base, map[string]string{proName: "", miniMac: "mac-mini"})
 	if err != nil {
 		panic(err)
 	}
@@ -366,8 +366,8 @@ func playAccounts(f Scene, mac string) (ids map[string]accounts.Identity, secret
 		}
 	}
 	if mac != proName {
-		ids[catalog.ProviderGitHub] = accounts.Identity{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Who: []string{"jterrazz-agent"}, Scopes: []string{"repo"}}
-		ids[catalog.ProviderClaude] = accounts.Identity{Provider: catalog.ProviderClaude, State: catalog.StateOK, Who: []string{"admin@jterrazz.com"}, Scopes: []string{"max"}}
+		ids[catalog.ProviderGitHub] = accounts.Identity{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Who: []string{"ci-agent"}, Scopes: []string{"repo"}}
+		ids[catalog.ProviderClaude] = accounts.Identity{Provider: catalog.ProviderClaude, State: catalog.StateOK, Who: []string{"you@example.com"}, Scopes: []string{"max"}}
 	}
 	for _, s := range loansOf(f, model.MacView{Name: mac, VMs: vmsOf(f, mac)}) {
 		for _, l := range s {

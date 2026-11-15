@@ -1,9 +1,9 @@
 description: 'a Mac of a model station has never seen is judged by what it reports: no battery, the desktop rule'
 env: unknown-model
 runs:
-    - command: 'world reads jterrazz-mac-mini display-sleep 60'
+    - command: 'world reads mac-mini display-sleep 60'
       exit: 0
-    - command: 'settings --on jterrazz-mac-mini | /usr/bin/grep -E "screen-lock|remote-login"'
+    - command: 'settings --on mac-mini | /usr/bin/grep -E "screen-lock|remote-login"'
       exit: 0
       stdout: |
           ●	screen-lock	as expected · locks 5 min after the display turns off

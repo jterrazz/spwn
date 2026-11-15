@@ -5,8 +5,8 @@ runs:
       exit: 0
       stdout: |
           # Machines
-          ●	jterrazz-macbook-pro	Mac	read
-          ✗	jterrazz-mac-mini	Mac	does not answer · last answer 03:12
+          ●	macbook-pro	Mac	read
+          ✗	mac-mini	Mac	does not answer · last answer 03:12
           ●	linux-1	Workspace	read
           ?	api	Workspace	stopped · not read since the engine started
           –	infra	Server	not checked: station does not manage its settings
@@ -19,4 +19,4 @@ runs:
     - command: 'settings --all-machines --json | /usr/bin/jq -c ''.findings'''
       exit: 0
       stdout: |
-          [{"machine":"jterrazz-mac-mini","severity":"broken","section":"settings","subject":"jterrazz-mac-mini","text":"jterrazz-mac-mini: does not answer, last answer 03:12","fix":{"call":null,"command":null,"path":null}},{"machine":"api","severity":"needs-a-look","section":"settings","subject":"api","text":"api: stopped, not read since the engine started","fix":{"call":null,"command":null,"path":null}}]
+          [{"machine":"mac-mini","severity":"broken","section":"settings","subject":"mac-mini","text":"mac-mini: does not answer, last answer 03:12","fix":{"call":null,"command":null,"path":null}},{"machine":"api","severity":"needs-a-look","section":"settings","subject":"api","text":"api: stopped, not read since the engine started","fix":{"call":null,"command":null,"path":null}}]

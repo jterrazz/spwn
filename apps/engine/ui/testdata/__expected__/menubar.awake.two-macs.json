@@ -3,7 +3,7 @@
   "id": "menubar.awake",
   "command": "awake",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer"
   },
   "state": "ready",
@@ -41,7 +41,7 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro",
+            "id": "macbook-pro",
             "mark": "ok",
             "label": "Keep This Mac awake",
             "cells": [
@@ -145,7 +145,7 @@
       "label": "1 hr",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ],
       "priority": 1,
       "mutates": true,
@@ -164,7 +164,7 @@
       "label": "4 hr",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ],
       "priority": 1,
       "mutates": true,
@@ -183,7 +183,7 @@
       "label": "Until 18:00",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ],
       "priority": 1,
       "mutates": true,
@@ -247,7 +247,7 @@
       "label": "Lid closed",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ],
       "priority": 2,
       "mutates": true,
@@ -266,7 +266,7 @@
       "label": "On battery",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ],
       "priority": 2,
       "mutates": true,
@@ -285,7 +285,7 @@
       "label": "Let it sleep",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ],
       "priority": 3,
       "mutates": true,

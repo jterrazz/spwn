@@ -1,13 +1,13 @@
 description: 'a process This Mac binds to its Tailscale address only is Private, never red'
 env: two-macs
 runs:
-    - command: 'world listen jterrazz-macbook-pro 100.101.102.103:8443 caddy'
+    - command: 'world listen macbook-pro 100.101.102.103:8443 caddy'
       exit: 0
     - command: 'ports | /usr/bin/grep -e 8443 -e "^#"'
       exit: 0
       stdout: |
           # Private: shared with you on Tailscale	3 ●
-          ●	jterrazz-macbook-pro	8443	private		on Tailscale	caddy
+          ●	macbook-pro	8443	private		on Tailscale	caddy
     - command: 'ports --json | /usr/bin/jq -c ''[[.ports[] | select(.port == 8443) | [.class, .bind]], .findings]'''
       exit: 0
       stdout: |

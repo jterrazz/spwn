@@ -29,8 +29,8 @@ func serverServing(served *ports.AllMachines, edit func(*model.VM)) page.Page {
 		edit(&vm)
 	}
 	fleet := &model.AllMachines{Read: serverNow, Macs: []model.MacView{
-		{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true},
-		{Name: "jterrazz-mac-mini", Reachable: true, VMs: []model.VM{vm}},
+		{Name: "macbook-pro", ThisMac: true, Reachable: true},
+		{Name: "mac-mini", Reachable: true, VMs: []model.VM{vm}},
 	}}
 	page.Strict(true)
 	defer page.Strict(false)
@@ -161,9 +161,9 @@ func TestTheLatencyCardSaysLatencyOnly(t *testing.T) {
 // that pushes that Mac's page.
 func TestAServersFactsLinkToTheMacItIsOn(t *testing.T) {
 	for _, part := range sectionOf(serverOn(nil), SectionSummary).Caption {
-		if part.Text == "on jterrazz-mac-mini" {
-			if part.Nav != machinePage("jterrazz-mac-mini") {
-				t.Fatalf("on jterrazz-mac-mini pushes %q, want the Mac's page", part.Nav)
+		if part.Text == "on mac-mini" {
+			if part.Nav != machinePage("mac-mini") {
+				t.Fatalf("on mac-mini pushes %q, want the Mac's page", part.Nav)
 			}
 			return
 		}
@@ -175,8 +175,8 @@ func TestAServersFactsLinkToTheMacItIsOn(t *testing.T) {
 // row, the address that reaches it: a public one the site its check asks
 // through its route, one on its tailnet device its name and port.
 func TestEveryPortAServerServesCopiesTheAddressThatReachesIt(t *testing.T) {
-	infra := machine.Ref{Name: "infra", On: "jterrazz-mac-mini"}
-	served := &ports.AllMachines{Macs: []ports.MacPorts{{Name: "jterrazz-mac-mini", Reachable: true, Ports: []ports.Port{
+	infra := machine.Ref{Name: "infra", On: "mac-mini"}
+	served := &ports.AllMachines{Macs: []ports.MacPorts{{Name: "mac-mini", Reachable: true, Ports: []ports.Port{
 		{Machine: infra, Port: 443, Process: "nginx", Reach: ports.Outside, Declared: &ports.Declaration{Machine: "infra", Port: 443, Via: catalog.RouteCloudflareTunnel}},
 		{Machine: infra, Port: 6443, Process: "kube-apiserver", Reach: ports.Tailnet, Device: true},
 	}}}}

@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"vault.new","in":{}}
       exit: 0
       stdout: |
-          {"intro":"It is kept in jterrazz-macbook-pro's Keychain; you can then grant it to a machine.","line":"","captures":[["gh","jterrazz",["repo"],"oauth-token","Kept as an OAuth token, the kind gh holds","GitHub · jterrazz"]]}
+          {"intro":"It is kept in macbook-pro's Keychain; you can then grant it to a machine.","line":"","captures":[["gh","jterrazz",["repo"],"oauth-token","Kept as an OAuth token, the kind gh holds","GitHub · jterrazz"]]}

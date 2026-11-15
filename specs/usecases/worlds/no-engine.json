@@ -1,14 +1,14 @@
 {
     "now": "2026-11-04T10:00:00Z",
-    "this_mac": "jterrazz-macbook-pro",
+    "this_mac": "macbook-pro",
     "user": "jterrazz",
     "registry": {
         "station-linux": "2026.11.03"
     },
     "macs": {
-        "jterrazz-macbook-pro": {
+        "macbook-pro": {
             "preferences": {
-                "here": "jterrazz-macbook-pro",
+                "here": "macbook-pro",
                 "vm_user": "admin"
             },
             "power": {

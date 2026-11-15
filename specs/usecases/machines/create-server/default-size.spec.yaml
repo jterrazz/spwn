@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           {"kind":"server","lifetime":"always-on","cpus":4,"memory_bytes":8589934592,"disk_bytes":50000000000}
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms["infra-2"].size'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms["infra-2"].size'' world.json'
       exit: 0
       stdout: |
           {"CPUs":4,"Memory":8589934592,"Disk":50000000000}

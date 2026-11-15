@@ -4,7 +4,7 @@ runs:
     - command: 'awake 4h'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	stays awake until 14:00
+          ●	macbook-pro	stays awake until 14:00
     - command: 'world battery 30'
       exit: 0
     - command: 'overview --all | /usr/bin/grep -e ''battery'' -e ''	Awake'''
@@ -12,7 +12,7 @@ runs:
       stdout: |
           ◐	Awake: battery 30 %, it stops at 20 %
           	Awake	● until 14:00
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].power.holds, .told]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].power.holds, .told]'' world.json'
       exit: 0
       stdout: |
           [["station: station awake 4h"],null]

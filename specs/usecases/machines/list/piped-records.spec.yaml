@@ -4,13 +4,13 @@ runs:
     - command: 'machines'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB
-          ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running
-          ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
-    - command: 'machines | /usr/bin/awk -F''\t'' ''$4 == "jterrazz-mac-mini"'' | /usr/bin/cut -f2'
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: 'machines | /usr/bin/awk -F''\t'' ''$4 == "mac-mini"'' | /usr/bin/cut -f2'
       exit: 0
       stdout: |
-          jterrazz-mac-mini
+          mac-mini
           infra

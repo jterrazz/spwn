@@ -8,11 +8,11 @@ runs:
     - command: 'awake --until-done linux-1'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	stays awake until linux-1 is done
+          ●	macbook-pro	stays awake until linux-1 is done
     - command: 'awake | /usr/bin/sed -n 1p'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Awake until linux-1 is done
+          ●	macbook-pro	Awake until linux-1 is done
     - command: 'world agent-end linux-1 s-1 "tests pass"'
       exit: 0
     - command: 'world advance 1m'
@@ -22,8 +22,8 @@ runs:
     - command: 'awake | /usr/bin/sed -n 1p'
       exit: 0
       stdout: |
-          ○	jterrazz-macbook-pro	Sleeps normally
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power.holds'' world.json'
+          ○	macbook-pro	Sleeps normally
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power.holds'' world.json'
       exit: 0
       stdout: |
           null

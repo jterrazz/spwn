@@ -23,7 +23,7 @@ runs:
           ●	discord	400 MB freed
           ●	notion	200 MB freed
           ●	Freed	34.8 GB	nothing is lost
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].disk | {free, kept: (.files | keys)}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk | {free, kept: (.files | keys)}'' world.json'
       exit: 0
       stdout: |
           {"free":422800000000,"kept":["~/.claude/projects/x","~/.gnupg/pubring.kbx","~/.ollama/models/x","~/.ssh/known_hosts","~/.tart/vms/linux-dev/disk.img","~/Library/Application Support/Zed/db/x","~/Library/Developer/CoreSimulator/Devices/A/data","~/Library/Group Containers/HUAQ24HBR6.dev.orbstack/data.img"]}

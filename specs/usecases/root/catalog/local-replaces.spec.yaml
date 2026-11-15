@@ -1,7 +1,7 @@
 description: 'an owner''s package replaces the built-in one whole in every command: jq lives everywhere'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/jq.yaml'
       stdin: |
           package: station.package/v1
           kind: app

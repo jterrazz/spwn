@@ -1,8 +1,8 @@
 {
     "now": "2026-11-04T10:00:00Z",
-    "this_mac": "jterrazz-macbook-pro",
+    "this_mac": "macbook-pro",
     "macs": {
-        "jterrazz-macbook-pro": {
+        "macbook-pro": {
             "engine": {
                 "started_at": "2026-11-01T10:00:00Z"
             },
@@ -58,9 +58,9 @@
                 }
             },
             "preferences": {
-                "here": "jterrazz-macbook-pro",
+                "here": "macbook-pro",
                 "macs": {
-                    "jterrazz-mac-mini": {
+                    "mac-mini": {
                         "user": "jterrazz.agent"
                     }
                 },
@@ -249,14 +249,14 @@
             "tailnet": {
                 "self": {
                     "ID": "n1",
-                    "Name": "jterrazz-macbook-pro",
-                    "DNSName": "jterrazz-macbook-pro.tail1234.ts.net",
+                    "Name": "macbook-pro",
+                    "DNSName": "macbook-pro.tail1234.ts.net",
                     "IP": "100.64.0.1",
                     "Online": true,
                     "Sharing": {
                         "Backend": "Running",
                         "On": true,
-                        "DNSName": "jterrazz-macbook-pro.tail1234.ts.net"
+                        "DNSName": "macbook-pro.tail1234.ts.net"
                     },
                     "Client": {
                         "Path": "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
@@ -282,19 +282,19 @@
                 "blocks": {
                     "api": {
                         "user": "admin",
-                        "behind": "jterrazz-macbook-pro",
+                        "behind": "macbook-pro",
                         "this_mac": true
                     },
                     "infra": {
                         "user": "admin",
-                        "behind": "jterrazz-mac-mini"
+                        "behind": "mac-mini"
                     },
-                    "jterrazz-mac-mini": {
+                    "mac-mini": {
                         "user": "jterrazz.agent"
                     },
                     "linux-1": {
                         "user": "admin",
-                        "behind": "jterrazz-macbook-pro",
+                        "behind": "macbook-pro",
                         "this_mac": true
                     }
                 }
@@ -345,7 +345,7 @@
                 },
                 "claude": {
                     "State": "ok",
-                    "Who": ["admin@jterrazz.com"],
+                    "Who": ["you@example.com"],
                     "Scopes": ["max"]
                 },
                 "tailscale": {
@@ -353,17 +353,17 @@
                 },
                 "cloudflare": {
                     "State": "ok",
-                    "Who": ["admin@jterrazz.com"],
+                    "Who": ["you@example.com"],
                     "Source": "wrangler"
                 },
                 "git": {
                     "State": "ok",
-                    "Who": ["Jean-Baptiste Terrazzoni", "admin@jterrazz.com"]
+                    "Who": ["Jean-Baptiste Terrazzoni", "you@example.com"]
                 },
                 "ssh": {
                     "State": "ok",
                     "Who": ["1 key"],
-                    "Scopes": ["admin@jterrazz.com"]
+                    "Scopes": ["you@example.com"]
                 },
                 "docker": {
                     "State": "absent",
@@ -589,7 +589,7 @@
                 }
             }
         },
-        "jterrazz-mac-mini": {
+        "mac-mini": {
             "engine": {
                 "started_at": "2026-10-23T09:00:00Z"
             },
@@ -597,7 +597,7 @@
                 "Source": "ac"
             },
             "preferences": {
-                "here": "jterrazz-mac-mini",
+                "here": "mac-mini",
                 "never_sleeps": true,
                 "vm_user": "admin"
             },
@@ -732,7 +732,7 @@
             "identities": {
                 "github": {
                     "State": "ok",
-                    "Who": ["jterrazz-agent"],
+                    "Who": ["ci-agent"],
                     "Scopes": ["repo"]
                 }
             },
@@ -751,14 +751,14 @@
                         }
                     ],
                     "ID": "n2",
-                    "Name": "jterrazz-mac-mini",
-                    "DNSName": "jterrazz-mac-mini.tail1234.ts.net",
+                    "Name": "mac-mini",
+                    "DNSName": "mac-mini.tail1234.ts.net",
                     "IP": "100.64.0.2",
                     "Online": true,
                     "Sharing": {
                         "Backend": "Running",
                         "On": true,
-                        "DNSName": "jterrazz-mac-mini.tail1234.ts.net"
+                        "DNSName": "mac-mini.tail1234.ts.net"
                     },
                     "Client": {
                         "Path": "/usr/local/bin/tailscale",

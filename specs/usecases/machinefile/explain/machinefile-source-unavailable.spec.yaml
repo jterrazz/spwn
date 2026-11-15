@@ -1,7 +1,7 @@
 description: 'a shared source with no repository at its url stops explain, naming the source'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'explain --machinefile station-macos'
       exit: 1

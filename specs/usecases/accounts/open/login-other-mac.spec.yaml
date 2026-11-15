@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","call":"accounts.open","in":{"Machine":"infra","Exchange":"ex-9"}}
       exit: 0
       stdout: |
-          {"code":"login.other-mac","subject":"jterrazz-mac-mini","message":"this sign-in runs on jterrazz-mac-mini, which another Mac holds"}
+          {"code":"login.other-mac","subject":"mac-mini","message":"this sign-in runs on mac-mini, which another Mac holds"}

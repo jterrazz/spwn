@@ -1,7 +1,7 @@
 description: 'a create its engine died in reads stopped and half made, its memory given back'
 env: creating
 runs:
-    - command: 'world reboot jterrazz-macbook-pro'
+    - command: 'world reboot macbook-pro'
       exit: 0
     - command: 'machines --json | /usr/bin/jq -c ''.macs[0] | [(.vms[] | [.name, .state, .detail, .birth]), .capacity.free_bytes]'''
       exit: 0

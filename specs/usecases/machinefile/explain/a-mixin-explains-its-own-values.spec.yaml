@@ -1,7 +1,7 @@
 description: 'a mixin explains the values its own chain says, none judged against a machine'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/dev-tools.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/dev-tools.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: dev-tools

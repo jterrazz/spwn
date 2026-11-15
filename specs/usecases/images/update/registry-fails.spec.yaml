@@ -8,7 +8,7 @@ runs:
       stderr: |
           Error: the registry did not answer for station-linux: the registry does not answer, as the world scripted it
           Hint: station images update station-linux
-    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "jterrazz-macbook-pro") | "\(.version) \(.newest)"'''
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | "\(.version) \(.newest)"'''
       exit: 0
       stdout: |
           2026.11.01 true

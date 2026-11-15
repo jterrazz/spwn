@@ -4,5 +4,5 @@ runs:
     - command: 'machines create big --server --memory 60G'
       exit: 2
       stderr: |
-          Error: not enough memory on jterrazz-macbook-pro: 60 GB asked, 4 GB left for VMs
+          Error: not enough memory on macbook-pro: 60 GB asked, 4 GB left for VMs
           Hint: ask for less: --memory 4G

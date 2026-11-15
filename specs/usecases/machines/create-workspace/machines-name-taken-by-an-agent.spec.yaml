@@ -31,6 +31,6 @@ runs:
       exit: 0
       stdout: |
           # Agents	3 ●
-          ●	docs-bot	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	1m ago
-          ●	linux-2·2	claudecode	working	Write the release notes	linux-1	jterrazz-macbook-pro	49s ago
-          ●	linux-3	claudecode	working	Review the auth refresh	linux-3	jterrazz-macbook-pro	12s ago
+          ●	docs-bot	claudecode	working	Write the changelog	linux-1	macbook-pro	1m ago
+          ●	linux-2·2	claudecode	working	Write the release notes	linux-1	macbook-pro	49s ago
+          ●	linux-3	claudecode	working	Review the auth refresh	linux-3	macbook-pro	12s ago

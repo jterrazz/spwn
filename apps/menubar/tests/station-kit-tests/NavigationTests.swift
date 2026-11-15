@@ -112,7 +112,7 @@ final class NavigationPathTests: XCTestCase {
     func testTheWayBackIsWordedByThePageUnderTheTop() {
         XCTAssertEqual(Navigation.title(Navigation.ports, nil), "Ports")
         XCTAssertEqual(Navigation.title(Navigation.page(Navigation.ports, of: "infra"), nil), "Ports")
-        XCTAssertEqual(Navigation.title(PageID.of("jterrazz-mac-mini"), try? Tree.page("menubar.mac.mini")), "mac-mini")
+        XCTAssertEqual(Navigation.title(PageID.of("mac-mini"), try? Tree.page("menubar.mac.mini")), "mac-mini")
     }
 
     // invariant: a page is swapped once the click that asked for it ended,

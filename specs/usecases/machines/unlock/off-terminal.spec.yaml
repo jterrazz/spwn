@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: machines unlock needs a terminal
           Hint: run it in a terminal
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].locked'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].locked'' world.json'
       exit: 0
       stdout: |
           true

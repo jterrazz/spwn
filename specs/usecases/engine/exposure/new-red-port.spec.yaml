@@ -1,7 +1,7 @@
 description: 'a port the mini starts listening on every interface needs you within 5 minutes, and is told once'
 env: two-macs
 runs:
-    - command: 'world listen jterrazz-mac-mini "*:9000" node'
+    - command: 'world listen mac-mini "*:9000" node'
       exit: 0
     - command: 'world advance 3m'
       exit: 0
@@ -18,18 +18,18 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.told[] | [.Kind, .Text]'' world.json'
       exit: 0
       stdout: |
-          ["port_exposed","jterrazz-mac-mini: port 9000 is reachable outside Tailscale"]
-    - command: 'overview --on jterrazz-mac-mini | /usr/bin/grep 9000'
+          ["port_exposed","mac-mini: port 9000 is reachable outside Tailscale"]
+    - command: 'overview --on mac-mini | /usr/bin/grep 9000'
       exit: 0
       stdout: |
           ✗	port 9000 is reachable outside Tailscale
     - command: 'ports --all-machines | /usr/bin/grep 9000'
       exit: 0
       stdout: |
-          ✗	jterrazz-mac-mini	9000	needs you	node	*:9000 all interfaces	declared no
+          ✗	mac-mini	9000	needs you	node	*:9000 all interfaces	declared no
     - command: 'world advance 5m'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq -c ''.told[] | [.Kind, .Text]'' world.json'
       exit: 0
       stdout: |
-          ["port_exposed","jterrazz-mac-mini: port 9000 is reachable outside Tailscale"]
+          ["port_exposed","mac-mini: port 9000 is reachable outside Tailscale"]

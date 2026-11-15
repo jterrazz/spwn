@@ -4,4 +4,4 @@ runs:
     - command: 'machines ssh mac-mini'
       exit: 0
       stdout: |
-          ssh jterrazz.agent@jterrazz-mac-mini
+          ssh jterrazz.agent@mac-mini

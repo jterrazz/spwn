@@ -53,7 +53,7 @@ type steps struct{ seen []string }
 func (s *steps) Step(task, _ string)       { s.seen = append(s.seen, task) }
 func (s *steps) Done(task string, _ error) { s.seen = append(s.seen, task+" done") }
 
-var laptop = machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Computer}
+var laptop = machine.Profile{Ref: machine.Ref{Name: "macbook-pro"}, Kind: machine.Computer}
 
 func server(t *testing.T) serve.Server {
 	t.Helper()
@@ -175,14 +175,14 @@ func TestACallForAnotherMachineRidesFarAndOneForThisMachineRunsHere(t *testing.T
 	s.Far = far
 	c := dialed(t.Context(), s)
 	var out stopOut
-	if err := c.Call(t.Context(), "machines.stop", machine.Ref{Name: "jterrazz-mac-mini"}, stopIn{VM: "infra", Confirm: "infra"}, &out, nil); err != nil || out.Wanted != "stopped there" {
+	if err := c.Call(t.Context(), "machines.stop", machine.Ref{Name: "mac-mini"}, stopIn{VM: "infra", Confirm: "infra"}, &out, nil); err != nil || out.Wanted != "stopped there" {
 		t.Fatalf("a call for mac-mini: %+v, %v, want the far answer", out, err)
 	}
 	out = stopOut{}
 	if err := c.Call(t.Context(), "machines.stop", laptop.Ref, stopIn{VM: "linux-1", Confirm: "linux-1"}, &out, nil); err != nil || out.Wanted != "stopped" {
 		t.Fatalf("a call for this Mac: %+v, %v, want it run here", out, err)
 	}
-	if strings.Join(far.asked, ",") != "jterrazz-mac-mini machines.stop" {
+	if strings.Join(far.asked, ",") != "mac-mini machines.stop" {
 		t.Fatalf("far was asked %v, want mac-mini's stop alone", far.asked)
 	}
 }

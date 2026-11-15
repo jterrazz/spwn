@@ -3,18 +3,18 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].engine.menubar = "closed"'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5; do "$STATION" world advance 1m; done; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].engine.activity | to_entries[] | .key as $m | def gaps: map(.at | fromdate) as $t | [range(1; $t | length) | $t[.] - $t[. - 1]]; (.value.series.fine | gaps) as $fine | (.value.series.coarse | gaps) as $coarse | "\($m), the menu bar closed: never closer than 60 s: \($fine | min >= 60), never 2 min without one: \($coarse | max < 120)"'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].engine.menubar = "closed"'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5; do "$STATION" world advance 1m; done; /usr/bin/jq -r ''.macs["macbook-pro"].engine.activity | to_entries[] | .key as $m | def gaps: map(.at | fromdate) as $t | [range(1; $t | length) | $t[.] - $t[. - 1]]; (.value.series.fine | gaps) as $fine | (.value.series.coarse | gaps) as $coarse | "\($m), the menu bar closed: never closer than 60 s: \($fine | min >= 60), never 2 min without one: \($coarse | max < 120)"'' world.json'
       exit: 0
       stdout: |
-          jterrazz-macbook-pro, the menu bar closed: never closer than 60 s: true, never 2 min without one: true
           linux-1, the menu bar closed: never closer than 60 s: true, never 2 min without one: true
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].engine.menubar = "open"'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5; do "$STATION" world advance 2s; done; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].engine.activity | to_entries[] | .key as $m | (.value.series.fine[-6:] | map(.at | fromdate)) as $t | [range(1; $t | length) | $t[.] - $t[. - 1]] | "\($m), the menu bar open: sampled every 2 s: \(min == 2)"'' world.json'
+          macbook-pro, the menu bar closed: never closer than 60 s: true, never 2 min without one: true
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].engine.menubar = "open"'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5; do "$STATION" world advance 2s; done; /usr/bin/jq -r ''.macs["macbook-pro"].engine.activity | to_entries[] | .key as $m | (.value.series.fine[-6:] | map(.at | fromdate)) as $t | [range(1; $t | length) | $t[.] - $t[. - 1]] | "\($m), the menu bar open: sampled every 2 s: \(min == 2)"'' world.json'
       exit: 0
       stdout: |
-          jterrazz-macbook-pro, the menu bar open: sampled every 2 s: true
           linux-1, the menu bar open: sampled every 2 s: false
-    - command: '--version >/dev/null; /usr/bin/jq -r ''.now'' world.json > shown; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].engine |= (.menubar = "closed" | .watching = ["linux-1"])'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5; do "$STATION" world advance 2s; done; /usr/bin/jq -r --arg shown "$(/bin/cat shown)" ''.macs["jterrazz-macbook-pro"].engine.activity | to_entries[] | .key as $m | ([.value.series.fine[] | select(.at > $shown) | .at | fromdate]) as $t | [range(1; $t | length) | $t[.] - $t[. - 1]] | "\($m), linux-1 shown: sampled every 2 s: \(min == 2)"'' world.json'
+          macbook-pro, the menu bar open: sampled every 2 s: true
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.now'' world.json > shown; /usr/bin/jq ''.macs["macbook-pro"].engine |= (.menubar = "closed" | .watching = ["linux-1"])'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3 4 5; do "$STATION" world advance 2s; done; /usr/bin/jq -r --arg shown "$(/bin/cat shown)" ''.macs["macbook-pro"].engine.activity | to_entries[] | .key as $m | ([.value.series.fine[] | select(.at > $shown) | .at | fromdate]) as $t | [range(1; $t | length) | $t[.] - $t[. - 1]] | "\($m), linux-1 shown: sampled every 2 s: \(min == 2)"'' world.json'
       exit: 0
       stdout: |
-          jterrazz-macbook-pro, linux-1 shown: sampled every 2 s: false
           linux-1, linux-1 shown: sampled every 2 s: true
+          macbook-pro, linux-1 shown: sampled every 2 s: false

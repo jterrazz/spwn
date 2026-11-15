@@ -4,9 +4,9 @@ runs:
     - command: 'init --name other'
       exit: 2
       stderr: |
-          Error: this Mac is named "jterrazz-macbook-pro", not "other"
+          Error: this Mac is named "macbook-pro", not "other"
           Hint: run station init without --name
-    - command: 'init --name jterrazz-macbook-pro | /usr/bin/head -1'
+    - command: 'init --name macbook-pro | /usr/bin/head -1'
       exit: 0
       stdout: |
-          ●	name	jterrazz-macbook-pro
+          ●	name	macbook-pro

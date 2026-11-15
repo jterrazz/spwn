@@ -2,14 +2,14 @@ description: 'the upgrade of another Mac runs on that Mac, and writes that Mac''
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.machine.yaml'
+    - command: 'world edit mac-mini machinefiles/mac-mini.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-mac-mini
+          name: mac-mini
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply --on jterrazz-mac-mini'
+    - command: 'apply --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
@@ -18,17 +18,17 @@ runs:
           	On mac-mini:
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.0.0	brew
-    - command: 'upgrade --on jterrazz-mac-mini'
+    - command: 'upgrade --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	homebrew	5.0.1	script
           ●	jq	1.0.0	brew
-    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-mac-mini"].files["machinefiles/jterrazz-mac-mini.lock"]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["mac-mini"].files["machinefiles/mac-mini.lock"]'' world.json'
       exit: 0
       stdout: |+
           lock: station.lock/v1
-          machinefile: jterrazz-mac-mini
+          machinefile: mac-mini
           apps:
               - name: homebrew
                 method: script

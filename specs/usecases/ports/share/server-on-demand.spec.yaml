@@ -3,15 +3,15 @@ env: two-macs
 runs:
     - command: 'world listen infra "*:8080" nginx'
       exit: 0
-    - command: 'ports share infra 8080 --on jterrazz-mac-mini'
+    - command: 'ports share infra 8080 --on mac-mini'
       exit: 0
       stdout: |
-          https://jterrazz-mac-mini.tail1234.ts.net:40000
-    - command: 'ports --on jterrazz-mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 8080) | [.machine, .state, .reserved]]'''
+          https://mac-mini.tail1234.ts.net:40000
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 8080) | [.machine, .state, .reserved]]'''
       exit: 0
       stdout: |
           [["infra","shared",40000]]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"] | {reserved: [.stores.reservations[] | [.vm, .guest_port, .host_port]], shared: [.tailnet.shares[] | .Reserved]}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | {reserved: [.stores.reservations[] | [.vm, .guest_port, .host_port]], shared: [.tailnet.shares[] | .Reserved]}'' world.json'
       exit: 0
       stdout: |
           {"reserved":[["infra",8080,40000]],"shared":[40000]}

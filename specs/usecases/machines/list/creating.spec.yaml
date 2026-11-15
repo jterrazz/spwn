@@ -8,6 +8,6 @@ runs:
     - command: 'machines'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          	linux-4	Workspace	jterrazz-macbook-pro	Creating · ephemeral	4 CPU	8 GB	boot 2 of 4
-          	linux-5	Workspace	jterrazz-macbook-pro	Creating · persistent	4 CPU	4 GB	image 1 of 5
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          	linux-4	Workspace	macbook-pro	Creating · ephemeral	4 CPU	8 GB	boot 2 of 4
+          	linux-5	Workspace	macbook-pro	Creating · persistent	4 CPU	4 GB	image 1 of 5

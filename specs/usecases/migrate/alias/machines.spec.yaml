@@ -13,16 +13,16 @@ runs:
           ●	infra-2	is a server	always on · 4 CPU · 8 GB · 50 GB
       stderr: |
           → now: station machines create infra-2 --server
-    - command: 'machines probe jterrazz-macbook-pro | /usr/bin/head -1'
+    - command: 'machines probe macbook-pro | /usr/bin/head -1'
       exit: 0
       stdout: |
           # Needs you
       stderr: |
-          → now: station machines jterrazz-macbook-pro
-    - command: 'machines probe jterrazz-macbook-pro --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
+          → now: station machines macbook-pro
+    - command: 'machines probe macbook-pro --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
       exit: 0
       stdout: |
-          {"schema":"station.overview.read/v1","machine":"jterrazz-macbook-pro"}
+          {"schema":"station.overview.read/v1","machine":"macbook-pro"}
     - command: 'machines probe infra'
       exit: 0
       stdout: |

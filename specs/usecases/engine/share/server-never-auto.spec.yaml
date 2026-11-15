@@ -3,11 +3,11 @@ env: two-macs
 runs:
     - command: 'world listen infra "*:8080" nginx'
       exit: 0
-    - command: 'ports --on jterrazz-mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 8080) | [.machine, .class, .state, .reserved]]'''
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 8080) | [.machine, .class, .state, .reserved]]'''
       exit: 0
       stdout: |
           [["infra","private",null,null]]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"] | {reserved: [(.stores.reservations // [])[] | .guest_port], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | {reserved: [(.stores.reservations // [])[] | .guest_port], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
       exit: 0
       stdout: |
           {"reserved":[],"shared":[]}

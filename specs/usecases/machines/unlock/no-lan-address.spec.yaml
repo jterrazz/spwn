@@ -5,7 +5,7 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: 'world power-cut jterrazz-mac-mini'
+    - command: 'world power-cut mac-mini'
       exit: 0
     - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines unlock mac-mini'
       stdin: |
@@ -15,7 +15,7 @@ runs:
       stdout: |
           Error: mac-mini does not answer
           Hint: station machines
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].locked'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].locked'' world.json'
       exit: 0
       stdout: |
           true

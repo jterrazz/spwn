@@ -22,11 +22,11 @@ runs:
       exit: 0
       stdout: |
           ●	linux-1	starts · claudecode · Write the release notes
-    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-macbook-pro"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "macbook-pro"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'agents'
       exit: 0
       stdout: |
           # Agents	2 ●
-          ●	linux-1	claudecode	working	Write the release notes	linux-1	jterrazz-macbook-pro	27s ago
-          ●	docs-bot	claudecode	working	Write the changelog	ci-1	jterrazz-mac-mini	1m ago
+          ●	linux-1	claudecode	working	Write the release notes	linux-1	macbook-pro	27s ago
+          ●	docs-bot	claudecode	working	Write the changelog	ci-1	mac-mini	1m ago

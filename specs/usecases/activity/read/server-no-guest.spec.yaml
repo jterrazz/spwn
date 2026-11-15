@@ -3,7 +3,7 @@ env:
     - server-without-guest
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].meter = {"sample": {}, "top": {"cpu": [], "memory": []}, "processes": {"2001": {"cpu": 18, "memory": 16106127360, "started": "2026-10-23T10:00:00Z"}}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; "$STATION" activity --on infra'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].meter = {"sample": {}, "top": {"cpu": [], "memory": []}, "processes": {"2001": {"cpu": 18, "memory": 16106127360, "started": "2026-10-23T10:00:00Z"}}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; "$STATION" activity --on infra'
       exit: 0
       stdout: |
           	On infra:

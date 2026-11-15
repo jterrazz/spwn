@@ -1,27 +1,27 @@
 description: 'a Mac whose engine is stopped refuses a start sent through --on, reads as stopped, starts again'
 env: two-macs
 runs:
-    - command: 'machines stop infra --on jterrazz-mac-mini --confirm=infra'
+    - command: 'machines stop infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	infra	stopped · wanted state: Stopped
-    - command: 'engine stop --yes --on jterrazz-mac-mini'
+    - command: 'engine stop --yes --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	engine	the engine stopped
-    - command: 'machines start infra --on jterrazz-mac-mini'
+    - command: 'machines start infra --on mac-mini'
       exit: 1
       stderr: |
-          Error: the engine is stopped on jterrazz-mac-mini
+          Error: the engine is stopped on mac-mini
           Hint: station engine start
-    - command: 'engine --on jterrazz-mac-mini'
+    - command: 'engine --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
           ◐	engine	stopped · since 10:01 by station engine stop	station engine start
-    - command: 'engine start --on jterrazz-mac-mini'
+    - command: 'engine start --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

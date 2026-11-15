@@ -8,7 +8,7 @@ runs:
       stderr: |
           Error: linux-1 runs in no terminal station opened
           Hint: station agents
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].attached'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].attached'' world.json'
       exit: 0
       stdout: |
           null

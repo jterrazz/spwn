@@ -3,7 +3,7 @@ env:
     - engine-stopped
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].meter = {"sample": {"at": "2026-11-04T10:00:00Z", "cpu_busy": 3400000, "cpu_total": 10000000, "cpus": 10, "load": [2.8, 3.1, 2.9], "mem_used": 13314398618, "mem_total": 17179869184, "pressure": "normal", "swap_used": 1288490188, "disk_read": 182000000000, "disk_written": 96000000000, "net_in": 38000000000, "net_out": 4600000000, "boot": "2026-11-01T06:00:00Z"}, "per_second": {"cpu_busy": 340, "cpu_total": 1000, "disk_read": 4100000, "disk_written": 1300000, "net_in": 2100000, "net_out": 210000}, "top": {"cpu": [{"pid": 4100, "name": "Zed", "value": 9}], "memory": [{"pid": 4100, "name": "Zed", "value": 2040109465}]}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" activity | /usr/bin/head -4'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].meter = {"sample": {"at": "2026-11-04T10:00:00Z", "cpu_busy": 3400000, "cpu_total": 10000000, "cpus": 10, "load": [2.8, 3.1, 2.9], "mem_used": 13314398618, "mem_total": 17179869184, "pressure": "normal", "swap_used": 1288490188, "disk_read": 182000000000, "disk_written": 96000000000, "net_in": 38000000000, "net_out": 4600000000, "boot": "2026-11-01T06:00:00Z"}, "per_second": {"cpu_busy": 340, "cpu_total": 1000, "disk_read": 4100000, "disk_written": 1300000, "net_in": 2100000, "net_out": 210000}, "top": {"cpu": [{"pid": 4100, "name": "Zed", "value": 9}], "memory": [{"pid": 4100, "name": "Zed", "value": 2040109465}]}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" activity | /usr/bin/head -4'
       exit: 0
       stdout: |
           ●	This Mac	up 3d 8h · rates over 1 s

@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: restart-after-power-cut needs admin rights
           Hint: sudo station settings apply restart-after-power-cut
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].settings["restart-after-power-cut"], .as_root]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].settings["restart-after-power-cut"], .as_root]'' world.json'
       exit: 0
       stdout: |
           [null,null]

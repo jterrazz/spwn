@@ -12,4 +12,4 @@ runs:
       stdout: |
           ["machine","api",null,"no","Start the machine first"]
           ["machine","linux-1",null,"fits","Signed out here"]
-          ["machine","infra",null,"no","It is on jterrazz-mac-mini: grant from there"]
+          ["machine","infra",null,"no","It is on mac-mini: grant from there"]

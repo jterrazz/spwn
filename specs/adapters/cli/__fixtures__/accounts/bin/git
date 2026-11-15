@@ -2,6 +2,6 @@
 printf 'git %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     "config --global user.name") echo "Jean-Baptiste Terrazzoni" ;;
-    "config --global user.email") echo "admin@jterrazz.com" ;;
+    "config --global user.email") echo "you@example.com" ;;
     *) echo "stub git: unexpected invocation: $*" >&2; exit 97 ;;
 esac

@@ -9,7 +9,7 @@ runs:
       exit: 0
       stdout: |
           ●	station-linux	2026.11.03	is the newest
-    - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "jterrazz-macbook-pro")] | length'''
+    - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "macbook-pro")] | length'''
       exit: 0
       stdout: |
           3

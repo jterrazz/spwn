@@ -8,7 +8,7 @@ runs:
       stderr: |
           Error: a server stays behind its Mac: --network bridged is for macOS workspaces
           Hint: share its ports instead: station ports share
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms["infra-2"]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms["infra-2"]'' world.json'
       exit: 0
       stdout: |
           null

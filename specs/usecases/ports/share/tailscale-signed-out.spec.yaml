@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: Tailscale is signed out on This Mac: ports are local only
           Hint: open Tailscale and sign in
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].stores.reservations[] | select(.vm == "linux-1" and .guest_port == 9000) | .host_port]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[] | select(.vm == "linux-1" and .guest_port == 9000) | .host_port]'' world.json'
       exit: 0
       stdout: |
           [40000]

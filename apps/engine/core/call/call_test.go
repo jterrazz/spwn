@@ -27,9 +27,9 @@ type listIn struct{ Prefix string }
 type listOut struct{ Apps []string }
 
 var (
-	laptop = machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Computer, Caps: machine.Capabilities{Battery: true, Lid: true, Engine: true}}
-	infra  = machine.Profile{Ref: machine.Ref{Name: "infra", On: "jterrazz-mac-mini"}, Kind: machine.Server}
-	linux1 = machine.Profile{Ref: machine.Ref{Name: "linux-1", On: "jterrazz-macbook-pro"}, Kind: machine.Workspace, System: machine.System{OS: machine.Linux}}
+	laptop = machine.Profile{Ref: machine.Ref{Name: "macbook-pro"}, Kind: machine.Computer, Caps: machine.Capabilities{Battery: true, Lid: true, Engine: true}}
+	infra  = machine.Profile{Ref: machine.Ref{Name: "infra", On: "mac-mini"}, Kind: machine.Server}
+	linux1 = machine.Profile{Ref: machine.Ref{Name: "linux-1", On: "macbook-pro"}, Kind: machine.Workspace, System: machine.System{OS: machine.Linux}}
 )
 
 func onMacOS(p machine.Profile) machine.Verdict {

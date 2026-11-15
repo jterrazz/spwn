@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" world advance 1m; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].engine.activity["jterrazz-macbook-pro"].series.fine | .[-1] | "sampled: \(.at != null), memory read: \(.mem_used > 0), disk read: \(.disk_total > 0)"'' world.json'
+    - command: '--version >/dev/null; "$STATION" world advance 1m; /usr/bin/jq -r ''.macs["macbook-pro"].engine.activity["macbook-pro"].series.fine | .[-1] | "sampled: \(.at != null), memory read: \(.mem_used > 0), disk read: \(.disk_total > 0)"'' world.json'
       exit: 0
       stdout: |
           sampled: true, memory read: true, disk read: true

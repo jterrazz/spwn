@@ -4,7 +4,7 @@ runs:
     - command: 'machines | /usr/bin/grep infra'
       exit: 0
       stdout: |
-          ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
     - command: 'world fault CheckRunner.Run 2 times'
       exit: 0
     - command: 'world advance 60s'
@@ -19,18 +19,18 @@ runs:
     - command: 'machines | /usr/bin/grep infra'
       exit: 0
       stdout: |
-          ◐	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB	check failing since 10:01
+          ◐	infra	Server	mac-mini	Running · always on	8 CPU	24 GB	check failing since 10:01
           ✗	infra	check failing since 10:01
     - command: 'world advance 60s'
       exit: 0
     - command: 'machines'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB
-          ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running
-          ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
     - command: 'machines infra | /usr/bin/grep Check'
       exit: 0
       stdout: |

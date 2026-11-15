@@ -21,7 +21,7 @@ runs:
           This Mac · 1 program · 1 signed in
 
           Accounts  ● wrangler · signed in · jterrazz · own
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["linux-1"].accounts.programs.wrangler.State, .macs["jterrazz-macbook-pro"].accounts.programs.wrangler.State]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["linux-1"].accounts.programs.wrangler.State, .macs["macbook-pro"].accounts.programs.wrangler.State]'' world.json'
       exit: 0
       stdout: |
           ["signed-in","signed-in"]

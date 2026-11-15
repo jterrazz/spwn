@@ -1,11 +1,11 @@
 description: 'a Mac of an unknown model behaves by what it reports: no battery, no lid, no lid toggle'
 env: unknown-model
 runs:
-    - command: 'awake --on jterrazz-mac-mini --json | /usr/bin/jq -c ''.macs[0] | {name, capabilities, reading}'''
+    - command: 'awake --on mac-mini --json | /usr/bin/jq -c ''.macs[0] | {name, capabilities, reading}'''
       exit: 0
       stdout: |
-          {"name":"jterrazz-mac-mini","capabilities":{"battery":false,"lid":false,"thermal":true},"reading":null}
-    - command: 'awake 4h --lid --on jterrazz-mac-mini'
+          {"name":"mac-mini","capabilities":{"battery":false,"lid":false,"thermal":true},"reading":null}
+    - command: 'awake 4h --lid --on mac-mini'
       exit: 2
       stderr: |
           Error: mac-mini has no lid: --lid is for laptops

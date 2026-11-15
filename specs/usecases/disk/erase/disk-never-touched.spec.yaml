@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: ~/.ssh is never touched: station erases no key, token or setting
           Hint: station disk
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].disk.files["~/.ssh/known_hosts"]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.ssh/known_hosts"]'' world.json'
       exit: 0
       stdout: |
           100000

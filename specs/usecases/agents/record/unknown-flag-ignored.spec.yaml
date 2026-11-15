@@ -11,7 +11,7 @@ runs:
       exit: 0
     - command: 'agents record --app'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal["s-2"] | {state, task}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents.journal["s-2"] | {state, task}'' world.json'
       exit: 0
       stdout: |
           {"state":"working","task":"Build the landing page"}

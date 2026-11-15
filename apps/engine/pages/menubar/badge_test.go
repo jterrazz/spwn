@@ -18,9 +18,9 @@ func TestTheStatusItemCountsWhatNeedsYouAndSaysItsOneSignal(t *testing.T) {
 	restarting := server(model.Running, false)
 	restarting.Restart = &model.RestartWalk{Step: 2, At: now}
 	fleet := func(vms ...model.VM) *model.AllMachines {
-		return &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true}, {Name: "jterrazz-mac-mini", VMs: vms}}}
+		return &model.AllMachines{Macs: []model.MacView{{Name: "macbook-pro", ThisMac: true}, {Name: "mac-mini", VMs: vms}}}
 	}
-	exposed := &ports.AllMachines{Macs: []ports.MacPorts{{Name: "jterrazz-mac-mini", Ports: []ports.Port{
+	exposed := &ports.AllMachines{Macs: []ports.MacPorts{{Name: "mac-mini", Ports: []ports.Port{
 		{Port: 5000, Reach: ports.Outside, Answer: ports.Answers},
 		{Port: 8080, Reach: ports.Outside, Answer: ports.Unreachable},
 	}}}}

@@ -17,13 +17,13 @@ runs:
       exit: 0
       stdout: |
           # Agents	2 ●
-          ●	docs-bot	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	24s ago
-          ●	ci-1	claudecode	working	Review the auth refresh	ci-1	jterrazz-mac-mini	12s ago
+          ●	docs-bot	claudecode	working	Write the changelog	linux-1	macbook-pro	24s ago
+          ●	ci-1	claudecode	working	Review the auth refresh	ci-1	mac-mini	12s ago
     - command: 'agents stop ci-1 --yes'
       exit: 0
       stdout: |
           ●	ci-1	stopped · its workspace keeps running
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal, .macs["jterrazz-mac-mini"].vms["ci-1"].agents.journal] | map(map_values(.state))'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].vms["linux-1"].agents.journal, .macs["mac-mini"].vms["ci-1"].agents.journal] | map(map_values(.state))'' world.json'
       exit: 0
       stdout: |
           [{"station-docs-bot":"working"},{"s-1":"finished"}]

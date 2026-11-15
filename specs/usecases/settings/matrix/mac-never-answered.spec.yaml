@@ -4,4 +4,4 @@ runs:
     - command: 'settings --all-machines --json | /usr/bin/jq -c ''.findings'''
       exit: 0
       stdout: |
-          [{"machine":"jterrazz-mac-mini","severity":"broken","section":"settings","subject":"jterrazz-mac-mini","text":"jterrazz-mac-mini: does not answer","fix":{"call":null,"command":null,"path":null}},{"machine":"api","severity":"needs-a-look","section":"settings","subject":"api","text":"api: stopped, not read since the engine started","fix":{"call":null,"command":null,"path":null}}]
+          [{"machine":"mac-mini","severity":"broken","section":"settings","subject":"mac-mini","text":"mac-mini: does not answer","fix":{"call":null,"command":null,"path":null}},{"machine":"api","severity":"needs-a-look","section":"settings","subject":"api","text":"api: stopped, not read since the engine started","fix":{"call":null,"command":null,"path":null}}]

@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           {"reach":"answers","hardware":{"name":"MacBook Air","laptop":true}}
-    - command: 'world offline jterrazz-macbook-air'
+    - command: 'world offline macbook-air'
       exit: 0
     - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | {reachable, reach, hardware: .hardware.name}'''
       exit: 0
@@ -14,5 +14,5 @@ runs:
     - command: 'machines'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	jterrazz-macbook-air	Mac	jterrazz-macbook-air	Asleep · last answer 10:00
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	macbook-air	Mac	macbook-air	Asleep · last answer 10:00

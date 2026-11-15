@@ -30,11 +30,11 @@ runs:
     - command: 'machines'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB
-          ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running
-          ✗	infra	Server	jterrazz-mac-mini	In a loop · always on	8 CPU	24 GB	↺ 5 in 10 min · waiting 60 s
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ✗	infra	Server	mac-mini	In a loop · always on	8 CPU	24 GB	↺ 5 in 10 min · waiting 60 s
           # Needs you
           ✗	infra	is in a loop: ↺ 5 in 10 min
     - command: 'machines infra | /usr/bin/grep Restarts'
@@ -47,7 +47,7 @@ runs:
       exit: 0
       stdout: |
           ["running",6,60]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 60, $down <= 61]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 60, $down <= 61]'' world.json'
       exit: 0
       stdout: |
           [true,true]

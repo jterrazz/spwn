@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	heroPro  = "jterrazz-macbook-pro"
-	heroMini = "jterrazz-mac-mini"
+	heroPro  = "macbook-pro"
+	heroMini = "mac-mini"
 )
 
 var heroNow = time.Date(2026, 11, 7, 14, 30, 0, 0, time.UTC)

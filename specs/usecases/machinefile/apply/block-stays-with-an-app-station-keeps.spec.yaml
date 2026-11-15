@@ -2,12 +2,12 @@ description: apply --remove keeps the block of an app it does not take back, the
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.offers["postgresql@18"] = "18.1"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.brew.offers["postgresql@18"] = "18.1"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, postgres]
       exit: 0
@@ -15,12 +15,12 @@ runs:
       exit: 0
     - command: 'apply > /dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger |= map(if .package == "postgres" then .machinefile = "work" else . end)'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger |= map(if .package == "postgres" then .machinefile = "work" else . end)'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
@@ -29,14 +29,14 @@ runs:
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger |= map(select(.package != "postgres"))'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger |= map(select(.package != "postgres"))'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
-    - command: '--version >/dev/null; /usr/bin/grep -c station:postgres/path .zshrc; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.blocks | map(.id)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/grep -c station:postgres/path .zshrc; /usr/bin/jq -c ''.macs["macbook-pro"].stores.blocks | map(.id)'' world.json'
       exit: 0
       stdout: |
           2

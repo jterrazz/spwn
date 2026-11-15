@@ -9,12 +9,12 @@ runs:
       exit: 0
     - command: 'world listen linux-1 "*:8080" python'
       exit: 0
-    - command: 'world listen jterrazz-macbook-pro "*:5000" ControlCenter'
+    - command: 'world listen macbook-pro "*:5000" ControlCenter'
       exit: 0
     - command: 'ports --all-machines --json | /usr/bin/jq -c ''.ports[] | [.machine, .port, .name, .logo]'''
       exit: 0
       stdout: |
-          ["jterrazz-macbook-pro",5000,"AirPlay Receiver",null]
+          ["macbook-pro",5000,"AirPlay Receiver",null]
           ["linux-1",4321,"Astro","astro"]
           ["linux-1",5173,"Vite","vite"]
           ["linux-1",6006,"Storybook","storybook"]

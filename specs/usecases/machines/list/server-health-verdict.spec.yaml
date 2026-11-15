@@ -14,4 +14,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          [["jterrazz-macbook-pro","running"],["jterrazz-mac-mini","running"]]
+          [["macbook-pro","running"],["mac-mini","running"]]

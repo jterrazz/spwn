@@ -1,7 +1,7 @@
 description: 'a move off a script copy to a manager keeps that copy and runs no undo'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/scripted.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/scripted.yaml'
       stdin: |
           package: station.package/v1
           kind: app
@@ -18,7 +18,7 @@ runs:
                     run: install-scripted
                     undo: uninstall-scripted
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.shell = {installed: {"install-scripted": "1.2.0"}}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.shell = {installed: {"install-scripted": "1.2.0"}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apps scripted | /usr/bin/head -1'
       exit: 0
@@ -29,7 +29,7 @@ runs:
       stdout: |
           ●	scripted	1.0.0	brew	installed by brew
           ●	copy on PATH			kept: it is yours, installed by none of its methods
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].apps | [.brew.installed.scripted, .shell.installed["install-scripted"]]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].apps | [.brew.installed.scripted, .shell.installed["install-scripted"]]'' world.json'
       exit: 0
       stdout: |
           ["1.0.0","1.2.0"]

@@ -9,7 +9,7 @@ runs:
     - command: 'machines infra --json | /usr/bin/jq -c ''[.machine, .state]'''
       exit: 0
       stdout: |
-          [{"name":"infra","label":"infra","kind":"server","on":"jterrazz-mac-mini","this_mac":false,"reachable":false},"unknown"]
+          [{"name":"infra","label":"infra","kind":"server","on":"mac-mini","this_mac":false,"reachable":false},"unknown"]
     - command: 'overview --on infra'
       exit: 0
       stdout: |

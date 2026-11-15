@@ -4,7 +4,7 @@ runs:
     - command: 'awake 4h --lid'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	stays awake until 14:00 · lid closed
+          ●	macbook-pro	stays awake until 14:00 · lid closed
     - command: 'world close-lid'
       exit: 0
     - command: 'world unplug'
@@ -12,9 +12,9 @@ runs:
     - command: 'awake | /usr/bin/sed -n 1,2p'
       exit: 0
       stdout: |
-          ◐	jterrazz-macbook-pro	Awake stopped · lid closed on battery
-          ●	jterrazz-mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power | {holds, clamshell}'' world.json'
+          ◐	macbook-pro	Awake stopped · lid closed on battery
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power | {holds, clamshell}'' world.json'
       exit: 0
       stdout: |
           {"holds":null,"clamshell":null}
