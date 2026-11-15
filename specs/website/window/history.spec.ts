@@ -33,7 +33,7 @@ describe('history', () => {
             await visitor.see(region('Its machines'));
             await visitor.click(back);
             await visitor.see(disabled(back));
-            await visitor.see(content('2 things need you.'));
+            await visitor.see(content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
         });
 
         // Then - the window is back on Home, with nothing broken on the way
@@ -70,7 +70,7 @@ describe('history', () => {
             await visitor.click(thisMac);
             await visitor.see(heading('jterrazz-macbook-pro Online'));
             await visitor.press('Control+BracketLeft');
-            await visitor.see(content('2 things need you.'));
+            await visitor.see(content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
             await visitor.see(enabled(forward));
             await visitor.press('Control+BracketRight');
             await visitor.see(heading('jterrazz-macbook-pro Online'));
