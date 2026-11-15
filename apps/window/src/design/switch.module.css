@@ -28,6 +28,15 @@
     background: var(--c);
     vertical-align: 1px;
 }
+.flag {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: var(--space-6);
+    border-radius: var(--radius-tick);
+    background: var(--warn);
+    vertical-align: 1px;
+}
 .option {
     all: unset;
     cursor: pointer;

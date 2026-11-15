@@ -108,6 +108,40 @@ describe('Machine files', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test('the machines that follow a file are rows, each with its count of differences, under the engine verdict', async () => {
+        // Given - the window on Machine files over stories-file, where two machines follow linux-dev and differ
+        const result = await component.render(windowOver('stories-file'), async (visitor) => {
+            await visitor.see(content('ghostty'));
+
+            // When - linux-dev is chosen, its tab flagged by the engine's verdict
+            await visitor.click(button('linux-dev', { exact: false }));
+
+            // Then - the engine's verdict on its followers, and each follower with how many lines differ
+            const followers = region('Machines that follow it');
+            await visitor.see(within(followers, content('2 machines differ.')));
+            await visitor.see(within(followers, content('agent-7f')));
+            await visitor.see(within(followers, content('2 differences')));
+            await visitor.see(within(followers, content('8 differences')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a file no machine follows says so, in the engine words', async () => {
+        // Given - the window on Machine files over stories-file
+        const result = await component.render(windowOver('stories-file'), async (visitor) => {
+            await visitor.see(content('ghostty'));
+
+            // When - the shipped file station-macos is chosen
+            await visitor.click(button('station-macos'));
+
+            // Then - the panel carries the engine's sentence
+            await visitor.see(
+                within(region('Machines that follow it'), content('No machine follows it.')),
+            );
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test('the YAML is the exact text of the file, and its own changes are a second tab', async () => {
         // Given - the window on Machine files over stories-file, on the file macbook-pro that has own changes
         const result = await component.render(windowOver('stories-file'), async (visitor) => {

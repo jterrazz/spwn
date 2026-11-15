@@ -111,3 +111,10 @@ export const SHARE_END_TONES: Tones<ShareEnd['kind']> = {
     'ends-in': 'warn',
     unread: 'plain',
 };
+
+// outside: machinefile.files says a follower matches, differs (a count) or was not read, as facts and no sentence.
+export const FOLLOWER_TONES: Tones<'differs' | 'matches' | 'unread'> = {
+    differs: 'warn',
+    matches: 'ok',
+    unread: 'plain',
+};

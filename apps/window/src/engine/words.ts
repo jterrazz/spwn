@@ -59,6 +59,13 @@ export const MAC_STATE_WORDS: Words<MacState> = {
     unreachable: 'not seen',
 };
 
+// outside: machinefile.files says a follower matches, differs (a count) or was not read, as facts and no sentence.
+export const FOLLOWER_WORDS = { matches: 'Matches', unread: 'not read' } as const;
+
+export function differencesWord(count: number): string {
+    return `${String(count)} ${count === 1 ? 'difference' : 'differences'}`;
+}
+
 export const MACHINE_KIND_WORDS: WordsOfAnOpenCode = {
     server: 'server',
     workspace: 'workspace',

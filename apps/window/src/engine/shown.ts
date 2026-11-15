@@ -7,6 +7,7 @@ import type {
     EngineReading,
     MachinefileChapter,
     MachinefileDiffering,
+    MachinefileFollower,
     MachinesEngineView,
     MachinesMacView,
     MachinesVM,
@@ -27,6 +28,7 @@ import {
 } from './provisional';
 import {
     APP_WHY_TONES,
+    FOLLOWER_TONES,
     MAC_STATE_TONES,
     NEWEST_TONE,
     OWN_STATE_TONES,
@@ -36,7 +38,9 @@ import {
 } from './tones';
 import {
     APP_WHY_WORDS,
+    differencesWord,
     DIFFERING_WORDS,
+    FOLLOWER_WORDS,
     MAC_STATE_WORDS,
     MACHINE_KIND_WORDS,
     NEWEST_WORD,
@@ -144,6 +148,19 @@ export function vmKindWord(vm: Pick<MachinesVM, 'Lifetime'>): string {
 
 export function verdictShown(verdict: CoreVerdictVerdict): Shown {
     return { tone: verdict.Tone, word: verdict.Sentence };
+}
+
+export function followerState({
+    Differences,
+    Match,
+    Read,
+}: Pick<MachinefileFollower, 'Differences' | 'Match' | 'Read'>): Shown {
+    if (!Read) {
+        return { tone: FOLLOWER_TONES.unread, word: FOLLOWER_WORDS.unread };
+    }
+    return Match
+        ? { tone: FOLLOWER_TONES.matches, word: FOLLOWER_WORDS.matches }
+        : { tone: FOLLOWER_TONES.differs, word: differencesWord(Differences) };
 }
 
 export function fileJoinOf(tone: Tone): string {
