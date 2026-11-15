@@ -5,7 +5,11 @@
 # invariant: every VM this run makes is named station-e2e-menubar-<label> and is
 # stopped and deleted by the trap, whatever happens; only the base survives, a cache
 # like tier 3's image. The VM runs headless: nothing opens a window on the Mac.
-# usage: run.sh <label> [--update-goldens | --capture]
+# usage: run.sh <label> [--update-goldens | --capture | --expect-goldens <file>]
+#   --expect-goldens <file> lists, one repo-relative path per line, the goldens this
+#   change is expected to redraw. The run compares every story as without it, fails
+#   on any golden that differs and is not listed, and on any listed one that did not
+#   change; only then are the listed ones rewritten, in one pass.
 #   the log is .artifacts/e2e/menubar-<label>.log; what the run wrote under
 #   apps/menubar (an .actual.png, or with --update-goldens the rewritten goldens and
 #   INDEX) comes back to .artifacts/e2e/menubar-<label>/changes/, the tree untouched.
@@ -24,13 +28,15 @@ set -uo pipefail
 label=${1:-}
 update=0
 capture=0
+expect=""
 case "${2:-}" in
   "") ;;
   --update-goldens) update=1 ;;
   --capture) capture=1 ;;
+  --expect-goldens) expect=$(cd "$(dirname "${3:-/nonexistent/x}")" 2> /dev/null && pwd)/$(basename "${3:-}"); [ -f "$expect" ] || label="" ;;
   *) label="" ;;
 esac
-[ -n "$label" ] || { echo "usage: specs/machine/menubar/run.sh <label> [--update-goldens | --capture]" >&2; exit 2; }
+[ -n "$label" ] || { echo "usage: specs/machine/menubar/run.sh <label> [--update-goldens | --capture | --expect-goldens <file>]" >&2; exit 2; }
 
 repo=$(cd "$(dirname "$0")/../../.." && pwd)
 suite="$repo/specs/machine"
@@ -161,6 +167,12 @@ t=$SECONDS
 # SDK required, so a VM that lost Xcode fails and never skips.
 env_line='STATION_REQUIRE_MENUBAR=1'
 [ $update -eq 0 ] || env_line="$env_line STATION_UPDATE_GOLDENS=1 STATION_UPDATE_INDEX=1"
+expected="$work/expected.txt"
+if [ -n "$expect" ]; then
+  grep -v '^[[:space:]]*#' "$expect" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep . | sort -u > "$expected"
+  ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'cat > /tmp/station-expect-goldens.txt' < "$expected" || fail "copy the golden list into the VM"
+  env_line="$env_line STATION_EXPECT_GOLDENS=/tmp/station-expect-goldens.txt"
+fi
 ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "zsh -lc 'cd ~/station && $env_line make menubar-check'" >> "$log" 2>&1
 code=$?
 say "-- make menubar-check exit $code in $((SECONDS - t)) s"
@@ -179,5 +191,18 @@ grep -E "differ|golden|error:|Test run|Executed" "$log" | tail -60 | sed 's/^/  
 if [ $code -ne 0 ]; then
   say "FAIL menubar-check exit $code"
   exit 1
+fi
+if [ -n "$expect" ]; then
+  # invariant: the goldens the run rewrote are exactly the listed ones: a listed path
+  # no story draws, or one drawn from another folder, is a failure, not a no-op.
+  in_vm "cd ~/station && git ls-files -m -o apps/menubar | grep '[.]png\$' | grep -v -e '[.]actual[.]png\$' -e '/symbols.xcassets/'" > "$work/rewritten.txt" 2>> "$log"
+  sort -u -o "$work/rewritten.txt" "$work/rewritten.txt"
+  if ! diff "$expected" "$work/rewritten.txt" >> "$log" 2>&1; then
+    say "listed, not rewritten: $(comm -23 "$expected" "$work/rewritten.txt" | tr '\n' ' ')"
+    say "rewritten, not listed: $(comm -13 "$expected" "$work/rewritten.txt" | tr '\n' ' ')"
+    say "FAIL the rewritten goldens are not the listed ones"
+    exit 1
+  fi
+  say "-- $(grep -c . "$expected") listed goldens rewritten, and no other"
 fi
 say "PASS menubar-check"
