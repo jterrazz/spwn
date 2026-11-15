@@ -3,6 +3,9 @@
     "apps.Cell": {
       "additionalProperties": false,
       "properties": {
+        "Holds": {
+          "type": "boolean"
+        },
         "Newest": {
           "type": "string"
         },
@@ -27,6 +30,7 @@
         }
       },
       "required": [
+        "Holds",
         "Newest",
         "NotHere",
         "State",

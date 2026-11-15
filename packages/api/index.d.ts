@@ -403,6 +403,7 @@ export type AppsCallsUpdateIn = {
 };
 
 export type AppsCell = {
+    Holds: boolean;
     Newest: string;
     NotHere: boolean;
     State: '' | 'failed' | 'not-installed' | 'not-known' | 'not-managed' | 'ok' | 'pending' | 'update-available';
