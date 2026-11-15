@@ -8,7 +8,7 @@ runs:
       stdout: |
           	On linux-1:
           # Needs you
-          ✗	wrangler sign-in fails: Refused at the provider
+          ✗	wrangler sign-in fails: Refused at the provider	station accounts login wrangler --on linux-1
           	Activity	memory 1.1 of 4 GB · 12.4 GB free
           	Apps	● 2 ok · ○ 71 not installed
           	Settings	set by station · ○ 0 of 7

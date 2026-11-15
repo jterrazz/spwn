@@ -89,7 +89,7 @@ A grant's removal undoes it inside the VM; a token stays valid at its provider u
 
 ## Windows
 
-The window's Accounts view has a Sign-ins tab per machine, the login sheet, the Passwords page and the grant picker. The menu bar's Accounts page, which lists what needs you first, offers Grant. Their screens are the window's and the menu bar's own; this page owns the words they show.
+A sign-in that no longer works is a Needs-you finding whose fix is the call `accounts.login` with the program as `Program`, run at that machine; it prints as `station accounts login <program> --on <machine>`. The window's Accounts view has a Sign-ins tab per machine, the login sheet, the Passwords page and the grant picker. The menu bar's Accounts page, which lists what needs you first, offers Grant. Their screens are the window's and the menu bar's own; this page owns the words they show.
 
 ## Related
 

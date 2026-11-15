@@ -19,9 +19,10 @@ func TestAFixPrintsAsTheCommandThatRunsIt(t *testing.T) {
 			"station machines delete agent-7f --confirm=agent-7f"},
 		"a manager's updates in a VM": {overview.Need{Call: "apps.update", Args: map[string]string{"Managers": "tools"}, On: "linux-1"},
 			"station apps update --manager tools --on linux-1"},
-		"a task's removal here":     {overview.Need{Call: "background.remove", Args: map[string]string{"Label": "com.x.y"}, On: self}, "station background remove com.x.y"},
-		"a misplaced folder's move": {overview.Need{Call: "disk.move", Args: map[string]string{"Folder": "~/Old"}, On: self}, "station disk move ~/Old"},
-		"an app's update":           {overview.Need{Call: "apps.update", Args: map[string]string{"Names": "node"}, On: self}, "station apps update node"},
+		"a task's removal here":          {overview.Need{Call: "background.remove", Args: map[string]string{"Label": "com.x.y"}, On: self}, "station background remove com.x.y"},
+		"a misplaced folder's move":      {overview.Need{Call: "disk.move", Args: map[string]string{"Folder": "~/Old"}, On: self}, "station disk move ~/Old"},
+		"a sign-in again on another Mac": {overview.Need{Call: "accounts.login", Args: map[string]string{"Program": "wrangler"}, On: "jterrazz-mac-mini"}, "station accounts login wrangler --on mac-mini"},
+		"an app's update":                {overview.Need{Call: "apps.update", Args: map[string]string{"Names": "node"}, On: self}, "station apps update node"},
 	}
 	for name, c := range cases {
 		s := overview.Summary{Head: overview.Head{Name: self, Kind: "computer", ThisMac: true}, Needs: []overview.Need{c.need}}
