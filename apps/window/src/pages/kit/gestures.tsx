@@ -91,6 +91,7 @@ export function GestureConfirm() {
     return (
         <ConfirmDialog
             destroys={asked.destroys}
+            held={ask.refusal?.wire?.detail?.holder}
             key={asked.key}
             onCancel={asked.cancel}
             onConfirm={asked.confirm}

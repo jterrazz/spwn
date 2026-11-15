@@ -117,9 +117,7 @@ describe('server', () => {
                 await visitor.see(
                     within(
                         restart,
-                        content(
-                            'infra stops while it restarts: what it serves is down until it answers again.',
-                        ),
+                        content('It is a server: what it serves stops while it restarts.'),
                     ),
                 );
                 await visitor.click(within(restart, button('Cancel')));

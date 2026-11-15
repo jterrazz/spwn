@@ -11,6 +11,7 @@ export type ConfirmDialogProps = {
     verb: string;
     typed?: string | undefined;
     said?: string | undefined;
+    held?: string | undefined;
     destroys?: boolean;
     onCancel: () => void;
     onConfirm: (typed: string) => void;
@@ -21,6 +22,7 @@ export function ConfirmDialog({
     verb,
     typed,
     said,
+    held,
     destroys = false,
     onCancel,
     onConfirm,
@@ -46,7 +48,10 @@ export function ConfirmDialog({
                     </>
                 }
                 consequence={
-                    (said ?? '') === '' ? undefined : asSentence(shownOrWithheld(said ?? ''))
+                    [said, held]
+                        .filter((line) => (line ?? '') !== '')
+                        .map((line) => asSentence(shownOrWithheld(line ?? '')))
+                        .join(' ') || undefined
                 }
                 onClose={onCancel}
                 opensOn="dialog"
