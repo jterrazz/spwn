@@ -139,11 +139,13 @@ func counted(n int, one, other string) string {
 	return fmt.Sprintf("%d %s", n, other)
 }
 
+const VaultLine = "a value never leaves this Mac's Keychain to be shown"
+
 func SummarizeVault(entries []VaultEntry) verdict.Verdict {
 	// invariant: the head of a Mac's passwords, one sentence and one tone,
 	// from its entries alone.
 	if len(entries) == 0 {
-		return verdict.Verdict{Tone: verdict.Plain, Sentence: SentencePasswordsNone.Text()}
+		return verdict.Verdict{Tone: verdict.Plain, Sentence: SentencePasswordsNone.Text(), Line: VaultLine}
 	}
 	granted := 0
 	for _, e := range entries {
@@ -151,7 +153,7 @@ func SummarizeVault(entries []VaultEntry) verdict.Verdict {
 			granted++
 		}
 	}
-	return verdict.Verdict{Tone: verdict.Plain, Sentence: fmt.Sprintf(SentencePasswordsSome.Text(), len(entries), granted)}
+	return verdict.Verdict{Tone: verdict.Plain, Sentence: fmt.Sprintf(SentencePasswordsSome.Text(), len(entries), granted), Line: VaultLine}
 }
 
 func (t Program) Delivery() (catalog.Delivery, bool) {
