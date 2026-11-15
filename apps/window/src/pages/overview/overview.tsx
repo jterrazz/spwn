@@ -1,4 +1,9 @@
-import type { MachinesMacView, MachinesVM, OverviewReadOutput } from '@jterrazz/station-api';
+import type {
+    CoreVerdictVerdict,
+    MachinesMacView,
+    MachinesVM,
+    OverviewReadOutput,
+} from '@jterrazz/station-api';
 
 import type { Reading as Answered } from '../../engine/entry';
 import { machineKindOf } from '../../engine/provisional';
@@ -11,7 +16,7 @@ import { ActivityTiles } from '../activity/tiles';
 import { DiskTile } from '../disk/disk-tile';
 import { MemoryPanel } from '../home/memory';
 import { HeldOutcomes } from '../kit/gestures';
-import { NoVerdict, Reading, SummaryHead, Unanswered } from '../kit/readings';
+import { NoVerdict, Reading, SummaryHead, Unanswered, VerdictHead } from '../kit/readings';
 import { DeleteGesture } from '../machine/gestures';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
@@ -27,11 +32,14 @@ type Go = (to: Route) => void;
 
 type Answer = Answered<OverviewReadOutput>;
 
-type HeadProps = { overview: Answer; name: string; answered?: string | undefined };
+type HeadProps = { overview: Answer; name: string; unseen?: CoreVerdictVerdict | undefined };
 
-function Head({ overview, name, answered }: HeadProps) {
+function Head({ overview, name, unseen }: HeadProps) {
+    if (unseen !== undefined) {
+        return <VerdictHead size="tab" verdict={unseen} />;
+    }
     if (overview.kind === 'failed') {
-        return <Unanswered answered={answered} error={overview.error} size="tab" />;
+        return <Unanswered error={overview.error} size="tab" />;
     }
     if (overview.kind === 'reading') {
         return <Reading size="tab" what={name} />;
@@ -75,7 +83,7 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
     const foot = overview.kind === 'read' ? overview.out.Summary.Machines : undefined;
     return (
         <Page>
-            <Head answered={found.mac.Answered} name={name} overview={overview} />
+            <Head name={name} overview={overview} unseen={found.mac.Unseen} />
             <ActivityTiles
                 disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}
                 found={found}
@@ -91,7 +99,7 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
                     title="Needs you, on this Mac"
                 />
             </HeldOutcomes>
-            <MemoryPanel macs={[found.mac]} only={name} />
+            {found.mac.Unseen === undefined ? <MemoryPanel macs={[found.mac]} only={name} /> : null}
             <Machines found={found} go={go} />
             <Follows found={found} go={go} />
         </Page>
