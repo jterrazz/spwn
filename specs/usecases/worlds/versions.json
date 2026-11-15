@@ -383,9 +383,9 @@
                     "Detail": "not signed in"
                 }
             },
-            "secrets": {
-                "session:github": "fake-session-github-of-this-mac",
-                "operator:claude:oauth-token": "fake-claude-token-of-this-mac"
+            "vault": {
+                "session:github": "ZmFrZS1zZXNzaW9uLWdpdGh1Yi1vZi10aGlzLW1hYw==",
+                "operator:claude:oauth-token": "ZmFrZS1jbGF1ZGUtdG9rZW4tb2YtdGhpcy1tYWM="
             },
             "jobs": {
                 "com.example.brain.x-snapshot": {
@@ -756,8 +756,8 @@
                     "Scopes": ["repo"]
                 }
             },
-            "secrets": {
-                "session:github": "fake-session-github-of-the-mini"
+            "vault": {
+                "session:github": "ZmFrZS1zZXNzaW9uLWdpdGh1Yi1vZi10aGUtbWluaQ=="
             },
             "tailnet": {
                 "self": {
@@ -943,9 +943,9 @@
                     "Who": ["you"]
                 }
             },
-            "secrets": {
-                "session:github": "fake-session-github-of-this-mac",
-                "operator:claude:oauth-token": "fake-claude-token-of-this-mac"
+            "vault": {
+                "session:github": "ZmFrZS1zZXNzaW9uLWdpdGh1Yi1vZi10aGlzLW1hYw==",
+                "operator:claude:oauth-token": "ZmFrZS1jbGF1ZGUtdG9rZW4tb2YtdGhpcy1tYWM="
             }
         },
         "infra": {

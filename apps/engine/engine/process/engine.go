@@ -102,8 +102,9 @@ type Options struct {
 	Executable string
 	// value: this engine as a client sees it: a second engine asks it first.
 	Peer Peer
-	// value: the lend records and the recall a lend past its until goes through.
-	AccountShares Shares
+	// value: the grant removals a VM could not receive, retried here; nil
+	// retries none.
+	GrantsOwed GrantsOwed
 	// value: the Notifier the engine tells, built over the engine's own log.
 	Notifier func(log func(subject, text string)) Notifier
 	// value: what runs a server's health check from this Mac; nil runs none.
@@ -192,9 +193,9 @@ type Engine struct {
 	// holds live in it, never in the request that started a VM.
 	life context.Context
 
-	shareMu        sync.Mutex
-	sharesAt       time.Time
-	takeBackFailed map[string]time.Time
+	owedMu      sync.Mutex
+	owedAt      time.Time
+	retryFailed map[string]time.Time
 
 	// value: the entries station owes the tailnet a removal of: an unshare
 	// that failed, or that could not read whether its entry was there.
@@ -240,7 +241,7 @@ func New(h Mac, hv Hypervisor, guests Guests, m Machines, tn Tailnet, st Stores,
 	if o.GuestPort == 0 {
 		o.GuestPort = catalog.GuestSSH
 	}
-	d := &Engine{h: h, hv: hv, guests: guests, m: m, tn: tn, st: st, o: o, vms: map[string]*vmState{}, svcs: map[string]*svc{}, heard: map[string][]ports.Listener{}, quiet: map[string]map[int]ports.Listener{}, lastHeard: map[string][]ports.Listener{}, rights: map[string]ports.Rights{}, takeBackFailed: map[string]time.Time{}}
+	d := &Engine{h: h, hv: hv, guests: guests, m: m, tn: tn, st: st, o: o, vms: map[string]*vmState{}, svcs: map[string]*svc{}, heard: map[string][]ports.Listener{}, quiet: map[string]map[int]ports.Listener{}, lastHeard: map[string][]ports.Listener{}, rights: map[string]ports.Rights{}, retryFailed: map[string]time.Time{}}
 	d.awakeJob = d.newAwake()
 	if o.Notifier != nil {
 		d.notifier = o.Notifier(d.logf)
@@ -362,7 +363,7 @@ func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 	d.servedMode = d.policy().HTTPS
 	d.refreshSelf(ctx)
 	d.adopt(ctx)
-	d.sweepShares(ctx)
+	d.sweepOwed(ctx)
 	d.reconcileServe(ctx)
 	return nil
 }
@@ -430,7 +431,7 @@ func (d *Engine) step(ctx context.Context, tick int) {
 		d.neverSleeps(time.Time{})
 	}
 	d.tick(ctx)
-	d.sweepShares(ctx)
+	d.sweepOwed(ctx)
 	d.watchExposure(ctx)
 	d.keepDrift(ctx)
 	d.awakeJob.Tick()

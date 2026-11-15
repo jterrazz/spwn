@@ -163,17 +163,6 @@ var Providers = []Provider{
 	{ID: ProviderEntry, Label: "entry", VM: true},
 }
 
-type ShareScope struct {
-	// value: a lend-list name, the provider whose right its copy carries,
-	// and what that right lets the VM do.
-	Name, Provider, Scope string
-}
-
 const ClaudeTokenName = "operator:claude:oauth-token"
-
-var ShareScopes = []ShareScope{
-	{Name: ClaudeTokenName, Provider: ProviderClaude, Scope: "Claude Code inference"},
-	{Name: "session:github", Provider: ProviderGitHub, Scope: "GitHub browser session"},
-}
 
 const DockerSettingsFile = ".docker/config.json"

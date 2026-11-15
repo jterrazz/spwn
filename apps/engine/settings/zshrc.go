@@ -1,11 +1,6 @@
 package settings
 
-import (
-	"encoding/json"
-	"strings"
-
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
-)
+import "strings"
 
 const (
 	blockStart = "# >>> station >>>"
@@ -84,16 +79,4 @@ func mainFirst(lines []string) bool {
 		}
 	}
 	return true
-}
-
-func ClaudeTokenLine(exportJSON []byte) (string, bool) {
-	var values map[string]string
-	if json.Unmarshal(exportJSON, &values) != nil {
-		return "", false
-	}
-	token := values[catalog.ClaudeTokenName]
-	if token == "" {
-		return "", false
-	}
-	return "export CLAUDE_CODE_OAUTH_TOKEN='" + strings.ReplaceAll(token, "'", `'\''`) + "'", true
 }

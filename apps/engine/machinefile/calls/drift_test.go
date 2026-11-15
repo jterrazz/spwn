@@ -22,8 +22,12 @@ const linuxDev = `machinefile: station.machinefile/v1
 name: linux-dev
 machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
 ports: { open: 3000-3999, to: private }
-accounts: { share: [{ account: forge }, { account: mail }] }
+accounts: { signins: [wrangler], grants: [claude] }
 `
+
+// value: the programs the mini reads on linux-1: one the file signs in to,
+// signed in; one it grants, signed out; one granted that it names in neither.
+const signedIn, signedOut, unasked accounts.Program = "wrangler", "claude", "gh"
 
 const apiServer = `machinefile: station.machinefile/v1
 name: api-server
@@ -108,9 +112,9 @@ func (f *fleet) Watch(_ context.Context, target machine.Ref, name string, in any
 	report := accounts.ProgramsRead{}
 	if of, _ := in.(accountscalls.ProgramsIn); target.Name == "mini" && of.Machine == "linux-1" {
 		report.Programs = []accounts.ProgramRow{
-			{Program: "forge", State: accounts.ProgramSignedIn, How: accounts.HowGranted},
-			{Program: "mail", State: accounts.ProgramSignedOut},
-			{Program: "notes", State: accounts.ProgramSignedIn, How: accounts.HowGranted},
+			{Program: signedIn, State: accounts.ProgramSignedIn, How: accounts.HowOwn},
+			{Program: signedOut, State: accounts.ProgramSignedOut},
+			{Program: unasked, State: accounts.ProgramSignedIn, How: accounts.HowGranted},
 		}
 	}
 	out := make(chan call.Update[any], 1)
@@ -164,9 +168,9 @@ func TestAVMsDriftJudgesItsPackagesOnItAndItsSharesOnItsMac(t *testing.T) {
 	}
 	a := chapterOf(t, d, machinefile.ChapterAccounts)
 	if a.Listed != 2 || a.Matching != 1 || len(a.Differing) != 2 {
-		t.Fatalf("accounts %+v; want forge matching, mail not signed in, notes granted unasked", a)
+		t.Fatalf("accounts %+v; want wrangler matching, claude not signed in, gh granted unasked", a)
 	}
-	if a.Differing[0].Account != "mail" || a.Differing[0].Condition != machinefile.Absent || a.Differing[1].Account != "notes" || a.Differing[1].Condition != machinefile.Extra {
+	if a.Differing[0].Account != string(signedOut) || a.Differing[0].Condition != machinefile.Absent || a.Differing[1].Account != string(unasked) || a.Differing[1].Condition != machinefile.Extra {
 		t.Errorf("accounts differ as %+v", a.Differing)
 	}
 	if d.Differences != 4 || d.Verdict.Sentence != "4 differences from linux-dev." {

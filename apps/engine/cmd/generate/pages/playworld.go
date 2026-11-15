@@ -3,7 +3,6 @@ package pages
 import (
 	"bytes"
 	"encoding/json"
-	"slices"
 	"strconv"
 	"time"
 
@@ -45,7 +44,6 @@ type playMac struct {
 	Building    []images.Making                `json:"building,omitempty"`
 	VMs         map[string]*playVM             `json:"vms,omitempty"`
 	Jobs        map[string]background.Job      `json:"jobs,omitempty"`
-	Secrets     map[string]string              `json:"secrets,omitempty"`
 	Identities  map[string]accounts.Identity   `json:"identities,omitempty"`
 	Accounts    *playSignIns                   `json:"accounts,omitempty"`
 	Facts       map[catalog.Fact]settings.Fact `json:"facts,omitempty"`
@@ -101,11 +99,10 @@ type playDisk struct {
 }
 
 type playStores struct {
-	Images       []images.Record             `json:"images,omitempty"`
-	Shares       map[string][]accounts.Share `json:"shares,omitempty"`
-	Reservations []ports.Reservation         `json:"reservations,omitempty"`
-	Declarations []ports.Declaration         `json:"declarations,omitempty"`
-	Uptime       map[string]model.Uptime     `json:"uptime,omitempty"`
+	Images       []images.Record         `json:"images,omitempty"`
+	Reservations []ports.Reservation     `json:"reservations,omitempty"`
+	Declarations []ports.Declaration     `json:"declarations,omitempty"`
+	Uptime       map[string]model.Uptime `json:"uptime,omitempty"`
 }
 
 type playVM struct {
@@ -192,7 +189,7 @@ func PlayWorld(base []byte) []byte {
 			m.Preferences["never_sleeps"] = true
 			m.Disk = &playDisk{Total: 994e9, Free: 610e9}
 		}
-		m.Identities, m.Secrets = playAccounts(f, h.Name)
+		m.Identities = playAccounts(f, h.Name)
 		m.Engine.Past = map[string]activity.Profile{h.Name: past[h.Name]}
 		m.Meter.Processes = map[int]activity.Usage{}
 		for _, vm := range h.VMs {
@@ -252,7 +249,6 @@ func PlayWorld(base []byte) []byte {
 				}
 			}
 		}
-		m.Stores.Shares = loansOf(f, h)
 		if h.ThisMac {
 			creating(m)
 		}
@@ -356,8 +352,8 @@ func macFacts(thisMac bool) map[catalog.Fact]settings.Fact {
 	return facts
 }
 
-func playAccounts(f Scene, mac string) (ids map[string]accounts.Identity, secrets map[string]string) {
-	ids, secrets = map[string]accounts.Identity{}, map[string]string{}
+func playAccounts(f Scene, mac string) map[string]accounts.Identity {
+	ids := map[string]accounts.Identity{}
 	for _, m := range f.Accounts.Machines {
 		if m.Name != mac {
 			continue
@@ -370,36 +366,7 @@ func playAccounts(f Scene, mac string) (ids map[string]accounts.Identity, secret
 		ids[catalog.ProviderGitHub] = accounts.Identity{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Who: []string{"ci-agent"}, Scopes: []string{"repo"}}
 		ids[catalog.ProviderClaude] = accounts.Identity{Provider: catalog.ProviderClaude, State: catalog.StateOK, Who: []string{"you@example.com"}, Scopes: []string{"max"}}
 	}
-	for _, s := range loansOf(f, model.MacView{Name: mac, VMs: vmsOf(f, mac)}) {
-		for _, l := range s {
-			secrets[l.Name] = "fake-" + l.Name + "-of-" + mac
-		}
-	}
-	return ids, secrets
-}
-
-func vmsOf(f Scene, mac string) []model.VM {
-	for _, h := range f.All.Macs {
-		if h.Name == mac {
-			return h.VMs
-		}
-	}
-	return nil
-}
-
-func loansOf(f Scene, h model.MacView) map[string][]accounts.Share {
-	out := map[string][]accounts.Share{}
-	for _, read := range f.Accounts.Machines {
-		if !slices.ContainsFunc(h.VMs, func(vm model.VM) bool { return vm.Name == read.Name }) {
-			continue
-		}
-		for _, a := range read.Accounts {
-			if a.Shared != nil {
-				out[read.Name] = append(out[read.Name], accounts.Share{Name: a.Shared.Name, At: a.Shared.At, Until: a.Shared.Until})
-			}
-		}
-	}
-	return out
+	return ids
 }
 
 // value: what each VM of the play world is for and the session that made

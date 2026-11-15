@@ -6,13 +6,17 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
+	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
 
 // value: the Machinefiles this Mac makes workspaces from, read from every
@@ -43,9 +47,7 @@ func (t machineTemplates) Template(ctx context.Context, name string) (model.Temp
 	for _, mt := range got.Mounts {
 		out.Mounts = append(out.Mounts, model.Mount{Computer: t.onMac(mt.Computer), Guest: mt.Guest, ReadOnly: mt.ReadOnly})
 	}
-	for _, s := range got.Shares {
-		out.Shares = append(out.Shares, model.TemplateShare{Account: s.Account, For: term(s.For)})
-	}
+	out.SignIns, out.Grants = got.SignIns, got.Grants
 	for _, f := range got.Files {
 		out.Files = append(out.Files, model.TemplateFile{Path: f.Path, Body: f.Body})
 	}
@@ -127,15 +129,6 @@ func (t machineTemplates) onMac(folder string) string {
 
 // value: a Machinefile's term as a share takes it: weeks in days; none, or
 // one a share cannot last, is the share's own default.
-func term(text string) time.Duration {
-	if weeks, ok := strings.CutSuffix(text, "w"); ok {
-		if n, err := strconv.Atoi(weeks); err == nil {
-			text = strconv.Itoa(n*7) + "d"
-		}
-	}
-	d, _ := accounts.ParseTerm(text)
-	return d
-}
 
 func (t machineTemplates) Drift(ctx context.Context, name, version string) ([]string, error) {
 	rec, err := t.m.stores.images.Get(ctx, name, version)
@@ -149,8 +142,48 @@ func (t machineTemplates) Drift(ctx context.Context, name, version string) ([]st
 	return machinefile.ImageDrift([]byte(rec.Lock), now), nil
 }
 
-// value: a workspace's first start shares each account its Machinefile
-// shares, through the share adapter alone: no call shares an account.
-func (m machine) shareAccount(ctx context.Context, account, vm string, term time.Duration) error {
-	return m.secrets().Share(ctx, account, vm, term)
+// value: a workspace's first start grants a program from this Mac's one
+// password for it, through grants.add: Touch ID is asked as for any grant.
+func (m machine) grantProgram(ctx context.Context, program, vm string) error {
+	r := m.far.router
+	if r == nil {
+		return errors.New("this Mac's engine does not answer")
+	}
+	read, err := call.Read(ctx, r, coremachine.Ref{}, vaultcalls.VaultList, vaultcalls.VaultListIn{}, nil)
+	if err != nil {
+		return err
+	}
+	var entries []accounts.VaultEntry
+	for _, e := range read.Entries {
+		if string(e.Program) == program {
+			entries = append(entries, e)
+		}
+	}
+	switch len(entries) {
+	case 0:
+		return errors.New("no password for " + program + " in this Mac's vault")
+	case 1:
+	default:
+		return errors.New(strconv.Itoa(len(entries)) + " passwords for " + program + " in this Mac's vault: grant one from the window")
+	}
+	_, err = call.Invoke(ctx, r, coremachine.Ref{}, grantscalls.GrantAdd, grantscalls.GrantAddIn{Entry: entries[0].ID, ToKind: accounts.ToMachine, To: vm}, nil)
+	return err
+}
+
+// value: the programs a VM of this Mac is signed in to, read through
+// this Mac as accounts.list reads them.
+func (m machine) signedIn(ctx context.Context, vm string) (map[string]bool, error) {
+	r := m.far.router
+	if r == nil {
+		return nil, errors.New("this Mac's engine does not answer")
+	}
+	read, err := call.Read(ctx, r, coremachine.Ref{}, accountscalls.Programs, accountscalls.ProgramsIn{Machine: vm}, nil)
+	if err != nil {
+		return nil, err
+	}
+	out := map[string]bool{}
+	for _, p := range read.Programs {
+		out[string(p.Program)] = p.State == accounts.ProgramSignedIn
+	}
+	return out, nil
 }

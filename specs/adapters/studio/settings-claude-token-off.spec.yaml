@@ -1,14 +1,11 @@
-description: 'off on the Claude token deletes it from studio and the share list, and it is off here'
+description: 'off on the Claude token deletes it from studio, and it is off here'
 fixture:
     - ./__fixtures__/settings-studio/
-    - ./__fixtures__/settings-lent/
 runs:
     - command: 'settings off claude-token --yes'
       exit: 0
       stdout: |
-          ●	claude-token
-          ●	operator:claude:oauth-token	deleted from the studio credential store
-          ●	share list	no longer holds operator:claude:oauth-token
+          ●	claude-token	operator:claude:oauth-token: deleted from the studio credential store
       files:
           .calls:
               equals: |
@@ -17,9 +14,6 @@ runs:
           .config/station/preferences.json:
               equals: |
                   {
-                    "share_list": [
-                      "session:a"
-                    ],
                     "off_here": [
                       "claude-token"
                     ]

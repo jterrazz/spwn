@@ -27,8 +27,10 @@ const (
 // as this Mac reads them now, replace the image's copies in the VM user's
 // folder, then `station apply --phase boot` runs as that user, a
 // secret named only by its `vault:` reference, which the guest resolves;
-// each account the Machinefile shares is shared, as accounts share does;
-// last, the image's drift from the Machinefile is read (hard case 17).
+// each program the Machinefile grants is granted, as grants.add does, and
+// each it signs in to that the workspace is not signed in to is left to
+// the owner with its command, since a sign-in is done at the program's
+// site; last, the image's drift from the Machinefile is read (hard case 17).
 // Nothing that fails here fails the create: the workspace is made, and
 // its page says what is left to do.
 func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model.Template) *model.FirstStart {
@@ -40,19 +42,39 @@ func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model
 	} else if err := s.applyBoot(ctx, name, t); err != nil {
 		b.Failed = firstLine(err.Error())
 	}
-	for _, sh := range t.Shares {
-		share := model.FirstStartShare{Account: sh.Account, For: sh.For}
-		if s.o.Share == nil {
-			share.Failed = "this Mac shares no account"
-		} else if err := s.o.Share(ctx, sh.Account, name, sh.For); err != nil {
-			share.Failed = firstLine(err.Error())
+	for _, program := range t.Grants {
+		g := model.FirstStartGrant{Program: program}
+		if s.o.Grant == nil {
+			g.Failed = "this Mac grants no password"
+		} else if err := s.o.Grant(ctx, program, name); err != nil {
+			g.Failed = firstLine(err.Error())
 		}
-		b.Shares = append(b.Shares, share)
+		b.Grants = append(b.Grants, g)
 	}
+	b.SignIns = s.signInsLeft(ctx, name, t.SignIns)
 	if s.o.Templates != nil {
 		b.Drift, _ = s.o.Templates.Drift(ctx, t.Name, version)
 	}
 	return b
+}
+
+// invariant: a sign-in whose read fails is left to the owner too: a
+// command run on a signed-in program says so.
+func (s *Machinist) signInsLeft(ctx context.Context, vm string, programs []string) []model.FirstStartSignIn {
+	if len(programs) == 0 {
+		return nil
+	}
+	var signedIn map[string]bool
+	if s.o.SignedIn != nil {
+		signedIn, _ = s.o.SignedIn(ctx, vm)
+	}
+	var out []model.FirstStartSignIn
+	for _, p := range programs {
+		if !signedIn[p] {
+			out = append(out, model.FirstStartSignIn{Program: p, Command: "station accounts login " + p + " --on " + vm})
+		}
+	}
+	return out
 }
 
 // invariant: each folder the VM shares with its Mac is mounted at its

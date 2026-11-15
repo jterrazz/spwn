@@ -82,7 +82,8 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		AgentsOf:    farAgents{m}.Held,
 		StartEngine: m.startEngine,
 		Templates:   machineTemplates{m},
-		Share:       m.shareAccount,
+		Grant:       m.grantProgram,
+		SignedIn:    m.signedIn,
 		Processes:   m.processes(),
 	})
 }
@@ -406,11 +407,12 @@ func createAsker(env kit.Env) kit.Asker {
 	return env.Prompt
 }
 
-// value: what a VM of this Mac holds beyond its disk, as this Mac's stores
-// keep it: its reserved ports and the accounts shared with it, by their label.
+// value: what a VM of this Mac holds beyond its disk: its reserved ports,
+// as this Mac's stores keep them, and the programs its vault grants it, by
+// their label.
 type holdings struct{ m machine }
 
-func (h holdings) Held(ctx context.Context, vm string) (ports []int, shared []string, err error) {
+func (h holdings) Held(ctx context.Context, vm string) (ports []int, granted []string, err error) {
 	reserved, err := h.m.stores.reservations.List(ctx)
 	if err != nil {
 		return nil, nil, err
@@ -420,14 +422,16 @@ func (h holdings) Held(ctx context.Context, vm string) (ports []int, shared []st
 			ports = append(ports, r.GuestPort)
 		}
 	}
-	shares, err := h.m.stores.shares.Get(ctx, vm)
+	vault, err := h.m.passwords().List(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, s := range shares {
-		if account := accounts.Label(accounts.AccountOf(s.Name)); !slices.Contains(shared, account) {
-			shared = append(shared, account)
+	for _, e := range vault.Entries {
+		for _, g := range e.Grants {
+			if label := e.Program.Label(); g.ToKind == accounts.ToMachine && g.To == vm && !slices.Contains(granted, label) {
+				granted = append(granted, label)
+			}
 		}
 	}
-	return ports, shared, nil
+	return ports, granted, nil
 }

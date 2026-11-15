@@ -64,9 +64,12 @@ type Options struct {
 	// value: the Machinefiles workspaces are made from, as this Mac reads
 	// them; nil reads none.
 	Templates Templates
-	// value: shares an account this Mac holds with one of its VMs for a
-	// term, as accounts share does; nil shares none.
-	Share func(ctx context.Context, account, vm string, term time.Duration) error
+	// value: grants one of its VMs this Mac's password for a program, as
+	// grants.add does; nil grants none.
+	Grant func(ctx context.Context, program, vm string) error
+	// value: the programs a VM of this Mac is signed in to, as accounts.list
+	// reads it there.
+	SignedIn func(ctx context.Context, vm string) (map[string]bool, error)
 	// value: the processes of this Mac, which say whether a create still
 	// runs; nil says none does.
 	Processes contract.Processes

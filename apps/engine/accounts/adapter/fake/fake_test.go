@@ -19,14 +19,6 @@ func TestVault(t *testing.T) {
 	})
 }
 
-func TestSecretSource(t *testing.T) {
-	contracttest.SecretSource(t, func(*testing.T) contracttest.SecretSourceSubject {
-		kept := map[string]string{"session:a": "value-a", "operator:claude:oauth-token": "value-token"}
-		w := &world.World{Macs: map[string]*world.Mac{"mac-mini": {Secrets: kept}}}
-		return contracttest.SecretSourceSubject{Source: fake.NewSecretSource(w, "mac-mini"), Kept: kept}
-	})
-}
-
 func TestIdentities(t *testing.T) {
 	contracttest.Identities(t, func(*testing.T) contracttest.IdentitiesSubject {
 		w := &world.World{Macs: map[string]*world.Mac{"mac-mini": {Identities: map[string]accounts.Identity{
@@ -42,10 +34,6 @@ func TestIdentities(t *testing.T) {
 
 func TestBookStore(t *testing.T) {
 	contracttest.BookStore(t, func(*testing.T) contract.BookStore { return fake.NewBook() })
-}
-
-func TestShareStore(t *testing.T) {
-	contracttest.ShareStore(t, func(_ *testing.T, vms ...string) contract.ShareStore { return fake.NewShares(vms...) })
 }
 
 func TestSignIns(t *testing.T) {

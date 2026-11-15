@@ -186,18 +186,22 @@ type SettingList struct {
 	Changes bool
 }
 
-// value: what a machine is lent, and for how long (`7d`, `12h`): each
-// account a VM is shared; and on a computer, the accounts it keeps signed
-// in.
+// value: the programs a machine signs itself in to, and those this Mac's
+// vault grants a workspace made from the file, each by its wire name.
 
 type AccountsSpec struct {
-	Share []AccountShare `yaml:"share,omitempty"`
-	Keep  []string       `yaml:"keep,omitempty"`
+	SignIns []ProgramName `yaml:"signins,omitempty"`
+	Grants  []ProgramName `yaml:"grants,omitempty"`
 }
 
-type AccountShare struct {
-	Account string `yaml:"account"`
-	For     string `yaml:"for,omitempty"`
+type ProgramName string
+
+func (ProgramName) Enum() []string {
+	names := make([]string, 0, len(LoginPrograms))
+	for _, p := range LoginPrograms {
+		names = append(names, p.Name)
+	}
+	return names
 }
 
 // value: who a port a machine opens is shared with: its computer alone,

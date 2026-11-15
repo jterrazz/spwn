@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"slices"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -20,22 +19,14 @@ const (
 	kept      = "kept by the studio credential store"
 )
 
-type ShareList interface {
-	// value: the accounts share list, as the accounts family edits it.
-	Get() ([]string, error)
-	Add(name string) error
-	Remove(name string) error
-}
-
 type ClaudeToken struct {
-	run   local.Runner
-	share ShareList
+	run local.Runner
 }
 
 var _ contract.Applier = (*ClaudeToken)(nil)
 
-func NewClaudeToken(run local.Runner, share ShareList) *ClaudeToken {
-	return &ClaudeToken{run: run, share: share}
+func NewClaudeToken(run local.Runner) *ClaudeToken {
+	return &ClaudeToken{run: run}
 }
 
 func (*ClaudeToken) Kind() catalog.EffectKind { return catalog.ProcClaudeToken.Kind() }
@@ -57,12 +48,7 @@ func (c *ClaudeToken) values(ctx context.Context) []settings.KeyValue {
 			token = kept
 		}
 	}
-	list, _ := c.share.Get()
-	held := "does not hold it"
-	if slices.Contains(list, tokenName) {
-		held = "holds it"
-	}
-	return []settings.KeyValue{{Key: "token", Value: token}, {Key: "share list", Value: held}}
+	return []settings.KeyValue{{Key: "token", Value: token}}
 }
 
 func (c *ClaudeToken) Apply(ctx context.Context, it catalog.Setting, values map[string]string) (settings.Change, error) {
@@ -79,12 +65,7 @@ func (c *ClaudeToken) Apply(ctx context.Context, it catalog.Setting, values map[
 	if _, err = local.Must(ctx, c.run, cmd); err != nil {
 		return settings.Change{}, fmt.Errorf("studio credentials import failed: %w", err)
 	}
-	change := settings.Change{Steps: []settings.ChangeStep{{Label: tokenName, State: catalog.StateOK, Detail: kept}}}
-	if err := c.share.Add(tokenName); err != nil {
-		return change, err
-	}
-	change.Steps = append(change.Steps, settings.ChangeStep{Label: "share list", State: catalog.StateOK, Detail: "holds " + tokenName})
-	return change, nil
+	return settings.Change{Steps: []settings.ChangeStep{{Label: tokenName, State: catalog.StateOK, Detail: kept}}}, nil
 }
 
 func (c *ClaudeToken) Undo(ctx context.Context, it catalog.Setting) (settings.Change, error) {
@@ -94,10 +75,5 @@ func (c *ClaudeToken) Undo(ctx context.Context, it catalog.Setting) (settings.Ch
 	if _, err := local.Must(ctx, c.run, local.Command("studio", "credentials", "delete", tokenName)); err != nil {
 		return settings.Change{}, err
 	}
-	change := settings.Change{Steps: []settings.ChangeStep{{Label: tokenName, State: catalog.StateOK, Detail: "deleted from the studio credential store"}}}
-	if err := c.share.Remove(tokenName); err != nil {
-		return change, err
-	}
-	change.Steps = append(change.Steps, settings.ChangeStep{Label: "share list", State: catalog.StateOK, Detail: "no longer holds " + tokenName})
-	return change, nil
+	return settings.Change{Steps: []settings.ChangeStep{{Label: tokenName, State: catalog.StateOK, Detail: "deleted from the studio credential store"}}}, nil
 }

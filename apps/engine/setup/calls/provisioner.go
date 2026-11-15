@@ -11,7 +11,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 
-	accountscontract "github.com/jterrazz/studio-station/apps/engine/accounts/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
@@ -64,12 +63,11 @@ type Zshrc interface {
 }
 
 type ProvisionerPrefs struct {
-	Name      setupcontract.NamePrefs
-	Identity  setupcontract.IdentityPrefs
-	Macs      machinescontract.MacsPrefs
-	VMUser    machinescontract.VMUserPrefs
-	ShareList accountscontract.ShareListPrefs
-	Ports     portscontract.PortsPrefs
+	Name     setupcontract.NamePrefs
+	Identity setupcontract.IdentityPrefs
+	Macs     machinescontract.MacsPrefs
+	VMUser   machinescontract.VMUserPrefs
+	Ports    portscontract.PortsPrefs
 	// value: every store station keeps, each brought to its version by the
 	// layout step.
 	Stores []store.Migrator

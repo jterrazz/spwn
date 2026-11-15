@@ -1,7 +1,7 @@
 package: station.package/v1
 kind: setting
 name: claude-token
-description: The Claude Code subscription token a VM may borrow
+description: The Claude Code subscription token, kept in the studio credential store
 help: run `claude setup-token` and paste the token
 reversible: true
 options:
@@ -13,7 +13,6 @@ options:
       required: true
 sets:
     - { key: token, value: kept by the studio credential store }
-    - { key: share list, value: holds it }
 methods:
     - os: macos
       machine: computer

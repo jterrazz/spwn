@@ -86,7 +86,8 @@ const preferences = module + "/core/contract.Preferences"
 
 func ruleOneWriterPerStore(w *world) []finding {
 	var out []finding
-	groups := map[string]string{}
+	type writer struct{ pkg, at string }
+	groups := map[string]writer{}
 	for _, f := range w.files {
 		if f.test {
 			continue
@@ -114,10 +115,11 @@ func ruleOneWriterPerStore(w *world) []finding {
 			if store == preferences && sel.Sel.Name == "Write" && restOf(f.pkg) == "contract" && topOf(f.pkg) != "core" && len(call.Args) > 0 {
 				if tv, ok := f.info.Types[call.Args[0]]; ok && tv.Value != nil && tv.Value.Kind() == constant.String {
 					group := constant.StringVal(tv.Value)
-					if other, taken := groups[group]; taken && other != f.pkg {
-						out = append(out, finding{"one-writer-per-store", f.at(call.Pos()), fmt.Sprintf("the preference group %q is written by %q and %q: one owner per group", group, other, f.pkg)})
+					if other, taken := groups[group]; taken && other.pkg != f.pkg {
+						what := fmt.Sprintf("the preference group %q is written by %q and %q: one owner per group", group, other.pkg, f.pkg)
+						out = append(out, finding{"one-writer-per-store", other.at, what}, finding{"one-writer-per-store", f.at(call.Pos()), what})
 					}
-					groups[group] = f.pkg
+					groups[group] = writer{f.pkg, f.at(call.Pos())}
 				}
 			}
 			if mayWrite(f.pkg, store) {

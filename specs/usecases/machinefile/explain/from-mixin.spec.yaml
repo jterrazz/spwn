@@ -6,7 +6,7 @@ runs:
           machinefile: station.machinefile/v1
           name: base
           apps: [git, jq]
-          accounts: { keep: [github] }
+          accounts: { signins: [gh] }
       exit: 0
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
@@ -40,4 +40,4 @@ runs:
           	apps.lazygit	listed	overlay	macbook-pro
           	apps.lazygit.method	brew	built-in	lazygit
           	apps.lazygit.because	its one method for macos	built-in	lazygit
-          	accounts.keep.github	kept	user	base
+          	accounts.signins.gh	signs in	user	base

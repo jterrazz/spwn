@@ -16,7 +16,7 @@
 
 ## What is built
 
-This page is the target. Reading who is signed in (`accounts.list`), the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone; an agent is no grant target yet, so a grant to one is refused `grant.unknown-agent` and the sheet lists none. Everything else here is not: the Passwords page and the Machinefile's `signins` and `grants`. Until those land, a workspace's first start still copies the accounts its Machinefile's `accounts.share` names through the studio CLI, with the share list and the expiry of those copies; no call shares or takes back an account any more. [The ADR's consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
+This page is the target. Reading who is signed in (`accounts.list`), the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone; an agent is no grant target yet, so a grant to one is refused `grant.unknown-agent` and the sheet lists none. The Machinefile's `signins` and `grants` are built too: a workspace's first start grants each program of `grants` from this Mac's one password for it and leaves each program of `signins` it is not signed in to with its `station accounts login` command ([the Machinefile's keys](machinefiles.md#the-keys)). The Passwords page is not built yet.
 
 ## Three concepts
 

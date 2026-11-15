@@ -30,7 +30,7 @@ type Deps struct {
 }
 
 type Holdings interface {
-	// value: the guest ports reserved for vm and the accounts shared with it.
+	// value: the guest ports reserved for vm and the programs granted it.
 	Held(ctx context.Context, vm string) (ports []int, accounts []string, err error)
 }
 

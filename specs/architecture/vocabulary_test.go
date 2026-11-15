@@ -605,8 +605,6 @@ func f() {
 // v3's words; v2's hidden commands that are no kit.Alias.
 func legacyEncodings() []string {
 	return []string{
-		"apps/engine/accounts/adapter/jsonfile sharedIn",
-		"apps/engine/accounts/contract GroupV2ShareList",
 		"apps/engine/catalog StatusV1Kind",
 		"apps/engine/engine/process hello",
 		"apps/engine/images UnmarshalJSON",

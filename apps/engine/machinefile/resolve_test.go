@@ -187,8 +187,8 @@ func TestACycleIsPrintedAroundItsLoop(t *testing.T) {
 }
 
 func TestAccountsAndPortsAreReplacedWhole(t *testing.T) {
-	base := machine("a", "{ os: macos }", "[]") + "accounts: { share: [{ account: claude, for: 7d }, { account: github }], keep: [github] }\nports: { open: 3000-9999, to: private, except: [22] }\n"
-	overlay := "machinefile: station.machinefile/v1\noverrides: a\naccounts: { share: [{ account: claude, for: 1d }] }\nports: { open: 8080, to: local }\n"
+	base := machine("a", "{ os: macos }", "[]") + "accounts: { signins: [gh], grants: [claude, wrangler] }\nports: { open: 3000-9999, to: private, except: [22] }\n"
+	overlay := "machinefile: station.machinefile/v1\noverrides: a\naccounts: { grants: [claude] }\nports: { open: 8080, to: local }\n"
 	lib := library(t, map[string]string{"machinefiles/a.machine.yaml": base, "machinefiles/a.local.yaml": overlay}, nil)
 	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
@@ -200,7 +200,7 @@ func TestAccountsAndPortsAreReplacedWhole(t *testing.T) {
 			got = append(got, v.Key+"="+v.Text+"@"+string(v.Origin.Layer))
 		}
 	}
-	want := []string{"accounts.share.claude=1d@overlay", "ports.open=8080@overlay", "ports.to=local@overlay"}
+	want := []string{"accounts.grants.claude=granted@overlay", "ports.open=8080@overlay", "ports.to=local@overlay"}
 	if !slices.Equal(got, want) {
 		t.Errorf("read %v, want the overlay's accounts and ports alone: %v", got, want)
 	}
@@ -307,7 +307,7 @@ methods:
 }
 
 func TestAMixinAnswersItsOwnChainsValuesAndIsNeverResolved(t *testing.T) {
-	base := "machinefile: station.machinefile/v1\nname: base\napps: [fd, left]\nvm: { network: nat }\naccounts: { keep: [github] }\n"
+	base := "machinefile: station.machinefile/v1\nname: base\napps: [fd, left]\nvm: { network: nat }\naccounts: { signins: [gh] }\n"
 	top := "machinefile: station.machinefile/v1\nname: top\nextends: [base]\napps: [releases]\nvm: { resources: { cpus: 4 } }\n"
 	lib := library(t, map[string]string{"machinefiles/top.machine.yaml": top}, map[string]string{"machinefiles/base.machine.yaml": base})
 	if _, err := machinefile.Resolve(lib, "top", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, new(*machinefile.MixinError)) {
@@ -336,8 +336,8 @@ func TestAMixinAnswersItsOwnChainsValuesAndIsNeverResolved(t *testing.T) {
 	if v := got["apps.left"]; v.Text != "listed" || v.Origin.Name != "base" {
 		t.Errorf("left %+v, want listed by base though no catalog step holds it", v)
 	}
-	if v := got["accounts.keep.github"]; v.Text != "kept" {
-		t.Errorf("github %+v, want kept", v)
+	if v := got["accounts.signins.gh"]; v.Text != "signs in" {
+		t.Errorf("the sign-in of gh %+v, want signs in", v)
 	}
 	if len(r.Steps) != 0 {
 		t.Errorf("a mixin holds steps %+v, want none judged", r.Steps)

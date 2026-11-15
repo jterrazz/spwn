@@ -2000,14 +2000,19 @@ export type MachinesEngineView = {
 export type MachinesFirstStart = {
     Drift: string[] | null;
     Failed: string;
-    Shares: MachinesFirstStartShare[] | null;
+    Grants: MachinesFirstStartGrant[] | null;
+    SignIns: MachinesFirstStartSignIn[] | null;
     Template: string;
 };
 
-export type MachinesFirstStartShare = {
-    Account: string;
+export type MachinesFirstStartGrant = {
     Failed: string;
-    For: number;
+    Program: string;
+};
+
+export type MachinesFirstStartSignIn = {
+    Command: string;
+    Program: string;
 };
 
 export type MachinesHold = {

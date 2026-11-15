@@ -3,16 +3,8 @@ package zshblock
 import (
 	"context"
 	"io/fs"
-	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
-	"github.com/jterrazz/studio-station/apps/engine/settings"
-)
-
-const (
-	// value: how long a new shell waits for the Claude token; past it, the shell starts without.
-	TokenBudget = 2 * time.Second
 )
 
 type BlockOptions struct {
@@ -22,19 +14,18 @@ type BlockOptions struct {
 
 type Block struct {
 	// value: the script station's ~/.zshrc block evaluates: the dotfiles'
-	// loader, the tools' activation, completion, the Claude token and the
-	// services' variables.
+	// loader, the tools' activation, completion, the granted programs'
+	// environment files and the services' variables.
 	files    Files
 	embedded fs.FS
-	source   contract.SecretSource
 	o        BlockOptions
 }
 
-func NewBlock(files Files, embedded fs.FS, source contract.SecretSource, o BlockOptions) *Block {
-	return &Block{files: files, embedded: embedded, source: source, o: o}
+func NewBlock(files Files, embedded fs.FS, o BlockOptions) *Block {
+	return &Block{files: files, embedded: embedded, o: o}
 }
 
-func (s *Block) Zsh(ctx context.Context, completion string) (string, error) {
+func (s *Block) Zsh(_ context.Context, completion string) (string, error) {
 	loader, err := fs.ReadFile(s.embedded, catalog.ZshLoader)
 	if err != nil {
 		return "", err
@@ -45,9 +36,6 @@ func (s *Block) Zsh(ctx context.Context, completion string) (string, error) {
 	script := string(loader) + "\n" + catalog.AppActivation + "\n" +
 		"if (( ! $+functions[compdef] )) && [[ -o interactive ]]; then\n  autoload -Uz compinit && compinit -i\nfi\n" +
 		"if (( $+functions[compdef] )); then\n" + completion + "\nfi\n"
-	if line, ok := s.token(ctx); ok {
-		script += "\n" + line + "\n"
-	}
 	return script + s.grants() + s.portsEnv(), nil
 }
 
@@ -72,17 +60,4 @@ func (s *Block) portsEnv() string {
 		return ""
 	}
 	return "\n" + string(data)
-}
-
-// hazard: the file backend is forced because a VM has no keychain, and any failure
-// (no studio, a timeout, an empty store) answers nothing so a new shell never breaks.
-func (s *Block) token(ctx context.Context) (string, bool) {
-	if s.o.ThisMachine != catalog.Linux && s.o.ThisMachine != catalog.MacOS {
-		return "", false
-	}
-	exported, err := s.source.Export(ctx, []string{catalog.ClaudeTokenName})
-	if err != nil {
-		return "", false
-	}
-	return settings.ClaudeTokenLine(exported)
 }

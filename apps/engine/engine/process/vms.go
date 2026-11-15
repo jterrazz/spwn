@@ -318,7 +318,7 @@ func (d *Engine) ended(ctx context.Context, v *vmState) {
 		_ = d.start(ctx, v)
 	case model.ActDelete:
 		d.releaseVM(ctx, name)
-		d.forgetShares(ctx, name)
+		d.forgetGrants(ctx, name)
 		_, _ = d.m.Remove(ctx, name)
 		d.forget(name)
 	case model.ActStopped:
@@ -491,7 +491,7 @@ func (d *Engine) opDelete(ctx context.Context, vm string) error {
 	d.mu.Unlock()
 	d.vmStopped(ctx, vm)
 	d.releaseVM(ctx, vm)
-	d.forgetShares(ctx, vm)
+	d.forgetGrants(ctx, vm)
 	_, err = d.m.Remove(ctx, vm)
 	d.forget(vm)
 	return err
@@ -761,7 +761,7 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 	name := v.name
 	switch m.Type {
 	case "ready":
-		d.takeBackBeforeReady(ctx, name)
+		d.retryBeforeReady(ctx, name)
 		d.mu.Lock()
 		v.guest, v.lastErr = engine.GuestConnected, ""
 		d.mu.Unlock()

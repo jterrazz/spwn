@@ -1,6 +1,6 @@
 package engine
 
-const NoticeTakeBackFailed = "take_back_failed"
+const NoticeGrantRemovalFailed = "grant_removal_failed"
 
 // value: the events of SPEC §B3 the engine adds to the closed list of
 // §10.4, each a Notification's Kind and the HUD's.

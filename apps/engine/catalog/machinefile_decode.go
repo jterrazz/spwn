@@ -31,10 +31,9 @@ func IsMachinefileName(name string) bool {
 }
 
 var (
-	sizeWord     = regexp.MustCompile(`^[1-9]\d*[MGT]$`)
-	durationWord = regexp.MustCompile(`^[1-9]\d*[mhdw]$`)
-	versionWord  = regexp.MustCompile(`^\d+(?:\.\d+)*$`)
-	vaultName    = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]*$`)
+	sizeWord    = regexp.MustCompile(`^[1-9]\d*[MGT]$`)
+	versionWord = regexp.MustCompile(`^\d+(?:\.\d+)*$`)
+	vaultName   = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]*$`)
 )
 
 // value: the most ports `to: public` names: the internet reaches a machine
@@ -418,21 +417,23 @@ func checkValues(pkg string, values map[string]OptionValue) string {
 }
 
 func checkAccounts(a AccountsSpec) string {
-	seen := map[string]bool{}
-	for _, s := range a.Share {
-		switch {
-		case s.Account == "":
-			return "a share names its account"
-		case seen[s.Account]:
-			return "shares " + s.Account + " twice"
-		case s.For != "" && !durationWord.MatchString(s.For):
-			return fmt.Sprintf("%s for %q: a term is a count and m, h, d or w (`7d`)", s.Account, s.For)
+	known := ProgramName("").Enum()
+	for _, list := range []struct {
+		key   string
+		names []ProgramName
+	}{{"signins", a.SignIns}, {"grants", a.Grants}} {
+		for i, n := range list.names {
+			switch {
+			case !slices.Contains(known, string(n)):
+				return fmt.Sprintf("%s names %q, none of %s", list.key, n, strings.Join(known, ", "))
+			case slices.Contains(list.names[:i], n):
+				return list.key + " lists " + string(n) + " twice"
+			}
 		}
-		seen[s.Account] = true
 	}
-	for i, k := range a.Keep {
-		if k == "" || slices.Contains(a.Keep[:i], k) {
-			return "keep lists each account once, by name"
+	for _, n := range a.Grants {
+		if slices.Contains(a.SignIns, n) {
+			return string(n) + " is both signed in and granted: a machine signed in to a program is not granted it"
 		}
 	}
 	return ""

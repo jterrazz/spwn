@@ -237,9 +237,18 @@
         "Failed": {
           "type": "string"
         },
-        "Shares": {
+        "Grants": {
           "items": {
-            "$ref": "#/$defs/machines.FirstStartShare"
+            "$ref": "#/$defs/machines.FirstStartGrant"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "SignIns": {
+          "items": {
+            "$ref": "#/$defs/machines.FirstStartSignIn"
           },
           "type": [
             "array",
@@ -253,28 +262,41 @@
       "required": [
         "Drift",
         "Failed",
-        "Shares",
+        "Grants",
+        "SignIns",
         "Template"
       ],
       "type": "object"
     },
-    "machines.FirstStartShare": {
+    "machines.FirstStartGrant": {
       "additionalProperties": false,
       "properties": {
-        "Account": {
-          "type": "string"
-        },
         "Failed": {
           "type": "string"
         },
-        "For": {
-          "type": "integer"
+        "Program": {
+          "type": "string"
         }
       },
       "required": [
-        "Account",
         "Failed",
-        "For"
+        "Program"
+      ],
+      "type": "object"
+    },
+    "machines.FirstStartSignIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Command": {
+          "type": "string"
+        },
+        "Program": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Command",
+        "Program"
       ],
       "type": "object"
     },
