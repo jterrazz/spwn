@@ -294,6 +294,7 @@ describe('gestures', () => {
             },
         );
         expect(shows).toBe('ssh admin@linux-1');
+        expect(result.html.text).not.toMatch(/class="[^"]*primary/u);
         expect(result.errors.text).toBe('');
     });
 

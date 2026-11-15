@@ -17,30 +17,18 @@ export type OpenButtonProps = {
     openable: Openable | undefined;
     held: string;
     variant?: ButtonVariant;
-    yields?: boolean;
 };
 
 // invariant: a click opens the engine's value and marks nothing done: the window changed nothing, and the reads
 // invariant: show what the engine says once it does. A value shaped like a secret is never opened, as never copied.
-export function OpenButton({
-    label,
-    openable,
-    held,
-    variant = 'plain',
-    yields = false,
-}: OpenButtonProps) {
+export function OpenButton({ label, openable, held, variant = 'plain' }: OpenButtonProps) {
     const opener = useOpener();
     const [busy, setBusy] = useState(false);
     const [refused, setRefused] = useState<EngineError | undefined>(undefined);
     const withheld = openable !== undefined && looksSecret(openable.value);
     if (openable === undefined || withheld) {
         return (
-            <Button
-                disabled
-                title={withheld ? WITHHELD_OPENS : held}
-                variant={variant}
-                yields={yields}
-            >
+            <Button disabled title={withheld ? WITHHELD_OPENS : held} variant={variant}>
                 {label}
             </Button>
         );
@@ -61,7 +49,6 @@ export function OpenButton({
                 }}
                 title={openable.value}
                 variant={variant}
-                yields={yields}
             >
                 {label}
             </Button>
