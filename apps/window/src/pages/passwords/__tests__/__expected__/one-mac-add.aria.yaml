@@ -4,7 +4,6 @@
   - text: No password kept yet · a value never leaves this Mac's Keychain to be shown.
 - region "Passwords":
   - heading "Passwords 0" [level=2]
-  - paragraph: "No value is shown, copied or revealed here: a password is only granted, and removed."
 - dialog "Add a password":
   - heading "Add a password" [level=3]
   - paragraph: It is kept in macbook-pro's Keychain; you can then grant it to a machine.
