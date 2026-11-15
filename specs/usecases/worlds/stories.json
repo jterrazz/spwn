@@ -1418,6 +1418,7 @@
                 "machinefiles/jterrazz-base.machine.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
                 "machinefiles/linux-1.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-1\nmachine: { kind: workspace }\nextends: [linux-dev]\nports: { open: [3000], to: public }\n",
                 "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [jterrazz-base]\napps: [ripgrep]\n",
+                "machinefiles/macbook-pro.local.yaml": "machinefile: station.machinefile/v1\noverrides: macbook-pro\napps: { add: [bat], remove: [lazygit] }\n",
                 "machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [jterrazz-base]\napps: [lazygit]\n",
                 "machinefiles/studio-linux.machine.yaml": "machinefile: station.machinefile/v1\nname: studio-linux\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [station-linux]\napps: [jq, gh, ripgrep]\n"
             },
@@ -1572,6 +1573,10 @@
                 "Cycles": 112
             },
             "preferences": {
+                "machinefile": {
+                    "bound_at": "2026-10-29T10:30:00Z",
+                    "name": "macbook-pro"
+                },
                 "macs": {
                     "mac-mini": {
                         "lan": "192.168.1.20",
