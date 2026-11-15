@@ -63,6 +63,14 @@ func TestTheHeadOfAMacSaysItOnlineWithTheMachinesItRuns(t *testing.T) {
 			t.Errorf("%s: %+v; want %+v", name, got.Head.Verdict, c.want)
 		}
 	}
+	told := overview.Summarize(mac, overview.EngineRunning, nil, nil, []overview.VM{{Name: "a", Running: true}}).Told("Engine running. Awake until 18:00.")
+	if told.Head.Verdict.Line != "Engine running. Awake until 18:00." || told.Head.Verdict.Sentence != "Online, with 1 machine running." {
+		t.Errorf("the Mac's sentence is the line of its head: %+v", told.Head.Verdict)
+	}
+	stopped := overview.Summarize(mac, overview.EngineStopped, nil, nil, nil).Told("Engine stopped.")
+	if stopped.Head.Verdict.Line != overview.LineEngineStopped {
+		t.Errorf("a stopped engine keeps its own line: %+v", stopped.Head.Verdict)
+	}
 	inside := overview.Summarize(overview.Head{Name: "linux-1", Kind: machine.Workspace}, overview.EngineNone, nil, nil, nil)
 	if inside.Head.Verdict != nil {
 		t.Errorf("a VM's head is its Mac's to say: %+v", inside.Head.Verdict)

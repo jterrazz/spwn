@@ -555,6 +555,9 @@
         "Asleep": {
           "type": "boolean"
         },
+        "Awake": {
+          "type": "string"
+        },
         "Engine": {
           "$ref": "#/$defs/machines.EngineView"
         },
@@ -575,6 +578,9 @@
         },
         "Reachable": {
           "type": "boolean"
+        },
+        "Sentence": {
+          "type": "string"
         },
         "StationVersion": {
           "type": "string"

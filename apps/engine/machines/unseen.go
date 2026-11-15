@@ -2,6 +2,7 @@ package machines
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
@@ -37,4 +38,32 @@ func silence(d time.Duration) string {
 		return strconv.Itoa(int(d/time.Hour)) + " h"
 	}
 	return strconv.Itoa(int(d/(24*time.Hour))) + " days"
+}
+
+func SentenceOf(h MacView, now time.Time) string {
+	// value: the one sentence a Mac is told by in the list of machines: a
+	// Mac that does not answer says since when it is not seen, one that
+	// answers its engine and what keeps it awake.
+	if h.ThisMac || h.Reachable {
+		parts := []string{}
+		switch h.Engine.State {
+		case EngineRunning:
+			parts = append(parts, "Engine running.")
+		case EngineStopped:
+			parts = append(parts, "Engine stopped.")
+		case EngineNotInstalled:
+			parts = append(parts, "Engine not installed.")
+		}
+		if h.Awake != "" {
+			parts = append(parts, strings.ToUpper(h.Awake[:1])+h.Awake[1:]+".")
+		}
+		return strings.Join(parts, " ")
+	}
+	switch {
+	case h.Answered.IsZero():
+		return "Never seen. Asleep or off the network."
+	case h.Asleep:
+		return "Asleep, not seen for " + silence(now.Sub(h.Answered)) + "."
+	}
+	return "Not seen for " + silence(now.Sub(h.Answered)) + ". Asleep or off the network."
 }

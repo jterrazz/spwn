@@ -37,3 +37,14 @@ func macHead(s Summary) verdict.Verdict {
 	}
 	return verdict.Verdict{Tone: verdict.OK, Sentence: "Online, with " + strconv.Itoa(running) + " machines running."}
 }
+
+func (s Summary) Told(sentence string) Summary {
+	// value: the Mac's sentence, as machines.list tells it, set as the line
+	// of its head while the engine runs.
+	if s.Head.Verdict != nil && s.Engine != EngineStopped {
+		v := *s.Head.Verdict
+		v.Line = sentence
+		s.Head.Verdict = &v
+	}
+	return s
+}

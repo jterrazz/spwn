@@ -104,6 +104,36 @@ type Report struct {
 	Choices []Choice
 }
 
+func (r Report) Until() string {
+	// invariant: a session that follows a run ends with it, whatever its 24 h
+	// bound says, in the words the Awake page says it.
+	s := r.Session
+	if s == nil {
+		return ""
+	}
+	if s.Run != "" {
+		return "until " + s.Run + " is done"
+	}
+	zone := r.Zone
+	if zone == nil {
+		zone = time.UTC
+	}
+	return "until " + s.Until.In(zone).Format("15:04")
+}
+
+func (r Report) Phrase() string {
+	// value: what keeps this Mac awake, in words ("awake until 18:00",
+	// "never sleeps"); empty when nothing does.
+	switch r.Mode() {
+	case NeverSleeps:
+		return "never sleeps"
+	case AwakeUntil:
+		return "awake " + r.Until()
+	case SleepsNormally, StoppedByGuard:
+	}
+	return ""
+}
+
 func (r Report) Mode() Mode { return ModeOf(r.Now, r.NeverSleeps, r.Session, r.LastEnd) }
 
 type Awoken struct {
