@@ -126,8 +126,25 @@ enum Snapshot {
     }
 }
 
+enum Expectation {
+    // invariant: STATION_EXPECT_GOLDENS names a file of golden paths, relative to the
+    // repository root, one per line: only those goldens are rewritten, and only when
+    // they differ; every other golden is compared exactly as without it.
+    static func paths(_ file: String?) -> Set<String> {
+        guard let file, let text = try? String(contentsOfFile: file, encoding: .utf8) else { return [] }
+        return Set(text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty && !$0.hasPrefix("#") })
+    }
+
+    static func listed(_ golden: URL, in set: Set<String>) -> Bool {
+        let root = Tree.root.standardizedFileURL.path + "/"
+        let path = golden.standardizedFileURL.path
+        return path.hasPrefix(root) && set.contains(String(path.dropFirst(root.count)))
+    }
+}
+
 enum Golden {
     static let update = ProcessInfo.processInfo.environment["STATION_UPDATE_GOLDENS"] == "1"
+    static let expected: Set<String> = Expectation.paths(ProcessInfo.processInfo.environment["STATION_EXPECT_GOLDENS"])
 
     // invariant: a view is proved by its golden PNG, drawn offscreen: nil
     // when it matches within 0.1 % of its pixels, else what differs.
@@ -145,19 +162,34 @@ enum Golden {
             try png.write(to: golden)
             return nil
         }
-        guard let data = try? Data(contentsOf: golden), let want = Bitmap(png: data) else { return "\(file): no golden (STATION_UPDATE_GOLDENS=1 swift test writes it)" }
+        let listed = Expectation.listed(golden, in: expected)
+        guard let data = try? Data(contentsOf: golden), let want = Bitmap(png: data) else {
+            if listed {
+                try png.write(to: golden)
+                return nil
+            }
+            return "\(file): no golden (STATION_UPDATE_GOLDENS=1 swift test writes it)"
+        }
         let actual = folder.appendingPathComponent(file + ".actual.png")
-        guard want.width == bitmap.width, want.height == bitmap.height else {
-            try png.write(to: actual)
-            return "\(file): \(bitmap.width)x\(bitmap.height), golden \(want.width)x\(want.height)"
+        var failure: String?
+        if want.width != bitmap.width || want.height != bitmap.height {
+            failure = "\(file): \(bitmap.width)x\(bitmap.height), golden \(want.width)x\(want.height)"
+        } else {
+            let differing = bitmap.differing(want, tolerance: tolerance)
+            if Double(differing) > Double(bitmap.width * bitmap.height) * 0.001 { failure = "\(file): \(differing) pixels differ" }
         }
-        let differing = bitmap.differing(want, tolerance: tolerance)
-        if Double(differing) > Double(bitmap.width * bitmap.height) * 0.001 {
-            try png.write(to: actual)
-            return "\(file): \(differing) pixels differ"
+        guard let failure else {
+            if listed { return "\(file): listed in STATION_EXPECT_GOLDENS, but it did not change" }
+            try? FileManager.default.removeItem(at: actual)
+            return nil
         }
-        try? FileManager.default.removeItem(at: actual)
-        return nil
+        if listed {
+            try png.write(to: golden)
+            try? FileManager.default.removeItem(at: actual)
+            return nil
+        }
+        try png.write(to: actual)
+        return failure
     }
 
     // invariant: a state of the menu bar is proved in both schemes, and
