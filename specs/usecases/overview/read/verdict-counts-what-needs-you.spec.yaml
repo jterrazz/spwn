@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          [{"Tone":"ok","Sentence":"Everything is fine.","Line":"9 things can wait."},[["npm","can-wait","fix"],["com.jterrazz.brain.x-snapshot","can-wait","remove"],["mise","can-wait","update"],["brew","can-wait","update"],["firewall","can-wait","fix"],["~/.tart","can-wait","move"],["com.bjango.istatmenus.installer","can-wait","fix"],["com.docker.socket","can-wait","fix"],["com.docker.vmnetd","can-wait","fix"]]]
+          [{"Tone":"bad","Sentence":"2 things need you.","Line":"npm sign-in expired"},[["npm","needs-you","fix"],["com.jterrazz.brain.x-snapshot","needs-you","remove"],["mise","can-wait","update"],["brew","can-wait","update"],["firewall","can-wait","fix"],["~/.tart","can-wait","move"],["com.bjango.istatmenus.installer","can-wait","fix"],["com.docker.socket","can-wait","fix"],["com.docker.vmnetd","can-wait","fix"]]]
