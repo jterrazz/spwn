@@ -70,7 +70,7 @@ describe('machine files', () => {
 
                 // When - Apps is read
                 // Then - each line sits under the file that declares it
-                await visitor.see(within(own, content('lazygit')));
+                await visitor.see(within(own, content('gh')));
                 await visitor.see(within(base, content('homebrew')));
 
                 // When - Settings is chosen
