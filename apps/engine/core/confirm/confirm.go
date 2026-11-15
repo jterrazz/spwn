@@ -192,7 +192,7 @@ func (a Action) Consequence() string {
 	case RestartMac:
 		return "%s restarts: its VMs stop, and its servers start again once it is back."
 	case RestartServer:
-		return "%s stops while it restarts: what it serves is down until it answers again."
+		return "It is a server: what it serves stops while it restarts."
 	case StopEngine:
 		return "Every VM of this Mac stops, and nothing is shared until the engine starts again."
 	case Stop:

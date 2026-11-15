@@ -109,7 +109,7 @@ func TestEveryConfirmationSaysWhatItsGestureDoes(t *testing.T) {
 			t.Errorf("%s says %q: every confirmation says what it does, in one sentence", a, c)
 		}
 	}
-	if got := confirm.Restart.Consequence(); !strings.Contains(got, "what it serves stops") {
-		t.Errorf("a server's restart says %q: it says what stops while it restarts", got)
+	if got := confirm.RestartServer.Consequence(); got != "It is a server: what it serves stops while it restarts." {
+		t.Errorf("a server's restart says %q: it says it is a server and what stops while it restarts", got)
 	}
 }
