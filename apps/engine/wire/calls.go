@@ -61,7 +61,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		accountscalls.All(accountscalls.Deps{Accounts: m.accounts(), Shares: m.secrets(), SignIns: m.signIns(), Kind: kind}),
 		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),
-		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Known: m.cat.Apps, Kind: kind}),
+		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Known: m.cat.Apps, Kind: kind, All: appsAllMachines{m}, Now: m.sys.Clock.Now}),
 		awakecalls.All(m.awakeDeps()),
 		backgroundcalls.All(m.backgroundDeps()),
 		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind}),

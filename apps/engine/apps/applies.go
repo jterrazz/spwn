@@ -1,5 +1,19 @@
 package apps
 
-import "github.com/jterrazz/studio-station/apps/engine/core/section"
+import (
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/section"
+)
 
 var Applies = section.Shown(section.Apps)
+
+var ReadsAllMachines = machine.All(Applies, fromAMac)
+
+func fromAMac(p machine.Profile) machine.Verdict {
+	// invariant: the matrix is read from a Mac: the one kind that reaches
+	// every other machine.
+	if !p.Caps.Engine {
+		return machine.No(p.Ref.Name + " is a " + p.Kind.Word(p.System.OS) + ": the apps of every machine are read from a Mac")
+	}
+	return machine.Yes
+}

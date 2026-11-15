@@ -1,0 +1,11 @@
+description: 'inside a workspace, the apps matrix is refused: it is read from a Mac'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error'''
+      stdin: |
+          {"v":2,"id":"1","call":"apps.matrix","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"type":"not-for-this-machine","code":"section.not-for-this-machine","subject":"linux-1","detail":{"call":"apps.matrix","fix":"","why":"linux-1 is a workspace: the apps of every machine are read from a Mac"},"message":"linux-1 is a workspace: the apps of every machine are read from a Mac","hint":"run station overview for what linux-1 has"}

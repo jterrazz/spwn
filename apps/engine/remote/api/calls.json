@@ -231,6 +231,13 @@
       "watch": true
     },
     {
+      "name": "apps.matrix",
+      "schema": "station.apps.matrix/v1",
+      "where": "in-process",
+      "in": "MatrixIn",
+      "out": "Matrix"
+    },
+    {
       "name": "apps.move",
       "schema": "station.apps.move/v1",
       "section": "apps",

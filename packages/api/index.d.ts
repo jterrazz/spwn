@@ -435,6 +435,8 @@ export type AppsCallsListIn = {
     Fresh?: boolean;
 };
 
+export type AppsCallsMatrixIn = Record<string, never>;
+
 export type AppsCallsMoveIn = {
     Name?: string;
     To?: string;
@@ -459,6 +461,37 @@ export type AppsCallsUpdateIn = {
     Managers?: string[];
     Names?: string[];
     Within?: string;
+};
+
+export type AppsCell = {
+    Newest: string;
+    NotHere: boolean;
+    State: '' | 'failed' | 'not-installed' | 'not-known' | 'not-managed' | 'ok' | 'pending' | 'update-available';
+    Version: string;
+};
+
+export type AppsColumn = {
+    Answered: string;
+    Away: '' | 'silent' | 'stopped';
+    Mac: boolean;
+    Name: string;
+    Read: string;
+    Ref: CoreMachineRef;
+    ThisMachine: boolean;
+    Why: string;
+};
+
+export type AppsMatrix = {
+    Columns: AppsColumn[] | null;
+    Rows: AppsMatrixRow[] | null;
+    Servers: string[] | null;
+};
+
+export type AppsMatrixRow = {
+    Carry: number;
+    Cells: AppsCell[] | null;
+    Name: string;
+    Of: number;
 };
 
 export type AppsOutcome = {
@@ -3228,6 +3261,8 @@ export type AppsInstallInput = AppsCallsInstallIn;
 export type AppsInstallOutput = AppsOutcome[] | null;
 export type AppsListInput = AppsCallsListIn;
 export type AppsListOutput = AppsReport[] | null;
+export type AppsMatrixInput = AppsCallsMatrixIn;
+export type AppsMatrixOutput = AppsMatrix;
 export type AppsMoveInput = AppsCallsMoveIn;
 export type AppsMoveOutput = AppsOutcome[] | null;
 export type AppsRemoveInput = AppsCallsRemoveIn;
@@ -3439,6 +3474,7 @@ export interface Calls {
     'agents.stop': { in: AgentsStopInput; out: AgentsStopOutput; watch: false; confirm: 'stop-agent'; consequence: 'The agent in %s stops where it is; its work so far stays.' };
     'apps.install': { in: AppsInstallInput; out: AppsInstallOutput; watch: false };
     'apps.list': { in: AppsListInput; out: AppsListOutput; watch: true };
+    'apps.matrix': { in: AppsMatrixInput; out: AppsMatrixOutput; watch: false };
     'apps.move': { in: AppsMoveInput; out: AppsMoveOutput; watch: false };
     'apps.remove': { in: AppsRemoveInput; out: AppsRemoveOutput; watch: false; confirm: 'remove'; consequence: '%s leaves this machine; its data stays.' };
     'apps.show': { in: AppsShowInput; out: AppsShowOutput; watch: false };
