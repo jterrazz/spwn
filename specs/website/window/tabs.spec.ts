@@ -36,17 +36,19 @@ describe('tabs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('A6 a server carries every tab but Sign-ins', async () => {
+    test('A6 a server carries the tabs of its sections: Overview, Activity and Ports', async () => {
         // Given - the window on infra's page over two-macs
         const result = await website.visit(
             '/?world=two-macs&machine=infra&tab=Activity',
             async (visitor) => {
                 // When - its tabs are read
-                // Then - five are there, and no Sign-ins: a server keeps its own
-                for (const tab of TABS.filter((one) => one !== 'Sign-ins')) {
+                // Then - three are there, and none of Packages, Sign-ins and Storage: its engine has no such section
+                for (const tab of ['Overview', 'Activity', 'Ports']) {
                     await visitor.see(within(main(), content(tab)));
                 }
-                await visitor.gone(within(main(), content('Sign-ins')));
+                for (const tab of ['Packages', 'Sign-ins', 'Storage']) {
+                    await visitor.gone(within(main(), content(tab)));
+                }
             },
         );
         expect(result.errors.text).toBe('');

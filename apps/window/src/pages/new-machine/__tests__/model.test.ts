@@ -71,15 +71,15 @@ describe('model', () => {
 
         // Then - the name and file the engine names, no size, and a server carries its image and no lifetime
         expect(workspace).toStrictEqual({
-            Request: { From: 'station-linux', Lifetime: 'persistent', Name: 'linux-2' },
+            Request: { From: 'station-linux', Lifetime: 'ephemeral', Name: 'linux-2' },
         });
         expect(server).toStrictEqual({ Image: 'station-linux', Name: 'linux-2' });
     });
 
     test('a purpose and a memory off the default are sent, trimmed and in bytes', () => {
-        // Given - a draft for the mini with a purpose and 8 GB
+        // Given - a draft for the mini with a purpose and 6 GB, off the engine's 8 GB default
         const answer = answerOn(MINI);
-        const draft = { ...EMPTY_DRAFT, memory: 8 * GB, name: ' gate5 ', purpose: ' Lot L6 ' };
+        const draft = { ...EMPTY_DRAFT, memory: 6 * GB, name: ' gate5 ', purpose: ' Lot L6 ' };
 
         // When - its input is made
         const workspace = workspaceInputOf({
@@ -92,10 +92,10 @@ describe('model', () => {
         expect(workspace).toStrictEqual({
             Request: {
                 From: 'station-linux',
-                Lifetime: 'persistent',
+                Lifetime: 'ephemeral',
                 Name: 'gate5',
                 Purpose: 'Lot L6',
-                Size: { MemoryBytes: 8 * GB },
+                Size: { MemoryBytes: 6 * GB },
             },
         });
     });

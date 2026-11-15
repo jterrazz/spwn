@@ -207,7 +207,7 @@ function calmNight(here: string): JournalReadOutput {
 }
 
 export const ANSWERS: readonly JournalAnswer[] = [
-    { fleet: 'agent-7f,api,linux-1 | infra,linux-3,review-bot | ?', out: stories },
+    { fleet: 'agent-7f,api,linux-1,linux-2 | infra,linux-3,review-bot | ?', out: stories },
     { fleet: 'api,linux-1 | infra', out: (macs) => failedNight(thisMacOf(macs)) },
     { fleet: 'api,linux-1 | infra?', out: (macs) => calmNight(thisMacOf(macs)) },
     { fleet: '', out: () => ({ Groups: [] }) },
