@@ -8,6 +8,7 @@ export type MemoryHolder = {
     squares: number;
     identity?: Identity | undefined;
     pending?: boolean | undefined;
+    used?: number | undefined;
 };
 
 export type MemoryGridProps = {
@@ -21,8 +22,14 @@ function count(squares: number): number {
     return Number.isFinite(squares) ? Math.max(0, Math.round(squares)) : 0;
 }
 
-function cellsOf(holder: MemoryHolder): readonly string[] {
-    return Array.from({ length: count(holder.squares) }, (_, at) => `${holder.key}-${String(at)}`);
+type Cell = { key: string; unused: boolean };
+
+function cellsOf(holder: MemoryHolder): readonly Cell[] {
+    const lit = holder.used === undefined ? Number.POSITIVE_INFINITY : count(holder.used);
+    return Array.from({ length: count(holder.squares) }, (_, at) => ({
+        key: `${holder.key}-${String(at)}`,
+        unused: at >= lit,
+    }));
 }
 
 export function MemoryGrid({ name, total, free, holders }: MemoryGridProps) {
@@ -42,9 +49,9 @@ export function MemoryGrid({ name, total, free, holders }: MemoryGridProps) {
                 role="img"
             >
                 {holders.map((holder) =>
-                    cellsOf(holder).map((key) => (
+                    cellsOf(holder).map(({ key, unused }) => (
                         <i
-                            className={`${styles.cell} ${holder.pending === true ? styles.pending : ''}`}
+                            className={`${styles.cell} ${holder.pending === true ? styles.pending : ''} ${unused ? styles.unused : ''}`}
                             data-identity={holder.identity}
                             key={key}
                         />
@@ -58,6 +65,7 @@ export function MemoryGrid({ name, total, free, holders }: MemoryGridProps) {
                 {holders.map((holder) => (
                     <span data-identity={holder.identity} key={holder.key}>
                         <b>{String(count(holder.squares))}</b> {holder.label}
+                        {holder.used === undefined ? null : `, ${String(count(holder.used))} used`}
                     </span>
                 ))}
                 <span className={styles.free}>

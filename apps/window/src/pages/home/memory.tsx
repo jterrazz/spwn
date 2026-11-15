@@ -89,6 +89,7 @@ function holdersOf(
             label: vm.Name,
             pending: beingCreated(macs, room.Mac, vm.Name),
             squares: squares(vm.Bytes),
+            used: vm.UsedBytes === undefined ? undefined : squares(vm.UsedBytes),
         })),
     ];
 }

@@ -85,27 +85,19 @@ function macCells(name: string, report: ActivityReport | undefined) {
 }
 
 export function vmCells(
-    vm: Pick<MachinesVM, 'Name' | 'Purpose' | 'Resources'>,
+    vm: Pick<MachinesVM, 'Name' | 'Purpose' | 'Resources' | 'UsedBytes'>,
     report: ActivityReport | undefined,
     identity?: Identity,
 ) {
     const purpose = vm.Purpose === '' ? null : vm.Purpose;
     const usage = report?.last.vms?.find((one) => one.vm === vm.Name);
-    if (usage === undefined) {
-        return [purpose, null, null];
-    }
+    const used = usage?.memory ?? vm.UsedBytes;
     const total = vm.Resources.MemoryBytes;
     return [
         purpose,
-        <Cpu key="cpu" name={vm.Name} value={percent(usage.cpu)} />,
-        total > 0 ? (
-            <Held
-                identity={identity}
-                key="memory"
-                name={vm.Name}
-                total={total}
-                used={usage.memory}
-            />
+        usage === undefined ? null : <Cpu key="cpu" name={vm.Name} value={percent(usage.cpu)} />,
+        used !== undefined && total > 0 ? (
+            <Held identity={identity} key="memory" name={vm.Name} total={total} used={used} />
         ) : null,
     ];
 }
