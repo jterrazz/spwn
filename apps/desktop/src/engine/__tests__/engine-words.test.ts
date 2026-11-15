@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
+import { keyOf } from '../../domain/request-key';
 import { recordingsOf } from '../../fixtures/recordings';
 import type { Out } from '../client';
 import { codesOf, countOf, headingOf, wordOf } from '../engine-words';
-import { keyOf } from '../frame';
 import { vmLifetimeWord } from '../shown';
 
 const recordingFor = await recordingsOf('two-macs');

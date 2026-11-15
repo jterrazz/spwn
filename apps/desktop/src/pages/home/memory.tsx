@@ -2,8 +2,8 @@ import type { MachinesMacView, MachinesRoom } from '@jterrazz/station-api';
 
 import { MemoryGrid, Panel, ShareBar, Tile } from '../../design/index';
 import type { MemoryHolder } from '../../design/index';
+import { GIB, memory } from '../../domain/format';
 import { useWatch } from '../../engine/react';
-import { GIB, memory } from '../../model/format';
 import { NotGivenTile, split, Unknown } from '../activity/tiles';
 import { useIdentityOf } from '../kit/identity';
 import type { IdentityOf } from '../kit/identity';

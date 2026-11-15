@@ -2,9 +2,9 @@ import type { AccountsVaultEntry, AccountsVaultRead } from '@jterrazz/station-ap
 
 import { Icon } from '../../design/icon';
 import { AppIcon, asSentence, Panel, Row, RowHead, Verdict } from '../../design/index';
+import { sentence } from '../../domain/format';
 import { useWatch } from '../../engine/react';
 import { verdictShown } from '../../engine/shown';
-import { sentence } from '../../model/format';
 import type { Route } from '../../shell/route';
 import { HeldOutcomes } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';

@@ -11,12 +11,12 @@ import {
     Switch,
 } from '../../design/index';
 import type { MemoryHolder, Pick as Option } from '../../design/index';
+import { bytes } from '../../domain/format';
+import { machineNamesOf, macsOf } from '../../domain/machines/machines';
 import { wordOf } from '../../engine/engine-words';
 import { fitAllows } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { machineKindWord } from '../../engine/shown';
-import { bytes } from '../../model/format';
-import { machineNamesOf, macsOf } from '../../model/machines';
 import { useIdentityOf } from '../kit/identity';
 import { GB, gbOf, leavesFreeOf } from './model';
 import type { Draft, Kind } from './model';

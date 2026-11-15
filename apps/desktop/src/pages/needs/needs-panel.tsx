@@ -1,8 +1,8 @@
 import type { MachinesMacView, OverviewNeed } from '@jterrazz/station-api';
 
 import { Panel } from '../../design/index';
+import { isNeedsYou } from '../../domain/overview/upkeep';
 import { needState } from '../../engine/shown';
-import { isNeedsYou } from '../../model/upkeep';
 import type { Route } from '../../shell/route';
 import { NeedLine } from './need-gesture';
 import { routeOfNeed } from './needs';

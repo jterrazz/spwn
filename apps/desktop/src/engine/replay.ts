@@ -1,6 +1,6 @@
 import type { EngineHello, Request } from '@jterrazz/station-api';
 
-import { isRecord, keyOf } from './frame';
+import { isRecord, keyOf } from '../domain/request-key';
 import type { Link, Exchange as Opened, Receiver, Transport } from './transport';
 
 export type Exchange = { request: Record<string, unknown>; answers: readonly unknown[] };

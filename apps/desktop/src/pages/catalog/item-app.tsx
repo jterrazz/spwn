@@ -10,13 +10,13 @@ import {
     StatePill,
     Value,
 } from '../../design/index';
+import { sentence } from '../../domain/format';
 import { countOf, detailOf, wordOf } from '../../engine/engine-words';
 import type { PlanLine } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import { appUpdate, kindChipWord } from '../../engine/shown';
 import { APP_STATE_TONES } from '../../engine/tones';
 import { APP_STATE_WORDS } from '../../engine/words';
-import { sentence } from '../../model/format';
 import { installLinesOf, usedBy } from './item-model';
 import {
     factOf,

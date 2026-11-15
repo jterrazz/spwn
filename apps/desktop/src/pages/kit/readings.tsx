@@ -12,13 +12,13 @@ import {
     Verdict,
 } from '../../design/index';
 import { shownOrWithheld } from '../../design/secret';
-import type { EngineError } from '../../engine/engine-error';
+import type { EngineError } from '../../domain/engine-error';
+import { clock, fixLine, sentence } from '../../domain/format';
+import { SEPARATOR } from '../../domain/separator';
+import type { Tone } from '../../domain/tone';
 import { failedState } from '../../engine/failed';
 import type { Reach } from '../../engine/reach';
 import { ownState, verdictShown } from '../../engine/shown';
-import { clock, fixLine, sentence } from '../../model/format';
-import { SEPARATOR } from '../../separator';
-import type { Tone } from '../../tone';
 
 import styles from '../page.module.css';
 

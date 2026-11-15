@@ -1,6 +1,6 @@
 import type { AppsReport, SettingsRow } from '@jterrazz/station-api';
 
-import { matchesQuery } from '../../model/search';
+import { matchesQuery } from '../../domain/search';
 
 export type Shelf = 'apps' | 'settings' | 'skills';
 

@@ -9,8 +9,8 @@ import { useId } from 'react';
 import type { ReactNode, RefCallback } from 'react';
 
 import { AppIcon, capitalised, Field, FormField, Picks } from '../../design/index';
+import { sentence } from '../../domain/format';
 import { codesOf, wordOf } from '../../engine/engine-words';
-import { sentence } from '../../model/format';
 import type { Asked } from './use-add';
 
 import styles from './passwords.module.css';

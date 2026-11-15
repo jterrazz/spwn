@@ -1,7 +1,7 @@
 import { identityOf } from '../../design/index';
 import type { Identity } from '../../design/index';
+import { machineNamesOf, macsOf } from '../../domain/machines/machines';
 import { useWatch } from '../../engine/react';
-import { machineNamesOf, macsOf } from '../../model/machines';
 
 export type IdentityOf = (name: string) => Identity | undefined;
 

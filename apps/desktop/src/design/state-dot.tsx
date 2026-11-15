@@ -1,4 +1,4 @@
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 
 import styles from './state-dot.module.css';
 

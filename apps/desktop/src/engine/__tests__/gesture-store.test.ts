@@ -1,7 +1,7 @@
 import { clock } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { EngineError } from '../engine-error';
+import { EngineError } from '../../domain/engine-error';
 import { GestureStore } from '../gesture-store';
 
 const ERASE = 'call disk.erase {"App":"orbstack"} {"name":"macbook-pro"}';

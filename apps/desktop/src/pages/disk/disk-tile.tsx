@@ -1,8 +1,8 @@
 import type { Target } from '@jterrazz/station-api';
 
 import { Bar, Tile } from '../../design/index';
+import { bytes, sentence } from '../../domain/format';
 import { useWatch } from '../../engine/react';
-import { bytes, sentence } from '../../model/format';
 import { NotGivenTile, split, Unknown } from '../activity/tiles';
 
 type Shows = 'free' | 'used';

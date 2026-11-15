@@ -1,6 +1,6 @@
 import type { CoreFindingFix } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../separator';
+import { SEPARATOR } from './separator';
 
 // invariant: station's rule of the numbers, as its Go prints them (apps/engine/activity/words.go): disk and network sizes
 // invariant: and rates are decimal, memory binary and written GB as macOS shows RAM; one decimal under 100.

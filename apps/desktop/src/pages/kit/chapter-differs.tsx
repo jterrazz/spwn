@@ -1,12 +1,12 @@
 import type { MachinefileDiffering } from '@jterrazz/station-api';
 
 import { AppIcon, Panel, StatePill, Value } from '../../design/index';
+import { driftAsked } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
 import { accountSideOf } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import { differingSide } from '../../engine/shown';
 import type { DifferingSide, SharedChapter } from '../../engine/shown';
-import { driftAsked } from '../../model/machines';
-import type { Found } from '../../model/machines';
 
 import styles from './chapter-differs.module.css';
 

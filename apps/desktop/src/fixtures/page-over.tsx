@@ -1,10 +1,10 @@
+import { findMachine } from '../domain/machines/machines';
 import { Client } from '../engine/client';
 import { NO_OPENER } from '../engine/opener';
 import type { Opener } from '../engine/opener';
 import { EngineProvider } from '../engine/react';
 import { replayTransport } from '../engine/replay';
 import type { Pace, Recording } from '../engine/replay';
-import { findMachine } from '../model/machines';
 import { PAGES } from '../pages/registry';
 import type { Route } from '../shell/route';
 import { RouterProvider, useRouter } from '../shell/router';

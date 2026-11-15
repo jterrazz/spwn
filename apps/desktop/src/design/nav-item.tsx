@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import { Icon } from './icon';
 import type { IconName } from './icon';
 import { StateDot } from './state-dot';

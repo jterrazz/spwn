@@ -1,8 +1,8 @@
 import type { MachinesMacView, OverviewReadOutput } from '@jterrazz/station-api';
 
+import { needsYou } from '../../domain/overview/upkeep';
 import { useReach } from '../../engine/react';
 import type { Reading } from '../../engine/react';
-import { needsYou } from '../../model/upkeep';
 import type { Route } from '../../shell/route';
 import { newMachineLeads } from '../../shell/toolbar-action';
 import { LastNight } from '../changes/changes';

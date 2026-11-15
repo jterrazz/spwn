@@ -1,8 +1,8 @@
 import type { ActivityReading } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
+import { reportPeakingAt } from '../../../pages/activity/__tests__/tiles.fixtures';
 import { busiestOf, busiestWithVms, chartedOf, marksOf, spanOf } from '../measures';
-import { reportPeakingAt } from './tiles.fixtures';
 
 describe('measures', () => {
     test('a window is asked in the nanoseconds of a Go duration', () => {

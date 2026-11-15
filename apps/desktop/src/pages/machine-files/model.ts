@@ -8,8 +8,8 @@ import type {
 import type { CodeLine } from '../../design/code-block';
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
+import { SEPARATOR } from '../../domain/separator';
 import { wordOf, wordOfSent } from '../../engine/engine-words';
-import { SEPARATOR } from '../../separator';
 import type { PlainPage, Route } from '../../shell/route';
 import { SHELVES } from '../packages/model';
 import type { Shelf } from '../packages/model';

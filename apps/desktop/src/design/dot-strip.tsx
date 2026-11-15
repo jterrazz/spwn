@@ -1,4 +1,4 @@
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import type { Identity } from './identity';
 
 import styles from './dot-strip.module.css';

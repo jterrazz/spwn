@@ -1,8 +1,6 @@
 import type { Answer, CoreCallWireError, EngineHello } from '@jterrazz/station-api';
 
-export function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord } from '../domain/request-key';
 
 function isWireError(value: unknown): value is CoreCallWireError {
     return isRecord(value) && typeof value.message === 'string';
@@ -50,27 +48,4 @@ export function helloOf(value: unknown): EngineHello | undefined {
 
 export function wireErrorOf(value: unknown): CoreCallWireError | undefined {
     return isWireError(value) ? value : undefined;
-}
-
-function canonical(value: unknown): unknown {
-    if (Array.isArray(value)) {
-        return value.map(canonical);
-    }
-    if (isRecord(value)) {
-        return Object.fromEntries(
-            Object.keys(value)
-                .toSorted()
-                .map((key) => [key, canonical(value[key])]),
-        );
-    }
-    return value;
-}
-
-export function keyOf(request: unknown): string {
-    if (!isRecord(request)) {
-        return 'none';
-    }
-    const name =
-        'watch' in request ? `watch ${String(request.watch)}` : `call ${String(request.call)}`;
-    return `${name} ${JSON.stringify(canonical(request.in ?? {}))} ${JSON.stringify(canonical(request.target ?? {}))}`;
 }

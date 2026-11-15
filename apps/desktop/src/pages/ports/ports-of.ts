@@ -7,7 +7,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import { sentence } from '../../model/format';
+import { sentence } from '../../domain/format';
 import { tabOf } from '../needs/needs';
 
 export type PortsOf = {

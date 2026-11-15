@@ -2,16 +2,16 @@ import type { MachinesVM } from '@jterrazz/station-api';
 
 import { Icon } from '../../design/icon';
 import { MachineIcon, Panel, Row, Tile } from '../../design/index';
+import { duration, sentence } from '../../domain/format';
+import { driftAsked } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
+import { between, firstUnitOf } from '../../domain/when';
 import { nounOf } from '../../engine/engine-words';
 import { machineKindOf } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
 import { verdictShown, vmState } from '../../engine/shown';
-import { duration, sentence } from '../../model/format';
-import { driftAsked } from '../../model/machines';
-import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
-import { between, firstUnitOf } from '../activity/when';
 import { useIdentityOf } from '../kit/identity';
 import { Unanswered } from '../kit/readings';
 

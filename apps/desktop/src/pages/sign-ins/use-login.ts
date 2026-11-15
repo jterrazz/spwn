@@ -1,10 +1,10 @@
 import type { AccountsProgramRow, AccountsStep } from '@jterrazz/station-api';
 import { useEffect, useRef, useState } from 'react';
 
-import type { EngineError } from '../../engine/engine-error';
+import type { EngineError } from '../../domain/engine-error';
+import { aimed } from '../../domain/machines/aim';
+import type { Found } from '../../domain/machines/machines';
 import { useClient } from '../../engine/react';
-import type { Found } from '../../model/machines';
-import { aimed } from './aim';
 
 export type Seen =
     | { kind: 'asking' }

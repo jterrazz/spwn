@@ -5,12 +5,12 @@ import type {
     OverviewReadOutput,
 } from '@jterrazz/station-api';
 
+import { isStopped, targetOf } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
+import { needsYou } from '../../domain/overview/upkeep';
 import type { Reading as Answered } from '../../engine/entry';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
-import { isStopped, targetOf } from '../../model/machines';
-import type { Found } from '../../model/machines';
-import { needsYou } from '../../model/upkeep';
 import type { Route } from '../../shell/route';
 import { ActivityTiles } from '../activity/tiles';
 import { DiskTile } from '../disk/disk-tile';

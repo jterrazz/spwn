@@ -3,11 +3,11 @@ import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
 import { Button } from '../../design/index';
-import { EngineError } from '../../engine/engine-error';
+import { EngineError } from '../../domain/engine-error';
+import { aimed } from '../../domain/machines/aim';
+import type { Found } from '../../domain/machines/machines';
 import { useClient } from '../../engine/react';
-import type { Found } from '../../model/machines';
 import { Unanswered } from '../kit/readings';
-import { aimed } from './aim';
 
 import styles from './sign-ins.module.css';
 

@@ -97,7 +97,7 @@ fn name_of(frame: &Map<String, Value>) -> &str {
 
 // invariant: the envelope is checked as the engine checks it (`remote/serve`): v 2, a string id, exactly one of
 // invariant: call and watch, a target of name and on; then the name, which is one of BRIDGED, the calls the window
-// invariant: sends (`src/engine/bridged.ts`). Whether its `in` fits is the engine's to answer.
+// invariant: sends (`src/domain/bridged.ts`). Whether its `in` fits is the engine's to answer.
 pub fn refusal(request: &Value, limit: usize) -> Option<Refusal> {
     let Value::Object(frame) = request else {
         return Some(Refusal::bad_frame("a request is one JSON object"));

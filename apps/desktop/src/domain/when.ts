@@ -1,4 +1,4 @@
-import { seconds } from '../../model/format';
+import { seconds } from './format';
 
 const MONTHS = [
     'Jan',

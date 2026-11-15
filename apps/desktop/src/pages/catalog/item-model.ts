@@ -7,7 +7,7 @@ import type {
     MachinefileFileView,
 } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../../separator';
+import { SEPARATOR } from '../../domain/separator';
 
 export function rowOf(matrix: AppsMatrix | undefined, name: string): AppsMatrixRow | undefined {
     return (matrix?.Rows ?? []).find((row) => row.Name === name);

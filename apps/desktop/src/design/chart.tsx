@@ -1,4 +1,4 @@
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import type { Measured } from './measure';
 
 import styles from './chart.module.css';

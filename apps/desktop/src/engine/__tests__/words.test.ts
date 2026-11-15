@@ -174,7 +174,7 @@ describe('words', () => {
 
     test("no table words or tones an enum the engine words, the engine's reader aside", () => {
         // Given - every source of src/ but the fixtures and the specs, the engine's words read by one module
-        const files = ['engine', 'pages', 'shell', 'model', 'design']
+        const files = ['engine', 'pages', 'shell', 'domain', 'design']
             .flatMap((folder) => sourcesUnder(folder))
             .filter((file) => file !== ENGINE_READER);
 

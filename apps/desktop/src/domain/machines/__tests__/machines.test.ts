@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import type { Out } from '../../engine/client';
-import { keyOf } from '../../engine/frame';
-import { recordingsOf } from '../../fixtures/recordings';
+import type { Out } from '../../../engine/client';
+import { recordingsOf } from '../../../fixtures/recordings';
+import { keyOf } from '../../request-key';
 import { targetOf } from '../machines';
 
 const recordingFor = await recordingsOf('two-macs');

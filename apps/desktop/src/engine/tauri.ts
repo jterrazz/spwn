@@ -2,7 +2,8 @@ import type { CancelFrame } from '@jterrazz/station-api';
 import { Channel, invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 
-import { answerOf, helloOf, isRecord, wireErrorOf } from './frame';
+import { isRecord } from '../domain/request-key';
+import { answerOf, helloOf, wireErrorOf } from './frame';
 import type { Link, Receiver, Transport } from './transport';
 
 export type Ipc = {

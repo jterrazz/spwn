@@ -4,17 +4,17 @@ import type { ReactNode } from 'react';
 
 import { CopyButton } from '../../design/copy-button';
 import { AppIcon, Button, Dialog, Screen, StateDot, StatePill } from '../../design/index';
-import type { EngineError } from '../../engine/engine-error';
+import { codeLeft } from '../../domain/accounts/code-left';
+import type { EngineError } from '../../domain/engine-error';
+import { aimed } from '../../domain/machines/aim';
+import type { Found } from '../../domain/machines/machines';
 import { detailOf, stepHeadingOf } from '../../engine/engine-words';
 import { useReread } from '../../engine/react';
 import { engineShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
-import type { Found } from '../../model/machines';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { Unanswered } from '../kit/readings';
-import { aimed } from './aim';
 import { PasteCode } from './paste-code';
-import { codeLeft } from './sign-ins-of';
 import { useLogin } from './use-login';
 
 import styles from './sign-ins.module.css';

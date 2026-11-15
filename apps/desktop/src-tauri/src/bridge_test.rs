@@ -537,7 +537,7 @@ fn a_typed_password_refused_or_unanswered_is_never_echoed() {
 
 #[test]
 fn every_call_of_the_bridged_list_passes_and_no_other_name() {
-    // Given - the list read from src/engine/bridged.ts at build, and names the window never sends
+    // Given - the list read from src/domain/bridged.ts at build, and names the window never sends
     let unsent = ["engine.guest-exec", "engine.stop", "x.y"];
 
     // When - a call of each is checked

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { ButtonVariant } from '../../design/button';
 import { Button } from '../../design/index';
 import { looksSecret } from '../../design/secret';
-import type { EngineError } from '../../engine/engine-error';
+import type { EngineError } from '../../domain/engine-error';
 import type { Openable } from '../../engine/opener';
 import { useOpener } from '../../engine/react';
 import { Unanswered } from './readings';

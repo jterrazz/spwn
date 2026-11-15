@@ -1,4 +1,4 @@
-import type { EngineError } from './engine-error';
+import type { EngineError } from '../domain/engine-error';
 import { engineShown, ownState } from './shown';
 import type { Shown } from './shown';
 

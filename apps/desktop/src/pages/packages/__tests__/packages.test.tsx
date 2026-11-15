@@ -13,8 +13,8 @@ import {
 import { describe, expect, test } from 'vitest';
 
 import { Screen } from '../../../design/index';
+import { keyOf } from '../../../domain/request-key';
 import type { Out } from '../../../engine/client';
-import { keyOf } from '../../../engine/frame';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 import { Differs } from '../differs';

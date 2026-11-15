@@ -2,8 +2,10 @@ import type { ActivityReport } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { Switch } from '../../design/index';
+import { SPANS } from '../../domain/activity/measures';
+import type { Span } from '../../domain/activity/measures';
+import type { Found } from '../../domain/machines/machines';
 import { THIS_MAC_WORD } from '../../engine/words';
-import type { Found } from '../../model/machines';
 import type { Route } from '../../shell/route';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
@@ -12,8 +14,6 @@ import { Cards } from './cards';
 import { Findings, Head } from './head';
 import { Log } from './log';
 import { MacFacts } from './mac-facts';
-import { SPANS } from './measures';
-import type { Span } from './measures';
 import { useActivity, useHistory } from './reading';
 
 import styles from './activity.module.css';

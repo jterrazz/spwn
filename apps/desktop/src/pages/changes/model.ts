@@ -1,6 +1,6 @@
+import { sentence } from '../../domain/format';
 import { countOf } from '../../engine/engine-words';
 import type { JournalLine, JournalSubjectKind } from '../../engine/kept-journal/journal';
-import { sentence } from '../../model/format';
 import { machineRoute } from '../../shell/route';
 import type { PlainPage, Route } from '../../shell/route';
 
