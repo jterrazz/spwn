@@ -8,7 +8,7 @@ import { useReach, useRead } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import type { Route } from '../../shell/route';
 import type { Opening } from '../../shell/window';
-import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
+import { Absent, Reading as ReadingVerdict, Unanswered, VerdictHead } from '../kit/readings';
 import { layersOf } from '../packages/model';
 import { Page } from '../page';
 import { Chapters } from './chapters';
@@ -18,8 +18,6 @@ import { Followers, Own, Text, Users } from './file-panels';
 import { shelvedOf } from './model';
 
 import styles from './machine-files.module.css';
-
-const RECIPE = 'A machine file is the recipe a machine is made from';
 
 type Go = (to: Route) => void;
 
@@ -160,7 +158,7 @@ export function MachineFilesPage({
     const view = all.find((candidate) => candidate.Name === file);
     return (
         <Page>
-            <NoVerdict line={RECIPE} size="page" />
+            <VerdictHead size="page" verdict={files.out.Verdict} />
             {view === undefined ? (
                 <Missing>{`No machine file named ${file}`}</Missing>
             ) : (
