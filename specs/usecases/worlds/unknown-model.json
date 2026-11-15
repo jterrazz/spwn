@@ -182,21 +182,7 @@
                         "http": false,
                         "reserved_at": "2026-11-04T09:05:00Z"
                     }
-                ],
-                "shares": {
-                    "linux-1": [
-                        {
-                            "name": "session:github",
-                            "at": "2026-11-04T09:10:00Z",
-                            "until": "2026-11-04T21:10:00Z"
-                        },
-                        {
-                            "name": "operator:claude:oauth-token",
-                            "at": "2026-11-04T09:10:00Z",
-                            "until": "2026-11-04T21:10:00Z"
-                        }
-                    ]
-                }
+                ]
             },
             "apps": {
                 "brew": {
