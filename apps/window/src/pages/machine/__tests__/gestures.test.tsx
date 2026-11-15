@@ -203,7 +203,7 @@ describe('gestures', () => {
 
             // Then - Home, and api is no machine of the sidebar any more
             const gone = within(sidebar, button('api Stopped'));
-            await visitor.see(content('2 things need you.'));
+            await visitor.see(content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
             await visitor.gone(gone);
         });
         expect(result.errors.text).toBe('');

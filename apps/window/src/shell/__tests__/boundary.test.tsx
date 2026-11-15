@@ -33,7 +33,7 @@ describe('Boundary', () => {
                 await visitor.see(content('Home is drawn'));
 
                 // When - Inbox is opened
-                await visitor.click(within(sidebar, button('Inbox 2')));
+                await visitor.click(within(sidebar, button('Inbox 1')));
 
                 // Then - its frame says what broke and where, with a Reload
                 await visitor.see(heading('The window could not draw Inbox.'));

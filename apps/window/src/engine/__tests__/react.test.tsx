@@ -200,7 +200,9 @@ describe('react', () => {
                 <Window initial={{ page: 'home' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
-                await visitor.see(content('2 things need you.'));
+                await visitor.see(
+                    content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'),
+                );
                 before = document.body.innerHTML;
                 watcher.observe(document.body, CHANGES);
 
