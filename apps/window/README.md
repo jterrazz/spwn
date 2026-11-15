@@ -238,7 +238,16 @@ The route (page, machine, tab, the file Machine files opens on and the catalog i
 
 ## Recording, capturing, proving
 
-All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `record.py` writes the worlds, a step of the root's `make generate`, so a recording the engine of the tree no longer answers so is a tree that `make generate` leaves changed; `node scripts/capture.ts <out>` photographs every page of every world, and `check.sh` is the proof, with `check-quick.sh` for the seconds between two edits. What the window must let its user do is [its scenarios](SCENARIOS.md), each a test of `specs/website/` that visits this proof build in Chromium ([Test](../../docs/guides/test.md#the-windows-scenarios)); a journey across pages is proved there, and one page's states stay its spec in `__tests__/`. A page opens directly in a dev or proof build by its start route, `?world=<world>&page=<page>` (Machine files on one file by `&file=<name>`, a catalog item on its shelf by `&item=<name>`) or `?world=<world>&machine=<name>&tab=<Tab>`.
+All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `record.py` writes the worlds, a step of the root's `make generate`, so a recording the engine of the tree no longer answers so is a tree that `make generate` leaves changed; `node scripts/capture.ts <out>` photographs every page of every world, and `check.sh` is the proof, with `check-quick.sh` for the seconds between two edits. What the window must let its user do is [its scenarios](SCENARIOS.md), each a test of `specs/website/` that visits this proof build in Chromium ([Test](../../docs/guides/test.md#the-windows-scenarios)); a journey across pages is proved there, and one page's states stay its spec in `__tests__/`. Between two edits, one test file runs alone in the VM, and one spec of it by its name; a scenario file of `specs/website/` runs alone against the proof build:
+
+```bash
+cd apps/window && npx vitest --run src/pages/sign-ins/__tests__/sign-ins.test.tsx -t "far Mac"   # -u rewrites its goldens
+npm run build:proof && cd ../.. && npm --workspace specs exec -- vitest --run --project website website/home/home.spec.ts
+```
+
+From the Mac, `scripts/look.sh <lot> <test path>` runs the first in the VM and copies back the goldens it changed. Neither is the proof: `check.sh` runs what the gate runs for the window, `typescript check` included, and the Rust bridge's checks besides.
+
+A page opens directly in a dev or proof build by its start route, `?world=<world>&page=<page>` (Machine files on one file by `&file=<name>`, a catalog item on its shelf by `&item=<name>`) or `?world=<world>&machine=<name>&tab=<Tab>`.
 
 In the world build the only door is `station guest serve --stdio`, whose Router runs any target that is not a VM in this process. So a call aimed at a far Mac answers with This Mac's data, and a capture of a far Mac's page proves its layout only, never what it shows.
 
