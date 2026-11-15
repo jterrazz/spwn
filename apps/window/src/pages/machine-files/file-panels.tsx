@@ -103,8 +103,10 @@ export function Followers({ view, go }: { view: MachinefileFileView; go: (to: Ro
             {...(followers.length === 0 ? {} : { note: view.Verdict.Sentence })}
             title="Machines that follow it"
         >
-            {followers.length === 0 ? (
+            {view.Followers === null ? (
                 <Missing>{view.Verdict.Sentence}</Missing>
+            ) : followers.length === 0 ? (
+                <p className={styles.none}>{view.Verdict.Sentence}</p>
             ) : (
                 <div className={styles.rows}>
                     {followers.map((follower) => (

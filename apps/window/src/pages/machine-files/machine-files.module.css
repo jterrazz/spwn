@@ -68,6 +68,12 @@
 .rows {
     padding-bottom: var(--space-8);
 }
+.none {
+    margin: 0;
+    color: var(--t3);
+    font-size: var(--text-label);
+    padding: 9px 0;
+}
 .extends {
     display: inline-flex;
     flex-wrap: wrap;
