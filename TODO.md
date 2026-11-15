@@ -190,6 +190,9 @@ becomes the bottleneck.
 
 ## Smaller follow-ups
 
+- `gh`'s `hosts.yml` row says the login is in the keychain's `gh:github.com`: check on a Mac whether `security` may list that entry (it was denied on one read), and add it to the Keychain rows if it can be read.
+- `codex`'s `~/.codex/auth.json` row names the file the login lives in: check on a Mac with a Codex login that this is the file's name (`ls ~/.codex`), and fix the path if it is not.
+- `claude-desktop`'s `vm_bundles` is level `data`: check whether the app downloads it again after a delete (delete it on a Mac and open the app); if it does, the level becomes `cache`.
 - The machine files the window still waits for: its Edit and Allow, which write the owner's files and wait for the owner's word on that.
 - The self-upgrade lot: `station upgrade` updates what the Machinefile carries but not station itself. The plan's first step, station first, is cut from L2.4 and waits for its own lot, which carries the self-replace risk: the release asset with its checksum, replaced by a rename, then the engine restarted on the new version (`apps/engine/images/calls/binary.go`'s download lifted to a shared adapter). Until then re-running the install is station's own upgrade ([ADR-041](docs/decisions/041-the-lock-is-what-apply-installs.md)).
 - The tier-3 proof of `station upgrade`: on a real Mac and a real VM, the managers' real order and that `brew update` refreshes the index now that every bundle runs with `HOMEBREW_NO_AUTO_UPDATE=1` (tier 1 proves the order over the fake world, `specs/usecases/machinefile/upgrade/homebrew-index-first.spec.yaml`, never the argv a real brew gets). Deferred from L2.4, whose plan names it; starts before the lock's release, or with the owner's explicit acceptance of the deferral (ADR-041).

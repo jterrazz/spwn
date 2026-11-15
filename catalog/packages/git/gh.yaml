@@ -21,7 +21,7 @@ disk:
           level: settings
         - path: '{config}/gh/hosts.yml'
           level: kept
-          note: "the login; the keychain's `gh:github.com` (HYPOTHESIS: listing denied)"
+          note: "the login; the keychain's `gh:github.com`"
     free:
         - delete: ['{cache}/gh/*']
     erase:

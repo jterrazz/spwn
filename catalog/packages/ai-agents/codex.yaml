@@ -27,7 +27,7 @@ disk:
           level: settings
         - path: ~/.codex/auth.json
           level: kept
-          note: "the login (HYPOTHESIS: the file's name)"
+          note: 'the login'
     installed: [~/.codex/plugins]
     free:
         - delete: [~/.codex/cache/*, ~/.codex/logs_2.sqlite, '{cache}/codex-runtimes/*']

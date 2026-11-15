@@ -2,6 +2,8 @@ package catalog_test
 
 import (
 	"errors"
+	"io/fs"
+	"regexp"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -284,5 +286,27 @@ func TestPackagesStandByCategoryThenByName(t *testing.T) {
 	}
 	if strings.Join(got, " ") != "mm aa zz bb" {
 		t.Errorf("the apps stand %v, want mm aa zz bb: runtimes, git, then agent skills", got)
+	}
+}
+
+func TestAPackageShowsNoWorkingNote(t *testing.T) {
+	working := regexp.MustCompile(`(?i)hypothesis|\btodo\b`)
+	built, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(built.Packages) == 0 {
+		t.Fatal("no package was loaded")
+	}
+	for _, p := range built.Packages {
+		body, err := fs.ReadFile(catalog.BuiltinFiles(), p.File)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for n, line := range strings.Split(string(body), "\n") {
+			if working.MatchString(line) {
+				t.Errorf("%s:%d shows a working note: %s", p.File, n+1, strings.TrimSpace(line))
+			}
+		}
 	}
 }

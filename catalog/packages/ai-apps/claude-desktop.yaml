@@ -12,7 +12,6 @@ disk:
     paths:
         - path: ~/Library/Application Support/Claude/vm_bundles
           level: data
-          note: 'HYPOTHESIS: re-downloaded; data until settled'
         - path: ~/Library/Application Support/Claude/claude-code-vm
           level: data
         - path: ~/Library/Application Support/Claude/claude-code
