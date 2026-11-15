@@ -15,16 +15,19 @@ function inboxOver(world: string) {
 }
 
 describe('Inbox', () => {
-    test("a world whose needs can wait lists them under Can wait, in the engine's head", async () => {
-        // Given - the Inbox over two-macs, where npm's sign-in expired and nothing else presses
+    test("a world whose needs press lists them under Needs you and the rest under Can wait, in the engine's head", async () => {
+        // Given - the Inbox over two-macs, where npm's sign-in expired and a background task fails
         const result = await component.render(inboxOver('two-macs'), async (visitor) => {
             // When - This Mac's overview has been read
-            await visitor.see(heading('Everything is fine.'));
-            await visitor.see(within(waiting, content('npm sign-in expired')));
-            await visitor.see(within(needs, content('No need is listed.')));
+            await visitor.see(heading('2 things need you.'));
+            await visitor.see(within(needs, content('npm sign-in expired')));
+            await visitor.see(
+                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+            );
+            await visitor.see(within(waiting, content('1 mise update waiting')));
         });
 
-        // Then - the engine's verdict heads the page, then Needs you empty and Can wait with each need and its verb
+        // Then - the engine's verdict heads the page, then Needs you with the two that press and Can wait with the rest
         await expect(result.tree).toMatch(file('./__expected__/two-macs-inbox.aria.yaml'));
     });
 
@@ -43,8 +46,8 @@ describe('Inbox', () => {
         // Given - the Inbox over mini-offline
         const result = await component.render(inboxOver('mini-offline'), async (visitor) => {
             // When - its overview has been read
-            await visitor.see(heading('Everything is fine.'));
-            await visitor.see(within(waiting, content('npm sign-in expired')));
+            await visitor.see(heading('npm sign-in expired.'));
+            await visitor.see(within(needs, content('npm sign-in expired')));
         });
 
         // Then - the needs of This Mac, and the Mac mini only a choice of the switch

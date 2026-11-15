@@ -58,7 +58,7 @@ describe('terminal', () => {
         let why: null | string | undefined;
         await component.render(page, async (visitor) => {
             // When - its header is drawn
-            await visitor.see(heading('api', { exact: false }));
+            await visitor.see(heading('api Stopped'));
             await visitor.see(disabled(button('Open in Terminal')));
             why = titleOf('Open in Terminal');
         });

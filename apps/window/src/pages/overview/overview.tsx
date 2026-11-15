@@ -11,7 +11,7 @@ import { ActivityTiles } from '../activity/tiles';
 import { DiskTile } from '../disk/disk-tile';
 import { MemoryPanel } from '../home/memory';
 import { HeldOutcomes } from '../kit/gestures';
-import { NoVerdict, Reading, SummaryHead, Unanswered, VerdictHead } from '../kit/readings';
+import { NoVerdict, Reading, SummaryHead, Unanswered } from '../kit/readings';
 import { DeleteGesture } from '../machine/gestures';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
@@ -27,9 +27,11 @@ type Go = (to: Route) => void;
 
 type Answer = Answered<OverviewReadOutput>;
 
-function Head({ overview, name }: { overview: Answer; name: string }) {
+type HeadProps = { overview: Answer; name: string; answered?: string | undefined };
+
+function Head({ overview, name, answered }: HeadProps) {
     if (overview.kind === 'failed') {
-        return <Unanswered error={overview.error} size="tab" />;
+        return <Unanswered answered={answered} error={overview.error} size="tab" />;
     }
     if (overview.kind === 'reading') {
         return <Reading size="tab" what={name} />;
@@ -70,13 +72,14 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
     const name = found.mac.Name;
     const overview = useWatch('overview.read', {}, targetOf(found));
     const up = overview.kind === 'read' ? overview.out.Summary.Head.Up : 0;
+    const foot = overview.kind === 'read' ? overview.out.Summary.Machines : undefined;
     return (
         <Page>
-            <Head name={name} overview={overview} />
+            <Head answered={found.mac.Answered} name={name} overview={overview} />
             <ActivityTiles
                 disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}
                 found={found}
-                fourth={<MachinesTile found={found} />}
+                fourth={<MachinesTile foot={foot} found={found} />}
                 up={up}
             />
             <HeldOutcomes>
@@ -98,13 +101,10 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
 type VmProps = { mac: MachinesMacView; vm: MachinesVM; go: Go };
 
 function StoppedOverview({ mac, vm, go }: VmProps) {
+    const overview = useWatch('overview.read', {}, targetOf({ mac, vm }));
     return (
         <Page>
-            {vm.Health === undefined ? (
-                <NoVerdict size="tab" />
-            ) : (
-                <VerdictHead size="tab" verdict={vm.Health} />
-            )}
+            <Head name={vm.Name} overview={overview} />
             <FileChapters drift={undefined} go={go} vm={vm.Name} />
             <DeleteGesture go={go} key={vm.Name} mac={mac} vm={vm} />
         </Page>

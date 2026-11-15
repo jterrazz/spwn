@@ -203,7 +203,7 @@ describe('gestures', () => {
 
             // Then - Home, and api is no machine of the sidebar any more
             const gone = within(sidebar, button('api Stopped'));
-            await visitor.see(content('Everything is fine.'));
+            await visitor.see(content('2 things need you.'));
             await visitor.gone(gone);
         });
         expect(result.errors.text).toBe('');

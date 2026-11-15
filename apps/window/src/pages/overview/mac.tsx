@@ -1,7 +1,7 @@
 import type { MachinesVM } from '@jterrazz/station-api';
 
 import { Icon } from '../../design/icon';
-import { MachineIcon, MissingMark, Panel, Row, Tile } from '../../design/index';
+import { MachineIcon, Panel, Row, Tile } from '../../design/index';
 import { nounOf } from '../../engine/engine-words';
 import { machineKindOf } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
@@ -19,16 +19,9 @@ import styles from './overview.module.css';
 
 type Go = (to: Route) => void;
 
-export function MachinesTile({ found }: { found: Found }) {
+export function MachinesTile({ found, foot }: { found: Found; foot: string | undefined }) {
     const count = (found.mac.VMs ?? []).length;
-    return (
-        <Tile
-            foot={<MissingMark />}
-            label="Its machines"
-            unit={nounOf('machine', count)}
-            value={count}
-        />
-    );
+    return <Tile foot={foot} label="Its machines" unit={nounOf('machine', count)} value={count} />;
 }
 
 // value: how long a VM has run, from its boot to the moment machines.list was read: a date drawn as "6 d".

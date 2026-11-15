@@ -10,6 +10,7 @@ function need(Subject: string, Upkeep: OverviewNeed['Upkeep']): OverviewNeed {
         Call: '',
         Command: '',
         Machine: 'mbp',
+        Noun: 'Apps',
         Path: '',
         Section: 'apps',
         Severity: 'needs-a-look',

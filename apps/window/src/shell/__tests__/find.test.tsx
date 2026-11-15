@@ -40,7 +40,7 @@ describe('Find', () => {
     test('the choice starts on the first row as drawn, the machine before its tabs', async () => {
         // Given - the window on Home over two-macs
         const result = await component.render(windowOnHome(), async (visitor) => {
-            await visitor.see(content('Everything is fine.'));
+            await visitor.see(content('2 things need you.'));
 
             // When - Find is opened, linux typed and Enter pressed at once
             await visitor.press(COMMAND_K);

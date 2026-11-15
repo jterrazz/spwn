@@ -24,6 +24,7 @@ const NEED: OverviewNeed = {
     Call: '',
     Command: '',
     Machine: 'linux-1',
+    Noun: 'Ports',
     Path: '',
     Section: 'ports',
     Severity: 'broken',
