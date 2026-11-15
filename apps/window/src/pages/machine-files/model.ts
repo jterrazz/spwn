@@ -44,10 +44,13 @@ export function descriptionsOf(reports: readonly AppsReport[]): ReadonlyMap<stri
 }
 
 export function systemOf({ System }: MachinefileHead): string {
-    const named = [wordOfSent('CatalogOS', System.OS), System.Version]
+    const named = [
+        System.OS === undefined ? '' : wordOfSent('CatalogOS', System.OS),
+        System.Version ?? '',
+    ]
         .filter((part) => part !== '')
         .join(' ');
-    return [named, wordOfSent('CatalogArch', System.Arch)]
+    return [named, System.Arch === undefined ? '' : wordOfSent('CatalogArch', System.Arch)]
         .filter((part) => part !== '')
         .join(SEPARATOR);
 }

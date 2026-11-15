@@ -75,8 +75,9 @@ describe('model', () => {
         };
         const mac: MachinefileHead = {
             Kind: 'computer',
-            System: { Arch: 'arm64', OS: 'macos', Version: '' },
+            System: { Arch: 'arm64', OS: 'macos' },
         };
+        const silent: MachinefileHead = { Kind: 'computer', System: {} };
 
         // Then - the role and the system, the size apart, a Mac having none
         expect([makesOf(workspace), systemOf(workspace), sizeOf(workspace)]).toStrictEqual([
@@ -89,6 +90,7 @@ describe('model', () => {
             'macOS · arm64',
             '',
         ]);
+        expect(systemOf(silent)).toBe('');
     });
 
     test('a file text is numbered line by line, its last newline ending no line', () => {
