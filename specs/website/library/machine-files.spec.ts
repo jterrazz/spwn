@@ -53,8 +53,9 @@ describe('machine files', () => {
                     within(region('Machines that follow it'), button('agent-7f', { exact: false })),
                 );
 
-                // Then - its Packages tab opens
-                await visitor.see(heading('agent-7f', { exact: false }));
+                // Then - the file's page is gone (its follower row bears the same name), and the head of that machine stands in its place
+                await visitor.gone(region('Machines that follow it'));
+                await visitor.see(heading('agent-7f Running'));
             },
         );
         expect(result.errors.text).toBe('');
