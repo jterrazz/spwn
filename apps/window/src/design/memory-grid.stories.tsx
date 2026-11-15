@@ -16,6 +16,19 @@ export const MEMORY_GRID_STORIES: readonly Story<MemoryGridProps>[] = [
         },
     },
     {
+        name: 'machines lit by what they use',
+        props: {
+            free: 34,
+            holders: [
+                { identity: 'system', key: 'macos', label: 'macOS', squares: 6 },
+                { identity: 'blue', key: 'infra', label: 'infra', squares: 16, used: 11 },
+                { identity: 'purple', key: 'linux-1', label: 'linux-1', squares: 8, used: 3 },
+            ],
+            name: 'jterrazz-mac-mini',
+            total: 64,
+        },
+    },
+    {
         name: 'a machine being created',
         props: {
             free: 4,

@@ -37,6 +37,9 @@
 .cell.free {
     background: var(--raise);
 }
+.cell.unused {
+    opacity: 0.4;
+}
 .cell.pending {
     background: repeating-linear-gradient(
         -45deg,

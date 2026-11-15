@@ -176,6 +176,39 @@ function DiskHeld({
     return <HeldTile held={held} label={label} shown={bytes} />;
 }
 
+function processHeldOf(vm: Found['vm']): Held | undefined {
+    if (vm?.UsedBytes === undefined) {
+        return undefined;
+    }
+    const total = vm.Resources.MemoryBytes;
+    return { total: total > 0 ? total : undefined, used: vm.UsedBytes };
+}
+
+type MemoryTileProps = {
+    label: string;
+    report: ActivityReport | undefined;
+    unknown: OwnState;
+    vm: Found['vm'];
+};
+
+function MemoryTile({ label, report, unknown, vm }: MemoryTileProps) {
+    const identityOf = useIdentityOf();
+    const process = processHeldOf(vm);
+    const held = report === undefined ? process : (memoryOf(report) ?? process);
+    if (held === undefined && report === undefined) {
+        return <Unknown label={label} state={unknown} />;
+    }
+    return (
+        <HeldTile
+            held={held}
+            identity={vm ? identityOf(vm.Name) : undefined}
+            label={label}
+            shown={memory}
+            tone="new"
+        />
+    );
+}
+
 type TilesProps = {
     found: Found;
     up: number;
@@ -190,7 +223,14 @@ export function ActivityTiles({ found, up, of, fourth, disk }: TilesProps) {
     const { readers, shown } = useActivity(found, '1h');
     const unknown = unknownOf(shown);
     const report = shown?.kind === 'read' ? shown.out : undefined;
-    const identityOf = useIdentityOf();
+    const memoryTile = (
+        <MemoryTile
+            label={labels.memory}
+            report={unknown === undefined ? report : undefined}
+            unknown={unknown ?? 'reading'}
+            vm={found.vm}
+        />
+    );
     return (
         <>
             {readers}
@@ -198,19 +238,13 @@ export function ActivityTiles({ found, up, of, fourth, disk }: TilesProps) {
                 {unknown !== undefined || report === undefined ? (
                     <>
                         <Unknown label={labels.cpu} state={unknown ?? 'reading'} />
-                        <Unknown label={labels.memory} state={unknown ?? 'reading'} />
+                        {memoryTile}
                         <Unknown label={labels.disk} state={unknown ?? 'reading'} />
                     </>
                 ) : (
                     <>
                         <CpuTile label={labels.cpu} name={name} report={report} />
-                        <HeldTile
-                            held={memoryOf(report)}
-                            identity={found.vm ? identityOf(found.vm.Name) : undefined}
-                            label={labels.memory}
-                            shown={memory}
-                            tone="new"
-                        />
+                        {memoryTile}
                         <DiskHeld disk={disk} label={labels.disk} report={report} />
                     </>
                 )}
