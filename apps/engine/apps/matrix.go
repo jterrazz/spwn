@@ -24,6 +24,9 @@ type Cell struct {
 	Newest  string
 	// value: the app does not live on that machine: its list does not hold it.
 	NotHere bool
+	// value: the machine holds the app, installed in any form: the one
+	// reading State.Installed gives, so a client counts holders itself.
+	Holds bool
 }
 
 type MatrixRow struct {
@@ -73,7 +76,7 @@ func MatrixOf(cols []Column, reads []Reading, servers []string) Matrix {
 				continue
 			}
 			st := StateOf(r)
-			m.Rows[j].Cells[i] = Cell{State: st, Version: r.Version, Newest: r.Newest}
+			m.Rows[j].Cells[i] = Cell{State: st, Version: r.Version, Newest: r.Newest, Holds: st.Installed()}
 			m.Rows[j].Of++
 			if st.Installed() {
 				m.Rows[j].Carry++

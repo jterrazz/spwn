@@ -3,9 +3,9 @@ env:
     - two-macs
     - engine
 runs:
-    - command: 'guest serve --stdio | /usr/bin/jq -c ''{columns: [.out.Columns[] | .Name], servers: .out.Servers, rows: [.out.Rows[] | select(.Name == "node" or .Name == "ghostty") | {n: .Name, carry: .Carry, of: .Of, cells: [.Cells[] | {s: .State, v: .Version, newest: .Newest, here: (.NotHere | not)}]}]}'''
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''{columns: [.out.Columns[] | .Name], servers: .out.Servers, rows: [.out.Rows[] | select(.Name == "node" or .Name == "ghostty") | {n: .Name, carry: .Carry, of: .Of, cells: [.Cells[] | {s: .State, v: .Version, newest: .Newest, here: (.NotHere | not), holds: .Holds}]}]}'''
       stdin: |
           {"v":2,"id":"1","call":"apps.matrix","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"columns":["jterrazz-macbook-pro","jterrazz-mac-mini","linux-1","api"],"servers":["infra"],"rows":[{"n":"node","carry":2,"of":3,"cells":[{"s":"update-available","v":"22.11.0","newest":"24.11.0","here":true},{"s":"not-installed","v":"","newest":"","here":true},{"s":"ok","v":"22.11.0","newest":"","here":true},{"s":"not-known","v":"","newest":"","here":true}]},{"n":"ghostty","carry":1,"of":2,"cells":[{"s":"ok","v":"1.2.0","newest":"","here":true},{"s":"not-installed","v":"","newest":"","here":true},{"s":"not-installed","v":"","newest":"","here":false},{"s":"not-known","v":"","newest":"","here":true}]}]}
+          {"columns":["jterrazz-macbook-pro","jterrazz-mac-mini","linux-1","api"],"servers":["infra"],"rows":[{"n":"node","carry":2,"of":3,"cells":[{"s":"update-available","v":"22.11.0","newest":"24.11.0","here":true,"holds":true},{"s":"not-installed","v":"","newest":"","here":true,"holds":false},{"s":"ok","v":"22.11.0","newest":"","here":true,"holds":true},{"s":"not-known","v":"","newest":"","here":true,"holds":false}]},{"n":"ghostty","carry":1,"of":2,"cells":[{"s":"ok","v":"1.2.0","newest":"","here":true,"holds":true},{"s":"not-installed","v":"","newest":"","here":true,"holds":false},{"s":"not-installed","v":"","newest":"","here":false,"holds":false},{"s":"not-known","v":"","newest":"","here":true,"holds":false}]}]}
