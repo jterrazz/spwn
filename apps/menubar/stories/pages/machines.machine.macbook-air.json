@@ -3122,20 +3122,7 @@
     },
     "buttons": [
       "menu"
-    ],
-    "stale": {
-      "kind": "list",
-      "items": [
-        {
-          "kind": "text",
-          "text": "seen 2 hr ago"
-        },
-        {
-          "kind": "text",
-          "text": "checking"
-        }
-      ]
-    }
+    ]
   },
   "segments": [
     {

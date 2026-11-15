@@ -5164,20 +5164,7 @@
     "buttons": [
       "new-vm",
       "menu"
-    ],
-    "stale": {
-      "kind": "list",
-      "items": [
-        {
-          "kind": "text",
-          "text": "seen 3 min ago"
-        },
-        {
-          "kind": "text",
-          "text": "checking"
-        }
-      ]
-    }
+    ]
   },
   "segments": [
     {
