@@ -1,22 +1,21 @@
 """Record the engine's real answers the window's pages read, over the worlds of specs/usecases/worlds/.
 
-Usage: record.py [--gestures] [--call=<call>...] [--only=<call> [--in=<json>]] [<world>...], every world already
+Usage: record.py [--gestures] [--call=<call>...] [<world>...], every world already
 recorded and every world of SEEDS
 when none is named, in a Linux VM only: it asks `station guest serve --stdio` of the world build (world.py), the door
 specs/architecture/answers_test.go asks, over a fresh copy of each world in a temporary HOME (one per request,
 so no answer depends on what another request did to the world), and writes one file per call:
 apps/window/src/fixtures/worlds/<world>/<call>.json, every request of that call the pages make in that world,
-with its answers. A page that reads a new call, or the same call with a new input, adds its requests to ASKS
-(or FOLLOWS, when they depend on another answer) and records again the worlds its specs use.
+with its answers. The recorder's tables are the one list of what is asked: a page that reads a new call, or the same
+call with a new input, adds its requests to `asks` (`follows`, when they depend on another answer; ALSO, when one
+world's spec alone makes it) and records again the worlds its specs use.
 
 A gesture of GESTURES is recorded in a fresh world of its own: the gesture, then every read of that world asked
 again in the same door, one after the other, with the reads of a machine the gesture created, and written to
 <world>/gestures/<call>.json with the reads whose answer it changed; the replay transport plays it, then answers
 those reads as they were after it. `--gestures` records the gestures alone, over the reads already recorded;
 `--call=<call>` records only that call's gestures, in the worlds named or every world GESTURES gives it, and rewrites
-no other file. `--only=<call>` asks again the reads of that one call, in the worlds named or every world that records
-it, ASKS gives or FOLLOWS draws from the recorded answers, and splices their answers into <world>/<call>.json in place; `--in=<json>` narrows it to the requests of that
-input (of every target), or adds that request when none is recorded yet. No other exchange and no other file moves.
+no other file.
 
 The world build's clock moves when a watch waits on it (apps/engine/wire/world_on.go), so two runs do not write the same
 files: a watch the engine ends before a check settles (disk.read) answers pending in one run and
@@ -32,8 +31,7 @@ A sign-in call names its VM in `Machine` to this Mac's engine and takes no targe
 and once per VM of every Mac, accounts.login and accounts.logout carry their `Machine`, and the `sign-ins` world
 holds the login whose code is pasted back. The vault is This Mac's alone: vault.list and vault.new are asked with no target, and
 grants.new once per entry it lists. A gesture's input is written with its recording, so a pasted code or a typed
-password is a plain word (`good`, `nope`), never one shaped like a token. A world is never recorded whole to change one call: `--call=` keeps the
-requests `--in=` added.
+password is a plain word (`good`, `nope`), never one shaped like a token.
 """
 
 import concurrent.futures
@@ -158,7 +156,7 @@ def asks(listed):
     names no target, as targetOf (src/model/machines.ts) sends it, and a read two pages ask is asked once. A drift
     names its machine in its input and no target, as driftAsked sends it. The New machine sheet watches machines.new
     of the socket's engine, opened anywhere or on one Mac machines.list lists, as askedOf sends it; a sheet opened
-    from a machine file names it in From, a request `--only=machines.new --in=<json>` adds."""
+    from a machine file names it in From, a request of ALSO."""
     here = thisMac(listed)
     vms = [(mac, vm) for mac in here for vm in mac.get("VMs") or []]
     targets = [{} for _ in here] + [at(vm["Name"]) for _, vm in vms]
@@ -191,7 +189,7 @@ def asks(listed):
         *[{"watch": "activity.read", "in": {"history": True, "of": vm["Name"], "machine": {"Name": vm["Name"], "On": mac["Name"]}}}
           for mac, vm in vms],
         *[{"call": "machines.log", "in": {"VM": vm["Name"]}} for _, vm in vms],
-        *[{"call": "machines.ssh", "in": {"Name": vm["Name"]}} for _, vm in vms],
+        *[{"call": "machines.ssh", "in": {"Name": name}} for name in vmsOf(listed)],
         *[{"watch": "accounts.list", "in": {}} for _ in here],
         *[{"watch": "accounts.list", "in": {"Machine": name}} for name in vmsOf(listed)],
         *[{"watch": "vault.list", "in": {}} for _ in here],
@@ -200,6 +198,20 @@ def asks(listed):
         {"watch": "machines.new", "in": {}},
         *[{"watch": "machines.new", "in": {"On": mac}} for mac in macsOf(listed)],
     ]}.values())
+
+
+ALSO = {
+    "stories": [
+        {"call": "machinefile.explain", "in": {"Machinefile": "linux-dev"}},
+        {"watch": "machines.new", "in": {"From": "linux-dev"}},
+    ],
+}
+
+
+def asked_in(world, listed):
+    """Every read the window asks in a world: those `asks` draws from its machines, then the ones of ALSO, a read a
+    spec of that world makes that no listing gives (a sheet opened from one machine file)."""
+    return list({keyOf(request): request for request in [*asks(listed), *ALSO.get(world, [])]}.values())
 
 
 def follows(requests, answered):
@@ -449,7 +461,7 @@ def record(world):
         made = gestures(world, seed, fixture, folder, requests, before)
         return f"{world}: {made} gestures over {len(requests)} recorded requests -> {folder}"
     station, [listed] = serve(seed, [MACHINES], fixture)
-    requests = asks(listed)
+    requests = asked_in(world, listed)
     answered = asked(seed, requests, fixture)
     more = follows(requests, answered)
     if more:
@@ -469,46 +481,14 @@ def record(world):
     return f"{world}: {len(requests)} requests in {len(by_call)} calls, {made} gestures -> {folder}"
 
 
-def again(world):
-    """The exchanges of one read call asked again, those of the input given alone when one is, and spliced into
-    the world's file of that call in place: every other exchange, and every other file, is left as recorded."""
-    seed, fixture = seeded(world)
-    path = out_root / world / f"{only}.json"
-    held = json.loads(path.read_text())["exchanges"] if path.exists() else []
-    station, [listed] = serve(seed, [MACHINES], fixture)
-    requests, before = recorded(out_root / world)
-    answered = [before[keyOf(request)] for request in requests]
-    known = [*[exchange["request"] for exchange in held], *asks(listed), *follows(requests, answered)]
-    of_call = [request for request in known if callOf(request) == only]
-    wanted = list({keyOf(request): request for request in of_call
-                   if given is None or request["in"] == given}.values())
-    if given is not None and not wanted:
-        if not of_call:
-            sys.exit(f"{world}: no recording nor ASKS names {only}, so its kind (call or watch) is unknown")
-        kind = "watch" if "watch" in of_call[0] else "call"
-        wanted = [{kind: only, "in": given}]
-    fresh = {keyOf(request): {"request": request, "answers": kept(request, frames)}
-             for request, frames in zip(wanted, asked(seed, wanted, fixture))}
-    exchanges = [fresh.pop(keyOf(exchange["request"]), exchange) for exchange in held] + list(fresh.values())
-    write(path, world, station, "exchanges", exchanges)
-    return f"{world}: {len(wanted)} exchanges of {only} asked again -> {path}"
-
-
 if __name__ == "__main__":
     print("world build:", binary)
     arguments = sys.argv[1:]
     calls = {argument.removeprefix("--call=") for argument in arguments if argument.startswith("--call=")}
-    only = next((argument.removeprefix("--only=") for argument in arguments if argument.startswith("--only=")), None)
-    given = next((json.loads(argument.removeprefix("--in=")) for argument in arguments if argument.startswith("--in=")), None)
     alone = "--gestures" in arguments or bool(calls)
     named = [argument for argument in arguments if not argument.startswith("--")]
     everywhere = sorted({folder.name for folder in out_root.iterdir() if folder.is_dir()} | set(SEEDS))
-    if only is not None:
-        worlds = named or [world for world in everywhere if (out_root / world / f"{only}.json").exists()]
-        job = again
-    else:
-        worlds = named or [world for world in everywhere if not calls or calls & {callOf(it) for it in GESTURES.get(world, [])}]
-        job = record
+    worlds = named or [world for world in everywhere if not calls or calls & {callOf(it) for it in GESTURES.get(world, [])}]
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-        for line in pool.map(job, worlds):
+        for line in pool.map(record, worlds):
             print(line)
