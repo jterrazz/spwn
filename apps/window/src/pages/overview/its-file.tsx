@@ -17,7 +17,7 @@ type Go = (to: Route) => void;
 const FILE_ROWS: readonly { chapter: MachinefileChapter; tab: Tab; about: string }[] = [
     { about: 'what is installed, and its settings', chapter: 'apps', tab: 'Packages' },
     { about: 'which ports are shared, and with whom', chapter: 'ports', tab: 'Ports' },
-    { about: 'which accounts it borrows, and for how long', chapter: 'accounts', tab: 'Sign-ins' },
+    { about: 'which accounts it borrows', chapter: 'accounts', tab: 'Sign-ins' },
 ];
 
 function stateOf(drift: MachinefileDrift | undefined, chapter: MachinefileChapter) {
