@@ -46,6 +46,32 @@ func For(words string, now time.Time, zone *time.Location) (time.Duration, error
 	return Bounded(d)
 }
 
+type Choice struct {
+	Label string
+	// value: the term as a length, in nanoseconds; empty when Until says it.
+	For time.Duration `json:",omitempty"`
+	// value: the term as the moment it ends, RFC 3339; empty when For says it.
+	Until string `json:",omitempty"`
+}
+
+func Choices(now time.Time, zone *time.Location) []Choice {
+	// invariant: the terms a page offers are the ones awake.keep takes, each
+	// as keep would end it: a length, or the next 18:00 of the Mac's zone.
+	if zone == nil {
+		zone = time.UTC
+	}
+	local := now.In(zone)
+	end := time.Date(local.Year(), local.Month(), local.Day(), 18, 0, 0, 0, zone)
+	if !end.After(local) {
+		end = end.AddDate(0, 0, 1)
+	}
+	return []Choice{
+		{Label: "1 hr", For: time.Hour},
+		{Label: "4 hr", For: 4 * time.Hour},
+		{Label: "Until 18:00", Until: end.Format(time.RFC3339)},
+	}
+}
+
 func Bounded(d time.Duration) (time.Duration, error) {
 	if d < Shortest || d > Longest {
 		return 0, ErrOutOfBounds

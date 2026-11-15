@@ -1,5 +1,23 @@
 {
   "$defs": {
+    "awake.Choice": {
+      "additionalProperties": false,
+      "properties": {
+        "For": {
+          "type": "integer"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Until": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Label"
+      ],
+      "type": "object"
+    },
     "awake.End": {
       "additionalProperties": false,
       "properties": {
@@ -85,6 +103,15 @@
         "Caps": {
           "$ref": "#/$defs/core.machine.Capabilities"
         },
+        "Choices": {
+          "items": {
+            "$ref": "#/$defs/awake.Choice"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Engine": {
           "type": "string"
         },
@@ -169,6 +196,7 @@
       },
       "required": [
         "Caps",
+        "Choices",
         "Engine",
         "Guards",
         "LastEnd",

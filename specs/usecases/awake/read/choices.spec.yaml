@@ -1,0 +1,11 @@
+description: 'awake.read offers the terms awake.keep takes: 1 hr, 4 hr, and Until 18:00 as the moment it ends'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Choices[0], .Choices[1], {Label: .Choices[2].Label, at: .Choices[2].Until[11:16], today: (.Choices[2].Until[0:10] == .Now[0:10])}]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"awake.read","in":{}}
+      exit: 0
+      stdout: |
+          [{"Label":"1 hr","For":3600000000000},{"Label":"4 hr","For":14400000000000},{"Label":"Until 18:00","at":"18:00","today":true}]
