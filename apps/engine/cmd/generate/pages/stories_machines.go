@@ -3,7 +3,6 @@ package pages
 import (
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
@@ -34,7 +33,7 @@ type Scene struct {
 	Insides  map[string]overview.Summary
 	Samples  map[string][]activity.Reading
 	History  map[string]activity.Report
-	Accounts accounts.Report
+	Accounts heldReport
 	Awake    awake.Report
 	Macs     []awake.Report
 	Activity pageactivity.View
@@ -199,24 +198,21 @@ func sceneSamples() map[string][]activity.Reading {
 	}
 }
 
-func loan(provider, name string, left time.Duration, may ...string) accounts.Account {
-	return accounts.Account{Provider: provider, State: catalog.StateOK, Origin: accounts.OriginShared, Identity: []string{"you@example.com"}, Scopes: append([]string{name}, may...),
-		Shared: &accounts.Loan{Name: name, At: storyNow.Add(left - 12*time.Hour), Until: storyNow.Add(left)}}
+func granted(provider string) heldAccount {
+	return heldAccount{Provider: provider, State: catalog.StateOK, Identity: []string{"you@example.com"}, Granted: true}
 }
 
-func sceneAccounts() accounts.Report {
-	vm := func(name, life string, loans ...accounts.Account) accounts.Machine {
-		return accounts.Machine{Name: name, Kind: accounts.KindVM, Lifetime: life, Running: true, Guest: accounts.GuestConnected, Accounts: loans}
-	}
-	return accounts.Report{Now: storyNow, Engine: accounts.EngineRunning, Machines: []accounts.Machine{
-		{Name: proName, Kind: accounts.KindComputer, ThisMac: true, Accounts: []accounts.Account{
-			own(catalog.ProviderGitHub, []string{"you"}, []string{"repo", "workflow"}, "", "github.com"),
-			{Provider: catalog.ProviderNPM, State: catalog.StateBroken, Reason: accounts.ReasonRefused, Origin: accounts.OriginOwn, Identity: []string{"?"}, Detail: "signed out of registry.npmjs.org", Hint: "npm login"},
-			own(catalog.ProviderClaude, []string{"you@example.com"}, []string{"max"}, "", "claude.ai"),
+func sceneAccounts() heldReport {
+	vm := func(name string, held ...heldAccount) heldMachine { return heldMachine{Name: name, Accounts: held} }
+	return heldReport{Machines: []heldMachine{
+		{Name: proName, Accounts: []heldAccount{
+			own(catalog.ProviderGitHub, []string{"you"}, []string{"repo", "workflow"}, "github.com"),
+			{Provider: catalog.ProviderNPM, State: catalog.StateBroken, Identity: []string{"?"}, Detail: "signed out of registry.npmjs.org"},
+			own(catalog.ProviderClaude, []string{"you@example.com"}, []string{"max"}, "claude.ai"),
 		}},
-		vm("linux-1", "ephemeral", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 24*time.Minute, "Max plan"), loan(catalog.ProviderGitHub, "session:github", 4*time.Hour, "read only")),
-		vm("linux-3", "ephemeral", loan(catalog.ProviderGitHub, "github", 6*time.Hour)),
-		vm("review-bot", "persistent", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 9*time.Hour)),
+		vm("linux-1", granted(catalog.ProviderClaude), granted(catalog.ProviderGitHub)),
+		vm("linux-3", granted(catalog.ProviderGitHub)),
+		vm("review-bot", granted(catalog.ProviderClaude)),
 	}}
 }
 

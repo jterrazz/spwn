@@ -44,13 +44,13 @@ func (f Scene) signIns(full bool) *pagemenubar.SignIns {
 	return &out
 }
 
-func (f Scene) report(name string) accounts.Machine {
+func (f Scene) report(name string) heldMachine {
 	for _, m := range f.Accounts.Machines {
 		if m.Name == name {
 			return m
 		}
 	}
-	return accounts.Machine{}
+	return heldMachine{}
 }
 
 func (f Scene) programRows(name string, where accounts.Where) []accounts.ProgramRow {
@@ -83,13 +83,13 @@ func entryID(provider string) string { return "pw-" + provider }
 
 func entryLabel(program accounts.Program) string { return program.Label() + " token" }
 
-func factsOf(program accounts.Program, a accounts.Account) accounts.Facts {
+func factsOf(program accounts.Program, a heldAccount) accounts.Facts {
 	facts := accounts.Facts{Program: program, State: accounts.ProgramSignedOut, How: accounts.HowOwn}
 	if len(a.Identity) > 0 && a.Identity[0] != "?" {
 		facts.Who = a.Identity[0]
 	}
 	switch {
-	case a.Shared != nil:
+	case a.Granted:
 		facts.State, facts.How, facts.Entry, facts.EntryLabel = accounts.ProgramSignedIn, accounts.HowGranted, entryID(a.Provider), entryLabel(program)
 	case a.State == catalog.StateOK:
 		facts.State, facts.Scopes = accounts.ProgramSignedIn, a.Scopes
@@ -124,7 +124,7 @@ func (f Scene) vault() (vault *accounts.VaultRead, offers map[string]accounts.Gr
 						continue
 					}
 					c.Facts = factsOf(program, held)
-					c.Granted = held.Shared != nil
+					c.Granted = held.Granted
 				}
 				if c.Granted {
 					entry.Grants = append(entry.Grants, accounts.VaultGrant{ToKind: accounts.ToMachine, To: vm.Name})

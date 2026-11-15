@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
@@ -43,8 +42,8 @@ func miniTight(f *Scene) {
 }
 
 func miniSignedIn(f *Scene) {
-	f.Accounts.Machines = append(f.Accounts.Machines, accounts.Machine{Name: miniMac, Kind: accounts.KindComputer, Accounts: []accounts.Account{
-		own(catalog.ProviderGitHub, []string{"ci-bot"}, []string{"repo"}, "", "github.com"),
-		own(catalog.ProviderClaude, []string{"bot@example.com"}, []string{"max"}, "", "claude.ai"),
+	f.Accounts.Machines = append(f.Accounts.Machines, heldMachine{Name: miniMac, Accounts: []heldAccount{
+		own(catalog.ProviderGitHub, []string{"ci-bot"}, []string{"repo"}, "github.com"),
+		own(catalog.ProviderClaude, []string{"bot@example.com"}, []string{"max"}, "claude.ai"),
 	}})
 }
