@@ -82,7 +82,9 @@ var Drift = call.Call[Deps, DriftIn, machinefile.Drift]{
 		if !vm {
 			drift := machinefile.DriftOf(p, nil)
 			drift.Machine = name
-			drift.Upgrades = nights(ctx, d, name, p.Name)
+			var seen machinefile.Nights
+			drift.Upgrades, seen = nights(ctx, d, name, p.Name)
+			drift.Plan = drift.Plan.WithWaiting(seen)
 			if d.Kind != machine.Computer {
 				drift = drift.AccessUnread()
 			}
@@ -103,9 +105,9 @@ var Drift = call.Call[Deps, DriftIn, machinefile.Drift]{
 // own ledger, another Mac's through its engine; a Mac whose nights do not
 // read says so, never guessed bound or not. Asked inside a VM, the
 // machine is no Mac.
-func nights(ctx context.Context, d Deps, name, file string) machinefile.Upgrades {
+func nights(ctx context.Context, d Deps, name, file string) (machinefile.Upgrades, machinefile.Nights) {
 	if name == d.Name && d.Kind != machine.Computer {
-		return machinefile.UpgradesOf(name, file, false, machinefile.Nights{})
+		return machinefile.UpgradesOf(name, file, false, machinefile.Nights{}), machinefile.Nights{}
 	}
 	var n Nightly
 	var err error
@@ -115,9 +117,10 @@ func nights(ctx context.Context, d Deps, name, file string) machinefile.Upgrades
 		n, err = call.Invoke(ctx, d.Far, machine.Ref{Name: name}, LastNight, NightlyIn{}, nil)
 	}
 	if err != nil {
-		return machinefile.Upgrades{File: file, Sentence: "Whether " + name + " upgrades by itself does not read now."}
+		return machinefile.Upgrades{File: file, Sentence: "Whether " + name + " upgrades by itself does not read now."}, machinefile.Nights{}
 	}
-	return machinefile.UpgradesOf(name, file, true, machinefile.Nights{Bound: n.Bound, Night: n.Night, Ran: n.Ran})
+	seen := machinefile.Nights{Bound: n.Bound, Night: n.Night, Ran: n.Ran}
+	return machinefile.UpgradesOf(name, file, true, seen), seen
 }
 
 func plannedOn(ctx context.Context, d Deps, name, file string) (machinefile.Plan, error) {

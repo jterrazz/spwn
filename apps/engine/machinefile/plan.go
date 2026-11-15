@@ -79,6 +79,11 @@ type Line struct {
 	Step   Step
 	Seen   Seen
 	Action Action
+	// value: the version the manager offers that the range asked does not
+	// take, in words ("25.1.0 is out"), as the machine's last night of this
+	// Machinefile read it; empty where none waits or no night reads it. Only
+	// a drift fills it.
+	Waiting string
 }
 
 // value: one install station made for a Machinefile, as its ledger keeps
@@ -138,6 +143,24 @@ type Plan struct {
 	Passwordless bool
 	// value: the owner's lines of every phase the Machinefile says.
 	Scripts []Script
+}
+
+func (p Plan) WithWaiting(n Nights) Plan {
+	// invariant: a night speaks of its own Machinefile only: a line carries
+	// the version that waits when the machine's last night of this file left
+	// one, as the plan reads its range now.
+	if !n.Ran || n.Night.Machinefile != p.Name {
+		return p
+	}
+	waits := map[string]string{}
+	for _, w := range n.Night.Reread(p).Waiting {
+		waits[w.App] = w.Newest + " is out"
+	}
+	p.Lines = slices.Clone(p.Lines)
+	for i, l := range p.Lines {
+		p.Lines[i].Waiting = waits[l.Step.Package]
+	}
+	return p
 }
 
 func (p Plan) Script() (Script, bool) {

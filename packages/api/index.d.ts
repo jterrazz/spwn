@@ -1514,6 +1514,7 @@ export type MachinefileExtraLine = {
     RequiredBy: string[] | null;
     Seen: MachinefileSeen;
     Step: MachinefileStep;
+    Waiting: string;
 };
 
 export type MachinefileFileView = {
@@ -1571,6 +1572,7 @@ export type MachinefileLine = {
     Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
     Seen: MachinefileSeen;
     Step: MachinefileStep;
+    Waiting: string;
 };
 
 export type MachinefileLocal = {

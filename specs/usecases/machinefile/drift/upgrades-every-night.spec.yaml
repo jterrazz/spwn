@@ -30,3 +30,9 @@ runs:
       exit: 0
       stdout: |
           {"Nightly":true,"File":"jterrazz-macbook-pro","Sentence":"Every night at 03:00, as jterrazz-macbook-pro allows.","Last":{"Verdict":{"Tone":"warn","Sentence":"2 apps moved.","Line":"1 app waits for you."}}}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Plan.Lines[] | select(.Waiting != "") | {package: .Step.Package, waiting: .Waiting}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"package":"node","waiting":"25.1.0 is out"}
