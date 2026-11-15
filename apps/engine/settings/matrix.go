@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	coreverdict "github.com/jterrazz/studio-station/apps/engine/core/verdict"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -89,32 +90,48 @@ type Column struct {
 
 func (c Column) Known() bool { return c.Rows != nil }
 
-type Cell string
+type Standing string
 
 const (
 	// value: a setting's state on a machine that was not read; any other
-	// cell is its Set by station or its checked state there.
-	CellUnknown Cell = "unknown"
+	// standing is its Set by station or its checked state there.
+	CellUnknown Standing = "unknown"
 )
 
-func CellOf(r Row) Cell {
+type Cell struct {
+	State Standing
+	// value: the machine holds the setting: station set it there, or it is
+	// checked there, as expected or not; a cell Standing.OK or Standing.Look
+	// says so.
+	Holds bool
+}
+
+func StandingOf(r Row) Standing {
 	if r.Group == Checked && r.Checked != "" {
-		return Cell(r.Checked)
+		return Standing(r.Checked)
 	}
-	return Cell(r.State)
+	return Standing(r.State)
 }
 
-func (c Cell) OK() bool { return c == Cell(StateApplied) || c == Cell(AsExpected) }
+func CellOf(r Row) Cell {
+	st := StandingOf(r)
+	return Cell{State: st, Holds: st.OK() || st.Look()}
+}
 
-func (c Cell) Look() bool {
-	// value: a cell the owner should look at: a setting changed since
+func (s Standing) OK() bool { return s == Standing(StateApplied) || s == Standing(AsExpected) }
+
+func (s Standing) Look() bool {
+	// value: a standing the owner should look at: a setting changed since
 	// station applied it, a check not as expected.
-	return c == Cell(StateChangedSince) || c == Cell(NeedsFix)
+	return s == Standing(StateChangedSince) || s == Standing(NeedsFix)
 }
 
-func (c Cell) away() bool {
-	return c == Cell(StateNotForThisMachine)
+func (s Standing) away() bool {
+	return s == Standing(StateNotForThisMachine)
 }
+
+func (c Cell) OK() bool   { return c.State.OK() }
+func (c Cell) Look() bool { return c.State.Look() }
 
 type MatrixRow struct {
 	Name  string
@@ -132,9 +149,11 @@ type Matrix struct {
 	Columns []Column
 	Servers []string
 	Rows    []MatrixRow
+	// value: the head of the Settings shelf.
+	Verdict coreverdict.Shelf
 }
 
-func MatrixOf(cols []Column, servers []string) Matrix {
+func MatrixOf(cols []Column, servers []string, inCatalog int) Matrix {
 	// invariant: one row per setting, in the order the machines list them,
 	// one cell per column; the Always-on Mac group counts only on a Mac
 	// where one of it is applied, as that Mac's own list counts it.
@@ -144,7 +163,7 @@ func MatrixOf(cols []Column, servers []string) Matrix {
 		for _, r := range c.Rows {
 			if _, ok := at[r.Name]; !ok {
 				at[r.Name] = len(m.Rows)
-				m.Rows = append(m.Rows, MatrixRow{Name: r.Name, Group: r.Group, Cells: slices.Repeat([]Cell{CellUnknown}, len(cols)), Counts: make([]bool, len(cols))})
+				m.Rows = append(m.Rows, MatrixRow{Name: r.Name, Group: r.Group, Cells: slices.Repeat([]Cell{{State: CellUnknown}}, len(cols)), Counts: make([]bool, len(cols))})
 			}
 		}
 	}
@@ -154,7 +173,7 @@ func MatrixOf(cols []Column, servers []string) Matrix {
 			row := &m.Rows[at[r.Name]]
 			cell := CellOf(r)
 			row.Cells[i] = cell
-			if cell.away() || (r.Group == AlwaysOnMac && !opted) {
+			if cell.State.away() || (r.Group == AlwaysOnMac && !opted) {
 				continue
 			}
 			row.Of++
@@ -163,6 +182,18 @@ func MatrixOf(cols []Column, servers []string) Matrix {
 				row.OK++
 			}
 		}
+	}
+	// invariant: a checked row is no package of the catalog: only the
+	// packages' settings are counted.
+	held := 0
+	for _, r := range m.Rows {
+		if r.Group != Checked && slices.ContainsFunc(r.Cells, func(c Cell) bool { return c.Holds }) {
+			held++
+		}
+	}
+	m.Verdict = coreverdict.Shelf{
+		Mine:    coreverdict.Counted(held, "setting", "on your machines"),
+		Catalog: coreverdict.Counted(inCatalog, "setting", "in the catalog"),
 	}
 	return m
 }

@@ -3020,6 +3020,11 @@ export type SettingsCallsZshIn = {
     Completion?: string;
 };
 
+export type SettingsCell = {
+    Holds: boolean;
+    State: string;
+};
+
 export type SettingsChange = {
     After: SettingsKeyValue[] | null;
     Before: SettingsKeyValue[] | null;
@@ -3076,10 +3081,11 @@ export type SettingsMatrix = {
     Columns: SettingsColumn[] | null;
     Rows: SettingsMatrixRow[] | null;
     Servers: string[] | null;
+    Verdict: CoreVerdictShelf;
 };
 
 export type SettingsMatrixRow = {
-    Cells: string[] | null;
+    Cells: SettingsCell[] | null;
     Counts: boolean[] | null;
     Group: '' | 'always-on-mac' | 'checked' | 'set';
     Name: string;

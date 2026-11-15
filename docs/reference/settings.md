@@ -59,6 +59,10 @@ The Checked group is what station reads from macOS and never applies, on a Mac o
 | `time-machine`      | Time Machine's last backup is within 7 days                                   |
 | `macos-updates`     | no macOS update is waiting                                                    |
 
+## Across the machines
+
+The `settings.matrix` call reads each setting on every machine, a cell per machine: its state (`State`) and whether the machine holds the setting (`Holds`: station set it there, or it is checked there, as expected or not). Its `Verdict` is the head of the catalog's Settings shelf: `Mine` counts the catalog settings held on at least one machine (`4 settings are on your machines`, `1 setting is on your machines`), and `Catalog` those the catalog holds (`25 settings are in the catalog`). A row of the Checked group is no package of the catalog and is not counted.
+
 ## Values
 
 A package with inputs (`autologin`, `claude-token`) or an interactive procedure (`git-signing`, `ssh-key`, `github-login`) runs on a terminal only. A form asks each value, a password is never echoed, and `AGENT_PASSWORD` pre-fills the autologin password. Off a terminal the command exits 2 with `Hint: run it on a terminal`.

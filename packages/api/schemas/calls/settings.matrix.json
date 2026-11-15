@@ -273,6 +273,64 @@
       ],
       "type": "object"
     },
+    "core.verdict.Shelf": {
+      "additionalProperties": false,
+      "properties": {
+        "Catalog": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
+        "Mine": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Catalog",
+        "Mine"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
+    "settings.Cell": {
+      "additionalProperties": false,
+      "properties": {
+        "Holds": {
+          "type": "boolean"
+        },
+        "State": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Holds",
+        "State"
+      ],
+      "type": "object"
+    },
     "settings.Column": {
       "additionalProperties": false,
       "properties": {
@@ -359,12 +417,16 @@
             "array",
             "null"
           ]
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Shelf"
         }
       },
       "required": [
         "Columns",
         "Rows",
-        "Servers"
+        "Servers",
+        "Verdict"
       ],
       "type": "object"
     },
@@ -373,7 +435,7 @@
       "properties": {
         "Cells": {
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/settings.Cell"
           },
           "type": [
             "array",
