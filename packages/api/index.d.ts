@@ -1381,6 +1381,7 @@ export type MachinefileCallsExplainOut = {
 
 export type MachinefileCallsFiles = {
     Files: MachinefileFileView[] | null;
+    Verdict: CoreVerdictVerdict;
 };
 
 export type MachinefileCallsFilesIn = Record<string, never>;
@@ -1476,8 +1477,7 @@ export type MachinefileFollower = {
     Differences: number;
     Mac: string;
     Machine: string;
-    Match: boolean;
-    Read: boolean;
+    State: 'matches' | 'differs' | 'unread';
     ThisMac: boolean;
 };
 
@@ -3574,6 +3574,8 @@ export type MachinefileChapter = 'apps' | 'settings' | 'ports' | 'accounts';
 
 export type MachinefileCondition = 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
 
+export type MachinefileFollowerState = 'matches' | 'differs' | 'unread';
+
 export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
 
 export type MachinefileShelf = 'yours' | 'mixin' | 'shipped';
@@ -3641,6 +3643,7 @@ export type StationWords = {
     MachinefileAction: Record<MachinefileAction, StationWord>;
     MachinefileChapter: Record<MachinefileChapter, StationWord>;
     MachinefileCondition: Record<MachinefileCondition, StationWord>;
+    MachinefileFollowerState: Record<MachinefileFollowerState, StationWord>;
     MachinefileLayer: Record<MachinefileLayer, StationWord>;
     MachinefileShelf: Record<MachinefileShelf, StationWord>;
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;

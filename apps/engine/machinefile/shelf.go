@@ -82,23 +82,45 @@ type SettingSet struct {
 	Setting, Option, Value string
 }
 
+// value: how a follower stands with the file: its drift matches, it
+// differs, or the drift did not read.
+
+type FollowerState string
+
+const (
+	FollowerMatches FollowerState = "matches"
+	FollowerDiffers FollowerState = "differs"
+	FollowerUnread  FollowerState = "unread"
+)
+
+func (FollowerState) Enum() []string {
+	return []string{string(FollowerMatches), string(FollowerDiffers), string(FollowerUnread)}
+}
+
 // value: a machine that follows a Machinefile: a Mac bound to it, a VM
-// made from it, by its name and the Mac it runs on; whether its drift read,
-// and, if it did, how many lines differ from the file.
+// made from it, by its name and the Mac it runs on; how it stands with the
+// file and, when it differs, how many lines.
 
 type Follower struct {
 	Machine     string
 	Mac         string
 	ThisMac     bool
-	Read        bool
-	Match       bool
+	State       FollowerState
 	Differences int
+}
+
+func Following(machine, mac string, thisMac bool) Follower {
+	return Follower{Machine: machine, Mac: mac, ThisMac: thisMac, State: FollowerUnread}
 }
 
 func (f Follower) Judged(d Drift) Follower {
 	// invariant: a follower matches its file exactly when its drift counts
 	// no difference: the one count machinefile.drift answers.
-	f.Read, f.Differences, f.Match = true, d.Differences, d.Differences == 0
+	f.Differences = d.Differences
+	f.State = FollowerMatches
+	if d.Differences > 0 {
+		f.State = FollowerDiffers
+	}
 	return f
 }
 
@@ -107,11 +129,12 @@ func FollowersVerdict(fs []Follower) verdict.Verdict {
 	// that every machine matches; a follower that did not read is said.
 	differ, unread := 0, 0
 	for _, f := range fs {
-		switch {
-		case !f.Read:
+		switch f.State {
+		case FollowerUnread:
 			unread++
-		case !f.Match:
+		case FollowerDiffers:
 			differ++
+		case FollowerMatches:
 		}
 	}
 	switch {
@@ -127,6 +150,34 @@ func FollowersVerdict(fs []Follower) verdict.Verdict {
 		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Whether " + strconv.Itoa(unread) + " machines match does not read now."}
 	}
 	return verdict.Verdict{Tone: verdict.OK, Sentence: "Every machine matches."}
+}
+
+func FilesVerdict(files []FileView) verdict.Verdict {
+	// invariant: the page's verdict reads each file's own verdict, never a
+	// follower again: a warn file differs, a plain one that has followers
+	// could not be read.
+	differ, unread, matching := 0, 0, 0
+	for _, f := range files {
+		switch {
+		case f.Verdict.Tone == verdict.Warn:
+			differ++
+		case f.Verdict.Tone == verdict.OK:
+			matching++
+		case len(f.Followers) > 0:
+			unread++
+		}
+	}
+	switch {
+	case differ == 1:
+		return verdict.Verdict{Tone: verdict.Warn, Sentence: "1 file differs from its machines."}
+	case differ > 1:
+		return verdict.Verdict{Tone: verdict.Warn, Sentence: strconv.Itoa(differ) + " files differ from their machines."}
+	case unread > 0:
+		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Whether the machines match their files does not read now."}
+	case matching > 0:
+		return verdict.Verdict{Tone: verdict.OK, Sentence: "Every machine matches its file."}
+	}
+	return verdict.Verdict{Tone: verdict.Plain, Sentence: "No machine follows a file."}
 }
 
 func FilesOf(lib Library) []FileView {
