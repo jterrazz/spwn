@@ -9,7 +9,7 @@ import (
 
 // value: whether a machine upgrades what its Machinefile lists by itself:
 // a Mac bound to the file does, every night, by its engine; the file that
-// allows it; the sentence that says it; and the last night that ran it,
+// allows it, none for a Mac bound to no Machinefile; the sentence that says it; and the last night that ran it,
 // with its verdict.
 
 type Upgrades struct {
@@ -41,7 +41,7 @@ func UpgradesOf(machine, file string, mac bool, n Nights) Upgrades {
 	case !mac:
 		return Upgrades{File: file, Sentence: "Never by itself: station upgrade inside " + machine + " moves it."}
 	case n.Bound == "":
-		return Upgrades{File: file, Sentence: "Never by itself: " + machine + " is bound to no Machinefile."}
+		return Upgrades{Sentence: "Never by itself: " + machine + " is bound to no Machinefile."}
 	case n.Bound != file:
 		return Upgrades{File: n.Bound, Sentence: "Never by this file: " + machine + " upgrades " + n.Bound + " every night."}
 	}

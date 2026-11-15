@@ -19,15 +19,16 @@ func TestOnlyAMacBoundToTheFileUpgradesByItself(t *testing.T) {
 		n       machinefile.Nights
 		nightly bool
 		last    bool
+		file    string
 	}{
-		{how: "a VM", n: machinefile.Nights{Bound: "m", Night: night, Ran: true}},
+		{how: "a VM", n: machinefile.Nights{Bound: "m", Night: night, Ran: true}, file: "m"},
 		{how: "a Mac bound to none", mac: true},
-		{how: "a Mac bound to another file", mac: true, n: machinefile.Nights{Bound: "other", Night: night, Ran: true}},
-		{how: "a Mac bound to it, no night yet", mac: true, n: machinefile.Nights{Bound: "m"}, nightly: true},
-		{how: "a Mac bound to it", mac: true, n: machinefile.Nights{Bound: "m", Night: night, Ran: true}, nightly: true, last: true},
+		{how: "a Mac bound to another file", mac: true, n: machinefile.Nights{Bound: "other", Night: night, Ran: true}, file: "other"},
+		{how: "a Mac bound to it, no night yet", mac: true, n: machinefile.Nights{Bound: "m"}, nightly: true, file: "m"},
+		{how: "a Mac bound to it", mac: true, n: machinefile.Nights{Bound: "m", Night: night, Ran: true}, nightly: true, last: true, file: "m"},
 	} {
 		u := machinefile.UpgradesOf("mini", "m", c.mac, c.n)
-		if u.Nightly != c.nightly || (u.Last != nil) != c.last || u.Sentence == "" {
+		if u.Nightly != c.nightly || (u.Last != nil) != c.last || u.Sentence == "" || u.File != c.file {
 			t.Errorf("%s: %+v", c.how, u)
 		}
 	}
