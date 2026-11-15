@@ -30,11 +30,11 @@ func TestSecretSource(t *testing.T) {
 func TestIdentities(t *testing.T) {
 	contracttest.Identities(t, func(*testing.T) contracttest.IdentitiesSubject {
 		w := &world.World{Macs: map[string]*world.Mac{"mac-mini": {Identities: map[string]accounts.Identity{
-			catalog.ProviderGitHub: {State: catalog.StateOK, Who: []string{"jterrazz"}},
+			catalog.ProviderGitHub: {State: catalog.StateOK, Who: []string{"you"}},
 		}}}}
 		return contracttest.IdentitiesSubject{
 			Identities: fake.NewIdentities(w, "mac-mini"),
-			SignedIn:   catalog.Provider{ID: catalog.ProviderGitHub}, Who: "jterrazz",
+			SignedIn:   catalog.Provider{ID: catalog.ProviderGitHub}, Who: "you",
 			Missing: catalog.Provider{ID: catalog.ProviderClaude},
 		}
 	})
@@ -52,7 +52,7 @@ func TestSignIns(t *testing.T) {
 	contracttest.SignIns(t, func(*testing.T) contracttest.SignInsSubject {
 		in, out := accounts.Programs()[1], accounts.Programs()[0]
 		w := &world.World{Macs: map[string]*world.Mac{"mac-mini": {Accounts: &world.Accounts{Programs: map[accounts.Program]accounts.Facts{
-			in: {State: accounts.ProgramSignedIn, Who: "jterrazz", How: accounts.HowOwn},
+			in: {State: accounts.ProgramSignedIn, Who: "you", How: accounts.HowOwn},
 		}}}}}
 		at := time.Date(2026, 11, 14, 9, 0, 0, 0, time.UTC)
 		clock := fake.Clock{Now: func() time.Time { return at }, Sleep: func(ctx context.Context, _ time.Duration) error {

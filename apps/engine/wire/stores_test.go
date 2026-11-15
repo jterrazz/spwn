@@ -13,7 +13,7 @@ func TestNeverSleepsIsStillOnAfterAnotherPreferenceIsWritten(t *testing.T) {
 	if err := s.neverSleeps().Set(true); err != nil {
 		t.Fatal(err)
 	}
-	if err := s.vmUser().Set("jterrazz"); err != nil {
+	if err := s.vmUser().Set("you"); err != nil {
 		t.Fatal(err)
 	}
 

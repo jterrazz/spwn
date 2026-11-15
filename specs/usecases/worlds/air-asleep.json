@@ -1,7 +1,7 @@
 {
     "now": "2026-11-04T10:00:00Z",
     "this_mac": "macbook-pro",
-    "user": "jterrazz",
+    "user": "you",
     "macs": {
         "macbook-pro": {
             "engine": {
@@ -12,7 +12,7 @@
                 "vm_user": "admin",
                 "macs": {
                     "macbook-air": {
-                        "user": "jterrazz"
+                        "user": "you"
                     }
                 }
             },

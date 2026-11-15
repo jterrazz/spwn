@@ -20,7 +20,7 @@ const (
 )
 
 // value: a Machinefile's name, as its file is named: lower-case words
-// joined by dashes, `<whose>-<what>` by convention (`jterrazz-macbook-pro`).
+// joined by dashes, `<whose>-<what>` by convention (`sam-macbook-pro`).
 var machinefileName = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
 func IsMachinefileName(name string) bool {

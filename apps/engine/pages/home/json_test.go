@@ -32,7 +32,7 @@ func fixed() pagehome.Overview {
 		Station:     overview.Station{Version: "v3.0.0", Commit: "abc1234", Engine: overview.Check{Name: "daemon", State: catalog.StateOK, Value: "running v3.0.0"}},
 		Machine: overview.Machine{
 			Name: "macbook", Registered: true, Kind: catalog.Mac, Hostname: "macbook",
-			OS: "Darwin 27.0.0", Arch: "arm64", User: "jterrazz", Shell: "zsh",
+			OS: "Darwin 27.0.0", Arch: "arm64", User: "you", Shell: "zsh",
 		},
 		System: overview.System{
 			Uptime: "3d 4h", Battery: "92% charging", MemoryTotal: 34359738368,

@@ -117,7 +117,7 @@ func machineOf(prints string) *scripted {
 	code, link, paste := flowed(catalog.FlowDeviceCode), flowed(catalog.FlowLink), flowed(catalog.FlowPaste)
 	return &scripted{detect: map[string]cli.Ran{
 		code.Name:  {Code: 1, Out: "You are not logged into any hosts"},
-		link.Name:  {Code: 0, Out: "jterrazz\n"},
+		link.Name:  {Code: 0, Out: "you\n"},
 		paste.Name: {Code: 0, Out: `{"loggedIn":false}`},
 	}, prints: prints}
 }

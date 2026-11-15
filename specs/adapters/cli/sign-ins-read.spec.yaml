@@ -8,8 +8,8 @@ runs:
           {"v":2,"id":"1","watch":"accounts.list","in":{}}
       exit: 0
       stdout: |
-          ["gh","signed-in","jterrazz",null,"sign-out"]
-          ["npm","signed-in","jterrazz",null,"sign-out"]
+          ["gh","signed-in","you",null,"sign-out"]
+          ["npm","signed-in","you",null,"sign-out"]
           ["claude","signed-in","you@example.com","Max plan","sign-out"]
           ["wrangler","signed-out",null,null,"sign-in"]
           gh auth status --hostname github.com

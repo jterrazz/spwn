@@ -14,7 +14,7 @@ import (
 func signInsOfTwo(t *testing.T) SignIns {
 	t.Helper()
 	return SignIns{Machines: []MachineSignIns{
-		{Name: proMac, Mac: proMac, ThisMac: true, Rows: []accounts.ProgramRow{signedInRow(t, catalog.ProviderGitHub, "jterrazz"), signedOutRow(t, catalog.ProviderClaude)}},
+		{Name: proMac, Mac: proMac, ThisMac: true, Rows: []accounts.ProgramRow{signedInRow(t, catalog.ProviderGitHub, "you"), signedOutRow(t, catalog.ProviderClaude)}},
 		{Name: "linux-1", Mac: proMac, ThisMac: true, VM: true, Rows: []accounts.ProgramRow{grantedRow(t, catalog.ProviderGitHub, "pw-1")}},
 		{Name: miniMac, Mac: miniMac, Silent: "mac-mini does not answer"},
 	}}

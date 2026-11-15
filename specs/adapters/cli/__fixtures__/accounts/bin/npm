@@ -7,6 +7,6 @@ echo "npm notice token SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB" >&2
 case "$mode:$*" in
     "e401:whoami") echo "npm error code E401" >&2; echo "npm error 401 Unauthorized - token SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB" >&2; exit 1 ;;
     "eneedauth:whoami") echo "npm error code ENEEDAUTH" >&2; exit 1 ;;
-    *":whoami") echo jterrazz ;;
+    *":whoami") echo you ;;
     *) echo "stub npm: unexpected invocation: $*" >&2; exit 97 ;;
 esac

@@ -8,8 +8,8 @@ runs:
           {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"package":"homebrew","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
-          {"package":"jq","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
-          {"package":"gh","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
+          {"package":"homebrew","chapter":"apps","file":"base","rule":"takes every version"}
+          {"package":"jq","chapter":"apps","file":"base","rule":"takes every version"}
+          {"package":"gh","chapter":"apps","file":"base","rule":"takes every version"}
           {"package":"bat","chapter":"apps","file":"macbook-pro","rule":"takes every version"}
           {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows."}

@@ -43,16 +43,16 @@ func findFleet() FindReading {
 	infra.Want, infra.Guest, infra.SSH, infra.IP = "running", "connected", true, "192.168.64.7"
 	infra.CheckStatus = model.CheckStatus{State: model.CheckPassing}
 	all := model.AllMachines{Macs: []model.MacView{
-		{Name: findPro, User: "jterrazz", ThisMac: true, Reachable: true, Laptop: true, Hardware: machine.Hardware{Memory: 48 * gib}, VMs: []model.VM{
+		{Name: findPro, User: "you", ThisMac: true, Reachable: true, Laptop: true, Hardware: machine.Hardware{Memory: 48 * gib}, VMs: []model.VM{
 			vm("linux-1", findPro, model.Ephemeral, 8, &model.AgentView{State: "working"}),
 			vm("agent-7f", findPro, model.Ephemeral, 8, &model.AgentView{State: model.AgentFinished, Ended: findNow.Add(-12 * time.Minute), Reason: "tests pass"}),
 		}},
-		{Name: findMini, User: "jterrazz", Reachable: true, Hardware: machine.Hardware{Memory: 64 * gib}, VMs: []model.VM{
+		{Name: findMini, User: "you", Reachable: true, Hardware: machine.Hardware{Memory: 64 * gib}, VMs: []model.VM{
 			infra,
 			vm("linux-3", findMini, model.Ephemeral, 8, &model.AgentView{State: "working"}),
 			vm("review-bot", findMini, model.Persistent, 4, &model.AgentView{State: "waiting", Ask: "PR #42 is ready", Since: findNow.Add(-6 * time.Minute)}),
 		}},
-		{Name: findAir, User: "jterrazz", Laptop: true, Answered: findNow.Add(-2 * time.Hour)},
+		{Name: findAir, User: "you", Laptop: true, Answered: findNow.Add(-2 * time.Hour)},
 	}}
 	vite := "https://" + findPro + ".tail.ts.net:40001"
 	listed := ports.AllMachines{Macs: []ports.MacPorts{

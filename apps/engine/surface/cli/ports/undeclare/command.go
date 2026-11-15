@@ -26,7 +26,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "undeclare <machine> <port>",
 		Short:   "Take back a port's declaration: it is red again while it listens where something outside " + catalog.TailnetProduct + " reaches it",
-		Example: "  station ports undeclare jterrazz-mac-mini 5000",
+		Example: "  station ports undeclare mac-mini 5000",
 		Args:    cobra.RangeArgs(1, 2),
 		Bind: func(in *Input, args []string) error {
 			in.Machine, in.Port = "", args[len(args)-1]

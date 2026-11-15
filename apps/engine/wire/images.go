@@ -52,7 +52,7 @@ func (m machine) imageSource(hypervisor string) imagescontract.ImageSource {
 	if m.world != nil {
 		return m.world.imageSource(hypervisor)
 	}
-	return oci.New(m.sys.Net, "https://ghcr.io", "jterrazz", hypervisor)
+	return oci.New(m.sys.Net, "https://ghcr.io", "you", hypervisor)
 }
 
 func imagesCommand(env kit.Env, m machine) *cobra.Command {

@@ -86,17 +86,17 @@ func sceneMachines() model.AllMachines {
 	bot := sceneVM("review-bot", miniMac, model.Persistent, model.Running, 2, 4, "192.168.64.9")
 	bot.Agent = &model.AgentView{State: "waiting", Task: "fixes the token refresh", Ask: "PR #42 is ready", Since: storyNow.Add(-6 * time.Minute)}
 	return model.AllMachines{Read: storyNow, Macs: []model.MacView{
-		{Name: proName, User: "jterrazz", StationVersion: stationVer, ThisMac: true, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.14"}, VMs: []model.VM{
+		{Name: proName, User: "you", StationVersion: stationVer, ThisMac: true, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.14"}, VMs: []model.VM{
 			linux1,
 			agent7f,
 			sceneVM("api", proName, model.Persistent, model.Stopped, 4, 8, ""),
 		}},
-		{Name: miniMac, User: "jterrazz", StationVersion: stationVer, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.20"}, LAN: "192.168.1.20", VMs: []model.VM{
+		{Name: miniMac, User: "you", StationVersion: stationVer, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.20"}, LAN: "192.168.1.20", VMs: []model.VM{
 			infra,
 			linux3,
 			bot,
 		}},
-		{Name: airName, User: "jterrazz", StationVersion: stationVer, Answered: storyNow.Add(-2 * time.Hour), Node: model.Node{IP: "100.98.133.31"}},
+		{Name: airName, User: "you", StationVersion: stationVer, Answered: storyNow.Add(-2 * time.Hour), Node: model.Node{IP: "100.98.133.31"}},
 	}}
 }
 
@@ -210,7 +210,7 @@ func sceneAccounts() accounts.Report {
 	}
 	return accounts.Report{Now: storyNow, Engine: accounts.EngineRunning, Machines: []accounts.Machine{
 		{Name: proName, Kind: accounts.KindComputer, ThisMac: true, Accounts: []accounts.Account{
-			own(catalog.ProviderGitHub, []string{"jterrazz"}, []string{"repo", "workflow"}, "", "github.com"),
+			own(catalog.ProviderGitHub, []string{"you"}, []string{"repo", "workflow"}, "", "github.com"),
 			{Provider: catalog.ProviderNPM, State: catalog.StateBroken, Reason: accounts.ReasonRefused, Origin: accounts.OriginOwn, Identity: []string{"?"}, Detail: "signed out of registry.npmjs.org", Hint: "npm login"},
 			own(catalog.ProviderClaude, []string{"you@example.com"}, []string{"max"}, "", "claude.ai"),
 		}},

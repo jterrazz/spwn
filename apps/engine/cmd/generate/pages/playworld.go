@@ -150,7 +150,7 @@ func PlayWorld(base []byte) []byte {
 		miniMac: {Model: "Mac16,11", Chip: "Apple M4 Pro", Memory: 64 * gb, CPUs: 14},
 		airName: {Model: "Mac15,12", Chip: "Apple M3", Memory: 24 * gb, CPUs: 8},
 	}
-	w := playWorld{Now: storyNow, ThisMac: proName, User: "jterrazz", Macs: map[string]*playMac{}, Registry: map[string]string{"station-linux": "3"}}
+	w := playWorld{Now: storyNow, ThisMac: proName, User: "you", Macs: map[string]*playMac{}, Registry: map[string]string{"station-linux": "3"}}
 	known := map[string]any{}
 	past := profiles()
 	pid := 1000

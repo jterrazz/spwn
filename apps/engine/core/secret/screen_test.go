@@ -97,7 +97,7 @@ func TestEachShapeIsWithheldAndTheWordsAroundIt(t *testing.T) {
 func TestTheMachinesOwnDataIsShown(t *testing.T) {
 	hex40, hex64 := strings.Repeat("0a1b2c3d4e", 4), strings.Repeat("0a1b2c3d", 8)
 	for _, text := range []string{
-		"/Users/jterrazz/Developer/0123456789abcdef0123456789abcdef/x",
+		"/Users/you/Developer/0123456789abcdef0123456789abcdef/x",
 		"~/" + strings.Repeat("ab12", 9),
 		"station v3.1.0-144-g833ff9985 (" + hex40 + ")",
 		"ghcr.io/cirruslabs/macos@sha256:" + strings.Repeat("A1b2", 16),
@@ -115,7 +115,7 @@ func TestTheMachinesOwnDataIsShown(t *testing.T) {
 		token("n", "pm_config_cache") + "=/Users/x/.cache",
 		"ssh://git@github.com/o/r.git",
 		"http://localhost:4873/@jterrazz/x-2026-11-13-release-candidate",
-		"/Users/jterrazz/.cache/go-build/0a/" + hex64 + "-d",
+		"/Users/you/.cache/go-build/0a/" + hex64 + "-d",
 		"/private/tmp/run/1f4e8ae8-830c-45f6-8826-69e96d7c385b/scratchpad",
 		"GET /x?author=jb&page=2",
 		"GET /x?keyboard=qwerty&monkey=banana&turkey=1",
@@ -123,8 +123,8 @@ func TestTheMachinesOwnDataIsShown(t *testing.T) {
 		"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl you@example.com",
 		"\"integrity\": \"sha512-z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==\"",
 		"sha1-Ql5HUkRp9bSsBk0WT7Kn2ZtdT0M=",
-		"file:///Users/jterrazz/.cache/0123456789abcdef0123456789abcdef",
-		"/Users/jterrazz/Library/Caches/ABCDEFAbcdef0123456789ABCDEFabcdef0123",
+		"file:///Users/you/.cache/0123456789abcdef0123456789abcdef",
+		"/Users/you/Library/Caches/ABCDEFAbcdef0123456789ABCDEFabcdef0123",
 		"GET /x?cache_key=v1&sort_key=name&public_key=AAAA&keys=a,b",
 		"GET /x?app=web&license=MIT&subscription=pro&x-request-id=7&happ_key=1",
 		"open https://github.com/AcmeLabs/widgets/releases/tag/4.4.0",

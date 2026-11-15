@@ -9,5 +9,5 @@ runs:
       exit: 0
       stdout: |
           ["device-code","0A1B-2C3D","github.com"]
-          ["signed-in","jterrazz"]
+          ["signed-in","you"]
           1

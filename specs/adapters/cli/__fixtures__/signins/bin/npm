@@ -5,7 +5,7 @@ printf 'npm %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     whoami)
         if [ -f "$HOME/npm.out" ]; then echo "npm error code ENEEDAUTH" >&2; exit 1; fi
-        echo "jterrazz" ;;
+        echo "you" ;;
     "login --auth-type=web")
         /bin/cat "$HOME/outputs/npm-login.txt" >&2
         /bin/sleep 1

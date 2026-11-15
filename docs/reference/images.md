@@ -14,7 +14,7 @@ An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac ho
 ## Listing
 
 ```sh
-station images                  # ●  station-linux  2026.11.01  4.0 GB  jterrazz-macbook-pro  api · linux-1
+station images                  # ●  station-linux  2026.11.01  4.0 GB  macbook-pro  api · linux-1
 station images --on mac-mini    # that Mac's alone
 station images --json           # station.images.list/v1: name, version, size_bytes, mac, vms, newest
 ```

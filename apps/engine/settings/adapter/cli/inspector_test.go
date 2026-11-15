@@ -29,7 +29,7 @@ func owner(c local.Cmd) (local.Output, error) {
 		}
 		return local.Output{ExitCode: 1}, nil
 	case "gh":
-		return local.Output{Stderr: "github.com\n  - Logged in to github.com account jterrazz (keyring)\n"}, nil
+		return local.Output{Stderr: "github.com\n  - Logged in to github.com account you (keyring)\n"}, nil
 	}
 	return local.Output{ExitCode: 97}, nil
 }
@@ -43,7 +43,7 @@ func TestInspector(t *testing.T) {
 	i := cli.New(run, home, cli.Options{Home: "/home"})
 	for f, want := range map[catalog.Fact]string{
 		catalog.FactGitEmail: "you@example.com", catalog.FactGitName: "", catalog.FactGitSigning: "on",
-		catalog.FactGPGKey: "", catalog.FactGitHub: "jterrazz", catalog.FactSSHKey: "present",
+		catalog.FactGPGKey: "", catalog.FactGitHub: "you", catalog.FactSSHKey: "present",
 	} {
 		if got, err := i.Read(context.Background(), f); err != nil || got.Value != want {
 			t.Errorf("Read(%s) = %+v, %v; want %q", f, got, err, want)

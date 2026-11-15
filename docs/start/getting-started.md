@@ -23,7 +23,7 @@ station init --name macbook
 ## 3. What it carries: its Machinefile
 
 ```sh
-station init --machinefile jterrazz-macbook-pro
+station init --machinefile macbook-pro
 station drift
 ```
 

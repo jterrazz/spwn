@@ -12,7 +12,7 @@ case "$mode:$*" in
         exit 1 ;;
     *"auth status --hostname github.com")
         echo "github.com"
-        echo "  ✓ Logged in to github.com account jterrazz (keyring)"
+        echo "  ✓ Logged in to github.com account you (keyring)"
         echo "  - Active account: true"
         echo "  - Git operations protocol: ssh"
         echo "  - Token: SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB"

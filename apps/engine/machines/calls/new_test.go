@@ -99,7 +99,7 @@ func TestACreateOfLessThanTwoGigabytesIsRefused(t *testing.T) {
 // value: a sheet's fleet: This Mac, a laptop of 16 GB, 12 free; the mini
 // with 1 GB free; the studio, silent.
 func sheetFleet() model.AllMachines {
-	this := model.MacView{Name: "macbook-pro", User: "jterrazz", ThisMac: true, Reachable: true, Laptop: true, Hardware: coremachine.Hardware{Memory: 16 << 30}}
+	this := model.MacView{Name: "macbook-pro", User: "you", ThisMac: true, Reachable: true, Laptop: true, Hardware: coremachine.Hardware{Memory: 16 << 30}}
 	mini := model.MacView{Name: "mac-mini", Reachable: true, Hardware: coremachine.Hardware{Memory: 16 << 30}, VMs: []model.VM{
 		{Name: "infra", Lifetime: model.AlwaysOn, Want: model.WantRunning, State: model.Running, Resources: model.Resources{MemoryBytes: 11 << 30}},
 	}}

@@ -137,7 +137,7 @@ func summed(st token.Styles, r page.Row, width int, outcome bool) []string {
 
 // invariant: a first line is text, as vision 07 draws it, and never cut: a
 // part the line cannot hold goes on the next one, two columns in
-// (`This Mac · jterrazz-macbook-pro · 9 things need you` / `  Engine running`).
+// (`This Mac · macbook-pro · 9 things need you` / `  Engine running`).
 // A titled one leads with its machine in bold.
 func sums(st token.Styles, parts []page.Value, width int, titled bool) []string {
 	room := width - 1 - token.Margin

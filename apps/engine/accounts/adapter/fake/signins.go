@@ -218,7 +218,7 @@ func (s *SignIns) finish(ctx context.Context, target string, program accounts.Pr
 	if own.Programs == nil {
 		own.Programs = map[accounts.Program]accounts.Facts{}
 	}
-	own.Programs[program] = accounts.Facts{Program: program, State: accounts.ProgramSignedIn, Who: "jterrazz", How: accounts.HowOwn}
+	own.Programs[program] = accounts.Facts{Program: program, State: accounts.ProgramSignedIn, Who: "you", How: accounts.HowOwn}
 	delete(own.Exchanges, id)
 	return nil
 }
