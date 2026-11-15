@@ -3,10 +3,10 @@
   - paragraph:
     - img "Not given yet"
     - text: "Everything station knows how to install or set: apps, agent skills and settings, each one a package"
+  - searchbox "Search the catalog"
   - group "Show":
     - button "On your machines6"
     - button "Everything97" [pressed]
-  - searchbox "Search the catalog"
   - group "Category":
     - button "All apps97"
     - button "Package Managers8"

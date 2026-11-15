@@ -1,6 +1,15 @@
-import type { AppsReport } from '@jterrazz/station-api';
+import type { AppsReport, SettingsRow } from '@jterrazz/station-api';
 
-import { Button, Facts, MissingMark, Panel, Row, StatePill, Value } from '../../design/index';
+import {
+    AppIcon,
+    Button,
+    Facts,
+    MissingMark,
+    Panel,
+    Row,
+    StatePill,
+    Value,
+} from '../../design/index';
 import { countOf, detailOf, wordOf } from '../../engine/engine-words';
 import type { PlanLine } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
@@ -103,11 +112,37 @@ function Version({ report, line }: { report: AppsReport; line: PlanLine | undefi
     );
 }
 
-function ComesWith({ report, go, routeOf }: ItemProps & { report: AppsReport }) {
+function ComesWith({
+    report,
+    settings,
+    go,
+    routeOf,
+}: ItemProps & { report: AppsReport; settings: readonly SettingsRow[] }) {
     const then = report.App.Then ?? [];
-    return then.length === 0 ? null : (
-        <Panel note="proposed once it is installed" padded title="Settings it comes with">
-            <ItemChips go={go} names={then} routeOf={routeOf} />
+    if (then.length === 0) {
+        return null;
+    }
+    return (
+        <Panel note="proposed once it is installed" title="Settings it comes with">
+            <div className={styles.rows}>
+                {then.map((name) => {
+                    const row = settings.find((one) => one.Name === name);
+                    return (
+                        <Row
+                            key={name}
+                            lead={<AppIcon kind="setting" name={name} />}
+                            onOpen={() => {
+                                go(routeOf(name));
+                            }}
+                            sentence={row?.Package.Description}
+                            size="slim"
+                            tag={kindChipWord('setting')}
+                            tagLook="type"
+                            title={name}
+                        />
+                    );
+                })}
+            </div>
         </Panel>
     );
 }
@@ -168,10 +203,12 @@ export function AppItem({
     reports,
     carried,
     declared,
+    settings,
     ...props
 }: ItemProps & {
     report: AppsReport;
     reports: readonly AppsReport[];
+    settings: readonly SettingsRow[];
     carried: readonly string[] | undefined;
     declared: readonly string[];
 }) {
@@ -198,7 +235,7 @@ export function AppItem({
                     <>
                         <HowInstalled {...props} report={report} />
                         <Version line={line} report={report} />
-                        <ComesWith {...props} report={report} />
+                        <ComesWith {...props} report={report} settings={settings} />
                         <OnDisk go={props.go} report={report} />
                     </>
                 }

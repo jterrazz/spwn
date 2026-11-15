@@ -8,6 +8,7 @@ import type { Reading } from '../engine/react';
 import { findMachine, macsOf } from '../model/machines';
 import type { Found } from '../model/machines';
 import { Boundary } from './boundary';
+import { useCarried } from './carried';
 import { Find } from './find';
 import { onTabKey, useShortcuts } from './keys';
 import { Lost, useLost } from './lost';
@@ -156,11 +157,12 @@ export function useStation() {
     const machines = useWatch('machines.list', {});
     const overview = useWatch('overview.read', {});
     const engine = useRead('engine.read', {});
+    const carried = useCarried();
     const macs = macsOf(machines.kind === 'read' ? machines.out : undefined);
     const needs = overview.kind === 'read' ? (overview.out.Summary.Needs ?? []) : [];
     const home: Station = { macs, overview };
     const listed = machines.kind === 'read' && machines.done;
-    return { home, listed, macs, needs, rail: { engine, macs, needs } };
+    return { home, listed, macs, needs, rail: { carried, engine, macs, needs } };
 }
 
 type SheetsProps = {

@@ -9,6 +9,19 @@
     padding-top: var(--space-14);
     border-top: 1px solid var(--line);
 }
+.bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    min-width: 0;
+}
+.foot {
+    margin: var(--space-10) 0 0;
+    padding-top: var(--space-14);
+    border-top: 1px solid var(--line);
+    color: var(--t3);
+    font-size: var(--text-label);
+}
 .update {
     display: flex;
     align-items: center;

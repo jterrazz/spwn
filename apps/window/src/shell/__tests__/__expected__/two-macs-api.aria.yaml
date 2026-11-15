@@ -1,7 +1,7 @@
 - navigation "Sidebar":
   - button "Find"
   - button "Home"
-  - button "Inbox 1"
+  - button "Inbox 2"
   - button "Storage"
   - group "Machines":
     - heading "Machines" [level=2]
@@ -24,9 +24,9 @@
   - button "Passwords"
   - group "Catalog":
     - heading "Catalog" [level=2]
-    - button "Apps"
-    - button "Skills"
-    - button "Settings"
+    - button "Apps 10"
+    - button "Skills 0"
+    - button "Settings 25"
   - img "running"
   - text: Engine running · dev
 - main:

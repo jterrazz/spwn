@@ -1,6 +1,5 @@
 import type { AppsReport, SettingsRow } from '@jterrazz/station-api';
 
-import { isSkill } from '../../model/apps';
 import { matchesQuery } from '../../model/search';
 
 export type Shelf = 'apps' | 'settings' | 'skills';
@@ -23,20 +22,12 @@ export function categoriesOf(packages: readonly Package[]): readonly string[] {
     return seen;
 }
 
-export function appsOn(shelf: 'apps' | 'skills', reports: readonly AppsReport[]): AppsReport[] {
-    return reports.filter((report) => isSkill(report.App) === (shelf === 'skills'));
-}
-
 export function packageOfApp(report: AppsReport): Package {
     return {
         category: report.App.Category,
         description: report.App.Description,
         name: report.App.Name,
     };
-}
-
-export function settingsInCatalog(rows: readonly SettingsRow[]): SettingsRow[] {
-    return rows.filter((row) => row.Package.Name !== '');
 }
 
 export function packageOfSetting(row: SettingsRow): Package {
