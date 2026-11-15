@@ -3,8 +3,8 @@ set -eu
 root=$(cd "$(dirname "$0")/../../.." && pwd)
 package="$root/apps/menubar"
 app="$root/.artifacts/menubar/Station.app"
-scratch="$root/.artifacts/menubar/build"
-swift "$package/scripts/symbols.swift" "$package/sources/station-kit/token/symbols.xcassets"
+scratch="${STATION_MENUBAR_SCRATCH:-$root/.artifacts/menubar/build}"
+[ "${STATION_SYMBOLS_DRAWN:-}" = 1 ] || swift "$package/scripts/symbols.swift" "$package/sources/station-kit/token/symbols.xcassets"
 swift build -c release --package-path "$package" --scratch-path "$scratch" --product StationMenuBar
 bin=$(swift build -c release --package-path "$package" --scratch-path "$scratch" --show-bin-path)
 rm -rf "$app"
