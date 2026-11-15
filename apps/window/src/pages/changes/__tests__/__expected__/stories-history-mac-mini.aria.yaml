@@ -1,7 +1,7 @@
 - main:
-  - heading "3 things need you." [level=1]
+  - heading "2 things need you." [level=1]
   - paragraph:
-    - img "3 things need you."
+    - img "2 things need you."
     - text: port 5000 is reachable outside Tailscale
   - group "Which machines":
     - button "All machines"

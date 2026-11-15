@@ -68,19 +68,20 @@ describe('machine', () => {
         );
     });
 
-    test("a workspace's Overview opens on its tiles, then its file, ports and accounts beside why it exists", async () => {
+    test("a workspace's Overview opens on its tiles, then its file, ports and sign-ins beside why it exists", async () => {
         // Given - linux-1's Overview over two-macs, a workspace running
         const result = await component.render(
             overviewOver('two-macs', 'linux-1'),
             async (visitor) => {
-                // When - its activity and its file have been read
+                // When - its activity, its file and its sign-ins have been read
                 await visitor.see(content('of 4 GB'));
                 await visitor.see(content('Why it exists'));
                 await visitor.see(content('Its file'));
+                await visitor.see(content('All sign-ins'));
             },
         );
 
-        // Then - CPU, memory and disk are its numbers, who made it the engine's, what it does not give said not given
+        // Then - CPU, memory and disk are its numbers, who made it the engine's, its sign-ins the tab's rows without a gesture
         expect(result.content.text).toContain('by you');
         await expect(result.tree).toMatch(
             file('./__expected__/two-macs-linux-1-overview.aria.yaml'),
@@ -118,6 +119,7 @@ describe('machine', () => {
 
         // Then - its state, address, SSH and check aged from the read, and the latency of each check kept
         expect(result.tree.text).toContain('checked 3 s ago');
+        expect(result.tree.text).not.toContain('sign-ins');
         await expect(result.tree).toMatch(file('./__expected__/two-macs-infra-overview.aria.yaml'));
     });
 

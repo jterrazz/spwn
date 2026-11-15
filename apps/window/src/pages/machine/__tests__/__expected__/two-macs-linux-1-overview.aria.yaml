@@ -13,7 +13,7 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "Everything is fine." [level=1]
+  - 'heading "wrangler sign-in fails: Refused at the provider." [level=1]'
   - text: CPU 8% 4 CPUs Memory 1.1GB
   - meter "Memory used of its total"
   - text: of 4 GB Disk 7.6GB
@@ -31,10 +31,10 @@
     - region "Port 7000":
       - text: :7000 server Private jterrazz-macbook-pro.tail1234.ts.net:40002
       - button "Stop sharing"
-  - region "Accounts shared with it":
-    - heading "Accounts shared with it" [level=2]
+  - region "Sign-ins":
+    - heading "Sign-ins 4" [level=2]
     - button "All sign-ins"
-    - text: github ends in 11 h 10 min claude ends in 11 h 10 min
+    - text: gh Signed out npm from the password npm publish Signed in claude admin@jterrazz.com · Max plan · signed in by itself Signed in wrangler Refused at the provider Needs signing in again
   - region "Why it exists":
     - heading "Why it exists" [level=2]
     - term: Purpose
