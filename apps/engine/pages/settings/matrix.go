@@ -251,7 +251,7 @@ func foldedRow(m settings.Matrix, rows []settings.MatrixRow, more bool) page.Row
 		ok, of := 0, 0
 		var thisMac []page.Mark
 		for _, r := range rows {
-			if r.Cells[i] != settings.Cell(settings.StateNotForThisMachine) {
+			if r.Cells[i].State != settings.Standing(settings.StateNotForThisMachine) {
 				thisMac = append(thisMac, cellMark(r.Cells[i]))
 			}
 			if r.Counts[i] {
@@ -319,16 +319,16 @@ func rowMark(r settings.MatrixRow) page.Mark {
 }
 
 func cellMark(c settings.Cell) page.Mark {
-	switch c {
-	case settings.Cell(settings.StateApplied), settings.Cell(settings.AsExpected):
+	switch c.State {
+	case settings.Standing(settings.StateApplied), settings.Standing(settings.AsExpected):
 		return page.OK
-	case settings.Cell(settings.StateChangedSince), settings.Cell(settings.NeedsFix):
+	case settings.Standing(settings.StateChangedSince), settings.Standing(settings.NeedsFix):
 		return page.Attention
-	case settings.Cell(settings.StateNotApplied):
+	case settings.Standing(settings.StateNotApplied):
 		return page.Absent
-	case settings.Cell(settings.StateOffThisMac):
+	case settings.Standing(settings.StateOffThisMac):
 		return page.OffHere
-	case settings.Cell(settings.StateNotForThisMachine):
+	case settings.Standing(settings.StateNotForThisMachine):
 		return page.NotForThisMachine
 	case settings.CellUnknown:
 	}
@@ -391,7 +391,7 @@ func MatrixContract(m settings.Matrix, now time.Time, thisMac page.Context) Matr
 	for _, r := range m.Rows {
 		cells := make([]string, len(r.Cells))
 		for i, c := range r.Cells {
-			cells[i] = string(c)
+			cells[i] = string(c.State)
 		}
 		body.Rows = append(body.Rows, MatrixRowJSON{Name: r.Name, Group: string(r.Group), Cells: cells, OK: r.OK, Of: r.Of})
 	}

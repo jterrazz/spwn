@@ -74,6 +74,6 @@ var Matrix = call.Call[Deps, MatrixIn, settings.Matrix]{
 			}
 			cols = append(cols, col)
 		}
-		return settings.MatrixOf(cols, servers), nil
+		return settings.MatrixOf(cols, servers, len(d.Settings.Packages())), nil
 	},
 }

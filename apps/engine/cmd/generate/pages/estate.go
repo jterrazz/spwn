@@ -247,10 +247,10 @@ func settingsMatrix() []Fixture {
 		{LivesOn: settings.LivesOn{Name: "api", Away: settings.Stopped}, Rows: space, Read: now.Add(-2 * time.Hour)},
 	}
 	short := func(name string) string { return name }
-	m := settings.MatrixOf(cols, []string{"infra"})
+	m := settings.MatrixOf(cols, []string{"infra"}, 0)
 	full := pagesettings.Matrix(m, now, false, short, thisMacContext())
 	return states("settings-matrix", pending(pagesettings.Matrix(m, now, false, short, thisMacContext())),
-		pagesettings.Matrix(settings.MatrixOf(nil, nil), now, false, short, thisMacContext()),
+		pagesettings.Matrix(settings.MatrixOf(nil, nil, 0), now, false, short, thisMacContext()),
 		failure(pagesettings.ID, "settings --all-machines", "macbook-pro does not answer", "station machines"),
 		full)
 }
