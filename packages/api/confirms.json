@@ -76,7 +76,7 @@
     "kinds": {
       "server": {
         "confirm": "restart-server",
-        "consequence": "%s stops while it restarts: what it serves is down until it answers again.",
+        "consequence": "It is a server: what it serves stops while it restarts.",
         "form": "type-name"
       },
       "workspace": {
