@@ -184,7 +184,7 @@ func TestTwoCreatesInTwoProcessesNeverBothTakeTheMemoryLeft(t *testing.T) {
 	outcomes := map[string]string{}
 	for ctx.Err() == nil && len(outcomes) < 2 {
 		for _, name := range []string{"api", "web"} {
-			if data, err := sys.FS.ReadFile(filepath.Join(meet, "outcome."+name)); err == nil {
+			if data, err := sys.FS.ReadFile(filepath.Join(meet, "outcome."+name)); err == nil && len(data) > 0 {
 				outcomes[name] = string(data)
 			}
 		}
