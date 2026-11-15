@@ -41,7 +41,7 @@ describe('sign-ins', () => {
                 // When - accounts.list has answered
                 // Then - its verdict and its four programs
                 await visitor.see(heading('Signed in to 3 of 4 programs.'));
-                await visitor.see(within(region('Sign-ins'), button('Sign in npm')));
+                await visitor.see(within(region('Sign-ins'), button('Sign in again npm')));
             },
         );
         expect(result.errors.text).toBe('');
