@@ -29,7 +29,7 @@ func TestAVolumeThatCannotTellItsSystemHasNoSystemAndNoRemainder(t *testing.T) {
 }
 
 func TestYourDataIsWhatNoOtherKindHoldsAndNeverBelowZero(t *testing.T) {
-	s := Survey{System: 100, Rows: []Tally{{Install: 50}}}
+	s := Survey{System: 100, Apps: 50}
 	rows := []Row{{App: "go", Group: CanRebuild, Bytes: 40}, {App: "xcode", Group: YourData, Bytes: 7}}
 	got, _ := KindsOf(1000, 500, s, rows, holding(200))
 	if got[2] != (Amount{Kind: KindYourData, Bytes: 110}) {
@@ -46,12 +46,43 @@ func TestYourDataIsWhatNoOtherKindHoldsAndNeverBelowZero(t *testing.T) {
 }
 
 func TestAHypervisorThatHasNotAnsweredLeavesMachinesAndYourDataOut(t *testing.T) {
-	s := Survey{System: 100, Rows: []Tally{{Install: 50}}}
+	s := Survey{System: 100, Apps: 50}
 	for _, state := range []HeldState{HeldPending, HeldFailed} {
 		got, _ := KindsOf(1000, 500, s, nil, HeldReading{State: state})
 		if want := []Kind{KindSystem, KindApps, KindCaches, KindFree}; !slices.Equal(kindsOf(got), want) {
 			t.Fatalf("kinds %v while the hypervisor is %d, want %v: your data would hold the machines", kindsOf(got), state, want)
 		}
+	}
+}
+
+func TestAKindWhoseWalkHasNotAnsweredIsAbsentAndYourDataWithIt(t *testing.T) {
+	cases := map[string]struct {
+		s    Survey
+		rows []Row
+		want []Kind
+	}{
+		"system":          {Survey{System: -1, SystemPending: true, Apps: 50}, nil, []Kind{KindApps, KindCaches, KindFree}},
+		"apps":            {Survey{System: 100, Apps: -1}, nil, []Kind{KindSystem, KindCaches, KindFree}},
+		"caches":          {Survey{System: 100, Apps: 50, CachesUnknown: true}, nil, []Kind{KindSystem, KindApps, KindFree}},
+		"a cache unsized": {Survey{System: 100, Apps: 50}, []Row{{App: "go", Group: CanRebuild, Bytes: -1}}, []Kind{KindSystem, KindApps, KindFree}},
+	}
+	for name, c := range cases {
+		got, can := KindsOf(1000, 500, c.s, c.rows, HeldReading{State: HeldNone})
+		if !slices.Equal(kindsOf(got), c.want) {
+			t.Errorf("%s unknown: kinds %v, want %v: nothing unknown reads 0", name, kindsOf(got), c.want)
+		}
+		if cachesAbsent := !slices.Contains(c.want, KindCaches); cachesAbsent != (can == CanFree{}) {
+			t.Errorf("%s unknown: can free %+v while caches are absent %v: it is absent with them", name, can, cachesAbsent)
+		}
+	}
+	if r := ReadingOf(1000, 500, Survey{System: -1, SystemPending: true}, HeldReading{}, "linux-1"); !r.Pending {
+		t.Error("a reading whose system is still walked is not pending")
+	}
+}
+
+func TestAReadingHasNoStationPartWhileItsLogsAreUnknown(t *testing.T) {
+	if r := ReadingOf(1000, 500, Survey{System: -1, Logs: -1}, holding(10), "mbp"); r.Station != nil {
+		t.Fatalf("station's part %+v while its logs are not sized, want none", r.Station)
 	}
 }
 

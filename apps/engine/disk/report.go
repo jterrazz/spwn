@@ -59,10 +59,14 @@ type Survey struct {
 	Rows      []Tally
 	Misplaced []MisplacedReport
 	Other     int64
-	// value: what the system holds on the volume, -1 when it cannot be
-	// told apart; the bytes of station's logs.
-	System int64
-	Logs   int64
+	// value: what the system, the apps' installs and station's logs hold;
+	// -1 while a part of one has not answered or did not within its budget,
+	// and the system's -1 too where the volume cannot tell it apart.
+	System, Apps, Logs int64
+	// value: the system's walk has not answered yet.
+	SystemPending bool
+	// value: a cache's walk has not answered, or did not within its budget.
+	CachesUnknown bool
 }
 
 type Outcome struct {

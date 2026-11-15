@@ -53,13 +53,14 @@ type Reading struct {
 }
 
 func ReadingOf(total, free int64, s Survey, h HeldReading, mac string) Reading {
-	// invariant: station's part is there only once the hypervisor answered:
-	// pending, failed or absent, it is nil, never zeros.
-	r := Reading{Total: total, Free: free, Rows: Classify(s), Pending: h.State == HeldPending}
+	// invariant: station's part is there only once the hypervisor and the
+	// walk of its logs answered: pending, failed or absent, it is nil, never
+	// zeros.
+	r := Reading{Total: total, Free: free, Rows: Classify(s), Pending: h.State == HeldPending || s.SystemPending}
 	for _, t := range s.Rows {
 		r.Pending = r.Pending || t.Pending
 	}
-	if h.State == HeldAnswered {
+	if h.State == HeldAnswered && s.Logs >= 0 {
 		station := StationOf(total, free, s.Logs, h.Held, mac)
 		r.Station = &station
 	}
