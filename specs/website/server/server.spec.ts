@@ -39,9 +39,18 @@ describe('server', () => {
 
     test.todo('S1 waits for 30 days of uptime on MachinesUptimeDay');
 
-    test.todo(
-        'S2 waits for a world whose server fails its check: the verdict and the Restart need are on the wire, no recorded world builds one',
-    );
+    test('S2 a server whose check fails says so, and no step of its health is drawn ok', async () => {
+        // Given - the window on infra's page over stories, a server on mac-mini whose check fails
+        const result = await website.visit(
+            '/?world=stories&machine=infra&tab=Overview',
+            async (visitor) => {
+                // When - I open it
+                // Then - its health says the engine's sentence of the failing check
+                await visitor.see(content('Its check fails.'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo(
         'S3 waits for a recording of a Restart of a server that is down, and of the line it leaves',
@@ -109,7 +118,7 @@ describe('server', () => {
                     within(
                         restart,
                         content(
-                            'infra restarts: its VMs stop, and its servers start again once it is back.',
+                            'infra stops while it restarts: what it serves is down until it answers again.',
                         ),
                     ),
                 );
