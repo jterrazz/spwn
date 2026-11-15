@@ -7,6 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 )
@@ -45,9 +46,15 @@ var Login = call.Watch[Deps, LoginIn, accounts.LoginRead]{
 		// exchange ends, so a later accounts.open or accounts.answer finds
 		// them; a VM's own station answers a call at its exit, too late for
 		// a step. A program station does not know is refused, before
-		// anything runs.
+		// anything runs. A server a Mac holds keeps its own sign-ins: the
+		// section's rule refuses it here as it does inside the server.
 		if !in.Program.Known() {
 			return nil, accounts.Refusal(fail.NotFound, accounts.LoginUnknownProgram, string(in.Program))
+		}
+		if where, known := d.SignIns.Where(ctx, in.Machine); known && in.Machine != "" && where.FarMac == "" {
+			if err := call.Gate(call.Meta{Name: "accounts.login", Section: section.Accounts, Applies: accounts.Applies}, machine.Profile{Ref: machine.Ref{Name: in.Machine}, Kind: where.Kind}); err != nil {
+				return nil, err
+			}
 		}
 		started, err := d.SignIns.Login(ctx, in.Machine, in.Program)
 		if err != nil {

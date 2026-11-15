@@ -68,6 +68,18 @@ func row(name string, r model.ProgramRow) page.Row {
 	return out
 }
 
+func LoginStep(s model.Step, thisMac page.Context) page.Page {
+	// value: a login step as a terminal says it: headed by what the owner
+	// does next, the code when there is one, the site, and the status line.
+	var items []page.Item
+	if s.Code != "" {
+		items = append(items, page.Item{Fact: &page.Fact{Key: "code", Value: page.Text(s.Code)}})
+	}
+	items = append(items, page.Item{Fact: &page.Fact{Key: "site", Value: page.Text(s.Site)}}, page.Item{Note: &page.Note{Text: s.Line}})
+	return page.Seal(page.Page{ID: "accounts-login", Command: "accounts login", Context: thisMac,
+		Sections: []page.Section{{ID: "step", Title: s.Kind.Heading(), Role: page.Banner, Uncounted: true, Columns: columns(), Items: items}}})
+}
+
 func section(id, title string, m Machine) page.Section {
 	s := page.Section{ID: id, Title: title, Columns: columns()}
 	for _, r := range m.Read.Programs {

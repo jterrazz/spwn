@@ -25,8 +25,8 @@ type Deps struct {
 
 type Input struct{ AllMachines bool }
 
-func Command(d Deps, env kit.Env) *cobra.Command {
-	return kit.Command(kit.Leaf[Input]{
+func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
+	cmd := kit.Command(kit.Leaf[Input]{
 		Use:     "accounts",
 		Short:   "Who is signed in on a machine, and what the vault granted it: names and scopes, never a token",
 		Example: "  station accounts\n  station accounts --on linux-1\n  station accounts --all-machines\n  station accounts --json",
@@ -41,8 +41,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if in.AllMachines {
 				return everyMachine(ctx, env, io)
 			}
-			at, of, m := reach(ctx, env, d.ThisMachine)
-			updates, err := call.Follow(ctx, env.Calls, at, accountscalls.Programs, of, nil)
+			aim := kit.Aim(ctx, env, d.ThisMachine.Machine)
+			m := pageaccounts.Machine{Name: aim.Name, Kind: string(aim.Kind)}
+			updates, err := call.Follow(ctx, env.Calls, aim.At, accountscalls.Programs, accountscalls.ProgramsIn{Machine: aim.VM}, nil)
 			if err != nil {
 				return err
 			}
@@ -64,20 +65,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			return io.PageRecords(pageaccounts.Page(m, d.ThisMachine), pageaccounts.List(m), pageaccounts.ListContract(accountscalls.Programs.Schema(), m))
 		},
 	}, env)
-}
-
-// invariant: a VM's programs are read through the engine of its own Mac,
-// which knows what it granted; a Mac's are its own.
-func reach(ctx context.Context, env kit.Env, self page.Context) (machine.Ref, accountscalls.ProgramsIn, pageaccounts.Machine) {
-	t := env.Target()
-	name := t.Name
-	if name == "" {
-		name = self.Machine
-	}
-	if h, ok := kit.Holder(ctx, env, name); ok {
-		return machine.Ref{Name: h.Mac}, accountscalls.ProgramsIn{Machine: name}, pageaccounts.Machine{Name: name, Kind: string(h.Kind)}
-	}
-	return t, accountscalls.ProgramsIn{}, pageaccounts.Machine{Name: name, Kind: string(machine.Computer)}
+	cmd.AddCommand(children...)
+	return cmd
 }
 
 func everyMachine(ctx context.Context, env kit.Env, io kit.IO) error {

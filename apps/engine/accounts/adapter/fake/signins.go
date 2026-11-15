@@ -119,6 +119,12 @@ func (s *SignIns) Read(_ context.Context, name string) (accounts.ProgramsRead, e
 	return accounts.ProgramsRead{Verdict: accounts.Summarize(rows, target, stand), Programs: rows}, nil
 }
 
+func (s *SignIns) Where(_ context.Context, name string) (accounts.Where, bool) {
+	s.w.Lock()
+	defer s.w.Unlock()
+	return s.standOf(s.target(name))
+}
+
 func (s *SignIns) Login(ctx context.Context, name string, program accounts.Program) (<-chan contract.LoginUpdate, error) {
 	now := s.clock.Now()
 	s.w.Lock()

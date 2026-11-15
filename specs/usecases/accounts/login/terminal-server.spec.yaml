@@ -1,0 +1,15 @@
+description: 'station accounts login on a server is refused, the server keeping its own sign-ins'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - engine
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" accounts login gh --on infra'
+      stdin: |
+          scrollback
+      exit: 2
+      stdout: |
+          Error: infra is a server: station does not manage its accounts
+          Hint: manage it with your own tooling: ssh infra

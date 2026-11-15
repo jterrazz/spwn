@@ -254,9 +254,9 @@ func wordedEnums() []worded {
 			string(accounts.ActionNone):        plain("nothing to do"),
 		}},
 		{accounts.StepKind(""), map[string]word{
-			string(accounts.StepDeviceCode): {Word: "a code to enter", Heading: "Enter the code", Detail: "Type it on the page that opened; it works once", Tone: verdict.Plain},
-			string(accounts.StepLink):       {Word: "a link to open", Heading: "Open the link", Detail: "Approve the sign-in in your browser", Tone: verdict.Plain},
-			string(accounts.StepPaste):      {Word: "a code to paste back", Heading: "Paste the code", Detail: "Sign in on the page that opened, then paste the code it gives you", Tone: verdict.Plain},
+			string(accounts.StepDeviceCode): {Word: "a code to enter", Heading: accounts.StepDeviceCode.Heading(), Detail: "Type it on the page that opened; it works once", Tone: verdict.Plain},
+			string(accounts.StepLink):       {Word: "a link to open", Heading: accounts.StepLink.Heading(), Detail: "Approve the sign-in in your browser", Tone: verdict.Plain},
+			string(accounts.StepPaste):      {Word: "a code to paste back", Heading: accounts.StepPaste.Heading(), Detail: "Sign in on the page that opened, then paste the code it gives you", Tone: verdict.Plain},
 		}},
 		{accounts.KeyKind(""), map[string]word{
 			string(accounts.KeyToken):       plain("token"),

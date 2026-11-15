@@ -10,6 +10,9 @@ import (
 type SignIns interface {
 	// value: the programs of the machine named, empty for this one, each row with its action.
 	Read(ctx context.Context, machine string) (accounts.ProgramsRead, error)
+	// value: where the machine named is, empty for this one: false for a name
+	// no record holds.
+	Where(ctx context.Context, machine string) (accounts.Where, bool)
 	// invariant: Login answers the refusals before it returns; the channel
 	// then carries the step, then the signed-in row, and closes when the
 	// exchange ends or ctx does. A failure after it rides as a refusal. The
