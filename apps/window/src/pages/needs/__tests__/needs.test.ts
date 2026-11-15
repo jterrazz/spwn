@@ -11,6 +11,7 @@ function need(Machine: string, change: Partial<OverviewNeed> = {}): OverviewNeed
         Call: '',
         Command: '',
         Machine,
+        Noun: 'Apps',
         Path: '',
         Section: 'apps',
         Severity: 'needs-a-look',

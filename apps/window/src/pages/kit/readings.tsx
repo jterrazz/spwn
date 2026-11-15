@@ -105,11 +105,14 @@ function saidOf(error: EngineError): Said {
 export function Unanswered({
     error,
     size,
+    answered,
 }: {
     error: EngineError;
     size: 'page' | 'panel' | 'tab';
+    answered?: string | undefined;
 }) {
     const said = saidOf(error);
+    const last = clock(answered);
     const command = error.wire?.fix?.Command ?? '';
     const copied = command === '' ? said.fix : command;
     const fix =
@@ -136,7 +139,11 @@ export function Unanswered({
     return (
         <Verdict
             action={fix}
-            line={sentence([capitalised(said.word), said.hint])}
+            line={sentence([
+                capitalised(said.word),
+                said.hint,
+                last === undefined ? undefined : `Last answer at ${last}`,
+            ])}
             size={size}
             title={asSentence(said.message)}
             tone={said.tone}

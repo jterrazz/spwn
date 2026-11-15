@@ -198,7 +198,7 @@ function MacPorts({ of, name, target }: MacPortsProps) {
 
 export function PortsTab({ found, go }: { found: Found; go: Go }) {
     const name = found.vm?.Name ?? found.mac.Name;
-    const listing = useRead('ports.list', { AllMachines: true });
+    const listing = useRead('ports.list', { Of: name });
     if (listing.kind === 'failed') {
         return (
             <Page>
