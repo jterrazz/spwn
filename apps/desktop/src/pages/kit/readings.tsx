@@ -1,6 +1,7 @@
 import type { CoreVerdictVerdict, OverviewSummary } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
+import type { Reach } from '../../application/use-cases/reach';
 import { CopyButton } from '../../design/copy-button';
 import {
     asSentence,
@@ -17,7 +18,6 @@ import { clock, fixLine, sentence } from '../../domain/format';
 import { SEPARATOR } from '../../domain/separator';
 import type { Tone } from '../../domain/tone';
 import { failedState } from '../../engine/failed';
-import type { Reach } from '../../engine/reach';
 import { ownState, verdictShown } from '../../engine/shown';
 
 import styles from '../page.module.css';

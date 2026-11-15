@@ -1,8 +1,8 @@
 import { clock, component, content, file, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 
 const recordingFor = await recordingsOf(
     'creating',

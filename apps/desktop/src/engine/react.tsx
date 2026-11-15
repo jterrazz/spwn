@@ -2,35 +2,47 @@ import type { CallName, Target } from '@jterrazz/station-api';
 import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 
-import type { Client, In, Out, ReadName, WatchName } from './client';
-import { READING } from './entry';
-import type { Asked, Reading } from './entry';
-import { GestureStore } from './gesture-store';
-import { NO_OPENER } from './opener';
-import type { Opener } from './opener';
-import { reachOf } from './reach';
-import type { Reach } from './reach';
-import { askedKey, ReadStore } from './store';
-import type { Link } from './transport';
+import type {
+    EnginePort,
+    In,
+    Link,
+    Out,
+    ReadName,
+    WatchName,
+} from '../application/ports/engine.port';
+import type { OpenerPort } from '../application/ports/opener.port';
+import type { PresencePort } from '../application/ports/presence.port';
+import { READING } from '../application/use-cases/entry';
+import type { Asked, Reading } from '../application/use-cases/entry';
+import { GestureStore } from '../application/use-cases/gesture-store';
+import { reachOf } from '../application/use-cases/reach';
+import type { Reach } from '../application/use-cases/reach';
+import { askedKey, ReadStore } from '../application/use-cases/store';
 
-export type { Reading } from './entry';
+export type { Reading } from '../application/use-cases/entry';
 
-type Engine = { client: Client; store: ReadStore; gestures: GestureStore; opener: Opener };
+export type Dependencies = { engine: EnginePort; opener: OpenerPort; presence: PresencePort };
+
+type Engine = { client: EnginePort; store: ReadStore; gestures: GestureStore; opener: OpenerPort };
 
 const EngineContext = createContext<Engine | null>(null);
 
 export function EngineProvider({
-    client,
-    opener = NO_OPENER,
+    dependencies,
     children,
 }: {
-    client: Client;
-    opener?: Opener;
+    dependencies: Dependencies;
     children: ReactNode;
 }) {
+    const { engine: client, opener, presence } = dependencies;
     const engine = useMemo(
-        () => ({ client, gestures: new GestureStore(), opener, store: new ReadStore(client) }),
-        [client, opener],
+        () => ({
+            client,
+            gestures: new GestureStore(),
+            opener,
+            store: new ReadStore(client, presence),
+        }),
+        [client, opener, presence],
     );
     return <EngineContext value={engine}>{children}</EngineContext>;
 }
@@ -43,7 +55,7 @@ function useEngine(): Engine {
     return engine;
 }
 
-export function useClient(): Client {
+export function useClient(): EnginePort {
     return useEngine().client;
 }
 
@@ -51,7 +63,7 @@ export function useGestureStore(): GestureStore {
     return useEngine().gestures;
 }
 
-export function useOpener(): Opener {
+export function useOpener(): OpenerPort {
     return useEngine().opener;
 }
 

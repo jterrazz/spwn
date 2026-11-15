@@ -2,7 +2,7 @@ import type { PortsSharedPort, Target } from '@jterrazz/station-api';
 
 import { TypeTag, Value } from '../../design/index';
 import { isCalm } from '../../design/state-pill';
-import { Openable, shareAddressOf } from '../../engine/opener';
+import { Openable, shareAddressOf } from '../../engine/openable';
 import { shareToWord } from '../../engine/shown';
 import { SHARE_STATE_TONES } from '../../engine/tones';
 import { SHARE_STATE_WORDS } from '../../engine/words';

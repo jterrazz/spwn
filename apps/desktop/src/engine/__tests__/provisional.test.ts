@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
+import type { Out } from '../../application/ports/engine.port';
 import { EngineError } from '../../domain/engine-error';
 import { keyOf } from '../../domain/request-key';
-import { recordingsOf } from '../../fixtures/recordings';
-import type { Out } from '../client';
+import { recordingsOf } from '../../infrastructure/outbound/engine-replay/recordings';
 import {
     createRefusalPlaceOf,
     diskGestureOf,

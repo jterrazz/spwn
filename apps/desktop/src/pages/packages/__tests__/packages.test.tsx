@@ -12,11 +12,11 @@ import {
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import type { Out } from '../../../application/ports/engine.port';
+import { pageOver } from '../../../composition/__tests__/page-over';
 import { Screen } from '../../../design/index';
 import { keyOf } from '../../../domain/request-key';
-import type { Out } from '../../../engine/client';
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { Differs } from '../differs';
 import { PlanSteps, unitOf } from '../plan';
 

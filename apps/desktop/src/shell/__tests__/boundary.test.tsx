@@ -1,10 +1,9 @@
 import { button, component, content, heading, navigation, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../engine/client';
+import { composeReplay } from '../../composition/compose';
 import { EngineProvider } from '../../engine/react';
-import { replayTransport } from '../../engine/replay';
-import { recordingsOf } from '../../fixtures/recordings';
+import { recordingsOf } from '../../infrastructure/outbound/engine-replay/recordings';
 import { PAGES } from '../../pages/registry';
 import type { PageProps, Pages } from '../window';
 import { Window } from '../window';
@@ -23,9 +22,9 @@ const THROWING: Pages = { ...PAGES, Body, Head: () => null };
 describe('Boundary', () => {
     test('a page that throws shows what broke in its frame, and the window around it survives', async () => {
         // Given - the window over two-macs, whose Inbox page throws when it renders
-        const client = new Client(replayTransport(recordingFor('two-macs')));
+        const dependencies = composeReplay({ recording: recordingFor('two-macs') });
         const result = await component.render(
-            <EngineProvider client={client}>
+            <EngineProvider dependencies={dependencies}>
                 <Window initial={{ page: 'home' }} pages={THROWING} />
             </EngineProvider>,
             async (visitor) => {

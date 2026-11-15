@@ -3,12 +3,11 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../../engine/client';
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { composeReplay } from '../../../composition/compose';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport } from '../../../engine/replay';
 import { useGesture } from '../../../engine/use-gesture';
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { GestureButton, GestureConfirm, GestureOutcome } from '../gestures';
 
 const recordingFor = await recordingsOf('stories', 'two-macs');
@@ -77,9 +76,9 @@ function heightOf(panel: string): number {
 }
 
 function over(children: ReactNode) {
-    const client = new Client(replayTransport(recordingFor('two-macs')));
+    const dependencies = composeReplay({ recording: recordingFor('two-macs') });
     return (
-        <EngineProvider client={client}>
+        <EngineProvider dependencies={dependencies}>
             {children}
             <GestureConfirm />
         </EngineProvider>

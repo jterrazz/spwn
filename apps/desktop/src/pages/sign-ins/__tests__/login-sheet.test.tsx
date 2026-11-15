@@ -1,9 +1,9 @@
 import { button, component, content, dialog, field, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { NO_OPENER } from '../../../engine/opener';
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
 
 const recordingFor = await recordingsOf('sign-ins', 'two-macs');
 

@@ -1,8 +1,10 @@
 import { Caption, Verdict } from '../../design/index';
+import type { Dependencies } from '../../engine/react';
 import { Page } from '../page';
 import { ENTRIES } from './entries';
 import { anchorOf, LAYERS } from './entry';
 import type { Entry, Layer } from './entry';
+import { SampleContext } from './sample';
 
 import styles from './gallery.module.css';
 
@@ -50,30 +52,32 @@ function EntryView({ entry }: { entry: Entry }) {
     );
 }
 
-export default function Gallery() {
+export default function Gallery({ sample }: { sample: Dependencies }) {
     return (
-        <Page>
-            <Verdict
-                line={`${String(ENTRIES.length)} components, each drawn in its variants and its data states`}
-                size="page"
-                title="Every component, every variant."
-                tone="ok"
-                word="Up"
-            />
-            <Contents />
-            {LAYERS.map((layer) => (
-                <section
-                    aria-label={layer}
-                    className={styles.layer}
-                    id={anchorOfLayer(layer)}
-                    key={layer}
-                >
-                    <Caption>{layer}</Caption>
-                    {ENTRIES.filter((one) => one.layer === layer).map((one) => (
-                        <EntryView entry={one} key={one.name} />
-                    ))}
-                </section>
-            ))}
-        </Page>
+        <SampleContext value={sample}>
+            <Page>
+                <Verdict
+                    line={`${String(ENTRIES.length)} components, each drawn in its variants and its data states`}
+                    size="page"
+                    title="Every component, every variant."
+                    tone="ok"
+                    word="Up"
+                />
+                <Contents />
+                {LAYERS.map((layer) => (
+                    <section
+                        aria-label={layer}
+                        className={styles.layer}
+                        id={anchorOfLayer(layer)}
+                        key={layer}
+                    >
+                        <Caption>{layer}</Caption>
+                        {ENTRIES.filter((one) => one.layer === layer).map((one) => (
+                            <EntryView entry={one} key={one.name} />
+                        ))}
+                    </section>
+                ))}
+            </Page>
+        </SampleContext>
     );
 }

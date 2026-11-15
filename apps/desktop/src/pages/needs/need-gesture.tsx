@@ -8,14 +8,14 @@ import type {
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
+import type { In, ReadName } from '../../application/ports/engine.port';
+import type { ConfirmKind } from '../../application/use-cases/confirms';
 import { CopyButton } from '../../design/copy-button';
 import { Button, Row, Value } from '../../design/index';
 import type { RowProps } from '../../design/row';
 import { sentence } from '../../domain/format';
 import { findMachine, targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
-import type { In, ReadName } from '../../engine/client';
-import type { ConfirmKind } from '../../engine/confirms';
 import { wordOf } from '../../engine/engine-words';
 import {
     deleteInputOf,

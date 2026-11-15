@@ -1,13 +1,13 @@
 import type { CallName, Target } from '@jterrazz/station-api';
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 
+import type { EnginePort, In, Out, ReadName } from '../application/ports/engine.port';
+import { confirmingOf, consequenceOf } from '../application/use-cases/confirms';
+import type { Confirming, ConfirmKind } from '../application/use-cases/confirms';
+import { IDLE, step } from '../application/use-cases/gesture';
+import type { Ask, GestureEvent, GestureState } from '../application/use-cases/gesture';
 import { EngineError } from '../domain/engine-error';
 import { keyOf } from '../domain/request-key';
-import type { Client, In, Out, ReadName } from './client';
-import { confirmingOf, consequenceOf } from './confirms';
-import type { Confirming, ConfirmKind } from './confirms';
-import { IDLE, step } from './gesture';
-import type { Ask, GestureEvent, GestureState } from './gesture';
 import { useClient, useGestureStore, useReread } from './react';
 
 export type GestureSpec<N extends ReadName> = {
@@ -41,7 +41,7 @@ function firstAsk(confirming: Confirming | undefined, name: string): Ask | undef
 }
 
 type Maker<N extends ReadName> = {
-    client: Client;
+    client: EnginePort;
     name: N;
     send: (event: GestureEvent<Out<N>>) => void;
 };

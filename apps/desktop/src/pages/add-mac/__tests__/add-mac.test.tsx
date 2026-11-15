@@ -1,10 +1,9 @@
 import { button, component, content, dialog, disabled, field, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Client } from '../../../engine/client';
+import { composeReplay } from '../../../composition/compose';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport } from '../../../engine/replay';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { Window } from '../../../shell/window';
 import { PAGES } from '../../registry';
 
@@ -13,9 +12,9 @@ const recordingFor = await recordingsOf('one-mac', 'two-macs');
 const sheet = dialog('Add a Mac');
 
 function windowOver(world: string) {
-    const client = new Client(replayTransport(recordingFor(world)));
+    const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
-        <EngineProvider client={client}>
+        <EngineProvider dependencies={dependencies}>
             <Window initial={{ page: 'home' }} pages={PAGES} />
         </EngineProvider>
     );

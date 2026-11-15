@@ -1,7 +1,7 @@
 import type { MachinesSshOutput, MachinesVM } from '@jterrazz/station-api';
 
 import { shownOrWithheld } from '../../design/secret';
-import { Openable } from '../../engine/opener';
+import { Openable } from '../../engine/openable';
 import { useRead } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { SSH_WORDS } from '../../engine/words';

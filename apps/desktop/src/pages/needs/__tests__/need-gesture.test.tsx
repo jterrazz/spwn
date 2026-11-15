@@ -1,10 +1,10 @@
 import { button, component, content, dialog, field, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { NO_OPENER } from '../../../engine/opener';
-import type { Recording } from '../../../engine/replay';
-import { pageOver } from '../../../fixtures/page-over';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { pageOver } from '../../../composition/__tests__/page-over';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
+import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
 
 const recordingFor = await recordingsOf('engine-stopped', 'machinefile-differs', 'two-macs');
 

@@ -4,7 +4,7 @@ import { CopyButton } from '../../design/copy-button';
 import { Button } from '../../design/index';
 import { QrCode } from '../../design/qr-code';
 import { SEPARATOR } from '../../domain/separator';
-import type { Openable } from '../../engine/opener';
+import type { Openable } from '../../engine/openable';
 import { OpenButton } from '../kit/opens';
 
 import styles from './ports.module.css';

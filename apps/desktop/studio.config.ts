@@ -7,6 +7,9 @@ export default defineConfig({
     presets: [test()],
     typescript: {
         architecture: {
+            // hazard: the hexagonal map derived from src/ refuses a spec that crosses its layers, so the layers below
+            // hazard: hold the hexagon, each sparing the specs.
+            hexagonal: false,
             layers: [
                 {
                     name: 'design-knows-no-app',
@@ -28,10 +31,48 @@ export default defineConfig({
                     read: 'docs/concepts/architecture.md#the-tree',
                 },
                 {
+                    name: 'use-cases-see-domain-and-ports',
+                    from: { path: '^src/application/', pathNot: '/__tests__/' },
+                    to: { path: '^src/', pathNot: '^src/(domain|application)/' },
+                    why: 'a use case reads the engine, the opener and the presence through its ports alone, and draws nothing',
+                    fix: 'name what the use case needs in a port of src/application/ports/ and let src/composition/ hand it the adapter (apps/desktop/README.md, The dependency rule)',
+                    read: 'docs/concepts/architecture.md#the-tree',
+                },
+                {
+                    name: 'adapters-draw-nothing',
+                    from: { path: '^src/infrastructure/', pathNot: '/__tests__/' },
+                    to: { path: '^src/(design|shell|pages|engine)/' },
+                    why: "an adapter speaks to the engine's socket, the Tauri shell or the document, and answers in the ports' types; the words and the drawing are the app's",
+                    fix: "return the port's type and let the hooks of src/engine/ or a page word and draw it (apps/desktop/README.md, The dependency rule)",
+                    read: 'docs/concepts/architecture.md#the-tree',
+                },
+                {
+                    name: 'only-composition-builds-adapters',
+                    from: {
+                        path: '^src/',
+                        pathNot: ['^src/composition/', '^src/infrastructure/', '/__tests__/'],
+                    },
+                    to: { path: '^src/infrastructure/' },
+                    why: 'the adapters are built in one place, src/composition/compose.ts, and every other module reads them through a port',
+                    fix: 'take the port from the provider (src/engine/react.tsx), or build the adapter in src/composition/compose.ts (apps/desktop/README.md, The dependency rule)',
+                    read: 'docs/concepts/architecture.md#the-tree',
+                },
+                {
+                    name: 'only-main-composes',
+                    from: {
+                        path: '^src/',
+                        pathNot: ['^src/main[.]tsx$', '^src/composition/', '/__tests__/'],
+                    },
+                    to: { path: '^src/composition/' },
+                    why: 'the window is composed once, by src/main.tsx, which hands the dependencies to the provider',
+                    fix: 'read the dependencies through the provider, or take them as a prop from src/main.tsx (apps/desktop/README.md, The dependency rule)',
+                    read: 'docs/concepts/architecture.md#the-tree',
+                },
+                {
                     name: 'engine-draws-nothing',
                     from: { path: '^src/engine/', pathNot: '/__tests__/' },
                     to: { path: '^src/(design|shell|pages)/' },
-                    why: "the engine layer reads the link and names what it answered; how it is drawn is the pages' and the shell's",
+                    why: "the engine's words, tones and hooks name what the engine answered; how it is drawn is the pages' and the shell's",
                     fix: 'return a code, a word or a tone (src/domain/tone.ts) and let the caller draw it (apps/desktop/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',
                 },

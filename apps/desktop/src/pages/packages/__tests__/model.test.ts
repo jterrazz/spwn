@@ -1,9 +1,9 @@
 import type { CallName } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
+import type { Out } from '../../../application/ports/engine.port';
 import { keyOf } from '../../../domain/request-key';
-import type { Out } from '../../../engine/client';
-import { recordingsOf } from '../../../fixtures/recordings';
+import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import {
     byAction,
     countOn,
