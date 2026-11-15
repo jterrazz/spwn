@@ -147,6 +147,12 @@ func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progres
 	if err != nil {
 		return images.Record{}, err
 	}
+	owner := s.owner()
+	defer s.clear(img.Name)
+	at := func(step images.BuildStep, label string) {
+		s.mark(images.Making{Image: img.Name, Version: version, Step: step, Owner: owner})
+		progress(images.Step{Label: label})
+	}
 	sha, err := s.recipeSHA(img)
 	if err != nil {
 		return images.Record{}, err
@@ -167,15 +173,15 @@ func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progres
 		return images.Record{}, &images.BuildFailedError{Image: img.Name, Step: "removing the earlier build VM", Cause: err}
 	}
 
-	progress(images.Step{Label: "pulling " + t.From})
+	at(images.BuildBaseSystem, "pulling "+t.From)
 	if err = s.e.Fetch(ctx, s.location(t.From), nil); err != nil {
 		return failed("pulling the base", err)
 	}
-	progress(images.Step{Label: "cloning " + vm})
+	at(images.BuildBaseSystem, "cloning "+vm)
 	if err = s.e.Clone(ctx, s.location(t.From), vm); err != nil {
 		return failed("cloning the base", err)
 	}
-	progress(images.Step{Label: "booting " + vm})
+	at(images.BuildBaseSystem, "booting "+vm)
 	if err = s.builds.Boot(ctx, vm); err != nil {
 		return failed("booting the build VM", err)
 	}
@@ -185,30 +191,30 @@ func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progres
 	}
 	defer func() { _ = b.Close() }()
 
-	progress(images.Step{Label: "copying station into " + vm})
+	at(images.BuildPackages, "copying station into "+vm)
 	if err = s.copy(ctx, b, binary); err != nil {
 		return failed("copying the station binary", err)
 	}
-	progress(images.Step{Label: "running the " + img.Name + " recipe"})
+	at(images.BuildPackages, "running the "+img.Name+" recipe")
 	env := "VM_USER=" + quote(s.o.User) + " IMAGE_KEY=" + quote(strings.TrimSpace(pub))
 	if err = recipeRun(ctx, b, string(recipe), env); err != nil {
 		return failed("the recipe", err)
 	}
-	progress(images.Step{Label: "baking " + t.Name + "'s image phase"})
+	at(images.BuildSettings, "baking "+t.Name+"'s image phase")
 	lock, err := s.bakeRun(ctx, b, img, t, Login{User: s.o.User, Key: key})
 	if err != nil {
 		return failed("the image phase", err)
 	}
-	progress(images.Step{Label: "removing the base's admin user"})
+	at(images.BuildSeal, "removing the base's admin user")
 	if err := cleanupRun(ctx, b, string(cleanup), Login{User: s.o.User, Key: key}); err != nil {
 		return failed("the cleanup", err)
 	}
-	progress(images.Step{Label: "waiting for " + vm + " to power off"})
+	at(images.BuildSeal, "waiting for "+vm+" to power off")
 	if err := s.waitStopped(ctx, vm); err != nil {
 		return failed("waiting for the build VM to power off", err)
 	}
 	_ = s.e.Shutdown(ctx, vm, 10*time.Second)
-	progress(images.Step{Label: "recording " + img.Name + " " + version})
+	at(images.BuildSeal, "recording "+img.Name+" "+version)
 	final := DiskName(img.Name, version)
 	if err := s.e.Rename(ctx, vm, final); err != nil {
 		return failed("renaming the build VM", err)

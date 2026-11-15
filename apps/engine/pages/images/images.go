@@ -18,6 +18,9 @@ type ImageJSON struct {
 	Mac       string   `json:"mac"`
 	VMs       []string `json:"vms"`
 	Newest    bool     `json:"newest"`
+	Deletable bool     `json:"deletable"`
+	// value: the step a build that is making this version is at, "Step 2 of 4".
+	Building string `json:"building,omitempty"`
 }
 
 type ListJSON struct {
@@ -28,14 +31,19 @@ type ListJSON struct {
 func ListContract(reports []images.Report) ListJSON {
 	body := ListJSON{Schema: "station.images.list/v1", Images: make([]ImageJSON, 0, len(reports))}
 	for _, r := range reports {
-		body.Images = append(body.Images, ImageJSON{
+		one := ImageJSON{
 			Name:      r.Record.Name,
 			Version:   r.Record.Version,
 			SizeBytes: int64(r.Record.SizeGB) * 1_000_000_000,
 			Mac:       r.Mac,
 			VMs:       append([]string{}, r.VMs...),
 			Newest:    r.Newest,
-		})
+			Deletable: r.Unused(),
+		}
+		if r.Building != nil {
+			one.Building = r.Building.Sentence
+		}
+		body.Images = append(body.Images, one)
 	}
 	return body
 }
@@ -60,9 +68,14 @@ func Section(reports []images.Report, known []catalog.Image, thisMac page.Contex
 			Cells:  []page.Value{page.Version(r.Record.Version), page.Size(int64(r.Record.SizeGB) * 1_000_000_000), page.Text(page.MacName(r.Mac, thisMac.Machine)), page.Text(r.Mac)},
 			Detail: madeFrom(r.VMs),
 		}
-		if !r.Newest {
+		switch {
+		case r.Building != nil:
+			row.Mark, row.Reason = page.Absent, page.Missing
+			row.Cells[1] = page.Text("")
+			row.Detail = page.Text("building: " + r.Building.Step.Word() + ", " + r.Building.Sentence)
+		case !r.Newest:
 			row.Mark, row.Reason = page.Absent, page.Outdated
-			if len(r.VMs) == 0 {
+			if r.Unused() {
 				row.Detail = page.Text("older")
 				row.Hint = page.Cmd("station images delete " + r.Record.Name + "@" + r.Record.Version)
 			}
@@ -150,7 +163,7 @@ func firstLine(reports []images.Report, known []catalog.Image) page.Section {
 	older := 0
 	for _, r := range reports {
 		macs[r.Mac] = true
-		if !r.Newest {
+		if !r.Newest && r.Building == nil {
 			older++
 		}
 	}

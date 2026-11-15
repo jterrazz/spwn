@@ -57,12 +57,21 @@ type Report struct {
 	VMs    []string
 	// value: the Mac that holds this version.
 	Mac string
+	// value: whether the gesture Delete is offered: it is Unused, the one rule.
+	Deletable bool
+	// value: the build that is making this version, nil once it is built.
+	Building *Building
 }
 
 func (r Report) Unused() bool {
-	// invariant: an image nothing uses is not the newest of its name and no
-	// machine was made from it.
-	return !r.Newest && len(r.VMs) == 0
+	// invariant: an image nothing uses is not the newest of its name, no
+	// machine was made from it and no build is making it.
+	return !r.Newest && len(r.VMs) == 0 && r.Building == nil
+}
+
+func (r Report) Judged() Report {
+	r.Deletable = r.Unused()
+	return r
 }
 
 type Update struct {

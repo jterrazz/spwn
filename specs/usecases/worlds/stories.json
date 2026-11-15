@@ -1334,6 +1334,17 @@
                     }
                 }
             },
+            "building": [
+                {
+                    "image": "station-linux",
+                    "version": "4",
+                    "step": "packages",
+                    "owner": {
+                        "pid": 4242,
+                        "start": "1794047380.000000"
+                    }
+                }
+            ],
             "disk": {
                 "total": 994000000000,
                 "free": 388000000000

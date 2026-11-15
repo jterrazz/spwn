@@ -1,0 +1,8 @@
+description: 'a bare image name is refused Delete while a build of it is making a version'
+env: creating
+runs:
+    - command: 'images delete station-linux --yes'
+      exit: 2
+      stderr: |
+          Error: image station-linux 2026.11.04 is being built
+          Hint: station images lists the versions you can delete

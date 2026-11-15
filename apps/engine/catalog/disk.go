@@ -161,6 +161,7 @@ var StationDisk = Disk{
 		noted(cache("{cache}/station/sources/*"), "the shared source's clone, at its default branch: cloned again when it is gone"),
 		noted(data("{data}/station/vms/vms/*"), "station's VMs and images: `station machines delete`, `station images delete`"),
 		noted(data("{state}/station/images/*/*.json"), "image records, paired with their images"),
+		noted(data("{state}/station/builds/*.json"), "each running build's step and its process, `<image>.json`: cleared when the build ends"),
 		noted(data("{state}/station/known_hosts/*"), "pins: deleting them downgrades to trust-on-first-use, never cleaned"),
 		noted(data("{state}/station/consoles/*"), "live while a VM or a build runs: `consoles/<vm>`, `consoles/station-build-<image>`"),
 		noted(data("{state}/station/engine.sock"), "the engine's socket, live while it runs"),

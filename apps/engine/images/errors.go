@@ -8,6 +8,29 @@ func (e *UnknownVersionError) Error() string {
 	return "image " + e.Image + " has no version " + e.Version
 }
 
+type InUseError struct {
+	// value: a version Delete refuses, by the rule of Report.Unused: a build
+	// is making it, it is the newest, or machines were made from it.
+	Image, Version   string
+	Building, Newest bool
+	VMs              []string
+}
+
+func (e *InUseError) Error() string {
+	said := "image " + e.Image + " " + e.Version
+	switch {
+	case e.Building:
+		return said + " is being built"
+	case e.Newest:
+		return said + " is the newest: the next machines are made from it"
+	}
+	names := strings.Join(e.VMs, ", ")
+	if n := len(e.VMs); n > 1 {
+		names = strings.Join(e.VMs[:n-1], ", ") + " and " + e.VMs[n-1]
+	}
+	return said + " has machines made from it: " + names
+}
+
 type NotBuiltError struct{ Image string }
 
 func (e *NotBuiltError) Error() string { return "image " + e.Image + " is not built here" }

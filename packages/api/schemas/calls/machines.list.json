@@ -67,6 +67,7 @@
             "guest_timeout",
             "ignored_port",
             "image.binary-not-found",
+            "image.in-use",
             "image.no-hypervisor",
             "image.no-linux-binary",
             "image.no-recipe",

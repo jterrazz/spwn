@@ -475,6 +475,13 @@ func Codes() map[fail.Code]Wording {
 		imagescalls.NoRecipe: func(e *fail.Error) (string, string) {
 			return (&images.NoRecipeError{Image: e.Subject}).Error(), "station images update " + e.Subject
 		},
+		imagescalls.InUse: func(e *fail.Error) (string, string) {
+			said := images.InUseError{Image: e.Subject, Version: e.Detail["version"], Building: e.Detail["building"] == "true", Newest: e.Detail["newest"] == "true"}
+			if vms := e.Detail["vms"]; vms != "" {
+				said.VMs = strings.Split(vms, ",")
+			}
+			return said.Error(), "station images lists the versions you can delete"
+		},
 		imagescalls.NoHypervisor: func(e *fail.Error) (string, string) {
 			return (&images.NoEngineError{Hypervisor: e.Subject}).Error(), "station apps install " + e.Subject
 		},

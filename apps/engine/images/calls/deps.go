@@ -3,6 +3,8 @@ package calls
 import (
 	"context"
 	"errors"
+	"strconv"
+	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -33,6 +35,7 @@ const (
 	BinaryNotFound fail.Code = "image.binary-not-found"
 	NoRecipe       fail.Code = "image.no-recipe"
 	NoHypervisor   fail.Code = "image.no-hypervisor"
+	InUse          fail.Code = "image.in-use"
 )
 
 // value: the refusals a build declares, each coded by Worded; a missing
@@ -54,6 +57,7 @@ func Worded(err error) error {
 		missing  *images.BinaryNotFoundError
 		noRecipe *images.NoRecipeError
 		noEngine *images.NoEngineError
+		inUse    *images.InUseError
 	)
 	switch {
 	case errors.As(err, &unknown):
@@ -66,6 +70,10 @@ func Worded(err error) error {
 		return coded(fail.Refused, NoRecipe, noRecipe.Image)
 	case errors.As(err, &noEngine):
 		return coded(fail.Refused, NoHypervisor, noEngine.Hypervisor)
+	case errors.As(err, &inUse):
+		return &fail.Error{Type: fail.Refused, Code: InUse, Subject: inUse.Image, Cause: err, Detail: map[string]string{
+			"version": inUse.Version, "building": strconv.FormatBool(inUse.Building), "newest": strconv.FormatBool(inUse.Newest), "vms": strings.Join(inUse.VMs, ","),
+		}}
 	}
 	return err
 }

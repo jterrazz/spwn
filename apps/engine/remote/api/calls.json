@@ -623,6 +623,7 @@
       "consequence": "%s is deleted; the next create that needs it builds it again.",
       "errors": [
         "confirm.yes-needed",
+        "image.in-use",
         "image.unknown"
       ],
       "in": "DeleteIn"

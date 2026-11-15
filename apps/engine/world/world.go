@@ -133,6 +133,9 @@ type Mac struct {
 	Clones map[string]string `json:"clones,omitempty"`
 	// value: the images the hypervisor holds, by reference.
 	Images []string `json:"images,omitempty"`
+	// value: the image builds this Mac is at when the world opens, each at
+	// its step.
+	Building []images.Making `json:"building,omitempty"`
 	// value: a VM freshly cloned from a fetched image, before anything ran
 	// in it: its size and the guest it answers with; nil clones a disk whose
 	// guest is station's image's.

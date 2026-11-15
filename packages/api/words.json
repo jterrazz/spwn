@@ -641,6 +641,11 @@
       "Detail": "image",
       "Tone": "plain"
     },
+    "image.in-use": {
+      "Word": "in use",
+      "Detail": "image",
+      "Tone": "plain"
+    },
     "image.no-hypervisor": {
       "Word": "no hypervisor",
       "Detail": "image",
@@ -1307,6 +1312,24 @@
     },
     "stopped": {
       "Word": "stopped",
+      "Tone": "plain"
+    }
+  },
+  "ImagesBuildStep": {
+    "base-system": {
+      "Word": "Base system",
+      "Tone": "plain"
+    },
+    "packages": {
+      "Word": "Packages",
+      "Tone": "plain"
+    },
+    "seal": {
+      "Word": "Seal",
+      "Tone": "plain"
+    },
+    "settings": {
+      "Word": "Settings",
       "Tone": "plain"
     }
   },
