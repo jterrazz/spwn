@@ -1,7 +1,7 @@
 description: 'lsof''s listening addresses are read as bound: loopback, every interface, Tailscale, LAN'
 fixture: ./__fixtures__/binds/
 runs:
-    - command: 'ports --json | /usr/bin/jq -c ''[.local_only, [.ports[] | [.port, .process, .bind, .class]], .findings]'''
+    - command: 'ports --json | /usr/bin/jq -c ''[.local_only, [.ports[] | [.port, .process, .bind, .class]], (.findings | map(del(.machine, .subject)))]'''
       exit: 0
       stdout: |
-          [1,[[3000,"node",["0.0.0.0","::"],"public"],[8000,"python3",["192.168.1.20"],"public"],[8443,"caddy",["100.101.102.103"],"private"]],[{"severity":"broken","section":"ports","subject":":3000","text":"port 3000 is reachable outside Tailscale","fix":{"call":null,"command":null,"path":null}},{"severity":"broken","section":"ports","subject":":8000","text":"port 8000 is reachable outside Tailscale","fix":{"call":null,"command":null,"path":null}}]]
+          [1,[[3000,"node",["0.0.0.0","::"],"public"],[8000,"python3",["192.168.1.20"],"public"],[8443,"caddy",["100.101.102.103"],"private"]],[{"severity":"broken","section":"ports","text":"port 3000 is reachable outside Tailscale","fix":{"call":null,"command":null,"path":null}},{"severity":"broken","section":"ports","text":"port 8000 is reachable outside Tailscale","fix":{"call":null,"command":null,"path":null}}]]

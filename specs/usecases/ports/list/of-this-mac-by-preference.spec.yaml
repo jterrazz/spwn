@@ -1,0 +1,15 @@
+description: 'ports.list names this Mac by its name preference, not its hostname'
+env:
+    - renamed-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.all.macs | map([.name, .this_mac])'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{"AllMachines":true}}
+      exit: 0
+      stdout: |
+          [["studio-laptop",true]]
+    - command: 'machines | /usr/bin/head -n 1'
+      exit: 0
+      stdout: |
+          ●	studio-laptop	Mac	studio-laptop	Engine running

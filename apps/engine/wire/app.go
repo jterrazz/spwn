@@ -20,6 +20,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/output"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -351,7 +352,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		// read, never the pin every document runs with.
 		pin, self, m.powerPort = "", world.self(), world.power()
 	}
-	name := thisMacName(registered, h.Env.Hostname())
+	name := model.ThisMacName(registered, h.Env.Hostname())
 	m.profile = profileOf(context.Background(), self, pin, name, m.powerPort, m.providers)
 	m.kind = legacyKind(m.profile)
 	m.where = page.Context{Machine: name, Kind: string(m.profile.Kind), Registered: registered != ""}
@@ -383,15 +384,6 @@ func pathsOf(home string, vars map[string]string) setup.Paths {
 	}
 }
 
-// value: the name the fleet shows this machine by: the one setup gave it, else
-// its hostname, as machines names it (one name in every page, §13.5).
-func thisMacName(registered, hostname string) string {
-	if registered != "" {
-		return registered
-	}
-	return strings.ToLower(hostname)
-}
-
 func (m machine) or(name, fallback string) string {
 	if v := m.vars[name]; v != "" {
 		return v
@@ -409,7 +401,4 @@ func (m machine) systemRoot() string {
 	return ""
 }
 
-func (m machine) thisMac() string {
-	thisMac, _ := m.stores.name().Get()
-	return thisMac
-}
+func (m machine) thisMac() string { return m.where.Machine }

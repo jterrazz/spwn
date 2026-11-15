@@ -57,7 +57,7 @@ func (m machine) portsOf(_ kit.Env) *portscalls.Reserver {
 		}
 		return "", false, &ports.UnknownVMError{Name: vm}
 	}
-	return portscalls.NewReserver(portscalls.Stores{Ports: m.stores.ports(), Name: m.stores.name(), Macs: m.stores.macs(), Reservations: m.stores.reservations, Declarations: m.stores.declarations}, d, o)
+	return portscalls.NewReserver(portscalls.Stores{Ports: m.stores.ports(), Macs: m.stores.macs(), Reservations: m.stores.reservations, Declarations: m.stores.declarations}, d, o)
 }
 
 // value: what listens on this Mac, read by lsof, the world's in a world.
