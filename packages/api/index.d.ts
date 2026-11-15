@@ -495,6 +495,12 @@ export type AwakeCallsOffIn = Record<string, never>;
 
 export type AwakeCallsReadIn = Record<string, never>;
 
+export type AwakeChoice = {
+    For?: number;
+    Label: string;
+    Until?: string;
+};
+
 export type AwakeEnd = {
     at: string;
     detail: string;
@@ -520,6 +526,7 @@ export type AwakeReading = {
 
 export type AwakeReport = {
     Caps: CoreMachineCapabilities;
+    Choices: AwakeChoice[] | null;
     Engine: string;
     Guards: AwakeGuardState[] | null;
     LastEnd: AwakeEnd | null;
