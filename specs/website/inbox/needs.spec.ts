@@ -136,6 +136,23 @@ describe('needs', () => {
         "N10 waits for the engine's kept journal, read for one Mac alone (drawn on a provisional copy)",
     );
 
+    test("N12 a broken sign-in's line opens the sheet of the Sign-ins tab, for its program on its machine", async () => {
+        // Given - the Inbox over two-macs, where This Mac's npm sign-in is broken
+        const result = await website.visit(
+            '/?world=two-macs&page=inbox&pace=600',
+            async (visitor) => {
+                await visitor.see(within(needs, button('Fix npm')));
+
+                // When - Fix is pressed on its line
+                await visitor.click(within(needs, button('Fix npm')));
+
+                // Then - the engine's step for npm on This Mac is on a sheet
+                await visitor.see(dialog('Sign in to npm on jterrazz-macbook-pro'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test('N11 the sidebar holds Home, Inbox, Storage, the machines, Machine files and the Catalog', async () => {
         // Given - the window over two-macs
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {

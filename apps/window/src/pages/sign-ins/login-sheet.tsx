@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { CopyButton } from '../../design/copy-button';
-import { AppIcon, Button, Dialog, StateDot, StatePill } from '../../design/index';
+import { AppIcon, Button, Dialog, Screen, StateDot, StatePill } from '../../design/index';
 import type { EngineError } from '../../engine/engine-error';
 import { detailOf, stepHeadingOf } from '../../engine/engine-words';
 import { useReread } from '../../engine/react';
@@ -146,14 +146,16 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
     });
     const cancel = <Button onClick={onClose}>Cancel</Button>;
     const sheet = (body: ReactNode, actions: ReactNode, step?: AccountsStep) => (
-        <Dialog
-            actions={actions}
-            lead={<AppIcon name={program} />}
-            onClose={onClose}
-            title={step === undefined ? title : step.Title}
-        >
-            {body}
-        </Dialog>
+        <Screen>
+            <Dialog
+                actions={actions}
+                lead={<AppIcon name={program} />}
+                onClose={onClose}
+                title={step === undefined ? title : step.Title}
+            >
+                {body}
+            </Dialog>
+        </Screen>
     );
     if (seen.kind === 'asking') {
         return sheet(<AppIcon name={program} />, cancel);
