@@ -11,28 +11,31 @@ const memory = region('Memory');
 const startHere = region('Start here');
 
 describe('home', () => {
-    test('H1 the verdict reads Everything is fine., its line counts what can wait, and no Needs you is drawn', async () => {
-        // Given - the window on Home over two-macs, whose nine lines can all wait
+    test.todo(
+        'H1 waits for a recorded world whose lines can all wait: two-macs and stories each hold a line that is broken, so the verdict never reads Everything is fine. on Home',
+    );
+
+    test('H2 the lines that need me are counted by the verdict and offered above everything else on Home', async () => {
+        // Given - the window on Home over two-macs, where npm's sign-in expired and a background task fails
         const result = await website.visit(TWO_MACS, async (visitor) => {
             // When - I open the window
-            // Then - the engine's verdict and its line head the page, and nothing is owed
-            await visitor.see(heading('Everything is fine.'));
-            await visitor.see(content('9 things can wait.'));
-            await visitor.gone(needsYou);
+            // Then - the verdict counts the two lines, and Needs you offers each its one verb
+            await visitor.see(heading('2 things need you.'));
+            await visitor.see(heading('Needs you 2'));
+            await visitor.see(within(needsYou, button('Copy npm login')));
+            await visitor.see(within(needsYou, button('Remove com.jterrazz.brain.x-snapshot')));
         });
         expect(result.errors.text).toBe('');
     });
 
     test('H2 every line the engine says can wait is counted in the Inbox and offers its one verb', async () => {
-        // Given - the Inbox over two-macs, whose engine lists nine lines that can wait
+        // Given - the Inbox over two-macs, whose engine lists seven lines that can wait
         const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
             // When - I open the window on the Inbox
             await visitor.see(canWait);
 
             // Then - the panel counts the lines, and each offers one verb of its own
-            await visitor.see(heading('Can wait 9'));
-            await visitor.see(within(canWait, button('Copy npm login')));
-            await visitor.see(within(canWait, button('Remove com.jterrazz.brain.x-snapshot')));
+            await visitor.see(heading('Can wait 7'));
             await visitor.see(within(canWait, button('Update mise')));
             await visitor.see(within(canWait, button('Update brew')));
             await visitor.see(within(canWait, button('Move ~/.tart')));
@@ -41,11 +44,7 @@ describe('home', () => {
     });
 
     test.todo(
-        'H2 waits for a recording of lines that need me, counted by the verdict and above everything else on Home',
-    );
-
-    test.todo(
-        'H3 waits for a world whose server fails its check: the head and the Restart need are on the wire, no recorded world builds one',
+        'H3 waits for a far Mac whose overview is recorded: stories gives infra on mac-mini a failing check, but the recorder answers a far Mac with This Mac overview, which lists no line for infra',
     );
 
     test('H4 Memory reads, per Mac, the GB left and who holds what', async () => {

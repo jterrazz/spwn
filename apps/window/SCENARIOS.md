@@ -55,7 +55,7 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 | N8  | See that nothing waits                       | no line                                                           | I open Needs you                    | "No need is listed." and no empty table                                                                                                  | yes    |
 | N9  | See that a thing is settled                  | a line waits for me in Inbox                                      | I press its verb                    | the line leaves the top and appears in the history below, with the verb and "by you"                                                     | yes    |
 | N10 | Read one Mac's inbox                         | two Macs, each with its machines                                  | I choose a Mac above the list       | what needs me, what can wait and the history keep only that Mac and its machines                                                         | yes    |
-| N11 | Find everything about the fleet in one place | I open the sidebar                                                | I read it                           | Home, Inbox with its count of lines that need me, Storage; then the machines; then Library with Machine files and Catalog               | yes    |
+| N11 | Find everything about the fleet in one place | I open the sidebar                                                | I read it                           | Home, Inbox with its count of lines that need me, Storage; then the machines; then Library with Machine files and Catalog                | yes    |
 
 ## Inbox, the history
 
