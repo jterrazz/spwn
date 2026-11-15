@@ -12,9 +12,9 @@
   - button "Passwords"
   - group "Catalog":
     - heading "Catalog" [level=2]
-    - button "Apps"
-    - button "Skills"
-    - button "Settings"
+    - button "Apps 1"
+    - button "Skills 0"
+    - button "Settings 25"
   - img "running"
   - text: Engine running · dev
 - main:

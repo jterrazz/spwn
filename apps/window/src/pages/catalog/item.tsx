@@ -77,6 +77,7 @@ function Item({
             declared={declaredIn(held, 'Apps', name)}
             report={report}
             reports={reports}
+            settings={settings}
         />
     ) : (
         <NotInTheCatalog name={name} />

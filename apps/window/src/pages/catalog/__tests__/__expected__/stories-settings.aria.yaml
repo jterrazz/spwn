@@ -4,6 +4,9 @@
     - img "Not given yet"
     - text: "Everything station knows how to install or set: apps, agent skills and settings, each one a package"
   - searchbox "Search the catalog"
+  - group "Show":
+    - button "On your machines25" [pressed]
+    - button "Everything25"
   - group "Category":
     - button "All settings25" [pressed]
     - button "Shell2"
@@ -48,3 +51,4 @@
     - paragraph: Agents 2
     - 'button "agent-hooks setting The agent hook: station sees what Claude Code and Codex do, and what they wait for 0 of 4 machines OK"'
     - 'button "herdr-machine setting Herdr reaches every workspace of this Mac: its agents show in Herdr 0 of 2 machines OK"'
+    - paragraph: Only what your machines carry is shown. The catalog holds 139 packages.

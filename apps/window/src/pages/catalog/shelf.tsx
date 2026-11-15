@@ -4,21 +4,21 @@ import type {
     SettingsMatrixRow,
     SettingsRow,
 } from '@jterrazz/station-api';
-import { useState } from 'react';
 
-import { AppIcon, Row, StatePill, Switch, Value } from '../../design/index';
+import { AppIcon, Row, StatePill, Value } from '../../design/index';
 import { countOf } from '../../engine/engine-words';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { appUpdate, kindChipWord } from '../../engine/shown';
 import { APP_STATE_TONES } from '../../engine/tones';
 import { APP_STATE_WORDS } from '../../engine/words';
+import { appsOn, carriedApps, carriedSettings, settingsInCatalog } from '../../model/carried';
 import { sentence } from '../../model/format';
 import type { Route } from '../../shell/route';
 import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { Listing } from './listing';
-import { appsOn, packageOfApp, packageOfSetting, settingsInCatalog } from './model';
+import { packageOfApp, packageOfSetting } from './model';
 import type { Shelf } from './model';
 import { SHELVES } from './shelves';
 
@@ -128,6 +128,7 @@ function SettingsShelf({ open }: { open: Open }) {
     const reach = useReach();
     const settings = useWatch('settings.list', {});
     const matrix = useRead('settings.matrix', {});
+    const size = useCatalogSize();
     if (settings.kind !== 'read' || reach.kind === 'unanswered') {
         return (
             <Page>
@@ -142,11 +143,17 @@ function SettingsShelf({ open }: { open: Open }) {
         <Page>
             <NoVerdict line={ABOUT} size="page" />
             <Listing
+                carried={
+                    matrix.kind === 'read'
+                        ? carriedSettings(settings.out ?? [], matrix.out.Rows ?? [])
+                        : undefined
+                }
                 items={settingsInCatalog(settings.out ?? [])}
                 packageOf={packageOfSetting}
                 renderRow={(row) => (
                     <SettingRow held={held.get(row.Name)} key={row.Name} open={open} row={row} />
                 )}
+                size={size}
                 title="Settings"
             />
             {matrix.kind === 'failed' ? <Unanswered error={matrix.error} size="tab" /> : null}
@@ -154,13 +161,22 @@ function SettingsShelf({ open }: { open: Open }) {
     );
 }
 
-type Shown = 'carried' | 'every';
+// value: the catalog's size is a count of the wire's own rows: every app and skill the engine lists, and every
+// value: setting that is a package.
+function useCatalogSize(): number | undefined {
+    const apps = useWatch('apps.list', {});
+    const settings = useWatch('settings.list', {});
+    if (apps.kind !== 'read' || settings.kind !== 'read') {
+        return undefined;
+    }
+    return (apps.out ?? []).length + settingsInCatalog(settings.out ?? []).length;
+}
 
 function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
     const reach = useReach();
     const apps = useWatch('apps.list', {});
     const matrix = useRead('apps.matrix', {});
-    const [shown, setShown] = useState<Shown>('carried');
+    const size = useCatalogSize();
     const { title } = SHELVES[shelf];
     if (apps.kind !== 'read' || reach.kind === 'unanswered') {
         return (
@@ -172,24 +188,16 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
     const held = new Map(
         matrix.kind === 'read' ? (matrix.out.Rows ?? []).map((row) => [row.Name, row]) : [],
     );
-    const listed = appsOn(shelf, apps.out ?? []);
-    const carried = matrix.kind === 'read' ? listed.filter((r) => held.has(r.App.Name)) : listed;
     return (
         <Page>
             <NoVerdict line={ABOUT} size="page" />
-            {matrix.kind === 'read' ? (
-                <Switch
-                    label="Show"
-                    onChange={setShown}
-                    options={[
-                        { count: carried.length, id: 'carried', label: 'On your machines' },
-                        { count: listed.length, id: 'every', label: 'Everything' },
-                    ]}
-                    value={shown}
-                />
-            ) : null}
             <Listing
-                items={shown === 'every' ? listed : carried}
+                carried={
+                    matrix.kind === 'read'
+                        ? carriedApps(shelf, apps.out ?? [], matrix.out.Rows ?? [])
+                        : undefined
+                }
+                items={appsOn(shelf, apps.out ?? [])}
                 packageOf={packageOfApp}
                 renderRow={(report) => (
                     <AppRow
@@ -199,6 +207,7 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
                         report={report}
                     />
                 )}
+                size={size}
                 title={title}
             />
             {matrix.kind === 'failed' ? <Unanswered error={matrix.error} size="tab" /> : null}

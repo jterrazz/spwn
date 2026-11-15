@@ -1,7 +1,7 @@
 - navigation "Sidebar":
   - button "Find"
   - button "Home"
-  - button "Inbox 1"
+  - button "Inbox 2"
   - button "Storage"
   - group "Machines":
     - heading "Machines" [level=2]
@@ -24,9 +24,9 @@
   - button "Passwords"
   - group "Catalog":
     - heading "Catalog" [level=2]
-    - button "Apps"
-    - button "Skills"
-    - button "Settings"
+    - button "Apps 10"
+    - button "Skills 0"
+    - button "Settings 25"
   - img "engine stopped"
   - text: the engine is stopping
 - main:
@@ -35,17 +35,19 @@
   - button "Forward" [disabled]
   - text: Home
   - button "New machine"
-  - heading "com.jterrazz.brain.x-snapshot is failing, last exit 2." [level=1]
+  - heading "2 things need you." [level=1]
   - paragraph:
-    - img "com.jterrazz.brain.x-snapshot is failing, last exit 2"
-    - text: 7 things can wait.
+    - img "2 things need you."
+    - text: "npm sign-in fails: The token is refused by registry.npmjs.org"
   - text: Memory free 40GB
   - img "Memory each machine holds, and what is free"
   - text: of 80 CPU, this Mac 34% 10 CPUs Awake, this Mac Off on power Disk free, this Mac 388GB
   - 'meter "Disk free, this Mac: used of its total"'
   - text: of 994 GB · machines hold 100 GB
   - region "Needs you":
-    - heading "Needs you 1" [level=2]
+    - heading "Needs you 2" [level=2]
+    - 'button "Broken npm sign-in fails: The token is refused by registry.npmjs.org jterrazz-macbook-pro · Sign-ins"'
+    - text: Fix
     - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 jterrazz-macbook-pro · Background"
     - button "Remove com.jterrazz.brain.x-snapshot": Remove
   - region "Memory":

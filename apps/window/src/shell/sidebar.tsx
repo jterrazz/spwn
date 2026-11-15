@@ -9,6 +9,7 @@ import { engineState, macState, ownState, vmState } from '../engine/shown';
 import { machineNamesOf } from '../model/machines';
 import { needsYou } from '../model/upkeep';
 import { SEPARATOR } from '../separator';
+import type { Carried } from './carried';
 import { onListKey } from './keys';
 import { machineRoute } from './route';
 import type { PlainPage, Route } from './route';
@@ -16,6 +17,7 @@ import type { PlainPage, Route } from './route';
 import styles from './sidebar.module.css';
 
 export type SidebarProps = {
+    carried: Carried;
     macs: readonly MachinesMacView[];
     needs: readonly OverviewNeed[];
     engine: Reading<EngineReadOutput>;
@@ -107,15 +109,34 @@ function MachineFiles({ place }: { place: Place }) {
     );
 }
 
-function Catalog({ place }: { place: Place }) {
+function countOf(value: number | undefined) {
+    return value === undefined ? undefined : { urgent: false, value };
+}
+
+function Catalog({ place, carried }: { place: Place; carried: Carried }) {
     return (
         <div aria-labelledby="side-catalog" className={styles.group} role="group">
             <h2 className={styles.caption} id="side-catalog">
                 Catalog
             </h2>
-            <NavItem {...place('catalog-apps')} icon="apps" label="Apps" />
-            <NavItem {...place('catalog-skills')} icon="skills" label="Skills" />
-            <NavItem {...place('catalog-settings')} icon="settings" label="Settings" />
+            <NavItem
+                {...place('catalog-apps')}
+                count={countOf(carried.apps)}
+                icon="apps"
+                label="Apps"
+            />
+            <NavItem
+                {...place('catalog-skills')}
+                count={countOf(carried.skills)}
+                icon="skills"
+                label="Skills"
+            />
+            <NavItem
+                {...place('catalog-settings')}
+                count={countOf(carried.settings)}
+                icon="settings"
+                label="Settings"
+            />
         </div>
     );
 }
@@ -168,7 +189,7 @@ function Engine({ engine }: Pick<SidebarProps, 'engine'>) {
     );
 }
 
-export function Sidebar({ macs, needs, engine, route, go, onFind }: SidebarProps) {
+export function Sidebar({ carried, macs, needs, engine, route, go, onFind }: SidebarProps) {
     const place = placeOf(route, go);
     return (
         <nav aria-label="Sidebar" className={styles.sidebar} onKeyDown={onListKey}>
@@ -186,7 +207,7 @@ export function Sidebar({ macs, needs, engine, route, go, onFind }: SidebarProps
             <Places needs={needs} place={place} />
             <Machines go={go} macs={macs} route={route} />
             <MachineFiles place={place} />
-            <Catalog place={place} />
+            <Catalog carried={carried} place={place} />
             <Engine engine={engine} />
         </nav>
     );

@@ -19,7 +19,7 @@
     - definition: Not given yet
   - region "Settings it comes with":
     - heading "Settings it comes with proposed once it is installed" [level=2]
-    - button "github-login"
+    - button "github-login setting The GitHub CLI logged in over SSH"
   - region "What it keeps on disk":
     - heading "What it keeps on disk" [level=2]
     - button "Storage"
