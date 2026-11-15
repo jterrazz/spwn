@@ -12,7 +12,6 @@
     - text: No answer
   - region "Images":
     - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
-    - button "Build a new one" [disabled]
     - paragraph: No image on jterrazz-mac-mini.
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
