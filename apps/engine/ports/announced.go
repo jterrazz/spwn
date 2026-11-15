@@ -1,6 +1,7 @@
 package ports
 
 import (
+	"slices"
 	"sort"
 	"strings"
 
@@ -135,4 +136,39 @@ func DiffAnnounced(before, after []Announced) []Announcement {
 		}
 	}
 	return out
+}
+
+func QuietOnMac(m Machine, from, to int, decl []Declaration) (heard Machine, quiet int) {
+	// invariant: a Mac's listener on a port of its ephemeral range is its
+	// system's own business, as a guest's is: left out of the list and
+	// counted, unless one of its addresses reaches outside the tailnet (an
+	// exposure is never folded away), a declaration names it or the catalog
+	// knows its port. The system's own listeners stay left out uncounted, as
+	// Classify leaves them.
+	loud := map[int]bool{}
+	inRange := map[int]bool{}
+	for _, l := range m.Listening {
+		if l.Port < from || l.Port > to {
+			continue
+		}
+		inRange[l.Port] = true
+		_, known := catalog.KnownPortOf(l.Port, l.Process)
+		declared := slices.ContainsFunc(decl, func(d Declaration) bool { return d.Machine == m.Ref.Name && d.Port == l.Port })
+		if known || declared || ReachOf(l.Bind, m.At) == Outside {
+			loud[l.Port] = true
+		}
+	}
+	kept := m.Listening[:0:0]
+	counted := map[int]bool{}
+	for _, l := range m.Listening {
+		if !inRange[l.Port] || loud[l.Port] {
+			kept = append(kept, l)
+			continue
+		}
+		if !slices.Contains(catalog.SystemListeners, l.Process) {
+			counted[l.Port] = true
+		}
+	}
+	m.Listening = kept
+	return m, len(counted)
 }

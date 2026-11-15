@@ -13,6 +13,8 @@ runs:
           .calls:
               equals: |
                   tailscale-standalone status --json
+                  sysctl -n net.inet.ip.portrange.first
+                  sysctl -n net.inet.ip.portrange.last
                   tailscale-standalone status --json
                   tailscale-standalone serve status --json
     - command: '--version >/dev/null; : > .calls; /bin/mv root/usr/local/bin/tailscale standalone; "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.variant, .cli]'''
@@ -23,6 +25,8 @@ runs:
           .calls:
               equals: |
                   tailscale-app-store status --json
+                  sysctl -n net.inet.ip.portrange.first
+                  sysctl -n net.inet.ip.portrange.last
                   tailscale-app-store status --json
                   tailscale-app-store serve status --json
     - command: '--version >/dev/null; /usr/bin/env -u TERM -u TERM_PROGRAM -u SHLVL "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.state, .variant]'''
@@ -41,5 +45,7 @@ runs:
           .calls:
               equals: |
                   tailscale status --json
+                  sysctl -n net.inet.ip.portrange.first
+                  sysctl -n net.inet.ip.portrange.last
                   tailscale status --json
                   tailscale serve status --json

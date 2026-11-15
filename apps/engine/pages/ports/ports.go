@@ -134,6 +134,9 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 		if h.Range != nil {
 			notes = append(notes, page.Item{Note: &page.Note{Text: reserved(h, thisMac)}})
 		}
+		if h.MacQuiet > 0 {
+			notes = append(notes, page.Item{Note: &page.Note{Text: catalog.QuietHere(h.MacQuiet)}})
+		}
 	}
 	var out []page.Section
 	if len(red) > 0 {

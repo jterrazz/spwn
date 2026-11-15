@@ -23,7 +23,7 @@ func Of(f AllMachines, name string) AllMachines {
 		if len(shared) == 0 && len(listened) == 0 {
 			continue
 		}
-		h.Shared, h.Ports, h.Range, h.Listening = shared, listened, nil, nil
+		h.Shared, h.Ports, h.Range, h.Listening, h.MacQuiet = shared, listened, nil, nil, 0
 		h.Quiet = slices.DeleteFunc(slices.Clone(h.Quiet), func(q Quiet) bool { return q.VM != name })
 		h.NotShared = slices.DeleteFunc(slices.Clone(h.NotShared), func(n NotShared) bool { return n.VM != name })
 		h.Rights = slices.DeleteFunc(slices.Clone(h.Rights), func(r VMRights) bool { return r.VM != name })

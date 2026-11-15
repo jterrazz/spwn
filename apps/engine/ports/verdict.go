@@ -21,6 +21,7 @@ func VerdictOf(f AllMachines) verdict.Verdict {
 	v := verdictOf(f)
 	quiet := 0
 	for _, h := range f.Macs {
+		quiet += h.MacQuiet
 		for _, q := range h.Quiet {
 			quiet += q.Count
 		}

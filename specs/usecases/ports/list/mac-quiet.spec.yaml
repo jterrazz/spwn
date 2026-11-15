@@ -1,0 +1,28 @@
+description: 'a Mac counts its listeners on ports the system keeps for itself, and an exposed one stays listed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world listen macbook-pro "127.0.0.1:50001" node'
+      exit: 0
+    - command: 'world listen macbook-pro "100.101.102.103:50002" node'
+      exit: 0
+    - command: 'world listen macbook-pro "*:50003" node'
+      exit: 0
+    - command: 'ports'
+      exit: 0
+      stdout: |
+          # Needs you: reachable outside Tailscale, not declared public	1 ✗
+          ✗	macbook-pro	50003	needs you	node	*:50003 all interfaces	declared no
+          ●	Tailscale	signed in · macbook-pro.tail1234.ts.net · ports are shared
+          # Private: shared with you on Tailscale	2 ●
+          ●	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
+          ●	linux-1	7000	private	macbook-pro.tail1234.ts.net:40002	shared	server
+          	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
+          	2 more listen on ports the system keeps for itself
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.verdict.Line, .out.all.macs[0].mac_quiet]'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{"AllMachines":true}}
+      exit: 0
+      stdout: |
+          ["Declare it public, or turn it off in the app that opens it. 2 short-lived listeners are left out.",2]

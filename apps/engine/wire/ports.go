@@ -31,6 +31,9 @@ import (
 func (m machine) portsOf(_ kit.Env) *portscalls.Reserver {
 	o := portscalls.ReserverOptions{Ports: m.cat.Ports(), ThisMachine: m.kind, State: m.paths.State, ThisMacName: m.thisMac(), Ask: m.askPorts, ReleaseOn: m.releaseOn, Exposure: m.exposure,
 		Listening: listedOrNone(m.listeners("/").Read), Routes: m.routes(), EngineInstalled: m.engineInstalled}
+	if e := m.ephemeral("/"); m.kind == catalog.Mac && e != nil {
+		o.Ephemeral = e.Range
+	}
 	d := portsEngine{c: m.engineAPI()}
 	if m.kind != catalog.Mac {
 		g := m.guest()
