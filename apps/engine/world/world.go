@@ -428,8 +428,6 @@ type Boot struct {
 }
 
 type Kept struct {
-	// value: alias of the v2 `lent` key, as a VM record the machines store
-	// keeps still holds it.
 	Image     string            `json:"image,omitempty"`
 	Version   string            `json:"version,omitempty"`
 	Lifetime  machines.Lifetime `json:"lifetime"`

@@ -608,7 +608,6 @@ func legacyEncodings() []string {
 		"apps/engine/catalog StatusV1Kind",
 		"apps/engine/engine/process hello",
 		"apps/engine/images UnmarshalJSON",
-		"apps/engine/machines/adapter/jsonfile file",
 		"apps/engine/pages/apps AppStatusJSON",
 		"apps/engine/pages/apps statusV1Category",
 		"apps/engine/pages/home SnapshotJSON",
@@ -624,6 +623,5 @@ func legacyEncodings() []string {
 		"apps/engine/setup/contract RetiredGroupName",
 		"apps/engine/surface/cli/kit RetiredEngineCommand",
 		"apps/engine/surface/cli/settings containerShortcuts",
-		"apps/engine/world Kept",
 	}
 }
