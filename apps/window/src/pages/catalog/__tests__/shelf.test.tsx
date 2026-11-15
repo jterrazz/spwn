@@ -1,4 +1,4 @@
-import { button, component, content, file } from '@jterrazz/test';
+import { button, component, content, file, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../fixtures/page-over';
@@ -69,11 +69,12 @@ describe('shelf', () => {
             windowOver('stories', { page: 'catalog-settings' }),
             async (visitor) => {
                 // When - settings.list and settings.matrix have answered
-                await visitor.see(content('0 of 4 machines OK'));
+                await visitor.see(heading('3 settings are on your machines.'));
             },
         );
+        expect(result.tree.text).not.toContain('docker-shortcuts');
 
-        // Then - each setting with the matrix's count, the Checked settings, sent with no package, left off
+        // Then - the settings a machine holds, each with the matrix's count, the Checked settings, sent with no package, left off
         expect(result.tree.text).not.toContain('filevault');
         await expect(result.tree).toMatch(file('./__expected__/stories-settings.aria.yaml'));
     });

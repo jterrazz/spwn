@@ -1,54 +1,15 @@
 - main:
-  - heading "No verdict from the engine." [level=1]
-  - paragraph:
-    - img "Not given yet"
-    - text: "Everything station knows how to install or set: apps, agent skills and settings, each one a package"
+  - heading "3 settings are on your machines." [level=1]
   - searchbox "Search the catalog"
   - group "Show":
-    - button "On your machines25" [pressed]
+    - button "On your machines3" [pressed]
     - button "Everything25"
   - group "Category":
-    - button "All settings25" [pressed]
-    - button "Shell2"
-    - button "Terminal4"
-    - button "Security6"
-    - button "Editor1"
-    - button "System4"
-    - button "Headless5"
-    - button "Network1"
-    - button "Agents2"
+    - button "All settings3" [pressed]
+    - button "Headless3"
   - region "Settings":
-    - paragraph: Shell 2
-    - 'button "docker-shortcuts setting Docker shortcuts: dclean, dclean-images, dreset, each asks first 0 of 6 machines OK"'
-    - 'button "git-shortcuts setting Git shortcuts: git wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup 0 of 6 machines OK"'
-    - paragraph: Terminal 4
-    - button "ghostty-dotfiles setting The Ghostty settings and its Catppuccin themes 0 of 2 machines OK"
-    - button "hushlogin setting Silence the terminal login message 0 of 6 machines OK"
-    - button "starship-dotfiles setting The Starship prompt settings 0 of 6 machines OK"
-    - button "tmux-dotfiles setting The tmux settings 0 of 6 machines OK"
-    - paragraph: Security 6
-    - button "claude-token setting The Claude Code subscription token a VM may borrow 0 of 2 machines OK"
-    - button "dns setting Encrypted DNS via Quad9 (DoH) 0 of 2 machines OK"
-    - button "git-signing setting Sign every commit with a GPG key 0 of 2 machines OK"
-    - button "github-login setting The GitHub CLI logged in over SSH 0 of 6 machines OK"
-    - button "spotlight-exclude setting Exclude ~/Developer from Spotlight (guided, opens Settings) 0 of 2 machines OK"
-    - button "ssh-key setting An ed25519 SSH key, kept in the Keychain 0 of 2 machines OK"
-    - paragraph: Editor 1
-    - button "zed-dotfiles setting The Zed settings and its formatter settings 0 of 2 machines OK"
-    - paragraph: System 4
-    - button "backup-exclusions setting Keep ~/.cache and station's VMs out of Time Machine 0 of 2 machines OK"
-    - button "dock-reset setting Put the Dock back to the system defaults 0 of 2 machines OK"
-    - button "dock-spacer setting Add a small spacer tile to the dock 0 of 2 machines OK"
-    - 'button "tart-launcher setting The tart launcher: Tart''s home is station''s VMs folder 0 of 2 machines OK"'
-    - paragraph: Headless 5
+    - paragraph: Headless 3
     - button "autologin setting GUI auto-login for jterrazz.agent (FileVault-aware) 1 of 1 machine OK"
-    - button "lock-after-login setting A LaunchAgent that locks the screen ~20s after auto-login 0 of 1 machine OK"
     - 'button "never-sleeps setting Never sleeps: the engine keeps this Mac awake, its servers with it 1 of 1 machine OK"'
     - button "restart-after-power-cut setting Restarts after a power cut, and wakes for the network 1 of 1 machine OK"
-    - button "sshd setting macOS Remote Login (sshd) 0 of 1 machine OK"
-    - paragraph: Network 1
-    - 'button "tailscale-cli setting The tailscale command for the App Store app: a script on PATH, never a link to the app 0 of 2 machines OK"'
-    - paragraph: Agents 2
-    - 'button "agent-hooks setting The agent hook: station sees what Claude Code and Codex do, and what they wait for 0 of 4 machines OK"'
-    - 'button "herdr-machine setting Herdr reaches every workspace of this Mac: its agents show in Herdr 0 of 2 machines OK"'
     - paragraph: Only what your machines carry is shown. The catalog holds 139 packages.

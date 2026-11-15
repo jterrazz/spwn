@@ -1,9 +1,11 @@
 import type {
     AppsMatrixRow,
     AppsReport,
+    CoreVerdictShelf,
     SettingsMatrixRow,
     SettingsRow,
 } from '@jterrazz/station-api';
+import type { ReactNode } from 'react';
 
 import { AppIcon, Row, StatePill, Value } from '../../design/index';
 import { countOf } from '../../engine/engine-words';
@@ -15,17 +17,34 @@ import { APP_STATE_WORDS } from '../../engine/words';
 import { appsOn, carriedApps, carriedSettings, settingsInCatalog } from '../../model/carried';
 import { sentence } from '../../model/format';
 import type { Route } from '../../shell/route';
-import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
+import { Absent, Reading as ReadingVerdict, Unanswered, VerdictHead } from '../kit/readings';
 import { Page } from '../page';
 import { Listing } from './listing';
+import type { Scope } from './listing';
 import { packageOfApp, packageOfSetting } from './model';
 import type { Shelf } from './model';
 import { SHELVES } from './shelves';
 
 import styles from './catalog.module.css';
 
-const ABOUT =
-    'Everything station knows how to install or set: apps, agent skills and settings, each one a package';
+function headOf<Out>(
+    matrix: Reading<Out>,
+    shelfOf: (out: Out) => CoreVerdictShelf,
+    what: string,
+): (scope: Scope) => ReactNode {
+    return (scope) => {
+        if (matrix.kind === 'failed') {
+            return <Unanswered error={matrix.error} size="page" />;
+        }
+        if (matrix.kind !== 'read') {
+            return <ReadingVerdict size="page" what={what} />;
+        }
+        const shelf = shelfOf(matrix.out);
+        return (
+            <VerdictHead size="page" verdict={scope === 'carried' ? shelf.Mine : shelf.Catalog} />
+        );
+    };
+}
 
 function kindOf(word: string): { tag?: string; tagLook?: 'type' } {
     return word === '' ? {} : { tag: word, tagLook: 'type' };
@@ -141,13 +160,13 @@ function SettingsShelf({ open }: { open: Open }) {
     );
     return (
         <Page>
-            <NoVerdict line={ABOUT} size="page" />
             <Listing
                 carried={
                     matrix.kind === 'read'
                         ? carriedSettings(settings.out ?? [], matrix.out.Rows ?? [])
                         : undefined
                 }
+                head={headOf(matrix, (out) => out.Verdict, 'Settings')}
                 items={settingsInCatalog(settings.out ?? [])}
                 packageOf={packageOfSetting}
                 renderRow={(row) => (
@@ -156,7 +175,6 @@ function SettingsShelf({ open }: { open: Open }) {
                 size={size}
                 title="Settings"
             />
-            {matrix.kind === 'failed' ? <Unanswered error={matrix.error} size="tab" /> : null}
         </Page>
     );
 }
@@ -190,13 +208,17 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
     );
     return (
         <Page>
-            <NoVerdict line={ABOUT} size="page" />
             <Listing
                 carried={
                     matrix.kind === 'read'
                         ? carriedApps(shelf, apps.out ?? [], matrix.out.Rows ?? [])
                         : undefined
                 }
+                head={headOf(
+                    matrix,
+                    (out) => (shelf === 'skills' ? out.Skills : out.Verdict),
+                    title,
+                )}
                 items={appsOn(shelf, apps.out ?? [])}
                 packageOf={packageOfApp}
                 renderRow={(report) => (
@@ -210,7 +232,6 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
                 size={size}
                 title={title}
             />
-            {matrix.kind === 'failed' ? <Unanswered error={matrix.error} size="tab" /> : null}
         </Page>
     );
 }

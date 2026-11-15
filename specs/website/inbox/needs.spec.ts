@@ -171,7 +171,7 @@ describe('needs', () => {
             await visitor.see(within(sidebar, button('Machine files')));
             await visitor.see(within(sidebar, button('Apps 10')));
             await visitor.see(within(sidebar, button('Skills 0')));
-            await visitor.see(within(sidebar, button('Settings 25')));
+            await visitor.see(within(sidebar, button('Settings 4')));
         });
         expect(result.errors.text).toBe('');
     });

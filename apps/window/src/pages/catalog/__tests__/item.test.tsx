@@ -64,9 +64,10 @@ describe('item', () => {
         const result = await component.render(
             windowOver({ page: 'catalog-settings' }),
             async (visitor) => {
+                await visitor.click(button('Everything', { exact: false }));
                 await visitor.fill(field('Search the catalog'), 'agent-hooks');
 
-                // When - agent-hooks's row is chosen, then claude among what it needs
+                // When - agent-hooks's row, which no machine holds, is chosen, then claude among what it needs
                 await visitor.click(button('agent-hooks', { exact: false }));
                 await visitor.click(button('claude', { exact: true }));
 
