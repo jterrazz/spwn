@@ -1,22 +1,21 @@
 - main:
-  - heading "Everything is fine." [level=1]
+  - heading "2 things need you." [level=1]
   - paragraph:
-    - img "Everything is fine."
-    - text: 9 things can wait.
+    - img "2 things need you."
+    - text: npm sign-in expired
   - group "Which machines":
     - button "All machines" [pressed]
     - button "jterrazz-macbook-pro"
     - button "jterrazz-mac-mini"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
-    - paragraph: No need is listed.
-  - region "Can wait":
-    - heading "Can wait 9" [level=2]
-    - button "Broken npm sign-in expired jterrazz-macbook-pro · Accounts"
+    - button "Broken npm sign-in expired jterrazz-macbook-pro · Sign-ins"
     - text: npm login
     - button "Copy npm login": Copy
     - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 jterrazz-macbook-pro · Background"
     - button "Remove com.jterrazz.brain.x-snapshot": Remove
+  - region "Can wait":
+    - heading "Can wait 7" [level=2]
     - button "Needs a look 1 mise update waiting jterrazz-macbook-pro · Apps"
     - button "Update mise": Update
     - button "Needs a look 1 brew update waiting jterrazz-macbook-pro · Apps"

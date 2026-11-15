@@ -1,7 +1,7 @@
 - navigation "Sidebar":
   - button "Find"
   - button "Home"
-  - button "Inbox"
+  - button "Inbox 2"
   - button "Storage"
   - group "Machines":
     - heading "Machines" [level=2]
@@ -35,15 +35,22 @@
   - button "Forward" [disabled]
   - text: Home
   - button "New machine"
-  - heading "Everything is fine." [level=1]
+  - heading "2 things need you." [level=1]
   - paragraph:
-    - img "Everything is fine."
-    - text: 9 things can wait.
+    - img "2 things need you."
+    - text: npm sign-in expired
   - text: Memory free 40GB
   - img "Memory each machine holds, and what is free"
   - text: of 80 CPU, this Mac 34% 10 CPUs Awake, this Mac Off on power Disk free, this Mac 388GB
   - 'meter "Disk free, this Mac: used of its total"'
   - text: of 994 GB · machines hold 100 GB
+  - region "Needs you":
+    - heading "Needs you 2" [level=2]
+    - button "Broken npm sign-in expired jterrazz-macbook-pro · Sign-ins"
+    - text: npm login
+    - button "Copy npm login": Copy
+    - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 jterrazz-macbook-pro · Background"
+    - button "Remove com.jterrazz.brain.x-snapshot": Remove
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]
     - text: jterrazz-macbook-pro

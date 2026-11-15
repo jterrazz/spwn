@@ -13,10 +13,10 @@
     - tab "Ports" [selected]
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "12 ports listen." [level=1]
+  - heading "4 ports listen." [level=1]
   - paragraph:
-    - img "12 ports listen."
-    - text: 3 are shared.
+    - img "4 ports listen."
+    - text: 2 are shared.
   - region "Shared":
     - heading "Shared" [level=2]
     - region "Port 3000":

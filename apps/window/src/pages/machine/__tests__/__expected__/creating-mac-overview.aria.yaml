@@ -10,7 +10,7 @@
     - tab "Sign-ins"
     - tab "Storage"
   - heading "Everything is fine." [level=1]
-  - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 2machines Not given yet
+  - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 2machines 2 stopped
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]
     - text: jterrazz-macbook-pro

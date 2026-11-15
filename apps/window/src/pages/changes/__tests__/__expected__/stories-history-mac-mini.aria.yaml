@@ -1,8 +1,8 @@
 - main:
-  - heading "Everything is fine." [level=1]
+  - heading "3 things need you." [level=1]
   - paragraph:
-    - img "Everything is fine."
-    - text: 4 things can wait.
+    - img "3 things need you."
+    - text: port 5000 is reachable outside Tailscale
   - group "Which machines":
     - button "All machines"
     - button "macbook-pro"

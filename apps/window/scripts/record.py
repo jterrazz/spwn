@@ -166,6 +166,7 @@ def asks(listed):
         {"watch": "overview.read", "in": {}},
         {"call": "engine.read", "in": {}},
         {"call": "ports.list", "in": {"AllMachines": True}},
+        *[{"call": "ports.list", "in": {"Of": name}} for name in [*macsOf(listed), *vmsOf(listed)]],
         {"call": "images.list", "in": {}},
         {"watch": "apps.list", "in": {}},
         {"watch": "settings.list", "in": {}},
