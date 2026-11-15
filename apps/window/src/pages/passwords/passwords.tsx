@@ -4,6 +4,7 @@ import { Icon } from '../../design/icon';
 import { AppIcon, asSentence, Panel, Row, RowHead, Verdict } from '../../design/index';
 import { useWatch } from '../../engine/react';
 import { verdictShown } from '../../engine/shown';
+import { sentence } from '../../model/format';
 import type { Route } from '../../shell/route';
 import { HeldOutcomes } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
@@ -66,7 +67,7 @@ function Vault({ read, go }: { read: AccountsVaultRead; go: Go }) {
     return (
         <Page>
             <Verdict
-                line={asSentence(read.Verdict.Sentence)}
+                line={asSentence(sentence([read.Verdict.Sentence, read.Verdict.Line]))}
                 size="page"
                 title={`Passwords on ${read.Mac}`}
                 {...verdictShown(read.Verdict)}

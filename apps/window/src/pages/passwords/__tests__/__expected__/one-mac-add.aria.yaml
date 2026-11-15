@@ -1,7 +1,7 @@
 - heading "Passwords on macbook-pro" [level=1]
 - paragraph:
   - img "No password kept yet"
-  - text: No password kept yet.
+  - text: No password kept yet · a value never leaves this Mac's Keychain to be shown.
 - region "Passwords":
   - heading "Passwords 0" [level=2]
   - paragraph: "No value is shown, copied or revealed here: a password is only granted, and removed."
