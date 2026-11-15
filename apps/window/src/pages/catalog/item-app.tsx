@@ -2,6 +2,8 @@ import type { AppsReport } from '@jterrazz/station-api';
 
 import { Button, Facts, MissingMark, Panel, Row, StatePill, Value } from '../../design/index';
 import { detailOf, wordOf } from '../../engine/engine-words';
+import type { PlanLine } from '../../engine/provisional';
+import { useRead } from '../../engine/react';
 import { appUpdate, kindChipWord } from '../../engine/shown';
 import { APP_STATE_TONES } from '../../engine/tones';
 import { APP_STATE_WORDS } from '../../engine/words';
@@ -53,8 +55,10 @@ function HowInstalled({ report, go, routeOf }: ItemProps & { report: AppsReport 
     );
 }
 
-function Version({ report }: { report: AppsReport }) {
+function Version({ report, line }: { report: AppsReport; line: PlanLine | undefined }) {
     const update = appUpdate(report);
+    const waiting = line?.Waiting ?? '';
+    const rule = line?.Step.Rule ?? '';
     const here =
         report.Version === '' ? (
             <StatePill
@@ -71,11 +75,14 @@ function Version({ report }: { report: AppsReport }) {
             <Facts
                 facts={[
                     { label: 'On your machines', value: here },
-                    { label: 'Rule', value: <MissingMark /> },
+                    { label: 'Rule', value: rule === '' ? <MissingMark /> : rule },
                     {
                         label: 'Newest',
                         value: update ? (
-                            <StatePill tone={update.tone} word={update.word} />
+                            <StatePill
+                                tone={update.tone}
+                                word={waiting === '' ? update.word : waiting}
+                            />
                         ) : (
                             newest
                         ),
@@ -138,6 +145,13 @@ export function AppItem({
 }: ItemProps & { report: AppsReport; reports: readonly AppsReport[] }) {
     const { App } = report;
     const users = usedBy(App.Name, reports);
+    const drift = useRead('machinefile.drift', {});
+    const line =
+        drift.kind === 'read'
+            ? [...(drift.out.Plan.Lines ?? []), ...(drift.out.Plan.Extra ?? [])].find(
+                  (one) => one.Step.Package === App.Name,
+              )
+            : undefined;
     return (
         <>
             <ItemHead
@@ -151,7 +165,7 @@ export function AppItem({
                 main={
                     <>
                         <HowInstalled {...props} report={report} />
-                        <Version report={report} />
+                        <Version line={line} report={report} />
                         <ComesWith {...props} report={report} />
                         <OnDisk go={props.go} report={report} />
                     </>
