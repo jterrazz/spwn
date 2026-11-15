@@ -1,35 +1,5 @@
 {
   "$defs": {
-    "catalog.SystemSpec": {
-      "additionalProperties": false,
-      "properties": {
-        "Arch": {
-          "enum": [
-            "arm64",
-            "amd64"
-          ],
-          "type": "string"
-        },
-        "OS": {
-          "enum": [
-            "macos",
-            "ubuntu",
-            "debian",
-            "any"
-          ],
-          "type": "string"
-        },
-        "Version": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "Arch",
-        "OS",
-        "Version"
-      ],
-      "type": "object"
-    },
     "core.verdict.Verdict": {
       "additionalProperties": false,
       "properties": {
@@ -197,7 +167,7 @@
           "type": "string"
         },
         "System": {
-          "$ref": "#/$defs/catalog.SystemSpec"
+          "$ref": "#/$defs/machinefile.HeadSystem"
         },
         "VM": {
           "$ref": "#/$defs/machinefile.HeadVM"
@@ -207,6 +177,31 @@
         "Kind",
         "System"
       ],
+      "type": "object"
+    },
+    "machinefile.HeadSystem": {
+      "additionalProperties": false,
+      "properties": {
+        "Arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
+        "OS": {
+          "enum": [
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "machinefile.HeadVM": {

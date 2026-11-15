@@ -886,12 +886,6 @@ export type CatalogStoredInput = {
     Path?: string;
 };
 
-export type CatalogSystemSpec = {
-    Arch: 'arm64' | 'amd64';
-    OS: 'macos' | 'ubuntu' | 'debian' | 'any';
-    Version: string;
-};
-
 export type CatalogValue = {
     Key: string;
     Value: string;
@@ -1484,8 +1478,14 @@ export type MachinefileFollower = {
 
 export type MachinefileHead = {
     Kind: 'computer' | 'workspace' | 'server';
-    System: CatalogSystemSpec;
+    System: MachinefileHeadSystem;
     VM?: MachinefileHeadVM;
+};
+
+export type MachinefileHeadSystem = {
+    Arch?: 'arm64' | 'amd64';
+    OS?: 'macos' | 'ubuntu' | 'debian' | 'any';
+    Version?: string;
 };
 
 export type MachinefileHeadVM = {

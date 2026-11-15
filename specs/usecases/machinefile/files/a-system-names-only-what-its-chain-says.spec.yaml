@@ -1,0 +1,22 @@
+description: 'a head names the system parts its chain says and leaves the others absent'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-dev.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-dev
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04', arch: arm64 } }
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Files[] | select(.Name == "jterrazz-macbook-pro" or .Name == "linux-dev") | {name: .Name, system: .Head.System}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"name":"jterrazz-macbook-pro","system":{"OS":"macos"}}
+          {"name":"linux-dev","system":{"OS":"ubuntu","Version":"24.04","Arch":"arm64"}}
