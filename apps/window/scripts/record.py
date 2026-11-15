@@ -1,8 +1,7 @@
 """Record the engine's real answers the window's pages read, over the worlds of specs/usecases/worlds/.
 
-Usage: record.py [--gestures] [--call=<call>...] [<world>...], every world already
-recorded and every world of SEEDS
-when none is named, in a Linux VM only: it asks `station guest serve --stdio` of the world build (world.py), the door
+Usage: record.py [--call=<call>...] [<world>...], every world of world.py's WORLDS when none is named, in a Linux VM
+only: it asks `station guest serve --stdio` of the world build (world.py), the door
 specs/architecture/answers_test.go asks, over a fresh copy of each world in a temporary HOME (one per request,
 so no answer depends on what another request did to the world), and writes one file per call:
 apps/window/src/fixtures/worlds/<world>/<call>.json, every request of that call the pages make in that world,
@@ -13,9 +12,12 @@ world's spec alone makes it) and records again the worlds its specs use.
 A gesture of GESTURES is recorded in a fresh world of its own: the gesture, then every read of that world asked
 again in the same door, one after the other, with the reads of a machine the gesture created, and written to
 <world>/gestures/<call>.json with the reads whose answer it changed; the replay transport plays it, then answers
-those reads as they were after it. `--gestures` records the gestures alone, over the reads already recorded;
-`--call=<call>` records only that call's gestures, in the worlds named or every world GESTURES gives it, and rewrites
-no other file.
+those reads as they were after it.
+
+One path records every world, one world or one call: a world is always asked whole, and `--call=<call>` writes only
+that call's files, <world>/<call>.json and <world>/gestures/<call>.json, in the worlds named or every one. A world
+WORLDS adds is recorded by the same command, its folder made; a run over every world removes the folder of a world
+WORLDS no longer names.
 
 The world build's clock moves when a watch waits on it (apps/engine/wire/world_on.go), so two runs do not write the same
 files: a watch the engine ends before a check settles (disk.read) answers pending in one run and
@@ -25,7 +27,7 @@ last recording: the process number the host gave, which no world decides, and th
 recording holds it.
 
 A far Mac's machine, asked through that door, is answered with This Mac's overview: only This Mac, with no
-target, and its VMs, by name, are asked. The worlds of world.py's SEEDS are recorded too.
+target, and its VMs, by name, are asked.
 
 A sign-in call names its VM in `Machine` to this Mac's engine and takes no target: accounts.list is asked for This Mac
 and once per VM of every Mac, accounts.login and accounts.logout carry their `Machine`, and the `sign-ins` world
@@ -42,7 +44,7 @@ import subprocess
 import sys
 import threading
 
-from world import ROOT, SEEDS, sandbox, seeded, world_binary
+from world import ROOT, WORLDS, sandbox, seeded, world_binary
 
 out_root = ROOT / "apps" / "window" / "src" / "fixtures" / "worlds"
 GRAPHS = (360 * 10**9, 3600 * 10**9, 86400 * 10**9)
@@ -50,7 +52,6 @@ SETTLED = {"apps.list", "settings.list"}
 TIMED = {"activity.read", "engine.watch"}
 NOISE = {"engine.start": "PID"}
 CLOCKED = {"settings.matrix": "Read"}
-PRIOR = {}
 MACHINES = {"watch": "machines.list", "in": {}}
 QUIET = 10
 UNENDED = {"overview.read"}
@@ -365,10 +366,9 @@ def carry(new, old, field):
             carry(one, was, field)
 
 
-def steadied(path, key, items):
-    """An answer of CLOCKED keeps the clock field its last recording holds, so a recording again moves no file for
-    time that passed."""
-    was = PRIOR.get(path) or (json.loads(path.read_text()) if path.exists() else {})
+def steadied(was, key, items):
+    """An answer of CLOCKED keeps the clock field its last recording `was` holds, so a recording again moves no file
+    for time that passed."""
     held = {keyOf(item["request"]): item for item in was.get(key, [])}
     for item in items:
         before = held.get(keyOf(item["request"]))
@@ -384,22 +384,27 @@ def steadied(path, key, items):
                 carry(read["answers"], one["answers"], field)
 
 
-def write(path, world, station, key, items):
-    steadied(path, key, items)
+def write(path, world, station, key, items, was):
+    """One recording file, its clock and NOISE fields kept as `was`, its last recording, holds them."""
+    steadied(was, key, items)
+    if key == "gestures":
+        for item in items:
+            steady(item, was)
     head = json.dumps({"world": world, "station": station})[:-1]
     lines = ",\n".join(json.dumps(item, separators=(",", ":")) for item in items)
     rest = '"exchanges": [], "gestures"' if key == "gestures" else '"exchanges"'
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f'{head}, {rest}: [\n{lines}\n]}}\n')
 
 
-def gesture(seed, fixture, request, reads, before):
+def gesture(world, seed, fixture, request, reads, before):
     """The gesture in a fresh world, then every read in that same world, kept when its answer changed: a watch by
-    its settled answer, the one a window shows once it has read again. A read no recording holds yet, of a machine
-    the gesture made, is kept whatever it answers."""
+    its settled answer, the one a window shows once it has read again. A read the world did not ask before, of a
+    machine the gesture made, is kept whatever it answers."""
     door = Door(seed, fixture)
     [answers] = door.ask([request])
     [listed] = door.ask([MACHINES])
-    born = [read for read in asks(listed) if keyOf(read) not in before]
+    born = [read for read in asked_in(world, listed) if keyOf(read) not in before]
     changed = []
     for read in [*reads, *born]:
         if callOf(read) in TIMED:
@@ -412,54 +417,33 @@ def gesture(seed, fixture, request, reads, before):
     return {"request": request, "answers": answers, "after": changed}
 
 
-def recorded(folder):
-    """The requests a world's recording holds and their answers, read back from its files."""
-    requests, before = [], {}
-    for path in sorted(folder.glob("*.json")):
-        for exchange in json.loads(path.read_text())["exchanges"]:
-            requests.append(exchange["request"])
-            before[keyOf(exchange["request"])] = exchange["answers"]
-    return requests, before
-
-
-def steady(item, path):
-    """A gesture's answer keeps the NOISE field its last recording holds: the number the host gave a process."""
+def steady(item, was):
+    """A gesture's answer keeps the NOISE field its last recording `was` holds: the number the host gave a process."""
     field = NOISE.get(callOf(item["request"]))
-    if not field or not path.exists():
+    if not field:
         return
-    was = [one for one in json.loads(path.read_text())["gestures"] if one["request"] == item["request"]]
-    held = [frame["out"][field] for one in was for frame in one["answers"] if field in frame.get("out", {})]
+    held = [frame["out"][field] for one in was.get("gestures", []) if one["request"] == item["request"]
+            for frame in one["answers"] if field in frame.get("out", {})]
     for frame in item["answers"]:
         if held and field in frame.get("out", {}):
             frame["out"][field] = held[0]
 
 
-def gestures(world, seed, fixture, folder, requests, before):
-    chosen = [request for request in GESTURES.get(world, []) if not calls or callOf(request) in calls]
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-        made = list(pool.map(lambda request: gesture(seed, fixture, request, requests, before), chosen))
-    by_gesture = {}
-    for request, item in zip(chosen, made):
-        by_gesture.setdefault(callOf(request), []).append(item)
-    for item in made:
-        steady(item, folder / "gestures" / f"{callOf(item['request'])}.json")
-    if not calls:
-        shutil.rmtree(folder / "gestures", ignore_errors=True)
-    if by_gesture:
-        (folder / "gestures").mkdir(exist_ok=True)
-    station = json.loads(next(folder.glob("*.json")).read_text())["station"]
-    for call, items in by_gesture.items():
-        write(folder / "gestures" / f"{call}.json", world, station, "gestures", items)
-    return sum(len(items) for items in by_gesture.values())
+def files_of(folder):
+    """The recording a world's folder holds, by its path inside it."""
+    if not folder.is_dir():
+        return {}
+    return {path.relative_to(folder).as_posix(): json.loads(path.read_text()) for path in sorted(folder.rglob("*.json"))}
 
 
-def record(world):
+def call_of_file(name):
+    return name.removeprefix("gestures/").removesuffix(".json")
+
+
+def record(world, calls):
+    """A world asked whole, every read then every gesture, and its files written: all of them, or those of `calls`."""
     seed, fixture = seeded(world)
     folder = out_root / world
-    if alone:
-        requests, before = recorded(folder)
-        made = gestures(world, seed, fixture, folder, requests, before)
-        return f"{world}: {made} gestures over {len(requests)} recorded requests -> {folder}"
     station, [listed] = serve(seed, [MACHINES], fixture)
     requests = asked_in(world, listed)
     answered = asked(seed, requests, fixture)
@@ -467,28 +451,43 @@ def record(world):
     if more:
         requests, answered = requests + more, answered + asked(seed, more, fixture)
     requests, answered = [MACHINES, *requests], [listed, *answered]
-    by_call, before = {}, {}
-    for request, frames in zip(requests, answered):
-        by_call.setdefault(callOf(request), []).append({"request": request, "answers": kept(request, frames)})
-        before[keyOf(request)] = kept(request, frames)
-    folder.mkdir(parents=True, exist_ok=True)
-    PRIOR.update({path: json.loads(path.read_text()) for path in folder.rglob("*.json")})
-    for stale in folder.glob("*.json"):
-        stale.unlink()
-    for call, exchanges in by_call.items():
-        write(folder / f"{call}.json", world, station, "exchanges", exchanges)
-    made = gestures(world, seed, fixture, folder, requests, before)
-    return f"{world}: {len(requests)} requests in {len(by_call)} calls, {made} gestures -> {folder}"
+    before = {keyOf(request): kept(request, frames) for request, frames in zip(requests, answered)}
+    chosen = [request for request in GESTURES.get(world, []) if not calls or callOf(request) in calls]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        made = list(pool.map(lambda request: gesture(world, seed, fixture, request, requests, before), chosen))
+    files = {}
+    for request in requests:
+        files.setdefault(f"{callOf(request)}.json", ("exchanges", []))[1].append(
+            {"request": request, "answers": before[keyOf(request)]})
+    for item in made:
+        files.setdefault(f"gestures/{callOf(item['request'])}.json", ("gestures", []))[1].append(item)
+    files = {name: file for name, file in files.items() if not calls or call_of_file(name) in calls}
+    prior = files_of(folder)
+    for name in prior:
+        if name not in files and (not calls or call_of_file(name) in calls):
+            (folder / name).unlink()
+    for name, (key, items) in files.items():
+        write(folder / name, world, station, key, items, prior.get(name, {}))
+    if (folder / "gestures").is_dir() and not any((folder / "gestures").iterdir()):
+        (folder / "gestures").rmdir()
+    return f"{world}: {len(requests)} requests, {len(made)} gestures, {len(files)} files written -> {folder}"
 
+
+USAGE = "usage: record.py [--call=<call>...] [<world>...], a world of world.py's WORLDS"
 
 if __name__ == "__main__":
-    print("world build:", binary)
     arguments = sys.argv[1:]
     calls = {argument.removeprefix("--call=") for argument in arguments if argument.startswith("--call=")}
-    alone = "--gestures" in arguments or bool(calls)
     named = [argument for argument in arguments if not argument.startswith("--")]
-    everywhere = sorted({folder.name for folder in out_root.iterdir() if folder.is_dir()} | set(SEEDS))
-    worlds = named or [world for world in everywhere if not calls or calls & {callOf(it) for it in GESTURES.get(world, [])}]
+    flags = [argument for argument in arguments if argument.startswith("--") and not argument.startswith("--call=")]
+    unknown = [world for world in named if world not in WORLDS]
+    if flags or unknown:
+        sys.exit(f"{USAGE}; not one: {' '.join(flags + unknown)}")
+    print("world build:", binary)
+    if not named and not calls and out_root.is_dir():
+        for folder in sorted(out_root.iterdir()):
+            if folder.is_dir() and folder.name not in WORLDS:
+                shutil.rmtree(folder)
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-        for line in pool.map(record, worlds):
+        for line in pool.map(lambda world: record(world, calls), named or list(WORLDS)):
             print(line)
