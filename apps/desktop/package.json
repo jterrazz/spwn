@@ -1,5 +1,5 @@
 {
-    "name": "station-window",
+    "name": "station-desktop",
     "private": true,
     "type": "module",
     "scripts": {

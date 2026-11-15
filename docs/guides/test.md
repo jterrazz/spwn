@@ -102,13 +102,13 @@ A spec copies one `fixture:` directory into its working directory, so stubs live
 
 ## The window's scenarios
 
-The desktop window's scenarios, the rows of [its scenarios page](../../apps/window/SCENARIOS.md), are website specs of `@jterrazz/test` ([Website specs](https://github.com/jterrazz/package-test/blob/main/docs/guides/website-specs.md)) under `specs/website/`: one `<domain>/<aspect>.spec.ts` per journey, each test's title opening on its scenario's id.
+The desktop window's scenarios, the rows of [its scenarios page](../../apps/desktop/SCENARIOS.md), are website specs of `@jterrazz/test` ([Website specs](https://github.com/jterrazz/package-test/blob/main/docs/guides/website-specs.md)) under `specs/website/`: one `<domain>/<aspect>.spec.ts` per journey, each test's title opening on its scenario's id.
 
-- `specs/website/website.specification.ts` serves the window's proof build, `apps/window/.artifacts/proof`, with `vite preview`; a visit opens a page by its start route, `/?world=<world>&page=<page>`, so the shipped entry draws it over that world's recorded answers in headless Chromium ([the window's page](../../apps/window/README.md#recording-capturing-proving)).
+- `specs/website/website.specification.ts` serves the window's proof build, `apps/desktop/.artifacts/proof`, with `vite preview`; a visit opens a page by its start route, `/?world=<world>&page=<page>`, so the shipped entry draws it over that world's recorded answers in headless Chromium ([the window's page](../../apps/desktop/README.md#recording-capturing-proving)).
 - `make test` builds the proof build first (`turbo run build:proof`, cached on the window's sources and `packages/api`), and the runner of `specs/` runs the `website` project with the others. The window's `check.sh` runs it after its own builds, in the Linux VM.
-- A scenario proved in Chromium is what crosses pages or needs the entry (`main.tsx`): a gesture here and its count in the sidebar, the history, the route a window keeps across a relaunch. One page's states over a world stay its component spec under `apps/window/src/**/__tests__/`.
+- A scenario proved in Chromium is what crosses pages or needs the entry (`main.tsx`): a gesture here and its count in the sidebar, the history, the route a window keeps across a relaunch. One page's states over a world stay its component spec under `apps/desktop/src/**/__tests__/`.
 - A scenario not proved yet is a `test.todo` of its journey's file, its title the id and why it waits; `specs/architecture/scenarios_test.go` fails an id the page holds twice, an id no test declares, and a test naming an id the page does not hold.
-- What a page visit cannot show (the Rust bridge, the opener, the Mac's chrome, a live engine) stays the bench's: `live-tauri.sh` for the Tauri window ([the bench](../../apps/window/scripts/README.md)); the recordings are `make generate`'s, rewritten from the engine of the tree, so a stale one is a tree it leaves changed.
+- What a page visit cannot show (the Rust bridge, the opener, the Mac's chrome, a live engine) stays the bench's: `live-tauri.sh` for the Tauri window ([the bench](../../apps/desktop/scripts/README.md)); the recordings are `make generate`'s, rewritten from the engine of the tree, so a stale one is a tree it leaves changed.
 
 ## The menu bar's stories
 

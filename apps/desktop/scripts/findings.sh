@@ -15,16 +15,16 @@ findings() {
     '
 }
 # value: `summary <log>...` lists the window's findings, counts the root's apart, and leaves the root's count in
-# value: root_findings for the caller's last line; it returns 0 when apps/window has none.
+# value: root_findings for the caller's last line; it returns 0 when apps/desktop has none.
 summary() {
     local all window rest
     all=$(findings "$@")
-    window=$(grep -E '^apps/window/' <<<"$all" || true)
-    rest=$(grep -vE '^apps/window/' <<<"$all" | grep -v '^$' || true)
+    window=$(grep -E '^apps/desktop/' <<<"$all" || true)
+    rest=$(grep -vE '^apps/desktop/' <<<"$all" | grep -v '^$' || true)
     root_findings=$(grep -c . <<<"$rest" || true)
     printf 'window findings: %s\n' "$(grep -c . <<<"$window" || true)"
     [ -z "$window" ] || sed 's/^/  /' <<<"$window"
-    printf 'root findings (outside apps/window): %s\n' "$root_findings"
+    printf 'root findings (outside apps/desktop): %s\n' "$root_findings"
     [ -z "$rest" ] || sed -E 's/[:(].*//' <<<"$rest" | sort | uniq -c | sort -rn | head -12 | sed 's/^/  /'
     [ -z "$window" ]
 }

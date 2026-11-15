@@ -4,7 +4,7 @@ Usage: record.py [--call=<call>...] [<world>...], every world of world.py's WORL
 only: it asks `station guest serve --stdio` of the world build (world.py), the door
 specs/architecture/answers_test.go asks, over a fresh copy of each world in a temporary HOME (one per request,
 so no answer depends on what another request did to the world), and writes one file per call:
-apps/window/src/fixtures/worlds/<world>/<call>.json, every request of that call the pages make in that world,
+apps/desktop/src/fixtures/worlds/<world>/<call>.json, every request of that call the pages make in that world,
 with its answers. The recorder's tables are the one list of what is asked: a page that reads a new call, or the same
 call with a new input, adds its requests to `asks` (`follows`, when they depend on another answer; ALSO, when one
 world's spec alone makes it) and records again the worlds its specs use.
@@ -55,7 +55,7 @@ import threading
 
 from world import ROOT, WORLDS, build_digest, sandbox, seeded, world_binary
 
-out_root = ROOT / "apps" / "window" / "src" / "fixtures" / "worlds"
+out_root = ROOT / "apps" / "desktop" / "src" / "fixtures" / "worlds"
 GRAPHS = (360 * 10**9, 3600 * 10**9, 86400 * 10**9)
 SETTLED = {"apps.list", "settings.list", "disk.read"}
 TIMED = {"activity.read", "engine.watch"}

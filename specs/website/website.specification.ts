@@ -6,7 +6,7 @@ import { afterAll } from 'vitest';
 export const { cleanup, website } = await specification.website({
     server: {
         command:
-            'cd ../apps/window && exec npx vite preview --outDir .artifacts/proof --host 127.0.0.1 --strictPort --port "$PORT"',
+            'cd ../apps/desktop && exec npx vite preview --outDir .artifacts/proof --host 127.0.0.1 --strictPort --port "$PORT"',
         ready: '/',
     },
 });

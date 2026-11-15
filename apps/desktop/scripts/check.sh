@@ -7,8 +7,8 @@
 # value: `cargo fmt --check` and `cargo clippy --all-targets` with warnings denied (the rustfmt and clippy components).
 # value: The recordings are not its to prove: `make generate` rewrites them from the world build of the tree, and a
 # value: tree it leaves changed is a stale one.
-# value: One exit code: 0 when apps/window has no finding and its tests and builds pass; a finding outside
-# value: apps/window is the root's and is counted apart. `--update` rewrites the
+# value: One exit code: 0 when apps/desktop has no finding and its tests and builds pass; a finding outside
+# value: apps/desktop is the root's and is counted apart. `--update` rewrites the
 # value: goldens the tests compare, before the toolchain's named-path pass asks for a golden no run wrote yet.
 # value: WINDOW_TEST_WORKERS sets the tests' workers (6 by default): fewer when other lots share the VM.
 set -uo pipefail

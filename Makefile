@@ -70,7 +70,7 @@ test: node_modules/.install ## The Go tests (modules and the boundary), then the
 	@$(TURBO) run test --filter='!go-workspace' --filter='!studio-station-specs'
 	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./apps/engine/wire
 	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./apps/engine/cmd/station && touch $(TEST_PATH)
-	@$(TURBO) run build:proof --filter=station-window
+	@$(TURBO) run build:proof --filter=station-desktop
 	@STATION_SPEC_BUILT=1 npm --workspace specs exec -- vitest --run
 	@STATION_SPEC_BUILT=1 STATION_SPEC_HYPERVISOR=vz npm --workspace specs exec -- vitest --run $(VZ_SUITES)
 
@@ -165,11 +165,11 @@ generate: ## Regenerate the catalog's projections, and on Linux the window's rec
 	fi
 	@if [ "$$(uname)" = Linux ]; then \
 		mkdir -p .artifacts; \
-		python3 -B apps/window/scripts/record.py --if-moved > .artifacts/window-record.log 2>&1 \
+		python3 -B apps/desktop/scripts/record.py --if-moved > .artifacts/window-record.log 2>&1 \
 			|| { tail -30 .artifacts/window-record.log; exit 1; }; \
-		printf "$(GREEN)●$(RESET) apps/window/src/fixtures/worlds, the window's recordings over the world build of this tree: %s\n" "$$(tail -1 .artifacts/window-record.log)"; \
+		printf "$(GREEN)●$(RESET) apps/desktop/src/fixtures/worlds, the window's recordings over the world build of this tree: %s\n" "$$(tail -1 .artifacts/window-record.log)"; \
 	else \
-		printf "window: apps/window/src/fixtures/worlds not regenerated, the world build is recorded in a Linux VM only\n"; \
+		printf "window: apps/desktop/src/fixtures/worlds not regenerated, the world build is recorded in a Linux VM only\n"; \
 	fi
 
 clean: ## Remove build artifacts
