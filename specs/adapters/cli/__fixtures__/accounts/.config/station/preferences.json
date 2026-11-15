@@ -1,7 +1,7 @@
 {
-  "here": "jterrazz-macbook-pro",
+  "here": "macbook-pro",
   "hosts": {
-    "jterrazz-macbook-pro": {}
+    "macbook-pro": {}
   },
   "lend_list": [
     "operator:claude:oauth-token",

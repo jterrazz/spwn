@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: refusing to forget without --yes
           Hint: re-run with --yes
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [(.preferences.macs | keys), (.ssh.blocks | keys)]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [(.preferences.macs | keys), (.ssh.blocks | keys)]'' world.json'
       exit: 0
       stdout: |
-          [["jterrazz-mac-mini"],["api","infra","jterrazz-mac-mini","linux-1"]]
+          [["mac-mini"],["api","infra","linux-1","mac-mini"]]

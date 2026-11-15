@@ -6,11 +6,11 @@ runs:
     - command: 'machines'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB
-          ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running
-          ✗	infra	Server	jterrazz-mac-mini	Stopped · always on	8 CPU	24 GB	powered off from inside
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ✗	infra	Server	mac-mini	Stopped · always on	8 CPU	24 GB	powered off from inside
           # Needs you
           ✗	infra	powered off from inside	station machines start infra --on mac-mini
     - command: 'world advance 5m'
@@ -19,7 +19,7 @@ runs:
       exit: 0
       stdout: |
           ["stopped","stopped",0,"powered off from inside"]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | [.pid, .kept.want]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | [.pid, .kept.want]'' world.json'
       exit: 0
       stdout: |
           [null,"stopped"]

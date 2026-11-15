@@ -16,7 +16,7 @@ runs:
       stderr: |
           Error: "soon" is not between 1 min and 24 h
           Hint: station awake 4h
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power.holds'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power.holds'' world.json'
       exit: 0
       stdout: |
           null

@@ -2,7 +2,7 @@ description: 'apply --remove undoes a script app the ledger holds and leaves one
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/scripted.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/scripted.yaml'
       stdin: |
           package: station.package/v1
           kind: app
@@ -18,7 +18,7 @@ runs:
                     run: install-scripted
                     undo: uninstall-scripted
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/byhand.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/byhand.yaml'
       stdin: |
           package: station.package/v1
           kind: app
@@ -34,20 +34,20 @@ runs:
                     run: install-byhand
                     undo: uninstall-byhand
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.shell = {installed: {"install-scripted": "1.2.0", "install-byhand": "1.0.0"}} | .macs["jterrazz-macbook-pro"].stores.ledger = [{package: "scripted", method: "shell", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.shell = {installed: {"install-scripted": "1.2.0", "install-byhand": "1.0.0"}} | .macs["macbook-pro"].stores.ledger = [{package: "scripted", method: "shell", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	scripted	shell	installed by station for jterrazz-macbook-pro, listed no longer
+          ?	scripted	shell	installed by station for macbook-pro, listed no longer
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	scripted		shell	removed

@@ -8,8 +8,8 @@ runs:
     - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | [.port, .url]]'''
       exit: 0
       stdout: |
-          [[5173,"http://jterrazz-macbook-pro.tail1234.ts.net:40001"],[7000,"jterrazz-macbook-pro.tail1234.ts.net:40002"]]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''([.macs["jterrazz-macbook-pro"].tailnet.shares[] | [.Port, .Scheme]] | sort), .macs["jterrazz-macbook-pro"].preferences.ports.https'' world.json'
+          [[5173,"http://macbook-pro.tail1234.ts.net:40001"],[7000,"macbook-pro.tail1234.ts.net:40002"]]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''([.macs["macbook-pro"].tailnet.shares[] | [.Port, .Scheme]] | sort), .macs["macbook-pro"].preferences.ports.https'' world.json'
       exit: 0
       stdout: |
           [[40001,"tcp"],[40002,"tcp"]]
@@ -21,8 +21,8 @@ runs:
     - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | [.port, .url]]'''
       exit: 0
       stdout: |
-          [[5173,"https://jterrazz-macbook-pro.tail1234.ts.net:40001"],[7000,"jterrazz-macbook-pro.tail1234.ts.net:40002"]]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].tailnet.shares[] | [.Port, .Scheme]] | sort'' world.json'
+          [[5173,"https://macbook-pro.tail1234.ts.net:40001"],[7000,"macbook-pro.tail1234.ts.net:40002"]]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].tailnet.shares[] | [.Port, .Scheme]] | sort'' world.json'
       exit: 0
       stdout: |
           [[40001,"https"],[40002,"tcp"]]

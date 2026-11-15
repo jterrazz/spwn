@@ -60,7 +60,7 @@ func fixed() pagehome.Overview {
 			{Name: "zshrc", State: catalog.StateOK},
 			{Name: "layout", State: catalog.StateOK},
 		}},
-		Identity:   []overview.Check{{Name: "git-email", State: catalog.StateOK, Value: "admin@jterrazz.com"}},
+		Identity:   []overview.Check{{Name: "git-email", State: catalog.StateOK, Value: "you@example.com"}},
 		Background: []background.Task{{Label: "ai.jterrazz.x", Group: background.GroupUnknown, State: catalog.StateOK, Run: background.Running, PID: 12, Scope: "user", Plist: "~/Library/LaunchAgents/ai.jterrazz.x.plist"}},
 		Gateways:   []overview.Check{{Name: catalog.ServeRow, State: catalog.StateOK, Value: "on"}},
 		Tailnet: ports.Status{

@@ -11,11 +11,11 @@
 ●	gatekeeper	on
 ●	macos	up to date	checked 22m ago
 ●	brew	up to date
-●	Tailscale	Running · jterrazz-macbook-pro.tail1234.ts.net · 100.98.133.14
+●	Tailscale	Running · macbook-pro.tail1234.ts.net · 100.98.133.14
 # Workspace
 ●	disk	27.9 GB	reclaimable: station disk free
 # Identity
-●	git email	admin@jterrazz.com
+●	git email	you@example.com
 ●	git signing	on
 # Background	1 ●
 ●	com.github.facebook.watchman	known	running · pid 3464	user	watchman	~/Library/LaunchAgents/com.github.facebook.watchman.plist

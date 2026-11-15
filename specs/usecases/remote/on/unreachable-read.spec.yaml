@@ -16,7 +16,7 @@ runs:
             "schema": "station.error/v1",
             "type": "unreachable",
             "code": "remote.unreachable",
-            "subject": "jterrazz-mac-mini",
+            "subject": "mac-mini",
             "message": "mac-mini does not answer",
             "hint": "station machines mac-mini",
             "fix": null

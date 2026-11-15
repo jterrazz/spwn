@@ -12,7 +12,7 @@ public final class Navigation: @unchecked Sendable {
     public static let accounts = "menubar.accounts"
 
     // value: the watch of a page of one subject: a Mac's ports
-    // (`menubar.ports:jterrazz-mac-mini`), the activity over a window
+    // (`menubar.ports:mac-mini`), the activity over a window
     // (`menubar.activity:6m`).
     public static func page(_ id: String, of subject: String) -> String { "\(id):\(subject)" }
 

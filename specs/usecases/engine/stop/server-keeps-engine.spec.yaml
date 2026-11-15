@@ -14,8 +14,8 @@ runs:
     - command: 'machines | /usr/bin/grep infra'
       exit: 0
       stdout: |
-          ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"] | [.engine.stopped, .vms.infra.kept.want, .vms.infra.pid > 0]'' world.json'
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | [.engine.stopped, .vms.infra.kept.want, .vms.infra.pid > 0]'' world.json'
       exit: 0
       stdout: |
           [null,"running",true]

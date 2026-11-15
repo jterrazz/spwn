@@ -10,7 +10,7 @@ runs:
       stdout: |
           ["gh","signed-in","jterrazz",null,"sign-out"]
           ["npm","signed-in","jterrazz",null,"sign-out"]
-          ["claude","signed-in","admin@jterrazz.com","Max plan","sign-out"]
+          ["claude","signed-in","you@example.com","Max plan","sign-out"]
           ["wrangler","signed-out",null,null,"sign-in"]
           gh auth status --hostname github.com
           npm whoami

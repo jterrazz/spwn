@@ -1,11 +1,11 @@
 description: 'station disk --on another Mac tells that Mac''s volume and rows, read there'
 env: two-macs
 runs:
-    - command: 'disk --on jterrazz-mac-mini'
+    - command: 'disk --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
-          ◐	jterrazz-mac-mini	1.6 TB free of 2.0 TB · 1 misplaced folder	station disk move ~/go
+          ◐	mac-mini	1.6 TB free of 2.0 TB · 1 misplaced folder	station disk move ~/go
           # Misplaced
           ◐	~/go	2.3 GB	misplaced · go · station disk move ~/go
           # Can rebuild

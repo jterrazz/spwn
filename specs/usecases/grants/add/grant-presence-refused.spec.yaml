@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].accounts.presence = "refused"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].accounts.presence = "refused"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
       stdin: |
@@ -16,4 +16,4 @@ runs:
           {"v":2,"id":"1","watch":"vault.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}
+          {"mac":"macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}

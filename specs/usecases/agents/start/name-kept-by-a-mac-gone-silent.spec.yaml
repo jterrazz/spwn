@@ -13,7 +13,7 @@ runs:
           ●	ci-1	stopped, kept · its agent docs-bot stopped
     - command: 'machines >/dev/null'
       exit: 0
-    - command: 'world offline jterrazz-mac-mini'
+    - command: 'world offline mac-mini'
       exit: 0
     - command: 'agents start "Write the release notes" --on linux-1 --name docs-bot'
       exit: 2

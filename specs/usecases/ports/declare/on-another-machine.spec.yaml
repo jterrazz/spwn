@@ -1,14 +1,14 @@
 description: 'a declaration sent with --on is kept by that Mac, not by This Mac'
 env: two-macs
 runs:
-    - command: 'world listen jterrazz-mac-mini "*:7000" ControlCenter'
+    - command: 'world listen mac-mini "*:7000" ControlCenter'
       exit: 0
-    - command: 'ports declare 7000 --via lan --on jterrazz-mac-mini'
+    - command: 'ports declare 7000 --via lan --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	7000 on jterrazz-mac-mini	declared public (your LAN)
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {mini: [.["jterrazz-mac-mini"].stores.declarations[] | .machine + ":" + (.port|tostring)], here: .["jterrazz-macbook-pro"].stores.declarations}'' world.json'
+          ●	7000 on mac-mini	declared public (your LAN)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {mini: [.["mac-mini"].stores.declarations[] | .machine + ":" + (.port|tostring)], here: .["macbook-pro"].stores.declarations}'' world.json'
       exit: 0
       stdout: |
-          {"mini":["infra:443","jterrazz-mac-mini:7000"],"here":null}
+          {"mini":["infra:443","mac-mini:7000"],"here":null}

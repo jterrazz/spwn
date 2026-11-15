@@ -3,7 +3,7 @@
   "id": "home",
   "command": "status",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer",
     "registered": true
   },

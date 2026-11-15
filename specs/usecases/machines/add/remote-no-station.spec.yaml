@@ -3,12 +3,12 @@ env: one-mac
 runs:
     - command: 'world fault EndpointDialer.Dial'
       exit: 0
-    - command: 'machines add jterrazz-mac-mini'
+    - command: 'machines add mac-mini'
       exit: 1
       stderr: |
           Error: station is not installed on mac-mini
           Hint: install it there (scripts/install.sh), then add it again
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.macs, (.ssh.blocks // {})]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.preferences.macs, (.ssh.blocks // {})]'' world.json'
       exit: 0
       stdout: |
           [null,{}]

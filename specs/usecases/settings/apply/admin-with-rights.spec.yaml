@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           ●	restart-after-power-cut	restart-after-power-cut: applied
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].settings["restart-after-power-cut"], .as_root]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].settings["restart-after-power-cut"], .as_root]'' world.json'
       exit: 0
       stdout: |
           ["autorestart=1\nwomp=1",null]

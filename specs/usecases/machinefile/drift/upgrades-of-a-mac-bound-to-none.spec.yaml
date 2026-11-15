@@ -1,15 +1,15 @@
 description: 'a mac bound to no file has no night, and its upgrades name no file'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
       exit: 0
     - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Upgrades'''
       stdin: |
-          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{"Machinefile":"jterrazz-macbook-pro"}}
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{"Machinefile":"macbook-pro"}}
       exit: 0
       stdout: |
-          {"Nightly":false,"File":"","Sentence":"Never by itself: jterrazz-macbook-pro is bound to no Machinefile."}
+          {"Nightly":false,"File":"","Sentence":"Never by itself: macbook-pro is bound to no Machinefile."}

@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: refusing to stop sharing linux-1:7000 without --yes
           Hint: re-run with --yes
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [.stores.reservations[].guest_port], shared: [.tailnet.shares[].Reserved], remembered: .preferences.services.not_shared}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [.stores.reservations[].guest_port], shared: [.tailnet.shares[].Reserved], remembered: .preferences.services.not_shared}'' world.json'
       exit: 0
       stdout: |
           {"reserved":[5173,7000],"shared":[40001,40002],"remembered":null}

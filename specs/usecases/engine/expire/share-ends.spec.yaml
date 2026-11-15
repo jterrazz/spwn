@@ -3,13 +3,13 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].secrets = {"session:github": "fake-session-github-of-this-mac"} | .macs["jterrazz-macbook-pro"].stores.shares = {"linux-1": [{"name": "session:github", "at": "2026-11-04T10:00:00Z", "until": "2026-11-04T14:00:00Z"}]}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].secrets = {"session:github": "fake-session-github-of-this-mac"} | .macs["macbook-pro"].stores.shares = {"linux-1": [{"name": "session:github", "at": "2026-11-04T10:00:00Z", "until": "2026-11-04T14:00:00Z"}]}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'world advance 4h'
       exit: 0
     - command: '--version >/dev/null; "$STATION" accounts > /dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.macs["linux-1"].secrets // {} | keys), (.macs["jterrazz-macbook-pro"].stores.shares["linux-1"] // [] | map(.name))]'' world.json; /usr/bin/jq -c ''.told'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.macs["linux-1"].secrets // {} | keys), (.macs["macbook-pro"].stores.shares["linux-1"] // [] | map(.name))]'' world.json; /usr/bin/jq -c ''.told'' world.json'
       exit: 0
       stdout: |
           [[],[]]

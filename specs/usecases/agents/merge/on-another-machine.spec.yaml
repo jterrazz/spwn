@@ -10,7 +10,7 @@ runs:
       stdout: |
           	On linux-1:
           ●	linux-1	merged PR #42 · finished
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {prs, state: .journal["s-1"].state}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents | {prs, state: .journal["s-1"].state}'' world.json'
       exit: 0
       stdout: |
           {"prs":{"42":"merged"},"state":"finished"}

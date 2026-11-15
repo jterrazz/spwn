@@ -4,10 +4,10 @@ runs:
     - command: 'machines create --image macos --memory 4G'
       exit: 2
       stderr: |
-          Error: image macos is not on jterrazz-macbook-pro
+          Error: image macos is not on macbook-pro
           Hint: station images update macos
     - command: 'machines create --image macos --memory 4G --yes'
       exit: 2
       stderr: |
-          Error: image macos is not on jterrazz-macbook-pro
+          Error: image macos is not on macbook-pro
           Hint: station images update macos

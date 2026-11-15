@@ -2,14 +2,14 @@ description: 'an apply of a range moved to hold the waiting version clears its N
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: node, version: '22' }]
       exit: 0
-    - command: 'apply --machinefile jterrazz-macbook-pro'
+    - command: 'apply --machinefile macbook-pro'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of mise
@@ -21,10 +21,10 @@ runs:
       exit: 0
       stdout: |
           1
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: node, version: '25' }]
       exit: 0

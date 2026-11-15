@@ -4,8 +4,8 @@ runs:
     - command: 'ports share 3000'
       exit: 0
       stdout: |
-          https://jterrazz-macbook-pro.tail1234.ts.net:40000
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [.stores.reservations[] | select(.vm == "linux-1" and .guest_port == 3000) | .host_port], shared: [.tailnet.shares[].Reserved]}'' world.json'
+          https://macbook-pro.tail1234.ts.net:40000
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [.stores.reservations[] | select(.vm == "linux-1" and .guest_port == 3000) | .host_port], shared: [.tailnet.shares[].Reserved]}'' world.json'
       exit: 0
       stdout: |
           {"reserved":[40000],"shared":[40001,40002]}
@@ -13,16 +13,16 @@ runs:
       exit: 0
       stdout: |
           # Private: shared with you on Tailscale	2 ●	1 ○
-          ○	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	not listening · reserved 40000		probably Node or Next
-          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
-          ●	linux-1	7000	private	jterrazz-macbook-pro.tail1234.ts.net:40002	shared	server
+          ○	linux-1	3000	private	https://macbook-pro.tail1234.ts.net:40000	not listening · reserved 40000		probably Node or Next
+          ●	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
+          ●	linux-1	7000	private	macbook-pro.tail1234.ts.net:40002	shared	server
     - command: 'world listen linux-1 "*:3000" node'
       exit: 0
     - command: 'ports | /usr/bin/grep 3000'
       exit: 0
       stdout: |
-          ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node	probably Node or Next
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].tailnet.shares[].Reserved] | sort'' world.json'
+          ●	linux-1	3000	private	https://macbook-pro.tail1234.ts.net:40000	shared	node	probably Node or Next
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].tailnet.shares[].Reserved] | sort'' world.json'
       exit: 0
       stdout: |
           [40000,40001,40002]

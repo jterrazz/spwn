@@ -30,7 +30,7 @@ runs:
       stdout: |
           # Agents	1 ○
           ○	review-bot	claudecode	finished · merged PR #42	Review the auth refresh	PR #42 · https://github.com/jterrazz/app/pull/42
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["review-bot"].agents.prs'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["review-bot"].agents.prs'' world.json'
       exit: 0
       stdout: |
           {"42":"merged"}

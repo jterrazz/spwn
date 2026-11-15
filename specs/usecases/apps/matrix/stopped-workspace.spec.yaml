@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","call":"apps.matrix","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"columns":[{"n":"jterrazz-macbook-pro","away":"","read":true},{"n":"jterrazz-mac-mini","away":"","read":true},{"n":"linux-1","away":"","read":true},{"n":"api","away":"stopped","read":false}],"servers":["infra"]}
+          {"columns":[{"n":"macbook-pro","away":"","read":true},{"n":"mac-mini","away":"","read":true},{"n":"linux-1","away":"","read":true},{"n":"api","away":"stopped","read":false}],"servers":["infra"]}

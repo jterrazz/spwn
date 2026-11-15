@@ -25,9 +25,9 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro",
+            "id": "macbook-pro",
             "mark": "ok",
-            "label": "jterrazz-macbook-pro",
+            "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
@@ -179,7 +179,7 @@
       "label": "lid",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ]
     },
     {
@@ -187,7 +187,7 @@
       "label": "battery",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ]
     }
   ]

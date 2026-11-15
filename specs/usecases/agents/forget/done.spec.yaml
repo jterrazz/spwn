@@ -14,7 +14,7 @@ runs:
       stdout: |
           # Agents
           	none
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents.journal'' world.json'
       exit: 0
       stdout: |
           null

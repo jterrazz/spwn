@@ -10,7 +10,7 @@ runs:
       exit: 0
       stdout: |
           ●	agent-hooks	claude: hook removed from ~/.claude/settings.json
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.hooks'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents.hooks'' world.json'
       exit: 0
       stdout: |
           null

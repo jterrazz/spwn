@@ -12,9 +12,9 @@ import (
 
 var (
 	start  = time.Unix(1_800_000_000, 0)
-	here   = machine.Ref{Name: "jterrazz-macbook-pro"}
-	linux1 = machine.Ref{Name: "linux-1", On: "jterrazz-macbook-pro"}
-	infra  = machine.Ref{Name: "infra", On: "jterrazz-mac-mini"}
+	here   = machine.Ref{Name: "macbook-pro"}
+	linux1 = machine.Ref{Name: "linux-1", On: "macbook-pro"}
+	infra  = machine.Ref{Name: "infra", On: "mac-mini"}
 )
 
 func calm(at time.Duration) activity.Sample {
@@ -63,7 +63,7 @@ func TestADiskAlmostFullNeedsALookUnderTenPercentAndIsBrokenUnderFive(t *testing
 	}{
 		{here, machine.Computer, 8e9, []line{{finding.NeedsALook, "disk", "station disk"}}},
 		{linux1, machine.Workspace, 4e9, []line{{finding.Broken, "disk", "station disk --on linux-1"}}},
-		{infra, machine.Server, 4e9, []line{{finding.Broken, "disk", "station machines edit infra --disk <size> --on jterrazz-mac-mini"}}},
+		{infra, machine.Server, 4e9, []line{{finding.Broken, "disk", "station machines edit infra --disk <size> --on mac-mini"}}},
 		{here, machine.Computer, 11e9, []line{}},
 	}
 	for _, c := range cases {

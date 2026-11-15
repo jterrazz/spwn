@@ -4,7 +4,7 @@ public enum Format {
     static let suffixes = Array("KMGTPE")
 
     // value: a Mac's name as the engine says it: its name without
-    // its domain (`jterrazz-macbook-pro`, never with `.local`).
+    // its domain (`macbook-pro`, never with `.local`).
     public static func bareName(_ raw: String) -> String {
         String(raw.split(separator: ".").first ?? Substring(raw))
     }

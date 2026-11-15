@@ -4,7 +4,7 @@ case "$*" in
     whoami)
         echo " ⛅️ wrangler 4.45.0"
         echo "Getting User settings..."
-        echo "👋 You are logged in with an OAuth Token, associated with the email admin@jterrazz.com."
+        echo "👋 You are logged in with an OAuth Token, associated with the email you@example.com."
         echo "Token: SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB"
         echo "┌──────────────┬──────────────────────────────────┐"
         echo "│ Account Name │ Account ID                       │"

@@ -13,9 +13,9 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ports/contract/contracttest"
 )
 
-const status = `{"BackendState":"Running","CertDomains":["jterrazz-macbook-pro.tail1234.ts.net"],
-"Self":{"ID":"n1","HostName":"jterrazz-macbook-pro","DNSName":"jterrazz-macbook-pro.tail1234.ts.net.","TailscaleIPs":["100.98.133.14"],"Online":true},
-"Peer":{"k2":{"ID":"n2","HostName":"jterrazz-mac-mini","DNSName":"jterrazz-mac-mini.tail1234.ts.net.","TailscaleIPs":["100.98.133.15"],"Online":true}}}`
+const status = `{"BackendState":"Running","CertDomains":["macbook-pro.tail1234.ts.net"],
+"Self":{"ID":"n1","HostName":"macbook-pro","DNSName":"macbook-pro.tail1234.ts.net.","TailscaleIPs":["100.98.133.14"],"Online":true},
+"Peer":{"k2":{"ID":"n2","HostName":"mac-mini","DNSName":"mac-mini.tail1234.ts.net.","TailscaleIPs":["100.98.133.15"],"Online":true}}}`
 
 type handler struct {
 	Proxy string `json:"Proxy,omitempty"`
@@ -63,7 +63,7 @@ func (c *cli) Output(_ context.Context, cmd local.Cmd) (local.Output, error) {
 		if c.AllowFunnel == nil {
 			c.AllowFunnel = map[string]bool{}
 		}
-		c.AllowFunnel["jterrazz-macbook-pro.tail1234.ts.net:"+port] = cmd.Args[len(cmd.Args)-1] != "off"
+		c.AllowFunnel["macbook-pro.tail1234.ts.net:"+port] = cmd.Args[len(cmd.Args)-1] != "off"
 		return local.Output{}, nil
 	}
 	return local.Output{Stderr: "unexpected invocation: " + args, ExitCode: 97}, nil
@@ -85,7 +85,7 @@ func (c *cli) serve(args []string) (port string) {
 			target = a
 		}
 	}
-	host := "jterrazz-macbook-pro.tail1234.ts.net:" + port
+	host := "macbook-pro.tail1234.ts.net:" + port
 	if c.TCP == nil {
 		c.TCP, c.Web = map[string]tcp{}, map[string]web{}
 	}

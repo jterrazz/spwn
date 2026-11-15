@@ -3,7 +3,7 @@
   "id": "menubar",
   "command": "menubar",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer"
   },
   "state": "ready",
@@ -11,7 +11,7 @@
     "cpu": {
       "kind": "percent",
       "n": 340,
-      "live": "cpu:jterrazz-macbook-pro"
+      "live": "cpu:macbook-pro"
     },
     "spark": [
       12,
@@ -35,7 +35,7 @@
       "kind": "ratio",
       "n": 14119704985,
       "of": 17179869184,
-      "live": "memory:jterrazz-macbook-pro"
+      "live": "memory:macbook-pro"
     },
     "memory_spark": [
       77,
@@ -78,7 +78,7 @@
         "kind": "size",
         "n": 1780000,
         "unit": "/s",
-        "live": "net:jterrazz-macbook-pro"
+        "live": "net:macbook-pro"
       }
     ]
   },
@@ -133,7 +133,7 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro",
+            "id": "macbook-pro",
             "mark": "ok",
             "label": "This Mac",
             "detail": {
@@ -142,16 +142,16 @@
             },
             "glyph": {
               "kind": "desktop",
-              "ring": "cpu:jterrazz-macbook-pro"
+              "ring": "cpu:macbook-pro"
             },
             "trail": "value",
-            "quick": "new-vm:jterrazz-macbook-pro",
-            "nav": "menubar.machine:jterrazz-macbook-pro",
+            "quick": "new-vm:macbook-pro",
+            "nav": "menubar.machine:macbook-pro",
             "menu": [
-              "title:jterrazz-macbook-pro",
-              "open:jterrazz-macbook-pro",
-              "new-vm:jterrazz-macbook-pro@menu",
-              "open-station@jterrazz-macbook-pro"
+              "title:macbook-pro",
+              "open:macbook-pro",
+              "new-vm:macbook-pro@menu",
+              "open-station@macbook-pro"
             ]
           }
         },
@@ -226,7 +226,7 @@
         {
           "group": {
             "head": {
-              "id": "jterrazz-macbook-pro",
+              "id": "macbook-pro",
               "mark": "ok",
               "label": "This Mac",
               "cells": [
@@ -296,7 +296,7 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
@@ -367,7 +367,7 @@
                 "default": "linux-1",
                 "note": "Generated, editable",
                 "taken": [
-                  "jterrazz-macbook-pro"
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -458,7 +458,7 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
@@ -529,7 +529,7 @@
                 "default": "linux-1",
                 "note": "Generated, editable",
                 "taken": [
-                  "jterrazz-macbook-pro"
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -573,11 +573,11 @@
       "label": "New VM",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro"
+        "macbook-pro"
       ],
       "priority": 1,
       "mutates": true,
-      "id": "new-vm:jterrazz-macbook-pro",
+      "id": "new-vm:macbook-pro",
       "run": {
         "call": "machines.create-workspace",
         "in": {
@@ -616,11 +616,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-macbook-pro",
+                "default": "new-vm:macbook-pro",
                 "swaps": true
               },
               {
@@ -687,7 +687,7 @@
                 "default": "linux-1",
                 "note": "Generated, editable",
                 "taken": [
-                  "jterrazz-macbook-pro"
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -718,7 +718,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-macbook-pro"
+          "open-new:new-vm:macbook-pro"
         ]
       },
       "icon": "plus",
@@ -733,7 +733,7 @@
       "label": "Create and Open in Terminal",
       "priority": 4,
       "mutates": true,
-      "id": "open-new:new-vm:jterrazz-macbook-pro",
+      "id": "open-new:new-vm:macbook-pro",
       "run": {
         "call": "machines.create-workspace",
         "in": {
@@ -779,11 +779,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-macbook-pro",
+                "default": "new-vm:macbook-pro",
                 "swaps": true
               },
               {
@@ -850,7 +850,7 @@
                 "default": "linux-1",
                 "note": "Generated, editable",
                 "taken": [
-                  "jterrazz-macbook-pro"
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -881,7 +881,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-macbook-pro"
+          "open-new:new-vm:macbook-pro"
         ]
       },
       "icon": "terminal",
@@ -894,7 +894,7 @@
       "label": "New VM",
       "priority": 1,
       "mutates": true,
-      "id": "new-server:jterrazz-macbook-pro",
+      "id": "new-server:macbook-pro",
       "run": {
         "call": "machines.create-server"
       },
@@ -907,11 +907,11 @@
             "kind": "select",
             "options": [
               {
-                "value": "new-server:jterrazz-macbook-pro",
+                "value": "new-server:macbook-pro",
                 "label": "This Mac"
               }
             ],
-            "default": "new-server:jterrazz-macbook-pro",
+            "default": "new-server:macbook-pro",
             "swaps": true
           },
           {
@@ -921,7 +921,7 @@
             "default": "linux-1",
             "note": "A server needs a name you will recognize",
             "taken": [
-              "jterrazz-macbook-pro"
+              "macbook-pro"
             ],
             "taken_hud": "{Name} already exists"
           },
@@ -940,11 +940,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-server:jterrazz-macbook-pro",
+                "default": "new-server:macbook-pro",
                 "swaps": true
               },
               {
@@ -1015,7 +1015,7 @@
           }
         ],
         "split": [
-          "open-new:new-server:jterrazz-macbook-pro"
+          "open-new:new-server:macbook-pro"
         ]
       },
       "icon": "plus",
@@ -1030,7 +1030,7 @@
       "label": "Create and Open in Terminal",
       "priority": 4,
       "mutates": true,
-      "id": "open-new:new-server:jterrazz-macbook-pro",
+      "id": "open-new:new-server:macbook-pro",
       "run": {
         "call": "machines.create-server",
         "then": {
@@ -1050,11 +1050,11 @@
             "kind": "select",
             "options": [
               {
-                "value": "new-server:jterrazz-macbook-pro",
+                "value": "new-server:macbook-pro",
                 "label": "This Mac"
               }
             ],
-            "default": "new-server:jterrazz-macbook-pro",
+            "default": "new-server:macbook-pro",
             "swaps": true
           },
           {
@@ -1064,7 +1064,7 @@
             "default": "linux-1",
             "note": "A server needs a name you will recognize",
             "taken": [
-              "jterrazz-macbook-pro"
+              "macbook-pro"
             ],
             "taken_hud": "{Name} already exists"
           },
@@ -1083,11 +1083,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-server:jterrazz-macbook-pro",
+                "default": "new-server:macbook-pro",
                 "swaps": true
               },
               {
@@ -1158,7 +1158,7 @@
           }
         ],
         "split": [
-          "open-new:new-server:jterrazz-macbook-pro"
+          "open-new:new-server:macbook-pro"
         ]
       },
       "icon": "terminal",
@@ -1289,13 +1289,13 @@
     {
       "label": "This Mac",
       "on": "menu",
-      "id": "title:jterrazz-macbook-pro"
+      "id": "title:macbook-pro"
     },
     {
       "key": "enter",
       "label": "Open",
       "on": "menu",
-      "id": "open:jterrazz-macbook-pro",
+      "id": "open:macbook-pro",
       "icon": "arrow.up.forward.square"
     },
     {
@@ -1304,7 +1304,7 @@
       "on": "menu",
       "priority": 1,
       "mutates": true,
-      "id": "new-vm:jterrazz-macbook-pro@menu",
+      "id": "new-vm:macbook-pro@menu",
       "run": {
         "call": "machines.create-workspace",
         "in": {
@@ -1343,11 +1343,11 @@
                     "label": "Workspace"
                   },
                   {
-                    "value": "new-server:jterrazz-macbook-pro",
+                    "value": "new-server:macbook-pro",
                     "label": "Server"
                   }
                 ],
-                "default": "new-vm:jterrazz-macbook-pro",
+                "default": "new-vm:macbook-pro",
                 "swaps": true
               },
               {
@@ -1414,7 +1414,7 @@
                 "default": "linux-1",
                 "note": "Generated, editable",
                 "taken": [
-                  "jterrazz-macbook-pro"
+                  "macbook-pro"
                 ],
                 "taken_hud": "{Request.Name} already exists"
               }
@@ -1445,7 +1445,7 @@
           }
         ],
         "split": [
-          "open-new:new-vm:jterrazz-macbook-pro"
+          "open-new:new-vm:macbook-pro"
         ]
       },
       "icon": "plus",
@@ -1460,7 +1460,7 @@
       "label": "Open in Terminal",
       "on": "menu",
       "priority": 2,
-      "id": "open-station@jterrazz-macbook-pro",
+      "id": "open-station@macbook-pro",
       "run": {
         "terminal": true
       },
@@ -1473,8 +1473,8 @@
   },
   "header": {},
   "live": [
-    "cpu:jterrazz-macbook-pro",
-    "memory:jterrazz-macbook-pro",
-    "net:jterrazz-macbook-pro"
+    "cpu:macbook-pro",
+    "memory:macbook-pro",
+    "net:macbook-pro"
   ]
 }

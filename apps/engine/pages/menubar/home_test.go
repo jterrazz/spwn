@@ -191,7 +191,7 @@ func TestAServerRowSaysItsHealth(t *testing.T) {
 // asleep one says when it was seen; one Mac alone adds Add a Mac.
 func TestAMacRowSaysWhatRunsThere(t *testing.T) {
 	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", time.Minute)
-	air := model.MacView{Name: "jterrazz-macbook-air", Asleep: true, Answered: heroNow.Add(-2 * time.Hour), Laptop: true}
+	air := model.MacView{Name: "macbook-air", Asleep: true, Answered: heroNow.Add(-2 * time.Hour), Laptop: true}
 	w.r.All.Macs = append(w.r.All.Macs, air)
 	s := homeSection(t, homeOf(t, w), SectionMacs)
 	got := rowWords(s)

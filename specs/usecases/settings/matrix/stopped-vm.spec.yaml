@@ -24,11 +24,11 @@ runs:
           ?	api	Workspace	stopped · not read since the engine started
           ○	linux-1	Workspace	stopped · last read 2 h ago
           ●	starship-dotfiles	●	●	?	●	3/3
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].engine.settings // {} | keys'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].engine.settings // {} | keys'' world.json'
       exit: 0
       stdout: |
           ["linux-1"]
-    - command: 'world engine-crash jterrazz-macbook-pro'
+    - command: 'world engine-crash macbook-pro'
       exit: 0
     - command: 'settings --all-machines --all | /usr/bin/grep -e "	Workspace	" -e "starship-dotfiles"'
       exit: 0
@@ -36,7 +36,7 @@ runs:
           ?	api	Workspace	stopped · not read since the engine started
           ?	linux-1	Workspace	stopped · not read since the engine started
           ●	starship-dotfiles	●	●	?	?	2/2
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].engine.settings // {} | keys'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].engine.settings // {} | keys'' world.json'
       exit: 0
       stdout: |
           []

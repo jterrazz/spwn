@@ -5,10 +5,10 @@ runs:
       exit: 0
       stdout: |
           	On linux-1 in this terminal. Other terminals stay on This Mac.
-    - command: 'overview --on jterrazz-mac-mini --json | /usr/bin/jq -r .machine.name'
+    - command: 'overview --on mac-mini --json | /usr/bin/jq -r .machine.name'
       exit: 0
       stdout: |
-          jterrazz-mac-mini
+          mac-mini
     - command: 'overview --json | /usr/bin/jq -r .machine.name'
       exit: 0
       stdout: |

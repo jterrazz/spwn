@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: not restarted: you typed "inf", not "infra"
           Hint: in a script: --confirm=infra
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
       exit: 0
       stdout: |
           {"pid":2001,"want":"running"}

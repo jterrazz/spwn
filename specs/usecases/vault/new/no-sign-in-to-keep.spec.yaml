@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["jterrazz-macbook-pro"].accounts.programs.gh)'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["macbook-pro"].accounts.programs.gh)'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {line: .CaptureLine, captures: (.Captures | length)}'''
       stdin: |

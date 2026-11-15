@@ -3,9 +3,9 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].accounts = {"programs": {"gh": {"Program": "gh", "State": "signed-in", "Who": "ci", "How": "own"}}}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].accounts = {"programs": {"gh": {"Program": "gh", "State": "signed-in", "Who": "ci", "How": "own"}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Program, .State, .Action] else .error | {code, subject, message} end'''
       stdin: |

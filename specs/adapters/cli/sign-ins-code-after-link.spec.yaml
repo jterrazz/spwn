@@ -9,5 +9,5 @@ runs:
       exit: 0
       stdout: |
           ["device-code","FAKE0000","dash.cloudflare.com"]
-          ["signed-in","admin@jterrazz.com"]
+          ["signed-in","you@example.com"]
           0

@@ -11,7 +11,7 @@ runs:
       exit: 0
       stdout: |
           	Ports	Public 1 · Private 2
-    - command: 'ports --on jterrazz-mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "infra") | .class] | group_by(.) | map([.[0], length])'''
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "infra") | .class] | group_by(.) | map([.[0], length])'''
       exit: 0
       stdout: |
           [["private",2],["public",1]]

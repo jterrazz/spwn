@@ -24,4 +24,4 @@ runs:
     - command: 'machines --json | /usr/bin/jq -c ''.findings'''
       exit: 0
       stdout: |
-          [{"machine":"jterrazz-mac-mini","severity":"needs-a-look","section":"overview","subject":"mac-mini","text":"mac-mini runs v3.2.0","fix":{"call":null,"command":null,"path":"update station there (scripts/install.sh)"}}]
+          [{"machine":"mac-mini","severity":"needs-a-look","section":"overview","subject":"mac-mini","text":"mac-mini runs v3.2.0","fix":{"call":null,"command":null,"path":"update station there (scripts/install.sh)"}}]

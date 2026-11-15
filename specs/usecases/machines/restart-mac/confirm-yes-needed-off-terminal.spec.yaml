@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: refusing to restart without --yes
           Hint: re-run with --yes
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].engine.started_at < .now'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].engine.started_at < .now'' world.json'
       exit: 0
       stdout: |
           true

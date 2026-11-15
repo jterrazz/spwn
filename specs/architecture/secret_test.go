@@ -67,7 +67,7 @@ func leakingServer() remoteserve.Server {
 	leak := leaking()
 	return remoteserve.Server{
 		Calls:       func(name string) (call.Handler, bool) { return leak, name == "machines.leak" },
-		ThisMachine: machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Computer},
+		ThisMachine: machine.Profile{Ref: machine.Ref{Name: "macbook-pro"}, Kind: machine.Computer},
 	}
 }
 
@@ -92,14 +92,14 @@ func TestTripwireCatches(t *testing.T) {
 				return conn{Reader: outR, Writer: inW, closers: []io.Closer{outR, inW}}, nil
 			})
 			var out leakOut
-			_ = client.Call(t.Context(), "machines.leak", machine.Ref{Name: "jterrazz-macbook-pro"}, struct{}{}, &out, nil)
+			_ = client.Call(t.Context(), "machines.leak", machine.Ref{Name: "macbook-pro"}, struct{}{}, &out, nil)
 		}},
 		{"an answer from another Mac", func(t *testing.T) {
 			far, err := call.NewRegistry([]call.Handler{leaking()})
 			if err != nil {
 				t.Fatal(err)
 			}
-			mini := machine.Profile{Ref: machine.Ref{Name: "jterrazz-mac-mini"}, Kind: machine.Computer}
+			mini := machine.Profile{Ref: machine.Ref{Name: "mac-mini"}, Kind: machine.Computer}
 			d := remotefake.New()
 			d.Serve(mini.Ref.Name, remotefake.Mac{Registry: far, Profile: mini})
 			e, err := d.Dial(t.Context(), mini.Ref.Name)

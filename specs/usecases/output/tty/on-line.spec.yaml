@@ -5,7 +5,7 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" overview --on jterrazz-mac-mini | /usr/bin/head -6'
+    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" overview --on mac-mini | /usr/bin/head -6'
       stdin: |
           scrollback
       exit: 0

@@ -93,7 +93,7 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/gh",
+            "id": "macbook-pro/gh",
             "mark": "pending",
             "label": "gh",
             "short": "GitHub",
@@ -120,7 +120,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/npm",
+            "id": "macbook-pro/npm",
             "mark": "pending",
             "label": "npm",
             "short": "npm",
@@ -147,7 +147,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/claude",
+            "id": "macbook-pro/claude",
             "mark": "pending",
             "label": "claude",
             "short": "Claude",
@@ -174,7 +174,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/wrangler",
+            "id": "macbook-pro/wrangler",
             "mark": "pending",
             "label": "wrangler",
             "short": "Cloudflare",

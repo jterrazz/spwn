@@ -1,12 +1,12 @@
 description: 'a keep-awake --on a Mac that sleeps normally is held there, by that Mac''s engine'
 env: mini-sleeps
 runs:
-    - command: 'awake 30m --on jterrazz-mac-mini'
+    - command: 'awake 30m --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	jterrazz-mac-mini	stays awake until 10:30
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].power.holds'' world.json'
+          ●	mac-mini	stays awake until 10:30
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power.holds'' world.json'
       exit: 0
       stdout: |
           ["station: station awake 30m"]

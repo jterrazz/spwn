@@ -28,7 +28,7 @@ runs:
       stderr: |
           Error: 1 of 18 could not be freed
           Hint: re-run it: station disk free homebrew
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].disk.files | {homebrew: .["~/Library/Caches/Homebrew/downloads/x"], go: .["~/Library/Caches/go-build/00/a"]}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {homebrew: .["~/Library/Caches/Homebrew/downloads/x"], go: .["~/Library/Caches/go-build/00/a"]}'' world.json'
       exit: 0
       stdout: |
           {"homebrew":2100000000,"go":null}

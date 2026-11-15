@@ -1,7 +1,7 @@
 description: 'the engine of another Mac reads through that Mac'
 env: two-macs
 runs:
-    - command: 'engine --on jterrazz-mac-mini'
+    - command: 'engine --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

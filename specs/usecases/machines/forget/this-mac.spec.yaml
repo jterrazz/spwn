@@ -1,7 +1,7 @@
 description: 'forget refuses This Mac by its name or its short one: exit 2, nothing changes'
 env: two-macs
 runs:
-    - command: 'machines forget jterrazz-macbook-pro --yes'
+    - command: 'machines forget macbook-pro --yes'
       exit: 2
       stderr: |
           Error: this is This Mac: station forgets only the other Macs
@@ -11,7 +11,7 @@ runs:
       stderr: |
           Error: this is This Mac: station forgets only the other Macs
           Hint: station machines
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].preferences.macs | keys'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.macs | keys'' world.json'
       exit: 0
       stdout: |
-          ["jterrazz-mac-mini"]
+          ["mac-mini"]

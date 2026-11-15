@@ -93,7 +93,7 @@ final class PagesTests: XCTestCase {
         let (frame, _) = try await sent(stop, answers: [ActionRunner.typedKey: "infra"], label: "mb-stop-srv")
         XCTAssertEqual(frame.call, "machines.stop")
         XCTAssertEqual(frame.input, ["VM": "infra", "Confirm": "infra"])
-        XCTAssertEqual(frame.target, ["name": "jterrazz-mac-mini"])
+        XCTAssertEqual(frame.target, ["name": "mac-mini"])
     }
 
     // invariant: SPEC A5: Restart on infra is a typed sheet as machines.restart
@@ -106,7 +106,7 @@ final class PagesTests: XCTestCase {
         let (frame, started) = try await sent(restart, answers: [ActionRunner.typedKey: "infra"], label: "mb-restart")
         XCTAssertEqual(frame.call, "machines.restart")
         XCTAssertEqual(frame.input, ["Name": "infra", "Confirm": "infra"])
-        XCTAssertEqual(frame.target, ["name": "jterrazz-mac-mini"])
+        XCTAssertEqual(frame.target, ["name": "mac-mini"])
         XCTAssertEqual(started, [])
     }
 
@@ -135,7 +135,7 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(share.form?.fields?.last?.options ?? [], [])
         XCTAssertEqual(share.form?.fields?.last?.note, "Nothing listens in linux-1 right now.")
         XCTAssertNil(share.run)
-        XCTAssertEqual(PortRow.link(try XCTUnwrap(page.section("private")?.rows.first), in: page.actions ?? [])?.run?.open, "https://jterrazz-macbook-pro.tail77a797.ts.net:40001")
+        XCTAssertEqual(PortRow.link(try XCTUnwrap(page.section("private")?.rows.first), in: page.actions ?? [])?.run?.open, "https://macbook-pro.tail77a797.ts.net:40001")
     }
 
     // invariant: AU-15: Remove on a grant of linux-1's page asks yes or no,
@@ -188,7 +188,7 @@ final class PagesTests: XCTestCase {
     // that machine's page and draws what the mini's engine streams.
     func testRemotePageRenders() async throws {
         let page = try Tree.page("menubar.mac.mini")
-        XCTAssertEqual(page.context?.machine, "jterrazz-mac-mini")
+        XCTAssertEqual(page.context?.machine, "mac-mini")
         XCTAssertEqual(page.section("vms")?.items?.first?.row?.label, "infra")
         XCTAssertEqual(page.section("summary")?.title, "mac-mini")
         let engine = try FakeEngine("mb-remote")
@@ -196,13 +196,13 @@ final class PagesTests: XCTestCase {
         let frame = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["event": "page", "page": JSONSerialization.jsonObject(with: page.encoded())]])
         engine.serveOnce(frame + [0x0A], thenClose: true)
         let got = Box()
-        let sub = Subscription(path: engine.path, pages: [PageID.of("jterrazz-mac-mini")], clock: TestClock()) { event in
+        let sub = Subscription(path: engine.path, pages: [PageID.of("mac-mini")], clock: TestClock()) { event in
             if case .page(let p) = event { got.set(p) }
         }
         let task = Task.detached { await sub.run() }
         for _ in 0..<500 where got.page == nil { try? await Task.sleep(nanoseconds: 10_000_000) }
         task.cancel()
-        XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar.machine:jterrazz-mac-mini"]},"v":2,"watch":"page"}"#])
+        XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar.machine:mac-mini"]},"v":2,"watch":"page"}"#])
         XCTAssertEqual(got.page?.section("vms"), page.section("vms"))
     }
 }

@@ -13,7 +13,7 @@ runs:
       stdout: |
           ●	linux-1	stopped, kept
           ◐	linux-1	linux-1 did not stop: the agents' journal could not be read
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].pid'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].pid'' world.json'
       exit: 0
       stdout: |
           null

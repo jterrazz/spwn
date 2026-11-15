@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           ●	linux-1:7000	not shared
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {reserved: [.["jterrazz-macbook-pro"].stores.reservations[].guest_port], remembered: .["jterrazz-macbook-pro"].preferences.ports.not_shared, inside: .["linux-1"].preferences}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {reserved: [.["macbook-pro"].stores.reservations[].guest_port], remembered: .["macbook-pro"].preferences.ports.not_shared, inside: .["linux-1"].preferences}'' world.json'
       exit: 0
       stdout: |
           {"reserved":[5173],"remembered":["linux-1:7000"],"inside":null}

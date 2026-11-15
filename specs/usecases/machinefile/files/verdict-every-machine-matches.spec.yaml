@@ -1,12 +1,12 @@
 description: 'every follower matching its file: the page says so, ok'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {name: "jterrazz-macbook-pro", bound_at: "2026-10-29T10:30:00Z"}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {name: "macbook-pro", bound_at: "2026-10-29T10:30:00Z"}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
       exit: 0
     - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Verdict'''

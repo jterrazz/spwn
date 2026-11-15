@@ -8,9 +8,9 @@ import (
 
 func TestAMacIsNamedWithoutTheUserBothNamesStartWith(t *testing.T) {
 	for _, c := range []struct{ name, self, want string }{
-		{"jterrazz-macbook-pro", "jterrazz-macbook-pro", page.ThisMac},
-		{"jterrazz-mac-mini", "jterrazz-macbook-pro", "mac-mini"},
-		{"mac-mini", "jterrazz-macbook-pro", "mac-mini"},
+		{"sam-macbook-pro", "sam-macbook-pro", page.ThisMac},
+		{"sam-mac-mini", "sam-macbook-pro", "mac-mini"},
+		{"mac-mini", "sam-macbook-pro", "mac-mini"},
 		{"macbook-air", "macbook-pro", "macbook-air"},
 		{"mac-mini", "macbook-pro", "mac-mini"},
 		{"studio", "", "studio"},

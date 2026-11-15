@@ -14,7 +14,7 @@ import (
 // it runs.
 func overviewOf(needs bool) overview.Summary {
 	s := overview.Summary{
-		Head:   overview.Head{Name: "jterrazz-macbook-pro", Kind: machine.Computer, ThisMac: true, Up: 3 * 24 * time.Hour},
+		Head:   overview.Head{Name: "macbook-pro", Kind: machine.Computer, ThisMac: true, Up: 3 * 24 * time.Hour},
 		Engine: overview.EngineRunning,
 		Lines: []overview.Line{
 			{Section: "activity", Parts: []overview.Part{{Word: "CPU 34%"}, {Word: "memory 12.4 of 16 GB"}, {Bytes: 388_000_000_000, Word: "free"}, {Word: "in 2.1 MB/s"}}},
@@ -53,7 +53,7 @@ func overviewPages() []Fixture {
 	return states("overview",
 		pagehome.Summary(loading, thisMacContext(), []string{loading.Head.Name}, false),
 		pagehome.Summary(overviewOf(false), thisMacContext(), []string{overviewOf(false).Head.Name}, false),
-		failure("overview", "overview", "the engine is stopped on jterrazz-macbook-pro", "station engine start"),
+		failure("overview", "overview", "the engine is stopped on macbook-pro", "station engine start"),
 		pagehome.Summary(overviewOf(true), thisMacContext(), []string{overviewOf(true).Head.Name}, false),
 	)
 }

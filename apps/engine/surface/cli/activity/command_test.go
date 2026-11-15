@@ -35,8 +35,8 @@ func (silentGuest) Watch(context.Context, machine.Ref, string, any, call.Progres
 }
 
 func TestAServerWhoseGuestStopsAnsweringBeforeItsMacNoticesIsShownFromItsMac(t *testing.T) {
-	mini := machine.Ref{Name: "jterrazz-mac-mini"}
-	env := kit.Env{Calls: silentGuest{mini: mini}, Self: machine.Ref{Name: "jterrazz-macbook"}}
+	mini := machine.Ref{Name: "mac-mini"}
+	env := kit.Env{Calls: silentGuest{mini: mini}, Self: machine.Ref{Name: "macbook"}}
 	d := Deps{Label: func(string) string { return "mac-mini" }}
 	v, err := vm(t.Context(), d, env, mini, "infra", machine.Server, true, read{})
 	if err != nil {

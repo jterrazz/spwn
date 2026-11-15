@@ -1,7 +1,7 @@
 description: 'herdr-core where Herdr was never opened: herdr-app installs, then the step says open it once'
 env: two-macs
 runs:
-    - command: 'world unopened jterrazz-macbook-pro herdr-app'
+    - command: 'world unopened macbook-pro herdr-app'
       exit: 0
     - command: 'apps install herdr-core'
       exit: 0

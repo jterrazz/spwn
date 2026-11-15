@@ -50,7 +50,7 @@ func TestWhoReachesAPortDependsOnItsAddressAndWhereItsMachineSits(t *testing.T) 
 }
 
 func TestADeclarationTakesARedPortOutOfNeedsYouButNotOutOfPublic(t *testing.T) {
-	mini := machine.Ref{Name: "jterrazz-mac-mini"}
+	mini := machine.Ref{Name: "mac-mini"}
 	m := ports.Machine{Ref: mini, At: ports.OnMac, Listening: []ports.Listener{
 		{Port: 5000, Bind: "*", Process: "ControlCenter"},
 		{Port: 9000, Bind: "*", Process: "node"},
@@ -62,7 +62,7 @@ func TestADeclarationTakesARedPortOutOfNeedsYouButNotOutOfPublic(t *testing.T) {
 		t.Fatalf("%d ports, want the system's own unknown listener left out", len(ps))
 	}
 	found := ports.Exposed(ps)
-	if len(found) != 1 || found[0].Subject != "jterrazz-mac-mini:5000" || found[0].Severity != finding.Broken || found[0].Fix.Path == "" {
+	if len(found) != 1 || found[0].Subject != "mac-mini:5000" || found[0].Severity != finding.Broken || found[0].Fix.Path == "" {
 		t.Fatalf("findings %+v, want 5000 alone, broken, with where to turn it off", found)
 	}
 	if ps[1].Class() != ports.Public || ps[1].Red() {

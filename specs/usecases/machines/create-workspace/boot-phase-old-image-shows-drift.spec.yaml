@@ -2,7 +2,7 @@ description: 'a workspace from an image its Machinefile moved on from shows that
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -12,9 +12,9 @@ runs:
       exit: 0
     - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''(.macs["jterrazz-macbook-pro"].stores.images[] | select(.name == "studio-linux") | .lock) = "lock: station.lock/v1\nmachinefile: studio-linux\napps:\n  - { name: mise, method: script, version: 2026.11.1 }\n  - { name: git, method: apt }\n"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''(.macs["macbook-pro"].stores.images[] | select(.name == "studio-linux") | .lock) = "lock: station.lock/v1\nmachinefile: studio-linux\napps:\n  - { name: mise, method: script, version: 2026.11.1 }\n  - { name: git, method: apt }\n"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -28,8 +28,8 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	vite	5173	https://jterrazz-macbook-pro.tail1234.ts.net:40003
-          ●	expo	8081	https://jterrazz-macbook-pro.tail1234.ts.net:40000
+          ●	vite	5173	https://macbook-pro.tail1234.ts.net:40003
+          ●	expo	8081	https://macbook-pro.tail1234.ts.net:40000
           ●	Boot phase	studio-linux
           ◐	Drift	from its image	jq is not baked into the image
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB

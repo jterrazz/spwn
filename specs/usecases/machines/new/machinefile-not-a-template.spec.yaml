@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/shell-bits.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/shell-bits.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: shell-bits

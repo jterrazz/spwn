@@ -22,7 +22,7 @@
           "kind": "text",
           "text": "on mac-mini",
           "pri": 1,
-          "nav": "menubar.machine:jterrazz-mac-mini"
+          "nav": "menubar.machine:mac-mini"
         },
         {
           "kind": "text",
@@ -647,7 +647,7 @@
           "Name": "infra"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       }
     },
@@ -677,7 +677,7 @@
           "VM": "infra"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       }
     },
@@ -707,7 +707,7 @@
           "VM": "infra"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       },
       "destructive": true
@@ -790,7 +790,7 @@
           "Name": "infra"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       },
       "icon": "arrow.clockwise",
@@ -822,7 +822,7 @@
           "VM": "infra"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       },
       "icon": "stop",
@@ -854,7 +854,7 @@
           "VM": "infra"
         },
         "target": {
-          "name": "jterrazz-mac-mini"
+          "name": "mac-mini"
         }
       },
       "icon": "trash",

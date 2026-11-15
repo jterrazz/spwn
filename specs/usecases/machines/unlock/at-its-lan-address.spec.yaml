@@ -5,11 +5,11 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: 'machines >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].preferences.macs["jterrazz-mac-mini"].lan'' world.json'
+    - command: 'machines >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].preferences.macs["mac-mini"].lan'' world.json'
       exit: 0
       stdout: |
           192.168.1.20
-    - command: 'world power-cut jterrazz-mac-mini'
+    - command: 'world power-cut mac-mini'
       exit: 0
     - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines unlock mac-mini'
       stdin: |
@@ -18,7 +18,7 @@ runs:
       exit: 0
       stdout: |
           ✓ mac-mini · unlocked · on Tailscale again
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"] | [.locked, .offline]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | [.locked, .offline]'' world.json'
       exit: 0
       stdout: |
           [null,null]

@@ -1,14 +1,14 @@
 {
     "now": "2026-11-04T10:00:05Z",
-    "this_mac": "jterrazz-macbook-pro",
+    "this_mac": "macbook-pro",
     "user": "jterrazz",
     "macs": {
-        "jterrazz-macbook-pro": {
+        "macbook-pro": {
             "engine": {
                 "started_at": "2026-11-01T10:00:00Z"
             },
             "preferences": {
-                "here": "jterrazz-macbook-pro",
+                "here": "macbook-pro",
                 "vm_user": "admin"
             },
             "processes": [

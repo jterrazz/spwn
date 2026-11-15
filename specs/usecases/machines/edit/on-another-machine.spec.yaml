@@ -1,7 +1,7 @@
 description: 'a VM of another Mac is edited through that Mac, and its new size is that Mac''s record'
 env: two-macs
 runs:
-    - command: 'machines edit infra --cpus 10 --on jterrazz-mac-mini'
+    - command: 'machines edit infra --cpus 10 --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

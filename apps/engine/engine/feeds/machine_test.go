@@ -36,8 +36,8 @@ import (
 )
 
 const (
-	thisMac = "jterrazz-macbook-pro"
-	mini    = "jterrazz-mac-mini"
+	thisMac = "macbook-pro"
+	mini    = "mac-mini"
 	gb      = int64(1) << 30
 )
 

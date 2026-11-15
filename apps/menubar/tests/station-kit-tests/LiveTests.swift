@@ -4,13 +4,13 @@ import XCTest
 
 @MainActor
 final class LiveTests: XCTestCase {
-    static let key = "cpu:jterrazz-macbook-pro"
+    static let key = "cpu:macbook-pro"
 
     static func value(_ json: String) -> Value {
         try! JSONDecoder().decode(Value.self, from: Data(json.utf8))
     }
 
-    static let pageCPU = value(#"{"kind":"percent","n":120,"live":"cpu:jterrazz-macbook-pro"}"#)
+    static let pageCPU = value(#"{"kind":"percent","n":120,"live":"cpu:macbook-pro"}"#)
     static let tick = value(#"{"kind":"spark","items":[{"kind":"percent","n":450},{"kind":"count","n":15},{"kind":"count","n":45}]}"#)
     static let tickCPU = value(#"{"kind":"percent","n":450}"#)
 

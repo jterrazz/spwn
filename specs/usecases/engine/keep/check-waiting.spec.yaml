@@ -12,4 +12,4 @@ runs:
     - command: 'machines | /usr/bin/grep infra'
       exit: 0
       stdout: |
-          ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

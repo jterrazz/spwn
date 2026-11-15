@@ -1,10 +1,10 @@
 {
     "now": "2026-11-04T10:00:00Z",
-    "this_mac": "jterrazz-macbook-pro",
+    "this_mac": "macbook-pro",
     "macs": {
-        "jterrazz-macbook-pro": {
+        "macbook-pro": {
             "files": {
-                "settings.json": "{\n  \"here\": \"jterrazz-macbook-pro\",\n  \"hosts\": {\n    \"jterrazz-macbook-pro\": {}\n  },\n  \"vm_user\": \"admin\"\n}\n"
+                "settings.json": "{\n  \"here\": \"macbook-pro\",\n  \"hosts\": {\n    \"macbook-pro\": {}\n  },\n  \"vm_user\": \"admin\"\n}\n"
             },
             "jobs": {
                 "com.jterrazz.station.daemon": {

@@ -3,7 +3,7 @@
   "id": "menubar.ports",
   "command": "menubar",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer"
   },
   "state": "ready",
@@ -124,7 +124,7 @@
       ],
       "id": "open-port:linux-1:5173",
       "run": {
-        "open": "https://jterrazz-macbook-pro.tail77a797.ts.net:40001"
+        "open": "https://macbook-pro.tail77a797.ts.net:40001"
       }
     },
     {
@@ -135,14 +135,14 @@
       ],
       "id": "copy-port:linux-1:5173",
       "run": {
-        "copy": "https://jterrazz-macbook-pro.tail77a797.ts.net:40001"
+        "copy": "https://macbook-pro.tail77a797.ts.net:40001"
       },
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Copied https://jterrazz-macbook-pro.tail77a797.ts.net:40001"
+            "text": "Copied https://macbook-pro.tail77a797.ts.net:40001"
           }
         ]
       }
@@ -182,7 +182,7 @@
         "call": "ports.stop-sharing",
         "in": {
           "Confirm": "yes",
-          "Mac": "\"jterrazz-macbook-pro\"",
+          "Mac": "\"macbook-pro\"",
           "Port": "\"5173\"",
           "VM": "\"linux-1\""
         }
@@ -234,7 +234,7 @@
         "call": "ports.stop-sharing",
         "in": {
           "Confirm": "yes",
-          "Mac": "\"jterrazz-macbook-pro\"",
+          "Mac": "\"macbook-pro\"",
           "Port": "\"7000\"",
           "VM": "\"linux-1\""
         }

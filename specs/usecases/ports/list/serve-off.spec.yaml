@@ -4,7 +4,7 @@ runs:
     - command: 'ports | /usr/bin/cut -f1-4,6-'
       exit: 0
       stdout: |
-          ◐	Tailscale	signed in · jterrazz-macbook-pro.tail1234.ts.net · ports are local only	Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console
+          ◐	Tailscale	signed in · macbook-pro.tail1234.ts.net · ports are local only	Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console
           # Private: shared with you on Tailscale	2 ◐
           ◐	linux-1	5173	private	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console	node	probably Vite
           ◐	linux-1	7000	private	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console	server

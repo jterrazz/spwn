@@ -200,7 +200,7 @@ func sceneSamples() map[string][]activity.Reading {
 }
 
 func loan(provider, name string, left time.Duration, may ...string) accounts.Account {
-	return accounts.Account{Provider: provider, State: catalog.StateOK, Origin: accounts.OriginShared, Identity: []string{"admin@jterrazz.com"}, Scopes: append([]string{name}, may...),
+	return accounts.Account{Provider: provider, State: catalog.StateOK, Origin: accounts.OriginShared, Identity: []string{"you@example.com"}, Scopes: append([]string{name}, may...),
 		Shared: &accounts.Loan{Name: name, At: storyNow.Add(left - 12*time.Hour), Until: storyNow.Add(left)}}
 }
 
@@ -212,7 +212,7 @@ func sceneAccounts() accounts.Report {
 		{Name: proName, Kind: accounts.KindComputer, ThisMac: true, Accounts: []accounts.Account{
 			own(catalog.ProviderGitHub, []string{"jterrazz"}, []string{"repo", "workflow"}, "", "github.com"),
 			{Provider: catalog.ProviderNPM, State: catalog.StateBroken, Reason: accounts.ReasonRefused, Origin: accounts.OriginOwn, Identity: []string{"?"}, Detail: "signed out of registry.npmjs.org", Hint: "npm login"},
-			own(catalog.ProviderClaude, []string{"admin@jterrazz.com"}, []string{"max"}, "", "claude.ai"),
+			own(catalog.ProviderClaude, []string{"you@example.com"}, []string{"max"}, "", "claude.ai"),
 		}},
 		vm("linux-1", "ephemeral", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 24*time.Minute, "Max plan"), loan(catalog.ProviderGitHub, "session:github", 4*time.Hour, "read only")),
 		vm("linux-3", "ephemeral", loan(catalog.ProviderGitHub, "github", 6*time.Hour)),

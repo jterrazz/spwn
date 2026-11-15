@@ -6,10 +6,10 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [fd, eza]
       exit: 0
@@ -22,14 +22,14 @@ runs:
           scrollback
       exit: 130
       stdout: |
-          jterrazz-macbook-pro · 2 to install · 1 present
+          macbook-pro · 2 to install · 1 present
 
           To install
             ○ fd   brew
             ○ eza  brew
 
           → station apply  carries it out
-          ✗ jterrazz-macbook-pro interrupted · 1 changed
+          ✗ macbook-pro interrupted · 1 changed
 
           Changes
             ● homebrew  5.0.1   script  the manager of fd
@@ -37,11 +37,11 @@ runs:
             ○ eza               brew    not run · station apply resumes
 
           → station apply  resumes
-    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].files["machinefiles/jterrazz-macbook-pro.lock"]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].files["machinefiles/macbook-pro.lock"]'' world.json'
       exit: 0
       stdout: |+
           lock: station.lock/v1
-          machinefile: jterrazz-macbook-pro
+          machinefile: macbook-pro
           apps:
               - name: fd
                 method: brew

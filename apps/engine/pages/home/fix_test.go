@@ -8,12 +8,12 @@ import (
 )
 
 func TestAFixPrintsAsTheCommandThatRunsIt(t *testing.T) {
-	const self = "jterrazz-macbook-pro"
+	const self = "macbook-pro"
 	cases := map[string]struct {
 		need overview.Need
 		want string
 	}{
-		"a server's restart on another Mac": {overview.Need{Call: "machines.restart", Args: map[string]string{"Name": "infra"}, On: "jterrazz-mac-mini", Confirm: "infra"},
+		"a server's restart on another Mac": {overview.Need{Call: "machines.restart", Args: map[string]string{"Name": "infra"}, On: "mac-mini", Confirm: "infra"},
 			"station machines restart infra --confirm=infra --on mac-mini"},
 		"a workspace's delete on this Mac": {overview.Need{Call: "machines.delete", Args: map[string]string{"VM": "agent-7f"}, On: self, Confirm: "agent-7f"},
 			"station machines delete agent-7f --confirm=agent-7f"},
@@ -21,7 +21,7 @@ func TestAFixPrintsAsTheCommandThatRunsIt(t *testing.T) {
 			"station apps update --manager tools --on linux-1"},
 		"a task's removal here":          {overview.Need{Call: "background.remove", Args: map[string]string{"Label": "com.x.y"}, On: self}, "station background remove com.x.y"},
 		"a misplaced folder's move":      {overview.Need{Call: "disk.move", Args: map[string]string{"Folder": "~/Old"}, On: self}, "station disk move ~/Old"},
-		"a sign-in again on another Mac": {overview.Need{Call: "accounts.login", Args: map[string]string{"Program": "wrangler"}, On: "jterrazz-mac-mini"}, "station accounts login wrangler --on mac-mini"},
+		"a sign-in again on another Mac": {overview.Need{Call: "accounts.login", Args: map[string]string{"Program": "wrangler"}, On: "mac-mini"}, "station accounts login wrangler --on mac-mini"},
 		"an app's update":                {overview.Need{Call: "apps.update", Args: map[string]string{"Names": "node"}, On: self}, "station apps update node"},
 	}
 	for name, c := range cases {

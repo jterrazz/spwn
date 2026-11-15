@@ -2,7 +2,7 @@ description: 'off a terminal, an upgrade whose update asks your password refuses
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/rooted.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/rooted.yaml'
       stdin: |
           package: station.package/v1
           kind: app
@@ -12,12 +12,12 @@ runs:
           methods:
               - { os: macos, brew: rooted, needs: [sudo] }
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.installed.rooted = "1.0.0" | .macs["jterrazz-macbook-pro"].apps.brew.behind.rooted = "1.1.0"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.brew.installed.rooted = "1.0.0" | .macs["macbook-pro"].apps.brew.behind.rooted = "1.1.0"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [rooted]
       exit: 0

@@ -1,7 +1,7 @@
 description: 'a move installs the app by the manager asked, then uninstalls the copy the old one held'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/jq.yaml'
       stdin: |
           package: station.package/v1
           kind: app
@@ -17,7 +17,7 @@ runs:
       stdout: |
           ●	jq	1.0.0	mise	moved from brew
           ●	brew copy			uninstalled
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].apps | [.brew.installed.jq, .mise.installed.jq]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].apps | [.brew.installed.jq, .mise.installed.jq]'' world.json'
       exit: 0
       stdout: |
           [null,"1.0.0"]

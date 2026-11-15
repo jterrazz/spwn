@@ -15,9 +15,9 @@ runs:
       exit: 0
       stdout: |
           # Agents	2 ●
-          ●	linux-1	claudecode	working	Build the landing page	linux-1	jterrazz-macbook-pro	24s ago
-          ●	linux-1·2	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	12s ago
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.terminals | map({address, name, typed})'' world.json'
+          ●	linux-1	claudecode	working	Build the landing page	linux-1	macbook-pro	24s ago
+          ●	linux-1·2	claudecode	working	Write the changelog	linux-1	macbook-pro	12s ago
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents.terminals | map({address, name, typed})'' world.json'
       exit: 0
       stdout: |
           [{"address":"t1","name":"linux-1","typed":["Build the landing page"]},{"address":"t2","name":"linux-1·2","typed":["Write the changelog"]}]

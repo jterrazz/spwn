@@ -22,6 +22,6 @@ func machinefilePages() []Fixture {
 	return states("machinefile",
 		pending(pagemachinefile.Explain("studio-linux", "", explained(), thisMacContext())),
 		pagemachinefile.Explain("studio-linux", "", nil, thisMacContext()),
-		failure("machinefile", "explain", "no Machinefile named jterrazz-macbook-pro", "station explain --machinefile <name>"),
+		failure("machinefile", "explain", "no Machinefile named macbook-pro", "station explain --machinefile <name>"),
 		pagemachinefile.Explain("studio-linux", "", explained(), thisMacContext()))
 }

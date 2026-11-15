@@ -73,9 +73,9 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/git-shortcuts",
+            "id": "macbook-pro/git-shortcuts",
             "mark": "attention",
-            "label": "jterrazz-macbook-pro",
+            "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
@@ -95,9 +95,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/claude-token",
+            "id": "macbook-pro/claude-token",
             "mark": "attention",
-            "label": "jterrazz-macbook-pro",
+            "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
@@ -117,9 +117,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/ssh-key",
+            "id": "macbook-pro/ssh-key",
             "mark": "attention",
-            "label": "jterrazz-macbook-pro",
+            "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
@@ -139,9 +139,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/tart-launcher",
+            "id": "macbook-pro/tart-launcher",
             "mark": "attention",
-            "label": "jterrazz-macbook-pro",
+            "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
@@ -161,9 +161,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/firewall",
+            "id": "macbook-pro/firewall",
             "mark": "attention",
-            "label": "jterrazz-macbook-pro",
+            "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
@@ -189,9 +189,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/screen-lock",
+            "id": "macbook-pro/screen-lock",
             "mark": "attention",
-            "label": "jterrazz-macbook-pro",
+            "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
@@ -221,9 +221,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/git-shortcuts",
+            "id": "mac-mini/git-shortcuts",
             "mark": "attention",
-            "label": "jterrazz-mac-mini",
+            "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
@@ -237,15 +237,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff git-shortcuts --on jterrazz-mac-mini"
+              "command": "station settings diff git-shortcuts --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/claude-token",
+            "id": "mac-mini/claude-token",
             "mark": "attention",
-            "label": "jterrazz-mac-mini",
+            "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
@@ -259,15 +259,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff claude-token --on jterrazz-mac-mini"
+              "command": "station settings diff claude-token --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/ssh-key",
+            "id": "mac-mini/ssh-key",
             "mark": "attention",
-            "label": "jterrazz-mac-mini",
+            "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
@@ -281,15 +281,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key --on jterrazz-mac-mini"
+              "command": "station settings diff ssh-key --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/tart-launcher",
+            "id": "mac-mini/tart-launcher",
             "mark": "attention",
-            "label": "jterrazz-mac-mini",
+            "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
@@ -303,15 +303,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher --on jterrazz-mac-mini"
+              "command": "station settings diff tart-launcher --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/firewall",
+            "id": "mac-mini/firewall",
             "mark": "attention",
-            "label": "jterrazz-mac-mini",
+            "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
@@ -337,9 +337,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/screen-lock",
+            "id": "mac-mini/screen-lock",
             "mark": "attention",
-            "label": "jterrazz-mac-mini",
+            "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
@@ -575,9 +575,9 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro",
+            "id": "macbook-pro",
             "mark": "ok",
-            "label": "jterrazz-macbook-pro",
+            "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
@@ -598,9 +598,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini",
+            "id": "mac-mini",
             "mark": "ok",
-            "label": "jterrazz-mac-mini",
+            "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
@@ -714,13 +714,13 @@
           "keep": 100
         },
         {
-          "key": "jterrazz-macbook-pro",
+          "key": "macbook-pro",
           "label": "This Mac",
           "kind": "text",
           "keep": 20
         },
         {
-          "key": "jterrazz-mac-mini",
+          "key": "mac-mini",
           "label": "mac-mini",
           "kind": "text",
           "keep": 20
@@ -911,13 +911,13 @@
           "keep": 100
         },
         {
-          "key": "jterrazz-macbook-pro",
+          "key": "macbook-pro",
           "label": "This Mac",
           "kind": "text",
           "keep": 20
         },
         {
-          "key": "jterrazz-mac-mini",
+          "key": "mac-mini",
           "label": "mac-mini",
           "kind": "text",
           "keep": 20
@@ -984,13 +984,13 @@
           "keep": 100
         },
         {
-          "key": "jterrazz-macbook-pro",
+          "key": "macbook-pro",
           "label": "This Mac",
           "kind": "text",
           "keep": 20
         },
         {
-          "key": "jterrazz-mac-mini",
+          "key": "mac-mini",
           "label": "mac-mini",
           "kind": "text",
           "keep": 20

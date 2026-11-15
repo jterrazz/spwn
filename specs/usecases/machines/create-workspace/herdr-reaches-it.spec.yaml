@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: 'machines create --memory 4G >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].reached'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].reached'' world.json'
       exit: 0
       stdout: |
           ["linux-2"]

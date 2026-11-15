@@ -1,17 +1,17 @@
 description: 'an https share says issuing certificate until This Mac''s certificate is issued, then shared'
 env: two-macs
 runs:
-    - command: 'world certificate jterrazz-macbook-pro pending'
+    - command: 'world certificate macbook-pro pending'
       exit: 0
     - command: 'ports | /usr/bin/grep linux-1'
       exit: 0
       stdout: |
-          ◐	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	issuing certificate	node	probably Vite
-          ●	linux-1	7000	private	jterrazz-macbook-pro.tail1234.ts.net:40002	shared	server
-    - command: 'world certificate jterrazz-macbook-pro issued'
+          ◐	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	issuing certificate	node	probably Vite
+          ●	linux-1	7000	private	macbook-pro.tail1234.ts.net:40002	shared	server
+    - command: 'world certificate macbook-pro issued'
       exit: 0
     - command: 'ports | /usr/bin/grep linux-1'
       exit: 0
       stdout: |
-          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
-          ●	linux-1	7000	private	jterrazz-macbook-pro.tail1234.ts.net:40002	shared	server
+          ●	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
+          ●	linux-1	7000	private	macbook-pro.tail1234.ts.net:40002	shared	server

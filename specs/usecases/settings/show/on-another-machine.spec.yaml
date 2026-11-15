@@ -1,12 +1,12 @@
 description: 'a setting''s detail on another Mac is that Mac''s state'
 env: two-macs
 runs:
-    - command: 'settings apply dns --on jterrazz-mac-mini'
+    - command: 'settings apply dns --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	dns	dns: applied
-    - command: 'settings dns --on jterrazz-mac-mini'
+    - command: 'settings dns --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

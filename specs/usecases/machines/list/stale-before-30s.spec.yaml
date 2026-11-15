@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: 'machines >/dev/null'
       exit: 0
-    - command: 'world power-cut jterrazz-mac-mini'
+    - command: 'world power-cut mac-mini'
       exit: 0
     - command: 'world advance 6s'
       exit: 0

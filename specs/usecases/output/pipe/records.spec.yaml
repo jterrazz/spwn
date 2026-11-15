@@ -13,10 +13,10 @@ runs:
     - command: 'machines | /usr/bin/cut -f2'
       exit: 0
       stdout: |
-          jterrazz-macbook-pro
+          macbook-pro
           api
           linux-1
-          jterrazz-mac-mini
+          mac-mini
           infra
     - command: '--version >/dev/null; for read in overview apps settings disk ports accounts background awake machines images engine activity; do /usr/bin/env -u NO_COLOR "$STATION" $read > $read.txt; done; /bin/cat *.txt | /usr/bin/grep -c -e "$(printf "\033")" -e " 	" -e "	 " -e " $"'
       exit: 1

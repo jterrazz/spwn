@@ -1,7 +1,7 @@
 description: 'what needs a terminal, off one, says so: exit 2'
 env: mini-offline
 runs:
-    - command: 'machines unlock jterrazz-mac-mini </dev/null'
+    - command: 'machines unlock mac-mini </dev/null'
       exit: 2
       stderr: |
           Error: machines unlock needs a terminal

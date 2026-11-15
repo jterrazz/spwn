@@ -1,12 +1,12 @@
 description: 'an apply on another Mac applies it there only'
 env: two-macs
 runs:
-    - command: 'settings apply dns --on jterrazz-mac-mini'
+    - command: 'settings apply dns --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	dns	dns: applied
-    - command: 'settings dns --on jterrazz-mac-mini --json | /usr/bin/jq -r .setting.state'
+    - command: 'settings dns --on mac-mini --json | /usr/bin/jq -r .setting.state'
       exit: 0
       stdout: |
           applied

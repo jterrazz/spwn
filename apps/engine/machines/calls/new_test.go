@@ -99,11 +99,11 @@ func TestACreateOfLessThanTwoGigabytesIsRefused(t *testing.T) {
 // value: a sheet's fleet: This Mac, a laptop of 16 GB, 12 free; the mini
 // with 1 GB free; the studio, silent.
 func sheetFleet() model.AllMachines {
-	this := model.MacView{Name: "jterrazz-macbook-pro", User: "jterrazz", ThisMac: true, Reachable: true, Laptop: true, Hardware: coremachine.Hardware{Memory: 16 << 30}}
-	mini := model.MacView{Name: "jterrazz-mac-mini", Reachable: true, Hardware: coremachine.Hardware{Memory: 16 << 30}, VMs: []model.VM{
+	this := model.MacView{Name: "macbook-pro", User: "jterrazz", ThisMac: true, Reachable: true, Laptop: true, Hardware: coremachine.Hardware{Memory: 16 << 30}}
+	mini := model.MacView{Name: "mac-mini", Reachable: true, Hardware: coremachine.Hardware{Memory: 16 << 30}, VMs: []model.VM{
 		{Name: "infra", Lifetime: model.AlwaysOn, Want: model.WantRunning, State: model.Running, Resources: model.Resources{MemoryBytes: 11 << 30}},
 	}}
-	studio := model.MacView{Name: "jterrazz-mac-studio", Hardware: coremachine.Hardware{Memory: 128 << 30}}
+	studio := model.MacView{Name: "mac-studio", Hardware: coremachine.Hardware{Memory: 128 << 30}}
 	return model.AllMachines{Macs: []model.MacView{this, mini, studio}}
 }
 
@@ -156,7 +156,7 @@ func sheet(t *testing.T, d machines.Deps, in machines.NewIn) []machines.NewMachi
 }
 
 func TestTheNewMachineSheetSaysWhatEachMacTakes(t *testing.T) {
-	got := sheet(t, machines.Deps{Machines: sheetMachines{builtin: "station-linux"}}, machines.NewIn{On: "jterrazz-mac-mini"})
+	got := sheet(t, machines.Deps{Machines: sheetMachines{builtin: "station-linux"}}, machines.NewIn{On: "mac-mini"})
 	if len(got) != 2 || got[0].Name != "linux-1" || len(got[0].On) != 1 {
 		t.Fatalf("%d updates %+v; want This Mac's, then the fleet's, the name given over each", len(got), got)
 	}
@@ -164,7 +164,7 @@ func TestTheNewMachineSheetSaysWhatEachMacTakes(t *testing.T) {
 	if s.Name != "linux-3" || s.Size.MemoryBytes != 8<<30 || s.Lifetime != model.Ephemeral || s.MinMemory != 2<<30 || s.PurposeMax != model.PurposeMax || len(s.Lifetimes) != 2 {
 		t.Errorf("the sheet %+v: want the file's size and lifetime, the least memory and the purpose's limit", s)
 	}
-	if s.Mac != "jterrazz-macbook-pro" {
+	if s.Mac != "macbook-pro" {
 		t.Errorf("offered on %q: the mini asked for has 1 GB free, the studio is silent; want This Mac", s.Mac)
 	}
 	if s.Server == nil || s.Server.Image != "station-linux" || s.Server.Size != model.ServerSize() {
@@ -207,8 +207,8 @@ func TestTheSheetOpensOnTheMacAskedForThoughAnotherIsRoomier(t *testing.T) {
 		f.Macs[1].VMs, f.Macs[1].Hardware.Memory = nil, 64<<30
 		return f
 	}
-	got := sheet(t, machines.Deps{Machines: sheetMachines{fleet: roomy}}, machines.NewIn{On: "jterrazz-macbook-pro"})
-	if last := got[len(got)-1]; last.Mac != "jterrazz-macbook-pro" {
+	got := sheet(t, machines.Deps{Machines: sheetMachines{fleet: roomy}}, machines.NewIn{On: "macbook-pro"})
+	if last := got[len(got)-1]; last.Mac != "macbook-pro" {
 		t.Errorf("offered on %q: This Mac was asked for and takes a VM, though the mini has more free; want This Mac", last.Mac)
 	}
 }

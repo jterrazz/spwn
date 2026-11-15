@@ -3,13 +3,13 @@ env: air-asleep
 runs:
     - command: 'machines --json >/dev/null'
       exit: 0
-    - command: 'world offline jterrazz-macbook-air'
+    - command: 'world offline macbook-air'
       exit: 0
     - command: 'machines remind macbook-air'
       exit: 0
       stdout: |
           ●	macbook-air	you are told once it answers
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].wake_sent'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].wake_sent'' world.json'
       exit: 0
       stdout: |
           null
@@ -23,7 +23,7 @@ runs:
       exit: 0
       stdout: |
           []
-    - command: 'world online jterrazz-macbook-air'
+    - command: 'world online macbook-air'
       exit: 0
     - command: 'world advance 1m'
       exit: 0
@@ -32,4 +32,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]? | select(.Kind == "mac_back") | [.Subject, .Text]]'' world.json'
       exit: 0
       stdout: |
-          [["jterrazz-macbook-air","macbook-air is back"]]
+          [["macbook-air","macbook-air is back"]]

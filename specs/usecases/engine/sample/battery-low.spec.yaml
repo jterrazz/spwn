@@ -3,7 +3,7 @@ env:
     - on-battery
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].power.Percent = 20 | .macs["jterrazz-macbook-pro"].meter = {"sample": {"cpus": 10, "mem_total": 17179869184}, "top": {"cpu": [], "memory": []}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; "$STATION" activity | /usr/bin/grep -E "Battery"'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].power.Percent = 20 | .macs["macbook-pro"].meter = {"sample": {"cpus": 10, "mem_total": 17179869184}, "top": {"cpu": [], "memory": []}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; "$STATION" activity | /usr/bin/grep -E "Battery"'
       exit: 0
       stdout: |
           ◐	Battery low: 20 %	plug in

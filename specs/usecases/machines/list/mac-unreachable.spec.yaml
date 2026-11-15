@@ -24,10 +24,10 @@ runs:
     - command: 'machines'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB
-          ✗	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Unreachable · last answer 03:12
-          ?	infra	Server	jterrazz-mac-mini	Not seen · always on	8 CPU	24 GB
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ✗	mac-mini	Mac	mac-mini	Unreachable · last answer 03:12
+          ?	infra	Server	mac-mini	Not seen · always on	8 CPU	24 GB
           # Needs you
           ✗	mac-mini	does not answer	station machines unlock mac-mini

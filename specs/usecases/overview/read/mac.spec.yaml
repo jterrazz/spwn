@@ -10,7 +10,7 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · jterrazz-macbook-pro · 8 things need you · Engine running
+          This Mac · macbook-pro · 8 things need you · Engine running
 
           Needs you
             ✗ com.jterrazz.brain.x-snapshot is failing, last exit 2

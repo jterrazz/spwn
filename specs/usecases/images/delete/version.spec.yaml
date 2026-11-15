@@ -18,5 +18,5 @@ runs:
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version) \(.vms | join(","))"'''
       exit: 0
       stdout: |
-          jterrazz-macbook-pro 2026.11.01 api,linux-1
-          jterrazz-mac-mini 2026.11.01 infra
+          macbook-pro 2026.11.01 api,linux-1
+          mac-mini 2026.11.01 infra

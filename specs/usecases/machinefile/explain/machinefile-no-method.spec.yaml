@@ -1,7 +1,7 @@
 description: 'an app with no method for the system stops the plan, and says how to make it optional'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux

@@ -17,7 +17,7 @@ runs:
       exit: 0
       stdout: |
           ["restart","ok"]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].stores.uptime.infra.days'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.uptime.infra.days'' world.json'
       exit: 0
       stdout: |
           [{"date":"2026-11-04","down_s":6,"restarts":1}]

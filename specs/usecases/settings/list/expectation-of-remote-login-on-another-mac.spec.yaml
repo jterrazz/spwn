@@ -5,11 +5,11 @@ runs:
       exit: 0
       stdout: |
           ●	remote-login	as expected · off
-    - command: 'settings --on jterrazz-mac-mini | /usr/bin/grep remote-login'
+    - command: 'settings --on mac-mini | /usr/bin/grep remote-login'
       exit: 0
       stdout: |
           ●	remote-login	as expected · on
-    - command: 'world reads jterrazz-macbook-pro remote-login on'
+    - command: 'world reads macbook-pro remote-login on'
       exit: 0
     - command: 'settings | /usr/bin/grep remote-login'
       exit: 0

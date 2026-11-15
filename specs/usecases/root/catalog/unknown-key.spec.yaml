@@ -1,7 +1,7 @@
 description: 'a package file of the owner''s with an unknown key stops every command at its line'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/jq.yaml'
       stdin: |
           package: station.package/v1
           kind: app

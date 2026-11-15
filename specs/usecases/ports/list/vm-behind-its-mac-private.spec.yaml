@@ -3,12 +3,12 @@ env: two-macs
 runs:
     - command: 'world listen infra "*:6443" k3s'
       exit: 0
-    - command: 'ports --on jterrazz-mac-mini | /usr/bin/grep -e 6443 -e "^#"'
+    - command: 'ports --on mac-mini | /usr/bin/grep -e 6443 -e "^#"'
       exit: 0
       stdout: |
           # Private: shared with you on Tailscale	1 ●
           ●	infra	6443	private		own Tailscale device: infra	Kubernetes API
-    - command: 'ports --on jterrazz-mac-mini --json | /usr/bin/jq -c ''[[.ports[] | select(.port == 6443) | [.machine, .class]], .findings]'''
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[[.ports[] | select(.port == 6443) | [.machine, .class]], .findings]'''
       exit: 0
       stdout: |
           [[["infra","private"]],[]]

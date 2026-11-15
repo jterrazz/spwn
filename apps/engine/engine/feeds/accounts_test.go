@@ -15,7 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/page"
 )
 
-const air = "jterrazz-macbook-air"
+const air = "macbook-air"
 
 func signedIn(provider, who string, scopes ...string) accounts.ProgramRow {
 	return accounts.Describe(accounts.Facts{Program: programNamed(provider), State: accounts.ProgramSignedIn, How: accounts.HowOwn, Who: who, Scopes: scopes}, accounts.Where{})
@@ -31,9 +31,9 @@ func twoMacsSignedIn() *world {
 	return &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{},
 		added: []machines.MacView{{Name: air}},
 		programs: map[string][]accounts.ProgramRow{
-			thisMac + "/":        {signedIn(catalog.ProviderGitHub, "jterrazz", "repo", "workflow"), refused, signedIn(catalog.ProviderClaude, "admin@jterrazz.com")},
+			thisMac + "/":        {signedIn(catalog.ProviderGitHub, "jterrazz", "repo", "workflow"), refused, signedIn(catalog.ProviderClaude, "you@example.com")},
 			thisMac + "/linux-1": grantedTo(catalog.ProviderGitHub, catalog.ProviderClaude),
-			mini + "/":           {signedIn(catalog.ProviderGitHub, "jterrazz-bot", "repo"), signedIn(catalog.ProviderClaude, "")},
+			mini + "/":           {signedIn(catalog.ProviderGitHub, "ci-bot", "repo"), signedIn(catalog.ProviderClaude, "")},
 		},
 		vault:  accounts.VaultRead{Mac: thisMac, Entries: []accounts.VaultEntry{entry(catalog.ProviderGitHub), entry(catalog.ProviderClaude)}},
 		offers: map[string]accounts.GrantOffer{"pw-" + catalog.ProviderGitHub: offer, "pw-" + catalog.ProviderClaude: offer}}
@@ -101,8 +101,8 @@ func TestASignInSaysWhatItsProviderPrintedAndAGrantItsPassword(t *testing.T) {
 		want        []string
 	}{
 		{"on:" + thisMac, thisMac + "/" + github, []string{"jterrazz", "repo, workflow"}},
-		{"on:" + thisMac, thisMac + "/" + claude, []string{"admin@jterrazz.com"}},
-		{"on:" + mini, mini + "/" + github, []string{"jterrazz-bot", "repo"}},
+		{"on:" + thisMac, thisMac + "/" + claude, []string{"you@example.com"}},
+		{"on:" + mini, mini + "/" + github, []string{"ci-bot", "repo"}},
 		{"on:linux-1", "linux-1/" + github, []string{"from the password " + catalog.ProviderGitHub + " token"}},
 	} {
 		r := row(p, c.section, c.id)

@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"vault.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"jterrazz-macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}
+          {"mac":"macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",true,[]],["pw-2","npm publish","npm","token",false,[["machine","linux-1"]]],["pw-3","Claude Max","claude","oauth-token",false,[]]]}

@@ -10,7 +10,7 @@ runs:
       stderr: |
           Error: refusing to stop without --yes
           Hint: re-run with --yes
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.closed'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents.closed'' world.json'
       exit: 0
       stdout: |
           null

@@ -3,21 +3,21 @@ env: two-macs
 runs:
     - command: 'machines >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''{vm: (.macs["jterrazz-mac-mini"].vms.infra.kept.lifetime), uptime: (.macs["jterrazz-mac-mini"].stores.uptime.infra != null), disk: .macs["jterrazz-mac-mini"].vms.infra.disk, declared: [.macs["jterrazz-mac-mini"].stores.declarations[]? | select(.machine == "infra") | .port], ssh: .macs["jterrazz-macbook-pro"].ssh.blocks.infra.behind}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''{vm: (.macs["mac-mini"].vms.infra.kept.lifetime), uptime: (.macs["mac-mini"].stores.uptime.infra != null), disk: .macs["mac-mini"].vms.infra.disk, declared: [.macs["mac-mini"].stores.declarations[]? | select(.machine == "infra") | .port], ssh: .macs["macbook-pro"].ssh.blocks.infra.behind}'' world.json'
       exit: 0
       stdout: |
-          {"vm":"always-on","uptime":true,"disk":true,"declared":[443],"ssh":"jterrazz-mac-mini"}
+          {"vm":"always-on","uptime":true,"disk":true,"declared":[443],"ssh":"mac-mini"}
     - command: 'machines delete infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	infra	deleted
-    - command: '--version >/dev/null; /usr/bin/jq -c ''{vm: (.macs["jterrazz-mac-mini"].vms.infra.kept.lifetime), uptime: (.macs["jterrazz-mac-mini"].stores.uptime.infra != null), disk: .macs["jterrazz-mac-mini"].vms.infra.disk, declared: [.macs["jterrazz-mac-mini"].stores.declarations[]? | select(.machine == "infra") | .port], ssh: .macs["jterrazz-macbook-pro"].ssh.blocks.infra.behind}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''{vm: (.macs["mac-mini"].vms.infra.kept.lifetime), uptime: (.macs["mac-mini"].stores.uptime.infra != null), disk: .macs["mac-mini"].vms.infra.disk, declared: [.macs["mac-mini"].stores.declarations[]? | select(.machine == "infra") | .port], ssh: .macs["macbook-pro"].ssh.blocks.infra.behind}'' world.json'
       exit: 0
       stdout: |
           {"vm":null,"uptime":false,"disk":null,"declared":[],"ssh":null}
-    - command: 'machines --on jterrazz-mac-mini'
+    - command: 'machines --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running
+          ●	mac-mini	Mac	mac-mini	Engine running

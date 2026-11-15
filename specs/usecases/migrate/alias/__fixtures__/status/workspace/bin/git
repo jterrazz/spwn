@@ -1,7 +1,7 @@
 #!/bin/sh
 # git as status reads it: the global identity and a signing flag.
 case "$*" in
-    "config --global user.email") echo admin@jterrazz.com ;;
+    "config --global user.email") echo you@example.com ;;
     "config --global user.name") echo "Someone Else" ;;
     "config --global commit.gpgsign") echo true ;;
     --version) echo "git version 2.51.0" ;;

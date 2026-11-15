@@ -2,10 +2,10 @@ description: 'an app provided by another brings its provider in as listed, so ap
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [herdr-core]
       exit: 0
@@ -18,7 +18,7 @@ runs:
           ●	homebrew	5.0.1	script	the manager of herdr-app
           ●	herdr-app	1.0.0	cask	the provider of herdr-core
           ●	herdr-core		provided-by
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.package, .method])'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map([.package, .method])'' world.json'
       exit: 0
       stdout: |
           [["herdr-app","cask"],["herdr-core","provided-by"]]

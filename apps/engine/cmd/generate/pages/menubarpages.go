@@ -42,7 +42,7 @@ func linuxPorts() ports.Listing {
 func twoMacsAwake() pageawake.AllMachines {
 	f := awakeAllMachines(awake.EngineRunning, true)
 	f.Reports[0].Session = thisMacAwake().Session
-	f.Label = func(mac string) string { return page.MacName(mac, "jterrazz-macbook-pro") }
+	f.Label = func(mac string) string { return page.MacName(mac, "macbook-pro") }
 	return f
 }
 

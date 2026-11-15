@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           ["running",1,5]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 5, $down <= 6]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 5, $down <= 6]'' world.json'
       exit: 0
       stdout: |
           [true,true]
@@ -20,7 +20,7 @@ runs:
       exit: 0
       stdout: |
           ["infra stopped and is restarting (↺ 1)"]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | [.pid > 0, .kept.want]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | [.pid > 0, .kept.want]'' world.json'
       exit: 0
       stdout: |
           [true,"running"]

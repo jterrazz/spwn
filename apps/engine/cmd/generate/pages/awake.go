@@ -11,7 +11,7 @@ import (
 // value: Awake on every Mac: This Mac a laptop kept awake with its lid
 // closed, the mini a desktop that never sleeps and hosts infra.
 func awakeAllMachines(engine string, held bool) pageawake.AllMachines {
-	laptop := awake.Report{Now: keepAwakeNow, Engine: engine, Mac: "jterrazz-macbook-pro", ThisMac: true, Reading: thisMacReading(),
+	laptop := awake.Report{Now: keepAwakeNow, Engine: engine, Mac: "macbook-pro", ThisMac: true, Reading: thisMacReading(),
 		Caps: machine.Capabilities{Battery: true, Lid: true, Thermal: true, Engine: true}}
 	mini := awake.Report{Now: keepAwakeNow, Engine: engine, Mac: "mac-mini", Reading: awake.Reading{Source: "ac"},
 		Caps: machine.Capabilities{Thermal: true, Engine: true}, Servers: []string{"infra"}}
@@ -26,7 +26,7 @@ func awakePages() []Fixture {
 	return states("awake",
 		pageawake.Page(awakeAllMachines(awake.EngineReading, false), thisMacContext()),
 		pageawake.Page(awakeAllMachines(awake.EngineRunning, false), thisMacContext()),
-		failure("awake", "awake", "the engine is stopped on jterrazz-macbook-pro", "station engine start"),
+		failure("awake", "awake", "the engine is stopped on macbook-pro", "station engine start"),
 		pageawake.Page(awakeAllMachines(awake.EngineRunning, true), thisMacContext()),
 	)
 }

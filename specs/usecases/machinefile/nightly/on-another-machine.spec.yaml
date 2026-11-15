@@ -2,14 +2,14 @@ description: 'another Mac upgrades its own Machinefile at night, and its overvie
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.machine.yaml'
+    - command: 'world edit mac-mini machinefiles/mac-mini.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-mac-mini
+          name: mac-mini
           machine: { kind: computer, system: { os: macos } }
           apps: [gh]
       exit: 0
-    - command: 'apply --machinefile jterrazz-mac-mini --on jterrazz-mac-mini'
+    - command: 'apply --machinefile mac-mini --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
@@ -20,7 +20,7 @@ runs:
           ●	gh	1.0.0	brew
     - command: 'world advance 18h'
       exit: 0
-    - command: 'overview --on jterrazz-mac-mini'
+    - command: 'overview --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
@@ -42,7 +42,7 @@ runs:
           ◐	disk unlock after a power cut	needs you	station machines unlock mac-mini (from the same network)
           ●	planned restarts unlock themselves	supported
           ●	engine starts at login	installed
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].stores.night | del(.at)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.night | del(.at)'' world.json'
       exit: 0
       stdout: |
-          {"machinefile":"jterrazz-mac-mini"}
+          {"machinefile":"mac-mini"}

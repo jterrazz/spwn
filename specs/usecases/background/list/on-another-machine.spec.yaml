@@ -1,7 +1,7 @@
 description: 'station background --on another Mac lists that Mac''s tasks, not This Mac''s'
 env: two-macs
 runs:
-    - command: 'background --on jterrazz-mac-mini'
+    - command: 'background --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

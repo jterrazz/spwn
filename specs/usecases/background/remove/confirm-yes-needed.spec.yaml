@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: refusing to remove without --yes
           Hint: re-run with --yes
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].jobs["com.jterrazz.brain.x-snapshot"] | [.Loaded, .LastExit]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs["com.jterrazz.brain.x-snapshot"] | [.Loaded, .LastExit]'' world.json'
       exit: 0
       stdout: |
           [true,2]

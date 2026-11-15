@@ -1,7 +1,7 @@
 description: 'moving an app that is not installed is refused, exit 2'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/fd.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/fd.yaml'
       stdin: |
           package: station.package/v1
           kind: app

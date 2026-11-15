@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: that is station's engine
           Hint: station engine stop
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].engine | has("stopped")'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].engine | has("stopped")'' world.json'
       exit: 0
       stdout: |
           false

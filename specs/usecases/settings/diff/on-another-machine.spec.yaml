@@ -1,12 +1,12 @@
 description: 'a diff on another Mac reads that Mac'
 env: two-macs
 runs:
-    - command: 'settings apply dns --on jterrazz-mac-mini'
+    - command: 'settings apply dns --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	dns	dns: applied
-    - command: 'settings diff dns --on jterrazz-mac-mini'
+    - command: 'settings diff dns --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

@@ -1,17 +1,17 @@
 description: 'the mini''s AirPlay Receiver on every interface needs you, with where it is turned off'
 env: two-macs
 runs:
-    - command: 'world listen jterrazz-mac-mini "*:5000" ControlCenter'
+    - command: 'world listen mac-mini "*:5000" ControlCenter'
       exit: 0
-    - command: 'ports --on jterrazz-mac-mini | /usr/bin/grep 5000'
-      exit: 0
-      stdout: |
-          ✗	jterrazz-mac-mini	5000	needs you	AirPlay Receiver	*:5000 all interfaces	declared no	System Settings > General > AirDrop & Handoff > AirPlay Receiver
-    - command: 'ports --on jterrazz-mac-mini --json | /usr/bin/jq -c ''[.findings, [.ports[] | select(.port == 5000) | [.what, .bind, .class, .declared]]]'''
+    - command: 'ports --on mac-mini | /usr/bin/grep 5000'
       exit: 0
       stdout: |
-          [[{"machine":"jterrazz-mac-mini","severity":"broken","section":"ports","subject":"jterrazz-mac-mini:5000","text":"port 5000 is reachable outside Tailscale","fix":{"call":null,"command":null,"path":"System Settings > General > AirDrop & Handoff > AirPlay Receiver"}}],[["AirPlay Receiver",["*"],"public",null]]]
-    - command: 'overview --on jterrazz-mac-mini | /usr/bin/grep 5000'
+          ✗	mac-mini	5000	needs you	AirPlay Receiver	*:5000 all interfaces	declared no	System Settings > General > AirDrop & Handoff > AirPlay Receiver
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.findings, [.ports[] | select(.port == 5000) | [.what, .bind, .class, .declared]]]'''
+      exit: 0
+      stdout: |
+          [[{"machine":"mac-mini","severity":"broken","section":"ports","subject":"mac-mini:5000","text":"port 5000 is reachable outside Tailscale","fix":{"call":null,"command":null,"path":"System Settings > General > AirDrop & Handoff > AirPlay Receiver"}}],[["AirPlay Receiver",["*"],"public",null]]]
+    - command: 'overview --on mac-mini | /usr/bin/grep 5000'
       exit: 0
       stdout: |
           ✗	port 5000 is reachable outside Tailscale	System Settings > General > AirDrop & Handoff > AirPlay Receiver

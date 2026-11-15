@@ -1,19 +1,19 @@
 description: 'the mini, a desktop, is judged on the lock after its display turns off, never on the laptop rule'
 env: two-macs
 runs:
-    - command: 'settings --on jterrazz-mac-mini | /usr/bin/grep screen-lock'
+    - command: 'settings --on mac-mini | /usr/bin/grep screen-lock'
       exit: 0
       stdout: |
           ●	screen-lock	as expected · locks 5 min after the display turns off
-    - command: 'world reads jterrazz-mac-mini display-sleep 60'
+    - command: 'world reads mac-mini display-sleep 60'
       exit: 0
-    - command: 'settings --on jterrazz-mac-mini | /usr/bin/grep screen-lock'
+    - command: 'settings --on mac-mini | /usr/bin/grep screen-lock'
       exit: 0
       stdout: |
           ●	screen-lock	as expected · locks 5 min after the display turns off
-    - command: 'world reads jterrazz-mac-mini screen-lock 600'
+    - command: 'world reads mac-mini screen-lock 600'
       exit: 0
-    - command: 'settings --on jterrazz-mac-mini | /usr/bin/grep screen-lock'
+    - command: 'settings --on mac-mini | /usr/bin/grep screen-lock'
       exit: 0
       stdout: |
           ◐	screen-lock	locks 10 min after the display turns off · expected 5 min	System Settings > Lock Screen

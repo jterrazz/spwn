@@ -8,16 +8,16 @@ runs:
     - command: 'awake 4h --lid'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	stays awake until 14:00 · lid closed
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power | {holds, clamshell}'' world.json'
+          ●	macbook-pro	stays awake until 14:00 · lid closed
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power | {holds, clamshell}'' world.json'
       exit: 0
       stdout: |
           {"holds":["station: station awake 4h --lid"],"clamshell":true}
     - command: 'awake | /usr/bin/sed -n 1,2p'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Awake until 14:00 · lid closed · 3h 59m left
-          ●	jterrazz-mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          ●	macbook-pro	Awake until 14:00 · lid closed · 3h 59m left
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
     - command: 'overview | /usr/bin/grep Awake'
       exit: 0
       stdout: |

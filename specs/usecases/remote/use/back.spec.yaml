@@ -12,7 +12,7 @@ runs:
     - command: 'overview --json | /usr/bin/jq -r .machine.name'
       exit: 0
       stdout: |
-          jterrazz-macbook-pro
+          macbook-pro
     - command: 'use -'
       exit: 0
       stdout: |

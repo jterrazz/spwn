@@ -10,7 +10,7 @@ runs:
           paint plain=38;2;202;211;245 bold=1;38;2;202;211;245 good=38;2;166;218;149 warn=38;2;238;212;159 bad=38;2;237;135;150 muted=38;2;165;173;203 subtle=38;2;110;115;141
       exit: 0
       stdout: |
-          {bold This Mac} · jterrazz-macbook-pro · 8 things need you · Engine running
+          {bold This Mac} · macbook-pro · 8 things need you · Engine running
 
           {bold Needs you}
             {bad ✗} {bold com.jterrazz.brain.x-snapshot is failing, last exit 2}
@@ -217,15 +217,14 @@ runs:
       stdout: |
           This Mac · 2 ports · nothing needs you
 
-          Tailscale  ● signed in · jterrazz-macbook-pro.tail1234.ts.net
-                       ports are shared
+          Tailscale  ● signed in · macbook-pro.tail1234.ts.net · ports are shared
           Private: shared with you on Tailscale
                                port  class    url                                  state
-            ● linux-1  5173 → 40001  private  https://jterrazz-macbook-pro…:40001  shared
-            ● linux-1  7000 → 40002  private  jterrazz-macbook-…1234.ts.net:40002  shared
+            ● linux-1  5173 → 40001  private  https://macbook-pro…:40001           shared
+            ● linux-1  7000 → 40002  private  macbook-pro.tail1234.ts.net:40002    shared
           Reserved ports
             Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
-    - command: 'world listen jterrazz-mac-mini "*:5000" ControlCenter'
+    - command: 'world listen mac-mini "*:5000" ControlCenter'
       exit: 0
     - command: '--version >/dev/null; terminal --size 80x60 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" ports --all-machines'
       stdin: |
@@ -239,12 +238,11 @@ runs:
             ✗ mac-mini  5000  needs you  AirPlay Receiver  *:5000 all interfac…
               declared no
               → System Settings > General > AirDrop & Handoff > AirPlay Receiver
-          Tailscale  ● signed in · jterrazz-macbook-pro.tail1234.ts.net
-                       ports are shared
+          Tailscale  ● signed in · macbook-pro.tail1234.ts.net · ports are shared
           Private: shared with you on Tailscale
                                port  class    url                                  state
-            ● linux-1  5173 → 40001  private  https://jterrazz-macbook-pro…:40001  shared
-            ● linux-1  7000 → 40002  private  jterrazz-macbook-…1234.ts.net:40002  shared
+            ● linux-1  5173 → 40001  private  https://macbook-pro…:40001           shared
+            ● linux-1  7000 → 40002  private  macbook-pro.tail1234.ts.net:40002    shared
           Reserved ports
             Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
             Reserved on mac-mini: 0 of 1000 (40000-40999), 1000 free

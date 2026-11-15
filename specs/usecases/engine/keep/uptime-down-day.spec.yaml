@@ -23,7 +23,7 @@ runs:
       exit: 0
       stdout: |
           ["running",[["2026-11-04","down"],["2026-11-05","restart"]],true]
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-mac-mini"].stores.uptime.infra.days[] | [.date, .down_s]]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["mac-mini"].stores.uptime.infra.days[] | [.date, .down_s]]'' world.json'
       exit: 0
       stdout: |
           [["2026-11-04",35967],["2026-11-05",50480]]

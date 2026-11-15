@@ -4,10 +4,10 @@ runs:
     - command: 'tailnet | /usr/bin/head -1'
       exit: 0
       stdout: |
-          ●	Tailscale	signed in · jterrazz-macbook-pro.tail1234.ts.net · ports are shared
+          ●	Tailscale	signed in · macbook-pro.tail1234.ts.net · ports are shared
       stderr: |
           → now: station ports
     - command: 'tailnet --json | /usr/bin/jq -S -c .tailscale'
       exit: 0
       stdout: |
-          {"cli":"/Applications/Tailscale.app/Contents/MacOS/Tailscale","dns_name":"jterrazz-macbook-pro.tail1234.ts.net","ip":"100.64.0.1","name":"jterrazz-macbook-pro","serve":"on","state":"on","variant":"app-store"}
+          {"cli":"/Applications/Tailscale.app/Contents/MacOS/Tailscale","dns_name":"macbook-pro.tail1234.ts.net","ip":"100.64.0.1","name":"macbook-pro","serve":"on","state":"on","variant":"app-store"}

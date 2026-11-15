@@ -16,11 +16,11 @@ runs:
           ┃ Restart mac-mini? infra pauses until it is back
           ┃
           ✓ mac-mini · back · infra running
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].engine.started_at > "2026-11-04"'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].engine.started_at > "2026-11-04"'' world.json'
       exit: 0
       stdout: |
           true
     - command: 'machines --on mac-mini | /usr/bin/grep infra'
       exit: 0
       stdout: |
-          ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

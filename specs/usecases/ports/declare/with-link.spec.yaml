@@ -9,7 +9,7 @@ runs:
       exit: 0
       stdout: |
           ●	443 on infra	declared public (Cloudflare Tunnel)
-    - command: 'ports --on jterrazz-mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 443) | .declared]'''
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 443) | .declared]'''
       exit: 0
       stdout: |
           [{"via":"cloudflare-tunnel","url":"https://jterrazz.com","seen":true}]

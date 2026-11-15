@@ -3,7 +3,7 @@
   "id": "home",
   "command": "status",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer",
     "registered": true
   },
@@ -322,7 +322,7 @@
             "cells": [
               {
                 "kind": "url",
-                "text": "https://jterrazz-macbook-pro.tail1234.ts.net:40001"
+                "text": "https://macbook-pro.tail1234.ts.net:40001"
               }
             ]
           }
@@ -335,7 +335,7 @@
             "cells": [
               {
                 "kind": "identity",
-                "text": "admin@jterrazz.com"
+                "text": "you@example.com"
               }
             ]
           }
@@ -955,9 +955,9 @@
         {
           "group": {
             "head": {
-              "id": "jterrazz-mac-mini",
+              "id": "mac-mini",
               "mark": "ok",
-              "label": "jterrazz-mac-mini",
+              "label": "mac-mini",
               "cells": [
                 {
                   "kind": "text",
@@ -965,7 +965,7 @@
                 },
                 {
                   "kind": "text",
-                  "text": "jterrazz-mac-mini"
+                  "text": "mac-mini"
                 }
               ]
             },
@@ -983,7 +983,7 @@
                       },
                       {
                         "kind": "text",
-                        "text": "jterrazz-mac-mini"
+                        "text": "mac-mini"
                       }
                     ]
                   },
@@ -998,7 +998,7 @@
                         },
                         "value": {
                           "kind": "url",
-                          "text": "https://jterrazz-mac-mini.ts.net:40002"
+                          "text": "https://mac-mini.ts.net:40002"
                         },
                         "detail": {
                           "kind": "text",
@@ -1020,7 +1020,7 @@
                           },
                           {
                             "kind": "text",
-                            "text": "jterrazz-mac-mini"
+                            "text": "mac-mini"
                           }
                         ]
                       }
@@ -1040,7 +1040,7 @@
                     },
                     {
                       "kind": "text",
-                      "text": "jterrazz-mac-mini"
+                      "text": "mac-mini"
                     }
                   ]
                 }
@@ -1141,7 +1141,7 @@
             "key": "machine",
             "value": {
               "kind": "text",
-              "text": "jterrazz-macbook-pro"
+              "text": "macbook-pro"
             }
           }
         },

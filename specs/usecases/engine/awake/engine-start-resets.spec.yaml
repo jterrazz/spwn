@@ -4,19 +4,19 @@ runs:
     - command: 'awake 4h --lid'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	stays awake until 14:00 · lid closed
-    - command: 'world engine-crash jterrazz-macbook-pro'
+          ●	macbook-pro	stays awake until 14:00 · lid closed
+    - command: 'world engine-crash macbook-pro'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power | {holds, clamshell}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power | {holds, clamshell}'' world.json'
       exit: 0
       stdout: |
           {"holds":null,"clamshell":null}
     - command: 'awake | /usr/bin/sed -n 1,2p'
       exit: 0
       stdout: |
-          ○	jterrazz-macbook-pro	Sleeps normally
-          ●	jterrazz-mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power | {holds, clamshell}'' world.json'
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power | {holds, clamshell}'' world.json'
       exit: 0
       stdout: |
           {"holds":null,"clamshell":null}

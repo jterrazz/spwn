@@ -8,9 +8,9 @@ runs:
       stdout: |
           github	ok		jterrazz	gist · read:org · repo · workflow	
           npm	ok		jterrazz		
-          claude	ok		admin@jterrazz.com	max	claude.ai
-          cloudflare	ok		admin@jterrazz.com	studio	
-          git	ok		Jean-Baptiste Terrazzoni, admin@jterrazz.com		
-          ssh	ok		6 keys	admin@jterrazz.com · station-image · station-e2e · deploy · old-rsa · github-actions	
+          claude	ok		you@example.com	max	claude.ai
+          cloudflare	ok		you@example.com	studio	
+          git	ok		Jean-Baptiste Terrazzoni, you@example.com		
+          ssh	ok		6 keys	you@example.com · station-image · station-e2e · deploy · old-rsa · github-actions	
           docker	ok		deploy	registry.jterrazz.com	
           entry	absent	unset			no SSH key

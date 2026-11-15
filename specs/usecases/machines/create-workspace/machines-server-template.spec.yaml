@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/infra-base.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/infra-base.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: infra-base

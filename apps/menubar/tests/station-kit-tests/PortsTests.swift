@@ -17,7 +17,7 @@ final class PortsTests: XCTestCase {
         let actions = page.actions ?? []
         let rows = try XCTUnwrap(page.section("private")?.rows)
         let row = try XCTUnwrap(rows.first)
-        let url = "https://jterrazz-macbook-pro.tail77a797.ts.net:40001"
+        let url = "https://macbook-pro.tail77a797.ts.net:40001"
         XCTAssertEqual(PortRow.link(row, in: actions)?.run?.open, url)
         let qr = try XCTUnwrap(page.action(row.quick ?? ""))
         XCTAssertEqual(PortsSection.qr(qr, of: row, in: actions), url)
@@ -29,7 +29,7 @@ final class PortsTests: XCTestCase {
         let stop = try XCTUnwrap(PortRow.menu(row, in: actions).last ?? nil)
         XCTAssertEqual(stop.confirm?.question, "Stop sharing linux-1:5173?")
         XCTAssertEqual(stop.run?.call, "ports.stop-sharing")
-        XCTAssertEqual(Client.input([:], fixed: stop.run?.in) as NSDictionary, ["VM": "linux-1", "Port": "5173", "Mac": "jterrazz-macbook-pro", "Confirm": "yes"] as NSDictionary)
+        XCTAssertEqual(Client.input([:], fixed: stop.run?.in) as NSDictionary, ["VM": "linux-1", "Port": "5173", "Mac": "macbook-pro", "Confirm": "yes"] as NSDictionary)
         var copied: [String] = []
         var opened: [URL] = []
         var asked: [String?] = []

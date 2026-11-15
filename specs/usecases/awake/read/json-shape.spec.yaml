@@ -4,11 +4,11 @@ runs:
     - command: 'awake --json | /usr/bin/jq -c ''{schema, macs: [.macs[] | {name, this_mac, mode, hosts_servers, capabilities, reading: (.reading | if . then keys else null end)}], silent}'''
       exit: 0
       stdout: |
-          {"schema":"station.awake.read/v1","macs":[{"name":"jterrazz-macbook-pro","this_mac":true,"mode":"sleeps-normally","hosts_servers":[],"capabilities":{"battery":true,"lid":true,"thermal":true},"reading":["battery_percent","charging","lid","low_power","source","thermal"]},{"name":"jterrazz-mac-mini","this_mac":false,"mode":"never-sleeps","hosts_servers":["infra"],"capabilities":{"battery":false,"lid":false,"thermal":true},"reading":null}],"silent":[]}
+          {"schema":"station.awake.read/v1","macs":[{"name":"macbook-pro","this_mac":true,"mode":"sleeps-normally","hosts_servers":[],"capabilities":{"battery":true,"lid":true,"thermal":true},"reading":["battery_percent","charging","lid","low_power","source","thermal"]},{"name":"mac-mini","this_mac":false,"mode":"never-sleeps","hosts_servers":["infra"],"capabilities":{"battery":false,"lid":false,"thermal":true},"reading":null}],"silent":[]}
     - command: 'awake 4h --lid'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	stays awake until 14:00 · lid closed
+          ●	macbook-pro	stays awake until 14:00 · lid closed
     - command: 'awake --json | /usr/bin/jq -c ''.macs[0] | {mode, until_at: .until_at[0:16], lid}'''
       exit: 0
       stdout: |

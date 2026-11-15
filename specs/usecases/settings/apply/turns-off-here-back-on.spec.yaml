@@ -13,7 +13,7 @@ runs:
           group	Set by station
           does	Silence the terminal login message
           lives on	Macs, Linux VMs, macOS VMs
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].preferences.off_here'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.off_here'' world.json'
       exit: 0
       stdout: |
           ["hushlogin"]
@@ -31,7 +31,7 @@ runs:
           lives on	Macs, Linux VMs, macOS VMs
           where	~/.hushlogin
           applied	just now
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].preferences.off_here'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.off_here'' world.json'
       exit: 0
       stdout: |
           null

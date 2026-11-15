@@ -10,7 +10,7 @@ runs:
       exit: 0
       stdout: |
           ●	linux-1	stopped, kept · its agent linux-1 stopped
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {closed, state: (.journal | map_values(.state)), reason: (.journal | map_values(.reason))}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents | {closed, state: (.journal | map_values(.state)), reason: (.journal | map_values(.reason))}'' world.json'
       exit: 0
       stdout: |
           {"closed":["t1"],"state":{"station-linux-1":"finished"},"reason":{"station-linux-1":"its workspace stopped"}}

@@ -16,7 +16,7 @@ runs:
     - command: 'overview --json | /usr/bin/jq -r .machine.name'
       exit: 0
       stdout: |
-          jterrazz-macbook-pro
+          macbook-pro
       stderr: |
           linux-1 is gone (deleted at 10:10) · back on This Mac
     - command: 'use'

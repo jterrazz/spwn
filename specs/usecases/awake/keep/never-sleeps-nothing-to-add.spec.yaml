@@ -1,12 +1,12 @@
 description: 'a keep-awake on a Mac that never sleeps adds nothing, exit 0, and says how to change the policy'
 env: two-macs
 runs:
-    - command: 'awake 4h --on jterrazz-mac-mini'
+    - command: 'awake 4h --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	jterrazz-mac-mini	already never sleeps (always-on Mac policy). Nothing to add. · station settings off never-sleeps --on mac-mini
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].power.holds'' world.json'
+          ●	mac-mini	already never sleeps (always-on Mac policy). Nothing to add. · station settings off never-sleeps --on mac-mini
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power.holds'' world.json'
       exit: 0
       stdout: |
           ["station: never sleeps"]

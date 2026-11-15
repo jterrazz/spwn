@@ -14,7 +14,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/env STATION_TERMINAL=other-terminal "$STATION" overview --json | /usr/bin/jq -r .machine.name'
       exit: 0
       stdout: |
-          jterrazz-macbook-pro
+          macbook-pro
     - command: 'overview --json | /usr/bin/jq -r .machine.name'
       exit: 0
       stdout: |

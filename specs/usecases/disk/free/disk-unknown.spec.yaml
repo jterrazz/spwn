@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: no disk row for "gooo"
           Hint: station disk
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].disk.free'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.free'' world.json'
       exit: 0
       stdout: |
           388000000000

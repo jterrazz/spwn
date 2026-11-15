@@ -1,7 +1,7 @@
 description: a setting as station last wrote it, which station writes otherwise now, is rewritten unasked
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/shell/greet.yaml'
+    - command: 'world edit macbook-pro catalog/shell/greet.yaml'
       stdin: |
           package: station.package/v1
           kind: setting
@@ -23,7 +23,7 @@ runs:
       exit: 0
       stdout: |
           ●	greet	~/.zshrc [station:greet]: written
-    - command: 'world edit jterrazz-macbook-pro catalog/shell/greet.yaml'
+    - command: 'world edit macbook-pro catalog/shell/greet.yaml'
       stdin: |
           package: station.package/v1
           kind: setting

@@ -1,7 +1,7 @@
 description: 'apps remove takes a script app back by its undo, and its check then reads it absent'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/scripted.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/scripted.yaml'
       stdin: |
           package: station.package/v1
           kind: app

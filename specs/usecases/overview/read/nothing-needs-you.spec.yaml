@@ -10,7 +10,7 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · jterrazz-macbook-pro · nothing needs you · Engine running
+          This Mac · macbook-pro · nothing needs you · Engine running
 
           Activity    ? not measured
           Apps        ● 1 ok · ○ 113 not installed

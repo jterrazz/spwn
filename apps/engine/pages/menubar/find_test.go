@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	findPro  = "jterrazz-macbook-pro"
-	findMini = "jterrazz-mac-mini"
-	findAir  = "jterrazz-macbook-air"
+	findPro  = "macbook-pro"
+	findMini = "mac-mini"
+	findAir  = "macbook-air"
 	gib      = int64(1) << 30
 )
 

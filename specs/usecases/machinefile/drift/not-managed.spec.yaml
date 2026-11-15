@@ -2,10 +2,10 @@ description: 'drift reads each package as a condition, an app there by another w
 fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, gh, fd, ripgrep]
       exit: 0

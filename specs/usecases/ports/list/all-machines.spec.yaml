@@ -1,7 +1,7 @@
 description: 'ports --all-machines lists Needs you, Public, then Private, and folds the local-only ones'
 env: two-macs
 runs:
-    - command: 'world listen jterrazz-mac-mini "*:5000" ControlCenter'
+    - command: 'world listen mac-mini "*:5000" ControlCenter'
       exit: 0
     - command: 'world listen infra "*:443" traefik'
       exit: 0
@@ -9,21 +9,21 @@ runs:
       exit: 0
     - command: 'world listen infra "*:6443" k3s'
       exit: 0
-    - command: 'world listen jterrazz-mac-mini 127.0.0.1:5432 postgres'
+    - command: 'world listen mac-mini 127.0.0.1:5432 postgres'
       exit: 0
-    - command: 'world listen jterrazz-macbook-pro "[::1]:8080" python'
+    - command: 'world listen macbook-pro "[::1]:8080" python'
       exit: 0
     - command: 'ports --all-machines'
       exit: 0
       stdout: |
           # Needs you: reachable outside Tailscale, not declared public	1 ✗
-          ✗	jterrazz-mac-mini	5000	needs you	AirPlay Receiver	*:5000 all interfaces	declared no	System Settings > General > AirDrop & Handoff > AirPlay Receiver
-          ●	Tailscale	signed in · jterrazz-macbook-pro.tail1234.ts.net · ports are shared
+          ✗	mac-mini	5000	needs you	AirPlay Receiver	*:5000 all interfaces	declared no	System Settings > General > AirDrop & Handoff > AirPlay Receiver
+          ●	Tailscale	signed in · macbook-pro.tail1234.ts.net · ports are shared
           # Public: reachable from anywhere else, internet or LAN, declared	1 ●
           ●	infra	443	public	traefik	*:443 all interfaces	Cloudflare Tunnel · tunnel seen
           # Private: shared with you on Tailscale	3 ●
-          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
-          ●	linux-1	7000	private	jterrazz-macbook-pro.tail1234.ts.net:40002	shared	server
+          ●	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
+          ●	linux-1	7000	private	macbook-pro.tail1234.ts.net:40002	shared	server
           ●	infra	6443	private		own Tailscale device: infra	Kubernetes API
           	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
           	Reserved on mac-mini: 0 of 1000 (40000-40999), 1000 free

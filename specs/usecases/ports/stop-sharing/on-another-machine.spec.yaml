@@ -1,16 +1,16 @@
 description: 'stop sharing sent with --on releases on that Mac and is remembered there, not on This Mac'
 env: two-macs
 runs:
-    - command: 'ports share infra 8080 --on jterrazz-mac-mini'
+    - command: 'ports share infra 8080 --on mac-mini'
       exit: 0
       stdout: |
-          https://jterrazz-mac-mini.tail1234.ts.net:40000
-    - command: 'ports stop-sharing infra 8080 --on jterrazz-mac-mini --yes'
+          https://mac-mini.tail1234.ts.net:40000
+    - command: 'ports stop-sharing infra 8080 --on mac-mini --yes'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	infra:8080	not shared
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {mini: [.["jterrazz-mac-mini"].stores.reservations[]?], remembered: .["jterrazz-mac-mini"].preferences.ports.not_shared, here: .["jterrazz-macbook-pro"].preferences.ports}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {mini: [.["mac-mini"].stores.reservations[]?], remembered: .["mac-mini"].preferences.ports.not_shared, here: .["macbook-pro"].preferences.ports}'' world.json'
       exit: 0
       stdout: |
           {"mini":[],"remembered":["infra:8080"],"here":null}

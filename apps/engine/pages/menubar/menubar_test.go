@@ -15,11 +15,11 @@ import (
 // server on another Mac is not its business.
 func TestStopEverythingOnThisMacSaysItsServerIsSkipped(t *testing.T) {
 	fleet := &model.AllMachines{Macs: []model.MacView{
-		{Name: "jterrazz-macbook-pro", ThisMac: true, VMs: []model.VM{
+		{Name: "macbook-pro", ThisMac: true, VMs: []model.VM{
 			{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running},
 			{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 		}},
-		{Name: "jterrazz-mac-mini", VMs: []model.VM{{Name: "db", Lifetime: model.AlwaysOn, State: model.Running}}},
+		{Name: "mac-mini", VMs: []model.VM{{Name: "db", Lifetime: model.AlwaysOn, State: model.Running}}},
 	}}
 	confirm := stopAll(Reading{All: fleet}).Confirm
 	if confirm.Question != "Stop everything on This Mac?" {
@@ -44,7 +44,7 @@ func TestUpdateAllLeavesNeedsYouAndTheBadgeNeverCountedIt(t *testing.T) {
 		{Section: "disk", Subject: "misplaced", Text: "a folder is misplaced", Call: "disk.move"},
 	}
 	before, after := overview.Summary{Needs: needs}, overview.Summary{Needs: needs[1:]}
-	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true}}}
+	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "macbook-pro", ThisMac: true}}}
 	was, is := Page(Reading{Home: &before, All: fleet}, page.Context{}), Page(Reading{Home: &after, All: fleet}, page.Context{})
 	if was.Badge.Needs != 0 || is.Badge.Needs != 0 {
 		t.Fatalf("badge %d then %d, want 0 then 0", was.Badge.Needs, is.Badge.Needs)
@@ -61,7 +61,7 @@ func TestUpdateAllLeavesNeedsYouAndTheBadgeNeverCountedIt(t *testing.T) {
 // whatever order its engine lists them in.
 func TestHomeDrawsAMacsServersThenItsWorkspaces(t *testing.T) {
 	fleet := &model.AllMachines{Macs: []model.MacView{
-		{Name: "jterrazz-mac-mini", ThisMac: true, Reachable: true, VMs: []model.VM{
+		{Name: "mac-mini", ThisMac: true, Reachable: true, VMs: []model.VM{
 			{Name: "build", Lifetime: model.Ephemeral, State: model.Running},
 			{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running},
 		}},

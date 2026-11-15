@@ -4,5 +4,5 @@ runs:
     - command: 'awake'
       exit: 0
       stdout: |
-          ○	jterrazz-macbook-pro	Sleeps normally · the engine is stopped	station engine start
-          ●	jterrazz-mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 5h · hosts infra (server)
+          ○	macbook-pro	Sleeps normally · the engine is stopped	station engine start
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 5h · hosts infra (server)

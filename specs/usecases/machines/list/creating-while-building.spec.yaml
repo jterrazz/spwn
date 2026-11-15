@@ -8,4 +8,4 @@ runs:
     - command: 'machines | /usr/bin/grep linux-5'
       exit: 0
       stdout: |
-          	linux-5	Workspace	jterrazz-macbook-pro	Creating · persistent	4 CPU	4 GB	image 1 of 5
+          	linux-5	Workspace	macbook-pro	Creating · persistent	4 CPU	4 GB	image 1 of 5

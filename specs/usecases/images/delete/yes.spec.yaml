@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           ●	station-linux	2026.10.20	deleted
-    - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "jterrazz-macbook-pro") | .version] | join(" ")'''
+    - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "macbook-pro") | .version] | join(" ")'''
       exit: 0
       stdout: |
           2026.11.01

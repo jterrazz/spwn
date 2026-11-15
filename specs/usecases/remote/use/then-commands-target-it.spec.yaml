@@ -15,7 +15,7 @@ runs:
           → station use -  to go back
     - command: 'settings > used.txt; "$STATION" settings --on linux-1 | /usr/bin/cmp used.txt -'
       exit: 0
-    - command: 'settings > used.txt; "$STATION" settings --on jterrazz-macbook-pro | /usr/bin/cmp -s used.txt - || echo not This Mac'
+    - command: 'settings > used.txt; "$STATION" settings --on macbook-pro | /usr/bin/cmp -s used.txt - || echo not This Mac'
       exit: 0
       stdout: |
           not This Mac

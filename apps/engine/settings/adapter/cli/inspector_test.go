@@ -25,7 +25,7 @@ func owner(c local.Cmd) (local.Output, error) {
 			return local.Output{Stdout: "true\n"}, nil
 		}
 		if c.Args[2] == "user.email" {
-			return local.Output{Stdout: "admin@jterrazz.com\n"}, nil
+			return local.Output{Stdout: "you@example.com\n"}, nil
 		}
 		return local.Output{ExitCode: 1}, nil
 	case "gh":
@@ -42,7 +42,7 @@ func TestInspector(t *testing.T) {
 	})
 	i := cli.New(run, home, cli.Options{Home: "/home"})
 	for f, want := range map[catalog.Fact]string{
-		catalog.FactGitEmail: "admin@jterrazz.com", catalog.FactGitName: "", catalog.FactGitSigning: "on",
+		catalog.FactGitEmail: "you@example.com", catalog.FactGitName: "", catalog.FactGitSigning: "on",
 		catalog.FactGPGKey: "", catalog.FactGitHub: "jterrazz", catalog.FactSSHKey: "present",
 	} {
 		if got, err := i.Read(context.Background(), f); err != nil || got.Value != want {

@@ -56,7 +56,7 @@ final class FormatTests: XCTestCase {
 
     // invariant: the engine-stopped page names the Mac as the engine does.
     func testHostNameDropsItsDomain() {
-        XCTAssertEqual(Format.bareName("jterrazz-macbook-pro.local"), "jterrazz-macbook-pro")
+        XCTAssertEqual(Format.bareName("macbook-pro.local"), "macbook-pro")
         XCTAssertEqual(Format.bareName("mini"), "mini")
     }
 }

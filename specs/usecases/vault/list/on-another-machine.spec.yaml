@@ -3,11 +3,11 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, .AgentGrantable, [.Grants[] | [.ToKind, .To]]]]}'''
       stdin: |
           {"v":2,"id":"1","watch":"vault.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"jterrazz-mac-mini","entries":[]}
+          {"mac":"mac-mini","entries":[]}

@@ -6,5 +6,5 @@ runs:
     - command: '--version >/dev/null; "$STATION" world advance 1m; /usr/bin/jq -c ''.macs | to_entries[] | select(.value.engine) | [.key, (.value.engine.activity | keys)]'' world.json'
       exit: 0
       stdout: |
-          ["jterrazz-mac-mini",["infra","jterrazz-mac-mini"]]
-          ["jterrazz-macbook-pro",["jterrazz-macbook-pro","linux-1"]]
+          ["mac-mini",["infra","mac-mini"]]
+          ["macbook-pro",["linux-1","macbook-pro"]]

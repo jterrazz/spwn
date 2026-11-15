@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          [["jterrazz-macbook-pro",null,[["api","stopped","yours"],["linux-1","running","yours"]]],["jterrazz-mac-mini",{"Tone":"plain","Sentence":"jterrazz-mac-mini has not been seen for 6 h.","Line":"Nothing proves it is down: it may be asleep, or off your network."},[["infra","unknown","not-seen"]]]]
+          [["macbook-pro",null,[["api","stopped","yours"],["linux-1","running","yours"]]],["mac-mini",{"Tone":"plain","Sentence":"mac-mini has not been seen for 6 h.","Line":"Nothing proves it is down: it may be asleep, or off your network."},[["infra","unknown","not-seen"]]]]

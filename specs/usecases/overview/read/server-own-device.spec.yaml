@@ -33,7 +33,7 @@ runs:
           ●	SSH answers
           ●	Restarts	↺ 0 · none since boot
           ●	Size	4 CPU · 8 GB · 50 GB
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].tailnet | {peers: [.self.Peers[].Name], shares: .shares}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].tailnet | {peers: [.self.Peers[].Name], shares: .shares}'' world.json'
       exit: 0
       stdout: |
           {"peers":["infra"],"shares":null}

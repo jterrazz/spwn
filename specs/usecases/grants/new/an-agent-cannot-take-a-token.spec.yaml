@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents = {"journal": {"s1": {"name": "review-bot", "vm": "linux-1", "app": "claude-code", "session": "s1", "state": "working"}}}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["linux-1"].agents = {"journal": {"s1": {"name": "review-bot", "vm": "linux-1", "app": "claude-code", "session": "s1", "state": "working"}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | select(.ToKind == "agent") | [.To, .Fit, .Line]'''
       stdin: |

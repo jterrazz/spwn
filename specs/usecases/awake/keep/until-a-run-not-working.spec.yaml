@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: no agent is working in api
           Hint: station awake 4h
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power.holds'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power.holds'' world.json'
       exit: 0
       stdout: |
           null

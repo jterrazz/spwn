@@ -36,8 +36,8 @@ func TestTheEventsWatchStreamsEachEventOfTheClosedListOnceAndNoOtherWord(t *test
 		runtime.Gosched()
 	}
 	d.tell(ctx, "infra", engine.Back("infra"))
-	d.Tell("jterrazz-macbook-pro", "memory", "This Mac: Memory pressure critical")
-	d.Tell("jterrazz-macbook-pro", activity.SubjectDisk, "This Mac: 3 % of its disk is free")
+	d.Tell("macbook-pro", "memory", "This Mac: Memory pressure critical")
+	d.Tell("macbook-pro", activity.SubjectDisk, "This Mac: 3 % of its disk is free")
 	d.tell(ctx, "infra", engine.PoweredOff("infra"))
 	added := []engine.Notice{
 		{Kind: engine.NoticeAgentWaiting, Icon: "bubble.left", Text: "review-bot is waiting for you"},

@@ -2,14 +2,14 @@ description: 'a mac bound to its file upgrades every night, and its drift says t
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [gh, { name: node, version: '22' }]
       exit: 0
-    - command: 'apply --machinefile jterrazz-macbook-pro'
+    - command: 'apply --machinefile macbook-pro'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of gh
@@ -21,7 +21,7 @@ runs:
           {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"Nightly":true,"File":"jterrazz-macbook-pro","Sentence":"Every night at 03:00, as jterrazz-macbook-pro allows."}
+          {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows."}
     - command: 'world advance 24h'
       exit: 0
     - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Upgrades | del(.Last.At)'''
@@ -29,7 +29,7 @@ runs:
           {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"Nightly":true,"File":"jterrazz-macbook-pro","Sentence":"Every night at 03:00, as jterrazz-macbook-pro allows.","Last":{"Verdict":{"Tone":"warn","Sentence":"2 apps moved.","Line":"1 app waits for you."}}}
+          {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows.","Last":{"Verdict":{"Tone":"warn","Sentence":"2 apps moved.","Line":"1 app waits for you."}}}
     - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Plan.Lines[] | select(.Waiting != "") | {package: .Step.Package, waiting: .Waiting}'''
       stdin: |
           {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}

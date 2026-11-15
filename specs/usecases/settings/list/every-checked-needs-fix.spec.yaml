@@ -1,15 +1,15 @@
 description: 'each checked setting not as expected needs a fix with its own fix path, never a station command'
 env: two-macs
 runs:
-    - command: 'world reads jterrazz-macbook-pro filevault off'
+    - command: 'world reads macbook-pro filevault off'
       exit: 0
-    - command: 'world reads jterrazz-macbook-pro sip off'
+    - command: 'world reads macbook-pro sip off'
       exit: 0
-    - command: 'world reads jterrazz-macbook-pro gatekeeper off'
+    - command: 'world reads macbook-pro gatekeeper off'
       exit: 0
-    - command: 'world reads jterrazz-macbook-pro automatic-updates off'
+    - command: 'world reads macbook-pro automatic-updates off'
       exit: 0
-    - command: 'world reads jterrazz-macbook-pro system-updates "1 pending"'
+    - command: 'world reads macbook-pro system-updates "1 pending"'
       exit: 0
     - command: 'settings | /usr/bin/sed -n ''/^# Checked/,$p'''
       exit: 0

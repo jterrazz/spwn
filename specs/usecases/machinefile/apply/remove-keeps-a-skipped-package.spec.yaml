@@ -2,10 +2,10 @@ description: 'apply --remove keeps an optional package the Machinefile still lis
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
@@ -17,10 +17,10 @@ runs:
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	fd	10.3.0	brew
-    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
-          name: jterrazz-macbook-pro
+          name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, { name: fd, manager: mise, optional: true }]
       exit: 0
@@ -35,7 +35,7 @@ runs:
       exit: 0
       stdout: |
           ●	fd	10.3.0	brew
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.package)'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0
       stdout: |
           ["fd"]

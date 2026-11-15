@@ -13,5 +13,5 @@ runs:
     - command: 'ports --all-machines --json | /usr/bin/jq -c ''.range[]'''
       exit: 0
       stdout: |
-          {"mac":"jterrazz-macbook-pro","from":40000,"to":40999,"reserved":2,"free":998}
-          {"mac":"jterrazz-mac-mini","from":40000,"to":40999,"reserved":0,"free":1000}
+          {"mac":"macbook-pro","from":40000,"to":40999,"reserved":2,"free":998}
+          {"mac":"mac-mini","from":40000,"to":40999,"reserved":0,"free":1000}

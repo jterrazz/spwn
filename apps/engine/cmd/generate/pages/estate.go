@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
@@ -70,7 +69,7 @@ func snapshot() pagehome.Overview {
 	return pagehome.Overview{
 		GeneratedAt: built,
 		Station:     overview.Station{Version: "v2.0.0-250", Engine: check("engine", catalog.StateDegraded, "not installed", "station engine start")},
-		Machine:     overview.Machine{Name: "macbook", Registered: true, Kind: catalog.Mac, Hostname: "jterrazz-macbook-pro", OS: "Darwin 27.0.0", Arch: "arm64", User: "jterrazz", Shell: "zsh"},
+		Machine:     overview.Machine{Name: "macbook", Registered: true, Kind: catalog.Mac, Hostname: "macbook-pro", OS: "Darwin 27.0.0", Arch: "arm64", User: "jterrazz", Shell: "zsh"},
 		System:      overview.System{Uptime: "22d 14h", Battery: "100% charged", MemoryTotal: 17179869184},
 		Environment: overview.Environment{
 			Network: []overview.Check{check("local ip", catalog.StateOK, "192.168.1.152", "")},
@@ -96,7 +95,7 @@ func snapshot() pagehome.Overview {
 			{Package: catalog.Setting{Name: "restart-after-power-cut", Description: "Restarts after a power cut, and wakes for the network"}, State: catalog.StateDegraded, Detail: "partly applied", Applies: true},
 		},
 		Setup:    overview.Setup{State: catalog.StateOK, Steps: []overview.Step{{Name: "name", State: catalog.StateOK, Detail: "macbook"}}},
-		Identity: []overview.Check{check("git-email", catalog.StateOK, "admin@jterrazz.com", ""), check("git-signing", catalog.StateOK, "on", "")},
+		Identity: []overview.Check{check("git-email", catalog.StateOK, "you@example.com", ""), check("git-signing", catalog.StateOK, "on", "")},
 		Background: []background.Task{
 			{Label: "com.github.facebook.watchman", Group: background.GroupKnown, Run: background.Running, PID: 3464, Scope: "user", Owner: "watchman", Plist: "~/Library/LaunchAgents/com.github.facebook.watchman.plist", State: catalog.StateOK},
 			{Label: "com.jterrazz.brain.x-snapshot", Group: background.GroupUnknown, Run: background.Failing, Exit: 2, Scope: "user", Plist: "~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist", State: catalog.StateBroken,
@@ -105,7 +104,7 @@ func snapshot() pagehome.Overview {
 				Removal: "sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist"},
 		},
 		Gateways: []overview.Check{check("Tailscale Serve", catalog.StateOK, "on", "")},
-		Tailnet:  ports.Status{State: catalog.StateOK, Connected: true, BackendState: "Running", Name: "macbook", DNSName: "jterrazz-macbook-pro.tail1234.ts.net", IP: "100.98.133.14", ServeOn: true},
+		Tailnet:  ports.Status{State: catalog.StateOK, Connected: true, BackendState: "Running", Name: "macbook", DNSName: "macbook-pro.tail1234.ts.net", IP: "100.98.133.14", ServeOn: true},
 	}
 }
 
@@ -242,17 +241,17 @@ func settingsMatrix() []Fixture {
 		space = append(space, r)
 	}
 	cols := []settings.Column{
-		{LivesOn: settings.LivesOn{Name: "jterrazz-macbook-pro", ThisMachine: true, Mac: true}, Rows: mac, Read: now},
-		{LivesOn: settings.LivesOn{Name: "jterrazz-mac-mini", Mac: true}, Rows: mac, Read: now},
+		{LivesOn: settings.LivesOn{Name: "macbook-pro", ThisMachine: true, Mac: true}, Rows: mac, Read: now},
+		{LivesOn: settings.LivesOn{Name: "mac-mini", Mac: true}, Rows: mac, Read: now},
 		{LivesOn: settings.LivesOn{Name: "linux-1"}, Rows: space, Read: now},
 		{LivesOn: settings.LivesOn{Name: "api", Away: settings.Stopped}, Rows: space, Read: now.Add(-2 * time.Hour)},
 	}
-	short := func(name string) string { return strings.TrimPrefix(name, "jterrazz-") }
+	short := func(name string) string { return name }
 	m := settings.MatrixOf(cols, []string{"infra"})
 	full := pagesettings.Matrix(m, now, false, short, thisMacContext())
 	return states("settings-matrix", pending(pagesettings.Matrix(m, now, false, short, thisMacContext())),
 		pagesettings.Matrix(settings.MatrixOf(nil, nil), now, false, short, thisMacContext()),
-		failure(pagesettings.ID, "settings --all-machines", "jterrazz-macbook-pro does not answer", "station machines"),
+		failure(pagesettings.ID, "settings --all-machines", "macbook-pro does not answer", "station machines"),
 		full)
 }
 
@@ -350,9 +349,9 @@ func sshPages() []Fixture {
 
 func imageReports() []images.Report {
 	return []images.Report{
-		{Record: images.Record{Name: "station-linux", Version: "2026.11.01", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"linux-1", "api"}, Mac: "jterrazz-macbook-pro"},
-		{Record: images.Record{Name: "station-linux", Version: "2026.10.20", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-240", BuiltAt: built.AddDate(0, 0, -20), SizeGB: 4}, Mac: "jterrazz-macbook-pro"},
-		{Record: images.Record{Name: "station-linux", Version: "2026.11.01", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"infra"}, Mac: "jterrazz-mac-mini"},
+		{Record: images.Record{Name: "station-linux", Version: "2026.11.01", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"linux-1", "api"}, Mac: "macbook-pro"},
+		{Record: images.Record{Name: "station-linux", Version: "2026.10.20", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-240", BuiltAt: built.AddDate(0, 0, -20), SizeGB: 4}, Mac: "macbook-pro"},
+		{Record: images.Record{Name: "station-linux", Version: "2026.11.01", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"infra"}, Mac: "mac-mini"},
 	}
 }
 
@@ -365,12 +364,12 @@ func imageLists() []Fixture {
 }
 
 func thisMacImages() page.Context {
-	return page.Context{Kind: "computer", Machine: "jterrazz-macbook-pro", Registered: true}
+	return page.Context{Kind: "computer", Machine: "macbook-pro", Registered: true}
 }
 
 func tailnetStatus() ports.Status {
 	return ports.Status{
-		State: catalog.StateOK, Connected: true, BackendState: "Running", Name: "macbook", DNSName: "jterrazz-macbook-pro.tail1234.ts.net",
+		State: catalog.StateOK, Connected: true, BackendState: "Running", Name: "macbook", DNSName: "macbook-pro.tail1234.ts.net",
 		IP: "100.98.133.14", Variant: "app-store", CLI: "/Applications/Tailscale.app/Contents/MacOS/Tailscale", ServeOn: true,
 		Peers: []ports.Node{
 			{ID: "1", Name: "mac-mini", IP: "100.98.133.20", Online: true, Tags: []string{"tag:station"}},
@@ -383,10 +382,10 @@ func tailnetStatus() ports.Status {
 func portsAllMachines() ports.AllMachines {
 	seen := built
 	return ports.AllMachines{Schema: ports.AllMachinesSchema, Macs: []ports.MacPorts{
-		{Name: "macbook", ThisMac: true, Reachable: true, Engine: ports.EngineInfo{Running: true}, PublicName: "jterrazz-macbook-pro.tail1234.ts.net", Serve: "on", HTTPS: "port",
+		{Name: "macbook", ThisMac: true, Reachable: true, Engine: ports.EngineInfo{Running: true}, PublicName: "macbook-pro.tail1234.ts.net", Serve: "on", HTTPS: "port",
 			Range: &ports.Range{Low: 40000, High: 40999, Reserved: 2, Free: 998, MaxPerVM: 20},
 			Shared: []ports.SharedPort{
-				{VM: "linux-1", GuestPort: 5173, Reserved: 40001, State: ports.PhaseShared, Process: "node", HTTP: true, Profile: "vite", Label: "Vite", To: "private", URLs: ports.URLSet{Public: "https://jterrazz-macbook-pro.tail1234.ts.net:40001"}, LastSeenAt: &seen},
+				{VM: "linux-1", GuestPort: 5173, Reserved: 40001, State: ports.PhaseShared, Process: "node", HTTP: true, Profile: "vite", Label: "Vite", To: "private", URLs: ports.URLSet{Public: "https://macbook-pro.tail1234.ts.net:40001"}, LastSeenAt: &seen},
 				{VM: "linux-1", GuestPort: 5432, Reserved: 40002, State: ports.PhaseWaiting, Process: "postgres"},
 			}},
 		{Name: "mac-mini", Reachable: false},
@@ -418,7 +417,7 @@ func portsByAudience() []Fixture {
 	f := portsAllMachines()
 	f.Macs[0].Shared = append(f.Macs[0].Shared,
 		ports.SharedPort{VM: "linux-1", GuestPort: 3001, Reserved: 40003, State: ports.PhaseShared, Process: "node", HTTP: true, To: "public",
-			URLs: ports.URLSet{Public: "https://jterrazz-macbook-pro.tail1234.ts.net:8443"}},
+			URLs: ports.URLSet{Public: "https://macbook-pro.tail1234.ts.net:8443"}},
 		ports.SharedPort{VM: "linux-1", GuestPort: 4000, Reserved: 40004, State: ports.PhaseShared, Process: "node", HTTP: true, To: "local",
 			URLs: ports.URLSet{Public: "http://127.0.0.1:40004"}},
 		ports.SharedPort{VM: "linux-1", GuestPort: 8443, State: ports.PhaseNotAllowed, Process: "node", Detail: "listens, not allowed (open: 3000-4999)"})

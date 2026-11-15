@@ -4,10 +4,10 @@ runs:
     - command: 'apps update --all-machines'
       exit: 1
       stdout: |
-          ●	jterrazz-macbook-pro	updated 2 apps
+          ●	macbook-pro	updated 2 apps
           –	api	skipped (stopped)
           ●	linux-1	every app is up to date
-          ✗	jterrazz-mac-mini	jterrazz-mac-mini does not answer
+          ✗	mac-mini	mac-mini does not answer
       stderr: |
           Error: 1 of 4 machines failed
           Hint: station machines

@@ -18,7 +18,7 @@ import (
 
 func apiPage(t *testing.T, state model.VMState) page.Page {
 	t.Helper()
-	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
+	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
 		{Name: "api", Lifetime: model.Persistent, State: state},
 	}}}}
 	return MachinePage(Machine{Name: "api", All: fleet, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
@@ -53,12 +53,12 @@ func TestAStoppedWorkspaceStartsAndSharesNothing(t *testing.T) {
 // invariant: a password granted to a workspace says which password it
 // came from, never an internal scope.
 func TestAGrantedAccountSaysItsPasswordAndNoInternalScope(t *testing.T) {
-	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
+	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
 		{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 	}}}}
 	granted := grantedRow(t, catalog.ProviderGitHub, "deploy")
 	granted.Scopes = []string{"session:github"}
-	signIns := &SignIns{Machines: []MachineSignIns{{Name: "linux-1", Mac: "jterrazz-macbook-pro", ThisMac: true, VM: true, Rows: []accounts.ProgramRow{granted}}}}
+	signIns := &SignIns{Machines: []MachineSignIns{{Name: "linux-1", Mac: "macbook-pro", ThisMac: true, VM: true, Rows: []accounts.ProgramRow{granted}}}}
 	p := MachinePage(Machine{Name: "linux-1", All: fleet, SignIns: signIns, Now: time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC), Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 	for _, s := range p.Sections {
 		if s.ID != SectionShared {
@@ -74,7 +74,7 @@ func TestAGrantedAccountSaysItsPasswordAndNoInternalScope(t *testing.T) {
 
 // invariant: Home lists a Mac's running workspaces before its stopped ones.
 func TestHomeListsRunningWorkspacesFirst(t *testing.T) {
-	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
+	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
 		{Name: "api", Lifetime: model.Persistent, State: model.Stopped},
 		{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 	}}}}
@@ -92,8 +92,8 @@ func TestHomeListsRunningWorkspacesFirst(t *testing.T) {
 // invariant: the Awake page names another Mac as Home does (`mac-mini`).
 func TestAwakeNamesMacsAsHomeDoes(t *testing.T) {
 	f := pageawake.AllMachines{Reports: []awake.Report{
-		{Mac: "jterrazz-macbook-pro", ThisMac: true, Caps: machine.Capabilities{Thermal: true}},
-		{Mac: "jterrazz-mac-mini", NeverSleeps: true},
+		{Mac: "macbook-pro", ThisMac: true, Caps: machine.Capabilities{Thermal: true}},
+		{Mac: "mac-mini", NeverSleeps: true},
 	}}
 	p := Awake(f, page.Context{})
 	if got := p.Sections[len(p.Sections)-1].Title; got != "mac-mini" {
@@ -122,15 +122,15 @@ func words(v page.Value) string {
 // actions target the Mac that holds it, never the VM itself.
 func TestAServerOfAnotherMacIsActedOnByItsMac(t *testing.T) {
 	fleet := &model.AllMachines{Macs: []model.MacView{
-		{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true},
-		{Name: "jterrazz-mac-mini", Reachable: true, VMs: []model.VM{{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running}}},
+		{Name: "macbook-pro", ThisMac: true, Reachable: true},
+		{Name: "mac-mini", Reachable: true, VMs: []model.VM{{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running}}},
 	}}
 	p := MachinePage(Machine{Name: "infra", All: fleet, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 	for _, a := range p.Actions {
 		if a.Run == nil || a.Run.Call == "" {
 			continue
 		}
-		if a.Run.Target == nil || *a.Run.Target != (page.Target{Name: "jterrazz-mac-mini"}) {
+		if a.Run.Target == nil || *a.Run.Target != (page.Target{Name: "mac-mini"}) {
 			t.Fatalf("%s targets %+v, want mac-mini", a.ID, a.Run.Target)
 		}
 	}

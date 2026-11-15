@@ -15,7 +15,7 @@ runs:
           ┃ Remove com.jterrazz.brain.x-snapshot?
           ┃
           ●       com.jterrazz.brain.x-snapshot   removed ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist deleted
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].jobs | [has("com.jterrazz.brain.x-snapshot"), has("com.jterrazz.brain.sync")]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs | [has("com.jterrazz.brain.x-snapshot"), has("com.jterrazz.brain.sync")]'' world.json'
       exit: 0
       stdout: |
           [false,true]

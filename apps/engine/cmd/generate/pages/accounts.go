@@ -12,7 +12,7 @@ func own(provider string, identity, scopes []string, source, detail string) acco
 }
 
 func listed(rows ...accounts.Facts) pageaccounts.Machine {
-	m := pageaccounts.Machine{Name: "jterrazz-macbook-pro", Kind: string(coremachine.Computer)}
+	m := pageaccounts.Machine{Name: "macbook-pro", Kind: string(coremachine.Computer)}
 	for _, f := range rows {
 		m.Read.Programs = append(m.Read.Programs, accounts.Describe(f, accounts.Where{Kind: coremachine.Computer}))
 	}
@@ -31,7 +31,7 @@ func fullAccounts() pageaccounts.Machine {
 	return listed(
 		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderGitHub), State: accounts.ProgramSignedIn, Who: "jterrazz", Scopes: []string{"gist", "read:org", "repo", "workflow"}, How: accounts.HowOwn},
 		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderNPM), State: accounts.ProgramBroken, Who: "jterrazz", How: accounts.HowOwn, Reason: "The token is refused by registry.npmjs.org"},
-		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderClaude), State: accounts.ProgramSignedIn, Who: "admin@jterrazz.com", Plan: "max", How: accounts.HowOwn},
+		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderClaude), State: accounts.ProgramSignedIn, Who: "you@example.com", Plan: "max", How: accounts.HowOwn},
 		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderCloudflare), State: accounts.ProgramSignedOut, How: accounts.HowOwn},
 	)
 }

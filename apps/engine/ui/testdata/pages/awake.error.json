@@ -7,7 +7,7 @@
   },
   "state": "failed",
   "error": {
-    "message": "the engine is stopped on jterrazz-macbook-pro",
+    "message": "the engine is stopped on macbook-pro",
     "hint": "station engine start"
   }
 }

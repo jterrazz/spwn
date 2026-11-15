@@ -92,7 +92,7 @@ func TestJudgeCheckedLeavesALivesOnOrAnOffThisMacUnread(t *testing.T) {
 func TestFindingsHoldACheckedSettingNotAsExpected(t *testing.T) {
 	it := checked(t, "firewall")
 	row := settings.JudgeChecked(it, true, map[catalog.Fact]settings.Fact{catalog.FactFirewall: on("off")}, settings.Expectation{}, false)
-	got := settings.Findings([]settings.Row{row}, machine.Ref{Name: "jterrazz-macbook-pro"})
+	got := settings.Findings([]settings.Row{row}, machine.Ref{Name: "macbook-pro"})
 	if len(got) != 1 || got[0].Subject != "firewall" || got[0].Text != "Firewall: off" || got[0].Fix.Path != "System Settings > Network > Firewall" {
 		t.Fatalf("findings = %+v, want Firewall off fixed in System Settings", got)
 	}

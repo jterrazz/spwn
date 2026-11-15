@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: linux-1 has 20 shared ports, the most a VM may
           Hint: station ports stop-sharing linux-1 <port>
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: (.stores.reservations | length), nine: [.stores.reservations[] | select(.guest_port == 9000)], shared: (.tailnet.shares | length)}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: (.stores.reservations | length), nine: [.stores.reservations[] | select(.guest_port == 9000)], shared: (.tailnet.shares | length)}'' world.json'
       exit: 0
       stdout: |
           {"reserved":20,"nine":[],"shared":20}

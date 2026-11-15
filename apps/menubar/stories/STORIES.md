@@ -487,7 +487,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![mac.mini.accounts](stories/mac.mini.accounts.png)
 
 - **Capture**: [dark](stories/mac.mini.accounts.png)
-- **Shows**: Accounts of mac-mini: GitHub (jterrazz-bot · repo) and Claude signed in there; then what linux-3 and review-bot are signed in to.
+- **Shows**: Accounts of mac-mini: GitHub (ci-bot · repo) and Claude signed in there; then what linux-3 and review-bot are signed in to.
 - **Data**: as mac.this.accounts
 - **Interactions**: "All machines" → back; "New VM" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "More options for mac-mini" → pageMenu(mac:mac-mini); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Grant a password…" → grant
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)

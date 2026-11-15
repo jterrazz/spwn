@@ -2,7 +2,7 @@ description: 'an owner''s VM Machinefile builds an image after its name, recordi
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: studio-linux
@@ -15,11 +15,11 @@ runs:
       exit: 0
       stdout: |
           ●	studio-linux	2026.11.04	built
-    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "jterrazz-macbook-pro" and .name == "studio-linux") | "\(.name) \(.version) \(.newest)"'''
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro" and .name == "studio-linux") | "\(.name) \(.version) \(.newest)"'''
       exit: 0
       stdout: |
           studio-linux 2026.11.04 true
-    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].stores.images[] | select(.name == "studio-linux") | "\(.machinefile) \(.machinefile_sha | length)"'' "$STATION_WORLD"'
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.images[] | select(.name == "studio-linux") | "\(.machinefile) \(.machinefile_sha | length)"'' "$STATION_WORLD"'
       exit: 0
       stdout: |
           studio-linux 64

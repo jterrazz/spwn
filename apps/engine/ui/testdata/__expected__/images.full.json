@@ -3,7 +3,7 @@
   "id": "images",
   "command": "images",
   "context": {
-    "machine": "jterrazz-macbook-pro",
+    "machine": "macbook-pro",
     "kind": "computer",
     "registered": true
   },
@@ -92,7 +92,7 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/station-linux@2026.11.01",
+            "id": "macbook-pro/station-linux@2026.11.01",
             "mark": "ok",
             "label": "station-linux",
             "cells": [
@@ -110,7 +110,7 @@
               },
               {
                 "kind": "text",
-                "text": "jterrazz-macbook-pro"
+                "text": "macbook-pro"
               }
             ],
             "detail": {
@@ -130,7 +130,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/station-linux@2026.10.20",
+            "id": "macbook-pro/station-linux@2026.10.20",
             "mark": "absent",
             "label": "station-linux",
             "cells": [
@@ -148,7 +148,7 @@
               },
               {
                 "kind": "text",
-                "text": "jterrazz-macbook-pro"
+                "text": "macbook-pro"
               }
             ],
             "detail": {
@@ -163,7 +163,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/station-linux@2026.11.01",
+            "id": "mac-mini/station-linux@2026.11.01",
             "mark": "ok",
             "label": "station-linux",
             "cells": [
@@ -181,7 +181,7 @@
               },
               {
                 "kind": "text",
-                "text": "jterrazz-mac-mini"
+                "text": "mac-mini"
               }
             ],
             "detail": {

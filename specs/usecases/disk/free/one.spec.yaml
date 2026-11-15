@@ -6,7 +6,7 @@ runs:
       stdout: |
           ●	go	19.4 GB freed
           ●	Freed	19.4 GB	nothing is lost
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].disk.files | {go: .["~/Library/Caches/go-build/00/a"], xcode: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], pnpm: .["~/Library/pnpm/store/v10/index"]}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {go: .["~/Library/Caches/go-build/00/a"], xcode: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], pnpm: .["~/Library/pnpm/store/v10/index"]}'' world.json'
       exit: 0
       stdout: |
           {"go":null,"xcode":5800000000,"pnpm":1800000000}

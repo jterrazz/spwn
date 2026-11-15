@@ -1,7 +1,7 @@
 description: 'a script app is present when its check exits 0, and the checks output gives the version it ends with'
 env: two-macs
 runs:
-    - command: 'world edit jterrazz-macbook-pro catalog/command-line/scripted.yaml'
+    - command: 'world edit macbook-pro catalog/command-line/scripted.yaml'
       stdin: |
           package: station.package/v1
           kind: app

@@ -13,7 +13,7 @@ runs:
       stdin: |
           not json
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents'' world.json'
       exit: 0
       stdout: |
           null

@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: 'world edit jterrazz-macbook-pro machinefiles/edge.machine.yaml'
+    - command: 'world edit macbook-pro machinefiles/edge.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: edge
