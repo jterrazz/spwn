@@ -154,9 +154,9 @@ generate: ## Regenerate the catalog's projections, and on Linux the window's rec
 	fi
 	@if [ "$$(uname)" = Linux ]; then \
 		mkdir -p .artifacts; \
-		python3 -B apps/window/scripts/record.py > .artifacts/window-record.log 2>&1 \
+		python3 -B apps/window/scripts/record.py --if-moved > .artifacts/window-record.log 2>&1 \
 			|| { tail -30 .artifacts/window-record.log; exit 1; }; \
-		printf "$(GREEN)●$(RESET) Regenerated apps/window/src/fixtures/worlds, the window's recordings over the world build of this tree\n"; \
+		printf "$(GREEN)●$(RESET) apps/window/src/fixtures/worlds, the window's recordings over the world build of this tree: %s\n" "$$(tail -1 .artifacts/window-record.log)"; \
 	else \
 		printf "window: apps/window/src/fixtures/worlds not regenerated, the world build is recorded in a Linux VM only\n"; \
 	fi

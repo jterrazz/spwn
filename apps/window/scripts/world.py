@@ -41,7 +41,9 @@ def temporary(prefix):
     return folder
 
 
-def world_binary():
+def build_digest():
+    """The hash of what the world build is built from, path and bytes of each file in sorted order: the Go modules,
+    every Go source of apps/engine and every file of catalog/."""
     digest = hashlib.sha256()
     modules = [ROOT / "go.work", *sorted(ROOT.glob("go.work.sum"))]
     for module in ("apps/engine", "catalog"):
@@ -51,9 +53,13 @@ def world_binary():
     for source in sources:
         digest.update(str(source.relative_to(ROOT)).encode())
         digest.update(source.read_bytes())
+    return digest.hexdigest()
+
+
+def world_binary():
     kept = pathlib.Path(os.environ.get("STATION_BENCH") or tempfile.gettempdir()) / "worlds"
     kept.mkdir(parents=True, exist_ok=True)
-    binary = kept / f"station-world-{digest.hexdigest()[:16]}"
+    binary = kept / f"station-world-{build_digest()[:16]}"
     if binary.exists():
         return binary
     building = binary.with_suffix(f".building-{os.getpid()}")
