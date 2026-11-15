@@ -273,12 +273,12 @@ Erase: delete `~/.local/state/yazi/*`.
 
 ### gh
 
-| Path                      | Group         | Note                                                                   |
-| ------------------------- | ------------- | ---------------------------------------------------------------------- |
-| `~/.cache/gh`             | can rebuild   |                                                                        |
-| `~/.local/state/gh`       | your data     |                                                                        |
-| `~/.config/gh/config.yml` | never touched |                                                                        |
-| `~/.config/gh/hosts.yml`  | never touched | the login; the keychain's `gh:github.com` (HYPOTHESIS: listing denied) |
+| Path                      | Group         | Note                                      |
+| ------------------------- | ------------- | ----------------------------------------- |
+| `~/.cache/gh`             | can rebuild   |                                           |
+| `~/.local/state/gh`       | your data     |                                           |
+| `~/.config/gh/config.yml` | never touched |                                           |
+| `~/.config/gh/hosts.yml`  | never touched | the login; the keychain's `gh:github.com` |
 
 Free: delete `~/.cache/gh/*`. Erase: delete `~/.local/state/gh/*`.
 
@@ -468,18 +468,18 @@ Free: delete `~/.claude/cache/*`, delete `~/.claude/shell-snapshots/*`, delete `
 
 ### codex
 
-| Path                               | Group         | Note                                    |
-| ---------------------------------- | ------------- | --------------------------------------- |
-| `~/.codex/cache`                   | can rebuild   |                                         |
-| `~/.codex/logs_2.sqlite`           | can rebuild   |                                         |
-| `~/.cache/codex-runtimes`          | can rebuild   |                                         |
-| `~/.codex/sessions`                | your data     |                                         |
-| `~/.codex/archived_sessions`       | your data     |                                         |
-| `~/.codex/thread_history_1.sqlite` | your data     |                                         |
-| `~/.codex/computer-use`            | your data     |                                         |
-| `~/.codex/config.toml`             | never touched |                                         |
-| `~/.codex/auth.json`               | never touched | the login (HYPOTHESIS: the file's name) |
-| `~/.codex/plugins`                 | installed     | removed by `station apps remove`        |
+| Path                               | Group         | Note                             |
+| ---------------------------------- | ------------- | -------------------------------- |
+| `~/.codex/cache`                   | can rebuild   |                                  |
+| `~/.codex/logs_2.sqlite`           | can rebuild   |                                  |
+| `~/.cache/codex-runtimes`          | can rebuild   |                                  |
+| `~/.codex/sessions`                | your data     |                                  |
+| `~/.codex/archived_sessions`       | your data     |                                  |
+| `~/.codex/thread_history_1.sqlite` | your data     |                                  |
+| `~/.codex/computer-use`            | your data     |                                  |
+| `~/.codex/config.toml`             | never touched |                                  |
+| `~/.codex/auth.json`               | never touched | the login                        |
+| `~/.codex/plugins`                 | installed     | removed by `station apps remove` |
 
 Free: delete `~/.codex/cache/*`, delete `~/.codex/logs_2.sqlite`, delete `~/.cache/codex-runtimes/*`. Erase: delete `~/.codex/sessions/*`, delete `~/.codex/archived_sessions/*`, delete `~/.codex/thread_history_1.sqlite`, delete `~/.codex/computer-use/*`. An erase refuses while `codex` runs.
 
@@ -567,11 +567,11 @@ Erase: delete `~/Library/Application Support/rtk/*`.
 
 ### claude-desktop
 
-| Path                                                  | Group     | Note                                          |
-| ----------------------------------------------------- | --------- | --------------------------------------------- |
-| `~/Library/Application Support/Claude/vm_bundles`     | your data | HYPOTHESIS: re-downloaded; data until settled |
-| `~/Library/Application Support/Claude/claude-code-vm` | your data |                                               |
-| `~/Library/Application Support/Claude/claude-code`    | your data |                                               |
+| Path                                                  | Group     | Note |
+| ----------------------------------------------------- | --------- | ---- |
+| `~/Library/Application Support/Claude/vm_bundles`     | your data |      |
+| `~/Library/Application Support/Claude/claude-code-vm` | your data |      |
+| `~/Library/Application Support/Claude/claude-code`    | your data |      |
 
 Erase: none (an app's data is its account's: erase it in the app). An erase refuses while `Claude` runs.
 
