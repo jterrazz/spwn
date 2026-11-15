@@ -94,9 +94,14 @@ describe('packages', () => {
             await visitor.see(within(own, content('ripgrep')));
         });
         expect(result.errors.text).toBe('');
+
+        // Then - each line carries the engine's rule for it
+        expect(result.content.text).toContain('takes every version');
     });
 
-    test.todo("W14 waits for each line's version rule on machinefile.drift");
+    test.todo(
+        'W14 waits for a recording of an app held on a major or a minor, which says "stays on 24, takes minors and fixes"',
+    );
 
     test.todo("W15 waits for a call capturing a machine's Packages");
 
@@ -116,7 +121,25 @@ describe('packages', () => {
         'W16 waits for the day and the count of the last run on machinefile.drift, and a Changes line',
     );
 
+    test('W17 Upgrades says whether the machine upgrades by itself and which file allows it', async () => {
+        // Given - the Packages tab of This Mac over stories, bound to its file
+        const result = await website.visit(
+            '/?world=stories&machine=macbook-pro&tab=Packages',
+            async (visitor) => {
+                // When - the tab is read
+                // Then - Upgrades gives the engine's sentence
+                await visitor.see(
+                    within(
+                        region('Upgrades'),
+                        content('Every night at 03:00, as macbook-pro allows.'),
+                    ),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test.todo(
-        'W17 waits for whether a machine upgrades by itself, when, and its last run, on machinefile.drift',
+        'W17 waits for a recording of a last night of the file, which the world cannot seed: the ledger is state',
     );
 });
