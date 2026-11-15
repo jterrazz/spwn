@@ -364,6 +364,8 @@ func apiFiles(root string) map[string][]byte {
 	out[typesPath] = typescript(calls, docs, frame, event)
 	out[wordsPath] = indented(wordsTable())
 	out[wordsTypesPath] = wordsDeclaration()
+	out[confirmsPath] = indented(confirmsTable())
+	out[confirmsTypesPath] = confirmsDeclaration()
 	return out
 }
 

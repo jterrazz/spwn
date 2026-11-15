@@ -117,3 +117,30 @@ func TestAnAwakeSessionThatFollowsARunEndsWithIt(t *testing.T) {
 		t.Errorf("a session for a time says %q", got)
 	}
 }
+
+func TestASignInNeedNamesTheSignInsTabItOpens(t *testing.T) {
+	s := overview.Summarize(mac, overview.EngineRunning, []finding.Finding{
+		{Section: section.Accounts, Severity: finding.Broken, Subject: "docs-bot", Text: "docs-bot sign-in expired"},
+		{Section: section.Apps, Severity: finding.NeedsALook, Subject: "jq"},
+	}, nil, nil)
+	nouns := map[string]string{}
+	for _, n := range s.Needs {
+		nouns[n.Subject] = n.Noun
+	}
+	if nouns["docs-bot"] != "Sign-ins" || nouns["jq"] != "Apps" {
+		t.Errorf("the nouns of a sign-in and an update: %v", nouns)
+	}
+}
+
+func TestAMacsMachinesAreCountedRunningThenStopped(t *testing.T) {
+	for want, vms := range map[string][]overview.VM{
+		"3 running, 1 stopped": {{Name: "api", Running: true}, {Name: "linux-1", Running: true}, {Name: "linux-2", Running: true}, {Name: "linux-3"}},
+		"1 running":            {{Name: "api", Running: true}},
+		"2 stopped":            {{Name: "api"}, {Name: "linux-1"}},
+		"":                     {},
+	} {
+		if got := overview.Summarize(mac, overview.EngineRunning, nil, nil, vms).Machines; got != want {
+			t.Errorf("%v: %q; want %q", vms, got, want)
+		}
+	}
+}

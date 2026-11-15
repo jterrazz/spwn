@@ -26,6 +26,10 @@ export default defineConfig({
                     "written by `make generate` from the calls' schemas, byte for byte what the packages-api drift test compares",
                 'packages/api/words.json':
                     "written by `make generate` from the closed enums' words, byte for byte what the packages-api drift test compares",
+                'packages/api/confirms.json':
+                    "written by `make generate` from the calls' confirmations, byte for byte what the packages-api drift test compares",
+                'packages/api/confirms.d.ts':
+                    'written by `make generate` beside confirms.json, byte for byte what the packages-api drift test compares',
                 'packages/api/words.d.ts':
                     'written by `make generate` beside words.json, byte for byte what the packages-api drift test compares',
                 'packages/api/schemas/**':

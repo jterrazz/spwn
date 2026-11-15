@@ -79,8 +79,10 @@ station machines stop api # asks yes or no; kept with its disk
 station machines stop infra --on mac-mini # a server: asks its name typed (--confirm=infra), --yes answers nothing
 station machines edit api --memory 16G # applies when api next starts; a disk only grows
 station machines edit infra --check infra:6443 # a server's health check, read by its next health run; --no-check removes it
+
 station machines ssh api # prints the ssh command: ssh admin@api
 station machines restart mac-mini # a Mac: asks naming the VMs that pause, a planned restart that unlocks itself, waits for its station, starts those VMs again; a VM: power off, run
+station machines restart infra --on mac-mini # a server: asks its name typed (--confirm=infra), --yes answers nothing; a workspace asks nothing
 station machines delete api # destroys the VM, its leases and the secrets lent to it
 station machines api # its Overview, as station overview --on api
 station machines unlock mac-mini # after a power cut, on its last LAN address: you type its password into macOS's pre-boot prompt

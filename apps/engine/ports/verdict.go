@@ -2,6 +2,7 @@ package ports
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
@@ -13,8 +14,29 @@ const (
 )
 
 func VerdictOf(f AllMachines) verdict.Verdict {
-	// invariant: the Ports page's head: a port exposed first, then what
-	// listens with what is shared as its line; an empty listing says so.
+	// invariant: the Ports page's head, of the machines the listing holds (one
+	// machine's when it was asked for one): a port exposed first, then what
+	// listens with what is shared as its line; an empty listing says so. The
+	// short-lived listeners left out are counted after the line.
+	v := verdictOf(f)
+	quiet := 0
+	for _, h := range f.Macs {
+		for _, q := range h.Quiet {
+			quiet += q.Count
+		}
+	}
+	switch quiet {
+	case 0:
+		return v
+	case 1:
+		v.Line = strings.TrimSpace(v.Line + " One short-lived listener is left out.")
+	default:
+		v.Line = strings.TrimSpace(v.Line + " " + strconv.Itoa(quiet) + " short-lived listeners are left out.")
+	}
+	return v
+}
+
+func verdictOf(f AllMachines) verdict.Verdict {
 	listening, shared, exposed := 0, 0, 0
 	first := 0
 	for _, h := range f.Macs {

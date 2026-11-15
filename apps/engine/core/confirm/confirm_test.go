@@ -19,6 +19,7 @@ func TestEachGestureAsksWhatItsKindNeeds(t *testing.T) {
 	}{
 		{"start a workspace", confirm.Start, machine.Workspace, confirm.None},
 		{"restart a server", confirm.Restart, machine.Server, confirm.None},
+		{"machines.restart of a server", confirm.RestartServer, machine.Server, confirm.TypeName},
 		{"install an app", confirm.Install, machine.Computer, confirm.None},
 		{"share a port", confirm.Share, machine.Workspace, confirm.None},
 		{"stop a workspace", confirm.Stop, machine.Workspace, confirm.YesNo},
@@ -105,7 +106,7 @@ func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
 func TestEveryConfirmationSaysWhatItsGestureDoes(t *testing.T) {
 	for _, a := range []confirm.Action{confirm.Install, confirm.Share, confirm.Start, confirm.Restart, confirm.Edit, confirm.Remove, confirm.TakeBack,
 		confirm.StopSharing, confirm.SignOut, confirm.RemovePassword, confirm.RemoveGrant, confirm.Undeclare, confirm.OffHere, confirm.Overwrite,
-		confirm.Forget, confirm.DeleteImage, confirm.RestartMac, confirm.StopEngine, confirm.Stop, confirm.StopAgent, confirm.Delete, confirm.Erase,
+		confirm.Forget, confirm.DeleteImage, confirm.RestartMac, confirm.RestartServer, confirm.StopEngine, confirm.Stop, confirm.StopAgent, confirm.Delete, confirm.Erase,
 		confirm.BuildImage, confirm.Cleanup} {
 		if c := a.Consequence(); c == "" || !strings.HasSuffix(c, ".") {
 			t.Errorf("%s says %q: every confirmation says what it does, in one sentence", a, c)

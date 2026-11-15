@@ -24,6 +24,8 @@ func Of(f AllMachines, name string) AllMachines {
 			continue
 		}
 		h.Shared, h.Ports, h.Range, h.Listening = shared, listened, nil, nil
+		h.Quiet = slices.DeleteFunc(slices.Clone(h.Quiet), func(q Quiet) bool { return q.VM != name })
+		h.NotShared = slices.DeleteFunc(slices.Clone(h.NotShared), func(n NotShared) bool { return n.VM != name })
 		out.Macs = []MacPorts{h}
 		return out
 	}

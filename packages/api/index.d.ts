@@ -1898,7 +1898,7 @@ export type MachinesLatencyPoint = {
 };
 
 export type MachinesMacView = {
-    Answered: string;
+    Answered?: string;
     Asleep: boolean;
     Engine: MachinesEngineView;
     Hardware: CoreMachineHardware;
@@ -2130,6 +2130,7 @@ export type OverviewNeed = {
     Call: string;
     Command: string;
     Machine: string;
+    Noun: string;
     Path: string;
     Section: 'overview' | 'activity' | 'apps' | 'settings' | 'disk' | 'ports' | 'accounts' | 'background' | 'awake' | 'ssh' | 'images';
     Severity: 'broken' | 'needs-a-look';
@@ -2198,6 +2199,7 @@ export type OverviewSummary = {
     Engine: '' | 'running' | 'stopped';
     Head: OverviewHead;
     Lines: OverviewLine[] | null;
+    Machines?: string;
     Needs: OverviewNeed[] | null;
     Pending: boolean;
     Read?: string;

@@ -50,7 +50,10 @@ type Call[D, In, Out any] struct {
 	// Applies, from the Profile's one presence read.
 	Needs   []machine.Need
 	Confirm confirm.Action
-	Errors  []fail.Code
+	// value: the confirmation a target of that kind asks instead of
+	// Confirm, for a call whose target is a Mac or one of its VMs.
+	ConfirmBy map[machine.Kind]confirm.Action
+	Errors    []fail.Code
 	// value: the version of the document its output is printed as,
 	// station.<name>/v<Document>; zero is 1.
 	Document int
@@ -81,15 +84,16 @@ type Watch[D, In, Out any] struct {
 func (w Watch[D, In, Out]) Schema() string { return schema(w.Name, w.Document) }
 
 type Meta struct {
-	Name    string
-	Section section.ID
-	Where   Where
-	Applies machine.Applies
-	Needs   []machine.Need
-	Confirm confirm.Action
-	Errors  []fail.Code
-	In      string
-	Out     string
+	Name      string
+	Section   section.ID
+	Where     Where
+	Applies   machine.Applies
+	Needs     []machine.Need
+	Confirm   confirm.Action
+	ConfirmBy map[machine.Kind]confirm.Action
+	Errors    []fail.Code
+	In        string
+	Out       string
 	// value: the Go types the call reads and answers, which the wire's
 	// schemas are reflected from.
 	InType   reflect.Type
@@ -165,7 +169,7 @@ func valueOf[Out any](name string, v any) (Out, error) {
 
 func Bind[D, In, Out any](c Call[D, In, Out], d D) Handler {
 	return bound[D, In, Out]{meta: Meta{
-		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, Errors: c.Errors,
+		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, ConfirmBy: c.ConfirmBy, Errors: c.Errors,
 		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), InType: reflect.TypeFor[In](), OutType: reflect.TypeFor[Out](),
 		Document: c.Document,
 	}, runFn: c.Run, deps: d}

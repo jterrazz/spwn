@@ -912,7 +912,13 @@
       "where": "at-target",
       "confirm": "restart-mac",
       "consequence": "%s restarts: its VMs stop, and its servers start again once it is back.",
+      "confirm_by": {
+        "server": "restart-server",
+        "workspace": "restart"
+      },
       "errors": [
+        "confirm.mismatch",
+        "confirm.needed",
         "confirm.yes-needed"
       ],
       "in": "RestartIn",

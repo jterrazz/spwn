@@ -2,6 +2,8 @@
     "name": "@jterrazz/station-api",
     "private": true,
     "files": [
+        "confirms.d.ts",
+        "confirms.json",
         "index.d.ts",
         "schemas",
         "words.d.ts",
@@ -12,6 +14,10 @@
     "exports": {
         ".": {
             "types": "./index.d.ts"
+        },
+        "./confirms.json": {
+            "types": "./confirms.d.ts",
+            "default": "./confirms.json"
         },
         "./words.json": {
             "types": "./words.d.ts",

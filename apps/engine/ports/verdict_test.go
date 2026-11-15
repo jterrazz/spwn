@@ -3,6 +3,7 @@ package ports_test
 import (
 	"testing"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 )
@@ -26,5 +27,23 @@ func TestThePortsHeadSaysWhatIsExposedElseWhatListens(t *testing.T) {
 		if got := ports.VerdictOf(c.f); got != c.want {
 			t.Errorf("%s: %+v; want %+v", name, got, c.want)
 		}
+	}
+}
+
+func TestOneMachinesPortsHeadCountsItsOwnAndTheShortLivedLeftOut(t *testing.T) {
+	on := func(vm string, port int) ports.Port {
+		return ports.Port{Machine: machine.Ref{Name: vm, On: "macbook"}, Port: port, Reach: ports.ThisMachine}
+	}
+	all := ports.AllMachines{Macs: []ports.MacPorts{{Name: "macbook", ThisMac: true,
+		Ports: []ports.Port{on("macbook", 22), on("linux-1", 3000), on("linux-1", 8080), on("linux-2", 5432), on("linux-2", 6379)},
+		Quiet: []ports.Quiet{{VM: "linux-1", Count: 3}, {VM: "linux-2", Count: 1}}}}}
+	if got := ports.VerdictOf(ports.Of(all, "linux-1")); got.Sentence != "2 ports listen." || got.Line != "None is shared. 3 short-lived listeners are left out." {
+		t.Errorf("linux-1's head: %+v", got)
+	}
+	if got := ports.VerdictOf(ports.Of(all, "linux-2")); got.Line != "None is shared. One short-lived listener is left out." {
+		t.Errorf("linux-2's head: %+v", got)
+	}
+	if got := ports.VerdictOf(all); got.Sentence != "5 ports listen." || got.Line != "None is shared. 4 short-lived listeners are left out." {
+		t.Errorf("the whole listing's head: %+v", got)
 	}
 }

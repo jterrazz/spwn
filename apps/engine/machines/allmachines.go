@@ -191,8 +191,8 @@ func (e EngineView) Running() bool { return e.State == EngineRunning }
 type MacView struct {
 	Name, User, StationVersion string
 	ThisMac, Reachable         bool
-	// value: when this Mac last had its answer; zero for one never heard.
-	Answered time.Time
+	// value: when this Mac last had its answer; absent for one never heard.
+	Answered time.Time `json:",omitzero"`
 	// value: its address on your LAN, as it reads it; empty when it cannot say.
 	LAN    string
 	Node   Node
