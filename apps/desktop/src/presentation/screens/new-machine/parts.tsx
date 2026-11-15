@@ -1,0 +1,227 @@
+import type { MachinesCallsNewMachine, MachinesCallsNewOn } from '@jterrazz/station-api';
+import type { ReactElement } from 'react';
+
+import { bytes } from '../../../domain/format';
+import { machineNamesOf, macsOf } from '../../../domain/machines/machines';
+import { useWatch } from '../../dependencies/dependencies';
+import { useIdentityOf } from '../../kit/identity';
+import { capitalised, Field, identityOf, MemoryPick, Missing, Picks, Switch } from '../../ui/index';
+import type { MemoryHolder, Pick as Option } from '../../ui/index';
+import { wordOf } from '../../words/engine-words';
+import { fitAllows } from '../../words/provisional';
+import { machineKindWord } from '../../words/shown';
+import { GB, gbOf, leavesFreeOf } from './model';
+import type { Draft, Kind } from './model';
+
+import styles from './new-machine.module.css';
+
+export type Change = (next: Partial<Draft>) => void;
+
+function onPick(on: MachinesCallsNewOn): Option<string> {
+    const free = on.Room === null ? [] : [`${String(gbOf(on.Room.Capacity.Free))} GB free`];
+    return {
+        disabled: !on.Ready,
+        id: on.Mac,
+        lines: on.Ready ? free : [on.Verdict.Sentence],
+        title: on.Mac,
+    };
+}
+
+type OnRowProps = { answer: MachinesCallsNewMachine; change: Change; refusal: null | ReactElement };
+
+export function OnRow({ answer, change, refusal }: OnRowProps) {
+    const offered = answer.On ?? [];
+    if (offered.length < 2) {
+        return refusal;
+    }
+    return (
+        <Field after={refusal} label="On">
+            <Picks
+                label="On"
+                look="cards"
+                onChange={(on) => {
+                    change({ memory: null, on });
+                }}
+                options={offered.map(onPick)}
+                value={answer.Mac}
+            />
+        </Field>
+    );
+}
+
+function useNewIdentity(name: string) {
+    const listing = useWatch('machines.list', {});
+    const listed = machineNamesOf(macsOf(listing.kind === 'read' ? listing.out : undefined));
+    return identityOf(name, [...listed, name]);
+}
+
+type MemoryProps = {
+    answer: MachinesCallsNewMachine;
+    on: MachinesCallsNewOn;
+    memory: number | undefined;
+    name: string;
+    change: Change;
+    refusal: null | ReactElement;
+};
+
+function Presets({ on, memory, change }: Pick<MemoryProps, 'change' | 'memory' | 'on'>) {
+    const presets = on.Room?.Presets ?? [];
+    return (
+        <Picks
+            label="Memory presets"
+            look="chips"
+            onChange={(id) => {
+                const preset = presets.find((one) => one.Preset === id);
+                if (preset !== undefined) {
+                    change({ memory: preset.MemoryBytes });
+                }
+            }}
+            options={presets.map((preset) => ({
+                disabled: !fitAllows(preset.Fit),
+                id: preset.Preset,
+                title: `${String(gbOf(preset.MemoryBytes))} GB · ${
+                    fitAllows(preset.Fit)
+                        ? wordOf('MachinesPreset', preset.Preset).Word
+                        : wordOf('MachinesFit', preset.Fit).Word
+                }`,
+            }))}
+            value={presets.find((preset) => preset.MemoryBytes === memory)?.Preset ?? null}
+        />
+    );
+}
+
+function Range({ answer, on, memory, change }: Omit<MemoryProps, 'name' | 'refusal'>) {
+    if (memory === undefined) {
+        return null;
+    }
+    return (
+        <input
+            aria-label="Memory, GB"
+            className={styles.range}
+            max={gbOf(on.MaxMemory)}
+            min={gbOf(answer.MinMemory)}
+            onChange={(event) => {
+                change({ memory: Number(event.target.value) * GB });
+            }}
+            step={1}
+            type="range"
+            value={gbOf(memory)}
+        />
+    );
+}
+
+export function Memory(props: MemoryProps) {
+    const { on, memory, name, refusal } = props;
+    const identityOfListed = useIdentityOf();
+    const identity = useNewIdentity(name);
+    if (on.Room === null) {
+        return (
+            <Field after={refusal} label="Memory">
+                <Missing>
+                    {on.Verdict.Sentence === ''
+                        ? 'machines.new measures no memory on this Mac.'
+                        : on.Verdict.Sentence}
+                </Missing>
+            </Field>
+        );
+    }
+    const { Capacity } = on.Room;
+    const holders: MemoryHolder[] = [
+        { identity: 'system', key: 'macos', label: 'macOS', squares: gbOf(Capacity.MacOS) },
+        ...(Capacity.VMs ?? []).map((vm) => ({
+            identity: identityOfListed(vm.Name),
+            key: vm.Name,
+            label: vm.Name,
+            squares: gbOf(vm.Bytes),
+        })),
+    ];
+    const chosen = memory === undefined ? 0 : gbOf(memory);
+    return (
+        <Field after={refusal} label="Memory">
+            <MemoryPick
+                chosen={chosen}
+                free={Math.max(0, gbOf(Capacity.Free) - chosen)}
+                holders={holders}
+                identity={identity}
+                line={leavesFreeOf(on, memory)}
+                name={on.Mac}
+            >
+                <Range {...props} />
+                <Presets {...props} />
+            </MemoryPick>
+        </Field>
+    );
+}
+
+type LifetimesProps = { answer: MachinesCallsNewMachine; draft: Draft; change: Change };
+
+export function Lifetimes({ answer, draft, change }: LifetimesProps) {
+    if (draft.kind === 'server') {
+        return null;
+    }
+    return (
+        <Field label="Lifetime">
+            <Picks
+                label="Lifetime"
+                look="cards"
+                onChange={(lifetime) => {
+                    change({ lifetime });
+                }}
+                options={(answer.Lifetimes ?? []).map((id) => {
+                    const word = wordOf('MachinesLifetime', id);
+                    return {
+                        id,
+                        lines: word.Detail === undefined ? [] : [word.Detail],
+                        title: word.Word,
+                    };
+                })}
+                value={draft.lifetime ?? answer.Lifetime}
+            />
+        </Field>
+    );
+}
+
+type OptionsProps = LifetimesProps & { open: boolean; onToggle: () => void };
+
+function summaryOf(answer: MachinesCallsNewMachine, kind: Kind): string {
+    const size = kind === 'server' && answer.Server !== null ? answer.Server.Size : answer.Size;
+    const from = kind === 'server' && answer.Server !== null ? answer.Server.Image : answer.From;
+    return [machineKindWord(kind), from, `${String(size.CPUs)} CPU`, bytes(size.DiskBytes)].join(
+        ' · ',
+    );
+}
+
+export function Options({ answer, draft, change, open, onToggle }: OptionsProps) {
+    const kinds: readonly { id: Kind; label: string }[] = [
+        { id: 'workspace', label: capitalised(machineKindWord('workspace')) },
+        ...(answer.Server === null
+            ? []
+            : [{ id: 'server' as const, label: capitalised(machineKindWord('server')) }]),
+    ];
+    return (
+        <div className={styles.options}>
+            <div className={styles.fold}>
+                <button
+                    aria-expanded={open}
+                    className={styles.toggle}
+                    onClick={onToggle}
+                    type="button"
+                >
+                    <span aria-hidden="true">{open ? '⌄' : '›'}</span> Options
+                </button>
+                <span className={styles.summary}>{summaryOf(answer, draft.kind)}</span>
+            </div>
+            {open ? (
+                <Switch
+                    label="Kind"
+                    onChange={(kind: Kind) => {
+                        change({ kind, memory: null });
+                    }}
+                    options={kinds}
+                    surface="panel"
+                    value={draft.kind}
+                />
+            ) : null}
+        </div>
+    );
+}

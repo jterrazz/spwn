@@ -3,7 +3,6 @@ import { lazy, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { compose, composeGallerySample } from './composition/compose';
-import { PAGES } from './pages/registry';
 import { EngineProvider } from './presentation/dependencies/dependencies';
 import { Boundary } from './presentation/navigation/boundary';
 import { placeOf, wearDress } from './presentation/navigation/chrome';
@@ -12,11 +11,12 @@ import type { Route } from './presentation/navigation/route';
 import { recalled, remember } from './presentation/navigation/route-memory';
 import type { Memory } from './presentation/navigation/route-memory';
 import { Window } from './presentation/navigation/window';
+import { PAGES } from './presentation/screens/registry';
 
 const proof = import.meta.env.MODE !== 'production';
 
 async function galleryOf() {
-    const { default: Drawn } = await import('./pages/gallery/gallery');
+    const { default: Drawn } = await import('./presentation/screens/gallery/gallery');
     const sample = composeGallerySample();
     function Sampled() {
         return <Drawn sample={sample} />;

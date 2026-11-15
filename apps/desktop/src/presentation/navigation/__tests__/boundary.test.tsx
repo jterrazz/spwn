@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
-import { PAGES } from '../../../pages/registry';
 import { EngineProvider } from '../../dependencies/dependencies';
+import { PAGES } from '../../screens/registry';
 import type { PageProps, Pages } from '../window';
 import { Window } from '../window';
 

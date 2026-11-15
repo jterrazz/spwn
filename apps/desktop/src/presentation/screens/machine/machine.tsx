@@ -1,0 +1,50 @@
+import { driftAsked, targetOf } from '../../../domain/machines/machines';
+import type { Found } from '../../../domain/machines/machines';
+import type { Route, Tab } from '../../navigation/route';
+import { ActivityTab } from './activity/activity';
+import { OverviewTab } from './overview/overview';
+import { PackagesTab } from './packages/packages';
+import { PortsTab } from './ports/ports';
+import { SignInsTab } from './sign-ins/sign-ins';
+import { StorageTab } from './storage/machine-storage';
+
+type Props = { found: Found; tab: Tab; go: (to: Route) => void };
+
+export function MachineTab({ found, tab, go }: Props) {
+    const name = found.vm?.Name ?? found.mac.Name;
+    switch (tab) {
+        case 'Overview': {
+            return <OverviewTab found={found} go={go} />;
+        }
+        case 'Activity': {
+            return <ActivityTab found={found} go={go} />;
+        }
+        case 'Packages': {
+            return (
+                <PackagesTab
+                    asked={driftAsked(found)}
+                    key={name}
+                    name={name}
+                    target={targetOf(found)}
+                />
+            );
+        }
+        case 'Ports': {
+            return <PortsTab found={found} go={go} />;
+        }
+        case 'Sign-ins': {
+            return <SignInsTab found={found} go={go} key={name} />;
+        }
+        case 'Storage': {
+            return (
+                <StorageTab
+                    go={go}
+                    key={name}
+                    name={name}
+                    target={targetOf(found)}
+                    vm={found.vm !== undefined}
+                />
+            );
+        }
+    }
+}

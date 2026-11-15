@@ -15,8 +15,8 @@ import { describe, expect, test } from 'vitest';
 import { composeReplay } from '../../../composition/compose';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
-import { PAGES } from '../../../pages/registry';
 import { EngineProvider } from '../../dependencies/dependencies';
+import { PAGES } from '../../screens/registry';
 import type { Route } from '../route';
 import { Window } from '../window';
 
