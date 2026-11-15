@@ -83,8 +83,19 @@ menubar-check: ## The menu bar's swift test, then its bundle; one line of skip w
 		fi; \
 		printf "menubar: skipped, no macOS SDK (install Xcode to build apps/menubar)\n"; exit 0; \
 	fi; \
-	swift apps/menubar/scripts/symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets && \
-	swift test --parallel --package-path apps/menubar --scratch-path .artifacts/menubar/build && apps/menubar/scripts/build.sh
+	swift apps/menubar/scripts/symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets || exit 1; \
+	mkdir -p .artifacts/menubar; \
+	( start=$$(date +%s); \
+		STATION_SYMBOLS_DRAWN=1 STATION_MENUBAR_SCRATCH=$(CURDIR)/.artifacts/menubar/release-build apps/menubar/scripts/build.sh > .artifacts/menubar/release.log 2>&1; \
+		code=$$?; echo $$(($$(date +%s) - start)) > .artifacts/menubar/release.seconds; exit $$code ) & \
+	release=$$!; \
+	start=$$(date +%s); \
+	swift test --parallel --package-path apps/menubar --scratch-path .artifacts/menubar/build; tested=$$?; \
+	tested_in=$$(($$(date +%s) - start)); \
+	wait $$release; built=$$?; \
+	[ $$built -eq 0 ] && tail -n 1 .artifacts/menubar/release.log || cat .artifacts/menubar/release.log; \
+	printf "menubar: swift test exit %s in %s s, release build exit %s in %s s, run side by side\n" $$tested $$tested_in $$built "$$(cat .artifacts/menubar/release.seconds)"; \
+	[ $$tested -eq 0 ] && [ $$built -eq 0 ]
 
 menubar: ## Build the menu bar's bundle, signed ad hoc, into $(MENUBAR_APP)
 	@apps/menubar/scripts/build.sh
