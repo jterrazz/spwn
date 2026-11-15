@@ -27,13 +27,17 @@ describe('needs', () => {
     });
 
     test('N2 the lines that press and those that can wait are told apart in two panels, by the engine', async () => {
-        // Given - the Inbox over two-macs, two lines that need me beside seven that can wait
+        // Given - the Inbox over two-macs, one line that needs me beside seven that can wait
         const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
             // When - I open Needs you
             // Then - two panels, each with the lines the engine's upkeep puts in it
-            await visitor.see(within(needs, content('npm sign-in expired')));
+            await visitor.see(
+                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+            );
             await visitor.see(within(canWait, content('1 mise update waiting')));
-            await visitor.gone(within(canWait, content('npm sign-in expired')));
+            await visitor.gone(
+                within(canWait, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+            );
         });
         expect(result.errors.text).toBe('');
     });
@@ -102,7 +106,9 @@ describe('needs', () => {
     test("N10 a Mac chosen above the list keeps only that Mac's needs, and All brings them back", async () => {
         // Given - the Inbox over two-macs, where every need is on the first Mac
         const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
-            await visitor.see(within(needs, content('npm sign-in expired')));
+            await visitor.see(
+                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+            );
 
             // When - the Mac mini is chosen
             await visitor.click(within(main(), button('jterrazz-mac-mini')));
@@ -111,13 +117,17 @@ describe('needs', () => {
             await visitor.see(
                 content('None of the needs listed concerns jterrazz-mac-mini or its machines.'),
             );
-            await visitor.gone(within(needs, content('npm sign-in expired')));
+            await visitor.gone(
+                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+            );
 
             // When - all machines are chosen again
             await visitor.click(within(main(), button('All machines')));
 
             // Then - the needs are back
-            await visitor.see(within(needs, content('npm sign-in expired')));
+            await visitor.see(
+                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+            );
         });
         expect(result.errors.text).toBe('');
     });
@@ -132,9 +142,9 @@ describe('needs', () => {
             // When - I read the sidebar
             await visitor.see(sidebar);
 
-            // Then - the fleet's places are there, Inbox with its count of the two lines that need me
+            // Then - the fleet's places are there, Inbox with its count of the line that needs me
             await visitor.see(within(sidebar, button('Home')));
-            await visitor.see(within(sidebar, button('Inbox 2')));
+            await visitor.see(within(sidebar, button('Inbox 1')));
             await visitor.see(within(sidebar, button('Storage')));
             await visitor.see(within(sidebar, button('jterrazz-macbook-pro online')));
             await visitor.see(within(sidebar, button('api Stopped')));
