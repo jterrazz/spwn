@@ -8,14 +8,14 @@ const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'two-macs');
 
 const needs = region('Needs you');
 
-const waiting = region('Can wait');
+const waiting = region('Upkeep');
 
 function inboxOver(world: string) {
     return pageOver(recordingFor(world), { page: 'inbox' });
 }
 
 describe('Inbox', () => {
-    test("a world whose needs press lists them under Needs you and the rest under Can wait, in the engine's head", async () => {
+    test("a world whose needs press lists them under Needs you and the rest under Upkeep, in the engine's head", async () => {
         // Given - the Inbox over two-macs, where npm's sign-in is refused and a background task fails
         const result = await component.render(inboxOver('two-macs'), async (visitor) => {
             // When - This Mac's overview has been read
@@ -26,7 +26,7 @@ describe('Inbox', () => {
             await visitor.see(within(waiting, content('1 mise update waiting')));
         });
 
-        // Then - the engine's verdict heads the page, then Needs you with the one that presses and Can wait with the rest
+        // Then - the engine's verdict heads the page, then Needs you with the one that presses and Upkeep with the rest
         await expect(result.tree).toMatch(file('./__expected__/two-macs-inbox.aria.yaml'));
     });
 
@@ -37,7 +37,7 @@ describe('Inbox', () => {
             await visitor.see(content('No need is listed.'));
         });
 
-        // Then - the engine's verdict that this Mac is ready, an empty Needs you and an empty Can wait
+        // Then - the engine's verdict that this Mac is ready, an empty Needs you and an empty Upkeep
         await expect(result.tree).toMatch(file('./__expected__/one-mac-inbox.aria.yaml'));
     });
 

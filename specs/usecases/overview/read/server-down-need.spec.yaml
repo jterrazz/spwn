@@ -1,0 +1,19 @@
+description: 'a server whose check fails is Down on Needs you, its detail the Mac and since when its check fails'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create srv --server --cpus 2 --memory 4G --disk 20G --check tcp:22 >/dev/null'
+      exit: 0
+    - command: 'world advance 2m'
+      exit: 0
+    - command: 'world fault CheckRunner.Run'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Verdict.Sentence, [.Needs[] | select(.Subject == "srv") | [.Text, .Upkeep, .Mark, .Detail, .Verb, .Noun]]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          ["srv is down.",[["srv check failing since 10:03","needs-you","down","macbook-pro. Since 10:03. SSH still answers.","restart","Overview"]]]

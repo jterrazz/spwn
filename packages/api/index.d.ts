@@ -925,6 +925,7 @@ export type CoreCallWireError = {
 };
 
 export type CoreFindingFinding = {
+    Detail?: string;
     Ends: string;
     Fix: CoreFindingFix;
     Machine: CoreMachineRef;
@@ -2280,7 +2281,9 @@ export type OverviewNeed = {
     Call: string;
     Command: string;
     Confirm: string;
+    Detail: string;
     Machine: string;
+    Mark: 'exposed' | 'down' | 'needs-you' | 'can-wait';
     Noun: string;
     On: string;
     Path: string;
@@ -3668,6 +3671,8 @@ export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
 export type MachinesVMState = 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
 
+export type OverviewMark = 'exposed' | 'down' | 'needs-you' | 'can-wait';
+
 export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
 export type OverviewVerb = 'review' | 'restart' | 'start' | 'delete' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
@@ -3728,6 +3733,7 @@ export type StationWords = {
     MachinesPreset: Record<MachinesPreset, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
     MachinesVMState: Record<MachinesVMState, StationWord>;
+    OverviewMark: Record<OverviewMark, StationWord>;
     OverviewUpkeep: Record<OverviewUpkeep, StationWord>;
     OverviewVerb: Record<OverviewVerb, StationWord>;
     PageNoun: Record<PageNoun, StationWord>;

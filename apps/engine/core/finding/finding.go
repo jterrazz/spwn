@@ -53,8 +53,11 @@ type Finding struct {
 	Severity Severity
 	Subject  string
 	Text     string
-	Fix      Fix
-	Urgency  Urgency
+	// value: the sentence under the finding's title, empty when the model
+	// tells none.
+	Detail  string `json:",omitempty"`
+	Fix     Fix
+	Urgency Urgency
 	// value: when an expiring finding expires.
 	Ends time.Time
 }

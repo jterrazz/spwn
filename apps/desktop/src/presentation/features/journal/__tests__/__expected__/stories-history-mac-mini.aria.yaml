@@ -11,8 +11,8 @@
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
     - paragraph: None of the needs listed concerns mac-mini or its machines.
-  - region "Can wait":
-    - heading "Can wait 0" [level=2]
+  - region "Upkeep":
+    - heading "Upkeep 0" [level=2]
     - paragraph: Nothing can wait.
   - region "History":
     - heading "History what happened, newest first" [level=2]

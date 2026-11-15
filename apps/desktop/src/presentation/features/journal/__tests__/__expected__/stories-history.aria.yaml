@@ -11,12 +11,11 @@
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
     - button "Broken port 5000 is reachable outside Tailscale macbook-pro · Ports"
-    - text: System Settings > General > AirDrop & Handoff > AirPlay Receiver
-    - button "Copy System Settings > General > AirDrop & Handoff > AirPlay Receiver": Copy
+    - text: Review
     - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
-  - region "Can wait":
-    - heading "Can wait 1" [level=2]
+  - region "Upkeep":
+    - heading "Upkeep 1" [level=2]
     - 'button "Needs a look Firewall: off macbook-pro · Settings"'
     - text: System Settings > Network > Firewall
     - button "Copy System Settings > Network > Firewall": Copy

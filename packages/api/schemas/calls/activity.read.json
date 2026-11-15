@@ -417,6 +417,9 @@
     "core.finding.Finding": {
       "additionalProperties": false,
       "properties": {
+        "Detail": {
+          "type": "string"
+        },
         "Ends": {
           "format": "date-time",
           "type": "string"

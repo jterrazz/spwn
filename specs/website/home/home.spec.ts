@@ -6,7 +6,7 @@ import { website } from '../website.specification.js';
 const FIRST_RUN = '/?world=bare-mac&page=home';
 const TWO_MACS = '/?world=two-macs&page=home';
 const needsYou = region('Needs you');
-const canWait = region('Can wait');
+const canWait = region('Upkeep');
 const memory = region('Memory');
 const startHere = region('Start here');
 
@@ -44,7 +44,7 @@ describe('home', () => {
             await visitor.see(canWait);
 
             // Then - the panel counts the lines, and each offers one verb of its own
-            await visitor.see(heading('Can wait 7'));
+            await visitor.see(heading('Upkeep 7'));
             await visitor.see(within(canWait, button('Update mise')));
             await visitor.see(within(canWait, button('Update brew')));
             await visitor.see(within(canWait, button('Move ~/.tart')));

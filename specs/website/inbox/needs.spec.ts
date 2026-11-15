@@ -5,7 +5,7 @@ import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
 const needs = region('Needs you');
-const canWait = region('Can wait');
+const canWait = region('Upkeep');
 
 describe('needs', () => {
     test('N1 a line settled by its verb leaves, and the sidebar counts one less', async () => {

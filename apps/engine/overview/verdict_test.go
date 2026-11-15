@@ -185,3 +185,30 @@ func TestAMacsMachinesAreCountedRunningThenStopped(t *testing.T) {
 		}
 	}
 }
+
+func TestANeedWearsExposedForAPortDownForAServerElseItsUpkeepWord(t *testing.T) {
+	ref := machine.Ref{Name: "macbook"}
+	exposed := finding.Finding{Machine: ref, Section: section.Ports, Severity: finding.Broken, Subject: "macbook:5000", Fix: finding.Fix{Path: "System Settings > General"}, Detail: "macbook. ControlCenter. Not declared public."}
+	down := finding.Finding{Machine: machine.Ref{Name: "infra", On: "macbook"}, Section: section.Overview, Severity: finding.Broken, Subject: "infra"}
+	macDown := finding.Finding{Machine: ref, Section: section.Overview, Severity: finding.Broken, Subject: "mini"}
+	expiring := finding.Finding{Machine: ref, Section: section.Accounts, Urgency: finding.Expiring, Subject: "token"}
+	update := finding.Finding{Machine: ref, Section: section.Apps, Severity: finding.NeedsALook, Subject: "lazygit"}
+	got := map[string]overview.Need{}
+	for _, n := range overview.Summarize(mac, overview.EngineRunning, []finding.Finding{exposed, down, macDown, expiring, update}, nil, []overview.VM{{Name: "infra", Running: true}}).Needs {
+		got[n.Subject] = n
+	}
+	for subject, want := range map[string]overview.Mark{
+		"macbook:5000": overview.MarkExposed,
+		"infra":        overview.MarkDown,
+		"mini":         overview.Mark(overview.NeedsYou),
+		"token":        overview.Mark(overview.NeedsYou),
+		"lazygit":      overview.Mark(overview.CanWait),
+	} {
+		if got[subject].Mark != want {
+			t.Errorf("%s wears %q; want %q", subject, got[subject].Mark, want)
+		}
+	}
+	if n := got["macbook:5000"]; n.Detail != exposed.Detail || n.Verb != overview.VerbReview || n.Noun != "Ports" || n.Command != "" || n.Path != "" {
+		t.Errorf("an exposed port is reviewed on Ports with its detail and no command: %+v", n)
+	}
+}

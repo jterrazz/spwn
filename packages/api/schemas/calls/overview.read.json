@@ -1743,7 +1743,19 @@
         "Confirm": {
           "type": "string"
         },
+        "Detail": {
+          "type": "string"
+        },
         "Machine": {
+          "type": "string"
+        },
+        "Mark": {
+          "enum": [
+            "exposed",
+            "down",
+            "needs-you",
+            "can-wait"
+          ],
           "type": "string"
         },
         "Noun": {
@@ -1812,7 +1824,9 @@
         "Call",
         "Command",
         "Confirm",
+        "Detail",
         "Machine",
+        "Mark",
         "Noun",
         "On",
         "Path",

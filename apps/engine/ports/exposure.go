@@ -167,13 +167,21 @@ func Exposed(ps []Port) []finding.Finding {
 		if p.Machine.On != "" {
 			text = p.Machine.Name + ": " + text
 		}
-		f := finding.Finding{Machine: p.Machine, Section: section.Ports, Severity: finding.Broken, Subject: p.Key(), Text: text}
+		f := finding.Finding{Machine: p.Machine, Section: section.Ports, Severity: finding.Broken, Subject: p.Key(), Text: text, Detail: exposedDetail(p)}
 		if k, ok := catalog.KnownPortOf(p.Port, p.Process); ok {
 			f.Fix.Path = k.Off
 		}
 		out = append(out, f)
 	}
 	return out
+}
+
+func exposedDetail(p Port) string {
+	parts := []string{p.Machine.Name}
+	if p.Process != "" {
+		parts = append(parts, p.Process)
+	}
+	return strings.Join(append(parts, "Not declared public"), ". ") + "."
 }
 
 func Told(f finding.Finding) string {

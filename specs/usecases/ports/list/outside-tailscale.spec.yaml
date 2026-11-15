@@ -14,4 +14,4 @@ runs:
     - command: 'overview --on mac-mini | /usr/bin/grep 5000'
       exit: 0
       stdout: |
-          ✗	port 5000 is reachable outside Tailscale	System Settings > General > AirDrop & Handoff > AirPlay Receiver
+          ✗	port 5000 is reachable outside Tailscale

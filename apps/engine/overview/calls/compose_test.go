@@ -21,7 +21,7 @@ func TestARefusedFileOfTheOwnerIsANeedWithTheFileToFix(t *testing.T) {
 
 	got := summarize(head, nil, nil, nil, nil, refused, time.Time{}).Needs
 	want := overview.Need{Machine: "laptop", Section: section.Overview, Broken: true, Severity: finding.Broken, Subject: overview.RefusedSubject,
-		Text: refused.Text, Path: refused.File, Upkeep: overview.NeedsYou, Verb: overview.VerbFix, Noun: "Overview"}
+		Text: refused.Text, Path: refused.File, Upkeep: overview.NeedsYou, Verb: overview.VerbFix, Mark: overview.Mark(overview.NeedsYou), Noun: "Overview"}
 	if len(got) != 1 || !reflect.DeepEqual(got[0], want) {
 		t.Fatalf("needs %+v, want exactly %+v", got, want)
 	}

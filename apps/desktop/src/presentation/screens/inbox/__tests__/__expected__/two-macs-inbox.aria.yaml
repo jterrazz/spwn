@@ -13,8 +13,8 @@
     - button "Fix npm": Fix
     - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
-  - region "Can wait":
-    - heading "Can wait 7" [level=2]
+  - region "Upkeep":
+    - heading "Upkeep 7" [level=2]
     - button "Needs a look 1 mise update waiting macbook-pro · Apps"
     - button "Update mise": Update
     - button "Needs a look 1 brew update waiting macbook-pro · Apps"
