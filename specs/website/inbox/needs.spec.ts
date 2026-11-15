@@ -142,9 +142,9 @@ describe('needs', () => {
             // When - I read the sidebar
             await visitor.see(sidebar);
 
-            // Then - the fleet's places are there, Inbox with its count of the line that needs me
+            // Then - the fleet's places are there, Inbox with its count of the lines that need me, the Catalog with its counts
             await visitor.see(within(sidebar, button('Home')));
-            await visitor.see(within(sidebar, button('Inbox 1')));
+            await visitor.see(within(sidebar, button('Inbox 2')));
             await visitor.see(within(sidebar, button('Storage')));
             await visitor.see(within(sidebar, button('jterrazz-macbook-pro online')));
             await visitor.see(within(sidebar, button('api Stopped')));
@@ -152,9 +152,9 @@ describe('needs', () => {
             await visitor.see(within(sidebar, button('jterrazz-mac-mini online')));
             await visitor.see(within(sidebar, button('infra Running')));
             await visitor.see(within(sidebar, button('Machine files')));
-            await visitor.see(within(sidebar, button('Apps')));
-            await visitor.see(within(sidebar, button('Skills')));
-            await visitor.see(within(sidebar, button('Settings')));
+            await visitor.see(within(sidebar, button('Apps 10')));
+            await visitor.see(within(sidebar, button('Skills 0')));
+            await visitor.see(within(sidebar, button('Settings 25')));
         });
         expect(result.errors.text).toBe('');
     });

@@ -145,11 +145,13 @@ describe('catalog', () => {
                 const kept = region('What it keeps on disk');
 
                 // When - the page is read
-                await visitor.see(within(comesWith, button('ghostty-dotfiles')));
+                await visitor.see(within(comesWith, button('ghostty-dotfiles', { exact: false })));
                 await visitor.see(within(kept, content('~/Library/WebKit/com.mitchellh.ghostty')));
 
-                // Then - the setting opens its page
-                await visitor.click(within(comesWith, button('ghostty-dotfiles')));
+                // Then - the setting, a row drawn with its kind and its description, opens its page
+                await visitor.click(
+                    within(comesWith, button('ghostty-dotfiles', { exact: false })),
+                );
                 await visitor.see(heading('ghostty-dotfiles setting'));
             },
         );
@@ -184,7 +186,7 @@ describe('catalog', () => {
             await visitor.see(region('Apps'));
 
             // When - Skills is pressed under Catalog
-            await visitor.click(within(sidebar, button('Skills')));
+            await visitor.click(within(sidebar, button('Skills', { exact: false })));
 
             // Then - the page lists the agent skills alone
             await visitor.see(region('Skills'));
@@ -193,7 +195,7 @@ describe('catalog', () => {
             await visitor.gone(region('Apps'));
 
             // When - Settings is pressed
-            await visitor.click(within(sidebar, button('Settings')));
+            await visitor.click(within(sidebar, button('Settings', { exact: false })));
 
             // Then - the page lists settings alone
             await visitor.see(region('Settings'));
