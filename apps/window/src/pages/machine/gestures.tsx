@@ -22,7 +22,12 @@ const LIFECYCLES: readonly Lifecycle[] = ['restart', 'start', 'stop'];
 
 function useLifecycle({ mac, vm }: VmProps) {
     const target = targetOf({ mac });
-    const spec = { rereads: LIFECYCLE_REREADS, subject: vm.Name, target };
+    const spec = {
+        kind: machineKindOf(vm),
+        rereads: LIFECYCLE_REREADS,
+        subject: vm.Name,
+        target,
+    };
     return {
         restart: useGesture('machines.restart', { ...spec, input: { Name: vm.Name } }),
         start: useGesture('machines.start', { ...spec, input: { VM: vm.Name } }),

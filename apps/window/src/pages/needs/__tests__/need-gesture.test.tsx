@@ -14,11 +14,12 @@ const waiting = region('Can wait');
 const doneHere = region('Done here');
 
 const RESTART = {
-    Args: { Name: 'infra' },
+    Args: { name: 'infra' },
     Broken: true,
     Call: 'machines.restart',
     Command: '',
     Machine: 'infra',
+    Noun: 'Overview',
     Path: '',
     Section: 'overview',
     Severity: 'broken',
@@ -34,6 +35,7 @@ const DELETE = {
     Call: 'machines.delete',
     Command: '',
     Machine: 'linux-1',
+    Noun: 'Overview',
     Path: '',
     Section: 'overview',
     Severity: 'needs-a-look',
@@ -97,25 +99,23 @@ describe('NeedLine', () => {
     });
 
     test('a background task the engine names is removed once its removal is confirmed', async () => {
-        // Given - the Inbox over two-macs, where a background task is failing
+        // Given - the Inbox over two-macs, where a background task is failing and presses
         const failing = 'com.jterrazz.brain.x-snapshot is failing, last exit 2';
         const asked = 'Remove com.jterrazz.brain.x-snapshot?';
         const result = await component.render(
             pageOver(recordingFor('two-macs'), { page: 'inbox' }),
             async (visitor) => {
-                await visitor.see(within(waiting, content(failing)));
+                await visitor.see(within(needs, content(failing)));
 
-                // When - its fix is clicked, then confirmed in the dialog calls.json asks
-                await visitor.click(
-                    within(waiting, button('Remove com.jterrazz.brain.x-snapshot')),
-                );
+                // When - its fix is clicked, then confirmed in the dialog confirms.json asks
+                await visitor.click(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
                 await visitor.see(dialog(asked));
                 await visitor.click(within(dialog(asked), button('Remove')));
 
                 // Then - overview.read, read again, no longer lists it, and Done here holds its outcome
                 await visitor.gone(dialog(asked));
                 await visitor.see(within(doneHere, content(failing)));
-                await visitor.gone(within(waiting, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.gone(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
             },
         );
         expect(result.errors.text).toBe('');
@@ -127,16 +127,14 @@ describe('NeedLine', () => {
         const result = await component.render(
             pageOver(recordingFor('machinefile-differs'), { page: 'inbox' }),
             async (visitor) => {
-                await visitor.click(
-                    within(waiting, button('Remove com.jterrazz.brain.x-snapshot')),
-                );
+                await visitor.click(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
 
                 // When - its dialog is cancelled
                 await visitor.click(within(dialog(asked), button('Cancel')));
 
                 // Then - the need and its button stay, and nothing is held as done
                 await visitor.gone(dialog(asked));
-                await visitor.see(within(waiting, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.see(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
                 await visitor.gone(doneHere);
             },
         );

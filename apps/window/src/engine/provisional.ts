@@ -24,9 +24,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import { duration } from '../model/format';
-import type { ConfirmName } from './confirms';
 import type { EngineError } from './engine-error';
-import type { AskForm } from './gesture';
 
 // outside: machines.list sends a Mac's reach as two booleans and no state code; this file alone makes it a code, until
 // outside: the wire carries one.
@@ -105,7 +103,7 @@ export function deleteInputOf(need: OverviewNeed): MachinesDeleteInput | undefin
 }
 
 export function restartInputOf(need: OverviewNeed): MachinesRestartInput | undefined {
-    const name = need.Args?.Name ?? '';
+    const name = need.Args?.name ?? '';
     return need.Call !== 'machines.restart' || name === '' ? undefined : { Name: name };
 }
 
@@ -120,39 +118,6 @@ export type NeedCall =
     | 'engine.start'
     | 'machines.delete'
     | 'machines.restart';
-
-// outside: calls.json declares that a call asks a confirmation, not how: which gestures are confirmed by their
-// outside: subject typed rather than a yes is this table's, one entry per confirmed call, until the call says it.
-const CONFIRM_FORMS: Readonly<Record<ConfirmName, AskForm>> = {
-    'accounts.logout': 'yes',
-    'accounts.take-back': 'yes',
-    'agents.stop': 'yes',
-    'apps.remove': 'yes',
-    'background.remove': 'yes',
-    'disk.erase': 'name',
-    'engine.stop': 'yes',
-    'grants.remove': 'yes',
-    'images.delete': 'yes',
-    'machinefile.apply': 'yes',
-    'machines.cleanup': 'yes',
-    'machines.create-server': 'yes',
-    'machines.create-workspace': 'yes',
-    'machines.delete': 'name',
-    'machines.forget': 'yes',
-    'machines.restart': 'name',
-    'machines.restart-mac': 'yes',
-    'machines.stop': 'yes',
-    'ports.stop-sharing': 'yes',
-    'ports.undeclare': 'yes',
-    'settings.apply': 'yes',
-    'settings.off': 'yes',
-    'settings.run-containers': 'yes',
-    'vault.remove': 'yes',
-};
-
-export function confirmFormOf(call: ConfirmName): AskForm {
-    return CONFIRM_FORMS[call];
-}
 
 // outside: a listening port carries no field saying it is shared (apps/engine/ports/exposure.go, Port).
 export function isPortShared(port: PortsPort, shares: readonly PortsSharedPort[]): boolean {

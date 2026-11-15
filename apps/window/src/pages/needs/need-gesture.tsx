@@ -5,9 +5,11 @@ import { CopyButton } from '../../design/copy-button';
 import { Row, Value } from '../../design/index';
 import type { RowProps } from '../../design/row';
 import type { In, ReadName } from '../../engine/client';
+import type { ConfirmKind } from '../../engine/confirms';
 import { wordOf } from '../../engine/engine-words';
 import {
     deleteInputOf,
+    machineKindOf,
     moveInputOf,
     removeInputOf,
     restartInputOf,
@@ -42,7 +44,7 @@ function rowOf({ need, onOpen }: Props, gesture: ReactNode): RowProps {
     return {
         link: gesture,
         onOpen,
-        sentence: sentence([need.Machine, wordOf('CoreSectionID', need.Section).Word]),
+        sentence: sentence([need.Machine, need.Noun]),
         state: needState(need),
         stateAt: 'start',
         title: need.Text,
@@ -64,6 +66,7 @@ type FixProps<N extends NeedCall & ReadName> = Props & {
     rereads: readonly CallName[];
     subject?: string | undefined;
     target?: Target | undefined;
+    kind?: ConfirmKind | undefined;
 };
 
 function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
@@ -71,6 +74,7 @@ function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
     const subject = props.subject ?? need.Subject;
     const fix = useGesture(call, {
         input,
+        kind: props.kind,
         rereads,
         subject,
         target: 'target' in props ? props.target : needTarget(need, macs),
@@ -117,6 +121,7 @@ function Lifecycle(props: Props) {
                 {...props}
                 call="machines.restart"
                 input={restart}
+                kind={machineKindOf(found.vm)}
                 rereads={LIFECYCLE_REREADS}
                 subject={restart.Name}
                 target={target}

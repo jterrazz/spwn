@@ -1,42 +1,27 @@
-import type { CallName, Calls } from '@jterrazz/station-api';
+import type { CallName } from '@jterrazz/station-api';
+import confirms from '@jterrazz/station-api/confirms.json';
+import type { ConfirmKind } from '@jterrazz/station-api/confirms.json';
 
-// outside: packages/api carries a call's confirmation as a type only (Calls[N]['confirm']), and the window needs to
-// outside: know at run time whether a call asks one before it sends; the word the engine checks is the subject
-// outside: typed or the yes, never this table's. This is the set of those calls as a value, checked both ways by the
-// outside: compiler: a call that gains or loses a confirmation fails the build here. It goes when packages/api
-// outside: ships calls.json's confirmations as a value.
+import type { AskForm } from './gesture';
 
-export type ConfirmName = {
-    [N in CallName]: Calls[N] extends { confirm: string } ? N : never;
-}[CallName];
+export type { ConfirmKind };
 
-export const CONFIRMED: Readonly<Record<ConfirmName, true>> = {
-    'accounts.logout': true,
-    'accounts.take-back': true,
-    'agents.stop': true,
-    'apps.remove': true,
-    'background.remove': true,
-    'disk.erase': true,
-    'engine.stop': true,
-    'grants.remove': true,
-    'images.delete': true,
-    'machinefile.apply': true,
-    'machines.cleanup': true,
-    'machines.create-server': true,
-    'machines.create-workspace': true,
-    'machines.delete': true,
-    'machines.forget': true,
-    'machines.restart': true,
-    'machines.restart-mac': true,
-    'machines.stop': true,
-    'ports.stop-sharing': true,
-    'ports.undeclare': true,
-    'settings.apply': true,
-    'settings.off': true,
-    'settings.run-containers': true,
-    'vault.remove': true,
-};
+export type Confirming = { form: AskForm | undefined; consequence: string };
 
-export function isConfirmed(name: CallName): name is ConfirmName {
-    return Object.hasOwn(CONFIRMED, name);
+const FORMS = { none: undefined, 'type-name': 'name', 'yes-no': 'yes' } as const;
+
+export function confirmingOf(call: CallName, kind?: ConfirmKind): Confirming | undefined {
+    const base = confirms[call];
+    if (base === undefined) {
+        return undefined;
+    }
+    const { form, consequence } = (kind === undefined ? undefined : base.kinds?.[kind]) ?? base;
+    return { consequence, form: FORMS[form] };
+}
+
+export function consequenceOf(
+    confirming: Confirming | undefined,
+    subject: string,
+): string | undefined {
+    return confirming?.consequence.replace('%s', () => subject);
 }
