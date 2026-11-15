@@ -144,7 +144,7 @@ func chapterOf(t *testing.T, d machinefile.Drift, c machinefile.Chapter) machine
 	return machinefile.ChapterDrift{}
 }
 
-func TestAVMsDriftJudgesItsPackagesOnItAndItsSharesOnItsMac(t *testing.T) {
+func TestAVMsDriftJudgesItsPackagesOnItAndItsAccessOnItsMac(t *testing.T) {
 	// invariant: the machine is the input's: its plan is judged on it, its
 	// ports read with no target and kept for it, its accounts asked of the
 	// Mac it runs on, never of This Mac.
@@ -178,7 +178,7 @@ func TestAVMsDriftJudgesItsPackagesOnItAndItsSharesOnItsMac(t *testing.T) {
 	}
 }
 
-func TestAVMWhoseSharesDoNotReadDriftsByItsPackagesAlone(t *testing.T) {
+func TestAVMWhoseAccessDoesNotReadDriftsByItsPackagesAlone(t *testing.T) {
 	// invariant: a VM whose Mac answers its plan but not its ports reads
 	// its packages alone, and its verdict says where the rest is read.
 	f := &fleet{asked: map[string]machine.Ref{}, ports: errors.New("no listing"), bare: true}

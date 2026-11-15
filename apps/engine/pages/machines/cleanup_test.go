@@ -18,7 +18,7 @@ func TestACleanupOfManyAsksOnceAndListsEachOnesLosses(t *testing.T) {
 		t.Fatalf("question %q danger %v yes %q", c.Question, c.Danger, c.Yes)
 	}
 	want := [][]string{
-		{"agent-7f", "finished 12 min ago", "tests pass", "goes with its disk (12 GB), 1 shared port and 2 shared accounts"},
+		{"agent-7f", "finished 12 min ago", "tests pass", "goes with its disk (12 GB), 1 shared port and 2 grants"},
 		{"linux-3", "stopped", "goes with its disk (20 GB)"},
 	}
 	if len(c.Lines) != len(want) {
@@ -33,7 +33,7 @@ func TestACleanupOfManyAsksOnceAndListsEachOnesLosses(t *testing.T) {
 			t.Errorf("line %d: %q, want %q", i, got, w)
 		}
 	}
-	if got := CleanupRefused(cands).Text; got != "refusing to delete 2 ephemeral workspaces without --yes: agent-7f goes with its disk (12 GB), 1 shared port and 2 shared accounts; linux-3 goes with its disk (20 GB)" {
+	if got := CleanupRefused(cands).Text; got != "refusing to delete 2 ephemeral workspaces without --yes: agent-7f goes with its disk (12 GB), 1 shared port and 2 grants; linux-3 goes with its disk (20 GB)" {
 		t.Errorf("refusal %q", got)
 	}
 }

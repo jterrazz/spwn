@@ -11,7 +11,7 @@ import (
 // value: a part of what a Machinefile puts on a machine, as drift counts
 // it: its apps (managers and the blocks of ~/.zshrc their methods write
 // included), its settings, the ports a VM shares and the accounts it is
-// given.
+// signed in to or granted.
 
 type Chapter string
 

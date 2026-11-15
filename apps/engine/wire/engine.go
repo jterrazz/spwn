@@ -55,9 +55,7 @@ import (
 func (m machine) guestPort() int { return m.port(22, "STATION_GUEST_SSH_PORT") }
 
 // invariant: inside the engine, the menu bar reads through this run's
-// Router, so its fleet reaches the other Macs as the CLI's does; a recall
-// rides the engine's own connections, never its socket: the lends are bound
-// to the engine they serve.
+// Router, so its fleet reaches the other Macs as the CLI's does.
 func (m machine) engine(env kit.Env) *process.Engine {
 	owed := &engineGrants{}
 	registry := m.registry(env)

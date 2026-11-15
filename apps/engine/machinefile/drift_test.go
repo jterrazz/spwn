@@ -107,8 +107,8 @@ func TestDriftSaysWhatApplyWouldDo(t *testing.T) {
 
 func TestDriftReadsAVMsPortsAndAccountsAgainstItsFile(t *testing.T) {
 	// invariant: a port shared public that the file opens to private
-	// differs, as does an account the file shares that has no copy and a
-	// copy the file does not share; what matches counts as matching.
+	// differs, as does an account the file lists that is not signed in and a
+	// grant the file lists in neither list; what matches counts as matching.
 	access := machinefile.Access{
 		Ports: []machinefile.PortHeld{
 			{Port: 3000, Seen: catalog.AudiencePublic, Asked: catalog.AudiencePrivate},

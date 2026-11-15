@@ -22,5 +22,5 @@ runs:
           ◐	port 3000		changed · shared public, its file opens it to private
           ○	port 4321		absent · not shared, its file opens it to private
           ○	port 9229		absent · not shared, its file opens it to private
-          ?	claude		extra · granted, its file does not share it
-          ?	gh		extra · granted, its file does not share it
+          ?	claude		extra · granted, its file does not grant it
+          ?	gh		extra · granted, its file does not grant it

@@ -175,7 +175,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 			{Fact: &page.Fact{Key: "uptime", Value: page.Duration(1951200)}},
 			{Note: &page.Note{Text: "Serve is off on Tailscale, so no shared port is reachable from another machine until it is turned on in the admin console."}},
 			{Error: &page.Error{Message: "defaults is not installed", Hint: "run station init"}},
-			{Empty: &page.Empty{Noun: "shared accounts", Hint: page.Cmd("station accounts share <account> --with <vm>")}},
+			{Empty: &page.Empty{Noun: "sign-ins", Hint: page.Cmd("station accounts login <program> --on <vm>")}},
 		},
 	}
 	peers := page.Section{

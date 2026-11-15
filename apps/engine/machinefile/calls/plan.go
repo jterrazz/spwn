@@ -91,7 +91,7 @@ var Drift = call.Call[Deps, DriftIn, machinefile.Drift]{
 			}
 			return drift, nil
 		}
-		access, err := shares(ctx, d, name, mac, p.Name)
+		access, err := accessOf(ctx, d, name, mac, p.Name)
 		drift := machinefile.DriftOf(p, access)
 		if err != nil {
 			drift = drift.AccessUnread()
@@ -148,7 +148,7 @@ func answering(h ports.MacPorts, mac string, thisMac bool) bool {
 	return named && (h.ThisMac || h.Reachable) && h.Engine.Running
 }
 
-func shares(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.Access, error) {
+func accessOf(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.Access, error) {
 	lib, err := library(ctx, d)
 	if err != nil {
 		return nil, err

@@ -160,7 +160,7 @@ So there is one way into a VM (its Mac's engine and its one `Guest` connection) 
 | `keep`     | when a run ends, at start, on the engine's loop        | keeps each VM in its wanted state: a server boots again after its wait; the health steps after every boot           |
 | `guest`    | per running VM                                         | holds its one `Guest` connection: dial after boot, redial, close at the end; every other job uses it                |
 | `share`    | on a reservation change, on the loop                   | shares a VM's ports inside its rights with their audience (Serve, Funnel), flags the others, reconciles the entries |
-| `expire`   | every minute                                           | takes back a shared account whose term ended                                                                        |
+| `retry`    | every minute                                           | takes out a grant removal owed to a VM                                                                              |
 | `awake`    | on a reading change, on `never_sleeps`, on the loop    | holds the keep-awake session and Never sleeps (`Power.Hold`), ends them by the guards this Mac's capabilities allow |
 | `sample`   | every 2 s while a surface watches a machine, else 60 s | feeds Activity's history (`engine/jobs`)                                                                            |
 | `exposure` | every 5 min                                            | reads every listener of this Mac and its VMs; a port reachable outside Tailscale undeclared is told                 |

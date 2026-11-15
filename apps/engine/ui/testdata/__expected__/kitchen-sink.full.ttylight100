@@ -69,7 +69,7 @@
   [38;2;76;79;105mon in the admin console.[m
   [1;38;2;210;15;57mError:[m [38;2;76;79;105mdefaults is not installed[m
   [38;2;108;111;133mHint:[m [38;2;76;79;105mrun station init[m
-  [38;2;108;111;133mno shared accounts[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation accounts share <account> --with <vm>[m
+  [38;2;108;111;133mno sign-ins[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation accounts login <program> --on <vm>[m
 [1;38;2;76;79;105mPeers[m  [38;2;76;79;105miphone[m[38;2;76;79;105m · offline[m
 
 [38;2;108;111;133m→ [m[38;2;76;79;105mstation overview --all[m

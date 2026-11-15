@@ -30,7 +30,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	// terminal the question, in a script --confirm=<name>; --yes answers nothing.
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "delete <vm>",
-		Short:   "Delete a workspace: its disk, its record, its reserved ports and its shared accounts",
+		Short:   "Delete a workspace: its disk, its record, its reserved ports and its grants",
 		Example: "  station machines delete linux-1 --confirm=linux-1",
 		Args:    cobra.ExactArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {

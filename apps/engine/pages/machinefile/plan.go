@@ -320,9 +320,9 @@ func accessRows(d machinefile.Drift) []page.Row {
 			case machinefile.ChapterPorts:
 				rows = append(rows, accessRow("ports/"+strconv.Itoa(f.Port), "port "+strconv.Itoa(f.Port), f, held(string(f.SeenTo), "shared "+string(f.SeenTo), "not shared"), held(string(f.AskedTo), "its file opens it to "+string(f.AskedTo), "its file does not open it")))
 			case machinefile.ChapterAccounts:
-				seen, asked := "not signed in", "its file shares it"
+				seen, asked := "not signed in", "its file asks for it"
 				if f.Condition == machinefile.Extra {
-					seen, asked = "granted", "its file does not share it"
+					seen, asked = "granted", "its file does not grant it"
 				}
 				rows = append(rows, accessRow("accounts/"+f.Account, f.Account, f, seen, asked))
 			case machinefile.ChapterApps, machinefile.ChapterSettings:

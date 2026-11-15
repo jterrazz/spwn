@@ -63,7 +63,7 @@ Prose
   on in the admin console.
   Error: defaults is not installed
   Hint: run station init
-  no shared accounts  → station accounts share <account> --with <vm>
+  no sign-ins  → station accounts login <program> --on <vm>
 Peers
   ◌ iphone
 
