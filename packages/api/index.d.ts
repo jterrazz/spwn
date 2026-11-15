@@ -956,6 +956,8 @@ export type CoreFindingFix = {
     Args: Record<string, string> | null;
     Call: string;
     Command: string;
+    Confirm: string;
+    On: string;
     Path: string;
 };
 
@@ -963,6 +965,8 @@ export type CoreFindingFixInput = {
     Args?: Record<string, string>;
     Call?: string;
     Command?: string;
+    Confirm?: string;
+    On?: string;
     Path?: string;
 };
 
@@ -2153,8 +2157,10 @@ export type OverviewNeed = {
     Broken: boolean;
     Call: string;
     Command: string;
+    Confirm: string;
     Machine: string;
     Noun: string;
+    On: string;
     Path: string;
     Section: 'overview' | 'activity' | 'apps' | 'settings' | 'disk' | 'ports' | 'accounts' | 'background' | 'awake' | 'ssh' | 'images';
     Severity: 'broken' | 'needs-a-look';

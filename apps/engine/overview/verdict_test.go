@@ -50,7 +50,7 @@ func TestOnlyWhatIsRedNeedsYouAndEachNeedHasItsVerb(t *testing.T) {
 	}{
 		"a port exposed":     {finding.Finding{Section: section.Ports, Severity: finding.Broken}, overview.NeedsYou, overview.VerbReview},
 		"a server down":      {finding.Finding{Section: section.Overview, Severity: finding.Broken, Fix: finding.Fix{Call: "machines.restart"}}, overview.NeedsYou, overview.VerbRestart},
-		"a check failing":    {finding.Finding{Section: section.Overview, Severity: finding.Broken, Fix: finding.Fix{Call: "machines.restart", Args: map[string]string{"name": "api"}}}, overview.NeedsYou, overview.VerbRestart},
+		"a check failing":    {finding.Finding{Section: section.Overview, Severity: finding.Broken, Fix: finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": "api"}}}, overview.NeedsYou, overview.VerbRestart},
 		"the engine stopped": {finding.Finding{Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Fix: finding.Fix{Call: "engine.start"}}, overview.NeedsYou, overview.VerbStartEngine},
 		"an app that failed": {finding.Finding{Section: section.Apps, Severity: finding.Broken}, overview.NeedsYou, overview.VerbFix},
 		"a sign-in expired":  {finding.Finding{Section: section.Accounts, Severity: finding.Broken}, overview.NeedsYou, overview.VerbFix},
@@ -80,7 +80,7 @@ func TestAWorkspaceIsIdleAnHourAfterItsAgentFinished(t *testing.T) {
 	vm := machines.VM{Name: "linux-1", Lifetime: machines.Persistent, State: machines.Running, Resources: machines.Resources{MemoryBytes: 10 << 30},
 		Agent: &machines.AgentView{State: machines.AgentFinished, Ended: now.Add(-5 * time.Hour)}}
 	f, ok := overview.Idle("macbook", vm, now)
-	if !ok || f.Text != "linux-1 has been idle for 5 h and holds 10 GB" || f.Fix.Call != "machines.delete" || f.Fix.Args["VM"] != "linux-1" {
+	if !ok || f.Text != "linux-1 has been idle for 5 h and holds 10 GB" || f.Fix.Call != "machines.delete" || f.Fix.Args["VM"] != "linux-1" || f.Fix.On != "macbook" || f.Fix.Confirm != "linux-1" {
 		t.Fatalf("a workspace finished 5 h ago: %+v, %v", f, ok)
 	}
 	if overview.UpkeepOf(f) != overview.CanWait {

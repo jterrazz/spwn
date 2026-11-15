@@ -17,4 +17,4 @@ runs:
     - command: 'disk --json | /usr/bin/jq -c .findings'
       exit: 0
       stdout: |
-          [{"severity":"needs-a-look","section":"disk","subject":"~/.tart","text":"~/.tart is misplaced","fix":{"call":"disk.move","args":{"path":"~/.tart"},"command":null,"path":null}},{"severity":"needs-a-look","section":"disk","subject":"~/go","text":"~/go is misplaced","fix":{"call":"disk.move","args":{"path":"~/go"},"command":null,"path":null}}]
+          [{"severity":"needs-a-look","section":"disk","subject":"~/.tart","text":"~/.tart is misplaced","fix":{"call":"disk.move","args":{"Folder":"~/.tart"},"command":null,"path":null}},{"severity":"needs-a-look","section":"disk","subject":"~/go","text":"~/go is misplaced","fix":{"call":"disk.move","args":{"Folder":"~/go"},"command":null,"path":null}}]

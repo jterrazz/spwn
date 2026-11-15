@@ -17,7 +17,7 @@ func TestAnUpdateWaitingIsFixedByItsManagerKey(t *testing.T) {
 	}
 	skill, cask, apt := string(catalog.MethodSkill), string(catalog.MethodCask), string(catalog.MethodApt)
 	found := apps.Findings([]apps.Report{waiting(catalog.MethodSkill, skill), waiting(catalog.MethodCask, cask), waiting(catalog.MethodApt, apt)}, machine.Ref{})
-	want := []map[string]string{{"manager": skill}, {"manager": cask}, {"manager": apt}}
+	want := []map[string]string{{"Managers": skill}, {"Managers": cask}, {"Managers": apt}}
 	if len(found) != len(want) {
 		t.Fatalf("found %+v", found)
 	}

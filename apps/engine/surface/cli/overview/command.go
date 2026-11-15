@@ -8,6 +8,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/overview"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	pagehome "github.com/jterrazz/studio-station/apps/engine/pages/home"
@@ -59,7 +60,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, all bool, io kit.IO) error {
 			return err
 		}
 		err = io.LivePage(kit.Updates(updates, func(out overviewcalls.ReadOut) page.Page {
-			return pagehome.Summary(out.Summary, d.ThisMachine, all)
+			return pagehome.Summary(out.Summary, d.ThisMachine, reader(out.Summary, d.ThisMachine, env.Far()), all)
 		}))
 		if err != nil {
 			return err
@@ -70,7 +71,16 @@ func Run(ctx context.Context, d Deps, env kit.Env, all bool, io kit.IO) error {
 	if err != nil {
 		return err
 	}
-	return io.Page(pagehome.Summary(out.Summary, d.ThisMachine, all), pagehome.SummaryContract(out.Summary, overviewcalls.Read.Schema()))
+	return io.Page(pagehome.Summary(out.Summary, d.ThisMachine, reader(out.Summary, d.ThisMachine, env.Far()), all), pagehome.SummaryContract(out.Summary, overviewcalls.Read.Schema()))
+}
+
+func reader(s overview.Summary, thisMac page.Context, far bool) []string {
+	// invariant: the names of the machine reading, as the read's own engine
+	// may give them: this machine's, and the head's of an Overview read here.
+	if far {
+		return []string{thisMac.Machine}
+	}
+	return []string{thisMac.Machine, s.Head.Name}
 }
 
 // invariant: a VM's Overview is its Mac's view of it around what it reads

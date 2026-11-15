@@ -62,13 +62,17 @@ const RefusedSubject = "catalog"
 
 type Need struct {
 	// value: one Needs-you line, a section's finding as the pages draw it.
-	Machine  string
-	Section  section.ID
-	Broken   bool
-	Subject  string
-	Text     string
-	Call     string
-	Args     map[string]string
+	Machine string
+	Section section.ID
+	Broken  bool
+	Subject string
+	Text    string
+	Call    string
+	Args    map[string]string
+	// value: the machine Call runs at, and the name its typed question
+	// takes; empty with no Call, and with no typed question.
+	On       string
+	Confirm  string
 	Command  string
 	Path     string
 	Severity finding.Severity
@@ -151,11 +155,18 @@ func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms [
 	}
 	for _, f := range finding.Rank(all) {
 		s.Needs = append(s.Needs, Need{Machine: f.Machine.Name, Section: f.Section, Broken: f.Severity == finding.Broken, Severity: f.Severity,
-			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, Command: f.Fix.Command, Path: f.Fix.Path,
+			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, On: onOf(f), Confirm: f.Fix.Confirm, Command: f.Fix.Command, Path: f.Fix.Path,
 			Upkeep: UpkeepOf(f), Verb: VerbOf(f), Noun: NounOf(f.Section)})
 	}
 	s.Verdict, s.Machines = VerdictOf(s), MachinesOf(vms)
 	return s
+}
+
+func onOf(f finding.Finding) string {
+	if f.Fix.Call == "" {
+		return ""
+	}
+	return f.Target()
 }
 
 func MachinesOf(vms []VM) string {

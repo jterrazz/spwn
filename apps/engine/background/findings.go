@@ -35,5 +35,5 @@ func FixOf(t Task) finding.Fix {
 	case t.Scope == ScopeRoot:
 		return finding.Fix{Command: t.ByHand}
 	}
-	return finding.Fix{Call: "background.remove", Args: map[string]string{"name": t.Label}}
+	return finding.Fix{Call: "background.remove", Args: map[string]string{"Label": t.Label}}
 }
