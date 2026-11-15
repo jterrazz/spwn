@@ -31,7 +31,7 @@ describe('Log', () => {
             activityOf('two-macs', 'linux-1'),
             async (visitor) => {
                 // When - its activity and its log have been read
-                await visitor.see(heading('No finding from the engine.'));
+                await visitor.see(heading('Nothing to look at.'));
                 await visitor.see(within(region('What linux-1 prints'), content(READ_AT)));
             },
         );
@@ -65,7 +65,7 @@ describe('Log', () => {
         const result = await component.render(
             activityOf('two-macs', 'linux-1'),
             async (visitor) => {
-                await visitor.see(heading('No finding from the engine.'));
+                await visitor.see(heading('Nothing to look at.'));
                 await visitor.see(within(region('What linux-1 prints'), content(READ_AT)));
 
                 // When - the setup run is chosen
@@ -89,7 +89,7 @@ describe('Log', () => {
             activityOf('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its Activity is shown
-                await visitor.see(heading('No finding from the engine.'));
+                await visitor.see(heading('Nothing to look at.'));
 
                 // Then - its last panel names the log no call reads, and draws no line
                 await visitor.see(

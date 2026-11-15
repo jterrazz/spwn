@@ -38,12 +38,15 @@ export function NoVerdict({ size, line }: { size: 'page' | 'tab'; line?: ReactNo
 export function VerdictHead({
     verdict,
     size,
+    action,
 }: {
     verdict: CoreVerdictVerdict;
     size: 'page' | 'tab';
+    action?: ReactNode;
 }) {
     return (
         <Verdict
+            action={action}
             line={verdict.Line}
             size={size}
             title={asSentence(verdict.Sentence)}

@@ -17,7 +17,6 @@ export const OWN_STATE_TONES: Tones<OwnState> = {
     done: 'ok',
     'engine-absent': 'bad',
     'no-answer': 'plain',
-    'no-finding': 'plain',
     'not-given': 'plain',
     'not-measured': 'plain',
     'not-wired': 'plain',

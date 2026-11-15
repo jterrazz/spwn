@@ -1,5 +1,4 @@
 import type {
-    ActivityReport,
     ActivitySample,
     AppsReport,
     DiskOutcome,
@@ -7,7 +6,6 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../separator';
 import type { AccountSide, DiskCall, MacState } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
@@ -26,7 +24,6 @@ export const OWN_STATE_WORDS = {
     done: 'done',
     'engine-absent': 'No answer',
     'no-answer': 'no answer',
-    'no-finding': 'No finding',
     'not-given': 'Not given yet',
     'not-measured': 'Not measured',
     'not-wired': 'Not wired',
@@ -47,11 +44,6 @@ export const THIS_MAC_WORD = 'This Mac';
 export const NO_PURPOSE_WORD = 'No purpose given';
 
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;
-
-export const SILENT_METER_WORDS = {
-    line: `The meter did not answer in time${SEPARATOR}no value is known`,
-    title: 'No value is known.',
-} as const;
 
 export const MAC_STATE_WORDS: Words<MacState> = {
     asleep: 'asleep',
@@ -121,13 +113,6 @@ export const DISK_RESULT_WORDS: Words<DiskOutcome['Result']> = {
     ok: 'done',
     pending: 'pending',
     unknown: 'not known',
-};
-
-export const ACTIVITY_SOURCE_WORDS: Words<ActivityReport['source']> = {
-    '': 'no history of it kept by its engine',
-    direct: 'two samples read now, 1 s apart',
-    engine: '',
-    'mac-process': 'its process on its Mac: its guest does not answer',
 };
 
 export const PRESSURE_WORDS: Words<'' | NonNullable<ActivitySample['pressure']>> = {

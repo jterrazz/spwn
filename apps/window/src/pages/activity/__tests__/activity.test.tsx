@@ -1,6 +1,7 @@
 import { button, clock, component, content, file, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import type { Recording } from '../../../engine/replay';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 
@@ -17,7 +18,7 @@ describe('Activity', () => {
             activityOf('two-macs', 'macbook-pro'),
             async (visitor) => {
                 // When - its activity has been read
-                await visitor.see(heading('No finding from the engine.'));
+                await visitor.see(heading('Nothing to look at.'));
             },
         );
 
@@ -31,7 +32,7 @@ describe('Activity', () => {
             activityOf('disk-low', 'macbook-pro'),
             async (visitor) => {
                 // When - its activity has been read
-                await visitor.see(heading('Disk almost full: 4 % free'));
+                await visitor.see(heading('Disk almost full: 4 % free.'));
             },
         );
 
@@ -45,7 +46,7 @@ describe('Activity', () => {
             activityOf('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its activity has been read
-                await visitor.see(heading('No finding from the engine.'));
+                await visitor.see(heading('Nothing to look at.'));
             },
         );
 
@@ -85,16 +86,56 @@ describe('Activity', () => {
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-mini.aria.yaml'));
     });
 
+    test("an Unseen Mac's refusal is the whole tab: the engine's sentence, no tile", async () => {
+        // Given - the Mac mini over mini-offline, whose activity.read the engine refuses as remote.unreachable
+        const world = recordingFor('mini-offline');
+        const refused: Recording = {
+            ...world,
+            exchanges: [
+                ...world.exchanges,
+                {
+                    answers: [
+                        {
+                            error: {
+                                code: 'remote.unreachable',
+                                message: 'mac-mini does not answer',
+                                subject: 'mac-mini',
+                                type: 'unreachable',
+                            },
+                            v: 2,
+                        },
+                    ],
+                    request: {
+                        in: { graph: 360_000_000_000 },
+                        target: { name: 'mac-mini' },
+                        watch: 'activity.read',
+                    },
+                },
+            ],
+        };
+        const result = await component.render(
+            pageOver(refused, { machine: 'mac-mini', page: 'machine', tab: 'Activity' }),
+            async (visitor) => {
+                // When - its activity is asked
+                await visitor.see(heading('mac-mini does not answer.'));
+            },
+        );
+
+        // Then - no measure, no placeholder of one
+        expect(result.tree.text).not.toContain('CPU');
+        expect(result.tree.text).not.toContain('Memory');
+    });
+
     test('the switches choose the window and the order of the busiest', async () => {
         // Given - This Mac over two-macs, read over the hour
         const result = await component.render(
             activityOf('two-macs', 'macbook-pro'),
             async (visitor) => {
-                await visitor.see(heading('No finding from the engine.'));
+                await visitor.see(heading('Nothing to look at.'));
 
                 // When - the day is chosen, then the busiest by memory
                 await visitor.click(button('24 h'));
-                await visitor.see(heading('No finding from the engine.'));
+                await visitor.see(heading('Nothing to look at.'));
                 await visitor.click(button('By memory'));
 
                 // Then - the VM's process leads by its resident memory
