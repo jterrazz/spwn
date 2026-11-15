@@ -124,6 +124,10 @@ Only community skills are in the catalog. The `@jterrazz` skills are not curated
 
 [`skills/studio-toolbelt/`](../../skills/studio-toolbelt/SKILL.md) tells an agent on a studio machine what is available. The sections between its `GENERATED` markers are compiled from the catalog by `make generate` (`apps/engine/cmd/generate/`), never edited by hand, and a test run by `make test` fails when the catalog and the skill drift. Change the catalog, run `make generate`, commit both together.
 
+## Across machines
+
+The `apps.matrix` call reads which machines carry each app, from a Mac as `settings.matrix` reads settings: a column per Mac and workspace (a stopped workspace and a Mac that does not answer are columns with no reading, a server is named apart), and a row per app some machine carries, each cell its state, its version and the version an update would bring, or that the app does not live on that machine, with how many machines carry it of those it lives on. A workspace or a server is refused it: it is read from a Mac.
+
 ## Related
 
 - [Commands](commands.md): `station apps`.
