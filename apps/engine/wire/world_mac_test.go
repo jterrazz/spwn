@@ -533,3 +533,29 @@ func TestWorldMacStartSettlesPastAGreetingThatNeverEnds(t *testing.T) {
 		t.Fatalf("a guest that never greets held the settling %v, want its bound %v once", waited, greetWait)
 	}
 }
+
+func TestWorldMacReadingsBesideRunInOrderOnAClockRealTimeNeverMoves(t *testing.T) {
+	began := time.Unix(1000, 0)
+	w := &world.World{ThisMac: "here", Now: began, Macs: map[string]*world.Mac{"here": {}}}
+	m := (&worldRun{w: w, macs: map[string]*worldMac{}}).mac("here")
+	var ran []string
+	var seen time.Time
+	m.beside(func() {
+		taking, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+		defer cancel()
+		<-taking.Done()
+		seen = m.run.clock().Now()
+		ran = append(ran, "first")
+	})
+	m.beside(func() { ran = append(ran, "second") })
+	m.aside()
+	if !seen.Equal(began) {
+		t.Fatalf("a reading that took real time read the clock at %v, want %v: real time moved it", seen, began)
+	}
+	if len(ran) != 2 || ran[0] != "first" || ran[1] != "second" {
+		t.Fatalf("the readings ran as %v, want first then second", ran)
+	}
+	if !w.Now.Equal(began) || len(m.besides) != 0 {
+		t.Fatalf("after the readings the clock reads %v with %d left, want %v and none", w.Now, len(m.besides), began)
+	}
+}

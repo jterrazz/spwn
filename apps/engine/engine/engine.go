@@ -42,6 +42,8 @@ type Remembered struct {
 	// change.
 	Agents   json.RawMessage `json:"agents,omitempty"`
 	Reported bool            `json:"reported,omitempty"`
+	// value: how it stood with its file at the drift job's last reading.
+	Drift *model.KeptDrift `json:"drift,omitempty"`
 }
 
 type VMAccounts struct {

@@ -19,6 +19,9 @@
         "detail": {
           "type": "string"
         },
+        "drift": {
+          "$ref": "#/$defs/machines.KeptDrift"
+        },
         "guest": {
           "type": "string"
         },
@@ -136,6 +139,29 @@
           "type": "string"
         }
       },
+      "type": "object"
+    },
+    "machines.KeptDrift": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Differences": {
+          "type": "integer"
+        },
+        "Failed": {
+          "type": "string"
+        },
+        "Unbound": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "At",
+        "Differences"
+      ],
       "type": "object"
     },
     "machines.LatencyPoint": {

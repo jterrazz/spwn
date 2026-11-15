@@ -128,6 +128,13 @@ type Options struct {
 	// value: the names every machine's agents and workspaces hold, read
 	// across every Mac; nil holds none.
 	AgentsHeld func(ctx context.Context) (agents.Held, error)
+	// value: how a workspace of this Mac stands with its file, read now;
+	// nil reads none, and the drift job does not run. Changes are the calls
+	// whose end on a VM makes its reading due again, and Beside runs a
+	// reading beside the loop (nil: in a goroutine of its own).
+	Drift   func(ctx context.Context, vm string) model.KeptDrift
+	Changes []string
+	Beside  func(func())
 }
 
 type Engine struct {
@@ -388,7 +395,7 @@ func (d *Engine) Memory() engine.Memory {
 		out[name] = engine.Remembered{
 			State: v.state, Detail: v.detail, Reruns: v.reruns, RerunAt: v.rerunAt, Restarts: v.restarts, BootAt: v.bootAt, Check: v.check,
 			Latency: v.latency, Restart: v.walk, Down: v.down, Cause: v.cause, LastLines: v.lastLines, LastHeard: heard, Agents: keptReport(v.agents), Reported: v.reported,
-			ReadyAt: v.readyAt,
+			ReadyAt: v.readyAt, Drift: v.drift,
 		}
 	}
 	return out
@@ -422,6 +429,7 @@ func (d *Engine) step(ctx context.Context, tick int) {
 	d.tick(ctx)
 	d.sweepShares(ctx)
 	d.watchExposure(ctx)
+	d.keepDrift(ctx)
 	d.awakeJob.Tick()
 	d.tellBack(ctx)
 	d.watchState()

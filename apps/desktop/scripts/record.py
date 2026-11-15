@@ -73,6 +73,9 @@ class Door:
 
     def __init__(self, seed, fixture):
         self.home, env = sandbox(seed, fixture)
+        # invariant: the world's engines take one turn before the door opens, as a Mac's engine has run before
+        # the window does: what an engine keeps beside its loop (a VM's drift) is kept when it is asked.
+        subprocess.run([str(binary), "--version"], cwd=self.home, env=env, stdout=subprocess.DEVNULL, check=True)
         self.process = subprocess.Popen(
             [str(binary), "guest", "serve", "--stdio"], cwd=self.home, env=env,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,

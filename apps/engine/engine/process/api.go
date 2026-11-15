@@ -75,6 +75,7 @@ func calls(d *Engine, served []string) []call.Handler {
 		}),
 		own(d, engine.CallGuestExec, func(ctx context.Context, d *Engine, in engine.ExecIn) (engine.ExecOut, error) {
 			ran, err := d.GuestExec(ctx, in.VM, in.Line, in.Stdin)
+			d.changed(in.VM, in.Call)
 			return engine.ExecOut(ran), err
 		}),
 		own(d, engine.CallAccounts, func(ctx context.Context, d *Engine, _ struct{}) (engine.AccountsView, error) {

@@ -28,10 +28,11 @@ type engine struct {
 	down  bool
 	lines []string
 	stdin []string
+	calls []string
 }
 
-func (e *engine) GuestExec(ctx context.Context, vm, line, stdin string) (stdout string, code int, err error) {
-	e.lines, e.stdin = append(e.lines, line), append(e.stdin, stdin)
+func (e *engine) GuestExec(ctx context.Context, vm, name, line, stdin string) (stdout string, code int, err error) {
+	e.lines, e.stdin, e.calls = append(e.lines, line), append(e.stdin, stdin), append(e.calls, name)
 	if e.down {
 		return "", 0, fail.New(fail.Unreachable, call.Unreachable, vm, nil)
 	}
@@ -71,6 +72,9 @@ func TestAVMIsAskedForItsOwnCallsOnlyThroughTheGuestServer(t *testing.T) {
 	}
 	if len(e.lines) != 2 || e.lines[0] != unix.Guest || e.lines[1] != unix.Guest {
 		t.Errorf("the engine ran %q inside the VM, want only %q", e.lines, unix.Guest)
+	}
+	if len(e.calls) != 2 || e.calls[0] != "" || e.calls[1] != "ports.declare" {
+		t.Errorf("the engine was told the exchanges carried %q, want the Hello alone then ports.declare", e.calls)
 	}
 }
 

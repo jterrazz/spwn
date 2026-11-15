@@ -61,7 +61,7 @@ type localGuest interface {
 
 type sharedGuest struct{ g localGuest }
 
-func (s sharedGuest) GuestExec(ctx context.Context, vm, line, stdin string) (stdout string, code int, err error) {
+func (s sharedGuest) GuestExec(ctx context.Context, vm, _, line, stdin string) (stdout string, code int, err error) {
 	out, err := s.g.GuestExec(ctx, vm, line, stdin)
 	return out.Stdout, out.Code, err
 }

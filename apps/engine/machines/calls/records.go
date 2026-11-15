@@ -132,6 +132,7 @@ func (s *Machinist) vmsOf(mac string, stored []model.Record, disks map[string]co
 			vm.SSH, vm.Restarts, vm.CheckStatus, vm.BootAt = d.SSH, d.Restarts, d.Check, d.BootAt
 			vm.Latency, vm.Restart = d.Latency, d.Restart
 			vm.Cause, vm.LastLines, vm.ReadyAt, vm.Agent = d.Cause, d.LastLines, d.ReadyAt, d.Agent
+			vm.Drift = d.Drift
 		}
 		out = append(out, model.Born(vm, r.Birth, s.runs(r.Owner)))
 	}

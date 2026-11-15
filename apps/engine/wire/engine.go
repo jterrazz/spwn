@@ -18,6 +18,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
+	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	enginejobs "github.com/jterrazz/studio-station/apps/engine/engine/jobs"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -25,12 +26,14 @@ import (
 	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
+	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 
 	"github.com/spf13/cobra"
 
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginelog "github.com/jterrazz/studio-station/apps/engine/engine/adapter/log"
@@ -119,6 +122,9 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		AgentsHeld: func(ctx context.Context) (agents.Held, error) {
 			return agentscalls.HeldEverywhere(ctx, calls)
 		},
+		Drift:   func(ctx context.Context, vm string) model.KeptDrift { return keptDrift(ctx, calls, vm) },
+		Changes: driftChanges(),
+		Beside:  m.beside(),
 	})
 	if m.world == nil && m.kind == catalog.Mac {
 		shares.g = m.vaultKept(d).Grants()
@@ -134,6 +140,38 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	m.far.engine = d
 	d.ServeWith(m.engineServer(d, registry, calls))
 	return d
+}
+
+// invariant: a workspace's reading of its file is machinefile.drift's
+// count over every chapter: only a refusal that no file is bound to it
+// reads unbound; any other is the failure, worded as the CLI words it.
+func keptDrift(ctx context.Context, calls call.Router, vm string) model.KeptDrift {
+	out, err := call.Invoke(ctx, calls, coremachine.Ref{}, machinefilecalls.Drift, machinefilecalls.DriftIn{Machine: vm}, nil)
+	var refused *fail.Error
+	switch {
+	case err == nil:
+		return model.KeptDrift{Differences: out.Differences}
+	case errors.As(err, &refused) && refused.Code == machinefilecalls.NotFound:
+		return model.KeptDrift{Unbound: true}
+	}
+	return model.KeptDrift{Failed: kit.Translate(err, "").Message}
+}
+
+// value: the calls whose end on a VM changes how it stands with its file.
+func driftChanges() []string {
+	return []string{
+		machinefilecalls.Apply.Name, machinefilecalls.Upgrade.Name, appscalls.Install.Name, appscalls.Remove.Name, appscalls.Update.Name,
+		settingscalls.Apply.Name,
+	}
+}
+
+// value: how the engine runs a reading beside its loop: in a goroutine of
+// its own; in a world once the command is done.
+func (m machine) beside() func(func()) {
+	if m.world != nil {
+		return m.world.beside
+	}
+	return nil
 }
 
 // invariant: a Mac's engine upgrades its bound Machinefile every night,
@@ -279,15 +317,19 @@ func (d macEngine) VMs(ctx context.Context) (map[string]machinescalls.EngineVM, 
 	for _, v := range views {
 		out[v.Name] = machinescalls.EngineVM{
 			State: v.State, Guest: v.Guest, IP: v.IP, Detail: v.Detail, SSH: v.SSH, Restarts: v.Restarts, Check: v.Check, BootAt: v.BootAt,
-			Latency: v.Latency, Restart: v.Restart, Cause: v.Cause, LastLines: v.LastLines, ReadyAt: v.ReadyAt, Agent: v.Agent,
+			Latency: v.Latency, Restart: v.Restart, Cause: v.Cause, LastLines: v.LastLines, ReadyAt: v.ReadyAt, Agent: v.Agent, Drift: v.Drift,
 		}
 	}
 	return out, nil
 }
 
 func (d macEngine) GuestExec(ctx context.Context, vm, line, stdin string) (engine.GuestRan, error) {
+	return d.GuestCall(ctx, vm, "", line, stdin)
+}
+
+func (d macEngine) GuestCall(ctx context.Context, vm, name, line, stdin string) (engine.GuestRan, error) {
 	var ran engine.ExecOut
-	if err := d.c.do(ctx, engine.CallGuestExec, engine.ExecIn{VM: vm, Line: line, Stdin: stdin}, &ran); err != nil {
+	if err := d.c.do(ctx, engine.CallGuestExec, engine.ExecIn{VM: vm, Line: line, Stdin: stdin, Call: name}, &ran); err != nil {
 		return engine.GuestRan{}, downAs(err, model.ErrEngineDown)
 	}
 	return engine.GuestRan(ran), nil

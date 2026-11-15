@@ -1113,6 +1113,7 @@ export type EngineCallsStopOut = {
 };
 
 export type EngineExecIn = {
+    call?: string;
     line?: string;
     stdin?: string;
     vm?: string;
@@ -1236,6 +1237,7 @@ export type EngineVMView = {
     cause?: string;
     check?: MachinesCheckStatus;
     detail: string;
+    drift?: MachinesKeptDrift;
     guest: string;
     holder?: number;
     ip: string;
@@ -2007,6 +2009,13 @@ export type MachinesIncident = {
     to?: string;
 };
 
+export type MachinesKeptDrift = {
+    At: string;
+    Differences: number;
+    Failed?: string;
+    Unbound?: boolean;
+};
+
 export type MachinesLatencyPoint = {
     at: string;
     took: number;
@@ -2151,8 +2160,10 @@ export type MachinesVM = {
     Creator: string;
     Detail: string;
     Device: string;
+    Drift?: MachinesKeptDrift;
     Gestures?: ('start' | 'stop' | 'restart')[];
     Guest: string;
+    Head?: CoreVerdictVerdict;
     Health?: CoreVerdictVerdict;
     Hold?: MachinesHold;
     IP: string;
@@ -2166,6 +2177,7 @@ export type MachinesVM = {
     Machinefile: string;
     Name: string;
     Network: string;
+    Pending?: boolean;
     Purpose: string;
     ReadyAt: string;
     Resources: MachinesResources;

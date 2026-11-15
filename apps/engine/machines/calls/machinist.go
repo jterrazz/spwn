@@ -107,6 +107,9 @@ type EngineVM struct {
 	// value: when the create it was made by made it ready.
 	ReadyAt time.Time
 	Agent   *model.AgentView
+	// value: how a running workspace stands with its file, as the engine
+	// keeps it; nil before its first reading since its boot.
+	Drift *model.KeptDrift
 }
 
 type Engine interface {

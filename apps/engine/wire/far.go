@@ -15,6 +15,9 @@ type farMac struct {
 	start    func() *process.Engine
 	// value: its own Router, which reaches the VMs it holds.
 	relay served
+	// value: drops the readings its run shares, so what it reads next is
+	// read again.
+	fresh func()
 }
 
 // invariant: a far Mac is built over its own slice of the world, with no
@@ -24,5 +27,5 @@ func (m machine) farMac(env kit.Env, w *worldMac) farMac {
 	fenv := kit.Env{Out: env.Out, On: &kit.On{ThisMachine: there.thisMac()}, Self: there.profile.Ref}
 	r := there.router(fenv)
 	fenv.Calls = r
-	return farMac{registry: there.registry(fenv), profile: there.profile, start: func() *process.Engine { return there.engine(fenv) }, relay: served{r}}
+	return farMac{registry: there.registry(fenv), profile: there.profile, start: func() *process.Engine { return there.engine(fenv) }, relay: served{r}, fresh: func() { there.pool.Forget("") }}
 }
