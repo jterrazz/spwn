@@ -1,0 +1,21 @@
+description: 'a far Mac that does not answer carries its last answer; one never heard carries none'
+env:
+    - mini-offline
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.All.Macs[] | {Name, Reachable, has: has("Answered"), Answered}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          {"Name":"jterrazz-macbook-pro","Reachable":true,"has":false,"Answered":null}
+          {"Name":"jterrazz-mac-mini","Reachable":false,"has":true,"Answered":"{{iso8601}}"}
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["jterrazz-macbook-pro"].preferences.macs["jterrazz-mac-mini"].answered)'' world.json > world.next && /bin/mv world.next world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.All.Macs[] | {Name, Reachable, has: has("Answered"), Answered}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          {"Name":"jterrazz-macbook-pro","Reachable":true,"has":false,"Answered":null}
+          {"Name":"jterrazz-mac-mini","Reachable":false,"has":false,"Answered":null}
