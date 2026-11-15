@@ -1529,11 +1529,15 @@ export type MachinefileFileView = {
     Settings: string[] | null;
     Shelf: 'yours' | 'mixin' | 'shipped';
     Text: string;
+    Verdict: CoreVerdictVerdict;
 };
 
 export type MachinefileFollower = {
+    Differences: number;
     Mac: string;
     Machine: string;
+    Match: boolean;
+    Read: boolean;
     ThisMac: boolean;
 };
 

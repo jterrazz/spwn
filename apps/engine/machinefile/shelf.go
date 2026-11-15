@@ -6,6 +6,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 // value: which of three groups a Machinefile is shown in: the owner's own
@@ -43,6 +44,7 @@ type FileView struct {
 	Settings    []string
 	Local       *Local `json:",omitempty"`
 	Followers   []Follower
+	Verdict     verdict.Verdict
 }
 
 // value: what a Machinefile makes, read over its whole chain: the kind
@@ -81,12 +83,50 @@ type SettingSet struct {
 }
 
 // value: a machine that follows a Machinefile: a Mac bound to it, a VM
-// made from it, by its name and the Mac it runs on.
+// made from it, by its name and the Mac it runs on; whether its drift read,
+// and, if it did, how many lines differ from the file.
 
 type Follower struct {
-	Machine string
-	Mac     string
-	ThisMac bool
+	Machine     string
+	Mac         string
+	ThisMac     bool
+	Read        bool
+	Match       bool
+	Differences int
+}
+
+func (f Follower) Judged(d Drift) Follower {
+	// invariant: a follower matches its file exactly when its drift counts
+	// no difference: the one count machinefile.drift answers.
+	f.Read, f.Differences, f.Match = true, d.Differences, d.Differences == 0
+	return f
+}
+
+func FollowersVerdict(fs []Follower) verdict.Verdict {
+	// value: the page's verdict on a file's followers: how many differ, or
+	// that every machine matches; a follower that did not read is said.
+	differ, unread := 0, 0
+	for _, f := range fs {
+		switch {
+		case !f.Read:
+			unread++
+		case !f.Match:
+			differ++
+		}
+	}
+	switch {
+	case len(fs) == 0:
+		return verdict.Verdict{Tone: verdict.Plain, Sentence: "No machine follows it."}
+	case differ == 1:
+		return verdict.Verdict{Tone: verdict.Warn, Sentence: "1 machine differs."}
+	case differ > 1:
+		return verdict.Verdict{Tone: verdict.Warn, Sentence: strconv.Itoa(differ) + " machines differ."}
+	case unread == 1:
+		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Whether 1 machine matches does not read now."}
+	case unread > 1:
+		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Whether " + strconv.Itoa(unread) + " machines match does not read now."}
+	}
+	return verdict.Verdict{Tone: verdict.OK, Sentence: "Every machine matches."}
 }
 
 func FilesOf(lib Library) []FileView {

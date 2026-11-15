@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -9,6 +10,11 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
+
+type Judged struct {
+	Drift machinefile.Drift
+	Err   error
+}
 
 type FilesIn struct{}
 
@@ -31,11 +37,41 @@ var ListFiles = call.Call[Deps, FilesIn, Files]{
 		}
 		files := machinefile.FilesOf(lib)
 		follow := followers(ctx, d)
+		type at struct{ file, follower int }
+		var asked []at
+		var names []string
 		for i := range files {
 			files[i].Followers = follow[files[i].Name]
 			if files[i].Followers == nil {
 				files[i].Followers = []machinefile.Follower{}
 			}
+			for j := range files[i].Followers {
+				asked = append(asked, at{i, j})
+				names = append(names, strconv.Itoa(len(asked)-1))
+			}
+		}
+		// invariant: a follower is judged by machinefile.drift, the one
+		// comparison, against the file it follows, a few at a time, each
+		// within its budget: one that does not answer is unread, never
+		// guessed matching.
+		var got map[string]Judged
+		if d.Judge != nil {
+			got = d.Judge(ctx, names, func(ctx context.Context, n string) (machinefile.Drift, error) {
+				k, _ := strconv.Atoi(n)
+				f := files[asked[k].file]
+				return Drift.Run(ctx, d, DriftIn{Machine: f.Followers[asked[k].follower].Machine, Machinefile: f.Name}, nil)
+			})
+		}
+		if err := ctx.Err(); err != nil {
+			return Files{}, err
+		}
+		for k, a := range asked {
+			if r, ok := got[names[k]]; ok && r.Err == nil {
+				files[a.file].Followers[a.follower] = files[a.file].Followers[a.follower].Judged(r.Drift)
+			}
+		}
+		for i := range files {
+			files[i].Verdict = machinefile.FollowersVerdict(files[i].Followers)
 		}
 		return Files{Files: files}, nil
 	},
