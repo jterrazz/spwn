@@ -19,6 +19,8 @@ What a machine is doing now (SPEC §6): CPU of the whole machine and its load, m
 
 The engine's `activity.read` carries the head of the page, `verdict`: `Nothing to look at.` (ok), under it `history kept 24 h, since the engine started` when an engine keeps the history, or the first finding's text under its subject (bad for a broken one, warn for one that needs a look); a Meter that did not answer says `No answer in 2 s.` (warn), never calm.
 
+A Mac that does not answer keeps no last values: `activity --on` it is refused as unreachable (`remote.unreachable`), with no `last` and no graph, and its page in the menu bar drops the Activity it held.
+
 ## Where each comes from
 
 Each fact has one owner, and Activity reads it there:

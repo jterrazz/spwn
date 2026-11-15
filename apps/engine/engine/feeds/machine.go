@@ -2,9 +2,11 @@ package feeds
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/activity"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
@@ -12,6 +14,7 @@ import (
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -160,12 +163,23 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 			if oerr == nil {
 				m.Summary = &read.Summary
 			}
-			if kerr == nil {
-				m.Activity = &kept
-			}
+			m.Activity = keptAfter(m.Activity, kept, kerr)
 		})
 		if rest(ctx, f.o.Clock, remoteEvery, in) != nil {
 			return
 		}
 	}
+}
+
+func keptAfter(was *activity.Report, read activity.Report, err error) *activity.Report {
+	// invariant: a read that fails keeps the last values on the page, except
+	// a machine that does not answer: it keeps none, its Activity dropped.
+	var failed *fail.Error
+	switch {
+	case err == nil:
+		return &read
+	case errors.As(err, &failed) && failed.Type == fail.Unreachable:
+		return nil
+	}
+	return was
 }
