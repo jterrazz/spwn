@@ -18,7 +18,7 @@ The desktop window of station: a Tauri 2 shell around a React page set, and a cl
 
 ## The dependency rule
 
-Each row is a layer of `typescript.architecture` in this folder's `studio.config.ts`, so `typescript check` run from `apps/window` fails an import that crosses it as `architecture/<name>`. A spec under `__tests__/` stands outside the map.
+Each row is a layer of `typescript.architecture` in this folder's `studio.config.ts`, so `typescript check` run from `apps/desktop` fails an import that crosses it as `architecture/<name>`. A spec under `__tests__/` stands outside the map.
 
 | From          | Never imports                                                | Layer                  |
 | ------------- | ------------------------------------------------------------ | ---------------------- |
@@ -29,7 +29,7 @@ Each row is a layer of `typescript.architecture` in this folder's `studio.config
 
 A component reaches whether an engine answers by `useReach()` (`src/engine/react.tsx`), never by a prop.
 
-The root's `typescript check`, the one `make check` runs, does not read a member's layers yet: on 2026-11-13 a probe import crossing `model-is-pure` and `shell-knows-no-page` was refused from `apps/window` and passed from the root. The rule holds in the gate once `@jterrazz/typescript` reads each member's `typescript.architecture` from the member's folder, and an import from `src/engine/` into `src/design/` failing the root's check as `architecture/engine-draws-nothing` proves it.
+The root's `typescript check`, the one `make check` runs, does not read a member's layers yet: on 2026-11-13 a probe import crossing `model-is-pure` and `shell-knows-no-page` was refused from `apps/desktop` and passed from the root. The rule holds in the gate once `@jterrazz/typescript` reads each member's `typescript.architecture` from the member's folder, and an import from `src/engine/` into `src/design/` failing the root's check as `architecture/engine-draws-nothing` proves it.
 
 ## The law
 
@@ -237,7 +237,7 @@ The route (page, machine, tab, the file Machine files opens on and the catalog i
 All three run in the VM, from `scripts/` ([its page](scripts/README.md)): `record.py` writes the worlds, a step of the root's `make generate`, so a recording the engine of the tree no longer answers so is a tree that `make generate` leaves changed; `node scripts/capture.ts <out>` photographs every page of every world, and `check.sh` is the proof, with `check-quick.sh` for the seconds between two edits. What the window must let its user do is [its scenarios](SCENARIOS.md), each a test of `specs/website/` that visits this proof build in Chromium ([Test](../../docs/guides/test.md#the-windows-scenarios)); a journey across pages is proved there, and one page's states stay its spec in `__tests__/`. Between two edits, one test file runs alone in the VM, and one spec of it by its name; a scenario file of `specs/website/` runs alone against the proof build:
 
 ```bash
-cd apps/window && npx vitest --run src/pages/sign-ins/__tests__/sign-ins.test.tsx -t "far Mac"   # -u rewrites its goldens
+cd apps/desktop && npx vitest --run src/pages/sign-ins/__tests__/sign-ins.test.tsx -t "far Mac"   # -u rewrites its goldens
 npm run build:proof && cd ../.. && npm --workspace specs exec -- vitest --run --project website website/home/home.spec.ts
 ```
 

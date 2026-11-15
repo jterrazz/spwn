@@ -16,7 +16,7 @@ export default defineConfig({
                         pathNot: ['^src/design/', '^src/tone[.]ts$', '^src/separator[.]ts$'],
                     },
                     why: 'the design kit draws what it is handed and knows nothing of the engine, the shell or a page',
-                    fix: 'take the value as a prop, or move the code that needs the app out of src/design/ (apps/window/README.md, The dependency rule)',
+                    fix: 'take the value as a prop, or move the code that needs the app out of src/design/ (apps/desktop/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',
                 },
                 {
@@ -24,7 +24,7 @@ export default defineConfig({
                     from: { path: '^src/model/', pathNot: '/__tests__/' },
                     to: { path: '^src/', pathNot: ['^src/model/', '^src/separator[.]ts$'] },
                     why: 'the model is plain functions over values: no word, no tone, no drawing, no link',
-                    fix: 'move the code that reads the engine to src/engine/, or the drawing to src/design/ (apps/window/README.md, The dependency rule)',
+                    fix: 'move the code that reads the engine to src/engine/, or the drawing to src/design/ (apps/desktop/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',
                 },
                 {
@@ -32,7 +32,7 @@ export default defineConfig({
                     from: { path: '^src/engine/', pathNot: '/__tests__/' },
                     to: { path: '^src/(design|shell|pages)/' },
                     why: "the engine layer reads the link and names what it answered; how it is drawn is the pages' and the shell's",
-                    fix: 'return a code, a word or a tone (src/tone.ts) and let the caller draw it (apps/window/README.md, The dependency rule)',
+                    fix: 'return a code, a word or a tone (src/tone.ts) and let the caller draw it (apps/desktop/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',
                 },
                 {
@@ -40,7 +40,7 @@ export default defineConfig({
                     from: { path: '^src/shell/', pathNot: '/__tests__/' },
                     to: { path: '^src/pages/' },
                     why: 'the pages are handed to the shell by src/pages/registry.tsx, so the shell never imports one back',
-                    fix: 'add the page to the registry, or move what the shell needs out of src/pages/ (apps/window/README.md, The dependency rule)',
+                    fix: 'add the page to the registry, or move what the shell needs out of src/pages/ (apps/desktop/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',
                 },
             ],

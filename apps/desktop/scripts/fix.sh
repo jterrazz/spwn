@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # outside: a Linux VM only.
-# value: `typescript fix` from the root, after bench-setup.sh. It exits 0 when apps/window holds no finding the fix left; the root's findings are counted apart.
+# value: `typescript fix` from the root, after bench-setup.sh. It exits 0 when apps/desktop holds no finding the fix left; the root's findings are counted apart.
 set -uo pipefail
 # shellcheck source=bench-env.sh
 source "$(dirname "$0")/bench-env.sh"

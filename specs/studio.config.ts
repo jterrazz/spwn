@@ -45,7 +45,7 @@ export default defineConfig({
             overrides: [
                 {
                     files: ['website/**/*.spec.ts'],
-                    reason: 'each scenario of apps/window/SCENARIOS.md is a test whose title opens on its id (`A4 ...`), and one not proved yet is declared all the same, a `test.todo` naming why it waits, so a journey whose scenarios all wait imports its runner for its side alone until its first body drives it; scenarios_test.go of specs/architecture holds the page and the titles together',
+                    reason: 'each scenario of apps/desktop/SCENARIOS.md is a test whose title opens on its id (`A4 ...`), and one not proved yet is declared all the same, a `test.todo` naming why it waits, so a journey whose scenarios all wait imports its runner for its side alone until its first body drives it; scenarios_test.go of specs/architecture holds the page and the titles together',
                     rules: {
                         'import/no-unassigned-import': 'off',
                         'vitest/prefer-lowercase-title': 'off',

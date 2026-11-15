@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-const scenariosPage = "apps/window/SCENARIOS.md"
+const scenariosPage = "apps/desktop/SCENARIOS.md"
 
 var (
 	scenarioRow   = regexp.MustCompile(`(?m)^\| ([A-Z]\d+) +\|`)
@@ -18,7 +18,7 @@ var (
 )
 
 // invariant: rule one-test-per-scenario: the window's scenarios have one owner,
-// apps/window/SCENARIOS.md, and each is a test of specs/website/
+// apps/desktop/SCENARIOS.md, and each is a test of specs/website/
 // whose title opens on its id, a test.todo while it waits: an id the page
 // holds twice, an id no test declares and a test naming an id the page does
 // not hold all fail, so the list and the specs never drift apart.
