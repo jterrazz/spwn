@@ -1,6 +1,7 @@
 import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../design/index';
 import type { PlanLine } from '../../engine/provisional';
 import { engineShown, kindChipWord } from '../../engine/shown';
+import { sentence } from '../../model/format';
 import { SEPARATOR } from '../../separator';
 import type { Tone } from '../../tone';
 import { countWord } from './model';
@@ -55,7 +56,7 @@ function MachineLine({ line, differs }: { line: PlanLine; differs: boolean }) {
                     </Value>
                 ) : null}
             </span>
-            <span className={styles.description}>{line.Step.Rule}</span>
+            <span className={styles.description}>{sentence([line.Step.Rule, line.Waiting])}</span>
         </div>
     );
 }
