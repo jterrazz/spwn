@@ -1,6 +1,6 @@
 - main:
   - heading "Claude Max" [level=1]
-  - paragraph: claude · OAuth token · admin@jterrazz.com · added 2 Oct
+  - paragraph: claude · OAuth token · you@example.com · added 2 Oct
   - button "Remove password"
   - region "This password":
     - heading "This password" [level=2]
@@ -11,7 +11,7 @@
     - term: Program
     - definition: claude
     - term: Account
-    - definition: admin@jterrazz.com
+    - definition: you@example.com
   - region "Granted to":
     - heading "Granted to" [level=2]
     - button "Grant…"
