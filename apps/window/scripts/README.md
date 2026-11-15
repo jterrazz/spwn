@@ -24,9 +24,9 @@ Every job the window's makers run, one script each, in the Linux VM only, `look.
 
 ## What a recording holds
 
-Two runs of `record.py` write the same requests, the same gestures and the same plain call answers.
-They do not write the same watches: the world build has no fixed clock (`apps/engine/wire/world_on.go`), so a watch the engine ends before a check settles (`disk.read`) answers pending in one run and settled in the other, and a gesture's reads follow.
-The recorder keeps a watch's first and last answers, skips the reads of `TIMED` after a gesture, and carries `engine.start`'s process number over from the last recording: nothing else is rewritten, since the rest is the engine's answer.
+Two runs of `record.py` over the same tree write the same bytes.
+The world build has no fixed clock (`apps/engine/wire/world_on.go`), and what a watch streams before it settles comes in the scheduler's order, so the recorder keeps only what no run decides: a watch's first and last answers, the last alone for a watch of `SETTLED` (`disk.read`, whose first answer races its walk); a gesture's reads in the world's order of asks, judged changed with the clock's fields left out; no read of `TIMED` after a gesture.
+It carries over from the file's last recording `engine.start`'s process number (`NOISE`) and the world's clock fields (`CLOCKED`: `settings.matrix`'s `Read`, `awake.read`'s `Now`): nothing else is rewritten, since the rest is the engine's answer.
 A watch of `UNENDED` the engine holds open (a VM being created streams its overview for as long as the birth lasts) is cancelled by its id after `QUIET` seconds of silence, as the window cancels a watch it lets go of, and its answers are those that came before; any other watch is waited for to its end, since one that settles (`disk.read`) may be silent longer.
 So record only what your lot changed, `--call=<call>` for a read or a gesture, and leave a churned file you did not mean to touch out of your commit.
 
