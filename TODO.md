@@ -188,6 +188,7 @@ becomes the bottleneck.
 
 ## Smaller follow-ups
 
+- The `claude-token` setting has no reader since K7: it keeps the Claude Code token in the studio CLI's credential store (`apps/engine/settings/adapter/vault/claude_token.go`), and no VM reads that store now that the Machinefile's grants replaced the share list. Delete it or give it one: the owner's call.
 - `gh`'s `hosts.yml` row says the login is in the keychain's `gh:github.com`: check on a Mac whether `security` may list that entry (it was denied on one read), and add it to the Keychain rows if it can be read.
 - `codex`'s `~/.codex/auth.json` row names the file the login lives in: check on a Mac with a Codex login that this is the file's name (`ls ~/.codex`), and fix the path if it is not.
 - `claude-desktop`'s `vm_bundles` is level `data`: check whether the app downloads it again after a delete (delete it on a Mac and open the app); if it does, the level becomes `cache`.
