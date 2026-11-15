@@ -3,19 +3,23 @@ import type {
     MachinefileChapterDrift,
     MachinefileDrift,
     MachinefileDriftInput,
+    MachinefileLastRun,
+    MachinefileUpgrades,
     Target,
 } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Screen, Verdict } from '../../design/index';
+import { Panel, Row, Screen, Verdict } from '../../design/index';
 import type { Reading as Read } from '../../engine/react';
 import { useRead } from '../../engine/react';
 import { chapterNoun, fileJoinOf, verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
+import { clock } from '../../model/format';
 import { SEPARATOR } from '../../separator';
 import { useRouter } from '../../shell/router';
+import { shortDay } from '../activity/when';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
-import { NotGiven, NoVerdict, Reading } from '../kit/readings';
+import { NoVerdict, Reading } from '../kit/readings';
 import { Page } from '../page';
 import { Differs } from './differs';
 import { Inventory } from './inventory';
@@ -102,7 +106,43 @@ type Aimed = { target: Target | undefined; name: string };
 
 type Asked = Aimed & { asked: MachinefileDriftInput };
 
-function Upgrades({ target, name }: Aimed) {
+function lastRunOf(last: MachinefileLastRun): string {
+    const day = shortDay(last.At);
+    return day === undefined ? '' : `${day}${SEPARATOR}${clock(last.At) ?? ''}`;
+}
+
+function UpgradeRows({ upgrades }: { upgrades: MachinefileUpgrades }) {
+    const { Last: last } = upgrades;
+    return (
+        <>
+            <Row size="slim" title={upgrades.Sentence} />
+            {last === undefined ? null : (
+                <Row
+                    kind="Last run"
+                    sentence={last.Verdict.Line}
+                    size="slim"
+                    {...(lastRunOf(last) === '' ? {} : { tag: lastRunOf(last) })}
+                    title={last.Verdict.Sentence}
+                />
+            )}
+        </>
+    );
+}
+
+function UpgradeBody({ drift }: { drift: Read<MachinefileDrift> }) {
+    if (drift.kind !== 'read') {
+        return (
+            <p className={styles.text}>
+                {drift.kind === 'failed'
+                    ? 'What the engine answered is below'
+                    : 'Reading how it upgrades…'}
+            </p>
+        );
+    }
+    return <UpgradeRows upgrades={drift.out.Upgrades} />;
+}
+
+function Upgrades({ target, name, drift }: Aimed & { drift: Read<MachinefileDrift> }) {
     const upgrade = useGesture('machinefile.upgrade', {
         input: {},
         rereads: UPGRADE_REREADS,
@@ -111,7 +151,7 @@ function Upgrades({ target, name }: Aimed) {
     });
     return (
         <>
-            <NotGiven
+            <Panel
                 action={
                     <GestureButton
                         gesture={upgrade}
@@ -121,8 +161,9 @@ function Upgrades({ target, name }: Aimed) {
                     />
                 }
                 title="Upgrades"
-                what="When it upgrades by itself, and its last run"
-            />
+            >
+                <UpgradeBody drift={drift} />
+            </Panel>
             <GestureOutcome gesture={upgrade} />
         </>
     );
@@ -134,7 +175,7 @@ function Setup({ target, name, asked, onPlan }: Asked & { onPlan: () => void }) 
         <Page>
             <FileState drift={drift} name={name} />
             {drift.kind === 'read' ? <Differs drift={drift.out} onPlan={onPlan} /> : null}
-            <Upgrades name={name} target={target} />
+            <Upgrades drift={drift} name={name} target={target} />
             <Inventory drift={drift} target={target} />
         </Page>
     );
