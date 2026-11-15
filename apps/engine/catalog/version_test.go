@@ -210,3 +210,27 @@ func TestAVersionedFormulaHoldsItsOwnMajor(t *testing.T) {
 		t.Error("jq fits 18; want an unversioned formula holding only its newest")
 	}
 }
+
+func TestARangeSaysItsRuleInWords(t *testing.T) {
+	// invariant: each form of a version says how far it moves: every
+	// version, the minors and fixes of a major, the fixes of a minor, or
+	// one version held, a caret below 1 held as npm reads it.
+	for text, want := range map[string]string{
+		"":         "takes every version",
+		"latest":   "takes every version",
+		"24":       "stays on 24, takes minors and fixes",
+		"^24.2.0":  "stays on 24, takes minors and fixes",
+		"24.11":    "stays on 24.11, takes fixes",
+		"~24.11.0": "stays on 24.11, takes fixes",
+		"^0.5.1":   "stays on 0.5, takes fixes",
+		"24.11.3":  "held at 24.11.3",
+	} {
+		r, err := catalog.ParseRange(text)
+		if err != nil {
+			t.Fatalf("%q: %v", text, err)
+		}
+		if got := r.Rule(); got != want {
+			t.Errorf("%q says %q, want %q", text, got, want)
+		}
+	}
+}

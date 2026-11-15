@@ -107,6 +107,9 @@
     "machinefile.calls.Nightly": {
       "additionalProperties": false,
       "properties": {
+        "bound": {
+          "type": "string"
+        },
         "night": {
           "$ref": "#/$defs/machinefile.Night"
         },
@@ -115,6 +118,7 @@
         }
       },
       "required": [
+        "bound",
         "night",
         "ran"
       ],

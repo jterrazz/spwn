@@ -120,9 +120,11 @@ type VM struct {
 	// stopped one or one of a silent Mac still holds.
 	Agents []string `json:",omitempty"`
 	// value: what it is for, as its create was told, empty when it was told
-	// nothing; who made it, the session its create named, else you.
-	Purpose string
-	Creator string
+	// nothing; who made it, the session its create named, else you; and
+	// the Machinefile it was made from, empty when none was named.
+	Purpose     string
+	Creator     string
+	Machinefile string
 	// value: a server's health in one verdict over its state, address, SSH
 	// and check, nil for a workspace; and what the engine kept of its check
 	// when there is too little of it to draw, empty otherwise.

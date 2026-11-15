@@ -190,6 +190,22 @@ func (r Range) Head() string {
 	return dotted(r.low)
 }
 
+func (r Range) Rule() string {
+	// value: how far the range lets an app move, in the owner's words:
+	// every version, the minors and fixes of a major, the fixes of a
+	// minor, or one version held.
+	head := r.Head()
+	switch {
+	case r.Any():
+		return "takes every version"
+	case r.Exact(), strings.Count(head, ".") == 2:
+		return "held at " + head
+	case strings.Contains(head, "."):
+		return "stays on " + head + ", takes fixes"
+	}
+	return "stays on " + head + ", takes minors and fixes"
+}
+
 func (r Range) Contains(version string) bool {
 	// invariant: every version is in latest; an exact range holds its one
 	// version (a `v` before it aside); any other holds the released

@@ -729,6 +729,20 @@
       "out": "ExplainOut"
     },
     {
+      "name": "machinefile.files",
+      "schema": "station.machinefile.files/v1",
+      "where": "in-process",
+      "errors": [
+        "catalog.invalid",
+        "catalog.newer-schema",
+        "machinefile.invalid",
+        "machinefile.newer-schema",
+        "machinefile.source-unavailable"
+      ],
+      "in": "FilesIn",
+      "out": "Files"
+    },
+    {
       "name": "machinefile.nightly",
       "schema": "station.machinefile.nightly/v1",
       "where": "at-target",

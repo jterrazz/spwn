@@ -262,6 +262,18 @@
       "Tone": "plain"
     }
   },
+  "CatalogLifetime": {
+    "ephemeral": {
+      "Word": "ephemeral",
+      "Detail": "Deleted when it powers off",
+      "Tone": "plain"
+    },
+    "persistent": {
+      "Word": "persistent",
+      "Detail": "Stays until you delete it",
+      "Tone": "plain"
+    }
+  },
   "CatalogMachineKind": {
     "linux": {
       "Word": "Linux",
@@ -273,6 +285,20 @@
     },
     "macos": {
       "Word": "macOS VM",
+      "Tone": "plain"
+    }
+  },
+  "CatalogMachineRole": {
+    "computer": {
+      "Word": "Computer",
+      "Tone": "plain"
+    },
+    "server": {
+      "Word": "Server",
+      "Tone": "plain"
+    },
+    "workspace": {
+      "Word": "Workspace",
       "Tone": "plain"
     }
   },
@@ -1377,6 +1403,20 @@
     },
     "user": {
       "Word": "~/.config/station",
+      "Tone": "plain"
+    }
+  },
+  "MachinefileShelf": {
+    "mixin": {
+      "Word": "Mixins",
+      "Tone": "plain"
+    },
+    "shipped": {
+      "Word": "Shipped with station",
+      "Tone": "plain"
+    },
+    "yours": {
+      "Word": "Your machines",
       "Tone": "plain"
     }
   },

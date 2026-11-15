@@ -69,6 +69,14 @@ type Step struct {
 	// value: where the step was asked (a Machinefile, or the package that
 	// brings it in), and where its package is defined.
 	Origin, Defined Origin
+	// value: the Machinefile that lists the step, or lists the package
+	// that brings it in, followed to the file; the chapter of a drift it
+	// counts in; and, for an app, how far its version lets it move in the
+	// owner's words ("stays on 24, takes minors and fixes"), empty for a
+	// setting.
+	File    Origin
+	Chapter Chapter
+	Rule    string
 }
 
 // value: a package the Machinefile marks optional that has no method for the system.
@@ -444,7 +452,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	if err != nil {
 		return Resolved{}, err
 	}
-	r.Steps, r.Skipped = p.baked(steps, m.bake), p.skipped
+	r.Steps, r.Skipped = filed(p.baked(steps, m.bake)), p.skipped
 	for _, phase := range []RunPhase{RunImage, RunBoot, RunUpgrade} {
 		if s, ok := m.scripts[phase]; ok {
 			r.Scripts = append(r.Scripts, s)
@@ -652,7 +660,42 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version 
 		Package: it.Package.Name, Kind: it.Package.Kind, Method: chosen.Method(), Chosen: because, Spec: chosen,
 		Version: version, UpdatesSelf: it.Package.Updates == catalog.UpdatesSelf, Locked: held, Recorded: recorded, Lock: lockFile(ok, p.lock.File), Phase: cmp.Or(it.Package.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Package.Needs, chosen.Needs),
 		Restarts: it.Package.AfterApply, Why: why, Defined: packageOrigin(it),
+		Chapter: chapterOf(it.Package.Kind), Rule: ruleOf(it.Package, version),
 	}, nil
+}
+
+func ruleOf(pkg catalog.Package, version catalog.Range) string {
+	switch {
+	case pkg.Kind == catalog.KindSetting:
+		return ""
+	case pkg.Updates == catalog.UpdatesSelf:
+		return "updates itself"
+	}
+	return version.Rule()
+}
+
+func filed(steps []Step) []Step {
+	// invariant: a step brought in by a package has that package's
+	// definition as its origin; its file is the bringer's, followed until
+	// a step a Machinefile lists, and a loop of bringers ends at the step
+	// it started from.
+	by := make(map[string]int, len(steps))
+	for i, s := range steps {
+		by[s.Package] = i
+	}
+	for i := range steps {
+		o, seen := steps[i].Origin, map[string]bool{steps[i].Package: true}
+		for {
+			j, ok := by[o.Name]
+			if !ok || seen[o.Name] || steps[j].Defined != o {
+				break
+			}
+			seen[o.Name] = true
+			o = steps[j].Origin
+		}
+		steps[i].File = o
+	}
+	return steps
 }
 
 func lockedAt(ok bool, asked catalog.Range, locked string) string {

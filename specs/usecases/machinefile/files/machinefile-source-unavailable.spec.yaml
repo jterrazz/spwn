@@ -1,0 +1,11 @@
+description: 'a shared source with no repository at its url stops the files read, naming the source'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error | {code, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"code":"machinefile.source-unavailable","message":"the source studio cannot be read: no repository at its url"}

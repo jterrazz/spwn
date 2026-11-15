@@ -1149,10 +1149,22 @@
         "Baked": {
           "type": "boolean"
         },
+        "Chapter": {
+          "enum": [
+            "apps",
+            "settings",
+            "ports",
+            "accounts"
+          ],
+          "type": "string"
+        },
         "Chosen": {
           "type": "string"
         },
         "Defined": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
+        "File": {
           "$ref": "#/$defs/machinefile.Origin"
         },
         "From": {
@@ -1224,6 +1236,9 @@
             "null"
           ]
         },
+        "Rule": {
+          "type": "string"
+        },
         "Spec": {
           "$ref": "#/$defs/catalog.MethodSpec"
         },
@@ -1257,8 +1272,10 @@
       },
       "required": [
         "Baked",
+        "Chapter",
         "Chosen",
         "Defined",
+        "File",
         "From",
         "Kind",
         "Lock",
@@ -1270,6 +1287,7 @@
         "Phase",
         "Recorded",
         "Restarts",
+        "Rule",
         "Spec",
         "UpdatesSelf",
         "Values",

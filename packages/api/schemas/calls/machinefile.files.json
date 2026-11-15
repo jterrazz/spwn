@@ -1,0 +1,327 @@
+{
+  "$defs": {
+    "catalog.SystemSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "Arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
+        "OS": {
+          "enum": [
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Arch",
+        "OS",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "machinefile.FileView": {
+      "additionalProperties": false,
+      "properties": {
+        "Apps": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Extends": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Followers": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Follower"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Head": {
+          "$ref": "#/$defs/machinefile.Head"
+        },
+        "Layer": {
+          "enum": [
+            "overlay",
+            "user",
+            "shared",
+            "built-in",
+            "this machine",
+            "catalog",
+            "lock"
+          ],
+          "type": "string"
+        },
+        "Local": {
+          "$ref": "#/$defs/machinefile.Local"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Settings": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Shelf": {
+          "enum": [
+            "yours",
+            "mixin",
+            "shipped"
+          ],
+          "type": "string"
+        },
+        "Text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Apps",
+        "Description",
+        "Extends",
+        "Followers",
+        "Layer",
+        "Name",
+        "Path",
+        "Settings",
+        "Shelf",
+        "Text"
+      ],
+      "type": "object"
+    },
+    "machinefile.Follower": {
+      "additionalProperties": false,
+      "properties": {
+        "Mac": {
+          "type": "string"
+        },
+        "Machine": {
+          "type": "string"
+        },
+        "ThisMac": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Mac",
+        "Machine",
+        "ThisMac"
+      ],
+      "type": "object"
+    },
+    "machinefile.Head": {
+      "additionalProperties": false,
+      "properties": {
+        "Kind": {
+          "enum": [
+            "computer",
+            "workspace",
+            "server"
+          ],
+          "type": "string"
+        },
+        "System": {
+          "$ref": "#/$defs/catalog.SystemSpec"
+        },
+        "VM": {
+          "$ref": "#/$defs/machinefile.HeadVM"
+        }
+      },
+      "required": [
+        "Kind",
+        "System"
+      ],
+      "type": "object"
+    },
+    "machinefile.HeadVM": {
+      "additionalProperties": false,
+      "properties": {
+        "CPUs": {
+          "type": "integer"
+        },
+        "Disk": {
+          "type": "string"
+        },
+        "From": {
+          "type": "string"
+        },
+        "Lifetime": {
+          "enum": [
+            "persistent",
+            "ephemeral"
+          ],
+          "type": "string"
+        },
+        "Memory": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "CPUs",
+        "Disk",
+        "From",
+        "Lifetime",
+        "Memory"
+      ],
+      "type": "object"
+    },
+    "machinefile.Local": {
+      "additionalProperties": false,
+      "properties": {
+        "Accounts": {
+          "type": "boolean"
+        },
+        "AppsAdded": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "AppsRemoved": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Ports": {
+          "type": "boolean"
+        },
+        "SettingsRemoved": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "SettingsSet": {
+          "items": {
+            "$ref": "#/$defs/machinefile.SettingSet"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Accounts",
+        "AppsAdded",
+        "AppsRemoved",
+        "Path",
+        "Ports",
+        "SettingsRemoved",
+        "SettingsSet",
+        "Text"
+      ],
+      "type": "object"
+    },
+    "machinefile.SettingSet": {
+      "additionalProperties": false,
+      "properties": {
+        "Option": {
+          "type": "string"
+        },
+        "Setting": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Option",
+        "Setting",
+        "Value"
+      ],
+      "type": "object"
+    },
+    "machinefile.calls.Files": {
+      "additionalProperties": false,
+      "properties": {
+        "Files": {
+          "items": {
+            "$ref": "#/$defs/machinefile.FileView"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Files"
+      ],
+      "type": "object"
+    },
+    "machinefile.calls.FilesIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machinefile.files.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machinefile.files of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machinefile.calls.FilesIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machinefile.calls.Files"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machinefile.files",
+  "type": "object"
+}

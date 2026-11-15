@@ -567,7 +567,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 		VM: model.VM{
 			Name: r.Name, Image: r.Image, Version: version, Mac: s.thisMac(cfg), Kind: img.Kind, Lifetime: r.Lifetime,
 			State: model.Running, Resources: r.Size, Network: r.Network, IP: ip, Check: model.ShownCheck(r.Check), CreatedAt: rec.CreatedAt,
-			Purpose: r.Purpose, Creator: model.CreatorOf(r.Creator),
+			Purpose: r.Purpose, Creator: model.CreatorOf(r.Creator), Machinefile: r.From,
 		},
 		Ports: reserved,
 		Env:   env,

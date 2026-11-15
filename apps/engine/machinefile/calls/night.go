@@ -10,12 +10,14 @@ import (
 
 type NightlyIn struct{}
 
-// value: the last night the engine's upgrade recorded here, and whether
-// one ran at all.
+// value: the last night the engine's upgrade recorded here, whether one
+// ran at all, and the Machinefile this machine is bound to, the one its
+// nights upgrade.
 
 type Nightly struct {
 	Night machinefile.Night `json:"night"`
 	Ran   bool              `json:"ran"`
+	Bound string            `json:"bound"`
 }
 
 var LastNight = call.Call[Deps, NightlyIn, Nightly]{
@@ -25,6 +27,10 @@ var LastNight = call.Call[Deps, NightlyIn, Nightly]{
 	Name: "machinefile.nightly", Where: call.AtTarget, Applies: machine.Anywhere,
 	Run: func(ctx context.Context, d Deps, _ NightlyIn, _ call.Progress) (Nightly, error) {
 		n, ran, err := d.Ledger.Night(ctx)
-		return Nightly{Night: n, Ran: ran}, err
+		if err != nil {
+			return Nightly{}, err
+		}
+		bound, err := d.Prefs.Bound()
+		return Nightly{Night: n, Ran: ran, Bound: bound}, err
 	},
 }
