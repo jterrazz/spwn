@@ -25,12 +25,13 @@ describe('home', () => {
     });
 
     test('H2 the lines that need me are counted by the verdict and offered above everything else on Home', async () => {
-        // Given - the window on Home over two-macs, where a background task fails
+        // Given - the window on Home over two-macs, where a sign-in is broken and a background task fails
         const result = await website.visit(TWO_MACS, async (visitor) => {
             // When - I open the window
-            // Then - the verdict says the line, and Needs you offers it its one verb
-            await visitor.see(heading('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
-            await visitor.see(heading('Needs you 1'));
+            // Then - the verdict counts the two, and Needs you offers each its one verb
+            await visitor.see(heading('2 things need you.'));
+            await visitor.see(heading('Needs you 2'));
+            await visitor.see(within(needsYou, button('Fix npm')));
             await visitor.see(within(needsYou, button('Remove com.jterrazz.brain.x-snapshot')));
         });
         expect(result.errors.text).toBe('');

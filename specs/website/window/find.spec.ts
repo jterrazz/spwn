@@ -1,4 +1,4 @@
-import { content, dialog, field, focused, heading, region, within } from '@jterrazz/test';
+import { dialog, field, focused, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -10,7 +10,7 @@ describe('find', () => {
     test('A1 ⌘K, a query and Enter open the machine tab it names', async () => {
         // Given - the window on Home over two-macs
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
-            await visitor.see(content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
+            await visitor.see(heading('2 things need you.'));
 
             // When - ⌘K is pressed, then linux-1 activity typed and Enter pressed
             await visitor.press('Control+k');
@@ -28,7 +28,7 @@ describe('find', () => {
     test('A1 two letters and Enter open the machine from the Inbox', async () => {
         // Given - the window on the Inbox over two-macs
         const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
-            await visitor.see(content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
+            await visitor.see(heading('2 things need you.'));
 
             // When - ⌘K is pressed, then li typed and Enter pressed
             await visitor.press('Control+k');
