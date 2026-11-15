@@ -1,10 +1,6 @@
 package pages
 
 import (
-	"time"
-
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 )
@@ -29,7 +25,6 @@ func needsWorlds() []World {
 		home("machines.home.creating", linux4Creating),
 		home("machines.home.born", linux4Ready, linux4Reads),
 		home("machines.home.awake-off", awakeOff),
-		needs("machines.needs.five", sharesEndingSoon),
 		needs("machines.needs.updated", updatesInstalled),
 		needs("machines.needs.catalog-refused", catalogRefused),
 	}
@@ -51,17 +46,6 @@ func linux4Reads(f *Scene) {
 
 func awakeOff(f *Scene) {
 	f.Awake.Session = nil
-}
-
-func sharesEndingSoon(f *Scene) {
-	for i, m := range f.Accounts.Machines {
-		switch m.Name {
-		case "linux-1":
-			f.Accounts.Machines[i].Accounts = []accounts.Account{loan(catalog.ProviderGitHub, "github", 12*time.Minute), loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 12*time.Minute)}
-		case "linux-3":
-			f.Accounts.Machines[i].Accounts = []accounts.Account{loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 12*time.Minute), loan(catalog.ProviderGitHub, "github", 12*time.Minute)}
-		}
-	}
 }
 
 // value: the owner's package file refused: the run reads the built-in packages,

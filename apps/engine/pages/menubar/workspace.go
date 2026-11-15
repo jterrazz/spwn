@@ -32,7 +32,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	p.Header = &page.Header{Back: "All machines", Glyph: workspaceGlyph(vm, mine), Buttons: []string{ActionMenu}}
 	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: workspaceFacts(m, h, vm, label, mine)}}
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage}
-	live, shared, loans := liveAgents(mine), len(workspacePorts(m, vm).Shares), len(sharedAccounts(m, vm.Name))
+	live, shared, grants := liveAgents(mine), len(workspacePorts(m, vm).Shares), grantedOn(m, vm.Name)
 	stop := stopWorkspace(vm, label, live, shared).action(m.Asks, page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
 		Run: &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
 	running := vm.State == model.Running
@@ -43,7 +43,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	if vm.State != model.Running {
 		live = nil
 	}
-	del := deleteWorkspace(vm, live, shared, loans).action(m.Asks, page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 2, Mutates: true,
+	del := deleteWorkspace(vm, live, shared, grants).action(m.Asks, page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 2, Mutates: true,
 		Run: &page.Run{Call: CallDeleteVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
 	p.Actions = []page.Action{stop, del}
 	if running {
@@ -64,9 +64,9 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	shares := workspacePorts(m, vm)
 	p.Sections = append(p.Sections, vmGauges(m, vm), workspacePortsCard(shares), footnote(m, vm, label))
 	p.Sections = append(p.Sections, shares.Sections...)
-	copies := sharedSection(m, h, vm)
-	copies.Segment = SegmentAccounts
-	p.Sections = append(p.Sections, copies)
+	signIns := vmAccountsSection(m, h, vm)
+	signIns.Segment = SegmentAccounts
+	p.Sections = append(p.Sections, signIns)
 	p.Actions = append(p.Actions, agentActions(h, vm, mine)...)
 	p.Actions = append(p.Actions, sharePortSheets(shares.Listeners, []workspace{{VM: vm.Name, Mac: h.Name}}, m.self())...)
 	if n, ok := needsOfVM(m, h, vm, label); ok {
@@ -74,7 +74,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 			p.Actions = append(p.Actions, need.Verb)
 		}
 	}
-	p.Actions = append(p.Actions, takeBacks(m, h, vm)...)
+	p.Actions = append(p.Actions, vmAccountActions(m, h, vm)...)
 	p.Actions = append(p.Actions, shares.Actions...)
 	shell := openIn("--on", vm.Name)
 	shell.Key, shell.Icon, shell.Hud = "cmd+enter", "terminal", opened(vm.Name)

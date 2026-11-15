@@ -585,14 +585,8 @@
       "card": "flush"
     },
     {
-      "id": "accounts:shared",
-      "title": "Lent to VMs",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "0"
-        }
-      ],
+      "id": "accounts:on:",
+      "title": "Accounts",
       "columns": [
         {
           "key": "name",
@@ -607,33 +601,12 @@
       ],
       "items": [
         {
-          "row": {
-            "id": "share-account",
-            "mark": "ok",
-            "label": "Lend an account",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ends by itself"
-              }
-            ],
-            "glyph": {
-              "kind": "symbol:plus",
-              "signal": "active"
-            },
-            "trail": "value",
-            "verb": "share-account"
+          "empty": {
+            "noun": "accounts"
           }
         }
       ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 1
-        }
-      ],
-      "segment": "accounts",
-      "card": "flush"
+      "segment": "accounts"
     }
   ],
   "actions": [
@@ -677,7 +650,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -752,45 +725,6 @@
                   8,
                   12
                 ]
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -893,7 +827,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -968,45 +902,6 @@
                   8,
                   12
                 ]
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -1098,7 +993,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -1173,45 +1068,6 @@
                   8,
                   12
                 ]
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -1308,7 +1164,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -1383,45 +1239,6 @@
                   8,
                   12
                 ]
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -1809,7 +1626,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -1884,45 +1701,6 @@
                   8,
                   12
                 ]
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -2025,7 +1803,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -2100,45 +1878,6 @@
                   8,
                   12
                 ]
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -2539,85 +2278,6 @@
         "target": {
           "name": "jterrazz-mac-mini"
         }
-      }
-    },
-    {
-      "label": "Lend an account",
-      "on": "row",
-      "rows": [
-        "share-account"
-      ],
-      "mutates": true,
-      "id": "share-account",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": ""
-        },
-        "target": {
-          "name": "jterrazz-mac-mini"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "default": "share-account",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 15:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 23:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Tuesday 10 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From mac-mini. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
-          }
-        ]
-      },
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with "
-          }
-        ]
       }
     },
     {

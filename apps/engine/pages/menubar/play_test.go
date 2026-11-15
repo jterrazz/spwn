@@ -9,6 +9,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -49,27 +50,26 @@ func TestAStoppedWorkspaceStartsAndSharesNothing(t *testing.T) {
 	}
 }
 
-// invariant: an account lent to a workspace says what it may do and its
-// time left, never its internal scope (`session:github`).
-func TestASharedAccountSaysNoInternalScope(t *testing.T) {
-	now := time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)
+// invariant: a password granted to a workspace says which password it
+// came from, never an internal scope.
+func TestAGrantedAccountSaysItsPasswordAndNoInternalScope(t *testing.T) {
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
 		{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 	}}}}
-	report := &accounts.Report{Machines: []accounts.Machine{{Name: "linux-1", Accounts: []accounts.Account{
-		{Provider: "github", Scopes: []string{"session:github", "read only"}, Shared: &accounts.Loan{Until: now.Add(4 * time.Hour)}},
-	}}}}
-	p := MachinePage(Machine{Name: "linux-1", All: fleet, Accounts: report, Now: now, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
+	granted := grantedRow(t, catalog.ProviderGitHub, "deploy")
+	granted.Scopes = []string{"session:github"}
+	signIns := &SignIns{Machines: []MachineSignIns{{Name: "linux-1", Mac: "jterrazz-macbook-pro", ThisMac: true, VM: true, Rows: []accounts.ProgramRow{granted}}}}
+	p := MachinePage(Machine{Name: "linux-1", All: fleet, SignIns: signIns, Now: time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC), Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 	for _, s := range p.Sections {
 		if s.ID != SectionShared {
 			continue
 		}
-		if r := s.Items[0].Row; words(r.Detail) != "read only" || r.Left == nil || r.Left.N != int64((4*time.Hour).Seconds()) {
-			t.Fatalf("shared account says %q, %+v left", words(r.Detail), r.Left)
+		if r := s.Items[0].Row; words(r.Detail) != "from the password deploy token" || r.Left != nil {
+			t.Fatalf("granted account says %q, %+v left", words(r.Detail), r.Left)
 		}
 		return
 	}
-	t.Fatal("no shared section")
+	t.Fatal("no accounts section")
 }
 
 // invariant: Home lists a Mac's running workspaces before its stopped ones.

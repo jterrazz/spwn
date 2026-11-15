@@ -332,7 +332,7 @@
     },
     {
       "id": "shared",
-      "title": "Lent to linux-1",
+      "title": "Accounts",
       "caption": [
         {
           "kind": "text",
@@ -354,13 +354,13 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/linux-1/github",
+            "id": "linux-1/gh",
             "mark": "ok",
             "label": "GitHub",
             "cells": [
               {
                 "kind": "text",
-                "text": "linux-1"
+                "text": "granted"
               }
             ],
             "detail": {
@@ -368,7 +368,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "read only"
+                  "text": "from the password GitHub token"
                 }
               ]
             },
@@ -377,75 +377,49 @@
             },
             "mac": "linux-1",
             "menu": [
-              "extend:jterrazz-macbook-pro/linux-1/github",
-              "take-back/github"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 14400,
-              "of": 43200
-            }
+              "remove-grant:linux-1/gh"
+            ]
           }
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/linux-1/claude",
+            "id": "linux-1/claude",
             "mark": "ok",
             "label": "Claude",
             "cells": [
               {
                 "kind": "text",
-                "text": "linux-1"
+                "text": "granted"
               }
             ],
             "detail": {
-              "kind": "text",
-              "text": "Claude Code inference"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "from the password Claude token"
+                }
+              ]
             },
             "glyph": {
               "kind": "account:claude"
             },
             "mac": "linux-1",
             "menu": [
-              "extend:jterrazz-macbook-pro/linux-1/claude",
-              "take-back/claude"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 43200,
-              "of": 43200
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "share-account",
-            "mark": "ok",
-            "label": "Lend an account",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ends by itself"
-              }
-            ],
-            "glyph": {
-              "kind": "symbol:plus",
-              "signal": "active"
-            },
-            "trail": "value",
-            "verb": "share-account"
+              "remove-grant:linux-1/claude"
+            ]
           }
         },
         {
           "note": {
-            "text": "These are This Mac's accounts. Every loan ends by itself."
+            "text": "A grant is a password of This Mac's, and stays until you remove it."
           }
         }
       ],
       "counts": [
         {
           "mark": "ok",
-          "n": 3
+          "n": 2
         }
       ],
       "segment": "accounts",
@@ -844,7 +818,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "This can't be undone. It goes with its disk (20 GB), 2 shared ports and 2 accounts lent to it."
+            "text": "This can't be undone. It goes with its disk (20 GB), 2 shared ports and 2 grants made to it."
           }
         ],
         "danger": true,
@@ -927,81 +901,56 @@
       "sheet": "share-port"
     },
     {
-      "label": "Take back",
+      "label": "Remove",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro/linux-1/github"
+        "linux-1/gh"
       ],
       "confirm": {
-        "question": "Take GitHub back from linux-1?",
-        "lines": [
+        "question": "Remove GitHub? The grant ends here; the token stays yours.",
+        "yes": "Remove"
+      },
+      "mutates": true,
+      "id": "remove-grant:linux-1/gh",
+      "run": {
+        "call": "grants.remove",
+        "in": {
+          "Confirm": "yes",
+          "Entry": "pw-github",
+          "To": "linux-1",
+          "ToKind": "machine"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
           {
             "kind": "text",
-            "text": "linux-1 loses access right away. The GitHub account on This Mac is untouched."
+            "text": "GitHub removed from linux-1"
           }
-        ],
-        "danger": true,
-        "yes": "Take back",
-        "no": "Cancel",
-        "icon": "app"
+        ]
       },
-      "priority": 4,
-      "mutates": true,
-      "id": "take-back/github",
-      "run": {
-        "call": "accounts.take-back",
-        "in": {
-          "Account": "github",
-          "Confirm": "yes",
-          "From": "linux-1"
-        }
-      }
+      "destructive": true
     },
     {
-      "label": "Take back",
+      "label": "Remove",
       "on": "row",
       "rows": [
-        "jterrazz-macbook-pro/linux-1/claude"
+        "linux-1/claude"
       ],
       "confirm": {
-        "question": "Take Claude back from linux-1?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "linux-1 loses access right away. The Claude account on This Mac is untouched."
-          }
-        ],
-        "danger": true,
-        "yes": "Take back",
-        "no": "Cancel",
-        "icon": "app"
+        "question": "Remove Claude? The grant ends here; the token stays yours.",
+        "yes": "Remove"
       },
-      "priority": 4,
       "mutates": true,
-      "id": "take-back/claude",
+      "id": "remove-grant:linux-1/claude",
       "run": {
-        "call": "accounts.take-back",
+        "call": "grants.remove",
         "in": {
-          "Account": "claude",
           "Confirm": "yes",
-          "From": "linux-1"
-        }
-      }
-    },
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "jterrazz-macbook-pro/linux-1/github"
-      ],
-      "mutates": true,
-      "id": "extend:jterrazz-macbook-pro/linux-1/github",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "github",
-          "For": "14400000000000",
-          "With": "linux-1"
+          "Entry": "pw-claude",
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "hud": {
@@ -1009,130 +958,11 @@
         "items": [
           {
             "kind": "text",
-            "text": "GitHub on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "jterrazz-macbook-pro/linux-1/claude"
-      ],
-      "mutates": true,
-      "id": "extend:jterrazz-macbook-pro/linux-1/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
-        }
-      },
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Lend an account",
-      "on": "row",
-      "rows": [
-        "share-account"
-      ],
-      "mutates": true,
-      "id": "share-account",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": "linux-1"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "options": [
-              {
-                "value": "share-account",
-                "label": "linux-1",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              }
-            ],
-            "default": "share-account",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 15:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 23:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Tuesday 10 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From This Mac. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
+            "text": "Claude removed from linux-1"
           }
         ]
       },
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with linux-1"
-          }
-        ]
-      }
+      "destructive": true
     },
     {
       "label": "Open Vite",
@@ -1311,7 +1141,6 @@
         "new-agent",
         "copy-ssh@menu",
         "share-port@menu",
-        "share-account@menu",
         "-",
         "stop@menu",
         "-",
@@ -1380,90 +1209,6 @@
       "sheet": "share-port"
     },
     {
-      "label": "Lend an account",
-      "on": "menu",
-      "mutates": true,
-      "id": "share-account@menu",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": "linux-1"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "options": [
-              {
-                "value": "share-account",
-                "label": "linux-1",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              }
-            ],
-            "default": "share-account",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 15:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 23:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Tuesday 10 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From This Mac. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
-          }
-        ]
-      },
-      "icon": "key",
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with linux-1"
-          }
-        ]
-      }
-    },
-    {
       "label": "Stop",
       "on": "menu",
       "confirm": {
@@ -1498,7 +1243,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "This can't be undone. It goes with its disk (20 GB), 2 shared ports and 2 accounts lent to it."
+            "text": "This can't be undone. It goes with its disk (20 GB), 2 shared ports and 2 grants made to it."
           }
         ],
         "danger": true,

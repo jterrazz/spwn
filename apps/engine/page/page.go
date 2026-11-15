@@ -470,11 +470,11 @@ type Action struct {
 }
 
 const (
-	SheetNewVM        = "new-vm"
-	SheetShareAccount = "share-account"
-	SheetSharePort    = "share-port"
-	SheetCleanup      = "cleanup"
-	SheetHint         = "hint:"
+	SheetNewVM     = "new-vm"
+	SheetGrant     = "grant"
+	SheetSharePort = "share-port"
+	SheetCleanup   = "cleanup"
+	SheetHint      = "hint:"
 )
 
 type Run struct {

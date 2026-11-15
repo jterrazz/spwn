@@ -36,52 +36,6 @@
       ]
     },
     {
-      "id": "needs-you",
-      "title": "Needs you",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "1",
-          "signal": "waits"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "ending:macbook-pro/linux-1/claude",
-            "mark": "attention",
-            "label": "linux-1",
-            "detail": {
-              "kind": "text",
-              "text": "Claude ends in 24 min"
-            },
-            "reason": "expiring",
-            "glyph": {
-              "kind": "symbol:clock",
-              "signal": "waits"
-            },
-            "verb": "ending:macbook-pro/linux-1/claude",
-            "nav": "menubar.machine:linux-1"
-          }
-        }
-      ],
-      "uncounted": true,
-      "segment": "overview",
-      "card": "flush"
-    },
-    {
       "id": "gauges",
       "title": "Gauges",
       "items": [
@@ -214,6 +168,7 @@
               "-",
               "copy-of:linux-1",
               "share-of:linux-1",
+              "grant@linux-1",
               "-",
               "stop@linux-1",
               "-",
@@ -253,6 +208,7 @@
               "-",
               "copy-of:agent-7f",
               "share-of:agent-7f",
+              "grant@agent-7f",
               "-",
               "stop@agent-7f",
               "-",
@@ -429,11 +385,6 @@
                         "kind": "text",
                         "text": "npm needs sign-in",
                         "signal": "waits"
-                      },
-                      {
-                        "kind": "text",
-                        "text": "it cannot be shared until you sign in",
-                        "pri": 1
                       }
                     ]
                   },
@@ -2199,7 +2150,7 @@
       "caption": [
         {
           "kind": "text",
-          "text": "2",
+          "text": "1",
           "signal": "waits"
         }
       ],
@@ -2218,35 +2169,23 @@
       "items": [
         {
           "row": {
-            "id": "short/macbook-pro/linux-1/claude",
-            "mark": "attention",
-            "label": "linux-1",
-            "detail": {
-              "kind": "text",
-              "text": "Claude ends in 24 min"
-            },
-            "reason": "expiring",
-            "glyph": {
-              "kind": "symbol:clock",
-              "signal": "waits"
-            },
-            "verb": "ending:macbook-pro/linux-1/claude"
-          }
-        },
-        {
-          "row": {
             "id": "macbook-pro/npm",
             "mark": "broken",
             "label": "This Mac",
             "detail": {
-              "kind": "text",
-              "text": "npm needs sign-in"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "npm needs sign-in"
+                },
+                {
+                  "kind": "text",
+                  "text": "signed out of registry.npmjs.org"
+                }
+              ]
             },
             "reason": "refused",
-            "hint": {
-              "command": "npm login",
-              "external": true
-            },
             "glyph": {
               "kind": "symbol:key",
               "signal": "waits"
@@ -2260,8 +2199,8 @@
       "card": "flush"
     },
     {
-      "id": "accounts:shared",
-      "title": "Lent to VMs",
+      "id": "accounts:on:macbook-pro",
+      "title": "On This Mac",
       "caption": [
         {
           "kind": "text",
@@ -2283,121 +2222,7 @@
       "items": [
         {
           "row": {
-            "id": "macbook-pro/linux-1/claude",
-            "mark": "attention",
-            "label": "Claude",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "linux-1"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "Claude Code inference"
-            },
-            "reason": "expiring",
-            "glyph": {
-              "kind": "account:claude"
-            },
-            "mac": "linux-1",
-            "menu": [
-              "extend:macbook-pro/linux-1/claude"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 1440,
-              "of": 43200
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "macbook-pro/linux-1/github",
-            "mark": "ok",
-            "label": "GitHub",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "linux-1"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "GitHub browser session"
-            },
-            "glyph": {
-              "kind": "account:github"
-            },
-            "mac": "linux-1",
-            "menu": [
-              "extend:macbook-pro/linux-1/github"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 14400,
-              "of": 43200
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "share-account",
-            "mark": "ok",
-            "label": "Lend an account",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ends by itself"
-              }
-            ],
-            "glyph": {
-              "kind": "symbol:plus",
-              "signal": "active"
-            },
-            "trail": "value",
-            "verb": "share-account"
-          }
-        }
-      ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 2
-        },
-        {
-          "mark": "attention",
-          "n": 1
-        }
-      ],
-      "segment": "accounts",
-      "card": "flush"
-    },
-    {
-      "id": "accounts:signed-in:macbook-pro",
-      "title": "Signed in on This Mac",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "2"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "macbook-pro/github",
+            "id": "macbook-pro/gh",
             "mark": "ok",
             "label": "GitHub",
             "detail": {
@@ -2428,7 +2253,11 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "Max plan"
+                  "text": "admin@jterrazz.com"
+                },
+                {
+                  "kind": "text",
+                  "text": "max"
                 }
               ]
             },
@@ -2446,40 +2275,99 @@
       ],
       "segment": "accounts",
       "card": "flush"
+    },
+    {
+      "id": "accounts:on:linux-1",
+      "title": "On linux-1",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1/claude",
+            "mark": "ok",
+            "label": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "granted"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "from the password Claude token"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:claude"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "remove-grant:linux-1/claude"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1/gh",
+            "mark": "ok",
+            "label": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "granted"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "from the password GitHub token"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:github"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "remove-grant:linux-1/gh"
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ],
+      "segment": "accounts",
+      "card": "flush"
     }
   ],
   "actions": [
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "ending:macbook-pro/linux-1/claude"
-      ],
-      "mutates": true,
-      "id": "ending:macbook-pro/linux-1/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
-        }
-      },
-      "default": true,
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
     {
       "label": "How to",
       "on": "row",
@@ -2607,7 +2495,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -2684,56 +2572,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect",
-                    "options": [
-                      {
-                        "value": "github",
-                        "label": "GitHub"
-                      },
-                      {
-                        "value": "claude",
-                        "label": "Claude"
-                      }
-                    ],
-                    "default": "github,claude"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -2840,7 +2678,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -2917,56 +2755,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect",
-                    "options": [
-                      {
-                        "value": "github",
-                        "label": "GitHub"
-                      },
-                      {
-                        "value": "claude",
-                        "label": "Claude"
-                      }
-                    ],
-                    "default": "github,claude"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -3068,7 +2856,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -3145,56 +2933,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect",
-                    "options": [
-                      {
-                        "value": "github",
-                        "label": "GitHub"
-                      },
-                      {
-                        "value": "claude",
-                        "label": "Claude"
-                      }
-                    ],
-                    "default": "github,claude"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -3301,7 +3039,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -3378,56 +3116,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect",
-                    "options": [
-                      {
-                        "value": "github",
-                        "label": "GitHub"
-                      },
-                      {
-                        "value": "claude",
-                        "label": "Claude"
-                      }
-                    ],
-                    "default": "github,claude"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -3851,7 +3539,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -3928,45 +3616,6 @@
                 ],
                 "limit": 24,
                 "limit_note": "Over 24 GB would squeeze mac-mini"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -4079,7 +3728,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -4156,45 +3805,6 @@
                 ],
                 "limit": 24,
                 "limit_note": "Over 24 GB would squeeze mac-mini"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -4937,37 +4547,6 @@
       }
     },
     {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "short/macbook-pro/linux-1/claude"
-      ],
-      "mutates": true,
-      "id": "ending:macbook-pro/linux-1/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
-        }
-      },
-      "default": true,
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
-    {
       "label": "Sign in",
       "on": "row",
       "rows": [
@@ -4991,25 +4570,30 @@
           },
           {
             "kind": "text",
-            "text": "npm login on This Mac"
+            "text": "station accounts on This Mac"
           }
         ]
       }
     },
     {
-      "label": "Extend",
+      "label": "Remove",
       "on": "row",
       "rows": [
-        "macbook-pro/linux-1/claude"
+        "linux-1/claude"
       ],
+      "confirm": {
+        "question": "Remove Claude? The grant ends here; the token stays yours.",
+        "yes": "Remove"
+      },
       "mutates": true,
-      "id": "extend:macbook-pro/linux-1/claude",
+      "id": "remove-grant:linux-1/claude",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.remove",
         "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
+          "Confirm": "yes",
+          "Entry": "pw-claude",
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "hud": {
@@ -5017,29 +4601,31 @@
         "items": [
           {
             "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
+            "text": "Claude removed from linux-1"
           }
         ]
-      }
+      },
+      "destructive": true
     },
     {
-      "label": "Extend",
+      "label": "Remove",
       "on": "row",
       "rows": [
-        "macbook-pro/linux-1/github"
+        "linux-1/gh"
       ],
+      "confirm": {
+        "question": "Remove GitHub? The grant ends here; the token stays yours.",
+        "yes": "Remove"
+      },
       "mutates": true,
-      "id": "extend:macbook-pro/linux-1/github",
+      "id": "remove-grant:linux-1/gh",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.remove",
         "in": {
-          "Account": "github",
-          "For": "14400000000000",
-          "With": "linux-1"
+          "Confirm": "yes",
+          "Entry": "pw-github",
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "hud": {
@@ -5047,31 +4633,29 @@
         "items": [
           {
             "kind": "text",
-            "text": "GitHub on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
+            "text": "GitHub removed from linux-1"
           }
         ]
-      }
+      },
+      "destructive": true
     },
     {
-      "label": "Lend an account",
+      "label": "Grant a password",
       "on": "row",
       "rows": [
-        "share-account"
+        "grant-password"
       ],
       "mutates": true,
-      "id": "share-account",
+      "id": "grant",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "With": "linux-1"
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account",
+        "title": "Grant a password",
         "fields": [
           {
             "key": "To",
@@ -5079,112 +4663,88 @@
             "kind": "select",
             "options": [
               {
-                "value": "share-account:linux-1",
+                "value": "grant:linux-1",
                 "label": "linux-1",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               },
               {
-                "value": "share-account:agent-7f",
+                "value": "grant:agent-7f",
                 "label": "agent-7f",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               }
             ],
-            "default": "share-account:linux-1",
+            "default": "grant:linux-1",
             "swaps": true
           },
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "pick",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Granted already; granting again replaces it",
                 "glyph": {
                   "kind": "account:github"
                 }
               },
               {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Granted already; granting again replaces it",
                 "glyph": {
                   "kind": "account:claude"
                 }
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself.",
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
         "primary": [
           {
             "when": {
-              "key": "Account",
+              "key": "Entry",
               "set": true
             },
-            "label": "Lend {Account} for {For}"
+            "label": "Grant {Entry}"
           }
         ]
       },
-      "sheet": "share-account",
+      "sheet": "grant",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Shared {Account} with linux-1"
+            "text": "Granted {Entry} to linux-1"
           }
         ]
       }
     },
     {
-      "label": "Lend an account",
+      "label": "Grant a password",
       "on": "row",
       "rows": [
-        "share-account"
+        "grant-password"
       ],
       "mutates": true,
-      "id": "share-account:linux-1",
+      "id": "grant:linux-1",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "With": "linux-1"
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account",
+        "title": "Grant a password",
         "fields": [
           {
             "key": "To",
@@ -5192,112 +4752,88 @@
             "kind": "select",
             "options": [
               {
-                "value": "share-account:linux-1",
+                "value": "grant:linux-1",
                 "label": "linux-1",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               },
               {
-                "value": "share-account:agent-7f",
+                "value": "grant:agent-7f",
                 "label": "agent-7f",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               }
             ],
-            "default": "share-account:linux-1",
+            "default": "grant:linux-1",
             "swaps": true
           },
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "pick",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Granted already; granting again replaces it",
                 "glyph": {
                   "kind": "account:github"
                 }
               },
               {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Granted already; granting again replaces it",
                 "glyph": {
                   "kind": "account:claude"
                 }
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself.",
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
         "primary": [
           {
             "when": {
-              "key": "Account",
+              "key": "Entry",
               "set": true
             },
-            "label": "Lend {Account} for {For}"
+            "label": "Grant {Entry}"
           }
         ]
       },
-      "sheet": "share-account",
+      "sheet": "grant",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Shared {Account} with linux-1"
+            "text": "Granted {Entry} to linux-1"
           }
         ]
       }
     },
     {
-      "label": "Lend an account",
+      "label": "Grant a password",
       "on": "row",
       "rows": [
-        "share-account"
+        "grant-password"
       ],
       "mutates": true,
-      "id": "share-account:agent-7f",
+      "id": "grant:agent-7f",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "With": "agent-7f"
+          "To": "agent-7f",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account",
+        "title": "Grant a password",
         "fields": [
           {
             "key": "To",
@@ -5305,92 +4841,67 @@
             "kind": "select",
             "options": [
               {
-                "value": "share-account:linux-1",
+                "value": "grant:linux-1",
                 "label": "linux-1",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               },
               {
-                "value": "share-account:agent-7f",
+                "value": "grant:agent-7f",
                 "label": "agent-7f",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               }
             ],
-            "default": "share-account:agent-7f",
+            "default": "grant:agent-7f",
             "swaps": true
           },
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "pick",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Signed out here",
                 "glyph": {
                   "kind": "account:github"
                 }
               },
               {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Signed out here",
                 "glyph": {
                   "kind": "account:claude"
                 }
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself.",
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
         "primary": [
           {
             "when": {
-              "key": "Account",
+              "key": "Entry",
               "set": true
             },
-            "label": "Lend {Account} for {For}"
+            "label": "Grant {Entry}"
           }
         ]
       },
-      "sheet": "share-account",
+      "sheet": "grant",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Shared {Account} with agent-7f"
+            "text": "Granted {Entry} to agent-7f"
           }
         ]
       }
@@ -5636,18 +5147,29 @@
       "sheet": "share-port"
     },
     {
-      "label": "An account",
+      "label": "Share",
+      "on": "menu",
+      "id": "share-of:linux-1",
+      "icon": "square.and.arrow.up",
+      "submenu": [
+        "qr:linux-1:5173@linux-1",
+        "share-port@linux-1"
+      ]
+    },
+    {
+      "label": "Grant a password",
       "on": "menu",
       "mutates": true,
-      "id": "share-account@linux-1",
+      "id": "grant@linux-1",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "With": "linux-1"
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account",
+        "title": "Grant a password",
         "fields": [
           {
             "key": "To",
@@ -5655,99 +5177,64 @@
             "kind": "select",
             "options": [
               {
-                "value": "share-account",
+                "value": "grant",
                 "label": "linux-1",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               }
             ],
-            "default": "share-account",
+            "default": "grant",
             "swaps": true
           },
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "pick",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Granted already; granting again replaces it",
                 "glyph": {
                   "kind": "account:github"
                 }
               },
               {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Granted already; granting again replaces it",
                 "glyph": {
                   "kind": "account:claude"
                 }
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself.",
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
         "primary": [
           {
             "when": {
-              "key": "Account",
+              "key": "Entry",
               "set": true
             },
-            "label": "Lend {Account} for {For}"
+            "label": "Grant {Entry}"
           }
         ]
       },
       "icon": "key",
-      "sheet": "share-account",
+      "sheet": "grant",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Shared {Account} with linux-1"
+            "text": "Granted {Entry} to linux-1"
           }
         ]
       }
-    },
-    {
-      "label": "Share",
-      "on": "menu",
-      "id": "share-of:linux-1",
-      "icon": "square.and.arrow.up",
-      "submenu": [
-        "qr:linux-1:5173@linux-1",
-        "share-port@linux-1",
-        "share-account@linux-1"
-      ]
     },
     {
       "label": "Stop",
@@ -5784,7 +5271,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-1 stops first. This can't be undone. It goes with its disk (40 GB), 2 shared ports and 2 accounts lent to it."
+            "text": "Its agent linux-1 stops first. This can't be undone. It goes with its disk (40 GB), 2 shared ports and 2 grants made to it."
           }
         ],
         "danger": true,
@@ -5907,18 +5394,28 @@
       "sheet": "share-port"
     },
     {
-      "label": "An account",
+      "label": "Share",
+      "on": "menu",
+      "id": "share-of:agent-7f",
+      "icon": "square.and.arrow.up",
+      "submenu": [
+        "share-port@agent-7f"
+      ]
+    },
+    {
+      "label": "Grant a password",
       "on": "menu",
       "mutates": true,
-      "id": "share-account@agent-7f",
+      "id": "grant@agent-7f",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "With": "agent-7f"
+          "To": "agent-7f",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account",
+        "title": "Grant a password",
         "fields": [
           {
             "key": "To",
@@ -5926,98 +5423,64 @@
             "kind": "select",
             "options": [
               {
-                "value": "share-account",
+                "value": "grant",
                 "label": "agent-7f",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               }
             ],
-            "default": "share-account",
+            "default": "grant",
             "swaps": true
           },
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "pick",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Signed out here",
                 "glyph": {
                   "kind": "account:github"
                 }
               },
               {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Signed out here",
                 "glyph": {
                   "kind": "account:claude"
                 }
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself.",
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
         "primary": [
           {
             "when": {
-              "key": "Account",
+              "key": "Entry",
               "set": true
             },
-            "label": "Lend {Account} for {For}"
+            "label": "Grant {Entry}"
           }
         ]
       },
       "icon": "key",
-      "sheet": "share-account",
+      "sheet": "grant",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Shared {Account} with agent-7f"
+            "text": "Granted {Entry} to agent-7f"
           }
         ]
       }
-    },
-    {
-      "label": "Share",
-      "on": "menu",
-      "id": "share-of:agent-7f",
-      "icon": "square.and.arrow.up",
-      "submenu": [
-        "share-port@agent-7f",
-        "share-account@agent-7f"
-      ]
     },
     {
       "label": "Stop",

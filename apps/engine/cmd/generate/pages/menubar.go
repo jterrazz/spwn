@@ -178,11 +178,12 @@ func linux1Page() pagemenubar.Machine {
 		{Section: "settings", Parts: []overview.Part{overview.Count(catalog.StateDegraded, 2, "need a look", "attention")}},
 		{Section: "disk", Parts: []overview.Part{{Word: "2.4 of 20 GB"}}},
 	}}
-	shares := accounts.Report{Now: keepAwakeNow, Engine: accounts.EngineRunning, Machines: []accounts.Machine{{Name: "linux-1", Kind: accounts.KindVM, Lifetime: "ephemeral", Running: true, Accounts: []accounts.Account{
-		{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Origin: accounts.OriginShared, Scopes: []string{"read only"}, Shared: &accounts.Loan{Name: "github", At: keepAwakeNow.Add(-8 * time.Hour), Until: keepAwakeNow.Add(4 * time.Hour)}},
-		{Provider: catalog.ProviderClaude, State: catalog.StateOK, Origin: accounts.OriginShared, Shared: &accounts.Loan{Name: catalog.ClaudeTokenName, At: keepAwakeNow, Until: keepAwakeNow.Add(12 * time.Hour)}},
-	}}}}
-	return pagemenubar.Machine{Asks: Levels, Name: "linux-1", All: &f, Summary: &inside, Samples: readings(4*gb, 20_000_000_000, 17_600_000_000), Ports: &svc, Accounts: &shares, Now: keepAwakeNow}
+	granted := func(provider string) accounts.ProgramRow {
+		program, _ := programOf(provider)
+		return accounts.Describe(accounts.Facts{Program: program, State: accounts.ProgramSignedIn, How: accounts.HowGranted, Entry: entryID(provider), EntryLabel: entryLabel(program)}, accounts.Where{Kind: coremachine.Workspace})
+	}
+	signIns := pagemenubar.SignIns{Machines: []pagemenubar.MachineSignIns{{Name: "linux-1", Mac: thisMacName, ThisMac: true, VM: true, Rows: []accounts.ProgramRow{granted(catalog.ProviderGitHub), granted(catalog.ProviderClaude)}}}}
+	return pagemenubar.Machine{Asks: Levels, Name: "linux-1", All: &f, Summary: &inside, Samples: readings(4*gb, 20_000_000_000, 17_600_000_000), Ports: &svc, SignIns: &signIns, Now: keepAwakeNow}
 }
 
 // value: infra's page from This Mac: up 12 days, its four health steps

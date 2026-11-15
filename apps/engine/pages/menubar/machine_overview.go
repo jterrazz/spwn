@@ -45,7 +45,7 @@ func overviewOf(m Machine, h model.MacView, label string, stale bool) macOvervie
 			o.self = mac.Name
 		}
 	}
-	r := NeedsReading{Now: m.Now, Zone: m.Zone, All: m.All, Ports: m.Ports, Accounts: m.Shares, Asks: m.Asks}
+	r := NeedsReading{Now: m.Now, Zone: m.Zone, All: m.All, Ports: m.Ports, Asks: m.Asks}
 	if m.Summary != nil {
 		r.Overviews = []overview.Summary{*m.Summary}
 	}
@@ -77,7 +77,7 @@ func overviewActions(m Machine, h model.MacView, label string) []page.Action {
 	for _, n := range append(o.needs, o.upkeep...) {
 		out = append(out, n.Verb)
 	}
-	out = append(out, newVMSheets(m.All, m.Shares, o.self, h.Name, false)...)
+	out = append(out, newVMSheets(m.All, o.self, h.Name, false)...)
 	for _, vm := range h.VMs {
 		if vm.State == model.Running || vm.State == model.Creating {
 			out = append(out, attach(h, vm))

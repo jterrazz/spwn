@@ -24,15 +24,11 @@ const (
 
 	VerbReview  = "Review"
 	VerbRestart = "Restart"
-	VerbExtend  = "Extend"
 	VerbHowTo   = "How to"
 	VerbSignIn  = "Sign in"
 	VerbShow    = "Show"
 	VerbUpdate  = "Update"
 	VerbCopyFix = "Copy fix"
-
-	CallShareAccount = "accounts.share"
-	extendBy         = 4 * time.Hour
 )
 
 type NeedsReading struct {
@@ -40,8 +36,7 @@ type NeedsReading struct {
 	Zone *time.Location
 	All  *model.AllMachines
 	// value: each part nil is still being read, or did not answer.
-	Ports    *ports.AllMachines
-	Accounts *accounts.AllMachines
+	Ports *ports.AllMachines
 	// value: each answering Mac's Overview, This Mac's first.
 	Overviews []overview.Summary
 	// value: the level each gesture asks at, the calls' own rule; nil asks nothing.
@@ -84,10 +79,10 @@ func (n Need) of(name string) bool {
 
 func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 	// invariant: SPEC B5.7: what needs the owner, ranked by finding.Rank (a
-	// server down, a port exposed, an agent waiting on the owner, a share
-	// ending under 30 min, soonest first), and upkeep apart, ranked by
-	// finding.RankUpkeep, never in the badge. Two reds are two needs. A
-	// server restarting is not one, even while it is still stopped.
+	// server down, a port exposed, an agent waiting on the owner), and
+	// upkeep apart, ranked by finding.RankUpkeep, never in the badge. Two
+	// reds are two needs. A server restarting is not one, even while it is
+	// still stopped.
 	w := needSaid{r: r, self: self}
 	if r.All != nil {
 		for _, h := range r.All.Macs {
@@ -108,13 +103,6 @@ func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 				if p.Red() {
 					needs = append(needs, w.exposed(h.Name, p))
 				}
-			}
-		}
-	}
-	if r.Accounts != nil {
-		for _, c := range r.Accounts.Read().Shared {
-			if c.Short {
-				needs = append(needs, w.ending(c))
 			}
 		}
 	}
@@ -204,25 +192,6 @@ func (w needSaid) exposed(mac string, p ports.Port) Need {
 	}
 }
 
-func (w needSaid) ending(c accounts.SharedCopy) Need {
-	account := accounts.Label(c.Provider)
-	in := "ends in " + minutes(c.Left)
-	key := "ending:" + c.Mac + "/" + c.VM + "/" + c.Provider
-	run := &page.Run{Call: CallShareAccount, In: map[string]string{"Account": c.Provider, "With": c.VM, "For": strconv.FormatInt(int64(extendBy), 10)}}
-	if c.Mac != w.self {
-		run.Target = &page.Target{Name: c.Mac}
-	}
-	return Need{
-		Finding: finding.Finding{Machine: machine.Ref{Name: c.VM, On: c.Mac}, Section: section.Accounts, Severity: finding.NeedsALook, Urgency: finding.Expiring, Ends: w.r.Now.Add(c.Left), Subject: c.Provider},
-		Key:     key, Glyph: symbol("clock", page.SignalWaits), Hero: account + " on " + c.VM + " " + in, Subject: c.VM, What: account + " " + in,
-		Find:  []string{VerbExtend + " " + account + " on " + c.VM},
-		Facts: []page.Value{page.Text("shared from " + w.mac(c.Mac)), page.Text("ends " + w.at(w.r.Now.Add(c.Left)))},
-		Nav:   machinePage(c.VM), Scope: []string{c.Mac, c.VM},
-		Verb: page.Action{ID: key, Label: VerbExtend, On: page.OnRow, Rows: []string{key}, Mutates: true, Default: true, Run: run,
-			Hud: hud(account+" on "+c.VM, minutes(extendBy)+" left")},
-	}
-}
-
 func (w needSaid) upkeep(s overview.Summary) []Need {
 	// invariant: SPEC B5.7, B5.18: a Mac's upkeep is its Overview's findings
 	// that block nothing: a setting, a background task, a sign-in, its
@@ -262,7 +231,6 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 			row(account+" needs sign-in on "+label, account+" needs sign-in", VerbSignIn)
 			item.Find = []string{VerbSignIn + " to " + account + " on " + label}
 			item.Glyph = symbol("key", page.SignalWaits)
-			item.Detail = []string{"it cannot be shared until you sign in"}
 			item.Verb.Run = &page.Run{Terminal: true, Argv: onMac([]string{"accounts"}, mac, w.self)}
 		case section.Background:
 			title, what := "A login item failed on "+label, "1 login item failed"

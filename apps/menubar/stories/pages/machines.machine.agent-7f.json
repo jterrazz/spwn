@@ -297,7 +297,7 @@
     },
     {
       "id": "shared",
-      "title": "Lent to agent-7f",
+      "title": "Accounts",
       "caption": [
         {
           "kind": "text",
@@ -320,18 +320,18 @@
         {
           "empty": {
             "noun": "accounts",
-            "text": "No account lent to agent-7f"
+            "text": "No sign-in on agent-7f"
           }
         },
         {
           "row": {
-            "id": "share-account",
+            "id": "grant-password",
             "mark": "ok",
-            "label": "Lend an account",
+            "label": "Grant a password",
             "cells": [
               {
                 "kind": "text",
-                "text": "ends by itself"
+                "text": "until you remove it"
               }
             ],
             "glyph": {
@@ -339,12 +339,12 @@
               "signal": "active"
             },
             "trail": "value",
-            "verb": "share-account"
+            "verb": "grant"
           }
         },
         {
           "note": {
-            "text": "These are This Mac's accounts. Every loan ends by itself."
+            "text": "A grant is a password of This Mac's, and stays until you remove it."
           }
         }
       ],
@@ -1925,21 +1925,22 @@
       "sheet": "share-port"
     },
     {
-      "label": "Lend an account",
+      "label": "Grant a password",
       "on": "row",
       "rows": [
-        "share-account"
+        "grant-password"
       ],
       "mutates": true,
-      "id": "share-account",
+      "id": "grant",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "With": "agent-7f"
+          "To": "agent-7f",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account",
+        "title": "Grant a password",
         "fields": [
           {
             "key": "To",
@@ -1947,84 +1948,60 @@
             "kind": "select",
             "options": [
               {
-                "value": "share-account",
+                "value": "grant",
                 "label": "agent-7f",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               }
             ],
-            "default": "share-account",
+            "default": "grant",
             "swaps": true
           },
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "pick",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Signed out here",
                 "glyph": {
                   "kind": "account:github"
                 }
               },
               {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Signed out here",
                 "glyph": {
                   "kind": "account:claude"
                 }
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself.",
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
         "primary": [
           {
             "when": {
-              "key": "Account",
+              "key": "Entry",
               "set": true
             },
-            "label": "Lend {Account} for {For}"
+            "label": "Grant {Entry}"
           }
         ]
       },
-      "sheet": "share-account",
+      "sheet": "grant",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Shared {Account} with agent-7f"
+            "text": "Granted {Entry} to agent-7f"
           }
         ]
       }
@@ -2107,7 +2084,7 @@
         "new-agent",
         "copy-ssh@menu",
         "share-port@menu",
-        "share-account@menu",
+        "grant@menu",
         "-",
         "stop@menu",
         "-",
@@ -2186,18 +2163,19 @@
       "sheet": "share-port"
     },
     {
-      "label": "Lend an account",
+      "label": "Grant a password",
       "on": "menu",
       "mutates": true,
-      "id": "share-account@menu",
+      "id": "grant@menu",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "With": "agent-7f"
+          "To": "agent-7f",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account",
+        "title": "Grant a password",
         "fields": [
           {
             "key": "To",
@@ -2205,85 +2183,61 @@
             "kind": "select",
             "options": [
               {
-                "value": "share-account",
+                "value": "grant",
                 "label": "agent-7f",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               }
             ],
-            "default": "share-account",
+            "default": "grant",
             "swaps": true
           },
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "pick",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Signed out here",
                 "glyph": {
                   "kind": "account:github"
                 }
               },
               {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Signed out here",
                 "glyph": {
                   "kind": "account:claude"
                 }
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself.",
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
         "primary": [
           {
             "when": {
-              "key": "Account",
+              "key": "Entry",
               "set": true
             },
-            "label": "Lend {Account} for {For}"
+            "label": "Grant {Entry}"
           }
         ]
       },
       "icon": "key",
-      "sheet": "share-account",
+      "sheet": "grant",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Shared {Account} with agent-7f"
+            "text": "Granted {Entry} to agent-7f"
           }
         ]
       }

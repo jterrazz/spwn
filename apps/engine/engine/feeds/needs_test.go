@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -24,10 +23,10 @@ func watchNeeds(t *testing.T, w *world, subject string) page.Page {
 }
 
 // invariant: SPEC B5.7: the needs page is read from the fleet, every Mac's
-// accounts and Overview, each through its own engine: infra down on
-// mac-mini comes first, then linux-1 waiting on This Mac, then the copy of
-// Claude ending; This Mac's updates are upkeep; a Mac that does not answer
-// is asked nothing.
+// ports and Overview, each through its own engine: infra down on
+// mac-mini comes first, then linux-1 waiting on This Mac; This Mac's updates
+// are upkeep; a Mac that does not answer is asked nothing, and no sign-in is
+// read at all.
 func TestTheNeedsPageReadsEveryMacThroughItsEngineAndRanksWhatNeedsYou(t *testing.T) {
 	w := twoMacsSignedIn()
 	w.infra = []machines.VM{infraAt(machines.Stopped, 5)}
@@ -40,16 +39,17 @@ func TestTheNeedsPageReadsEveryMacThroughItsEngineAndRanksWhatNeedsYou(t *testin
 	if p.Error != nil {
 		t.Fatalf("the needs page failed: %s", p.Error.Message)
 	}
-	if got, want := rowIDs(p, pagemenubar.SectionNeeds), []string{"down:infra", "waiting:linux-1", "ending:" + thisMac + "/linux-1/" + catalog.ProviderClaude}; !slices.Equal(got, want) {
+	if got, want := rowIDs(p, pagemenubar.SectionNeeds), []string{"down:infra", "waiting:linux-1"}; !slices.Equal(got, want) {
 		t.Errorf("needs %v, want %v", got, want)
 	}
 	if got := rowIDs(p, pagemenubar.SectionUpkeep); len(got) != 1 {
 		t.Errorf("upkeep %v, want This Mac's updates alone", got)
 	}
-	for _, read := range []string{accountscalls.Read.Name, overviewcalls.Read.Name} {
-		if got := w.askedOf(read); !slices.Equal(got, []string{thisMac, mini}) {
-			t.Errorf("%s asked %v, want This Mac then mac-mini, never the silent air", read, got)
-		}
+	if got := w.askedOf(overviewcalls.Read.Name); !slices.Equal(got, []string{thisMac, mini}) {
+		t.Errorf("%s asked %v, want This Mac then mac-mini, never the silent air", overviewcalls.Read.Name, got)
+	}
+	if got := w.askedOf(accountscalls.Programs.Name); len(got) != 0 {
+		t.Errorf("the needs page read sign-ins on %v, want none", got)
 	}
 
 	scoped := watchNeeds(t, w, "mac-mini")

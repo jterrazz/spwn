@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/agents"
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
@@ -28,8 +27,7 @@ func homeWorlds() []World {
 		home("machines.home.recovered", infraRecovered),
 		home("machines.home.exposed", airPlayExposed),
 		home("machines.home.down-exposed", infraDown, airPlayExposed),
-		home("machines.home.one-wait", sharesLong),
-		home("machines.home.share-ending", reviewMerged),
+		home("machines.home.merged", reviewMerged),
 		home("machines.home.many", manyNeeds),
 		home("machines.home.fine", nothingNeedsYou),
 		home("machines.home.empty", thisMacAlone),
@@ -74,16 +72,6 @@ func airPlayExposed(f *Scene) {
 	pro.Ports = append(pro.Ports, ports.Port{Machine: coremachine.Ref{Name: proName}, Port: 5000, Process: "ControlCenter", Binds: []string{"0.0.0.0"}, Reach: ports.Outside, Answer: ports.Answers})
 }
 
-func sharesLong(f *Scene) {
-	for i, m := range f.Accounts.Machines {
-		for j, a := range m.Accounts {
-			if a.Shared != nil {
-				f.Accounts.Machines[i].Accounts[j] = loan(a.Provider, a.Shared.Name, 6*time.Hour)
-			}
-		}
-	}
-}
-
 func reviewMerged(f *Scene) {
 	bot := &f.All.Macs[1].VMs[2]
 	bot.Agent = &model.AgentView{State: model.AgentFinished, Task: bot.Agent.Task, Ended: storyNow.Add(-3 * time.Minute), Reason: "merged PR #42"}
@@ -94,14 +82,6 @@ func reviewMerged(f *Scene) {
 func manyNeeds(f *Scene) {
 	linux3 := &f.All.Macs[1].VMs[1]
 	linux3.Agent = &model.AgentView{State: "waiting", Task: linux3.Agent.Task, Ask: "asks which token store to use", Since: storyNow.Add(-2 * time.Minute)}
-	for i, m := range f.Accounts.Machines {
-		switch m.Name {
-		case "linux-3":
-			f.Accounts.Machines[i].Accounts[0] = loan(catalog.ProviderGitHub, "github", 12*time.Minute)
-		case "review-bot":
-			f.Accounts.Machines[i].Accounts[0] = loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 17*time.Minute)
-		}
-	}
 }
 
 func miniSilent(f *Scene) {

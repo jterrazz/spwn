@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -50,8 +49,8 @@ type Reading struct {
 	Macs []awake.Report
 	// value: every other Mac's Overview, as its engine reports it.
 	Away []overview.Summary
-	// value: every Mac's copies shared with its VMs, for the leases ending.
-	Accounts *accounts.AllMachines
+	// value: every machine's sign-ins and grants, and This Mac's vault.
+	SignIns *SignIns
 	// value: the fleet's agents by their own names, which Clean up forgets;
 	// nil until read.
 	Agents []agents.Agent
@@ -70,7 +69,7 @@ func Page(r Reading, thisMac page.Context) page.Page {
 	tree := Tree(r.All, r.Ports, homeLine(r))
 	markMacs(&tree, r)
 	p.Sections = []page.Section{needs, tree}
-	p.Actions = append(append(newVMSheets(r.All, r.Accounts, thisMac.Machine, roomiest(r.All, thisMac.Machine), true), openStation(), stopAll(r)), updateAll(needs, r.Home)...)
+	p.Actions = append(append(newVMSheets(r.All, thisMac.Machine, roomiest(r.All, thisMac.Machine), true), openStation(), stopAll(r)), updateAll(needs, r.Home)...)
 	ranked, upkeep := needsOf(r.needsReading(), thisMac.Machine)
 	if top, stale, ok := hero(r, thisMac.Machine, ranked); ok {
 		sections, actions := homeSections(r, thisMac.Machine, upkeep)
@@ -477,7 +476,6 @@ const (
 	CallDeleteVM  = "machines.delete"
 	CallRestartVM = "machines.restart"
 	CallSharePort = "ports.share"
-	CallTakeBack  = "accounts.take-back"
 )
 
 func gigabytes(n int64) string { return strconv.FormatInt(n<<30, 10) }

@@ -94,7 +94,7 @@ func Find(r FindReading, thisMac page.Context) page.Page {
 	if verbs := f.verbs(&p); len(verbs.Items) > 0 {
 		p.Sections = append(p.Sections, verbs)
 	}
-	for _, a := range newVMSheets(r.All, r.Accounts, f.self, "", false) {
+	for _, a := range newVMSheets(r.All, f.self, "", false) {
 		if !slices.ContainsFunc(p.Actions, func(b page.Action) bool { return b.ID == a.ID }) {
 			p.Actions = append(p.Actions, a)
 		}
@@ -147,7 +147,7 @@ func (f finder) needs() []entry {
 	// titled by its verb first ("Restart infra", "Review review-bot"), the
 	// rest of its title the list of its detail ("PR #42 is ready"), else
 	// its detail what Needs you says of it; upkeep is not Find's.
-	r := NeedsReading{Now: f.r.Now, Zone: f.r.Zone, All: f.r.All, Ports: f.r.Ports, Accounts: f.r.Accounts, Asks: f.r.Asks}
+	r := NeedsReading{Now: f.r.Now, Zone: f.r.Zone, All: f.r.All, Ports: f.r.Ports, Asks: f.r.Asks}
 	if f.r.Home != nil {
 		r.Overviews = append([]overview.Summary{*f.r.Home}, f.r.Away...)
 	}
@@ -376,7 +376,7 @@ func (f finder) sections() []entry {
 	}{
 		{"needs", "Needs you", "", "exclamationmark.circle", "", NeedsID, []string{"needs", "upkeep", "updates"}},
 		{"ports", "Ports", "All machines", "network", "cmd+p", PortsID, []string{"ports", "every", "machines"}},
-		{"accounts", "Accounts", "All machines", "key", "cmd+u", AccountsID, []string{"accounts", "sign-in", "share"}},
+		{"accounts", "Accounts", "All machines", "key", "cmd+u", AccountsID, []string{"accounts", "sign-in", "grant", "password"}},
 		{"awake", "Awake", "All Macs", "sun.max", "cmd+e", AwakeID, []string{"awake", "sleep"}},
 	}
 	for _, s := range every {
@@ -413,7 +413,7 @@ func (f finder) actions() []entry {
 		rooms = append(rooms, room{h, n})
 	}
 	slices.SortStableFunc(rooms, func(a, b room) int { return cmp.Compare(b.free, a.free) })
-	sheets := newVMSheets(f.r.All, f.r.Accounts, f.self, "", false)
+	sheets := newVMSheets(f.r.All, f.self, "", false)
 	for _, m := range rooms {
 		i := slices.IndexFunc(sheets, func(a page.Action) bool { return a.ID == ActionNewVMOn+m.h.Name })
 		if i < 0 {
@@ -530,7 +530,7 @@ func (f finder) cleanup(h model.MacView) (entry, bool) {
 func (f finder) verbs(p *page.Page) page.Section {
 	// value: SPEC A6: a VM's verbs, which the app offers once two letters
 	// begin its name: Open in Terminal for a running workspace, Share a port
-	// of it, Lend an account to a workspace, Restart for a server.
+	// of it, Grant a password to a workspace, Restart for a server.
 	s := page.Section{ID: FindVerbs, Title: "Verbs", Columns: findColumns(), Uncounted: true}
 	for _, h := range f.r.All.Macs {
 		for _, vm := range model.Ordered(h.VMs) {
@@ -548,8 +548,8 @@ func (f finder) verbs(p *page.Page) page.Section {
 					Form: &page.Form{Title: "Share a port of " + vm.Name, Fields: []page.Field{{Key: "Port", Label: "Port", Kind: page.FieldText, Required: true, Note: "a port number, like 5173"}}}}
 				es = append(es, entry{row: page.Row{ID: "share:" + vm.Name, Label: "Share a port of " + vm.Name, Glyph: symbol("network", "")}, verb: share})
 			}
-			if shareAccount, ok := f.shareAccount(h, vm); !server && running && ok {
-				es = append(es, entry{row: page.Row{ID: "share-account:" + vm.Name, Label: "Lend an account to " + vm.Name, Glyph: symbol("key", "")}, verb: shareAccount})
+			if grant, ok := f.grantPassword(h, vm); !server && running && ok {
+				es = append(es, entry{row: page.Row{ID: "grant:" + vm.Name, Label: GrantLabel + " to " + vm.Name, Glyph: symbol("key", "")}, verb: grant})
 			}
 			if server {
 				restart := f.restart(h, vm).verb
@@ -570,29 +570,25 @@ func (f finder) verbs(p *page.Page) page.Section {
 	return s
 }
 
-func (f finder) shareAccount(h model.MacView, vm model.VM) (page.Action, bool) {
-	// value: Lend an account: one of the accounts the VM's Mac is signed in
-	// to, for 4 hr; none to share is no verb.
-	if f.r.Accounts == nil {
+func (f finder) grantPassword(h model.MacView, vm model.VM) (page.Action, bool) {
+	// value: Grant a password: one of This Mac's passwords that fits the
+	// VM, as grants.new says; a VM of another Mac, or none that fits, is
+	// no verb.
+	if f.r.SignIns == nil || f.r.SignIns.Vault == nil || !h.ThisMac {
 		return page.Action{}, false
 	}
 	var opts []page.Option
-	for _, m := range f.r.Accounts.Macs {
-		if m.Name != h.Name {
-			continue
-		}
-		for _, a := range m.Accounts {
-			if a.Origin == accounts.OriginOwn && a.State == catalog.StateOK {
-				opts = append(opts, page.Option{Value: a.Provider, Label: accounts.Label(a.Provider)})
-			}
+	for _, e := range f.r.SignIns.Vault.Entries {
+		if fits, _ := f.r.SignIns.fit(e.ID, vm.Name); fits {
+			opts = append(opts, page.Option{Value: e.ID, Label: e.Label})
 		}
 	}
 	if len(opts) == 0 {
 		return page.Action{}, false
 	}
-	return page.Action{ID: "verb-share-account:" + vm.Name, Label: VerbRun, Mutates: true,
-		Run: &page.Run{Call: CallShareAccount, In: map[string]string{"With": vm.Name, "For": nanos(extendBy)}, Target: macTarget(h.Name, f.self)},
-		Form: &page.Form{Title: "Lend an account to " + vm.Name, Subtitle: "From " + f.mac(h.Name), Fields: []page.Field{
-			{Key: "Account", Label: "Account", Kind: page.FieldSelect, Required: true, Default: opts[0].Value, Options: opts},
+	return page.Action{ID: "verb-grant:" + vm.Name, Label: VerbRun, Mutates: true,
+		Run: &page.Run{Call: CallGrant, In: map[string]string{"ToKind": string(accounts.ToMachine), "To": vm.Name}},
+		Form: &page.Form{Title: GrantLabel + " to " + vm.Name, Subtitle: "From " + f.mac(h.Name), Fields: []page.Field{
+			{Key: "Entry", Label: "Password", Kind: page.FieldSelect, Required: true, Default: opts[0].Value, Options: opts},
 		}}}, true
 }

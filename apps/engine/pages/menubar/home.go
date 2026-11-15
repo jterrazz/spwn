@@ -152,7 +152,7 @@ func (h homeReading) vm(name string) (model.VM, bool) {
 }
 
 // value: the Accounts tile: what is signed out on any Mac, as its upkeep
-// says it, else how many accounts are shared with VMs.
+// says it, else how many passwords are granted to machines.
 func (h homeReading) accountsTile() *page.Tile {
 	t := &page.Tile{Caption: "Accounts", Glyph: symbol("key", page.SignalQuiet), Nav: AccountsID, Tip: page.Texts("Accounts", "All machines"), Key: keyAccounts}
 	out := 0
@@ -165,15 +165,11 @@ func (h homeReading) accountsTile() *page.Tile {
 		t.Number, t.Word, t.Signal = page.Count(int64(out), ""), "signed out", page.SignalWaits
 		return t
 	}
-	if h.r.Accounts == nil {
+	if h.r.SignIns == nil {
 		t.Number = page.Pending()
 		return t
 	}
-	shared := 0
-	for _, m := range h.r.Accounts.Macs {
-		shared += len(m.Shares)
-	}
-	t.Number, t.Word = page.Count(int64(shared), ""), "shared"
+	t.Number, t.Word = page.Count(int64(h.r.SignIns.grants()), ""), "granted"
 	return t
 }
 

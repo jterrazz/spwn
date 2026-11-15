@@ -11,6 +11,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
@@ -19,6 +20,7 @@ import (
 	pageawake "github.com/jterrazz/studio-station/apps/engine/pages/awake"
 	pagemenubar "github.com/jterrazz/studio-station/apps/engine/pages/menubar"
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
+	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
 
 func (o Menubar) Ports() engine.Feed {
@@ -43,8 +45,8 @@ func (o Menubar) Ports() engine.Feed {
 }
 
 func (o Menubar) Accounts() engine.Feed {
-	// invariant: SPEC B5.8: the accounts of every answering Mac and the
-	// copies each shared, each read through its own engine; of one Mac, or
+	// invariant: SPEC B5.8: the sign-ins and grants of every answering Mac
+	// and its VMs, each read through its own engine; of one Mac, or
 	// of the Mac a VM is on, when the page names one; read when it opens,
 	// every 30 s, on a refresh and on a change of this engine's state.
 	return func(ctx context.Context, in engine.FeedInput) <-chan any {
@@ -54,37 +56,65 @@ func (o Menubar) Accounts() engine.Feed {
 				return pagemenubar.Unread(pagemenubar.AccountsID, o.ThisMachine, err)
 			}
 			of := accountsOf(listed.All, in.Subject)
-			of.Asks, of.Machines = levels, &listed.All
-			all := o.everyMacAccounts(ctx, listed.All, of.Mac)
-			return pagemenubar.Accounts(all, of, o.ThisMachine)
+			of.Asks = levels
+			return pagemenubar.Accounts(o.signIns(ctx, listed.All, of.Mac), of, o.ThisMachine)
 		}
 		return o.reread(ctx, in, pagemenubar.AccountsID, remoteEvery, read)
 	}
 }
 
-// value: the accounts of every Mac, or of one, each read through its own
-// engine; a Mac that does not answer is named, never dropped.
-func (o Menubar) everyMacAccounts(ctx context.Context, listed machines.AllMachines, only string) accounts.AllMachines {
-	all := accounts.AllMachines{Now: o.Clock.Now()}
+// value: the sign-ins and grants of every Mac and its running VMs, or of
+// one Mac's, each read through the Mac they are on; a Mac that does not
+// answer is named, never dropped. This Mac's vault and what grants.new
+// says of each password are read alongside.
+func (o Menubar) signIns(ctx context.Context, listed machines.AllMachines, only string) pagemenubar.SignIns {
+	var out pagemenubar.SignIns
 	for _, h := range listed.Macs {
+		if h.ThisMac {
+			out.Vault, out.Offers = o.vault(ctx)
+		}
 		if only != "" && h.Name != only {
 			continue
 		}
-		m := accounts.MacAccounts{Name: h.Name, ThisMac: h.ThisMac}
+		m := pagemenubar.MachineSignIns{Name: h.Name, Mac: h.Name, ThisMac: h.ThisMac}
 		if !h.ThisMac && !h.Reachable {
 			m.Silent = page.MacName(h.Name, o.ThisMachine.Machine) + " does not answer"
-			all.Macs = append(all.Macs, m)
+			out.Machines = append(out.Machines, m)
 			continue
 		}
-		r, err := call.Read(ctx, o.Calls, macRef(h), accountscalls.Read, accountscalls.ReadIn{}, nil)
-		if err != nil {
-			m.Silent = err.Error()
-		} else if len(r.Machines) > 0 {
-			m.Accounts, m.Shares = r.Machines[0].Accounts, r.Shares
+		out.Machines = append(out.Machines, o.programsOf(ctx, h, m, ""))
+		for _, vm := range h.VMs {
+			if vm.State != machines.Running {
+				continue
+			}
+			out.Machines = append(out.Machines, o.programsOf(ctx, h, pagemenubar.MachineSignIns{Name: vm.Name, Mac: h.Name, ThisMac: h.ThisMac, VM: true}, vm.Name))
 		}
-		all.Macs = append(all.Macs, m)
 	}
-	return all
+	return out
+}
+
+func (o Menubar) programsOf(ctx context.Context, h machines.MacView, m pagemenubar.MachineSignIns, vm string) pagemenubar.MachineSignIns {
+	read, err := call.Read(ctx, o.Calls, macRef(h), accountscalls.Programs, accountscalls.ProgramsIn{Machine: vm}, nil)
+	if err != nil {
+		m.Silent = err.Error()
+		return m
+	}
+	m.Rows = read.Programs
+	return m
+}
+
+func (o Menubar) vault(ctx context.Context) (vault *accounts.VaultRead, offers map[string]accounts.GrantOffer) {
+	read, err := call.Read(ctx, o.Calls, machine.Ref{}, vaultcalls.VaultList, vaultcalls.VaultListIn{}, nil)
+	if err != nil {
+		return nil, nil
+	}
+	offers = map[string]accounts.GrantOffer{}
+	for _, e := range read.Entries {
+		if offer, err := call.Read(ctx, o.Calls, machine.Ref{}, grantscalls.GrantNew, grantscalls.GrantNewIn{Entry: e.ID}, nil); err == nil {
+			offers[e.ID] = offer
+		}
+	}
+	return &read, offers
 }
 
 func macRef(h machines.MacView) machine.Ref {
@@ -109,8 +139,6 @@ func (o Menubar) Needs() engine.Feed {
 			if l, err := call.Invoke(ctx, o.Calls, machine.Ref{}, portscalls.List, portscalls.ListIn{AllMachines: true}, nil); err == nil {
 				r.Ports = &l.AllMachines
 			}
-			shares := o.everyMacAccounts(ctx, listed.All, "")
-			r.Accounts = &shares
 			for _, h := range listed.All.Macs {
 				if !h.ThisMac && !h.Reachable {
 					continue

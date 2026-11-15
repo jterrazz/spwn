@@ -62,7 +62,7 @@ func yesNo(string, coremachine.Kind, ...string) string { return LevelYesNo }
 func TestAWorkspaceRowsMenuOffersItsOwnPagesVerbs(t *testing.T) {
 	p := macPageOf(t, miniMac, nil)
 	got := rowMenu(t, p, "linux-3")
-	want := []string{"linux-3 on mac-mini", "Open", "Open in Terminal", "-", "Copy [SSH command]", "Share [A port..., An account...]", "-", "Stop...", "-", "Delete... (red)"}
+	want := []string{"linux-3 on mac-mini", "Open", "Open in Terminal", "-", "Copy [SSH command]", "Share [A port...]", "-", "Stop...", "-", "Delete... (red)"}
 	if !slices.Equal(got, want) {
 		t.Fatalf("linux-3's menu %q", got)
 	}
@@ -162,21 +162,30 @@ func TestTheAwakeTilesMenuOffersItsTerms(t *testing.T) {
 	}
 }
 
-// invariant: SPEC A5: a copy lent to a VM: its account to the VM, Extend
-// 4 hr, then Take back... in red.
-func TestALoansMenuExtendsOrTakesItBack(t *testing.T) {
-	all := accounts.AllMachines{Now: macNow, Macs: []accounts.MacAccounts{{Name: proMac, ThisMac: true,
-		Shares: []accounts.Shared{{Account: catalog.ProviderGitHub, VM: "linux-1", At: macNow.Add(-time.Hour), Until: macNow.Add(3 * time.Hour)}}}}}
-	p := Accounts(all, AccountsOf{Asks: yesNo}, page.Context{Machine: proMac})
-	var loan string
-	for _, s := range p.Sections {
-		for _, it := range s.Items {
-			if it.Row != nil && strings.HasSuffix(it.Row.ID, "/linux-1/github") {
-				loan = it.Row.ID
+// invariant: SPEC A5: a grant to a VM: its program granted to the VM,
+// then Remove... in red; only a grant to a VM of This Mac has one.
+func TestAGrantsMenuRemovesIt(t *testing.T) {
+	s := SignIns{Machines: []MachineSignIns{
+		{Name: proMac, Mac: proMac, ThisMac: true},
+		{Name: "linux-1", Mac: proMac, ThisMac: true, VM: true, Rows: []accounts.ProgramRow{grantedRow(t, catalog.ProviderGitHub, "pw-1")}},
+		{Name: "linux-3", Mac: miniMac, VM: true, Rows: []accounts.ProgramRow{grantedRow(t, catalog.ProviderGitHub, "pw-1")}},
+	}}
+	p := Accounts(s, AccountsOf{Asks: yesNo}, page.Context{Machine: proMac})
+	var rows []string
+	for _, sec := range p.Sections {
+		for _, it := range sec.Items {
+			if it.Row != nil && strings.HasSuffix(it.Row.ID, "/"+string(programFor(t, catalog.ProviderGitHub))) {
+				rows = append(rows, it.Row.ID)
 			}
 		}
 	}
-	if got := rowMenu(t, p, loan); !slices.Equal(got, []string{"GitHub lent to linux-1", "Extend 4 hr", "-", "Take back... (red)"}) {
-		t.Fatalf("the loan's menu %q", got)
+	if len(rows) != 2 {
+		t.Fatalf("grant rows %q, want linux-1's and linux-3's", rows)
+	}
+	if got := rowMenu(t, p, rows[0]); !slices.Equal(got, []string{"GitHub granted to linux-1", "Remove... (red)"}) {
+		t.Fatalf("the grant's menu %q", got)
+	}
+	if got := rowOf("linux-3", programFor(t, catalog.ProviderGitHub)); slices.ContainsFunc(p.Actions, func(a page.Action) bool { return a.ID == ActionRemoveGrant+got }) {
+		t.Errorf("a grant to a VM of another Mac offers Remove")
 	}
 }

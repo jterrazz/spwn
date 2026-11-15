@@ -11,11 +11,10 @@ Life
 Private  2
   ● Vite       linux-1:5173
   ● Port 7000  linux-1:7000
-Lent to linux-1  2
-  ● GitHub           linux-1         read only · 4h left
-  ● Claude           linux-1         Claude Code inference · 12h left
-  ● Lend an account  ends by itself
-  These are This Mac's accounts. Every loan ends by itself.
+Accounts  2
+  ● GitHub  granted  from the password GitHub token
+  ● Claude  granted  from the password Claude token
+  A grant is a password of This Mac's, and stays until you remove it.
 Last 6 minutes
     CPU  34%  now                          Network  1.7 · 0.1 MB/s
 Last hour

@@ -1,7 +1,7 @@
 mac-mini
 
 Gauges
-VMs          ● infra · healthy · up 12 days
+VMs  ● infra · healthy · up 12 days
 Care
   ● Upkeep                    all fine
   └─ ● Ready to host servers            6 of 6
@@ -18,4 +18,5 @@ Public  0
 Private  0
   Nothing shared yet
 ● HTTPS links on mac-mini · on
-Lent to VMs  ● Lend an account · ends by itself
+Accounts
+  no accounts
