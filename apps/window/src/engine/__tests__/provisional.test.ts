@@ -12,7 +12,6 @@ import {
     isPortShared,
     machineKindOf,
     portsMacOf,
-    shareEndOf,
 } from '../provisional';
 import { macState, vmState } from '../shown';
 
@@ -142,23 +141,6 @@ describe('provisional', () => {
                 ([lifetime, kind]) => kind === (lifetime === 'always-on' ? 'server' : 'workspace'),
             ),
         ).toBe(true);
-    });
-
-    test("a share holds until its end, against the report's hour", () => {
-        // Given - a report read at 10:00
-        const now = '2026-11-12T10:00:00Z';
-
-        // When - three ends are read: later, past, unreadable
-        const ends = ['2026-11-12T11:00:00Z', '2026-11-12T09:00:00Z', 'soon'].map((until) =>
-            shareEndOf(until, now),
-        );
-
-        // Then - an hour left, ended, and not read
-        expect(ends).toStrictEqual([
-            { kind: 'ends-in', nanoseconds: 3_600_000_000_000 },
-            { kind: 'ended' },
-            { kind: 'unread' },
-        ]);
     });
 
     test("this Mac's ports are found by its name, or by the flag when ports.list names it otherwise", () => {

@@ -178,8 +178,10 @@ export const SHARE_STATE_WORDS: Words<PortsSharedPort['state']> = {
 
 // outside: machinefile.drift words a port's audience and no side left out, nor an account's (provisional.ts,
 // outside: accountSideOf): these are the words of what it leaves unsaid, until each side carries its own.
-export const DIFFERING_WORDS: Words<AccountSide> = {
+export const DIFFERING_WORDS: Words<'not-shared' | AccountSide> = {
+    granted: 'Granted',
     'not-in-the-file': 'Not in the file',
     'not-shared': 'Not shared',
+    'not-signed-in': 'Not signed in',
     shared: 'Shared',
 };

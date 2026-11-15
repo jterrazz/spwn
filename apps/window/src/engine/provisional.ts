@@ -22,7 +22,6 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import { duration } from '../model/format';
 import type { EngineError } from './engine-error';
 
 // outside: machines.list sends a Mac's reach as two booleans and no state code; this file alone makes it a code, until
@@ -165,44 +164,13 @@ export function holdsRebuildable(reading: DiskReading): boolean {
     return (reading.Rows ?? []).some((row) => freesWhole(row.Group));
 }
 
-export type ShareEnd =
-    | { kind: 'ended' }
-    | { kind: 'ends-in'; nanoseconds: number }
-    | { kind: 'unread' };
-
-const NS_PER_MS = 1_000_000;
-
-// outside: accounts.read gives a share its end and the report its hour, and no state of the share: whether it still
-// outside: holds, and how long, is read from the two until the share carries both.
-export function shareEndOf(until: string, now: string): ShareEnd {
-    const left = Date.parse(until) - Date.parse(now);
-    if (Number.isNaN(left)) {
-        return { kind: 'unread' };
-    }
-    return left > 0 ? { kind: 'ends-in', nanoseconds: left * NS_PER_MS } : { kind: 'ended' };
-}
-
-export function shareEndWordOf(end: ShareEnd, until: string): string {
-    switch (end.kind) {
-        case 'ends-in': {
-            return `ends in ${duration(end.nanoseconds)}`;
-        }
-        case 'ended': {
-            return `ended at ${until}`;
-        }
-        case 'unread': {
-            return `until ${until}`;
-        }
-    }
-}
-
 export type PlanLine = MachinefileExtraLine | MachinefileLine;
 
-export type AccountSide = 'not-in-the-file' | 'not-shared' | 'shared';
+export type AccountSide = 'granted' | 'not-in-the-file' | 'not-signed-in' | 'shared';
 
-// outside: machinefile.drift says an account's difference by its Condition alone, extra where the Mac holds a copy the
-// outside: file does not share, absent where the file shares one the Mac does not hold: each side is read from it,
-// outside: until a difference carries the word of each side.
+// outside: machinefile.drift says an account's difference by its Condition alone, extra where the machine holds a
+// outside: grant the file does not share, absent where the file shares a sign-in the machine does not hold: each side
+// outside: is read from it, until a difference carries the word of each side.
 export function accountSideOf(
     side: 'asked' | 'seen',
     differing: MachinefileDiffering,
@@ -211,7 +179,7 @@ export function accountSideOf(
     if (side === 'asked') {
         return extra ? 'not-in-the-file' : 'shared';
     }
-    return extra ? 'shared' : 'not-shared';
+    return extra ? 'granted' : 'not-signed-in';
 }
 
 // outside: ports.list may name this Mac otherwise than machines.list does (the stories world names it ''), and

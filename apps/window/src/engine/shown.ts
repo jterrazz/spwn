@@ -19,13 +19,7 @@ import type {
 import type { Tone } from '../tone';
 import { wordOf } from './engine-words';
 import type { CodeOf, Worded } from './engine-words';
-import {
-    accountSideOf,
-    machineKindOf,
-    macStateOf,
-    shareEndOf,
-    shareEndWordOf,
-} from './provisional';
+import { accountSideOf, machineKindOf, macStateOf } from './provisional';
 import {
     APP_WHY_TONES,
     FOLLOWER_TONES,
@@ -34,7 +28,6 @@ import {
     OWN_STATE_TONES,
     PORT_REACH_TONES,
     REVERSIBLE_TONE,
-    SHARE_END_TONES,
 } from './tones';
 import {
     APP_WHY_WORDS,
@@ -126,11 +119,6 @@ export function newestState(newest: boolean): null | Shown {
 
 export function reversibleState(reversible: boolean): null | Shown {
     return reversible ? { tone: REVERSIBLE_TONE, word: REVERSIBLE_WORD } : null;
-}
-
-export function holdsFor(until: string, now: string): Shown {
-    const end = shareEndOf(until, now);
-    return { tone: SHARE_END_TONES[end.kind], word: shareEndWordOf(end, until) };
 }
 
 // value: a count of the wire's own rows, the ones whose How the engine says is granted; no judgement is made here.

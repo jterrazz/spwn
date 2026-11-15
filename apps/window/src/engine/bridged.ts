@@ -10,7 +10,6 @@ export const BRIDGED = [
     'accounts.login',
     'accounts.logout',
     'accounts.open',
-    'accounts.read',
     'activity.read',
     'apps.list',
     'apps.matrix',

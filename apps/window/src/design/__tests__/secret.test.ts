@@ -29,7 +29,7 @@ describe('secret', () => {
             'repo, workflow',
             '~/.claude/.credentials.json',
             'keychain: operator:claude:oauth-token',
-            'station accounts share claude --with api',
+            'station accounts list --on api',
             'jterrazz-macbook-pro.tail1234.ts.net',
         ];
 
