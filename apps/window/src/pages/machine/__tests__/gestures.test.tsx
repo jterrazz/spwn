@@ -232,9 +232,7 @@ describe('gestures', () => {
                 await visitor.click(within(asked, button('Delete')));
 
                 // Then - the engine's message and its hint, no word of the window's own
-                await visitor.see(
-                    content('is being created on macbook-pro', { exact: false }),
-                );
+                await visitor.see(content('is being created on macbook-pro', { exact: false }));
                 await visitor.see(
                     content('wait for its create to end, or interrupt it where it runs'),
                 );

@@ -45,9 +45,7 @@ describe('sign-ins', () => {
             },
         );
         expect(result.errors.text).toBe('');
-        await expect(result.tree).toMatch(
-            file('./__expected__/two-macs-macbook-pro.aria.yaml'),
-        );
+        await expect(result.tree).toMatch(file('./__expected__/two-macs-macbook-pro.aria.yaml'));
     });
 
     test("a far Mac's VM is asked of this Mac's engine, by its name", async () => {

@@ -62,9 +62,7 @@ describe('tabs', () => {
                 // When - the tab is read
                 // Then - its list says it holds nothing
                 const listening = region('What listens on this Mac');
-                await visitor.see(
-                    within(listening, content('Nothing listed on macbook-pro.')),
-                );
+                await visitor.see(within(listening, content('Nothing listed on macbook-pro.')));
             },
         );
         expect(result.errors.text).toBe('');

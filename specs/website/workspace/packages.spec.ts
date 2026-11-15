@@ -49,9 +49,7 @@ describe('packages', () => {
             await visitor.click(button('Apply'));
 
             // When - the dialog confirms Apply
-            await visitor.click(
-                within(dialog('Apply the plan of macbook-pro?'), button('Apply')),
-            );
+            await visitor.click(within(dialog('Apply the plan of macbook-pro?'), button('Apply')));
 
             // Then - the plan reads Done
             await visitor.see(content('Done'));

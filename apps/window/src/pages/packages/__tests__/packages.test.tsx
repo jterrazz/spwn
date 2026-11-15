@@ -56,9 +56,7 @@ describe('Packages', () => {
             windowOver('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its file has been read, and refused
-                await visitor.see(
-                    content('no Machinefile named macbook-pro.', { exact: false }),
-                );
+                await visitor.see(content('no Machinefile named macbook-pro.', { exact: false }));
             },
         );
 
@@ -112,8 +110,7 @@ describe('Packages', () => {
                 square =
                     document.querySelector<HTMLElement>('i[title="ripgrep"]')?.dataset.tone ?? '';
                 layer =
-                    document.querySelector('section[aria-label="macbook-pro"]')
-                        ?.innerHTML ?? '';
+                    document.querySelector('section[aria-label="macbook-pro"]')?.innerHTML ?? '';
             },
         );
 
