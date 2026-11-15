@@ -1,7 +1,7 @@
-import type { DiskRow } from '@jterrazz/station-api';
+import type { DiskAmount, DiskHolding, DiskRow } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { byApp, groupsOf, partsOf, rebuildableOf, sizeOf } from '../disk';
+import { byApp, groupsOf, holdPartsOf, kindPartsOf, sizeOf } from '../disk';
 
 function row(App: string, Group: DiskRow['Group'], change: Partial<DiskRow> = {}): DiskRow {
     return { App, Bytes: 1_000_000_000, Group, MoveTo: '', Paths: [], Pending: false, ...change };
@@ -30,28 +30,50 @@ describe('disk', () => {
         ]);
     });
 
-    test("a group's share is the sizes its rows were read at, one part per group", () => {
-        // Given - two rows that can be rebuilt, one not read yet, and one misplaced
-        const reading = {
-            Free: 0,
-            Pending: false,
-            Rows: [
-                row('go', 'can-rebuild', { Bytes: 2_000_000_000 }),
-                row('docker', 'can-rebuild', { Bytes: -1 }),
-                row('tart', 'misplaced', { Bytes: 7_000_000_000 }),
-                row('bun', 'can-rebuild', { Bytes: 500_000_000 }),
-            ],
-            Total: 0,
-        };
+    test('the bar has one part per kind the engine gives, in its order, and none for an absent kind', () => {
+        // Given - kinds with no system and no machines, caches before apps
+        const kinds: DiskAmount[] = [
+            { Bytes: 2_000_000_000, Kind: 'caches' },
+            { Bytes: 0, Kind: 'apps' },
+            { Bytes: 5_000_000_000, Kind: 'free' },
+        ];
 
-        // When - the bar's parts are made
-        const parts = partsOf(reading);
+        // When - the parts are made
+        const parts = kindPartsOf(kinds);
 
-        // Then - each group once, in the engine's order, holding the sizes read and no unread one
-        expect(parts.map((part) => [part.group, part.bytes])).toStrictEqual([
-            ['can-rebuild', 2_500_000_000],
-            ['misplaced', 7_000_000_000],
+        // Then - those three alone, in that order, the measured zero kept and free as the rest
+        expect(parts.map((part) => [part.key, part.bytes, part.rest])).toStrictEqual([
+            ['caches', 2_000_000_000, false],
+            ['apps', 0, false],
+            ['free', 5_000_000_000, true],
         ]);
+        expect(kindPartsOf(undefined)).toStrictEqual([]);
+    });
+
+    test('a kind or a holder the window does not know is worded by its code and drawn neutral', () => {
+        // Given - a kind the window has no colour for
+        const unknown = [{ Bytes: 1, Kind: 'swap' }];
+
+        // When - its part is made
+        const [part] = kindPartsOf(unknown);
+
+        // Then - its code as its word and the neutral colour
+        expect([part?.label, part?.identity]).toStrictEqual(['swap', 'system']);
+    });
+
+    test("the holders of a Mac's station are parts in the engine's order, and none is no part", () => {
+        // Given - two holders
+        const holds: DiskHolding[] = [
+            { Bytes: 3, Holder: 'images' },
+            { Bytes: 1, Holder: 'machine-disks' },
+        ];
+
+        // When - parts are made from them and from none
+        const parts = holdPartsOf(holds);
+
+        // Then - images then machine disks, and nothing from null
+        expect(parts.map((part) => part.key)).toStrictEqual(['images', 'machine-disks']);
+        expect(holdPartsOf(null)).toStrictEqual([]);
     });
 
     test("an app's rows are one row, but a misplaced folder stays a row of its own", () => {
@@ -74,22 +96,6 @@ describe('disk', () => {
             ['go', ['can-rebuild']],
             ['tart', ['misplaced']],
         ]);
-    });
-
-    test('what can be rebuilt is the sum of the rebuildable rows read, and nothing else', () => {
-        // Given - two rows that can be rebuilt, one unread, and data
-        const rows = [
-            row('go', 'can-rebuild', { Bytes: 2_000_000_000 }),
-            row('docker', 'can-rebuild', { Bytes: -1 }),
-            row('xcode', 'your-data', { Bytes: 9_000_000_000 }),
-            row('bun', 'can-rebuild', { Bytes: 500_000_000 }),
-        ];
-
-        // When - their sum is made
-        const held = rebuildableOf(rows);
-
-        // Then - 2.5 GB
-        expect(held).toBe(2_500_000_000);
     });
 
     test('a size the engine has not read is never shown as a number', () => {

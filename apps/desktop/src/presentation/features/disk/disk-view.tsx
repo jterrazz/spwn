@@ -7,9 +7,9 @@ import { useReread } from '../../dependencies/dependencies';
 import { AppIcon, Button, Panel, ShareBar, TypeTag } from '../../ui/index';
 import type { SharePart } from '../../ui/index';
 import { detailOf, wordOf } from '../../words/engine-words';
-import { diskGestureOf, freesWhole, holdsRebuildable } from '../../words/provisional';
+import { diskGestureOf, freesWhole } from '../../words/provisional';
 import { DISK_PENDING_WORD } from '../../words/words';
-import { byApp, groupsOf, partsOf, rebuildableOf, sizeOf } from './disk';
+import { byApp, groupsOf, holdPartsOf, kindPartsOf, sizeOf } from './disk';
 import type { AppRow, Group, Part } from './disk';
 import { DiskLine, EraseLink, FreeAllButton } from './disk-gestures';
 import type { DiskGesture } from './disk-gestures';
@@ -32,54 +32,43 @@ function Used({ reading }: { reading: DiskReading }) {
 
 function DiskBar({
     parts,
-    reading,
+    total,
     label,
 }: {
     parts: readonly Part[];
-    reading: DiskReading;
+    total: number;
     label: string;
 }) {
-    const { Free, Total } = reading;
-    if (Total <= 0) {
+    if (total <= 0 || parts.length === 0) {
         return null;
     }
-    const held: SharePart[] = parts
-        .filter((part) => part.bytes > 0)
-        .map((part) => ({
-            identity: part.identity,
-            key: part.group,
-            label: `${part.label}${SEPARATOR}${bytes(part.bytes)}`,
-            size: part.bytes,
-        }));
-    const unsorted = Total - Free - held.reduce((sum, part) => sum + part.size, 0);
-    const used: SharePart[] =
-        unsorted > 0
-            ? [{ key: 'used', label: `Used${SEPARATOR}${bytes(unsorted)}`, size: unsorted }]
-            : [];
-    const free: SharePart[] =
-        Free > 0
-            ? [{ key: 'free', label: `Free${SEPARATOR}${bytes(Free)}`, rest: true, size: Free }]
-            : [];
-    return <ShareBar label={label} of={Total} parts={[...held, ...used, ...free]} />;
+    const held: SharePart[] = parts.map((part) => ({
+        identity: part.rest ? undefined : part.identity,
+        key: part.key,
+        label: `${part.label}${SEPARATOR}${bytes(part.bytes)}`,
+        rest: part.rest,
+        size: part.bytes,
+    }));
+    return <ShareBar label={label} of={total} parts={held} />;
 }
 
-function Legend({ parts, free }: { parts: readonly Part[]; free: number }) {
+function Legend({ parts }: { parts: readonly Part[] }) {
+    if (parts.length === 0) {
+        return null;
+    }
     return (
-        <ul aria-label="The groups" className={styles.legend}>
+        <ul aria-label="The parts" className={styles.legend}>
             {parts.map((part) => (
-                <li data-identity={part.identity} key={part.group}>
+                <li
+                    className={part.rest ? styles.free : undefined}
+                    data-identity={part.rest ? undefined : part.identity}
+                    key={part.key}
+                >
                     <i className={styles.swatch} />
                     <span className={styles.word}>{part.label}</span>
-                    {part.bytes > 0 ? <b className={styles.size}>{bytes(part.bytes)}</b> : null}
+                    <b className={styles.size}>{bytes(part.bytes)}</b>
                 </li>
             ))}
-            {free > 0 ? (
-                <li className={styles.free}>
-                    <i className={styles.swatch} />
-                    <span className={styles.word}>Free</span>
-                    <b className={styles.size}>{bytes(free)}</b>
-                </li>
-            ) : null}
         </ul>
     );
 }
@@ -87,17 +76,21 @@ function Legend({ parts, free }: { parts: readonly Part[]; free: number }) {
 type FootProps = { reading: DiskReading; freeAll: DiskGesture; name: string };
 
 function Foot({ reading, freeAll, name }: FootProps) {
-    if (!holdsRebuildable(reading)) {
+    const { CanFree } = reading;
+    if (CanFree === undefined) {
         return null;
     }
-    const held = bytes(rebuildableOf(reading.Rows ?? []));
     return (
         <div className={styles.foot}>
-            <p>
-                {`What can be rebuilt holds ${held}. `}
-                <span className={styles.quiet}>Each app rebuilds its own when it needs it.</span>
-            </p>
-            <FreeAllButton gesture={freeAll} label={`Free ${held}`} name={name} variant="primary" />
+            <p>{CanFree.Sentence}</p>
+            {CanFree.Bytes > 0 ? (
+                <FreeAllButton
+                    gesture={freeAll}
+                    label={`Free ${bytes(CanFree.Bytes)}`}
+                    name={name}
+                    variant="primary"
+                />
+            ) : null}
         </div>
     );
 }
@@ -107,11 +100,12 @@ type DiskPanelProps = {
     name: string;
     title: string;
     freeAll: DiskGesture;
+    by: 'holds' | 'kinds';
     sub?: ReactNode;
 };
 
-export function DiskPanel({ reading, name, title, freeAll, sub }: DiskPanelProps) {
-    const parts = partsOf(reading);
+export function DiskPanel({ reading, name, title, freeAll, by, sub }: DiskPanelProps) {
+    const parts = by === 'holds' ? holdPartsOf(reading.Station?.Holds) : kindPartsOf(reading.Kinds);
     const reread = useReread();
     return (
         <Panel note={reading.Pending ? DISK_PENDING_WORD : ''} padded title={title}>
@@ -126,8 +120,8 @@ export function DiskPanel({ reading, name, title, freeAll, sub }: DiskPanelProps
                 </Button>
             </div>
             {sub === undefined ? null : <p className={styles.sub}>{sub}</p>}
-            <DiskBar label={`What holds the disk of ${name}`} parts={parts} reading={reading} />
-            <Legend free={reading.Free} parts={parts} />
+            <DiskBar label={`What holds the disk of ${name}`} parts={parts} total={reading.Total} />
+            <Legend parts={parts} />
             <Foot freeAll={freeAll} name={name} reading={reading} />
         </Panel>
     );

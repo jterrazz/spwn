@@ -8,7 +8,6 @@ import {
     createRefusalPlaceOf,
     diskGestureOf,
     freesWhole,
-    holdsRebuildable,
     isPortShared,
     machineKindOf,
 } from '../provisional';
@@ -44,20 +43,6 @@ function portsOf(world: string) {
     return listingOf(world).all.macs ?? [];
 }
 
-function diskOf(world: string) {
-    const asked = keyOf({ in: {}, watch: 'disk.read' });
-    const exchange = recordingFor(world).exchanges.find((one) => keyOf(one.request) === asked);
-    const outs = (exchange?.answers ?? []).filter(
-        (answer): answer is { out: Out<'disk.read'> } =>
-            typeof answer === 'object' && answer !== null && 'out' in answer,
-    );
-    const reading = outs.at(-1)?.out;
-    if (!reading) {
-        throw new Error(`${world} records no disk.read of This Mac.`);
-    }
-    return reading;
-}
-
 describe('provisional', () => {
     test("a Mac's reach and a VM's state are shown by the one word their code has", () => {
         // Given - This Mac of two-macs, reachable, with a stopped and a running VM
@@ -91,18 +76,6 @@ describe('provisional', () => {
             [5173, true],
             [9229, false],
         ]);
-    });
-
-    test('a disk holds what can be rebuilt when one of its rows is in that group', () => {
-        // Given - the disk of This Mac in disk-low, whose rows hold caches, and in bare-mac, which lists none
-        const low = diskOf('disk-low');
-        const bare = diskOf('bare-mac');
-
-        // When - each is asked whether it holds what can be rebuilt
-        const held = [holdsRebuildable(low), holdsRebuildable(bare)];
-
-        // Then - the first does, the second does not
-        expect(held).toStrictEqual([true, false]);
     });
 
     test('each Disk group names the call that would act on it, and never touched none', () => {

@@ -1,7 +1,8 @@
 import type {
     AppsReport,
+    DiskAmount,
+    DiskHolding,
     DiskOutcome,
-    DiskRow,
     PortsPort,
     PortsSharedPort,
 } from '@jterrazz/station-api';
@@ -33,14 +34,35 @@ export const AWAKE_ON_TONE = 'ok' satisfies Tone;
 export const REVERSIBLE_TONE: Tone = 'ok';
 
 // outside: a colour of identity is design/'s type, which engine/ never imports: these are the colours the Disk
-// outside: groups take, and design/'s type checks each where a page hands it over.
-type GroupColour = 'pink' | 'purple' | 'slate' | 'system' | 'teal';
+// outside: bar's kinds and holders take, and design/'s type checks each where a page hands it over.
+export type ShareColour =
+    | 'blue'
+    | 'indigo'
+    | 'pink'
+    | 'purple'
+    | 'sky'
+    | 'slate'
+    | 'system'
+    | 'teal';
 
-export const DISK_GROUP_COLOURS: Readonly<Record<DiskRow['Group'], GroupColour>> = {
-    'can-rebuild': 'teal',
-    misplaced: 'pink',
-    'never-touched': 'slate',
+export const UNKNOWN_SHARE_COLOUR: ShareColour = 'system';
+
+export const DISK_KIND_COLOURS: Readonly<Record<DiskAmount['Kind'], ShareColour>> = {
+    apps: 'blue',
+    caches: 'teal',
+    free: 'system',
+    machines: 'indigo',
+    system: 'slate',
     'your-data': 'purple',
+};
+
+export const DISK_HOLDER_COLOURS: Readonly<Record<DiskHolding['Holder'], ShareColour>> = {
+    free: 'system',
+    images: 'purple',
+    leftovers: 'pink',
+    logs: 'sky',
+    'machine-disks': 'blue',
+    'this-mac': 'slate',
 };
 
 export const PORT_ANSWER_TONES: Tones<PortsPort['Answer']> = {

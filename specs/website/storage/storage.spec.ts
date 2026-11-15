@@ -1,4 +1,4 @@
-import { button, heading, region, within } from '@jterrazz/test';
+import { button, content, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -6,10 +6,25 @@ import { website } from '../website.specification.js';
 describe('storage', () => {
     test.todo('D6 waits for the input of images.build');
 
-    test.todo('D8 waits for what each kind holds, on disk.read');
+    test('D8 the disk of a Mac is told by what Station holds and the engine verdict heads the page', async () => {
+        // Given - Storage over two-macs
+        const result = await website.visit('/?world=two-macs&page=storage', async (visitor) => {
+            // When - the page is read
+            // Then - the engine's verdict heads it, and the disk says what station holds
+            await visitor.see(heading('3.0 GB can be freed.'));
+            await visitor.see(
+                within(
+                    region('Disk'),
+                    content('Outside any machine, station holds 107 GB', { exact: false }),
+                ),
+            );
+            await visitor.see(within(region('Disk'), content('Machine disks')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo(
-        "D9 waits for what nothing uses on disk.read, the leftovers of deleted VMs among it, and the page's verdict",
+        'D9 waits for what nothing uses on disk.read, the leftovers of deleted VMs among it, and a gesture to free it',
     );
 
     test.todo('D10 waits for a recording of the disk of the other Mac');
@@ -33,9 +48,12 @@ describe('storage', () => {
             // When - Machines is read
             const machines = region('Machines');
 
-            // Then - the Mac and linux-1 each say their caches, linux-1 its size too, api none
+            // Then - the Mac and linux-1 each say their caches and their size, api its size alone
             await visitor.see(
-                within(machines, button('macbook-pro the Mac itself 34.8 GB of caches inside')),
+                within(
+                    machines,
+                    button('macbook-pro the Mac itself 34.8 GB of caches inside 499 GB'),
+                ),
             );
             await visitor.see(within(machines, button('linux-1 1.5 GB of caches inside 50 GB')));
             await visitor.see(within(machines, button('api 50 GB')));

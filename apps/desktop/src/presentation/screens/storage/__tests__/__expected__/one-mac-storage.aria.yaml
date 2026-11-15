@@ -1,17 +1,25 @@
 - main:
-  - heading "No verdict from the engine." [level=1]
+  - heading "Nothing to free." [level=1]
   - paragraph:
-    - img "Not given yet"
-    - text: What follows is what the engine answers, with no sentence that sums it up
+    - img "Nothing to free."
+    - text: "on macbook-pro: no machine and no file of yours is touched"
   - group "Which Mac":
     - button "macbook-pro" [pressed]
   - region "Disk":
     - heading "Disk" [level=2]
     - button "Rescan"
-    - list "The groups"
+    - paragraph: "Outside any machine, station holds 0 B: machine disks, images, leftovers and its logs"
+    - list "The parts":
+      - listitem: Machine disks 0 B
+      - listitem: Images 0 B
+      - listitem: Leftovers 0 B
+      - listitem: Station logs 0 B
+      - listitem: The Mac itself 0 B
+      - listitem: Free 0 B
+    - paragraph: No cache to free. What is left is yours or the system's.
   - region "Images":
     - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
     - paragraph: No image on macbook-pro.
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
-    - button "macbook-pro the Mac itself"
+    - button "macbook-pro the Mac itself 0 B of caches inside 0 B"

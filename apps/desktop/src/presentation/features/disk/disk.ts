@@ -1,10 +1,11 @@
-import type { DiskReading, DiskRow } from '@jterrazz/station-api';
+import type { DiskAmount, DiskHolding, DiskRow } from '@jterrazz/station-api';
 
 import { bytes } from '../../../domain/format';
 import type { Identity } from '../../ui/index';
-import { wordOf } from '../../words/engine-words';
-import { diskGestureOf, freesWhole } from '../../words/provisional';
-import { DISK_GROUP_COLOURS } from '../../words/tones';
+import { wordOfSent } from '../../words/engine-words';
+import { diskGestureOf } from '../../words/provisional';
+import { DISK_HOLDER_COLOURS, DISK_KIND_COLOURS, UNKNOWN_SHARE_COLOUR } from '../../words/tones';
+import type { ShareColour } from '../../words/tones';
 import { DISK_PENDING_WORD } from '../../words/words';
 
 export type Group = { group: DiskRow['Group']; rows: readonly DiskRow[] };
@@ -29,22 +30,42 @@ export function sizeOf(row: DiskRow): string {
     return row.Bytes < 0 ? 'size not read' : bytes(row.Bytes);
 }
 
-function identityOfGroup(group: DiskRow['Group']): Identity {
-    return DISK_GROUP_COLOURS[group];
+export type Part = {
+    key: string;
+    bytes: number;
+    identity: Identity;
+    label: string;
+    rest: boolean;
+};
+
+function colourOf(table: Readonly<Record<string, ShareColour>>, code: string): ShareColour {
+    return Object.hasOwn(table, code)
+        ? (table[code] ?? UNKNOWN_SHARE_COLOUR)
+        : UNKNOWN_SHARE_COLOUR;
 }
 
-export type Part = { group: DiskRow['Group']; bytes: number; identity: Identity; label: string };
+type Amount = Pick<DiskAmount, 'Bytes'> & { Kind: string };
 
-function readOf(rows: readonly DiskRow[]): number {
-    let read = 0;
-    for (const row of rows) {
-        read += Math.max(0, row.Bytes);
-    }
-    return read;
+type Holding = Pick<DiskHolding, 'Bytes'> & { Holder: string };
+
+export function kindPartsOf(kinds: readonly Amount[] | undefined): readonly Part[] {
+    return (kinds ?? []).map(({ Kind, Bytes }) => ({
+        bytes: Bytes,
+        identity: colourOf(DISK_KIND_COLOURS, Kind),
+        key: Kind,
+        label: wordOfSent('DiskKind', Kind),
+        rest: Kind === 'free',
+    }));
 }
 
-export function rebuildableOf(rows: readonly DiskRow[]): number {
-    return readOf(rows.filter((row) => freesWhole(row.Group)));
+export function holdPartsOf(holds: null | readonly Holding[] | undefined): readonly Part[] {
+    return (holds ?? []).map(({ Holder, Bytes }) => ({
+        bytes: Bytes,
+        identity: colourOf(DISK_HOLDER_COLOURS, Holder),
+        key: Holder,
+        label: wordOfSent('DiskHolder', Holder),
+        rest: Holder === 'free',
+    }));
 }
 
 export type AppRow = { key: string; app: string; rows: readonly DiskRow[] };
@@ -67,13 +88,4 @@ export function byApp(rows: readonly DiskRow[]): readonly AppRow[] {
         }
     }
     return apps;
-}
-
-export function partsOf(reading: DiskReading): readonly Part[] {
-    return groupsOf(reading.Rows ?? []).map(({ group, rows }) => ({
-        bytes: readOf(rows),
-        group,
-        identity: identityOfGroup(group),
-        label: wordOf('DiskGroup', group).Word,
-    }));
 }
