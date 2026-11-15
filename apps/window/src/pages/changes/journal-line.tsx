@@ -26,7 +26,8 @@ function Tail({ line }: { line: JournalLine }) {
     const end = endOf(line);
     return (
         <span className={styles.tail}>
-            {isCalm(shown.tone) ? null : <StatePill {...shown} />}
+            {isCalm(shown.tone) || shown.tone === 'warn' ? null : <StatePill {...shown} />}
+            {shown.tone === 'warn' ? <span className={styles.end}>{shown.word}</span> : null}
             {end === '' ? null : <span className={styles.end}>{end}</span>}
         </span>
     );
