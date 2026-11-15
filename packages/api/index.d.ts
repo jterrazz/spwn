@@ -990,6 +990,11 @@ export type CoreVerdictVerdict = {
     Tone: 'ok' | 'warn' | 'bad' | 'plain' | 'new';
 };
 
+export type DiskAmount = {
+    Bytes: number;
+    Kind: 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'free';
+};
+
 export type DiskCallsEraseIn = {
     App?: string;
     Confirm?: string;
@@ -1004,6 +1009,21 @@ export type DiskCallsMoveIn = {
 };
 
 export type DiskCallsReadIn = Record<string, never>;
+
+export type DiskCanFree = {
+    Bytes: number;
+    Sentence: string;
+};
+
+export type DiskHolding = {
+    Bytes: number;
+    Holder: 'machine-disks' | 'images' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+};
+
+export type DiskMachineDisk = {
+    Bytes: number;
+    Name: string;
+};
 
 export type DiskMisplacedReport = {
     Bytes: number;
@@ -1024,9 +1044,12 @@ export type DiskOutcome = {
 };
 
 export type DiskReading = {
+    CanFree?: DiskCanFree;
     Free: number;
+    Kinds?: DiskAmount[];
     Pending: boolean;
     Rows: DiskRow[] | null;
+    Station?: DiskStationPart;
     Total: number;
 };
 
@@ -1037,6 +1060,13 @@ export type DiskRow = {
     MoveTo: string;
     Paths: string[] | null;
     Pending: boolean;
+};
+
+export type DiskStationPart = {
+    Holds: DiskHolding[] | null;
+    Machines: DiskMachineDisk[] | null;
+    Sentence: string;
+    Verdict: CoreVerdictVerdict;
 };
 
 export type DoneFrame = {
@@ -3589,6 +3619,10 @@ export type CoreVerdictTone = 'ok' | 'warn' | 'bad' | 'plain' | 'new';
 
 export type DiskGroup = 'misplaced' | 'can-rebuild' | 'your-data' | 'never-touched';
 
+export type DiskHolder = 'machine-disks' | 'images' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+
+export type DiskKind = 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'free';
+
 export type EngineReadState = 'running' | 'stopped' | 'not-installed';
 
 export type MachinefileAction = 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
@@ -3662,6 +3696,8 @@ export type StationWords = {
     CoreFindingSeverity: Record<CoreFindingSeverity, StationWord>;
     CoreSectionID: Record<CoreSectionID, StationWord>;
     DiskGroup: Record<DiskGroup, StationWord>;
+    DiskHolder: Record<DiskHolder, StationWord>;
+    DiskKind: Record<DiskKind, StationWord>;
     EngineReadState: Record<EngineReadState, StationWord>;
     MachinefileAction: Record<MachinefileAction, StationWord>;
     MachinefileChapter: Record<MachinefileChapter, StationWord>;

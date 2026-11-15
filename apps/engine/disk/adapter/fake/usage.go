@@ -96,6 +96,15 @@ func (u *Usage) Volume(context.Context) (total, free int64, err error) {
 	return d.Total, d.Free, nil
 }
 
+func (u *Usage) System(context.Context) int64 {
+	u.w.Lock()
+	defer u.w.Unlock()
+	if s := u.disk().System; s > 0 {
+		return s
+	}
+	return -1
+}
+
 func (u *Usage) Move(_ context.Context, from, to string) error {
 	u.w.Lock()
 	defer u.w.Unlock()

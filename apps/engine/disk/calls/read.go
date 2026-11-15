@@ -22,10 +22,7 @@ var Read = call.Watch[Deps, ReadIn, disk.Reading]{
 		go func() {
 			defer close(readings)
 			for s := range surveys {
-				r := disk.Reading{Total: total, Free: free, Rows: disk.Classify(s)}
-				for _, t := range s.Rows {
-					r.Pending = r.Pending || t.Pending
-				}
+				r := disk.ReadingOf(total, free, s, d.Name)
 				select {
 				case readings <- r:
 				case <-ctx.Done():

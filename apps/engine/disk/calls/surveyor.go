@@ -41,6 +41,14 @@ type SurveyorOptions struct {
 	Containers ContainerSpace
 	// value: applies the settings a moved folder needs (tart-launcher).
 	Configurer Configurer
+	// value: the disks station holds on a Mac, nil on any other machine.
+	Station Station
+}
+
+type Station interface {
+	// value: the disks this Mac's hypervisor holds for its machines and
+	// images, as it lists them.
+	Held(ctx context.Context) (disk.Held, error)
 }
 
 type Configurer interface {

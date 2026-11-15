@@ -1,0 +1,11 @@
+description: 'a mac whose only image is its newest heads its disk with nothing to free'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out.Station.Verdict'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"Tone":"ok","Sentence":"Nothing to free.","Line":"on macbook-pro: no machine and no file of yours is touched"}

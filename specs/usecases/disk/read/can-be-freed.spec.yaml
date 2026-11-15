@@ -1,0 +1,11 @@
+description: 'an image nothing uses heads a mac''s disk with what can be freed, and touches nothing of yours'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out.Station.Verdict'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"Tone":"warn","Sentence":"3.0 GB can be freed.","Line":"on macbook-pro: no machine and no file of yours is touched"}

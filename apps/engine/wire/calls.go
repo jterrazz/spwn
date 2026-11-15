@@ -64,7 +64,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Known: m.cat.Apps, Kind: kind, All: appsAllMachines{m}, Now: m.sys.Clock.Now}),
 		awakecalls.All(m.awakeDeps()),
 		backgroundcalls.All(m.backgroundDeps()),
-		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind}),
+		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind, Name: m.profile.Ref.Name}),
 		enginecalls.All(enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m, machines: m.machines(false)}, Kind: kind}),
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
 		machinefilecalls.All(m.machinefileDeps(thisMac)),

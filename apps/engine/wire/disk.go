@@ -19,6 +19,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/disk/adapter/posix"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
+	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	diskcmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/disk"
 	diskerase "github.com/jterrazz/studio-station/apps/engine/surface/cli/disk/erase"
 	diskfree "github.com/jterrazz/studio-station/apps/engine/surface/cli/disk/free"
@@ -36,6 +37,10 @@ func diskCommand(env kit.Env, m machine) *cobra.Command {
 }
 
 func (m machine) diskOf(env kit.Env) *diskcalls.Surveyor {
+	var station diskcalls.Station
+	if m.profile.Kind == coremachine.Computer {
+		station = diskStation{m}
+	}
 	return diskcalls.NewSurveyor(diskMachine{m.sys}, m.cat.Apps, diskcalls.SurveyorOptions{
 		Disk:        m.disk(),
 		Containers:  diskdocker.New(m.sys.Run),
@@ -45,6 +50,7 @@ func (m machine) diskOf(env kit.Env) *diskcalls.Surveyor {
 		Files:       m.appFiles(),
 		Inventory:   inventory{apps: appsOf(env, m)},
 		Configurer:  setupSettingsWriter{settings: settingsOf(m)},
+		Station:     station,
 	})
 }
 
@@ -64,6 +70,52 @@ func (m machine) expander() disk.Expander {
 
 func (m machine) appFiles() map[catalog.AppFile]string {
 	return catalog.AppFilePaths(m.sys.Env.Home(), m.paths.Roots.Prefs, m.kind, m.vars)
+}
+
+// value: the disks this Mac's hypervisor holds for station, told apart by
+// the machine records and the images' versions; a Mac without the
+// hypervisor holds none.
+type diskStation struct{ m machine }
+
+func (s diskStation) Held(ctx context.Context) (disk.Held, error) {
+	h := s.m.hypervisor()
+	if !h.Installed() {
+		return disk.Held{}, nil
+	}
+	disks, err := h.Disks(ctx)
+	if err != nil {
+		return disk.Held{}, err
+	}
+	sizes := make(map[string]int64, len(disks))
+	for _, d := range disks {
+		sizes[d.VM] = d.Bytes
+	}
+	records, err := s.m.stores.machines.ListReadable(ctx)
+	if err != nil {
+		return disk.Held{}, err
+	}
+	reports, err := s.m.images().List(ctx)
+	if err != nil {
+		return disk.Held{}, err
+	}
+	var held disk.Held
+	for _, r := range records {
+		if b, ok := sizes[r.Name]; ok {
+			held.Machines = append(held.Machines, disk.MachineDisk{Name: r.Name, Bytes: b})
+		}
+	}
+	for _, r := range reports {
+		name := imagescalls.DiskName(r.Record.Name, r.Record.Version)
+		b, ok := sizes[name]
+		if !ok {
+			continue
+		}
+		held.Images = append(held.Images, disk.MachineDisk{Name: name, Bytes: b})
+		if r.Unused() {
+			held.Unused += b
+		}
+	}
+	return held, nil
 }
 
 type inventory struct{ apps *appscalls.Shelf }

@@ -1,10 +1,125 @@
 {
   "$defs": {
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
+    "disk.Amount": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Kind": {
+          "enum": [
+            "system",
+            "apps",
+            "your-data",
+            "caches",
+            "machines",
+            "free"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Kind"
+      ],
+      "type": "object"
+    },
+    "disk.CanFree": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Sentence": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Sentence"
+      ],
+      "type": "object"
+    },
+    "disk.Holding": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Holder": {
+          "enum": [
+            "machine-disks",
+            "images",
+            "leftovers",
+            "logs",
+            "this-mac",
+            "free"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Holder"
+      ],
+      "type": "object"
+    },
+    "disk.MachineDisk": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Name"
+      ],
+      "type": "object"
+    },
     "disk.Reading": {
       "additionalProperties": false,
       "properties": {
+        "CanFree": {
+          "$ref": "#/$defs/disk.CanFree"
+        },
         "Free": {
           "type": "integer"
+        },
+        "Kinds": {
+          "items": {
+            "$ref": "#/$defs/disk.Amount"
+          },
+          "type": "array"
         },
         "Pending": {
           "type": "boolean"
@@ -17,6 +132,9 @@
             "array",
             "null"
           ]
+        },
+        "Station": {
+          "$ref": "#/$defs/disk.StationPart"
         },
         "Total": {
           "type": "integer"
@@ -71,6 +189,42 @@
         "MoveTo",
         "Paths",
         "Pending"
+      ],
+      "type": "object"
+    },
+    "disk.StationPart": {
+      "additionalProperties": false,
+      "properties": {
+        "Holds": {
+          "items": {
+            "$ref": "#/$defs/disk.Holding"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Machines": {
+          "items": {
+            "$ref": "#/$defs/disk.MachineDisk"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Holds",
+        "Machines",
+        "Sentence",
+        "Verdict"
       ],
       "type": "object"
     },

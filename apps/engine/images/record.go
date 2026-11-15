@@ -59,6 +59,12 @@ type Report struct {
 	Mac string
 }
 
+func (r Report) Unused() bool {
+	// invariant: an image nothing uses is not the newest of its name and no
+	// machine was made from it.
+	return !r.Newest && len(r.VMs) == 0
+}
+
 type Update struct {
 	Ref Ref
 	// value: the version was already the newest here: nothing was fetched.
