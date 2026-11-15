@@ -1,8 +1,8 @@
 description: 'a --confirm that is not the name is refused, nothing deleted'
 env: two-macs
 runs:
-    - command: 'machines delete linux-1 --confirm=linux'
+    - command: 'machines delete api --confirm=ap'
       exit: 2
       stderr: |
-          Error: not deleted: you typed "linux", not "linux-1"
-          Hint: in a script: --confirm=linux-1
+          Error: not deleted: you typed "ap", not "api"
+          Hint: in a script: --confirm=api
