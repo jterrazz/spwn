@@ -49,6 +49,11 @@ func infraServes(f *Scene) {
 	vm.Uptime = u
 }
 
+func infraFailing(f *Scene) {
+	vm := infra(f)
+	vm.CheckStatus = model.CheckStatus{State: model.CheckFailing, Since: storyNow.Add(-12 * time.Minute), At: storyNow.Add(-30 * time.Second)}
+}
+
 func infraDownToday(f *Scene) {
 	vm := infra(f)
 	vm.Latency = nil

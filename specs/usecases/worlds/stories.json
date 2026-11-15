@@ -353,9 +353,9 @@
                         "state": "running",
                         "boot_at": "2026-10-26T10:30:00Z",
                         "check": {
-                            "state": "passing",
-                            "at": "2026-11-07T10:29:20Z",
-                            "answer": "200"
+                            "state": "failing",
+                            "since": "2026-11-07T10:18:00Z",
+                            "at": "2026-11-07T10:29:30Z"
                         },
                         "latency": [
                             {
@@ -1493,6 +1493,14 @@
                     "Removal": ""
                 }
             },
+            "listening": [
+                {
+                    "Port": 5000,
+                    "Bind": "*",
+                    "Process": "ControlCenter",
+                    "PID": 588
+                }
+            ],
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
@@ -1967,6 +1975,9 @@
     "registry": {
         "station-linux": "3"
     },
+    "sites_down": [
+        "jterrazz.com"
+    ],
     "this_mac": "macbook-pro",
     "user": "jterrazz"
 }

@@ -51,6 +51,9 @@ type World struct {
 	Admin bool `json:"admin,omitempty"`
 	// value: the repositories a shared source is read from, by URL.
 	Sources map[string]*Repository `json:"sources,omitempty"`
+	// value: the names a health check asks that answer no more, a site
+	// down whichever machine serves it: jterrazz.com.
+	SitesDown []string `json:"sites_down,omitempty"`
 }
 
 // value: a repository's files at each of its commits, by slash path,

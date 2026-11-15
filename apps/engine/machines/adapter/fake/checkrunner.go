@@ -3,6 +3,7 @@ package fake
 import (
 	"context"
 	"errors"
+	"slices"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -24,11 +25,12 @@ const answersIn = 41 * time.Millisecond
 func (p *CheckRunner) Run(_ context.Context, t machines.CheckTarget) (machines.CheckAnswer, error) {
 	// invariant: a check of the world answers while the VM its name holds
 	// runs, until a scripted fault of CheckRunner.Run stands for what
-	// inside stopped answering it; a check on any other name answers. A URL
-	// answers 200, in the time its VM's check takes (41 ms when unsaid).
+	// inside stopped answering it; a check on any other name answers unless
+	// the world holds that site down. A URL answers 200, in the time its
+	// VM's check takes (41 ms when unsaid).
 	p.w.Lock()
 	defer p.w.Unlock()
-	if p.w.Fails("CheckRunner.Run") {
+	if p.w.Fails("CheckRunner.Run") || slices.Contains(p.w.SitesDown, t.Name) {
 		return machines.CheckAnswer{}, ErrNoAnswer
 	}
 	took := answersIn
