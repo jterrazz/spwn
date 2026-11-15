@@ -1,8 +1,11 @@
 import type { MachinefileFileView } from '@jterrazz/station-api';
 
 import { Icon } from '../../design/icon';
-import { CodeBlock, Panel, Row, Switch, Value } from '../../design/index';
+import { CodeBlock, Missing, Panel, Row, Switch, Value } from '../../design/index';
 import { countOf } from '../../engine/engine-words';
+import { followerState } from '../../engine/shown';
+import { machineRoute } from '../../shell/route';
+import type { Route } from '../../shell/route';
 import type { Shown } from './file-head';
 import { extendedBy, linesOf } from './model';
 
@@ -89,6 +92,37 @@ export function Own({ view }: { view: MachinefileFileView }) {
                     />
                 ))}
             </div>
+        </Panel>
+    );
+}
+
+export function Followers({ view, go }: { view: MachinefileFileView; go: (to: Route) => void }) {
+    const followers = view.Followers ?? [];
+    return (
+        <Panel
+            {...(followers.length === 0 ? {} : { note: view.Verdict.Sentence })}
+            title="Machines that follow it"
+        >
+            {followers.length === 0 ? (
+                <Missing>{view.Verdict.Sentence}</Missing>
+            ) : (
+                <div className={styles.rows}>
+                    {followers.map((follower) => (
+                        <Row
+                            key={`${follower.Mac}-${follower.Machine}`}
+                            onOpen={() => {
+                                go(machineRoute(follower.Machine, 'Packages'));
+                            }}
+                            sentence={
+                                follower.Machine === follower.Mac ? undefined : `on ${follower.Mac}`
+                            }
+                            size="slim"
+                            state={{ ...followerState(follower), calm: 'pill' }}
+                            title={follower.Machine}
+                        />
+                    ))}
+                </div>
+            )}
         </Panel>
     );
 }

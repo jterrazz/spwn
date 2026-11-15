@@ -7,6 +7,7 @@ export type SwitchOption<T extends string> = {
     label: string;
     count?: number | undefined;
     identity?: Identity | undefined;
+    flagged?: string | undefined;
 };
 
 type Shared<T extends string> = {
@@ -29,6 +30,7 @@ function Option({
     label,
     count,
     identity,
+    flagged,
     chosen,
     tabs,
     disabled,
@@ -38,6 +40,7 @@ function Option({
     label: string;
     count?: number | undefined;
     identity?: Identity | undefined;
+    flagged?: string | undefined;
     chosen: boolean;
     tabs: boolean;
     disabled: boolean;
@@ -61,6 +64,9 @@ function Option({
             )}
             {label}
             {count === undefined ? null : <span className={styles.count}>{count}</span>}
+            {flagged === undefined ? null : (
+                <span aria-label={flagged} className={styles.flag} role="img" />
+            )}
         </button>
     );
 }
@@ -106,6 +112,7 @@ export function Switch<T extends string>(props: SwitchProps<T>) {
                     controls={controls}
                     count={option.count}
                     disabled={disabled}
+                    flagged={option.flagged}
                     identity={option.identity}
                     key={option.id}
                     label={option.label}

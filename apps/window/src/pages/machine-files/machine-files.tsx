@@ -2,24 +2,19 @@ import type { MachinefileFileView } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { Caption, Missing, Switch } from '../../design/index';
+import { isCalm } from '../../design/state-pill';
 import { wordOf } from '../../engine/engine-words';
 import { useReach, useRead } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import type { Route } from '../../shell/route';
 import type { Opening } from '../../shell/window';
-import {
-    Absent,
-    NotGiven,
-    NoVerdict,
-    Reading as ReadingVerdict,
-    Unanswered,
-} from '../kit/readings';
+import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
 import { layersOf } from '../packages/model';
 import { Page } from '../page';
 import { Chapters } from './chapters';
 import { FileHead } from './file-head';
 import type { Identities, Shown } from './file-head';
-import { Own, Text, Users } from './file-panels';
+import { Followers, Own, Text, Users } from './file-panels';
 import { shelvedOf } from './model';
 
 import styles from './machine-files.module.css';
@@ -48,6 +43,9 @@ function Tabs({
                         label={wordOf('MachinefileShelf', shelf).Word}
                         onChange={choose}
                         options={shelved.map((candidate) => ({
+                            flagged: isCalm(candidate.Verdict.Tone)
+                                ? undefined
+                                : candidate.Verdict.Sentence,
                             id: candidate.Name,
                             identity: identities.get(candidate.Name),
                             label: candidate.Name,
@@ -105,10 +103,7 @@ function File({
                     {view.Head === undefined ? (
                         <Users choose={choose} files={files} name={file} />
                     ) : (
-                        <NotGiven
-                            title="Machines that follow it"
-                            what="The machines made from it, and whether each matches it"
-                        />
+                        <Followers go={go} view={view} />
                     )}
                     {drift.kind === 'read' ? (
                         <Chapters file={file} go={go} plan={drift.out.Plan} />

@@ -6,8 +6,12 @@
   - paragraph: Your machines
   - group "Your machines":
     - button "linux-1"
-    - button "linux-dev"
-    - button "macbook-pro" [pressed]
+    - button "linux-dev 2 machines differ.":
+      - text: linux-dev
+      - img "2 machines differ."
+    - button "macbook-pro 1 machine differs." [pressed]:
+      - text: macbook-pro
+      - img "1 machine differs."
     - button "studio-linux"
   - paragraph: Mixins
   - group "Mixins":
@@ -31,8 +35,8 @@
     - definition:
       - button "jterrazz-base"
   - region "Machines that follow it":
-    - heading "Machines that follow it" [level=2]
-    - paragraph: Not given yet The machines made from it, and whether each matches it
+    - heading "Machines that follow it 1 machine differs." [level=2]
+    - button "macbook-pro 3 differences"
   - region "What it puts on a machine":
     - heading "What it puts on a machine the boxed values are the ones you set" [level=2]
     - group "Chapter":
