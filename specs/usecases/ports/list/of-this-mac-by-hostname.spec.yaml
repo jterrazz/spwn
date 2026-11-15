@@ -1,0 +1,19 @@
+description: 'ports.list of this Mac by its hostname lists its exposed port, as the inbox does'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [(.all.macs | map([.name, .this_mac, ([.ports[]? | .Port])])), .verdict.Sentence]'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{"Of":"macbook-pro"}}
+      exit: 0
+      stdout: |
+          [[["macbook-pro",true,[5000,6006,3000,4321,5173,9229]]],"Port 5000 is exposed."]
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''[.ports[] | select(.port == 5000) | .machine]'''
+      exit: 0
+      stdout: |
+          ["macbook-pro"]
+    - command: 'overview | /usr/bin/grep 5000'
+      exit: 0
+      stdout: |
+          ✗	port 5000 is reachable outside Tailscale	System Settings > General > AirDrop & Handoff > AirPlay Receiver

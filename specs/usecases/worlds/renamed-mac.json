@@ -1,0 +1,21 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook",
+    "user": "jterrazz",
+    "macs": {
+        "macbook": {
+            "engine": {},
+            "preferences": {
+                "here": "studio-laptop",
+                "vm_user": "admin"
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            }
+        }
+    }
+}

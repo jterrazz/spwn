@@ -9,7 +9,6 @@ import (
 	"sort"
 
 	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
-	setupcontract "github.com/jterrazz/studio-station/apps/engine/setup/contract"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
@@ -48,7 +47,6 @@ type ReserverOptions struct {
 
 type Stores struct {
 	Ports        contract.PortsPrefs
-	Name         setupcontract.NamePrefs
 	Macs         machinescontract.MacsPrefs
 	Reservations contract.ReservationStore
 	Declarations contract.DeclarationStore
@@ -176,10 +174,7 @@ func (s *Reserver) List(ctx context.Context, thisMacOnly bool) (ports.AllMachine
 	if err != nil {
 		return ports.AllMachines{}, err
 	}
-	name, err := s.st.Name.Get()
-	if err != nil {
-		return ports.AllMachines{}, err
-	}
+	name := s.o.ThisMacName
 	var others []string
 	for mac := range macs {
 		if mac != name {

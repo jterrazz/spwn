@@ -5,7 +5,6 @@ import (
 	"errors"
 	"maps"
 	"sort"
-	"strings"
 	"time"
 
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -160,10 +159,7 @@ func (s *Machinist) ForgetMac(ctx context.Context, name string) error {
 }
 
 func (s *Machinist) thisMac(cfg prefsView) string {
-	if cfg.ThisMachine != "" {
-		return cfg.ThisMachine
-	}
-	return strings.ToLower(s.h.Hostname())
+	return model.ThisMacName(cfg.ThisMachine, s.h.Hostname())
 }
 
 func (s *Machinist) OtherMacs() []string {
