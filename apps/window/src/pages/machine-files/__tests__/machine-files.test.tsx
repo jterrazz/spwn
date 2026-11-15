@@ -22,7 +22,7 @@ describe('Machine files', () => {
     test('a Mac that matches its file shows each line present', async () => {
         // Given - the window on Machine files over machinefile-kept, This Mac holding its applied file whole
         const result = await component.render(windowOver('machinefile-kept'), async (visitor) => {
-            // When - machinefile.explain and machinefile.drift have answered
+            // When - machinefile.files and machinefile.drift have answered
             await visitor.see(content('lazygit'));
         });
 
@@ -57,7 +57,21 @@ describe('Machine files', () => {
         await expect(result.tree).toMatch(file('./__expected__/stories-files.aria.yaml'));
     });
 
-    test('a mixin chosen is refused in the engine words', async () => {
+    test('every file is a tab under the caption of its shelf, in the engine words', async () => {
+        // Given - the window on Machine files over stories-file, which holds yours, a mixin and shipped files
+        const result = await component.render(windowOver('stories-file'), async (visitor) => {
+            await visitor.see(content('ghostty'));
+
+            // Then - one group per shelf, each under its caption
+            await visitor.see(content('Your machines'));
+            await visitor.see(content('Mixins'));
+            await visitor.see(content('Shipped with station'));
+            await visitor.see(button('station-linux'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a mixin chosen says it makes no machine and lists the files that extend it', async () => {
         // Given - the window on Machine files over stories-file
         const result = await component.render(windowOver('stories-file'), async (visitor) => {
             await visitor.see(content('ghostty'));
@@ -67,10 +81,46 @@ describe('Machine files', () => {
                 within(region('macbook-pro.machine.yaml'), button('jterrazz-base')),
             );
 
-            // Then - the engine refuses to read a machine against a mixin
+            // Then - it makes no machine, and the file that extends it is listed
             await visitor.see(
-                content('Refused · extend it from a Machinefile that says its machine'),
+                content('A mixin makes no machine by itself: it is a piece other files extend'),
             );
+            await visitor.see(within(region('Files that extend it'), content('macbook-pro')));
+            await visitor.gone(button('New machine'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a file that makes a workspace says what it makes, its size and where it starts from', async () => {
+        // Given - the window on Machine files over stories-file
+        const result = await component.render(windowOver('stories-file'), async (visitor) => {
+            await visitor.see(content('ghostty'));
+
+            // When - the shipped workspace file station-linux is chosen
+            await visitor.click(button('station-linux'));
+
+            // Then - the engine's word for what it makes, its size, and the image it starts from
+            const head = region('station-linux.machine.yaml');
+            await visitor.see(within(head, content('Workspace')));
+            await visitor.see(within(head, content('4 CPU · 8G · 20G')));
+            await visitor.see(within(head, content('ghcr.io/cirruslabs/ubuntu:24.04')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('the YAML is the exact text of the file, and its own changes are a second tab', async () => {
+        // Given - the window on Machine files over stories-file, on the file macbook-pro that has own changes
+        const result = await component.render(windowOver('stories-file'), async (visitor) => {
+            await visitor.see(content('ghostty'));
+            await visitor.see(region("This Mac's own changes"));
+
+            // When - YAML is chosen
+            await visitor.click(within(region('macbook-pro.machine.yaml'), button('YAML')));
+
+            // Then - the text of the file is read only, and a tab opens the changes file
+            await visitor.see(region('File text'));
+            await visitor.click(button('This Mac'));
+            await visitor.see(region('macbook-pro.local.yaml'));
         });
         expect(result.errors.text).toBe('');
     });

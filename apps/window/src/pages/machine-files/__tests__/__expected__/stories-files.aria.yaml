@@ -3,14 +3,28 @@
   - paragraph:
     - img "Not given yet"
     - text: A machine file is the recipe a machine is made from
-  - group "Machine files":
-    - button "jterrazz-base"
+  - paragraph: Your machines
+  - group "Your machines":
+    - button "linux-1"
+    - button "linux-dev"
     - button "macbook-pro" [pressed]
+    - button "studio-linux"
+  - paragraph: Mixins
+  - group "Mixins":
+    - button "jterrazz-base"
+  - paragraph: Shipped with station
+  - group "Shipped with station":
+    - button "station-linux"
+    - button "station-macos"
   - region "macbook-pro.machine.yaml":
     - heading "macbook-pro.machine.yaml" [level=2]
     - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
+    - group "How the file is shown":
+      - button "Fields" [pressed]
+      - button "YAML"
+    - paragraph: The owner's Mac
     - term: Makes
-    - definition: a Mac
+    - definition: Computer
     - term: System
     - definition: macOS
     - term: Extends
@@ -35,3 +49,6 @@
       - paragraph: jterrazz-base extended · 2
       - button "homebrew manager macOS package manager takes every version"
       - button "jq Command-line JSON processor takes every version"
+  - region "This Mac's own changes":
+    - heading "This Mac's own changes ~/.config/station/machinefiles/macbook-pro.local.yaml" [level=2]
+    - text: bat an app added on this Mac only added lazygit an app the files declare, left out here removed

@@ -1,82 +1,103 @@
-import type { MachinefileLayer } from '@jterrazz/station-api';
+import type { MachinefileFileView, MachinefileHead } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { extendedBy, factsOf, filesOf } from '../model';
+import { extendedBy, linesOf, makesOf, shelvedOf, sizeOf, systemOf } from '../model';
 
-const origin = (Name: string, Layer: MachinefileLayer) => ({
-    File: `/files/${Name}.yaml`,
-    Layer,
+const view = (
+    Name: string,
+    Shelf: MachinefileFileView['Shelf'],
+    Extends: null | string[] = null,
+): MachinefileFileView => ({
+    Apps: null,
+    Description: '',
+    Extends,
+    Followers: null,
+    Layer: 'user',
     Name,
+    Path: '',
+    Settings: null,
+    Shelf,
+    Text: '',
+    Verdict: { Sentence: 'No machine follows it.', Tone: 'plain' },
 });
 
 describe('model', () => {
-    test('the files a machine file is read from are each listed once, in the engine order', () => {
-        // Given - an explain that names a file twice and one file with no name
-        const files = filesOf({
-            Files: [
-                origin('jterrazz-macbook-pro', 'user'),
-                origin('station-macos', 'built-in'),
-                origin('jterrazz-macbook-pro', 'user'),
-                origin('', 'built-in'),
-            ],
-            Name: 'jterrazz-macbook-pro',
-            Values: null,
-        });
+    test('the files are shelved yours, mixins, then shipped, a shelf with no file left out', () => {
+        // Given - files in the engine's name order, none of them a mixin but one
+        const files = [
+            view('jterrazz-base', 'mixin'),
+            view('jterrazz-macbook-pro', 'yours'),
+            view('station-macos', 'shipped'),
+            view('station-linux', 'shipped'),
+        ];
 
-        // Then - each named file once
-        expect(files.map((file) => file.Name)).toStrictEqual([
-            'jterrazz-macbook-pro',
-            'station-macos',
+        // When - they are shelved
+        const shelves = shelvedOf(files).map(({ shelf, files: held }) => [
+            shelf,
+            held.map((file) => file.Name),
         ]);
+
+        // Then - the order of the captions, each shelf keeping the engine's order
+        expect(shelves).toStrictEqual([
+            ['yours', ['jterrazz-macbook-pro']],
+            ['mixin', ['jterrazz-base']],
+            ['shipped', ['station-macos', 'station-linux']],
+        ]);
+        expect(shelvedOf([view('only', 'yours')])).toHaveLength(1);
     });
 
-    test('an explain that names no file lists none', () => {
-        // Given - an explain whose files are null on the wire
-        const files = filesOf({ Files: null, Name: 'station-linux', Values: null });
+    test('the files that extend a file are the ones whose Extends name it', () => {
+        // Given - a mixin extended by two files, and a file that extends nothing
+        const files = [
+            view('base', 'mixin'),
+            view('a', 'yours', ['base']),
+            view('b', 'yours', ['base', 'other']),
+            view('c', 'yours'),
+        ];
 
-        // Then - the list is empty
-        expect(files).toStrictEqual([]);
+        // Then - the join inverts Extends
+        expect(extendedBy(files, 'base').map((file) => file.Name)).toStrictEqual(['a', 'b']);
+        expect(extendedBy(files, 'a')).toStrictEqual([]);
     });
 
-    test("a file's facts are its values, and it extends the files read before it", () => {
-        // Given - an explain of a Mac's file that a mixin comes before
-        const explain = {
-            Files: [origin('jterrazz-base', 'user'), origin('jterrazz-macbook-pro', 'user')],
-            Name: 'jterrazz-macbook-pro',
-            Values: [
-                {
-                    Key: 'machine.kind',
-                    Origin: origin('jterrazz-macbook-pro', 'user'),
-                    Text: 'computer',
-                    Withheld: false,
-                },
-                {
-                    Key: 'machine.system.os',
-                    Origin: origin('jterrazz-macbook-pro', 'user'),
-                    Text: 'macos',
-                    Withheld: false,
-                },
-                {
-                    Key: 'machine.system.arch',
-                    Origin: origin('jterrazz-base', 'user'),
-                    Text: 'arm64',
-                    Withheld: false,
-                },
-            ],
+    test("a file's head is worded by the engine's tables, its VM's size in counts of the wire", () => {
+        // Given - a head that makes a workspace on Ubuntu, and one that makes a Mac
+        const workspace: MachinefileHead = {
+            Kind: 'workspace',
+            System: { Arch: 'arm64', OS: 'ubuntu', Version: '24.04' },
+            VM: {
+                CPUs: 4,
+                Disk: '20G',
+                From: 'station-linux',
+                Lifetime: 'ephemeral',
+                Memory: '4G',
+            },
+        };
+        const mac: MachinefileHead = {
+            Kind: 'computer',
+            System: { Arch: 'arm64', OS: 'macos', Version: '' },
         };
 
-        // When - the facts and the files extended are read for the file, then for its mixin
-        const file = [
-            factsOf(explain, 'jterrazz-macbook-pro'),
-            extendedBy(explain, 'jterrazz-macbook-pro'),
-        ];
-        const mixin = [factsOf(explain, 'jterrazz-base'), extendedBy(explain, 'jterrazz-base')];
-
-        // Then - the file makes a computer on macOS, the engine's word for its code, and extends the mixin; the mixin sets the arch alone
-        expect(file).toStrictEqual([
-            { makes: 'computer', system: 'macOS · arm64' },
-            [{ identity: 'blue', name: 'jterrazz-base' }],
+        // Then - the role and the system, the size apart, a Mac having none
+        expect([makesOf(workspace), systemOf(workspace), sizeOf(workspace)]).toStrictEqual([
+            'Workspace',
+            'Ubuntu 24.04 · arm64',
+            '4 CPU · 4G · 20G',
         ]);
-        expect(mixin).toStrictEqual([{ makes: '', system: 'arm64' }, []]);
+        expect([makesOf(mac), systemOf(mac), sizeOf(mac)]).toStrictEqual([
+            'Computer',
+            'macOS · arm64',
+            '',
+        ]);
+    });
+
+    test('a file text is numbered line by line, its last newline ending no line', () => {
+        // Given - a text of two lines
+        // Then - two numbered lines, and an empty text has none
+        expect(linesOf('name: a\napps: []\n')).toStrictEqual([
+            { number: 1, text: 'name: a' },
+            { number: 2, text: 'apps: []' },
+        ]);
+        expect(linesOf('')).toStrictEqual([]);
     });
 });
