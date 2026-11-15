@@ -32,6 +32,7 @@ export const BRIDGED = [
     'machinefile.apply',
     'machinefile.drift',
     'machinefile.explain',
+    'machinefile.files',
     'machinefile.plan',
     'machinefile.upgrade',
     'machines.add',

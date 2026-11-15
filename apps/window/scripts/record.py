@@ -171,7 +171,9 @@ def asks(listed):
         {"watch": "apps.list", "in": {}},
         {"watch": "settings.list", "in": {}},
         {"call": "settings.matrix", "in": {}},
+        {"call": "apps.matrix", "in": {}},
         {"call": "machinefile.explain", "in": {}},
+        {"call": "machinefile.files", "in": {}},
         {"watch": "engine.watch", "in": {"machines": []}},
         *[{"watch": "engine.watch", "in": {"machines": [vm["Name"]]}} for _, vm in vms],
         *[{kind: call, "in": {}, **target} for target in targets for kind, call in (
@@ -202,11 +204,11 @@ def asks(listed):
 
 
 def follows(requests, answered):
-    """The reads asked of an answer: a drift per machine file explain names, and the grant picker's offer per
-    entry of this Mac's vault."""
-    explained = [last_out(frames) for request, frames in zip(requests, answered)
-                 if request.get("call") == "machinefile.explain" and "target" not in request]
-    names = [file["Name"] for out in explained if out for file in out.get("Files") or [] if file.get("Name")]
+    """The reads asked of an answer: a drift per machine file machinefile.files names, and the grant picker's offer
+    per entry of this Mac's vault."""
+    listed = [last_out(frames) for request, frames in zip(requests, answered)
+              if request.get("call") == "machinefile.files" and "target" not in request]
+    names = [file["Name"] for out in listed if out for file in out.get("Files") or [] if file.get("Name")]
     vaults = [last_out(frames) for request, frames in zip(requests, answered) if request.get("watch") == "vault.list"]
     entries = [entry["ID"] for out in vaults if out for entry in out.get("Entries") or [] if entry.get("ID")]
     asked_already = {keyOf(request) for request in requests}

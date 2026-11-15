@@ -1,12 +1,14 @@
 import type {
     AppsReport,
-    MachinefileCallsExplainOut,
-    MachinefileOrigin,
+    MachinefileFileView,
+    MachinefileHead,
+    MachinefileShelf,
 } from '@jterrazz/station-api';
 
+import type { CodeLine } from '../../design/code-block';
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
-import { wordOfSent } from '../../engine/engine-words';
+import { wordOf, wordOfSent } from '../../engine/engine-words';
 import { SEPARATOR } from '../../separator';
 import type { PlainPage, Route } from '../../shell/route';
 import { SHELVES } from '../packages/model';
@@ -26,51 +28,60 @@ export function catalogRouteOf(shelf: Shelf, name: string): Route {
     return { item: name, page: CATALOG_PAGES[shelf] };
 }
 
-export type Extended = { name: string; identity: Identity };
+const SHELF_ORDER: readonly MachinefileShelf[] = ['yours', 'mixin', 'shipped'];
 
-export function filesOf(explain: MachinefileCallsExplainOut): readonly MachinefileOrigin[] {
-    const files = explain.Files ?? [];
-    const seen = new Set<string>();
-    return files.filter((file) => {
-        if (file.Name === '' || seen.has(file.Name)) {
-            return false;
-        }
-        seen.add(file.Name);
-        return true;
-    });
+export type Shelved = { shelf: MachinefileShelf; files: readonly MachinefileFileView[] };
+
+export function shelvedOf(files: readonly MachinefileFileView[]): readonly Shelved[] {
+    return SHELF_ORDER.map((shelf) => ({
+        files: files.filter((file) => file.Shelf === shelf),
+        shelf,
+    })).filter((shelved) => shelved.files.length > 0);
 }
 
 export function descriptionsOf(reports: readonly AppsReport[]): ReadonlyMap<string, string> {
     return new Map(reports.map((report) => [report.App.Name, report.App.Description]));
 }
 
-export function factsOf(
-    explain: MachinefileCallsExplainOut,
-    file: string,
-): { makes: string; system: string } {
-    const values = (explain.Values ?? []).filter(
-        (value) => file === explain.Name || value.Origin.Name === file,
-    );
-    const text = new Map(values.map((value) => [value.Key, value.Text]));
-    const os = text.get('machine.system.os') ?? '';
-    const named = [os === '' ? '' : wordOfSent('CatalogOS', os), text.get('machine.system.version')]
-        .filter((part) => part !== undefined && part !== '')
+export function systemOf({ System }: MachinefileHead): string {
+    const named = [wordOfSent('CatalogOS', System.OS), System.Version]
+        .filter((part) => part !== '')
         .join(' ');
-    const arch = wordOfSent('CatalogArch', text.get('machine.system.arch') ?? '');
-    return {
-        makes: text.get('machine.kind') ?? '',
-        system: [named, arch].filter((part) => part !== '').join(SEPARATOR),
-    };
+    return [named, wordOfSent('CatalogArch', System.Arch)]
+        .filter((part) => part !== '')
+        .join(SEPARATOR);
 }
 
-export function extendedBy(explain: MachinefileCallsExplainOut, file: string): readonly Extended[] {
-    if (file !== explain.Name) {
-        return [];
+export function makesOf({ Kind }: MachinefileHead): string {
+    return wordOf('CatalogMachineRole', Kind).Word;
+}
+
+export function sizeOf({ VM }: MachinefileHead): string {
+    if (VM === undefined) {
+        return '';
     }
-    const files = filesOf(explain);
-    const at = files.findIndex((candidate) => candidate.Name === file);
-    return (at === -1 ? files : files.slice(0, at)).map((candidate, index) => ({
-        identity: IDENTITIES[index % IDENTITIES.length] ?? 'system',
-        name: candidate.Name,
-    }));
+    return [VM.CPUs === 0 ? '' : `${String(VM.CPUs)} CPU`, VM.Memory, VM.Disk]
+        .filter((part) => part !== '')
+        .join(SEPARATOR);
+}
+
+export function lifetimeOf({ VM }: MachinefileHead): string {
+    return VM === undefined ? '' : wordOfSent('CatalogLifetime', VM.Lifetime);
+}
+
+export function extendedBy(
+    files: readonly MachinefileFileView[],
+    name: string,
+): readonly MachinefileFileView[] {
+    return files.filter((file) => (file.Extends ?? []).includes(name));
+}
+
+export function identityAt(index: number): Identity {
+    return IDENTITIES[index % IDENTITIES.length] ?? 'system';
+}
+
+export function linesOf(text: string): readonly CodeLine[] {
+    const lines = text.split('\n');
+    const kept = lines.at(-1) === '' ? lines.slice(0, -1) : lines;
+    return kept.map((line, index) => ({ number: index + 1, text: line }));
 }

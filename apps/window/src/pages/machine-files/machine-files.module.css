@@ -50,6 +50,24 @@
     color: var(--t3);
     overflow-wrap: anywhere;
 }
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-16);
+}
+.shelf {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    min-width: 0;
+}
+.lead {
+    margin: 0;
+    color: var(--t2);
+}
+.rows {
+    padding-bottom: var(--space-8);
+}
 .extends {
     display: inline-flex;
     flex-wrap: wrap;

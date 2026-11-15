@@ -60,7 +60,6 @@ export const MAC_STATE_WORDS: Words<MacState> = {
 };
 
 export const MACHINE_KIND_WORDS: WordsOfAnOpenCode = {
-    computer: 'Mac',
     server: 'server',
     workspace: 'workspace',
 };

@@ -39,7 +39,7 @@ describe('machine files', () => {
             '/?world=stories&page=machine-files&file=macbook-pro',
             async (visitor) => {
                 const file = region('macbook-pro.machine.yaml');
-                await visitor.see(within(file, content('a Mac')));
+                await visitor.see(within(file, content('Computer')));
 
                 // When - its head is read
                 // Then - its head offers no New machine
