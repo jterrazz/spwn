@@ -10,4 +10,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          ["3 things need you.",[["port 5000 is reachable outside Tailscale","needs-you","review","System Settings > General > AirDrop & Handoff > AirPlay Receiver"]]]
+          ["2 things need you.",[["port 5000 is reachable outside Tailscale","needs-you","review","System Settings > General > AirDrop & Handoff > AirPlay Receiver"]]]

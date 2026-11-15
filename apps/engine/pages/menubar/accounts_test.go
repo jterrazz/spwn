@@ -108,6 +108,9 @@ func TestRemovingAGrantAsksAndCallsGrantsRemoveOnThisMacAlone(t *testing.T) {
 	if remove == nil || remove.Run.Call != CallRemoveGrant || remove.Run.In["Entry"] != "pw-1" || remove.Run.In["To"] != "linux-1" || remove.Run.In["Confirm"] != yes || remove.Confirm == nil {
 		t.Fatalf("Remove is %+v, want grants.remove of pw-1 from linux-1, confirmed", remove)
 	}
+	if !remove.Destructive || !remove.Confirm.Danger {
+		t.Errorf("Remove is red %v, its question red %v; want both, as the window draws it", remove.Destructive, remove.Confirm.Danger)
+	}
 	if remove.Hud == nil || words(*remove.Hud) != "GitHub removed from linux-1" {
 		t.Errorf("Remove says %+v once it ran", remove.Hud)
 	}

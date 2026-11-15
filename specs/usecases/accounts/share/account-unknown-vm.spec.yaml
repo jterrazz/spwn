@@ -1,8 +1,0 @@
-description: 'sharing with a machine station does not know is refused, exit 2'
-env: two-macs
-runs:
-    - command: 'accounts share github --with ghost'
-      exit: 2
-      stderr: |
-          Error: no machine named "ghost"
-          Hint: station machines

@@ -37,16 +37,6 @@ func Holder(ctx context.Context, env Env, vm string) (Held, bool) {
 	return Held{}, false
 }
 
-func (h Held) OnTarget(env Env) bool {
-	// value: whether the Mac the command runs on is the one that holds the
-	// VM, named in full or as the interface names it (mac-mini).
-	t := env.Target()
-	if t.Name == "" || t.Name == env.Self.Name {
-		return h.MacIsThisMac
-	}
-	return t.Name == h.Mac || t.Name == page.MacName(h.Mac, env.Self.Name)
-}
-
 // value: SPEC §8.1: when the Mac that does not answer last answered, as All
 // machines says it (`last answer 03:12`); nothing for a Mac never heard, or
 // for a VM of it, which is named by where it is.

@@ -36,19 +36,15 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "8 accounts"
+                    "text": "4 programs"
                   },
                   {
                     "kind": "text",
-                    "text": "6 signed in"
+                    "text": "2 signed in"
                   },
                   {
                     "kind": "text",
                     "text": "1 needs you"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "shared with 2 VMs"
                   }
                 ]
               }
@@ -63,727 +59,196 @@
       "title": "Accounts",
       "columns": [
         {
-          "key": "provider",
+          "key": "program",
           "kind": "text",
           "keep": 100
         },
         {
-          "key": "identity",
-          "kind": "identity",
-          "keep": 60
-        },
-        {
-          "key": "origin",
+          "key": "state",
           "kind": "text",
           "keep": 90
         },
         {
+          "key": "who",
+          "kind": "identity",
+          "keep": 60
+        },
+        {
+          "key": "how",
+          "kind": "text",
+          "keep": 70
+        },
+        {
           "key": "scope",
           "kind": "list",
-          "keep": 70,
+          "keep": 50,
           "whole": true
         },
         {
-          "key": "detail",
+          "key": "line",
           "kind": "text",
-          "keep": 50
+          "keep": 40
         }
       ],
       "items": [
         {
-          "group": {
-            "head": {
-              "id": "jterrazz-macbook-pro",
-              "mark": "broken",
-              "label": "jterrazz-macbook-pro",
-              "cells": [
-                {
-                  "kind": "text",
-                  "text": "Mac"
-                }
-              ],
-              "reason": "degraded"
-            },
-            "items": [
+          "row": {
+            "id": "jterrazz-macbook-pro/gh",
+            "mark": "ok",
+            "label": "gh",
+            "short": "GitHub",
+            "cells": [
               {
-                "row": {
-                  "id": "jterrazz-macbook-pro/github",
-                  "mark": "ok",
-                  "label": "github",
-                  "short": "GitHub",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "jterrazz"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "gist"
-                        },
-                        {
-                          "kind": "text",
-                          "text": "read:org"
-                        },
-                        {
-                          "kind": "text",
-                          "text": "repo"
-                        },
-                        {
-                          "kind": "text",
-                          "text": "workflow"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "gh"
-                        },
-                        {
-                          "kind": "text",
-                          "text": "keyring"
-                        },
-                        {
-                          "kind": "text",
-                          "text": "ssh"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "row": {
-                  "id": "jterrazz-macbook-pro/npm",
-                  "mark": "broken",
-                  "label": "npm",
-                  "short": "npm",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "?"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "none"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "token refused by registry.npmjs.org"
-                        }
-                      ]
-                    }
-                  ],
-                  "reason": "refused",
-                  "hint": {
-                    "command": "npm login",
-                    "external": true
-                  }
-                }
-              },
-              {
-                "row": {
-                  "id": "jterrazz-macbook-pro/claude",
-                  "mark": "ok",
-                  "label": "claude",
-                  "short": "Claude",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "admin@jterrazz.com"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "max"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "claude.ai"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "row": {
-                  "id": "jterrazz-macbook-pro/tailscale",
-                  "mark": "ok",
-                  "label": "tailscale",
-                  "short": "Tailscale",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "jterrazz@github"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "jterrazz.github"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "app-store"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "row": {
-                  "id": "jterrazz-macbook-pro/cloudflare",
-                  "mark": "absent",
-                  "label": "cloudflare",
-                  "short": "Cloudflare",
-                  "cells": [
-                    {
-                      "kind": "none"
-                    },
-                    {
-                      "kind": "none"
-                    },
-                    {
-                      "kind": "none"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "wrangler not on PATH"
-                        }
-                      ]
-                    }
-                  ],
-                  "reason": "missing"
-                }
-              },
-              {
-                "row": {
-                  "id": "jterrazz-macbook-pro/git",
-                  "mark": "ok",
-                  "label": "git",
-                  "short": "git",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "Jean-Baptiste Terrazzoni"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "none"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "admin@jterrazz.com"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "row": {
-                  "id": "jterrazz-macbook-pro/ssh",
-                  "mark": "ok",
-                  "label": "ssh",
-                  "short": "ssh",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "6 keys"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "none"
-                    },
-                    {
-                      "kind": "none"
-                    }
-                  ],
-                  "detail": {
-                    "kind": "list",
-                    "items": [
-                      {
-                        "kind": "text",
-                        "text": "admin@jterrazz.com"
-                      },
-                      {
-                        "kind": "text",
-                        "text": "station-image"
-                      },
-                      {
-                        "kind": "text",
-                        "text": "station-e2e"
-                      },
-                      {
-                        "kind": "text",
-                        "text": "deploy"
-                      },
-                      {
-                        "kind": "text",
-                        "text": "old-rsa"
-                      },
-                      {
-                        "kind": "text",
-                        "text": "github-actions"
-                      }
-                    ]
-                  }
-                }
-              },
-              {
-                "row": {
-                  "id": "jterrazz-macbook-pro/docker",
-                  "mark": "ok",
-                  "label": "docker",
-                  "short": "Docker",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "deploy"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "registry.jterrazz.com"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "osxkeychain"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            ],
-            "fold": "open"
-          }
-        },
-        {
-          "group": {
-            "head": {
-              "id": "linux-1",
-              "mark": "ok",
-              "label": "linux-1",
-              "cells": [
-                {
-                  "kind": "text",
-                  "text": "ephemeral"
-                }
-              ],
-              "detail": {
                 "kind": "text",
-                "text": "guest connected"
-              }
-            },
-            "items": [
-              {
-                "row": {
-                  "id": "linux-1/claude",
-                  "mark": "ok",
-                  "label": "claude",
-                  "short": "Claude",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "admin@jterrazz.com"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "shared"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "operator:claude:oauth-token"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "until",
-                      "n": 42000,
-                      "at": "2026-11-03T22:10:00Z"
-                    }
-                  ]
-                }
+                "text": "signed in"
               },
               {
-                "row": {
-                  "id": "linux-1/git",
-                  "mark": "ok",
-                  "label": "git",
-                  "short": "git",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "Jean-Baptiste Terrazzoni"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "none"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "admin@jterrazz.com"
-                        }
-                      ]
-                    }
-                  ]
-                }
+                "kind": "identity",
+                "text": "jterrazz"
               },
               {
-                "row": {
-                  "id": "linux-1/entry",
-                  "mark": "ok",
-                  "label": "entry",
-                  "short": "entry",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "1 SSH key"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "jterrazz-macbook-pro"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4"
-                        }
-                      ]
-                    }
-                  ]
-                }
+                "kind": "text",
+                "text": "own"
               },
               {
-                "group": {
-                  "head": {
-                    "id": "linux-1/absent",
-                    "label": "not set here"
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "gist"
                   },
-                  "items": [
-                    {
-                      "row": {
-                        "id": "linux-1/github",
-                        "mark": "absent",
-                        "label": "github",
-                        "short": "GitHub",
-                        "cells": [
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "list",
-                            "items": [
-                              {
-                                "kind": "text",
-                                "text": "not logged in"
-                              }
-                            ]
-                          }
-                        ],
-                        "reason": "unset",
-                        "hint": {
-                          "command": "ssh linux-1 gh auth login",
-                          "external": true
-                        }
-                      }
-                    },
-                    {
-                      "row": {
-                        "id": "linux-1/npm",
-                        "mark": "absent",
-                        "label": "npm",
-                        "short": "npm",
-                        "cells": [
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "list",
-                            "items": [
-                              {
-                                "kind": "text",
-                                "text": "npm not on PATH"
-                              }
-                            ]
-                          }
-                        ],
-                        "reason": "missing"
-                      }
-                    },
-                    {
-                      "row": {
-                        "id": "linux-1/ssh",
-                        "mark": "absent",
-                        "label": "ssh",
-                        "short": "ssh",
-                        "cells": [
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "none"
-                          },
-                          {
-                            "kind": "list",
-                            "items": [
-                              {
-                                "kind": "text",
-                                "text": "no key in the agent"
-                              }
-                            ]
-                          }
-                        ],
-                        "detail": {
-                          "kind": "none"
-                        },
-                        "reason": "unset"
-                      }
-                    }
-                  ],
-                  "fold": "folded"
-                }
+                  {
+                    "kind": "text",
+                    "text": "read:org"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "repo"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "workflow"
+                  }
+                ]
+              },
+              {
+                "kind": "none"
               }
-            ],
-            "fold": "open"
+            ]
           }
         },
         {
-          "group": {
-            "head": {
-              "id": "api",
-              "mark": "attention",
-              "label": "api",
-              "cells": [
-                {
-                  "kind": "text",
-                  "text": "persistent"
-                }
-              ],
-              "detail": {
+          "row": {
+            "id": "jterrazz-macbook-pro/npm",
+            "mark": "broken",
+            "label": "npm",
+            "short": "npm",
+            "cells": [
+              {
                 "kind": "text",
-                "text": "guest connected"
-              },
-              "reason": "degraded"
-            },
-            "items": [
-              {
-                "row": {
-                  "id": "api/claude",
-                  "mark": "attention",
-                  "label": "claude",
-                  "short": "Claude",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "admin@jterrazz.com"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "shared"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "operator:claude:oauth-token"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "until",
-                      "n": 2520,
-                      "at": "2026-11-03T11:12:00Z"
-                    }
-                  ],
-                  "reason": "expiring",
-                  "hint": {
-                    "command": "station accounts share claude --with api"
-                  }
-                }
+                "text": "broken"
               },
               {
-                "row": {
-                  "id": "api/entry",
-                  "mark": "ok",
-                  "label": "entry",
-                  "short": "entry",
-                  "cells": [
-                    {
-                      "kind": "identity",
-                      "text": "1 SSH key"
-                    },
-                    {
-                      "kind": "text",
-                      "text": "own"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "jterrazz-macbook-pro"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4"
-                        }
-                      ]
-                    }
-                  ]
-                }
+                "kind": "identity",
+                "text": "jterrazz"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "The token is refused by registry.npmjs.org"
               }
             ],
-            "fold": "open"
+            "reason": "failing"
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/claude",
+            "mark": "ok",
+            "label": "claude",
+            "short": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "signed in"
+              },
+              {
+                "kind": "identity",
+                "text": "admin@jterrazz.com"
+              },
+              {
+                "kind": "text",
+                "text": "own"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "max"
+                  }
+                ]
+              },
+              {
+                "kind": "none"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/wrangler",
+            "mark": "absent",
+            "label": "wrangler",
+            "short": "Cloudflare",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "signed out"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              }
+            ]
           }
         }
       ],
       "counts": [
         {
           "mark": "ok",
-          "n": 11
-        },
-        {
-          "mark": "attention",
           "n": 2
         },
         {
           "mark": "absent",
-          "n": 4
+          "n": 1
         },
         {
           "mark": "broken",
-          "n": 2
+          "n": 1
         }
       ]
     }
   ],
   "actions": [
     {
-      "key": "s",
-      "label": "share with a VM",
-      "on": "row",
-      "priority": 1,
-      "mutates": true
-    },
-    {
-      "key": "t",
-      "label": "take back",
-      "on": "row",
-      "confirm": {
-        "yes": "take back"
-      },
-      "priority": 2,
-      "mutates": true
-    },
-    {
       "key": "R",
       "label": "reload",
       "on": "page",
-      "priority": 3
+      "priority": 1
     }
   ]
 }

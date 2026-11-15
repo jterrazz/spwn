@@ -69,7 +69,7 @@ final class MenuTests: XCTestCase {
         XCTAssertEqual(read["menu.grant.to"], ["✓ linux-1", "agent-7f"])
         XCTAssertEqual(read["menu.share-port.of"], workspaces)
         XCTAssertEqual(read["menu.context.stopped"], ["api on This Mac", "Open ↩", "-", "Start", "-", "Delete… (red)"])
-        XCTAssertEqual(read["menu.context.server.down"]?.contains("Restart…"), true)
+        XCTAssertEqual(read["menu.context.server.down"]?.contains("Restart… (red)"), true)
         XCTAssertEqual(read["menu.context.mac"], ["mac-mini", "Open ↩", "New VM on mac-mini… ⌘N", "Open in Terminal ⌘T"])
         XCTAssertEqual(read["menu.context.mac.asleep"], ["macbook-air", "Open ↩", "Wake macbook-air"])
         XCTAssertEqual(read["menu.context.grant"], ["GitHub granted to linux-1", "Remove… (red)"])

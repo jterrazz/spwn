@@ -10,22 +10,22 @@ runs:
           paint plain=38;2;202;211;245 bold=1;38;2;202;211;245 good=38;2;166;218;149 warn=38;2;238;212;159 bad=38;2;237;135;150 muted=38;2;165;173;203 subtle=38;2;110;115;141
       exit: 0
       stdout: |
-          {bold This Mac} · jterrazz-macbook-pro · 9 things need you · Engine running
+          {bold This Mac} · jterrazz-macbook-pro · 8 things need you · Engine running
 
           {bold Needs you}
-            {bad ✗} {bold npm sign-in expired}    npm login
             {bad ✗} {bold com.jterrazz.brain.x-snapshot is failing, last exit 2}
               station background remove com.jterrazz.brain.x-snapshot
             {warn ◐} {bold 1 mise update waiting}  station apps update --manager mise
             {warn ◐} {bold 1 brew update waiting}  station apps update --manager brew
             {warn ◐} {bold Firewall: off}          System Settings > Network > Firewall
-            4 more: station overview --all
+            {warn ◐} {bold ~/.tart is misplaced}   station disk move ~/.tart
+            3 more: station overview --all
           {bold Activity}    memory 12.4 of 16 GB · 388 GB free
           {bold Apps}        {good ●} 7 ok · {warn ◐} 2 updates · {muted ○} 105 not installed
           {bold Settings}    set by station · {muted ○} 0 of 19 · checked · {good ●} 8 of 9
           {bold Disk}        {warn ◐} 388 GB free · 34.8 GB can rebuild · {warn ◐} 1 misplaced
           {bold Ports}       Public 0 · Private 2
-          {bold Accounts}    {good ●} 6 · {bad ✗} npm
+          {bold Accounts}    {good ●} 3
           {bold Background}  {good ●} 10 · {bad ✗} 1 failing · {warn ◐} 3 orphans
           {bold Awake}       {muted ○} sleeps normally
           {bold VMs}         {muted ○} api stopped · {good ●} linux-1 running

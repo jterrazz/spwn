@@ -75,50 +75,6 @@
       "out": "Opened"
     },
     {
-      "name": "accounts.read",
-      "schema": "station.accounts.read/v1",
-      "section": "accounts",
-      "where": "at-target",
-      "in": "ReadIn",
-      "out": "Report",
-      "watch": true
-    },
-    {
-      "name": "accounts.share",
-      "schema": "station.accounts.share/v1",
-      "section": "accounts",
-      "where": "in-engine",
-      "errors": [
-        "account.not-shareable",
-        "account.not-signed-in",
-        "account.other-mac",
-        "account.term-out-of-bounds",
-        "account.to-server",
-        "account.unknown",
-        "account.unknown-vm",
-        "account.unreadable",
-        "account.vm-stopped"
-      ],
-      "in": "ShareIn",
-      "out": "Shared"
-    },
-    {
-      "name": "accounts.take-back",
-      "schema": "station.accounts.take-back/v1",
-      "section": "accounts",
-      "where": "in-engine",
-      "confirm": "take-back",
-      "consequence": "The account leaves %s; it stays signed in on this Mac.",
-      "errors": [
-        "account.not-shared",
-        "account.unknown",
-        "account.unknown-vm",
-        "confirm.yes-needed"
-      ],
-      "in": "TakeBackIn",
-      "out": "Shared"
-    },
-    {
       "name": "activity.read",
       "schema": "station.activity.read/v1",
       "section": "activity",
@@ -636,7 +592,7 @@
       "section": "accounts",
       "where": "in-engine",
       "confirm": "remove-grant",
-      "consequence": "The grant of %s ends now, before its term.",
+      "consequence": "The grant of %s ends now; the password stays in this Mac's vault.",
       "errors": [
         "confirm.yes-needed",
         "grant.not-granted",

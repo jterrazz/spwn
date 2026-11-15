@@ -159,6 +159,32 @@
             }
         },
         "linux-1": {
+            "accounts": {
+                "programs": {
+                    "claude": {
+                        "Program": "claude",
+                        "State": "signed-in",
+                        "Who": "admin@jterrazz.com",
+                        "Scopes": null,
+                        "Plan": "",
+                        "How": "granted",
+                        "Entry": "pw-claude",
+                        "EntryLabel": "Claude token",
+                        "Reason": ""
+                    },
+                    "gh": {
+                        "Program": "gh",
+                        "State": "signed-in",
+                        "Who": "admin@jterrazz.com",
+                        "Scopes": null,
+                        "Plan": "",
+                        "How": "granted",
+                        "Entry": "pw-github",
+                        "EntryLabel": "GitHub token",
+                        "Reason": ""
+                    }
+                }
+            },
             "apps": {
                 "apt": {
                     "installed": {
@@ -266,6 +292,21 @@
             }
         },
         "linux-3": {
+            "accounts": {
+                "programs": {
+                    "gh": {
+                        "Program": "gh",
+                        "State": "signed-in",
+                        "Who": "admin@jterrazz.com",
+                        "Scopes": null,
+                        "Plan": "",
+                        "How": "granted",
+                        "Entry": "pw-github",
+                        "EntryLabel": "GitHub token",
+                        "Reason": ""
+                    }
+                }
+            },
             "disk": {
                 "total": 40000000000,
                 "free": 30000000000
@@ -1944,6 +1985,21 @@
             }
         },
         "review-bot": {
+            "accounts": {
+                "programs": {
+                    "claude": {
+                        "Program": "claude",
+                        "State": "signed-in",
+                        "Who": "admin@jterrazz.com",
+                        "Scopes": null,
+                        "Plan": "",
+                        "How": "granted",
+                        "Entry": "pw-claude",
+                        "EntryLabel": "Claude token",
+                        "Reason": ""
+                    }
+                }
+            },
             "disk": {
                 "total": 40000000000,
                 "free": 30000000000

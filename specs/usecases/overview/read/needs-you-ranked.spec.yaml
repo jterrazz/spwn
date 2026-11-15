@@ -4,7 +4,6 @@ runs:
     - command: 'overview --json | /usr/bin/jq -c ''.findings[] | [.severity, .section, .subject]'''
       exit: 0
       stdout: |
-          ["broken","accounts","npm"]
           ["broken","background","com.jterrazz.brain.x-snapshot"]
           ["needs-a-look","apps","mise"]
           ["needs-a-look","apps","brew"]
@@ -17,7 +16,6 @@ runs:
       exit: 0
       stdout: |
           # Needs you
-          ✗	npm sign-in expired
           ✗	com.jterrazz.brain.x-snapshot is failing, last exit 2
           ◐	1 mise update waiting
           ◐	1 brew update waiting

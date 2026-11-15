@@ -1,8 +1,0 @@
-description: 'sharing an account the catalogue does not hold is refused, exit 2'
-env: two-macs
-runs:
-    - command: 'accounts share gitlab --with linux-1'
-      exit: 2
-      stderr: |
-          Error: no account named "gitlab"
-          Hint: station accounts

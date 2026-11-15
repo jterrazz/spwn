@@ -21,7 +21,7 @@ runs:
           	Settings	set by station · ● 2 of 19 · checked · ● 3 of 9
           	Disk	● N free · 2.0 KB can rebuild
           	Ports	Public 1 · Private 0
-          	Accounts	● 1
+          	Accounts	● 0
           	Background	● 3 · ✗ 1 failing · ◐ 2 orphans
           	Awake	needs the engine
     - command: 'apps'
@@ -205,20 +205,13 @@ runs:
       stdout: |
           ○	station-linux				not built yet
           ○	macos				not built yet
-    - command: 'secrets'
+    - command: 'accounts'
       exit: 0
       stdout: |
-          ○	github	not signed in			gh not on PATH	station apps install gh
-          ○	npm	not signed in			npm not on PATH
-          ○	claude	not signed in			claude not on PATH
-          ●	tailscale	signed in
-          ○	cloudflare	not signed in			wrangler not on PATH
-          ○	git	not signed in			git not on PATH
-          ○	ssh	not signed in			ssh-add not on PATH
-          # Shared with VMs
-          	none
-      stderr: |
-          → now: station accounts
+          ○	gh	signed out
+          ○	npm	signed out
+          ○	claude	signed out
+          ○	wrangler	signed out
     - command: 'ports'
       exit: 0
       stdout: |
@@ -253,10 +246,10 @@ runs:
       exit: 0
       stdout: |
           {"findings":[],"images":[],"machine":{"kind":"computer","label":"This Mac","name":"x","on":null,"this_mac":true},"schema":"station.images.list/v1"}
-    - command: 'secrets --json | /usr/bin/jq -S -c ''del(.generated_at, .station.version?, .station.commit?) | (.. | objects | select(has("station_version")) | .station_version) |= "V"'''
+    - command: 'accounts --json | /usr/bin/jq -S -c ''del(.generated_at, .station.version?, .station.commit?) | (.. | objects | select(has("station_version")) | .station_version) |= "V"'''
       exit: 0
       stdout: |
-          {"accounts":[{"detail":"gh not on PATH","fix":"station apps install gh","label":"GitHub","name":"github","shareable":true,"state":"not-signed-in"},{"detail":"npm not on PATH","label":"npm","name":"npm","shareable":false,"state":"not-signed-in"},{"detail":"claude not on PATH","label":"Claude","name":"claude","shareable":true,"state":"not-signed-in"},{"label":"Tailscale","name":"tailscale","shareable":false,"state":"signed-in"},{"detail":"wrangler not on PATH","label":"Cloudflare","name":"cloudflare","shareable":false,"state":"not-signed-in"},{"detail":"git not on PATH","label":"git","name":"git","shareable":false,"state":"not-signed-in"},{"detail":"ssh-add not on PATH","label":"ssh","name":"ssh","shareable":false,"state":"not-signed-in"}],"findings":[],"machine":{"kind":"computer","label":"This Mac","name":"x","on":null,"this_mac":true},"schema":"station.accounts.read/v1","share_list":["session:*","operator:claude:oauth-token"],"shares":[]}
+          {"accounts":[{"label":"GitHub","program":"gh","state":"signed-out"},{"label":"npm","program":"npm","state":"signed-out"},{"label":"Claude","program":"claude","state":"signed-out"},{"label":"Cloudflare","program":"wrangler","state":"signed-out"}],"findings":[],"machine":{"kind":"computer","label":"This Mac","name":"x","on":null,"this_mac":true},"schema":"station.accounts.list/v1"}
     - command: 'ports --json | /usr/bin/jq -S -c ''del(.generated_at, .station.version?, .station.commit?) | (.. | objects | select(has("station_version")) | .station_version) |= "V"'''
       exit: 0
       stdout: |

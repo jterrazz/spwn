@@ -1,11 +1,2 @@
 # Accounts
-✗	jterrazz-macbook-pro	Mac
-●	github	jterrazz	own	gist · read:org · repo · workflow	gh · keyring · ssh
-✗	npm	?	own		token refused by registry.npmjs.org	npm login
-●	claude	admin@jterrazz.com	own	max	claude.ai
-●	tailscale	jterrazz@github	own	jterrazz.github	app-store
-○	cloudflare				wrangler not on PATH
-●	git	Jean-Baptiste Terrazzoni	own		admin@jterrazz.com
-●	ssh	6 keys	own			admin@jterrazz.com · station-image · station-e2e · deploy · old-rsa · github-actions
-●	docker	deploy	own	registry.jterrazz.com	osxkeychain
-◐	engine	stopped				station engine start
+✗	gh	broken				The sign-in no longer works

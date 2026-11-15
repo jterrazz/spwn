@@ -96,6 +96,12 @@ func menuCopy(a page.Action, id, label, icon string) page.Action {
 	return a
 }
 
+// value: a menu item is red when the question it asks is.
+func red(a page.Action) page.Action {
+	a.Destructive = a.Confirm != nil && a.Confirm.Danger
+	return a
+}
+
 func pageAction(p page.Page, id string) (page.Action, bool) {
 	for _, a := range p.Actions {
 		if a.ID == id {
@@ -180,9 +186,9 @@ func vmMenu(row page.Row, header string, own page.Page) menu {
 	}
 	m.next()
 	if a, ok := pageAction(own, ActionRestartUp); ok {
-		m.add(menuCopy(a, menuID(ActionRestart, key), "Restart", "arrow.clockwise"))
+		m.add(red(menuCopy(a, menuID(ActionRestart, key), "Restart", "arrow.clockwise")))
 	} else if a, ok := pageAction(own, ActionRestart); ok {
-		m.add(menuCopy(a, menuID(a.ID, key), "", "arrow.clockwise"))
+		m.add(red(menuCopy(a, menuID(a.ID, key), "", "arrow.clockwise")))
 	}
 	if a, ok := pageAction(own, ActionStop); ok {
 		m.add(menuCopy(a, menuID(a.ID, key), "", "stop"))
@@ -321,9 +327,7 @@ func vmPageMenu(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page 
 		if !ok {
 			continue
 		}
-		a = menuCopy(a, menuID(a.ID, key), v.label, v.icon)
-		a.Destructive = a.Confirm != nil && a.Confirm.Danger
-		pm.add(a)
+		pm.add(red(menuCopy(a, menuID(a.ID, key), v.label, v.icon)))
 	}
 	pm.next()
 	if a, ok := pageAction(p, ActionDelete); ok {

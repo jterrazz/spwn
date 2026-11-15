@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/apps"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
@@ -168,7 +169,7 @@ func shares(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.Acc
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	updates, err := call.Follow(ctx, d.Far, machine.Ref{Name: mac}, accountscalls.Read, accountscalls.ReadIn{}, nil)
+	updates, err := call.Follow(ctx, d.Far, machine.Ref{Name: mac}, accountscalls.Programs, accountscalls.ProgramsIn{Machine: vm}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -204,18 +205,22 @@ func shares(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.Acc
 			access.Ports = append(access.Ports, machinefile.PortHeld{Port: l.Port, Asked: rights.Audience()})
 		}
 	}
-	copied := map[string]bool{}
-	for _, s := range first.Value.Shares {
-		if s.VM == vm {
-			copied[s.Account] = true
+	signedIn, granted := map[accounts.Program]bool{}, map[accounts.Program]bool{}
+	for _, p := range first.Value.Programs {
+		if p.State == accounts.ProgramSignedIn {
+			signedIn[p.Program] = true
+			granted[p.Program] = p.How == accounts.HowGranted
 		}
 	}
 	for _, s := range asked.Shares {
-		access.Accounts = append(access.Accounts, machinefile.AccountHeld{Account: s.Account, Seen: copied[s.Account], Asked: true})
-		delete(copied, s.Account)
+		program := accounts.ProgramOf(s.Account)
+		access.Accounts = append(access.Accounts, machinefile.AccountHeld{Account: s.Account, Seen: signedIn[program], Asked: true})
+		delete(granted, program)
 	}
-	for _, account := range slices.Sorted(maps.Keys(copied)) {
-		access.Accounts = append(access.Accounts, machinefile.AccountHeld{Account: account, Seen: true})
+	for _, program := range slices.Sorted(maps.Keys(granted)) {
+		if granted[program] {
+			access.Accounts = append(access.Accounts, machinefile.AccountHeld{Account: string(program), Seen: true})
+		}
 	}
 	return access, nil
 }

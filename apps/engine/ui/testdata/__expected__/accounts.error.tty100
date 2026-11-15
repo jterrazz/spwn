@@ -1,15 +1,4 @@
-This Mac · 8 accounts · 6 signed in · 1 needs you · shared with 2 VMs
+This Mac · 1 program · 0 signed in · 1 needs you
 
 Accounts
-  ✗ jterrazz-macbook-pro  Mac
-  ├─ ● GitHub             jterrazz                  own  gist · read:org · repo · workflow  gh …
-  ├─ ✗ npm                ?                         own  token refused by registry.npmjs.org
-       → npm login
-  ├─ ● Claude             admin@jterrazz.com        own  max                                claude…
-  ├─ ● Tailscale          jterrazz@github           own  jterrazz.github                    app-st…
-  ├─ ○ Cloudflare         wrangler not on PATH
-  ├─ ● git                Jean-Baptiste Terrazzoni  own  admin@jterrazz.com
-  ├─ ● ssh                6 keys                    own
-  └─ ● Docker             deploy                    own  registry.jterrazz.com              osxkey…
-  ◐ engine                stopped
-    → station engine start
+  ✗ GitHub  broken  The sign-in no longer works

@@ -9,12 +9,10 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
-	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
-	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 )
 
 // value: the Machinefiles this Mac makes workspaces from, read from every
@@ -151,11 +149,8 @@ func (t machineTemplates) Drift(ctx context.Context, name, version string) ([]st
 	return machinefile.ImageDrift([]byte(rec.Lock), now), nil
 }
 
-// value: accounts share's own use case, run for a workspace's first start.
+// value: a workspace's first start shares each account its Machinefile
+// shares, through the share adapter alone: no call shares an account.
 func (m machine) shareAccount(ctx context.Context, account, vm string, term time.Duration) error {
-	d := accountscalls.Deps{Accounts: m.accounts(), Shares: m.secrets(), Kind: m.profile.Kind}
-	if _, err := accountscalls.Share.Run(ctx, d, accountscalls.ShareIn{Account: account, With: vm, For: term}, nil); err != nil {
-		return errors.New(kit.Translate(err, "").Message)
-	}
-	return nil
+	return m.secrets().Share(ctx, account, vm, term)
 }

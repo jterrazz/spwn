@@ -21,6 +21,6 @@ runs:
           ["settings",{"applied":0,"as-expected":8}]
           ["disk",{"misplaced":1}]
           ["ports",{"private":2,"public":0}]
-          ["accounts",{"signed-in":6}]
+          ["accounts",{"signed-in":3}]
           ["background",{"failing":1,"ok":10,"orphan":3}]
           ["awake",{}]

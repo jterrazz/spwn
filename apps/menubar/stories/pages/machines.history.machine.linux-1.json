@@ -2196,6 +2196,7 @@
       ],
       "confirm": {
         "question": "Remove Claude? The grant ends here; the token stays yours.",
+        "danger": true,
         "yes": "Remove"
       },
       "mutates": true,
@@ -2228,6 +2229,7 @@
       ],
       "confirm": {
         "question": "Remove GitHub? The grant ends here; the token stays yours.",
+        "danger": true,
         "yes": "Remove"
       },
       "mutates": true,

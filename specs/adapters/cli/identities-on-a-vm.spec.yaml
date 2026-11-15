@@ -1,9 +1,9 @@
-description: 'on a VM, accounts reads that VM alone, its entry row from the station hosts block'
+description: 'a VM''s entry row counts the keys its Mac''s hello gives the guest'
 fixture:
     - ./__fixtures__/accounts/
 env: engine
 runs:
-    - command: '--version > /dev/null; /bin/mkdir -p .ssh; printf ''# >>> station hosts >>>\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl jterrazz-macbook-pro\n# <<< station hosts <<<\n'' > .ssh/authorized_keys; STATION_MACHINE_KIND=linux "$STATION" accounts --json | /usr/bin/jq -c ''[.machine.kind, [.accounts[].name], (.accounts[]|select(.name=="entry")|[.who, .scope, .detail])]'''
+    - command: '--version >/dev/null; /bin/mkdir -p root; n=0; { printf ''%s\n'' ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl jterrazz-macbook-pro"],"env":{},"ignored":[22],"min_port":1024}'' ''{"v":1,"type":"request","id":"h1","op":"accounts"}''; while ! /usr/bin/grep -q ''"type":"reply"'' out.jsonl 2>/dev/null && [ $n -lt 200 ]; do /bin/sleep 0.1; n=$((n+1)); done; } | STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/root "$STATION" guest > out.jsonl; /usr/bin/jq -c ''select(.type == "reply") | [[.result[].provider], (.result[] | select(.provider == "entry") | [.identity, .scopes, .detail])]'' out.jsonl'
       exit: 0
       stdout: |
-          ["workspace",["github","npm","claude","cloudflare","git","ssh","docker","entry"],["1 SSH key","jterrazz-macbook-pro","SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU"]]
+          [["github","npm","claude","cloudflare","git","ssh","docker","entry"],[["1 SSH key"],["jterrazz-macbook-pro"],"SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU"]]

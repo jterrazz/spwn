@@ -293,22 +293,6 @@ say "   dclean asks before removing: $(tr '\n' ' ' <<< "$asked")"
 case_pass
 
 
-case_begin claude-token-share AU-13
-# outside: how the studio CLI reaches a VM is not designed (docs/reference/accounts.md),
-# so the VM's credential store is the stub's file store.
-vm_ssh ws1 'cat > /tmp/studio && sudo -n install -m 755 /tmp/studio /usr/local/bin/studio' < "$suite/linux/vm-studio" || fail "put the VM's studio"
-st accounts share claude --with ws1 >> "$log" 2>&1 || fail "accounts share exited $?"
-held=$(in_vm ws1 "zsh -lic 'echo \${#CLAUDE_CODE_OAUTH_TOKEN}'" 2>/dev/null | tail -1)
-placeholder=$(sed -n 's/.*"\(sk-ant-[^"]*\)".*/\1/p' "$suite/linux/stubs/studio")
-[ "$held" = "${#placeholder}" ] || fail "the VM's shell exports no token of the shared length: $held"
-st accounts take-back claude --from ws1 --yes >> "$log" 2>&1 || fail "accounts take-back exited $?"
-held=$(in_vm ws1 "zsh -lic 'echo \${#CLAUDE_CODE_OAUTH_TOKEN}'" 2>/dev/null | tail -1)
-[ "$held" = 0 ] || fail "the token is still exported after take-back"
-say "   the VM's shell exports CLAUDE_CODE_OAUTH_TOKEN once shared and not once taken back"
-say "   owner-gated: \`claude\` answering with the owner's real token (no studio in a VM yet)"
-case_pass
-
-
 case_begin server-check-self-signed KP-21
 st machines create srv1 --image studio-linux --server --check https://srv1:8443/readyz --cpus 2 --memory 2G --disk 20G >> "$log" 2>&1 || fail "create srv1 exited $?"
 vm_ssh srv1 'mkdir -p /tmp/e2e-tls && cd /tmp/e2e-tls && openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1 -subj /CN=cluster-ca 2>/dev/null && cat > https.py && (nohup python3 https.py > /dev/null 2>&1 &)' < "$suite/linux/https.py" || fail "serve readyz in srv1"

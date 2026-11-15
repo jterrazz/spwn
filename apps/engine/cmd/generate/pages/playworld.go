@@ -46,6 +46,7 @@ type playMac struct {
 	Jobs        map[string]background.Job      `json:"jobs,omitempty"`
 	Secrets     map[string]string              `json:"secrets,omitempty"`
 	Identities  map[string]accounts.Identity   `json:"identities,omitempty"`
+	Accounts    *playSignIns                   `json:"accounts,omitempty"`
 	Facts       map[catalog.Fact]settings.Fact `json:"facts,omitempty"`
 	Self        *playSelf                      `json:"self,omitempty"`
 	Listening   []ports.Listener               `json:"listening,omitempty"`
@@ -71,6 +72,10 @@ type playSelf struct {
 	Kind     coremachine.Kind     `json:"kind,omitempty"`
 	System   coremachine.System   `json:"system"`
 	Hardware coremachine.Hardware `json:"hardware"`
+}
+
+type playSignIns struct {
+	Programs map[accounts.Program]accounts.Facts `json:"programs,omitempty"`
 }
 
 type playNode struct {
@@ -500,16 +505,22 @@ func inside(f Scene, vm model.VM, share float64, p activity.Profile) *playMac {
 	} else if s, ok := f.Insides[vm.Name]; ok && len(s.Needs) > 0 {
 		m.Apps = map[catalog.Method]*playApps{catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0"}, Behind: map[string]string{"gh": "2.98.0", "jq": "1.8.2"}}}
 	}
-	ids := map[string]accounts.Identity{}
+	ids, programs := map[string]accounts.Identity{}, map[accounts.Program]accounts.Facts{}
 	for _, read := range f.Accounts.Machines {
 		if read.Name == vm.Name {
 			for _, a := range read.Accounts {
 				ids[a.Provider] = accounts.Identity{Provider: a.Provider, State: catalog.StateOK, Who: a.Identity}
+				if program, ok := programOf(a.Provider); ok {
+					programs[program] = factsOf(program, a)
+				}
 			}
 		}
 	}
 	if len(ids) > 0 {
 		m.Identities = ids
+	}
+	if len(programs) > 0 {
+		m.Accounts = &playSignIns{Programs: programs}
 	}
 	return m
 }

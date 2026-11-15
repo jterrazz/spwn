@@ -1,12 +1,7 @@
-This Mac · 5 accounts · 0 signed in
+This Mac · 4 programs · 0 signed in
 
 Accounts
-  ● jterrazz-macbook-pro  Mac
-  ├─ ○ GitHub                  not logged in                → station settings apply github-login
-  ├─ ○ npm                     not logged in                → npm login
-  ├─ ○ Claude                  not logged in                → claude /login
-  ├─ ○ Tailscale               not installed
-  └─ ○ git                     no user.name nor user.email  → git config --global user.name <name>
-  no VMs: accounts shared with a VM appear here
-
-→ station machines create
+  ○ GitHub      signed out
+  ○ npm         signed out
+  ○ Claude      signed out
+  ○ Cloudflare  signed out

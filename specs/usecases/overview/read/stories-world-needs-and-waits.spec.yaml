@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          [{"Tone":"bad","Sentence":"3 things need you.","Line":"port 5000 is reachable outside Tailscale"},[[":5000","needs-you","review"],["npm","needs-you","fix"],["com.jterrazz.brain.x-snapshot","needs-you","remove"],["firewall","can-wait","fix"]]]
+          [{"Tone":"bad","Sentence":"2 things need you.","Line":"port 5000 is reachable outside Tailscale"},[[":5000","needs-you","review"],["com.jterrazz.brain.x-snapshot","needs-you","remove"],["firewall","can-wait","fix"]]]

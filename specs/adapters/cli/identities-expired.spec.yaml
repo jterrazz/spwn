@@ -1,14 +1,14 @@
-description: 'a refused credential is ✗ refused, a missing login ○ unset, each with its fix'
+description: 'a refused credential reads broken, a missing login unset, each with its reason'
 fixture:
     - ./__fixtures__/accounts/
 env: engine
 runs:
-    - command: '--version > /dev/null; /bin/mkdir -p answers/accounts; echo e401 > answers/accounts/npm.mode; "$STATION" accounts | /usr/bin/awk -F''\t'' ''$2=="npm"'''
+    - command: '--version >/dev/null; /bin/mkdir -p root; /bin/mkdir -p answers/accounts; echo e401 > answers/accounts/npm.mode; n=0; { printf ''%s\n'' ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' ''{"v":1,"type":"request","id":"h1","op":"accounts"}''; while ! /usr/bin/grep -q ''"type":"reply"'' out.jsonl 2>/dev/null && [ $n -lt 200 ]; do /bin/sleep 0.1; n=$((n+1)); done; } | STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/root "$STATION" guest > out.jsonl; /usr/bin/jq -r ''select(.type == "reply") | .result[] | select(.provider == "npm") | [.provider, .state, .reason, .detail] | @tsv'' out.jsonl'
       exit: 0
       stdout: |
-          ✗	npm	expired			token refused by registry.npmjs.org	npm login
-    - command: '--version > /dev/null; echo eneedauth > answers/accounts/npm.mode; echo out > answers/accounts/gh.mode; "$STATION" accounts | /usr/bin/awk -F''\t'' ''$2=="npm"||$2=="github"'''
+          npm	broken	refused	token refused by registry.npmjs.org
+    - command: '--version >/dev/null; /bin/rm out.jsonl; echo eneedauth > answers/accounts/npm.mode; echo out > answers/accounts/gh.mode; n=0; { printf ''%s\n'' ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' ''{"v":1,"type":"request","id":"h1","op":"accounts"}''; while ! /usr/bin/grep -q ''"type":"reply"'' out.jsonl 2>/dev/null && [ $n -lt 200 ]; do /bin/sleep 0.1; n=$((n+1)); done; } | STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/root "$STATION" guest > out.jsonl; /usr/bin/jq -r ''select(.type == "reply") | .result[] | select(.provider == "npm" or .provider == "github") | [.provider, .state, .reason, .detail] | @tsv'' out.jsonl'
       exit: 0
       stdout: |
-          ○	github	not signed in			not logged in	station settings apply github-login
-          ○	npm	not signed in			not logged in	npm login
+          github	absent	unset	not logged in
+          npm	absent	unset	not logged in

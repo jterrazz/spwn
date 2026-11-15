@@ -1,10 +1,10 @@
-description: 'an absent app is ○ missing: gh with its install hint, wrangler with no hint (not a catalogue app)'
+description: 'an absent app reads unset with the program it misses, gh and wrangler alike'
 fixture:
     - ./__fixtures__/accounts/
 env: engine
 runs:
-    - command: '--version > /dev/null; /bin/rm bin/gh bin/wrangler; "$STATION" accounts | /usr/bin/awk -F''\t'' ''$2=="github"||$2=="cloudflare"'''
+    - command: '--version >/dev/null; /bin/mkdir -p root; /bin/rm bin/gh bin/wrangler; n=0; { printf ''%s\n'' ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' ''{"v":1,"type":"request","id":"h1","op":"accounts"}''; while ! /usr/bin/grep -q ''"type":"reply"'' out.jsonl 2>/dev/null && [ $n -lt 200 ]; do /bin/sleep 0.1; n=$((n+1)); done; } | STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/root "$STATION" guest > out.jsonl; /usr/bin/jq -r ''select(.type == "reply") | .result[] | select(.provider == "github" or .provider == "cloudflare") | [.provider, .state, .reason, .detail] | @tsv'' out.jsonl'
       exit: 0
       stdout: |
-          ○	github	not signed in			gh not on PATH	station apps install gh
-          ○	cloudflare	not signed in			wrangler not on PATH
+          github	absent	missing	gh not on PATH
+          cloudflare	absent	missing	wrangler not on PATH

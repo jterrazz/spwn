@@ -4,11 +4,6 @@
     "consequence": "%s is signed out on this machine; its token stays valid at its provider.",
     "form": "yes-no"
   },
-  "accounts.take-back": {
-    "confirm": "take-back",
-    "consequence": "The account leaves %s; it stays signed in on this Mac.",
-    "form": "yes-no"
-  },
   "agents.stop": {
     "confirm": "stop-agent",
     "consequence": "The agent in %s stops where it is; its work so far stays.",
@@ -36,7 +31,7 @@
   },
   "grants.remove": {
     "confirm": "remove-grant",
-    "consequence": "The grant of %s ends now, before its term.",
+    "consequence": "The grant of %s ends now; the password stays in this Mac's vault.",
     "form": "yes-no"
   },
   "images.delete": {

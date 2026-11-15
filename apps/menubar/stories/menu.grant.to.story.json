@@ -3,9 +3,7 @@
     "heightNote": "4.5 pt shorter than the prototype, as accounts.all under it: MachineHeader's back line is 24 pt where the prototype's is 28",
     "id": "menu.grant.to",
     "note": "The To popup of Grant a password: the workspaces of This Mac it can be granted to.",
-    "pages": [
-        "pages/machines.accounts.accounts.json"
-    ],
+    "pages": ["pages/machines.accounts.accounts.json"],
     "schema": "station.story/v1",
     "ui": {
         "menu": {

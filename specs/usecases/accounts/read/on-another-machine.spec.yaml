@@ -1,9 +1,0 @@
-description: 'accounts --on the mini lists the mini''s own sign-ins, read there'
-env: two-macs
-runs:
-    - command: 'accounts --on jterrazz-mac-mini'
-      exit: 0
-      stdout: |
-          ●	github	signed in	jterrazz-agent	repo
-          # Shared with VMs
-          	none

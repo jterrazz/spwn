@@ -1,8 +1,0 @@
-description: 'npm is not on the share list: refused, exit 2, its hint the share list in the preferences'
-env: two-macs
-runs:
-    - command: 'accounts share npm --with linux-1'
-      exit: 2
-      stderr: |
-          Error: npm is not on the share list
-          Hint: the share list is share_list in ~/.config/station/preferences.json

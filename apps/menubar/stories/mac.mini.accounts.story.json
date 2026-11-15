@@ -2,9 +2,7 @@
     "group": "mac",
     "id": "mac.mini.accounts",
     "note": "mac-mini's Accounts: GitHub and Claude signed in there, then what its VMs linux-3 and review-bot are signed in to.",
-    "pages": [
-        "pages/machines.accounts.machine.mac-mini.json"
-    ],
+    "pages": ["pages/machines.accounts.machine.mac-mini.json"],
     "schema": "station.story/v1",
     "ui": {
         "segment": "accounts"

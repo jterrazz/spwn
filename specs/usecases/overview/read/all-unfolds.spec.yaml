@@ -10,5 +10,5 @@ runs:
     - command: 'overview --all | /usr/bin/grep -c -e "^✗" -e "^◐"; "$STATION" overview --all | /usr/bin/grep -c "more:"'
       exit: 1
       stdout: |
-          9
+          8
           0

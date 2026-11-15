@@ -1,8 +1,0 @@
-description: 'taking back an account the VM was never given is refused, exit 2'
-env: two-macs
-runs:
-    - command: 'accounts take-back github --from api --yes'
-      exit: 2
-      stderr: |
-          Error: GitHub is not shared with api
-          Hint: station accounts

@@ -32,7 +32,7 @@ func (m machine) guest() *guest.Agent {
 		root = "/"
 	}
 	return guest.New(m.sys, guest.Options{State: m.paths.State, PortsEnv: filepath.Join(m.paths.Prefs, "services.env"), Kind: m.kind, Ephemeral: m.ephemeral(root), Version: Version(), Listeners: m.listeners(root), Containers: m.containers(), Journal: m.journal(), Accounts: func(ctx context.Context, keys []string) any {
-		a := accountscalls.NewReader(m.pool, m.identities(path.Join(m.paths.State, "children")), accountscalls.ReaderPorts{}, accountscalls.ReaderOptions{ThisMachine: m.kind, ThisMacName: m.where.Machine, Now: m.sys.Clock.Now, Keys: func() []string { return keys }})
+		a := accountscalls.NewReader(m.identities(path.Join(m.paths.State, "children")), accountscalls.ReaderOptions{ThisMachine: m.kind, Keys: func() []string { return keys }})
 		return a.Own(ctx)
 	}})
 }
