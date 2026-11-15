@@ -30,7 +30,9 @@ import (
 
 	accountsfake "github.com/jterrazz/studio-station/apps/engine/accounts/adapter/fake"
 	accountscontract "github.com/jterrazz/studio-station/apps/engine/accounts/contract"
+	"github.com/jterrazz/studio-station/apps/engine/activity"
 	activityfake "github.com/jterrazz/studio-station/apps/engine/activity/adapter/fake"
+	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	agentsfake "github.com/jterrazz/studio-station/apps/engine/agents/adapter/fake"
@@ -303,7 +305,21 @@ func (m *worldMac) stores(st *stores) {
 	st.ledger = machinefilefake.LedgerOf(w, m.name)
 }
 
-func (m *worldMac) self() corecontract.Self    { return corefake.SelfOf(m.run.w, m.name) }
+func (m *worldMac) self() corecontract.Self { return corefake.SelfOf(m.run.w, m.name) }
+
+func (m *worldMac) withAwake(kept map[string]activity.Kept) map[string]activity.Kept {
+	// invariant: This Mac's kept reading carries the thermal and battery its
+	// reading says, as a live sample composes them; a VM's are its Mac's.
+	own, ok := kept[m.name]
+	if !ok || m.power() == nil {
+		return kept
+	}
+	out := maps.Clone(kept)
+	activitycalls.ComposeAwake(&own.Last.Sample, m.power())
+	out[m.name] = own
+	return out
+}
+
 func (m *worldMac) power() awakecontract.Power { return awakefake.PowerOf(m.run.w, m.name) }
 func (m *worldMac) guests() contract.GuestDialer {
 	return worldGuests{GuestDialer: machinesfake.GuestsOf(m.run.w).Serving(engine.GuestSession), r: m.run}
@@ -624,7 +640,7 @@ func (m *worldMac) begin(ctx context.Context, s *engineStart, start func() *proc
 		return nil, false
 	}
 	if kept := m.slice().Engine.Activity; kept != nil {
-		d.History().Take(kept)
+		d.History().Take(m.withAwake(kept))
 	}
 	// invariant: when it began is set before the engine is, so a surface of
 	// that engine that asks for it meanwhile never reads it as a successor.
@@ -788,7 +804,7 @@ func (m *worldMac) down(forget bool) {
 	kept := d.AwakeKept()
 	exposure := d.ExposureKept()
 	memory := d.Memory()
-	activity := d.History().Hand()
+	history := d.History().Hand()
 	read := d.SettingsKept()
 	if leave := m.takeLeave(); leave != nil {
 		left := m.run.clock().moved.leave()
@@ -808,7 +824,7 @@ func (m *worldMac) down(forget bool) {
 	defer m.run.w.Unlock()
 	if e := m.run.w.Mac(m.name).Engine; e != nil {
 		e.Memory = memory
-		e.Awake, e.Exposure, e.Activity, e.Settings = &kept, &exposure, activity, read
+		e.Awake, e.Exposure, e.Activity, e.Settings = &kept, &exposure, history, read
 		if forget || e.Stopped {
 			e.Awake, e.Exposure, e.Activity, e.Settings = nil, nil, nil, nil
 		}
