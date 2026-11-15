@@ -43,13 +43,10 @@ describe('memory', () => {
                 await visitor.see(content('linux-4', { exact: false }));
             },
         );
-        const silent = await component.render(
-            over('one-mac', 'macbook-pro'),
-            async (visitor) => {
-                // When - machines.list has answered with no room
-                await visitor.see(content("What each machine holds of this Mac's memory."));
-            },
-        );
+        const silent = await component.render(over('one-mac', 'macbook-pro'), async (visitor) => {
+            // When - machines.list has answered with no room
+            await visitor.see(content("What each machine holds of this Mac's memory."));
+        });
 
         // Then - the machine being created holds its squares, and the silent Mac draws no number
         expect(creating.content.text).toMatch(/4\s*linux-5/u);

@@ -90,16 +90,13 @@ describe('mac', () => {
 
     test('M4 New machine on a Mac opens the sheet with that Mac chosen', async () => {
         // Given - the window on the mini's page over two-macs, which is not This Mac
-        const result = await website.visit(
-            '/?world=two-macs&machine=mac-mini',
-            async (visitor) => {
-                // When - its New machine is pressed
-                await visitor.click(button('New machine on mac-mini'));
+        const result = await website.visit('/?world=two-macs&machine=mac-mini', async (visitor) => {
+            // When - its New machine is pressed
+            await visitor.click(button('New machine on mac-mini'));
 
-                // Then - the sheet opens on the mini
-                await visitor.see(dialog('New machine on mac-mini'));
-            },
-        );
+            // Then - the sheet opens on the mini
+            await visitor.see(dialog('New machine on mac-mini'));
+        });
         expect(result.errors.text).toBe('');
     });
 

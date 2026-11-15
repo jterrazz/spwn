@@ -35,10 +35,7 @@ describe('storage', () => {
 
             // Then - the Mac and linux-1 each say their caches, linux-1 its size too, api none
             await visitor.see(
-                within(
-                    machines,
-                    button('macbook-pro the Mac itself 34.8 GB of caches inside'),
-                ),
+                within(machines, button('macbook-pro the Mac itself 34.8 GB of caches inside')),
             );
             await visitor.see(within(machines, button('linux-1 1.5 GB of caches inside 50 GB')));
             await visitor.see(within(machines, button('api 50 GB')));

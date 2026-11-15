@@ -77,9 +77,7 @@ describe('Machine files', () => {
             await visitor.see(content('ghostty'));
 
             // When - the mixin the file extends is chosen from its facts
-            await visitor.click(
-                within(region('macbook-pro.machine.yaml'), button('base')),
-            );
+            await visitor.click(within(region('macbook-pro.machine.yaml'), button('base')));
 
             // Then - it makes no machine, and the file that extends it is listed
             await visitor.see(
