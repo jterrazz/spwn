@@ -19,6 +19,7 @@ type NeedsProps = {
     none?: string;
     on?: string;
     note?: string;
+    standsBack?: boolean;
 };
 
 function keyOf(need: OverviewNeed): string {
@@ -27,11 +28,15 @@ function keyOf(need: OverviewNeed): string {
 
 // invariant: a need the engine no longer lists after its gesture takes its outcome to the page's HeldOutcomes,
 // invariant: so every page that draws this panel holds it inside one.
-export function Needs({ needs, title, macs, go, none, note }: NeedsProps) {
+// invariant: a page whose toolbar leads with its own button asks the panel to stand back, so no need draws a second
+// invariant: primary on the screen.
+export function Needs({ needs, title, macs, go, none, note, standsBack = false }: NeedsProps) {
     if (needs.length === 0 && none === undefined) {
         return null;
     }
-    const bright = needs.findIndex((need) => isNeedsYou(need) && needState(need).tone === 'bad');
+    const bright = standsBack
+        ? -1
+        : needs.findIndex((need) => isNeedsYou(need) && needState(need).tone === 'bad');
     return (
         <Panel note={note ?? String(needs.length)} title={title}>
             {needs.length === 0 ? (

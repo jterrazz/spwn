@@ -5,9 +5,9 @@ import type { Route } from './route';
 import type { ToolbarAction } from './toolbar';
 
 // value: while this Mac's engine is stopped, Start the engine leads Home and New machine stands back.
-function engineStopped(macs: readonly MachinesMacView[]): boolean {
+export function newMachineLeads(macs: readonly MachinesMacView[]): boolean {
     const thisMac = macs.find((mac) => mac.ThisMac);
-    return thisMac !== undefined && engineViewStopped(thisMac.Engine);
+    return thisMac === undefined || !engineViewStopped(thisMac.Engine);
 }
 
 export type Opens = {
@@ -25,7 +25,7 @@ export function actionOf({
     addPassword,
 }: Opens): ToolbarAction | undefined {
     if (route.page === 'home') {
-        return { label: 'New machine', leads: !engineStopped(macs), onClick: newMachine };
+        return { label: 'New machine', leads: newMachineLeads(macs), onClick: newMachine };
     }
     if (route.page === 'passwords' && route.item === undefined) {
         return { label: 'Add a password', leads: false, onClick: addPassword };

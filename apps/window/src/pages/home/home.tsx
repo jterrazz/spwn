@@ -4,6 +4,7 @@ import { useReach } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { needsYou } from '../../model/upkeep';
 import type { Route } from '../../shell/route';
+import { newMachineLeads } from '../../shell/toolbar-action';
 import { LastNight } from '../changes/changes';
 import { HeldOutcomes } from '../kit/gestures';
 import { Absent, Reading as ReadingVerdict, SummaryHead, Unanswered } from '../kit/readings';
@@ -59,6 +60,7 @@ export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomePro
                     go={go}
                     macs={macs}
                     needs={needsYou(Summary.Needs ?? [])}
+                    standsBack={newMachineLeads(macs)}
                     title="Needs you"
                 />
             </HeldOutcomes>
