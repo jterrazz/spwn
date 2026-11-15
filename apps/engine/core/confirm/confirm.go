@@ -82,21 +82,18 @@ type Fact string
 
 const (
 	Ephemeral   Fact = "ephemeral"
-	Healthy     Fact = "healthy"
 	HostsServer Fact = "hosts-server"
 )
 
 func Of(a Action, k machine.Kind, facts ...Fact) Level {
 	// invariant: SPEC A5: the menu bar's alert asks at the level its facts
 	// grade, facts the page that asks it knows beyond the machine's kind: a
-	// ephemeral's delete yes or no, a healthy server's restart yes
-	// or no (an outage), a Mac hosting a server its name typed to restart.
+	// ephemeral's delete yes or no, a Mac hosting a server its name typed
+	// to restart.
 	// With no fact, the level is the call's own, For's.
 	has := func(f Fact) bool { return slices.Contains(facts, f) }
 	switch {
 	case a == Delete && k == machine.Workspace && has(Ephemeral):
-		return YesNo
-	case a == Restart && k == machine.Server && has(Healthy):
 		return YesNo
 	case a == RestartMac && has(HostsServer):
 		return TypeName

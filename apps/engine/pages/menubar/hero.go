@@ -34,7 +34,7 @@ func (r Reading) needsReading() NeedsReading {
 		overviews = append(overviews, *r.Home)
 	}
 	overviews = append(overviews, r.Away...)
-	return NeedsReading{Now: r.now(), Zone: r.Zone, All: r.All, Ports: r.Ports, Accounts: r.Accounts, Overviews: overviews}
+	return NeedsReading{Now: r.now(), Zone: r.Zone, All: r.All, Ports: r.Ports, Accounts: r.Accounts, Overviews: overviews, Asks: r.Asks}
 }
 
 // value: SPEC B5.15: the first Mac not heard from for 30 s that is not

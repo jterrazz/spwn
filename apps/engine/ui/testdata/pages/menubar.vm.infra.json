@@ -632,6 +632,8 @@
             "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
           }
         ],
+        "danger": true,
+        "type": "infra",
         "yes": "Restart infra",
         "no": "Cancel",
         "icon": "app"
@@ -773,6 +775,8 @@
             "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
           }
         ],
+        "danger": true,
+        "type": "infra",
         "yes": "Restart infra",
         "no": "Cancel",
         "icon": "app"
@@ -789,7 +793,8 @@
           "name": "jterrazz-mac-mini"
         }
       },
-      "icon": "arrow.clockwise"
+      "icon": "arrow.clockwise",
+      "destructive": true
     },
     {
       "label": "Stop",

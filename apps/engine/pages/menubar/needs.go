@@ -44,6 +44,8 @@ type NeedsReading struct {
 	Accounts *accounts.AllMachines
 	// value: each answering Mac's Overview, This Mac's first.
 	Overviews []overview.Summary
+	// value: the level each gesture asks at, the calls' own rule; nil asks nothing.
+	Asks Levels
 }
 
 type Need struct {
@@ -150,12 +152,16 @@ func (w needSaid) down(h model.MacView, vm model.VM) Need {
 	}
 	facts = append(facts, page.Text("on "+w.mac(h.Name)))
 	key := "down:" + vm.Name
+	verb := page.Action{ID: key, Label: VerbRestart, On: page.OnRow, Rows: []string{key}, Mutates: true, Default: true,
+		Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}}
+	if w.r.Asks != nil {
+		verb = restartServer(vm, w.mac(h.Name)).action(w.r.Asks, verb)
+	}
 	return Need{
 		Finding: finding.Finding{Machine: machine.Ref{Name: vm.Name, On: h.Name}, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: vm.Name},
 		Key:     key, Glyph: symbol("xmark.octagon.fill", page.SignalFailing), Hero: vm.Name + " is down", Subject: vm.Name, What: what,
 		Find: []string{VerbRestart + " " + vm.Name}, Facts: facts, Nav: machinePage(vm.Name), Scope: []string{h.Name, vm.Name},
-		Verb: page.Action{ID: key, Label: VerbRestart, On: page.OnRow, Rows: []string{key}, Mutates: true, Default: true,
-			Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}},
+		Verb: verb,
 	}
 }
 

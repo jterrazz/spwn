@@ -13,7 +13,7 @@ final class AlertTests: XCTestCase {
     // invariant: SPEC A5: the level is the engine's, drawn as it comes: a
     // typed alert names what to type, a yes or no one names nothing.
     func testEachAlertAsksAtTheLevelTheEngineGraded() throws {
-        let typed = ["alert.stop-server", "alert.stop-server.typed", "alert.delete-server", "alert.delete-vm.persistent", "alert.restart-mac"]
+        let typed = ["alert.restart-server", "alert.stop-server", "alert.stop-server.typed", "alert.delete-server", "alert.delete-vm.persistent", "alert.restart-mac"]
         let asked = try Stories.load(root: Tree.stories).filter { $0.group == .alert }.map(\.id)
         XCTAssertEqual(asked.count, 16)
         for id in asked {
@@ -25,8 +25,8 @@ final class AlertTests: XCTestCase {
     // something defaults to Cancel, and a typed one stays off until its
     // name is typed whole.
     func testTheRedButtonIsNeverTheDefaultAndATypedOneWaitsForItsName() throws {
-        XCTAssertTrue(AlertCard.yesIsDefault(try confirm("alert.restart-server")))
-        for id in ["alert.stop-server", "alert.delete-vm.ephemeral", "alert.stop-agent", "alert.forget-mac"] {
+        XCTAssertTrue(AlertCard.yesIsDefault(try confirm("alert.stop-vm")))
+        for id in ["alert.restart-server", "alert.stop-server", "alert.delete-vm.ephemeral", "alert.stop-agent", "alert.forget-mac"] {
             XCTAssertFalse(AlertCard.yesIsDefault(try confirm(id)), id)
         }
         let stop = try confirm("alert.stop-server")
@@ -53,6 +53,9 @@ final class AlertTests: XCTestCase {
     func testTheCallTakesTheAnswerItsOwnLevelAsks() throws {
         let server = try XCTUnwrap(Stories["alert.stop-server"].state.shown?.action("stop"))
         XCTAssertEqual(ActionRunner.filled(server, answers: [ActionRunner.typedKey: "infra"])[ActionRunner.typedKey], "infra")
+        let restart = try XCTUnwrap(Stories["alert.restart-server"].state.shown?.action("restart"))
+        XCTAssertEqual(restart.confirm?.type, "infra")
+        XCTAssertEqual(ActionRunner.filled(restart, answers: [ActionRunner.typedKey: "infra"])[ActionRunner.typedKey], "infra")
         let mac = try XCTUnwrap(Stories["alert.restart-mac"].state.shown?.action("restart-mac"))
         XCTAssertEqual(mac.confirm?.type, "mac-mini")
         XCTAssertNil(ActionRunner.filled(mac, answers: [ActionRunner.typedKey: "mac-mini"])[ActionRunner.typedKey])

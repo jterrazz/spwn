@@ -16,13 +16,8 @@ func graded(gesture string, k machine.Kind, facts ...string) string {
 	switch {
 	case gesture == "delete" && k == machine.Workspace && has(FactEphemeral):
 		return LevelYesNo
-	case gesture == "delete", gesture == "stop" && k == machine.Server:
+	case gesture == "delete", gesture == "stop" && k == machine.Server, gesture == "restart-server":
 		return LevelTypeName
-	case gesture == "restart" && k == machine.Server:
-		if has(FactHealthy) {
-			return LevelYesNo
-		}
-		return LevelNone
 	case gesture == "restart-mac" && has(FactHostsServer):
 		return LevelTypeName
 	}
@@ -88,13 +83,14 @@ func TestStopEverythingSaysWhatEndsOnThisMacAndWhatKeepsRunningOnAServersMac(t *
 	}
 }
 
-func TestAServersRestartAsksOnlyWhileItIsHealthy(t *testing.T) {
+func TestAServersRestartAsksItsNameTypedAndSendsNoAnswerOfItsOwn(t *testing.T) {
 	vm := model.VM{Name: "infra", Lifetime: model.AlwaysOn}
-	if c := restartServer(vm, "mac-mini", true).confirm(graded); c == nil || c.Danger || c.Yes != "Restart infra" {
-		t.Errorf("a healthy server's restart asks %+v, want yes or no with Restart infra tinted", c)
+	a := restartServer(vm, "mac-mini").action(graded, page.Action{Run: &page.Run{In: map[string]string{"Name": "infra"}}})
+	if a.Confirm == nil || a.Confirm.Type != "infra" || !a.Confirm.Danger || a.Confirm.Yes != "Restart infra" {
+		t.Errorf("a server's restart asks %+v, want infra typed, red, Restart infra", a.Confirm)
 	}
-	if c := restartServer(vm, "mac-mini", false).confirm(graded); c != nil {
-		t.Errorf("a down server's restart asks %+v, want none", c)
+	if _, sent := a.Run.In["Confirm"]; sent {
+		t.Errorf("a server's restart sends %v, want the typed name the sheet adds", a.Run.In)
 	}
 }
 

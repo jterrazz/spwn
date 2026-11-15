@@ -45,7 +45,7 @@ func overviewOf(m Machine, h model.MacView, label string, stale bool) macOvervie
 			o.self = mac.Name
 		}
 	}
-	r := NeedsReading{Now: m.Now, Zone: m.Zone, All: m.All, Ports: m.Ports, Accounts: m.Shares}
+	r := NeedsReading{Now: m.Now, Zone: m.Zone, All: m.All, Ports: m.Ports, Accounts: m.Shares, Asks: m.Asks}
 	if m.Summary != nil {
 		r.Overviews = []overview.Summary{*m.Summary}
 	}

@@ -1263,9 +1263,9 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 ![alert.restart-server](stories/alert.restart-server.png) ![alert.restart-server light](stories/alert.restart-server.light.png)
 
 - **Capture**: [dark](stories/alert.restart-server.png), [light](stories/alert.restart-server.light.png)
-- **Shows**: Restart infra on mac-mini? (y/n: a restart of a healthy server is an outage) "infra is unreachable for about a minute…"; Cancel / Restart infra. The alert scales in from 1.08 at the panel centre over a scrim.
+- **Shows**: Restart infra on mac-mini? (its name typed, as `machines.restart` asks of a server, `--confirm=infra` in the CLI) "infra is unreachable for about a minute…", the name field, Cancel / Restart infra in red, disabled until infra is typed. The alert scales in from 1.08 at the panel centre over a scrim.
 - **Data**: server, host
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Restart infra" → sheetYes
+- **Interactions**: "the scrim (click outside the card)" → closeSheet; field "infra"; "Cancel" → closeSheet; "Restart infra" → sheetYes (disabled)
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
 
