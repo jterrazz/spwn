@@ -68,6 +68,9 @@ func Accounts(s SignIns, of AccountsOf, thisMac page.Context) page.Page {
 	if sheets := b.grantSheets(); of.VM == "" && len(sheets) > 0 {
 		sheets[0].On, sheets[0].Rows, sheets[0].Icon = page.OnPage, nil, "plus"
 		p.Actions = append(p.Actions, sheets[0])
+		if of.Mac == "" {
+			p.Actions = append(p.Actions, sheets[1:]...)
+		}
 		p.Footer.Buttons = append(p.Footer.Buttons, sheets[0].ID)
 	}
 	for _, m := range b.s.Machines {
