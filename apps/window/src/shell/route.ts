@@ -1,10 +1,21 @@
+import type { MachinesSections } from '@jterrazz/station-api';
+
 export const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Sign-ins', 'Storage'] as const;
 
 export type Tab = (typeof TABS)[number];
 
-// invariant: a server keeps its own sign-ins (`section.not-for-this-machine`), so it offers no Sign-ins tab.
-export function tabsOf(server: boolean): readonly Tab[] {
-    return server ? TABS.filter((tab) => tab !== 'Sign-ins') : TABS;
+const SECTIONS_OF: Readonly<Record<Tab, (sections: MachinesSections) => boolean>> = {
+    Activity: (sections) => sections.Activity,
+    Overview: (sections) => sections.Overview,
+    Packages: (sections) => sections.Apps || sections.Settings,
+    Ports: (sections) => sections.Ports,
+    'Sign-ins': (sections) => sections.Accounts,
+    Storage: (sections) => sections.Disk,
+};
+
+// invariant: a machine's tabs are the ones its engine says it has sections for; a Mac sends none and has every tab.
+export function tabsOf(sections: MachinesSections | undefined): readonly Tab[] {
+    return sections === undefined ? TABS : TABS.filter((tab) => SECTIONS_OF[tab](sections));
 }
 
 export function tabOf(value: unknown): Tab | undefined {
