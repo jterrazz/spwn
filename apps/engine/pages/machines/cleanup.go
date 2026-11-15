@@ -17,7 +17,7 @@ func Cleaned(out model.Cleaned, mac string, thisMac page.Context) page.Page {
 	// value: SPEC B5.9: each ephemeral workspace deleted, then what stays named.
 	rows := make([]page.Row, 0, len(out.Deleted))
 	for _, name := range out.Deleted {
-		rows = append(rows, done(name, catalog.StateOK, "deleted", "with its disk, its ports and its shared accounts"))
+		rows = append(rows, done(name, catalog.StateOK, "deleted", "with its disk, its ports and its grants"))
 	}
 	var extra []page.Section
 	if words := Stays(out.Kept); words.Text != "" {
@@ -87,7 +87,7 @@ func ago(d time.Duration) string {
 
 func losses(c model.Candidate) string {
 	// value: SPEC A5: what an ephemeral workspace's delete takes with it, "its disk
-	// (12 GB)", "2 shared ports", "2 shared accounts", joined with "and".
+	// (12 GB)", "2 shared ports", "2 grants", joined with "and".
 	disk := "its disk"
 	if c.DiskBytes > 0 {
 		disk += " (" + DiskSize(c.DiskBytes).Text + ")"
@@ -97,7 +97,7 @@ func losses(c model.Candidate) string {
 		parts = append(parts, counted(n, "shared port"))
 	}
 	if n := len(c.Accounts); n > 0 {
-		parts = append(parts, counted(n, "shared account"))
+		parts = append(parts, counted(n, "grant"))
 	}
 	if len(parts) == 1 {
 		return parts[0]

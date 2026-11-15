@@ -19,9 +19,9 @@ runs:
       exit: 0
       stdout: |
           ┃ Delete linux-1?
-          ┃ linux-1 · finished 12 min ago · tests pass · goes with its disk (50 GB), 2 shared ports and 1 shared account
+          ┃ linux-1 · finished 12 min ago · tests pass · goes with its disk (50 GB), 2 shared ports and 1 grant
           ┃
-          ●       linux-1 deleted · with its disk, its ports and its shared accounts
+          ●       linux-1 deleted · with its disk, its ports and its grants
     - command: 'machines | /usr/bin/grep -c linux-1'
       exit: 1
       stdout: |

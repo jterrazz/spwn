@@ -8,7 +8,7 @@ runs:
     - command: 'machines cleanup --yes'
       exit: 0
       stdout: |
-          ●	linux-1	deleted · with its disk, its ports and its shared accounts
+          ●	linux-1	deleted · with its disk, its ports and its grants
     - command: 'machines --this-mac'
       exit: 0
       stdout: |

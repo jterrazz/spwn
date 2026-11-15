@@ -25,7 +25,7 @@ type CleanupIn struct {
 var Cleanup = call.Call[Deps, CleanupIn, machines.Cleaned]{
 	// invariant: SPEC B5.9: one yes or no deletes every ephemeral workspace asked for,
 	// each one the VM delete it would be alone, with its disk, its ports and
-	// its shared accounts; a VM that may not go is refused before any goes,
+	// its grants; a VM that may not go is refused before any goes,
 	// and the question comes back with every candidate and what it loses.
 	Name: "machines.cleanup", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Cleanup,
 	Errors: []fail.Code{confirm.YesNeeded, NotFinished},

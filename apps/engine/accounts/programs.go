@@ -28,8 +28,8 @@ func Programs() []Program {
 }
 
 func ProgramOf(account string) Program {
-	// value: the program a Machinefile's account names, by the catalog's
-	// label; an account no program carries is its own name.
+	// value: the program a provider's id names, by the catalog's
+	// label; an id no program carries is its own name.
 	for _, p := range catalog.Providers {
 		if p.ID != account {
 			continue

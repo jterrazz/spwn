@@ -1167,9 +1167,9 @@
         },
         {
           "empty": {
-            "noun": "shared accounts",
+            "noun": "sign-ins",
             "hint": {
-              "command": "station accounts share <account> --with <vm>"
+              "command": "station accounts login <program> --on <vm>"
             }
           }
         }

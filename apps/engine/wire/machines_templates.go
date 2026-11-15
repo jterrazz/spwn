@@ -127,9 +127,6 @@ func (t machineTemplates) onMac(folder string) string {
 	return folder
 }
 
-// value: a Machinefile's term as a share takes it: weeks in days; none, or
-// one a share cannot last, is the share's own default.
-
 func (t machineTemplates) Drift(ctx context.Context, name, version string) ([]string, error) {
 	rec, err := t.m.stores.images.Get(ctx, name, version)
 	if err != nil {

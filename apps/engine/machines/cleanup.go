@@ -22,7 +22,7 @@ type Candidate struct {
 	Reason string
 	Idle   time.Duration
 	// value: what goes with it: its disk, the guest ports reserved for it,
-	// and the accounts shared with it, by their label.
+	// and the grants it holds, by their label.
 	DiskBytes int64
 	Ports     []int
 	Accounts  []string
