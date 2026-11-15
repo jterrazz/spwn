@@ -13,7 +13,6 @@ import (
 // engine's confirmation rule (confirm.Fact).
 const (
 	FactEphemeral   = "ephemeral"
-	FactHealthy     = "healthy"
 	FactHostsServer = "hosts-server"
 )
 
@@ -114,13 +113,9 @@ func site(vm model.VM) string {
 	return name
 }
 
-func restartServer(vm model.VM, on string, healthy bool) alert {
-	a := alert{Gesture: "restart", Kind: machine.Server, Name: vm.Name, Question: "Restart " + vm.Name + " on " + on + "?",
+func restartServer(vm model.VM, on string) alert {
+	return alert{Gesture: "restart-server", Kind: machine.Server, Name: vm.Name, Question: "Restart " + vm.Name + " on " + on + "?",
 		Says: []string{vm.Name + " is unreachable for about a minute while it boots.", "Its health checks run again after the boot."}, Verb: "Restart " + vm.Name}
-	if healthy {
-		a.Facts = []string{FactHealthy}
-	}
-	return a
 }
 
 func stopServer(vm model.VM, on string) alert {

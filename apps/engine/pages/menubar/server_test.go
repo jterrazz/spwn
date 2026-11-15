@@ -111,8 +111,8 @@ func TestADownServerSaysWhyWithItsLastLines(t *testing.T) {
 		t.Fatalf("banner %q %q %q", g.Head.Label, g.Head.Detail.Text, g.Head.Mark)
 	}
 	for _, a := range p.Actions {
-		if a.ID == restart && (a.Confirm != nil || a.Run == nil || a.Run.Call != CallRestartVM) {
-			t.Fatalf("the banner's Restart %+v asks or runs no restart", a)
+		if a.ID == restart && (a.Confirm == nil || a.Run == nil || a.Run.Call != CallRestartVM) {
+			t.Fatalf("the banner's Restart %+v asks nothing or runs no restart", a)
 		}
 	}
 	log := sectionOf(p, SectionLog)

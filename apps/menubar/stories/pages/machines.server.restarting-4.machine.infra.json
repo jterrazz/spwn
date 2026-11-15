@@ -1834,6 +1834,20 @@
     {
       "label": "Restart",
       "on": "page",
+      "confirm": {
+        "question": "Restart infra on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Restart infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
       "priority": 1,
       "mutates": true,
       "id": "restart",
@@ -1945,6 +1959,20 @@
     {
       "label": "Restart",
       "on": "menu",
+      "confirm": {
+        "question": "Restart infra on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Restart infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
       "priority": 1,
       "mutates": true,
       "id": "restart@menu",
@@ -1957,7 +1985,8 @@
           "name": "mac-mini"
         }
       },
-      "icon": "arrow.clockwise"
+      "icon": "arrow.clockwise",
+      "destructive": true
     },
     {
       "label": "Stop",

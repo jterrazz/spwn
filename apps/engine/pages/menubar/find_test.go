@@ -25,8 +25,8 @@ const (
 var findNow = time.Date(2026, 11, 7, 15, 30, 0, 0, time.UTC)
 
 func asksYesNo(gesture string, k machine.Kind, _ ...string) string {
-	if gesture == "restart" && k == machine.Server {
-		return LevelYesNo
+	if gesture == "restart-server" && k == machine.Server {
+		return LevelTypeName
 	}
 	return LevelNone
 }
@@ -212,7 +212,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 }
 
 // invariant: SPEC A6 [find.down]: while infra is down Find leads with
-// Restart infra, run at once, and says since when it is down.
+// Restart infra, run once its name is typed, and says since when it is down.
 func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 	p := Find(findFleetDown(), page.Context{Machine: findPro, Kind: "computer"})
 	if err := page.Check(p); err != nil {
@@ -230,8 +230,8 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 		t.Errorf("review-bot's need %+v, want the orange mark of a wait", r)
 	}
 	for _, a := range p.Actions {
-		if restart != nil && a.ID == restart.Verb && (a.Confirm != nil || a.Run == nil || a.Run.Call != CallRestartVM) {
-			t.Errorf("Restart infra from Find runs %+v, want machines.restart at once", a)
+		if restart != nil && a.ID == restart.Verb && (a.Confirm == nil || a.Confirm.Type != "infra" || a.Run == nil || a.Run.Call != CallRestartVM) {
+			t.Errorf("Restart infra from Find runs %+v, want machines.restart once infra is typed", a)
 		}
 	}
 	if r := findRow(p, FindMachines, "infra"); r == nil || words(r.Detail) != "down since 15:10 | mac-mini" || r.Glyph.Signal != page.SignalFailing {
@@ -247,8 +247,8 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 	}
 	action := findRow(p, FindActions, "restart:infra")
 	for _, a := range p.Actions {
-		if action != nil && a.ID == action.Verb && (a.Confirm != nil || a.Run == nil || a.Run.Call != CallRestartVM) {
-			t.Errorf("Restart infra among the actions runs %+v, want machines.restart asking nothing", a)
+		if action != nil && a.ID == action.Verb && (a.Confirm == nil || a.Confirm.Type != "infra" || a.Run == nil || a.Run.Call != CallRestartVM) {
+			t.Errorf("Restart infra among the actions runs %+v, want machines.restart once infra is typed", a)
 		}
 	}
 }

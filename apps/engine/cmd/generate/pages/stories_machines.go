@@ -305,7 +305,7 @@ func (f Scene) needs() pagemenubar.NeedsReading {
 		}
 		all.Macs = append(all.Macs, m)
 	}
-	return pagemenubar.NeedsReading{Now: storyNow, Zone: time.UTC, All: &f.All, Ports: &f.Ports, Accounts: &all, Overviews: append([]overview.Summary{f.Home}, f.Away...)}
+	return pagemenubar.NeedsReading{Now: storyNow, Zone: time.UTC, All: &f.All, Ports: &f.Ports, Accounts: &all, Overviews: append([]overview.Summary{f.Home}, f.Away...), Asks: Levels}
 }
 
 func (f Scene) portsOf(mac string) ports.Listing {

@@ -81,9 +81,8 @@ func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
 		facts  []confirm.Fact
 		want   confirm.Level
 	}{
-		{"alert.restart-server", confirm.Restart, machine.Server, []confirm.Fact{confirm.Healthy}, confirm.YesNo},
-		{"a down server restarts at once", confirm.Restart, machine.Server, nil, confirm.None},
-		{"alert.stop-server", confirm.Stop, machine.Server, []confirm.Fact{confirm.Healthy}, confirm.TypeName},
+		{"alert.restart-server", confirm.RestartServer, machine.Server, nil, confirm.TypeName},
+		{"alert.stop-server", confirm.Stop, machine.Server, nil, confirm.TypeName},
 		{"alert.delete-server", confirm.Delete, machine.Server, nil, confirm.TypeName},
 		{"alert.stop-vm", confirm.Stop, machine.Workspace, []confirm.Fact{confirm.Ephemeral}, confirm.YesNo},
 		{"alert.stop-agent", confirm.StopAgent, machine.Workspace, nil, confirm.YesNo},

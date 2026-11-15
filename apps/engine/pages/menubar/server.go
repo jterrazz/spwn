@@ -596,7 +596,7 @@ func (s serverView) footer() *page.Footer {
 
 func (s serverView) actions() []page.Action {
 	m, h, vm := s.m, s.h, s.vm
-	restart := restartServer(vm, s.on, s.state == serverUp).action(m.Asks, page.Action{ID: ActionRestart, Label: "Restart", On: page.OnPage, Priority: 1, Mutates: true,
+	restart := restartServer(vm, s.on).action(m.Asks, page.Action{ID: ActionRestart, Label: "Restart", On: page.OnPage, Priority: 1, Mutates: true,
 		Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}})
 	stop := stopServer(vm, s.on).action(m.Asks, page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 2, Mutates: true,
 		Run: &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
@@ -608,8 +608,8 @@ func (s serverView) actions() []page.Action {
 	switch s.state {
 	case serverDown:
 		out = append(out,
-			page.Action{ID: ActionRestartUp, Label: "Restart", On: page.OnRow, Rows: []string{"down"}, Priority: 1, Mutates: true, Default: true,
-				Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}, Hud: hud("Restarting " + vm.Name)},
+			restartServer(vm, s.on).action(m.Asks, page.Action{ID: ActionRestartUp, Label: "Restart", On: page.OnRow, Rows: []string{"down"}, Priority: 1, Mutates: true, Default: true,
+				Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}, Hud: hud("Restarting " + vm.Name)}),
 			page.Action{ID: ActionLog, Label: "Show full log", On: page.OnPage, Priority: 4, Run: &page.Run{Terminal: true, Argv: []string{"machines", "log", vm.Name}, Target: target(h)}})
 	case serverStopped:
 		out = append(out, page.Action{ID: ActionStartVM, Label: "Start", On: page.OnRow, Rows: []string{"stopped"}, Priority: 1, Mutates: true, Default: true,

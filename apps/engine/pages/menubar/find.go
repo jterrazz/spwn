@@ -147,7 +147,7 @@ func (f finder) needs() []entry {
 	// titled by its verb first ("Restart infra", "Review review-bot"), the
 	// rest of its title the list of its detail ("PR #42 is ready"), else
 	// its detail what Needs you says of it; upkeep is not Find's.
-	r := NeedsReading{Now: f.r.Now, Zone: f.r.Zone, All: f.r.All, Ports: f.r.Ports, Accounts: f.r.Accounts}
+	r := NeedsReading{Now: f.r.Now, Zone: f.r.Zone, All: f.r.All, Ports: f.r.Ports, Accounts: f.r.Accounts, Asks: f.r.Asks}
 	if f.r.Home != nil {
 		r.Overviews = append([]overview.Summary{*f.r.Home}, f.r.Away...)
 	}
@@ -499,14 +499,14 @@ func (f finder) restart(h model.MacView, vm model.VM) entry {
 	row := page.Row{ID: "restart:" + vm.Name, Label: "Restart " + vm.Name, Glyph: symbol("arrow.clockwise", "")}
 	verb := page.Action{ID: "restart:" + vm.Name, Label: VerbRestart, Mutates: true,
 		Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}}
+	if f.r.Asks != nil {
+		verb = restartServer(vm, model.Label(*f.r.All, h)).action(f.r.Asks, verb)
+	}
 	switch {
 	case model.Down(vm):
 		row.Detail = page.Text("down")
-	case f.r.Asks != nil:
-		verb = restartServer(vm, model.Label(*f.r.All, h), true).action(f.r.Asks, verb)
-		if verb.Confirm != nil {
-			row.Detail = page.Text("asks first")
-		}
+	case verb.Confirm != nil:
+		row.Detail = page.Text("asks first")
 	}
 	return entry{row: row, tags: []string{"restart", "server", "reboot"}, verb: verb}
 }
