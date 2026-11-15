@@ -55,7 +55,7 @@ extension Token.Symbol {
     public static let popup = "chevron.up.chevron.down"
 }
 
-// value: SPEC A5's other sheets: Lend an account's pick list, Share a
+// value: SPEC A5's other sheets: Grant a password's pick list, Share a
 // port's listeners, Clean up's checked lists and its note, a hint's
 // command box, as the prototype draws them.
 extension Token.Metric.Sheet {

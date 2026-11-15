@@ -2,9 +2,8 @@ import SwiftUI
 
 // invariant: SPEC A4: one card of accounts under its label and count:
 // what needs you, each with its verb (Sign in reads its busy words while
-// Terminal runs the login); the copies shared, each with its time left,
-// then the row that shares one more, or the line that says none is; what a Mac is
-// signed in to; a footnote under the card.
+// Terminal runs the login); what a machine is signed in to, then the row
+// that grants it one more password; a footnote under the card.
 public struct AccountsSection: View {
     let section: Section
     let actions: [Action]
@@ -22,13 +21,13 @@ public struct AccountsSection: View {
     var needs: Bool { (section.id ?? "").split(separator: ":").last.map(String.init) == TodoBadge.section }
 
     // value: the action a row adds one more with: a verb that opens the
-    // share sheet.
+    // grant sheet.
     func adds(_ row: Row) -> Action? {
         guard let verb = RowView.action(row.verb, in: actions), verb.sheet == Self.shareSheet else { return nil }
         return verb
     }
 
-    static let shareSheet = "share-account"
+    static let shareSheet = "grant"
 
     public var body: some View {
         let items = section.items ?? []

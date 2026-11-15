@@ -8,7 +8,7 @@ public enum SheetAnchor {
 }
 
 // value: a select with one choice: its value said, glyph, label and
-// note, with nothing to open (Lend an account to the page's own VM).
+// note, with nothing to open (Grant a password to the page's own VM).
 struct FixedValue: View {
     let option: Option
     let answers: Answers
@@ -100,7 +100,7 @@ struct SheetLine: View {
     }
 }
 
-// invariant: SPEC A5 Lend an account: one answer picked among rows, each
+// invariant: SPEC A5 Grant a password: one answer picked among rows, each
 // its logo, its name and its words, the picked one ticked; one it cannot
 // take dimmed with its reason as its words.
 public struct PickRows: View {

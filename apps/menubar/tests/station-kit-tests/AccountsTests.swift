@@ -97,7 +97,7 @@ final class AccountsTests: XCTestCase {
 
     // invariant: only a verb that opens Terminal and names its busy words
     // waits, its verb pending from the press, once however often it is
-    // pressed: Extend calls the engine and is done when it returns.
+    // pressed: Remove calls the engine and is done when it returns.
     func testOnlySignInWaitsOnWhatItStarted() throws {
         let page = try story("machines.accounts.accounts")
         let signIn = try XCTUnwrap(page.action("sign-in:macbook-pro/npm"))
@@ -107,8 +107,8 @@ final class AccountsTests: XCTestCase {
         XCTAssertEqual(pending, ["sign-in:macbook-pro/npm"])
         XCTAssertNil(SignInWatch.start(signIn, pending: &pending))
         XCTAssertEqual(pending, ["sign-in:macbook-pro/npm"])
-        let extend = try XCTUnwrap(page.action("ending:macbook-pro/linux-1/claude"))
-        XCTAssertNil(SignInWatch.start(extend, pending: &pending))
+        let remove = try XCTUnwrap(page.action("remove-grant:linux-1/gh"))
+        XCTAssertNil(SignInWatch.start(remove, pending: &pending))
         XCTAssertEqual(pending, ["sign-in:macbook-pro/npm"])
     }
 

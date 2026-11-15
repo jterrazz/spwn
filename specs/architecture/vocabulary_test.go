@@ -81,7 +81,7 @@ func aliasName(name string) bool {
 
 // invariant: another program's own text is not station's vocabulary: a
 // file's location (`~/.ssh/config`, `{config}/gh/hosts.yml`), a URL, a
-// launchd label or a bundle id, a menu bar story's id (`sheet.lend-account`,
+// launchd label or a bundle id, a menu bar story's id (`sheet.share-port`,
 // STORIES.md's name for it), a file's name, an environment variable's
 // name, an HTTP header's (`X-RateLimit-Reset`), ssh_config's own lines (`Host *`), the JSON keys of another program
 // (Tailscale's `HostName`), a code span quoted in a text, and a command line
@@ -533,7 +533,7 @@ func TestVocabularyReadsTheCatalogsPackages(t *testing.T) {
 }
 
 func TestVocabularyKeepsItsPhrases(t *testing.T) {
-	for _, text := range []string{"a URL or host:port", "after a power cut", "the Tailnet contract", "a file's path", "Off here", "git config --global", "dclean", "Low Power Mode is on", "deleted when it powers off", "waiting for the VM to power off", "no power management here", "Lend an account to linux-1", "Lend {Account} for {For}", "Clean up ephemeral workspaces on This Mac", "Clean up", "It works when it is on power", "Ready to host servers", "Lent to linux-1", "No account lent to review-bot"} {
+	for _, text := range []string{"a URL or host:port", "after a power cut", "the Tailnet contract", "a file's path", "Off here", "git config --global", "dclean", "Low Power Mode is on", "deleted when it powers off", "waiting for the VM to power off", "no power management here", "Clean up ephemeral workspaces on This Mac", "Clean up", "It works when it is on power", "Ready to host servers"} {
 		if got := saysBanned(codeBanned(), []string{text}); len(got) > 0 {
 			t.Errorf("%q says %v, a phrase SPEC §2.2 keeps", text, got)
 		}
@@ -563,7 +563,7 @@ func TestVocabularyLetsOnlyTheCatalogueSayOrbStack(t *testing.T) {
 }
 
 func TestVocabularyReadsPastForeignTextOnly(t *testing.T) {
-	for _, text := range []string{"~/.ssh/config", "{config}/gh/hosts.yml", "https://example.com/tools/x.sh", "com.jterrazz.station.daemon", "STATION_PUBLIC_HOST", "config.toml", "Host ", "\nHost *\n  UseKeychain yes\n", `json:"HostName"`, "sheet.lend-account", "X-RateLimit-Reset"} {
+	for _, text := range []string{"~/.ssh/config", "{config}/gh/hosts.yml", "https://example.com/tools/x.sh", "com.jterrazz.station.daemon", "STATION_PUBLIC_HOST", "config.toml", "Host ", "\nHost *\n  UseKeychain yes\n", `json:"HostName"`, "sheet.share-port", "X-RateLimit-Reset"} {
 		if !foreignShape.MatchString(text) {
 			t.Errorf("%q is another program's text, read as station's", text)
 		}

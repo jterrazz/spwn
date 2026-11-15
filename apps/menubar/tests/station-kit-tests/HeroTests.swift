@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class HeroTests: XCTestCase {
     static let states = [
-        "home.needs", "home.one-need.wait", "home.one-need.lease", "home.many-needs", "home.down", "home.restarting",
+        "home.needs", "home.many-needs", "home.down", "home.restarting",
         "home.exposed", "home.down-and-exposed", "home.loading", "home.fine", "home.empty",
     ]
 
@@ -36,8 +36,10 @@ final class HeroTests: XCTestCase {
     // a bare "heading".
     func testVoiceOverNamesTheHeroHeading() throws {
         let loading = try XCTUnwrap(try stories().first { $0.id == "home.loading" }?.pages.first)
-        XCTAssertEqual(Hero.heading(try hero("home.needs"), stale: nil), "2 things need you")
-        let said = Hero.heading(loading.section("hero"), stale: loading.header?.stale)
+        XCTAssertEqual(Hero.heading(try hero("home.needs"), stale: nil), "review-bot is waiting · PR #42 is ready · 6 min")
+        XCTAssertEqual(Hero.heading(try hero("home.many-needs"), stale: nil), "2 things need you")
+        XCTAssertEqual(Hero.heading(loading.section("hero"), stale: loading.header?.stale), "review-bot is waiting · PR #42 is ready · 6 min")
+        let said = Hero.heading(try hero("home.many-needs"), stale: loading.header?.stale)
         XCTAssertTrue(said.hasPrefix("2 things need you"), said)
         XCTAssertTrue(said.hasSuffix(Token.Glyph.ellipsis), said)
     }
@@ -52,7 +54,7 @@ final class HeroTests: XCTestCase {
     // which a sample does not move.
     func testVoiceOverHearsTheHeroOncePerChangeNeverOnATick() throws {
         let needs = try hero("home.needs"), down = try hero("home.down"), restarting = try hero("home.restarting"), fine = try hero("home.fine")
-        XCTAssertEqual(Hero.announcement(needs), "2 things need you")
+        XCTAssertEqual(Hero.announcement(needs), "review-bot is waiting · PR #42 is ready · 6 min")
         XCTAssertEqual(Hero.announcement(down), "infra is down\(Token.Glyph.sep)out of memory\(Token.Glyph.sep)since 10:26\(Token.Glyph.sep)on mac-mini")
         XCTAssertEqual(Hero.announcement(restarting), "Restarting infra\(Token.Glyph.ellipsis)\(Token.Glyph.sep)on mac-mini\(Token.Glyph.sep)has an address\(Token.Glyph.sep)2 of 4")
 

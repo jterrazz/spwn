@@ -1,0 +1,16 @@
+{
+    "group": "sheet",
+    "heightNote": "the panel keeps the height of linux-1's Accounts page under it; the sheet is shorter than both",
+    "id": "sheet.grant.vm",
+    "note": "Grant a password from linux-1's Accounts page: To linux-1 said, not asked; the passwords of This Mac.",
+    "pages": [
+        "pages/machines.accounts.machine.linux-1.json"
+    ],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "accounts",
+        "sheet": {
+            "id": "grant"
+        }
+    }
+}

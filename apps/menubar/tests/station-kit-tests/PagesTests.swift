@@ -51,7 +51,7 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(infra.section("health")?.items?.first?.group?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
         XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Delete", "Copy ssh admin@infra", "Open in Terminal"])
         let mini = try Tree.page("menubar.mac.mini")
-        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts:shared"])
+        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts:on:"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
                 XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil || action.run?.copy != nil || action.run?.open != nil || (action.run == nil && action.icon == Token.Symbol.qr) || (action.run == nil && action.on == "menu") || (action.run == nil && action.sheet != nil), "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
@@ -78,7 +78,7 @@ final class PagesTests: XCTestCase {
         let delete = try XCTUnwrap(Tree.page("menubar.vm.linux-1").action("delete"))
         let confirm = try XCTUnwrap(delete.confirm)
         XCTAssertNil(confirm.type)
-        XCTAssertEqual(texts(confirm.lines), ["This can't be undone. It goes with its disk (20 GB), 2 shared ports and 2 accounts lent to it."])
+        XCTAssertEqual(texts(confirm.lines), ["This can't be undone. It goes with its disk (20 GB), 2 shared ports and 2 grants made to it."])
         let (frame, _) = try await sent(delete, label: "mb-delete")
         XCTAssertEqual(frame.call, "machines.delete")
         XCTAssertEqual(frame.input, ["VM": "linux-1", "Confirm": "linux-1"])
@@ -96,16 +96,16 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(frame.target, ["name": "jterrazz-mac-mini"])
     }
 
-    // invariant: SPEC A5: Restart on a healthy infra asks yes or no (an
-    // outage), and its yes runs on infra's Mac, the call asking nothing.
-    func testHealthyServerRestartAsksYesOrNo() async throws {
+    // invariant: SPEC A5: Restart on infra is a typed sheet as machines.restart
+    // asks it, and its yes runs on infra's Mac with the name typed.
+    func testServerRestartSheetTyped() async throws {
         let restart = try XCTUnwrap(Tree.page("menubar.vm.infra").action("restart"))
         XCTAssertEqual(restart.confirm?.question, "Restart infra on mac-mini?")
-        XCTAssertNil(restart.confirm?.type)
+        XCTAssertEqual(restart.confirm?.type, "infra")
         XCTAssertNil(restart.form)
-        let (frame, started) = try await sent(restart, label: "mb-restart")
+        let (frame, started) = try await sent(restart, answers: [ActionRunner.typedKey: "infra"], label: "mb-restart")
         XCTAssertEqual(frame.call, "machines.restart")
-        XCTAssertEqual(frame.input, ["Name": "infra"])
+        XCTAssertEqual(frame.input, ["Name": "infra", "Confirm": "infra"])
         XCTAssertEqual(frame.target, ["name": "jterrazz-mac-mini"])
         XCTAssertEqual(started, [])
     }
@@ -138,21 +138,20 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(PortRow.link(try XCTUnwrap(page.section("private")?.rows.first), in: page.actions ?? [])?.run?.open, "https://jterrazz-macbook-pro.tail77a797.ts.net:40001")
     }
 
-    // invariant: AU-15: Take back on linux-1's page asks yes or no, then
-    // takes the account back from linux-1.
-    func testAccountTakeBack() async throws {
+    // invariant: AU-15: Remove on a grant of linux-1's page asks yes or no,
+    // then removes the grant made to linux-1.
+    func testRemovingAGrant() async throws {
         let page = try Tree.page("menubar.vm.linux-1")
         let shared = try XCTUnwrap(page.section("shared"))
-        XCTAssertEqual(shared.title, "Lent to linux-1")
-        XCTAssertEqual(shared.items?.compactMap(\.row?.label), ["GitHub", "Claude", "Lend an account"])
+        XCTAssertEqual(shared.title, "Accounts")
+        XCTAssertEqual(shared.items?.compactMap(\.row?.label), ["GitHub", "Claude"])
         let github = try XCTUnwrap(shared.rows.first { $0.label == "GitHub" }?.id)
-        let take = try XCTUnwrap(page.rowActions(github).first { $0.label == "Take back" })
-        XCTAssertEqual(take.label, "Take back")
-        XCTAssertEqual(take.confirm?.question, "Take GitHub back from linux-1?")
-        XCTAssertNil(take.confirm?.type)
-        let (frames, _) = try await sentAll(take, label: "mb-take-back", reread: [PageID.of("linux-1")])
-        XCTAssertEqual(frames.map(\.call), ["accounts.take-back", "engine.refresh"])
-        XCTAssertEqual(frames.first?.input, ["Account": "github", "From": "linux-1", "Confirm": "yes"])
+        let remove = try XCTUnwrap(page.rowActions(github).first { $0.label == "Remove" })
+        XCTAssertEqual(remove.confirm?.question, "Remove GitHub? The grant ends here; the token stays yours.")
+        XCTAssertNil(remove.confirm?.type)
+        let (frames, _) = try await sentAll(remove, label: "mb-remove-grant", reread: [PageID.of("linux-1")])
+        XCTAssertEqual(frames.map(\.call), ["grants.remove", "engine.refresh"])
+        XCTAssertEqual(frames.first?.input, ["Entry": "pw-github", "To": "linux-1", "ToKind": "machine", "Confirm": "yes"])
         XCTAssertEqual(frames.last?.input, ["pages": ["menubar.machine:linux-1"]])
     }
 
