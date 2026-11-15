@@ -59,13 +59,14 @@ describe('Storage', () => {
     test('a Mac the world holds no answer for shows that no answer came', async () => {
         // Given - Storage over mini-offline
         const result = await component.render(storageOver('mini-offline'), async (visitor) => {
-            await visitor.see(heading('No verdict from the engine.'));
+            await visitor.see(heading('Nothing to free.'));
 
             // When - the Mac mini, which does not answer, is chosen
             await visitor.click(button('mac-mini'));
 
-            // Then - its disk is no answer, and its machines are still listed
+            // Then - its disk is no answer, it has no verdict, and its machines are still listed
             await visitor.see(heading('No answer from the engine.'));
+            await visitor.see(heading('No verdict from the engine.'));
             await visitor.see(within(region('Machines'), content('infra')));
         });
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-storage.aria.yaml'));
@@ -78,8 +79,8 @@ describe('Storage', () => {
             await visitor.see(content('No image on macbook-pro.'));
         });
 
-        // Then - the volume as the engine gave it, no footer and no image
-        expect(result.content.text).not.toContain('What can be rebuilt holds');
+        // Then - the volume as the engine gave it, no Free and no image
+        expect(result.content.text).not.toContain('Free 0');
         await expect(result.tree).toMatch(file('./__expected__/one-mac-storage.aria.yaml'));
     });
 });

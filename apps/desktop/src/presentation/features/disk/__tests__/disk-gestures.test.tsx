@@ -48,7 +48,7 @@ describe('disk gestures', () => {
     test('freeing what can be rebuilt on Storage frees every rebuildable row, and the footer leaves', async () => {
         // Given - Storage over two-macs, 34.8 GB that can be rebuilt
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
-            await visitor.see(content('What can be rebuilt holds 34.8 GB.', { exact: false }));
+            await visitor.see(content('Caches hold 34.8 GB.', { exact: false }));
 
             // When - the footer's gesture is clicked
             await visitor.click(button('Free 34.8 GB'));

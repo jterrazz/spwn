@@ -3,7 +3,6 @@ import type {
     AppsUpdateInput,
     BackgroundRemoveInput,
     DiskMoveInput,
-    DiskReading,
     DiskRow,
     EngineStartInput,
     ImagesReport,
@@ -145,11 +144,6 @@ export function freesWhole(group: DiskRow['Group']): boolean {
 // outside: images.list carries no "can be deleted": not the newest, and none a machine uses, until each image does.
 export function isDeletable(image: Pick<ImagesReport, 'Newest' | 'VMs'>): boolean {
     return !image.Newest && (image.VMs ?? []).length === 0;
-}
-
-// outside: disk.read flags no volume as holding what can be rebuilt, only each row (apps/engine/disk/group.go).
-export function holdsRebuildable(reading: DiskReading): boolean {
-    return (reading.Rows ?? []).some((row) => freesWhole(row.Group));
 }
 
 export type PlanLine = MachinefileExtraLine | MachinefileLine;

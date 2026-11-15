@@ -13,14 +13,16 @@
     - heading "Storage" [level=2]
     - paragraph: 606 GB of 994 GB used
     - button "Rescan"
+    - paragraph: "Outside any machine, station holds 107 GB: machine disks, images, leftovers and its logs"
     - img "What holds the disk of macbook-pro"
-    - list "The groups":
-      - listitem: Misplaced 73.3 GB
-      - listitem: Can rebuild 34.8 GB
-      - listitem: Your data 41.6 GB
-      - listitem: Never touched 300 KB
+    - list "The parts":
+      - listitem: System 21.4 GB
+      - listitem: Apps 0 B
+      - listitem: Your data 443 GB
+      - listitem: Caches 34.8 GB
+      - listitem: Machines and images 107 GB
       - listitem: Free 388 GB
-    - paragraph: What can be rebuilt holds 34.8 GB. Each app rebuilds its own when it needs it.
+    - paragraph: Caches hold 34.8 GB. Each app rebuilds its own when it needs it.
     - button "Free 34.8 GB"
   - region "By app":
     - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]

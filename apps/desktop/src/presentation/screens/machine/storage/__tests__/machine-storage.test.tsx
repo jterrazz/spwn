@@ -40,7 +40,7 @@ describe('machine-storage', () => {
 
                 // Then - the line under its figure opens Storage
                 await visitor.click(within(region('Storage'), button('Storage')));
-                await visitor.see(heading('No verdict from the engine.'));
+                await visitor.see(heading('3.0 GB can be freed.'));
             },
         );
         expect(result.errors.text).toBe('');

@@ -12,7 +12,13 @@
   - region "Storage":
     - heading "Storage" [level=2]
     - button "Rescan"
-    - list "The groups"
+    - paragraph: "Outside any machine, station holds 0 B: machine disks, images, leftovers and its logs"
+    - list "The parts":
+      - listitem: Apps 0 B
+      - listitem: Caches 0 B
+      - listitem: Machines and images 0 B
+      - listitem: Free 0 B
+    - paragraph: No cache to free. What is left is yours or the system's.
   - region "By app":
     - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
     - paragraph: Nothing listed on macbook-pro.

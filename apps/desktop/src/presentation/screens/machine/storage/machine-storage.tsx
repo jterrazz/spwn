@@ -51,10 +51,11 @@ function Read({ reading, name, target, vm, go }: ReadProps) {
         <Screen>
             <Page>
                 <DiskPanel
+                    by="kinds"
                     freeAll={freeAll}
                     name={name}
                     reading={reading}
-                    sub={vm ? <Inside go={go} /> : undefined}
+                    sub={vm ? <Inside go={go} /> : reading.Station?.Sentence}
                     title="Storage"
                 />
                 <HeldOutcomes>

@@ -1,5 +1,6 @@
 import type {
     DiskReading,
+    DiskStationPart,
     ImagesReport,
     MachinesMacView,
     MachinesVM,
@@ -13,12 +14,17 @@ import type { Found } from '../../../domain/machines/machines';
 import { shortDay } from '../../../domain/when';
 import { useReach, useRead, useWatch } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
-import { rebuildableOf } from '../../features/disk/disk';
 import { Freed, useFreeAll } from '../../features/disk/disk-gestures';
 import { DiskPanel, groupOf, GroupPanel } from '../../features/disk/disk-view';
 import { HeldOutcomes } from '../../kit/gestures';
 import { useIdentityOf } from '../../kit/identity';
-import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../../kit/readings';
+import {
+    Absent,
+    NoVerdict,
+    Reading as ReadingVerdict,
+    Unanswered,
+    VerdictHead,
+} from '../../kit/readings';
 import { machineRoute } from '../../navigation/route';
 import type { Route } from '../../navigation/route';
 import { MachineIcon, Panel, Row, Switch } from '../../ui/index';
@@ -39,7 +45,14 @@ function DiskRead({ reading, mac, target }: DiskOfProps) {
     const erasable = groupOf(reading, (row) => diskGestureOf(row.Group)?.call === 'disk.erase');
     return (
         <>
-            <DiskPanel freeAll={freeAll} name={mac} reading={reading} title="Disk" />
+            <DiskPanel
+                by="holds"
+                freeAll={freeAll}
+                name={mac}
+                reading={reading}
+                sub={reading.Station?.Sentence}
+                title="Disk"
+            />
             <HeldOutcomes>
                 <Freed gesture={freeAll} />
                 {erasable === undefined ? null : <GroupPanel group={erasable} target={target} />}
@@ -107,11 +120,18 @@ function useCachesInside(found: Found): null | string {
     if (disk.kind !== 'read') {
         return null;
     }
-    const caches = rebuildableOf(disk.out.Rows ?? []);
-    return caches > 0 ? `${bytes(caches)} of caches inside` : null;
+    const { CanFree } = disk.out;
+    return CanFree === undefined ? null : `${bytes(CanFree.Bytes)} of caches inside`;
 }
 
-function MacLine({ mac, go }: { mac: MachinesMacView; go: Go }) {
+function sizeFrom(station: DiskStationPart | undefined, name: string): null | string {
+    const held = station?.Machines?.find((machine) => machine.Name === name);
+    return held === undefined ? null : bytes(held.Bytes);
+}
+
+type LineProps = { mac: MachinesMacView; station: DiskStationPart | undefined; go: Go };
+
+function MacLine({ mac, station, go }: LineProps) {
     const caches = useCachesInside({ mac });
     return (
         <Row
@@ -122,12 +142,12 @@ function MacLine({ mac, go }: { mac: MachinesMacView; go: Go }) {
             }}
             sentence="the Mac itself"
             title={mac.Name}
-            value={null}
+            value={sizeFrom(station, mac.Name)}
         />
     );
 }
 
-function VmLine({ mac, vm, go }: { mac: MachinesMacView; vm: MachinesVM; go: Go }) {
+function VmLine({ mac, vm, station, go }: LineProps & { vm: MachinesVM }) {
     const identityOf = useIdentityOf();
     const caches = useCachesInside({ mac, vm });
     return (
@@ -139,33 +159,65 @@ function VmLine({ mac, vm, go }: { mac: MachinesMacView; vm: MachinesVM; go: Go 
             }}
             sentence={vm.Purpose}
             title={vm.Name}
-            value={vm.SizeGB > 0 ? `${vm.SizeGB} GB` : null}
+            value={sizeFrom(station, vm.Name)}
         />
     );
 }
 
-function Machines({ mac, go }: { mac: MachinesMacView; go: Go }) {
+function Machines({ mac, station, go }: LineProps) {
     return (
         <Panel note="what is inside one is on its own Storage tab" title="Machines">
-            <MacLine go={go} mac={mac} />
+            <MacLine go={go} mac={mac} station={station} />
             {(mac.VMs ?? []).map((vm) => (
-                <VmLine go={go} key={vm.Name} mac={mac} vm={vm} />
+                <VmLine go={go} key={vm.Name} mac={mac} station={station} vm={vm} />
             ))}
         </Panel>
     );
 }
 
-function OneMac({ mac, go }: { mac: MachinesMacView; go: Go }) {
-    const target = targetOf({ mac });
-    const disk = useWatch('disk.read', {}, target);
+type OneMacProps = { disk: Reading<DiskReading>; mac: MachinesMacView; go: Go };
+
+function OneMac({ disk, mac, go }: OneMacProps) {
     const images = useRead('images.list', {});
     return (
         <>
-            <DiskOf disk={disk} mac={mac.Name} target={target} />
+            <DiskOf disk={disk} mac={mac.Name} target={targetOf({ mac })} />
             <HeldOutcomes>
                 <Images images={images} mac={mac} />
             </HeldOutcomes>
-            <Machines go={go} mac={mac} />
+            <Machines go={go} mac={mac} station={stationOf(disk)} />
+        </>
+    );
+}
+
+function stationOf(disk: Reading<DiskReading>): DiskStationPart | undefined {
+    return disk.kind === 'read' ? disk.out.Station : undefined;
+}
+
+type ChosenProps = {
+    mac: MachinesMacView;
+    macs: readonly MachinesMacView[];
+    choose: (name: string) => void;
+    go: Go;
+};
+
+function ChosenMac({ mac, macs, choose, go }: ChosenProps) {
+    const disk = useWatch('disk.read', {}, targetOf({ mac }));
+    const station = stationOf(disk);
+    return (
+        <>
+            {station === undefined ? (
+                <NoVerdict size="page" />
+            ) : (
+                <VerdictHead size="page" verdict={station.Verdict} />
+            )}
+            <Switch
+                label="Which Mac"
+                onChange={choose}
+                options={macs.map((candidate) => ({ id: candidate.Name, label: candidate.Name }))}
+                value={mac.Name}
+            />
+            <OneMac disk={disk} go={go} mac={mac} />
         </>
     );
 }
@@ -191,14 +243,7 @@ export function StoragePage({ macs, go }: { macs: readonly MachinesMacView[]; go
     }
     return (
         <Page>
-            <NoVerdict size="page" />
-            <Switch
-                label="Which Mac"
-                onChange={setChosen}
-                options={macs.map((candidate) => ({ id: candidate.Name, label: candidate.Name }))}
-                value={mac.Name}
-            />
-            <OneMac go={go} key={mac.Name} mac={mac} />
+            <ChosenMac choose={setChosen} go={go} key={mac.Name} mac={mac} macs={macs} />
         </Page>
     );
 }
