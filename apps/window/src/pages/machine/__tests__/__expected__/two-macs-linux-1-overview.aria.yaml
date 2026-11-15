@@ -34,7 +34,7 @@
   - region "Sign-ins":
     - heading "Sign-ins 4" [level=2]
     - button "All sign-ins"
-    - text: gh Signed out npm from the password npm publish Signed in claude admin@jterrazz.com · Max plan · signed in by itself Signed in wrangler Refused at the provider Needs signing in again
+    - text: gh Signed out npm from the password npm publish Signed in claude you@example.com · Max plan · signed in by itself Signed in wrangler Refused at the provider Needs signing in again
   - region "Why it exists":
     - heading "Why it exists" [level=2]
     - term: Purpose

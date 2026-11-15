@@ -5,9 +5,9 @@
 - region "Passwords":
   - heading "Passwords 3" [level=2]
   - text: Password Kind Account Added Granted to
-  - button "GitHub deploy gh fine-grained token jterrazz 30 Oct not granted"
+  - button "GitHub deploy gh fine-grained token you 30 Oct not granted"
   - button "npm publish npm token 12 Oct 1 machine"
-  - button "Claude Max claude OAuth token admin@jterrazz.com 2 Oct not granted"
+  - button "Claude Max claude OAuth token you@example.com 2 Oct not granted"
   - paragraph: "No value is shown, copied or revealed here: a password is only granted, and removed."
 - dialog "Add a password":
   - heading "Add a password" [level=3]

@@ -1,6 +1,6 @@
 - main:
   - heading "GitHub deploy" [level=1]
-  - paragraph: gh · fine-grained token · jterrazz · added 30 Oct
+  - paragraph: gh · fine-grained token · you · added 30 Oct
   - button "Remove password"
   - region "This password":
     - heading "This password" [level=2]
@@ -11,7 +11,7 @@
     - term: Program
     - definition: gh
     - term: Account
-    - definition: jterrazz
+    - definition: you
   - region "Granted to":
     - heading "Granted to" [level=2]
     - button "Grant…"
