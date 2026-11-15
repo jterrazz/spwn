@@ -7,7 +7,24 @@ const sidebar = navigation('Sidebar');
 const search = field('Search the catalog');
 
 describe('catalog', () => {
-    test.todo("D4 waits for each app's rule and its last move, on apps.list");
+    test('D4 an app the file lists reads its version rule in plain words', async () => {
+        // Given - the window on gh's page over stories, an app This Mac's file lists
+        const result = await website.visit(
+            '/?world=stories&page=catalog-apps&item=gh',
+            async (visitor) => {
+                // When - its Version is read
+                const version = region('Version');
+
+                // Then - the rule is the engine's sentence
+                await visitor.see(within(version, content('takes every version')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo(
+        "D4 waits for a recording of a night that left a version waiting (Line.Waiting), for each app's last move, and for Allow, which no call gives: it writes the owner's file",
+    );
 
     test.todo('D5 waits for the machine files that declare each package, and its source');
 
