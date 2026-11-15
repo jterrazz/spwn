@@ -36,7 +36,9 @@ var Read = call.Watch[Deps, ReadIn, activity.Report]{
 	Name: "activity.read", Section: section.Activity, Where: call.AtTarget, Applies: activity.Applies,
 	Run: func(ctx context.Context, d Deps, in ReadIn, _ call.Progress) (<-chan call.Update[activity.Report], error) {
 		out := make(chan activity.Report, 1)
-		out <- d.read(ctx, in)
+		r := d.read(ctx, in)
+		r.Verdict = activity.VerdictOf(r)
+		out <- r
 		close(out)
 		return call.Updates(ctx, out), nil
 	},

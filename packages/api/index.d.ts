@@ -214,6 +214,7 @@ export type ActivityReport = {
     silent?: boolean;
     since?: string;
     source: '' | 'direct' | 'engine' | 'mac-process';
+    verdict: CoreVerdictVerdict;
     window: number;
 };
 
