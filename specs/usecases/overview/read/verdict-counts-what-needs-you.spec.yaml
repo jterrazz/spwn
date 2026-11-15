@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          [{"Tone":"bad","Sentence":"com.example.brain.x-snapshot is failing, last exit 2","Line":"7 things can wait."},[["com.example.brain.x-snapshot","needs-you","remove"],["mise","can-wait","update"],["brew","can-wait","update"],["firewall","can-wait","fix"],["~/.tart","can-wait","move"],["com.bjango.istatmenus.installer","can-wait","fix"],["com.docker.socket","can-wait","fix"],["com.docker.vmnetd","can-wait","fix"]]]
+          [{"Tone":"bad","Sentence":"1 thing needs you.","Line":"The rest is fine. 2 machines on 1 Mac"},[["com.example.brain.x-snapshot","needs-you","remove"],["mise","can-wait","update"],["brew","can-wait","update"],["firewall","can-wait","fix"],["~/.tart","can-wait","move"],["com.bjango.istatmenus.installer","can-wait","fix"],["com.docker.socket","can-wait","fix"],["com.docker.vmnetd","can-wait","fix"]]]

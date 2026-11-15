@@ -41,6 +41,8 @@ A Mac that falls silent is shown as it last answered: for 30 s since its last an
 
 `station machines <machine>` is that machine's Overview, the one `station overview --on <machine>` prints.
 
+A Mac's Overview opens on its own head, `Summary.Head.Verdict`, apart from what needs you (`Summary.Verdict`): `Online, with N machines running.`, or, its engine stopped, `The engine is stopped.`. A Mac that does not answer is told by its `Unseen` verdict in `machines.list`, never down. A VM's Overview carries none.
+
 A server has four sections: Overview, Activity, Ports and SSH (SPEC §3.2). Its Overview adds `Own Tailscale device` when its tooling put one on the tailnet (station never installs nor blocks it) and its ssh, for debugging; its SSH section is the one door, the path that reaches it and what station leaves to the owner's tooling. Apps, Settings, Disk, Accounts, Background and Awake are refused on it, exit 2: `infra is a server: station does not manage its apps`, `Hint: manage it with your own tooling: ssh infra`. `apps update --all-machines` and `accounts --all-machines` skip a server by its kind and say so.
 
 ## Lifetimes

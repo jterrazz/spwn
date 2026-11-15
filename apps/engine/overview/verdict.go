@@ -1,7 +1,9 @@
 package overview
 
 import (
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
@@ -115,54 +117,75 @@ const (
 )
 
 func VerdictOf(s Summary) verdict.Verdict {
-	// invariant: the head of an Overview and of Home: the engine stopped
-	// first, then what needs you: the one need's own text, or the count with
-	// the first of them as its line,
-	// then a reading still running, then a Mac with no machine yet ready,
-	// else all is well, what can wait counted as its line.
+	// invariant: the head of Home: the engine stopped first, then what needs
+	// you: a server down by its name, else the count; a reading still
+	// running, then a Mac with no machine yet ready, else all is well. What
+	// is left past the first is said as the rest, the machines counted, and
+	// what can wait stays the client's count of the can-wait needs.
 	if s.Engine == EngineStopped {
 		return verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceEngineStopped, Line: LineEngineStopped}
 	}
 	var urgent []Need
-	waits, broken := 0, false
+	broken := false
 	for _, n := range s.Needs {
-		if n.Upkeep == CanWait {
-			waits++
-			continue
+		if n.Upkeep == NeedsYou {
+			urgent = append(urgent, n)
+			broken = broken || n.Broken
 		}
-		urgent = append(urgent, n)
-		broken = broken || n.Broken
 	}
+	tail := machinesLine(s)
 	if len(urgent) > 0 {
 		tone := verdict.Warn
 		if broken {
 			tone = verdict.Bad
 		}
-		if len(urgent) == 1 {
-			return verdict.Verdict{Tone: tone, Sentence: urgent[0].Text, Line: waitLine(waits)}
+		if down, ok := serverDown(s, urgent); ok {
+			line := "The rest is fine."
+			if len(urgent) > 1 {
+				line = more(len(urgent)-1) + " " + line
+			}
+			return verdict.Verdict{Tone: verdict.Bad, Sentence: down.Subject + " is down.", Line: strings.TrimSpace(line + " " + tail)}
 		}
-		return verdict.Verdict{Tone: tone, Sentence: things(len(urgent), "needs", "need") + " you.", Line: urgent[0].Text}
+		return verdict.Verdict{Tone: tone, Sentence: things(len(urgent), "needs", "need") + " you.", Line: strings.TrimSpace("The rest is fine. " + tail)}
 	}
-	line := waitLine(waits)
 	switch {
 	case s.Pending:
-		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Reading " + s.Head.Name + ".", Line: line}
+		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Reading " + s.Head.Name + ".", Line: tail}
 	case s.Head.Mac() && s.Head.ThisMac && s.VMs != nil && len(s.VMs) == 0:
-		return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceReady, Line: line}
+		return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceReady}
 	}
-	return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceFine, Line: line}
+	return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceFine, Line: tail}
 }
 
-func waitLine(waits int) string {
-	if waits == 0 {
+func serverDown(s Summary, urgent []Need) (Need, bool) {
+	for _, n := range urgent {
+		if n.Broken && n.Section == section.Overview && slices.ContainsFunc(s.VMs, func(vm VM) bool { return vm.Name == n.Subject }) {
+			return n, true
+		}
+	}
+	return Need{}, false
+}
+
+func more(n int) string {
+	if n == 1 {
+		return "1 more thing needs you."
+	}
+	return strconv.Itoa(n) + " more things need you."
+}
+
+func machinesLine(s Summary) string {
+	if len(s.VMs) == 0 {
 		return ""
 	}
-	return things(waits, "can", "can") + " wait."
+	if len(s.VMs) == 1 {
+		return "1 machine on 1 Mac"
+	}
+	return strconv.Itoa(len(s.VMs)) + " machines on 1 Mac"
 }
 
 func things(n int, one, other string) string {
 	if n == 1 {
-		return "One thing " + one
+		return "1 thing " + one
 	}
 	return strconv.Itoa(n) + " things " + other
 }

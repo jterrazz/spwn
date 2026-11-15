@@ -1618,6 +1618,9 @@
         },
         "Up": {
           "type": "integer"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
         }
       },
       "required": [
