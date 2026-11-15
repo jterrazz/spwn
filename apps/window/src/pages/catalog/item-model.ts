@@ -1,6 +1,40 @@
-import type { AppsReport, CatalogLivesOn, CatalogSetting } from '@jterrazz/station-api';
+import type {
+    AppsMatrix,
+    AppsMatrixRow,
+    AppsReport,
+    CatalogLivesOn,
+    CatalogSetting,
+    MachinefileFileView,
+} from '@jterrazz/station-api';
 
+import { carries } from '../../engine/provisional';
 import { SEPARATOR } from '../../separator';
+
+export function rowOf(matrix: AppsMatrix | undefined, name: string): AppsMatrixRow | undefined {
+    return (matrix?.Rows ?? []).find((row) => row.Name === name);
+}
+
+export function carriedBy(matrix: AppsMatrix | undefined, name: string): string[] | undefined {
+    const row = rowOf(matrix, name);
+    if (matrix === undefined) {
+        return undefined;
+    }
+    const columns = matrix.Columns ?? [];
+    return (row?.Cells ?? []).flatMap((cell, index) => {
+        const column = columns[index];
+        return column !== undefined && carries(cell) ? [column.Name] : [];
+    });
+}
+
+export function declaredIn(
+    files: readonly MachinefileFileView[],
+    chapter: 'Apps' | 'Settings',
+    name: string,
+): string[] {
+    return files
+        .filter((file) => ((chapter === 'Apps' ? file.Apps : file.Settings) ?? []).includes(name))
+        .map((file) => file.Name);
+}
 
 export type System = NonNullable<CatalogLivesOn['Kinds']>[number];
 

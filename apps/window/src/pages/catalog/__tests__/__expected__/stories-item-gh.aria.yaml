@@ -1,0 +1,42 @@
+- main:
+  - heading "gh 2.97.0" [level=1]
+  - paragraph: GitHub CLI for repository management
+  - button "Add to a machine" [disabled]
+  - region "How it is installed":
+    - heading "How it is installed" [level=2]
+    - text: Mac, macOS VM brew gh Linux apt gh
+    - term: Puts on your path
+    - definition: gh
+  - region "Version":
+    - heading "Version" [level=2]
+    - term: On your machines
+    - definition: 2.97.0
+    - term: Rule
+    - definition: takes every version
+    - term: Newest
+    - definition: 2.98.0 is out
+    - term: Last moved
+    - definition: Not given yet
+  - region "Settings it comes with":
+    - heading "Settings it comes with proposed once it is installed" [level=2]
+    - button "github-login"
+  - region "What it keeps on disk":
+    - heading "What it keeps on disk" [level=2]
+    - button "Storage"
+    - text: "{cache}/gh rebuilt when needed cache {state}/gh yours, kept data {config}/gh/config.yml your settings, kept settings {config}/gh/hosts.yml kept · the login; the keychain's `gh:github.com` (HYPOTHESIS: listing denied) kept"
+  - region "gh in the catalog":
+    - term: Kind
+    - definition: app
+    - term: Category
+    - definition: Git
+    - term: Declared in
+    - definition:
+      - button "jterrazz-base"
+      - button "studio-linux"
+    - term: 3 machines
+    - definition:
+      - button "macbook-pro"
+      - button "agent-7f"
+      - button "linux-1"
+    - term: Comes from
+    - definition: Not given yet

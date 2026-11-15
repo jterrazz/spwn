@@ -1,4 +1,4 @@
-import { button, component, content, field, file, region } from '@jterrazz/test';
+import { button, component, content, field, file, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../fixtures/page-over';
@@ -24,6 +24,22 @@ describe('item', () => {
 
         // Then - mise on every system, its path, its disk, and the rail's empty slots
         await expect(result.tree).toMatch(file('./__expected__/stories-item-node.aria.yaml'));
+    });
+
+    test("an app's rail names the machine files that declare it and the machines that carry it", async () => {
+        // Given - the window on gh's page over stories, listed by macbook-pro's file and carried by three machines
+        const result = await component.render(
+            windowOver({ item: 'gh', page: 'catalog-apps' }),
+            async (visitor) => {
+                const rail = region('gh in the catalog');
+
+                // When - machinefile.files and apps.matrix have answered
+                await visitor.see(within(rail, content('3 machines')));
+            },
+        );
+
+        // Then - the files that list it are links, and the machines that carry it are chips
+        await expect(result.tree).toMatch(file('./__expected__/stories-item-gh.aria.yaml'));
     });
 
     test("a setting's page says how it is applied, what it changes, and the machines it is for", async () => {

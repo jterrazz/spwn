@@ -4,7 +4,16 @@ import { Facts, Panel, Row, StatePill, Value } from '../../design/index';
 import { countOf, wordOf } from '../../engine/engine-words';
 import { kindChipWord, reversibleState } from '../../engine/shown';
 import { needsOf } from './item-model';
-import { factOf, ItemChips, ItemHead, MachineChips, Rail, systemsWord, Two } from './item-parts';
+import {
+    factOf,
+    FileLinks,
+    ItemChips,
+    ItemHead,
+    MachineChips,
+    Rail,
+    systemsWord,
+    Two,
+} from './item-parts';
 import type { ItemProps } from './item-parts';
 import { Marked } from './marked';
 import { categoryWord } from './shelves';
@@ -92,8 +101,13 @@ function countedOn(name: string, matrix: SettingsMatrix | undefined): string[] |
 export function SettingItem({
     row,
     matrix,
+    declared,
     ...props
-}: ItemProps & { row: SettingsRow; matrix: SettingsMatrix | undefined }) {
+}: ItemProps & {
+    row: SettingsRow;
+    matrix: SettingsMatrix | undefined;
+    declared: readonly string[];
+}) {
     const setting = row.Package;
     const on = countedOn(row.Name, matrix);
     return (
@@ -117,7 +131,12 @@ export function SettingItem({
                         facts={[
                             factOf('Kind', wordOf('CatalogKind', 'setting').Word),
                             factOf('Category', categoryWord(setting.Category)),
-                            factOf('Declared in', null),
+                            factOf(
+                                'Declared in',
+                                declared.length === 0 ? null : (
+                                    <FileLinks go={props.go} names={declared} />
+                                ),
+                            ),
                             factOf(
                                 on === undefined ? 'Machines' : countOf('machine', on.length),
                                 on === undefined ? null : (

@@ -9,6 +9,7 @@ import type { Route } from '../../shell/route';
 import { Absent, Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { AppItem } from './item-app';
+import { carriedBy, declaredIn } from './item-model';
 import type { Go } from './item-parts';
 import { SettingItem } from './item-setting';
 import type { Shelf } from './model';
@@ -51,12 +52,16 @@ function Item({
     settings: readonly SettingsRow[];
 }) {
     const matrix = useRead('settings.matrix', {});
+    const carriers = useRead('apps.matrix', {});
+    const files = useRead('machinefile.files', {});
     const props = { go, macs, routeOf: routeOfName(reports, settings) };
+    const held = files.kind === 'read' ? (files.out.Files ?? []) : [];
     if (shelf === 'settings') {
         const row = settings.find((one) => one.Name === name);
         return row ? (
             <SettingItem
                 {...props}
+                declared={declaredIn(held, 'Settings', name)}
                 matrix={matrix.kind === 'read' ? matrix.out : undefined}
                 row={row}
             />
@@ -66,7 +71,13 @@ function Item({
     }
     const report = reports.find((one) => one.App.Name === name);
     return report ? (
-        <AppItem {...props} report={report} reports={reports} />
+        <AppItem
+            {...props}
+            carried={carriedBy(carriers.kind === 'read' ? carriers.out : undefined, name)}
+            declared={declaredIn(held, 'Apps', name)}
+            report={report}
+            reports={reports}
+        />
     ) : (
         <NotInTheCatalog name={name} />
     );

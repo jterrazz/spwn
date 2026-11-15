@@ -13,13 +13,16 @@ function windowOver(world: string, initial: Route) {
 
 const category = (name: string, count: number) => button(`${name}${count}`, { exact: true });
 
+const everything = button('Everything', { exact: false });
+
 describe('shelf', () => {
     test('the Skills shelf lists the agent skills alone', async () => {
         // Given - the window on Skills over stories
         const result = await component.render(
             windowOver('stories', { page: 'catalog-skills' }),
             async (visitor) => {
-                // When - apps.list has answered
+                // When - apps.list has answered, and Everything is chosen
+                await visitor.click(everything);
                 await visitor.see(content('agent-browser-skill'));
             },
         );
@@ -33,8 +36,9 @@ describe('shelf', () => {
         const result = await component.render(
             windowOver('stories', { page: 'catalog-apps' }),
             async (visitor) => {
-                // When - the Git category is chosen
+                // When - Everything and the Git category are chosen
                 await visitor.see(content('gh'));
+                await visitor.click(everything);
                 await visitor.click(category('Git', 4));
             },
         );
@@ -47,8 +51,9 @@ describe('shelf', () => {
         // Given - the window on Apps over stories, its descriptions of every length
         let cut: string[] = ['not read'];
         await component.render(windowOver('stories', { page: 'catalog-apps' }), async (visitor) => {
-            // When - apps.list has answered
+            // When - apps.list has answered, and Everything is chosen
             await visitor.see(content('gh'));
+            await visitor.click(everything);
             cut = [...document.querySelectorAll('div[class*="_cell_"]')]
                 .filter((cell) => cell.scrollWidth > cell.clientWidth)
                 .map((cell) => cell.textContent ?? '');
@@ -73,12 +78,29 @@ describe('shelf', () => {
         await expect(result.tree).toMatch(file('./__expected__/stories-settings.aria.yaml'));
     });
 
+    test('the apps shelf shows what the machines carry by default, each with how many carry it', async () => {
+        // Given - the window on Apps over stories, where six machines are read
+        const result = await component.render(
+            windowOver('stories', { page: 'catalog-apps' }),
+            async (visitor) => {
+                // When - apps.list and apps.matrix have answered
+                await visitor.see(content('gh'));
+
+                // Then - a row says how many of the machines read carry the app, and Everything is offered
+                await visitor.see(content('1 of 2 machines', { exact: false }));
+                await visitor.see(everything);
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test('a Mac with nothing installed lists every app not installed', async () => {
         // Given - the window on Apps over bare-mac
         const result = await component.render(
             windowOver('bare-mac', { page: 'catalog-apps' }),
             async (visitor) => {
-                // When - apps.list has answered
+                // When - apps.list and apps.matrix have answered, and Everything is chosen
+                await visitor.click(everything);
                 await visitor.see(content('homebrew'));
             },
         );

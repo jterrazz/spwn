@@ -1,7 +1,7 @@
 import type { AppsReport } from '@jterrazz/station-api';
 
 import { Button, Facts, MissingMark, Panel, Row, StatePill, Value } from '../../design/index';
-import { detailOf, wordOf } from '../../engine/engine-words';
+import { countOf, detailOf, wordOf } from '../../engine/engine-words';
 import type { PlanLine } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import { appUpdate, kindChipWord } from '../../engine/shown';
@@ -9,7 +9,16 @@ import { APP_STATE_TONES } from '../../engine/tones';
 import { APP_STATE_WORDS } from '../../engine/words';
 import { sentence } from '../../model/format';
 import { installLinesOf, usedBy } from './item-model';
-import { factOf, Installs, ItemChips, ItemHead, Rail, Two } from './item-parts';
+import {
+    factOf,
+    FileLinks,
+    Installs,
+    ItemChips,
+    ItemHead,
+    MachineChips,
+    Rail,
+    Two,
+} from './item-parts';
 import type { ItemProps } from './item-parts';
 import { categoryWord } from './shelves';
 
@@ -138,11 +147,34 @@ function kindName(report: AppsReport): string {
     return wordOf('CatalogAppKind', report.App.AppKind).Word;
 }
 
+function declaredFact(go: ItemProps['go'], declared: readonly string[]) {
+    return factOf(
+        'Declared in',
+        declared.length === 0 ? null : <FileLinks go={go} names={declared} />,
+    );
+}
+
+function carriedFact(props: ItemProps, carried: readonly string[] | undefined) {
+    return factOf(
+        carried === undefined ? 'Machines' : countOf('machine', carried.length),
+        carried === undefined || carried.length === 0 ? null : (
+            <MachineChips go={props.go} macs={props.macs} names={carried} />
+        ),
+    );
+}
+
 export function AppItem({
     report,
     reports,
+    carried,
+    declared,
     ...props
-}: ItemProps & { report: AppsReport; reports: readonly AppsReport[] }) {
+}: ItemProps & {
+    report: AppsReport;
+    reports: readonly AppsReport[];
+    carried: readonly string[] | undefined;
+    declared: readonly string[];
+}) {
     const { App } = report;
     const users = usedBy(App.Name, reports);
     const drift = useRead('machinefile.drift', {});
@@ -175,8 +207,8 @@ export function AppItem({
                         facts={[
                             factOf('Kind', kindName(report)),
                             factOf('Category', categoryWord(App.Category)),
-                            factOf('Declared in', null),
-                            factOf('Machines', null),
+                            declaredFact(props.go, declared),
+                            carriedFact(props, carried),
                             ...(users.length === 0
                                 ? []
                                 : [factOf('Used by', <ItemChips {...props} names={users} />)]),
