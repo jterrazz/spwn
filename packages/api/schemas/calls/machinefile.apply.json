@@ -985,6 +985,9 @@
         },
         "Step": {
           "$ref": "#/$defs/machinefile.Step"
+        },
+        "Waiting": {
+          "type": "string"
         }
       },
       "required": [
@@ -992,7 +995,8 @@
         "Installed",
         "RequiredBy",
         "Seen",
-        "Step"
+        "Step",
+        "Waiting"
       ],
       "type": "object"
     },
@@ -1040,12 +1044,16 @@
         },
         "Step": {
           "$ref": "#/$defs/machinefile.Step"
+        },
+        "Waiting": {
+          "type": "string"
         }
       },
       "required": [
         "Action",
         "Seen",
-        "Step"
+        "Step",
+        "Waiting"
       ],
       "type": "object"
     },
