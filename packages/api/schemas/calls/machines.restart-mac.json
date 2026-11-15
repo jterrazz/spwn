@@ -433,6 +433,17 @@
         "Device": {
           "type": "string"
         },
+        "Gestures": {
+          "items": {
+            "enum": [
+              "start",
+              "stop",
+              "restart"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
         "Guest": {
           "type": "string"
         },
