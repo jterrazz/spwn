@@ -425,6 +425,8 @@ export type AppsMatrix = {
     Columns: AppsColumn[] | null;
     Rows: AppsMatrixRow[] | null;
     Servers: string[] | null;
+    Skills: CoreVerdictShelf;
+    Verdict: CoreVerdictShelf;
 };
 
 export type AppsMatrixRow = {
@@ -967,6 +969,11 @@ export type CoreMachineRef = {
 export type CoreMachineRefInput = {
     Name?: string;
     On?: string;
+};
+
+export type CoreVerdictShelf = {
+    Catalog: CoreVerdictVerdict;
+    Mine: CoreVerdictVerdict;
 };
 
 export type CoreVerdictVerdict = {

@@ -4,8 +4,12 @@ import (
 	"slices"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
+
+const EveryAppFollowsItsRule = "Every app follows its rule"
 
 type Column struct {
 	settings.LivesOn
@@ -40,6 +44,9 @@ type Matrix struct {
 	Columns []Column
 	Servers []string
 	Rows    []MatrixRow
+	// value: the head of the Apps shelf and of the Skills shelf.
+	Verdict verdict.Shelf
+	Skills  verdict.Shelf
 }
 
 type Reading struct {
@@ -47,14 +54,16 @@ type Reading struct {
 	Read    bool
 }
 
-func MatrixOf(cols []Column, reads []Reading, servers []string) Matrix {
+func MatrixOf(cols []Column, reads []Reading, servers []string, known []catalog.App) Matrix {
 	// invariant: one row per app some machine carries, in the order the
 	// machines list them, one cell per column; a machine not read says Not
 	// known, one whose list lacks the app says it does not live there.
 	m := Matrix{Columns: cols, Servers: servers}
 	at := map[string]int{}
+	kinds := map[string]catalog.AppKind{}
 	for _, rd := range reads {
 		for _, r := range rd.Reports {
+			kinds[r.App.Name] = r.App.AppKind
 			if _, ok := at[r.App.Name]; !ok {
 				at[r.App.Name] = len(m.Rows)
 				m.Rows = append(m.Rows, MatrixRow{Name: r.App.Name, Cells: slices.Repeat([]Cell{{State: NotKnown}}, len(cols))})
@@ -84,5 +93,27 @@ func MatrixOf(cols []Column, reads []Reading, servers []string) Matrix {
 		}
 	}
 	m.Rows = slices.DeleteFunc(m.Rows, func(r MatrixRow) bool { return r.Carry == 0 })
+	// invariant: a skill is counted on a shelf of its own: the catalog's
+	// skills, and the skills some machine carries.
+	skillsHeld := 0
+	for _, r := range m.Rows {
+		if kinds[r.Name] == catalog.AppKindSkill {
+			skillsHeld++
+		}
+	}
+	inCatalog := 0
+	for _, a := range known {
+		if a.AppKind == catalog.AppKindSkill {
+			inCatalog++
+		}
+	}
+	m.Verdict = verdict.Shelf{
+		Mine:    verdict.Verdict{Tone: verdict.OK, Sentence: EveryAppFollowsItsRule},
+		Catalog: verdict.Verdict{Tone: verdict.OK, Sentence: EveryAppFollowsItsRule},
+	}
+	m.Skills = verdict.Shelf{
+		Mine:    verdict.Counted(skillsHeld, "skill", "on your machines"),
+		Catalog: verdict.Counted(inCatalog, "skill", "in the catalog"),
+	}
 	return m
 }

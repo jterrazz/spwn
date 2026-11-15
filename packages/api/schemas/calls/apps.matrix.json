@@ -114,12 +114,20 @@
             "array",
             "null"
           ]
+        },
+        "Skills": {
+          "$ref": "#/$defs/core.verdict.Shelf"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Shelf"
         }
       },
       "required": [
         "Columns",
         "Rows",
-        "Servers"
+        "Servers",
+        "Skills",
+        "Verdict"
       ],
       "type": "object"
     },
@@ -171,6 +179,48 @@
       "required": [
         "Name",
         "On"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Shelf": {
+      "additionalProperties": false,
+      "properties": {
+        "Catalog": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
+        "Mine": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Catalog",
+        "Mine"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
       ],
       "type": "object"
     }

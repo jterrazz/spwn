@@ -66,6 +66,6 @@ var Matrix = call.Call[Deps, MatrixIn, apps.Matrix]{
 			cols = append(cols, col)
 			reads = append(reads, rd)
 		}
-		return apps.MatrixOf(cols, reads, servers), nil
+		return apps.MatrixOf(cols, reads, servers, d.Known), nil
 	},
 }
