@@ -107,7 +107,7 @@ func enumsOnTheWire(t *testing.T) map[string]bool {
 		}
 	}
 	for file, body := range apiFiles(root(t)) {
-		if !strings.HasSuffix(file, ".json") || file == wordsPath {
+		if !strings.HasSuffix(file, ".json") || file == wordsPath || file == confirmsPath {
 			continue
 		}
 		var doc any

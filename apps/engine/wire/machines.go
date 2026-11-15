@@ -296,15 +296,17 @@ func (c machineCalls) CheckVM(name, verb string) error {
 	return err
 }
 
-func (c machineCalls) CheckRestart(name string) (bool, error) {
+func (c machineCalls) CheckRestart(name string) (coremachine.Kind, error) {
 	r, err := c.Remote(name)
-	if err != nil {
-		return false, err
+	switch {
+	case err != nil:
+		return "", err
+	case r.Kind == catalog.Mac:
+		return coremachine.Computer, nil
+	case r.Lifetime == model.AlwaysOn:
+		return coremachine.Server, nil
 	}
-	if r.Kind == catalog.Mac {
-		return false, nil
-	}
-	return true, nil
+	return coremachine.Workspace, nil
 }
 
 func (c machineCalls) Running(ctx context.Context, name string) (bool, error) {

@@ -41,6 +41,8 @@ func typedGesture(action string) (doing, done string, ok bool) {
 		return "stopping", "stopped", true
 	case confirm.Delete:
 		return "deleting", "deleted", true
+	case confirm.RestartServer:
+		return "restarting", "restarted", true
 	default:
 		return "", "", false
 	}

@@ -15,7 +15,7 @@ runs:
       exit: 0
       stdout: |
           {"check":"https://jterrazz.com/healthz","state":"passing","latency":60,"days":2}
-    - command: 'machines restart infra --on mac-mini'
+    - command: 'machines restart infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |
           	On mac-mini:

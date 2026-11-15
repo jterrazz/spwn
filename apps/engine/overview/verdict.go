@@ -82,6 +82,17 @@ func VerbOf(f finding.Finding) Verb {
 	return VerbFix
 }
 
+const NounSignIns = "Sign-ins"
+
+func NounOf(id section.ID) string {
+	// invariant: every Accounts finding is a sign-in that fails or expired,
+	// so its noun is the tab it opens, not the section's word.
+	if id == section.Accounts {
+		return NounSignIns
+	}
+	return id.Title()
+}
+
 func Idle(mac string, vm machines.VM, now time.Time) (finding.Finding, bool) {
 	// invariant: a workspace that runs on after its agent finished, for
 	// IdleAfter or longer, holds its memory for nothing: a need that can

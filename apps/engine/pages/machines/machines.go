@@ -248,6 +248,13 @@ func StopServerForm(name string) page.Form {
 	}
 }
 
+func RestartServerForm(name string) page.Form {
+	return page.Form{
+		Title:  "Restart " + name + "? What it serves is down until it answers again",
+		Fields: []page.Field{{Key: "name", Label: "Type " + name + " to restart it:", Kind: page.FieldText}},
+	}
+}
+
 func Added(a model.Added, thisMac page.Context) page.Page {
 	// value: the Mac added, as ssh and its station answered; a station of
 	// another version is one more row, with what brings them to one.

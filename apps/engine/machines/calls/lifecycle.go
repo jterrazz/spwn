@@ -165,24 +165,34 @@ type RestartIn struct {
 
 var Restart = call.Call[Deps, RestartIn, machines.RestartReport]{
 	Name: "machines.restart", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.RestartMac,
-	Errors: []fail.Code{confirm.YesNeeded},
+	ConfirmBy: map[machine.Kind]confirm.Action{machine.Server: RestartConfirm(machine.Server), machine.Workspace: RestartConfirm(machine.Workspace)},
+	Errors:    []fail.Code{confirm.YesNeeded, confirm.Needed, confirm.Mismatch},
 	Run: func(ctx context.Context, d Deps, in RestartIn, _ call.Progress) (machines.RestartReport, error) {
 		if err := d.Machines.CheckMac(); err != nil {
 			return machines.RestartReport{}, err
 		}
-		vm, err := d.Machines.CheckRestart(in.Name)
+		kind, err := d.Machines.CheckRestart(in.Name)
 		if err != nil {
 			return machines.RestartReport{}, err
 		}
-		gesture := confirm.RestartMac
-		if vm {
-			gesture = confirm.Restart
-		}
-		if err := confirm.Require(confirm.For(gesture, d.Kind), in.Name, in.Confirm); err != nil {
+		if err := confirm.Ask(RestartConfirm(kind), kind, "", in.Name, in.Confirm); err != nil {
 			return machines.RestartReport{}, err
 		}
 		return d.Machines.Restart(ctx, in.Name)
 	},
+}
+
+func RestartConfirm(kind machine.Kind) confirm.Action {
+	// invariant: a Mac's restart asks a yes, a server's its name typed (S4),
+	// a workspace's nothing: the confirmation Restart's ConfirmBy declares.
+	switch kind {
+	case machine.Server:
+		return confirm.RestartServer
+	case machine.Workspace:
+		return confirm.Restart
+	case machine.Computer:
+	}
+	return confirm.RestartMac
 }
 
 type LogOut struct {

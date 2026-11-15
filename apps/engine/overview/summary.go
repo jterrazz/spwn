@@ -1,6 +1,8 @@
 package overview
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -18,8 +20,10 @@ type Summary struct {
 	Engine Engine
 	Needs  []Need
 	Lines  []Line
-	// value: the VMs of a Mac, servers then workspaces.
-	VMs []VM
+	// value: the VMs of a Mac, servers then workspaces, and the sentence of
+	// its machines' foot ("3 running, 1 stopped"), absent with no VM.
+	VMs      []VM
+	Machines string `json:",omitempty"`
 	// value: a section has not answered yet.
 	Pending bool
 	// value: SPEC §7.6's Mac readiness, empty on a Mac that needs none.
@@ -72,6 +76,9 @@ type Need struct {
 	// its gesture.
 	Upkeep Upkeep
 	Verb   Verb
+	// value: the noun its line names after its machine, the tab its gesture
+	// opens: its section's word, Sign-ins for a sign-in.
+	Noun string
 }
 
 type Line struct {
@@ -137,10 +144,27 @@ func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms [
 	for _, f := range finding.Rank(all) {
 		s.Needs = append(s.Needs, Need{Machine: f.Machine.Name, Section: f.Section, Broken: f.Severity == finding.Broken, Severity: f.Severity,
 			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, Command: f.Fix.Command, Path: f.Fix.Path,
-			Upkeep: UpkeepOf(f), Verb: VerbOf(f)})
+			Upkeep: UpkeepOf(f), Verb: VerbOf(f), Noun: NounOf(f.Section)})
 	}
-	s.Verdict = VerdictOf(s)
+	s.Verdict, s.Machines = VerdictOf(s), MachinesOf(vms)
 	return s
+}
+
+func MachinesOf(vms []VM) string {
+	running := 0
+	for _, vm := range vms {
+		if vm.Running {
+			running++
+		}
+	}
+	var parts []string
+	if running > 0 {
+		parts = append(parts, strconv.Itoa(running)+" running")
+	}
+	if stopped := len(vms) - running; stopped > 0 {
+		parts = append(parts, strconv.Itoa(stopped)+" stopped")
+	}
+	return strings.Join(parts, ", ")
 }
 
 func Count(state catalog.State, n int, word, key string) Part {

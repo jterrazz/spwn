@@ -20,7 +20,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /bin/rmdir data; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].vms["web"].kept.lifetime = "always-on"'' world.json > world.next && /bin/mv world.next world.json'
       exit: 0
-    - command: 'machines restart web >/dev/null'
+    - command: 'machines restart web --confirm=web >/dev/null'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {folders: .booted.folders}'' world.json'
       exit: 0

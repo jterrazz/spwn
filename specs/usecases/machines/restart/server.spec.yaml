@@ -1,11 +1,11 @@
-description: 'a server of another Mac restarts through that Mac with no question: a new run, still wanted running'
+description: 'a server of another Mac restarts through that Mac, its name typed: a new run, still wanted running'
 env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
       exit: 0
       stdout: |
           {"pid":2001,"want":"running"}
-    - command: 'machines restart infra --on mac-mini'
+    - command: 'machines restart infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |
           	On mac-mini:

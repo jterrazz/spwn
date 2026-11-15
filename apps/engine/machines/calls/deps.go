@@ -92,7 +92,7 @@ type Machines interface {
 	// value: the lines a VM of this Mac's runs wrote, as its hypervisor keeps them.
 	Log(ctx context.Context, name string) ([]string, error)
 	// value: whether name is a VM rather than a Mac.
-	CheckRestart(name string) (vm bool, err error)
+	CheckRestart(name string) (machine.Kind, error)
 	Restart(ctx context.Context, name string) (machines.RestartReport, error)
 	CheckMac() error
 	// value: the registered name of another Mac, which name may say short;

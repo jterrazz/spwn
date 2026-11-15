@@ -1,0 +1,27 @@
+description: 'on a terminal, a server restart asks its name typed, then restarts it'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines restart infra --on mac-mini'
+      stdin: |
+          within 10 see Type infra
+          send infra\r
+          within 30 exit 0
+          screen
+      exit: 0
+      stdout: |
+          Restart infra? What it serves is down until it answers again
+          ┃ Type infra to restart it:
+          On mac-mini:
+          Changes
+            ● Running
+            ● Has an address
+            ● SSH answers
+            ● infra           restarted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":1002,"want":"running"}

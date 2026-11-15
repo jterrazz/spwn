@@ -232,3 +232,26 @@ func jsonType(v any) string {
 	}
 	return "object"
 }
+
+func TestConfirmsSayTheFormTheEngineChecksPerKindOfTarget(t *testing.T) {
+	var got map[string]callConfirmation
+	if err := json.Unmarshal(apiFiles(root(t))[confirmsPath], &got); err != nil {
+		t.Fatal(err)
+	}
+	restart := got["machines.restart"]
+	if restart.Confirm != "restart-mac" || restart.Form != "yes-no" {
+		t.Errorf("a Mac's restart: %+v", restart.confirmation)
+	}
+	if s := restart.Kinds["server"]; s.Confirm != "restart-server" || s.Form != "type-name" || s.Consequence == "" {
+		t.Errorf("a server's restart: %+v", s)
+	}
+	if w := restart.Kinds["workspace"]; w.Confirm != "restart" || w.Form != "none" {
+		t.Errorf("a workspace's restart: %+v", w)
+	}
+	if s := got["machines.stop"].Kinds["server"]; s.Form != "type-name" {
+		t.Errorf("a server's stop asks %q", s.Form)
+	}
+	if _, ok := got["machines.list"]; ok {
+		t.Errorf("a read is confirmed")
+	}
+}

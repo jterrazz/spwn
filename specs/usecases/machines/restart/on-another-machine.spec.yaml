@@ -1,7 +1,7 @@
 description: 'a restart sent with --on restarts the VM of that Mac, read running again through its Overview'
 env: two-macs
 runs:
-    - command: 'machines restart infra --on mac-mini'
+    - command: 'machines restart infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |
           	On mac-mini:

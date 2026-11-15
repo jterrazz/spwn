@@ -24,18 +24,19 @@ const (
 	// value: a password leaves this Mac's vault, and the grants made from it end.
 	RemovePassword Action = "remove-password"
 	// value: a grant ends before its term.
-	RemoveGrant Action = "remove-grant"
-	Undeclare   Action = "undeclare"
-	OffHere     Action = "off-here"
-	Overwrite   Action = "overwrite"
-	Forget      Action = "forget"
-	DeleteImage Action = "delete-image"
-	RestartMac  Action = "restart-mac"
-	StopEngine  Action = "stop-engine"
-	Stop        Action = "stop"
-	StopAgent   Action = "stop-agent"
-	Delete      Action = "delete"
-	Erase       Action = "erase"
+	RemoveGrant   Action = "remove-grant"
+	Undeclare     Action = "undeclare"
+	OffHere       Action = "off-here"
+	Overwrite     Action = "overwrite"
+	Forget        Action = "forget"
+	DeleteImage   Action = "delete-image"
+	RestartMac    Action = "restart-mac"
+	RestartServer Action = "restart-server"
+	StopEngine    Action = "stop-engine"
+	Stop          Action = "stop"
+	StopAgent     Action = "stop-agent"
+	Delete        Action = "delete"
+	Erase         Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.
 	BuildImage Action = "build-image"
 	// value: delete the ephemeral workspaces whose agent finished, in one question.
@@ -65,7 +66,7 @@ func For(a Action, k machine.Kind) Level {
 	switch a {
 	case Install, Share, Start, Restart, Edit:
 		return None
-	case Delete, Erase:
+	case Delete, Erase, RestartServer:
 		return TypeName
 	case Stop:
 		if k == machine.Server {
@@ -196,6 +197,8 @@ func (a Action) Consequence() string {
 		return "%s is deleted; the next create that needs it builds it again."
 	case RestartMac:
 		return "%s restarts: its VMs stop, and its servers start again once it is back."
+	case RestartServer:
+		return "%s stops while it restarts: what it serves is down until it answers again."
 	case StopEngine:
 		return "Every VM of this Mac stops, and nothing is shared until the engine starts again."
 	case Stop:

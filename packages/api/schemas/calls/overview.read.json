@@ -1742,6 +1742,9 @@
         "Machine": {
           "type": "string"
         },
+        "Noun": {
+          "type": "string"
+        },
         "Path": {
           "type": "string"
         },
@@ -1802,6 +1805,7 @@
         "Call",
         "Command",
         "Machine",
+        "Noun",
         "Path",
         "Section",
         "Severity",
@@ -2107,6 +2111,9 @@
             "array",
             "null"
           ]
+        },
+        "Machines": {
+          "type": "string"
         },
         "Needs": {
           "items": {
