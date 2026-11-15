@@ -3,6 +3,9 @@
   - paragraph:
     - img "Not given yet"
     - text: "Everything station knows how to install or set: apps, agent skills and settings, each one a package"
+  - group "Show":
+    - button "On your machines1"
+    - button "Everything97" [pressed]
   - searchbox "Search the catalog"
   - group "Category":
     - button "All apps97" [pressed]
@@ -27,7 +30,7 @@
   - region "Apps":
     - paragraph: Package Managers 8
     - button "cocoapods Dependency manager for iOS and macOS projects Not installed"
-    - button "github-release manager Commands from a project's GitHub releases, fetched and checked by station itself Installed"
+    - button "github-release manager 1 of 1 machine Commands from a project's GitHub releases, fetched and checked by station itself Installed"
     - button "homebrew manager macOS package manager Not installed"
     - button "mas manager Mac App Store command line Not installed"
     - 'button "mise manager Polyglot runtime manager: node, go, python, bun, rust, java Not installed"'

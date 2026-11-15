@@ -138,6 +138,25 @@ export function MachineChips({
     );
 }
 
+export function FileLinks({ names, go }: Pick<ItemProps, 'go'> & { names: readonly string[] }) {
+    return (
+        <span className={styles.chips}>
+            {names.map((name) => (
+                <button
+                    className={styles.chip}
+                    key={name}
+                    onClick={() => {
+                        go({ file: name, page: 'machine-files' });
+                    }}
+                    type="button"
+                >
+                    {name}
+                </button>
+            ))}
+        </span>
+    );
+}
+
 export function factOf(label: string, value: ReactNode): Fact {
     return { label, value: value ?? <MissingMark /> };
 }

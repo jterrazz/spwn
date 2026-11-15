@@ -1,6 +1,12 @@
-import type { AppsReport, SettingsMatrixRow, SettingsRow } from '@jterrazz/station-api';
+import type {
+    AppsMatrixRow,
+    AppsReport,
+    SettingsMatrixRow,
+    SettingsRow,
+} from '@jterrazz/station-api';
+import { useState } from 'react';
 
-import { AppIcon, Row, StatePill, Value } from '../../design/index';
+import { AppIcon, Row, StatePill, Switch, Value } from '../../design/index';
 import { countOf } from '../../engine/engine-words';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
@@ -27,7 +33,15 @@ function kindOf(word: string): { tag?: string; tagLook?: 'type' } {
 
 type Open = (name: string) => void;
 
-function AppRow({ report, open }: { report: AppsReport; open: Open }) {
+function AppRow({
+    report,
+    carry,
+    open,
+}: {
+    report: AppsReport;
+    carry: AppsMatrixRow | undefined;
+    open: Open;
+}) {
     const { App } = report;
     const update = appUpdate(report);
     const version = report.Version === '' ? null : <Value look="raised">{report.Version}</Value>;
@@ -58,6 +72,9 @@ function AppRow({ report, open }: { report: AppsReport; open: Open }) {
                 )
             }
             valueSize={update === null ? 'short' : 'long'}
+            {...(carry === undefined
+                ? {}
+                : { sentence: `${String(carry.Carry)} of ${countOf('machine', carry.Of)}` })}
         />
     );
 }
@@ -137,9 +154,13 @@ function SettingsShelf({ open }: { open: Open }) {
     );
 }
 
+type Shown = 'carried' | 'every';
+
 function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
     const reach = useReach();
     const apps = useWatch('apps.list', {});
+    const matrix = useRead('apps.matrix', {});
+    const [shown, setShown] = useState<Shown>('carried');
     const { title } = SHELVES[shelf];
     if (apps.kind !== 'read' || reach.kind === 'unanswered') {
         return (
@@ -148,15 +169,39 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
             </Page>
         );
     }
+    const held = new Map(
+        matrix.kind === 'read' ? (matrix.out.Rows ?? []).map((row) => [row.Name, row]) : [],
+    );
+    const listed = appsOn(shelf, apps.out ?? []);
+    const carried = matrix.kind === 'read' ? listed.filter((r) => held.has(r.App.Name)) : listed;
     return (
         <Page>
             <NoVerdict line={ABOUT} size="page" />
+            {matrix.kind === 'read' ? (
+                <Switch
+                    label="Show"
+                    onChange={setShown}
+                    options={[
+                        { count: carried.length, id: 'carried', label: 'On your machines' },
+                        { count: listed.length, id: 'every', label: 'Everything' },
+                    ]}
+                    value={shown}
+                />
+            ) : null}
             <Listing
-                items={appsOn(shelf, apps.out ?? [])}
+                items={shown === 'every' ? listed : carried}
                 packageOf={packageOfApp}
-                renderRow={(report) => <AppRow key={report.App.Name} open={open} report={report} />}
+                renderRow={(report) => (
+                    <AppRow
+                        carry={held.get(report.App.Name)}
+                        key={report.App.Name}
+                        open={open}
+                        report={report}
+                    />
+                )}
                 title={title}
             />
+            {matrix.kind === 'failed' ? <Unanswered error={matrix.error} size="tab" /> : null}
         </Page>
     );
 }

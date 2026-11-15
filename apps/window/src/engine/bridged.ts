@@ -13,6 +13,7 @@ export const BRIDGED = [
     'accounts.read',
     'activity.read',
     'apps.list',
+    'apps.matrix',
     'apps.update',
     'awake.read',
     'background.remove',
