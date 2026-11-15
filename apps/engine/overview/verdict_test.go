@@ -20,25 +20,55 @@ func TestTheVerdictSaysTheEngineFirstThenWhatNeedsYou(t *testing.T) {
 	down := finding.Finding{Machine: machine.Ref{Name: "infra", On: "macbook"}, Section: section.Overview, Severity: finding.Broken, Subject: "infra", Text: "infra is in a loop"}
 	update := finding.Finding{Machine: machine.Ref{Name: "macbook"}, Section: section.Apps, Severity: finding.NeedsALook, Subject: "lazygit", Text: "3 outdated"}
 	exposed := finding.Finding{Machine: machine.Ref{Name: "macbook"}, Section: section.Ports, Severity: finding.Broken, Subject: "5432", Text: "port 5432 is reachable"}
+	expired := finding.Finding{Machine: machine.Ref{Name: "macbook"}, Section: section.Accounts, Severity: finding.Broken, Subject: "github", Text: "github expired"}
 	vms := []overview.VM{{Name: "infra", Running: true}}
+	const rest = "1 machine on 1 Mac"
 	for name, c := range map[string]struct {
 		engine overview.Engine
 		own    []finding.Finding
 		vms    []overview.VM
 		want   verdict.Verdict
 	}{
-		"all is well":        {overview.EngineRunning, nil, vms, verdict.Verdict{Tone: verdict.OK, Sentence: overview.SentenceFine}},
+		"all is well":        {overview.EngineRunning, nil, vms, verdict.Verdict{Tone: verdict.OK, Sentence: overview.SentenceFine, Line: rest}},
 		"a Mac with no VM":   {overview.EngineRunning, nil, []overview.VM{}, verdict.Verdict{Tone: verdict.OK, Sentence: overview.SentenceReady}},
-		"upkeep alone":       {overview.EngineRunning, []finding.Finding{update}, vms, verdict.Verdict{Tone: verdict.OK, Sentence: overview.SentenceFine, Line: "One thing can wait."}},
-		"a server down":      {overview.EngineRunning, []finding.Finding{update, down}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: "infra is in a loop", Line: "One thing can wait."}},
-		"one need alone":     {overview.EngineRunning, []finding.Finding{exposed}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: "port 5432 is reachable"}},
-		"two needs":          {overview.EngineRunning, []finding.Finding{down, exposed}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: "2 things need you.", Line: "infra is in a loop"}},
+		"upkeep alone":       {overview.EngineRunning, []finding.Finding{update}, vms, verdict.Verdict{Tone: verdict.OK, Sentence: overview.SentenceFine, Line: rest}},
+		"a server down":      {overview.EngineRunning, []finding.Finding{update, down}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: "infra is down.", Line: "The rest is fine. " + rest}},
+		"one need alone":     {overview.EngineRunning, []finding.Finding{exposed}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: "1 thing needs you.", Line: "The rest is fine. " + rest}},
+		"two needs":          {overview.EngineRunning, []finding.Finding{expired, exposed}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: "2 things need you.", Line: "The rest is fine. " + rest}},
+		"a server down more": {overview.EngineRunning, []finding.Finding{down, exposed}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: "infra is down.", Line: "1 more thing needs you. The rest is fine. " + rest}},
 		"the engine stopped": {overview.EngineStopped, []finding.Finding{down}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: overview.SentenceEngineStopped, Line: overview.LineEngineStopped}},
 		"VMs not read yet":   {overview.EngineRunning, nil, nil, verdict.Verdict{Tone: verdict.OK, Sentence: overview.SentenceFine}},
 	} {
 		if got := overview.Summarize(mac, c.engine, c.own, nil, c.vms).Verdict; got != c.want {
 			t.Errorf("%s: %+v; want %+v", name, got, c.want)
 		}
+	}
+}
+
+func TestTheHeadOfAMacSaysItOnlineWithTheMachinesItRuns(t *testing.T) {
+	two := []overview.VM{{Name: "a", Running: true}, {Name: "b", Running: true}, {Name: "c"}}
+	for name, c := range map[string]struct {
+		engine overview.Engine
+		vms    []overview.VM
+		want   verdict.Verdict
+	}{
+		"two running":        {overview.EngineRunning, two, verdict.Verdict{Tone: verdict.OK, Sentence: "Online, with 2 machines running."}},
+		"one running":        {overview.EngineRunning, two[:1], verdict.Verdict{Tone: verdict.OK, Sentence: "Online, with 1 machine running."}},
+		"none running":       {overview.EngineRunning, two[2:], verdict.Verdict{Tone: verdict.OK, Sentence: "Online, with no machine running."}},
+		"not read yet":       {overview.EngineRunning, nil, verdict.Verdict{Tone: verdict.OK, Sentence: "Online."}},
+		"the engine stopped": {overview.EngineStopped, two, verdict.Verdict{Tone: verdict.Bad, Sentence: overview.SentenceEngineStopped, Line: overview.LineEngineStopped}},
+	} {
+		got := overview.Summarize(mac, c.engine, nil, nil, c.vms)
+		if got.Head.Verdict == nil || *got.Head.Verdict != c.want {
+			t.Errorf("%s: %+v; want %+v", name, got.Head.Verdict, c.want)
+		}
+	}
+	inside := overview.Summarize(overview.Head{Name: "linux-1", Kind: machine.Workspace}, overview.EngineNone, nil, nil, nil)
+	if inside.Head.Verdict != nil {
+		t.Errorf("a VM's head is its Mac's to say: %+v", inside.Head.Verdict)
+	}
+	if stopped := overview.Stopped("api", machine.Workspace); stopped.Head.Verdict != nil {
+		t.Errorf("a stopped VM's head is its Mac's to say: %+v", stopped.Head.Verdict)
 	}
 }
 

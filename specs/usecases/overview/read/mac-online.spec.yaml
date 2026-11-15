@@ -1,0 +1,11 @@
+description: 'a Mac heads its Overview online with the machines it runs'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary.Head.Verdict'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          {"Tone":"ok","Sentence":"Online, with 2 machines running."}

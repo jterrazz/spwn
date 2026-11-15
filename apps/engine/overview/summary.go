@@ -42,6 +42,10 @@ type Head struct {
 	// value: how long the machine has run, as Activity's meter reads it;
 	// zero where unknown.
 	Up time.Duration
+	// value: a Mac itself in one verdict: online with the machines it
+	// runs, or its engine stopped; Summary.Verdict is what needs you. Absent
+	// on a VM, whose head machines.list says from its Mac.
+	Verdict *verdict.Verdict `json:",omitempty"`
 }
 
 func (h Head) Mac() bool    { return h.Kind == machine.Computer }
@@ -159,6 +163,7 @@ func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms [
 			Upkeep: UpkeepOf(f), Verb: VerbOf(f), Noun: NounOf(f.Section)})
 	}
 	s.Verdict, s.Machines = VerdictOf(s), MachinesOf(vms)
+	s.Head.Verdict = HeadOf(s)
 	return s
 }
 

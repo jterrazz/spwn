@@ -2239,6 +2239,7 @@ export type OverviewHead = {
     Name: string;
     ThisMac: boolean;
     Up: number;
+    Verdict?: CoreVerdictVerdict;
 };
 
 export type OverviewLine = {
