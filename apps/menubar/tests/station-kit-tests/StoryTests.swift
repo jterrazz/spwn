@@ -86,11 +86,15 @@ final class StoryTests: XCTestCase {
         return renderer.cgImage.map { Double($0.height) }
     }
 
-    // invariant: MB-12: every story is drawn offscreen, and drawing them
-    // all opens no window.
-    func testEveryStoryMatchesItsGoldensInBothSchemes() throws {
+    static let goldenShards = 4
+
+    static func shard(_ stories: [Story], _ index: Int) -> [Story] {
+        stories.enumerated().filter { $0.offset % goldenShards == index }.map(\.element)
+    }
+
+    func matchGoldens(shard index: Int) throws {
         let windows = NSApplication.shared.windows.count
-        let stories = try stories()
+        let stories = Self.shard(try stories(), index)
         XCTAssertFalse(stories.isEmpty)
         var failures: [String] = []
         for story in stories {
@@ -105,6 +109,28 @@ final class StoryTests: XCTestCase {
         }
         XCTAssertEqual(failures, [])
         XCTAssertEqual(NSApplication.shared.windows.count, windows)
+    }
+
+    // invariant: MB-12: every story is drawn offscreen, and drawing them
+    // all opens no window. The stories are dealt to the shards by index, so
+    // each runs in its own process under `swift test --parallel`.
+    func testStoryGoldensShard0() throws { try matchGoldens(shard: 0) }
+    func testStoryGoldensShard1() throws { try matchGoldens(shard: 1) }
+    func testStoryGoldensShard2() throws { try matchGoldens(shard: 2) }
+    func testStoryGoldensShard3() throws { try matchGoldens(shard: 3) }
+
+    // invariant: the shards are exactly the story list, each story once, and
+    // there is one method per shard.
+    func testTheShardsAreExactlyTheStoryList() throws {
+        let all = try stories()
+        let dealt = (0..<Self.goldenShards).flatMap { Self.shard(all, $0).map(\.id) }
+        XCTAssertEqual(dealt.count, all.count)
+        XCTAssertEqual(Set(dealt), Set(all.map(\.id)))
+        let methods = Self.defaultTestSuite.tests.map(\.name).filter { $0.contains("testStoryGoldensShard") }.sorted()
+        XCTAssertEqual(methods.count, Self.goldenShards)
+        for index in 0..<Self.goldenShards {
+            XCTAssertTrue(methods[index].hasSuffix("testStoryGoldensShard\(index)]"), methods[index])
+        }
     }
 
     func testEveryPanelStoryStaysGlass() throws {
