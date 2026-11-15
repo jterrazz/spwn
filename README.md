@@ -1,6 +1,6 @@
 # station
 
-A single CLI to set up and run a Mac, its VMs and your other Macs: the apps and agent skills, the settings, the disk, the ports and who reaches them, the accounts shared with a VM, Awake, and the servers and workspaces where development lives. No sudo required for the install.
+A single CLI to set up and run a Mac, its VMs and your other Macs: the apps and agent skills, the settings, the disk, the ports and who reaches them, who is signed in and what the vault granted, Awake, and the servers and workspaces where development lives. No sudo required for the install.
 
 ## Install
 
@@ -31,7 +31,7 @@ station apps            # install, update, remove apps and agent skills
 station settings        # what station sets up and checks: applied, changed since, off here
 station disk            # what each app keeps: free what rebuilds, erase data, move what is misplaced
 station ports           # what listens, Private or Public, and what your VMs share on Tailscale
-station accounts        # who is signed in, and the accounts shared with VMs: never a token
+station accounts        # who is signed in, and what the vault granted: never a token
 station background      # the background tasks: failing, orphans, station's, the apps'
 station awake           # keep a Mac from sleeping: every Mac's mode, a keep-awake for a while
 

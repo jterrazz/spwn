@@ -54,11 +54,33 @@ It replaces the idea of `station apps install --all`. Starts once the new
 MacBook runs station v3 and the owner opens the design.
 
 ## The next minor release: the v2 words go
-The hidden aliases (`status`, `start`, `stop`, `tools`, `secrets`, `config`,
+The hidden aliases (`status`, `start`, `stop`, `tools`, `config`,
 `run`, `probe`, `--always-on`) and `station.status/v1` are kept for one release ([Commands](docs/reference/commands.md#hidden-aliases)). The next
 minor removes them, with the `machines supervise` retirement shim and the
 retired preference names (`here`, `hosts`, `services`, `lend_list`), once
 `studio doctor` reads `station.overview.read/v1`.
+
+## The Machinefile's accounts become grants and sign-ins (K7)
+K6 deleted `accounts.share`, `accounts.take-back` and `accounts.read`; the
+menu bar grants, and `station accounts` reads `accounts.list`. What K7
+inherits, kept only behind the Machinefile's `accounts.share` key: the share
+adapter (`accounts/calls/sharing.go`: the check, the studio CLI copy, the
+shares store), the share list, and the engine's expiry job, whose share half
+takes those copies back at their term (its other half retries the grant
+removals owed). K7 turns `accounts.share` and `accounts.keep` into `grants`
+and `signins`, then deletes all three with the share half of the job, the
+`claude-token` setting's share list and the studio CLI adapter. The drift of
+a Machinefile's accounts reads the VM's `accounts.list` meanwhile: an asked
+account is seen when its program is signed in there. K7 deletes in the
+same cut `engine.accounts`, the guest's own read
+(`accounts/calls/reader.go`, the guest's `accounts` op) and the identities
+adapter (`accounts/adapter/cli`): no surface calls `engine.accounts` since
+`accounts.read` went, and the share check reads one provider through the
+identities adapter. Their stories (`specs/adapters/cli/identities-*`,
+`docker`) drive the guest's `accounts` op and `engine.accounts` until then.
+A guest never runs on a Mac, so the Mac-only provider reads (Tailscale)
+answer nothing meanwhile. ADR-049 keeps `engine.accounts`, reshaped: K7
+amends it.
 
 ## The test VMs show in Disk
 Tier 3 (`specs/machine/macos/tier.sh`) makes its macOS VM with tart directly,
