@@ -330,7 +330,7 @@ struct SheetFor: View {
 // the panel's sheet layer, the page dimmed under its scrim; the forms of
 // today's kind stay in the flow of the page.
 public enum SheetLayer {
-    public static let kinds: Set<String> = ["new-vm", "share-account", "share-port", "cleanup"]
+    public static let kinds: Set<String> = ["new-vm", "grant", "share-port", "cleanup"]
     public static let hint = "hint:"
 
     public static func layered(_ action: Action) -> Bool {
@@ -343,7 +343,7 @@ public enum SheetLayer {
         guard let id = state.confirming, let page, let action = page.action(id), layered(action) else { return nil }
         let given = state.answers[id] ?? [:]
         switch action.sheet ?? "" {
-        case "share-account": return AnyView(LoanSheet(page: page, action: action, given: given, handlers: handlers))
+        case "grant": return AnyView(GrantSheet(page: page, action: action, given: given, handlers: handlers))
         case "share-port": return AnyView(SharePortSheet(page: page, action: action, given: given, handlers: handlers))
         case "cleanup": return AnyView(CleanupSheet(page: page, action: action, given: given, handlers: handlers))
         case let sheet where sheet.hasPrefix(hint): return AnyView(HintSheet(page: page, action: action, given: given, handlers: handlers))

@@ -76,17 +76,17 @@ final class MacPageTests: XCTestCase {
 
     // invariant: SPEC A4: a running workspace's page, as the live app
     // holds it with no segment picked, is drawn on the frame its segments
-    // are picked in; its loans, each with its time left, are one pick away
+    // are picked in; its grants, each with its Remove menu, are one pick away
     // under Accounts and never drawn on its Overview.
-    func testARunningWorkspacesLoansAreOnePickAwayUnderAccounts() throws {
+    func testARunningWorkspacesGrantsAreOnePickAwayUnderAccounts() throws {
         let page = try Tree.page("menubar.vm.linux-1")
         let state = Snapshot.state("menubar.vm.linux-1", page)
         XCTAssertNil(state.segment)
         let calls = Calls()
         XCTAssertNotNil(MachinePage.view(state, handlers: handlers(calls), scrolls: false))
         XCTAssertEqual(page.segments?.map(\.label), ["Overview", "Activity", "Ports", "Accounts"])
-        let loans = MacPage.sections(page, segment: "accounts").flatMap(\.rows).filter { $0.left != nil }
-        XCTAssertEqual(loans.map(\.label), ["GitHub", "Claude"])
+        let grants = MacPage.sections(page, segment: "accounts").flatMap(\.rows).filter { !($0.menu ?? []).isEmpty }
+        XCTAssertEqual(grants.map(\.label), ["GitHub", "Claude"])
         let overview = MacPage.sections(page, segment: "overview").compactMap(\.id)
         XCTAssertEqual(overview, ["agents", "gauges", "ports", "footnote"])
         var picked = state
@@ -101,8 +101,8 @@ final class MacPageTests: XCTestCase {
     // invariant: SPEC A4: Needs you shows its first rows until unfolded,
     // then every row; the fold's words are the page's.
     func testNeedsFoldAfterThePagesTopAndUnfoldInPlace() throws {
-        let page = try XCTUnwrap(Stories["mac.this.needs-unfolded"].state.pushed)
-        let needs = try XCTUnwrap(page.section("needs-you"))
+        let row = { (id: String) in #"{"row":{"id":"\#(id)","label":"\#(id)"}}"# }
+        let needs = try JSONDecoder().decode(Section.self, from: Data(#"{"id":"needs-you","items":[\#(["a", "b", "c", "d"].map(row).joined(separator: ","))],"top":3,"rest":{"row":{"id":"more-needs","label":"1 more","detail":{"kind":"text","text":"Show less"}}}}"#.utf8))
         XCTAssertEqual(NeedsCard.shown(needs, open: false).count, 3)
         XCTAssertEqual(NeedsCard.shown(needs, open: true).count, 4)
         XCTAssertEqual(needs.rest?.row?.label, "1 more")

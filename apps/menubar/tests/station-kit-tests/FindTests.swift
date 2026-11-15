@@ -19,17 +19,17 @@ final class FindTests: XCTestCase {
     // action and New VM on the two roomiest Macs.
     func testNothingTypedListsTheNeedsTheRecentMachinesAndTheActionsAtHand() throws {
         XCTAssertEqual(said(try index().results(query: "", recent: Self.recent)), [
-            "Needs you:", "Review review-bot · PR #42 is ready", "Extend Claude on linux-1",
+            "Needs you:", "Review review-bot · PR #42 is ready",
             "Recent:", "linux-1", "mac-mini", "infra",
             "Actions:", "Keep This Mac awake 4 hr", "New VM on This Mac", "New VM on mac-mini",
         ])
     }
 
     // invariant: SPEC A6 [find.down]: a down server leads the needs as
-    // "Restart infra", and the needs stop at three.
-    func testADownServerLeadsTheNeedsAndTheyStopAtThree() throws {
+    // "Restart infra".
+    func testADownServerLeadsTheNeeds() throws {
         let groups = try index("machines.find.down").results(query: "", recent: Self.recent)
-        XCTAssertEqual(groups.first?.entries.map(\.title), ["Restart infra", "Review review-bot · PR #42 is ready", "Extend Claude on linux-1"])
+        XCTAssertEqual(groups.first?.entries.map(\.title), ["Restart infra", "Review review-bot · PR #42 is ready"])
     }
 
     // invariant: SPEC B5.21: Recent is the app's own list, the machines it
@@ -76,7 +76,7 @@ final class FindTests: XCTestCase {
         XCTAssertEqual(said(find.results(query: "linux", recent: [])), [
             "Machines:", "linux-1", "linux-3",
             "Ports:", "Vite · linux-1:5173", "Port 3000 · linux-1:3000", "Port 8080 · linux-3:8080", "Show 3 more",
-            "Actions:", "Open linux-1 in Terminal", "Share a port of linux-1", "Lend an account to linux-1", "Show 3 more",
+            "Actions:", "Open linux-1 in Terminal", "Share a port of linux-1", "Grant a password to linux-1", "Show 3 more",
         ])
         let open = find.results(query: "linux", recent: [], open: [FindIndex.ports])
         XCTAssertEqual(open.first { $0.id == FindIndex.ports }?.entries.count, 6)

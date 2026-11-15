@@ -642,6 +642,216 @@
       }
     },
     {
+      "label": "Grant a password",
+      "on": "row",
+      "rows": [
+        "grant-password"
+      ],
+      "mutates": true,
+      "id": "grant:linux-1",
+      "run": {
+        "call": "grants.add",
+        "in": {
+          "To": "linux-1",
+          "ToKind": "machine"
+        }
+      },
+      "form": {
+        "title": "Grant a password",
+        "fields": [
+          {
+            "key": "To",
+            "label": "To",
+            "kind": "select",
+            "options": [
+              {
+                "value": "grant:linux-1",
+                "label": "linux-1",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "grant:agent-7f",
+                "label": "agent-7f",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "grant:linux-1",
+            "swaps": true
+          },
+          {
+            "key": "Entry",
+            "label": "Password",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Granted already; granting again replaces it",
+                "glyph": {
+                  "kind": "account:github"
+                }
+              },
+              {
+                "value": "pw-npm",
+                "label": "npm token",
+                "note": "Signed out here",
+                "glyph": {
+                  "kind": "account:npm"
+                }
+              },
+              {
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Granted already; granting again replaces it",
+                "glyph": {
+                  "kind": "account:claude"
+                }
+              },
+              {
+                "value": "pw-cloudflare",
+                "label": "Cloudflare token",
+                "note": "Signed out here",
+                "glyph": {
+                  "kind": "account:cloudflare"
+                }
+              }
+            ],
+            "default": "pw-github",
+            "required": true
+          }
+        ],
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
+        "primary": [
+          {
+            "when": {
+              "key": "Entry",
+              "set": true
+            },
+            "label": "Grant {Entry}"
+          }
+        ]
+      },
+      "sheet": "grant",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Granted {Entry} to linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Grant a password",
+      "on": "row",
+      "rows": [
+        "grant-password"
+      ],
+      "mutates": true,
+      "id": "grant:agent-7f",
+      "run": {
+        "call": "grants.add",
+        "in": {
+          "To": "agent-7f",
+          "ToKind": "machine"
+        }
+      },
+      "form": {
+        "title": "Grant a password",
+        "fields": [
+          {
+            "key": "To",
+            "label": "To",
+            "kind": "select",
+            "options": [
+              {
+                "value": "grant:linux-1",
+                "label": "linux-1",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "grant:agent-7f",
+                "label": "agent-7f",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "grant:agent-7f",
+            "swaps": true
+          },
+          {
+            "key": "Entry",
+            "label": "Password",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Signed out here",
+                "glyph": {
+                  "kind": "account:github"
+                }
+              },
+              {
+                "value": "pw-npm",
+                "label": "npm token",
+                "note": "Signed out here",
+                "glyph": {
+                  "kind": "account:npm"
+                }
+              },
+              {
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Signed out here",
+                "glyph": {
+                  "kind": "account:claude"
+                }
+              },
+              {
+                "value": "pw-cloudflare",
+                "label": "Cloudflare token",
+                "note": "Signed out here",
+                "glyph": {
+                  "kind": "account:cloudflare"
+                }
+              }
+            ],
+            "default": "pw-github",
+            "required": true
+          }
+        ],
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
+        "primary": [
+          {
+            "when": {
+              "key": "Entry",
+              "set": true
+            },
+            "label": "Grant {Entry}"
+          }
+        ]
+      },
+      "sheet": "grant",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Granted {Entry} to agent-7f"
+          }
+        ]
+      }
+    },
+    {
       "label": "Claude granted to linux-1",
       "on": "menu",
       "id": "title:linux-1/claude"

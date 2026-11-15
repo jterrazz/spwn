@@ -126,11 +126,11 @@ final class StoryTests: XCTestCase {
             $0[$1.id] = MenuBarIcon.of(connection: $1.state.connection, page: $1.state.page).label
         }
         XCTAssertEqual(labels, [
-            "menubar.count": "station, 2 things need you",
+            "menubar.count": "station, 1 thing needs you",
             "menubar.down": "station, infra down",
             "menubar.restarting": "infra restarting, 2 of 4 checks",
             "menubar.fine": "all machines are fine",
-            "menubar.open": "station, 2 things need you",
+            "menubar.open": "station, 1 thing needs you",
         ])
     }
 
@@ -211,7 +211,7 @@ final class StoryTests: XCTestCase {
             StoryFile(id: "menubar.count", group: .shell, note: "n", pages: page),
             StoryFile(id: "home.unknown", group: .home, note: "n", pages: page),
         ]
-        let measured = ["home.needs": 692.0, "home.fine": 600, "home.empty": 200]
+        let measured = ["home.needs": 642.0, "home.fine": 600, "home.empty": 200]
         XCTAssertEqual(heights.audit(stories, measured: measured), [
             "home.fine: 600 pt tall, the prototype's 637 pt (a heightNote names a difference on purpose)",
             "home.unknown: no prototype height in heights.json",

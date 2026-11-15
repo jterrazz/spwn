@@ -9,7 +9,6 @@ final class KeyboardTests: XCTestCase {
 
     func testHomeWalksItsRowsAndControlsInReadingOrder() {
         let rows: [PanelFocus] = [
-            .row("waiting:review-bot"), .row("ending:macbook-pro/linux-1/claude"),
             .control("menubar.ports"), .control("menubar.accounts"), .control("menubar.awake"),
             .row("review-bot"), .row("linux-1"), .row("linux-3"),
             .row("infra"),
@@ -21,11 +20,11 @@ final class KeyboardTests: XCTestCase {
 
     func testAMachinePageWalksTheRowsThatAct() {
         XCTAssertEqual(PanelOrder.walk(mac), [
-            .row("ending:macbook-pro/linux-1/claude"), .row("linux-1"), .row("agent-7f"), .row("api"), .row("awake"),
+            .row("linux-1"), .row("agent-7f"), .row("api"), .row("awake"),
             .row("upkeep:macbook-pro/settings/3"), .row("upkeep:macbook-pro/background/1"), .row("upkeep:macbook-pro/accounts/0"), .row("upkeep:macbook-pro/apps/2"),
         ])
         XCTAssertEqual(PanelOrder.walk(Stories["workspace.agents"].state), [
-            .row("linux-1"), .row("docs-bot"), .row("ending:macbook-pro/linux-1/claude"), .row("linux-1:5173"), .row("linux-1:3000"), .row("linux-1:4321"),
+            .row("linux-1"), .row("docs-bot"), .row("linux-1:5173"), .row("linux-1:3000"), .row("linux-1:4321"),
         ])
     }
 
@@ -47,7 +46,7 @@ final class KeyboardTests: XCTestCase {
         XCTAssertEqual(PanelOrder.walk(find), [
             .row("linux-1"), .row("linux-3"),
             .row("shared:linux-1:5173"), .row("shared:linux-1:3000"), .row("shared:linux-3:8080"), .more("ports"),
-            .row("attach:linux-1"), .row("share:linux-1"), .row("share-account:linux-1"), .more("actions"),
+            .row("attach:linux-1"), .row("share:linux-1"), .row("grant:linux-1"), .more("actions"),
         ])
     }
 
@@ -58,10 +57,10 @@ final class KeyboardTests: XCTestCase {
         XCTAssertEqual(PanelOrder.walked(.find, by: 1, in: walk), .control("new-vm"))
         XCTAssertEqual(PanelOrder.walked(.control("new-vm"), by: -1, in: walk), .find)
         let arrows = PanelOrder.arrows(home)
-        XCTAssertEqual(PanelOrder.moved(nil, by: 1, in: arrows), .row("waiting:review-bot"))
-        XCTAssertEqual(PanelOrder.moved(.row("ending:macbook-pro/linux-1/claude"), by: 1, in: arrows), .control("menubar.ports"))
+        XCTAssertEqual(PanelOrder.moved(nil, by: 1, in: arrows), .control("menubar.ports"))
+        XCTAssertEqual(PanelOrder.moved(.control("menubar.ports"), by: 1, in: arrows), .control("menubar.accounts"))
         XCTAssertEqual(PanelOrder.moved(.row("macbook-air"), by: 1, in: arrows), .row("macbook-air"))
-        XCTAssertEqual(PanelOrder.moved(.row("waiting:review-bot"), by: -1, in: arrows), .row("waiting:review-bot"))
+        XCTAssertEqual(PanelOrder.moved(.control("menubar.ports"), by: -1, in: arrows), .control("menubar.ports"))
     }
 
     func testTheHighlightFollowsItsRowByIdentityAndGoesWithIt() {
@@ -120,7 +119,7 @@ final class KeyboardTests: XCTestCase {
             ("left", "a page", mac, nil, .pop),
             ("left", "home", home, nil, .none),
             ("enter", "an agent row", home, .row("linux-1"), .open("menubar.machine:linux-1")),
-            ("enter", "a need row", home, .row("waiting:review-bot"), .run("waiting:review-bot")),
+            ("enter", "a need row", Stories["home.many-needs"].state, .row("waiting:review-bot"), .run("waiting:review-bot")),
             ("enter", "a tile", home, .control("menubar.accounts"), .open("menubar.accounts")),
             ("enter", "the + button", home, .control("new-vm"), .run("new-vm")),
             ("enter", "nothing lit", home, nil, .none),

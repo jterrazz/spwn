@@ -18,7 +18,8 @@ final class NewVMSheetTests: XCTestCase {
         guard case let .runs(sent, hud) = SheetOutcome.of(action, answers) else { return XCTFail("a free name creates") }
         XCTAssertEqual(hud, "Creating linux-2 on This Mac…")
         XCTAssertEqual(sent["Request.Name"], "linux-2")
-        XCTAssertEqual(sent["Share"], #"["github","claude"]"#)
+        XCTAssertNil(sent["Share"])
+        XCTAssertNil(sent["ShareFor"])
     }
 
     func testANameAlreadyInUseCreatesNothingAndTheHUDSaysSo() throws {
@@ -28,19 +29,13 @@ final class NewVMSheetTests: XCTestCase {
         XCTAssertEqual(SheetOutcome.of(action, taken), .refused(hud: "linux-1 already exists"))
     }
 
-    func testTheFoldedOptionsSayWhatTheVMSharesOrThatItSharesNone() throws {
+    func testTheFoldedOptionsSayTheNameAndNoAccountIsOffered() throws {
         let (_, answers) = try sheet()
         let options = try XCTUnwrap(answers.field("Options"))
-        let share = try XCTUnwrap(answers.field("Sharing"))
         XCTAssertEqual(answers.fill(options.summary), "Ephemeral · Linux · 8 GB")
-        XCTAssertEqual(answers.fill(options.note ?? ""), "linux-2 · shares GitHub and Claude for 4 hr")
-        XCTAssertEqual(answers.fill(share.summary), "GitHub, Claude for 4 hr")
-        var none = answers
-        none.given["Share"] = ""
-        XCTAssertEqual(none.fill(options.note ?? ""), "linux-2 · shares no account")
-        XCTAssertEqual(none.fill(share.summary), "No account")
-        XCTAssertFalse(none.shown(try XCTUnwrap(none.field("ShareFor"))), "Share for hides while nothing is shared")
-        XCTAssertNil(none.sent["ShareFor"])
+        XCTAssertEqual(answers.fill(options.note ?? ""), "linux-2")
+        XCTAssertNil(answers.field("Sharing"), "a VM is created with no grant")
+        XCTAssertNil(answers.field("Share"))
     }
 
     // invariant: SPEC A9 1-8: the hatch starts where the Mac's free memory
@@ -82,9 +77,9 @@ final class NewVMSheetTests: XCTestCase {
         let engine = try FakeEngine("mb-sheet-create")
         engine.serveOnce(Data(#"{"v":2,"id":"1","out":{"VM":{"Name":"linux-2"}}}"#.utf8) + [0x0A], thenClose: false)
         defer { engine.stop() }
-        let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(action, answers: ["Request.Lifetime": "persistent", "Share": "claude", "Options": Answers.open])
+        let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(action, answers: ["Request.Lifetime": "persistent", "Options": Answers.open])
         XCTAssertNil(status)
-        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"station-linux","Lifetime":"persistent","Name":"linux-2","Network":"nat","Size":{"MemoryBytes":8589934592}},"Share":["claude"],"ShareFor":14400000000000},"v":2}"#])
+        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"station-linux","Lifetime":"persistent","Name":"linux-2","Network":"nat","Size":{"MemoryBytes":8589934592}}},"v":2}"#])
     }
 
     func testCreateAndOpenInTerminalOpensItOnceMade() async throws {

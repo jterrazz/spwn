@@ -4,8 +4,6 @@ import SwiftUI
 
 #Preview("accounts.all") { StoryStage(Stories["accounts.all"]) }
 
-#Preview("accounts.extended") { StoryStage(Stories["accounts.extended"]) }
-
 #Preview("accounts.signed-in") { StoryStage(Stories["accounts.signed-in"]) }
 
 #Preview("accounts.signing-in") { StoryStage(Stories["accounts.signing-in"]) }
@@ -38,6 +36,8 @@ import SwiftUI
 
 #Preview("alert.let-sleep") { StoryStage(Stories["alert.let-sleep"]) }
 
+#Preview("alert.remove-grant") { StoryStage(Stories["alert.remove-grant"]) }
+
 #Preview("alert.restart-mac") { StoryStage(Stories["alert.restart-mac"]) }
 
 #Preview("alert.restart-server") { StoryStage(Stories["alert.restart-server"]) }
@@ -55,8 +55,6 @@ import SwiftUI
 #Preview("alert.stop-share") { StoryStage(Stories["alert.stop-share"]) }
 
 #Preview("alert.stop-vm") { StoryStage(Stories["alert.stop-vm"]) }
-
-#Preview("alert.take-back") { StoryStage(Stories["alert.take-back"]) }
 
 #Preview("awake.4h") { StoryStage(Stories["awake.4h"]) }
 
@@ -118,10 +116,6 @@ import SwiftUI
 
 #Preview("home.needs") { StoryStage(Stories["home.needs"]) }
 
-#Preview("home.one-need.lease") { StoryStage(Stories["home.one-need.lease"]) }
-
-#Preview("home.one-need.wait") { StoryStage(Stories["home.one-need.wait"]) }
-
 #Preview("home.recovered") { StoryStage(Stories["home.recovered"]) }
 
 #Preview("home.restarting") { StoryStage(Stories["home.restarting"]) }
@@ -162,8 +156,6 @@ import SwiftUI
 
 #Preview("mac.this.exposed") { StoryStage(Stories["mac.this.exposed"]) }
 
-#Preview("mac.this.needs-unfolded") { StoryStage(Stories["mac.this.needs-unfolded"]) }
-
 #Preview("mac.this.overview") { StoryStage(Stories["mac.this.overview"]) }
 
 #Preview("mac.this.ports") { StoryStage(Stories["mac.this.ports"]) }
@@ -172,7 +164,7 @@ import SwiftUI
 
 #Preview("menu.awake") { StoryStage(Stories["menu.awake"]) }
 
-#Preview("menu.context.lease") { StoryStage(Stories["menu.context.lease"]) }
+#Preview("menu.context.grant") { StoryStage(Stories["menu.context.grant"]) }
 
 #Preview("menu.context.mac.asleep") { StoryStage(Stories["menu.context.mac.asleep"]) }
 
@@ -190,7 +182,7 @@ import SwiftUI
 
 #Preview("menu.context.workspace") { StoryStage(Stories["menu.context.workspace"]) }
 
-#Preview("menu.lend.to") { StoryStage(Stories["menu.lend.to"]) }
+#Preview("menu.grant.to") { StoryStage(Stories["menu.grant.to"]) }
 
 #Preview("menu.new-vm.create") { StoryStage(Stories["menu.new-vm.create"]) }
 
@@ -274,21 +266,17 @@ import SwiftUI
 
 #Preview("sheet.cleanup.mac") { StoryStage(Stories["sheet.cleanup.mac"]) }
 
+#Preview("sheet.grant") { StoryStage(Stories["sheet.grant"]) }
+
+#Preview("sheet.grant.vm") { StoryStage(Stories["sheet.grant.vm"]) }
+
 #Preview("sheet.hint.add-mac") { StoryStage(Stories["sheet.hint.add-mac"]) }
 
 #Preview("sheet.hint.declare-public") { StoryStage(Stories["sheet.hint.declare-public"]) }
 
 #Preview("sheet.hint.firewall") { StoryStage(Stories["sheet.hint.firewall"]) }
 
-#Preview("sheet.lend-account") { StoryStage(Stories["sheet.lend-account"]) }
-
-#Preview("sheet.lend-account.vm") { StoryStage(Stories["sheet.lend-account.vm"]) }
-
 #Preview("sheet.new-vm.first") { StoryStage(Stories["sheet.new-vm.first"]) }
-
-#Preview("sheet.new-vm.lend") { StoryStage(Stories["sheet.new-vm.lend"]) }
-
-#Preview("sheet.new-vm.no-account") { StoryStage(Stories["sheet.new-vm.no-account"]) }
 
 #Preview("sheet.new-vm.options") { StoryStage(Stories["sheet.new-vm.options"]) }
 
@@ -339,8 +327,6 @@ import SwiftUI
 #Preview("workspace.started") { StoryStage(Stories["workspace.started"]) }
 
 #Preview("workspace.stopped") { StoryStage(Stories["workspace.stopped"]) }
-
-#Preview("workspace.waiting.accounts") { StoryStage(Stories["workspace.waiting.accounts"]) }
 
 #Preview("workspace.waiting.ports") { StoryStage(Stories["workspace.waiting.ports"]) }
 

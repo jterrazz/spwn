@@ -61,23 +61,23 @@ final class MenuTests: XCTestCase {
         let read = Dictionary(uniqueKeysWithValues: try menuStories().compactMap { s in s.menu.map { (s.id, Self.read($0)) } })
         XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "✓ Open at login", "CPU in the menu bar", "-", "Quit station ⌘Q"])
         XCTAssertEqual(read["menu.context.workspace"], ["linux-1 on This Mac", "Open ↩", "Open in Terminal ⌘↩", "Open Vite", "-",
-                                                        "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…, An account…]", "-",
+                                                        "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…]", "Grant a password…", "-",
                                                         "Stop…", "-", "Delete… (red)"])
         XCTAssertEqual(read["menu.new-vm.on"], ["This Mac · 28 GB free", "✓ mac-mini · 8 GB free", "macbook-air · asleep (off)"])
         XCTAssertEqual(read["menu.new-vm.create"], ["Create ↩", "Create and Open in Terminal ⌥↩"])
         let workspaces = ["✓ linux-1 · on This Mac", "agent-7f · on This Mac", "linux-3 · on mac-mini", "review-bot · on mac-mini"]
-        XCTAssertEqual(read["menu.lend.to"], workspaces)
+        XCTAssertEqual(read["menu.grant.to"], ["✓ linux-1", "agent-7f"])
         XCTAssertEqual(read["menu.share-port.of"], workspaces)
         XCTAssertEqual(read["menu.context.stopped"], ["api on This Mac", "Open ↩", "-", "Start", "-", "Delete… (red)"])
-        XCTAssertEqual(read["menu.context.server.down"]?.contains("Restart"), true)
+        XCTAssertEqual(read["menu.context.server.down"]?.contains("Restart…"), true)
         XCTAssertEqual(read["menu.context.mac"], ["mac-mini", "Open ↩", "New VM on mac-mini… ⌘N", "Open in Terminal ⌘T"])
         XCTAssertEqual(read["menu.context.mac.asleep"], ["macbook-air", "Open ↩", "Wake macbook-air"])
-        XCTAssertEqual(read["menu.context.lease"], ["GitHub lent to linux-1", "Extend 4 hr", "-", "Take back… (red)"])
+        XCTAssertEqual(read["menu.context.grant"], ["GitHub granted to linux-1", "Remove… (red)"])
         XCTAssertEqual(read["menu.awake"], ["Keep This Mac awake", "For 1 hr", "For 4 hr", "✓ Until 18:00", "-", "Let it sleep", "Awake of all Macs ⌘E"])
         XCTAssertEqual(read["menu.page.mac"], ["mac-mini", "Open in Terminal ⌘T", "-", "Restart…", "Stop everything… (red)", "-", "Forget… (red)"])
         XCTAssertEqual(read["menu.page.this-mac"], ["This Mac", "Open in Terminal ⌘T", "-", "Stop everything… (red)"])
         XCTAssertEqual(read["menu.page.mac.asleep"], ["macbook-air", "Wake macbook-air", "-", "Forget… (red)"])
-        XCTAssertEqual(read["menu.page.server"], ["infra on mac-mini", "Restart…", "Stop… (red)", "-", "Delete… (red)"])
+        XCTAssertEqual(read["menu.page.server"], ["infra on mac-mini", "Restart… (red)", "Stop… (red)", "-", "Delete… (red)"])
         XCTAssertEqual(read["menu.page.ports"], ["Share a port…", "Declare a port public…"])
     }
 

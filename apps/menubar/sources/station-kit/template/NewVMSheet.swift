@@ -2,7 +2,7 @@ import SwiftUI
 
 // invariant: SPEC A5 New VM: the engine's form drawn on the sheet's grid:
 // On, then Options folded into one line and its caption, or open on Kind,
-// Lifetime, System, Memory, Share and Name; a server's Name first and the
+// Lifetime, System, Memory and Name; a server's Name first and the
 // line saying what its Mac's sleep does to it; Cancel, then Create and
 // its arrow. Every word is the page's; On and Kind open the sibling form
 // the page carries for that Mac and kind.

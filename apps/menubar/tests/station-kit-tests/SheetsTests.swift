@@ -2,9 +2,9 @@ import Foundation
 import StationKit
 import XCTest
 
-// invariant: SPEC A5's other sheets, in what the owner sees: Lend an
-// account names the account and the time and shares from the workspace's
-// own Mac; Clean up's button says what it does with what is checked, and
+// invariant: SPEC A5's other sheets, in what the owner sees: Grant a
+// password names the password and grants it from This Mac to the
+// workspace it is asked for; Clean up's button says what it does with what is checked, and
 // sends only what is left checked; a hint's command is the page's.
 final class SheetsTests: XCTestCase {
     func sheet(_ story: String, _ id: String) throws -> (Page, Action, Answers) {
@@ -13,28 +13,24 @@ final class SheetsTests: XCTestCase {
         return (page, action, Answers(try XCTUnwrap(action.form)))
     }
 
-    func testALoanSaysTheAccountAndTheTimeAndWhenItEnds() throws {
-        let (_, _, answers) = try sheet("sheet.lend-account", "share-account")
-        XCTAssertEqual(answers.primary.map { answers.fill($0.label ?? "") }, "Lend GitHub for 4 hr")
-        var longer = answers
-        longer.given["Account"] = "claude"
-        longer.given["For"] = "604800000000000"
-        XCTAssertEqual(longer.primary.map { longer.fill($0.label ?? "") }, "Lend Claude for 7 days")
-        let ends = try XCTUnwrap(answers.field("For")?.options).compactMap(\.note)
-        XCTAssertEqual(ends, ["Ends at 14:30, then taken back", "Ends at 22:30, then taken back", "Ends Saturday 14 Nov"])
-        XCTAssertEqual(answers.sent["Account"], "github")
+    func testAGrantSaysThePasswordItGrantsAndTheyStayUntilRemoved() throws {
+        let (_, _, answers) = try sheet("sheet.grant", "grant")
+        XCTAssertEqual(answers.primary.map { answers.fill($0.label ?? "") }, "Grant GitHub token")
+        var other = answers
+        other.given["Entry"] = "pw-claude"
+        XCTAssertEqual(other.primary.map { other.fill($0.label ?? "") }, "Grant Claude token")
+        XCTAssertEqual(answers.sent["Entry"], "pw-github")
         XCTAssertNil(answers.sent["To"])
     }
 
-    func testPickingAnotherWorkspaceSharesFromItsMac() throws {
-        let (page, action, answers) = try sheet("sheet.lend-account", "share-account")
+    func testPickingAnotherWorkspaceGrantsToIt() throws {
+        let (page, action, answers) = try sheet("sheet.grant", "grant")
         let to = try XCTUnwrap(answers.field("To"))
-        let linux3 = try XCTUnwrap(to.options?.first { $0.label == "linux-3" }?.value)
-        let other = try XCTUnwrap(page.action(linux3))
-        XCTAssertEqual(other.form?.subtitle, "From mac-mini. It ends by itself.")
-        XCTAssertEqual(other.run?.target?.name, "mac-mini")
-        XCTAssertEqual(other.run?.in?["With"], "linux-3")
-        XCTAssertNil(action.run?.target)
+        let agent = try XCTUnwrap(to.options?.first { $0.label == "agent-7f" }?.value)
+        let other = try XCTUnwrap(page.action(agent))
+        XCTAssertEqual(other.run?.call, "grants.add")
+        XCTAssertEqual(other.run?.in?["To"], "agent-7f")
+        XCTAssertEqual(action.run?.in?["To"], "linux-1")
     }
 
     func testCleanUpSaysWhatItDeletesAndForgetsAsTheOwnerChecks() throws {
