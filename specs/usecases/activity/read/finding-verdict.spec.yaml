@@ -1,0 +1,11 @@
+description: 'a Mac at 4 % free disk heads its activity with that finding'
+env:
+    - disk-low
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.verdict'''
+      stdin: |
+          {"v":2,"id":"1","call":"activity.read","target":{"name":"macbook-pro"},"in":{"history":true}}
+      exit: 0
+      stdout: |
+          {"Tone":"bad","Sentence":"Disk almost full: 4 % free","Line":"disk"}

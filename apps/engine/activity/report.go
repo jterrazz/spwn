@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 type Source string
@@ -35,6 +36,9 @@ const (
 
 type Report struct {
 	Source Source `json:"source"`
+	// invariant: the head of the page: Nothing to look at, or the first
+	// finding's text under its subject.
+	Verdict verdict.Verdict `json:"verdict"`
 	// value: when the engine that keeps the history started; zero on a
 	// direct read.
 	Since time.Time `json:"since,omitzero"`
@@ -54,6 +58,34 @@ type Report struct {
 	Chart *Chart `json:"chart,omitempty"`
 	// invariant: never nil: SPEC §6.5's findings over the series read.
 	Findings []finding.Finding `json:"findings"`
+}
+
+const (
+	SentenceCalm   = "Nothing to look at."
+	SentenceSilent = "No answer in 2 s."
+	LineKept       = "history kept 24 h, since the engine started"
+)
+
+func VerdictOf(r Report) verdict.Verdict {
+	// invariant: a silent Meter is said so, never calm; the first finding
+	// of the ranked list leads otherwise; the line says the history is kept
+	// only when an engine keeps it.
+	switch {
+	case r.Silent:
+		return verdict.Verdict{Tone: verdict.Warn, Sentence: SentenceSilent}
+	case len(r.Findings) > 0:
+		f := r.Findings[0]
+		tone := verdict.Warn
+		if f.Severity == finding.Broken {
+			tone = verdict.Bad
+		}
+		return verdict.Verdict{Tone: tone, Sentence: f.Text, Line: f.Subject}
+	}
+	v := verdict.Verdict{Tone: verdict.OK, Sentence: SentenceCalm}
+	if !r.Since.IsZero() {
+		v.Line = LineKept
+	}
+	return v
 }
 
 func SeriesOf(fine, coarse []Sample) Series {

@@ -238,6 +238,9 @@
           ],
           "type": "string"
         },
+        "verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
         "window": {
           "type": "integer"
         }
@@ -247,6 +250,7 @@
         "last",
         "rates",
         "source",
+        "verdict",
         "window"
       ],
       "type": "object"
@@ -538,6 +542,32 @@
           "type": "string"
         }
       },
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
       "type": "object"
     }
   },
