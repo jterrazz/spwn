@@ -22,6 +22,11 @@ describe('changes', () => {
 
         // Then - Today, Last night and Yesterday, each line with its time, who, what moved and on how many machines
         await expect(result.tree).toMatch(file('./__expected__/stories-history.aria.yaml'));
+
+        // And - a held line draws the engine's word as a plain tag, a failed one as a pill
+        expect(result.html.text).toMatch(/<span class="[^"]*_end_[^"]*">Held</u);
+        expect(result.html.text).not.toMatch(/_pill_[^>]*>Held</u);
+        expect(result.html.text).toMatch(/_pill_[^>]*>Failed</u);
     });
 
     test("home draws the last night alone, with the night's first three lines", async () => {
