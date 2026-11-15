@@ -11,7 +11,6 @@ import {
     holdsRebuildable,
     isPortShared,
     machineKindOf,
-    portsMacOf,
 } from '../provisional';
 import { macState, vmState } from '../shown';
 
@@ -141,21 +140,6 @@ describe('provisional', () => {
                 ([lifetime, kind]) => kind === (lifetime === 'always-on' ? 'server' : 'workspace'),
             ),
         ).toBe(true);
-    });
-
-    test("this Mac's ports are found by its name, or by the flag when ports.list names it otherwise", () => {
-        // Given - two-macs, whose ports.list names This Mac as machines.list does, and stories, which names it ''
-        const [twoMacs, stories] = [listingOf('two-macs'), listingOf('stories')];
-
-        // When - This Mac is looked for in each, by the name machines.list gives it
-        const found = [
-            portsMacOf(twoMacs, 'jterrazz-macbook-pro', true)?.name,
-            portsMacOf(stories, 'macbook-pro', true)?.this_mac,
-            portsMacOf(stories, 'macbook-pro', false),
-        ];
-
-        // Then - by name in the first; by the flag in the second, and only when it is This Mac
-        expect(found).toStrictEqual(['jterrazz-macbook-pro', true, undefined]);
     });
 
     test("a create's refusal is placed by its code, then by whether its subject is a Mac the sheet offers", () => {

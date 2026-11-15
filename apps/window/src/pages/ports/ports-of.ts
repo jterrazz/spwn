@@ -7,7 +7,6 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import { portsMacOf } from '../../engine/provisional';
 import { sentence } from '../../model/format';
 import { tabOf } from '../needs/needs';
 
@@ -18,10 +17,10 @@ export type PortsOf = {
     notShared: readonly PortsNotShared[];
 };
 
-export type Asked = { mac: string; thisMac: boolean; vm?: string | undefined };
+export type Asked = { mac: string; vm?: string | undefined };
 
-export function portsOf(listing: PortsListing, { mac: macName, thisMac, vm }: Asked): PortsOf {
-    const mac = portsMacOf(listing, macName, thisMac);
+export function portsOf(listing: PortsListing, { mac: macName, vm }: Asked): PortsOf {
+    const mac = (listing.all.macs ?? []).find((candidate) => candidate.name === macName);
     const mine = <T extends { vm: string }>(rows: null | readonly T[] | undefined): T[] =>
         vm === undefined ? [] : (rows ?? []).filter((row) => row.vm === vm);
     return {

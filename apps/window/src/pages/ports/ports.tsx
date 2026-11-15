@@ -214,7 +214,7 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
         );
     }
     const vm = found.vm?.Name;
-    const of = portsOf(listing.out, { mac: found.mac.Name, thisMac: found.mac.ThisMac, vm });
+    const of = portsOf(listing.out, { mac: found.mac.Name, vm });
     return (
         <Page>
             <VerdictHead size="tab" verdict={listing.out.verdict} />
