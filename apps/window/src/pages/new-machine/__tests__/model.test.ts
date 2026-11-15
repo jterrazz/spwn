@@ -15,8 +15,8 @@ import {
     workspaceInputOf,
 } from '../model';
 
-const PRO = 'jterrazz-macbook-pro';
-const MINI = 'jterrazz-mac-mini';
+const PRO = 'macbook-pro';
+const MINI = 'mac-mini';
 
 const recordingFor = await recordingsOf('two-macs');
 

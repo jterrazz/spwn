@@ -2,7 +2,7 @@
   - heading "linux-1 Running" [level=2]
   - paragraph:
     - text: workspace · ephemeral · on
-    - button "jterrazz-macbook-pro"
+    - button "macbook-pro"
   - button "Start"
   - button "Stop"
   - button "Open in Terminal"
@@ -26,10 +26,10 @@
     - heading "Ports" [level=2]
     - button "All ports"
     - region "Port 5173":
-      - text: :5173 Vite Private https://jterrazz-macbook-pro.tail1234.ts.net:40001
+      - text: :5173 Vite Private https://macbook-pro.tail1234.ts.net:40001
       - button "Stop sharing"
     - region "Port 7000":
-      - text: :7000 server Private jterrazz-macbook-pro.tail1234.ts.net:40002
+      - text: :7000 server Private macbook-pro.tail1234.ts.net:40002
       - button "Stop sharing"
   - region "Sign-ins":
     - heading "Sign-ins 4" [level=2]

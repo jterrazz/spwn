@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-const DIFFERS = '/?world=machinefile-differs&machine=jterrazz-macbook-pro&tab=Packages';
+const DIFFERS = '/?world=machinefile-differs&machine=macbook-pro&tab=Packages';
 
 describe('packages', () => {
     test('W8 a difference from the file sets what it says beside what the machine has, and what Apply will do', async () => {
@@ -31,7 +31,7 @@ describe('packages', () => {
             await visitor.click(within(region('Differs from its file'), button('Plan')));
 
             // Then - counts, then the list by group, and the line that nothing has changed
-            await visitor.see(heading('Plan for jterrazz-macbook-pro'));
+            await visitor.see(heading('Plan for macbook-pro'));
             await visitor.see(content('Nothing has changed yet.', { exact: false }));
             const install = region('To install');
             await visitor.see(within(install, content('ripgrep')));
@@ -50,7 +50,7 @@ describe('packages', () => {
 
             // When - the dialog confirms Apply
             await visitor.click(
-                within(dialog('Apply the plan of jterrazz-macbook-pro?'), button('Apply')),
+                within(dialog('Apply the plan of macbook-pro?'), button('Apply')),
             );
 
             // Then - the plan reads Done
@@ -86,8 +86,8 @@ describe('packages', () => {
             await visitor.see(apps);
 
             // Then - each layer is a group, in the order they apply, with its apps and versions
-            const base = within(apps, region('jterrazz-base'));
-            const own = within(apps, region('jterrazz-macbook-pro'));
+            const base = within(apps, region('base'));
+            const own = within(apps, region('macbook-pro'));
             await visitor.see(within(base, content('2 apps')));
             await visitor.see(within(base, content('homebrew')));
             await visitor.see(within(own, content('4 apps')));

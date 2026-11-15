@@ -53,11 +53,11 @@ describe('Packages', () => {
     test('a Mac with no file of its name keeps an honest head, and its refusal in the body', async () => {
         // Given - the window on This Mac's Packages over one-mac
         const result = await component.render(
-            windowOver('one-mac', 'jterrazz-macbook-pro'),
+            windowOver('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its file has been read, and refused
                 await visitor.see(
-                    content('no Machinefile named jterrazz-macbook-pro.', { exact: false }),
+                    content('no Machinefile named macbook-pro.', { exact: false }),
                 );
             },
         );
@@ -69,17 +69,17 @@ describe('Packages', () => {
     test('a Mac its applied file holds whole shows no difference, and one whose file asks more shows what it lacks', async () => {
         // Given - This Mac's Packages over machinefile-kept, then over machinefile-differs
         const kept = await component.render(
-            windowOver('machinefile-kept', 'jterrazz-macbook-pro'),
+            windowOver('machinefile-kept', 'macbook-pro'),
             async (visitor) => {
                 await visitor.see(content('lazygit'));
             },
         );
         const differs = await component.render(
-            windowOver('machinefile-differs', 'jterrazz-macbook-pro'),
+            windowOver('machinefile-differs', 'macbook-pro'),
             async (visitor) => {
                 // When - both have been read to their inventory
                 await visitor.see(heading('Differs from its file 2'));
-                await visitor.see(within(region('jterrazz-macbook-pro'), content('ripgrep')));
+                await visitor.see(within(region('macbook-pro'), content('ripgrep')));
             },
         );
 
@@ -105,14 +105,14 @@ describe('Packages', () => {
         let square = '';
         let layer = '';
         await component.render(
-            windowOver('machinefile-differs', 'jterrazz-macbook-pro'),
+            windowOver('machinefile-differs', 'macbook-pro'),
             async (visitor) => {
                 // When - its layer is drawn
-                await visitor.see(within(region('jterrazz-macbook-pro'), content('ripgrep')));
+                await visitor.see(within(region('macbook-pro'), content('ripgrep')));
                 square =
                     document.querySelector<HTMLElement>('i[title="ripgrep"]')?.dataset.tone ?? '';
                 layer =
-                    document.querySelector('section[aria-label="jterrazz-macbook-pro"]')
+                    document.querySelector('section[aria-label="macbook-pro"]')
                         ?.innerHTML ?? '';
             },
         );
@@ -142,7 +142,7 @@ describe('Packages', () => {
     test('a machine the engine does not answer for shows its refusal', async () => {
         // Given - the window on the Mac that does not answer, over mini-offline
         const result = await component.render(
-            windowOver('mini-offline', 'jterrazz-mac-mini'),
+            windowOver('mini-offline', 'mac-mini'),
             async (visitor) => {
                 // When - the tab has heard from its transport
                 await visitor.see(heading('No verdict from the engine.'));
@@ -209,13 +209,13 @@ describe('Packages', () => {
     test('an upgrade starts on the click, with no confirmation, and the engine says it is done', async () => {
         // Given - This Mac's Packages over machinefile-differs
         const result = await component.render(
-            windowOver('machinefile-differs', 'jterrazz-macbook-pro'),
+            windowOver('machinefile-differs', 'macbook-pro'),
             async (visitor) => {
                 // When - Upgrade now is clicked
                 await visitor.click(button('Upgrade now'));
 
                 // Then - no dialog asks, and the engine's answer settles the gesture done
-                await visitor.gone(dialog('Upgrade what the file of jterrazz-macbook-pro lists?'));
+                await visitor.gone(dialog('Upgrade what the file of macbook-pro lists?'));
                 await visitor.see(content('Done'));
             },
         );

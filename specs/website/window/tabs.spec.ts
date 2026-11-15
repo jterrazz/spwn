@@ -9,7 +9,7 @@ describe('tabs', () => {
     test('A6 a Mac carries the six tabs', async () => {
         // Given - the window on This Mac's page over two-macs
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Activity',
+            '/?world=two-macs&machine=macbook-pro&tab=Activity',
             async (visitor) => {
                 // When - its tabs are read
                 // Then - the six are there
@@ -57,13 +57,13 @@ describe('tabs', () => {
     test('A6 a tab with nothing in it still shows its list', async () => {
         // Given - the Ports tab of This Mac over two-macs, which lists nothing
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Ports',
+            '/?world=two-macs&machine=macbook-pro&tab=Ports',
             async (visitor) => {
                 // When - the tab is read
                 // Then - its list says it holds nothing
                 const listening = region('What listens on this Mac');
                 await visitor.see(
-                    within(listening, content('Nothing listed on jterrazz-macbook-pro.')),
+                    within(listening, content('Nothing listed on macbook-pro.')),
                 );
             },
         );

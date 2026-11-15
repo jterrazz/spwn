@@ -30,7 +30,7 @@ export const NAV_ITEM_STORIES: readonly Story<NavItemProps>[] = [
         name: 'a machine and its state',
         props: {
             current: false,
-            label: 'jterrazz-mac-mini',
+            label: 'mac-mini',
             lead: <MachineIcon kind="mac" />,
             onSelect: nothing,
             state: { tone: 'ok', word: 'Up' },

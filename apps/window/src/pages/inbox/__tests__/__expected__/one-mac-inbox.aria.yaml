@@ -2,7 +2,7 @@
   - heading "This Mac is ready." [level=1]
   - group "Which machines":
     - button "All machines" [pressed]
-    - button "jterrazz-macbook-pro"
+    - button "macbook-pro"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
     - paragraph: No need is listed.

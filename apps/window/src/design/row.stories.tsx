@@ -149,7 +149,7 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
                 'A path keeps its end: it is cut in the middle, and the sentence under it is cut at its end',
             state: { tone: 'plain', word: 'Not installed' },
             title: LONG_NAME,
-            value: <Value>~/.config/station/machinefiles/jterrazz-macbook-pro.yaml</Value>,
+            value: <Value>~/.config/station/machinefiles/macbook-pro.yaml</Value>,
         },
     },
 ];

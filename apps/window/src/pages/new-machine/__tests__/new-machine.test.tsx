@@ -22,9 +22,9 @@ import { PAGES } from '../../registry';
 
 const recordingFor = await recordingsOf('one-mac', 'two-macs', 'mini-offline');
 
-const onThisMac = dialog('New machine on jterrazz-macbook-pro');
-const thisMac = button('jterrazz-macbook-pro');
-const onMini = dialog('New machine on jterrazz-mac-mini');
+const onThisMac = dialog('New machine on macbook-pro');
+const thisMac = button('macbook-pro');
+const onMini = dialog('New machine on mac-mini');
 
 const HOME: Route = { page: 'home' };
 
@@ -78,17 +78,17 @@ describe('New machine', () => {
     test("from a Mac's page the create is sent to that Mac, and a refusal naming a Mac is drawn on the On row", async () => {
         // Given - the mini's page over two-macs
         const result = await component.render(
-            windowOver('two-macs', machineRoute('jterrazz-mac-mini')),
+            windowOver('two-macs', machineRoute('mac-mini')),
             async (visitor) => {
                 // When - its New machine opens the sheet on it, and gate5 of 8 GB is launched there
-                await visitor.click(button('New machine on jterrazz-mac-mini'));
+                await visitor.click(button('New machine on mac-mini'));
                 await visitor.fill(within(onMini, field('Name')), 'gate5');
                 await visitor.click(within(onMini, button('8 GB · workspace')));
                 await visitor.click(within(onMini, button('Launch')));
                 await visitor.click(within(dialog('Launch gate5?'), button('Launch')));
 
                 // Then - the engine's answer to the mini's create names a Mac, so it stands on the On row
-                const said = content('not enough memory on jterrazz-macbook-pro', { exact: false });
+                const said = content('not enough memory on macbook-pro', { exact: false });
                 await visitor.see(within(region('On'), said));
             },
         );
@@ -106,7 +106,7 @@ describe('New machine', () => {
             await visitor.click(within(dialog('Launch linux-1?'), button('Launch')));
 
             // Then - the sheet stays, with the engine's refusal, off the On row
-            const said = content('"linux-1" is taken (on jterrazz-macbook-pro)', { exact: false });
+            const said = content('"linux-1" is taken (on macbook-pro)', { exact: false });
             await visitor.see(within(onMini, said));
             await visitor.gone(within(region('On'), said));
         });
@@ -196,7 +196,7 @@ describe('New machine', () => {
 
             // Then - the sheet is on This Mac, and the mini's card is shut with the engine's sentence
             await visitor.see(onThisMac);
-            const mini = disabled(button('jterrazz-mac-mini'));
+            const mini = disabled(button('mac-mini'));
             await visitor.see(within(region('On'), mini));
             await visitor.see(within(region('On'), content('mac-mini does not answer')));
         });

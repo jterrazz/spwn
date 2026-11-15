@@ -13,8 +13,8 @@
     - button "Broken port 5000 is reachable outside Tailscale macbook-pro · Ports"
     - text: System Settings > General > AirDrop & Handoff > AirPlay Receiver
     - button "Copy System Settings > General > AirDrop & Handoff > AirPlay Receiver": Copy
-    - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
-    - button "Remove com.jterrazz.brain.x-snapshot": Remove
+    - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.example.brain.x-snapshot": Remove
   - region "Can wait":
     - heading "Can wait 2" [level=2]
     - button "Needs a look 1 brew update waiting macbook-pro · Apps"

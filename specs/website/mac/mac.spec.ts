@@ -9,11 +9,11 @@ describe('mac', () => {
     test('M1 a Mac reads its name, Online, its CPU, memory and disk', async () => {
         // Given - the window on This Mac's page over two-macs
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Overview',
+            '/?world=two-macs&machine=macbook-pro&tab=Overview',
             async (visitor) => {
                 // When - the page is read
                 // Then - its name and state head it, and its three measures follow
-                await visitor.see(heading('jterrazz-macbook-pro Online'));
+                await visitor.see(heading('macbook-pro Online'));
                 await visitor.see(content('This Mac · Engine running', { exact: false }));
                 await visitor.see(content('34%'));
                 await visitor.see(content('12.4GB'));
@@ -26,7 +26,7 @@ describe('mac', () => {
     test('M1 a Mac says whether it stays awake, and until when', async () => {
         // Given - This Mac over two-macs, which sleeps as usual, then over stories, kept awake until 18:00
         const sleeps = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Overview',
+            '/?world=two-macs&machine=macbook-pro&tab=Overview',
             async (visitor) => {
                 // When - the page is read
                 // Then - its line says it sleeps normally
@@ -50,7 +50,7 @@ describe('mac', () => {
     test('M3 the machines of a Mac are listed with their creator and their state', async () => {
         // Given - the window on This Mac's page over two-macs, which holds api and linux-1
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Overview',
+            '/?world=two-macs&machine=macbook-pro&tab=Overview',
             async (visitor) => {
                 // When - Its machines is read
                 const machines = region('Its machines');
@@ -67,7 +67,7 @@ describe('mac', () => {
     test('M3 a machine of Its machines carries its purpose beside its creator', async () => {
         // Given - the window on This Mac's page over creating, where a session made linux-5 for a purpose
         const result = await website.visit(
-            '/?world=creating&machine=jterrazz-macbook-pro&tab=Overview',
+            '/?world=creating&machine=macbook-pro&tab=Overview',
             async (visitor) => {
                 // When - Its machines is read
                 const machines = region('Its machines');
@@ -91,13 +91,13 @@ describe('mac', () => {
     test('M4 New machine on a Mac opens the sheet with that Mac chosen', async () => {
         // Given - the window on the mini's page over two-macs, which is not This Mac
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-mac-mini',
+            '/?world=two-macs&machine=mac-mini',
             async (visitor) => {
                 // When - its New machine is pressed
-                await visitor.click(button('New machine on jterrazz-mac-mini'));
+                await visitor.click(button('New machine on mac-mini'));
 
                 // Then - the sheet opens on the mini
-                await visitor.see(dialog('New machine on jterrazz-mac-mini'));
+                await visitor.see(dialog('New machine on mac-mini'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -106,13 +106,13 @@ describe('mac', () => {
     test('M5 a Mac not seen reads Not seen, greyed, and answers nothing it does not know', async () => {
         // Given - the window on the mini's page over mini-offline, a Mac not seen for 6 h
         const result = await website.visit(
-            '/?world=mini-offline&machine=jterrazz-mac-mini&tab=Overview',
+            '/?world=mini-offline&machine=mac-mini&tab=Overview',
             async (visitor) => {
                 // When - the page and the sidebar are read
                 // Then - the Mac reads Not seen in both, and its head says what the engine says of it
-                await visitor.see(heading('jterrazz-mac-mini Not seen'));
-                await visitor.see(within(sidebar, button('jterrazz-mac-mini not seen')));
-                await visitor.see(heading('jterrazz-mac-mini has not been seen for 6 h.'));
+                await visitor.see(heading('mac-mini Not seen'));
+                await visitor.see(within(sidebar, button('mac-mini not seen')));
+                await visitor.see(heading('mac-mini has not been seen for 6 h.'));
                 await visitor.see(
                     content('Nothing proves it is down: it may be asleep, or off your network.'),
                 );
@@ -176,7 +176,7 @@ describe('mac', () => {
     test('M7 Free on one app frees its cache, and the bar and the verdict follow', async () => {
         // Given - the Storage tab of This Mac over two-macs, 34.8 GB of caches
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Storage',
+            '/?world=two-macs&machine=macbook-pro&tab=Storage',
             async (visitor) => {
                 await visitor.see(within(region('Storage'), content('606 GB', { exact: false })));
                 await visitor.see(within(region('By app'), button('Free go')));
@@ -202,7 +202,7 @@ describe('mac', () => {
     test('M8 the Packages tab names the file the Mac follows, and says it matches', async () => {
         // Given - the Packages tab of This Mac over two-macs
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Packages',
+            '/?world=two-macs&machine=macbook-pro&tab=Packages',
             async (visitor) => {
                 // When - the tab is read
                 // Then - it says Matches and names the file it follows
@@ -211,7 +211,7 @@ describe('mac', () => {
                 await visitor.see(head);
 
                 // When - the file's name is pressed
-                await visitor.click(within(head, button('jterrazz-macbook-pro')));
+                await visitor.click(within(head, button('macbook-pro')));
 
                 // Then - the file opens
                 await visitor.see(region('What it puts on a machine'));
@@ -227,7 +227,7 @@ describe('mac', () => {
     test("M10 a Mac's Sign-ins tab lists each program with its state and the action the engine names", async () => {
         // Given - the Sign-ins tab of This Mac over two-macs
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Sign-ins',
+            '/?world=two-macs&machine=macbook-pro&tab=Sign-ins',
             async (visitor) => {
                 // When - its rows are read
                 const rows = region('Sign-ins');
@@ -244,7 +244,7 @@ describe('mac', () => {
     test('M11 Activity reads its four measures, its machines among the busiest, its heat and battery', async () => {
         // Given - the Activity tab of This Mac over two-macs
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Activity',
+            '/?world=two-macs&machine=macbook-pro&tab=Activity',
             async (visitor) => {
                 // When - the page is read
                 // Then - the four measures, the busiest and the Mac's own facts are there
@@ -275,15 +275,15 @@ describe('mac', () => {
     test('M12 the Packages tab of a Mac that matches its file says so, then lists its upgrades and its apps by layer', async () => {
         // Given - the Packages tab of This Mac over two-macs
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Packages',
+            '/?world=two-macs&machine=macbook-pro&tab=Packages',
             async (visitor) => {
                 // When - the tab is read
                 // Then - the head matches, then upgrades, then the apps under each layer
                 await visitor.see(content('4 of 4 apps match', { exact: false }));
                 await visitor.see(region('Upgrades'));
                 const apps = region('Apps');
-                const base = within(apps, region('jterrazz-base'));
-                const own = within(apps, region('jterrazz-macbook-pro'));
+                const base = within(apps, region('base'));
+                const own = within(apps, region('macbook-pro'));
                 await visitor.see(within(base, content('homebrew')));
                 await visitor.see(within(own, content('lazygit')));
             },

@@ -25,7 +25,7 @@ const RESTART = {
     Confirm: 'infra',
     Machine: 'infra',
     Noun: 'Overview',
-    On: 'jterrazz-mac-mini',
+    On: 'mac-mini',
     Path: '',
     Section: 'overview',
     Severity: 'broken',
@@ -43,7 +43,7 @@ const DELETE = {
     Confirm: 'linux-1',
     Machine: 'linux-1',
     Noun: 'Overview',
-    On: 'jterrazz-macbook-pro',
+    On: 'macbook-pro',
     Path: '',
     Section: 'overview',
     Severity: 'needs-a-look',
@@ -108,22 +108,22 @@ describe('NeedLine', () => {
 
     test('a background task the engine names is removed once its removal is confirmed', async () => {
         // Given - the Inbox over two-macs, where a background task is failing and presses
-        const failing = 'com.jterrazz.brain.x-snapshot is failing, last exit 2';
-        const asked = 'Remove com.jterrazz.brain.x-snapshot?';
+        const failing = 'com.example.brain.x-snapshot is failing, last exit 2';
+        const asked = 'Remove com.example.brain.x-snapshot?';
         const result = await component.render(
             pageOver(recordingFor('two-macs'), { page: 'inbox' }),
             async (visitor) => {
                 await visitor.see(within(needs, content(failing)));
 
                 // When - its fix is clicked, then confirmed in the dialog confirms.json asks
-                await visitor.click(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.click(within(needs, button('Remove com.example.brain.x-snapshot')));
                 await visitor.see(dialog(asked));
                 await visitor.click(within(dialog(asked), button('Remove')));
 
                 // Then - overview.read, read again, no longer lists it, and Done here holds its outcome
                 await visitor.gone(dialog(asked));
                 await visitor.see(within(doneHere, content(failing)));
-                await visitor.gone(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.gone(within(needs, button('Remove com.example.brain.x-snapshot')));
             },
         );
         expect(result.errors.text).toBe('');
@@ -131,18 +131,18 @@ describe('NeedLine', () => {
 
     test('a cancelled removal sends nothing and leaves the need listed', async () => {
         // Given - the Inbox over machinefile-differs, its failing background task listed
-        const asked = 'Remove com.jterrazz.brain.x-snapshot?';
+        const asked = 'Remove com.example.brain.x-snapshot?';
         const result = await component.render(
             pageOver(recordingFor('machinefile-differs'), { page: 'inbox' }),
             async (visitor) => {
-                await visitor.click(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.click(within(needs, button('Remove com.example.brain.x-snapshot')));
 
                 // When - its dialog is cancelled
                 await visitor.click(within(dialog(asked), button('Cancel')));
 
                 // Then - the need and its button stay, and nothing is held as done
                 await visitor.gone(dialog(asked));
-                await visitor.see(within(needs, button('Remove com.jterrazz.brain.x-snapshot')));
+                await visitor.see(within(needs, button('Remove com.example.brain.x-snapshot')));
                 await visitor.gone(doneHere);
             },
         );
@@ -220,7 +220,7 @@ describe('NeedLine', () => {
                 await visitor.click(within(needs, button('Fix npm')));
 
                 // Then - the engine's step for npm on This Mac is on a sheet, which goes once the engine signs in
-                const sheet = dialog('Sign in to npm on jterrazz-macbook-pro');
+                const sheet = dialog('Sign in to npm on macbook-pro');
                 await visitor.see(sheet);
                 await visitor.gone(sheet);
             },

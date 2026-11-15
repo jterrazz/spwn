@@ -63,7 +63,7 @@ describe('disk gestures', () => {
 
     test("an app's Free frees that app alone", async () => {
         // Given - This Mac's Storage tab over two-macs
-        const mac = tabOver('two-macs', 'jterrazz-macbook-pro');
+        const mac = tabOver('two-macs', 'macbook-pro');
         const result = await component.render(mac, async (visitor) => {
             await visitor.see(within(byApp, button('Free go')));
 
@@ -80,7 +80,7 @@ describe('disk gestures', () => {
 
     test('move takes a misplaced folder where its app looks, and its row leaves the page', async () => {
         // Given - This Mac's Storage tab over two-macs, where ~/.tart is misplaced
-        const mac = tabOver('two-macs', 'jterrazz-macbook-pro');
+        const mac = tabOver('two-macs', 'macbook-pro');
         const result = await component.render(mac, async (visitor) => {
             await visitor.see(within(byApp, content('misplaced 73.3 GB')));
 
@@ -98,7 +98,7 @@ describe('disk gestures', () => {
 
     test("a machine's Storage tab erases an app's data from its By app row, by its name typed", async () => {
         // Given - This Mac's Storage tab over two-macs, where ollama holds data alone
-        const mac = tabOver('two-macs', 'jterrazz-macbook-pro');
+        const mac = tabOver('two-macs', 'macbook-pro');
         const result = await component.render(mac, async (visitor) => {
             await visitor.see(within(byApp, button('Erase… ollama')));
 

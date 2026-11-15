@@ -12,7 +12,7 @@
     - button "studio-linux"
   - paragraph: Mixins
   - group "Mixins":
-    - button "jterrazz-base"
+    - button "base"
   - paragraph: Shipped with station
   - group "Shipped with station":
     - button "station-linux"
@@ -30,7 +30,7 @@
     - definition: macOS
     - term: Extends
     - definition:
-      - button "jterrazz-base"
+      - button "base"
   - region "Machines that follow it":
     - heading "Machines that follow it 1 machine differs." [level=2]
     - button "macbook-pro 3 differences"
@@ -46,8 +46,8 @@
       - button "gh GitHub CLI for repository management takes every version"
       - button "ghostty GPU-accelerated terminal emulator updates itself"
       - button "bat Cat clone with syntax highlighting takes every version"
-    - region "jterrazz-base":
-      - paragraph: jterrazz-base extended · 2
+    - region "base":
+      - paragraph: base extended · 2
       - button "homebrew manager macOS package manager takes every version"
       - button "jq Command-line JSON processor takes every version"
   - region "This Mac's own changes":

@@ -13,7 +13,7 @@ export const CAPTION_STORIES: readonly Story<ComponentProps<typeof Caption>>[] =
             children: (
                 <>
                     <Value identity="teal" look="raised">
-                        jterrazz-base
+                        base
                     </Value>
                     <span>3 apps</span>
                     <DotStrip identity="teal" names={['jq', 'git', 'node']} />

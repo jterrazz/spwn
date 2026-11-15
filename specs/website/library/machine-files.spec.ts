@@ -24,20 +24,20 @@ describe('machine files', () => {
     test('D2 the name of the file a machine follows opens the file', async () => {
         // Given - the window on This Mac's Packages over two-macs
         const result = await website.visit(
-            '/?world=two-macs&machine=jterrazz-macbook-pro&tab=Packages',
+            '/?world=two-macs&machine=macbook-pro&tab=Packages',
             async (visitor) => {
                 await visitor.see(content('lazygit'));
 
                 // When - the name of its file is pressed in the head
                 await visitor.click(
                     within(
-                        heading('jterrazz-macbook-pro.', { exact: false }),
-                        button('jterrazz-macbook-pro', { exact: true }),
+                        heading('macbook-pro.', { exact: false }),
+                        button('macbook-pro', { exact: true }),
                     ),
                 );
 
                 // Then - Machine files opens on that file
-                await visitor.see(heading('jterrazz-macbook-pro.machine.yaml'));
+                await visitor.see(heading('macbook-pro.machine.yaml'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -104,13 +104,13 @@ describe('machine files', () => {
     });
 
     test('D12 each chapter lists its lines grouped by the file that declares them', async () => {
-        // Given - the window on the file macbook-pro over stories-file, which extends jterrazz-base
+        // Given - the window on the file macbook-pro over stories-file, which extends base
         const result = await website.visit(
             '/?world=stories-file&page=machine-files&file=macbook-pro',
             async (visitor) => {
                 const puts = region('What it puts on a machine');
                 const own = within(puts, region('macbook-pro'));
-                const base = within(puts, region('jterrazz-base'));
+                const base = within(puts, region('base'));
 
                 // When - Apps is read
                 // Then - each line sits under the file that declares it
@@ -190,9 +190,9 @@ describe('machine files', () => {
     });
 
     test('D21 a mixin makes no machine and lists the files that extend it', async () => {
-        // Given - the window on the mixin jterrazz-base over stories-file
+        // Given - the window on the mixin base over stories-file
         const result = await website.visit(
-            '/?world=stories-file&page=machine-files&file=jterrazz-base',
+            '/?world=stories-file&page=machine-files&file=base',
             async (visitor) => {
                 // When - its head and its users are read
                 // Then - it makes no machine, and the file that extends it is listed

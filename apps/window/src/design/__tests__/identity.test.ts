@@ -28,6 +28,6 @@ describe('identity', () => {
         const listed = ['infra'];
 
         // Then - a Mac or a machine gone draws in no identity colour
-        expect(identityOf('jterrazz-mac-mini', listed)).toBeUndefined();
+        expect(identityOf('mac-mini', listed)).toBeUndefined();
     });
 });

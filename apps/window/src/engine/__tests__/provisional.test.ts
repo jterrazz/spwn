@@ -144,7 +144,7 @@ describe('provisional', () => {
 
     test("a create's refusal is placed by its code, then by whether its subject is a Mac the sheet offers", () => {
         // Given - a refusal of each placed code, one naming an offered Mac, one naming a machine, and no answer
-        const macs = ['jterrazz-macbook-pro', 'jterrazz-mac-mini'];
+        const macs = ['macbook-pro', 'mac-mini'];
         const refusals = [
             new EngineError({
                 code: 'machines.bad-purpose',
@@ -154,7 +154,7 @@ describe('provisional', () => {
             new EngineError({
                 code: 'machines.too-little-memory',
                 message: 'too little',
-                subject: 'jterrazz-mac-mini',
+                subject: 'mac-mini',
             }),
             new EngineError({
                 code: 'machinefile.not-a-template',
@@ -165,12 +165,12 @@ describe('provisional', () => {
             new EngineError({
                 code: 'machines.server-template',
                 message: 'no server',
-                subject: 'jterrazz-macbook-pro',
+                subject: 'macbook-pro',
             }),
             new EngineError({
                 code: 'machines.not-enough-memory',
                 message: 'not enough',
-                subject: 'jterrazz-macbook-pro',
+                subject: 'macbook-pro',
             }),
             new EngineError({ code: 'machines.name-taken', message: 'taken', subject: 'linux-1' }),
             new EngineError(undefined),

@@ -23,7 +23,7 @@ describe('passwords', () => {
             await visitor.click(within(navigation('Sidebar'), button('Passwords')));
 
             // Then - the page names this Mac, and each password says what it is and where it is granted
-            await visitor.see(heading('Passwords on jterrazz-macbook-pro'));
+            await visitor.see(heading('Passwords on macbook-pro'));
             await visitor.see(content('3 kept, 1 granted', { exact: false }));
             const passwords = region('Passwords');
             await visitor.see(within(passwords, content('fine-grained token')));
@@ -62,7 +62,7 @@ describe('passwords', () => {
                 await visitor.click(within(asked, button('Remove')));
 
                 // Then - the vault is listed again without it
-                await visitor.see(heading('Passwords on jterrazz-macbook-pro'));
+                await visitor.see(heading('Passwords on macbook-pro'));
                 await visitor.gone(
                     within(region('Passwords'), button('npm publish', { exact: false })),
                 );

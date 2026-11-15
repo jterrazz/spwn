@@ -233,7 +233,7 @@ describe('gestures', () => {
 
                 // Then - the engine's message and its hint, no word of the window's own
                 await visitor.see(
-                    content('is being created on jterrazz-macbook-pro', { exact: false }),
+                    content('is being created on macbook-pro', { exact: false }),
                 );
                 await visitor.see(
                     content('wait for its create to end, or interrupt it where it runs'),
@@ -255,7 +255,7 @@ describe('gestures', () => {
                 await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
 
                 // Then - the engine's words, and Dismiss clears them
-                const said = content('the engine is stopped on jterrazz-macbook-pro', {
+                const said = content('the engine is stopped on macbook-pro', {
                     exact: false,
                 });
                 await visitor.see(said);
@@ -268,7 +268,7 @@ describe('gestures', () => {
     });
 
     test("a server's restart is asked first, sent to its Mac, and the engine's answer is shown", async () => {
-        // Given - infra's page over two-macs, a server on jterrazz-mac-mini
+        // Given - infra's page over two-macs, a server on mac-mini
         const result = await component.render(machineOver('two-macs', 'infra'), async (visitor) => {
             await visitor.see(heading('infra', { exact: false }));
 
@@ -335,14 +335,14 @@ describe('gestures', () => {
     test("a Mac's header says what it is, its engine's state, and New machine", async () => {
         // Given - This Mac's page over two-macs
         const result = await component.render(
-            machineOver('two-macs', 'jterrazz-macbook-pro'),
+            machineOver('two-macs', 'macbook-pro'),
             async (visitor) => {
                 // When - its header is drawn
-                await visitor.see(heading('jterrazz-macbook-pro', { exact: false }));
+                await visitor.see(heading('macbook-pro', { exact: false }));
 
                 // Then - its line is the engine's, and New machine is its one action
                 await visitor.see(content('This Mac · Engine running', { exact: false }));
-                await visitor.see(enabled(button('New machine on jterrazz-macbook-pro')));
+                await visitor.see(enabled(button('New machine on macbook-pro')));
             },
         );
         expect(result.errors.text).toBe('');

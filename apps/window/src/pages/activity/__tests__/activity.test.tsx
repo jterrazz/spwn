@@ -14,7 +14,7 @@ describe('Activity', () => {
     test("a calm Mac's Activity is its measures, its busiest and its facts", async () => {
         // Given - This Mac over two-macs, which raises no finding
         const result = await component.render(
-            activityOf('two-macs', 'jterrazz-macbook-pro'),
+            activityOf('two-macs', 'macbook-pro'),
             async (visitor) => {
                 // When - its activity has been read
                 await visitor.see(heading('No finding from the engine.'));
@@ -28,7 +28,7 @@ describe('Activity', () => {
     test("a finding heads the tab in the engine's words, with its fix", async () => {
         // Given - This Mac over disk-low, whose disk is almost full
         const result = await component.render(
-            activityOf('disk-low', 'jterrazz-macbook-pro'),
+            activityOf('disk-low', 'macbook-pro'),
             async (visitor) => {
                 // When - its activity has been read
                 await visitor.see(heading('Disk almost full: 4 % free'));
@@ -42,7 +42,7 @@ describe('Activity', () => {
     test('a Mac whose kernel counted nothing shows unknown, never zeros', async () => {
         // Given - This Mac over one-mac, whose meter counted no tick and no memory
         const result = await component.render(
-            activityOf('one-mac', 'jterrazz-macbook-pro'),
+            activityOf('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its activity has been read
                 await visitor.see(heading('No finding from the engine.'));
@@ -74,7 +74,7 @@ describe('Activity', () => {
     test('a Mac that does not answer is no answer, never a zero', async () => {
         // Given - the Mac mini over mini-offline, which does not answer
         const result = await component.render(
-            activityOf('mini-offline', 'jterrazz-mac-mini'),
+            activityOf('mini-offline', 'mac-mini'),
             async (visitor) => {
                 // When - its activity is asked
                 await visitor.see(heading('No answer from the engine.'));
@@ -88,7 +88,7 @@ describe('Activity', () => {
     test('the switches choose the window and the order of the busiest', async () => {
         // Given - This Mac over two-macs, read over the hour
         const result = await component.render(
-            activityOf('two-macs', 'jterrazz-macbook-pro'),
+            activityOf('two-macs', 'macbook-pro'),
             async (visitor) => {
                 await visitor.see(heading('No finding from the engine.'));
 
@@ -107,7 +107,7 @@ describe('Activity', () => {
     test("a VM among a Mac's busiest opens that VM's Activity", async () => {
         // Given - This Mac over two-macs, linux-1 among its busiest
         const result = await component.render(
-            activityOf('two-macs', 'jterrazz-macbook-pro'),
+            activityOf('two-macs', 'macbook-pro'),
             async (visitor) => {
                 await visitor.see(content('a machine of this Mac'));
 

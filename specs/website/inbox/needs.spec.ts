@@ -32,11 +32,11 @@ describe('needs', () => {
             // When - I open Needs you
             // Then - two panels, each with the lines the engine's upkeep puts in it
             await visitor.see(
-                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
             );
             await visitor.see(within(canWait, content('1 mise update waiting')));
             await visitor.gone(
-                within(canWait, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+                within(canWait, content('com.example.brain.x-snapshot is failing, last exit 2')),
             );
         });
         expect(result.errors.text).toBe('');
@@ -107,18 +107,18 @@ describe('needs', () => {
         // Given - the Inbox over two-macs, where every need is on the first Mac
         const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
             await visitor.see(
-                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
             );
 
             // When - the Mac mini is chosen
-            await visitor.click(within(main(), button('jterrazz-mac-mini')));
+            await visitor.click(within(main(), button('mac-mini')));
 
             // Then - none of the needs concerns it
             await visitor.see(
-                content('None of the needs listed concerns jterrazz-mac-mini or its machines.'),
+                content('None of the needs listed concerns mac-mini or its machines.'),
             );
             await visitor.gone(
-                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
             );
 
             // When - all machines are chosen again
@@ -126,7 +126,7 @@ describe('needs', () => {
 
             // Then - the needs are back
             await visitor.see(
-                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
             );
         });
         expect(result.errors.text).toBe('');
@@ -147,7 +147,7 @@ describe('needs', () => {
                 await visitor.click(within(needs, button('Fix npm')));
 
                 // Then - the engine's step for npm on This Mac is on a sheet
-                await visitor.see(dialog('Sign in to npm on jterrazz-macbook-pro'));
+                await visitor.see(dialog('Sign in to npm on macbook-pro'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -163,10 +163,10 @@ describe('needs', () => {
             await visitor.see(within(sidebar, button('Home')));
             await visitor.see(within(sidebar, button('Inbox 2')));
             await visitor.see(within(sidebar, button('Storage')));
-            await visitor.see(within(sidebar, button('jterrazz-macbook-pro online')));
+            await visitor.see(within(sidebar, button('macbook-pro online')));
             await visitor.see(within(sidebar, button('api Stopped')));
             await visitor.see(within(sidebar, button('linux-1 Running')));
-            await visitor.see(within(sidebar, button('jterrazz-mac-mini online')));
+            await visitor.see(within(sidebar, button('mac-mini online')));
             await visitor.see(within(sidebar, button('infra Running')));
             await visitor.see(within(sidebar, button('Machine files')));
             await visitor.see(within(sidebar, button('Apps 10')));

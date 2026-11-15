@@ -62,7 +62,7 @@ describe('Storage', () => {
             await visitor.see(heading('No verdict from the engine.'));
 
             // When - the Mac mini, which does not answer, is chosen
-            await visitor.click(button('jterrazz-mac-mini'));
+            await visitor.click(button('mac-mini'));
 
             // Then - its disk is no answer, and its machines are still listed
             await visitor.see(heading('No answer from the engine.'));
@@ -75,7 +75,7 @@ describe('Storage', () => {
         // Given - Storage over one-mac
         const result = await component.render(storageOver('one-mac'), async (visitor) => {
             // When - its disk has been read
-            await visitor.see(content('No image on jterrazz-macbook-pro.'));
+            await visitor.see(content('No image on macbook-pro.'));
         });
 
         // Then - the volume as the engine gave it, no footer and no image

@@ -11,7 +11,7 @@ import { LOCAL_ELSEWHERE } from '../shared-row';
 
 const recordingFor = await recordingsOf('stories', 'two-macs');
 
-const SHARED = 'https://jterrazz-macbook-pro.tail1234.ts.net:40001';
+const SHARED = 'https://macbook-pro.tail1234.ts.net:40001';
 const ON_THE_MINI = 'https://mac-mini.tail77a797.ts.net:40001';
 const LOCAL = 'http://127.0.0.1:40001';
 

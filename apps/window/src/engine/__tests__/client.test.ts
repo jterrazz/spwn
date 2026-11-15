@@ -75,7 +75,7 @@ describe('Client', () => {
                 progress: (step) => {
                     progress.push(step.task);
                 },
-                target: { name: 'jterrazz-mac-mini' },
+                target: { name: 'mac-mini' },
             },
         );
         const { request, receiver } = last(opened);
@@ -90,7 +90,7 @@ describe('Client', () => {
             call: 'engine.read',
             id: request.id,
             in: {},
-            target: { name: 'jterrazz-mac-mini' },
+            target: { name: 'mac-mini' },
             v: 2,
         });
         await expect(answer).resolves.toStrictEqual({ State: 'running', Version: 'v3.1.0' });

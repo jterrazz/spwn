@@ -32,7 +32,7 @@ describe('home', () => {
             await visitor.see(heading('2 things need you.'));
             await visitor.see(heading('Needs you 2'));
             await visitor.see(within(needsYou, button('Fix npm')));
-            await visitor.see(within(needsYou, button('Remove com.jterrazz.brain.x-snapshot')));
+            await visitor.see(within(needsYou, button('Remove com.example.brain.x-snapshot')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -95,20 +95,20 @@ describe('home', () => {
         // Given - the New machine sheet opened from Home over two-macs, on the Mac with 36 GB free
         const result = await website.visit(TWO_MACS, async (visitor) => {
             await visitor.click(button('New machine'));
-            const sheet = dialog('New machine on jterrazz-mac-mini');
-            await visitor.see(within(sheet, content('leaves 28 GB free on jterrazz-mac-mini')));
+            const sheet = dialog('New machine on mac-mini');
+            await visitor.see(within(sheet, content('leaves 28 GB free on mac-mini')));
 
             // When - the 12 GB preset is pressed
             await visitor.click(within(sheet, button('12 GB · gate')));
 
             // Then - the figure and what it leaves follow
-            await visitor.see(within(sheet, content('leaves 24 GB free on jterrazz-mac-mini')));
+            await visitor.see(within(sheet, content('leaves 24 GB free on mac-mini')));
 
             // When - the Mac with 4 GB free is chosen
-            await visitor.click(within(sheet, button('jterrazz-macbook-pro')));
+            await visitor.click(within(sheet, button('macbook-pro')));
 
             // Then - the sheet follows that Mac, and the sizes above its room are refused
-            const onIt = dialog('New machine on jterrazz-macbook-pro');
+            const onIt = dialog('New machine on macbook-pro');
             await visitor.see(within(onIt, content('leaves 0 GB free on this Mac')));
             const eight = within(onIt, button('8 GB · no room'));
             const twelve = within(onIt, button('12 GB · no room'));
@@ -157,7 +157,7 @@ describe('home', () => {
             await visitor.click(within(startHere, button('New machine, a workspace')));
 
             // Then - the sheet opens on this Mac
-            await visitor.see(dialog('New machine on jterrazz-macbook-pro'));
+            await visitor.see(dialog('New machine on macbook-pro'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -171,7 +171,7 @@ describe('home', () => {
             await visitor.click(within(startHere, button('Open the file')));
 
             // Then - Machine files opens, and Start here is left behind
-            await visitor.see(heading('no Machinefile named jterrazz-macbook-pro.'));
+            await visitor.see(heading('no Machinefile named macbook-pro.'));
             await visitor.gone(startHere);
         });
         expect(result.errors.text).toBe('');

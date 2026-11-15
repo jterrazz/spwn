@@ -25,8 +25,8 @@ describe('model', () => {
     test('the files are shelved yours, mixins, then shipped, a shelf with no file left out', () => {
         // Given - files in the engine's name order, none of them a mixin but one
         const files = [
-            view('jterrazz-base', 'mixin'),
-            view('jterrazz-macbook-pro', 'yours'),
+            view('base', 'mixin'),
+            view('macbook-pro', 'yours'),
             view('station-macos', 'shipped'),
             view('station-linux', 'shipped'),
         ];
@@ -39,8 +39,8 @@ describe('model', () => {
 
         // Then - the order of the captions, each shelf keeping the engine's order
         expect(shelves).toStrictEqual([
-            ['yours', ['jterrazz-macbook-pro']],
-            ['mixin', ['jterrazz-base']],
+            ['yours', ['macbook-pro']],
+            ['mixin', ['base']],
             ['shipped', ['station-macos', 'station-linux']],
         ]);
         expect(shelvedOf([view('only', 'yours')])).toHaveLength(1);

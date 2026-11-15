@@ -1,7 +1,7 @@
 - main:
-  - heading "jterrazz-macbook-pro Online" [level=2]
+  - heading "macbook-pro Online" [level=2]
   - paragraph: "This Mac · Engine running · Awake: sleeps normally"
-  - button "New machine on jterrazz-macbook-pro": New machine
+  - button "New machine on macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview" [selected]
     - tab "Activity"
@@ -13,10 +13,10 @@
   - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 2machines 2 stopped
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]
-    - text: jterrazz-macbook-pro
+    - text: macbook-pro
     - emphasis: 8 GB free
     - text: of 24
-    - img "Memory of jterrazz-macbook-pro, one square per GB"
+    - img "Memory of macbook-pro, one square per GB"
     - text: 4 macOS 8 linux-4 4 linux-5 8 free
   - region "Its machines":
     - heading "Its machines" [level=2]
@@ -24,4 +24,4 @@
     - 'button "linux-5 Lot shell, one block per package · by studio-os-fe Creating: image 1 of 5"'
   - region "Packages":
     - heading "Packages" [level=2]
-    - text: "Not found no Machinefile named jterrazz-macbook-pro. give this machine one: station init --machinefile <name>"
+    - text: "Not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"

@@ -12,7 +12,7 @@ const recordingFor = await recordingsOf(
     'two-macs',
 );
 
-function overviewOver(world: string, machine = 'jterrazz-macbook-pro') {
+function overviewOver(world: string, machine = 'macbook-pro') {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Overview' });
 }
 
@@ -51,13 +51,13 @@ describe('machine', () => {
     test("a Mac that holds its file and one whose file asks more each say the engine's verdict of the file it follows", async () => {
         // Given - This Mac's Overview over machinefile-kept, then over machinefile-differs
         const kept = await component.render(overviewOver('machinefile-kept'), async (visitor) => {
-            await visitor.see(content('Matches jterrazz-macbook-pro.'));
+            await visitor.see(content('Matches macbook-pro.'));
         });
         const differs = await component.render(
             overviewOver('machinefile-differs'),
             async (visitor) => {
                 // When - both overview.read and machinefile.drift answers have settled
-                await visitor.see(content('2 differences from jterrazz-macbook-pro.'));
+                await visitor.see(content('2 differences from macbook-pro.'));
             },
         );
 
@@ -128,7 +128,7 @@ describe('machine', () => {
         const result = await component.render(overviewOver('two-macs'), async (visitor) => {
             // When - its activity and its file have been read
             await visitor.see(content('of 16 GB'));
-            await visitor.see(content('Follows jterrazz-macbook-pro'));
+            await visitor.see(content('Follows macbook-pro'));
         });
 
         // Then - the tiles hold the Mac's numbers, its machines listed, the file it follows named

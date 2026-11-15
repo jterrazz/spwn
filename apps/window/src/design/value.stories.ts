@@ -2,7 +2,7 @@ import { SECRET_SAMPLE } from './story';
 import type { Story } from './story';
 import type { ValueProps } from './value';
 
-const PATH = '~/.config/station/machinefiles/jterrazz-macbook-pro.yaml';
+const PATH = '~/.config/station/machinefiles/macbook-pro.yaml';
 
 export const VALUE_STORIES: readonly Story<ValueProps>[] = [
     { name: 'plain', props: { children: '24.11.1' } },
@@ -10,7 +10,7 @@ export const VALUE_STORIES: readonly Story<ValueProps>[] = [
     { name: 'boxed, a value you set', props: { children: 'vault:claude', look: 'boxed' } },
     {
         name: 'raised, an identity',
-        props: { children: 'jterrazz-base', identity: 'teal', look: 'raised' },
+        props: { children: 'base', identity: 'teal', look: 'raised' },
     },
     {
         name: 'raised, the system identity',

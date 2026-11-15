@@ -1,7 +1,7 @@
 - main:
-  - heading "jterrazz-macbook-pro Online" [level=2]
+  - heading "macbook-pro Online" [level=2]
   - paragraph: "This Mac · Engine running · Awake: sleeps normally"
-  - button "New machine on jterrazz-macbook-pro": New machine
+  - button "New machine on macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview"
     - tab "Activity"
@@ -15,5 +15,5 @@
     - list "The groups"
   - region "By app":
     - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
-    - paragraph: Nothing listed on jterrazz-macbook-pro.
+    - paragraph: Nothing listed on macbook-pro.
     - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.

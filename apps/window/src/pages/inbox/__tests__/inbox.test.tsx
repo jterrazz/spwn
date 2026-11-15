@@ -21,7 +21,7 @@ describe('Inbox', () => {
             // When - This Mac's overview has been read
             await visitor.see(heading('2 things need you.'));
             await visitor.see(
-                within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
+                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
             );
             await visitor.see(within(waiting, content('1 mise update waiting')));
         });

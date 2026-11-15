@@ -87,7 +87,7 @@ def sandbox(seed, fixture=None):
 
 
 BASE = """machinefile: station.machinefile/v1
-name: jterrazz-base
+name: base
 description: What every machine of the owner carries
 apps: [jq]
 """
@@ -95,15 +95,15 @@ apps: [jq]
 
 def machine(name, apps, settings=""):
     return {
-        "machinefiles/jterrazz-base.machine.yaml": BASE,
+        "machinefiles/base.machine.yaml": BASE,
         f"machinefiles/{name}.machine.yaml": "machinefile: station.machinefile/v1\n"
         f"name: {name}\ndescription: The owner's Mac\nmachine: {{ kind: computer, system: {{ os: macos }} }}\n"
-        f"extends: [jterrazz-base]\napps: [{', '.join(apps)}]\n" + settings,
+        f"extends: [base]\napps: [{', '.join(apps)}]\n" + settings,
     }
 
 
 LOCK = """lock: station.lock/v1
-machinefile: jterrazz-macbook-pro
+machinefile: macbook-pro
 apps:
     - name: bat
       method: brew
@@ -121,7 +121,7 @@ apps:
 
 
 def applied(apps):
-    return {**machine("jterrazz-macbook-pro", apps), "machinefiles/jterrazz-macbook-pro.lock": LOCK}
+    return {**machine("macbook-pro", apps), "machinefiles/macbook-pro.lock": LOCK}
 
 
 EXPIRES = "2026-11-04T11:00:00Z"
@@ -174,14 +174,14 @@ WORLDS = {
     **{name: plain(name) for name in (
         "bare-mac", "creating", "disk-low", "engine-stopped", "mini-offline", "mini-workspace", "one-mac", "stories",
     )},
-    "two-macs":("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
+    "two-macs":("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
                  [exchange("linux-1", "ex-1", "gh", "device-code", "github.com"),
-                  broken("jterrazz-macbook-pro", "npm", "jterrazz", "The token is refused by registry.npmjs.org")]),
-    "sign-ins": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
+                  broken("macbook-pro", "npm", "you", "The token is refused by registry.npmjs.org")]),
+    "sign-ins": ("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
                  [signed_out("linux-1", "claude"), exchange("linux-1", "ex-1", "claude", "paste", "claude.com", asking=True)]),
-    "calm": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
-             [dropped("jterrazz-macbook-pro", "identities", "npm"),
-              dropped("jterrazz-macbook-pro", "jobs", "com.jterrazz.brain.x-snapshot")]),
+    "calm": ("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
+             [dropped("macbook-pro", "identities", "npm"),
+              dropped("macbook-pro", "jobs", "com.example.brain.x-snapshot")]),
     "machinefile-kept": ("two-macs", "homebrew", applied(["lazygit", "bat"]), []),
     "machinefile-differs": ("two-macs", "homebrew", applied(["lazygit", "bat", "ripgrep", "fd"]), []),
     "presence-refused": ("two-macs", None, {}, [switched("presence", "refused")]),

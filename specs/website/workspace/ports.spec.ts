@@ -21,7 +21,7 @@ describe('ports', () => {
                 // Then - the code of its address is drawn, and can be hidden again
                 await visitor.see(within(shared, button('Hide QR code')));
                 await visitor.see(
-                    within(shared, content('https://jterrazz-macbook-pro.tail1234.ts.net:40001')),
+                    within(shared, content('https://macbook-pro.tail1234.ts.net:40001')),
                 );
             },
         );

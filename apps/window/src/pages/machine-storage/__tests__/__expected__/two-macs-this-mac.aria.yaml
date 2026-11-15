@@ -1,7 +1,7 @@
 - main:
-  - heading "jterrazz-macbook-pro Online" [level=2]
+  - heading "macbook-pro Online" [level=2]
   - paragraph: "This Mac · Engine running · Awake: sleeps normally"
-  - button "New machine on jterrazz-macbook-pro": New machine
+  - button "New machine on macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview"
     - tab "Activity"
@@ -13,7 +13,7 @@
     - heading "Storage" [level=2]
     - paragraph: 606 GB of 994 GB used
     - button "Rescan"
-    - img "What holds the disk of jterrazz-macbook-pro"
+    - img "What holds the disk of macbook-pro"
     - list "The groups":
       - listitem: Misplaced 73.3 GB
       - listitem: Can rebuild 34.8 GB
