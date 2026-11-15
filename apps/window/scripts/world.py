@@ -7,7 +7,7 @@ environment: HOME, PATH and every station path in a temporary folder, never the 
 
 SEEDS adds to a world what the specs' worlds lack for a page: machinefiles on This Mac, the fake binaries
 of a fixture of specs/usecases/__fixtures__/, and edits of its machines (a sign-in in progress, a program signed
-out, an accounts switch the fake reads in apps/engine/world/accounts.go, as the presence check a grant asks, a
+out or broken, an accounts switch the fake reads in apps/engine/world/accounts.go, as the presence check a grant asks, a
 failed sign-in or a failing background task dropped); a
 world of SEEDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise.
 
@@ -134,6 +134,15 @@ def signed_out(name, program):
     return edit
 
 
+def broken(name, program, who, reason):
+    """A program of a machine whose sign-in no longer works, the engine's Needs you line of it follows."""
+    def edit(content):
+        content["macs"][name].setdefault("accounts", {}).setdefault("programs", {})[program] = {
+            "Program": program, "State": "broken", "Who": who, "How": "own", "Reason": reason,
+        }
+    return edit
+
+
 def switched(name, value):
     def edit(content):
         content["macs"][content["this_mac"]].setdefault("accounts", {})[name] = value
@@ -152,7 +161,8 @@ def dropped(name, *path):
 
 SEEDS = {
     "two-macs": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
-                 [exchange("linux-1", "ex-1", "gh", "device-code", "github.com")]),
+                 [exchange("linux-1", "ex-1", "gh", "device-code", "github.com"),
+                  broken("jterrazz-macbook-pro", "npm", "jterrazz", "The token is refused by registry.npmjs.org")]),
     "sign-ins": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
                  [signed_out("linux-1", "claude"), exchange("linux-1", "ex-1", "claude", "paste", "claude.com", asking=True)]),
     "calm": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),

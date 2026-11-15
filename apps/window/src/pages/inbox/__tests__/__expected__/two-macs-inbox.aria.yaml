@@ -1,14 +1,16 @@
 - main:
-  - heading "com.jterrazz.brain.x-snapshot is failing, last exit 2." [level=1]
+  - heading "2 things need you." [level=1]
   - paragraph:
-    - img "com.jterrazz.brain.x-snapshot is failing, last exit 2"
-    - text: 7 things can wait.
+    - img "2 things need you."
+    - text: "npm sign-in fails: The token is refused by registry.npmjs.org"
   - group "Which machines":
     - button "All machines" [pressed]
     - button "jterrazz-macbook-pro"
     - button "jterrazz-mac-mini"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
+    - 'button "Broken npm sign-in fails: The token is refused by registry.npmjs.org jterrazz-macbook-pro · Sign-ins"'
+    - text: Fix
     - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 jterrazz-macbook-pro · Background"
     - button "Remove com.jterrazz.brain.x-snapshot": Remove
   - region "Can wait":

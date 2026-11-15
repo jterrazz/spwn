@@ -16,10 +16,10 @@ function inboxOver(world: string) {
 
 describe('Inbox', () => {
     test("a world whose needs press lists them under Needs you and the rest under Can wait, in the engine's head", async () => {
-        // Given - the Inbox over two-macs, where a background task fails
+        // Given - the Inbox over two-macs, where npm's sign-in is refused and a background task fails
         const result = await component.render(inboxOver('two-macs'), async (visitor) => {
             // When - This Mac's overview has been read
-            await visitor.see(heading('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
+            await visitor.see(heading('2 things need you.'));
             await visitor.see(
                 within(needs, content('com.jterrazz.brain.x-snapshot is failing, last exit 2')),
             );

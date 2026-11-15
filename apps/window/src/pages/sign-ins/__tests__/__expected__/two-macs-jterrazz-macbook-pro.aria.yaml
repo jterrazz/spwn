@@ -14,8 +14,8 @@
     - heading "Sign-ins 4" [level=2]
     - text: gh jterrazz · repo · signed in by itself Signed in
     - button "Sign out gh": Sign out
-    - text: npm Signed out
-    - button "Sign in npm": Sign in
+    - text: npm jterrazz · signed in by itself · The token is refused by registry.npmjs.org Needs signing in again
+    - button "Sign in again npm": Sign in again
     - text: claude admin@jterrazz.com · Max plan · signed in by itself Signed in
     - button "Sign out claude": Sign out
     - text: wrangler admin@jterrazz.com · signed in by itself Signed in

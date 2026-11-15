@@ -48,7 +48,7 @@ describe('Window', () => {
         // Given - the window on Home over two-macs, where a background task fails
         const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
             // When - This Mac's overview has been read
-            await visitor.see(content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
+            await visitor.see(content('2 things need you.'));
         });
 
         // Then - Home holds the verdict, the lines and the machines the engine answered
@@ -245,7 +245,7 @@ describe('Window', () => {
 
             // When - the mouse's back button is released, then its forward button
             globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 3 }));
-            await visitor.see(content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'));
+            await visitor.see(content('2 things need you.'));
             globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 4 }));
 
             // Then - the window is on This Mac again
@@ -261,9 +261,7 @@ describe('Window', () => {
             windowOver('two-macs', { machine: 'gate9', page: 'machine', tab: 'Activity' }),
             async (visitor) => {
                 // When - machines.list has answered whole
-                await visitor.see(
-                    content('com.jterrazz.brain.x-snapshot is failing, last exit 2.'),
-                );
+                await visitor.see(content('2 things need you.'));
 
                 // Then - Home is shown, under the line that says why
                 await visitor.see(
