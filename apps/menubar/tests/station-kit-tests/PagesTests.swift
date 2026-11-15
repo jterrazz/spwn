@@ -172,7 +172,7 @@ final class PagesTests: XCTestCase {
     // Terminal on station machines unlock mac-mini, and nothing else runs.
     func testMacUnlockOpensTerminal() async throws {
         let page = try Tree.page("menubar.mac.mini-offline")
-        XCTAssertEqual(page.header?.stale?.items?.last?.text, "checking")
+        XCTAssertNil(page.header?.stale)
         let unlock = try XCTUnwrap(page.action("unlock"))
         XCTAssertNil(unlock.run?.call)
         let calls = Recorded()

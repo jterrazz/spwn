@@ -1,9 +1,8 @@
 import SwiftUI
 
 // invariant: SPEC A4: a machine page's header: the way back, the
-// machine's glyph and name, its buttons (New VM, its menu), its facts with
-// the stale marking after them, a fact that links pushing its page, and
-// its segments.
+// machine's glyph and name, its buttons (New VM, its menu), its facts, a
+// fact that links pushing its page, and its segments.
 public struct MachineHeader: View {
     let page: Page
     let segment: String?
@@ -27,16 +26,10 @@ public struct MachineHeader: View {
 
     var summary: Section? { page.section("summary") }
 
-    // value: the facts, then the stale marking, each part dimmed with it.
+    // value: the facts of the page's summary.
     public static func facts(_ page: Page) -> Value {
-        var parts = page.section("summary")?.caption ?? []
-        for part in (page.header?.stale?.items ?? page.header?.stale.map { [$0] } ?? []) {
-            var p = part
-            p.signal = "stale"
-            parts.append(p)
-        }
         var line = Value(kind: "list")
-        line.items = parts
+        line.items = page.section("summary")?.caption ?? []
         return line
     }
 

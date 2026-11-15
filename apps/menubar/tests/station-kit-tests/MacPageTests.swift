@@ -109,14 +109,14 @@ final class MacPageTests: XCTestCase {
         XCTAssertEqual(needs.rest?.row?.detail?.text, "Show less")
     }
 
-    // invariant: SPEC A4, B5.15: a Mac not heard from says when it was
-    // seen after its facts, dimmed with them.
-    func testAStaleMacSaysWhenItWasSeenAfterItsFacts() throws {
+    // invariant: SPEC A4, B5.15: a Mac not heard from says nothing of when
+    // it was seen after its facts: an Unseen Mac keeps no last values.
+    func testAStaleMacHasNoSeenMarkingAfterItsFacts() throws {
         let page = try XCTUnwrap(Stories["mac.mini.stale"].state.pushed)
         let facts = MachineHeader.facts(page).items ?? []
-        XCTAssertEqual(facts.suffix(2).map(\.text), ["seen 3 min ago", "checking"])
-        XCTAssertEqual(facts.suffix(2).map(\.signal), ["stale", "stale"])
-        XCTAssertNil(MachineHeader.facts(try XCTUnwrap(Stories["mac.mini.overview"].state.pushed)).items?.first { $0.signal == "stale" })
+        XCTAssertNil(page.header?.stale)
+        XCTAssertNil(facts.first { $0.signal == "stale" })
+        XCTAssertFalse(facts.contains { $0.text == "checking" })
     }
 
     // invariant: SPEC A4: mac-mini never sleeps, so its upkeep unfolds to

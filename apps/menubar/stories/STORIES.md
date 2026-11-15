@@ -509,7 +509,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![mac.mini.loading](stories/mac.mini.loading.png)
 
 - **Capture**: [dark](stories/mac.mini.loading.png)
-- **Shows**: The Mac page while its Mac is still being checked: the prototype renders the last known values with no stale marking (only home marks a Mac "seen 40 s ago · checking…"). Open question for the build: the page should carry the same stale marking.
+- **Shows**: The Mac page while its Mac is still being checked: the prototype renders the last known values with no stale marking (only home marks a Mac "seen 40 s ago · checking…"). The Mac's own page carries no marking: an Unseen Mac keeps no last values.
 - **Data**: last-seen timestamp
 - **Interactions**: "All machines" → back; "New VM" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "More options for mac-mini" → pageMenu(mac:mac-mini); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Review" → push(vm:review-bot); "CPU 46%" → seg(activity); "Memory 19 GB free" → seg(activity); "Network 0.7 MB/s" → seg(activity); "infra healthy · up 12 days" → push(vm:infra); "linux-3 working" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "review-bot fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "Keep mac-mini awake" → awakeChange(mac-mini); "Upkeep all fine" → unfold(upkeep:mac-mini)
 - **Enters**: #panel: height 689px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(-30%) 0 340 ms smooth; .page: transform translateX(100%) → none 340 ms smooth; .spin.sm: CSS spin 800 ms linear; .dot.ring: CSS ping 600 ms linear; .dot.ping: CSS ping 600 ms linear
@@ -518,11 +518,11 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ### `mac.mini.stale`
 
 - **Capture**: none (a gap state SPEC A4 rules, after `mac.mini.loading`: the prototype does not draw it)
-- **Shows**: mac-mini not heard from for 3 min while its page is open: the last known values stay, the facts end "seen 3 min ago · checking" in t3, the gauges say their last values in t3 with no spark, and every VM row is dimmed to .45.
+- **Shows**: mac-mini not heard from for 3 min while its page is open: its facts carry no marking, the gauges say their last values in t3 with no spark, and every VM row is dimmed to .45.
 - **Data**: last answer 3 min ago; the Mac's last page parts
 - **Interactions**: as `mac.mini.loading`
-- **Enters**: no animation (the marking turns on in place once the Mac is 30 s late)
-- **Leaves**: the marking turns off in place when mac-mini answers again
+- **Enters**: no animation (the dimming turns on in place once the Mac is 30 s late)
+- **Leaves**: the dimming turns off in place when mac-mini answers again
 
 ### `mac.mini.creating`
 
@@ -2020,7 +2020,7 @@ These are in `ia/PROPOSAL.md` but have no screen in the prototype, so no capture
 
 | Gap | Id | Status |
 | --- | --- | --- |
-| the stale marking on a remote Mac's own page (see `mac.mini.loading`) | `mac.mini.stale` | built (P4), its story under A Mac |
+| the stale gauges and rows on a remote Mac's own page (see `mac.mini.loading`) | `mac.mini.stale` | built (P4), its story under A Mac |
 | an agent hook not installed (K4: the tile shows only what is detected) | `workspace.hook-missing` | built (P9), its story under A workspace |
 | a Mac unreachable, told apart from an asleep one | `mac.unreachable` | pending |
 | a Mac's disk locked at boot (chip + Unlock the disk ↗) | `mac.disk-locked` | pending |

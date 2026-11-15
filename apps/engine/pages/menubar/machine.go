@@ -212,7 +212,7 @@ func macPage(m Machine, h model.MacView) page.Page {
 	// lid, New VM and its menu), its facts, then every segment's sections
 	// in the one page, so a segment is picked on the client and asks
 	// nothing; an asleep Mac has no segment and says so; a Mac not heard
-	// from carries home's stale marking.
+	// from has its gauges and rows drawn stale, and no marking in its header.
 	label := model.Label(*m.All, h)
 	p := page.Page{ID: MachineID, Command: "menubar", Context: page.Context{Machine: h.Name, Kind: string(machine.Computer)}}
 	p.Header = &page.Header{Back: "All machines", Glyph: page.Glyph{Kind: lid(h)}}
@@ -223,13 +223,6 @@ func macPage(m Machine, h model.MacView) page.Page {
 		p.Sections = append(p.Sections, asleep(label)...)
 		p.Actions = append(p.Actions, wake(h, label)...)
 	} else {
-		if stale {
-			v := page.Texts("checking")
-			if !h.Answered.IsZero() && m.All.Read.After(h.Answered) {
-				v = page.Texts("seen "+ago(m.All.Read.Sub(h.Answered))+" ago", "checking")
-			}
-			p.Header.Stale = &v
-		}
 		p.Segments = segments()
 		p.Sections = append(p.Sections, macOverviewSections(m, h, label, stale)...)
 		shares := macPorts(m, h)

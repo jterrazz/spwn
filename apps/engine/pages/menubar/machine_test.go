@@ -197,20 +197,17 @@ func TestAnAsleepMacOffersWakeAndNoSegment(t *testing.T) {
 }
 
 // invariant: SPEC A4, B5.15: a Mac not heard from for more than 30 s
-// keeps its last values, marked as home marks them: seen when, checking,
-// its gauges and rows stale.
+// keeps its last gauges and rows drawn stale, and its header carries no
+// marking: the owner's word is that an Unseen Mac says no last values.
 func TestAMacNotHeardFromFor30sIsMarkedStale(t *testing.T) {
 	silent := func(d time.Duration) page.Page {
 		return macPageOf(t, miniMac, func(m *Machine) {
 			m.All.Macs[1].Reachable, m.All.Macs[1].Answered = false, macNow.Add(-d)
 		})
 	}
-	if p := silent(20 * time.Second); p.Header.Stale != nil {
-		t.Fatalf("a Mac silent for 20 s is marked %+v", p.Header.Stale)
-	}
 	p := silent(40 * time.Second)
-	if p.Header.Stale == nil || p.Header.Stale.Items[0].Text != "seen 40 s ago" || p.Header.Stale.Items[1].Text != "checking" {
-		t.Fatalf("stale %+v, want seen 40 s ago, checking", p.Header.Stale)
+	if p.Header.Stale != nil {
+		t.Fatalf("a Mac silent for 40 s carries the header marking %+v, want none", p.Header.Stale)
 	}
 	for _, it := range sectionOf(p, SectionGauges).Items {
 		if !it.Gauge.Stale {
