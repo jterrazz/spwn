@@ -2,10 +2,13 @@ package calls
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -38,5 +41,41 @@ func TestABootPhaseOutlastsItsPackagesAndItsLines(t *testing.T) {
 	if off := e.until[0].Sub(due); off < 0 || off > time.Minute {
 		left := e.until[0].Sub(due) + want
 		t.Fatalf("the boot phase had %v; want %v, the packages' share and the lines' bound", left, want)
+	}
+}
+
+// value: a Mac whose clock stands still and whose kept lines are collected by file.
+type keepingMac struct {
+	ThisMac
+	kept map[string]string
+}
+
+func (keepingMac) Now() time.Time { return time.Date(2026, 11, 16, 9, 0, 0, 0, time.UTC) }
+
+func (m keepingMac) Append(file, line string) error {
+	m.kept[file] += line
+	return nil
+}
+
+func TestARefusedGrantWithoutACodeKeepsItsCauseInTheEngineLog(t *testing.T) {
+	mac := keepingMac{kept: map[string]string{}}
+	s := &Machinist{h: mac, o: Options{Logs: "/state/logs"}}
+	cause := errors.New("dial tcp 192.0.2.7:22: connection refused")
+	code, subject := s.refusal(cause, "web")
+	if code != accounts.GrantCannotDeliver || subject != "web" {
+		t.Fatalf("got %q on %q; want %q on web", code, subject, accounts.GrantCannotDeliver)
+	}
+	want := "2026-11-16T09:00:00Z grant to web: dial tcp 192.0.2.7:22: connection refused\n"
+	if got := mac.kept["/state/logs/engine.log"]; got != want {
+		t.Fatalf("the engine log holds %q; want %q", got, want)
+	}
+}
+
+func TestARefusedGrantWithACodeKeepsItsCodeAndLogsNothing(t *testing.T) {
+	mac := keepingMac{kept: map[string]string{}}
+	s := &Machinist{h: mac, o: Options{Logs: "/state/logs"}}
+	code, subject := s.refusal(accounts.Refusal(fail.Refused, accounts.GrantNoPassword, "tool-a"), "web")
+	if code != accounts.GrantNoPassword || subject != "tool-a" || len(mac.kept) != 0 {
+		t.Fatalf("got %q on %q with %d files logged; want %q on tool-a and none", code, subject, len(mac.kept), accounts.GrantNoPassword)
 	}
 }

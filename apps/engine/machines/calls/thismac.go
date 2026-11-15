@@ -18,6 +18,9 @@ type ThisMac interface {
 	// value: the names in dir, an error when it cannot be read.
 	Names(dir string) ([]string, error)
 	Remove(path string) error
+	// value: one line added at the end of a file, made with its folder when it
+	// is not; the file may be one another process appends to.
+	Append(file, line string) error
 }
 
 type GuestRan struct {

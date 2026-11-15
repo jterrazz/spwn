@@ -37,6 +37,7 @@ func (*stillMac) Hostname() string               { return "mac" }
 func (*stillMac) Exists(string) bool             { return false }
 func (*stillMac) Names(string) ([]string, error) { return nil, nil }
 func (*stillMac) Remove(string) error            { return nil }
+func (*stillMac) Append(string, string) error    { return nil }
 
 // value: preferences kept in memory, each group as its JSON.
 type memoryPrefs map[string][]byte

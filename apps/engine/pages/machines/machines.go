@@ -357,7 +357,10 @@ type CreatedBoot struct {
 
 type CreatedGrant struct {
 	Program string `json:"program"`
-	Failed  string `json:"failed,omitempty"`
+	// value: why it was not granted, its refusal's code and subject; absent
+	// when it was granted.
+	Code    string `json:"code,omitempty"`
+	Subject string `json:"subject,omitempty"`
 }
 
 type CreatedSignIn struct {
@@ -397,7 +400,7 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 		body.Template = b.Template
 		body.Boot = &CreatedBoot{Failed: b.Failed, Grants: []CreatedGrant{}, SignIns: []CreatedSignIn{}, Drift: append([]string{}, b.Drift...)}
 		for _, g := range b.Grants {
-			body.Boot.Grants = append(body.Boot.Grants, CreatedGrant{Program: g.Program, Failed: g.Failed})
+			body.Boot.Grants = append(body.Boot.Grants, CreatedGrant{Program: g.Program, Code: string(g.Code), Subject: g.Subject})
 		}
 		for _, s := range b.SignIns {
 			body.Boot.SignIns = append(body.Boot.SignIns, CreatedSignIn{Program: s.Program, Command: s.Command})
@@ -406,7 +409,7 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 	return body
 }
 
-func Created(c model.Created, thisMac page.Context) page.Page {
+func Created(c model.Created, thisMac page.Context, refusal func(model.FirstStartGrant) string) page.Page {
 	vm, r := c.VM, c.VM.Resources
 	rows := []page.Row{passed(model.StepRunning, ""), passed(model.StepAddress, vm.IP), passed(model.StepSSH, "")}
 	if vm.Lifetime == model.AlwaysOn {
@@ -426,7 +429,7 @@ func Created(c model.Created, thisMac page.Context) page.Page {
 		row := page.Row{ID: "ports", Label: "ports", Mark: page.Attention, Reason: page.Degraded, Cells: []page.Value{page.Text(off)}}
 		rows = append(rows, row)
 	}
-	rows = append(rows, bootRows(c.Boot)...)
+	rows = append(rows, bootRows(c.Boot, refusal)...)
 	head := pages.Done(vm.Name, catalog.StateOK, "")
 	head.Cells = []page.Value{page.Text("Created"), page.List(page.Text(titled(string(vm.Lifetime))), page.Text(strconv.Itoa(r.CPUs)+" CPU"), Memory(r.MemoryBytes), DiskSize(r.DiskBytes))}
 	rows = append(rows, head)
@@ -443,10 +446,11 @@ func Created(c model.Created, thisMac page.Context) page.Page {
 }
 
 // invariant: a first start's boot phase says what it did of its
-// Machinefile and what it left: a boot phase or a share that failed is
-// attention, never a failed create, and the image's drift names each item
-// with the build that carries it.
-func bootRows(b *model.FirstStart) []page.Row {
+// Machinefile and what it left: a boot phase or a grant that failed is
+// attention, never a failed create, a refused grant in the words of its
+// refusal, and the image's drift names each item with the build that
+// carries it.
+func bootRows(b *model.FirstStart, refusal func(model.FirstStartGrant) string) []page.Row {
 	if b == nil {
 		return nil
 	}
@@ -460,8 +464,8 @@ func bootRows(b *model.FirstStart) []page.Row {
 		rows = append(rows, passed(model.StepBoot, b.Template))
 	}
 	for _, g := range b.Grants {
-		if g.Failed != "" {
-			rows = append(rows, attention("grant/"+g.Program, g.Program, "not granted: "+g.Failed))
+		if g.Code != "" {
+			rows = append(rows, attention("grant/"+g.Program, g.Program, "not granted: "+refusal(g)))
 			continue
 		}
 		row := passed(g.Program, "granted")

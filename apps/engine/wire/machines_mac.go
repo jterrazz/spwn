@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"path/filepath"
 	"time"
 
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
@@ -23,6 +24,13 @@ func (t macSystem) Exists(path string) bool {
 	return err == nil
 }
 func (t macSystem) Remove(path string) error { return t.h.FS.Remove(path) }
+
+func (t macSystem) Append(file, line string) error {
+	if err := t.h.FS.MkdirAll(filepath.Dir(file), 0o700); err != nil {
+		return err
+	}
+	return t.h.FS.Append(file, []byte(line), 0o600)
+}
 
 func (t macSystem) Names(dir string) ([]string, error) {
 	entries, err := t.h.FS.ReadDir(dir)

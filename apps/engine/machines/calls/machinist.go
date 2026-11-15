@@ -65,7 +65,7 @@ type Options struct {
 	// them; nil reads none.
 	Templates Templates
 	// value: grants one of its VMs this Mac's password for a program, as
-	// grants.add does; nil grants none.
+	// grants.add does, refused by a coded error; nil grants none.
 	Grant func(ctx context.Context, program, vm string) error
 	// value: the programs a VM of this Mac is signed in to, as accounts.list
 	// reads it there.

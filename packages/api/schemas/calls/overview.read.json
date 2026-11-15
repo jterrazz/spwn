@@ -1183,6 +1183,8 @@
             "engine.start-failed",
             "grant.cannot-deliver",
             "grant.machine-stopped",
+            "grant.many-passwords",
+            "grant.no-password",
             "grant.no-presence",
             "grant.not-agent-grantable",
             "grant.not-granted",

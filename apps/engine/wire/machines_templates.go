@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -140,11 +140,12 @@ func (t machineTemplates) Drift(ctx context.Context, name, version string) ([]st
 }
 
 // value: a workspace's first start grants a program from this Mac's one
-// password for it, through grants.add: Touch ID is asked as for any grant.
+// password for it, through grants.add: Touch ID is asked as for any grant,
+// and every refusal is coded.
 func (m machine) grantProgram(ctx context.Context, program, vm string) error {
 	r := m.far.router
 	if r == nil {
-		return errors.New("this Mac's engine does not answer")
+		return accounts.Refusal(fail.Unreachable, accounts.GrantCannotDeliver, vm)
 	}
 	read, err := call.Read(ctx, r, coremachine.Ref{}, vaultcalls.VaultList, vaultcalls.VaultListIn{}, nil)
 	if err != nil {
@@ -158,10 +159,10 @@ func (m machine) grantProgram(ctx context.Context, program, vm string) error {
 	}
 	switch len(entries) {
 	case 0:
-		return errors.New("no password for " + program + " in this Mac's vault")
+		return accounts.Refusal(fail.Refused, accounts.GrantNoPassword, program)
 	case 1:
 	default:
-		return errors.New(strconv.Itoa(len(entries)) + " passwords for " + program + " in this Mac's vault: grant one from the window")
+		return accounts.Refusal(fail.Refused, accounts.GrantManyPasswords, program)
 	}
 	_, err = call.Invoke(ctx, r, coremachine.Ref{}, grantscalls.GrantAdd, grantscalls.GrantAddIn{Entry: entries[0].ID, ToKind: accounts.ToMachine, To: vm}, nil)
 	return err

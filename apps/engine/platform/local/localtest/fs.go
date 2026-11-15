@@ -29,6 +29,14 @@ func (f *FS) WriteFile(p string, data []byte, perm fs.FileMode) error {
 	return nil
 }
 
+func (f *FS) Append(p string, data []byte, perm fs.FileMode) error {
+	if file, ok := f.Files[key(p)]; ok {
+		file.Data = append(file.Data, data...)
+		return nil
+	}
+	return f.WriteFile(p, data, perm)
+}
+
 func (f *FS) Replace(p string, data []byte, perm fs.FileMode) error {
 	if file, ok := f.Files[key(p)]; ok {
 		perm = file.Mode.Perm()

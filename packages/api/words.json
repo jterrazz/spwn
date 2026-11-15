@@ -574,6 +574,16 @@
       "Detail": "grant",
       "Tone": "plain"
     },
+    "grant.many-passwords": {
+      "Word": "many passwords",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
+    "grant.no-password": {
+      "Word": "no password",
+      "Detail": "grant",
+      "Tone": "plain"
+    },
     "grant.no-presence": {
       "Word": "no presence",
       "Detail": "grant",

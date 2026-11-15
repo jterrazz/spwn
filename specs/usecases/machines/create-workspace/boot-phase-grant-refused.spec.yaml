@@ -19,7 +19,7 @@ runs:
       exit: 0
       stdout: |
           ●	Boot phase	studio-linux
-          ◐	npm	not granted: grant.presence-refused: pw-2
+          ◐	npm	not granted: this Mac did not confirm you are there: nothing was granted
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
     - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].accounts.passwords[] | [.ID, [.Grants[]? | .To]]]'' world.json'
       exit: 0

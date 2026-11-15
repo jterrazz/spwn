@@ -81,6 +81,16 @@ func Translate(err error, path string) *fail.Error {
 	return failed(message, hint, err)
 }
 
+func Refusal(code fail.Code, subject string) string {
+	// value: the words of a refusal a result carries by its code and
+	// subject, as Translate words one raised; the code itself where this
+	// binary words it not.
+	if worded := Translate(fail.New("", code, subject, nil), ""); worded.Message != "" {
+		return worded.Message
+	}
+	return string(code)
+}
+
 func AdminApply(setting, mac string, thisMac bool) string {
 	// value: the command that applies an admin setting on that Mac's own
 	// terminal, in the words' table.
