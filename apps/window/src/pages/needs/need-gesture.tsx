@@ -1,14 +1,22 @@
-import type { CallName, MachinesMacView, OverviewNeed, Target } from '@jterrazz/station-api';
+import type {
+    AccountsProgram,
+    CallName,
+    MachinesMacView,
+    OverviewNeed,
+    Target,
+} from '@jterrazz/station-api';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { CopyButton } from '../../design/copy-button';
-import { Row, Value } from '../../design/index';
+import { Button, Row, Value } from '../../design/index';
 import type { RowProps } from '../../design/row';
 import type { In, ReadName } from '../../engine/client';
 import type { ConfirmKind } from '../../engine/confirms';
 import { wordOf } from '../../engine/engine-words';
 import {
     deleteInputOf,
+    loginProgramOf,
     machineKindOf,
     moveInputOf,
     removeInputOf,
@@ -21,7 +29,9 @@ import { needState } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import { sentence } from '../../model/format';
 import { findMachine, targetOf } from '../../model/machines';
+import type { Found } from '../../model/machines';
 import { GestureButton, GestureRow } from '../kit/gestures';
+import { LoginSheet } from '../sign-ins/login-sheet';
 import { gestureOf } from './needs';
 
 import styles from './needs.module.css';
@@ -149,7 +159,46 @@ function Call(props: Props) {
     if (start) {
         return <Fix {...props} call="engine.start" input={start} rereads={START_REREADS} />;
     }
+    const program = loginProgramOf(need);
+    const found = findMachine(props.macs, need.On);
+    if (program && found) {
+        return <Login {...props} found={found} program={program} />;
+    }
     return <Said {...props} />;
+}
+
+function Login(props: Props & { found: Found; program: AccountsProgram }) {
+    const { found, need, primary, program } = props;
+    const [asked, setAsked] = useState(false);
+    const verb = verbOf(need);
+    return (
+        <>
+            <Row
+                {...rowOf(
+                    props,
+                    <Button
+                        name={`${verb} ${program}`}
+                        onClick={() => {
+                            setAsked(true);
+                        }}
+                        variant={primary ? 'primary' : 'plain'}
+                    >
+                        {verb}
+                    </Button>,
+                )}
+            />
+            {asked ? (
+                <LoginSheet
+                    found={found}
+                    onClose={() => {
+                        setAsked(false);
+                    }}
+                    program={program}
+                    title={`${verb} ${program}`}
+                />
+            ) : null}
+        </>
+    );
 }
 
 function Command({ text }: { text: string }) {

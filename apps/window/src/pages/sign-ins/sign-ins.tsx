@@ -261,12 +261,12 @@ export function SignInsTab({ found, go }: { found: Found; go: Go }) {
             </HeldOutcomes>
             {asked === undefined ? null : (
                 <LoginSheet
-                    action={asked.action}
                     found={found}
                     onClose={() => {
                         setAsked(undefined);
                     }}
                     program={asked.program}
+                    title={`${wordOf('AccountsProgramAction', asked.action).Word} ${asked.program}`}
                 />
             )}
         </Page>

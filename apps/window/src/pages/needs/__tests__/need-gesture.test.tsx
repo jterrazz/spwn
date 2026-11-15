@@ -1,11 +1,15 @@
 import { button, component, content, dialog, field, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { NO_OPENER } from '../../../engine/opener';
 import type { Recording } from '../../../engine/replay';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 
 const recordingFor = await recordingsOf('engine-stopped', 'machinefile-differs', 'two-macs');
+
+// value: each frame of a watch held this long, so a step is on screen before the next one replaces it.
+const PACE = { gestureFrame: 600 };
 
 const needs = region('Needs you');
 
@@ -204,6 +208,23 @@ describe('NeedLine', () => {
 
         // Then - and only this button was drawn primary
         expect(bright).toStrictEqual(['Restart infra']);
+        expect(result.errors.text).toBe('');
+    });
+
+    test("a broken sign-in's need opens the same sign-in sheet the Sign-ins tab opens, aimed at the need's machine", async () => {
+        // Given - the Inbox over two-macs, where This Mac's npm sign-in is broken
+        const result = await component.render(
+            pageOver(recordingFor('two-macs'), { page: 'inbox' }, NO_OPENER, PACE),
+            async (visitor) => {
+                // When - its Fix is clicked
+                await visitor.click(within(needs, button('Fix npm')));
+
+                // Then - the engine's step for npm on This Mac is on a sheet, which goes once the engine signs in
+                const sheet = dialog('Sign in to npm on jterrazz-macbook-pro');
+                await visitor.see(sheet);
+                await visitor.gone(sheet);
+            },
+        );
         expect(result.errors.text).toBe('');
     });
 

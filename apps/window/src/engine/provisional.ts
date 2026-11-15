@@ -1,4 +1,5 @@
 import type {
+    AccountsProgram,
     AppsUpdateInput,
     BackgroundRemoveInput,
     DiskMoveInput,
@@ -20,6 +21,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import type { EngineError } from './engine-error';
+import { codesOf } from './engine-words';
 
 // outside: machines.list sends a Mac's reach as two booleans and no state code; this file alone makes it a code, until
 // outside: the wire carries one.
@@ -74,6 +76,12 @@ export function updateInputOf(need: OverviewNeed): AppsUpdateInput | undefined {
     }
     const name = need.Args?.Names ?? '';
     return name === '' ? undefined : { Names: [name] };
+}
+
+export function loginProgramOf(need: OverviewNeed): AccountsProgram | undefined {
+    return need.Call === 'accounts.login'
+        ? codesOf('AccountsProgram').find((program) => program === need.Args?.Program)
+        : undefined;
 }
 
 export function moveInputOf(need: OverviewNeed): DiskMoveInput | undefined {
