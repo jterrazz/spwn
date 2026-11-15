@@ -104,7 +104,7 @@ func Idle(mac string, vm machines.VM, now time.Time) (finding.Finding, bool) {
 	hours := int(idle / time.Hour)
 	text := vm.Name + " has been idle for " + strconv.Itoa(hours) + " h and holds " + strconv.FormatInt(vm.Resources.MemoryBytes>>30, 10) + " GB"
 	return finding.Finding{Machine: machine.Ref{Name: vm.Name, On: mac}, Section: section.Overview, Severity: finding.NeedsALook, Subject: vm.Name, Text: text,
-		Fix: finding.Fix{Call: "machines.delete", Args: map[string]string{"VM": vm.Name}}}, true
+		Fix: finding.Fix{Call: "machines.delete", Args: map[string]string{"VM": vm.Name}, On: mac, Confirm: vm.Name}}, true
 }
 
 const (

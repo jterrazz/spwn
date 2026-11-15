@@ -182,7 +182,7 @@ func needsYou(r Reading) page.Section {
 	}
 	var rows []page.Item
 	counts := map[page.Mark]int{}
-	for _, body := range pagehome.Body(*r.Home, true) {
+	for _, body := range pagehome.Body(*r.Home, []string{r.Home.Head.Name}, true) {
 		if body.ID != SectionNeeds {
 			continue
 		}
@@ -348,10 +348,10 @@ func updateAll(needs page.Section, home *overview.Summary) []page.Action {
 		}
 		run := &page.Run{Call: CallUpdate}
 		switch {
-		case n.Args["manager"] != "":
-			run.In = map[string]string{"Managers": `["` + n.Args["manager"] + `"]`}
-		case n.Args["name"] != "":
-			run.In = map[string]string{"Names": `["` + n.Args["name"] + `"]`}
+		case n.Args["Managers"] != "":
+			run.In = map[string]string{"Managers": `["` + n.Args["Managers"] + `"]`}
+		case n.Args["Names"] != "":
+			run.In = map[string]string{"Names": `["` + n.Args["Names"] + `"]`}
 		}
 		out = append(out, page.Action{ID: ActionUpdateAll + ":" + id, Label: "Update all", On: page.OnRow, Rows: []string{id}, Priority: 5, Mutates: true, Run: run})
 	}

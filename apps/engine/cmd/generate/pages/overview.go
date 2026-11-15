@@ -36,9 +36,9 @@ func overviewOf(needs bool) overview.Summary {
 		s.Needs = []overview.Need{
 			{Section: "accounts", Subject: "npm", Broken: true, Text: "npm sign-in expired", Command: "npm login"},
 			{Section: "background", Subject: "com.jterrazz.brain.x-snapshot", Broken: true, Text: "1 background task failing", Command: "station background"},
-			{Section: "apps", Subject: "brew", Text: "122 brew updates waiting", Call: "apps.update", Args: map[string]string{"manager": "brew"}},
+			{Section: "apps", Subject: "brew", Text: "122 brew updates waiting", Call: "apps.update", Args: map[string]string{"Managers": "brew"}},
 			{Section: "settings", Subject: "firewall", Text: "Firewall off", Path: "System Settings > Network > Firewall"},
-			{Section: "disk", Subject: misplaced, Text: misplaced + " is misplaced", Call: "disk.move", Args: map[string]string{"path": misplaced}},
+			{Section: "disk", Subject: misplaced, Text: misplaced + " is misplaced", Call: "disk.move", Args: map[string]string{"Folder": misplaced}},
 		}
 	}
 	return s
@@ -51,9 +51,9 @@ func overviewPages() []Fixture {
 		loading.Lines[i] = overview.Line{Section: loading.Lines[i].Section, Pending: true}
 	}
 	return states("overview",
-		pagehome.Summary(loading, thisMacContext(), false),
-		pagehome.Summary(overviewOf(false), thisMacContext(), false),
+		pagehome.Summary(loading, thisMacContext(), []string{loading.Head.Name}, false),
+		pagehome.Summary(overviewOf(false), thisMacContext(), []string{overviewOf(false).Head.Name}, false),
 		failure("overview", "overview", "the engine is stopped on jterrazz-macbook-pro", "station engine start"),
-		pagehome.Summary(overviewOf(true), thisMacContext(), false),
+		pagehome.Summary(overviewOf(true), thisMacContext(), []string{overviewOf(true).Head.Name}, false),
 	)
 }

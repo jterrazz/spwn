@@ -301,7 +301,7 @@ func pluralVerb(n int, one, many string) string {
 }
 
 func lineOf(s overview.Summary, id string) page.Value {
-	for _, body := range pagehome.Body(s, true) {
+	for _, body := range pagehome.Body(s, nil, true) {
 		for _, it := range body.Items {
 			if body.ID == "sections" && it.Row != nil && it.Row.ID == id && len(it.Row.Cells) > 0 {
 				return it.Row.Cells[0]

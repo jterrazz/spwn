@@ -47,8 +47,8 @@ func VMPage(o VMOverview, s *overview.Summary, thisMac page.Context, all bool) p
 	state := page.Ready
 	var hints []page.Hint
 	if s != nil {
-		sections = append(sections, pagehome.Body(*s, all)...)
-		hints = pagehome.Hints(*s, all)
+		sections = append(sections, pagehome.Body(*s, []string{thisMac.Machine}, all)...)
+		hints = pagehome.Hints(*s, []string{thisMac.Machine}, all)
 		if s.Pending {
 			state = page.Loading
 		}

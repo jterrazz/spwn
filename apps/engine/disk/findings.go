@@ -15,7 +15,7 @@ func Findings(r Reading, m machine.Ref) []finding.Finding {
 		}
 		path := row.Paths[0]
 		out = append(out, finding.Finding{Machine: m, Section: section.Disk, Severity: finding.NeedsALook, Subject: path,
-			Text: path + " is misplaced", Fix: finding.Fix{Call: "disk.move", Args: map[string]string{"path": path}}})
+			Text: path + " is misplaced", Fix: finding.Fix{Call: "disk.move", Args: map[string]string{"Folder": path}}})
 	}
 	return out
 }

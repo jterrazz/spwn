@@ -91,8 +91,8 @@ func TestHomeDrawsAMacsServersThenItsWorkspaces(t *testing.T) {
 // its manager's updates, never the other line's too.
 func TestEachUpdateLineUpdatesItsOwnManager(t *testing.T) {
 	needs := []overview.Need{
-		{Section: "apps", Subject: "tools", Text: "1 tools update waiting", Call: CallUpdate, Args: map[string]string{"manager": "tools"}},
-		{Section: "apps", Subject: "pkgs", Text: "2 pkgs updates waiting", Call: CallUpdate, Args: map[string]string{"manager": "pkgs"}},
+		{Section: "apps", Subject: "tools", Text: "1 tools update waiting", Call: CallUpdate, Args: map[string]string{"Managers": "tools"}},
+		{Section: "apps", Subject: "pkgs", Text: "2 pkgs updates waiting", Call: CallUpdate, Args: map[string]string{"Managers": "pkgs"}},
 	}
 	p := Page(Reading{Home: &overview.Summary{Needs: needs}}, page.Context{})
 	got := map[string]string{}

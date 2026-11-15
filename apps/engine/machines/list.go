@@ -209,7 +209,7 @@ func serverFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 		f.Severity, f.Text, f.Fix = finding.Broken, vm.Name+" "+PoweredOffInside, finding.Fix{Command: "station machines start " + vm.Name + on}
 	case vm.State == Running && vm.CheckStatus.State == CheckFailing:
 		f.Severity, f.Text = finding.Broken, vm.Name+" check failing since "+vm.CheckStatus.Since.Local().Format("15:04")
-		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"name": vm.Name}}
+		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name}
 	default:
 		return finding.Finding{}, false
 	}

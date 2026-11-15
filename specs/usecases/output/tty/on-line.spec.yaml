@@ -14,7 +14,7 @@ runs:
           mac-mini · Mac · 1 thing needs you · Engine running
 
           Needs you
-            ◐ ~/go is misplaced  station disk move ~/go
+            ◐ ~/go is misplaced  station disk move ~/go --on mac-mini
           Activity    memory 26 of 64 GB · 1.6 TB free
     - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" machines --on mac-mini'
       stdin: |

@@ -1,6 +1,7 @@
 package home
 
 import (
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -17,16 +18,17 @@ import (
 // value: the Needs-you lines an Overview shows folded; --all shows every one.
 const folded = 5
 
-func Summary(s overview.Summary, thisMac page.Context, all bool) page.Page {
+func Summary(s overview.Summary, thisMac page.Context, self []string, all bool) page.Page {
 	// invariant: SPEC §5.1: the first line sums the machine up, Needs you
 	// comes first, then one line per section in the one order, then the VMs
-	// of a Mac, then one or two next steps.
-	sections := append([]page.Section{{ID: "overview", Title: title(s, thisMac), Caption: caption(s, thisMac), Joined: true, Role: page.Banner, Uncounted: true}}, Body(s, all)...)
+	// of a Mac, then one or two next steps; self holds the names the
+	// machine reading goes by.
+	sections := append([]page.Section{{ID: "overview", Title: title(s, thisMac), Caption: caption(s, thisMac), Joined: true, Role: page.Banner, Uncounted: true}}, Body(s, self, all)...)
 	state := page.Ready
 	if s.Pending {
 		state = page.Loading
 	}
-	p := page.Page{ID: "overview", Command: "overview", Context: thisMac, State: state, Sections: sections, Hints: Hints(s, all)}
+	p := page.Page{ID: "overview", Command: "overview", Context: thisMac, State: state, Sections: sections, Hints: Hints(s, self, all)}
 	if len(s.Needs) > 0 {
 		p.Actions = []page.Action{{Key: KeyFix, Label: "fix", On: page.OnRow, Rows: needsRows(sections), Priority: 1, Mutates: true}}
 	}
@@ -51,12 +53,12 @@ func needsRows(sections []page.Section) []string {
 	return rows
 }
 
-func Body(s overview.Summary, all bool) []page.Section {
+func Body(s overview.Summary, self []string, all bool) []page.Section {
 	// value: an Overview below its first line: Needs you, then one line per
 	// section, then the VMs of a Mac; a server says what station leaves to you.
 	var sections []page.Section
 	if len(s.Needs) > 0 {
-		sections = append(sections, needsYou(s.Needs, all))
+		sections = append(sections, needsYou(s.Needs, self, all))
 	}
 	lines := make([]page.Item, 0, len(s.Lines)+2)
 	for _, l := range s.Lines {
@@ -130,7 +132,7 @@ func caption(s overview.Summary, thisMachine page.Context) []page.Value {
 	return parts
 }
 
-func needsYou(needs []overview.Need, all bool) page.Section {
+func needsYou(needs []overview.Need, self []string, all bool) page.Section {
 	items := make([]page.Item, 0, len(needs))
 	for i, n := range needs {
 		if !all && i == folded {
@@ -141,17 +143,17 @@ func needsYou(needs []overview.Need, all bool) page.Section {
 		if n.Broken {
 			mark, reason = page.Broken, page.Failing
 		}
-		row := page.Row{ID: strconv.Itoa(i) + "-" + n.Subject, Label: n.Text, Mark: mark, Reason: reason, Cells: []page.Value{fixValue(n)}}
+		row := page.Row{ID: strconv.Itoa(i) + "-" + n.Subject, Label: n.Text, Mark: mark, Reason: reason, Cells: []page.Value{fixValue(n, self)}}
 		items = append(items, page.Item{Row: &row})
 	}
 	columns := []page.Column{{Key: "finding", Kind: page.KindText, Keep: 100}, {Key: "fix", Kind: page.KindCommand, Keep: 50}}
 	return page.Section{ID: "needs-you", Title: "Needs you", Uncounted: true, Columns: columns, Items: items}
 }
 
-func fixValue(n overview.Need) page.Value {
+func fixValue(n overview.Need, self []string) page.Value {
 	switch {
 	case n.Call != "":
-		return page.Text(fixWords(n.Call, n.Args))
+		return page.Text(fixWords(n, self))
 	case n.Command != "":
 		return page.Text(n.Command)
 	case n.Path != "":
@@ -160,28 +162,38 @@ func fixValue(n overview.Need) page.Value {
 	return page.None()
 }
 
-func fixWords(name string, args map[string]string) string {
+func fixWords(n overview.Need, self []string) string {
 	// invariant: a fix's call printed as the command that runs it: its noun
-	// and verb, the name or path it acts on, then each other input a flag.
-	noun, verb, _ := strings.Cut(name, ".")
+	// and verb, the input it acts on as its word, each other input a flag
+	// named by its field in lower case (a list's by its singular), the
+	// name its typed question takes, and the machine it runs at when that
+	// is not the one reading.
+	subjects := []string{"Name", "Names", "VM", "Label", "Folder"}
+	noun, verb, _ := strings.Cut(n.Call, ".")
 	words := []string{"station", noun}
 	if verb != "list" && verb != "read" && verb != "run" {
 		words = append(words, verb)
 	}
-	for _, key := range []string{"name", "path"} {
-		if v, ok := args[key]; ok {
+	for _, key := range subjects {
+		if v, ok := n.Args[key]; ok {
 			words = append(words, v)
 		}
 	}
-	keys := make([]string, 0, len(args))
-	for k := range args {
-		if k != "name" && k != "path" {
+	keys := make([]string, 0, len(n.Args))
+	for k := range n.Args {
+		if !slices.Contains(subjects, k) {
 			keys = append(keys, k)
 		}
 	}
 	sort.Strings(keys)
 	for _, k := range keys {
-		words = append(words, "--"+k, args[k])
+		words = append(words, "--"+strings.TrimSuffix(strings.ToLower(k), "s"), n.Args[k])
+	}
+	if n.Confirm != "" {
+		words = append(words, "--confirm="+n.Confirm)
+	}
+	if len(self) > 0 && self[0] != "" && n.On != "" && !slices.Contains(self, n.On) {
+		words = append(words, "--on", page.MacName(n.On, self[0]))
 	}
 	return strings.Join(words, " ")
 }
@@ -261,11 +273,11 @@ func Up(d time.Duration) page.Value {
 	return page.Text("up " + strconv.Itoa(max(int(d/time.Minute), 1)) + " min")
 }
 
-func Hints(s overview.Summary, all bool) []page.Hint {
+func Hints(s overview.Summary, self []string, all bool) []page.Hint {
 	var out []page.Hint
 	for _, n := range s.Needs {
 		if n.Call != "" {
-			out = append(out, page.Hint{Command: fixWords(n.Call, n.Args)})
+			out = append(out, page.Hint{Command: fixWords(n, self)})
 			break
 		}
 	}

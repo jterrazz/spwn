@@ -18,7 +18,7 @@ func Findings(rows []Row, m machine.Ref) []finding.Finding {
 		}
 		if r.State == StateChangedSince {
 			out = append(out, finding.Finding{Machine: m, Section: section.Settings, Severity: finding.NeedsALook, Subject: r.Name,
-				Text: r.Name + " changed since", Fix: finding.Fix{Call: "settings.diff", Args: map[string]string{"name": r.Name}}})
+				Text: r.Name + " changed since", Fix: finding.Fix{Call: "settings.diff", Args: map[string]string{"Name": r.Name}}})
 		}
 	}
 	return out

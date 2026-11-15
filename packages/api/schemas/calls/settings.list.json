@@ -237,6 +237,12 @@
         "Command": {
           "type": "string"
         },
+        "Confirm": {
+          "type": "string"
+        },
+        "On": {
+          "type": "string"
+        },
         "Path": {
           "type": "string"
         }
@@ -245,6 +251,8 @@
         "Args",
         "Call",
         "Command",
+        "Confirm",
+        "On",
         "Path"
       ],
       "type": "object"

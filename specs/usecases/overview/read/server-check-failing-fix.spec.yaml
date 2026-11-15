@@ -6,5 +6,5 @@ runs:
     - command: 'overview --on mac-mini | /usr/bin/grep infra'
       exit: 0
       stdout: |
-          ✗	infra check failing since 10:18	station machines restart infra
+          ✗	infra check failing since 10:18	station machines restart infra --confirm=infra --on mac-mini
           	VMs	● infra running · ● linux-3 running · ● review-bot running

@@ -176,6 +176,12 @@
         "Command": {
           "type": "string"
         },
+        "Confirm": {
+          "type": "string"
+        },
+        "On": {
+          "type": "string"
+        },
         "Path": {
           "type": "string"
         }

@@ -20,7 +20,7 @@ func Findings(reports []Report, m machine.Ref) []finding.Finding {
 		switch StateOf(r) {
 		case Failed:
 			out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: finding.Broken, Subject: r.App.Name,
-				Text: r.App.Name + " failed", Fix: finding.Fix{Call: "apps.update", Args: map[string]string{"name": r.App.Name}}})
+				Text: r.App.Name + " failed", Fix: finding.Fix{Call: "apps.update", Args: map[string]string{"Names": r.App.Name}}})
 		case UpdateAvailable:
 			manager := cmp.Or(r.Manager, string(r.Method))
 			if waiting[manager] == 0 {
@@ -35,9 +35,8 @@ func Findings(reports []Report, m machine.Ref) []finding.Finding {
 		if waiting[manager] == 1 {
 			text = "1 " + manager + " update waiting"
 		}
-		args := map[string]string{"manager": manager}
 		out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: finding.NeedsALook, Subject: manager,
-			Text: text, Fix: finding.Fix{Call: "apps.update", Args: args}})
+			Text: text, Fix: finding.Fix{Call: "apps.update", Args: map[string]string{"Managers": manager}}})
 	}
 	return out
 }

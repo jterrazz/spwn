@@ -1,6 +1,7 @@
 package finding
 
 import (
+	"cmp"
 	"slices"
 	"time"
 
@@ -31,8 +32,17 @@ const (
 
 type Fix struct {
 	// invariant: a fix that needs admin carries a Path or a Command, never a Call.
-	Call    string
-	Args    map[string]string
+	Call string
+	// invariant: each key is a field of Call's input, as its schema in
+	// packages/api names it; a list field holds the one value given
+	// (rule fix-args-are-inputs).
+	Args map[string]string
+	// value: the machine Call runs at when it is not the finding's own: a
+	// VM's restart or delete goes to its Mac.
+	On string
+	// value: the name Call's question takes typed, when it asks one for
+	// the machine it acts on; the printed command answers it.
+	Confirm string
 	Command string
 	Path    string
 }
@@ -47,6 +57,12 @@ type Finding struct {
 	Urgency  Urgency
 	// value: when an expiring finding expires.
 	Ends time.Time
+}
+
+func (f Finding) Target() string {
+	// invariant: the machine a fix's call runs at: its own On, else the
+	// machine the finding is about.
+	return cmp.Or(f.Fix.On, f.Machine.Name)
 }
 
 func Rank(fs []Finding) []Finding {
