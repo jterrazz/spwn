@@ -211,6 +211,7 @@ The rules are Go tests under [`specs/architecture/`](../../specs/architecture/);
 | `vm-record-locked`                                                       | `record_test.go`                                       | the engine reaches a VM's record only through its locked accessors, and sets its name once                                                                                                      |
 | the calls' list                                                          | `api_test.go`                                          | `calls.json` is what the Registry and the engine's own calls hold                                                                                                                               |
 | `answers-match-schemas`                                                  | `answers_test.go`                                      | every read the Registry serves without a confirmation answers, over every world, what its schema in `packages/api` says                                                                         |
+| `fix-args-are-inputs`                                                    | `fixes_test.go`                                        | a finding's fix names a call of `calls.json`, its `Args` keys fields of that call's input schema, and its `Confirm` set where the call's question is typed                                      |
 
 ## The error model
 

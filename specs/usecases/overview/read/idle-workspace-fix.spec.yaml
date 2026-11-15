@@ -1,0 +1,18 @@
+description: 'an idle workspace''s delete prints with its name typed, and its need names the Mac it runs at'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'world advance 5h'
+      exit: 0
+    - command: 'overview --all | /usr/bin/grep agent-7f'
+      exit: 0
+      stdout: |
+          ◐	agent-7f has been idle for 5 h and holds 8 GB	station machines delete agent-7f --confirm=agent-7f
+          	VMs	● agent-7f running · ○ api stopped · ● linux-1 running · ○ linux-2 stopped
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Needs[] | select(.Subject == "agent-7f") | [.Call, .Args, .On, .Confirm]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          [["machines.delete",{"VM":"agent-7f"},"macbook-pro","agent-7f"]]
