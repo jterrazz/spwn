@@ -39,44 +39,44 @@ machinefile: station.machinefile/v1
 name: studio-linux
 description: The owner's Linux workspace
 machine: # WHAT it is
-  kind: workspace # computer | workspace | server
-  system: { os: ubuntu, version: "24.04", arch: arm64 }
+    kind: workspace # computer | workspace | server
+    system: { os: ubuntu, version: '24.04', arch: arm64 }
 
 vm: # HOW it runs (a VM's alone)
-  lifetime: persistent # persistent | ephemeral
-  resources: { cpus: 8, memory: 32G, disk: 80G }
-  network: nat # nat | bridged
-  image: { from: "ghcr.io/cirruslabs/ubuntu:24.04", bake: [node, bun] }
-  mounts:
-    - { computer: ~/Developer/studio-os, guest: ~/Developer/studio-os }
-    - { computer: ~/Documents/refs, guest: ~/refs, read-only: true }
+    lifetime: persistent # persistent | ephemeral
+    resources: { cpus: 8, memory: 32G, disk: 80G }
+    network: nat # nat | bridged
+    image: { from: 'ghcr.io/cirruslabs/ubuntu:24.04', bake: [node, bun] }
+    mounts:
+        - { computer: ~/Developer/studio-os, guest: ~/Developer/studio-os }
+        - { computer: ~/Documents/refs, guest: ~/refs, read-only: true }
 
 extends: [station-linux, jterrazz-base] # WHAT it inherits
 prefer: [mise] # method keys tried first (rare)
 
 apps: # WHAT it carries
-  - docker
-  - { name: node, version: "24" }
-  - { name: ghostty, optional: true }
-  - { name: jq, manager: apt }
+    - docker
+    - { name: node, version: '24' }
+    - { name: ghostty, optional: true }
+    - { name: jq, manager: apt }
 settings:
-  git-identity: { from: computer }
-  autologin: { password: "vault:agent-password" }
-  hushlogin: {}
+    git-identity: { from: computer }
+    autologin: { password: 'vault:agent-password' }
+    hushlogin: {}
 
 accounts: # WHAT accounts it is shared, and for how long
-  share: [{ account: claude, for: 7d }]
-  keep: [github]
+    share: [{ account: claude, for: 7d }]
+    keep: [github]
 ports: # WHAT it may open, and to whom
-  open: 3000-9999
-  to: private # local | private | public
-  except: [22]
+    open: 3000-9999
+    to: private # local | private | public
+    except: [22]
 
 run: # the owner's own lines, per phase
-  boot: |
-    git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
-  upgrade: |
-    cd ~/Developer/studio-os && git pull --ff-only
+    boot: |
+        git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
+    upgrade: |
+        cd ~/Developer/studio-os && git pull --ff-only
 ```
 
 | Key              | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -210,9 +210,9 @@ lock: station.lock/v1
 machinefile: jterrazz-macbook-pro
 source: { name: studio, commit: 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d }
 apps:
-  - name: gh
-    method: brew
-    version: 2.98.0
+    - name: gh
+      method: brew
+      version: 2.98.0
 ```
 
 `apply` and `upgrade` write it once their run ends, interrupted or not, and only when it moved. It then names, for every app the Machinefile lists that reads there by a method, that method and the version it reads, an adopted app by the method that holds it; an app the run did not bring there (it failed, was interrupted, was not run, or does not read) keeps what the lock held of it, so the next `apply` installs it as locked; a copy no method holds is yours and leaves the lock, as does an app the Machinefile lists no longer. Settings are not locked. An app the lock holds is installed by the lock's method, at its version where that method pins one (mise's runtimes, an apt package as `package=<version>`, a release as its tag; a brew formula takes its newest), and the plan says so (`○ python  mise  locked 3.12.7`), `explain apps.<app>` naming the lock as the layer of its method; where the method cannot pin (brew), the plan says only what the lock records (`○ ripgrep  brew  recorded 14.0.0`), and `explain` has no `locked` line, since the install takes the newest. A lock of another kind of machine, whose method this one has not, gives way to this machine's choice. The lock is what `apply` installs on every path: fresh, locked, upgraded, interrupted, adopted, and from another machine's lock ([ADR-041](../decisions/041-the-lock-is-what-apply-installs.md)).
