@@ -1,8 +1,5 @@
 - main:
-  - heading "No verdict from the engine." [level=1]
-  - paragraph:
-    - img "Not given yet"
-    - text: A machine file is the recipe a machine is made from
+  - heading "No machine follows a file." [level=1]
   - paragraph: Your machines
   - group "Your machines":
     - button "jterrazz-macbook-pro" [pressed]

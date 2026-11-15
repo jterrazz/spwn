@@ -27,7 +27,7 @@
   - region "Upgrades":
     - heading "Upgrades" [level=2]
     - button "Upgrade now"
-    - text: Every night at 03:00, as macbook-pro allows.
+    - text: Every night at 03:00, as macbook-pro allows. macbook-pro File
   - group "Which packages":
     - button "Apps5"
     - button "Settings1" [pressed]

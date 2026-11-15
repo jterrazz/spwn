@@ -1,8 +1,5 @@
 - main:
-  - heading "No verdict from the engine." [level=1]
-  - paragraph:
-    - img "Not given yet"
-    - text: A machine file is the recipe a machine is made from
+  - heading "2 files differ from their machines." [level=1]
   - paragraph: Your machines
   - group "Your machines":
     - button "linux-1"
