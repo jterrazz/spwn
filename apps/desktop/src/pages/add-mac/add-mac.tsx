@@ -1,10 +1,10 @@
 import type { CallName, MachinesAdded } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Button, Dialog, FormField, Screen } from '../../design/index';
-import { useGesture } from '../../engine/use-gesture';
-import { machineRoute } from '../../shell/route';
-import type { Route } from '../../shell/route';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route } from '../../presentation/navigation/route';
+import { Button, Dialog, FormField, Screen } from '../../presentation/ui/index';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { addInputOf, EMPTY_MAC } from './model';
 import type { MacDraft } from './model';

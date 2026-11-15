@@ -1,4 +1,4 @@
-import { useWatch } from '../../engine/react';
+import { useWatch } from '../../presentation/dependencies/dependencies';
 
 // invariant: a password is named by its engine label, the id its route carries standing in until vault.list answers.
 export function PasswordName({ id }: { id: string }) {

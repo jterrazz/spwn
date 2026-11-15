@@ -1,4 +1,4 @@
-import { EngineProvider } from '../../engine/react';
+import { EngineProvider } from '../../presentation/dependencies/dependencies';
 import { OpenButton } from '../kit/opens';
 import type { OpenButtonProps } from '../kit/opens';
 import { useSample } from './sample';

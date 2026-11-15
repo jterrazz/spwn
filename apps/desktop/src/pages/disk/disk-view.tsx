@@ -1,14 +1,14 @@
 import type { DiskReading, DiskRow, Target } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import { AppIcon, Button, Panel, ShareBar, TypeTag } from '../../design/index';
-import type { SharePart } from '../../design/index';
 import { bytes, sentence } from '../../domain/format';
 import { SEPARATOR } from '../../domain/separator';
-import { detailOf, wordOf } from '../../engine/engine-words';
-import { diskGestureOf, freesWhole, holdsRebuildable } from '../../engine/provisional';
-import { useReread } from '../../engine/react';
-import { DISK_PENDING_WORD } from '../../engine/words';
+import { useReread } from '../../presentation/dependencies/dependencies';
+import { AppIcon, Button, Panel, ShareBar, TypeTag } from '../../presentation/ui/index';
+import type { SharePart } from '../../presentation/ui/index';
+import { detailOf, wordOf } from '../../presentation/words/engine-words';
+import { diskGestureOf, freesWhole, holdsRebuildable } from '../../presentation/words/provisional';
+import { DISK_PENDING_WORD } from '../../presentation/words/words';
 import { byApp, groupsOf, partsOf, rebuildableOf, sizeOf } from './disk';
 import type { AppRow, Group, Part } from './disk';
 import { DiskLine, EraseLink, FreeAllButton } from './disk-gestures';

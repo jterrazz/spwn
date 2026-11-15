@@ -1,12 +1,12 @@
 import type { CallName, DiskOutcome, DiskRow, Target } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import type { ButtonVariant } from '../../design/button';
-import { Button, Row } from '../../design/index';
-import { diskGestureOf } from '../../engine/provisional';
-import { useGesture } from '../../engine/use-gesture';
-import type { Gesture } from '../../engine/use-gesture';
-import { DISK_GESTURE_LABELS, DISK_GESTURE_VERBS } from '../../engine/words';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import type { Gesture } from '../../presentation/dependencies/use-gesture';
+import type { ButtonVariant } from '../../presentation/ui/button';
+import { Button, Row } from '../../presentation/ui/index';
+import { diskGestureOf } from '../../presentation/words/provisional';
+import { DISK_GESTURE_LABELS, DISK_GESTURE_VERBS } from '../../presentation/words/words';
 import { GestureButton, GestureOutcome, GestureRow, HoldsWhenDone } from '../kit/gestures';
 import { FreedFigure, heldOf, OutcomePill } from './outcomes';
 

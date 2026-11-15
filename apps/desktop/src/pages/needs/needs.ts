@@ -1,7 +1,7 @@
 import type { OverviewNeed } from '@jterrazz/station-api';
 
-import { machineRoute } from '../../shell/route';
-import type { Route, Tab } from '../../shell/route';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route, Tab } from '../../presentation/navigation/route';
 
 const TAB_OF_SECTION: Readonly<Record<OverviewNeed['Section'], Tab>> = {
     accounts: 'Sign-ins',

@@ -2,7 +2,6 @@ import { invoke } from '@tauri-apps/api/core';
 
 import type { Link } from '../application/ports/engine.port';
 import type { OpenerPort } from '../application/ports/opener.port';
-import type { Dependencies } from '../engine/react';
 import { documentPresence } from '../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../infrastructure/outbound/engine-link/client';
 import type { Transport } from '../infrastructure/outbound/engine-link/transport';
@@ -10,6 +9,7 @@ import { replayTransport } from '../infrastructure/outbound/engine-replay/replay
 import type { Pace, Recording } from '../infrastructure/outbound/engine-replay/replay';
 import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
 import { NO_OPENER, tauriOpener } from '../infrastructure/outbound/opener-tauri/tauri-opener';
+import type { Dependencies } from '../presentation/dependencies/dependencies';
 
 // invariant: a build-time constant, so a production build drops the recorded worlds' import below.
 const PROOF = import.meta.env.MODE !== 'production';

@@ -1,4 +1,4 @@
-import { Value } from '../../design/index';
+import { Value } from '../../presentation/ui/index';
 
 export type Span = { at: number; code: boolean; text: string };
 

@@ -4,9 +4,9 @@ import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../composition/__tests__/page-over';
 import { composeReplay } from '../../../composition/compose';
-import { Screen } from '../../../design/index';
-import { EngineProvider } from '../../../engine/react';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { EngineProvider } from '../../../presentation/dependencies/dependencies';
+import { Screen } from '../../../presentation/ui/index';
 import { GestureConfirm } from '../../kit/gestures';
 import { MacPortRow } from '../ports';
 

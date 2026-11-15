@@ -2,10 +2,10 @@ import { button, component, content, disabled } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
-import { Openable } from '../../../engine/openable';
-import { EngineProvider } from '../../../engine/react';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { tauriOpener } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
+import { EngineProvider } from '../../../presentation/dependencies/dependencies';
+import { Openable } from '../../../presentation/kit/openable';
 import { OpenButton, WITHHELD_OPENS } from '../opens';
 
 const recordingFor = await recordingsOf('two-macs');

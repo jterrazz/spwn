@@ -10,13 +10,14 @@ import type { ReactNode } from 'react';
 
 import type { In, ReadName } from '../../application/ports/engine.port';
 import type { ConfirmKind } from '../../application/use-cases/confirms';
-import { CopyButton } from '../../design/copy-button';
-import { Button, Row, Value } from '../../design/index';
-import type { RowProps } from '../../design/row';
 import { sentence } from '../../domain/format';
 import { findMachine, targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
-import { wordOf } from '../../engine/engine-words';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import { CopyButton } from '../../presentation/ui/copy-button';
+import { Button, Row, Value } from '../../presentation/ui/index';
+import type { RowProps } from '../../presentation/ui/row';
+import { wordOf } from '../../presentation/words/engine-words';
 import {
     deleteInputOf,
     loginProgramOf,
@@ -26,10 +27,9 @@ import {
     restartInputOf,
     startInputOf,
     updateInputOf,
-} from '../../engine/provisional';
-import type { NeedCall } from '../../engine/provisional';
-import { needState } from '../../engine/shown';
-import { useGesture } from '../../engine/use-gesture';
+} from '../../presentation/words/provisional';
+import type { NeedCall } from '../../presentation/words/provisional';
+import { needState } from '../../presentation/words/shown';
 import { GestureButton, GestureRow } from '../kit/gestures';
 import { LoginSheet } from '../sign-ins/login-sheet';
 import { gestureOf } from './needs';

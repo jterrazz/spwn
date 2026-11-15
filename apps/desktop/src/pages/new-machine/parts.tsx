@@ -1,6 +1,9 @@
 import type { MachinesCallsNewMachine, MachinesCallsNewOn } from '@jterrazz/station-api';
 import type { ReactElement } from 'react';
 
+import { bytes } from '../../domain/format';
+import { machineNamesOf, macsOf } from '../../domain/machines/machines';
+import { useWatch } from '../../presentation/dependencies/dependencies';
 import {
     capitalised,
     Field,
@@ -9,14 +12,11 @@ import {
     Missing,
     Picks,
     Switch,
-} from '../../design/index';
-import type { MemoryHolder, Pick as Option } from '../../design/index';
-import { bytes } from '../../domain/format';
-import { machineNamesOf, macsOf } from '../../domain/machines/machines';
-import { wordOf } from '../../engine/engine-words';
-import { fitAllows } from '../../engine/provisional';
-import { useWatch } from '../../engine/react';
-import { machineKindWord } from '../../engine/shown';
+} from '../../presentation/ui/index';
+import type { MemoryHolder, Pick as Option } from '../../presentation/ui/index';
+import { wordOf } from '../../presentation/words/engine-words';
+import { fitAllows } from '../../presentation/words/provisional';
+import { machineKindWord } from '../../presentation/words/shown';
 import { useIdentityOf } from '../kit/identity';
 import { GB, gbOf, leavesFreeOf } from './model';
 import type { Draft, Kind } from './model';

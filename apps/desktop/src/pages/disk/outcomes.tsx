@@ -1,9 +1,9 @@
 import type { DiskOutcome } from '@jterrazz/station-api';
 
-import { StatePill, Value } from '../../design/index';
 import { bytes, sentence } from '../../domain/format';
-import { DISK_RESULT_TONES } from '../../engine/tones';
-import { DISK_RESULT_WORDS } from '../../engine/words';
+import { StatePill, Value } from '../../presentation/ui/index';
+import { DISK_RESULT_TONES } from '../../presentation/words/tones';
+import { DISK_RESULT_WORDS } from '../../presentation/words/words';
 import type { Held } from '../kit/gestures';
 
 export function OutcomePill({ outcome }: { outcome: DiskOutcome }) {

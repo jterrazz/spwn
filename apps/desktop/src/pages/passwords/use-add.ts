@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import type { RefCallback } from 'react';
 
 import { EngineError } from '../../domain/engine-error';
-import { useClient, useReread } from '../../engine/react';
+import { useClient, useReread } from '../../presentation/dependencies/dependencies';
 import { VAULT_REREADS } from './passwords-of';
 
 export type Asked = Omit<VaultAddInput, 'Value'>;

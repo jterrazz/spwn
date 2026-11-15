@@ -1,9 +1,9 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
-import { Button, Panel } from '../../design/index';
-import { useJournal } from '../../engine/kept-journal/journal';
-import type { JournalGroup } from '../../engine/kept-journal/journal';
-import type { Route } from '../../shell/route';
+import { useJournal } from '../../presentation/features/journal/kept-journal/journal';
+import type { JournalGroup } from '../../presentation/features/journal/kept-journal/journal';
+import type { Route } from '../../presentation/navigation/route';
+import { Button, Panel } from '../../presentation/ui/index';
 import { NotGiven } from '../kit/readings';
 import { JournalLineRow } from './journal-line';
 import { keyOfLine } from './model';

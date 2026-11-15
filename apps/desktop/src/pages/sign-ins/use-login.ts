@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { EngineError } from '../../domain/engine-error';
 import { aimed } from '../../domain/machines/aim';
 import type { Found } from '../../domain/machines/machines';
-import { useClient } from '../../engine/react';
+import { useClient } from '../../presentation/dependencies/dependencies';
 
 export type Seen =
     | { kind: 'asking' }

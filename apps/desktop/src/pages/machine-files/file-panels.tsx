@@ -1,11 +1,11 @@
 import type { MachinefileFileView } from '@jterrazz/station-api';
 
-import { Icon } from '../../design/icon';
-import { CodeBlock, Missing, Panel, Row, Switch, Value } from '../../design/index';
-import { countOf } from '../../engine/engine-words';
-import { followerState } from '../../engine/shown';
-import { machineRoute } from '../../shell/route';
-import type { Route } from '../../shell/route';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route } from '../../presentation/navigation/route';
+import { Icon } from '../../presentation/ui/icon';
+import { CodeBlock, Missing, Panel, Row, Switch, Value } from '../../presentation/ui/index';
+import { countOf } from '../../presentation/words/engine-words';
+import { followerState } from '../../presentation/words/shown';
 import type { Shown } from './file-head';
 import { extendedBy, linesOf } from './model';
 

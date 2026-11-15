@@ -1,8 +1,6 @@
 import type { ActivityReport } from '@jterrazz/station-api';
 import type { ReactElement, ReactNode } from 'react';
 
-import { Bar, Chart, MissingMark, Tile } from '../../design/index';
-import type { Identity } from '../../design/index';
 import { chartedOf, cpuOf, diskOf, marksOf, memoryOf } from '../../domain/activity/measures';
 import type { Held } from '../../domain/activity/measures';
 import { bytes, duration, memory, percent } from '../../domain/format';
@@ -10,8 +8,10 @@ import type { Found } from '../../domain/machines/machines';
 import { SEPARATOR } from '../../domain/separator';
 import type { Tone } from '../../domain/tone';
 import { agoOf, firstUnitOf, shortDay } from '../../domain/when';
-import { ownState } from '../../engine/shown';
-import type { OwnState } from '../../engine/words';
+import { Bar, Chart, MissingMark, Tile } from '../../presentation/ui/index';
+import type { Identity } from '../../presentation/ui/index';
+import { ownState } from '../../presentation/words/shown';
+import type { OwnState } from '../../presentation/words/words';
 import { useIdentityOf } from '../kit/identity';
 import { Tiles } from '../page';
 import { useActivity } from './reading';

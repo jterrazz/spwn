@@ -7,7 +7,7 @@ import type {
 
 import { sentence } from '../../domain/format';
 import { shortDay } from '../../domain/when';
-import { codesOf, wordOf } from '../../engine/engine-words';
+import { codesOf, wordOf } from '../../presentation/words/engine-words';
 
 type GrantTo = AccountsVaultGrant['ToKind'];
 

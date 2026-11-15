@@ -1,11 +1,11 @@
 import type { AccountsVaultEntry, AccountsVaultRead } from '@jterrazz/station-api';
 
-import { Icon } from '../../design/icon';
-import { AppIcon, asSentence, Panel, Row, RowHead, Verdict } from '../../design/index';
 import { sentence } from '../../domain/format';
-import { useWatch } from '../../engine/react';
-import { verdictShown } from '../../engine/shown';
-import type { Route } from '../../shell/route';
+import { useWatch } from '../../presentation/dependencies/dependencies';
+import type { Route } from '../../presentation/navigation/route';
+import { Icon } from '../../presentation/ui/icon';
+import { AppIcon, asSentence, Panel, Row, RowHead, Verdict } from '../../presentation/ui/index';
+import { verdictShown } from '../../presentation/words/shown';
 import { HeldOutcomes } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';

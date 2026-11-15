@@ -1,12 +1,12 @@
 import type { CallName, ImagesReport, MachinesMacView } from '@jterrazz/station-api';
 
-import { Icon } from '../../design/icon';
-import { StatePill } from '../../design/index';
 import { targetOf } from '../../domain/machines/machines';
 import { SEPARATOR } from '../../domain/separator';
-import { isDeletable } from '../../engine/provisional';
-import { newestState } from '../../engine/shown';
-import { useGesture } from '../../engine/use-gesture';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import { Icon } from '../../presentation/ui/icon';
+import { StatePill } from '../../presentation/ui/index';
+import { isDeletable } from '../../presentation/words/provisional';
+import { newestState } from '../../presentation/words/shown';
 import { GestureButton, GestureRow } from '../kit/gestures';
 
 import styles from '../disk/disk.module.css';

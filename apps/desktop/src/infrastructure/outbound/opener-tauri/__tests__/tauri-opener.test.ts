@@ -1,7 +1,7 @@
 import type { PortsSharedPort } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { Openable, shareAddressOf } from '../../../../engine/openable';
+import { Openable, shareAddressOf } from '../../../../presentation/kit/openable';
 import { NO_OPENER, tauriOpener } from '../tauri-opener';
 
 type Invoked = { command: string; args: Record<string, unknown> | undefined };

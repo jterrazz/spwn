@@ -1,7 +1,7 @@
 import type { PortsListing, PortsPort } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { portReach } from '../../../engine/shown';
+import { portReach } from '../../../presentation/words/shown';
 import { aboutPort, portsOf } from '../ports-of';
 
 function port(name: string, number: number, on: string): PortsPort {

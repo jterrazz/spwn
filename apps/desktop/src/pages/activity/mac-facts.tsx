@@ -1,10 +1,10 @@
 import type { ActivityReport } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import { Facts, MissingMark, Panel } from '../../design/index';
 import { duration, sentence } from '../../domain/format';
 import { between, firstUnitOf } from '../../domain/when';
-import { BATTERY_WORDS, THERMAL_WORDS } from '../../engine/words';
+import { Facts, MissingMark, Panel } from '../../presentation/ui/index';
+import { BATTERY_WORDS, THERMAL_WORDS } from '../../presentation/words/words';
 
 function upFor(report: ActivityReport): ReactNode {
     const { boot, at } = report.last.sample;

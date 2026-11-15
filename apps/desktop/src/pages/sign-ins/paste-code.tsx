@@ -2,11 +2,11 @@ import type { AccountsStep } from '@jterrazz/station-api';
 import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
-import { Button } from '../../design/index';
 import { EngineError } from '../../domain/engine-error';
 import { aimed } from '../../domain/machines/aim';
 import type { Found } from '../../domain/machines/machines';
-import { useClient } from '../../engine/react';
+import { useClient } from '../../presentation/dependencies/dependencies';
+import { Button } from '../../presentation/ui/index';
 import { Unanswered } from '../kit/readings';
 
 import styles from './sign-ins.module.css';

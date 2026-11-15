@@ -9,15 +9,15 @@ import type {
 } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Panel, Row, Screen, Verdict } from '../../design/index';
 import { clock } from '../../domain/format';
 import { SEPARATOR } from '../../domain/separator';
 import { shortDay } from '../../domain/when';
-import type { Reading as Read } from '../../engine/react';
-import { useRead } from '../../engine/react';
-import { chapterNoun, fileJoinOf, verdictShown } from '../../engine/shown';
-import { useGesture } from '../../engine/use-gesture';
-import { useRouter } from '../../shell/router';
+import type { Reading as Read } from '../../presentation/dependencies/dependencies';
+import { useRead } from '../../presentation/dependencies/dependencies';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import { useRouter } from '../../presentation/navigation/router';
+import { Panel, Row, Screen, Verdict } from '../../presentation/ui/index';
+import { chapterNoun, fileJoinOf, verdictShown } from '../../presentation/words/shown';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { NoVerdict, Reading } from '../kit/readings';
 import { Page } from '../page';

@@ -1,10 +1,10 @@
-import { asSentence, Button, Panel, Row } from '../../design/index';
 import { aimed } from '../../domain/machines/aim';
 import { targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
-import { useRead, useWatch } from '../../engine/react';
-import { machineRoute, tabsOf } from '../../shell/route';
-import type { Route, Tab } from '../../shell/route';
+import { useRead, useWatch } from '../../presentation/dependencies/dependencies';
+import { machineRoute, tabsOf } from '../../presentation/navigation/route';
+import type { Route, Tab } from '../../presentation/navigation/route';
+import { asSentence, Button, Panel, Row } from '../../presentation/ui/index';
 import { Unanswered } from '../kit/readings';
 import { portsOf } from '../ports/ports-of';
 import { SharedRow } from '../ports/shared-row';

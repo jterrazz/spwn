@@ -1,10 +1,10 @@
 import type { MachinesMacView, OverviewReadOutput } from '@jterrazz/station-api';
 
 import { needsYou } from '../../domain/overview/upkeep';
-import { useReach } from '../../engine/react';
-import type { Reading } from '../../engine/react';
-import type { Route } from '../../shell/route';
-import { newMachineLeads } from '../../shell/toolbar-action';
+import { useReach } from '../../presentation/dependencies/dependencies';
+import type { Reading } from '../../presentation/dependencies/dependencies';
+import type { Route } from '../../presentation/navigation/route';
+import { newMachineLeads } from '../../presentation/navigation/toolbar-action';
 import { LastNight } from '../changes/changes';
 import { HeldOutcomes } from '../kit/gestures';
 import { Absent, Reading as ReadingVerdict, SummaryHead, Unanswered } from '../kit/readings';

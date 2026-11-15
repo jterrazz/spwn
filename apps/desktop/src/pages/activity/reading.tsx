@@ -14,7 +14,7 @@ import type { EngineError } from '../../domain/engine-error';
 import { targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { keyOf } from '../../domain/request-key';
-import { useWatch } from '../../engine/react';
+import { useWatch } from '../../presentation/dependencies/dependencies';
 
 export type Heard = { kind: 'failed'; error: EngineError } | { kind: 'read'; out: ActivityReport };
 

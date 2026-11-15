@@ -1,19 +1,25 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
-import { Button, MachineIcon, StatePill, Switch } from '../../design/index';
 import { sentence } from '../../domain/format';
 import { targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { lineOf } from '../../domain/overview/overview';
 import { SEPARATOR } from '../../domain/separator';
-import { wordOf } from '../../engine/engine-words';
-import { machineKindOf } from '../../engine/provisional';
-import { useWatch } from '../../engine/react';
-import { engineViewWord, macState, vmKindWord, vmLifetimeWord, vmState } from '../../engine/shown';
-import { THIS_MAC_WORD } from '../../engine/words';
-import { machineRoute, TAB_PANEL, tabsOf } from '../../shell/route';
-import type { Route, Tab } from '../../shell/route';
-import type { Opening } from '../../shell/window';
+import { useWatch } from '../../presentation/dependencies/dependencies';
+import { machineRoute, TAB_PANEL, tabsOf } from '../../presentation/navigation/route';
+import type { Route, Tab } from '../../presentation/navigation/route';
+import type { Opening } from '../../presentation/navigation/window';
+import { Button, MachineIcon, StatePill, Switch } from '../../presentation/ui/index';
+import { wordOf } from '../../presentation/words/engine-words';
+import { machineKindOf } from '../../presentation/words/provisional';
+import {
+    engineViewWord,
+    macState,
+    vmKindWord,
+    vmLifetimeWord,
+    vmState,
+} from '../../presentation/words/shown';
+import { THIS_MAC_WORD } from '../../presentation/words/words';
 import { useIdentityOf } from '../kit/identity';
 import { LifecycleGestures } from './gestures';
 import { TerminalButton } from './terminal';

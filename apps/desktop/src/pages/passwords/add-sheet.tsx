@@ -1,10 +1,10 @@
 import type { AccountsAddFrom, AccountsVaultOffer } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Button, Dialog } from '../../design/index';
 import type { EngineError } from '../../domain/engine-error';
-import { codesOf } from '../../engine/engine-words';
-import { useWatch } from '../../engine/react';
+import { useWatch } from '../../presentation/dependencies/dependencies';
+import { Button, Dialog } from '../../presentation/ui/index';
+import { codesOf } from '../../presentation/words/engine-words';
 import { Reading, Unanswered } from '../kit/readings';
 import { BLANK, chosenOf, Form, wayOf } from './add-form';
 import type { Draft, Place } from './add-form';

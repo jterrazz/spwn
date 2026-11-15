@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../composition/__tests__/page-over';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
-import type { Route } from '../../../shell/route';
+import type { Route } from '../../../presentation/navigation/route';
 
 const recordingFor = await recordingsOf('stories');
 

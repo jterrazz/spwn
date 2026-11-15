@@ -12,11 +12,11 @@ import {
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
-import { EngineProvider } from '../../../engine/react';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
-import { machineRoute } from '../../../shell/route';
-import type { Route } from '../../../shell/route';
-import { Window } from '../../../shell/window';
+import { EngineProvider } from '../../../presentation/dependencies/dependencies';
+import { machineRoute } from '../../../presentation/navigation/route';
+import type { Route } from '../../../presentation/navigation/route';
+import { Window } from '../../../presentation/navigation/window';
 import { PAGES } from '../../registry';
 
 const recordingFor = await recordingsOf('one-mac', 'two-macs', 'mini-offline');

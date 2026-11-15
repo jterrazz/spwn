@@ -1,11 +1,11 @@
 import type { DiskReading, DiskRow } from '@jterrazz/station-api';
 
-import type { Identity } from '../../design/index';
 import { bytes } from '../../domain/format';
-import { wordOf } from '../../engine/engine-words';
-import { diskGestureOf, freesWhole } from '../../engine/provisional';
-import { DISK_GROUP_COLOURS } from '../../engine/tones';
-import { DISK_PENDING_WORD } from '../../engine/words';
+import type { Identity } from '../../presentation/ui/index';
+import { wordOf } from '../../presentation/words/engine-words';
+import { diskGestureOf, freesWhole } from '../../presentation/words/provisional';
+import { DISK_GROUP_COLOURS } from '../../presentation/words/tones';
+import { DISK_PENDING_WORD } from '../../presentation/words/words';
 
 export type Group = { group: DiskRow['Group']; rows: readonly DiskRow[] };
 

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
-import type { ButtonVariant } from '../../design/button';
-import { Button } from '../../design/index';
-import { looksSecret } from '../../design/secret';
 import type { EngineError } from '../../domain/engine-error';
-import type { Openable } from '../../engine/openable';
-import { useOpener } from '../../engine/react';
+import { useOpener } from '../../presentation/dependencies/dependencies';
+import type { Openable } from '../../presentation/kit/openable';
+import type { ButtonVariant } from '../../presentation/ui/button';
+import { Button } from '../../presentation/ui/index';
+import { looksSecret } from '../../presentation/ui/secret';
 import { Unanswered } from './readings';
 
 import styles from '../page.module.css';

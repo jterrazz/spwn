@@ -1,7 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 
-import { Screen } from '../../design/index';
-import type { Story } from '../../design/story';
+import { Screen } from '../../presentation/ui/index';
+import type { Story } from '../../presentation/ui/story';
 
 export const LAYERS = [
     'Marks',

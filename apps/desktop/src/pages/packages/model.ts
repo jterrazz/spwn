@@ -9,11 +9,11 @@ import type {
     PageNoun,
 } from '@jterrazz/station-api';
 
-import { IDENTITIES } from '../../design/index';
-import type { Identity } from '../../design/index';
-import { countOf } from '../../engine/engine-words';
-import type { PlanLine } from '../../engine/provisional';
-import { shelfWord } from '../../engine/shown';
+import { IDENTITIES } from '../../presentation/ui/index';
+import type { Identity } from '../../presentation/ui/index';
+import { countOf } from '../../presentation/words/engine-words';
+import type { PlanLine } from '../../presentation/words/provisional';
+import { shelfWord } from '../../presentation/words/shown';
 
 export const SHELVES = ['Apps', 'Skills', 'Settings'] as const;
 

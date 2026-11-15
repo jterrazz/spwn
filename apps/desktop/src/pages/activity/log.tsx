@@ -1,13 +1,13 @@
 import type { MachinesLogInput, MachinesLogOutput, Target } from '@jterrazz/station-api';
 import { useCallback, useEffect, useState } from 'react';
 
-import { Button, Missing, Panel, SearchField, Switch } from '../../design/index';
 import type { EngineError } from '../../domain/engine-error';
 import { clock } from '../../domain/format';
 import { targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { SEPARATOR } from '../../domain/separator';
-import { useRead } from '../../engine/react';
+import { useRead } from '../../presentation/dependencies/dependencies';
+import { Button, Missing, Panel, SearchField, Switch } from '../../presentation/ui/index';
 import { NotGiven, Unanswered } from '../kit/readings';
 import { LineList } from './line-list';
 

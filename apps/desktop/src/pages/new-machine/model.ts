@@ -8,7 +8,7 @@ import type {
     Target,
 } from '@jterrazz/station-api';
 
-import type { Opening } from '../../shell/window';
+import type { Opening } from '../../presentation/navigation/window';
 
 export type Kind = 'server' | 'workspace';
 

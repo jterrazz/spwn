@@ -1,15 +1,15 @@
 import type { AccountsProgramRow, CallName } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { AppIcon, asSentence, Button, Panel, Verdict } from '../../design/index';
 import { aimed } from '../../domain/machines/aim';
 import type { Found } from '../../domain/machines/machines';
-import { countOf, wordOf } from '../../engine/engine-words';
-import { useWatch } from '../../engine/react';
-import { engineShown, grantedCount, verdictShown } from '../../engine/shown';
-import { useGesture } from '../../engine/use-gesture';
-import type { Gesture } from '../../engine/use-gesture';
-import type { Route } from '../../shell/route';
+import { useWatch } from '../../presentation/dependencies/dependencies';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import type { Gesture } from '../../presentation/dependencies/use-gesture';
+import type { Route } from '../../presentation/navigation/route';
+import { AppIcon, asSentence, Button, Panel, Verdict } from '../../presentation/ui/index';
+import { countOf, wordOf } from '../../presentation/words/engine-words';
+import { engineShown, grantedCount, verdictShown } from '../../presentation/words/shown';
 import { GestureButton, GestureRow, HeldOutcomes } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';

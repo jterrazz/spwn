@@ -14,7 +14,6 @@ import {
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
-import { EngineProvider } from '../../../engine/react';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import { holdingCall } from '../../../infrastructure/outbound/engine-replay/__tests__/held-call';
@@ -22,8 +21,9 @@ import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/rec
 import { recordingOf, stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
-import type { Route } from '../../../shell/route';
-import { Window } from '../../../shell/window';
+import { EngineProvider } from '../../../presentation/dependencies/dependencies';
+import type { Route } from '../../../presentation/navigation/route';
+import { Window } from '../../../presentation/navigation/window';
 import { PAGES } from '../../registry';
 
 const recordingFor = await recordingsOf('creating', 'engine-stopped', 'two-macs');

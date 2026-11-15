@@ -1,10 +1,10 @@
 import type { MachinesSshOutput, MachinesVM } from '@jterrazz/station-api';
 
-import { shownOrWithheld } from '../../design/secret';
-import { Openable } from '../../engine/openable';
-import { useRead } from '../../engine/react';
-import type { Reading } from '../../engine/react';
-import { SSH_WORDS } from '../../engine/words';
+import { useRead } from '../../presentation/dependencies/dependencies';
+import type { Reading } from '../../presentation/dependencies/dependencies';
+import { Openable } from '../../presentation/kit/openable';
+import { shownOrWithheld } from '../../presentation/ui/secret';
+import { SSH_WORDS } from '../../presentation/words/words';
 import { OpenButton } from '../kit/opens';
 
 export function terminalHeld(vm: MachinesVM, ssh: Reading<MachinesSshOutput>): string {

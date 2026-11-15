@@ -7,7 +7,6 @@ import type {
 } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import { AppIcon, Row, StatePill, Value } from '../../design/index';
 import {
     appsOn,
     carriedApps,
@@ -15,13 +14,14 @@ import {
     settingsInCatalog,
 } from '../../domain/catalog/carried';
 import { sentence } from '../../domain/format';
-import { countOf } from '../../engine/engine-words';
-import { useReach, useRead, useWatch } from '../../engine/react';
-import type { Reading } from '../../engine/react';
-import { appUpdate, kindChipWord } from '../../engine/shown';
-import { APP_STATE_TONES } from '../../engine/tones';
-import { APP_STATE_WORDS } from '../../engine/words';
-import type { Route } from '../../shell/route';
+import { useReach, useRead, useWatch } from '../../presentation/dependencies/dependencies';
+import type { Reading } from '../../presentation/dependencies/dependencies';
+import type { Route } from '../../presentation/navigation/route';
+import { AppIcon, Row, StatePill, Value } from '../../presentation/ui/index';
+import { countOf } from '../../presentation/words/engine-words';
+import { appUpdate, kindChipWord } from '../../presentation/words/shown';
+import { APP_STATE_TONES } from '../../presentation/words/tones';
+import { APP_STATE_WORDS } from '../../presentation/words/words';
 import { Absent, Reading as ReadingVerdict, Unanswered, VerdictHead } from '../kit/readings';
 import { Page } from '../page';
 import { Listing } from './listing';

@@ -1,5 +1,5 @@
 // value: the menu bar app's marks, read from apps/menubar/scripts/symbols.swift, their one owner, and written as
-// value: the window's src/design/menubar-marks.ts (menubar-marks.sh); its spec fails when the two drift. The reader
+// value: the window's src/presentation/ui/menubar-marks.ts (menubar-marks.sh); its spec fails when the two drift. The reader
 // value: knows the forms the script writes a mark in (a string, `+`, `\(strokes)`, a literal array's
 // value: `.map { "…" }.joined()`) and throws on any other, so a new form is read before it is drawn.
 

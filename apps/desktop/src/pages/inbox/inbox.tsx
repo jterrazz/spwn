@@ -1,12 +1,12 @@
 import type { MachinesMacView, OverviewNeed, OverviewReadOutput } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Switch } from '../../design/index';
 import { canWait, needsYou } from '../../domain/overview/upkeep';
-import { wordOf } from '../../engine/engine-words';
-import { useReach } from '../../engine/react';
-import type { Reading } from '../../engine/react';
-import type { Route } from '../../shell/route';
+import { useReach } from '../../presentation/dependencies/dependencies';
+import type { Reading } from '../../presentation/dependencies/dependencies';
+import type { Route } from '../../presentation/navigation/route';
+import { Switch } from '../../presentation/ui/index';
+import { wordOf } from '../../presentation/words/engine-words';
 import { History } from '../changes/changes';
 import { HeldOutcomes } from '../kit/gestures';
 import { Absent, Reading as ReadingVerdict, SummaryHead, Unanswered } from '../kit/readings';

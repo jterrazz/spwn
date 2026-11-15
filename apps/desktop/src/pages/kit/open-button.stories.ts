@@ -1,6 +1,6 @@
-import { SECRET_SAMPLE } from '../../design/story';
-import type { Story } from '../../design/story';
-import { Openable } from '../../engine/openable';
+import { Openable } from '../../presentation/kit/openable';
+import { SECRET_SAMPLE } from '../../presentation/ui/story';
+import type { Story } from '../../presentation/ui/story';
 import type { OpenButtonProps } from './opens';
 
 const SSH = Openable.ofSsh({ Address: 'linux-1', Command: 'ssh admin@linux-1', User: 'admin' });

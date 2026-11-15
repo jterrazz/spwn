@@ -1,7 +1,7 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
-import { Button, Panel, Row } from '../../design/index';
-import type { Route } from '../../shell/route';
+import type { Route } from '../../presentation/navigation/route';
+import { Button, Panel, Row } from '../../presentation/ui/index';
 
 type StartHereProps = {
     macs: readonly MachinesMacView[];
