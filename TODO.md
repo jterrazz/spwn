@@ -113,9 +113,7 @@ fleet page (`agents.list`, `agents.empty`), the New agent sheet
 (`sheet.new-agent`, `sheet.new-agent.new`) and the agent's menus
 (`menu.context.agent`, `menu.page.agent`, `menu.new-agent.on`). Fourteen
 gap ids wait for a design before they are stories (STORIES.md, "Gaps").
-`share_ended` is a notice kind the HUD knows and no engine job tells yet:
-the take-back of a copy at its term is where it would be told. Each starts
-as a lot of its own once the owner asks for it.
+Each starts as a lot of its own once the owner asks for it.
 
 ## Permanent agents, and what each machine holds of them
 The owner's question (2026-11-10): Herdr runs the agents, so every machine

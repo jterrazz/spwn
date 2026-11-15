@@ -10,7 +10,6 @@ const (
 	NoticeAgentFinished = "agent_finished"
 	NoticeVMReady       = "vm_ready"
 	NoticeMacBack       = "mac_back"
-	NoticeShareEnded    = "share_ended"
 )
 
 type Notification struct {
@@ -33,6 +32,5 @@ func NoticeIcon(kind string) string {
 		NoticeAgentFinished: "checkmark.circle.fill",
 		NoticeVMReady:       "checkmark.circle.fill",
 		NoticeMacBack:       "checkmark.circle.fill",
-		NoticeShareEnded:    "stop.fill",
 	}[kind]
 }
