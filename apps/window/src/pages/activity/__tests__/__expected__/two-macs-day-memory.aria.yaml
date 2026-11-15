@@ -9,10 +9,10 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "No finding from the engine." [level=1]
+  - heading "Nothing to look at." [level=1]
   - paragraph:
-    - img "No finding"
-    - text: Read live · two samples read now, 1 s apart · a point every 30 min · history kept since 1 Nov 10:00
+    - img "Nothing to look at."
+    - text: history kept 24 h, since the engine started
   - group "Window":
     - button "6 min"
     - button "1 h"

@@ -38,6 +38,7 @@ export function reportPeakingAt(peak: number): ActivityReport {
         },
         rates: { CPU: 23, DiskRead: 0, DiskWrite: 0, NetIn: 0, NetOut: 0 },
         source: 'engine',
+        verdict: { Sentence: 'Nothing to look at', Tone: 'ok' },
         window: 3_600_000_000_000,
     };
 }

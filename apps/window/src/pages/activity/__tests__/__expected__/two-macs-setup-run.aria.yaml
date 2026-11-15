@@ -13,10 +13,7 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "No finding from the engine." [level=1]
-  - paragraph:
-    - img "No finding"
-    - text: Read live · two samples read now, 1 s apart
+  - heading "Nothing to look at." [level=1]
   - group "Window":
     - button "6 min" [pressed]
     - button "1 h"
