@@ -70,7 +70,7 @@ func importTable() map[string][]string {
 		"pages":                      {"page", "catalog", std},
 		"pages/*":                    {"page", "pages", "pages/*", "core/call/lanes", "core/finding", "core/machine", "core/section", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "agents", "machinefile", "catalog", std},
 		"ui/token":                   {lip, term, std},
-		"ui/atom":                    {"ui/token", "page", lip, bubble + "/spinner", std},
+		"ui/atom":                    {"core/size", "ui/token", "page", lip, bubble + "/spinner", std},
 		"ui/molecule":                {"ui/atom", "ui/token", "page", lip, std},
 		"ui/organism":                organism,
 		"ui/template":                template,

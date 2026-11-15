@@ -1,6 +1,9 @@
 package disk
 
-import "github.com/jterrazz/studio-station/apps/engine/core/verdict"
+import (
+	"github.com/jterrazz/studio-station/apps/engine/core/size"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
+)
 
 type Holder string
 
@@ -102,7 +105,7 @@ func StationOf(total, free, logs int64, h Held, mac string) StationPart {
 			{Holder: HolderThisMac, Bytes: itself},
 			{Holder: HolderFree, Bytes: free},
 		},
-		Sentence: "Outside any machine, station holds " + Size(held) + ": machine disks, images, leftovers and its logs",
+		Sentence: "Outside any machine, station holds " + size.Bytes(held) + ": machine disks, images, leftovers and its logs",
 		Machines: machines,
 		Verdict:  freeable(h.Unused+leftovers, mac),
 	}
@@ -111,7 +114,7 @@ func StationOf(total, free, logs int64, h Held, mac string) StationPart {
 func freeable(unused int64, mac string) verdict.Verdict {
 	line := "on " + mac + ": no machine and no file of yours is touched"
 	if unused > 0 {
-		return verdict.Verdict{Tone: verdict.Warn, Sentence: Size(unused) + " can be freed.", Line: line}
+		return verdict.Verdict{Tone: verdict.Warn, Sentence: size.Bytes(unused) + " can be freed.", Line: line}
 	}
 	return verdict.Verdict{Tone: verdict.OK, Sentence: "Nothing to free.", Line: line}
 }
