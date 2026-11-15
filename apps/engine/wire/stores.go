@@ -31,7 +31,7 @@ import (
 func preferenceGroups() []string {
 	return []string{
 		setupcontract.GroupName, machinescontract.GroupMacs, machinescontract.GroupVMUser,
-		accountscontract.GroupShareList, accountscontract.GroupV2ShareList, setupcontract.GroupUserEmail, setupcontract.GroupUserName,
+		setupcontract.GroupUserEmail, setupcontract.GroupUserName,
 		portscontract.GroupPorts, settingscontract.GroupOffHere, awakecontract.GroupNeverSleeps, machinefilecontract.GroupSource,
 	}
 }
@@ -57,11 +57,6 @@ type imageStore interface {
 
 type bookStore interface {
 	accountscontract.BookStore
-	store.Migrator
-}
-
-type shareStore interface {
-	accountscontract.ShareStore
 	store.Migrator
 }
 
@@ -97,7 +92,6 @@ type stores struct {
 	machines     machineStore
 	images       imageStore
 	marks        imagescontract.BuildMarks
-	shares       shareStore
 	book         bookStore
 	reservations reservationStore
 	declarations declarationStore
@@ -113,7 +107,6 @@ func newStores(files local.FS, p setup.Paths) *stores {
 		machines:     machinesjsonfile.New(lockable{files}, filepath.Join(p.State, "vms")),
 		images:       imagesjsonfile.New(files, filepath.Join(p.State, "images")),
 		marks:        imagesjsonfile.NewMarks(files, filepath.Join(p.State, "builds")),
-		shares:       accountsjsonfile.NewShares(files, filepath.Join(p.State, "shares.json"), filepath.Join(p.State, "vms")),
 		book:         accountsjsonfile.NewBook(lockable{files}, filepath.Join(p.State, "vault.json")),
 		reservations: portsjsonfile.NewReservations(files, filepath.Join(p.State, "leases.json")),
 		declarations: portsjsonfile.NewDeclarations(files, filepath.Join(p.Prefs, "public.json")),
@@ -133,16 +126,14 @@ func (lockable) Hold(ctx context.Context, path string) (func(), error) {
 }
 
 func (s *stores) migrators() []store.Migrator {
-	return []store.Migrator{s.prefs, s.ports(), s.machines, s.images, s.shares, s.book, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}
+	return []store.Migrator{s.prefs, s.ports(), s.machines, s.images, s.book, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}
 }
 
 func (s *stores) name() setupcontract.NamePrefs         { return setupcontract.Name(s.prefs) }
 func (s *stores) identity() setupcontract.IdentityPrefs { return setupcontract.Identity(s.prefs) }
 func (s *stores) macs() machinescontract.MacsPrefs      { return machinescontract.Macs(s.prefs) }
 func (s *stores) vmUser() machinescontract.VMUserPrefs  { return machinescontract.VMUser(s.prefs) }
-func (s *stores) shareList() accountscontract.ShareListPrefs {
-	return accountscontract.ShareList(s.prefs)
-}
+
 func (s *stores) ports() portscontract.PortsPrefs { return portscontract.Ports(s.prefs) }
 func (s *stores) neverSleeps() awakecontract.NeverSleepsPrefs {
 	return awakecontract.NeverSleeps(s.prefs)

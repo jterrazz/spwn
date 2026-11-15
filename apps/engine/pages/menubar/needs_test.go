@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
@@ -45,7 +44,7 @@ func needsFleet() NeedsReading {
 	}}}}
 	home := overview.Summary{Head: overview.Head{Name: needsPro, Kind: machine.Computer, ThisMac: true}, Needs: []overview.Need{
 		{Section: section.Apps, Subject: "tool-a", Text: "2 tool-a updates waiting", Call: CallUpdate},
-		{Section: section.Accounts, Subject: catalog.ProviderCloudflare, Broken: true, Text: "signed out"},
+		{Section: section.Accounts, Subject: "wrangler", Broken: true, Text: "signed out"},
 		{Section: section.Background, Subject: "com.example.socket", Broken: true, Text: "com.example.socket is failing, last exit 78", Command: "station background"},
 		{Section: section.Apps, Subject: "tool-b", Text: "2 tool-b updates waiting", Call: CallUpdate},
 		{Section: section.Settings, Subject: "firewall", Text: "Firewall off", Path: "System Settings > Network > Firewall"},

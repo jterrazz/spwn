@@ -227,7 +227,7 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 				item.Detail = []string{"station never changes it for you"}
 			}
 		case section.Accounts:
-			account := accounts.Label(n.Subject)
+			account := accounts.Program(n.Subject).Label()
 			row(account+" needs sign-in on "+label, account+" needs sign-in", VerbSignIn)
 			item.Find = []string{VerbSignIn + " to " + account + " on " + label}
 			item.Glyph = symbol("key", page.SignalWaits)

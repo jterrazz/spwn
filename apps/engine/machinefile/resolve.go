@@ -262,11 +262,11 @@ func merge(files []Placed) merged {
 		}
 		if a := f.Accounts; a != nil {
 			m.drop("accounts")
-			for _, s := range a.Share {
-				m.put("accounts.share."+s.Account, cmp.Or(s.For, "shared"), o)
+			for _, p := range a.SignIns {
+				m.put(signInKey+string(p), "signs in", o)
 			}
-			for _, k := range a.Keep {
-				m.put("accounts.keep."+k, "kept", o)
+			for _, p := range a.Grants {
+				m.put(grantKey+string(p), "granted", o)
 			}
 		}
 		if p := f.Ports; p != nil {

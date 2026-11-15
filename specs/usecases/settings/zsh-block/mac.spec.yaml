@@ -1,5 +1,4 @@
 description: 'shell zsh prints the loader, mise and guarded completion, and no nvm nor token on a Mac'
-fixture: ../../../__fixtures__/studio-cli/
 runs:
     - command: 'shell zsh | /usr/bin/grep -c ''eval "$(mise activate zsh)"'''
       exit: 0

@@ -20,8 +20,8 @@ func Notifier(t *testing.T, subject func(t *testing.T) NotifierSubject) {
 	t.Run("each notification reaches the owner whole, in the order told", func(t *testing.T) {
 		s := subject(t)
 		told := []engine.Notification{
-			{Kind: engine.NoticeTakeBackFailed, Subject: "api share", Text: "taking GitHub back failed: exit 1"},
-			{Kind: engine.NoticeTakeBackFailed, Subject: "api share", Text: "take back of session:b failed: exit 1"},
+			{Kind: engine.NoticeGrantRemovalFailed, Subject: "api grant", Text: "removing the grant of GitHub failed: exit 1"},
+			{Kind: engine.NoticeGrantRemovalFailed, Subject: "api grant", Text: "removing the grant of Cloudflare failed: exit 1"},
 		}
 		for _, n := range told {
 			s.Notifier.Notify(context.Background(), n)

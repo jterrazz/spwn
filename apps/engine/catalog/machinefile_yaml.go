@@ -29,6 +29,28 @@ func knownKeys(n *yaml.Node, t reflect.Type, extra ...string) error {
 	return nil
 }
 
+func (a *AccountsSpec) UnmarshalYAML(n *yaml.Node) error {
+	// invariant: a key accounts had before signins and grants is refused at
+	// its line with the key that says it now, never read.
+	if n.Kind == yaml.MappingNode {
+		for i := 0; i+1 < len(n.Content); i += 2 {
+			switch k := n.Content[i]; k.Value {
+			case "share":
+				return &yaml.TypeError{Errors: []string{fmt.Sprintf("line %d: accounts.share is no key: the programs a workspace is granted are accounts.grants (`grants: [npm]`)", k.Line)}}
+			case "keep":
+				return &yaml.TypeError{Errors: []string{fmt.Sprintf("line %d: accounts.keep is no key: the programs a machine signs in to are accounts.signins (`signins: [gh]`)", k.Line)}}
+			}
+		}
+	}
+	type plain AccountsSpec
+	if n.Kind == yaml.MappingNode {
+		if err := knownKeys(n, reflect.TypeFor[plain]()); err != nil {
+			return err
+		}
+	}
+	return n.Decode((*plain)(a))
+}
+
 func (a *AppEntry) UnmarshalYAML(n *yaml.Node) error {
 	// invariant: an app is written as its name, or as a mapping.
 	if n.Kind == yaml.ScalarNode {

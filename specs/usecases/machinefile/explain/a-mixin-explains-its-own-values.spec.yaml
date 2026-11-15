@@ -6,7 +6,7 @@ runs:
           machinefile: station.machinefile/v1
           name: dev-tools
           apps: [git, jq]
-          accounts: { keep: [github] }
+          accounts: { signins: [gh] }
       exit: 0
     - command: 'explain --machinefile dev-tools'
       exit: 0
@@ -14,4 +14,4 @@ runs:
           # dev-tools
           	apps.git	listed	user	dev-tools
           	apps.jq	listed	user	dev-tools
-          	accounts.keep.github	kept	user	dev-tools
+          	accounts.signins.gh	signs in	user	dev-tools

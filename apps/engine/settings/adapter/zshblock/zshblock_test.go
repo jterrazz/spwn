@@ -116,7 +116,7 @@ func TestALoneBlocksFingerprintIsItsTextsAlone(t *testing.T) {
 func TestAVMShellSourcesTheGrantedFilesByPathAndAMacSourcesNone(t *testing.T) {
 	const line = `for f in "$HOME/.config/station/grants/"*.env(N); do source "$f"; done`
 	for kind, want := range map[catalog.MachineKind]bool{catalog.Linux: true, catalog.MacOS: true, catalog.Mac: false} {
-		block := zshblock.NewBlock(&memory{files: map[string][]byte{}}, catalog.DotfilesFS, refusedSource{}, zshblock.BlockOptions{ThisMachine: kind})
+		block := zshblock.NewBlock(&memory{files: map[string][]byte{}}, catalog.DotfilesFS, zshblock.BlockOptions{ThisMachine: kind})
 		script, err := block.Zsh(context.Background(), "")
 		if err != nil {
 			t.Fatalf("%s: %v", kind, err)
@@ -125,10 +125,4 @@ func TestAVMShellSourcesTheGrantedFilesByPathAndAMacSourcesNone(t *testing.T) {
 			t.Errorf("%s: sources the granted files = %v; want %v", kind, got, want)
 		}
 	}
-}
-
-type refusedSource struct{}
-
-func (refusedSource) Export(context.Context, []string) ([]byte, error) {
-	return nil, errors.New("no studio")
 }

@@ -52,8 +52,6 @@ type Grants struct{ k *Kept }
 
 var _ contract.Grants = (*Grants)(nil)
 
-const duePrefix = "grant:"
-
 // invariant: a program a machine's own read finds signed in came from a
 // grant when the book holds that grant: the facts say so and name its
 // entry, so a grant given again is never refused as signed in by itself.
@@ -276,27 +274,21 @@ func (g *Grants) Remove(ctx context.Context, id string, to accounts.GrantTo, tar
 	return accounts.Revoked{Sentence: accounts.RevokedSentence(e.Program)}, err
 }
 
-func (g *Grants) Due(ctx context.Context) (map[string][]accounts.Share, error) {
-	// value: what the expiry owes each machine: a removal that could not
-	// reach it, by machine, each named grant:<program>.
+func (g *Grants) Owed(ctx context.Context) (map[string][]accounts.Program, error) {
+	// value: the removals that could not reach a machine, by machine.
 	b, err := g.k.book.Read(ctx)
 	if err != nil {
 		return nil, err
 	}
-	due := map[string][]accounts.Share{}
+	owed := map[string][]accounts.Program{}
 	for _, o := range b.Owed {
-		due[o.To] = append(due[o.To], accounts.Share{Name: duePrefix + string(o.Program)})
+		owed[o.To] = append(owed[o.To], o.Program)
 	}
-	return due, nil
+	return owed, nil
 }
 
-func Due(name string) (accounts.Program, bool) {
-	p, ok := strings.CutPrefix(name, duePrefix)
-	return accounts.Program(p), ok
-}
-
-func (g *Grants) Expire(ctx context.Context, vm string, programs []accounts.Program) error {
-	// invariant: the expiry retries each removal owed to the machine; one
+func (g *Grants) Retry(ctx context.Context, vm string, programs []accounts.Program) error {
+	// invariant: the retry job takes out each removal owed to the machine; one
 	// that is taken out is no longer owed, one that fails stays owed.
 	var failed []error
 	return errors.Join(g.k.book.Change(ctx, func(b *accounts.Book) error {

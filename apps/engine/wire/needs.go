@@ -1,7 +1,6 @@
 package wire
 
 import (
-	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/studio"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/tailscale"
 )
@@ -17,12 +16,10 @@ func (m machine) providers() map[coremachine.Need]coremachine.Provider {
 	looks := map[coremachine.Need]func() bool{
 		coremachine.Hypervisor:     hv.Installed,
 		coremachine.PrivateNetwork: tn.Present,
-		coremachine.Credentials:    func() bool { return studio.Present(m.sys.Run) },
 	}
 	names := map[coremachine.Need]string{
 		coremachine.Hypervisor:     hv.Name(),
 		coremachine.PrivateNetwork: tailscale.App,
-		coremachine.Credentials:    studio.Command,
 	}
 	out := map[coremachine.Need]coremachine.Provider{}
 	for need, look := range looks {

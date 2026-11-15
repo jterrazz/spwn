@@ -67,7 +67,7 @@ func (s *Provisioner) migrateSettings() error {
 }
 
 // invariant: same is false when the preferences hold a group a v1
-// config.json never converts to (the share list, the services' policy).
+// config.json never converts to (the services' policy).
 func (s *Provisioner) current() (v setup.V1Preferences, same bool, err error) {
 	if v.ThisMachine, err = s.p.Name.Get(); err != nil {
 		return v, false, err
@@ -83,15 +83,11 @@ func (s *Provisioner) current() (v setup.V1Preferences, same bool, err error) {
 		return v, false, err
 	}
 	v.UserEmail, v.UserName = id.UserEmail, id.UserName
-	list, err := s.p.ShareList.Get()
-	if err != nil {
-		return v, false, err
-	}
 	policy, err := s.p.Ports.Get()
 	if err != nil {
 		return v, false, err
 	}
-	return v, len(list) == 0 && policy == nil, nil
+	return v, policy == nil, nil
 }
 
 func (s *Provisioner) write(v setup.V1Preferences) error {

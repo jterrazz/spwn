@@ -31,7 +31,9 @@ type Template struct {
 	Memory   string
 	Disk     string
 	Mounts   []catalog.Mount
-	Shares   []catalog.AccountShare
+	// value: the programs the workspace signs in to, and those its Mac's
+	// vault grants it, by their wire names.
+	SignIns, Grants []string
 	// value: each file by its slash path under the owner's folder
 	// (`machinefiles/<name>.machine.yaml`, `machinefiles/<name>.local.yaml`).
 	Files []File
@@ -62,7 +64,7 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 		Memory: m.values["vm.resources.memory"].Text, Disk: m.values["vm.resources.disk"].Text, Mounts: m.mounts,
 	}
 	t.CPUs, _ = strconv.Atoi(m.values["vm.resources.cpus"].Text)
-	t.Shares = m.shares()
+	t.SignIns, t.Grants = m.programs(signInKey), m.programs(grantKey)
 	for _, b := range m.bake {
 		t.Bake = append(t.Bake, b.name)
 	}
@@ -92,15 +94,16 @@ func (l Library) Templates() []string {
 	return out
 }
 
-func (m merged) shares() []catalog.AccountShare {
-	var out []catalog.AccountShare
+const (
+	signInKey = "accounts.signins."
+	grantKey  = "accounts.grants."
+)
+
+func (m merged) programs(prefix string) []string {
+	var out []string
 	for _, key := range m.order {
-		if account, ok := strings.CutPrefix(key, "accounts.share."); ok {
-			term := m.values[key].Text
-			if term == "shared" {
-				term = ""
-			}
-			out = append(out, catalog.AccountShare{Account: account, For: term})
+		if program, ok := strings.CutPrefix(key, prefix); ok {
+			out = append(out, program)
 		}
 	}
 	return out
@@ -108,12 +111,12 @@ func (m merged) shares() []catalog.AccountShare {
 
 // value: what a Machinefile gives the VM that follows it, as the VM's Mac
 // holds it: the ports it may open and to whom (nil, the file says none),
-// the accounts it is shared, and whether it is a server's.
+// the programs it signs in to and is granted, and whether it is a server's.
 
 type Given struct {
-	Ports  *catalog.PortRights
-	Shares []catalog.AccountShare
-	Server bool
+	Ports           *catalog.PortRights
+	SignIns, Grants []string
+	Server          bool
 }
 
 func GivenOf(lib Library, name string) (Given, error) {
@@ -125,5 +128,5 @@ func GivenOf(lib Library, name string) (Given, error) {
 		return Given{}, err
 	}
 	m := merge(files)
-	return Given{Ports: m.ports, Shares: m.shares(), Server: catalog.MachineRole(m.values["machine.kind"].Text) == catalog.RoleServer}, nil
+	return Given{Ports: m.ports, SignIns: m.programs(signInKey), Grants: m.programs(grantKey), Server: catalog.MachineRole(m.values["machine.kind"].Text) == catalog.RoleServer}, nil
 }

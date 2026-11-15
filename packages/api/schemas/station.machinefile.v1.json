@@ -1,32 +1,29 @@
 {
   "$defs": {
-    "AccountShare": {
-      "additionalProperties": false,
-      "properties": {
-        "account": {
-          "type": "string"
-        },
-        "for": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "account"
-      ],
-      "type": "object"
-    },
     "AccountsSpec": {
       "additionalProperties": false,
       "properties": {
-        "keep": {
+        "grants": {
           "items": {
+            "enum": [
+              "gh",
+              "npm",
+              "claude",
+              "wrangler"
+            ],
             "type": "string"
           },
           "type": "array"
         },
-        "share": {
+        "signins": {
           "items": {
-            "$ref": "#/$defs/AccountShare"
+            "enum": [
+              "gh",
+              "npm",
+              "claude",
+              "wrangler"
+            ],
+            "type": "string"
           },
           "type": "array"
         }

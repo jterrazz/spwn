@@ -201,3 +201,15 @@ func (g *Grants) Remove(_ context.Context, id string, to accounts.GrantTo, targe
 	}
 	return accounts.Revoked{Sentence: accounts.RevokedSentence(e.Program)}, nil
 }
+
+func (g *Grants) Forget(_ context.Context, vm string) error {
+	// invariant: a machine deleted takes what was granted to it with its
+	// disk; a world owes it no removal.
+	g.w.Lock()
+	defer g.w.Unlock()
+	own := state(mac(g.w, g.mac))
+	for i := range own.Passwords {
+		own.Passwords[i].Grants = slices.DeleteFunc(own.Passwords[i].Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == vm })
+	}
+	return nil
+}

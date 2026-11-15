@@ -294,7 +294,7 @@ func TestAValueTheShellWouldReadOtherwiseIsNeverSent(t *testing.T) {
 	}
 }
 
-func TestAGrantNeverEndsOnItsOwnAndTheExpiryRetriesOnlyWhatIsOwed(t *testing.T) {
+func TestAGrantNeverEndsOnItsOwnAndTheRetryTakesOutOnlyWhatIsOwed(t *testing.T) {
 	r := newRig(t)
 	id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
 	g := r.vault.Grants()
@@ -302,8 +302,8 @@ func TestAGrantNeverEndsOnItsOwnAndTheExpiryRetriesOnlyWhatIsOwed(t *testing.T) 
 		t.Fatalf("Add: %v", err)
 	}
 	r.now = r.now.Add(10 * 365 * 24 * time.Hour)
-	if due, _ := g.Due(t.Context()); len(due) != 0 {
-		t.Fatalf("a grant years old is due: %v", due)
+	if due, _ := g.Owed(t.Context()); len(due) != 0 {
+		t.Fatalf("a grant years old is owed a removal: %v", due)
 	}
 	read, _ := r.vault.Passwords().List(t.Context())
 	if len(read.Entries[0].Grants) != 1 {
@@ -313,20 +313,20 @@ func TestAGrantNeverEndsOnItsOwnAndTheExpiryRetriesOnlyWhatIsOwed(t *testing.T) 
 	if _, err := r.vault.Passwords().Remove(t.Context(), id); err != nil {
 		t.Fatalf("Remove: %v", err)
 	}
-	if err := g.Expire(t.Context(), "linux-1", []accounts.Program{accounts.Program(own().Program)}); err == nil {
-		t.Fatal("an expiry that could not reach the machine succeeded")
+	if err := g.Retry(t.Context(), "linux-1", []accounts.Program{accounts.Program(own().Program)}); err == nil {
+		t.Fatal("a retry that could not reach the machine succeeded")
 	}
-	if due, _ := g.Due(t.Context()); len(due["linux-1"]) != 1 {
+	if due, _ := g.Owed(t.Context()); len(due["linux-1"]) != 1 {
 		t.Fatalf("due %v; want the removal still owed", due)
 	}
 	r.unreach = false
-	if err := g.Expire(t.Context(), "linux-1", []accounts.Program{accounts.Program(own().Program)}); err != nil {
-		t.Fatalf("Expire: %v", err)
+	if err := g.Retry(t.Context(), "linux-1", []accounts.Program{accounts.Program(own().Program)}); err != nil {
+		t.Fatalf("Retry: %v", err)
 	}
 	if r.sent[len(r.sent)-1].line != own().Remove {
 		t.Errorf("last line %q; want the program's own Remove", r.sent[len(r.sent)-1].line)
 	}
-	if due, _ := g.Due(t.Context()); len(due) != 0 {
+	if due, _ := g.Owed(t.Context()); len(due) != 0 {
 		t.Fatalf("due %v; want nothing owed", due)
 	}
 }
@@ -342,14 +342,14 @@ func TestARemovalThatCannotReachTheMachineIsDueAtItsReturn(t *testing.T) {
 	if _, err := r.vault.Passwords().Remove(t.Context(), id); err != nil {
 		t.Fatalf("Remove: %v", err)
 	}
-	due, _ := g.Due(t.Context())
-	if len(due["linux-1"]) != 1 || due["linux-1"][0].Name != "grant:"+own().Program {
+	due, _ := g.Owed(t.Context())
+	if len(due["linux-1"]) != 1 || due["linux-1"][0] != accounts.Program(own().Program) {
 		t.Fatalf("due %v; want the program on linux-1 at once", due)
 	}
 	if err := g.Forget(t.Context(), "linux-1"); err != nil {
 		t.Fatal(err)
 	}
-	if due, _ := g.Due(t.Context()); len(due) != 0 {
+	if due, _ := g.Owed(t.Context()); len(due) != 0 {
 		t.Fatalf("a deleted machine is still owed: %v", due)
 	}
 }

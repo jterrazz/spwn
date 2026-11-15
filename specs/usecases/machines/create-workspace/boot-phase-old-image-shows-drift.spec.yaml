@@ -40,4 +40,4 @@ runs:
     - command: 'machines create --memory 4G web --from studio-linux --json | /usr/bin/jq -c ''{template, boot}'''
       exit: 0
       stdout: |
-          {"template":"studio-linux","boot":{"shares":[],"drift":["jq is not baked into the image"]}}
+          {"template":"studio-linux","boot":{"grants":[],"signins":[],"drift":["jq is not baked into the image"]}}

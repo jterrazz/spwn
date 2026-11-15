@@ -36,7 +36,7 @@ func initCommands(env kit.Env, m machine) []*cobra.Command {
 func setupOf(env kit.Env, m machine) *setupcalls.Provisioner {
 	allMachines := m.machines(env.Interactive)
 	registrar := allMachinesRegistrar{name: m.stores.name(), machines: allMachines}
-	return setupcalls.NewProvisioner(setupMachine{m.sys}, setupcalls.ProvisionerPrefs{Name: m.stores.name(), Identity: m.stores.identity(), Macs: m.stores.macs(), VMUser: m.stores.vmUser(), ShareList: m.stores.shareList(), Ports: m.stores.ports(), Stores: m.stores.migrators()}, setupVault{m.vault()}, registrar, setupcalls.ProvisionerOptions{
+	return setupcalls.NewProvisioner(setupMachine{m.sys}, setupcalls.ProvisionerPrefs{Name: m.stores.name(), Identity: m.stores.identity(), Macs: m.stores.macs(), VMUser: m.stores.vmUser(), Ports: m.stores.ports(), Stores: m.stores.migrators()}, setupVault{m.vault()}, registrar, setupcalls.ProvisionerOptions{
 		Kind:            m.kind,
 		Server:          m.profile.Kind == coremachine.Server,
 		PreferencesFile: m.stores.prefs.File(), State: m.paths.State,

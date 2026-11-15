@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
-
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/claudecode"
 	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/codex"
@@ -136,7 +134,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 	appliers = append(appliers, mac.Appliers()...)
 	appliers = append(appliers, settingsdefaults.NewDock(m.sys.Run)...)
 	return append(appliers,
-		vault.NewClaudeToken(m.sys.Run, accountscalls.NewShareList(m.stores.shareList())),
+		vault.NewClaudeToken(m.sys.Run),
 		git.NewSigning(m.sys.Run, m.stores.identity()),
 		git.NewLogin(m.sys.Run, m.sharedRead()),
 		settingstailscale.New(m.sys.FS, settingstailscale.Options{

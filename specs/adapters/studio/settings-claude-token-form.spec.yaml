@@ -1,4 +1,4 @@
-description: 'the Claude token reaches studio on stdin, never as an argument, and the share list holds it'
+description: 'the Claude token reaches studio on stdin, never as an argument'
 fixture:
     - ../../__fixtures__/terminal/
     - ./__fixtures__/settings-studio/
@@ -15,9 +15,7 @@ runs:
           Configure claude-token
           ┃ Claude Code token
           ┃ run `claude setup-token` and paste the token
-          ●       claude-token
-          ●       operator:claude:oauth-token     kept by the studio credential store
-          ●       share list      holds operator:claude:oauth-token
+          ●       claude-token    operator:claude:oauth-token: kept by the studio credente
     - command: '--version >/dev/null; terminal "$STATION" settings apply claude-token'
       stdin: |
           see ┃ Claude Code token

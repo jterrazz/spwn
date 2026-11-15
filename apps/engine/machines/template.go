@@ -1,10 +1,6 @@
 package machines
 
-import (
-	"time"
-
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
-)
+import "github.com/jterrazz/studio-station/apps/engine/catalog"
 
 // value: the Machinefile a workspace is made from (create --from), as the
 // create reads it on its Mac: its name (the image's), its system, what its
@@ -21,13 +17,10 @@ type Template struct {
 	Network  string
 	Size     Resources
 	Mounts   []Mount
-	Shares   []TemplateShare
-	Files    []TemplateFile
-}
-
-type TemplateShare struct {
-	Account string
-	For     time.Duration
+	// value: the programs it signs in to, and those this Mac's vault grants
+	// it, by their wire names.
+	SignIns, Grants []string
+	Files           []TemplateFile
 }
 
 type TemplateFile struct {
@@ -37,21 +30,28 @@ type TemplateFile struct {
 
 // value: what a workspace's first start did of its Machinefile: the boot
 // phase's apply (Failed, its first line, when it did not end well), each
-// account shared, and the image's drift from the Machinefile now, one
-// line a package (hard case 17).
+// program granted, each sign-in left to the owner, and the image's drift
+// from the Machinefile now, one line a package (hard case 17).
 
 type FirstStart struct {
 	Template string
 	Failed   string
-	Shares   []FirstStartShare
+	Grants   []FirstStartGrant
+	SignIns  []FirstStartSignIn
 	Drift    []string
 }
 
-type FirstStartShare struct {
-	Account string
-	For     time.Duration
-	// value: why it was not shared; empty when it was.
+type FirstStartGrant struct {
+	Program string
+	// value: why it was not granted; empty when it was.
 	Failed string
+}
+
+// value: a program the Machinefile signs in to that the workspace is not
+// signed in to, and the command that signs it in.
+
+type FirstStartSignIn struct {
+	Program, Command string
 }
 
 type ServerTemplateError struct{ Name string }

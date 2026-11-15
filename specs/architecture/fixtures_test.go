@@ -68,8 +68,7 @@ func worldSecrets(t *testing.T, root string) []string {
 		}
 		var w struct {
 			Macs map[string]struct {
-				Vault   map[string][]byte `json:"vault"`
-				Secrets map[string]string `json:"secrets"`
+				Vault map[string][]byte `json:"vault"`
 			} `json:"macs"`
 		}
 		if err := json.Unmarshal(data, &w); err != nil {
@@ -78,9 +77,6 @@ func worldSecrets(t *testing.T, root string) []string {
 		for _, mac := range w.Macs {
 			for _, v := range mac.Vault {
 				out = append(out, string(v))
-			}
-			for _, v := range mac.Secrets {
-				out = append(out, v)
 			}
 		}
 	}

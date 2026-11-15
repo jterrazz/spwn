@@ -150,8 +150,6 @@ type Mac struct {
 	Overrides map[string]bool `json:"overrides,omitempty"`
 	// value: what station keeps in this Mac's vault, by name.
 	Vault map[string][]byte `json:"vault,omitempty"`
-	// value: the secrets another tool keeps on this Mac, by name.
-	Secrets map[string]string `json:"secrets,omitempty"`
 	// value: who each provider says is signed in, by provider; a provider
 	// absent here has no row on this Mac.
 	Identities map[string]accounts.Identity `json:"identities,omitempty"`
@@ -288,7 +286,6 @@ type SSHBlock struct {
 
 type Stores struct {
 	Images       []images.Record             `json:"images,omitempty"`
-	Shares       map[string][]accounts.Share `json:"shares,omitempty"`
 	Reservations []ports.Reservation         `json:"reservations,omitempty"`
 	Declarations []ports.Declaration         `json:"declarations,omitempty"`
 	Applied      map[string]settings.Applied `json:"applied,omitempty"`
@@ -448,9 +445,6 @@ type Kept struct {
 	Birth     *machines.Birth   `json:"birth,omitempty"`
 	// value: the process its create runs in, while it runs.
 	Owner *machines.Process `json:"owner,omitempty"`
-	// value: the shares station v2 kept in the VM's record, by name, until
-	// the accounts' store moves them out once.
-	Shared []string `json:"lent,omitempty"`
 	// value: the agents a workspace held when it last stopped.
 	Agents []string `json:"agents,omitempty"`
 	// value: the Machinefile it was made from.

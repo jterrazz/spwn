@@ -3,7 +3,6 @@ package machines
 import (
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 
@@ -350,15 +349,20 @@ type CreatedJSON struct {
 
 type CreatedBoot struct {
 	// value: why the boot phase's apply did not end well; empty when it did.
-	Failed string         `json:"failed,omitempty"`
-	Shares []CreatedShare `json:"shares"`
-	Drift  []string       `json:"drift"`
+	Failed  string          `json:"failed,omitempty"`
+	Grants  []CreatedGrant  `json:"grants"`
+	SignIns []CreatedSignIn `json:"signins"`
+	Drift   []string        `json:"drift"`
 }
 
-type CreatedShare struct {
-	Account string `json:"account"`
-	ForS    int64  `json:"for_s"`
+type CreatedGrant struct {
+	Program string `json:"program"`
 	Failed  string `json:"failed,omitempty"`
+}
+
+type CreatedSignIn struct {
+	Program string `json:"program"`
+	Command string `json:"command"`
 }
 
 type CreatedHealth struct {
@@ -391,9 +395,12 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 	}
 	if b := c.Boot; b != nil {
 		body.Template = b.Template
-		body.Boot = &CreatedBoot{Failed: b.Failed, Shares: []CreatedShare{}, Drift: append([]string{}, b.Drift...)}
-		for _, s := range b.Shares {
-			body.Boot.Shares = append(body.Boot.Shares, CreatedShare{Account: s.Account, ForS: int64(s.For.Seconds()), Failed: s.Failed})
+		body.Boot = &CreatedBoot{Failed: b.Failed, Grants: []CreatedGrant{}, SignIns: []CreatedSignIn{}, Drift: append([]string{}, b.Drift...)}
+		for _, g := range b.Grants {
+			body.Boot.Grants = append(body.Boot.Grants, CreatedGrant{Program: g.Program, Failed: g.Failed})
+		}
+		for _, s := range b.SignIns {
+			body.Boot.SignIns = append(body.Boot.SignIns, CreatedSignIn{Program: s.Program, Command: s.Command})
 		}
 	}
 	return body
@@ -452,14 +459,17 @@ func bootRows(b *model.FirstStart) []page.Row {
 	} else {
 		rows = append(rows, passed(model.StepBoot, b.Template))
 	}
-	for _, s := range b.Shares {
-		if s.Failed != "" {
-			rows = append(rows, attention("share/"+s.Account, s.Account, "not shared: "+s.Failed))
+	for _, g := range b.Grants {
+		if g.Failed != "" {
+			rows = append(rows, attention("grant/"+g.Program, g.Program, "not granted: "+g.Failed))
 			continue
 		}
-		row := passed(s.Account, "shared for "+termWords(s.For))
-		row.ID = "share/" + s.Account
+		row := passed(g.Program, "granted")
+		row.ID = "grant/" + g.Program
 		rows = append(rows, row)
+	}
+	for _, s := range b.SignIns {
+		rows = append(rows, attention("signin/"+s.Program, s.Program, "not signed in: "+s.Command))
 	}
 	if len(b.Drift) > 0 {
 		row := attention("drift", "Drift", "from its image")
@@ -471,19 +481,6 @@ func bootRows(b *model.FirstStart) []page.Row {
 		rows = append(rows, row)
 	}
 	return rows
-}
-
-// value: a share's term in the owner's words: `7 d`, `12 h`, `30 min`.
-func termWords(d time.Duration) string {
-	switch {
-	case d <= 0:
-		return "its default term"
-	case d%(24*time.Hour) == 0:
-		return strconv.Itoa(int(d/(24*time.Hour))) + " d"
-	case d%time.Hour == 0:
-		return strconv.Itoa(int(d/time.Hour)) + " h"
-	}
-	return strconv.Itoa(int(d/time.Minute)) + " min"
 }
 
 func passed(label, detail string) page.Row {

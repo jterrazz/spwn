@@ -212,9 +212,9 @@ func shares(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.Acc
 			granted[p.Program] = p.How == accounts.HowGranted
 		}
 	}
-	for _, s := range asked.Shares {
-		program := accounts.ProgramOf(s.Account)
-		access.Accounts = append(access.Accounts, machinefile.AccountHeld{Account: s.Account, Seen: signedIn[program], Asked: true})
+	for _, name := range slices.Concat(asked.SignIns, asked.Grants) {
+		program := accounts.Program(name)
+		access.Accounts = append(access.Accounts, machinefile.AccountHeld{Account: name, Seen: signedIn[program], Asked: true})
 		delete(granted, program)
 	}
 	for _, program := range slices.Sorted(maps.Keys(granted)) {

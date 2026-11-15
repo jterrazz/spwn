@@ -70,10 +70,12 @@ linters:
         misspell:
             locale: US
             # invariant: the glossary's words (docs/concepts/glossary.md): the CLI
-            # says "catalogue" and a declined question is "cancelled".
+            # says "catalogue", a declined question is "cancelled", and a
+            # Machinefile lists its sign-ins under "signins".
             ignore-rules:
                 - catalogue
                 - cancelled
+                - signins
         staticcheck:
             checks:
                 - all

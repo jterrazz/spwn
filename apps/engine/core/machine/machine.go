@@ -72,8 +72,6 @@ const (
 	Hypervisor Need = "hypervisor"
 	// value: what carries a shared port to the owner's other devices.
 	PrivateNetwork Need = "private-network"
-	// value: the credential store an account is copied out of.
-	Credentials Need = "credentials"
 )
 
 type Provider struct {

@@ -15,7 +15,7 @@ import (
 // runs it and the completion it carries is defined; the proof runs macOS's
 // own /bin/zsh, which a Linux runner does not ship.
 func TestAFreshMacsZshGetsTheCompletionFromTheBlock(t *testing.T) {
-	block := zshblock.NewBlock(&memory{files: map[string][]byte{}}, catalog.DotfilesFS, nil, zshblock.BlockOptions{ThisMachine: catalog.Mac})
+	block := zshblock.NewBlock(&memory{files: map[string][]byte{}}, catalog.DotfilesFS, zshblock.BlockOptions{ThisMachine: catalog.Mac})
 	script, err := block.Zsh(context.Background(), "_station() { }\ncompdef _station station")
 	if err != nil {
 		t.Fatal(err)

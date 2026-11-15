@@ -17,7 +17,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
-	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -60,7 +59,7 @@ func (m machine) guestPort() int { return m.port(22, "STATION_GUEST_SSH_PORT") }
 // rides the engine's own connections, never its socket: the lends are bound
 // to the engine they serve.
 func (m machine) engine(env kit.Env) *process.Engine {
-	shares := &engineShares{}
+	owed := &engineGrants{}
 	registry := m.registry(env)
 	calls := env.Calls
 	if calls == nil {
@@ -111,8 +110,8 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		},
 		State: m.paths.State, ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Mounts: m.vmMounts, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
 		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(),
-		NeverSleeps:   func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
-		AccountShares: shares, Peer: m.engineAPI(),
+		NeverSleeps: func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
+		GrantsOwed:  owed, Peer: m.engineAPI(),
 		Feeds: map[string]engine.Feed{engine.PageMenubar: menubar.Feed(), engine.PageMachine: menubar.Machine(),
 			engine.PagePorts: menubar.Ports(), engine.PageAwake: menubar.Awake(), engine.PageActivity: menubar.Activity(), engine.PageAccounts: menubar.Accounts(), engine.PageNeeds: menubar.Needs(), engine.PageFind: menubar.Find(), engine.PageAgent: menubar.Agent()},
 		Sample:   live.Sample,
@@ -128,16 +127,11 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Beside:  m.beside(),
 	})
 	if m.world == nil && m.kind == catalog.Mac {
-		shares.g = m.vaultKept(d).Grants()
+		owed.g = m.vaultKept(d).Grants()
 	}
-	shares.s = m.secretsVia(d, func(_ context.Context, vm string) (bool, error) {
-		for _, v := range d.VMs() {
-			if v.Name == vm {
-				return v.State == engine.StateRunning, nil
-			}
-		}
-		return false, nil
-	})
+	if m.world != nil {
+		owed.forget = m.world.forgetGrants
+	}
 	m.far.engine = d
 	d.ServeWith(m.engineServer(d, registry, calls))
 	return d
@@ -246,58 +240,36 @@ func retiredEngineCommand(env kit.Env, m machine) *cobra.Command {
 	return cmd
 }
 
-// invariant: the expiry job takes back the shares past their term and the
-// removals a grant still owes a machine alike: a removal owed is due as
-// grant:<program>, and is taken out by its program's Remove.
-type engineShares struct {
-	s *accountscalls.Sharing
-	g *keychain.Grants
+// invariant: the retry job takes out the removals a grant still owes a
+// machine, each by its program's Remove; a VM owes none, and a world's
+// grants only go with their machine.
+type engineGrants struct {
+	g      *keychain.Grants
+	forget func(ctx context.Context, vm string) error
 }
 
-func (l *engineShares) Held() (map[string][]accounts.Share, error) {
-	held, err := l.s.Shares(context.Background())
-	if err != nil || l.g == nil {
-		return held, err
+func (l *engineGrants) Owed() (map[string][]accounts.Program, error) {
+	if l.g == nil {
+		return nil, nil
 	}
-	due, err := l.g.Due(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	if held == nil {
-		held = map[string][]accounts.Share{}
-	}
-	for vm, list := range due {
-		held[vm] = append(held[vm], list...)
-	}
-	return held, nil
+	return l.g.Owed(context.Background())
 }
 
-func (l *engineShares) Expire(ctx context.Context, vm string, names []string) error {
-	var shared []string
-	var granted []accounts.Program
-	for _, n := range names {
-		if p, ok := keychain.Due(n); ok && l.g != nil {
-			granted = append(granted, p)
-		} else {
-			shared = append(shared, n)
-		}
+func (l *engineGrants) Retry(ctx context.Context, vm string, programs []accounts.Program) error {
+	if l.g == nil {
+		return nil
 	}
-	var errs []error
-	if len(shared) > 0 {
-		errs = append(errs, l.s.Expire(ctx, vm, shared))
-	}
-	if len(granted) > 0 {
-		errs = append(errs, l.g.Expire(ctx, vm, granted))
-	}
-	return errors.Join(errs...)
+	return l.g.Retry(ctx, vm, programs)
 }
 
-func (l *engineShares) Forget(ctx context.Context, vm string) error {
-	err := l.s.Forget(ctx, vm)
-	if l.g != nil {
-		err = errors.Join(err, l.g.Forget(ctx, vm))
+func (l *engineGrants) Forget(ctx context.Context, vm string) error {
+	switch {
+	case l.g != nil:
+		return l.g.Forget(ctx, vm)
+	case l.forget != nil:
+		return l.forget(ctx, vm)
 	}
-	return err
+	return nil
 }
 
 type macEngine struct{ c engineAPI }
