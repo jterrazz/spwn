@@ -66,7 +66,7 @@ Its check (`--check`, a URL that answers 2xx or 3xx, or a `host:port` that accep
 
 Each VM of `machines.list`, of this Mac or another, says what the Machines page shows of it, and no other answer carries these:
 
-- `Hold` is who holds it and whether it is safe to delete, one `State` of six with its `Sentence`, the first rule that matches: `not-seen` while its Mac does not answer; `always-on` for a server (`Always on. Stopping it needs its name typed.`); `held` while it is created, or runs with an agent at work in it or, ephemeral, made by a session whose agent is not known, `By` the session that holds it, absent for you (`Held by studio-os-fe. Not safe to delete while it runs.`); `idle` once its agent finished an hour ago or more (`Idle for 5 h. Safe to delete.`); `free` when its agent finished sooner, or an ephemeral one is stopped; `yours` otherwise (`Yours. Stays until you delete it.`).
+- `Hold` is who holds it and whether it is safe to delete, one `State` of six with its `Sentence`, the first rule that matches: `not-seen` while its Mac does not answer; `always-on` for a server (`Always on. Stopping it needs its name typed.`); `held` while it is created, or runs with an agent at work in it or, ephemeral, made by a session whose agent is not known, `By` the session that holds it, absent for you (`It is held by its lot, by studio-os-fe: work may be in progress.`, or `It is held by its agent: work may be in progress.`); `idle` once its agent finished an hour ago or more (`Idle for 5 h. Safe to delete.`); `free` when its agent finished sooner, or an ephemeral one is stopped; `yours` otherwise (`Yours. Stays until you delete it.`).
 - `Sections` are the sections its kind has, one flag each: a server's Overview, Activity, Ports and SSH; a workspace's all but Awake and SSH. Images is the estate's section, never one machine's, so it has no flag.
 - `Gestures` are the gestures its header offers, drawn as the list says: a running VM `stop`, a running server also `restart`, a stopped or suspended one `start`; a VM that is being created, not seen or broken offers none, and a Mac has none.
 - `UsedBytes` is the memory its process holds on its Mac now, read by the meter from the process the engine runs it in, absent while it does not run or its Mac did not measure it; each share of a Mac's `Capacity.VMs` carries the same, capped at the share's `Bytes`.
@@ -92,7 +92,7 @@ station machines edit infra --check infra:6443 # a server's health check, read b
 station machines ssh api # prints the ssh command: ssh admin@api
 station machines restart mac-mini # a Mac: asks naming the VMs that pause, a planned restart that unlocks itself, waits for its station, starts those VMs again; a VM: power off, run
 station machines restart infra --on mac-mini # a server: asks its name typed (--confirm=infra), --yes answers nothing; a workspace asks nothing
-station machines delete api # destroys the VM, its grants and the accounts its first start shared with it
+station machines delete api # destroys the VM, its grants and the accounts its first start shared with it; asks its name typed (--confirm=api), saying who holds it when one does; an ephemeral workspace nobody holds asks nothing
 station machines api # its Overview, as station overview --on api
 station machines unlock mac-mini # after a power cut, on its last LAN address: you type its password into macOS's pre-boot prompt
 station machines wake macbook-air --tell # a Wake-on-LAN packet from this Mac; told once it answers again

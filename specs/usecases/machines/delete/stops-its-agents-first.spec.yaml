@@ -14,7 +14,7 @@ runs:
     - command: 'machines delete linux-1'
       exit: 2
       stderr: |
-          Error: refusing without the name typed: linux-1 (its agents stop first: docs-bot, linux-1)
+          Error: refusing without the name typed: linux-1 (its agents stop first: docs-bot, linux-1). It is held by its agent: work may be in progress.
           Hint: in a script: --confirm=linux-1
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].agents.closed'' world.json'
       exit: 0

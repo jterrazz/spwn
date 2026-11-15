@@ -1,7 +1,6 @@
 package machines
 
 import (
-	"cmp"
 	"strconv"
 	"time"
 )
@@ -63,7 +62,7 @@ func HoldOf(vm VM, now time.Time) Hold {
 	case vm.State == Creating:
 		return Hold{State: HoldHeld, By: holder(vm, session), Sentence: "Being created" + by(vm, session) + ". It cannot be deleted until its create ends."}
 	case vm.State == Running && working:
-		return Hold{State: HoldHeld, By: holder(vm, session), Sentence: "Held by " + cmp.Or(holder(vm, session), "its agent") + ". Not safe to delete while it runs."}
+		return Hold{State: HoldHeld, By: holder(vm, session), Sentence: heldBy(vm, session)}
 	case isIdle:
 		return Hold{State: HoldIdle, Sentence: "Idle for " + strconv.Itoa(int(idle/time.Hour)) + " h. Safe to delete."}
 	case vm.State == Running && vm.Finished():
@@ -74,6 +73,15 @@ func HoldOf(vm VM, now time.Time) Hold {
 		return Hold{State: HoldYours, Sentence: "Yours. Deleted when it powers off."}
 	}
 	return Hold{State: HoldYours, Sentence: "Yours. Stays until you delete it."}
+}
+
+func heldBy(vm VM, session bool) string {
+	// value: the sentence a delete's question carries for a VM someone works
+	// in; the lot is the session that made it.
+	if session {
+		return "It is held by its lot, by " + vm.Creator + ": work may be in progress."
+	}
+	return "It is held by its agent: work may be in progress."
 }
 
 func holder(vm VM, session bool) string {

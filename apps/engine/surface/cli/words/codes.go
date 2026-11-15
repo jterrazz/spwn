@@ -56,6 +56,15 @@ func agentsFirst(e *fail.Error) string {
 	return ""
 }
 
+// value: a held VM's confirmation says who holds it, in the sentence the
+// engine worded.
+func heldBy(e *fail.Error) string {
+	if said := e.Detail["holder"]; said != "" {
+		return ". " + said
+	}
+	return ""
+}
+
 func carried(e *fail.Error, generic, advice string) (message, hint string) {
 	// value: the engine words its own refusals where it raises them, naming
 	// the VM, the port or the duration at hand; a caller prints those
@@ -77,7 +86,7 @@ func Codes() map[fail.Code]Wording {
 			if doing, _, ok := typedGesture(e.Detail["action"]); ok && e.Detail["by"] == "yes" {
 				return doing + " a " + machine.Kind(e.Detail["kind"]).Word(machine.OS(e.Detail["os"])) + " needs its name", "--confirm=" + e.Subject
 			}
-			return "refusing without the name typed: " + e.Subject + agentsFirst(e), "in a script: --confirm=" + e.Subject
+			return "refusing without the name typed: " + e.Subject + agentsFirst(e) + heldBy(e), "in a script: --confirm=" + e.Subject
 		},
 		confirm.Mismatch: func(e *fail.Error) (string, string) {
 			said := "you typed \"" + e.Detail["typed"] + "\", not \"" + e.Subject + "\""
