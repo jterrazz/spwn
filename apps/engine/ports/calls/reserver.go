@@ -154,7 +154,7 @@ func (s *Reserver) survey(ctx context.Context, vms []ports.Machine) (ps []ports.
 	}
 	thisMac, quiet := ports.QuietOnMac(ports.MacOf(s.o.ThisMacName, mine), from, to, decl)
 	ms := append([]ports.Machine{thisMac}, vms...)
-	ps = ports.Survey(ms, decl)
+	ps = ports.MarkStopped(ports.Survey(ms, decl), s.policy())
 	if s.o.Routes == nil {
 		return ps, quiet, nil
 	}

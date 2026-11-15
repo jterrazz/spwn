@@ -76,6 +76,8 @@ func QuietWords(n int) string {
 	return strconv.Itoa(n) + " listeners on ports the system keeps for itself"
 }
 
+var StoppedByYou = []string{"stopped by you", "stays closed until you share it again"} // value: a port the owner stopped sharing, as its row says it.
+
 func QuietHere(n int) string {
 	// value: a Mac's own listeners on ports the system keeps for itself, a
 	// count beside the reserved ports: a Mac's port is never shared.

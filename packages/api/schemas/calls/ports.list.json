@@ -379,6 +379,9 @@
         "Reach": {
           "type": "integer"
         },
+        "Stopped": {
+          "type": "boolean"
+        },
         "Verified": {
           "anyOf": [
             {
