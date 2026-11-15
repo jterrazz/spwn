@@ -36,7 +36,7 @@ function actionWord(row: Pick<AccountsProgramRow, 'Action'>): string {
     return wordOf('AccountsProgramAction', row.Action).Word;
 }
 
-function rowShown(row: AccountsProgramRow, withLine: boolean) {
+export function rowShown(row: AccountsProgramRow, withLine: boolean) {
     return {
         lead: <AppIcon name={row.Program} />,
         sentence: secondLine(row, withLine),

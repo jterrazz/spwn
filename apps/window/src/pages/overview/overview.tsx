@@ -23,7 +23,7 @@ import { Page } from '../page';
 import { CheckLatency, CheckTile, Health, LastDays } from './health';
 import { FileChapters, ItsFile } from './its-file';
 import { Follows, Machines, MachinesTile } from './mac';
-import { SharedAccounts, SharedPorts } from './shared';
+import { SharedPorts, SignInsPanel } from './shared';
 import { BusiestNow, WhyItExists } from './why';
 
 import styles from './overview.module.css';
@@ -146,7 +146,7 @@ function VmOverview({ mac, vm, go }: VmProps) {
                             <>
                                 <ItsFile found={found} go={go} />
                                 <SharedPorts found={found} go={go} vm={vm.Name} />
-                                <SharedAccounts found={found} go={go} vm={vm.Name} />
+                                <SignInsPanel found={found} go={go} vm={vm.Name} />
                             </>
                         )}
                     </HeldOutcomes>

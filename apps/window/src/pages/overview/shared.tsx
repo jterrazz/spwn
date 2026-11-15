@@ -1,14 +1,14 @@
-import { AppIcon, Button, Panel, Row } from '../../design/index';
-import { looksSecret } from '../../design/secret';
+import { asSentence, Button, Panel, Row } from '../../design/index';
 import { useRead, useWatch } from '../../engine/react';
-import { holdsFor } from '../../engine/shown';
 import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
-import { machineRoute } from '../../shell/route';
+import { machineRoute, tabsOf } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
 import { Unanswered } from '../kit/readings';
 import { portsOf } from '../ports/ports-of';
 import { SharedRow } from '../ports/shared-row';
+import { aimed } from '../sign-ins/aim';
+import { rowShown } from '../sign-ins/sign-ins';
 
 import styles from './overview.module.css';
 
@@ -63,38 +63,29 @@ export function SharedPorts({ found, vm, go }: Props) {
     );
 }
 
-export function SharedAccounts({ found, vm, go }: Props) {
-    const target = targetOf({ mac: found.mac });
-    const accounts = useWatch('accounts.read', { VMs: true }, target);
+export function SignInsPanel({ found, vm, go }: Props) {
+    const { input, target } = aimed(found, {});
+    const listed = useWatch('accounts.list', input, target);
     const all = <AllOf go={go} label="All sign-ins" tab="Sign-ins" vm={vm} />;
-    if (accounts.kind === 'reading') {
+    if (!tabsOf(found.vm?.Sections).includes('Sign-ins') || listed.kind === 'reading') {
         return null;
     }
-    if (accounts.kind === 'failed') {
+    if (listed.kind === 'failed') {
         return (
-            <Panel action={all} title="Accounts shared with it">
-                <Unanswered error={accounts.error} size="panel" />
+            <Panel action={all} title="Sign-ins">
+                <Unanswered error={listed.error} size="panel" />
             </Panel>
         );
     }
-    const report = accounts.out;
-    const shares = (report.Shares ?? []).filter((share) => share.vm === vm);
+    const programs = listed.out.Programs ?? [];
     return (
-        <Panel action={all} title="Accounts shared with it">
-            {shares.length === 0 ? (
-                <p className={styles.none}>No account is shared with it.</p>
+        <Panel action={all} note={String(programs.length)} title="Sign-ins">
+            {programs.length === 0 ? (
+                <p className={styles.none}>{asSentence(listed.out.Verdict.Sentence)}</p>
             ) : null}
-            {shares.map((share) => {
-                const withheld = looksSecret(share.account);
-                return (
-                    <Row
-                        key={`${share.vm}/${share.account}`}
-                        lead={<AppIcon name={withheld ? '' : share.account} />}
-                        state={{ ...holdsFor(share.until, report.Now), asWritten: true }}
-                        title={withheld ? 'a share whose name is withheld' : share.account}
-                    />
-                );
-            })}
+            {programs.map((row) => (
+                <Row {...rowShown(row, true)} key={row.Program} />
+            ))}
         </Panel>
     );
 }
