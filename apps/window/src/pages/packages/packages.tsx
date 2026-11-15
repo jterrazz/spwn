@@ -116,6 +116,7 @@ function UpgradeRows({ upgrades }: { upgrades: MachinefileUpgrades }) {
     return (
         <>
             <Row size="slim" title={upgrades.Sentence} />
+            {upgrades.File === '' ? null : <Row kind="File" size="slim" title={upgrades.File} />}
             {last === undefined ? null : (
                 <Row
                     kind="Last run"
