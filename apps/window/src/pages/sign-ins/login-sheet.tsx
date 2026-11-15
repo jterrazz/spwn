@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { CopyButton } from '../../design/copy-button';
 import { AppIcon, Button, Dialog, StateDot, StatePill } from '../../design/index';
 import type { EngineError } from '../../engine/engine-error';
-import { detailOf, stepHeadingOf, wordOf } from '../../engine/engine-words';
+import { detailOf, stepHeadingOf } from '../../engine/engine-words';
 import { useReread } from '../../engine/react';
 import { engineShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
@@ -141,7 +141,7 @@ type RoundProps = {
 function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
     const reread = useReread();
     const seen = useLogin(found, program, () => {
-        reread(['accounts.list']);
+        reread(['accounts.list', 'overview.read']);
         onClose();
     });
     const cancel = <Button onClick={onClose}>Cancel</Button>;
@@ -197,11 +197,11 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
 type SheetProps = {
     found: Found;
     program: Program;
-    action: AccountsProgramRow['Action'];
+    title: string;
     onClose: () => void;
 };
 
-export function LoginSheet({ found, program, action, onClose }: SheetProps) {
+export function LoginSheet({ found, program, title, onClose }: SheetProps) {
     const [round, setRound] = useState(0);
     return (
         <Round
@@ -212,7 +212,7 @@ export function LoginSheet({ found, program, action, onClose }: SheetProps) {
                 setRound(round + 1);
             }}
             program={program}
-            title={`${wordOf('AccountsProgramAction', action).Word} ${program}`}
+            title={title}
         />
     );
 }

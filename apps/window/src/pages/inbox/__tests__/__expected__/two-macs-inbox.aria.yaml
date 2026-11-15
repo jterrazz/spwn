@@ -10,7 +10,7 @@
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
     - 'button "Broken npm sign-in fails: The token is refused by registry.npmjs.org jterrazz-macbook-pro · Sign-ins"'
-    - text: Fix
+    - button "Fix npm": Fix
     - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 jterrazz-macbook-pro · Background"
     - button "Remove com.jterrazz.brain.x-snapshot": Remove
   - region "Can wait":
