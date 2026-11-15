@@ -73,6 +73,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Hardware:    m.hardware,
 		Laptop:      m.profile.Caps.Lid,
 		Asleep:      m.asleep,
+		Awake:       m.awakePhrase,
 		LAN:         m.lanAddress,
 		Uses:        m.vmUses,
 		Uptime:      m.stores.uptime,

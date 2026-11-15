@@ -2015,6 +2015,7 @@ export type MachinesLatencyPoint = {
 export type MachinesMacView = {
     Answered?: string;
     Asleep: boolean;
+    Awake?: string;
     Engine: MachinesEngineView;
     Hardware: CoreMachineHardware;
     LAN: string;
@@ -2022,6 +2023,7 @@ export type MachinesMacView = {
     Name: string;
     Node: MachinesNode;
     Reachable: boolean;
+    Sentence?: string;
     StationVersion: string;
     ThisMac: boolean;
     Unseen?: CoreVerdictVerdict;

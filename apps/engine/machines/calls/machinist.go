@@ -41,6 +41,9 @@ type Options struct {
 	// value: this Mac runs on battery with its lid closed now: it is going
 	// to sleep; nil when it cannot say.
 	Asleep func(ctx context.Context) bool
+	// value: what keeps this Mac awake, in words; empty when nothing does
+	// or the engine cannot say; nil says none.
+	Awake func(ctx context.Context) string
 	// value: this Mac's address on your LAN; empty when it cannot say.
 	LAN func(ctx context.Context) string
 	// value: the memory each VM's process holds on this Mac now, in bytes,

@@ -279,16 +279,7 @@ func AwakeRead(r awake.Report, m machine.Ref) Read {
 		parts = []Part{{State: catalog.StateOK, Word: "never sleeps"}}
 	case awake.AwakeUntil:
 		s := r.Session
-		zone := r.Zone
-		if zone == nil {
-			zone = time.UTC
-		}
-		until := "until " + s.Until.In(zone).Format("15:04")
-		if s.Run != "" {
-			// invariant: a session that follows a run ends with it, whatever
-			// its 24 h bound says, in the words the Awake page says it.
-			until = "until " + s.Run + " is done"
-		}
+		until := r.Until()
 		parts = []Part{{State: catalog.StateOK, Word: until}}
 		if s.Lid {
 			parts = append(parts, Part{Word: "lid closed"})

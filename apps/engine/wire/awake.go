@@ -32,6 +32,23 @@ func (m machine) awakeDeps() awakecalls.Deps {
 	}
 }
 
+// value: what keeps this Mac awake in words, as its engine says it; empty
+// where it cannot be read.
+func (m machine) awakePhrase(ctx context.Context) string {
+	w := m.awakeWaker()
+	if w.Check() != nil {
+		return ""
+	}
+	var last awake.Report
+	for r := range w.Read(ctx) {
+		last = r
+	}
+	if last.Engine != awake.EngineRunning {
+		return ""
+	}
+	return last.Phrase()
+}
+
 // value: the servers this Mac keeps, by name.
 func (m machine) servers() []string {
 	records, err := m.machines(false).Records()

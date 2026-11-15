@@ -228,6 +228,7 @@ func Judged(f AllMachines) AllMachines {
 	macs := slices.Clone(f.Macs)
 	for i := range macs {
 		macs[i].Unseen = UnseenVerdict(macs[i], f.Read)
+		macs[i].Sentence = SentenceOf(macs[i], f.Read)
 		vms := slices.Clone(macs[i].VMs)
 		for j := range vms {
 			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j]), LatencyNote(vms[j])
