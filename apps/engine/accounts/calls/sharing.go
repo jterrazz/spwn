@@ -64,14 +64,6 @@ func NewSharing(guest Guest, st SharingStores, source contract.SecretSource, ids
 	return &Sharing{guest: guest, st: st, source: source, ids: ids, o: o}
 }
 
-func (s *Sharing) ShareList() []string {
-	list, err := s.st.ShareList.Get()
-	if err != nil {
-		return nil
-	}
-	return list
-}
-
 func (s *Sharing) Shares(ctx context.Context) (map[string][]accounts.Share, error) {
 	return s.st.Shares.List(ctx)
 }
@@ -118,18 +110,6 @@ func (s *Sharing) CheckShare(ctx context.Context, account, vm string) (secret st
 	return secret, nil
 }
 
-func (s *Sharing) CheckFrom(ctx context.Context, account, vm, from string) error {
-	// invariant: a share is its VM's own Mac's: asked from another Mac, the
-	// VM is judged first, so a server's refusal stands, then it is refused.
-	if from == "" || from == s.thisMac() {
-		return nil
-	}
-	if err := s.CheckReceiver(ctx, vm); err != nil {
-		return err
-	}
-	return &accounts.OtherMacError{Account: account, VM: vm, Mac: s.thisMac()}
-}
-
 func (s *Sharing) CheckReceiver(ctx context.Context, vm string) error {
 	// invariant: a share lands only in a running VM this Mac keeps that
 	// keeps accounts: a server keeps its own secrets.
@@ -157,43 +137,40 @@ func (s *Sharing) CheckReceiver(ctx context.Context, vm string) error {
 	return nil
 }
 
-func (s *Sharing) Share(ctx context.Context, account, vm string, term time.Duration) (accounts.Shared, error) {
+func (s *Sharing) Share(ctx context.Context, account, vm string, term time.Duration) error {
 	term, ok := accounts.CheckTerm(term)
 	if !ok {
-		return accounts.Shared{}, &accounts.TermError{Account: account, VM: vm, Term: term}
+		return &accounts.TermError{Account: account, VM: vm, Term: term}
 	}
 	secret, err := s.CheckShare(ctx, account, vm)
 	if err != nil {
-		return accounts.Shared{}, err
+		return err
 	}
 	found, err := s.inVM(ctx, vm, "command -v studio", "")
 	switch {
 	case err != nil:
-		return accounts.Shared{}, &accounts.StepError{VM: vm, Step: "reaching it", Cause: err}
+		return &accounts.StepError{VM: vm, Step: "reaching it", Cause: err}
 	case found.ExitCode != 0:
-		return accounts.Shared{}, &accounts.NoStudioError{VM: vm}
+		return &accounts.NoStudioError{VM: vm}
 	}
 	exported, err := s.source.Export(ctx, []string{secret})
 	if err != nil {
-		return accounts.Shared{}, &accounts.UnreadableError{Account: account, Mac: "This Mac", Cause: err, Log: s.keep("share "+account+" with "+vm, err)}
+		return &accounts.UnreadableError{Account: account, Mac: "This Mac", Cause: err, Log: s.keep("share "+account+" with "+vm, err)}
 	}
 	// invariant: the secret travels from the export's output to the VM's
 	// stdin and nowhere else: never argv, never a file on the Mac.
 	imported, err := s.inVM(ctx, vm, accounts.VMStudio("import"), string(exported))
 	if err != nil || imported.ExitCode != 0 {
-		return accounts.Shared{}, &accounts.StepError{VM: vm, Step: "copying " + accounts.Label(account), Cause: failure(err, imported)}
+		return &accounts.StepError{VM: vm, Step: "copying " + accounts.Label(account), Cause: failure(err, imported)}
 	}
 	at := s.o.Now().UTC().Truncate(time.Second)
 	share := accounts.Share{Name: secret, At: at, Until: at.Add(term)}
 	held, err := s.st.Shares.Get(ctx, vm)
 	if err != nil {
-		return accounts.Shared{}, err
+		return err
 	}
 	held = slices.DeleteFunc(held, func(have accounts.Share) bool { return have.Name == secret })
-	if err := s.st.Shares.Put(ctx, vm, append(held, share)); err != nil {
-		return accounts.Shared{}, err
-	}
-	return accounts.Shared{Account: account, VM: vm, At: share.At, Until: share.Until}, nil
+	return s.st.Shares.Put(ctx, vm, append(held, share))
 }
 
 func (s *Sharing) keep(what string, cause error) string {
@@ -203,34 +180,6 @@ func (s *Sharing) keep(what string, cause error) string {
 		return ""
 	}
 	return s.o.Keep(s.o.Now().UTC().Format(time.RFC3339) + " " + what + ": " + cause.Error() + "\n")
-}
-
-func (s *Sharing) CheckTakeBack(ctx context.Context, account, vm string) (string, error) {
-	// invariant: a take-back names an account this Mac shares with that VM;
-	// anything else is refused before the VM is asked.
-	if !accounts.Known(account) {
-		return "", &accounts.UnknownError{Account: account}
-	}
-	if err := s.checkVM(ctx, vm); err != nil {
-		return "", err
-	}
-	held, err := s.st.Shares.Get(ctx, vm)
-	if err != nil {
-		return "", err
-	}
-	secret, _ := accounts.SecretOf(account)
-	if !slices.ContainsFunc(held, func(sh accounts.Share) bool { return sh.Name == secret }) {
-		return "", &accounts.NotSharedError{Account: account, VM: vm}
-	}
-	return secret, nil
-}
-
-func (s *Sharing) TakeBack(ctx context.Context, account, vm string) error {
-	secret, err := s.CheckTakeBack(ctx, account, vm)
-	if err != nil {
-		return err
-	}
-	return s.Expire(ctx, vm, []string{secret})
 }
 
 func (s *Sharing) Expire(ctx context.Context, vm string, secrets []string) error {

@@ -1,4 +1,4 @@
-description: 'the Claude token reaches studio on stdin, never as an argument, and the share list once'
+description: 'the Claude token reaches studio on stdin, never as an argument, and the share list holds it'
 fixture:
     - ../../__fixtures__/terminal/
     - ./__fixtures__/settings-studio/
@@ -35,10 +35,6 @@ runs:
                   studio credentials import
                   {"operator:claude:oauth-token":"sk-ant-oat01-x"}
                   studio credentials export operator:claude:oauth-token
-    - command: 'accounts --json | /usr/bin/jq -c .share_list'
-      exit: 0
-      stdout: |
-          ["session:*","operator:claude:oauth-token"]
     - command: '--version >/dev/null; /bin/cat .config/station/*.json 2>/dev/null | /usr/bin/grep -c sk-ant'
       exit: 1
       stdout: |

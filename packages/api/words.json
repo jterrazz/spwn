@@ -339,56 +339,6 @@
     }
   },
   "CoreFailCode": {
-    "account.not-shareable": {
-      "Word": "not shareable",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.not-shared": {
-      "Word": "not shared",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.not-signed-in": {
-      "Word": "not signed in",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.other-mac": {
-      "Word": "other Mac",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.term-out-of-bounds": {
-      "Word": "term out of bounds",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.to-server": {
-      "Word": "to server",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.unknown": {
-      "Word": "unknown",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.unknown-vm": {
-      "Word": "unknown VM",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.unreadable": {
-      "Word": "unreadable",
-      "Detail": "account",
-      "Tone": "plain"
-    },
-    "account.vm-stopped": {
-      "Word": "VM stopped",
-      "Detail": "account",
-      "Tone": "plain"
-    },
     "agents.ambiguous": {
       "Word": "ambiguous",
       "Detail": "agents",

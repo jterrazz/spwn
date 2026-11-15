@@ -3477,7 +3477,8 @@
           "name": "mac-mini"
         }
       },
-      "icon": "arrow.clockwise"
+      "icon": "arrow.clockwise",
+      "destructive": true
     },
     {
       "label": "Stop",

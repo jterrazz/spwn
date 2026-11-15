@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -99,14 +100,18 @@ func (f *fleet) Invoke(_ context.Context, target machine.Ref, name string, _, ou
 	return nil
 }
 
-func (f *fleet) Watch(_ context.Context, target machine.Ref, name string, _ any, _ call.Progress) (<-chan call.Update[any], error) {
+func (f *fleet) Watch(_ context.Context, target machine.Ref, name string, in any, _ call.Progress) (<-chan call.Update[any], error) {
 	f.asked[name] = target
 	if f.silent {
 		return nil, errSilent
 	}
-	report := accounts.Report{}
-	if target.Name == "mini" {
-		report.Shares = []accounts.Shared{{Account: "forge", VM: "linux-1"}, {Account: "notes", VM: "linux-1"}, {Account: "mail", VM: "linux-2"}}
+	report := accounts.ProgramsRead{}
+	if of, _ := in.(accountscalls.ProgramsIn); target.Name == "mini" && of.Machine == "linux-1" {
+		report.Programs = []accounts.ProgramRow{
+			{Program: "forge", State: accounts.ProgramSignedIn, How: accounts.HowGranted},
+			{Program: "mail", State: accounts.ProgramSignedOut},
+			{Program: "notes", State: accounts.ProgramSignedIn, How: accounts.HowGranted},
+		}
 	}
 	out := make(chan call.Update[any], 1)
 	out <- call.Update[any]{Value: report}
@@ -144,7 +149,7 @@ func TestAVMsDriftJudgesItsPackagesOnItAndItsSharesOnItsMac(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if f.asked["machinefile.plan"] != (machine.Ref{Name: "linux-1"}) || f.asked["ports.list"] != (machine.Ref{}) || f.asked["accounts.read"] != (machine.Ref{Name: "mini"}) {
+	if f.asked["machinefile.plan"] != (machine.Ref{Name: "linux-1"}) || f.asked["ports.list"] != (machine.Ref{}) || f.asked["accounts.list"] != (machine.Ref{Name: "mini"}) {
 		t.Errorf("asked %v; want the plan of linux-1, the ports with no target, the accounts of the mini", f.asked)
 	}
 	if d.Machine != "linux-1" {
@@ -159,7 +164,7 @@ func TestAVMsDriftJudgesItsPackagesOnItAndItsSharesOnItsMac(t *testing.T) {
 	}
 	a := chapterOf(t, d, machinefile.ChapterAccounts)
 	if a.Listed != 2 || a.Matching != 1 || len(a.Differing) != 2 {
-		t.Fatalf("accounts %+v; want forge matching, mail not copied, notes copied unasked", a)
+		t.Fatalf("accounts %+v; want forge matching, mail not signed in, notes granted unasked", a)
 	}
 	if a.Differing[0].Account != "mail" || a.Differing[0].Condition != machinefile.Absent || a.Differing[1].Account != "notes" || a.Differing[1].Condition != machinefile.Extra {
 		t.Errorf("accounts differ as %+v", a.Differing)

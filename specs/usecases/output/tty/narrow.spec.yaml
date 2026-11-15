@@ -10,11 +10,10 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · jterrazz-macbook-pro · 9 things need you
+          This Mac · jterrazz-macbook-pro · 8 things need you
             Engine running
 
           Needs you
-            ✗ npm sign-in expired  npm login
             ✗ com.jterrazz.brain.x-snapshot is failing, last exit 2
               station background remove com.jterrazz.brain.x-snapshot
             ◐ 1 mise update waiting
@@ -23,14 +22,15 @@ runs:
               station apps update --manager brew
             ◐ Firewall: off
               System Settings > Network > Firewall
-            4 more: station overview --all
+            ◐ ~/.tart is misplaced  station disk move ~/.tart
+            3 more: station overview --all
           Activity    memory 12.4 of 16 GB · 388 GB free
           Apps        ● 7 ok · ◐ 2 updates · ○ 105 not installed
           Settings    set by station · ○ 0 of 19 · checked · ● 8 of 9
           Disk        ◐ 388 GB free · 34.8 GB can rebuild
                       ◐ 1 misplaced
           Ports       Public 0 · Private 2
-          Accounts    ● 6 · ✗ npm
+          Accounts    ● 3
           Background  ● 10 · ✗ 1 failing · ◐ 3 orphans
           Awake       ○ sleeps normally
           VMs         ○ api stopped · ● linux-1 running
@@ -103,7 +103,7 @@ runs:
           Disk        ◐ 1.6 TB free · 1.1 GB can rebuild
                       ◐ 1 misplaced
           Ports       Public 0 · Private 0
-          Accounts    ● 1
+          Accounts    ● 0
           Background  ● 1
           Awake       ● never sleeps
           VMs         ● infra running

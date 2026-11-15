@@ -16,28 +16,11 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/remote/adapter/unix"
 	accountscmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/accounts"
-	accountsshare "github.com/jterrazz/studio-station/apps/engine/surface/cli/accounts/share"
-	accountstakeback "github.com/jterrazz/studio-station/apps/engine/surface/cli/accounts/takeback"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 )
 
 func accountsCommand(env kit.Env, m machine) *cobra.Command {
-	return accountscmd.Command(accountscmd.Deps{ThisMachine: m.where}, env,
-		accountsshare.Command(accountsshare.Deps{Now: m.sys.Clock.Now}, env),
-		accountstakeback.Command(env),
-	)
-}
-
-// invariant: station secrets and its verbs are the hidden v2 words of
-// station accounts for one release (SPEC §4.3); allow and disallow are
-// refused, the share list being the owner's to write.
-func secretsAlias(env kit.Env, m machine) *cobra.Command {
-	return kit.Alias("secrets", accountscmd.Command(accountscmd.Deps{ThisMachine: m.where}, env,
-		kit.AliasArgs(kit.Alias("lend", accountsshare.LendAlias(accountsshare.Deps{Now: m.sys.Clock.Now}, env), "share"), "<account>"),
-		kit.AliasArgs(kit.Alias("recall", accountstakeback.RecallAlias(env), "take-back"), "<account>"),
-		accountscmd.Retired("allow", env),
-		accountscmd.Retired("disallow", env),
-	), "accounts")
+	return accountscmd.Command(accountscmd.Deps{ThisMachine: m.where}, env)
 }
 
 func (m machine) secretStores() accountscalls.SharingStores {

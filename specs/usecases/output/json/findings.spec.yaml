@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" overview --json > overview.json; for read in accounts apps settings disk background; do /usr/bin/jq -c --arg s "$read" ''[.findings[] | select(.section == $s) | del(.machine)] | sort_by(.subject)'' overview.json > want.json; "$STATION" $read --json | /usr/bin/jq -c ''.findings | sort_by(.subject)'' > got.json; echo "$read  $(/usr/bin/jq length got.json)  $(/usr/bin/cmp -s want.json got.json && echo same as overview || echo differs)"; done'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].accounts.programs.npm = {"Program": "npm", "State": "broken", "Reason": "Refused at the provider"}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" overview --json > overview.json; for read in accounts apps settings disk background; do /usr/bin/jq -c --arg s "$read" ''[.findings[] | select(.section == $s) | del(.machine)] | sort_by(.subject)'' overview.json > want.json; "$STATION" $read --json | /usr/bin/jq -c ''.findings | sort_by(.subject)'' > got.json; echo "$read  $(/usr/bin/jq length got.json)  $(/usr/bin/cmp -s want.json got.json && echo same as overview || echo differs)"; done'
       exit: 0
       stdout: |
           accounts  1  same as overview
@@ -19,4 +19,4 @@ runs:
     - command: 'accounts --json | /usr/bin/jq -c ''.findings[0]'''
       exit: 0
       stdout: |
-          {"severity":"broken","section":"accounts","subject":"npm","text":"npm sign-in expired","fix":{"call":null,"command":"npm login","path":null}}
+          {"severity":"broken","section":"accounts","subject":"npm","text":"npm sign-in fails: Refused at the provider","fix":{"call":null,"command":null,"path":null}}

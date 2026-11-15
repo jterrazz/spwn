@@ -1,8 +1,0 @@
-description: 'a server keeps its own accounts: accounts --on infra is refused, exit 2'
-env: two-macs
-runs:
-    - command: 'accounts --on infra'
-      exit: 2
-      stderr: |
-          Error: infra is a server: station does not manage its accounts
-          Hint: manage it with your own tooling: ssh infra

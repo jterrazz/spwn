@@ -30,10 +30,6 @@ runs:
       exit: 0
       stdout: |
           station.page/v1	images	ready	true
-    - command: 'secrets --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
-      exit: 0
-      stdout: |
-          station.page/v1	accounts	ready	true
     - command: 'ports --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
       exit: 0
       stdout: |

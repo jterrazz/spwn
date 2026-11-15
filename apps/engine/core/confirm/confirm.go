@@ -17,13 +17,12 @@ const (
 	Restart     Action = "restart"
 	Edit        Action = "edit"
 	Remove      Action = "remove"
-	TakeBack    Action = "take-back"
 	StopSharing Action = "stop-sharing"
 	// value: a tool's sign-in on a machine ends; the token stays valid at its provider.
 	SignOut Action = "sign-out"
 	// value: a password leaves this Mac's vault, and the grants made from it end.
 	RemovePassword Action = "remove-password"
-	// value: a grant ends before its term.
+	// value: a grant ends; the password stays in the vault.
 	RemoveGrant   Action = "remove-grant"
 	Undeclare     Action = "undeclare"
 	OffHere       Action = "off-here"
@@ -172,8 +171,6 @@ func (a Action) Consequence() string {
 		return "%s changes on this machine."
 	case Remove:
 		return "%s leaves this machine; its data stays."
-	case TakeBack:
-		return "The account leaves %s; it stays signed in on this Mac."
 	case StopSharing:
 		return "%s is no longer shared, and its reserved port is released."
 	case SignOut:
@@ -181,7 +178,7 @@ func (a Action) Consequence() string {
 	case RemovePassword:
 		return "%s leaves this Mac's vault, and every grant made from it ends."
 	case RemoveGrant:
-		return "The grant of %s ends now, before its term."
+		return "The grant of %s ends now; the password stays in this Mac's vault."
 	case Undeclare:
 		return "%s is no longer declared, so a listener on it is flagged again."
 	case OffHere:

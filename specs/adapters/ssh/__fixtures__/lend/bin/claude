@@ -1,9 +1,0 @@
-#!/bin/sh
-# claude auth status: the JSON this Mac printed, the sentinel in its token keys.
-printf 'claude %s\n' "$*" >> "$HOME/.calls"
-case "$*" in
-    "auth status")
-        echo '{"loggedIn":true,"authMethod":"claude.ai","apiProvider":"firstParty","email":"admin@jterrazz.com","orgId":"0123","subscriptionType":"max","oauthToken":"SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB","apiKey":"SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB"}'
-        echo "SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB" >&2 ;;
-    *) echo "stub claude: unexpected invocation: $*" >&2; exit 97 ;;
-esac

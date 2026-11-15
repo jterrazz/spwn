@@ -15,6 +15,7 @@ const (
 	SectionNeedsYou = "needs-you"
 	SectionOn       = "on:"
 	SectionSilent   = "silent"
+	SectionNone     = "none"
 
 	RowGrant = "grant-password"
 
@@ -130,7 +131,7 @@ func (b accountsBody) sections() []page.Section {
 		out = append(out, page.Section{ID: b.id(SectionSilent), Title: "Not read", Segment: b.segment, Uncounted: true, Columns: columns(), Items: silent})
 	}
 	if len(out) == 0 {
-		out = []page.Section{{ID: b.id(SectionOn), Title: "Accounts", Segment: b.segment, Columns: columns(), Items: []page.Item{{Empty: &page.Empty{Noun: "accounts"}}}}}
+		out = []page.Section{{ID: b.id(SectionNone), Title: "Accounts", Segment: b.segment, Columns: columns(), Items: []page.Item{{Empty: &page.Empty{Noun: "accounts"}}}}}
 	}
 	return out
 }
@@ -231,6 +232,9 @@ func (b accountsBody) remove(m MachineSignIns, r accounts.ProgramRow) (page.Acti
 		levels = yesOrNo
 	}
 	c := ask(levels, "remove-grant", machine.Workspace, m.Name, question, "remove")
+	if c != nil {
+		c.Danger = true
+	}
 	return page.Action{ID: ActionRemoveGrant + key, Label: VerbRemove, On: page.OnRow, Rows: []string{key}, Mutates: true, Confirm: c, Destructive: c != nil,
 		Run: &page.Run{Call: CallRemoveGrant, In: answered(c, map[string]string{"Entry": r.Entry, "ToKind": string(accounts.ToMachine), "To": m.Name})},
 		Hud: hud(r.Program.Label() + " removed from " + m.Name)}, true

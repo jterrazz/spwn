@@ -3422,7 +3422,8 @@
             "text": "Restarting infra"
           }
         ]
-      }
+      },
+      "destructive": true
     },
     {
       "label": "Stop",

@@ -585,7 +585,7 @@
       "card": "flush"
     },
     {
-      "id": "accounts:on:",
+      "id": "accounts:none",
       "title": "Accounts",
       "columns": [
         {
@@ -2510,7 +2510,8 @@
           "name": "jterrazz-mac-mini"
         }
       },
-      "icon": "arrow.clockwise"
+      "icon": "arrow.clockwise",
+      "destructive": true
     },
     {
       "label": "Stop",

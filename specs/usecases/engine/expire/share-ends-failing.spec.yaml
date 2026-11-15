@@ -1,14 +1,10 @@
-description: 'an ended share the VM fails to delete keeps its copy and its share, reads failing, and is told'
+description: 'an ended share the VM fails to delete keeps its copy and its share, and is told'
 env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["linux-1"].secrets) | del(.macs["jterrazz-macbook-pro"].stores.shares)'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].secrets = {"session:github": "fake-session-github-of-this-mac"} | .macs["jterrazz-macbook-pro"].stores.shares = {"linux-1": [{"name": "session:github", "at": "2026-11-04T10:00:00Z", "until": "2026-11-04T14:00:00Z"}]}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'accounts share github --with linux-1 --for 4h'
-      exit: 0
-      stdout: |
-          ●	github	shared with linux-1	4 h
     - command: 'world fault Guest.Exec'
       exit: 0
     - command: 'world advance 4h'
@@ -20,8 +16,3 @@ runs:
       stdout: |
           [["session:github"],["session:github"]]
           [["take_back_failed","linux-1 share","taking GitHub back failed: deleting the copies failed for \"linux-1\": studio: the credential store is not writable"]]
-    - command: 'accounts | /usr/bin/grep -A1 "^# Shared"'
-      exit: 0
-      stdout: |
-          # Shared with VMs
-          ✗	github	linux-1	ended	station accounts take-back github --from linux-1

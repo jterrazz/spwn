@@ -27,7 +27,6 @@ func TestEachGestureAsksWhatItsKindNeeds(t *testing.T) {
 		{"delete a workspace", confirm.Delete, machine.Workspace, confirm.TypeName},
 		{"delete a server", confirm.Delete, machine.Server, confirm.TypeName},
 		{"remove an app", confirm.Remove, machine.Computer, confirm.YesNo},
-		{"take back an account", confirm.TakeBack, machine.Computer, confirm.YesNo},
 		{"forget a Mac", confirm.Forget, machine.Computer, confirm.YesNo},
 		{"delete an image", confirm.DeleteImage, machine.Computer, confirm.YesNo},
 		{"erase an app's data", confirm.Erase, machine.Computer, confirm.TypeName},
@@ -92,7 +91,6 @@ func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
 		{"alert.restart-mac", confirm.RestartMac, machine.Computer, []confirm.Fact{confirm.HostsServer}, confirm.TypeName},
 		{"a Mac hosting no server restarts on yes", confirm.RestartMac, machine.Computer, nil, confirm.YesNo},
 		{"alert.forget-mac", confirm.Forget, machine.Computer, nil, confirm.YesNo},
-		{"alert.take-back", confirm.TakeBack, machine.Workspace, nil, confirm.YesNo},
 		{"alert.stop-share", confirm.StopSharing, machine.Workspace, nil, confirm.YesNo},
 		{"alert.let-sleep", confirm.OffHere, machine.Computer, []confirm.Fact{confirm.HostsServer}, confirm.YesNo},
 	} {
@@ -103,7 +101,7 @@ func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
 }
 
 func TestEveryConfirmationSaysWhatItsGestureDoes(t *testing.T) {
-	for _, a := range []confirm.Action{confirm.Install, confirm.Share, confirm.Start, confirm.Restart, confirm.Edit, confirm.Remove, confirm.TakeBack,
+	for _, a := range []confirm.Action{confirm.Install, confirm.Share, confirm.Start, confirm.Restart, confirm.Edit, confirm.Remove,
 		confirm.StopSharing, confirm.SignOut, confirm.RemovePassword, confirm.RemoveGrant, confirm.Undeclare, confirm.OffHere, confirm.Overwrite,
 		confirm.Forget, confirm.DeleteImage, confirm.RestartMac, confirm.RestartServer, confirm.StopEngine, confirm.Stop, confirm.StopAgent, confirm.Delete, confirm.Erase,
 		confirm.BuildImage, confirm.Cleanup} {

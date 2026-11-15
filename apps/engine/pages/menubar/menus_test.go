@@ -134,14 +134,15 @@ func TestAMacRowsMenuOnHome(t *testing.T) {
 }
 
 // invariant: a server's row on Home asks Restart as its page does, down
-// or up, since machines.restart asks a server's name typed.
+// or up, since machines.restart asks a server's name typed; the item is
+// red, as its typed question is.
 func TestAServerRowsMenuOnHomeRestartsAsItsPageDoes(t *testing.T) {
 	w := newHeroWorld()
-	w.r.Asks = yesNo
-	if got := rowMenu(t, homeOf(t, w), "infra"); !slices.Contains(got, "Restart...") || !slices.Contains(got, "Delete... (red)") || got[0] != "infra on mac-mini" {
+	w.r.Asks = graded
+	if got := rowMenu(t, homeOf(t, w), "infra"); !slices.Contains(got, "Restart... (red)") || !slices.Contains(got, "Delete... (red)") || got[0] != "infra on mac-mini" {
 		t.Fatalf("infra's menu %q", got)
 	}
-	if got := rowMenu(t, homeOf(t, w.down()), "infra"); !slices.Contains(got, "Restart...") {
+	if got := rowMenu(t, homeOf(t, w.down()), "infra"); !slices.Contains(got, "Restart... (red)") {
 		t.Fatalf("a down server's menu %q", got)
 	}
 }

@@ -233,23 +233,18 @@ func PortsRead(l ports.Listing) Read {
 		Findings: ports.Exposed(heard)}
 }
 
-func AccountsRead(r accounts.Report, m machine.Ref) Read {
+func AccountsRead(r accounts.ProgramsRead, m machine.Ref) Read {
 	ok := 0
 	var broken []Part
-	for _, mm := range r.Machines {
-		if !mm.ThisMac {
-			continue
-		}
-		for _, a := range mm.Accounts {
-			switch a.State {
-			case catalog.StateOK:
-				ok++
-			case catalog.StateBroken:
-				broken = append(broken, Part{State: catalog.StateBroken, Word: a.Provider})
-			case catalog.StatePending:
-				return Pending(section.Accounts)
-			case catalog.StateDegraded, catalog.StateAbsent, catalog.StateUnknown:
-			}
+	for _, p := range r.Programs {
+		switch p.State {
+		case accounts.ProgramSignedIn:
+			ok++
+		case accounts.ProgramBroken:
+			broken = append(broken, Part{State: catalog.StateBroken, Word: string(p.Program)})
+		case accounts.ProgramReading, accounts.ProgramWaiting:
+			return Pending(section.Accounts)
+		case accounts.ProgramSignedOut:
 		}
 	}
 	return Read{Line: Line{Section: section.Accounts, Parts: append([]Part{Count(catalog.StateOK, ok, "", "signed-in")}, broken...)}, Findings: accounts.Findings(r, m)}

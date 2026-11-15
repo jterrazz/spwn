@@ -1,8 +1,0 @@
-description: 'taking back an account the catalogue does not hold is refused, exit 2'
-env: two-macs
-runs:
-    - command: 'accounts take-back gitlab --from linux-1 --yes'
-      exit: 2
-      stderr: |
-          Error: no account named "gitlab"
-          Hint: station accounts

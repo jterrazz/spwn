@@ -51,7 +51,7 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(infra.section("health")?.items?.first?.group?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
         XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Delete", "Copy ssh admin@infra", "Open in Terminal"])
         let mini = try Tree.page("menubar.mac.mini")
-        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts:on:"])
+        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts:none"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
                 XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil || action.run?.copy != nil || action.run?.open != nil || (action.run == nil && action.icon == Token.Symbol.qr) || (action.run == nil && action.on == "menu") || (action.run == nil && action.sheet != nil), "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")

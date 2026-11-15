@@ -1,32 +1,21 @@
 package accounts
 
 import (
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 )
 
-func Findings(r Report, m machine.Ref) []finding.Finding {
-	// invariant: an account of this machine that is broken (an expired
-	// sign-in, a refused token) is a Needs-you line, fixed by the owner's own
-	// sign-in command; a VM's accounts are its own Overview's.
+func Findings(r ProgramsRead, m machine.Ref) []finding.Finding {
+	// invariant: a sign-in of this machine that no longer works is a
+	// Needs-you line, worded by its row's own line.
 	var out []finding.Finding
-	for _, mm := range r.Machines {
-		if !mm.ThisMac {
+	for _, p := range r.Programs {
+		if p.State != ProgramBroken {
 			continue
 		}
-		for _, a := range mm.Accounts {
-			if a.State != catalog.StateBroken {
-				continue
-			}
-			text := a.Provider + " sign-in fails"
-			if a.Reason == ReasonRefused {
-				text = a.Provider + " sign-in expired"
-			}
-			out = append(out, finding.Finding{Machine: m, Section: section.Accounts, Severity: finding.Broken, Subject: a.Provider,
-				Text: text, Fix: finding.Fix{Command: a.Hint}})
-		}
+		out = append(out, finding.Finding{Machine: m, Section: section.Accounts, Severity: finding.Broken, Subject: string(p.Program),
+			Text: string(p.Program) + " sign-in fails: " + p.Line})
 	}
 	return out
 }

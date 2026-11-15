@@ -27,6 +27,22 @@ func Programs() []Program {
 	return programs
 }
 
+func ProgramOf(account string) Program {
+	// value: the program a Machinefile's account names, by the catalog's
+	// label; an account no program carries is its own name.
+	for _, p := range catalog.Providers {
+		if p.ID != account {
+			continue
+		}
+		for _, known := range catalog.LoginPrograms {
+			if known.Label == p.Label {
+				return Program(known.Name)
+			}
+		}
+	}
+	return Program(account)
+}
+
 func (t Program) Label() string {
 	if known, ok := t.login(); ok {
 		return known.Label

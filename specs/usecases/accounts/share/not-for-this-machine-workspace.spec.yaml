@@ -1,8 +1,0 @@
-description: 'a share is a Mac''s: run on a workspace it is refused, exit 2'
-env: two-macs
-runs:
-    - command: 'accounts share github --with linux-1 --on linux-1'
-      exit: 2
-      stderr: |
-          Error: accounts are shared from a Mac
-          Hint: run station overview for what linux-1 has

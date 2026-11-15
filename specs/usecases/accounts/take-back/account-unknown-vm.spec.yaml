@@ -1,8 +1,0 @@
-description: 'taking back from a machine station does not know is refused, exit 2'
-env: two-macs
-runs:
-    - command: 'accounts take-back github --from ghost --yes'
-      exit: 2
-      stderr: |
-          Error: no machine named "ghost"
-          Hint: station machines

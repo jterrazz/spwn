@@ -604,8 +604,8 @@ const (
 	FieldSegmented  FieldKind = "segmented"
 	FieldSlider     FieldKind = "slider"
 	FieldDisclosure FieldKind = "disclosure"
-	// value: one answer picked from a list of rows (Lend an account's
-	// accounts), each its glyph, its label and its note.
+	// value: one answer picked from a list of rows (the grant sheet's
+	// passwords), each its glyph, its label and its note.
 	FieldPick FieldKind = "pick"
 	// value: rows whose button runs the action each option's value names
 	// (Share a port's listeners); Note is the line said when none is.

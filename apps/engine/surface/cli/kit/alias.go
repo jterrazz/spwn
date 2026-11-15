@@ -10,7 +10,6 @@ import (
 const (
 	aliasNow        = "station.alias.now"
 	aliasShell      = "station.alias.shell"
-	aliasArgs       = "station.alias.args"
 	aliasPositional = "station.alias.positional"
 )
 
@@ -36,13 +35,6 @@ func Alias(old string, cmd *cobra.Command, now string) *cobra.Command {
 	return cmd
 }
 
-func AliasArgs(cmd *cobra.Command, now string) *cobra.Command {
-	// value: the arguments the new command takes in place of the old run's,
-	// when the old ones do not carry over (many v2 names, one account now).
-	cmd.Annotations[aliasArgs] = now
-	return cmd
-}
-
 func AliasShell(cmd *cobra.Command, now string) *cobra.Command {
 	// value: an old command whose new form is no station command but a
 	// line of the owner's shell (run git wip is git wip): the notice says
@@ -63,9 +55,6 @@ func notice(env Env, c *cobra.Command, args []string) {
 	}
 	var words []string
 	aliased := false
-	if now, ok := c.Annotations[aliasArgs]; ok {
-		args = []string{now}
-	}
 	for p := c; p != nil && p.HasParent(); p = p.Parent() {
 		word := p.Name()
 		if now, ok := p.Annotations[aliasNow]; ok {

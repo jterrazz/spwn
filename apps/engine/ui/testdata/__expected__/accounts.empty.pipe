@@ -1,8 +1,5 @@
 # Accounts
-●	jterrazz-macbook-pro	Mac
-○	github				not logged in	station settings apply github-login
-○	npm				not logged in	npm login
-○	claude				not logged in	claude /login
-○	tailscale				not installed
-○	git				no user.name nor user.email	git config --global user.name <name>
-	no VMs: accounts shared with a VM appear here
+○	gh	signed out
+○	npm	signed out
+○	claude	signed out
+○	wrangler	signed out

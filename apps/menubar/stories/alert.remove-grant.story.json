@@ -3,9 +3,7 @@
     "heightNote": "the page under it is workspace.working.accounts, whose footer is the workspace page's own (P9)",
     "id": "alert.remove-grant",
     "note": "Remove GitHub from linux-1? The grant ends here; the token stays yours.",
-    "pages": [
-        "pages/machines.accounts.machine.linux-1.json"
-    ],
+    "pages": ["pages/machines.accounts.machine.linux-1.json"],
     "schema": "station.story/v1",
     "ui": {
         "alert": "remove-grant:linux-1/gh",

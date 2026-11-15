@@ -12,10 +12,6 @@ type NotSignedInError struct{ Account, Mac string }
 
 func (e *NotSignedInError) Error() string { return Label(e.Account) + " is not signed in on " + e.Mac }
 
-type NotSharedError struct{ Account, VM string }
-
-func (e *NotSharedError) Error() string { return Label(e.Account) + " is not shared with " + e.VM }
-
 type UnreadableError struct {
 	Account, Mac string
 	Log          string
@@ -40,10 +36,4 @@ type ToServerError struct{ VM string }
 
 func (e *ToServerError) Error() string {
 	return e.VM + " is a server: station shares no account with it"
-}
-
-type OtherMacError struct{ Account, VM, Mac string }
-
-func (e *OtherMacError) Error() string {
-	return e.VM + " is on " + e.Mac + ": share from " + e.Mac + "'s accounts"
 }

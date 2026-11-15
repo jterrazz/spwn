@@ -10,8 +10,8 @@ runs:
     - command: 'overview --json > o.json; "$STATION" accounts --json | /usr/bin/jq -c ''[.accounts[] | select(.state == "signed-in")] | length''; /usr/bin/jq -c ''.sections[] | select(.id == "accounts") | .counts["signed-in"]'' o.json'
       exit: 0
       stdout: |
-          6
-          6
+          3
+          3
     - command: 'overview --json > o.json; "$STATION" background --json | /usr/bin/jq -c ''[(.tasks | length), ([.findings[] | select(.severity == "broken")] | length), ([.findings[] | select(.severity == "needs-a-look")] | length)]''; /usr/bin/jq -c ''.sections[] | select(.id == "background") | .counts | [.ok + .failing + .orphan, .failing, .orphan]'' o.json'
       exit: 0
       stdout: |

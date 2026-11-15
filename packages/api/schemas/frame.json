@@ -264,16 +264,6 @@
       "properties": {
         "code": {
           "enum": [
-            "account.not-shareable",
-            "account.not-shared",
-            "account.not-signed-in",
-            "account.other-mac",
-            "account.term-out-of-bounds",
-            "account.to-server",
-            "account.unknown",
-            "account.unknown-vm",
-            "account.unreadable",
-            "account.vm-stopped",
             "agents.ambiguous",
             "agents.bad-name",
             "agents.ended",
