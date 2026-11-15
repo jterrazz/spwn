@@ -40,9 +40,10 @@ func (Verb) Enum() []string {
 }
 
 func urgencyOf(f finding.Finding) finding.Urgency {
-	// invariant: SPEC B5.7: a machine broken (down, silent, with no engine)
-	// or a port exposed is red; a finding keeps an urgency it was given.
-	if f.Urgency == "" && f.Severity == finding.Broken && (f.Section == section.Overview || f.Section == section.Ports) {
+	// invariant: SPEC B5.7: whatever is broken is red, in any section (a
+	// machine down, a port exposed, a sign-in expired, a background task
+	// failing); a finding keeps an urgency it was given.
+	if f.Urgency == "" && f.Severity == finding.Broken {
 		return finding.Red
 	}
 	return f.Urgency

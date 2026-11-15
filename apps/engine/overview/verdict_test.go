@@ -52,7 +52,10 @@ func TestOnlyWhatIsRedNeedsYouAndEachNeedHasItsVerb(t *testing.T) {
 		"a server down":      {finding.Finding{Section: section.Overview, Severity: finding.Broken, Fix: finding.Fix{Call: "machines.restart"}}, overview.NeedsYou, overview.VerbRestart},
 		"a check failing":    {finding.Finding{Section: section.Overview, Severity: finding.Broken, Fix: finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": "api"}}}, overview.NeedsYou, overview.VerbRestart},
 		"the engine stopped": {finding.Finding{Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Fix: finding.Fix{Call: "engine.start"}}, overview.NeedsYou, overview.VerbStartEngine},
-		"an app that failed": {finding.Finding{Section: section.Apps, Severity: finding.Broken}, overview.CanWait, overview.VerbFix},
+		"an app that failed": {finding.Finding{Section: section.Apps, Severity: finding.Broken}, overview.NeedsYou, overview.VerbFix},
+		"a sign-in expired":  {finding.Finding{Section: section.Accounts, Severity: finding.Broken}, overview.NeedsYou, overview.VerbFix},
+		"a task failing":     {finding.Finding{Section: section.Background, Severity: finding.Broken, Fix: finding.Fix{Call: "background.remove"}}, overview.NeedsYou, overview.VerbRemove},
+		"a setting off":      {finding.Finding{Section: section.Settings, Severity: finding.NeedsALook}, overview.CanWait, overview.VerbFix},
 		"updates":            {finding.Finding{Section: section.Apps, Severity: finding.NeedsALook, Fix: finding.Fix{Call: "apps.update"}}, overview.CanWait, overview.VerbUpdate},
 		"an idle workspace":  {finding.Finding{Section: section.Overview, Severity: finding.NeedsALook, Fix: finding.Fix{Call: "machines.delete"}}, overview.CanWait, overview.VerbDelete},
 	} {
@@ -64,11 +67,11 @@ func TestOnlyWhatIsRedNeedsYouAndEachNeedHasItsVerb(t *testing.T) {
 		}
 	}
 	s := overview.Summarize(mac, overview.EngineRunning, []finding.Finding{
-		{Section: section.Apps, Severity: finding.Broken, Subject: "jq"},
+		{Section: section.Apps, Severity: finding.NeedsALook, Subject: "jq"},
 		{Section: section.Ports, Severity: finding.Broken, Subject: "5432"},
 	}, nil, nil)
-	if s.Needs[0].Subject != "5432" || s.Needs[0].Upkeep != overview.NeedsYou {
-		t.Errorf("an exposed port ranks after a failed app: %+v", s.Needs)
+	if s.Needs[0].Subject != "5432" || s.Needs[0].Upkeep != overview.NeedsYou || s.Needs[1].Upkeep != overview.CanWait {
+		t.Errorf("an exposed port ranks after an update: %+v", s.Needs)
 	}
 }
 

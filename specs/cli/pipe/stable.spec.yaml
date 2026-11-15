@@ -11,8 +11,8 @@ runs:
       stdout: |
           # Needs you
           ✗	port 3000 is reachable outside Tailscale
-          ◐	Engine not installed	station engine start
           ✗	ai.jterrazz.y is failing, last exit 1	station background remove ai.jterrazz.y
+          ◐	Engine not installed	station engine start
           ◐	Firewall: off	System Settings > Network > Firewall
           ◐	Remote login: on, not expected on a laptop	System Settings > General > Sharing > Remote Login
           	3 more: station overview --all
