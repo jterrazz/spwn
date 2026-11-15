@@ -40,7 +40,7 @@ export type Held = {
     macs: readonly {
         Name: string;
         ThisMac?: boolean;
-        VMs: null | readonly { Name: string; Lifetime: MachinesVM['Lifetime'] }[];
+        VMs: null | readonly Pick<MachinesVM, 'Lifetime' | 'Name' | 'Sections'>[];
     }[];
     needs: readonly OverviewNeed[];
     routeOfNeed: (need: OverviewNeed) => Route;
@@ -99,14 +99,11 @@ function machinesOf(held: Held): readonly Result[] {
 
 function tabsFound(held: Held): readonly Result[] {
     const machines = held.macs.flatMap((mac) => [
-        { name: mac.Name, server: false },
-        ...(mac.VMs ?? []).map((vm) => ({
-            name: vm.Name,
-            server: machineKindOf(vm) === 'server',
-        })),
+        { name: mac.Name, sections: undefined },
+        ...(mac.VMs ?? []).map((vm) => ({ name: vm.Name, sections: vm.Sections })),
     ]);
-    return machines.flatMap(({ name, server }) =>
-        tabsOf(server).map((tab): Result => ({
+    return machines.flatMap(({ name, sections }) =>
+        tabsOf(sections).map((tab): Result => ({
             detail: '',
             kind: 'Tabs',
             label: `${name} › ${tab}`,

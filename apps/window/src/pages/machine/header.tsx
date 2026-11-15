@@ -127,9 +127,10 @@ export function MachineHeader({ found, tab, go, onNewMachine }: Props) {
                     onChange={(next) => {
                         go(machineRoute(name, next));
                     }}
-                    options={tabsOf(vm !== undefined && machineKindOf(vm) === 'server').map(
-                        (option) => ({ id: option, label: option }),
-                    )}
+                    options={tabsOf(vm?.Sections).map((option) => ({
+                        id: option,
+                        label: option,
+                    }))}
                     value={tab}
                     variant="tabs"
                 />

@@ -1,4 +1,4 @@
-import type { OverviewNeed } from '@jterrazz/station-api';
+import type { MachinesSections, OverviewNeed } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
 import { everything, matching } from '../finds';
@@ -23,8 +23,10 @@ const NEED: OverviewNeed = {
     Broken: true,
     Call: '',
     Command: '',
+    Confirm: '',
     Machine: 'linux-1',
     Noun: 'Ports',
+    On: '',
     Path: '',
     Section: 'ports',
     Severity: 'broken',
@@ -32,6 +34,19 @@ const NEED: OverviewNeed = {
     Text: 'web does not answer on :3000',
     Upkeep: 'needs-you',
     Verb: 'review',
+};
+
+const SECTIONS: MachinesSections = {
+    Accounts: true,
+    Activity: true,
+    Apps: true,
+    Awake: false,
+    Background: false,
+    Disk: true,
+    Overview: true,
+    Ports: true,
+    SSH: false,
+    Settings: true,
 };
 
 const HELD: Held = {
@@ -44,8 +59,8 @@ const HELD: Held = {
         {
             Name: 'book',
             VMs: [
-                { Lifetime: 'ephemeral', Name: 'linux-1' },
-                { Lifetime: 'always-on', Name: 'api' },
+                { Lifetime: 'ephemeral', Name: 'linux-1', Sections: SECTIONS },
+                { Lifetime: 'always-on', Name: 'api', Sections: { ...SECTIONS, Accounts: false } },
             ],
         },
     ],
