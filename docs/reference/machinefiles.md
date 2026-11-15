@@ -39,44 +39,44 @@ machinefile: station.machinefile/v1
 name: studio-linux
 description: The owner's Linux workspace
 machine: # WHAT it is
-    kind: workspace # computer | workspace | server
-    system: { os: ubuntu, version: '24.04', arch: arm64 }
+  kind: workspace # computer | workspace | server
+  system: { os: ubuntu, version: "24.04", arch: arm64 }
 
 vm: # HOW it runs (a VM's alone)
-    lifetime: persistent # persistent | ephemeral
-    resources: { cpus: 8, memory: 32G, disk: 80G }
-    network: nat # nat | bridged
-    image: { from: 'ghcr.io/cirruslabs/ubuntu:24.04', bake: [node, bun] }
-    mounts:
-        - { computer: ~/Developer/studio-os, guest: ~/Developer/studio-os }
-        - { computer: ~/Documents/refs, guest: ~/refs, read-only: true }
+  lifetime: persistent # persistent | ephemeral
+  resources: { cpus: 8, memory: 32G, disk: 80G }
+  network: nat # nat | bridged
+  image: { from: "ghcr.io/cirruslabs/ubuntu:24.04", bake: [node, bun] }
+  mounts:
+    - { computer: ~/Developer/studio-os, guest: ~/Developer/studio-os }
+    - { computer: ~/Documents/refs, guest: ~/refs, read-only: true }
 
 extends: [station-linux, jterrazz-base] # WHAT it inherits
 prefer: [mise] # method keys tried first (rare)
 
 apps: # WHAT it carries
-    - docker
-    - { name: node, version: '24' }
-    - { name: ghostty, optional: true }
-    - { name: jq, manager: apt }
+  - docker
+  - { name: node, version: "24" }
+  - { name: ghostty, optional: true }
+  - { name: jq, manager: apt }
 settings:
-    git-identity: { from: computer }
-    autologin: { password: 'vault:agent-password' }
-    hushlogin: {}
+  git-identity: { from: computer }
+  autologin: { password: "vault:agent-password" }
+  hushlogin: {}
 
 accounts: # WHAT accounts it is shared, and for how long
-    share: [{ account: claude, for: 7d }]
-    keep: [github]
+  share: [{ account: claude, for: 7d }]
+  keep: [github]
 ports: # WHAT it may open, and to whom
-    open: 3000-9999
-    to: private # local | private | public
-    except: [22]
+  open: 3000-9999
+  to: private # local | private | public
+  except: [22]
 
 run: # the owner's own lines, per phase
-    boot: |
-        git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
-    upgrade: |
-        cd ~/Developer/studio-os && git pull --ff-only
+  boot: |
+    git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
+  upgrade: |
+    cd ~/Developer/studio-os && git pull --ff-only
 ```
 
 | Key              | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -162,6 +162,12 @@ A machine carries one Machinefile: `station init --machinefile <name|path>` or `
 - **apply** prints the plan, then carries it out one step at a time, through `apps install` and `settings apply`, each app by the method and at the version its step shows, the method the ledger then records: a step whose requirement did not install is not run, naming it, every other one goes on; an interruption says `station apply resumes`, which the next `station apply` does, from the plan read again, a package that finished just before it being kept as its install answered; one whose install handed nothing back is in the ledger when a fresh read of the apps gives its row within 15 seconds of the interrupt (unrecorded otherwise, so never removed); off a terminal, a plan that asks you anything is refused before any step. A `vault:` value is read from the vault only to hand its setting the secret, and is shown as the reference everywhere.
 - **drift** is the plan read as conditions: `present`, `absent`, `outdated`, `changed`, `not managed`, `extra`, `unknown`. It never acts. The `machinefile.drift` call takes the machine in its input (`Machine`, This Mac when empty) and counts it by chapter, apps (managers and their shell blocks with them, an extra too) and settings, judged on that machine, and for a workspace VM its ports and accounts, read on its Mac against what its file gives it (a port shared with another audience than the file opens it to, a port it listens on inside its file's ports and does not share, an account shared by the file and not copied, a copy the file does not share; a server's are what it runs and never counted): how many lines the file lists, how many match, each line that differs; then the one count of differences, what apply would do with them (`Apply will install 2 and leave 1.`, `Nothing to apply.`), and its verdict (`Matches linux-dev.`, `1 difference from linux-dev.`, `3 differences from linux-dev.`), a chapter's pill `Matches` or its own count. Asked inside a VM, or for a VM whose Mac answers its plan but not its shares (the ports listing does not hold that Mac answering, its engine running), it reads the packages alone and its verdict ends `Its ports and accounts are read from its Mac.`; a VM is reached through its Mac, so one whose Mac does not answer is not read at all.
 
+Each line of the drift's plan names the Machinefile that lists it (`Step.File`; a package brought in by another follows its bringer to the file), the chapter it counts in (`Step.Chapter`, `apps` or `settings`), and for an app how far its version lets it move, in words (`Step.Rule`: `stays on 24, takes minors and fixes`, `stays on 24.11, takes fixes`, `held at 24.11.3`, `takes every version`, `updates itself`). The drift also says whether the machine upgrades by itself (`Upgrades`): a Mac bound to the file does, `Every night at 03:00, as <file> allows.`, with its last night's verdict (`2 apps moved.`, `1 app waits for you.`, `It did not run to its end.`); a VM, a Mac bound to no Machinefile or to another one never upgrades that file by itself, and says so. A Mac's nights are read where they run, This Mac's in its ledger and another Mac's through its engine (`machinefile.nightly` answers the Machinefile it is `bound` to).
+
+### Every Machinefile
+
+The `machinefile.files` call lists every Machinefile This Mac reads, in name order, as a window shows them: its shelf (`yours`, `mixin` for a file whose chain says no `machine:` whatever its source, `shipped` for a built-in one), its layer and path, its description, the files it extends, what it makes over its whole chain (the kind, the system and, for a VM, its lifetime, size and the image it starts from; none for a mixin), its text as its source holds it (a token inside it `withheld`), the apps and settings it lists itself, this Mac's overlay of it (what it adds, removes and sets, a secret value withheld whole, and the overlay's path, the one file a surface writes), and the machines that follow it: This Mac when bound to it, another Mac whose engine says it is, and each VM made from it, as its record keeps it (`MachinesVM.Machinefile`). A Mac that does not answer is left out. A file whose chain does not resolve is listed with no head; a source or a file that does not read stops the call with its refusal.
+
 What `apply` installed is in the ledger, `~/.local/state/station/ledger.json`: each app, its method, the Machinefile that listed it and when, and each block of `~/.zshrc` it wrote, by id, with the digest of its text ([Dotfiles](dotfiles.md#package-blocks)). Two applies at once take its lock in turn (`ledger.json.lock`), and each change is written whole, so neither loses the other's record. An app the ledger holds for this Machinefile that it lists no longer is extra (one installed for another Machinefile is not, nor an `optional` one it still lists that this system skips); what was there before station, adopted, or installed by `station apps install`, is never in the ledger, so never removed. Settings are not in the ledger; `station settings off` turns one off.
 
 `apply --remove` asks on a terminal and needs `--yes` off one; off a terminal, an extra whose uninstall asks your password is refused before any step, as a plan's need is. It then takes the extras back, what another one leans on (what it requires, its provider, its manager) after it, and each as `plan` says:
@@ -204,9 +210,9 @@ lock: station.lock/v1
 machinefile: jterrazz-macbook-pro
 source: { name: studio, commit: 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d }
 apps:
-    - name: gh
-      method: brew
-      version: 2.98.0
+  - name: gh
+    method: brew
+    version: 2.98.0
 ```
 
 `apply` and `upgrade` write it once their run ends, interrupted or not, and only when it moved. It then names, for every app the Machinefile lists that reads there by a method, that method and the version it reads, an adopted app by the method that holds it; an app the run did not bring there (it failed, was interrupted, was not run, or does not read) keeps what the lock held of it, so the next `apply` installs it as locked; a copy no method holds is yours and leaves the lock, as does an app the Machinefile lists no longer. Settings are not locked. An app the lock holds is installed by the lock's method, at its version where that method pins one (mise's runtimes, an apt package as `package=<version>`, a release as its tag; a brew formula takes its newest), and the plan says so (`○ python  mise  locked 3.12.7`), `explain apps.<app>` naming the lock as the layer of its method; where the method cannot pin (brew), the plan says only what the lock records (`○ ripgrep  brew  recorded 14.0.0`), and `explain` has no `locked` line, since the install takes the newest. A lock of another kind of machine, whose method this one has not, gives way to this machine's choice. The lock is what `apply` installs on every path: fresh, locked, upgraded, interrupted, adopted, and from another machine's lock ([ADR-041](../decisions/041-the-lock-is-what-apply-installs.md)).
@@ -272,7 +278,7 @@ The format is whole now, so a Machinefile a newer station writes in v1 decodes i
 | `accounts`                                         | shown by `explain`; `share` shared by a workspace's first start (`machines create --from`)                                                                                                                                                                                                                                                                                    | the accounts a Mac keeps                  |
 | `ports`                                            | checked (a public port one by one, three at most), shown; the engine reads a VM's by its name (see [Ports](ports.md#rights-and-audiences))                                                                                                                                                                                                                                    | the ports' rights and audiences           |
 | `run`                                              | shown by `plan` and `explain`; `image` run by `images build`, `boot` by a workspace's first start, `upgrade` by `station upgrade`                                                                                                                                                                                                                                             |                                           |
-| `description`                                      | decoded                                                                                                                                                                                                                                                                                                                                                                       | the menu bar                              |
+| `description`                                      | decoded, and answered by `machinefile.files`                                                                                                                                                                                                                                                                                                                                  | the menu bar                              |
 | the overlay                                        | merged by the resolution                                                                                                                                                                                                                                                                                                                                                      | the menu bar, which writes it             |
 | the user catalog                                   | by every command: a package of `~/.config/station/catalog/` replaces the built-in one, and the folders its methods land commands in (`path`) are searched; a refused file stops every command that reads the catalog at its line, while `--version`, help and the engine (which the menu bar must keep reaching) run on the built-in packages and print the refusal on stderr |                                           |
 | the shared source                                  | by `explain`, `plan`, `apply` and `drift`: every other command reads the user and built-in catalog                                                                                                                                                                                                                                                                            |                                           |
