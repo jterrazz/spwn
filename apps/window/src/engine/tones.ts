@@ -7,7 +7,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import type { Tone } from '../tone';
-import type { MacState, ShareEnd } from './provisional';
+import type { MacState } from './provisional';
 import type { OwnState } from './words';
 
 type Tones<T extends PropertyKey> = Readonly<Record<T, Tone>>;
@@ -104,12 +104,6 @@ export const SHARE_STATE_TONES: Tones<PortsSharedPort['state']> = {
     shared: 'ok',
     unknown: 'plain',
     waiting: 'new',
-};
-
-export const SHARE_END_TONES: Tones<ShareEnd['kind']> = {
-    ended: 'plain',
-    'ends-in': 'warn',
-    unread: 'plain',
 };
 
 // outside: machinefile.files says a follower matches, differs (a count) or was not read, as facts and no sentence.

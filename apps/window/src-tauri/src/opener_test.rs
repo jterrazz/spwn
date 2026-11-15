@@ -69,7 +69,7 @@ fn a_command_runs_when_it_is_one_line() {
     for command in [
         "ssh admin@infra",
         "npm login",
-        "station accounts share claude --with linux-1",
+        "station accounts list --on linux-1",
     ] {
         assert_eq!(one_line(command), Ok(command));
     }

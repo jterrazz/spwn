@@ -22,7 +22,7 @@ import time
 from record import NOISE, Door, callOf, gesture, keyOf, kept, out_root, recorded, seeded, settled, unclocked
 
 MISSING = object()
-RACING = {"accounts.read","disk.read"}
+RACING = {"disk.read"}
 SHOWN = 4
 
 
