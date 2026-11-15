@@ -16,14 +16,16 @@ const templateFile = "studio-linux"
 
 // value: the owner's Machinefiles as the play world keeps them on This
 // Mac, by path under its station files: a base every machine extends, the
-// Mac's own, the workspace every dev VM is made from, and linux-1's, which
+// Mac's own with its overlay, the workspace every dev VM is made from, and linux-1's, which
 // narrows it with the ports its Mac may open to the internet.
 func ownerFiles() map[string]string {
 	file := func(name string) string { return "machinefiles/" + name + catalog.MachinefileSuffix }
+	overlay := func(name string) string { return "machinefiles/" + name + catalog.OverlaySuffix }
 	return map[string]string{
 		file(baseFile):     "machinefile: station.machinefile/v1\nname: " + baseFile + "\nmachine: { kind: workspace }\napps: [jq, gh]\n",
 		file(proName):      "machinefile: station.machinefile/v1\nname: " + proName + "\nmachine: { kind: computer, system: { os: macos } }\nextends: [" + baseFile + "]\napps: [lazygit]\n",
 		file(devFile):      "machinefile: station.machinefile/v1\nname: " + devFile + "\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [" + baseFile + "]\napps: [ripgrep]\n",
+		overlay(proName):   "machinefile: station.machinefile/v1\noverrides: " + proName + "\napps: { add: [bat], remove: [lazygit] }\n",
 		file(templateFile): "machinefile: station.machinefile/v1\nname: " + templateFile + "\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [station-linux]\napps: [jq, gh, ripgrep]\n",
 		file(exposedVM):    "machinefile: station.machinefile/v1\nname: " + exposedVM + "\nmachine: { kind: workspace }\nextends: [" + devFile + "]\nports: { open: [3000], to: public }\n",
 	}
@@ -47,6 +49,7 @@ func devApps(vm string) (*playApps, bool) {
 func devFiles() map[string]string {
 	files := ownerFiles()
 	delete(files, "machinefiles/"+proName+catalog.MachinefileSuffix)
+	delete(files, "machinefiles/"+proName+catalog.OverlaySuffix)
 	delete(files, "machinefiles/"+exposedVM+catalog.MachinefileSuffix)
 	delete(files, "machinefiles/"+templateFile+catalog.MachinefileSuffix)
 	return files

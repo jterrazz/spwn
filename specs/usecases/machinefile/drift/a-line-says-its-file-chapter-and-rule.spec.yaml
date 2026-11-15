@@ -11,5 +11,5 @@ runs:
           {"package":"homebrew","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
           {"package":"jq","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
           {"package":"gh","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
-          {"package":"lazygit","chapter":"apps","file":"macbook-pro","rule":"takes every version"}
-          {"Nightly":false,"File":"macbook-pro","Sentence":"Never by itself: macbook-pro is bound to no Machinefile."}
+          {"package":"bat","chapter":"apps","file":"macbook-pro","rule":"takes every version"}
+          {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows."}
