@@ -913,6 +913,12 @@ export type CatalogStoredInput = {
     Path?: string;
 };
 
+export type CatalogSystemSpec = {
+    Arch: 'arm64' | 'amd64';
+    OS: 'macos' | 'ubuntu' | 'debian' | 'any';
+    Version: string;
+};
+
 export type CatalogValue = {
     Key: string;
     Value: string;
@@ -1401,7 +1407,14 @@ export type MachinefileCallsExplainOut = {
     Values: MachinefileValue[] | null;
 };
 
+export type MachinefileCallsFiles = {
+    Files: MachinefileFileView[] | null;
+};
+
+export type MachinefileCallsFilesIn = Record<string, never>;
+
 export type MachinefileCallsNightly = {
+    bound: string;
     night: MachinefileNight;
     ran: boolean;
 };
@@ -1458,6 +1471,7 @@ export type MachinefileDrift = {
     Differences: number;
     Machine: string;
     Plan: MachinefilePlan;
+    Upgrades: MachinefileUpgrades;
     Verdict: CoreVerdictVerdict;
 };
 
@@ -1469,6 +1483,41 @@ export type MachinefileExtraLine = {
     Step: MachinefileStep;
 };
 
+export type MachinefileFileView = {
+    Apps: string[] | null;
+    Description: string;
+    Extends: string[] | null;
+    Followers: MachinefileFollower[] | null;
+    Head?: MachinefileHead;
+    Layer: 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
+    Local?: MachinefileLocal;
+    Name: string;
+    Path: string;
+    Settings: string[] | null;
+    Shelf: 'yours' | 'mixin' | 'shipped';
+    Text: string;
+};
+
+export type MachinefileFollower = {
+    Mac: string;
+    Machine: string;
+    ThisMac: boolean;
+};
+
+export type MachinefileHead = {
+    Kind: 'computer' | 'workspace' | 'server';
+    System: CatalogSystemSpec;
+    VM?: MachinefileHeadVM;
+};
+
+export type MachinefileHeadVM = {
+    CPUs: number;
+    Disk: string;
+    From: string;
+    Lifetime: 'persistent' | 'ephemeral';
+    Memory: string;
+};
+
 export type MachinefileInstalled = {
     at: string;
     machinefile: string;
@@ -1476,10 +1525,26 @@ export type MachinefileInstalled = {
     package: string;
 };
 
+export type MachinefileLastRun = {
+    At: string;
+    Verdict: CoreVerdictVerdict;
+};
+
 export type MachinefileLine = {
     Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
     Seen: MachinefileSeen;
     Step: MachinefileStep;
+};
+
+export type MachinefileLocal = {
+    Accounts: boolean;
+    AppsAdded: string[] | null;
+    AppsRemoved: string[] | null;
+    Path: string;
+    Ports: boolean;
+    SettingsRemoved: string[] | null;
+    SettingsSet: MachinefileSettingSet[] | null;
+    Text: string;
 };
 
 export type MachinefileLock = {
@@ -1566,6 +1631,12 @@ export type MachinefileSeen = {
     Version: string;
 };
 
+export type MachinefileSettingSet = {
+    Option: string;
+    Setting: string;
+    Value: string;
+};
+
 export type MachinefileSkip = {
     Origin: MachinefileOrigin;
     Package: string;
@@ -1574,8 +1645,10 @@ export type MachinefileSkip = {
 
 export type MachinefileStep = {
     Baked: boolean;
+    Chapter: 'apps' | 'settings' | 'ports' | 'accounts';
     Chosen: string;
     Defined: MachinefileOrigin;
+    File: MachinefileOrigin;
     From: string;
     Kind: 'manager' | 'app' | 'setting';
     Lock: string;
@@ -1587,6 +1660,7 @@ export type MachinefileStep = {
     Phase: '' | 'image' | 'boot' | 'apply';
     Recorded: string;
     Restarts: ('restart-dock' | 'restart-finder' | 'restart-menu-bar' | 'logout' | 'reboot')[] | null;
+    Rule: string;
     Spec: CatalogMethodSpec;
     UpdatesSelf: boolean;
     Values: Record<string, string> | null;
@@ -1604,6 +1678,13 @@ export type MachinefileUpgraded = {
     Unbound: boolean;
     Unpulled: string;
     Waiting: MachinefileWaiting[] | null;
+};
+
+export type MachinefileUpgrades = {
+    File: string;
+    Last?: MachinefileLastRun;
+    Nightly: boolean;
+    Sentence: string;
 };
 
 export type MachinefileValue = {
@@ -2055,6 +2136,7 @@ export type MachinesVM = {
     LatencyNote?: string;
     Lifetime: 'ephemeral' | 'persistent' | 'always-on';
     Mac: string;
+    Machinefile: string;
     Name: string;
     Network: string;
     Purpose: string;
@@ -3248,6 +3330,8 @@ export type MachinefileDriftInput = MachinefileCallsDriftIn;
 export type MachinefileDriftOutput = MachinefileDrift;
 export type MachinefileExplainInput = MachinefileCallsExplainIn;
 export type MachinefileExplainOutput = MachinefileCallsExplainOut;
+export type MachinefileFilesInput = MachinefileCallsFilesIn;
+export type MachinefileFilesOutput = MachinefileCallsFiles;
 export type MachinefileNightlyInput = MachinefileCallsNightlyIn;
 export type MachinefileNightlyOutput = MachinefileCallsNightly;
 export type MachinefilePlanInput = MachinefileCallsPlanIn;
@@ -3406,6 +3490,7 @@ export interface Calls {
     'machinefile.apply': { in: MachinefileApplyInput; out: MachinefileApplyOutput; watch: false; confirm: 'remove'; consequence: '%s leaves this machine; its data stays.' };
     'machinefile.drift': { in: MachinefileDriftInput; out: MachinefileDriftOutput; watch: false };
     'machinefile.explain': { in: MachinefileExplainInput; out: MachinefileExplainOutput; watch: false };
+    'machinefile.files': { in: MachinefileFilesInput; out: MachinefileFilesOutput; watch: false };
     'machinefile.nightly': { in: MachinefileNightlyInput; out: MachinefileNightlyOutput; watch: false };
     'machinefile.plan': { in: MachinefilePlanInput; out: MachinefilePlanOutput; watch: false };
     'machinefile.upgrade': { in: MachinefileUpgradeInput; out: MachinefileUpgradeOutput; watch: false };
@@ -3485,7 +3570,11 @@ export type CatalogKind = 'manager' | 'app' | 'setting';
 
 export type CatalogLevel = 'cache' | 'data' | 'settings' | 'kept';
 
+export type CatalogLifetime = 'persistent' | 'ephemeral';
+
 export type CatalogMachineKind = 'mac' | 'linux' | 'macos';
+
+export type CatalogMachineRole = 'computer' | 'workspace' | 'server';
 
 export type CatalogNeed = 'sudo' | 'terminal' | 'license' | 'app-store-login';
 
@@ -3514,6 +3603,8 @@ export type MachinefileChapter = 'apps' | 'settings' | 'ports' | 'accounts';
 export type MachinefileCondition = 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
 
 export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
+
+export type MachinefileShelf = 'yours' | 'mixin' | 'shipped';
 
 export type MachinesBirthStep = 'building' | 'cloning' | 'booting' | 'address' | 'ssh';
 
@@ -3563,7 +3654,9 @@ export type StationWords = {
     CatalogAudience: Record<CatalogAudience, StationWord>;
     CatalogKind: Record<CatalogKind, StationWord>;
     CatalogLevel: Record<CatalogLevel, StationWord>;
+    CatalogLifetime: Record<CatalogLifetime, StationWord>;
     CatalogMachineKind: Record<CatalogMachineKind, StationWord>;
+    CatalogMachineRole: Record<CatalogMachineRole, StationWord>;
     CatalogNeed: Record<CatalogNeed, StationWord>;
     CatalogOS: Record<CatalogOS, StationWord>;
     CoreFailCode: Record<CoreFailCode, StationWord>;
@@ -3577,6 +3670,7 @@ export type StationWords = {
     MachinefileChapter: Record<MachinefileChapter, StationWord>;
     MachinefileCondition: Record<MachinefileCondition, StationWord>;
     MachinefileLayer: Record<MachinefileLayer, StationWord>;
+    MachinefileShelf: Record<MachinefileShelf, StationWord>;
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
     MachinesCheckState: Record<MachinesCheckState, StationWord>;
     MachinesFit: Record<MachinesFit, StationWord>;

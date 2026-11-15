@@ -82,6 +82,7 @@ var Drift = call.Call[Deps, DriftIn, machinefile.Drift]{
 		if !vm {
 			drift := machinefile.DriftOf(p, nil)
 			drift.Machine = name
+			drift.Upgrades = nights(ctx, d, name, p.Name)
 			if d.Kind != machine.Computer {
 				drift = drift.AccessUnread()
 			}
@@ -93,8 +94,30 @@ var Drift = call.Call[Deps, DriftIn, machinefile.Drift]{
 			drift = drift.AccessUnread()
 		}
 		drift.Machine = name
+		drift.Upgrades = machinefile.UpgradesOf(name, p.Name, false, machinefile.Nights{})
 		return drift, nil
 	},
+}
+
+// invariant: a Mac's nights are read where they run: This Mac's from its
+// own ledger, another Mac's through its engine; a Mac whose nights do not
+// read says so, never guessed bound or not. Asked inside a VM, the
+// machine is no Mac.
+func nights(ctx context.Context, d Deps, name, file string) machinefile.Upgrades {
+	if name == d.Name && d.Kind != machine.Computer {
+		return machinefile.UpgradesOf(name, file, false, machinefile.Nights{})
+	}
+	var n Nightly
+	var err error
+	if name == d.Name {
+		n, err = LastNight.Run(ctx, d, NightlyIn{}, nil)
+	} else {
+		n, err = call.Invoke(ctx, d.Far, machine.Ref{Name: name}, LastNight, NightlyIn{}, nil)
+	}
+	if err != nil {
+		return machinefile.Upgrades{File: file, Sentence: "Whether " + name + " upgrades by itself does not read now."}
+	}
+	return machinefile.UpgradesOf(name, file, true, machinefile.Nights{Bound: n.Bound, Night: n.Night, Ran: n.Ran})
 }
 
 func plannedOn(ctx context.Context, d Deps, name, file string) (machinefile.Plan, error) {

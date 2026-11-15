@@ -97,6 +97,20 @@ func wordedEnums() []worded {
 			string(machinefile.ChapterPorts):    {Word: "Ports", One: "port", Other: "ports", Tone: verdict.Plain},
 			string(machinefile.ChapterAccounts): {Word: "Accounts", One: "account", Other: "accounts", Tone: verdict.Plain},
 		}},
+		{catalog.MachineRole(""), map[string]word{
+			string(catalog.RoleComputer):  plain("Computer"),
+			string(catalog.RoleWorkspace): plain("Workspace"),
+			string(catalog.RoleServer):    plain("Server"),
+		}},
+		{catalog.Lifetime(""), map[string]word{
+			string(catalog.LifetimeEphemeral):  {Word: machines.Ephemeral.Word(), Detail: "Deleted when it powers off", Tone: verdict.Plain},
+			string(catalog.LifetimePersistent): {Word: machines.Persistent.Word(), Detail: "Stays until you delete it", Tone: verdict.Plain},
+		}},
+		{machinefile.Shelf(""), map[string]word{
+			string(machinefile.ShelfYours):   plain("Your machines"),
+			string(machinefile.ShelfMixin):   plain("Mixins"),
+			string(machinefile.ShelfShipped): plain("Shipped with station"),
+		}},
 		{machinefile.Condition(""), map[string]word{
 			string(machinefile.Present):    toned(verdict.OK, "present"),
 			string(machinefile.Absent):     toned(verdict.Warn, "not installed"),

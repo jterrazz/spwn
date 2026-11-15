@@ -1,0 +1,24 @@
+description: 'this mac''s own changes to its file: what it adds, removes and sets, and the one file written'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, gh]
+          settings: { dock-spacer: {} }
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.local.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          overrides: jterrazz-macbook-pro
+          apps: { add: [lazygit], remove: [jq] }
+          settings: { set: { macos-dock: { size: 36 } }, remove: [dock-spacer] }
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Files[] | select(.Name == "jterrazz-macbook-pro") | {path: .Path, local: .Local}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"path":"~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml","local":{"Path":"~/.config/station/machinefiles/jterrazz-macbook-pro.local.yaml","Text":"machinefile: station.machinefile/v1\noverrides: jterrazz-macbook-pro\napps: { add: [lazygit], remove: [jq] }\nsettings: { set: { macos-dock: { size: 36 } }, remove: [dock-spacer] }\n","AppsAdded":["lazygit"],"AppsRemoved":["jq"],"SettingsSet":[{"Setting":"macos-dock","Option":"size","Value":"36"}],"SettingsRemoved":["dock-spacer"],"Accounts":false,"Ports":false}}

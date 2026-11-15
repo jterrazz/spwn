@@ -29,7 +29,7 @@ func (Chapter) Enum() []string {
 // value: a machine against its Machinefile: the machine, the plan its
 // packages read as, each chapter with what differs in it, how many lines
 // differ in all, what apply would do with them, and the verdict that says
-// it.
+// it; and whether the machine upgrades by itself what the file lists.
 
 type Drift struct {
 	Machine     string
@@ -38,6 +38,7 @@ type Drift struct {
 	Differences int
 	Apply       Applying
 	Verdict     verdict.Verdict
+	Upgrades    Upgrades
 }
 
 // value: one chapter of a drift: how many of its items the Machinefile

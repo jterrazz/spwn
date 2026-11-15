@@ -1,0 +1,15 @@
+description: 'a machine file of a newer schema stops the files read with update station'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v2
+          name: jterrazz-macbook-pro
+          horizon: far
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error | {code, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"code":"machinefile.newer-schema","message":"~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml is station.machinefile/v2, newer than this station reads (station.machinefile/v1)"}

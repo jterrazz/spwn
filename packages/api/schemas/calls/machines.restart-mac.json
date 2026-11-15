@@ -488,6 +488,9 @@
         "Mac": {
           "type": "string"
         },
+        "Machinefile": {
+          "type": "string"
+        },
         "Name": {
           "type": "string"
         },
@@ -570,6 +573,7 @@
         "Latency",
         "Lifetime",
         "Mac",
+        "Machinefile",
         "Name",
         "Network",
         "Purpose",

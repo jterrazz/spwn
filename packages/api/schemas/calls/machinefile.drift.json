@@ -925,6 +925,9 @@
         "Plan": {
           "$ref": "#/$defs/machinefile.Plan"
         },
+        "Upgrades": {
+          "$ref": "#/$defs/machinefile.Upgrades"
+        },
         "Verdict": {
           "$ref": "#/$defs/core.verdict.Verdict"
         }
@@ -935,6 +938,7 @@
         "Differences",
         "Machine",
         "Plan",
+        "Upgrades",
         "Verdict"
       ],
       "type": "object"
@@ -1003,6 +1007,23 @@
         "machinefile",
         "method",
         "package"
+      ],
+      "type": "object"
+    },
+    "machinefile.LastRun": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "At",
+        "Verdict"
       ],
       "type": "object"
     },
@@ -1342,10 +1363,22 @@
         "Baked": {
           "type": "boolean"
         },
+        "Chapter": {
+          "enum": [
+            "apps",
+            "settings",
+            "ports",
+            "accounts"
+          ],
+          "type": "string"
+        },
         "Chosen": {
           "type": "string"
         },
         "Defined": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
+        "File": {
           "$ref": "#/$defs/machinefile.Origin"
         },
         "From": {
@@ -1417,6 +1450,9 @@
             "null"
           ]
         },
+        "Rule": {
+          "type": "string"
+        },
         "Spec": {
           "$ref": "#/$defs/catalog.MethodSpec"
         },
@@ -1450,8 +1486,10 @@
       },
       "required": [
         "Baked",
+        "Chapter",
         "Chosen",
         "Defined",
+        "File",
         "From",
         "Kind",
         "Lock",
@@ -1463,12 +1501,36 @@
         "Phase",
         "Recorded",
         "Restarts",
+        "Rule",
         "Spec",
         "UpdatesSelf",
         "Values",
         "Version",
         "Waits",
         "Why"
+      ],
+      "type": "object"
+    },
+    "machinefile.Upgrades": {
+      "additionalProperties": false,
+      "properties": {
+        "File": {
+          "type": "string"
+        },
+        "Last": {
+          "$ref": "#/$defs/machinefile.LastRun"
+        },
+        "Nightly": {
+          "type": "boolean"
+        },
+        "Sentence": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "File",
+        "Nightly",
+        "Sentence"
       ],
       "type": "object"
     },

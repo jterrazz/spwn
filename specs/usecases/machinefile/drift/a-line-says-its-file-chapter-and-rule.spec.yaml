@@ -1,0 +1,15 @@
+description: 'each line of a drift names the file that lists it, its chapter and its version rule'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | (.Plan.Lines[] | {package: .Step.Package, chapter: .Step.Chapter, file: .Step.File.Name, rule: .Step.Rule}), .Upgrades'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"package":"homebrew","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
+          {"package":"jq","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
+          {"package":"gh","chapter":"apps","file":"jterrazz-base","rule":"takes every version"}
+          {"package":"lazygit","chapter":"apps","file":"macbook-pro","rule":"takes every version"}
+          {"Nightly":false,"File":"macbook-pro","Sentence":"Never by itself: macbook-pro is bound to no Machinefile."}

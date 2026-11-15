@@ -15,6 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 type Deps struct {
@@ -53,6 +54,9 @@ type Deps struct {
 	// value: the Mac a VM runs on; ok false for a Mac's name or a name no
 	// Mac holds.
 	MacOf func(ctx context.Context, name string) (mac string, ok bool)
+	// value: every Mac and the VMs on each, as This Mac lists them: the
+	// machines that may follow a Machinefile.
+	AllMachines func(ctx context.Context) (machines.AllMachines, error)
 }
 
 type Vault interface {
@@ -206,7 +210,7 @@ func load(ctx context.Context, d Deps, asked string) (name string, lib machinefi
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Explain, d), call.Bind(Plan, d), call.Bind(Apply, d), call.Bind(Drift, d), call.Bind(Upgrade, d), call.Bind(LastNight, d)}
+	return []call.Handler{call.Bind(Explain, d), call.Bind(Plan, d), call.Bind(Apply, d), call.Bind(Drift, d), call.Bind(Upgrade, d), call.Bind(LastNight, d), call.Bind(ListFiles, d)}
 }
 
 func Worded(err error) error {
