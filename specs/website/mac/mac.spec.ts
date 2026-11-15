@@ -104,23 +104,39 @@ describe('mac', () => {
     });
 
     test('M5 a Mac not seen reads Not seen, greyed, and answers nothing it does not know', async () => {
-        // Given - the window on the mini's page over mini-offline, a Mac not seen for 12 min
+        // Given - the window on the mini's page over mini-offline, a Mac not seen for 6 h
         const result = await website.visit(
             '/?world=mini-offline&machine=jterrazz-mac-mini&tab=Overview',
             async (visitor) => {
                 // When - the page and the sidebar are read
-                // Then - the Mac reads Not seen in both, and its measures say no answer
+                // Then - the Mac reads Not seen in both, and its head says what the engine says of it
                 await visitor.see(heading('jterrazz-mac-mini Not seen'));
                 await visitor.see(within(sidebar, button('jterrazz-mac-mini not seen')));
-                await visitor.see(heading('No answer from the engine.'));
+                await visitor.see(heading('jterrazz-mac-mini has not been seen for 6 h.'));
+                await visitor.see(
+                    content('Nothing proves it is down: it may be asleep, or off your network.'),
+                );
             },
         );
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'M5 waits for the state of a VM whose Mac is not seen, and a sentence saying nothing proves that Mac is down, on machines.list',
-    );
+    test('M5 a VM of a Mac not seen reads Not seen, with the hold the engine gives it', async () => {
+        // Given - the window on infra's page over mini-offline, infra being on the Mac not seen
+        const result = await website.visit(
+            '/?world=mini-offline&machine=infra&tab=Overview',
+            async (visitor) => {
+                // When - the page and the sidebar are read
+                // Then - infra reads Not seen in both, and its hold says nothing is known of it
+                await visitor.see(heading('infra Not seen'));
+                await visitor.see(within(sidebar, button('infra Not seen')));
+                await visitor.see(
+                    content('Not seen: its Mac does not answer, so nothing says what holds it.'),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo('M5 waits for the values of an Activity page of a Mac not seen, said unknown');
 

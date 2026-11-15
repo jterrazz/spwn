@@ -70,7 +70,7 @@ describe('New machine', () => {
 
             // Then - the sheet is gone and gate5's page is open
             await visitor.gone(onThisMac);
-            await visitor.see(heading('gate5 does not answer.'));
+            await visitor.see(heading('gate5 Running'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -148,7 +148,7 @@ describe('New machine', () => {
 
             // Then - the sheet hands over to web's page
             await visitor.gone(onThisMac);
-            await visitor.see(heading('web does not answer.'));
+            await visitor.see(heading('web Running'));
         });
         expect(result.errors.text).toBe('');
     });

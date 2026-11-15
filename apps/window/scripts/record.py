@@ -246,10 +246,10 @@ GESTURES = {
         {"call": "accounts.open", "in": {"Machine": "linux-1", "Exchange": "ex-1"}},
         {"call": "accounts.logout", "in": {"Program": "claude", "Machine": "linux-1", "Confirm": "yes"}},
         {"call": "background.remove", "in": {"Label": "com.jterrazz.brain.x-snapshot", "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "persistent", "Size": {"MemoryBytes": 8589934592}}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-1", "From": "station-linux", "Lifetime": "persistent"}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "persistent", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}, "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-1", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "ephemeral", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("jterrazz-mac-mini")},
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
         {"call": "vault.remove", "in": {"ID": "pw-2", "Confirm": "yes"}},
@@ -281,7 +281,7 @@ GESTURES = {
         {"call": "engine.start", "in": {}},
     ],
     "one-mac": [
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "persistent"}, "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "jterrazz-mac-mini"}},
     ],
     "creating": [

@@ -17,9 +17,9 @@
     - button "jterrazz-mac-mini not seen":
       - text: jterrazz-mac-mini
       - img "not seen"
-    - button "infra Unknown":
+    - button "infra Not seen":
       - text: infra
-      - img "Unknown"
+      - img "Not seen"
   - button "Machine files"
   - button "Passwords"
   - group "Catalog":
@@ -45,17 +45,14 @@
     - tab "Sign-ins"
     - tab "Storage"
   - tabpanel "Overview":
-    - heading "No answer from the engine." [level=1]
+    - heading "jterrazz-mac-mini has not been seen for 6 h." [level=1]
     - paragraph:
-      - img "no answer"
-      - text: No answer · Last answer at 03:12
+      - img "jterrazz-mac-mini has not been seen for 6 h."
+      - text: "Nothing proves it is down: it may be asleep, or off your network."
     - text: CPU no answer Memory no answer Disk no answer Its machines 1machine
-    - region "Memory":
-      - heading "Memory" [level=2]
-      - paragraph: Not given yet What each machine holds of this Mac's memory.
     - region "Its machines":
       - heading "Its machines" [level=2]
-      - button "infra Unknown"
+      - button "infra Not seen"
     - region "Packages":
       - heading "Packages" [level=2]
       - text: No answer No answer from the engine.

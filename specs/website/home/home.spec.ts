@@ -63,7 +63,18 @@ describe('home', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('H5 waits for what each machine uses, on MachinesShare');
+    test('H5 Memory tells what a machine holds from what it uses', async () => {
+        // Given - the window on Home over stories, where agent-7f holds 8 GB of its Mac's and uses 5, infra 24 and uses 16
+        const result = await website.visit('/?world=stories&page=home', async (visitor) => {
+            // When - I look at its squares
+            await visitor.see(memory);
+
+            // Then - each machine's legend says how many of its squares are used
+            await visitor.see(within(memory, content('8 agent-7f, 5 used')));
+            await visitor.see(within(memory, content('24 infra, 16 used')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo('H6 waits for a recording of a VM above 85 % CPU, its usage read by activity.read');
 
@@ -76,13 +87,13 @@ describe('home', () => {
         const result = await website.visit(TWO_MACS, async (visitor) => {
             await visitor.click(button('New machine'));
             const sheet = dialog('New machine on jterrazz-mac-mini');
-            await visitor.see(within(sheet, content('leaves 32 GB free on jterrazz-mac-mini')));
+            await visitor.see(within(sheet, content('leaves 28 GB free on jterrazz-mac-mini')));
 
-            // When - the 8 GB preset is pressed
-            await visitor.click(within(sheet, button('8 GB · workspace')));
+            // When - the 12 GB preset is pressed
+            await visitor.click(within(sheet, button('12 GB · gate')));
 
             // Then - the figure and what it leaves follow
-            await visitor.see(within(sheet, content('leaves 28 GB free on jterrazz-mac-mini')));
+            await visitor.see(within(sheet, content('leaves 24 GB free on jterrazz-mac-mini')));
 
             // When - the Mac with 4 GB free is chosen
             await visitor.click(within(sheet, button('jterrazz-macbook-pro')));

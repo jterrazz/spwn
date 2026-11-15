@@ -10,9 +10,7 @@
   - tablist "Tabs":
     - tab "Overview" [selected]
     - tab "Activity"
-    - tab "Packages"
     - tab "Ports"
-    - tab "Storage"
   - heading "No answer from the engine." [level=1]
   - paragraph:
     - img "no answer"
@@ -35,7 +33,7 @@
     - term: Created
     - definition: 23 Oct, by you
     - term: Hold
-    - definition: Not given yet
+    - definition: Always on. Stopping it needs its name typed.
     - term: Check
     - definition: https://infra:6443/readyz
   - button "Delete infra…"

@@ -99,7 +99,7 @@ describe('Window', () => {
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-mini.aria.yaml'));
     });
 
-    test("a far Mac's overview the engine finds unreachable is the page's refusal, in the engine's sentence", async () => {
+    test("a far Mac not seen heads its Overview with the engine's verdict, whatever its overview answers", async () => {
         // Given - mini-offline, whose mini's overview.read answers remote.unreachable
         const recording = recordingFor('mini-offline');
         const unreachable: Recording = {
@@ -136,9 +136,14 @@ describe('Window', () => {
             async (visitor) => {
                 await visitor.click(within(sidebar, button('jterrazz-mac-mini not seen')));
 
-                // Then - its Overview stands on the engine's refusal, worded by its type
-                await visitor.see(heading('mac-mini does not answer.'));
-                await visitor.see(content('Unreachable', { exact: false }));
+                // Then - its Overview stands on the verdict machines.list gives it, not on the refusal
+                await visitor.see(heading('jterrazz-mac-mini has not been seen for 6 h.'));
+                await visitor.see(
+                    content('Nothing proves it is down: it may be asleep, or off your network.', {
+                        exact: false,
+                    }),
+                );
+                await visitor.gone(content('Unreachable', { exact: false }));
             },
         );
         expect(result.errors.text).toBe('');

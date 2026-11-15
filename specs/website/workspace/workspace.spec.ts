@@ -37,9 +37,37 @@ describe('workspace', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('W2 waits for the hold on MachinesVM, which says whether it is safe to delete');
+    test('W2 a workspace says who holds it and whether it is safe to delete', async () => {
+        // Given - the window on the stories world, where linux-1 is held by a session and agent-7f has finished
+        const held = await website.visit(
+            '/?world=stories&machine=linux-1&tab=Overview',
+            async (visitor) => {
+                // When - Why it exists is read
+                // Then - its hold names the session and says it is not safe to delete
+                await visitor.see(
+                    within(
+                        region('Why it exists'),
+                        content('Held by studio-os-fe. Not safe to delete while it runs.'),
+                    ),
+                );
+            },
+        );
+        const finished = await website.visit(
+            '/?world=stories&machine=agent-7f&tab=Overview',
+            async (visitor) => {
+                // Then - the hold of a finished one says it is safe to delete
+                await visitor.see(
+                    within(region('Why it exists'), content('Its agent finished. Safe to delete.')),
+                );
+            },
+        );
+        expect(held.errors.text).toBe('');
+        expect(finished.errors.text).toBe('');
+    });
 
-    test.todo('W3 waits for the hold on MachinesVM');
+    test.todo(
+        "W3 waits for the dialog of a Delete to say who holds the machine: confirms.json words it and holds no holder, though the hold's sentence is on MachinesVM",
+    );
 
     test('W4 Stop reads Stopped everywhere, and the memory it held is free on Home', async () => {
         // Given - the window on Home over two-macs, where linux-1 runs and holds 8 GB of its Mac's 16

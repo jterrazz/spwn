@@ -3,7 +3,7 @@
   - paragraph:
     - img "3 things need you."
     - text: port 5000 is reachable outside Tailscale
-  - text: Memory free 72GB
+  - text: Memory free 64GB
   - img "Memory each machine holds, and what is free"
   - text: of 136 CPU, this Mac 22%
   - img "CPU of macbook-pro, its last bars"
@@ -23,14 +23,14 @@
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]
     - text: macbook-pro
-    - emphasis: 28 GB free
+    - emphasis: 20 GB free
     - text: of 48
     - img "Memory of macbook-pro, one square per GB"
-    - text: 4 macOS 8 agent-7f 8 linux-1 28 free mac-mini
+    - text: 4 macOS 8 agent-7f, 5 used 8 linux-1, 5 used 8 linux-2 20 free mac-mini
     - emphasis: 24 GB free
     - text: of 64
     - img "Memory of mac-mini, one square per GB"
-    - text: 4 macOS 24 infra 8 linux-3 4 review-bot 24 free macbook-air
+    - text: 4 macOS 24 infra, 16 used 8 linux-3, 5 used 4 review-bot, 3 used 24 free macbook-air
     - emphasis: 20 GB free
     - text: of 24
     - img "Memory of macbook-air, one square per GB"
@@ -44,19 +44,29 @@
       - text: 22 %
       - meter "Memory of macbook-pro, used of its total"
       - text: 32 / 48
-    - button "agent-7f 1 % 67 5.3 / 8":
-      - text: agent-7f 1 %
+    - button "agent-7f Write the changelog of v4 1 % 67 5.3 / 8":
+      - text: agent-7f Write the changelog of v4 1 %
       - meter "Memory of agent-7f, used of its total"
       - text: 5.3 / 8
-    - button "api"
-    - button "linux-1 9 % 67 5.3 / 8":
-      - text: linux-1 9 %
+    - button "api The API's staging copy"
+    - button "linux-1 Lot L2.5, settings from a machine file 9 % 67 5.3 / 8":
+      - text: linux-1 Lot L2.5, settings from a machine file 9 %
       - meter "Memory of linux-1, used of its total"
       - text: 5.3 / 8
+    - button "linux-2 Lot L3, the Machines page"
     - button "mac-mini"
-    - button "infra"
-    - button "linux-3"
-    - button "review-bot"
+    - button "infra The cluster's control plane 67 16 / 24":
+      - text: infra The cluster's control plane
+      - meter "Memory of infra, used of its total"
+      - text: 16 / 24
+    - button "linux-3 Refresh the auth token 67 5.3 / 8":
+      - text: linux-3 Refresh the auth token
+      - meter "Memory of linux-3, used of its total"
+      - text: 5.3 / 8
+    - button "review-bot Review every pull request of studio-station 67 2.7 / 4":
+      - text: review-bot Review every pull request of studio-station
+      - meter "Memory of review-bot, used of its total"
+      - text: 2.7 / 4
     - button "macbook-air"
   - region "Last night":
     - heading "Last night 3 moved, 1 held, 1 failed" [level=2]
