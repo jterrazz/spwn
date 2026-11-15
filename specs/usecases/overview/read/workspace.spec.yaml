@@ -15,6 +15,7 @@ runs:
 
           Needs you
             ✗ wrangler sign-in fails: Refused at the provider
+              station accounts login wrangler --on linux-1
           Activity  memory 1.1 of 4 GB · 12.4 GB free
           Apps      ● 2 ok · ○ 71 not installed
           Settings  set by station · ○ 0 of 7
@@ -26,12 +27,14 @@ runs:
             ● Has an address  192.168.64.5
             ● SSH answers
             ● Size            4 CPU · 8 GB · 50 GB
+
+          → station accounts login wrangler --on linux-1
     - command: 'overview --on linux-1'
       exit: 0
       stdout: |
           	On linux-1:
           # Needs you
-          ✗	wrangler sign-in fails: Refused at the provider
+          ✗	wrangler sign-in fails: Refused at the provider	station accounts login wrangler --on linux-1
           	Activity	memory 1.1 of 4 GB · 12.4 GB free
           	Apps	● 2 ok · ○ 71 not installed
           	Settings	set by station · ○ 0 of 7

@@ -168,7 +168,7 @@ func fixWords(n overview.Need, self []string) string {
 	// named by its field in lower case (a list's by its singular), the
 	// name its typed question takes, and the machine it runs at when that
 	// is not the one reading.
-	subjects := []string{"Name", "Names", "VM", "Label", "Folder"}
+	subjects := []string{"Name", "Names", "VM", "Label", "Folder", "Program"}
 	noun, verb, _ := strings.Cut(n.Call, ".")
 	words := []string{"station", noun}
 	if verb != "list" && verb != "read" && verb != "run" {

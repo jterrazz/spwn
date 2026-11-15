@@ -19,4 +19,4 @@ runs:
     - command: 'accounts --json | /usr/bin/jq -c ''.findings[0]'''
       exit: 0
       stdout: |
-          {"severity":"broken","section":"accounts","subject":"npm","text":"npm sign-in fails: Refused at the provider","fix":{"call":null,"command":null,"path":null}}
+          {"severity":"broken","section":"accounts","subject":"npm","text":"npm sign-in fails: Refused at the provider","fix":{"call":"accounts.login","args":{"Program":"npm"},"command":null,"path":null}}
