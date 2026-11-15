@@ -7,7 +7,8 @@ environment: HOME, PATH and every station path in a temporary folder, never the 
 
 SEEDS adds to a world what the specs' worlds lack for a page: machinefiles on This Mac, the fake binaries
 of a fixture of specs/usecases/__fixtures__/, and edits of its machines (a sign-in in progress, a program signed
-out, an accounts switch the fake reads in apps/engine/world/accounts.go, as the presence check a grant asks); a
+out, an accounts switch the fake reads in apps/engine/world/accounts.go, as the presence check a grant asks, a
+failed sign-in or a failing background task dropped); a
 world of SEEDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
@@ -139,11 +140,24 @@ def switched(name, value):
     return edit
 
 
+def dropped(name, *path):
+    """What a machine of the world holds at `path` (a failed sign-in, a failing background task), gone."""
+    def edit(content):
+        held = content["macs"][name]
+        for key in path[:-1]:
+            held = held.get(key, {})
+        held.pop(path[-1], None)
+    return edit
+
+
 SEEDS = {
     "two-macs": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
                  [exchange("linux-1", "ex-1", "gh", "device-code", "github.com")]),
     "sign-ins": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
                  [signed_out("linux-1", "claude"), exchange("linux-1", "ex-1", "claude", "paste", "claude.com", asking=True)]),
+    "calm": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
+             [dropped("jterrazz-macbook-pro", "identities", "npm"),
+              dropped("jterrazz-macbook-pro", "jobs", "com.jterrazz.brain.x-snapshot")]),
     "machinefile-kept": ("two-macs", "homebrew", applied(["lazygit", "bat"]), []),
     "machinefile-differs": ("two-macs", "homebrew", applied(["lazygit", "bat", "ripgrep", "fd"]), []),
     "presence-refused": ("two-macs", None, {}, [switched("presence", "refused")]),

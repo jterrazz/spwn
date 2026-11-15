@@ -11,9 +11,18 @@ const memory = region('Memory');
 const startHere = region('Start here');
 
 describe('home', () => {
-    test.todo(
-        'H1 waits for a recorded world whose lines can all wait: two-macs and stories each hold a line that is broken, so the verdict never reads Everything is fine. on Home',
-    );
+    test('H1 the verdict reads Everything is fine. and nothing on Home needs me', async () => {
+        // Given - the window on Home over calm, where every line the engine lists can wait
+        const result = await website.visit('/?world=calm&page=home', async (visitor) => {
+            // When - I open the window
+            // Then - the verdict says all is well and counts what can wait, and no Needs you is offered
+            await visitor.see(heading('Everything is fine.'));
+            await visitor.see(content('7 things can wait.'));
+            await visitor.gone(needsYou);
+        });
+        expect(result.errors.text).toBe('');
+        expect(result.content.text).not.toContain('need you');
+    });
 
     test('H2 the lines that need me are counted by the verdict and offered above everything else on Home', async () => {
         // Given - the window on Home over two-macs, where npm's sign-in expired and a background task fails
