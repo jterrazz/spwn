@@ -40,7 +40,6 @@
     - text: workspace · persistent · on
     - button "macbook-pro"
   - button "Start"
-  - button "Stop"
   - button "Open in Terminal" [disabled]
   - tablist "Tabs":
     - tab "Overview" [selected]

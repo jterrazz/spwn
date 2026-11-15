@@ -3,9 +3,6 @@
   - paragraph:
     - text: server · always on · on
     - button "mac-mini"
-  - button "Start"
-  - button "Stop"
-  - button "Restart"
   - button "Open in Terminal" [disabled]
   - tablist "Tabs":
     - tab "Overview"
