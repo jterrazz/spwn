@@ -304,6 +304,7 @@
             "disk": {
                 "total": 994000000000,
                 "free": 388000000000,
+                "system": 21400000000,
                 "files": {
                     "~/.tart/vms/linux-dev/disk.img": 73300000000,
                     "~/Library/Caches/go-build/00/a": 19400000000,
@@ -980,6 +981,7 @@
                 "total": 20000000000,
                 "free": 12400000000,
                 "files": {
+                    "/usr/lib/aarch64-linux-gnu/libc.so.6": 2900000000,
                     "~/.cache/go-build/x": 1200000000,
                     "~/.cache/npm/x": 300000000
                 }

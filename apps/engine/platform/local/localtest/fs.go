@@ -131,6 +131,8 @@ type Disk struct {
 
 func (d Disk) Volume(context.Context) (total, free int64, err error) { return 1 << 40, 1 << 39, nil }
 
+func (d Disk) System(context.Context) int64 { return -1 }
+
 func (d Disk) Erase(_ context.Context, paths []string) error {
 	for _, p := range paths {
 		if err := d.RemoveAll(p); err != nil {

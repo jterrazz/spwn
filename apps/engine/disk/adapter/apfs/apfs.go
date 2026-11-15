@@ -62,6 +62,21 @@ func (u *Usage) Volume(context.Context) (total, free int64, err error) {
 	return int64(st.Blocks) * block, int64(st.Bavail) * block, nil //nolint:gosec // outside: a volume's block counts fit an int64.
 }
 
+func (u *Usage) System(context.Context) int64 {
+	// invariant: on APFS a volume's free blocks are its own and its
+	// available ones the container's, so their gap is what the container's
+	// other volumes hold; a staged root stands on no container.
+	if u.root != "" {
+		return -1
+	}
+	var st unix.Statfs_t
+	if err := unix.Statfs(dataVolume, &st); err != nil {
+		return -1
+	}
+	block := int64(st.Bsize)                                //nolint:unconvert // Bsize is a uint32 on darwin, an int64 on linux.
+	return max(int64(st.Bfree)-int64(st.Bavail), 0) * block //nolint:gosec // outside: a volume's block counts fit an int64.
+}
+
 func (u *Usage) Move(_ context.Context, from, to string) error { return local.Move(from, to) }
 
 func (u *Usage) Erase(_ context.Context, paths []string) error { return local.Erase(paths) }

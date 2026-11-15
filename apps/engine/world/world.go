@@ -259,9 +259,12 @@ type Meter struct {
 }
 
 type Disk struct {
-	Total int64            `json:"total,omitempty"`
-	Free  int64            `json:"free,omitempty"`
-	Files map[string]int64 `json:"files,omitempty"`
+	Total int64 `json:"total,omitempty"`
+	Free  int64 `json:"free,omitempty"`
+	// value: what its APFS container's other volumes hold; 0 for a volume
+	// that does not tell its system apart.
+	System int64            `json:"system,omitempty"`
+	Files  map[string]int64 `json:"files,omitempty"`
 	// value: the processes that run, by name.
 	Running []string `json:"running,omitempty"`
 	// value: how late each size answers.

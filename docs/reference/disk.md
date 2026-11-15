@@ -2,15 +2,16 @@
 
 What an app keeps on a machine, by what an erase would lose, and the one family that sizes, frees, erases and moves it. Every path of every row is listed, generated from the table, in [Footprint](footprint.md).
 
-| Section        | Answers                                                  |
-| -------------- | -------------------------------------------------------- |
-| The groups     | What each Disk group means and who removes it            |
-| The folders    | Where station's own files live                           |
-| Relocation     | How an app's home moves, and what never moves            |
-| Tart           | Where the engine and its VMs live                        |
-| `station disk` | The read, `free`, `erase` and `move`                     |
-| Misplaced      | The home-root folders an app left, and how they are seen |
-| Backups        | What Time Machine skips                                  |
+| Section        | Answers                                                   |
+| -------------- | --------------------------------------------------------- |
+| The groups     | What each Disk group means and who removes it             |
+| By kind        | A machine's disk by kind, and what station holds on a Mac |
+| The folders    | Where station's own files live                            |
+| Relocation     | How an app's home moves, and what never moves             |
+| Tart           | Where the engine and its VMs live                         |
+| `station disk` | The read, `free`, `erase` and `move`                      |
+| Misplaced      | The home-root folders an app left, and how they are seen  |
+| Backups        | What Time Machine skips                                   |
 
 ## The groups
 
@@ -24,6 +25,21 @@ Every path an app or station writes has one catalogue level, declared in `apps/e
 | `never-touched` | `config` and `kept` | keys, tokens, settings, the VM records                                | nobody: a setting's `off`, where reversible    |
 
 The files an install put there (an app bundle, a Cellar, mise's installs, bun's and uv's globals, browser builds) are no group: `station apps remove` owns them. station's own data are its VMs and images, which `station machines delete` and `station images delete` own: they are no Disk row.
+
+## By kind
+
+`disk.read` tells a machine's disk by kind as well as by row (`Kinds`, in this order), and what its caches can free (`CanFree`: "Caches hold 41.7 GB. Each app rebuilds its own when it needs it.", or "No cache to free. What is left is yours or the system's."). Each kind is read from what the survey already walks, and a kind the machine cannot measure cheaply is absent, never a guess:
+
+| Kind        | Measured                                                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `system`    | macOS: one `statfs` of the data volume, its free blocks less the container's available ones, what the APFS container's other volumes hold. Linux: `/usr`, walked with the rows |
+| `apps`      | the files the catalog's apps installed (each row's `installed` paths)                                                                                                          |
+| `your-data` | what the volume uses that no other kind holds, never below 0; absent with `system`, since it would hold the system too                                                         |
+| `caches`    | the Can rebuild rows, what `station disk free` frees                                                                                                                           |
+| `machines`  | on a Mac only: its machines' and images' disks, and the leftovers                                                                                                              |
+| `free`      | the volume's free bytes                                                                                                                                                        |
+
+The owner's home and `/Applications` are not walked whole: what no row and no kind names falls in `your-data`. On a Mac, `Station` adds what station holds outside any machine: `Holds` (`machine-disks`, each VM record's disk as the hypervisor lists it; `images`, each image version's disk; `leftovers`, nothing yet; `logs`, `~/.local/state/station/logs`; `this-mac`, what the volume uses beyond them; `free`), its sentence ("Outside any machine, station holds 107 GB: machine disks, images, leftovers and its logs"), each machine's size with the Mac first, and its verdict: "3.0 GB can be freed." (warn) for the images nothing uses (not the newest of their name, no machine made from them), else "Nothing to free." (ok), with the line "on macbook-pro: no machine and no file of yours is touched". A VM's caches are its own `disk.read`'s `CanFree`. A Mac whose hypervisor does not answer has no `Station`.
 
 ## The folders
 

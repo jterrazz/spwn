@@ -45,6 +45,26 @@ type Reading struct {
 	Total, Free int64
 	Rows        []Row
 	Pending     bool
+	// value: the machine's disk by kind, and what its caches can free.
+	Kinds   []Amount `json:",omitempty"`
+	CanFree CanFree  `json:",omitempty,omitzero"`
+	// value: what station holds on a Mac, nil on any other machine.
+	Station *StationPart `json:",omitempty"`
+}
+
+func ReadingOf(total, free int64, s Survey, mac string) Reading {
+	r := Reading{Total: total, Free: free, Rows: Classify(s), Pending: s.HeldPending}
+	for _, t := range s.Rows {
+		r.Pending = r.Pending || t.Pending
+	}
+	var machines int64
+	if s.Held != nil {
+		machines = s.Held.Holding()
+		station := StationOf(total, free, s.Logs, *s.Held, mac)
+		r.Station = &station
+	}
+	r.Kinds, r.CanFree = KindsOf(total, free, s, r.Rows, machines, s.Held != nil || s.HeldPending)
+	return r
 }
 
 func (r Reading) Of(g Group) []Row {

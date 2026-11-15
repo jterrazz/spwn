@@ -79,6 +79,13 @@ func DiskUsage(t *testing.T, open Open) {
 			t.Fatalf("Volume = %d total, %d free, %v", total, free, err)
 		}
 	})
+	t.Run("the system holds no more than the volume uses, or is untold", func(t *testing.T) {
+		u, _ := open(t, Scene())
+		total, free, _ := u.Volume(context.Background())
+		if got := u.System(context.Background()); got != -1 && (got < 0 || got > total-free) {
+			t.Fatalf("System = %d of %d used, want -1 or within it", got, total-free)
+		}
+	})
 	t.Run("an app that is not running is said so", func(t *testing.T) {
 		u, _ := open(t, Scene())
 		if u.Running(context.Background(), "station-no-such-app") {

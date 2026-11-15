@@ -11,6 +11,8 @@ import (
 type Deps struct {
 	Disk Disk
 	Kind machine.Kind
+	// value: this machine's name, as a reading names it.
+	Name string
 }
 
 type Disk interface {

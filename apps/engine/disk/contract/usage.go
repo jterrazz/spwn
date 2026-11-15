@@ -8,6 +8,10 @@ type DiskUsage interface {
 	Sizes(ctx context.Context, roots []string, each func(i int, bytes int64))
 	// invariant: the volume the owner's data lives on.
 	Volume(ctx context.Context) (total, free int64, err error)
+	// invariant: what the system holds on Volume's disk outside the owner's
+	// data volume (the other volumes of an APFS container), never more than
+	// it uses; -1 when the volume's counts cannot tell the two apart.
+	System(ctx context.Context) int64
 	// invariant: the folder is at to afterwards and nothing is left at from,
 	// by one rename: a destination that holds anything, or one on another
 	// volume, is refused and nothing moves.

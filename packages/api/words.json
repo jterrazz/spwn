@@ -1224,6 +1224,58 @@
       "Tone": "plain"
     }
   },
+  "DiskHolder": {
+    "free": {
+      "Word": "Free",
+      "Tone": "plain"
+    },
+    "images": {
+      "Word": "Images",
+      "Tone": "plain"
+    },
+    "leftovers": {
+      "Word": "Leftovers",
+      "Tone": "warn"
+    },
+    "logs": {
+      "Word": "Station logs",
+      "Tone": "plain"
+    },
+    "machine-disks": {
+      "Word": "Machine disks",
+      "Tone": "plain"
+    },
+    "this-mac": {
+      "Word": "The Mac itself",
+      "Tone": "plain"
+    }
+  },
+  "DiskKind": {
+    "apps": {
+      "Word": "Apps",
+      "Tone": "plain"
+    },
+    "caches": {
+      "Word": "Caches",
+      "Tone": "plain"
+    },
+    "free": {
+      "Word": "Free",
+      "Tone": "plain"
+    },
+    "machines": {
+      "Word": "Machines and images",
+      "Tone": "plain"
+    },
+    "system": {
+      "Word": "System",
+      "Tone": "plain"
+    },
+    "your-data": {
+      "Word": "Your data",
+      "Tone": "plain"
+    }
+  },
   "EngineReadState": {
     "not-installed": {
       "Word": "not installed",

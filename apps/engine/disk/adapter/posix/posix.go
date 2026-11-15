@@ -36,6 +36,11 @@ func (u *Usage) Volume(context.Context) (total, free int64, err error) {
 	return int64(st.Blocks) * block, int64(st.Bavail) * block, nil //nolint:gosec // outside: a volume's block counts fit an int64.
 }
 
+func (u *Usage) System(context.Context) int64 {
+	// invariant: one volume holds the system and the owner's data alike.
+	return -1
+}
+
 func (u *Usage) Move(_ context.Context, from, to string) error { return local.Move(from, to) }
 
 func (u *Usage) Erase(_ context.Context, paths []string) error { return local.Erase(paths) }

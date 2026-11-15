@@ -17,6 +17,7 @@ const (
 	subject     = "disk"
 	pending     = int64(-2)
 	globWorkers = 8
+	systemRoot  = "/usr"
 )
 
 type part struct {
@@ -47,6 +48,8 @@ type plan struct {
 	entries []entryPlan
 	roots   []string
 	other   []int
+	// value: the root the system is walked at, -1 where the volume tells it.
+	system int
 }
 
 type reading struct {
@@ -55,6 +58,9 @@ type reading struct {
 	installed  map[string]bool
 	listed     bool
 	containers int64
+	system     int64
+	held       *disk.Held
+	waitsHeld  bool
 	// value: no walk has answered on this machine yet, so no row has a
 	// last size to show.
 	fresh bool
@@ -72,7 +78,10 @@ func (s *Surveyor) Forget() { s.o.Pool.Forget(subject) }
 // answers, its mark when its own tool answers the inventory.
 func (s *Surveyor) watch(ctx context.Context) <-chan disk.Survey {
 	p := s.plan()
-	frame := reading{sizes: make([]int64, len(p.roots)), known: make([]int64, len(p.roots)), containers: pending}
+	frame := reading{sizes: make([]int64, len(p.roots)), known: make([]int64, len(p.roots)), containers: pending, system: -1, waitsHeld: s.o.Station != nil}
+	if p.system < 0 {
+		frame.system = s.o.Disk.System(ctx)
+	}
 	known := s.loadKnown()
 	frame.fresh = len(known) == 0
 	for i, root := range p.roots {
@@ -129,8 +138,23 @@ func (s *Surveyor) watch(ctx context.Context) <-chan disk.Survey {
 			Late: func(r *reading) { r.containers = unmeasured },
 		},
 	}
+	if s.o.Station != nil {
+		jobs = append(jobs, lanes.Job[reading]{
+			Key: subject + "/station", Lane: lanes.Commands,
+			Do: func(ctx context.Context) func(*reading) {
+				held, err := s.o.Station.Held(ctx)
+				return func(r *reading) {
+					r.waitsHeld = false
+					if err == nil {
+						r.held = &held
+					}
+				}
+			},
+			Late: func(r *reading) { r.waitsHeld = false },
+		})
+	}
 	readings := lanes.Run(ctx, s.o.Pool, frame, jobs, func(r reading) reading {
-		return reading{sizes: slices.Clone(r.sizes), known: r.known, fresh: r.fresh, installed: maps.Clone(r.installed), listed: r.listed, containers: r.containers}
+		return reading{sizes: slices.Clone(r.sizes), known: r.known, fresh: r.fresh, installed: maps.Clone(r.installed), listed: r.listed, containers: r.containers, system: r.system, held: r.held, waitsHeld: r.waitsHeld}
 	})
 	out := make(chan disk.Survey)
 	go func() {
@@ -156,7 +180,7 @@ func containersEntry(p plan) string {
 }
 
 func (s *Surveyor) plan() plan {
-	var p plan
+	p := plan{system: -1}
 	index := map[string]int{}
 	root := func(abs string) int {
 		if i, ok := index[abs]; ok {
@@ -205,6 +229,11 @@ func (s *Surveyor) plan() plan {
 	}
 	for _, other := range s.otherRoots() {
 		p.other = append(p.other, root(other))
+	}
+	if s.o.ThisMachine == catalog.Linux {
+		// value: one volume holds a Linux machine's system and data alike,
+		// so its system is what its programs and libraries hold.
+		p.system = root(systemRoot)
 	}
 	return p
 }
@@ -264,7 +293,33 @@ func (s *Surveyor) assemble(p plan, r reading) disk.Survey {
 			report.Other += b
 		}
 	}
+	report.System = r.system
+	if p.system >= 0 {
+		switch b := r.sizes[p.system]; b {
+		case pending:
+			report.System = max(r.known[p.system], 0)
+		default:
+			report.System = b
+		}
+	}
+	report.Logs = s.logs(report.Rows)
+	report.Held, report.HeldPending = r.held, r.waitsHeld
 	return report
+}
+
+func (s *Surveyor) logs(rows []disk.Tally) int64 {
+	logs := s.o.Expand.Display(s.o.Expand.Expand(catalog.StationLogs))
+	for _, t := range rows {
+		if t.Entry.Name != disk.StationName {
+			continue
+		}
+		for _, p := range t.Paths {
+			if p.Path == logs {
+				return max(p.Bytes, 0)
+			}
+		}
+	}
+	return 0
 }
 
 func (s *Surveyor) row(ep entryPlan, r reading) (disk.Tally, bool) {

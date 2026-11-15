@@ -168,6 +168,22 @@ func wordedEnums() []worded {
 			string(disk.YourData):     {Word: "Your data", Detail: "data", Tone: verdict.Plain},
 			string(disk.NeverTouched): {Word: "Never touched", Detail: "never touched", Tone: verdict.Plain},
 		}},
+		{disk.Kind(""), map[string]word{
+			string(disk.KindSystem):   plain("System"),
+			string(disk.KindApps):     plain("Apps"),
+			string(disk.KindYourData): plain("Your data"),
+			string(disk.KindCaches):   plain("Caches"),
+			string(disk.KindMachines): plain("Machines and images"),
+			string(disk.KindFree):     plain("Free"),
+		}},
+		{disk.Holder(""), map[string]word{
+			string(disk.HolderMachineDisks): plain("Machine disks"),
+			string(disk.HolderImages):       plain("Images"),
+			string(disk.HolderLeftovers):    toned(verdict.Warn, "Leftovers"),
+			string(disk.HolderLogs):         plain("Station logs"),
+			string(disk.HolderThisMac):      plain("The Mac itself"),
+			string(disk.HolderFree):         plain("Free"),
+		}},
 		{machines.VMState(""), map[string]word{
 			string(machines.Running):      toned(verdict.OK, machines.Running.Word()),
 			string(machines.Stopped):      plain(machines.Stopped.Word()),
