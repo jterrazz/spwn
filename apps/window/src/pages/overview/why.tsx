@@ -25,10 +25,12 @@ export function WhyItExists({ vm }: { vm: MachinesVM }) {
                 <dd>{vm.Purpose === '' ? NO_PURPOSE_WORD : vm.Purpose}</dd>
                 <dt>Created</dt>
                 <dd>{created === undefined ? <MissingMark /> : sentenceBy(created, vm.Creator)}</dd>
-                <dt>Hold</dt>
-                <dd>
-                    <MissingMark />
-                </dd>
+                {vm.Hold === undefined ? null : (
+                    <>
+                        <dt>Hold</dt>
+                        <dd>{vm.Hold.Sentence}</dd>
+                    </>
+                )}
                 {vm.Check === '' ? null : (
                     <>
                         <dt>Check</dt>
