@@ -1,12 +1,50 @@
 package menubar
 
 import (
+	"slices"
 	"strings"
 
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 )
 
 const ActionSharePortSheet = "share-port:"
+
+type workspace struct {
+	// value: a running workspace of an awake Mac, a port may be shared
+	// from.
+	VM, Mac string
+}
+
+func runningWorkspaces(all model.AllMachines) []workspace {
+	var out []workspace
+	for _, h := range all.Macs {
+		if h.Asleep || !h.ThisMac && !h.Reachable {
+			continue
+		}
+		for _, vm := range liveFirst(h.VMs) {
+			if vm.Lifetime != model.AlwaysOn && vm.State == model.Running {
+				out = append(out, workspace{VM: vm.Name, Mac: h.Name})
+			}
+		}
+	}
+	return out
+}
+
+// value: a Mac's VMs, those whose agent finished after the others, so
+// what a sheet picks first and a question names first is live work.
+func liveFirst(vms []model.VM) []model.VM {
+	out := slices.Clone(vms)
+	slices.SortStableFunc(out, func(a, b model.VM) int { return finished(a) - finished(b) })
+	return out
+}
+
+func finished(vm model.VM) int {
+	if vm.Finished() {
+		return 1
+	}
+	return 0
+}
 
 // invariant: SPEC A5 Share a port: one sheet per workspace, Of swapping
 // between them; under it what listens there and is not shared yet, each

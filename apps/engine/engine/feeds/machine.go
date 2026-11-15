@@ -5,8 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
-	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
@@ -123,22 +121,21 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 	for {
 		listed, ferr := call.Read(ctx, f.o.Calls, machine.Ref{}, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil)
 		shared, serr := call.Invoke(ctx, f.o.Calls, machine.Ref{}, portscalls.List, portscalls.ListIn{AllMachines: true}, nil)
-		shares, aerr := call.Read(ctx, f.o.Calls, machine.Ref{}, accountscalls.Read, accountscalls.ReadIn{VMs: true}, nil)
 		read, oerr := call.Read(ctx, f.o.Calls, at, overviewcalls.Read, overviewcalls.ReadIn{}, nil)
 		kept, kerr := call.Read(ctx, f.o.Calls, at, activitycalls.Read, activitycalls.ReadIn{History: true, Graph: 6 * time.Minute, Quick: true}, nil)
-		var copies *accounts.AllMachines
+		var signed *pagemenubar.SignIns
 		var held *awake.Report
 		var hosted []agents.Agent
 		h, isMac := macNamed(listed.All, f.m.Name)
 		if ferr == nil && isMac {
-			all := f.o.everyMacAccounts(ctx, listed.All, "")
-			copies = &all
+			all := f.o.signIns(ctx, listed.All, "")
+			signed = &all
 		}
 		if ferr == nil && !isMac {
 			h, _ = macOfVM(listed.All, f.m.Name)
 			if h.Name != "" {
-				all := f.o.everyMacAccounts(ctx, listed.All, h.Name)
-				copies = &all
+				all := f.o.signIns(ctx, listed.All, h.Name)
+				signed = &all
 			}
 		}
 		if ferr == nil {
@@ -153,15 +150,12 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 			}
 		}
 		f.send(ctx, func(m *pagemenubar.Machine) {
-			m.Zone, m.Shares, m.Awake, m.Agents = f.o.zone(), copies, held, hosted
+			m.Zone, m.SignIns, m.Awake, m.Agents = f.o.zone(), signed, held, hosted
 			if ferr == nil {
 				m.All = &listed.All
 			}
 			if serr == nil {
 				m.Ports = &shared.AllMachines
-			}
-			if aerr == nil {
-				m.Accounts = &shares
 			}
 			if oerr == nil {
 				m.Summary = &read.Summary

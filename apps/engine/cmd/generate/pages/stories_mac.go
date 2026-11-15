@@ -3,9 +3,7 @@ package pages
 import (
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
@@ -16,7 +14,6 @@ func macWorlds() []World {
 	return []World{
 		{Name: "machines.macs", Edit: macIdentities, Pages: []string{pro, mini, air}},
 		{Name: "machines.macs.down", Edit: macs().then(infraDown), Pages: []string{mini}},
-		{Name: "machines.macs.four-needs", Edit: macs().then(infraDown, sharesEnding), Pages: []string{mini}},
 		{Name: "machines.macs.exposed", Edit: macs().then(airPlayOnEvery), Pages: []string{pro}},
 		{Name: "machines.macs.empty", Edit: edits{thisMacAlone}.then(macIdentities), Pages: []string{pro}},
 		{Name: "machines.macs.checking", Edit: macs().then(miniSilentFor(40 * time.Second)), Pages: []string{mini}},
@@ -69,17 +66,6 @@ func macIdentities(f *Scene) {
 				if vm.State == model.Running {
 					last.VMs = append(last.VMs, activity.VMUsage{VM: vm.Name, Usage: activity.Usage{CPU: share[vm.Name]}})
 				}
-			}
-		}
-	}
-}
-
-func sharesEnding(f *Scene) {
-	for i, m := range f.Accounts.Machines {
-		if m.Name == "linux-3" {
-			f.Accounts.Machines[i].Accounts = []accounts.Account{
-				loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 12*time.Minute),
-				loan(catalog.ProviderGitHub, "github", 12*time.Minute),
 			}
 		}
 	}

@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -100,20 +99,20 @@ func TestAMacsNeedsAreItsOwnRedFirstThreeBeforeTheFold(t *testing.T) {
 	p := macPageOf(t, miniMac, func(m *Machine) {
 		mini := &m.All.Macs[1]
 		mini.VMs[2].State, mini.VMs[2].CheckStatus = model.Stopped, model.CheckStatus{State: model.CheckFailing, Since: macNow.Add(-4 * time.Minute)}
-		m.Shares = &accounts.AllMachines{Now: macNow, Macs: []accounts.MacAccounts{{Name: miniMac, Shares: []accounts.Shared{
-			{Account: "acme", VM: "linux-3", At: macNow.Add(-time.Hour), Until: macNow.Add(12 * time.Minute)},
-			{Account: "globex", VM: "linux-3", At: macNow.Add(-time.Hour), Until: macNow.Add(12 * time.Minute)},
-		}}}}
-		m.Ports = &ports.AllMachines{Macs: []ports.MacPorts{{Name: proMac, ThisMac: true, Ports: []ports.Port{
-			{Machine: coremachine.Ref{Name: proMac}, Port: 5000, Process: "ControlCenter", Reach: ports.Outside},
-		}}}}
+		m.Ports = &ports.AllMachines{Macs: []ports.MacPorts{
+			{Name: proMac, ThisMac: true, Ports: []ports.Port{{Machine: coremachine.Ref{Name: proMac}, Port: 5000, Process: "ControlCenter", Reach: ports.Outside}}},
+			{Name: miniMac, Ports: []ports.Port{
+				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8080, Process: "node", Reach: ports.Outside},
+				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8081, Process: "node", Reach: ports.Outside},
+			}},
+		}}
 	})
 	needs := sectionOf(p, SectionNeeds)
 	if needs == nil {
 		t.Fatal("no Needs you on a Mac whose server is down")
 	}
-	if got := labels(needs.Items); !slices.Equal(got, []string{"infra", "review-bot", "linux-3", "linux-3"}) {
-		t.Fatalf("needs %q, want infra down first, then the wait, then the two shares ending; This Mac's port is not the mini's", got)
+	if got := labels(needs.Items); !slices.Equal(got, []string{"infra", "Port 8080 exposed", "Port 8081 exposed", "review-bot"}) {
+		t.Fatalf("needs %q, want infra down first, then the two exposed ports, then the wait; This Mac's port is not the mini's", got)
 	}
 	if needs.Top != 3 || needs.Rest == nil || needs.Rest.Row.Label != "1 more" || needs.Rest.Row.Detail.Text != "Show less" {
 		t.Fatalf("fold top %d rest %+v, want three rows then 1 more", needs.Top, needs.Rest)
@@ -163,9 +162,13 @@ func TestAMacsVMsListTheWorkingFirstAndEachOpensItsPage(t *testing.T) {
 // own words; its app is the one fact after them, and the first to go.
 func TestAnExposedPortLeadsThisMacsNeeds(t *testing.T) {
 	p := macPageOf(t, proMac, func(m *Machine) {
-		m.Ports = &ports.AllMachines{Macs: []ports.MacPorts{{Name: proMac, ThisMac: true, Ports: []ports.Port{
-			{Machine: coremachine.Ref{Name: proMac}, Port: 5000, Process: "ControlCenter", Reach: ports.Outside},
-		}}}}
+		m.Ports = &ports.AllMachines{Macs: []ports.MacPorts{
+			{Name: proMac, ThisMac: true, Ports: []ports.Port{{Machine: coremachine.Ref{Name: proMac}, Port: 5000, Process: "ControlCenter", Reach: ports.Outside}}},
+			{Name: miniMac, Ports: []ports.Port{
+				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8080, Process: "node", Reach: ports.Outside},
+				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8081, Process: "node", Reach: ports.Outside},
+			}},
+		}}
 	})
 	needs := sectionOf(p, SectionNeeds)
 	if needs == nil || needs.Items[0].Row.Label != "Port 5000 exposed" || needs.Items[0].Row.Glyph.Kind != "symbol:exclamationmark.shield" {

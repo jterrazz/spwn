@@ -37,7 +37,7 @@ func TestAnEphemeralWorkspacesDeleteAsksYesOrNoAndListsWhatGoesWithIt(t *testing
 	if a.Confirm.Type != "" || !a.Confirm.Danger || a.Confirm.Yes != "Delete agent-7f" {
 		t.Fatalf("an ephemeral workspace's delete asks %+v, want yes or no, red, Delete agent-7f", a.Confirm)
 	}
-	if got := consequence(a.Confirm); got != "This can't be undone. It goes with its disk (12 GB), 2 shared ports and 2 accounts lent to it." {
+	if got := consequence(a.Confirm); got != "This can't be undone. It goes with its disk (12 GB), 2 shared ports and 2 grants made to it." {
 		t.Errorf("an ephemeral workspace's delete says %q", got)
 	}
 	if a.Run.In["Confirm"] != `"agent-7f"` {

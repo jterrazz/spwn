@@ -65,24 +65,6 @@
             "verb": "need:waiting:review-bot",
             "nav": "menubar.machine:review-bot"
           }
-        },
-        {
-          "row": {
-            "id": "ending:macbook-pro/linux-1/claude",
-            "mark": "attention",
-            "label": "Extend Claude on linux-1",
-            "detail": {
-              "kind": "text",
-              "text": "Claude ends in 24 min"
-            },
-            "reason": "expiring",
-            "glyph": {
-              "kind": "symbol:clock",
-              "signal": "waits"
-            },
-            "verb": "need:ending:macbook-pro/linux-1/claude",
-            "nav": "menubar.machine:linux-1"
-          }
         }
       ],
       "uncounted": true
@@ -1487,7 +1469,11 @@
                   },
                   {
                     "kind": "text",
-                    "text": "share"
+                    "text": "grant"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "password"
                   }
                 ]
               }
@@ -1592,12 +1578,12 @@
               },
               {
                 "row": {
-                  "id": "share-account:agent-7f",
-                  "label": "Lend an account to agent-7f",
+                  "id": "grant:agent-7f",
+                  "label": "Grant a password to agent-7f",
                   "glyph": {
                     "kind": "symbol:key"
                   },
-                  "verb": "verb-share-account:agent-7f"
+                  "verb": "verb-grant:agent-7f"
                 }
               }
             ]
@@ -1632,12 +1618,12 @@
               },
               {
                 "row": {
-                  "id": "share-account:linux-1",
-                  "label": "Lend an account to linux-1",
+                  "id": "grant:linux-1",
+                  "label": "Grant a password to linux-1",
                   "glyph": {
                     "kind": "symbol:key"
                   },
-                  "verb": "verb-share-account:linux-1"
+                  "verb": "verb-grant:linux-1"
                 }
               }
             ]
@@ -1769,37 +1755,6 @@
       ],
       "id": "need:waiting:review-bot",
       "default": true
-    },
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "ending:macbook-pro/linux-1/claude"
-      ],
-      "mutates": true,
-      "id": "need:ending:macbook-pro/linux-1/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
-        }
-      },
-      "default": true,
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
     },
     {
       "key": "cmd+1",
@@ -2312,7 +2267,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -2389,56 +2344,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect",
-                    "options": [
-                      {
-                        "value": "github",
-                        "label": "GitHub"
-                      },
-                      {
-                        "value": "claude",
-                        "label": "Claude"
-                      }
-                    ],
-                    "default": "github,claude"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -2543,7 +2448,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -2620,45 +2525,6 @@
                 ],
                 "limit": 24,
                 "limit_note": "Over 24 GB would squeeze mac-mini"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -2914,35 +2780,35 @@
       "label": "Run",
       "on": "row",
       "rows": [
-        "share-account:agent-7f"
+        "grant:agent-7f"
       ],
       "mutates": true,
-      "id": "verb-share-account:agent-7f",
+      "id": "verb-grant:agent-7f",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "For": "14400000000000",
-          "With": "agent-7f"
+          "To": "agent-7f",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account to agent-7f",
+        "title": "Grant a password to agent-7f",
         "fields": [
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "select",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub"
+                "value": "pw-github",
+                "label": "GitHub token"
               },
               {
-                "value": "claude",
-                "label": "Claude"
+                "value": "pw-claude",
+                "label": "Claude token"
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
           }
         ],
@@ -3005,35 +2871,35 @@
       "label": "Run",
       "on": "row",
       "rows": [
-        "share-account:linux-1"
+        "grant:linux-1"
       ],
       "mutates": true,
-      "id": "verb-share-account:linux-1",
+      "id": "verb-grant:linux-1",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "For": "14400000000000",
-          "With": "linux-1"
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account to linux-1",
+        "title": "Grant a password to linux-1",
         "fields": [
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "select",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub"
+                "value": "pw-github",
+                "label": "GitHub token"
               },
               {
-                "value": "claude",
-                "label": "Claude"
+                "value": "pw-claude",
+                "label": "Claude token"
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
           }
         ],
@@ -3231,7 +3097,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -3308,56 +3174,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect",
-                    "options": [
-                      {
-                        "value": "github",
-                        "label": "GitHub"
-                      },
-                      {
-                        "value": "claude",
-                        "label": "Claude"
-                      }
-                    ],
-                    "default": "github,claude"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -3788,7 +3604,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -3865,45 +3681,6 @@
                 ],
                 "limit": 24,
                 "limit_note": "Over 24 GB would squeeze mac-mini"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",

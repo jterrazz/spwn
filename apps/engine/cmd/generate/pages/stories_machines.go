@@ -39,8 +39,8 @@ type Scene struct {
 	Macs     []awake.Report
 	Activity pageactivity.View
 	Agents   []agents.Agent
-	// value: home reads every Mac's own accounts beside the copies it
-	// lent, as the engine does: what a sheet offers to lend.
+	// value: home reads every Mac's own sign-ins beside the grants of its
+	// VMs, as the engine does: what a sheet offers to grant.
 	SignedIn bool
 }
 
@@ -250,15 +250,14 @@ func proActivity() pageactivity.View {
 }
 
 func (f Scene) reading() pagemenubar.Reading {
-	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, Accounts: f.shares(), Agents: f.Agents, Asks: Levels}
+	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, SignIns: f.signIns(f.SignedIn), Agents: f.Agents, Asks: Levels}
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {
-	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, Accounts: &f.Accounts, Now: storyNow, Zone: time.UTC, Agents: f.Agents}
+	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, SignIns: f.signIns(true), Now: storyNow, Zone: time.UTC, Agents: f.Agents}
 	if h, ok := f.History[name]; ok {
 		m.Activity = &h
 	}
-	m.Shares = f.needs().Accounts
 	reports := append([]awake.Report{f.Awake}, f.Macs...)
 	for i := range reports {
 		if reports[i].Mac == name || reports[i].Mac == f.macOf(name) {
@@ -280,32 +279,9 @@ func (f Scene) machine(name string) pagemenubar.Machine {
 }
 
 // value: the scene's needs as the engine reads them: the fleet, its ports,
-// every Mac's accounts with the copies each shared, each Mac's Overview.
+// each Mac's Overview.
 func (f Scene) needs() pagemenubar.NeedsReading {
-	all := accounts.AllMachines{Now: storyNow}
-	for _, h := range f.All.Macs {
-		if !h.Reachable {
-			continue
-		}
-		m := accounts.MacAccounts{Name: h.Name, ThisMac: h.ThisMac}
-		for _, read := range f.Accounts.Machines {
-			if read.Name == h.Name {
-				m.Accounts = read.Accounts
-			}
-			for _, vm := range h.VMs {
-				if read.Name != vm.Name {
-					continue
-				}
-				for _, a := range read.Accounts {
-					if a.Shared != nil {
-						m.Shares = append(m.Shares, accounts.Shared{Account: a.Provider, VM: vm.Name, At: a.Shared.At, Until: a.Shared.Until})
-					}
-				}
-			}
-		}
-		all.Macs = append(all.Macs, m)
-	}
-	return pagemenubar.NeedsReading{Now: storyNow, Zone: time.UTC, All: &f.All, Ports: &f.Ports, Accounts: &all, Overviews: append([]overview.Summary{f.Home}, f.Away...), Asks: Levels}
+	return pagemenubar.NeedsReading{Now: storyNow, Zone: time.UTC, All: &f.All, Ports: &f.Ports, Overviews: append([]overview.Summary{f.Home}, f.Away...), Asks: Levels}
 }
 
 func (f Scene) portsOf(mac string) ports.Listing {
@@ -356,7 +332,7 @@ func (f Scene) draw() []Fixture {
 		{Name: "activity", Page: pagemenubar.Activity(f.Activity, thisMac)},
 		{Name: "needs", Page: pagemenubar.NeedsPage(f.needs(), "", thisMac)},
 		{Name: "find", Page: pagemenubar.Find(f.find(), thisMac)},
-		{Name: "accounts", Page: pagemenubar.Accounts(*f.needs().Accounts, pagemenubar.AccountsOf{Asks: Levels, Machines: &f.All}, thisMac)},
+		{Name: "accounts", Page: pagemenubar.Accounts(*f.signIns(true), pagemenubar.AccountsOf{Asks: Levels}, thisMac)},
 	}
 	for _, h := range f.All.Macs {
 		out = append(out, Fixture{Name: "machine." + h.Name, Page: pagemenubar.MachinePage(f.machine(h.Name))})
@@ -417,15 +393,7 @@ func nothingNeedsYou(f *Scene) {
 			}
 		}
 	}
-	for i, m := range f.Accounts.Machines {
-		for j, a := range m.Accounts {
-			if a.Shared != nil {
-				f.Accounts.Machines[i].Accounts[j] = loan(a.Provider, a.Shared.Name, 6*time.Hour)
-			}
-		}
-	}
 	f.Home.Needs = nil
-	f.Accounts.Machines[1].Accounts[0].Shared.Until = storyNow.Add(4 * time.Hour)
 	f.Home.Lines[1].Parts = f.Home.Lines[1].Parts[:1]
 	f.Home.Lines[2].Parts[1] = overview.Part{State: catalog.StateOK, N: 12, Of: 12, Key: "applied", Counted: true}
 	f.Home.Lines[5].Parts = f.Home.Lines[5].Parts[:1]

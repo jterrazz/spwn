@@ -28,7 +28,7 @@ type heroWorld struct {
 func newHeroWorld() *heroWorld {
 	infra := model.VM{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running, BootAt: heroNow.Add(-12 * 24 * time.Hour)}
 	linux1 := model.VM{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: "working"}}
-	return &heroWorld{r: Reading{Now: heroNow, Zone: time.UTC, Ports: &ports.AllMachines{}, Accounts: &accounts.AllMachines{Now: heroNow},
+	return &heroWorld{r: Reading{Now: heroNow, Zone: time.UTC, Ports: &ports.AllMachines{},
 		All: &model.AllMachines{Read: heroNow, Macs: []model.MacView{
 			{Name: heroPro, ThisMac: true, Reachable: true, Answered: heroNow, Hardware: hardware(48), VMs: []model.VM{linux1}},
 			{Name: heroMini, Reachable: true, Answered: heroNow, Hardware: hardware(64), VMs: []model.VM{infra}},
@@ -43,9 +43,9 @@ func (w *heroWorld) waiting(name, ask string, since time.Duration) *heroWorld {
 	return w
 }
 
-func (w *heroWorld) lease(vm string, left time.Duration) *heroWorld {
-	w.r.Accounts.Macs = append(w.r.Accounts.Macs, accounts.MacAccounts{Name: heroPro, ThisMac: true,
-		Shares: []accounts.Shared{{Account: catalog.ProviderClaude, VM: vm, At: heroNow.Add(left - 12*time.Hour), Until: heroNow.Add(left)}}})
+func (w *heroWorld) granted(t *testing.T, vm string) *heroWorld {
+	t.Helper()
+	w.r.SignIns = &SignIns{Machines: []MachineSignIns{{Name: vm, Mac: heroPro, ThisMac: true, VM: true, Rows: []accounts.ProgramRow{grantedRow(t, catalog.ProviderClaude, "pw-1")}}}}
 	return w
 }
 
@@ -134,13 +134,13 @@ func equal(t *testing.T, got, want heroSaid) {
 // badge's number, the three most urgent rows follow with their verbs, then
 // one link to the Needs you page for the rest.
 func TestSeveralNeedsAreCountedThenTheThreeMostUrgentAndALinkToTheRest(t *testing.T) {
-	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute).lease("linux-1", 23*time.Minute)
+	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute).waiting("api-bot", "PR #7 is ready", time.Minute)
 	got, p := said(t, w)
-	equal(t, got, heroSaid{title: "2 things need you", rows: []string{"review-bot | PR #42 is ready [Review]", "linux-1 | Claude ends in 23 min [Extend]"}})
+	equal(t, got, heroSaid{title: "2 things need you", rows: []string{"review-bot | PR #42 is ready [Review]", "api-bot | PR #7 is ready [Review]"}})
 	if p.Badge.Needs != 2 {
 		t.Fatalf("the badge says %d, the hero 2", p.Badge.Needs)
 	}
-	w.waiting("linux-3", "asks which store", 2*time.Minute).waiting("api-bot", "PR #7 is ready", time.Minute).lease("linux-1", 9*time.Minute)
+	w.waiting("linux-3", "asks which store", 2*time.Minute).waiting("docs-bot", "PR #9 is ready", 3*time.Minute).waiting("ops-bot", "PR #3 is ready", 4*time.Minute)
 	got, _ = said(t, w)
 	if got.title != "5 things need you" || len(got.rows) != 3 || got.link != "2 more need you" {
 		t.Fatalf("five needs: %+v", got)
@@ -152,16 +152,16 @@ func TestSeveralNeedsAreCountedThenTheThreeMostUrgentAndALinkToTheRest(t *testin
 func TestOneNeedIsTheHeroWithItsFactsAndItsVerb(t *testing.T) {
 	got, _ := said(t, newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute))
 	equal(t, got, heroSaid{title: "review-bot is waiting", facts: "PR #42 is ready | 6 min^1", verb: "Review"})
-	got, _ = said(t, newHeroWorld().lease("linux-1", 23*time.Minute))
-	equal(t, got, heroSaid{title: "Claude on linux-1 ends in 23 min", facts: "shared from This Mac | ends 14:53^1", verb: "Extend"})
+	got, _ = said(t, newHeroWorld().exposed())
+	equal(t, got, heroSaid{title: "Port 5000 is exposed", facts: "This Mac | AirPlay Receiver^1", verb: "Review"})
 }
 
 // invariant: a red need carries the hero with its fix; the others fold into
 // one line naming each subject once, or keep their row when there is one;
 // two reds are never merged, the first ranked carries the hero.
 func TestARedNeedCarriesTheHeroAndTheOthersFoldUnderIt(t *testing.T) {
-	got, _ := said(t, newHeroWorld().down().waiting("review-bot", "PR #42 is ready", 6*time.Minute).lease("linux-1", 23*time.Minute))
-	equal(t, got, heroSaid{title: "infra is down", facts: "out of memory | since 14:28 | on mac-mini^1", verb: "Restart", link: "2 more need you | review-bot, linux-1"})
+	got, _ := said(t, newHeroWorld().down().waiting("review-bot", "PR #42 is ready", 6*time.Minute).exposed())
+	equal(t, got, heroSaid{title: "infra is down", facts: "out of memory | since 14:28 | on mac-mini^1", verb: "Restart", link: "2 more need you | This Mac, review-bot"})
 	got, _ = said(t, newHeroWorld().exposed().waiting("review-bot", "PR #42 is ready", 6*time.Minute))
 	equal(t, got, heroSaid{title: "Port 5000 is exposed", facts: "This Mac | AirPlay Receiver^1", verb: "Review", rows: []string{"review-bot | PR #42 is ready [Review]"}})
 	got, _ = said(t, newHeroWorld().down().exposed().waiting("review-bot", "PR #42 is ready", 6*time.Minute))
@@ -171,19 +171,19 @@ func TestARedNeedCarriesTheHeroAndTheOthersFoldUnderIt(t *testing.T) {
 // invariant: a server restarting carries the hero while it boots, its step
 // counted as it runs, and the needs fold under it as under a red.
 func TestAServerRestartingCarriesTheHeroWithItsStep(t *testing.T) {
-	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute).lease("linux-1", 23*time.Minute)
+	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute).exposed()
 	w.mini().VMs[0].Restart = &model.RestartWalk{Step: 2, At: heroNow}
 	got, _ := said(t, w)
-	equal(t, got, heroSaid{title: "Restarting infra", facts: "on mac-mini^2 | has an address | 2 of 4", link: "2 more need you | review-bot, linux-1"})
+	equal(t, got, heroSaid{title: "Restarting infra", facts: "on mac-mini^2 | has an address | 2 of 4", link: "2 more need you | This Mac, review-bot"})
 }
 
 // invariant: a restart begins while the server is still down: from its
 // first step it is the restart, never a need folded under it nor counted.
 func TestAServerRestartingFromDownIsNeitherANeedNorCounted(t *testing.T) {
-	w := newHeroWorld().down().waiting("review-bot", "PR #42 is ready", 6*time.Minute).lease("linux-1", 23*time.Minute)
+	w := newHeroWorld().down().waiting("review-bot", "PR #42 is ready", 6*time.Minute).waiting("api-bot", "PR #7 is ready", time.Minute)
 	w.mini().VMs[0].Restart = &model.RestartWalk{Step: 1, At: heroNow}
 	got, p := said(t, w)
-	if got.title != "Restarting infra" || got.link != "2 more need you | review-bot, linux-1" {
+	if got.title != "Restarting infra" || got.link != "2 more need you | review-bot, api-bot" {
 		t.Fatalf("hero %+v", got)
 	}
 	if b := p.Badge; b == nil || b.Needs != 2 || !b.Restarting || b.Down {
@@ -217,7 +217,7 @@ func TestAnEmptyFleetIsTheEmptyStateWithNewVM(t *testing.T) {
 // invariant: SPEC B5.15: a Mac silent for more than 30 s is checked: the
 // header says so, its needs are drawn stale, an asleep Mac is not checked.
 func TestAMacStillAnsweringIsCheckedAndItsNeedsDrawnStale(t *testing.T) {
-	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute).lease("linux-1", 23*time.Minute)
+	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute).exposed()
 	w.mini().Reachable, w.mini().Answered = false, heroNow.Add(-40*time.Second)
 	_, p := said(t, w)
 	if p.Header.Stale == nil || p.Header.Stale.Text != "checking mac-mini" {
@@ -227,7 +227,7 @@ func TestAMacStillAnsweringIsCheckedAndItsNeedsDrawnStale(t *testing.T) {
 	for _, it := range p.Sections[0].Items[1:] {
 		signals[it.Row.Label] = it.Row.Signal
 	}
-	if signals["review-bot"] != page.SignalStale || signals["linux-1"] != "" {
+	if signals["review-bot"] != page.SignalStale || signals["This Mac"] != "" {
 		t.Fatalf("signals %v", signals)
 	}
 	w.mini().Asleep = true

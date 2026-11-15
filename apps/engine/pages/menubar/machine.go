@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
@@ -22,19 +21,18 @@ import (
 const (
 	MachineID page.ID = "menubar.machine"
 
-	ActionStop     = "stop"
-	ActionDelete   = "delete"
-	ActionRestart  = "restart"
-	ActionShare    = "share-port"
-	ActionTakeBack = "take-back"
-	ActionUnlock   = "unlock"
-	ActionAddMac   = "add-mac"
-	ActionStartVM  = "start-vm"
-	ActionMenu     = "menu"
-	ActionAttach   = "attach:"
-	ActionCleanup  = "cleanup"
-	ActionWake     = "wake"
-	ActionRemind   = "remind"
+	ActionStop    = "stop"
+	ActionDelete  = "delete"
+	ActionRestart = "restart"
+	ActionShare   = "share-port"
+	ActionUnlock  = "unlock"
+	ActionAddMac  = "add-mac"
+	ActionStartVM = "start-vm"
+	ActionMenu    = "menu"
+	ActionAttach  = "attach:"
+	ActionCleanup = "cleanup"
+	ActionWake    = "wake"
+	ActionRemind  = "remind"
 
 	CallCleanup = "machines.cleanup"
 	CallWake    = "machines.wake"
@@ -70,14 +68,14 @@ type Machine struct {
 	// at 2 s (Graph) and the day at a minute (History), nil until read.
 	Activity *activity.Report
 	Ports    *ports.AllMachines
-	Accounts *accounts.Report
-	// value: a Mac's page: the copies every Mac shared, its Awake, and the
-	// zone its times are said in.
-	Shares *accounts.AllMachines
-	Awake  *awake.Report
-	Zone   *time.Location
-	Now    time.Time
-	Asks   Levels
+	// value: the sign-ins and grants of the machines the page reads, and
+	// This Mac's vault.
+	SignIns *SignIns
+	// value: a Mac's page: its Awake, and the zone its times are said in.
+	Awake *awake.Report
+	Zone  *time.Location
+	Now   time.Time
+	Asks  Levels
 	// value: a workspace's page: the fleet's agents, nil until they are read.
 	Agents []agents.Agent
 }

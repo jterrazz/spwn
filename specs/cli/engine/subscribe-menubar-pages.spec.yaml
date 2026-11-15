@@ -22,7 +22,7 @@ runs:
           ["menubar.activity",["machine","graphs"],null]
           ["menubar.accounts"]
           loading ready
-          ["menubar.accounts",["summary","needs-you","signed-in"],null]
+          ["menubar.accounts",["summary","needs-you"],null]
           ["menubar.needs"]
           loading ready
           ["menubar.needs",["summary","needs-you"],null]

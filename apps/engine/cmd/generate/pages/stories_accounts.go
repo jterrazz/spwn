@@ -1,8 +1,6 @@
 package pages
 
 import (
-	"time"
-
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
@@ -12,33 +10,6 @@ func accountsWorlds() []World {
 	return []World{
 		{Name: "machines.accounts", Edit: macs().then(everyMacSignedIn), Pages: pages},
 		{Name: "machines.accounts.signed-in", Edit: macs().then(everyMacSignedIn, npmSignedIn), Pages: []string{"accounts"}},
-		{Name: "machines.accounts.extended", Edit: macs().then(everyMacSignedIn, claudeExtended), Pages: []string{"machine.linux-1"}},
-		{Name: "machines.accounts.no-loan", Edit: macs().then(everyMacSignedIn, nothingLentTo("review-bot")), Pages: []string{"machine.review-bot"}},
-	}
-}
-
-// value: Extend pressed on Claude's copy to linux-1: accounts.share shares
-// it again, from now for 4 hr, as Sharing.Share records a share.
-func claudeExtended(f *Scene) {
-	for i, m := range f.Accounts.Machines {
-		for j, a := range m.Accounts {
-			if m.Name == "linux-1" && a.Provider == catalog.ProviderClaude && a.Shared != nil {
-				loan := *a.Shared
-				loan.At = f.Accounts.Now
-				loan.Until = f.Accounts.Now.Add(4 * time.Hour)
-				f.Accounts.Machines[i].Accounts[j].Shared = &loan
-			}
-		}
-	}
-}
-
-func nothingLentTo(vm string) func(*Scene) {
-	return func(f *Scene) {
-		for i, m := range f.Accounts.Machines {
-			if m.Name == vm {
-				f.Accounts.Machines[i].Accounts = nil
-			}
-		}
 	}
 }
 

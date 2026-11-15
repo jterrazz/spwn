@@ -213,10 +213,10 @@ func TestAMacRowSaysWhatRunsThere(t *testing.T) {
 }
 
 // invariant: SPEC A4 Home 2: the Ports tile counts what is shared, red
-// what is exposed, never a loopback listener of a VM with its own device; Accounts what is signed out, else what is shared; Awake
+// what is exposed, never a loopback listener of a VM with its own device; Accounts what is signed out, else what is granted; Awake
 // the hours left, or Off, its switch one click.
 func TestTheTilesSayOneNumberEach(t *testing.T) {
-	w := newHeroWorld().lease("linux-1", 3*time.Hour)
+	w := newHeroWorld().granted(t, "linux-1")
 	w.r.Ports.Macs = []ports.MacPorts{{Name: heroPro, ThisMac: true, Shared: []ports.SharedPort{{VM: "linux-1", GuestPort: 5173}}, Ports: []ports.Port{
 		{Machine: machine.Ref{Name: "infra", On: heroPro}, Port: 20241, Process: "connector", Reach: ports.ThisMachine, Device: true},
 	}}}
@@ -226,7 +226,7 @@ func TestTheTilesSayOneNumberEach(t *testing.T) {
 	if got := tile(t, p, "Ports"); got.Number.N != 1 || got.Word != "shared" || got.Nav != PortsID {
 		t.Fatalf("ports %+v", got)
 	}
-	if got := tile(t, p, "Accounts"); got.Number.N != 1 || got.Word != "shared" {
+	if got := tile(t, p, "Accounts"); got.Number.N != 1 || got.Word != "granted" {
 		t.Fatalf("accounts %+v", got)
 	}
 	got := tile(t, p, "Awake")

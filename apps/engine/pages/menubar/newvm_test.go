@@ -4,8 +4,6 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 )
 
@@ -45,27 +43,24 @@ func TestNewVMOpensOnTheRoomiestMacWithTheNextFreeName(t *testing.T) {
 	}
 }
 
-// invariant: SPEC A9 1-8 and 1-9: the memory past what the Mac has free
-// is refused with its words; the accounts it can share are checked,
-// Share for showing only while one is.
-func TestNewVMOffersTheMemoryAndTheAccountsOfItsMac(t *testing.T) {
-	w := newHeroWorld()
-	w.r.Accounts.Macs = []accounts.MacAccounts{{Name: heroPro, ThisMac: true, Accounts: []accounts.Account{
-		{Provider: catalog.ProviderGitHub, State: catalog.StateOK},
-		{Provider: catalog.ProviderClaude, State: catalog.StateOK},
-	}}}
-	a := actionOf(homeOf(t, w), ActionNewVMOn+heroPro)
+// invariant: SPEC A9 1-8: the memory past what the Mac has free is
+// refused with its words; the form offers no account to share, since a
+// grant is made from the VM's own page.
+func TestNewVMOffersTheMemoryOfItsMacAndNoAccount(t *testing.T) {
+	a := actionOf(homeOf(t, newHeroWorld()), ActionNewVMOn+heroPro)
 	memory := field(a.Form.Fields, "Request.Size.MemoryBytes")
 	free := memory.Limit
 	if free <= 0 || memory.LimitNote == "" || slices.ContainsFunc(memory.Options, func(o page.Option) bool { return o.Disabled != "" }) != (free < 32) {
 		t.Errorf("memory %+v", memory)
 	}
-	share := field(a.Form.Fields, keyShare)
-	if share.Default != "github,claude" || len(share.Options) != 2 {
-		t.Errorf("share %+v, want GitHub and Claude checked", share)
+	options := field(a.Form.Fields, keyOptions)
+	if !slices.ContainsFunc(options.Fields, func(f page.Field) bool { return f.Key == "Request.Size.MemoryBytes" }) || options.Note != "{Request.Name}" {
+		t.Errorf("options %+v, want the memory among them and the name as its note", options)
 	}
-	if f := field(a.Form.Fields, keyShareFor); f.When == nil || f.When.Key != keyShare || !f.When.Set {
-		t.Errorf("Share for %+v, want shown only while an account is checked", f)
+	for _, f := range options.Fields {
+		if f.Kind == page.FieldMulti || f.Kind == page.FieldDisclosure {
+			t.Errorf("field %+v: a new VM shares nothing", f)
+		}
 	}
 }
 

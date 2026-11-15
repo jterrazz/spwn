@@ -8,7 +8,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -34,8 +33,8 @@ func asksYesNo(gesture string, k machine.Kind, _ ...string) string {
 // value: the prototype's fleet: This Mac with linux-1 at work and agent-7f
 // finished, mac-mini with infra healthy, linux-3 at work and review-bot
 // waiting on its PR, macbook-air asleep; Vite of linux-1 shared, Postgres
-// listening in linux-3; This Mac awake until 18:00 and its copy of Claude
-// to linux-1 ending in 24 min.
+// listening in linux-3; This Mac awake until 18:00 and a password of its
+// vault that fits linux-1 and agent-7f.
 func findFleet() FindReading {
 	vm := func(name, mac string, life model.Lifetime, memory int64, agent *model.AgentView) model.VM {
 		return model.VM{Name: name, Mac: mac, Lifetime: life, State: model.Running, Resources: model.Resources{MemoryBytes: memory * gib}, Agent: agent}
@@ -64,15 +63,11 @@ func findFleet() FindReading {
 			{Machine: machine.Ref{Name: "linux-3", On: findMini}, Port: 5432, Process: "postgres", Reach: ports.Tailnet},
 		}},
 	}}
-	signedIn := accounts.Account{Provider: catalog.ProviderClaude, State: catalog.StateOK, Origin: accounts.OriginOwn}
-	shares := accounts.AllMachines{Now: findNow, Macs: []accounts.MacAccounts{
-		{Name: findPro, ThisMac: true, Accounts: []accounts.Account{signedIn},
-			Shares: []accounts.Shared{{Account: catalog.ProviderClaude, VM: "linux-1", At: findNow.Add(-11 * time.Hour), Until: findNow.Add(24 * time.Minute)}}},
-		{Name: findMini},
-	}}
+	entry := accounts.VaultEntry{ID: "pw-1", Label: "deploy token", Program: accounts.Programs()[0]}
+	signIns := &SignIns{Vault: &accounts.VaultRead{Mac: findPro, Entries: []accounts.VaultEntry{entry}}, Offers: map[string]accounts.GrantOffer{"pw-1": offerFor("linux-1", "agent-7f")}}
 	held := &awake.Report{Engine: awake.EngineRunning, Mac: findPro, ThisMac: true,
 		Session: &awake.Session{Lid: true, StartedAt: findNow.Add(-time.Hour), Until: time.Date(2026, 11, 7, 18, 0, 0, 0, time.UTC)}}
-	return FindReading{Reading: Reading{All: &all, Ports: &listed, Accounts: &shares, Awake: held}, Now: findNow, Zone: time.UTC, Asks: asksYesNo}
+	return FindReading{Reading: Reading{All: &all, Ports: &listed, SignIns: signIns, Awake: held}, Now: findNow, Zone: time.UTC, Asks: asksYesNo}
 }
 
 // value: the same fleet once infra fell at 15:10.
@@ -147,7 +142,6 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 	}{
 		{FindNeeds, []findSaid{
 			{"Review review-bot", "PR #42 is ready", "Review", "", ""},
-			{"Extend Claude on linux-1", "Claude ends in 24 min", "Extend", "", ""},
 		}},
 		{FindMachines, []findSaid{
 			{"This Mac", "2 VMs | 28 GB free", "Open", "cmd+1", ""},
@@ -190,10 +184,10 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 	if got, want := entries(t, p, FindVerbs), []findSaid{
 		{"Open agent-7f in Terminal", "", "Open in Terminal", "cmd+enter", ""},
 		{"Share a port of agent-7f", "", "Share", "", ""},
-		{"Lend an account to agent-7f", "", "Run", "", ""},
+		{"Grant a password to agent-7f", "", "Run", "", ""},
 		{"Open linux-1 in Terminal", "", "Open in Terminal", "cmd+enter", ""},
 		{"Share a port of linux-1", "", "Share", "", ""},
-		{"Lend an account to linux-1", "", "Run", "", ""},
+		{"Grant a password to linux-1", "", "Run", "", ""},
 		{"Share a port of infra", "", "Share", "", ""},
 		{"Restart infra", "", "Restart", "", ""},
 		{"Open linux-3 in Terminal", "", "Open in Terminal", "cmd+enter", ""},
@@ -219,7 +213,7 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 		t.Fatalf("the Find index fails its checks: %v", err)
 	}
 	needs := entries(t, p, FindNeeds)
-	if len(needs) != 3 || needs[0] != (findSaid{"Restart infra", "down since 15:10", "Restart", "", ""}) || needs[1].title != "Review review-bot" {
+	if len(needs) != 2 || needs[0] != (findSaid{"Restart infra", "down since 15:10", "Restart", "", ""}) || needs[1].title != "Review review-bot" {
 		t.Errorf("Find's needs %+v, want Restart infra first, then Review review-bot", needs)
 	}
 	restart := findRow(p, FindNeeds, "down:infra")

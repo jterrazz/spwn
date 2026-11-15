@@ -171,12 +171,12 @@ func vmMenu(row page.Row, header string, own page.Page) menu {
 	if a, ok := pageAction(own, ActionShare); ok {
 		shares.add(menuCopy(a, menuID(a.ID, key), "A port", "point.3.connected.trianglepath.dotted"))
 	}
-	if a, ok := pageAction(own, ActionShareAccount); ok {
-		shares.add(menuCopy(a, menuID(a.ID, key), "An account", "key"))
-	}
 	if len(shares.ids) > 0 {
 		m.added = append(m.added, shares.added...)
 		m.add(page.Action{ID: ActionShareOf + key, Label: "Share", Icon: "square.and.arrow.up", On: OnMenu, Submenu: shares.ids})
+	}
+	if a, ok := pageAction(own, ActionGrant); ok {
+		m.add(menuCopy(a, menuID(a.ID, key), "", "key"))
 	}
 	m.next()
 	if a, ok := pageAction(own, ActionRestartUp); ok {
@@ -278,12 +278,12 @@ func macMenus(m Machine, h model.MacView, p page.Page) page.Page {
 	withPageMenu(&p, pm)
 	for _, vm := range h.VMs {
 		own := vmPage(m, h, vm)
-		withRowMenu(&p, vm.Name, vmMenu(rowOf(p, vm.Name), vm.Name+" on "+label, own))
+		withRowMenu(&p, vm.Name, vmMenu(rowIn(p, vm.Name), vm.Name+" on "+label, own))
 	}
 	return p
 }
 
-func rowOf(p page.Page, id string) page.Row {
+func rowIn(p page.Page, id string) page.Row {
 	for _, s := range p.Sections {
 		for _, it := range s.Items {
 			if it.Row != nil && it.Row.ID == id {
@@ -312,7 +312,7 @@ func vmPageMenu(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page 
 	if a, ok := pageAction(p, ActionShare); ok && vm.State == model.Running {
 		pm.add(menuCopy(a, menuID(a.ID, key), "Share a port", "point.3.connected.trianglepath.dotted"))
 	}
-	if a, ok := pageAction(p, ActionShareAccount); ok {
+	if a, ok := pageAction(p, ActionGrant); ok {
 		pm.add(menuCopy(a, menuID(a.ID, key), "", "key"))
 	}
 	pm.next()
@@ -363,7 +363,7 @@ func homeMenus(r Reading, p page.Page) page.Page {
 	if r.All == nil {
 		return p
 	}
-	m := Machine{All: r.All, Ports: r.Ports, Shares: r.Accounts, Zone: r.Zone, Now: r.now(), Asks: r.Asks}
+	m := Machine{All: r.All, Ports: r.Ports, SignIns: r.SignIns, Zone: r.Zone, Now: r.now(), Asks: r.Asks}
 	for _, h := range r.All.Macs {
 		label := model.Label(*r.All, h)
 		for _, vm := range h.VMs {
@@ -371,7 +371,7 @@ func homeMenus(r Reading, p page.Page) page.Page {
 				continue
 			}
 			m.Name = vm.Name
-			withRowMenu(&p, vm.Name, vmMenu(rowOf(p, vm.Name), vm.Name+" on "+label, vmPage(m, h, vm)))
+			withRowMenu(&p, vm.Name, vmMenu(rowIn(p, vm.Name), vm.Name+" on "+label, vmPage(m, h, vm)))
 		}
 		withRowMenu(&p, h.Name, macRowMenu(p, h, label))
 	}
@@ -435,25 +435,15 @@ func awakeMenu(r awake.Report, now time.Time, zone *time.Location) menu {
 	return m
 }
 
-// invariant: SPEC A5: a copy lent to a VM: its header (the account lent
-// to the VM), Extend by its term, Take back last.
-func loanMenu(c accounts.SharedCopy, extend page.Action, levels Levels, self string) menu {
+// invariant: SPEC A5: a grant to a VM: its header (the program granted
+// to the VM), then Remove, which asks as grants.remove does.
+func grantMenu(vm string, r accounts.ProgramRow, remove page.Action) menu {
 	var m menu
-	key := c.Mac + "/" + c.VM + "/" + c.Provider
-	label := accounts.Label(c.Provider)
-	m.title(key, label+" lent to "+c.VM)
-	m.add(menuCopy(extend, menuID(extend.ID, "menu"), VerbExtend+" "+hoursLeft(extendBy), "clock"))
-	if levels == nil {
-		return m
-	}
-	m.next()
-	ask := ask(levels, "take-back", machine.Workspace, label, "Take back "+label+" from "+c.VM+"?", "take back", "Its copy on "+c.VM+" is deleted.")
-	back := page.Action{ID: menuID(ActionTakeBack+"/"+c.Provider, key), Label: "Take back", Icon: "stop", On: OnMenu, Mutates: true, Confirm: ask, Destructive: ask != nil,
-		Run: &page.Run{Call: CallTakeBack, In: answered(ask, map[string]string{"Account": c.Provider, "From": c.VM})}}
-	if c.Mac != self {
-		back.Run.Target = &page.Target{Name: c.Mac}
-	}
-	m.add(back)
+	key := rowOf(vm, r.Program)
+	m.title(key, r.Program.Label()+" granted to "+vm)
+	item := menuCopy(remove, menuID(remove.ID, "menu"), "", "stop")
+	item.Destructive = remove.Confirm != nil
+	m.add(item)
 	return m
 }
 

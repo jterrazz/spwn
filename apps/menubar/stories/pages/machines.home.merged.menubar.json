@@ -103,29 +103,36 @@
         {
           "row": {
             "id": "hero",
-            "mark": "attention",
-            "label": "Claude on linux-1 ends in 24 min",
+            "mark": "ok",
+            "label": "All machines are fine",
             "detail": {
               "kind": "list",
               "items": [
                 {
                   "kind": "text",
-                  "text": "shared from This Mac"
+                  "text": "infra healthy"
                 },
                 {
                   "kind": "text",
-                  "text": "ends 10:54",
+                  "text": "up 12 days",
+                  "pri": 3
+                },
+                {
+                  "kind": "text",
+                  "text": "2 of 3 Macs awake",
                   "pri": 1
+                },
+                {
+                  "kind": "text",
+                  "text": "2 agents working",
+                  "pri": 2
                 }
               ]
             },
-            "reason": "expiring",
             "glyph": {
-              "kind": "symbol:exclamationmark.circle.fill",
-              "signal": "waits"
-            },
-            "verb": "ending:macbook-pro/linux-1/claude",
-            "nav": "menubar.machine:linux-1"
+              "kind": "symbol:checkmark.circle.fill",
+              "signal": "well"
+            }
           }
         }
       ],
@@ -1017,7 +1024,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -1094,45 +1101,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -1238,7 +1206,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -1315,45 +1283,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -1455,7 +1384,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -1532,45 +1461,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -1677,7 +1567,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -1754,45 +1644,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -2216,7 +2067,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -2293,45 +2144,6 @@
                 ],
                 "limit": 24,
                 "limit_note": "Over 24 GB would squeeze mac-mini"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -2444,7 +2256,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -2521,45 +2333,6 @@
                 ],
                 "limit": 24,
                 "limit_note": "Over 24 GB would squeeze mac-mini"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -3000,37 +2773,6 @@
       "id": "update-all:2-updates",
       "run": {
         "call": "apps.update"
-      }
-    },
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "ending:macbook-pro/linux-1/claude"
-      ],
-      "mutates": true,
-      "id": "ending:macbook-pro/linux-1/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
-        }
-      },
-      "default": true,
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
       }
     },
     {
@@ -3507,7 +3249,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -3584,45 +3326,6 @@
                 ],
                 "limit": 28,
                 "limit_note": "Over 28 GB would squeeze This Mac"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -3946,7 +3649,7 @@
             "key": "Options",
             "label": "Options",
             "kind": "disclosure",
-            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "note": "{Request.Name}",
             "fields": [
               {
                 "key": "Kind",
@@ -4023,45 +3726,6 @@
                 ],
                 "limit": 24,
                 "limit_note": "Over 24 GB would squeeze mac-mini"
-              },
-              {
-                "key": "Sharing",
-                "label": "Share",
-                "kind": "disclosure",
-                "fields": [
-                  {
-                    "key": "Share",
-                    "kind": "multiselect"
-                  },
-                  {
-                    "key": "ShareFor",
-                    "label": "Share for",
-                    "kind": "segmented",
-                    "options": [
-                      {
-                        "value": "14400000000000",
-                        "label": "4 hr"
-                      },
-                      {
-                        "value": "43200000000000",
-                        "label": "12 hr"
-                      },
-                      {
-                        "value": "604800000000000",
-                        "label": "7 days"
-                      }
-                    ],
-                    "default": "14400000000000",
-                    "when": {
-                      "key": "Share",
-                      "set": true
-                    }
-                  }
-                ],
-                "summary": {
-                  "kind": "text",
-                  "text": "{Share:, |No account}[ for {ShareFor}]"
-                }
               },
               {
                 "key": "Request.Name",
@@ -4257,8 +3921,8 @@
     }
   ],
   "badge": {
-    "needs": 1,
-    "label": "station, 1 thing needs you"
+    "needs": 0,
+    "label": "all machines are fine"
   },
   "header": {
     "buttons": [

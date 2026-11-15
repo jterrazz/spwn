@@ -19,7 +19,7 @@
         },
         {
           "kind": "text",
-          "text": "2 things, most urgent first"
+          "text": "1 thing"
         }
       ]
     },
@@ -56,30 +56,12 @@
             "verb": "waiting:review-bot",
             "nav": "menubar.machine:review-bot"
           }
-        },
-        {
-          "row": {
-            "id": "ending:macbook-pro/linux-1/claude",
-            "mark": "attention",
-            "label": "linux-1",
-            "detail": {
-              "kind": "text",
-              "text": "Claude ends in 24 min"
-            },
-            "reason": "expiring",
-            "glyph": {
-              "kind": "symbol:clock",
-              "signal": "waits"
-            },
-            "verb": "ending:macbook-pro/linux-1/claude",
-            "nav": "menubar.machine:linux-1"
-          }
         }
       ],
       "counts": [
         {
           "mark": "attention",
-          "n": 2
+          "n": 1
         }
       ],
       "card": "flush"
@@ -178,37 +160,6 @@
       ],
       "id": "waiting:review-bot",
       "default": true
-    },
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "ending:macbook-pro/linux-1/claude"
-      ],
-      "mutates": true,
-      "id": "ending:macbook-pro/linux-1/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
-        }
-      },
-      "default": true,
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
     },
     {
       "label": "How to",

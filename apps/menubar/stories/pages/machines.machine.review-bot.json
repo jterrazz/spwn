@@ -294,7 +294,7 @@
     },
     {
       "id": "shared",
-      "title": "Lent to review-bot",
+      "title": "Accounts",
       "caption": [
         {
           "kind": "text",
@@ -316,63 +316,40 @@
       "items": [
         {
           "row": {
-            "id": "mac-mini/review-bot/claude",
+            "id": "review-bot/claude",
             "mark": "ok",
             "label": "Claude",
             "cells": [
               {
                 "kind": "text",
-                "text": "review-bot"
+                "text": "granted"
               }
             ],
             "detail": {
-              "kind": "text",
-              "text": "Claude Code inference"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "from the password Claude token"
+                }
+              ]
             },
             "glyph": {
               "kind": "account:claude"
             },
-            "mac": "review-bot",
-            "menu": [
-              "extend:mac-mini/review-bot/claude",
-              "take-back/claude"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 32400,
-              "of": 43200
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "share-account",
-            "mark": "ok",
-            "label": "Lend an account",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ends by itself"
-              }
-            ],
-            "glyph": {
-              "kind": "symbol:plus",
-              "signal": "active"
-            },
-            "trail": "value",
-            "verb": "share-account"
+            "mac": "review-bot"
           }
         },
         {
           "note": {
-            "text": "These are mac-mini's accounts. Every loan ends by itself."
+            "text": "Grant from mac-mini: its passwords are its own."
           }
         }
       ],
       "counts": [
         {
           "mark": "ok",
-          "n": 2
+          "n": 1
         }
       ],
       "segment": "accounts",
@@ -1828,7 +1805,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 account lent to it."
+            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 grant made to it."
           }
         ],
         "danger": true,
@@ -1955,162 +1932,6 @@
       "sheet": "share-port"
     },
     {
-      "label": "Take back",
-      "on": "row",
-      "rows": [
-        "mac-mini/review-bot/claude"
-      ],
-      "confirm": {
-        "question": "Take Claude back from review-bot?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "review-bot loses access right away. The Claude account on mac-mini is untouched."
-          }
-        ],
-        "danger": true,
-        "yes": "Take back",
-        "no": "Cancel",
-        "icon": "app"
-      },
-      "priority": 4,
-      "mutates": true,
-      "id": "take-back/claude",
-      "run": {
-        "call": "accounts.take-back",
-        "in": {
-          "Account": "claude",
-          "Confirm": "yes",
-          "From": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      }
-    },
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "mac-mini/review-bot/claude"
-      ],
-      "mutates": true,
-      "id": "extend:mac-mini/review-bot/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on review-bot"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Lend an account",
-      "on": "row",
-      "rows": [
-        "share-account"
-      ],
-      "mutates": true,
-      "id": "share-account",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "options": [
-              {
-                "value": "share-account",
-                "label": "review-bot",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              }
-            ],
-            "default": "share-account",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From mac-mini. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
-          }
-        ]
-      },
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with review-bot"
-          }
-        ]
-      }
-    },
-    {
       "label": "Share",
       "on": "row",
       "rows": [
@@ -2191,7 +2012,6 @@
         "new-agent",
         "copy-ssh@menu",
         "share-port@menu",
-        "share-account@menu",
         "-",
         "stop@menu",
         "-",
@@ -2270,93 +2090,6 @@
       "sheet": "share-port"
     },
     {
-      "label": "Lend an account",
-      "on": "menu",
-      "mutates": true,
-      "id": "share-account@menu",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "options": [
-              {
-                "value": "share-account",
-                "label": "review-bot",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              }
-            ],
-            "default": "share-account",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From mac-mini. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
-          }
-        ]
-      },
-      "icon": "key",
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with review-bot"
-          }
-        ]
-      }
-    },
-    {
       "label": "Stop",
       "on": "menu",
       "confirm": {
@@ -2394,7 +2127,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 account lent to it."
+            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 grant made to it."
           }
         ],
         "danger": true,

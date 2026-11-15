@@ -3,9 +3,7 @@ package menubar
 import (
 	"slices"
 	"strconv"
-	"strings"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 )
@@ -18,9 +16,9 @@ const (
 
 	CallCreateServer = "machines.create-server"
 
-	keyOn, keyKind, keyShare, keyShareFor = "On", "Kind", "Share", "ShareFor"
-	keyOptions, keySharing                = "Options", "Sharing"
-	soon                                  = "Ready in about a minute."
+	keyOn, keyKind = "On", "Kind"
+	keyOptions     = "Options"
+	soon           = "Ready in about a minute."
 )
 
 // value: the memory a new VM may ask, in GB: the presets.
@@ -34,11 +32,10 @@ func memoryStops() []int {
 
 // invariant: SPEC A5 New VM: the engine builds the sheet whole, one form
 // per Mac and per kind, so every word it says (the memory a Mac has free,
-// the accounts it can share, the name the VM takes) is the engine's; On and
+// the name the VM takes) is the engine's; On and
 // Kind swap between those forms, which the page carries side by side.
 type vmSheet struct {
 	all     model.AllMachines
-	signed  accounts.Reading
 	self    string
 	primary string
 	roomy   bool
@@ -48,14 +45,11 @@ type vmSheet struct {
 // value: New VM's sheets over the fleet as read: new-vm on primary (the
 // roomiest Mac when roomy, which the subtitle says), then a workspace and
 // a server on every Mac awake, with their split items.
-func newVMSheets(all *model.AllMachines, shares *accounts.AllMachines, self, primary string, roomy bool) []page.Action {
+func newVMSheets(all *model.AllMachines, self, primary string, roomy bool) []page.Action {
 	if all == nil {
 		return nil
 	}
 	s := vmSheet{all: *all, self: self, primary: primary, roomy: roomy, held: model.Held(*all)}
-	if shares != nil {
-		s.signed = shares.Read()
-	}
 	var out []page.Action
 	for _, h := range s.macs() {
 		if h.Name == primary {
@@ -148,37 +142,6 @@ func (s vmSheet) name(key, note string) page.Field {
 		Taken: s.held, TakenHud: answer(key) + " already exists"}
 }
 
-// invariant: SPEC A9 1-9: the accounts the Mac is signed in to, checked,
-// the ones it is out of there but refused with why; Share for under
-// them, only while one is checked.
-func (s vmSheet) sharing(h model.MacView) page.Field {
-	name := model.Label(s.all, h)
-	chips := page.Field{Key: keyShare, Kind: page.FieldMulti}
-	var checked []string
-	for _, on := range s.signed.SignedIn {
-		if on.Mac != h.Name {
-			continue
-		}
-		for _, a := range on.Accounts {
-			if _, ok := accounts.SecretOf(a.Provider); ok {
-				chips.Options = append(chips.Options, page.Option{Value: a.Provider, Label: accounts.Label(a.Provider)})
-				checked = append(checked, a.Provider)
-			}
-		}
-	}
-	for _, out := range s.signed.SignedOut {
-		if _, ok := accounts.SecretOf(out.Provider); ok && out.Mac == h.Name {
-			label := accounts.Label(out.Provider)
-			chips.Options = append(chips.Options, page.Option{Value: out.Provider, Label: label, Disabled: label + ": sign in on " + name + " first"})
-		}
-	}
-	chips.Default = strings.Join(checked, ",")
-	shareFor := page.Field{Key: keyShareFor, Label: "Share for", Kind: page.FieldSegmented, Default: shareFor()[0].Value, Options: shareFor(),
-		When: &page.When{Key: keyShare, Set: true}}
-	return page.Field{Key: keySharing, Label: "Share", Kind: page.FieldDisclosure, Summary: page.Text("{" + keyShare + ":, |No account}[ for " + answer(keyShareFor) + "]"),
-		Fields: []page.Field{chips, shareFor}}
-}
-
 func hudSaying(words string) *page.Value {
 	v := page.Text(words)
 	return &v
@@ -202,13 +165,13 @@ func (s vmSheet) workspace(h model.MacView, id string) []page.Action {
 	)
 	options := page.Field{Key: keyOptions, Label: "Options", Kind: page.FieldDisclosure,
 		Summary: page.Texts(answer(lifetime), answer(image), answer(memory)),
-		Note:    answer(vm) + answerSep + "shares {" + keyShare + ": and |no account}[ for " + answer(keyShareFor) + "]",
+		Note:    answer(vm),
 		Fields: []page.Field{
 			s.kind(h, id),
 			{Key: lifetime, Label: "Lifetime", Kind: page.FieldSegmented, Default: string(model.Ephemeral), Options: []page.Option{
 				{Value: string(model.Ephemeral), Label: "Ephemeral"}, {Value: string(model.Persistent), Label: "Persistent"},
 			}},
-			system(image), s.memory(h, memory), s.sharing(h), s.name(vm, "Generated, editable"),
+			system(image), s.memory(h, memory), s.name(vm, "Generated, editable"),
 		}}
 	form := &page.Form{Title: "New VM", Subtitle: s.subtitle(h, id), Split: []string{ActionCreateOpen + id}, Primary: create(),
 		Fields: []page.Field{s.on(h, s.workspaceID), options}}

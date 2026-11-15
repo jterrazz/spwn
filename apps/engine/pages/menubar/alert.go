@@ -160,7 +160,7 @@ func stopWorkspace(vm model.VM, on string, live []string, shared int) alert {
 	return a
 }
 
-func deleteWorkspace(vm model.VM, live []string, shared, loans int) alert {
+func deleteWorkspace(vm model.VM, live []string, shared, grants int) alert {
 	var says []string
 	switch len(live) {
 	case 0:
@@ -173,8 +173,8 @@ func deleteWorkspace(vm model.VM, live []string, shared, loans int) alert {
 	if shared > 0 {
 		goes = append(goes, counted(shared, "shared port", "shared ports"))
 	}
-	if loans > 0 {
-		goes = append(goes, counted(loans, "account", "accounts")+" lent to it")
+	if grants > 0 {
+		goes = append(goes, counted(grants, "grant", "grants")+" made to it")
 	}
 	says = append(says, "This can't be undone. It goes with "+and(goes)+".")
 	a := alert{Gesture: "delete", Kind: vm.Lifetime.Kind(), Name: vm.Name, Question: "Delete " + vm.Name + "?", Says: says, Verb: "Delete " + vm.Name, Danger: true}
@@ -217,11 +217,6 @@ func restartMac(label string, servers []string) alert {
 func forgetMac(label string) alert {
 	return alert{Gesture: "forget", Kind: machine.Computer, Name: label, Question: "Forget " + label + "?",
 		Says: []string{"Its VMs keep running; station stops showing it. You can add it again."}, Verb: "Forget " + label, Danger: true}
-}
-
-func takeBack(account, vm, from string) alert {
-	return alert{Gesture: "take-back", Kind: machine.Workspace, Name: account, Question: "Take " + account + " back from " + vm + "?",
-		Says: []string{vm + " loses access right away. The " + account + " account on " + from + " is untouched."}, Verb: "Take back", Danger: true}
 }
 
 func stopShare(vm, port string) alert {

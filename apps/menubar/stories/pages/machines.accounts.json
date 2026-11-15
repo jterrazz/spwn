@@ -19,11 +19,11 @@
         },
         {
           "kind": "text",
-          "text": "2 accounts"
+          "text": "2 sign-ins"
         },
         {
           "kind": "text",
-          "text": "4 lent to VMs"
+          "text": "4 grants"
         }
       ]
     },
@@ -33,7 +33,7 @@
       "caption": [
         {
           "kind": "text",
-          "text": "2",
+          "text": "1",
           "signal": "waits"
         }
       ],
@@ -52,35 +52,23 @@
       "items": [
         {
           "row": {
-            "id": "short/macbook-pro/linux-1/claude",
-            "mark": "attention",
-            "label": "linux-1",
-            "detail": {
-              "kind": "text",
-              "text": "Claude ends in 24 min"
-            },
-            "reason": "expiring",
-            "glyph": {
-              "kind": "symbol:clock",
-              "signal": "waits"
-            },
-            "verb": "ending:macbook-pro/linux-1/claude"
-          }
-        },
-        {
-          "row": {
             "id": "macbook-pro/npm",
             "mark": "broken",
             "label": "This Mac",
             "detail": {
-              "kind": "text",
-              "text": "npm needs sign-in"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "npm needs sign-in"
+                },
+                {
+                  "kind": "text",
+                  "text": "signed out of registry.npmjs.org"
+                }
+              ]
             },
             "reason": "refused",
-            "hint": {
-              "command": "npm login",
-              "external": true
-            },
             "glyph": {
               "kind": "symbol:key",
               "signal": "waits"
@@ -93,172 +81,8 @@
       "card": "flush"
     },
     {
-      "id": "shared",
-      "title": "Lent to VMs",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "4"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "macbook-pro/linux-1/claude",
-            "mark": "attention",
-            "label": "Claude",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "linux-1"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "Claude Code inference"
-            },
-            "reason": "expiring",
-            "glyph": {
-              "kind": "account:claude"
-            },
-            "mac": "linux-1",
-            "menu": [
-              "title:macbook-pro/linux-1/claude",
-              "extend:macbook-pro/linux-1/claude@menu",
-              "-",
-              "take-back/claude@macbook-pro/linux-1/claude"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 1440,
-              "of": 43200
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "macbook-pro/linux-1/github",
-            "mark": "ok",
-            "label": "GitHub",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "linux-1"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "GitHub browser session"
-            },
-            "glyph": {
-              "kind": "account:github"
-            },
-            "mac": "linux-1",
-            "menu": [
-              "title:macbook-pro/linux-1/github",
-              "extend:macbook-pro/linux-1/github@menu",
-              "-",
-              "take-back/github@macbook-pro/linux-1/github"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 14400,
-              "of": 43200
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "mac-mini/linux-3/github",
-            "mark": "ok",
-            "label": "GitHub",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "linux-3"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "GitHub browser session"
-            },
-            "glyph": {
-              "kind": "account:github"
-            },
-            "mac": "linux-3",
-            "menu": [
-              "title:mac-mini/linux-3/github",
-              "extend:mac-mini/linux-3/github@menu",
-              "-",
-              "take-back/github@mac-mini/linux-3/github"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 21600,
-              "of": 43200
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "mac-mini/review-bot/claude",
-            "mark": "ok",
-            "label": "Claude",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "review-bot"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "Claude Code inference"
-            },
-            "glyph": {
-              "kind": "account:claude"
-            },
-            "mac": "review-bot",
-            "menu": [
-              "title:mac-mini/review-bot/claude",
-              "extend:mac-mini/review-bot/claude@menu",
-              "-",
-              "take-back/claude@mac-mini/review-bot/claude"
-            ],
-            "left": {
-              "kind": "until",
-              "n": 32400,
-              "of": 43200
-            }
-          }
-        }
-      ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 3
-        },
-        {
-          "mark": "attention",
-          "n": 1
-        }
-      ],
-      "card": "flush"
-    },
-    {
-      "id": "signed-in",
-      "title": "Signed in",
+      "id": "on:macbook-pro",
+      "title": "On This Mac",
       "caption": [
         {
           "kind": "text",
@@ -280,7 +104,7 @@
       "items": [
         {
           "row": {
-            "id": "github",
+            "id": "macbook-pro/gh",
             "mark": "ok",
             "label": "GitHub",
             "detail": {
@@ -288,7 +112,11 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "This Mac"
+                  "text": "jterrazz"
+                },
+                {
+                  "kind": "text",
+                  "text": "repo, workflow"
                 }
               ]
             },
@@ -299,7 +127,7 @@
         },
         {
           "row": {
-            "id": "claude",
+            "id": "macbook-pro/claude",
             "mark": "ok",
             "label": "Claude",
             "detail": {
@@ -307,7 +135,11 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "This Mac"
+                  "text": "admin@jterrazz.com"
+                },
+                {
+                  "kind": "text",
+                  "text": "max"
                 }
               ]
             },
@@ -324,40 +156,248 @@
         }
       ],
       "card": "flush"
+    },
+    {
+      "id": "on:linux-1",
+      "title": "On linux-1",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1/claude",
+            "mark": "ok",
+            "label": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "granted"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "from the password Claude token"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:claude"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "title:linux-1/claude",
+              "remove-grant:linux-1/claude@menu"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1/gh",
+            "mark": "ok",
+            "label": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "granted"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "from the password GitHub token"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:github"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "title:linux-1/gh",
+              "remove-grant:linux-1/gh@menu"
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ],
+      "card": "flush"
+    },
+    {
+      "id": "on:linux-3",
+      "title": "On linux-3",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-3/gh",
+            "mark": "ok",
+            "label": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "granted"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "from the password GitHub token"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:github"
+            },
+            "mac": "linux-3"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "card": "flush"
+    },
+    {
+      "id": "on:review-bot",
+      "title": "On review-bot",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot/claude",
+            "mark": "ok",
+            "label": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "granted"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "from the password Claude token"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:claude"
+            },
+            "mac": "review-bot"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "card": "flush"
+    },
+    {
+      "id": "silent",
+      "title": "Not read",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-air",
+            "mark": "unknown",
+            "label": "macbook-air",
+            "short": "macbook-air",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "macbook-air does not answer"
+              }
+            ],
+            "reason": "unreachable"
+          }
+        }
+      ],
+      "uncounted": true
     }
   ],
   "actions": [
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "short/macbook-pro/linux-1/claude"
-      ],
-      "mutates": true,
-      "id": "ending:macbook-pro/linux-1/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
-        }
-      },
-      "default": true,
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
     {
       "label": "Sign in",
       "on": "row",
@@ -382,25 +422,30 @@
           },
           {
             "kind": "text",
-            "text": "npm login on This Mac"
+            "text": "station accounts on This Mac"
           }
         ]
       }
     },
     {
-      "label": "Extend",
+      "label": "Remove",
       "on": "row",
       "rows": [
-        "macbook-pro/linux-1/claude"
+        "linux-1/claude"
       ],
+      "confirm": {
+        "question": "Remove Claude? The grant ends here; the token stays yours.",
+        "yes": "Remove"
+      },
       "mutates": true,
-      "id": "extend:macbook-pro/linux-1/claude",
+      "id": "remove-grant:linux-1/claude",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.remove",
         "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
+          "Confirm": "yes",
+          "Entry": "pw-claude",
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "hud": {
@@ -408,29 +453,31 @@
         "items": [
           {
             "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
+            "text": "Claude removed from linux-1"
           }
         ]
-      }
+      },
+      "destructive": true
     },
     {
-      "label": "Extend",
+      "label": "Remove",
       "on": "row",
       "rows": [
-        "macbook-pro/linux-1/github"
+        "linux-1/gh"
       ],
+      "confirm": {
+        "question": "Remove GitHub? The grant ends here; the token stays yours.",
+        "yes": "Remove"
+      },
       "mutates": true,
-      "id": "extend:macbook-pro/linux-1/github",
+      "id": "remove-grant:linux-1/gh",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.remove",
         "in": {
-          "Account": "github",
-          "For": "14400000000000",
-          "With": "linux-1"
+          "Confirm": "yes",
+          "Entry": "pw-github",
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "hud": {
@@ -438,80 +485,11 @@
         "items": [
           {
             "kind": "text",
-            "text": "GitHub on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
+            "text": "GitHub removed from linux-1"
           }
         ]
-      }
-    },
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "mac-mini/linux-3/github"
-      ],
-      "mutates": true,
-      "id": "extend:mac-mini/linux-3/github",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "github",
-          "For": "14400000000000",
-          "With": "linux-3"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
       },
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "GitHub on linux-3"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Extend",
-      "on": "row",
-      "rows": [
-        "mac-mini/review-bot/claude"
-      ],
-      "mutates": true,
-      "id": "extend:mac-mini/review-bot/claude",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on review-bot"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
+      "destructive": true
     },
     {
       "label": "Full list in Terminal",
@@ -528,18 +506,19 @@
       "icon": "arrow.up.forward"
     },
     {
-      "label": "Lend an account",
+      "label": "Grant a password",
       "on": "page",
       "mutates": true,
-      "id": "share-account",
+      "id": "grant",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.add",
         "in": {
-          "With": "linux-1"
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "form": {
-        "title": "Lend an account",
+        "title": "Grant a password",
         "fields": [
           {
             "key": "To",
@@ -547,843 +526,140 @@
             "kind": "select",
             "options": [
               {
-                "value": "share-account:linux-1",
+                "value": "grant:linux-1",
                 "label": "linux-1",
-                "note": "on This Mac",
                 "glyph": {
                   "kind": "workspace"
                 }
               },
               {
-                "value": "share-account:agent-7f",
+                "value": "grant:agent-7f",
                 "label": "agent-7f",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:linux-3",
-                "label": "linux-3",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:review-bot",
-                "label": "review-bot",
-                "note": "on mac-mini",
                 "glyph": {
                   "kind": "workspace"
                 }
               }
             ],
-            "default": "share-account:linux-1",
+            "default": "grant:linux-1",
             "swaps": true
           },
           {
-            "key": "Account",
-            "label": "Account",
+            "key": "Entry",
+            "label": "Password",
             "kind": "pick",
             "options": [
               {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
+                "value": "pw-github",
+                "label": "GitHub token",
+                "note": "Granted already; granting again replaces it",
                 "glyph": {
                   "kind": "account:github"
                 }
               },
               {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
+                "value": "pw-claude",
+                "label": "Claude token",
+                "note": "Granted already; granting again replaces it",
                 "glyph": {
                   "kind": "account:claude"
                 }
               }
             ],
-            "default": "github",
+            "default": "pw-github",
             "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself.",
+        "subtitle": "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you to confirm before the password leaves this Mac.",
         "primary": [
           {
             "when": {
-              "key": "Account",
+              "key": "Entry",
               "set": true
             },
-            "label": "Lend {Account} for {For}"
+            "label": "Grant {Entry}"
           }
         ]
       },
       "icon": "plus",
-      "sheet": "share-account",
+      "sheet": "grant",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Shared {Account} with linux-1"
+            "text": "Granted {Entry} to linux-1"
           }
         ]
       }
     },
     {
-      "label": "Lend an account",
-      "on": "row",
-      "rows": [
-        "share-account"
-      ],
-      "mutates": true,
-      "id": "share-account:linux-1",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": "linux-1"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "options": [
-              {
-                "value": "share-account:linux-1",
-                "label": "linux-1",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:agent-7f",
-                "label": "agent-7f",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:linux-3",
-                "label": "linux-3",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:review-bot",
-                "label": "review-bot",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              }
-            ],
-            "default": "share-account:linux-1",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "options": [
-              {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
-                "glyph": {
-                  "kind": "account:github"
-                }
-              },
-              {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
-                "glyph": {
-                  "kind": "account:claude"
-                }
-              }
-            ],
-            "default": "github",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From This Mac. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
-          }
-        ]
-      },
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with linux-1"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Lend an account",
-      "on": "row",
-      "rows": [
-        "share-account"
-      ],
-      "mutates": true,
-      "id": "share-account:agent-7f",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": "agent-7f"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "options": [
-              {
-                "value": "share-account:linux-1",
-                "label": "linux-1",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:agent-7f",
-                "label": "agent-7f",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:linux-3",
-                "label": "linux-3",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:review-bot",
-                "label": "review-bot",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              }
-            ],
-            "default": "share-account:agent-7f",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "options": [
-              {
-                "value": "github",
-                "label": "GitHub",
-                "note": "jterrazz{sep}repo, workflow",
-                "glyph": {
-                  "kind": "account:github"
-                }
-              },
-              {
-                "value": "claude",
-                "label": "Claude",
-                "note": "Max plan",
-                "glyph": {
-                  "kind": "account:claude"
-                }
-              }
-            ],
-            "default": "github",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From This Mac. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
-          }
-        ]
-      },
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with agent-7f"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Lend an account",
-      "on": "row",
-      "rows": [
-        "share-account"
-      ],
-      "mutates": true,
-      "id": "share-account:linux-3",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": "linux-3"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "options": [
-              {
-                "value": "share-account:linux-1",
-                "label": "linux-1",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:agent-7f",
-                "label": "agent-7f",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:linux-3",
-                "label": "linux-3",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:review-bot",
-                "label": "review-bot",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              }
-            ],
-            "default": "share-account:linux-3",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From mac-mini. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
-          }
-        ]
-      },
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with linux-3"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Lend an account",
-      "on": "row",
-      "rows": [
-        "share-account"
-      ],
-      "mutates": true,
-      "id": "share-account:review-bot",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "With": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "To",
-            "label": "To",
-            "kind": "select",
-            "options": [
-              {
-                "value": "share-account:linux-1",
-                "label": "linux-1",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:agent-7f",
-                "label": "agent-7f",
-                "note": "on This Mac",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:linux-3",
-                "label": "linux-3",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              },
-              {
-                "value": "share-account:review-bot",
-                "label": "review-bot",
-                "note": "on mac-mini",
-                "glyph": {
-                  "kind": "workspace"
-                }
-              }
-            ],
-            "default": "share-account:review-bot",
-            "swaps": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "pick",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr",
-                "note": "Ends at 14:30, then taken back"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr",
-                "note": "Ends at 22:30, then taken back"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days",
-                "note": "Ends Saturday 14 Nov"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From mac-mini. It ends by itself.",
-        "primary": [
-          {
-            "when": {
-              "key": "Account",
-              "set": true
-            },
-            "label": "Lend {Account} for {For}"
-          }
-        ]
-      },
-      "sheet": "share-account",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Shared {Account} with review-bot"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Claude lent to linux-1",
+      "label": "Claude granted to linux-1",
       "on": "menu",
-      "id": "title:macbook-pro/linux-1/claude"
+      "id": "title:linux-1/claude"
     },
     {
-      "label": "Extend 4 hr",
-      "on": "menu",
-      "mutates": true,
-      "id": "extend:macbook-pro/linux-1/claude@menu",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "linux-1"
-        }
-      },
-      "icon": "clock",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Take back",
+      "label": "Remove",
       "on": "menu",
       "confirm": {
-        "question": "Take back Claude from linux-1?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its copy on linux-1 is deleted."
-          }
-        ],
-        "yes": "Take back"
+        "question": "Remove Claude? The grant ends here; the token stays yours.",
+        "yes": "Remove"
       },
       "mutates": true,
-      "id": "take-back/claude@macbook-pro/linux-1/claude",
+      "id": "remove-grant:linux-1/claude@menu",
       "run": {
-        "call": "accounts.take-back",
+        "call": "grants.remove",
         "in": {
-          "Account": "claude",
           "Confirm": "yes",
-          "From": "linux-1"
+          "Entry": "pw-claude",
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
       "icon": "stop",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude removed from linux-1"
+          }
+        ]
+      },
       "destructive": true
     },
     {
-      "label": "GitHub lent to linux-1",
+      "label": "GitHub granted to linux-1",
       "on": "menu",
-      "id": "title:macbook-pro/linux-1/github"
+      "id": "title:linux-1/gh"
     },
     {
-      "label": "Extend 4 hr",
+      "label": "Remove",
       "on": "menu",
+      "confirm": {
+        "question": "Remove GitHub? The grant ends here; the token stays yours.",
+        "yes": "Remove"
+      },
       "mutates": true,
-      "id": "extend:macbook-pro/linux-1/github@menu",
+      "id": "remove-grant:linux-1/gh@menu",
       "run": {
-        "call": "accounts.share",
+        "call": "grants.remove",
         "in": {
-          "Account": "github",
-          "For": "14400000000000",
-          "With": "linux-1"
+          "Confirm": "yes",
+          "Entry": "pw-github",
+          "To": "linux-1",
+          "ToKind": "machine"
         }
       },
-      "icon": "clock",
+      "icon": "stop",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "GitHub on linux-1"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
+            "text": "GitHub removed from linux-1"
           }
         ]
-      }
-    },
-    {
-      "label": "Take back",
-      "on": "menu",
-      "confirm": {
-        "question": "Take back GitHub from linux-1?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its copy on linux-1 is deleted."
-          }
-        ],
-        "yes": "Take back"
       },
-      "mutates": true,
-      "id": "take-back/github@macbook-pro/linux-1/github",
-      "run": {
-        "call": "accounts.take-back",
-        "in": {
-          "Account": "github",
-          "Confirm": "yes",
-          "From": "linux-1"
-        }
-      },
-      "icon": "stop",
-      "destructive": true
-    },
-    {
-      "label": "GitHub lent to linux-3",
-      "on": "menu",
-      "id": "title:mac-mini/linux-3/github"
-    },
-    {
-      "label": "Extend 4 hr",
-      "on": "menu",
-      "mutates": true,
-      "id": "extend:mac-mini/linux-3/github@menu",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "github",
-          "For": "14400000000000",
-          "With": "linux-3"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "icon": "clock",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "GitHub on linux-3"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Take back",
-      "on": "menu",
-      "confirm": {
-        "question": "Take back GitHub from linux-3?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its copy on linux-3 is deleted."
-          }
-        ],
-        "yes": "Take back"
-      },
-      "mutates": true,
-      "id": "take-back/github@mac-mini/linux-3/github",
-      "run": {
-        "call": "accounts.take-back",
-        "in": {
-          "Account": "github",
-          "Confirm": "yes",
-          "From": "linux-3"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "icon": "stop",
-      "destructive": true
-    },
-    {
-      "label": "Claude lent to review-bot",
-      "on": "menu",
-      "id": "title:mac-mini/review-bot/claude"
-    },
-    {
-      "label": "Extend 4 hr",
-      "on": "menu",
-      "mutates": true,
-      "id": "extend:mac-mini/review-bot/claude@menu",
-      "run": {
-        "call": "accounts.share",
-        "in": {
-          "Account": "claude",
-          "For": "14400000000000",
-          "With": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "icon": "clock",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Claude on review-bot"
-          },
-          {
-            "kind": "text",
-            "text": "4 hr left"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Take back",
-      "on": "menu",
-      "confirm": {
-        "question": "Take back Claude from review-bot?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its copy on review-bot is deleted."
-          }
-        ],
-        "yes": "Take back"
-      },
-      "mutates": true,
-      "id": "take-back/claude@mac-mini/review-bot/claude",
-      "run": {
-        "call": "accounts.take-back",
-        "in": {
-          "Account": "claude",
-          "Confirm": "yes",
-          "From": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "icon": "stop",
       "destructive": true
     }
   ],
@@ -1397,7 +673,7 @@
     "kind": "terminal-list",
     "buttons": [
       "full-list",
-      "share-account"
+      "grant"
     ]
   }
 }

@@ -14,23 +14,6 @@ import (
 
 var sheetNow = time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
 
-// invariant: SPEC A5: a loan's end is said by day: its hour today,
-// tomorrow at its hour, else its weekday and date.
-func TestALoanSaysWhenItEndsByDay(t *testing.T) {
-	for _, c := range []struct {
-		after time.Duration
-		want  string
-	}{
-		{4 * time.Hour, "Ends at 14:30, then taken back"},
-		{17 * time.Hour, "Ends tomorrow at 03:30"},
-		{7 * 24 * time.Hour, "Ends Saturday 14 Nov"},
-	} {
-		if got := endsBy(sheetNow, sheetNow.Add(c.after)); got != c.want {
-			t.Errorf("a loan of %s says %q, want %q", c.after, got, c.want)
-		}
-	}
-}
-
 func fleetOfTwo() model.AllMachines {
 	finished := &model.AgentView{State: model.AgentFinished, Ended: sheetNow.Add(-12 * time.Minute), Reason: "tests pass"}
 	working := &model.AgentView{State: "working"}
@@ -141,44 +124,52 @@ func TestCleanUpSaysAWaitingAgentIsLive(t *testing.T) {
 	}
 }
 
-// invariant: SPEC A5 Lend an account: one sheet per running workspace of
-// an awake Mac, To swapping between them; each lists its Mac's accounts
-// it may share, the one signed out there disabled with why; the button
-// names the account and the time, and the call goes to that Mac.
-func TestLendAnAccountOffersEachWorkspaceTheAccountsOfItsMac(t *testing.T) {
+// invariant: SPEC A5 Grant a password: one sheet per machine a password
+// may go to, To swapping between them; This Mac's passwords as a pick
+// list, the one that cannot go there disabled with the engine's line; the
+// button names the password, and the call is grants.add.
+func TestGrantAPasswordOffersEachMachineThePasswordsThatFit(t *testing.T) {
 	to := runningWorkspaces(fleetOfTwo())
 	if want := []workspace{{VM: "linux-1", Mac: "pro"}, {VM: "agent-7f", Mac: "pro"}, {VM: "docs", Mac: "pro"}}; !slices.Equal(to, want) {
 		t.Fatalf("the workspaces %v, want %v", to, want)
 	}
-	mac := func(name string, this bool, as ...accounts.Account) accounts.MacAccounts {
-		return accounts.MacAccounts{Name: name, ThisMac: this, Accounts: as}
+	deploy := accounts.VaultEntry{ID: "pw-1", Label: "deploy token", Program: programFor(t, catalog.ProviderGitHub)}
+	mail := accounts.VaultEntry{ID: "pw-2", Label: "mail token", Program: programFor(t, catalog.ProviderClaude)}
+	target := func(vm string, fits accounts.TargetFit, line string) accounts.Target {
+		return accounts.Target{ToKind: accounts.ToMachine, To: vm, Fit: fits, Line: line}
 	}
-	in := accounts.Account{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Identity: []string{"jterrazz"}}
-	out := accounts.Account{Provider: catalog.ProviderClaude, State: catalog.StateAbsent}
-	all := accounts.AllMachines{Now: sheetNow, Macs: []accounts.MacAccounts{mac("pro", true, in), mac("mini", false, in, out)}}
-	machines := model.AllMachines{Macs: []model.MacView{
-		{Name: "pro", ThisMac: true, VMs: []model.VM{{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running}}},
-		{Name: "mini", Reachable: true, VMs: []model.VM{{Name: "linux-3", Lifetime: model.Ephemeral, State: model.Running}, {Name: "infra", Lifetime: model.AlwaysOn, State: model.Running}}},
-	}}
-	b := accountsBody{now: all, hosts: all, self: "pro", of: AccountsOf{Machines: &machines}}
-	sheets := b.loanSheets()
+	s := SignIns{
+		Vault: &accounts.VaultRead{Mac: "pro", Entries: []accounts.VaultEntry{deploy, mail}},
+		Offers: map[string]accounts.GrantOffer{
+			"pw-1": {Targets: []accounts.Target{target("linux-1", accounts.TargetFits, "Signed out here"), target("docs", accounts.TargetFits, "Signed out here"), target("linux-3", accounts.TargetNo, "It is on mini: grant from there")}, Presence: "Touch ID will ask you"},
+			"pw-2": {Targets: []accounts.Target{target("linux-1", accounts.TargetNo, "It has its own sign-in"), target("docs", accounts.TargetFits, "Signed out here")}},
+		},
+	}
+	b := accountsBody{s: s, self: "pro"}
+	sheets := b.grantSheets()
 	ids := make([]string, 0, len(sheets))
 	for _, a := range sheets {
 		ids = append(ids, a.ID)
 	}
-	if want := []string{"share-account", "share-account:linux-1", "share-account:linux-3"}; !slices.Equal(ids, want) {
+	if want := []string{"grant", "grant:linux-1", "grant:docs"}; !slices.Equal(ids, want) {
 		t.Fatalf("the sheets %q, want %q", ids, want)
 	}
-	mini := sheets[2]
-	pick := mini.Form.Fields[1]
-	if mini.Form.Subtitle != "From mini. It ends by itself." || mini.Run.Target.Name != "mini" || mini.Run.In["With"] != "linux-3" || mini.Form.Fields[0].Default != "share-account:linux-3" {
-		t.Errorf("linux-3's sheet: %+v runs %+v", mini.Form, mini.Run)
+	first, docs := sheets[1], sheets[2]
+	pick := first.Form.Fields[1]
+	if first.Sheet != page.SheetGrant || first.Run.Call != CallGrant || first.Run.In["To"] != "linux-1" || first.Run.In["ToKind"] != string(accounts.ToMachine) || first.Form.Fields[0].Default != "grant:linux-1" {
+		t.Errorf("linux-1's sheet: %+v runs %+v", first.Form, first.Run)
 	}
-	if len(pick.Options) != 2 || pick.Default != catalog.ProviderGitHub || pick.Options[1].Disabled != "needs sign-in on mini" {
-		t.Errorf("mini's accounts %+v", pick)
+	if len(pick.Options) != 2 || pick.Default != "pw-1" || pick.Options[1].Disabled != "It has its own sign-in" || pick.Options[0].Disabled != "" {
+		t.Errorf("linux-1's passwords %+v", pick)
 	}
-	if p := mini.Form.Primary[0]; p.Label != "Lend {Account} for {For}" || p.When.Key != "Account" || !p.When.Set {
+	if got := docs.Form.Fields[1]; got.Default != "pw-1" || got.Options[1].Disabled != "" || docs.Run.In["To"] != "docs" {
+		t.Errorf("docs' passwords %+v runs %+v", got, docs.Run)
+	}
+	if p := first.Form.Primary[0]; p.Label != "Grant {Entry}" || p.When.Key != "Entry" || !p.When.Set {
 		t.Errorf("the button %+v", p)
+	}
+	if first.Form.Subtitle != "From the passwords of This Mac. It stays until you remove it. Touch ID will ask you." {
+		t.Errorf("the subtitle %q", first.Form.Subtitle)
 	}
 }
 

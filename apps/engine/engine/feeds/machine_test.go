@@ -24,6 +24,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
+	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
@@ -31,6 +32,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
+	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
 
 const (
@@ -92,9 +94,13 @@ type world struct {
 	beside []machines.VM
 	here   []machines.VM
 	added  []machines.MacView
-	lent   accounts.Report
-	// value: each Mac's own accounts reading, by name; nil answers lent.
-	signedIn map[string]accounts.Report
+	// value: the programs each machine reads as signed in, by the Mac asked
+	// and the VM read through it ("mac/vm", empty vm the Mac's own).
+	programs map[string][]accounts.ProgramRow
+	// value: This Mac's vault, and what grants.new says of each entry.
+	vault    accounts.VaultRead
+	offers   map[string]accounts.GrantOffer
+	read     []string
 	updates  bool
 	asked    map[string][]string
 	activity map[string]uint64
@@ -136,13 +142,21 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 		return machinescalls.ListOut{All: w.machines(listed.ThisMac)}
 	case portscalls.List.Name:
 		return ports.Listing{}
-	case accountscalls.Read.Name:
+	case accountscalls.Programs.Name:
 		w.mu.Lock()
 		defer w.mu.Unlock()
-		if r, ok := w.signedIn[at]; ok {
-			return r
-		}
-		return w.lent
+		of, _ := in.(accountscalls.ProgramsIn)
+		w.read = append(w.read, at+"/"+of.Machine)
+		return accounts.ProgramsRead{Programs: w.programs[at+"/"+of.Machine]}
+	case vaultcalls.VaultList.Name:
+		w.mu.Lock()
+		defer w.mu.Unlock()
+		return w.vault
+	case grantscalls.GrantNew.Name:
+		w.mu.Lock()
+		defer w.mu.Unlock()
+		entry, _ := in.(grantscalls.GrantNewIn)
+		return w.offers[entry.Entry]
 	case overviewcalls.Read.Name:
 		need := map[string]string{thisMac: "a sign-in expired", mini: "port 5000 is reachable from outside", "infra": "a container exited"}[at]
 		needs := []overview.Need{{Machine: at, Section: "ports", Broken: true, Text: need}}
@@ -391,23 +405,37 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 	}
 }
 
-func lentTo(vm string, providers ...string) accounts.Report {
-	until := time.Date(2026, 11, 4, 6, 30, 0, 0, time.UTC)
-	m := accounts.Machine{Name: vm, Kind: accounts.KindVM}
-	for _, p := range providers {
-		m.Accounts = append(m.Accounts, accounts.Account{Provider: p, Shared: &accounts.Loan{Name: p, Until: until}})
+func programNamed(provider string) accounts.Program {
+	for _, p := range catalog.Providers {
+		if p.ID != provider {
+			continue
+		}
+		for _, known := range catalog.LoginPrograms {
+			if known.Label == p.Label {
+				return accounts.Program(known.Name)
+			}
+		}
 	}
-	return accounts.Report{Machines: []accounts.Machine{m}}
+	return ""
 }
 
-func shared(p page.Page) []string {
+func grantedTo(providers ...string) []accounts.ProgramRow {
+	rows := make([]accounts.ProgramRow, 0, len(providers))
+	for _, p := range providers {
+		program := programNamed(p)
+		rows = append(rows, accounts.Describe(accounts.Facts{Program: program, State: accounts.ProgramSignedIn, How: accounts.HowGranted, Entry: "pw-" + p, EntryLabel: p + " token"}, accounts.Where{}))
+	}
+	return rows
+}
+
+func granted(p page.Page) []string {
 	var out []string
 	for _, s := range p.Sections {
 		if s.ID != "shared" {
 			continue
 		}
 		for _, it := range s.Items {
-			if it.Row != nil && it.Row.ID != "share-account" {
+			if it.Row != nil && it.Row.ID != "grant-password" {
 				out = append(out, it.Row.ID[strings.LastIndex(it.Row.ID, "/")+1:])
 			}
 		}
@@ -415,22 +443,22 @@ func shared(p page.Page) []string {
 	return out
 }
 
-func TestAnAccountTakenBackLeavesLinux1sPageOnceTheCallReturns(t *testing.T) {
+func TestAGrantRemovedLeavesLinux1sPageOnceItIsRead(t *testing.T) {
 	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Persistent, State: machines.Running, Guest: "connected"}
-	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, lent: lentTo("linux-1", catalog.ProviderGitHub, catalog.ProviderClaude), asked: map[string][]string{}, activity: map[string]uint64{}}
+	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{},
+		programs: map[string][]accounts.ProgramRow{thisMac + "/linux-1": grantedTo(catalog.ProviderGitHub, catalog.ProviderClaude)}}
 	refresh := make(chan struct{}, 1)
 	pages := watchWith(t, w, newSteps(), engine.FeedInput{Subject: "linux-1", Refresh: refresh})
-	until(t, pages, "GitHub and Claude shared with linux-1", func(p page.Page) bool {
-		return slices.Equal(shared(p), []string{catalog.ProviderGitHub, catalog.ProviderClaude})
-	})
+	both := []string{string(programNamed(catalog.ProviderGitHub)), string(programNamed(catalog.ProviderClaude))}
+	until(t, pages, "GitHub and Claude granted to linux-1", func(p page.Page) bool { return slices.Equal(granted(p), both) })
 	w.mu.Lock()
-	w.lent = lentTo("linux-1", catalog.ProviderClaude)
+	w.programs[thisMac+"/linux-1"] = grantedTo(catalog.ProviderClaude)
 	w.mu.Unlock()
 	refresh <- struct{}{}
-	p := until(t, pages, "GitHub gone from linux-1's shared accounts", func(p page.Page) bool { return slices.Equal(shared(p), []string{catalog.ProviderClaude}) })
+	p := until(t, pages, "GitHub gone from linux-1's accounts", func(p page.Page) bool { return slices.Equal(granted(p), both[1:]) })
 	for _, a := range p.Actions {
-		if a.ID == "take-back/github" {
-			t.Errorf("linux-1's page still offers %q after GitHub was taken back", a.Label)
+		if strings.HasPrefix(a.ID, "remove-grant:") && strings.HasSuffix(a.ID, "/"+both[0]) {
+			t.Errorf("linux-1's page still offers %q after GitHub was removed", a.Label)
 		}
 	}
 }
@@ -519,37 +547,21 @@ func TestUpdateAllLeavesHomesNeedsYouOnceTheCallReturns(t *testing.T) {
 func nothing[T any](func() T) func() T { return func() T { var zero T; return zero } }
 
 // invariant: SPEC A4, B5.7: a Mac's page reads that Mac's Awake through
-// its engine and the copies every Mac shared, so its care card says it
-// never sleeps and its Needs you holds the copy it shared that ends soon,
-// not another Mac's; its times
-// are in the owner's own clock.
-func TestTheMacMinisPageSaysItsAwakeTheCopiesEndingAndItsTimesInTheOwnersClock(t *testing.T) {
+// its engine, so its care card says it never sleeps; its times are in the
+// owner's own clock.
+func TestTheMacMinisPageSaysItsAwakeAndItsTimesInTheOwnersClock(t *testing.T) {
 	clock := newSteps()
 	clock.zone = time.FixedZone("CET", 3600)
-	soon := accounts.Report{Machines: []accounts.Machine{{Name: mini}},
-		Shares: []accounts.Shared{{Account: catalog.ProviderGitHub, VM: "review-bot", At: clock.Now().Add(-time.Hour), Until: clock.Now().Add(20 * time.Minute)}}}
-	here := accounts.Report{Machines: []accounts.Machine{{Name: thisMac}},
-		Shares: []accounts.Shared{{Account: catalog.ProviderClaude, VM: "linux-1", At: clock.Now().Add(-time.Hour), Until: clock.Now().Add(10 * time.Minute)}}}
 	down := infraAt(machines.Stopped, 0)
 	down.CheckStatus.Since = clock.Now().Add(-25 * time.Minute)
 	w := &world{infra: []machines.VM{down}, asked: map[string][]string{}, activity: map[string]uint64{},
-		signedIn: map[string]accounts.Report{mini: soon, thisMac: here},
-		awake:    map[string]awake.Report{mini: {Engine: awake.EngineRunning, NeverSleeps: true, NeverHeld: true, Servers: []string{"infra"}}}}
-	ending := "ending:" + mini + "/review-bot/" + catalog.ProviderGitHub
-	p := until(t, watch(t, w, clock, mini), "mac-mini's Awake and the copy ending", func(p page.Page) bool {
-		return row(p, "care", "awake") != nil && row(p, "needs-you", ending) != nil
-	})
+		awake: map[string]awake.Report{mini: {Engine: awake.EngineRunning, NeverSleeps: true, NeverHeld: true, Servers: []string{"infra"}}}}
+	p := until(t, watch(t, w, clock, mini), "mac-mini's Awake", func(p page.Page) bool { return row(p, "care", "awake") != nil })
 	if r := row(p, "care", "awake"); r.Label != "Never sleeps" || r.Detail.Text != "hosts infra, which pauses if it sleeps" {
 		t.Errorf("mac-mini's Awake reads %q, %q", r.Label, r.Detail.Text)
 	}
 	if got := w.askedOf(awakecalls.Read.Name); !slices.Contains(got, mini) || slices.Contains(got, thisMac) {
 		t.Errorf("Awake was read on %q, want on mac-mini", got)
-	}
-	if r := row(p, "needs-you", ending); r.Detail.Text != "GitHub ends in 20 min" {
-		t.Errorf("the copy ending reads %q", r.Detail.Text)
-	}
-	if r := row(p, "needs-you", "ending:"+thisMac+"/linux-1/"+catalog.ProviderClaude); r != nil {
-		t.Errorf("mac-mini's Needs you holds This Mac's copy %q", r.Detail.Text)
 	}
 	if r := row(p, "vms", "infra"); r == nil || len(r.Detail.Items) == 0 || r.Detail.Items[0].Text != "down since 11:05" {
 		t.Errorf("infra reads %+v, want down since 11:05 in the owner's clock", r)
