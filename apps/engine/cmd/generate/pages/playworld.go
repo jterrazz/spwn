@@ -33,6 +33,8 @@ type playWorld struct {
 	User     string              `json:"user"`
 	Macs     map[string]*playMac `json:"macs"`
 	Registry map[string]string   `json:"registry,omitempty"`
+	// value: the site each failing URL check asks, which the world holds down.
+	SitesDown []string `json:"sites_down,omitempty"`
 }
 
 type playMac struct {
@@ -131,6 +133,7 @@ type playAgents struct {
 func PlayWorld(base []byte) []byte {
 	f := everyMachine()
 	infraServes(&f)
+	infraFailing(&f)
 	cpu := map[string]float64{proName: .30, miniMac: .55, "linux-1": .37, "agent-7f": .04, "infra": .18, "linux-3": .60, "review-bot": .06}
 	hardware := map[string]coremachine.Hardware{
 		proName: {Model: "Mac16,5", Chip: "Apple M4 Max", Memory: 48 * gb, CPUs: 16},
@@ -202,6 +205,9 @@ func PlayWorld(base []byte) []byte {
 				m.Stores.Uptime[vm.Name] = vm.Uptime
 			}
 			w.Macs[vm.Name] = inside(f, vm, cpu[vm.Name], past[vm.Name])
+			if check, ok := model.ParseCheck(vm.Check); ok && check.URL != nil && vm.CheckStatus.State == model.CheckFailing {
+				w.SitesDown = append(w.SitesDown, check.URL.Hostname())
+			}
 		}
 		var notShared []string
 		for _, p := range f.portsOf(h.Name).AllMachines.Macs {
@@ -238,6 +244,9 @@ func PlayWorld(base []byte) []byte {
 		w.Macs[h.Name] = m
 	}
 	w.Macs[proName].Preferences["macs"] = known
+	// value: one port this Mac opens to its LAN, a need beside the failing
+	// server's, so one world shows what needs you beside what can wait.
+	w.Macs[proName].Listening = append(w.Macs[proName].Listening, ports.Listener{Port: 5000, Bind: "*", Process: "ControlCenter", PID: 588})
 	out, err := json.Marshal(w)
 	if err != nil {
 		panic(err)

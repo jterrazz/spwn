@@ -14,7 +14,7 @@ runs:
           {"v":2,"id":"1","call":"machines.list","target":{"name":"macbook-pro"},"in":{}}
       exit: 0
       stdout: |
-          {"check":"https://jterrazz.com/healthz","state":"passing","latency":60,"days":2}
+          {"check":"https://jterrazz.com/healthz","state":"failing","latency":60,"days":2}
     - command: 'machines restart infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |
