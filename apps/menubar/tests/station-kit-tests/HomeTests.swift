@@ -154,7 +154,7 @@ final class HomeLineTests: XCTestCase {
     // invariant: Needs you's folded line is short words: a launchd label
     // by its last part, nothing past a comma.
     func testNeedsYouFoldedLineIsShort() throws {
-        let rows: [Row] = try decoded(#"[{"label":"npm sign-in expired"},{"label":"com.jterrazz.brain.x-snapshot is failing, last exit 1"}]"#)
+        let rows: [Row] = try decoded(#"[{"label":"npm sign-in expired"},{"label":"com.example.brain.x-snapshot is failing, last exit 1"}]"#)
         XCTAssertEqual(HomePage.folded(rows), "npm sign-in expired · x-snapshot is failing")
     }
 

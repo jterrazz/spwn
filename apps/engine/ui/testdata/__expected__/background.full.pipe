@@ -1,5 +1,5 @@
 # Failing	1 ✗
-✗	com.jterrazz.brain.x-snapshot	user	failing · last exit 2		~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist · station background remove com.jterrazz.brain.x-snapshot
+✗	com.example.brain.x-snapshot	user	failing · last exit 2		~/Library/LaunchAgents/com.example.brain.x-snapshot.plist · station background remove com.example.brain.x-snapshot
 # Orphans	1 ◐
 ◐	com.bjango.istatmenus.installer	root	idle	iStat Menus (gone)	/Library/LaunchDaemons/com.bjango.istatmenus.installer.plist · sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
 # Station	1 ●
@@ -7,5 +7,5 @@
 # Known apps	1 ●
 ●	com.github.facebook.watchman	user	running · pid 3464	watchman	~/Library/LaunchAgents/com.github.facebook.watchman.plist
 # Unknown	1 ●	1 ◐
-●	com.jterrazz.brain.sync	user	idle		~/Library/LaunchAgents/com.jterrazz.brain.sync.plist
-◐	com.jterrazz.brain.late	user	?		~/Library/LaunchAgents/com.jterrazz.brain.late.plist
+●	com.example.brain.sync	user	idle		~/Library/LaunchAgents/com.example.brain.sync.plist
+◐	com.example.brain.late	user	?		~/Library/LaunchAgents/com.example.brain.late.plist

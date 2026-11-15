@@ -52,7 +52,7 @@ type World struct {
 	// value: the repositories a shared source is read from, by URL.
 	Sources map[string]*Repository `json:"sources,omitempty"`
 	// value: the names a health check asks that answer no more, a site
-	// down whichever machine serves it: jterrazz.com.
+	// down whichever machine serves it: example.com.
 	SitesDown []string `json:"sites_down,omitempty"`
 }
 

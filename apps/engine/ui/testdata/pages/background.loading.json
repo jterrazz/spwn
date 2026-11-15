@@ -72,9 +72,9 @@
       "items": [
         {
           "row": {
-            "id": "com.jterrazz.brain.x-snapshot",
+            "id": "com.example.brain.x-snapshot",
             "mark": "pending",
-            "label": "com.jterrazz.brain.x-snapshot",
+            "label": "com.example.brain.x-snapshot",
             "cells": [
               {
                 "kind": "pending"
@@ -300,9 +300,9 @@
       "items": [
         {
           "row": {
-            "id": "com.jterrazz.brain.sync",
+            "id": "com.example.brain.sync",
             "mark": "pending",
-            "label": "com.jterrazz.brain.sync",
+            "label": "com.example.brain.sync",
             "cells": [
               {
                 "kind": "pending"
@@ -321,9 +321,9 @@
         },
         {
           "row": {
-            "id": "com.jterrazz.brain.late",
+            "id": "com.example.brain.late",
             "mark": "pending",
-            "label": "com.jterrazz.brain.late",
+            "label": "com.example.brain.late",
             "cells": [
               {
                 "kind": "pending"

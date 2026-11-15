@@ -83,9 +83,9 @@
       "items": [
         {
           "row": {
-            "id": "com.jterrazz.brain.x-snapshot",
+            "id": "com.example.brain.x-snapshot",
             "mark": "broken",
-            "label": "com.jterrazz.brain.x-snapshot",
+            "label": "com.example.brain.x-snapshot",
             "cells": [
               {
                 "kind": "text",
@@ -110,11 +110,11 @@
             ],
             "detail": {
               "kind": "path",
-              "text": "~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist"
+              "text": "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist"
             },
             "reason": "failing",
             "hint": {
-              "command": "station background remove com.jterrazz.brain.x-snapshot"
+              "command": "station background remove com.example.brain.x-snapshot"
             }
           }
         }
@@ -361,9 +361,9 @@
       "items": [
         {
           "row": {
-            "id": "com.jterrazz.brain.sync",
+            "id": "com.example.brain.sync",
             "mark": "ok",
-            "label": "com.jterrazz.brain.sync",
+            "label": "com.example.brain.sync",
             "cells": [
               {
                 "kind": "text",
@@ -379,15 +379,15 @@
             ],
             "detail": {
               "kind": "path",
-              "text": "~/Library/LaunchAgents/com.jterrazz.brain.sync.plist"
+              "text": "~/Library/LaunchAgents/com.example.brain.sync.plist"
             }
           }
         },
         {
           "row": {
-            "id": "com.jterrazz.brain.late",
+            "id": "com.example.brain.late",
             "mark": "attention",
-            "label": "com.jterrazz.brain.late",
+            "label": "com.example.brain.late",
             "cells": [
               {
                 "kind": "text",
@@ -403,7 +403,7 @@
             ],
             "detail": {
               "kind": "path",
-              "text": "~/Library/LaunchAgents/com.jterrazz.brain.late.plist"
+              "text": "~/Library/LaunchAgents/com.example.brain.late.plist"
             },
             "reason": "late"
           }

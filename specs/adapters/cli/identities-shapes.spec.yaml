@@ -12,5 +12,5 @@ runs:
           cloudflare	ok		you@example.com	studio	
           git	ok		Jean-Baptiste Terrazzoni, you@example.com		
           ssh	ok		6 keys	you@example.com · station-image · station-e2e · deploy · old-rsa · github-actions	
-          docker	ok		deploy	registry.jterrazz.com	
+          docker	ok		deploy	registry.example.com	
           entry	absent	unset			no SSH key

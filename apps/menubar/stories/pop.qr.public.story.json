@@ -2,10 +2,10 @@
     "group": "pop",
     "heightNote": "the prototype gives no height for this capture; the page under it is server.healthy's",
     "id": "pop.qr.public",
-    "note": "infra's Traefik as a QR: jterrazz.com, anyone can open it through Cloudflare Tunnel, Copy and Open, no Stop sharing.",
+    "note": "infra's Traefik as a QR: example.com, anyone can open it through Cloudflare Tunnel, Copy and Open, no Stop sharing.",
     "pages": ["pages/machines.server.machine.infra.json"],
     "schema": "station.story/v1",
     "ui": {
-        "popover": "https://jterrazz.com"
+        "popover": "https://example.com"
     }
 }

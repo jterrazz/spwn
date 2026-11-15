@@ -158,7 +158,7 @@
   ],
   "background": [
     {
-      "label": "ai.jterrazz.x",
+      "label": "ai.example.x",
       "group": "unknown",
       "state": "running",
       "mark": "ok",
@@ -166,7 +166,7 @@
       "last_exit": 0,
       "scope": "user",
       "owner": "",
-      "plist": "~/Library/LaunchAgents/ai.jterrazz.x.plist",
+      "plist": "~/Library/LaunchAgents/ai.example.x.plist",
       "program": "",
       "removal": ""
     }

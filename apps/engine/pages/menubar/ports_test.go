@@ -22,7 +22,7 @@ func portFleet() ports.AllMachines {
 			{VM: "linux-1", GuestPort: 5173, Reserved: 40001, State: ports.PhaseShared, HTTP: true, URLs: ports.URLSet{Public: "http://pro.ts.net:40001"}, ReservedAt: macNow.Add(-time.Hour)},
 		}, Ports: []ports.Port{listen(linux1, 4321, "astro"), {Machine: coremachine.Ref{Name: proMac}, Port: 5000, Process: "ControlCenter", Binds: []string{"*"}, Reach: ports.Outside}}},
 		{Name: miniMac, Reachable: true, HTTPS: ports.HTTPSPort, Ports: []ports.Port{
-			{Machine: infra, Port: 443, Process: "nginx", Binds: []string{"0.0.0.0"}, Reach: ports.Outside, Declared: &ports.Declaration{Machine: "infra", Port: 443, Via: catalog.RouteCloudflareTunnel, URL: "https://jterrazz.com"}},
+			{Machine: infra, Port: 443, Process: "nginx", Binds: []string{"0.0.0.0"}, Reach: ports.Outside, Declared: &ports.Declaration{Machine: "infra", Port: 443, Via: catalog.RouteCloudflareTunnel, URL: "https://example.com"}},
 			{Machine: infra, Port: 6443, Process: "kube-apiserver", Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet, Device: true},
 			listen(linux3, 5432, "postgres"),
 		}},
@@ -119,16 +119,16 @@ func TestAPortRowIsItsOwnVerb(t *testing.T) {
 func TestAPublicPortOpensItsLink(t *testing.T) {
 	p := fleetPorts(t, portFleet(), PortsOf{})
 	traefik := rowsOf(p, SectionPublic)[0]
-	if d := traefik.Detail.Items; len(d) != 2 || d[0].Text != "jterrazz.com" || d[1].Text != "Cloudflare Tunnel" {
+	if d := traefik.Detail.Items; len(d) != 2 || d[0].Text != "example.com" || d[1].Text != "Cloudflare Tunnel" {
 		t.Fatalf("the public row says %+v", traefik.Detail)
 	}
-	if open := action(p, traefik.Verb); open == nil || open.Label != "Open Traefik" || open.Run.Open != "https://jterrazz.com" {
+	if open := action(p, traefik.Verb); open == nil || open.Label != "Open Traefik" || open.Run.Open != "https://example.com" {
 		t.Fatalf("the public row runs %+v", open)
 	}
 	if qr := action(p, traefik.Quick); qr == nil || qr.Label != "Show QR for Traefik" {
 		t.Fatalf("the public row offers %+v beside", qr)
 	}
-	if copyIt := action(p, ActionCopyPort+"infra:443"); copyIt == nil || copyIt.Run.Copy != "https://jterrazz.com" {
+	if copyIt := action(p, ActionCopyPort+"infra:443"); copyIt == nil || copyIt.Run.Copy != "https://example.com" {
 		t.Fatalf("the public link copies %+v", copyIt)
 	}
 }

@@ -22,7 +22,7 @@ func TestRedactDropsEveryTokenShape(t *testing.T) {
 			t.Errorf("a plain scope beside %q was dropped", s)
 		}
 	}
-	for _, s := range []string{"you@example.com", "Jean-Baptiste Terrazzoni", "SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4", "registry.jterrazz.com", "read:org"} {
+	for _, s := range []string{"you@example.com", "Jean-Baptiste Terrazzoni", "SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4", "registry.example.com", "read:org"} {
 		if a := accounts.RedactAccount(accounts.Account{Identity: []string{s}}); a.Identity[0] != s || a.Redacted {
 			t.Errorf("an identity %q was taken for a token", s)
 		}

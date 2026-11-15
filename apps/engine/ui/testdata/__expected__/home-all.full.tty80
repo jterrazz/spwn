@@ -1,7 +1,7 @@
 To do
   ✗ brain.x-snapshot         failing · last exit 2
-    → launchctl bootout gui/501/com.jterrazz.brain.x-snapshot &&
-      rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
+    → launchctl bootout gui/501/com.example.brain.x-snapshot &&
+      rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist
   ◐ setup                    name not set  → station init
   ◐ engine                   runs v2.0.0-242-gd653060, station is v2.0.0-250
     → station engine start
@@ -50,11 +50,11 @@ Background
     known
   └─ ● watchman  running · pid 3464  user  watchman    ~/Library/L…tchman.plist
     unknown
-  └─ ✗ com.jterrazz.brain.x-snapshot
+  └─ ✗ com.example.brain.x-snapshot
        failing · last exit 2  user
-       ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
-       → launchctl bootout gui/501/com.jterrazz.brain.x-snapshot &&
-         rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
+       ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist
+       → launchctl bootout gui/501/com.example.brain.x-snapshot &&
+         rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist
     orphan
   └─ ◐ socket    not loaded          root  Docker.app  /Library/La…socket.plist
        → sudo launchctl bootout system/com.docker.socket &&

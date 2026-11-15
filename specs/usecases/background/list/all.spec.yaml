@@ -13,9 +13,8 @@ runs:
           This Mac · 14 background tasks · 1 failing · 3 orphans
 
           Failing
-            ✗ com.jterrazz.brain.x-snapshot
-              user  failing · last exit 2  ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
-              → station background remove com.jterrazz.brain.x-snapshot
+            ✗ com.example.brain.x-snapshot  user  failing · last exit 2  ~/Library/LaunchA…n.x-snapshot.plist
+              → station background remove com.example.brain.x-snapshot
           Orphans
             ◐ com.bjango.istatmenus.installer
               root  not loaded  iStat Menus (gone)
@@ -44,5 +43,5 @@ runs:
               user  running · pid 611  Tailscale
               ~/Library/LaunchAgents/io.tailscale.ipn.macsys.login-item-helper.plist
           Unknown
-            ● com.jterrazz.brain.sync      user  running · pid 4120  ~/…/com.jterrazz.brain.sync.plist
+            ● com.example.brain.sync       user  running · pid 4120  ~/…/com.example.brain.sync.plist
             ● homebrew.mxcl.postgresql@16  user  running · pid 901   ~/…/homebrew.mxcl.postgresql@16.plist

@@ -6,7 +6,7 @@ runs:
       stdout: |
           	On macos-1:
           ●	dev.expo.metro	removed	~/Library/LaunchAgents/dev.expo.metro.plist deleted
-    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.macs["macos-1"].jobs | has("dev.expo.metro")), (.macs["macbook-pro"].jobs | has("com.jterrazz.brain.x-snapshot"))]'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.macs["macos-1"].jobs | has("dev.expo.metro")), (.macs["macbook-pro"].jobs | has("com.example.brain.x-snapshot"))]'' world.json'
       exit: 0
       stdout: |
           [false,true]

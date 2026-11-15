@@ -60,7 +60,7 @@
         },
         {
           "row": {
-            "id": "1-com.jterrazz.brain.x-snapshot",
+            "id": "1-com.example.brain.x-snapshot",
             "mark": "broken",
             "label": "1 background task failing",
             "cells": [
@@ -386,7 +386,7 @@
       "on": "row",
       "rows": [
         "0-npm",
-        "1-com.jterrazz.brain.x-snapshot",
+        "1-com.example.brain.x-snapshot",
         "2-brew",
         "3-firewall",
         "4-~/.tart"

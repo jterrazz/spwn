@@ -35,26 +35,26 @@ runs:
     - command: 'status --json | /usr/bin/jq -c ''.background | map([.label, .group, .state, .mark, .scope, .owner, .program])'''
       exit: 0
       stdout: |
-          [["TC3Q7MAJXF.com.adguard.safari.AdGuard.Helper","known","running","ok","user","AdGuard",""],["ai.jterrazz.gone","orphan","not-loaded","attention","user","","/opt/gone/bin/agent"],["ai.jterrazz.x","unknown","running","ok","user","",""],["ai.jterrazz.y","unknown","failing","broken","user","",""],["com.docker.vmnetd","orphan","not-loaded","attention","root","Docker.app","/Library/PrivilegedHelperTools/com.docker.vmnetd"],["dev.orbstack.OrbStack.privhelper","known","idle","ok","root","OrbStack","/Library/PrivilegedHelperTools/dev.orbstack.OrbStack.privhelper"]]
+          [["TC3Q7MAJXF.com.adguard.safari.AdGuard.Helper","known","running","ok","user","AdGuard",""],["ai.example.gone","orphan","not-loaded","attention","user","","/opt/gone/bin/agent"],["ai.example.x","unknown","running","ok","user","",""],["ai.example.y","unknown","failing","broken","user","",""],["com.docker.vmnetd","orphan","not-loaded","attention","root","Docker.app","/Library/PrivilegedHelperTools/com.docker.vmnetd"],["dev.orbstack.OrbStack.privhelper","known","idle","ok","root","OrbStack","/Library/PrivilegedHelperTools/dev.orbstack.OrbStack.privhelper"]]
     - command: 'status --json | /usr/bin/jq -r ''.background[] | select(.removal != "") | .removal'' | /usr/bin/sed ''s|gui/[0-9]*/|gui/UID/|'''
       exit: 0
       stdout: |
-          launchctl bootout gui/UID/ai.jterrazz.gone && rm ~/Library/LaunchAgents/ai.jterrazz.gone.plist
-          launchctl bootout gui/UID/ai.jterrazz.y && rm ~/Library/LaunchAgents/ai.jterrazz.y.plist
+          launchctl bootout gui/UID/ai.example.gone && rm ~/Library/LaunchAgents/ai.example.gone.plist
+          launchctl bootout gui/UID/ai.example.y && rm ~/Library/LaunchAgents/ai.example.y.plist
           sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
     - command: 'background --all | /usr/bin/sed -e ''s|gui/[0-9]*/|gui/UID/|'''
       exit: 0
       stdout: |
           # Failing	1 ✗
-          ✗	ai.jterrazz.y	user	failing · last exit 1		~/Library/LaunchAgents/ai.jterrazz.y.plist · station background remove ai.jterrazz.y
+          ✗	ai.example.y	user	failing · last exit 1		~/Library/LaunchAgents/ai.example.y.plist · station background remove ai.example.y
           # Orphans	2 ◐
-          ◐	ai.jterrazz.gone	user	not loaded		~/Library/LaunchAgents/ai.jterrazz.gone.plist · station background remove ai.jterrazz.gone
+          ◐	ai.example.gone	user	not loaded		~/Library/LaunchAgents/ai.example.gone.plist · station background remove ai.example.gone
           ◐	com.docker.vmnetd	root	not loaded	Docker.app (gone)	/Library/LaunchDaemons/com.docker.vmnetd.plist · sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
           # Known apps	2 ●
           ●	TC3Q7MAJXF.com.adguard.safari.AdGuard.Helper	user	running · pid 2211	AdGuard (gone)
           ●	dev.orbstack.OrbStack.privhelper	root	idle	OrbStack	/Library/LaunchDaemons/dev.orbstack.OrbStack.privhelper.plist
           # Unknown	1 ●
-          ●	ai.jterrazz.x	user	running · pid 12		~/Library/LaunchAgents/ai.jterrazz.x.plist
+          ●	ai.example.x	user	running · pid 12		~/Library/LaunchAgents/ai.example.x.plist
     - command: '--version >/dev/null; /usr/bin/grep "^launchctl" .calls | /usr/bin/grep -c -v -E "^launchctl (list|print|print-disabled) ?"'
       exit: 1
       stdout: |

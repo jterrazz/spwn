@@ -2012,7 +2012,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "jterrazz.com"
+                  "text": "example.com"
                 },
                 {
                   "kind": "text",
@@ -4322,7 +4322,7 @@
       ],
       "id": "open-port:infra:443",
       "run": {
-        "open": "https://jterrazz.com"
+        "open": "https://example.com"
       }
     },
     {
@@ -4333,14 +4333,14 @@
       ],
       "id": "copy-port:infra:443",
       "run": {
-        "copy": "https://jterrazz.com"
+        "copy": "https://example.com"
       },
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Copied https://jterrazz.com"
+            "text": "Copied https://example.com"
           }
         ]
       }

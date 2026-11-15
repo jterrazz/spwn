@@ -20,7 +20,7 @@ func serverOn(edit func(*model.VM)) page.Page { return serverServing(nil, edit) 
 
 func serverServing(served *ports.AllMachines, edit func(*model.VM)) page.Page {
 	vm := model.VM{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running, Want: "running", IP: "192.168.64.7", SSH: true, Guest: "connected",
-		Check: "https://jterrazz.com/healthz", BootAt: serverNow.Add(-12 * 24 * time.Hour), Resources: model.Resources{CPUs: 8, MemoryBytes: 24 << 30},
+		Check: "https://example.com/healthz", BootAt: serverNow.Add(-12 * 24 * time.Hour), Resources: model.Resources{CPUs: 8, MemoryBytes: 24 << 30},
 		CheckStatus: model.CheckStatus{State: model.CheckPassing, At: serverNow.Add(-40 * time.Second), Answer: "200"}}
 	for i := range 3 {
 		vm.Latency = append(vm.Latency, model.LatencyPoint{At: serverNow.Add(time.Duration(i-2) * time.Minute), Took: time.Duration(30+i*10) * time.Millisecond})
@@ -149,7 +149,7 @@ func TestAServerItsOwnerStoppedOffersStart(t *testing.T) {
 // latency now, its p50 and its peak with when; no request rate.
 func TestTheLatencyCardSaysLatencyOnly(t *testing.T) {
 	s := sectionOf(serverOn(nil), SectionLatency)
-	if s == nil || s.Title != "jterrazz.com" || s.Caption[0].Text != "50 ms" {
+	if s == nil || s.Title != "example.com" || s.Caption[0].Text != "50 ms" {
 		t.Fatalf("service %+v", s)
 	}
 	if got := s.Items[0].Fact.Key + ": " + words(s.Items[0].Fact.Value); got != "health check: p50 40 ms | peak 50 ms, 1 s ago" {
@@ -189,14 +189,14 @@ func TestEveryPortAServerServesCopiesTheAddressThatReachesIt(t *testing.T) {
 		}
 		copied[it.Row.Label] = a.Run.Copy
 	}
-	if want := map[string]string{"Traefik": "https://jterrazz.com", "Kubernetes API": "infra:6443"}; !maps.Equal(copied, want) {
+	if want := map[string]string{"Traefik": "https://example.com", "Kubernetes API": "infra:6443"}; !maps.Equal(copied, want) {
 		t.Fatalf("copied %q, want %q", copied, want)
 	}
 	traefik := sectionOf(p, SectionPorts).Items[0].Row
-	if open := action(p, traefik.Verb); open == nil || open.Run == nil || open.Run.Open != "https://jterrazz.com" || traefik.Quick != ActionQR+traefik.ID {
-		t.Fatalf("Traefik opens %+v and its quick is %q, want jterrazz.com opened and its QR", open, traefik.Quick)
+	if open := action(p, traefik.Verb); open == nil || open.Run == nil || open.Run.Open != "https://example.com" || traefik.Quick != ActionQR+traefik.ID {
+		t.Fatalf("Traefik opens %+v and its quick is %q, want example.com opened and its QR", open, traefik.Quick)
 	}
-	if got := traefik.Detail.Items[0].Text; got != "jterrazz.com" {
+	if got := traefik.Detail.Items[0].Text; got != "example.com" {
 		t.Fatalf("Traefik reads %q, want the site its route reaches", got)
 	}
 }

@@ -5,17 +5,17 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: '--version >/dev/null; terminal --size 120x30 "$STATION" background remove com.jterrazz.brain.x-snapshot'
+    - command: '--version >/dev/null; terminal --size 120x30 "$STATION" background remove com.example.brain.x-snapshot'
       stdin: |
-          see Remove com.jterrazz.brain.x-snapshot?
+          see Remove com.example.brain.x-snapshot?
           send y
           scrollback
       exit: 0
       stdout: |
-          ┃ Remove com.jterrazz.brain.x-snapshot?
+          ┃ Remove com.example.brain.x-snapshot?
           ┃
-          ●       com.jterrazz.brain.x-snapshot   removed ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist deleted
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs | [has("com.jterrazz.brain.x-snapshot"), has("com.jterrazz.brain.sync")]'' world.json'
+          ●       com.example.brain.x-snapshot    removed ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist deleted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs | [has("com.example.brain.x-snapshot"), has("com.example.brain.sync")]'' world.json'
       exit: 0
       stdout: |
           [false,true]

@@ -142,7 +142,7 @@ public struct MoleculeSheet: View {
             }
             card {
                 PortRow(Self.row("Vite", glyph: Self.glyph("port:Vite"), sub: Self.text("linux-1:5173"), nav: "open"), actions: Self.actions)
-                PortRow(Self.row("Traefik", glyph: Self.glyph("port:Traefik"), sub: Self.text("jterrazz.com"), mac: "infra", quick: "copy", nav: "open"), actions: Self.actions, highlighted: true)
+                PortRow(Self.row("Traefik", glyph: Self.glyph("port:Traefik"), sub: Self.text("example.com"), mac: "infra", quick: "copy", nav: "open"), actions: Self.actions, highlighted: true)
                 PortRow(Self.row("Astro", glyph: Self.glyph("port:Astro"), sub: Self.text("linux-1:4321"), verb: "share"), actions: Self.actions)
                 PortRow(Self.row("Postgres", glyph: Self.glyph("port:Postgres"), sub: Self.text("linux-2:5432"), signal: "faint"), actions: Self.actions)
             }

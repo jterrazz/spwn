@@ -9,7 +9,7 @@
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105m2 app updates[m         [38;2;76;79;105mstation apps update[m
   [38;2;156;160;176m[m[38;2;210;15;57m✗[m [1;38;2;76;79;105mnpm sign-in expired[m   [38;2;76;79;105mnpm login[m
   [38;2;156;160;176m[m[38;2;210;15;57m✗[m [1;38;2;76;79;105mA background task is failing: brain snapshot[m
-    [38;2;76;79;105mstation background[m  [38;2;108;111;133mcom.jterrazz.brain.x-snapshot[m
+    [38;2;76;79;105mstation background[m  [38;2;108;111;133mcom.example.brain.x-snapshot[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mFirewall off[m          [38;2;76;79;105mSystem Settings > Network > Firewall[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105m~/.tart is misplaced[m  [38;2;76;79;105mstation disk move ~/.tart[m
 [1;38;2;76;79;105mMachines[m

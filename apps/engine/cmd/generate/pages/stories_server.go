@@ -30,7 +30,7 @@ func infra(f *Scene) *model.VM { return &f.All.Macs[1].VMs[0] }
 // two restarts of 4 min each, 20 and 8 days ago.
 func infraServes(f *Scene) {
 	vm := infra(f)
-	vm.Check = "https://jterrazz.com/healthz"
+	vm.Check = "https://example.com/healthz"
 	vm.Latency = nil
 	bump := map[int]time.Duration{24: 64, 25: 98, 26: 91, 27: 58}
 	for i := range model.LatencyPoints {

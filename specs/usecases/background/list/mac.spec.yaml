@@ -11,9 +11,8 @@ runs:
       exit: 0
       stdout: |
           This Mac · 14 background tasks · 1 failing · 3 orphans
-            ✗ com.jterrazz.brain.x-snapshot
-              user  failing · last exit 2  ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
-              → station background remove com.jterrazz.brain.x-snapshot
+            ✗ com.example.brain.x-snapshot  user  failing · last exit 2  ~/Library/LaunchA…n.x-snapshot.plist
+              → station background remove com.example.brain.x-snapshot
           → station background --all  for every row
     - command: 'background | /usr/bin/grep -e "^#" -e "docker.vmnetd" -e "station.engine"'
       exit: 0

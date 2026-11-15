@@ -279,7 +279,7 @@ func taskWords(n overview.Need) string {
 }
 
 // value: a launchd label's own words: its maker's domain dropped, its
-// parts split, a lone letter left out (`com.jterrazz.brain.x-snapshot`
+// parts split, a lone letter left out (`com.example.brain.x-snapshot`
 // reads `brain snapshot`).
 func taskName(label string) string {
 	parts := strings.Split(label, ".")

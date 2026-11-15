@@ -4,12 +4,12 @@ runs:
     - command: 'background --json | /usr/bin/jq -c ''[.schema, (.tasks | length), (.findings | map(.subject))]'''
       exit: 0
       stdout: |
-          ["station.background.list/v1",14,["com.jterrazz.brain.x-snapshot","com.bjango.istatmenus.installer","com.docker.socket","com.docker.vmnetd"]]
-    - command: 'background --json | /usr/bin/jq -c ''.tasks[] | select(.label == "com.docker.vmnetd" or .label == "com.jterrazz.brain.x-snapshot")'''
+          ["station.background.list/v1",14,["com.example.brain.x-snapshot","com.bjango.istatmenus.installer","com.docker.socket","com.docker.vmnetd"]]
+    - command: 'background --json | /usr/bin/jq -c ''.tasks[] | select(.label == "com.docker.vmnetd" or .label == "com.example.brain.x-snapshot")'''
       exit: 0
       stdout: |
           {"label":"com.docker.vmnetd","group":"orphan","scope":"root","owner":"Docker.app","state":"loaded","pid":null,"last_exit":null,"plist":"/Library/LaunchDaemons/com.docker.vmnetd.plist","fix":{"command":"sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist"}}
-          {"label":"com.jterrazz.brain.x-snapshot","group":"unknown","scope":"user","owner":"","state":"failing","pid":null,"last_exit":2,"plist":"~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist","fix":{"command":"station background remove com.jterrazz.brain.x-snapshot"}}
+          {"label":"com.example.brain.x-snapshot","group":"unknown","scope":"user","owner":"","state":"failing","pid":null,"last_exit":2,"plist":"~/Library/LaunchAgents/com.example.brain.x-snapshot.plist","fix":{"command":"station background remove com.example.brain.x-snapshot"}}
     - command: 'background --json | /usr/bin/jq -c ''[.tasks[] | select(.scope == "root") | .fix.command != null] | unique'''
       exit: 0
       stdout: |

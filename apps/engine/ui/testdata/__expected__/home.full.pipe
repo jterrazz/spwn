@@ -21,7 +21,7 @@
 ●	git signing	on
 # Background	1 ●	1 ◐	1 ✗
 ●	com.github.facebook.watchman	known	running · pid 3464	user	watchman	~/Library/LaunchAgents/com.github.facebook.watchman.plist
-✗	com.jterrazz.brain.x-snapshot	unknown	failing · last exit 2	user		~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist · launchctl bootout gui/501/com.jterrazz.brain.x-snapshot && rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
+✗	com.example.brain.x-snapshot	unknown	failing · last exit 2	user		~/Library/LaunchAgents/com.example.brain.x-snapshot.plist · launchctl bootout gui/501/com.example.brain.x-snapshot && rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist
 ◐	com.docker.socket	orphan	not loaded	root	Docker.app	/Library/LaunchDaemons/com.docker.socket.plist · sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist
 # Gateways
 ●	Tailscale Serve	on

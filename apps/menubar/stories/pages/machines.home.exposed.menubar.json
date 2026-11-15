@@ -600,7 +600,7 @@
         },
         {
           "row": {
-            "id": "1-com.jterrazz.brain.x-snapshot",
+            "id": "1-com.example.brain.x-snapshot",
             "mark": "broken",
             "label": "A background task is failing: brain snapshot",
             "cells": [
@@ -611,7 +611,7 @@
             ],
             "detail": {
               "kind": "text",
-              "text": "com.jterrazz.brain.x-snapshot"
+              "text": "com.example.brain.x-snapshot"
             },
             "reason": "failing"
           }
