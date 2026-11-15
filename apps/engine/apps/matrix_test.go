@@ -19,7 +19,7 @@ func TestACellHoldsTheAppWhenItsStateIsInstalledInAnyForm(t *testing.T) {
 		{Read: true, Reports: []apps.Report{report(catalog.StateOK, false)}},
 		{Read: true, Reports: []apps.Report{report(catalog.StateAbsent, false)}},
 		{},
-	}, nil)
+	}, nil, nil)
 	if len(m.Rows) != 1 {
 		t.Fatalf("%d rows", len(m.Rows))
 	}
@@ -34,5 +34,31 @@ func TestACellHoldsTheAppWhenItsStateIsInstalledInAnyForm(t *testing.T) {
 	}
 	if holds != m.Rows[0].Carry {
 		t.Errorf("%d cells hold it, Carry says %d", holds, m.Rows[0].Carry)
+	}
+}
+
+func TestTheShelvesSayWhatMachinesCarryAndWhatTheCatalogHolds(t *testing.T) {
+	skill := func(name string) apps.Report {
+		return apps.Report{App: catalog.App{Name: name, AppKind: catalog.AppKindSkill}, State: catalog.StateOK}
+	}
+	app := apps.Report{App: catalog.App{Name: "node", AppKind: catalog.AppKindApp}, State: catalog.StateOK}
+	known := []catalog.App{app.App, skill("a").App, skill("b").App, skill("c").App}
+	cols := make([]apps.Column, 1)
+	many := apps.MatrixOf(cols, []apps.Reading{{Read: true, Reports: []apps.Report{app, skill("a"), skill("b")}}}, nil, known)
+	if got, want := many.Skills.Mine.Sentence, "2 skills are on your machines"; got != want {
+		t.Errorf("mine %q, want %q", got, want)
+	}
+	if got, want := many.Skills.Catalog.Sentence, "3 skills are in the catalog"; got != want {
+		t.Errorf("catalog %q, want %q", got, want)
+	}
+	if got := many.Verdict.Mine; got.Sentence != apps.EveryAppFollowsItsRule || got.Tone != "ok" {
+		t.Errorf("apps %+v", got)
+	}
+	one := apps.MatrixOf(cols, []apps.Reading{{Read: true, Reports: []apps.Report{skill("a")}}}, nil, known[:2])
+	if got, want := one.Skills.Mine.Sentence, "1 skill is on your machines"; got != want {
+		t.Errorf("one %q, want %q", got, want)
+	}
+	if got, want := one.Skills.Catalog.Sentence, "1 skill is in the catalog"; got != want {
+		t.Errorf("one catalog %q, want %q", got, want)
 	}
 }
