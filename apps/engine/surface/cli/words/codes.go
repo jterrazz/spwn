@@ -642,6 +642,30 @@ func Codes() map[fail.Code]Wording {
 		ports.CodeUnknownRoute: func(e *fail.Error) (string, string) {
 			return `"` + e.Subject + `" is not a route station knows`, "--via is one of " + e.Detail["routes"]
 		},
+		ports.CodeUnknownAudience: func(e *fail.Error) (string, string) {
+			return `"` + e.Subject + `" is not an audience`, "--to is one of " + e.Detail["audiences"]
+		},
+		ports.CodeAudienceInside: func(e *fail.Error) (string, string) {
+			return "a VM's share takes the audience its rights give it", "on its Mac: station ports share " + e.Detail["vm"] + " " + e.Subject + " --to " + e.Detail["to"]
+		},
+		ports.CodeEngineTooOld: func(e *fail.Error) (string, string) {
+			older := "an older station"
+			if v := e.Detail["version"]; v != "" {
+				older += " (" + v + ")"
+			}
+			return "the engine on " + e.Subject + " runs " + older + ", which cannot set a share's audience", "on " + e.Subject + ": station engine start"
+		},
+		ports.CodeAudienceNotKept: func(e *fail.Error) (string, string) {
+			got := cmp.Or(e.Detail["got"], "its rights' audience")
+			shared := "the engine on " + e.Detail["mac"] + " shared " + e.Subject + " with " + got + ", not " + e.Detail["asked"]
+			if e.Detail["released"] == "" {
+				if cause := e.Detail["cause"]; cause != "" {
+					shared += " (" + cause + ")"
+				}
+				return shared + ", and it is still shared", "station ports stop-sharing " + e.Detail["vm"] + " " + e.Detail["port"]
+			}
+			return shared + ": it is shared no more, and stays closed until you share it again", "on " + e.Detail["mac"] + ": station engine start, then station ports share " + e.Detail["vm"] + " " + e.Detail["port"] + " --to " + e.Detail["asked"]
+		},
 		ports.CodeNotDeclared: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not declared public", "station ports --on " + e.Detail["machine"]
 		},

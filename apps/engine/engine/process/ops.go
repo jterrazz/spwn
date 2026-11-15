@@ -6,6 +6,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 
 	"github.com/jterrazz/studio-station/apps/engine/awake"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 
@@ -27,15 +28,15 @@ func fault(code fail.Code, message, hint string) *enginecalls.OpError {
 }
 
 func (d *Engine) Hello() engine.Hello {
-	return engine.Hello{Version: d.o.Version, Page: d.o.Page, PID: d.o.PID, StartedAt: d.started, Executable: d.o.Executable}
+	return engine.Hello{Version: d.o.Version, Page: d.o.Page, PID: d.o.PID, StartedAt: d.started, Executable: d.o.Executable, Abilities: d.o.Abilities}
 }
 
 func (d *Engine) VMs() []engine.VMView { return d.vmViews() }
 
 func (d *Engine) Ports(ctx context.Context, vm string) ports.MacPorts { return d.surveyed(ctx, vm) }
 
-func (d *Engine) Reserve(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
-	return d.shareOf(ctx, vm, port, ports.ByOwner)
+func (d *Engine) Reserve(ctx context.Context, vm string, port int, to catalog.Audience) (ports.SharedPort, error) {
+	return d.shareOf(ctx, vm, port, ports.ByOwner, to)
 }
 
 func (d *Engine) Release(ctx context.Context, vm string, port int) (ports.Reservation, error) {
@@ -45,13 +46,13 @@ func (d *Engine) Release(ctx context.Context, vm string, port int) (ports.Reserv
 // invariant: a share takes back a stop of sharing, and a stop of sharing is
 // remembered, on this Mac whoever asked: a command here or a VM's guest;
 // by is who makes it, the owner for a command, the rights for a guest.
-func (d *Engine) shareOf(ctx context.Context, vm string, port int, by string) (ports.SharedPort, error) {
+func (d *Engine) shareOf(ctx context.Context, vm string, port int, by string, to catalog.Audience) (ports.SharedPort, error) {
 	if d.o.Remember != nil {
 		if err := d.o.Remember(vm, port, false); err != nil {
 			return ports.SharedPort{}, err
 		}
 	}
-	return d.reserve(ctx, vm, port, by)
+	return d.reserve(ctx, vm, port, by, to)
 }
 
 func (d *Engine) stopSharing(ctx context.Context, vm string, port int) (ports.Reservation, error) {

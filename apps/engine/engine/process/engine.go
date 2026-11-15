@@ -78,8 +78,11 @@ type Options struct {
 	// value: the folders of this Mac a VM shares, read at each of its
 	// starts, with why they are not its Machinefile's; an error refuses the
 	// start, and nil Mounts shares none.
-	Mounts    func(ctx context.Context, vm string) (model.MountsRead, error)
-	Version   string
+	Mounts  func(ctx context.Context, vm string) (model.MountsRead, error)
+	Version string
+	// value: the abilities its hello lists (engine.Abilities); nil lists
+	// none, so a caller asks none of it.
+	Abilities []string
 	Page      int
 	PID       int
 	Tick      time.Duration

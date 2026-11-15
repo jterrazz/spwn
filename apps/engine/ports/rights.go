@@ -90,7 +90,9 @@ func (r Rights) Judge(l Reservation, httpsMode string) (Reservation, bool) {
 	// takes the audience and Funnel port the rights give it today. One
 	// made before reservations said who made them is the owner's on a
 	// server, which only `ports share` shared then, and the rights' on a
-	// workspace.
+	// workspace. One the owner made with an audience chosen keeps it, inside
+	// the rights or outside them: a public one keeps its Funnel port, which
+	// its engine judges free (Engine.chosenFunnelLocked).
 	if l.By == "" {
 		l.By = ByRights
 		if r.Server {
@@ -100,6 +102,16 @@ func (r Rights) Judge(l Reservation, httpsMode string) (Reservation, bool) {
 	allowed := r.Allows(l.GuestPort)
 	if !allowed && !l.Owned() {
 		return l, false
+	}
+	if l.Owned() && l.Chosen != "" {
+		l.To = l.Chosen
+		if l.To == catalog.AudiencePrivate {
+			l.To = ""
+		}
+		if l.To != catalog.AudiencePublic {
+			l.PublicPort = 0
+		}
+		return l, true
 	}
 	l.To, l.PublicPort = "", 0
 	if !allowed || r.Audience() == catalog.AudiencePrivate {
@@ -162,6 +174,23 @@ func (e *NoFunnelPort) Error() string {
 	// value: why a public port is not shared in path mode: 443 carries the
 	// private paths, so two Funnel ports are left.
 	return "no Funnel port is left for " + strconv.Itoa(e.Port) + ": HTTPS links by path keep 443 private, so public opens 2 ports at most"
+}
+
+type FunnelsHeld struct {
+	Port int
+	// value: the Funnel ports the HTTPS mode offers, each held by another
+	// share.
+	Held []int
+}
+
+func (e *FunnelsHeld) Error() string {
+	// value: why a port the owner shares public is not: every Funnel port
+	// already carries another share.
+	held := make([]string, 0, len(e.Held))
+	for _, p := range e.Held {
+		held = append(held, strconv.Itoa(p))
+	}
+	return "no Funnel port is left for " + strconv.Itoa(e.Port) + ": " + strings.Join(held, ", ") + " each carry another share"
 }
 
 type FunnelHeld struct {

@@ -919,6 +919,21 @@
       "Word": "Port outside its rights",
       "Tone": "plain"
     },
+    "port.audience-inside-vm": {
+      "Word": "audience inside VM",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.audience-not-kept": {
+      "Word": "audience not kept",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.engine-too-old": {
+      "Word": "engine too old",
+      "Detail": "port",
+      "Tone": "plain"
+    },
     "port.needs-route": {
       "Word": "needs route",
       "Detail": "port",
@@ -951,6 +966,11 @@
     },
     "port.signed-out": {
       "Word": "signed out",
+      "Detail": "port",
+      "Tone": "plain"
+    },
+    "port.unknown-audience": {
+      "Word": "unknown audience",
       "Detail": "port",
       "Tone": "plain"
     },

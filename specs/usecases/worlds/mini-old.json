@@ -134,7 +134,7 @@
                 ]
             },
             "station": "v3.2.0",
-            "lacks": ["ports.declare", "activity.read"]
+            "lacks": ["ports.declare", "activity.read", "ports.share.to"]
         }
     },
     "user": "you"

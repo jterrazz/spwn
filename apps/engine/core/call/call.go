@@ -57,7 +57,18 @@ type Call[D, In, Out any] struct {
 	// value: the version of the document its output is printed as,
 	// station.<name>/v<Document>; zero is 1.
 	Document int
-	Run      func(ctx context.Context, d D, in In, p Progress) (Out, error)
+	// value: what this binary reads of In that an older one decodes as
+	// absent, each named `<name>.<field>`: its hello lists them, and an In
+	// whose Asks names one is sent only to a binary that lists it.
+	Abilities []string
+	Run       func(ctx context.Context, d D, in In, p Progress) (Out, error)
+}
+
+type Asker interface {
+	// invariant: an input that sets a field an older binary does not read
+	// asks for its ability: the far side that does not list it is refused as
+	// far-too-old, never sent the call it would run without that field.
+	Asks() []string
 }
 
 func (c Call[D, In, Out]) Schema() string { return schema(c.Name, c.Document) }
@@ -96,10 +107,11 @@ type Meta struct {
 	Out       string
 	// value: the Go types the call reads and answers, which the wire's
 	// schemas are reflected from.
-	InType   reflect.Type
-	OutType  reflect.Type
-	Watch    bool
-	Document int
+	InType    reflect.Type
+	OutType   reflect.Type
+	Watch     bool
+	Document  int
+	Abilities []string
 }
 
 type Handler interface {
@@ -171,7 +183,7 @@ func Bind[D, In, Out any](c Call[D, In, Out], d D) Handler {
 	return bound[D, In, Out]{meta: Meta{
 		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, ConfirmBy: c.ConfirmBy, Errors: c.Errors,
 		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), InType: reflect.TypeFor[In](), OutType: reflect.TypeFor[Out](),
-		Document: c.Document,
+		Document: c.Document, Abilities: c.Abilities,
 	}, runFn: c.Run, deps: d}
 }
 

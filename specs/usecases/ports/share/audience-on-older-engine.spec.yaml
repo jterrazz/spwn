@@ -1,0 +1,12 @@
+description: 'an audience asked of an engine older than its station is refused before the share is sent'
+env: engine-behind
+runs:
+    - command: 'ports share linux-1 3000 --to private'
+      exit: 1
+      stderr: |
+          Error: the engine on macbook-pro runs an older station (v3.2.0), which cannot set a share's audience
+          Hint: on macbook-pro: station engine start
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[].guest_port]'' world.json'
+      exit: 0
+      stdout: |
+          [5173,7000]

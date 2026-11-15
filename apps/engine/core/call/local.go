@@ -39,6 +39,20 @@ func (r *Registry) Input(name string, raw json.RawMessage) (any, error) {
 	return h.input(raw)
 }
 
+func (r *Registry) Asks(name string, raw json.RawMessage) []string {
+	// value: the abilities a frame's input asks of the binary that runs it;
+	// none for a call this registry does not hold or an input it cannot
+	// read, which the far side refuses itself.
+	v, err := r.Input(name, raw)
+	if err != nil {
+		return nil
+	}
+	if a, ok := v.(Asker); ok {
+		return a.Asks()
+	}
+	return nil
+}
+
 func input[In any](m Meta, raw json.RawMessage) (any, error) {
 	var in In
 	if len(raw) == 0 || string(raw) == "null" {

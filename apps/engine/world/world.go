@@ -310,6 +310,9 @@ func (m *Mac) Store() *Stores {
 type Engine struct {
 	// value: the version the engine runs; empty is the binary's own.
 	Version string `json:"version,omitempty"`
+	// value: the abilities of its own calls that older engine does not
+	// serve, until it starts again.
+	Lacks []string `json:"lacks,omitempty"`
 	// value: when the engine that runs now started.
 	StartedAt time.Time `json:"started_at,omitzero"`
 	// value: set up, and stopped by the owner: when, and by what.

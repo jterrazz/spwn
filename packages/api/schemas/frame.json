@@ -106,6 +106,12 @@
     "Hello": {
       "additionalProperties": false,
       "properties": {
+        "abilities": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "calls": {
           "items": {
             "type": "string"
@@ -382,6 +388,9 @@
             "machines.too-little-memory",
             "machines.unknown-image",
             "not_allowed",
+            "port.audience-inside-vm",
+            "port.audience-not-kept",
+            "port.engine-too-old",
             "port.needs-route",
             "port.needs-vm",
             "port.not-declared",
@@ -389,6 +398,7 @@
             "port.on-another-mac",
             "port.range-full",
             "port.signed-out",
+            "port.unknown-audience",
             "port.unknown-route",
             "range_full",
             "remote.caller-too-old",

@@ -6,6 +6,14 @@
         "guest_port": {
           "type": "integer"
         },
+        "to": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
+          "type": "string"
+        },
         "vm": {
           "type": "string"
         }

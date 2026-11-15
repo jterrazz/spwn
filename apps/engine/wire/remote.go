@@ -57,7 +57,7 @@ func (m machine) router(env kit.Env) *remote.Router {
 	}
 	r := remote.NewRouter(m.registry(env), m.profile, remote.Reach{
 		Macs:    macs,
-		Engine:  unix.New(guestRelay{m.macEngine()}, func() contract.Hello { return m.far.router.Served() }, m.imageOf),
+		Engine:  unix.New(guestRelay{m.macEngine()}, func() contract.Hello { return m.far.router.Served() }, m.imageOf, func(name string, in json.RawMessage) []string { return m.far.router.Asks(name, in) }),
 		Locate:  m.locate,
 		Holder:  m.holder,
 		Version: Version(),

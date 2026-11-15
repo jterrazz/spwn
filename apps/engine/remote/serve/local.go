@@ -24,6 +24,7 @@ func (l local) Hello() api.Hello {
 	h := api.Hello{Version: l.version, Calls: []string{}, Kind: l.thisMac.Kind}
 	for _, m := range l.registry.Metas() {
 		h.Calls = append(h.Calls, m.Name)
+		h.Abilities = append(h.Abilities, m.Abilities...)
 	}
 	return h
 }

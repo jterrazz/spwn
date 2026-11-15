@@ -3,6 +3,12 @@
     "engine.Hello": {
       "additionalProperties": false,
       "properties": {
+        "abilities": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "calls": {
           "items": {
             "type": "string"

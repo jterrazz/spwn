@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
 
@@ -42,6 +43,15 @@ const (
 	CallWatch = "engine.watch"
 )
 
+const (
+	// value: what the engine's own calls read of an input that an older
+	// engine decodes as absent, each named `<call>.<field>`: its hello lists
+	// those it serves, and a caller asks one only of an engine that lists it.
+	AbilityReserveTo = CallReserve + ".to"
+)
+
+func Abilities() []string { return []string{AbilityReserveTo} }
+
 // value: what a VM's verb asks of the engine, by the verb's name.
 const (
 	VMRun     = "run"
@@ -77,6 +87,8 @@ type VMIn struct {
 type ReserveIn struct {
 	VM        string `json:"vm"`
 	GuestPort int    `json:"guest_port"`
+	// value: the audience the owner chose; empty keeps the reservation's.
+	To catalog.Audience `json:"to,omitempty"`
 }
 
 type ExecIn struct {

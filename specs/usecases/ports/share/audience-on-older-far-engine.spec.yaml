@@ -1,0 +1,12 @@
+description: 'an audience sent with --on to a Mac whose engine is older than its station is refused there'
+env: engine-behind
+runs:
+    - command: 'ports share infra 8080 --to private --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: the engine on mac-mini runs an older station (v3.2.0), which cannot set a share's audience
+          Hint: on mac-mini: station engine start
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.macs["mac-mini"].stores.reservations // [])[].guest_port]'' world.json'
+      exit: 0
+      stdout: |
+          []

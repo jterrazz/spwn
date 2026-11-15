@@ -92,3 +92,21 @@ func TestARightsMadeReservationIsReleasedWhenTheRightsNarrow(t *testing.T) {
 		t.Error("a reservation under a refused Machinefile is kept, want released")
 	}
 }
+
+// invariant: an audience the owner chose wins over the rights, inside them
+// or outside, and a rights-made reservation never keeps one.
+func TestAnAudienceTheOwnerChoseWinsOverTheRights(t *testing.T) {
+	public := ports.RightsOf(&catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, false)
+	local := ports.Reservation{VM: "linux-1", GuestPort: 3000, MacPort: 40000, By: ports.ByOwner, Chosen: catalog.AudienceLocal}
+	if got, keep := public.Judge(local, ports.HTTPSPort); !keep || got.Audience() != catalog.AudienceLocal || got.PublicPort != 0 {
+		t.Errorf("an owner's local share under public rights = %+v, %v, want local, kept", got, keep)
+	}
+	outside := ports.Reservation{VM: "linux-1", GuestPort: 5000, MacPort: 40001, By: ports.ByOwner, Chosen: catalog.AudiencePublic, PublicPort: 8443}
+	if got, keep := public.Judge(outside, ports.HTTPSPort); !keep || got.Audience() != catalog.AudiencePublic || got.PublicPort != 8443 {
+		t.Errorf("an owner's public share outside the rights = %+v, %v, want public on 8443, kept", got, keep)
+	}
+	rights := ports.Reservation{VM: "linux-1", GuestPort: 3000, MacPort: 40000, By: ports.ByRights, Chosen: catalog.AudienceLocal}
+	if got, _ := public.Judge(rights, ports.HTTPSPort); got.Audience() != catalog.AudiencePublic || got.PublicPort != 443 {
+		t.Errorf("a rights-made reservation = %+v, want the rights' public on 443", got)
+	}
+}

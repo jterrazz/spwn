@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -35,10 +34,13 @@ type Dialer struct {
 	// value: the image a VM of this Mac was made from, which holds its
 	// station; empty for a VM this Mac keeps no record of.
 	image func(vm string) string
+	// value: the abilities a call's input asks of the guest that runs it
+	// (call.Registry.Asks); nil asks none.
+	asks func(name string, in json.RawMessage) []string
 }
 
-func New(engine Engine, thisMac func() contract.Hello, image func(vm string) string) Dialer {
-	return Dialer{engine: engine, thisMac: thisMac, image: image}
+func New(engine Engine, thisMac func() contract.Hello, image func(vm string) string, asks func(name string, in json.RawMessage) []string) Dialer {
+	return Dialer{engine: engine, thisMac: thisMac, image: image, asks: asks}
 }
 
 // value: the hello this Mac opens an exchange with: its version, so a
@@ -127,17 +129,26 @@ func (d Dialer) far(ctx context.Context, target machine.Ref) (*api.Hello, error)
 
 // invariant: two exchanges per call: the guest's server reads its stdin to
 // the end, answers and exits, so its Hello is asked alone first and a release
-// before api.Floor is refused before the request reaches it; the second sends
-// the hello and the request, and its Hello is judged again, so a guest whose
-// binary changed between the two, to a release before the floor or one that
-// serves no such call, is too old.
+// before api.Floor, or one that lacks an ability the request's input asks, is
+// refused before the request reaches it; the second sends the hello and the
+// request, and its Hello is judged again, so a guest whose binary changed
+// between the two, to a release before the floor or one that serves no such
+// call or ability, is too old.
 func (e endpoint) exchange(ctx context.Context, target machine.Ref, request api.Frame) ([]api.Frame, error) {
 	first, err := Dialer(e).far(ctx, target)
 	if err != nil {
 		return nil, err
 	}
+	name := request.Call + request.Watch
+	var asks []string
+	if e.asks != nil {
+		asks = e.asks(name, request.In)
+	}
 	if api.BeforeFloor(first.Version) {
 		return nil, e.tooOld(target, map[string]string{"version": first.Version, "floor": api.Floor})
+	}
+	if lacked := first.Lacks(name, asks); lacked != "" && lacked != name {
+		return nil, e.tooOld(target, map[string]string{"version": first.Version, "call": lacked})
 	}
 	request.V, request.ID = api.Version, "2"
 	hello, _ := json.Marshal(api.Frame{V: api.Version, ID: "1", Hello: Dialer(e).hello()})
@@ -165,14 +176,14 @@ func (e endpoint) exchange(ctx context.Context, target machine.Ref, request api.
 			answers = append(answers, f)
 		}
 	}
-	name := request.Call + request.Watch
-	switch {
-	case far == nil:
+	if far == nil {
 		return nil, lost(target, errors.New("the guest's station did not answer, exit "+strconv.Itoa(code)))
-	case api.BeforeFloor(far.Version):
+	}
+	if api.BeforeFloor(far.Version) {
 		return nil, e.tooOld(target, map[string]string{"version": far.Version, "floor": api.Floor})
-	case !slices.Contains(far.Calls, name):
-		return nil, e.tooOld(target, map[string]string{"version": far.Version, "call": name})
+	}
+	if lacked := far.Lacks(name, asks); lacked != "" {
+		return nil, e.tooOld(target, map[string]string{"version": far.Version, "call": lacked})
 	}
 	return answers, nil
 }

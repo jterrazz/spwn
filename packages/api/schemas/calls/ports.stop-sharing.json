@@ -6,6 +6,14 @@
         "by": {
           "type": "string"
         },
+        "chosen": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
+          "type": "string"
+        },
         "guest_port": {
           "type": "integer"
         },

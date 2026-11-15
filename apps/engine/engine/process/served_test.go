@@ -177,7 +177,7 @@ func TestEveryChangeToWhatAReservationServesUnsharesTheOldEntryFirst(t *testing.
 		h, _, tn, _ := restartedOver(t, privateAt(40000), ports.HTTPSPort, &private)
 		ctx := t.Context()
 		listen(ctx, h)
-		if _, err := h.d.reserve(ctx, "api", 3000, ports.ByOwner); err != nil {
+		if _, err := h.d.reserve(ctx, "api", 3000, ports.ByOwner, ""); err != nil {
 			t.Fatal(err)
 		}
 		if got, want := tn.dump(), "40000<-40000 funnel=false"; got != want {

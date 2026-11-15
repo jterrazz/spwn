@@ -26,10 +26,13 @@ type Reservation struct {
 	// at each run of the VM and each adoption. Empty, made before this
 	// key, it is read as the owner's on a server, the rights' on a
 	// workspace (Rights.Judge).
-	By         string    `json:"by,omitempty"`
-	HTTP       *bool     `json:"http,omitempty"`
-	ReservedAt time.Time `json:"reserved_at"`
-	LastSeenAt time.Time `json:"last_seen_at,omitzero"`
+	By string `json:"by,omitempty"`
+	// value: the audience the owner chose for it (`ports share --to`): it
+	// wins over its VM's rights; empty takes theirs.
+	Chosen     catalog.Audience `json:"chosen,omitempty"`
+	HTTP       *bool            `json:"http,omitempty"`
+	ReservedAt time.Time        `json:"reserved_at"`
+	LastSeenAt time.Time        `json:"last_seen_at,omitzero"`
 }
 
 func (r Reservation) Key() string { return r.VM + ":" + strconv.Itoa(r.GuestPort) }

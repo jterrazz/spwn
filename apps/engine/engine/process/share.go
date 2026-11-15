@@ -507,7 +507,7 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 	}
 	i := d.reservationIndex(s.vm, s.port)
 	if i < 0 {
-		l, err := d.reserveLocked(ctx, p, s.vm, s.port, d.rights[s.vm], ports.ByRights)
+		l, err := d.reserveLocked(ctx, p, s.vm, s.port, d.rights[s.vm], ports.ByRights, "")
 		if err != nil {
 			refuse(err)
 			return
@@ -794,8 +794,9 @@ func (d *Engine) macPorts(vm string) ports.MacPorts {
 // and one the owner shares outside them is private; a public one takes its
 // Funnel port, refused while another VM's share holds it, or when the HTTPS
 // mode leaves none for it. by is who makes it, ports.ByOwner or
-// ports.ByRights. The caller holds d.mu.
-func (d *Engine) reserveLocked(ctx context.Context, p ports.Policy, vm string, port int, r ports.Rights, by string) (ports.Reservation, error) {
+// ports.ByRights, and to the audience the owner chose, empty for none.
+// The caller holds d.mu.
+func (d *Engine) reserveLocked(ctx context.Context, p ports.Policy, vm string, port int, r ports.Rights, by string, to catalog.Audience) (ports.Reservation, error) {
 	if i := d.reservationIndex(vm, port); i >= 0 {
 		return d.reservations[i], nil
 	}
@@ -808,9 +809,14 @@ func (d *Engine) reserveLocked(ctx context.Context, p ports.Policy, vm string, p
 		return l, err
 	}
 	l.ReservedAt = d.h.Now().UTC().Truncate(time.Second)
-	l.By = by
+	l.By, l.Chosen = by, to
 	judged, keep := r.Judge(l, p.HTTPS)
+	if keep {
+		judged = d.chosenFunnelLocked(judged, p.HTTPS)
+	}
 	switch {
+	case to == catalog.AudiencePublic && judged.Audience() != catalog.AudiencePublic:
+		return ports.Reservation{}, &ports.FunnelsHeld{Port: port, Held: ports.FunnelPortsIn(p.HTTPS)}
 	case !keep && r.Allows(port):
 		return ports.Reservation{}, &ports.NoFunnelPort{Port: port}
 	case !keep:
@@ -823,6 +829,33 @@ func (d *Engine) reserveLocked(ctx context.Context, p ports.Policy, vm string, p
 		judged.HTTP = &h.HTTP
 	}
 	return judged, nil
+}
+
+// invariant: a share the owner chose public keeps its Funnel port while
+// the HTTPS mode offers it and no other share holds it, else takes the
+// first one free; with none left it is private. The caller holds d.mu.
+func (d *Engine) chosenFunnelLocked(l ports.Reservation, httpsMode string) ports.Reservation {
+	if !l.Owned() || l.Chosen != catalog.AudiencePublic {
+		return l
+	}
+	free := func(port int) bool {
+		return !slices.ContainsFunc(d.reservations, func(o ports.Reservation) bool {
+			return o.Key() != l.Key() && o.Audience() == catalog.AudiencePublic && o.PublicPort == port
+		})
+	}
+	funnel := ports.FunnelPortsIn(httpsMode)
+	if slices.Contains(funnel, l.PublicPort) && free(l.PublicPort) {
+		l.To = catalog.AudiencePublic
+		return l
+	}
+	for _, port := range funnel {
+		if free(port) {
+			l.To, l.PublicPort = catalog.AudiencePublic, port
+			return l
+		}
+	}
+	l.To, l.PublicPort = "", 0
+	return l
 }
 
 func (d *Engine) funnelTakenLocked(l ports.Reservation) error {
@@ -889,25 +922,21 @@ func (d *Engine) judgeLocked(ctx context.Context, vm string, r ports.Rights, htt
 			continue
 		}
 		want, keep := r.Judge(l, httpsMode)
+		if keep {
+			want = d.chosenFunnelLocked(want, httpsMode)
+		}
 		if keep && d.funnelTakenLocked(want) != nil {
 			want.To, want.PublicPort, keep = "", 0, want.Owned()
 		}
 		if keep && want.Audience() == l.Audience() && want.PublicPort == l.PublicPort {
 			continue
 		}
-		s := d.svcs[key(vm, l.GuestPort)]
-		live := s != nil && len(s.listeners) > 0
 		if keep {
-			if s != nil {
-				d.closeLocked(s)
-				s.serveNote = ""
-			}
-			d.rewriteLocked(ctx, d.reservationIndex(vm, l.GuestPort), want)
-			if live {
-				d.share(ctx, s)
-			}
+			d.moveLocked(ctx, l, want)
 			continue
 		}
+		s := d.svcs[key(vm, l.GuestPort)]
+		live := s != nil && len(s.listeners) > 0
 		d.dropLocked(ctx, vm, l.GuestPort)
 		switch {
 		case s == nil:
@@ -921,9 +950,28 @@ func (d *Engine) judgeLocked(ctx context.Context, vm string, r ports.Rights, htt
 	}
 }
 
+// invariant: a reservation whose audience or Funnel port changes is
+// unshared, then shared again with the new one while its port listens. The
+// caller holds d.mu.
+func (d *Engine) moveLocked(ctx context.Context, l, want ports.Reservation) {
+	s := d.svcs[key(l.VM, l.GuestPort)]
+	moved := want.Audience() != l.Audience() || want.PublicPort != l.PublicPort
+	live := s != nil && len(s.listeners) > 0
+	if s != nil && moved {
+		d.closeLocked(s)
+		s.serveNote = ""
+	}
+	d.rewriteLocked(ctx, d.reservationIndex(l.VM, l.GuestPort), want)
+	if moved && live {
+		d.share(ctx, s)
+	}
+}
+
 // invariant: a Mac signed out of the tailnet refuses a share the owner asks
-// for.
-func (d *Engine) reserve(ctx context.Context, vm string, port int, by string) (ports.SharedPort, error) {
+// for. The owner's share of a port already reserved makes it the owner's,
+// and an audience chosen moves it to that audience; a public one no Funnel
+// port is left for is refused, and nothing moves.
+func (d *Engine) reserve(ctx context.Context, vm string, port int, by string, to catalog.Audience) (ports.SharedPort, error) {
 	if _, err := d.find(vm); err != nil {
 		return ports.SharedPort{}, err
 	}
@@ -931,16 +979,26 @@ func (d *Engine) reserve(ctx context.Context, vm string, port int, by string) (p
 	p := d.policy()
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	l, err := d.reserveLocked(ctx, p, vm, port, r, by)
+	l, err := d.reserveLocked(ctx, p, vm, port, r, by, to)
 	if err != nil {
 		return ports.SharedPort{}, asOp(err)
 	}
 	if i := d.reservationIndex(vm, port); i < 0 {
 		d.reservations = append(d.reservations, l)
 		d.saveReservations()
-	} else if by == ports.ByOwner && !l.Owned() {
-		l.By = ports.ByOwner
-		d.rewriteLocked(ctx, i, l)
+	} else if by == ports.ByOwner && (!l.Owned() || to != "" && to != l.Chosen) {
+		want := l
+		want.By = ports.ByOwner
+		if to != "" {
+			want.Chosen = to
+		}
+		want, _ = r.Judge(want, p.HTTPS)
+		want = d.chosenFunnelLocked(want, p.HTTPS)
+		if to == catalog.AudiencePublic && want.Audience() != catalog.AudiencePublic {
+			return ports.SharedPort{}, asOp(&ports.FunnelsHeld{Port: port, Held: ports.FunnelPortsIn(p.HTTPS)})
+		}
+		d.moveLocked(ctx, l, want)
+		l = want
 	}
 	s := d.svcs[key(vm, port)]
 	if s != nil && (s.st.Phase == ports.PhaseRefused || s.st.Phase == ports.PhaseNotAllowed || s.refused) {

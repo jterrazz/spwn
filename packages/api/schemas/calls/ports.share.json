@@ -107,6 +107,14 @@
         "Port": {
           "type": "string"
         },
+        "To": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
+          "type": "string"
+        },
         "VM": {
           "type": "string"
         }

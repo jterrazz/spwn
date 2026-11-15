@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
@@ -43,7 +44,7 @@ type Ports interface {
 	ParsePort(text string) (int, error)
 	// value: the other Mac a VM runs on; empty when it is one of this Mac's.
 	CheckVM(ctx context.Context, vm string) (mac string, err error)
-	Share(ctx context.Context, vm string, port int) (ports.SharedPort, error)
+	Share(ctx context.Context, vm string, port int, to catalog.Audience) (ports.SharedPort, error)
 	// value: the other Mac that holds the reservation; empty when this one does.
 	CheckRelease(ctx context.Context, t ports.Target) (mac string, err error)
 	Release(ctx context.Context, t ports.Target, mac string, yes bool) (ports.Reservation, error)

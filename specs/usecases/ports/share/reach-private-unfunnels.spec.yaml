@@ -1,0 +1,24 @@
+description: 'the owner moves a port its rights make public to private: its Funnel entry is removed'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace }
+          ports: { open: [3000], to: public }
+      exit: 0
+    - command: 'world listen linux-1 "*:3000" node'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1" and .guest_port == 3000) | [.guest_port, .host_port, .to, .by, .chosen]], shared: [(.tailnet.shares // [])[] | [.Port, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[3000,40000,"public","rights",null]],"shared":[[443,40000,"public"]],"funnel":[443]}
+    - command: 'ports share linux-1 3000 --to private'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:40000
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1" and .guest_port == 3000) | [.guest_port, .host_port, .to, .by, .chosen]], shared: [(.tailnet.shares // [])[] | [.Port, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[3000,40000,null,"owner","private"]],"shared":[[40000,40000,"private"]],"funnel":null}
