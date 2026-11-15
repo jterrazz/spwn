@@ -2112,6 +2112,7 @@ export type MachinesVM = {
     Creator: string;
     Detail: string;
     Device: string;
+    Gestures?: ('start' | 'stop' | 'restart')[];
     Guest: string;
     Health?: CoreVerdictVerdict;
     Hold?: MachinesHold;

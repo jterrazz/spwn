@@ -232,7 +232,7 @@ func Judged(f AllMachines) AllMachines {
 		for j := range vms {
 			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j]), LatencyNote(vms[j])
 			hold, sections := HoldOf(vms[j], f.Read), SectionsOf(vms[j])
-			vms[j].Hold, vms[j].Sections = &hold, &sections
+			vms[j].Hold, vms[j].Sections, vms[j].Gestures = &hold, &sections, GesturesOf(vms[j])
 		}
 		macs[i].VMs = vms
 	}

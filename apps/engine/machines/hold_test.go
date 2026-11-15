@@ -137,3 +137,27 @@ func TestAShareSaysWhatOfItsMemoryTheVMUses(t *testing.T) {
 		t.Errorf("a VM's use is at most what it holds: %+v", c.VMs[1])
 	}
 }
+
+func TestAVMsHeaderOffersWhatItsStateAllows(t *testing.T) {
+	for name, c := range map[string]struct {
+		vm   machines.VM
+		want []machines.Gesture
+	}{
+		"a running server":      {machines.VM{Lifetime: machines.AlwaysOn, State: machines.Running}, []machines.Gesture{machines.GestureStop, machines.GestureRestart}},
+		"a running workspace":   {machines.VM{Lifetime: machines.Persistent, State: machines.Running}, []machines.Gesture{machines.GestureStop}},
+		"an ephemeral one":      {machines.VM{Lifetime: machines.Ephemeral, State: machines.Running}, []machines.Gesture{machines.GestureStop}},
+		"a stopped server":      {machines.VM{Lifetime: machines.AlwaysOn, State: machines.Stopped}, []machines.Gesture{machines.GestureStart}},
+		"a stopped workspace":   {machines.VM{Lifetime: machines.Persistent, State: machines.Stopped}, []machines.Gesture{machines.GestureStart}},
+		"a suspended workspace": {machines.VM{Lifetime: machines.Persistent, State: machines.Suspended}, []machines.Gesture{machines.GestureStart}},
+		"one being created":     {machines.VM{Lifetime: machines.Persistent, State: machines.Creating}, nil},
+		"one not seen":          {machines.VM{Lifetime: machines.AlwaysOn, State: machines.UnknownState}, nil},
+	} {
+		if got := machines.GesturesOf(c.vm); !slices.Equal(got, c.want) {
+			t.Errorf("%s offers %v, want %v", name, got, c.want)
+		}
+	}
+	f := machines.Judged(machines.AllMachines{Macs: []machines.MacView{{VMs: []machines.VM{{Lifetime: machines.AlwaysOn, State: machines.Running}}}}})
+	if got := f.Macs[0].VMs[0].Gestures; len(got) != 2 {
+		t.Errorf("machines.list leaves a server's gestures unjudged: %v", got)
+	}
+}

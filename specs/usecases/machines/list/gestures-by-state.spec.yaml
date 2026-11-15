@@ -1,0 +1,11 @@
+description: 'a running server offers stop and restart, a running workspace stop, a stopped one start'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | [.Name, .State, .Gestures]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [["agent-7f","running",["stop"]],["api","stopped",["start"]],["linux-1","running",["stop"]],["linux-2","creating",null],["infra","running",["stop","restart"]],["linux-3","running",["stop"]],["review-bot","running",["stop"]]]
