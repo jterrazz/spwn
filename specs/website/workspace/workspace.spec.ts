@@ -47,7 +47,7 @@ describe('workspace', () => {
                 await visitor.see(
                     within(
                         region('Why it exists'),
-                        content('Held by studio-os-fe. Not safe to delete while it runs.'),
+                        content('It is held by its lot, by studio-os-fe: work may be in progress.'),
                     ),
                 );
             },
