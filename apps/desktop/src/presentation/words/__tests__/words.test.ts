@@ -28,12 +28,12 @@ type Exempt = { file: RegExp; rule: string; why: string };
 
 const EXEMPT: readonly Exempt[] = [
     {
-        file: /^pages\/gallery\//u,
+        file: /^presentation\/screens\/gallery\//u,
         rule: '',
         why: 'the gallery draws every design component with samples, never an engine answer',
     },
     {
-        file: /^pages\/needs\/needs\.ts$/u,
+        file: /^presentation\/features\/overview\/needs\.ts$/u,
         rule: 'a table keyed by a wire code',
         why: "a need's section to the machine tab it opens is routing (README, the engine-owes table)",
     },
@@ -63,7 +63,7 @@ function findingsIn(file: string, text: string): string[] {
 }
 
 function foundIn(lines: readonly string[]): number[] {
-    return lines.map((line) => findingsIn('pages/any.tsx', line).length);
+    return lines.map((line) => findingsIn('presentation/screens/any.tsx', line).length);
 }
 
 const API = join(SRC, '..', '..', '..', 'packages', 'api');
@@ -129,11 +129,15 @@ function wordedTablesIn(file: string, text: string): string[] {
 }
 
 describe('words', () => {
-    test('no page and no part of the presentation maps a code of its own', () => {
-        // Given - every source of src/pages/ and src/presentation/ but the words, the ui kit and the specs
-        const files = [...sourcesUnder('pages'), ...sourcesUnder('presentation')].filter(
-            (file) => !/^presentation\/(?:words|ui)\//u.test(file),
-        );
+    test('no screen and no part of the presentation maps a code of its own', () => {
+        // Given - every source of the screens, the features, the kit, the navigation and the dependencies
+        const files = [
+            'presentation/screens',
+            'presentation/features',
+            'presentation/kit',
+            'presentation/navigation',
+            'presentation/dependencies',
+        ].flatMap((folder) => sourcesUnder(folder));
 
         // When - each is read for the patterns the law forbids
         const findings = files.flatMap((file) =>
@@ -176,14 +180,7 @@ describe('words', () => {
 
     test("no table words or tones an enum the engine words, the engine's reader aside", () => {
         // Given - every source of src/ but the fixtures and the specs, the engine's words read by one module
-        const files = [
-            'domain',
-            'application',
-            'infrastructure',
-            'composition',
-            'presentation',
-            'pages',
-        ]
+        const files = ['domain', 'application', 'infrastructure', 'composition', 'presentation']
             .flatMap((folder) => sourcesUnder(folder))
             .filter((file) => file !== ENGINE_READER);
 
@@ -220,7 +217,7 @@ describe('words', () => {
 
         // When - each is read as a line of a page
         const found = [forbidden, lawful].map((lines) =>
-            lines.map((line) => wordedTablesIn('pages/any.tsx', line).length),
+            lines.map((line) => wordedTablesIn('presentation/screens/any.tsx', line).length),
         );
 
         // Then - every forbidden line is found once, no lawful one

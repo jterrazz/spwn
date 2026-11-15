@@ -11,8 +11,8 @@ import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/rec
 import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
-import { PAGES } from '../../../pages/registry';
 import { Window } from '../../navigation/window';
+import { PAGES } from '../../screens/registry';
 import { EngineProvider, useRead } from '../dependencies';
 import { useGesture } from '../use-gesture';
 

@@ -1,11 +1,11 @@
 import type { OpenerPort } from '../../application/ports/opener.port';
 import { findMachine } from '../../domain/machines/machines';
 import type { Pace, Recording } from '../../infrastructure/outbound/engine-replay/replay';
-import { PAGES } from '../../pages/registry';
 import { EngineProvider } from '../../presentation/dependencies/dependencies';
 import type { Route } from '../../presentation/navigation/route';
 import { RouterProvider, useRouter } from '../../presentation/navigation/router';
 import { PageArea, useStation } from '../../presentation/navigation/window';
+import { PAGES } from '../../presentation/screens/registry';
 import { composeReplay } from '../compose';
 
 const { Confirm } = PAGES;

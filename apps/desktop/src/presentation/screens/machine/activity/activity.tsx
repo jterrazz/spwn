@@ -1,0 +1,94 @@
+import type { ActivityReport } from '@jterrazz/station-api';
+import { useState } from 'react';
+
+import { SPANS } from '../../../../domain/activity/measures';
+import type { Span } from '../../../../domain/activity/measures';
+import type { Found } from '../../../../domain/machines/machines';
+import { Busiest } from '../../../features/activity/busiest';
+import { useActivity, useHistory } from '../../../features/activity/reading';
+import { Reading, Unanswered } from '../../../kit/readings';
+import type { Route } from '../../../navigation/route';
+import { Switch } from '../../../ui/index';
+import { Page } from '../../../ui/page';
+import { THIS_MAC_WORD } from '../../../words/words';
+import { Cards } from './cards';
+import { Findings, Head } from './head';
+import { Log } from './log';
+import { MacFacts } from './mac-facts';
+
+import styles from '../../../features/activity/activity.module.css';
+
+type Go = (to: Route) => void;
+
+function Measured({
+    report,
+    found,
+    span,
+    go,
+}: {
+    report: ActivityReport;
+    found: Found;
+    span: Span;
+    go: Go;
+}) {
+    const name = found.vm?.Name ?? found.mac.Name;
+    const history = useHistory(found);
+    if (report.silent === true) {
+        return null;
+    }
+    return (
+        <>
+            <Cards history={history} name={name} report={report} span={span} />
+            <Busiest found={found} go={go} report={report} />
+            {found.vm ? null : (
+                <MacFacts
+                    report={report}
+                    title={found.mac.ThisMac ? THIS_MAC_WORD : found.mac.Name}
+                />
+            )}
+        </>
+    );
+}
+
+export function ActivityTab({ found, go }: { found: Found; go: Go }) {
+    const name = found.vm?.Name ?? found.mac.Name;
+    const [span, setSpan] = useState<Span>('6m');
+    const { readers, shown } = useActivity(found, span);
+    const switcher = (
+        <div className={styles.bar}>
+            <Switch
+                label="Window"
+                onChange={setSpan}
+                options={SPANS.map((option) => ({ id: option.id, label: option.label }))}
+                value={span}
+            />
+        </div>
+    );
+    let now;
+    if (shown?.kind === 'failed') {
+        now = <Unanswered error={shown.error} size="tab" />;
+    } else if (shown) {
+        now = (
+            <>
+                <Head report={shown.out} />
+                {switcher}
+                <Findings findings={shown.out.findings ?? []} />
+                <Measured found={found} go={go} report={shown.out} span={span} />
+            </>
+        );
+    } else {
+        now = (
+            <>
+                <Reading size="tab" what={`the activity of ${name}`} />
+                {switcher}
+            </>
+        );
+    }
+    return (
+        <Page>
+            {readers}
+            {now}
+            <Log found={found} />
+        </Page>
+    );
+}

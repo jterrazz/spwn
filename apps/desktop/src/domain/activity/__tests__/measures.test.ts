@@ -1,7 +1,7 @@
 import type { ActivityReading } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { reportPeakingAt } from '../../../pages/activity/__tests__/tiles.fixtures';
+import { reportPeakingAt } from '../../../presentation/features/activity/__tests__/tiles.fixtures';
 import { busiestOf, busiestWithVms, chartedOf, marksOf, spanOf } from '../measures';
 
 describe('measures', () => {
