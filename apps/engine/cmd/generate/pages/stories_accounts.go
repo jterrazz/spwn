@@ -21,7 +21,7 @@ func everyMacSignedIn(f *Scene) {
 			f.Accounts.Machines[i].Accounts = append(f.Accounts.Machines[i].Accounts,
 				own(catalog.ProviderTailscale, []string{"tail3e9a.ts.net"}, nil, "", ""),
 				own(catalog.ProviderCloudflare, []string{"jterrazz.com"}, nil, "", ""),
-				own(catalog.ProviderDocker, []string{"jterrazz"}, nil, "", ""))
+				own(catalog.ProviderDocker, []string{"you"}, nil, "", ""))
 		}
 	}
 	f.Accounts.Machines = append(f.Accounts.Machines, accounts.Machine{Name: miniMac, Kind: accounts.KindComputer, Accounts: []accounts.Account{
@@ -38,7 +38,7 @@ func npmSignedIn(f *Scene) {
 		}
 		for j, a := range m.Accounts {
 			if a.Provider == catalog.ProviderNPM {
-				f.Accounts.Machines[i].Accounts[j] = own(catalog.ProviderNPM, []string{"jterrazz"}, nil, "", "registry.npmjs.org")
+				f.Accounts.Machines[i].Accounts[j] = own(catalog.ProviderNPM, []string{"you"}, nil, "", "registry.npmjs.org")
 			}
 		}
 	}

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	baseFile  = "jterrazz-base"
+	baseFile  = "base"
 	devFile   = "linux-dev"
 	exposedVM = "linux-1"
 )

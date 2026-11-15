@@ -32,7 +32,7 @@ func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
 	return kit.Leaf[Input]{
 		Use:     "init",
 		Short:   "Make this machine known to station: its name, the ~/.zshrc block, the XDG folders",
-		Example: "  station init\n  station init --name macbook\n  station init --machinefile jterrazz-macbook-pro",
+		Example: "  station init\n  station init --name macbook\n  station init --machinefile macbook-pro",
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Name, "name", "", "the name this Mac takes (asked on a terminal when omitted)")

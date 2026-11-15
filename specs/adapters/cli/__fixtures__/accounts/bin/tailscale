@@ -1,6 +1,6 @@
 #!/bin/sh
 printf 'tailscale %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
-    "status --json") echo '{"BackendState":"Running","AuthURL":"SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB","Self":{"ID":"1","UserID":123,"HostName":"macbook-pro","DNSName":"macbook-pro.tail1234.ts.net.","TailscaleIPs":["100.98.133.14"],"Online":true},"User":{"123":{"ID":123,"LoginName":"jterrazz@github","DisplayName":"Jean-Baptiste"}},"CurrentTailnet":{"Name":"jterrazz.github","MagicDNSSuffix":"tail1234.ts.net"}}' ;;
+    "status --json") echo '{"BackendState":"Running","AuthURL":"SENTINELgho_0123456789abcdefghijklmnopqrstuvwxyzAB","Self":{"ID":"1","UserID":123,"HostName":"macbook-pro","DNSName":"macbook-pro.tail1234.ts.net.","TailscaleIPs":["100.98.133.14"],"Online":true},"User":{"123":{"ID":123,"LoginName":"jterrazz@github","DisplayName":"Jean-Baptiste"}},"CurrentTailnet":{"Name":"you.github","MagicDNSSuffix":"tail1234.ts.net"}}' ;;
     *) echo "stub tailscale: unexpected invocation: $*" >&2; exit 97 ;;
 esac

@@ -31,7 +31,7 @@ func twoMacsSignedIn() *world {
 	return &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{},
 		added: []machines.MacView{{Name: air}},
 		programs: map[string][]accounts.ProgramRow{
-			thisMac + "/":        {signedIn(catalog.ProviderGitHub, "jterrazz", "repo", "workflow"), refused, signedIn(catalog.ProviderClaude, "you@example.com")},
+			thisMac + "/":        {signedIn(catalog.ProviderGitHub, "you", "repo", "workflow"), refused, signedIn(catalog.ProviderClaude, "you@example.com")},
 			thisMac + "/linux-1": grantedTo(catalog.ProviderGitHub, catalog.ProviderClaude),
 			mini + "/":           {signedIn(catalog.ProviderGitHub, "ci-bot", "repo"), signedIn(catalog.ProviderClaude, "")},
 		},
@@ -100,7 +100,7 @@ func TestASignInSaysWhatItsProviderPrintedAndAGrantItsPassword(t *testing.T) {
 		section, id string
 		want        []string
 	}{
-		{"on:" + thisMac, thisMac + "/" + github, []string{"jterrazz", "repo, workflow"}},
+		{"on:" + thisMac, thisMac + "/" + github, []string{"you", "repo, workflow"}},
 		{"on:" + thisMac, thisMac + "/" + claude, []string{"you@example.com"}},
 		{"on:" + mini, mini + "/" + github, []string{"ci-bot", "repo"}},
 		{"on:linux-1", "linux-1/" + github, []string{"from the password " + catalog.ProviderGitHub + " token"}},

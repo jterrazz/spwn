@@ -6,7 +6,7 @@ case "$*" in
     "auth status --hostname github.com")
         if [ -f "$HOME/gh.out" ]; then echo "You are not logged into any GitHub hosts. To log in, run: gh auth login" >&2; exit 1; fi
         echo "github.com"
-        echo "  ✓ Logged in to github.com account jterrazz (keyring)" ;;
+        echo "  ✓ Logged in to github.com account you (keyring)" ;;
     "auth login --web --hostname github.com --git-protocol https --skip-ssh-key")
         echo "! First copy your one-time code: 0A1B-2C3D" >&2
         echo "Open this URL to continue in your web browser: https://github.com/login/device" >&2

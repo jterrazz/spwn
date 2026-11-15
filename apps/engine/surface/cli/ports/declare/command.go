@@ -24,7 +24,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:   "declare <machine> <port>",
 		Short: "Declare a port public: it is meant to be reached from outside " + catalog.TailnetProduct + ", by the route --via names (" + catalog.RouteNames() + ")",
-		Example: "  station ports declare jterrazz-mac-mini 5000 --via lan\n" +
+		Example: "  station ports declare mac-mini 5000 --via lan\n" +
 			"  station ports declare infra 443 --via cloudflare-tunnel --url https://jterrazz.com",
 		Args: cobra.RangeArgs(1, 2),
 		Bind: func(in *Input, args []string) error {

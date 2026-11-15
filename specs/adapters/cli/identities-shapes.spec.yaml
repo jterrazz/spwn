@@ -6,8 +6,8 @@ runs:
     - command: '--version >/dev/null; /bin/mkdir -p root; n=0; { printf ''%s\n'' ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' ''{"v":1,"type":"request","id":"h1","op":"accounts"}''; while ! /usr/bin/grep -q ''"type":"reply"'' out.jsonl 2>/dev/null && [ $n -lt 200 ]; do /bin/sleep 0.1; n=$((n+1)); done; } | STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/root "$STATION" guest > out.jsonl; /usr/bin/jq -r ''select(.type == "reply") | .result[] | [.provider, .state, .reason, (.identity // [] | join(", ")), (.scopes // [] | join(" · ")), .detail] | @tsv'' out.jsonl'
       exit: 0
       stdout: |
-          github	ok		jterrazz	gist · read:org · repo · workflow	
-          npm	ok		jterrazz		
+          github	ok		you	gist · read:org · repo · workflow	
+          npm	ok		you		
           claude	ok		you@example.com	max	claude.ai
           cloudflare	ok		you@example.com	studio	
           git	ok		Jean-Baptiste Terrazzoni, you@example.com		

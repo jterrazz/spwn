@@ -13,6 +13,6 @@ runs:
           .local/state/station/images/key: { equals: "a private key\n" }
           .local/state/station/leases.json: { equals: "{\"schema\":\"station.leases/v1\",\"leases\":[]}\n" }
           .local/state/station/known_hosts/x: { equals: "x ssh-ed25519 AAAA\n" }
-          .config/gh/hosts.yml: { equals: "github.com:\n    user: jterrazz\n" }
+          .config/gh/hosts.yml: { equals: "github.com:\n    user: you\n" }
           .npmrc: { equals: "registry=https://r.example/\n" }
           .ssh/config: { equals: "Host x\n    User u\n" }

@@ -9,5 +9,5 @@ runs:
       exit: 0
       stdout: |
           ["link",null,"www.npmjs.com"]
-          ["signed-in","jterrazz"]
+          ["signed-in","you"]
           0

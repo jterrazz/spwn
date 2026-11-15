@@ -136,7 +136,7 @@ func (o IO) LivePage(pages <-chan page.Page) error {
 
 // invariant: SPEC §8.1: every output for another machine starts with
 // `On <that machine>:`, the machine --on named by the name the interface
-// gives it (SPEC §2.5: `mac-mini` for `jterrazz-mac-mini`), in place of a
+// gives it (SPEC §2.5: `mac-mini` for `sam-mac-mini`), in place of a
 // page's own.
 func (o IO) onLine(p page.Page) page.Page {
 	if o.on == "" {

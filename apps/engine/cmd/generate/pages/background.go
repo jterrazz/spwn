@@ -9,7 +9,7 @@ import (
 // a failing one, a root orphan whose app is gone, the engine, a known app's,
 // an unknown one, and one the job manager did not answer for.
 func backgroundJobs() []background.Job {
-	agent := func(label string) string { return "/Users/jterrazz/Library/LaunchAgents/" + label + ".plist" }
+	agent := func(label string) string { return "/Users/you/Library/LaunchAgents/" + label + ".plist" }
 	rootPlist := func(label string) string { return "/Library/LaunchDaemons/" + label + ".plist" }
 	return []background.Job{
 		{Label: "com.jterrazz.brain.x-snapshot", File: agent("com.jterrazz.brain.x-snapshot"), Scope: background.ScopeUser, Loaded: true, LastExit: 2, ProgramExists: true, OwnerExists: true},
@@ -23,7 +23,7 @@ func backgroundJobs() []background.Job {
 }
 
 func backgroundPages() []Fixture {
-	tasks := background.Judge(backgroundJobs(), "", "/Users/jterrazz")
+	tasks := background.Judge(backgroundJobs(), "", "/Users/you")
 	return states("background",
 		pending(pagebackground.List(tasks, thisMacContext(), false)),
 		pagebackground.List(nil, thisMacContext(), false),

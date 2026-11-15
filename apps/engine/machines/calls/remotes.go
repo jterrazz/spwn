@@ -34,7 +34,7 @@ func (s *Machinist) lookup(name string) (Machine, error) {
 		}
 	}
 	// value: a Mac answers to its short name too, the one All machines shows
-	// (mac-mini for jterrazz-mac-mini).
+	// (mac-mini for sam-mac-mini).
 	if full := s.o.User + "-" + name; s.o.User != "" {
 		if h, ok := cfg.Macs[full]; ok {
 			return Machine{Name: full, Kind: catalog.Mac, ThisMachine: full == cfg.ThisMachine, User: h.User, Key: h.Key, LAN: h.LAN}, nil

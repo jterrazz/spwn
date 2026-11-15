@@ -16,7 +16,7 @@ import (
 func homeOf(t *testing.T, w *heroWorld) page.Page {
 	t.Helper()
 	for i := range w.r.All.Macs {
-		w.r.All.Macs[i].User = "jterrazz"
+		w.r.All.Macs[i].User = "you"
 	}
 	return Page(w.r, page.Context{Machine: heroPro, Kind: "computer"})
 }

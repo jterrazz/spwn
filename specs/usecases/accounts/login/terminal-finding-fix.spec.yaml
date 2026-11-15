@@ -20,7 +20,7 @@ runs:
           On linux-1:
           This Mac · 1 program · 1 signed in
 
-          Accounts  ● wrangler · signed in · jterrazz · own
+          Accounts  ● wrangler · signed in · you · own
     - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["linux-1"].accounts.programs.wrangler.State, .macs["macbook-pro"].accounts.programs.wrangler.State]'' world.json'
       exit: 0
       stdout: |

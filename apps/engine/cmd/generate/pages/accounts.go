@@ -29,8 +29,8 @@ func everyProgram(state accounts.ProgramState) pageaccounts.Machine {
 
 func fullAccounts() pageaccounts.Machine {
 	return listed(
-		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderGitHub), State: accounts.ProgramSignedIn, Who: "jterrazz", Scopes: []string{"gist", "read:org", "repo", "workflow"}, How: accounts.HowOwn},
-		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderNPM), State: accounts.ProgramBroken, Who: "jterrazz", How: accounts.HowOwn, Reason: "The token is refused by registry.npmjs.org"},
+		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderGitHub), State: accounts.ProgramSignedIn, Who: "you", Scopes: []string{"gist", "read:org", "repo", "workflow"}, How: accounts.HowOwn},
+		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderNPM), State: accounts.ProgramBroken, Who: "you", How: accounts.HowOwn, Reason: "The token is refused by registry.npmjs.org"},
 		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderClaude), State: accounts.ProgramSignedIn, Who: "you@example.com", Plan: "max", How: accounts.HowOwn},
 		accounts.Facts{Program: accounts.ProgramOf(catalog.ProviderCloudflare), State: accounts.ProgramSignedOut, How: accounts.HowOwn},
 	)

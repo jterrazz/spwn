@@ -17,7 +17,7 @@ func TestConvertV1KeepsTheRegistryAndDropsRolesAndTheSecret(t *testing.T) {
     "mac-mini": {"role": "server", "ssh": "jterrazz.agent@mac-mini", "identity": "~/.ssh/id_ed25519"}
   }
 }`
-	got, err := setup.ConvertV1([]byte(v1), "jterrazz")
+	got, err := setup.ConvertV1([]byte(v1), "you")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func TestConvertV1KeepsTheRegistryAndDropsRolesAndTheSecret(t *testing.T) {
 			"macbook":  {},
 			"mac-mini": {User: "jterrazz.agent", Key: "~/.ssh/id_ed25519"},
 		},
-		VMUser:    "jterrazz",
+		VMUser:    "you",
 		UserEmail: "a@b.c",
 	}
 	if !reflect.DeepEqual(got, want) {

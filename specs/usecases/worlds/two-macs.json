@@ -336,7 +336,7 @@
             "identities": {
                 "github": {
                     "State": "ok",
-                    "Who": ["jterrazz"],
+                    "Who": ["you"],
                     "Scopes": ["read:org", "repo"]
                 },
                 "npm": {
@@ -595,7 +595,7 @@
                     "gh": {
                         "Program": "gh",
                         "State": "signed-in",
-                        "Who": "jterrazz",
+                        "Who": "you",
                         "Scopes": ["repo"],
                         "How": "own"
                     },
@@ -620,7 +620,7 @@
                         "Label": "GitHub deploy",
                         "Program": "gh",
                         "Kind": "fine-grained",
-                        "Who": "jterrazz",
+                        "Who": "you",
                         "Added": "2026-10-30T09:00:00Z",
                         "AgentGrantable": true,
                         "Grants": []
@@ -987,12 +987,12 @@
             "identities": {
                 "github": {
                     "State": "ok",
-                    "Who": ["jterrazz"],
+                    "Who": ["you"],
                     "Scopes": ["repo"]
                 },
                 "git": {
                     "State": "ok",
-                    "Who": ["jterrazz"]
+                    "Who": ["you"]
                 }
             },
             "secrets": {
@@ -1108,7 +1108,7 @@
             }
         }
     },
-    "user": "jterrazz",
+    "user": "you",
     "registry": {
         "station-linux": "2026.11.03"
     }

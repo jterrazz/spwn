@@ -31,7 +31,7 @@ func provider(id string) catalog.Provider {
 // sentinel token wherever a tool may leak one.
 func printed() map[string]local.Output {
 	return map[string]local.Output{
-		"gh":                            {Stdout: "github.com\n  Logged in to github.com account jterrazz (keyring)\n  - Git operations protocol: ssh\n  - Token: " + sentinel + "\n  - Token scopes: 'gist', '" + sentinel + "'\n", Stderr: sentinel},
+		"gh":                            {Stdout: "github.com\n  Logged in to github.com account you (keyring)\n  - Git operations protocol: ssh\n  - Token: " + sentinel + "\n  - Token scopes: 'gist', '" + sentinel + "'\n", Stderr: sentinel},
 		"npm":                           {Stdout: sentinel + "\n", Stderr: "notice " + sentinel},
 		"claude":                        {Stdout: `{"loggedIn":true,"email":"` + sentinel + `","subscriptionType":"max","oauthToken":"` + sentinel + `","authMethod":"claude.ai"}`},
 		"wrangler":                      {Stdout: "You are logged in with an OAuth Token, associated with the email " + sentinel + ".\nToken: " + sentinel + "\n| " + sentinel + " | 0123456789abcdef0123456789abcdef |\n"},
@@ -50,7 +50,7 @@ func signedIn(on ...string) *cli.Reads {
 func TestIdentities(t *testing.T) {
 	contracttest.Identities(t, func(*testing.T) contracttest.IdentitiesSubject {
 		return contracttest.IdentitiesSubject{
-			Identities: signedIn("gh"), SignedIn: provider(catalog.ProviderGitHub), Who: "jterrazz",
+			Identities: signedIn("gh"), SignedIn: provider(catalog.ProviderGitHub), Who: "you",
 			Missing: provider(catalog.ProviderClaude),
 		}
 	})

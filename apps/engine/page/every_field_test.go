@@ -19,7 +19,7 @@ func everyField() page.Page {
 			{Key: "name", Label: "Name", Kind: page.FieldText, Taken: []string{"linux-1"}, TakenHud: "{name} already exists"},
 			{Key: "lend-for", Label: "Lend for", Kind: page.FieldSegmented, When: &page.When{Key: "lend", Set: true}},
 			{Key: "more", Label: "More", Kind: page.FieldDisclosure, Summary: page.Text("NAT, ephemeral"), Fields: []page.Field{{Key: "network", Kind: page.FieldSelect}}},
-			{Key: "Account", Label: "Account", Kind: page.FieldPick, Options: []page.Option{{Value: "github", Label: "GitHub", Note: "jterrazz", Glyph: page.Glyph{Kind: "account:github"}, Of: "linux-1"}}, Follows: "VMs"},
+			{Key: "Account", Label: "Account", Kind: page.FieldPick, Options: []page.Option{{Value: "github", Label: "GitHub", Note: "you", Glyph: page.Glyph{Kind: "account:github"}, Of: "linux-1"}}, Follows: "VMs"},
 			{Key: "copy", Kind: page.FieldCommand, Note: "On the new Mac, run this once.", Hint: page.Cmd("station machines add mac-mini")},
 		},
 		Primary: []page.Primary{{Label: "Create"}, {When: &page.When{Key: "task", Value: "*", Count: 1}, Label: "Create and Start Claude", Danger: true}},

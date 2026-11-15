@@ -21,9 +21,9 @@ Summary
   ● Identity    you@example.com · signing on       ◐ All machines  engine runs v2.0.0-242-gd653060…
   ✗ Background  3 jobs · 1 failing · 1 orphan      ● Gateways      1 ●
 Machine
-  ◐ name    unregistered  Mac · Darwin 27.0.0 arm64 · jterrazz · zsh
-  ● uptime  22d 14h       battery 100% charged
-  ◐ setup   name          not set  → station init
+  ◐ name    unregistered                                     Mac · Darwin 27.0.0 arm64 · you · zsh
+  ● uptime  22d 14h                                          battery 100% charged
+  ◐ setup   name                                             not set  → station init
   ◐ engine  runs v2.0.0-242-gd653060, station is v2.0.0-250  → station engine start
 Environment
   ● local ip    192.168.1.152

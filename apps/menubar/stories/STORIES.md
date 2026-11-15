@@ -939,7 +939,7 @@ Every agent of the fleet, the page behind home's Agents label (SPEC §A4, `stati
 ![accounts.signed-in](stories/accounts.signed-in.png)
 
 - **Capture**: [dark](stories/accounts.signed-in.png)
-- **Shows**: Signed in: the need collapses (height to zero) and npm joins the signed-in list "jterrazz · publish".
+- **Shows**: Signed in: the need collapses (height to zero) and npm joins the signed-in list "you · publish".
 - **Data**: account becomes signed in with its scope
 - **Interactions**: "All machines" → back; "Full list in Terminal" → terminal(station accounts --all-machines); "Grant a password…" → grant
 - **Enters**: #hud: CSS hud 2600 ms linear

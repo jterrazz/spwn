@@ -16,7 +16,7 @@ station keeps its own choices in one file, `~/.config/station/preferences.json`,
     "macs": {
         "mac-mini": { "user": "jterrazz.agent", "key": "~/.ssh/id_ed25519", "lan": "192.168.1.20" }
     },
-    "vm_user": "jterrazz",
+    "vm_user": "you",
     "share_list": ["session:*", "operator:claude:oauth-token"],
     "user_email": "admin@jterrazz.com",
     "user_name": "Jean-Baptiste Terrazzoni",
@@ -25,7 +25,7 @@ station keeps its own choices in one file, `~/.config/station/preferences.json`,
     "off_here": ["dock-spacer"],
     "never_sleeps": true,
     "machinefile": {
-        "name": "jterrazz-macbook-pro",
+        "name": "macbook-pro",
         "bound_at": "2026-11-10T09:12:00Z",
         "source": {
             "name": "studio",

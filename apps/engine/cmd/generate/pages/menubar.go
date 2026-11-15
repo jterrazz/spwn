@@ -72,8 +72,8 @@ func twoMacs() model.AllMachines {
 	running := model.EngineView{State: model.EngineRunning, Version: "v3.0.0"}
 	infra.BootAt = keepAwakeNow.Add(-(12*24*time.Hour + 4*time.Hour))
 	return model.AllMachines{Read: keepAwakeNow, Macs: []model.MacView{
-		{Name: thisMacName, User: "jterrazz", StationVersion: "v3.0.0", ThisMac: true, Reachable: true, Engine: running, Node: model.Node{Online: true, IP: "100.98.133.14"}, VMs: []model.VM{linux1, api}},
-		{Name: miniName, User: "jterrazz", StationVersion: "v3.0.0", Reachable: true, Engine: running, Node: model.Node{Online: true, IP: "100.98.133.20"}, LAN: "192.168.1.20", VMs: []model.VM{infra}},
+		{Name: thisMacName, User: "you", StationVersion: "v3.0.0", ThisMac: true, Reachable: true, Engine: running, Node: model.Node{Online: true, IP: "100.98.133.14"}, VMs: []model.VM{linux1, api}},
+		{Name: miniName, User: "you", StationVersion: "v3.0.0", Reachable: true, Engine: running, Node: model.Node{Online: true, IP: "100.98.133.20"}, LAN: "192.168.1.20", VMs: []model.VM{infra}},
 	}}
 }
 

@@ -31,10 +31,10 @@ func macFleet() *model.AllMachines {
 	works := model.VM{Name: "linux-3", Lifetime: model.Ephemeral, State: model.Running, Resources: model.Resources{MemoryBytes: 8 << 30},
 		Agent: &model.AgentView{State: "working", Task: "refresh the auth token"}}
 	return &model.AllMachines{Read: macNow, Macs: []model.MacView{
-		{Name: proMac, User: "jterrazz", ThisMac: true, Reachable: true, Answered: macNow, Laptop: true, Hardware: coremachine.Hardware{Model: "Mac16,5", Chip: "Apple M4 Max", Memory: 48 << 30}},
-		{Name: miniMac, User: "jterrazz", Reachable: true, Answered: macNow, Hardware: coremachine.Hardware{Model: "Mac16,11", Chip: "Apple M4 Pro", Memory: 64 << 30},
+		{Name: proMac, User: "you", ThisMac: true, Reachable: true, Answered: macNow, Laptop: true, Hardware: coremachine.Hardware{Model: "Mac16,5", Chip: "Apple M4 Max", Memory: 48 << 30}},
+		{Name: miniMac, User: "you", Reachable: true, Answered: macNow, Hardware: coremachine.Hardware{Model: "Mac16,11", Chip: "Apple M4 Pro", Memory: 64 << 30},
 			VMs: []model.VM{works, waits, server}},
-		{Name: airMac, User: "jterrazz", Answered: macNow.Add(-2 * time.Hour), Asleep: true, Laptop: true},
+		{Name: airMac, User: "you", Answered: macNow.Add(-2 * time.Hour), Asleep: true, Laptop: true},
 	}}
 }
 

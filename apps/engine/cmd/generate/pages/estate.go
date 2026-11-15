@@ -69,7 +69,7 @@ func snapshot() pagehome.Overview {
 	return pagehome.Overview{
 		GeneratedAt: built,
 		Station:     overview.Station{Version: "v2.0.0-250", Engine: check("engine", catalog.StateDegraded, "not installed", "station engine start")},
-		Machine:     overview.Machine{Name: "macbook", Registered: true, Kind: catalog.Mac, Hostname: "macbook-pro", OS: "Darwin 27.0.0", Arch: "arm64", User: "jterrazz", Shell: "zsh"},
+		Machine:     overview.Machine{Name: "macbook", Registered: true, Kind: catalog.Mac, Hostname: "macbook-pro", OS: "Darwin 27.0.0", Arch: "arm64", User: "you", Shell: "zsh"},
 		System:      overview.System{Uptime: "22d 14h", Battery: "100% charged", MemoryTotal: 17179869184},
 		Environment: overview.Environment{
 			Network: []overview.Check{check("local ip", catalog.StateOK, "192.168.1.152", "")},
@@ -295,12 +295,12 @@ func disks() []Fixture {
 
 func allMachines() model.AllMachines {
 	return model.AllMachines{Macs: []model.MacView{
-		{Name: "macbook", User: "jterrazz", StationVersion: "v2.0.0-250", ThisMac: true, Reachable: true, Engine: model.EngineView{State: model.EngineRunning, Version: "v2.0.0-250"}, Node: model.Node{Online: true, IP: "100.98.133.14"},
+		{Name: "macbook", User: "you", StationVersion: "v2.0.0-250", ThisMac: true, Reachable: true, Engine: model.EngineView{State: model.EngineRunning, Version: "v2.0.0-250"}, Node: model.Node{Online: true, IP: "100.98.133.14"},
 			VMs: []model.VM{
 				sized(model.VM{Name: "linux-1", Image: "station-linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Ephemeral, State: model.Running, SizeGB: 20, IP: "192.168.64.5", CreatedAt: built}, 4, 4),
 				sized(model.VM{Name: "api", Image: "station-linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Persistent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8),
 			}},
-		{Name: "mac-mini", User: "jterrazz", StationVersion: "v2.0.0-248", Reachable: true, Engine: model.EngineView{State: model.EngineRunning, Version: "v2.0.0-248"}, Node: model.Node{Online: true, IP: "100.98.133.20"}},
+		{Name: "mac-mini", User: "you", StationVersion: "v2.0.0-248", Reachable: true, Engine: model.EngineView{State: model.EngineRunning, Version: "v2.0.0-248"}, Node: model.Node{Online: true, IP: "100.98.133.20"}},
 	}}
 }
 
@@ -309,7 +309,7 @@ func allMachines() model.AllMachines {
 func stoppedAllMachines() model.AllMachines {
 	f := allMachines()
 	f.Macs[0].Engine = model.EngineView{State: model.EngineStopped}
-	f.Macs[1] = model.MacView{Name: "mac-mini", User: "jterrazz", Node: model.Node{IP: "100.98.133.20"}}
+	f.Macs[1] = model.MacView{Name: "mac-mini", User: "you", Node: model.Node{IP: "100.98.133.20"}}
 	return f
 }
 

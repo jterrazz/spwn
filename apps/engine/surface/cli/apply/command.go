@@ -27,7 +27,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "apply",
 		Short:   "Carry out the plan: install, set and adopt what the machine's Machinefile lists",
-		Example: "  station apply\n  station apply --machinefile jterrazz-macbook-pro\n  station apply --remove --yes",
+		Example: "  station apply\n  station apply --machinefile macbook-pro\n  station apply --remove --yes",
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile, by its name or its file, which this machine then carries (default: the one it carries)")

@@ -1,5 +1,5 @@
 # Accounts
-●	gh	signed in	jterrazz	own	gist · read:org · repo · workflow
-✗	npm	broken	jterrazz			The token is refused by registry.npmjs.org
+●	gh	signed in	you	own	gist · read:org · repo · workflow
+✗	npm	broken	you			The token is refused by registry.npmjs.org
 ●	claude	signed in	you@example.com	own	max
 ○	wrangler	signed out

@@ -124,7 +124,7 @@
             "identities": {
                 "github": {
                     "State": "ok",
-                    "Who": ["jterrazz"],
+                    "Who": ["you"],
                     "Scopes": ["read:org", "repo"]
                 },
                 "npm": {
@@ -261,12 +261,12 @@
             "identities": {
                 "github": {
                     "State": "ok",
-                    "Who": ["jterrazz"],
+                    "Who": ["you"],
                     "Scopes": ["repo"]
                 },
                 "git": {
                     "State": "ok",
-                    "Who": ["jterrazz"]
+                    "Who": ["you"]
                 }
             },
             "secrets": {
@@ -284,5 +284,5 @@
             }
         }
     },
-    "user": "jterrazz"
+    "user": "you"
 }
