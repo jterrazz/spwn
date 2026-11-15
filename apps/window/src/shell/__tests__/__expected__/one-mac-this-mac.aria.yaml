@@ -34,7 +34,7 @@
     - tab "Storage"
   - tabpanel "Overview":
     - heading "This Mac is ready." [level=1]
-    - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 0machines Not given yet
+    - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 0machines
     - region "Memory":
       - heading "Memory" [level=2]
       - paragraph: Not given yet What each machine holds of this Mac's memory.

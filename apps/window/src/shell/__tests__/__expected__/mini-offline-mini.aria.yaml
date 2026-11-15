@@ -1,7 +1,7 @@
 - navigation "Sidebar":
   - button "Find"
   - button "Home"
-  - button "Inbox"
+  - button "Inbox 1"
   - button "Storage"
   - group "Machines":
     - heading "Machines" [level=2]
@@ -48,8 +48,8 @@
     - heading "No answer from the engine." [level=1]
     - paragraph:
       - img "no answer"
-      - text: No answer
-    - text: CPU no answer Memory no answer Disk no answer Its machines 1machine Not given yet
+      - text: No answer · Last answer at 03:12
+    - text: CPU no answer Memory no answer Disk no answer Its machines 1machine
     - region "Memory":
       - heading "Memory" [level=2]
       - paragraph: Not given yet What each machine holds of this Mac's memory.

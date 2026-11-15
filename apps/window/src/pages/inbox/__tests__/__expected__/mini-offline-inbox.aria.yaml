@@ -1,20 +1,19 @@
 - main:
-  - heading "Everything is fine." [level=1]
+  - heading "npm sign-in expired." [level=1]
   - paragraph:
-    - img "Everything is fine."
-    - text: 3 things can wait.
+    - img "npm sign-in expired"
+    - text: 2 things can wait.
   - group "Which machines":
     - button "All machines" [pressed]
     - button "jterrazz-macbook-pro"
     - button "jterrazz-mac-mini"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
-    - paragraph: No need is listed.
-  - region "Can wait":
-    - heading "Can wait 3" [level=2]
-    - button "Broken npm sign-in expired jterrazz-macbook-pro · Accounts"
+    - button "Broken npm sign-in expired jterrazz-macbook-pro · Sign-ins"
     - text: npm login
     - button "Copy npm login": Copy
+  - region "Can wait":
+    - heading "Can wait 2" [level=2]
     - button "Needs a look 1 mise update waiting jterrazz-macbook-pro · Apps"
     - button "Update mise": Update
     - button "Needs a look 1 brew update waiting jterrazz-macbook-pro · Apps"

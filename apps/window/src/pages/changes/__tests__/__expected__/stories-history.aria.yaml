@@ -1,8 +1,8 @@
 - main:
-  - heading "Everything is fine." [level=1]
+  - heading "3 things need you." [level=1]
   - paragraph:
-    - img "Everything is fine."
-    - text: 4 things can wait.
+    - img "3 things need you."
+    - text: port 5000 is reachable outside Tailscale
   - group "Which machines":
     - button "All machines" [pressed]
     - button "macbook-pro"
@@ -10,14 +10,16 @@
     - button "macbook-air"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
-    - paragraph: No need is listed.
-  - region "Can wait":
-    - heading "Can wait 4" [level=2]
-    - button "Broken npm sign-in expired macbook-pro · Accounts"
+    - button "Broken port 5000 is reachable outside Tailscale Ports"
+    - text: System Settings > General > AirDrop & Handoff > AirPlay Receiver
+    - button "Copy System Settings > General > AirDrop & Handoff > AirPlay Receiver": Copy
+    - button "Broken npm sign-in expired macbook-pro · Sign-ins"
     - text: npm login
     - button "Copy npm login": Copy
     - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.jterrazz.brain.x-snapshot": Remove
+  - region "Can wait":
+    - heading "Can wait 2" [level=2]
     - button "Needs a look 1 brew update waiting macbook-pro · Apps"
     - button "Update brew": Update
     - 'button "Needs a look Firewall: off macbook-pro · Settings"'

@@ -1,8 +1,8 @@
 - main:
-  - heading "Everything is fine." [level=1]
+  - heading "3 things need you." [level=1]
   - paragraph:
-    - img "Everything is fine."
-    - text: 4 things can wait.
+    - img "3 things need you."
+    - text: port 5000 is reachable outside Tailscale
   - text: Memory free 72GB
   - img "Memory each machine holds, and what is free"
   - text: of 136 CPU, this Mac 22%
@@ -10,6 +10,16 @@
   - text: Peak 48 % · 25 min ago Awake, this Mac On 7h 29 min left until 18:00 · on power Disk free, this Mac 388GB
   - 'meter "Disk free, this Mac: used of its total"'
   - text: of 994 GB · machines hold 120 GB
+  - region "Needs you":
+    - heading "Needs you 3" [level=2]
+    - button "Broken port 5000 is reachable outside Tailscale Ports"
+    - text: System Settings > General > AirDrop & Handoff > AirPlay Receiver
+    - button "Copy System Settings > General > AirDrop & Handoff > AirPlay Receiver": Copy
+    - button "Broken npm sign-in expired macbook-pro · Sign-ins"
+    - text: npm login
+    - button "Copy npm login": Copy
+    - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.jterrazz.brain.x-snapshot": Remove
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]
     - text: macbook-pro
