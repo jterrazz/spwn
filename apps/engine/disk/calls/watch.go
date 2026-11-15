@@ -5,6 +5,7 @@ import (
 	"maps"
 	"path"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -48,8 +49,10 @@ type plan struct {
 	entries []entryPlan
 	roots   []string
 	other   []int
-	// value: the root the system is walked at, -1 where the volume tells it.
-	system int
+	// value: the root the system is walked at, -1 where the volume tells it,
+	// and the apps' install roots inside it, which are apps, not system.
+	system      int
+	underSystem []int
 }
 
 type reading struct {
@@ -248,6 +251,15 @@ func (s *Surveyor) plan() plan {
 		// value: one volume holds a Linux machine's system and data alike,
 		// so its system is what its programs and libraries hold.
 		p.system = root(systemRoot)
+		seen := map[int]bool{}
+		for _, ep := range p.entries {
+			for _, i := range ep.install {
+				if !seen[i] && strings.HasPrefix(p.roots[i], systemRoot+"/") {
+					seen[i] = true
+					p.underSystem = append(p.underSystem, i)
+				}
+			}
+		}
 	}
 	return p
 }
@@ -307,29 +319,81 @@ func (s *Surveyor) assemble(p plan, r reading) disk.Survey {
 			report.Other += b
 		}
 	}
-	report.System = r.system
+	report.System, report.SystemPending = r.system, false
 	if p.system >= 0 {
-		switch b := r.sizes[p.system]; b {
-		case pending:
-			report.System = max(r.known[p.system], 0)
-		default:
-			report.System = b
+		report.System, report.SystemPending = walked(r, append([]int{p.system}, p.underSystem...))
+		if report.System >= 0 {
+			report.System = r.sizes[p.system]
+			for _, i := range p.underSystem {
+				report.System -= r.sizes[i]
+			}
+			report.System = max(report.System, 0)
 		}
 	}
-	report.Logs = s.logs(report.Rows)
+	report.Apps, report.CachesUnknown = s.kinds(p, r)
+	report.Logs = s.logs(p, r)
 	return report
 }
 
-func (s *Surveyor) logs(rows []disk.Tally) int64 {
+// invariant: a size the walk has not answered, pending or past its
+// budget, is never read as 0: what it is part of is -1, pending while one
+// of its roots still is.
+func walked(r reading, roots []int) (bytes int64, waiting bool) {
+	for _, i := range roots {
+		switch b := r.sizes[i]; {
+		case b == pending:
+			bytes, waiting = -1, true
+		case b < 0:
+			bytes = -1
+		case bytes >= 0:
+			bytes += b
+		}
+	}
+	return bytes, waiting
+}
+
+func (s *Surveyor) kinds(p plan, r reading) (apps int64, cachesUnknown bool) {
+	seen := map[int]bool{}
+	var installs []int
+	for _, ep := range p.entries {
+		for _, i := range ep.install {
+			if !seen[i] {
+				seen[i] = true
+				installs = append(installs, i)
+			}
+		}
+		for _, pp := range ep.paths {
+			if pp.report.Level != catalog.LevelCache {
+				continue
+			}
+			for _, pt := range pp.parts {
+				cachesUnknown = cachesUnknown || r.sizes[pt.root] < 0
+			}
+		}
+		cachesUnknown = cachesUnknown || (ep.containers && r.containers < 0)
+	}
+	apps, _ = walked(r, installs)
+	return apps, cachesUnknown
+}
+
+func (s *Surveyor) logs(p plan, r reading) int64 {
 	logs := s.o.Expand.Display(s.o.Expand.Expand(catalog.StationLogs))
-	for _, t := range rows {
-		if t.Entry.Name != disk.StationName {
+	for _, ep := range p.entries {
+		if ep.entry.Name != disk.StationName {
 			continue
 		}
-		for _, p := range t.Paths {
-			if p.Path == logs {
-				return max(p.Bytes, 0)
+		for _, pp := range ep.paths {
+			if pp.report.Path != logs {
+				continue
 			}
+			var bytes int64
+			for _, pt := range pp.parts {
+				if r.sizes[pt.root] < 0 {
+					return -1
+				}
+				bytes += pt.sign * r.sizes[pt.root]
+			}
+			return max(bytes, 0)
 		}
 	}
 	return 0
