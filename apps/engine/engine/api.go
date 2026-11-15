@@ -19,7 +19,6 @@ const (
 	CallReserve   = "engine.reserve"
 	CallRelease   = "engine.release"
 	CallGuestExec = "engine.guest-exec"
-	CallAccounts  = "engine.accounts"
 	CallStopAll   = "engine.stop-all"
 	CallAwakeView = "engine.awake"
 	CallKeepAwake = "engine.awake-keep"

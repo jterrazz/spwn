@@ -204,32 +204,6 @@
                 "machinefiles/base.machine.yaml": "machinefile: station.machinefile/v1\nname: base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
                 "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [base]\napps: [ripgrep]\n"
             },
-            "identities": {
-                "claude": {
-                    "Provider": "claude",
-                    "State": "ok",
-                    "Reason": "",
-                    "Who": [
-                        "you@example.com"
-                    ],
-                    "Scopes": null,
-                    "Source": "",
-                    "Detail": "",
-                    "Notes": null
-                },
-                "github": {
-                    "Provider": "github",
-                    "State": "ok",
-                    "Reason": "",
-                    "Who": [
-                        "you@example.com"
-                    ],
-                    "Scopes": null,
-                    "Source": "",
-                    "Detail": "",
-                    "Notes": null
-                }
-            },
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
@@ -310,20 +284,6 @@
             "disk": {
                 "total": 40000000000,
                 "free": 30000000000
-            },
-            "identities": {
-                "github": {
-                    "Provider": "github",
-                    "State": "ok",
-                    "Reason": "",
-                    "Who": [
-                        "you@example.com"
-                    ],
-                    "Scopes": null,
-                    "Source": "",
-                    "Detail": "",
-                    "Notes": null
-                }
             },
             "meter": {
                 "sample": {
@@ -760,36 +720,6 @@
                             "poweroff": true
                         }
                     }
-                }
-            },
-            "identities": {
-                "claude": {
-                    "Provider": "claude",
-                    "State": "ok",
-                    "Reason": "",
-                    "Who": [
-                        "you@example.com"
-                    ],
-                    "Scopes": [
-                        "max"
-                    ],
-                    "Source": "",
-                    "Detail": "",
-                    "Notes": null
-                },
-                "github": {
-                    "Provider": "github",
-                    "State": "ok",
-                    "Reason": "",
-                    "Who": [
-                        "ci-agent"
-                    ],
-                    "Scopes": [
-                        "repo"
-                    ],
-                    "Source": "",
-                    "Detail": "",
-                    "Notes": null
                 }
             },
             "images": [
@@ -1473,49 +1403,6 @@
                     }
                 }
             },
-            "identities": {
-                "claude": {
-                    "Provider": "claude",
-                    "State": "ok",
-                    "Reason": "",
-                    "Who": [
-                        "you@example.com"
-                    ],
-                    "Scopes": [
-                        "max"
-                    ],
-                    "Source": "",
-                    "Detail": "claude.ai",
-                    "Notes": null
-                },
-                "github": {
-                    "Provider": "github",
-                    "State": "ok",
-                    "Reason": "",
-                    "Who": [
-                        "you"
-                    ],
-                    "Scopes": [
-                        "repo",
-                        "workflow"
-                    ],
-                    "Source": "",
-                    "Detail": "github.com",
-                    "Notes": null
-                },
-                "npm": {
-                    "Provider": "npm",
-                    "State": "broken",
-                    "Reason": "refused",
-                    "Who": [
-                        "?"
-                    ],
-                    "Scopes": null,
-                    "Source": "",
-                    "Detail": "signed out of registry.npmjs.org",
-                    "Notes": null
-                }
-            },
             "images": [
                 "ghcr.io/jterrazz/station-linux:3"
             ],
@@ -1983,20 +1870,6 @@
             "disk": {
                 "total": 40000000000,
                 "free": 30000000000
-            },
-            "identities": {
-                "claude": {
-                    "Provider": "claude",
-                    "State": "ok",
-                    "Reason": "",
-                    "Who": [
-                        "you@example.com"
-                    ],
-                    "Scopes": null,
-                    "Source": "",
-                    "Detail": "",
-                    "Notes": null
-                }
             },
             "meter": {
                 "sample": {

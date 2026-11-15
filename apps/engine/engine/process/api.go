@@ -82,9 +82,6 @@ func calls(d *Engine, served []string) []call.Handler {
 			d.changed(in.VM, in.Call)
 			return engine.ExecOut(ran), err
 		}),
-		own(d, engine.CallAccounts, func(ctx context.Context, d *Engine, _ struct{}) (engine.AccountsView, error) {
-			return d.Accounts(ctx), nil
-		}),
 		own(d, engine.CallStopAll, func(ctx context.Context, d *Engine, _ struct{}) (engine.StopAll, error) { return d.StopAll(ctx), nil }),
 		own(d, engine.CallAwakeView, func(_ context.Context, d *Engine, _ struct{}) (awake.View, error) { return d.AwakeView(), nil }),
 		own(d, engine.CallKeepAwake, func(_ context.Context, d *Engine, in engine.AwakeIn) (awake.Awoken, error) { return d.Awake(in) }),

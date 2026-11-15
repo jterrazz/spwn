@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/gh"
 	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/herdr"
 	agentsjsonfile "github.com/jterrazz/studio-station/apps/engine/agents/adapter/jsonfile"
@@ -31,10 +30,7 @@ func (m machine) guest() *guest.Agent {
 	if root == "" {
 		root = "/"
 	}
-	return guest.New(m.sys, guest.Options{State: m.paths.State, PortsEnv: filepath.Join(m.paths.Prefs, "services.env"), Kind: m.kind, Ephemeral: m.ephemeral(root), Version: Version(), Listeners: m.listeners(root), Containers: m.containers(), Journal: m.journal(), Accounts: func(ctx context.Context, keys []string) any {
-		a := accountscalls.NewReader(m.identities(path.Join(m.paths.State, "children")), accountscalls.ReaderOptions{ThisMachine: m.kind, Keys: func() []string { return keys }})
-		return a.Own(ctx)
-	}})
+	return guest.New(m.sys, guest.Options{State: m.paths.State, PortsEnv: filepath.Join(m.paths.Prefs, "services.env"), Kind: m.kind, Ephemeral: m.ephemeral(root), Version: Version(), Listeners: m.listeners(root), Containers: m.containers(), Journal: m.journal()})
 }
 
 // value: the ports this VM's containers publish; none in a world.

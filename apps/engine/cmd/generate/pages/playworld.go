@@ -44,7 +44,6 @@ type playMac struct {
 	Building    []images.Making                `json:"building,omitempty"`
 	VMs         map[string]*playVM             `json:"vms,omitempty"`
 	Jobs        map[string]background.Job      `json:"jobs,omitempty"`
-	Identities  map[string]accounts.Identity   `json:"identities,omitempty"`
 	Accounts    *playSignIns                   `json:"accounts,omitempty"`
 	Facts       map[catalog.Fact]settings.Fact `json:"facts,omitempty"`
 	Self        *playSelf                      `json:"self,omitempty"`
@@ -189,7 +188,6 @@ func PlayWorld(base []byte) []byte {
 			m.Preferences["never_sleeps"] = true
 			m.Disk = &playDisk{Total: 994e9, Free: 610e9}
 		}
-		m.Identities = playAccounts(f, h.Name)
 		m.Engine.Past = map[string]activity.Profile{h.Name: past[h.Name]}
 		m.Meter.Processes = map[int]activity.Usage{}
 		for _, vm := range h.VMs {
@@ -352,23 +350,6 @@ func macFacts(thisMac bool) map[catalog.Fact]settings.Fact {
 	return facts
 }
 
-func playAccounts(f Scene, mac string) map[string]accounts.Identity {
-	ids := map[string]accounts.Identity{}
-	for _, m := range f.Accounts.Machines {
-		if m.Name != mac {
-			continue
-		}
-		for _, a := range m.Accounts {
-			ids[a.Provider] = accounts.Identity{Provider: a.Provider, State: a.State, Reason: a.Reason, Who: a.Identity, Scopes: a.Scopes, Detail: a.Detail}
-		}
-	}
-	if mac != proName {
-		ids[catalog.ProviderGitHub] = accounts.Identity{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Who: []string{"ci-agent"}, Scopes: []string{"repo"}}
-		ids[catalog.ProviderClaude] = accounts.Identity{Provider: catalog.ProviderClaude, State: catalog.StateOK, Who: []string{"you@example.com"}, Scopes: []string{"max"}}
-	}
-	return ids
-}
-
 // value: what each VM of the play world is for and the session that made
 // it, empty for the owner.
 func purposeOf(name string) (purpose, creator string) {
@@ -474,19 +455,15 @@ func inside(f Scene, vm model.VM, share float64, p activity.Profile) *playMac {
 	} else if s, ok := f.Insides[vm.Name]; ok && len(s.Needs) > 0 {
 		m.Apps = map[catalog.Method]*playApps{catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0"}, Behind: map[string]string{"gh": "2.98.0", "jq": "1.8.2"}}}
 	}
-	ids, programs := map[string]accounts.Identity{}, map[accounts.Program]accounts.Facts{}
+	programs := map[accounts.Program]accounts.Facts{}
 	for _, read := range f.Accounts.Machines {
 		if read.Name == vm.Name {
 			for _, a := range read.Accounts {
-				ids[a.Provider] = accounts.Identity{Provider: a.Provider, State: catalog.StateOK, Who: a.Identity}
 				if program, ok := programOf(a.Provider); ok {
 					programs[program] = factsOf(program, a)
 				}
 			}
 		}
-	}
-	if len(ids) > 0 {
-		m.Identities = ids
 	}
 	if len(programs) > 0 {
 		m.Accounts = &playSignIns{Programs: programs}

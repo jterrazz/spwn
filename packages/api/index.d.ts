@@ -1076,10 +1076,6 @@ export type DoneFrame = {
     v: 2;
 };
 
-export type EngineAccountsView = {
-    vms: EngineVMAccounts[] | null;
-};
-
 export type EngineActivityOut = {
     machines: EngineKept[] | null;
     since: string;
@@ -1222,12 +1218,6 @@ export type EngineStopped = {
     lifetime: string;
     name: string;
     result: string;
-};
-
-export type EngineVMAccounts = {
-    accounts?: unknown;
-    guest: string;
-    name: string;
 };
 
 export type EngineVMIn = {
@@ -3327,8 +3317,6 @@ export type DiskMoveInput = DiskCallsMoveIn;
 export type DiskMoveOutput = DiskOutcome;
 export type DiskReadInput = DiskCallsReadIn;
 export type DiskReadOutput = DiskReading;
-export type EngineAccountsInput = Record<string, never>;
-export type EngineAccountsOutput = EngineAccountsView;
 export type EngineActivityInput = Record<string, never>;
 export type EngineActivityOutput = EngineActivityOut;
 export type EngineAgentsHeldInput = Record<string, never>;
@@ -3523,7 +3511,6 @@ export interface Calls {
     'disk.free': { in: DiskFreeInput; out: DiskFreeOutput; watch: false };
     'disk.move': { in: DiskMoveInput; out: DiskMoveOutput; watch: false };
     'disk.read': { in: DiskReadInput; out: DiskReadOutput; watch: true };
-    'engine.accounts': { in: EngineAccountsInput; out: EngineAccountsOutput; watch: false; own: true };
     'engine.activity': { in: EngineActivityInput; out: EngineActivityOutput; watch: false; own: true };
     'engine.agents-held': { in: EngineAgentsHeldInput; out: EngineAgentsHeldOutput; watch: false; own: true };
     'engine.awake': { in: EngineAwakeInput; out: EngineAwakeOutput; watch: false; own: true };

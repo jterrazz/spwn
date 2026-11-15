@@ -411,10 +411,6 @@ func (m *worldMac) installer(method catalog.Method, lined bool) appscontract.Ins
 	return appsfake.InstallerOf(m.run.w, m.name, method, lined)
 }
 
-func (m *worldMac) identities() accountscontract.Identities {
-	return accountsfake.NewIdentities(m.run.w, m.name)
-}
-
 func (m *worldMac) checks() contract.CheckRunner { return machinesfake.CheckRunnerOf(m.run.w) }
 
 func (m *worldMac) notifier() process.Notifier {

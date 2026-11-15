@@ -343,46 +343,6 @@
                     "~/.gnupg/pubring.kbx": 200000
                 }
             },
-            "identities": {
-                "github": {
-                    "State": "ok",
-                    "Who": ["you"],
-                    "Scopes": ["read:org", "repo"]
-                },
-                "npm": {
-                    "State": "broken",
-                    "Reason": "refused",
-                    "Who": ["?"],
-                    "Detail": "token refused"
-                },
-                "claude": {
-                    "State": "ok",
-                    "Who": ["you@example.com"],
-                    "Scopes": ["max"]
-                },
-                "tailscale": {
-                    "State": "ok"
-                },
-                "cloudflare": {
-                    "State": "ok",
-                    "Who": ["you@example.com"],
-                    "Source": "wrangler"
-                },
-                "git": {
-                    "State": "ok",
-                    "Who": ["Jean-Baptiste Terrazzoni", "you@example.com"]
-                },
-                "ssh": {
-                    "State": "ok",
-                    "Who": ["1 key"],
-                    "Scopes": ["you@example.com"]
-                },
-                "docker": {
-                    "State": "absent",
-                    "Reason": "unset",
-                    "Detail": "not signed in"
-                }
-            },
             "vault": {
                 "session:github": "ZmFrZS1zZXNzaW9uLWdpdGh1Yi1vZi10aGlzLW1hYw==",
                 "operator:claude:oauth-token": "ZmFrZS1jbGF1ZGUtdG9rZW4tb2YtdGhpcy1tYWM="
@@ -749,13 +709,6 @@
                     "~/go/pkg/mod/cache/x": 2300000000
                 }
             },
-            "identities": {
-                "github": {
-                    "State": "ok",
-                    "Who": ["ci-agent"],
-                    "Scopes": ["repo"]
-                }
-            },
             "vault": {
                 "session:github": "ZmFrZS1zZXNzaW9uLWdpdGh1Yi1vZi10aGUtbWluaQ=="
             },
@@ -930,17 +883,6 @@
                 "files": {
                     "~/.cache/go-build/x": 1200000000,
                     "~/.cache/npm/x": 300000000
-                }
-            },
-            "identities": {
-                "github": {
-                    "State": "ok",
-                    "Who": ["you"],
-                    "Scopes": ["repo"]
-                },
-                "git": {
-                    "State": "ok",
-                    "Who": ["you"]
                 }
             },
             "vault": {

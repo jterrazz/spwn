@@ -90,7 +90,6 @@ func (*worldMac) grants(func() time.Time, func(context.Context, time.Duration) e
 	return nil
 }
 func (*worldMac) forgetGrants(context.Context, string) error { return nil }
-func (*worldMac) identities() accountscontract.Identities    { return nil }
 func (*worldMac) userSource() machinefilecontract.Source     { return nil }
 func (*worldMac) owned() machinefilecontract.Owned           { return nil }
 func (*worldMac) locks() machinefilecontract.Locks           { return nil }

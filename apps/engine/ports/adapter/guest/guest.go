@@ -26,7 +26,6 @@ const (
 	snapshotEach   = 60
 	containersEach = 5
 	relayBudget    = 30 * time.Second
-	readBudget     = 10 * time.Second
 )
 
 type Options struct {
@@ -37,9 +36,6 @@ type Options struct {
 	Ephemeral Ephemeral
 	Kind      catalog.MachineKind
 	Version   string
-	// value: what the host's `accounts` request is answered with: this VM's
-	// providers, parsed into identities and scopes, never a token.
-	Accounts func(ctx context.Context, keys []string) any
 	// value: what listens in this VM, read by the adapter of its kind.
 	Listeners Listeners
 	// value: the ports this VM's containers publish; nil reads none.
@@ -172,8 +168,6 @@ func (g *session) handle(ctx context.Context, m message) {
 		}
 	case "ping":
 		g.send(map[string]any{"v": 1, "type": "pong"})
-	case "request":
-		go g.answer(ctx, m)
 	case "reply":
 		g.mu.Lock()
 		ch := g.pending[m.ID]
@@ -183,21 +177,6 @@ func (g *session) handle(ctx context.Context, m message) {
 			ch <- m
 		}
 	}
-}
-
-// invariant: a host's request is answered on the same channel, with only the
-// parsed result: the providers' own output never leaves this process.
-func (g *session) answer(ctx context.Context, m message) {
-	if m.Op != "accounts" || g.s.o.Accounts == nil {
-		g.send(map[string]any{"v": 1, "type": "reply", "id": m.ID, "ok": false, "error": map[string]string{"code": "unknown_op", "message": "unknown op \"" + m.Op + "\"", "hint": "station accounts"}})
-		return
-	}
-	ctx, cancel := context.WithTimeout(ctx, readBudget)
-	defer cancel()
-	g.mu.Lock()
-	keys := g.hello.Keys
-	g.mu.Unlock()
-	g.send(map[string]any{"v": 1, "type": "reply", "id": m.ID, "ok": true, "result": g.s.o.Accounts(ctx, keys)})
 }
 
 // invariant: SPEC B5.1: the guest reports its VM's journal with its first

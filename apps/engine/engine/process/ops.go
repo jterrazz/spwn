@@ -96,8 +96,6 @@ func (d *Engine) VM(ctx context.Context, verb, vm string) error {
 	return fault(enginecalls.UnknownOp, "unknown verb \""+verb+"\" for a VM", "station machines")
 }
 
-func (d *Engine) Accounts(ctx context.Context) engine.AccountsView { return d.accounts(ctx) }
-
 func (d *Engine) StopAll(ctx context.Context) engine.StopAll {
 	shared := d.sharedVMs()
 	vms := d.stopAll(ctx)
