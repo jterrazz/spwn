@@ -84,6 +84,9 @@ type Port struct {
 	// value: its machine is a VM with its own tailnet device.
 	Device   bool
 	Declared *Declaration
+	// value: a VM's port the owner stopped sharing (`ports stop-sharing`):
+	// its Mac does not share it again until the owner shares it.
+	Stopped bool `json:",omitempty"`
 	// value: what its route showed of it, once a declared port is verified.
 	Verified *Verified
 	Answer   Answer
@@ -204,6 +207,15 @@ func OwnDevices(f AllMachines, peers []Node) AllMachines {
 		}
 	}
 	return f
+}
+
+func MarkStopped(ps []Port, p Policy) []Port {
+	// invariant: a VM's port is stopped while its Mac's policy remembers the
+	// owner's stop of sharing it; a Mac's own port never is.
+	for i := range ps {
+		ps[i].Stopped = ps[i].Machine.On != "" && p.Stopped(ps[i].Machine.Name, ps[i].Port)
+	}
+	return ps
 }
 
 func Survey(ms []Machine, decl []Declaration) []Port {

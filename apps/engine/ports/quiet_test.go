@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 )
 
@@ -36,5 +37,19 @@ func TestAMacsShortLivedListenersAreCountedButNeverAnExposure(t *testing.T) {
 	}
 	if want := []int{3000, 50003, 50005, 50006}; !slices.Equal(listed, want) {
 		t.Errorf("listed = %v, want %v: the ports below the range, the exposed and the declared", listed, want)
+	}
+}
+
+// invariant: a VM's port its Mac remembers stopped is marked, a Mac's own
+// port of the same number never is.
+func TestAPortTheOwnerStoppedIsMarkedOnItsVMOnly(t *testing.T) {
+	ps := []ports.Port{
+		{Machine: machine.Ref{Name: "linux-1", On: "macbook-pro"}, Port: 7000},
+		{Machine: machine.Ref{Name: "linux-1", On: "macbook-pro"}, Port: 5173},
+		{Machine: machine.Ref{Name: "macbook-pro"}, Port: 7000},
+	}
+	got := ports.MarkStopped(ps, ports.Policy{NotShared: []string{"linux-1:7000", "macbook-pro:7000"}})
+	if !got[0].Stopped || got[1].Stopped || got[2].Stopped {
+		t.Errorf("stopped = %v %v %v, want linux-1:7000 alone", got[0].Stopped, got[1].Stopped, got[2].Stopped)
 	}
 }

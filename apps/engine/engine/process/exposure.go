@@ -174,7 +174,7 @@ func (d *Engine) surveyed(ctx context.Context, vm string) ports.MacPorts {
 	if d.o.Declarations != nil {
 		decl, _ = d.o.Declarations(ctx)
 	}
-	out.Ports = ports.Survey(heard, decl)
+	out.Ports = ports.MarkStopped(ports.Survey(heard, decl), d.policy())
 	return out
 }
 

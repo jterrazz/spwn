@@ -318,15 +318,17 @@ func LocalRow(p ports.Port) page.Row {
 func PrivateRow(p ports.Port) page.Row {
 	// value: a port reachable through the tailnet only that station does not
 	// share: a VM's own tailnet device, its Mac, or the Mac's tailnet address.
-	how := "on " + catalog.TailnetProduct
+	how := page.Text("on " + catalog.TailnetProduct)
 	switch {
 	case p.Device:
-		how = "own " + catalog.TailnetProduct + " device: " + p.Machine.Name
+		how = page.Text("own " + catalog.TailnetProduct + " device: " + p.Machine.Name)
+	case p.Stopped:
+		how = page.Texts(catalog.StoppedByYou...)
 	case p.Machine.On != "":
-		how = "behind " + p.Machine.On + ", not shared"
+		how = page.Text("behind " + p.Machine.On + ", not shared")
 	}
 	return page.Row{ID: p.Key(), Label: p.Machine.Name, Mark: page.OK,
-		Cells: []page.Value{page.Port(int64(p.Port)), page.Text(ClassPrivate), page.None(), page.Text(how), page.Text(p.What())}}
+		Cells: []page.Value{page.Port(int64(p.Port)), page.Text(ClassPrivate), page.None(), how, page.Text(p.What())}}
 }
 
 func reserved(h ports.MacPorts, thisMac page.Context) string {

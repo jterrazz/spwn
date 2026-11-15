@@ -2936,6 +2936,7 @@ export type PortsPort = {
     Port: number;
     Process: string;
     Reach: number;
+    Stopped?: boolean;
     Verified: PortsVerified | null;
 };
 
