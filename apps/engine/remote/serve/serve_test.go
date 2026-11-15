@@ -264,3 +264,103 @@ func TestAnErrorAndAProgressLeaveWithTheirTokensWithheld(t *testing.T) {
 		t.Errorf("the error's ref and path were not kept: %q", e.Message)
 	}
 }
+
+// value: a caller's side that tells when the server has read its end.
+type closing struct {
+	r     io.Reader
+	ended chan struct{}
+}
+
+func (c closing) Read(p []byte) (int, error) {
+	n, err := c.r.Read(p)
+	if errors.Is(err, io.EOF) {
+		select {
+		case <-c.ended:
+		default:
+			close(c.ended)
+		}
+	}
+	return n, err
+}
+
+// value: a watch whose frame answers at once and whose last value only once
+// the test lets it.
+type lateWatch struct{ release chan struct{} }
+
+func (lateWatch) Hello() api.Hello { return api.Hello{} }
+
+func (lateWatch) Invoke(context.Context, machine.Ref, string, json.RawMessage, call.Progress) (any, error) {
+	return nil, errors.New("no call here")
+}
+
+func (w lateWatch) Watch(ctx context.Context, _ machine.Ref, _ string, _ json.RawMessage, _ call.Progress) (<-chan call.Update[any], error) {
+	out := make(chan call.Update[any])
+	go func() {
+		defer close(out)
+		for i, value := range []string{"frame", "last"} {
+			if i > 0 {
+				select {
+				case <-w.release:
+				case <-ctx.Done():
+					return
+				}
+			}
+			select {
+			case out <- call.Update[any]{Value: value}:
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+	return out, nil
+}
+
+func TestAWatchAnswersItsLastValueAfterItsCallerClosedItsSide(t *testing.T) {
+	in := closing{r: strings.NewReader(`{"v":2,"id":"1","watch":"disk.read"}` + "\n"), ended: make(chan struct{})}
+	outR, outW := io.Pipe()
+	w := lateWatch{release: make(chan struct{})}
+	served := make(chan error, 1)
+	go func() {
+		served <- serve.Stream(t.Context(), in, outW, w, nil)
+		_ = outW.Close()
+	}()
+	bounded, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	select {
+	case <-in.ended:
+	case <-bounded.Done():
+		t.Fatal("the server never read its caller's end")
+	}
+	close(w.release)
+	lines := make(chan []string, 1)
+	go func() {
+		var got []string
+		s := bufio.NewScanner(outR)
+		for s.Scan() {
+			var f api.Frame
+			if json.Unmarshal(s.Bytes(), &f) == nil {
+				got = append(got, string(f.Out)+doneMark(f.Done))
+			}
+		}
+		lines <- got
+	}()
+	var got []string
+	select {
+	case got = <-lines:
+	case <-bounded.Done():
+		t.Fatal("the server never ended once its watch had")
+	}
+	if want := []string{`"frame"`, `"last"`, "done"}; strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("the watch answered %v after its caller's end, want %v: a slow last value would be lost", got, want)
+	}
+	if err := <-served; err != nil {
+		t.Fatalf("serve: %v", err)
+	}
+}
+
+func doneMark(done bool) string {
+	if done {
+		return "done"
+	}
+	return ""
+}
