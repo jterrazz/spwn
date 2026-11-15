@@ -20,7 +20,6 @@ import { wordOf } from './engine-words';
 import type { CodeOf, Worded } from './engine-words';
 import {
     accountSideOf,
-    chapterOfKind,
     machineKindOf,
     macStateOf,
     shareEndOf,
@@ -193,6 +192,6 @@ export function kindChipWord(kind: CatalogKind): string {
     return kind === 'app' ? '' : wordOf('CatalogKind', kind).Word;
 }
 
-export function shelfWord(kind: CatalogKind): string {
-    return wordOf('MachinefileChapter', chapterOfKind(kind)).Word;
+export function shelfWord(chapter: MachinefileChapter): string {
+    return wordOf('MachinefileChapter', chapter).Word;
 }

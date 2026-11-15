@@ -3,7 +3,6 @@ import { useState } from 'react';
 
 import { AppIcon, Button, Panel, StatePill, Switch, Value } from '../../design/index';
 import type { Identity } from '../../design/index';
-import { layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
 import { engineShown } from '../../engine/shown';
 import { differencesOf, layersOf } from './model';
@@ -104,9 +103,7 @@ export function Differs({ drift, onPlan }: { drift: MachinefileDrift; onPlan: ()
         return null;
     }
     const toFile = direction === 'file';
-    const plan = drift.Plan;
-    const all = [...(plan.Lines ?? []), ...(plan.Extra ?? [])];
-    const identities = new Map(layersOf(plan).map((layer) => [layer.name, layer.identity]));
+    const identities = new Map(layersOf(drift.Plan).map((layer) => [layer.name, layer.identity]));
     return (
         <Panel
             action={
@@ -135,7 +132,7 @@ export function Differs({ drift, onPlan }: { drift: MachinefileDrift; onPlan: ()
                         />
                     );
                 }
-                const name = layerOf(line, all);
+                const name = line.Step.File.Name;
                 return (
                     <DiffRow
                         key={`${line.Step.Kind}/${line.Step.Package}`}
