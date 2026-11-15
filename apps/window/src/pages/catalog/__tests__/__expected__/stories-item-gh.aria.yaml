@@ -23,7 +23,7 @@
   - region "What it keeps on disk":
     - heading "What it keeps on disk" [level=2]
     - button "Storage"
-    - text: "{cache}/gh rebuilt when needed cache {state}/gh yours, kept data {config}/gh/config.yml your settings, kept settings {config}/gh/hosts.yml kept · the login; the keychain's `gh:github.com` (HYPOTHESIS: listing denied) kept"
+    - text: "{cache}/gh rebuilt when needed cache {state}/gh yours, kept data {config}/gh/config.yml your settings, kept settings {config}/gh/hosts.yml kept · the login; the keychain's `gh:github.com` kept"
   - region "gh in the catalog":
     - term: Kind
     - definition: app
