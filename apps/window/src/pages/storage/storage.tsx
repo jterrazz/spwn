@@ -7,7 +7,7 @@ import type {
 } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Button, MachineIcon, Panel, Row, Switch } from '../../design/index';
+import { MachineIcon, Panel, Row, Switch } from '../../design/index';
 import { countOf } from '../../engine/engine-words';
 import { diskGestureOf, machineKindOf } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
@@ -29,8 +29,6 @@ import { chosenMac, imagesOn } from './chosen';
 import { ImageLine } from './image-gesture';
 
 import styles from '../page.module.css';
-
-const BUILD_NEEDS = 'Building an image is not offered in the window yet';
 
 type Go = (to: Route) => void;
 
@@ -74,15 +72,10 @@ function imageSentence(image: ImagesReport): string {
 type ImagesProps = { images: Reading<null | readonly ImagesReport[]>; mac: MachinesMacView };
 
 function Images({ images, mac }: ImagesProps) {
-    const build = (
-        <Button disabled title={BUILD_NEEDS}>
-            Build a new one
-        </Button>
-    );
     const note = 'a machine built in advance; a new machine starts as a copy of it';
     if (images.kind === 'failed') {
         return (
-            <Panel action={build} note={note} title="Images">
+            <Panel note={note} title="Images">
                 <Unanswered error={images.error} size="panel" />
             </Panel>
         );
@@ -92,7 +85,7 @@ function Images({ images, mac }: ImagesProps) {
     }
     const mine = imagesOn(images.out ?? [], mac.Name);
     return (
-        <Panel action={build} note={note} title="Images">
+        <Panel note={note} title="Images">
             {mine.length === 0 ? (
                 <p className={styles.none}>No image on {mac.Name}.</p>
             ) : (
