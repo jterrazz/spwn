@@ -1326,6 +1326,22 @@
       "Tone": "plain"
     }
   },
+  "MachinefileFollowerState": {
+    "differs": {
+      "Word": "Differs",
+      "One": "difference",
+      "Other": "differences",
+      "Tone": "warn"
+    },
+    "matches": {
+      "Word": "Matches",
+      "Tone": "ok"
+    },
+    "unread": {
+      "Word": "Not read",
+      "Tone": "plain"
+    }
+  },
   "MachinefileLayer": {
     "built-in": {
       "Word": "built into station",

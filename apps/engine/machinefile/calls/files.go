@@ -7,6 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
@@ -22,7 +23,8 @@ type FilesIn struct{}
 // text, this Mac's overlay of it and the machines that follow it.
 
 type Files struct {
-	Files []machinefile.FileView
+	Files   []machinefile.FileView
+	Verdict verdict.Verdict
 }
 
 var ListFiles = call.Call[Deps, FilesIn, Files]{
@@ -73,7 +75,7 @@ var ListFiles = call.Call[Deps, FilesIn, Files]{
 		for i := range files {
 			files[i].Verdict = machinefile.FollowersVerdict(files[i].Followers)
 		}
-		return Files{Files: files}, nil
+		return Files{Files: files, Verdict: machinefile.FilesVerdict(files)}, nil
 	},
 }
 
@@ -83,7 +85,7 @@ var ListFiles = call.Call[Deps, FilesIn, Files]{
 func followers(ctx context.Context, d Deps) map[string][]machinefile.Follower {
 	out := map[string][]machinefile.Follower{}
 	if bound, err := d.Prefs.Bound(); err == nil && bound != "" {
-		out[bound] = append(out[bound], machinefile.Follower{Machine: d.Name, Mac: d.Name, ThisMac: true})
+		out[bound] = append(out[bound], machinefile.Following(d.Name, d.Name, true))
 	}
 	if d.AllMachines == nil || d.Far == nil {
 		return out
@@ -95,7 +97,7 @@ func followers(ctx context.Context, d Deps) map[string][]machinefile.Follower {
 	for _, mac := range all.Macs {
 		if !mac.ThisMac && mac.Reachable {
 			if n, err := call.Invoke(ctx, d.Far, machine.Ref{Name: mac.Name}, LastNight, NightlyIn{}, nil); err == nil && n.Bound != "" {
-				out[n.Bound] = append(out[n.Bound], machinefile.Follower{Machine: mac.Name, Mac: mac.Name})
+				out[n.Bound] = append(out[n.Bound], machinefile.Following(mac.Name, mac.Name, false))
 			}
 		}
 		for _, vm := range mac.VMs {
@@ -108,5 +110,5 @@ func followers(ctx context.Context, d Deps) map[string][]machinefile.Follower {
 }
 
 func follower(mac machines.MacView, vm machines.VM) machinefile.Follower {
-	return machinefile.Follower{Machine: vm.Name, Mac: mac.Name, ThisMac: mac.ThisMac}
+	return machinefile.Following(vm.Name, mac.Name, mac.ThisMac)
 }

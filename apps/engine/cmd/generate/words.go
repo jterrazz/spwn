@@ -111,6 +111,11 @@ func wordedEnums() []worded {
 			string(machinefile.ShelfMixin):   plain("Mixins"),
 			string(machinefile.ShelfShipped): plain("Shipped with station"),
 		}},
+		{machinefile.FollowerState(""), map[string]word{
+			string(machinefile.FollowerMatches): toned(verdict.OK, "Matches"),
+			string(machinefile.FollowerDiffers): {Word: "Differs", One: "difference", Other: "differences", Tone: verdict.Warn},
+			string(machinefile.FollowerUnread):  plain("Not read"),
+		}},
 		{machinefile.Condition(""), map[string]word{
 			string(machinefile.Present):    toned(verdict.OK, "present"),
 			string(machinefile.Absent):     toned(verdict.Warn, "not installed"),
