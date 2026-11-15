@@ -44,8 +44,6 @@ func New(files Files, dir string) *Store {
 
 func (s *Store) recordFile(name string) string { return path.Join(s.dir, name+".json") }
 
-// value: alias of the v2 `lent` key, kept in a VM record until Accounts
-// moves its shares; the record is otherwise v3's.
 type file struct {
 	Name        string            `json:"name"`
 	Image       string            `json:"image"`
@@ -58,7 +56,6 @@ type file struct {
 	CPUs        int               `json:"cpus"`
 	MemoryBytes int64             `json:"memory_bytes"`
 	DiskBytes   int64             `json:"disk_bytes"`
-	Shared      json.RawMessage   `json:"lent,omitempty"`
 	CreatedAt   time.Time         `json:"created_at"`
 	Birth       *machines.Birth   `json:"birth,omitempty"`
 	Owner       *machines.Process `json:"owner,omitempty"`
@@ -172,10 +169,8 @@ func (s *Store) Put(_ context.Context, r machines.Record) error {
 }
 
 func (s *Store) put(r machines.Record) error {
-	// invariant: a put keeps the shares on disk as they are: the accounts'
-	// store writes them, and a record held in memory may predate a share.
-	// A put without agents keeps those on disk too: a stop writes them, and
-	// the engine's record of a run that ends predates them.
+	// invariant: a put without agents keeps those on disk: a stop writes
+	// them, and the engine's record of a run that ends predates them.
 	var held file
 	if current, err := s.files.ReadFile(s.recordFile(r.Name)); err == nil {
 		_ = json.Unmarshal(current, &held)
@@ -185,7 +180,7 @@ func (s *Store) put(r machines.Record) error {
 	}
 	data, err := json.MarshalIndent(file{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
-		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, Shared: held.Shared, CreatedAt: r.CreatedAt,
+		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, CreatedAt: r.CreatedAt,
 		Birth: r.Birth, Owner: r.Owner, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts, Purpose: r.Purpose, Creator: r.Creator, V: Version,
 	}, "", "  ")
 	if err != nil {
@@ -251,8 +246,8 @@ func lifetimeAlias(l machines.Lifetime) machines.Lifetime {
 
 func (s *Store) Migrate(context.Context) error {
 	// invariant: a record written before version 2 is rewritten at it in
-	// today's lifetime words, its shares kept as they are; a record at
-	// version 2, or one that cannot be read, is left as it is.
+	// today's lifetime words; a record at version 2, or one that cannot be
+	// read, is left as it is.
 	entries, err := s.files.ReadDir(s.dir)
 	if err != nil {
 		return store.OnlyNewer(err)

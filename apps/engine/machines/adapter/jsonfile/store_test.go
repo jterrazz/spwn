@@ -25,21 +25,21 @@ func TestMachineStore(t *testing.T) {
 	})
 }
 
-func TestAPutKeepsTheV2SharesUntilTheyMoveOut(t *testing.T) {
+func TestAnOldRecordWithItsSharesReadsAndItsPutDropsThem(t *testing.T) {
 	dir := t.TempDir()
 	at := filepath.Join(dir, "api.json")
 	_ = os.WriteFile(at, []byte(`{"name":"api","image":"linux","lent":[{"name":"session:a","at":"2026-11-01T09:00:00Z","until":"2026-11-01T17:00:00Z"}]}`), 0o600)
 	s := jsonfile.New(disk(), dir)
 	r, err := s.Get(context.Background(), "api")
-	if err != nil {
-		t.Fatal(err)
+	if err != nil || r.Name != "api" || r.Image != "linux" {
+		t.Fatalf("an old record reads %+v, %v; want api on linux", r, err)
 	}
 	r.Want = "stopped"
 	if err := s.Put(context.Background(), r); err != nil {
 		t.Fatal(err)
 	}
-	if data, _ := os.ReadFile(at); !strings.Contains(string(data), `"until": "2026-11-01T17:00:00Z"`) {
-		t.Errorf("the share was lost:\n%s", data)
+	if data, _ := os.ReadFile(at); strings.Contains(string(data), "session:a") || !strings.Contains(string(data), `"want": "stopped"`) {
+		t.Errorf("the put kept the old shares, or lost the change:\n%s", data)
 	}
 }
 
@@ -87,8 +87,8 @@ func TestMigrateRewritesAnOlderRecordInTodaysLifetimeWordsAndLeavesTheRest(t *te
 	if r, err := s.Get(context.Background(), "temp"); err != nil || r.Lifetime != machines.Ephemeral {
 		t.Errorf("temp reads %q, %v after the migration; want ephemeral", r.Lifetime, err)
 	}
-	if data, _ := os.ReadFile(filepath.Join(dir, "api.json")); !strings.Contains(string(data), `"until": "2026-11-01T17:00:00Z"`) {
-		t.Errorf("the share was lost:\n%s", data)
+	if data, _ := os.ReadFile(filepath.Join(dir, "api.json")); strings.Contains(string(data), "session:a") {
+		t.Errorf("the migration kept the old shares:\n%s", data)
 	}
 	if data, _ := os.ReadFile(filepath.Join(dir, "today.json")); string(data) != old["today"] {
 		t.Errorf("a record already at version 2 changed:\n%s", data)
