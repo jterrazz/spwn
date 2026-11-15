@@ -48,7 +48,7 @@ type Declaration struct {
 	Machine string `json:"machine"`
 	Port    int    `json:"port"`
 	Via     string `json:"via"`
-	// value: the link it is reached by from outside (`https://jterrazz.com`);
+	// value: the link it is reached by from outside (`https://example.com`);
 	// empty when only its address is known.
 	URL string `json:"url,omitempty"`
 	// value: the setting that declared it; empty when the owner did.
@@ -59,7 +59,7 @@ func (d Declaration) Key() string { return d.Machine + ":" + strconv.Itoa(d.Port
 
 func (d Declaration) Domain() (domain string, web bool) {
 	// value: where its link reaches, as an address pill says it
-	// (`jterrazz.com`), and whether a browser opens it; empty when it has
+	// (`example.com`), and whether a browser opens it; empty when it has
 	// no link.
 	rest, web := strings.CutPrefix(d.URL, "https://")
 	if !web {

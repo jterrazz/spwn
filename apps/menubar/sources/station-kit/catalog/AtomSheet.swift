@@ -127,7 +127,7 @@ public struct AtomSheet: View {
             }
             line {
                 Pill("linux-1:5173", reach: .tailnet)
-                Pill("api.jterrazz.com", reach: .open)
+                Pill("api.example.com", reach: .open)
             }
             line {
                 Pill("localhost:6006", reach: .unshared)

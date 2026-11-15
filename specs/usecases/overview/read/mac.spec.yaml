@@ -13,8 +13,8 @@ runs:
           This Mac · macbook-pro · 8 things need you · Engine running
 
           Needs you
-            ✗ com.jterrazz.brain.x-snapshot is failing, last exit 2
-              station background remove com.jterrazz.brain.x-snapshot
+            ✗ com.example.brain.x-snapshot is failing, last exit 2
+              station background remove com.example.brain.x-snapshot
             ◐ 1 mise update waiting  station apps update --manager mise
             ◐ 1 brew update waiting  station apps update --manager brew
             ◐ Firewall: off          System Settings > Network > Firewall
@@ -30,5 +30,5 @@ runs:
           Awake       ○ sleeps normally
           VMs         ○ api stopped · ● linux-1 running
 
-          → station background remove com.jterrazz.brain.x-snapshot
+          → station background remove com.example.brain.x-snapshot
           → station overview --all  for every line

@@ -61,7 +61,7 @@ func fixed() pagehome.Overview {
 			{Name: "layout", State: catalog.StateOK},
 		}},
 		Identity:   []overview.Check{{Name: "git-email", State: catalog.StateOK, Value: "you@example.com"}},
-		Background: []background.Task{{Label: "ai.jterrazz.x", Group: background.GroupUnknown, State: catalog.StateOK, Run: background.Running, PID: 12, Scope: "user", Plist: "~/Library/LaunchAgents/ai.jterrazz.x.plist"}},
+		Background: []background.Task{{Label: "ai.example.x", Group: background.GroupUnknown, State: catalog.StateOK, Run: background.Running, PID: 12, Scope: "user", Plist: "~/Library/LaunchAgents/ai.example.x.plist"}},
 		Gateways:   []overview.Check{{Name: catalog.ServeRow, State: catalog.StateOK, Value: "on"}},
 		Tailnet: ports.Status{
 			State: catalog.StateOK, Connected: true, BackendState: "Running",

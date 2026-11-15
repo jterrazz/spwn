@@ -22,7 +22,7 @@
       "items": [
         {
           "row": {
-            "id": "background/com.jterrazz.brain.x-snapshot",
+            "id": "background/com.example.brain.x-snapshot",
             "mark": "broken",
             "label": "brain.x-snapshot",
             "detail": {
@@ -40,7 +40,7 @@
             },
             "reason": "failing",
             "hint": {
-              "command": "launchctl bootout gui/501/com.jterrazz.brain.x-snapshot && rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist",
+              "command": "launchctl bootout gui/501/com.example.brain.x-snapshot && rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist",
               "external": true
             }
           }
@@ -986,9 +986,9 @@
             "items": [
               {
                 "row": {
-                  "id": "com.jterrazz.brain.x-snapshot",
+                  "id": "com.example.brain.x-snapshot",
                   "mark": "broken",
-                  "label": "com.jterrazz.brain.x-snapshot",
+                  "label": "com.example.brain.x-snapshot",
                   "cells": [
                     {
                       "kind": "text",
@@ -1017,11 +1017,11 @@
                   ],
                   "detail": {
                     "kind": "path",
-                    "text": "~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist"
+                    "text": "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist"
                   },
                   "reason": "failing",
                   "hint": {
-                    "command": "launchctl bootout gui/501/com.jterrazz.brain.x-snapshot && rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist",
+                    "command": "launchctl bootout gui/501/com.example.brain.x-snapshot && rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist",
                     "external": true
                   }
                 }

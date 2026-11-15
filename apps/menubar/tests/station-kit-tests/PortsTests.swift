@@ -83,11 +83,11 @@ final class PortsTests: XCTestCase {
 
     // invariant: SPEC A4: a public row's address is set in mono and the
     // route it is reached by follows in words, so the whole line reads
-    // "jterrazz.com · Cloudflare Tunnel"; a private row's is its address.
+    // "example.com · Cloudflare Tunnel"; a private row's is its address.
     func testAPublicRowSaysItsAddressThenItsRoute() throws {
         let page = try Tree.page("menubar.ports.mini")
         let traefik = try XCTUnwrap(page.section("public")?.rows.first?.detail)
-        XCTAssertEqual(PortRow.address(traefik).address, "jterrazz.com")
+        XCTAssertEqual(PortRow.address(traefik).address, "example.com")
         XCTAssertEqual(PortRow.address(traefik).route, "Cloudflare Tunnel")
         let kube = try XCTUnwrap(page.section("private")?.rows.first?.detail)
         XCTAssertEqual(PortRow.address(kube).address, "infra:6443")

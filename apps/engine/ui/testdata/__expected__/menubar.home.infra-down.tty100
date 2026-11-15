@@ -10,7 +10,7 @@ Needs you  5 things need you
   ◐ 2 app updates         station apps update
   ✗ npm sign-in expired   npm login
   ✗ A background task is failing: brain snapshot
-    station background  com.jterrazz.brain.x-snapshot
+    station background  com.example.brain.x-snapshot
   ◐ Firewall off          System Settings > Network > Firewall
   ◐ ~/.tart is misplaced  station disk move ~/.tart
 Machines

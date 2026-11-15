@@ -101,7 +101,7 @@ func texts(vs []page.Value) []string {
 // label, which stays the line's detail.
 func TestNeedsYouSaysABackgroundTaskInPlainWords(t *testing.T) {
 	home := overview.Summary{Needs: []overview.Need{
-		{Section: "background", Broken: true, Subject: "com.jterrazz.brain.x-snapshot", Text: "com.jterrazz.brain.x-snapshot is failing, last exit 2"},
+		{Section: "background", Broken: true, Subject: "com.example.brain.x-snapshot", Text: "com.example.brain.x-snapshot is failing, last exit 2"},
 		{Section: "background", Subject: "com.docker.vmnetd", Text: "com.docker.vmnetd is left over"},
 		{Section: "background", Subject: "com.bjango.istatmenus.installer", Text: "com.bjango.istatmenus.installer is left over"},
 		{Section: "background", Subject: "org.example.helper", Text: "org.example.helper is left over"},
@@ -115,7 +115,7 @@ func TestNeedsYouSaysABackgroundTaskInPlainWords(t *testing.T) {
 		"A background task is left over: helper",
 		"Firewall: off",
 	}
-	details := []string{"com.jterrazz.brain.x-snapshot", "com.docker.vmnetd", "com.bjango.istatmenus.installer", "org.example.helper", ""}
+	details := []string{"com.example.brain.x-snapshot", "com.docker.vmnetd", "com.bjango.istatmenus.installer", "org.example.helper", ""}
 	for i, it := range s.Items {
 		if it.Row.Label != want[i] || it.Row.Detail.Text != details[i] {
 			t.Fatalf("line %d %q (detail %q), want %q (detail %q)", i, it.Row.Label, it.Row.Detail.Text, want[i], details[i])

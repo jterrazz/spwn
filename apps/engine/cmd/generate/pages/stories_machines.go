@@ -120,7 +120,7 @@ func scenePorts() ports.AllMachines {
 			},
 			Ports: []ports.Port{
 				{Machine: infra, Port: 443, Process: "nginx", Binds: []string{"0.0.0.0"}, Reach: ports.Outside,
-					Declared: &ports.Declaration{Machine: infra.Name, Port: 443, Via: catalog.RouteCloudflareTunnel, URL: "https://jterrazz.com"}, Verified: &ports.Verified{Seen: true}},
+					Declared: &ports.Declaration{Machine: infra.Name, Port: 443, Via: catalog.RouteCloudflareTunnel, URL: "https://example.com"}, Verified: &ports.Verified{Seen: true}},
 				{Machine: infra, Port: 6443, Process: "kube-apiserver", Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet, Device: true},
 				listen(linux3, 5432, "postgres"), listen(bot, 8000, "uvicorn"), listen(coremachine.Ref{Name: miniMac}, 5900, "screensharingd"),
 			}},
@@ -134,7 +134,7 @@ func proSummary() overview.Summary {
 		Engine: overview.EngineRunning,
 		Needs: []overview.Need{
 			{Section: "accounts", Subject: "npm", Broken: true, Text: "npm signed out", Command: "npm login"},
-			{Section: "background", Subject: "com.jterrazz.brain.x-snapshot", Broken: true, Text: "1 login item failing", Command: "station background"},
+			{Section: "background", Subject: "com.example.brain.x-snapshot", Broken: true, Text: "1 login item failing", Command: "station background"},
 			{Section: "apps", Subject: "updates", Text: "2 app updates", Call: "apps.update"},
 			{Section: "settings", Subject: "firewall", Text: "Firewall off", Path: "System Settings > Network > Firewall"},
 		},

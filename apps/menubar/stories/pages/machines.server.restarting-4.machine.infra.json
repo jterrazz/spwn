@@ -363,7 +363,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "jterrazz.com"
+                  "text": "example.com"
                 },
                 {
                   "kind": "text",
@@ -1869,7 +1869,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "infra stays stopped until you start it. jterrazz.com goes offline."
+            "text": "infra stays stopped until you start it. example.com goes offline."
           }
         ],
         "danger": true,
@@ -1899,7 +1899,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "This can't be undone. It goes with its disk (80 GB), its address and 2 ports, and jterrazz.com stops answering."
+            "text": "This can't be undone. It goes with its disk (80 GB), its address and 2 ports, and example.com stops answering."
           }
         ],
         "danger": true,
@@ -1996,7 +1996,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "infra stays stopped until you start it. jterrazz.com goes offline."
+            "text": "infra stays stopped until you start it. example.com goes offline."
           }
         ],
         "danger": true,
@@ -2028,7 +2028,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "This can't be undone. It goes with its disk (80 GB), its address and 2 ports, and jterrazz.com stops answering."
+            "text": "This can't be undone. It goes with its disk (80 GB), its address and 2 ports, and example.com stops answering."
           }
         ],
         "danger": true,

@@ -20,7 +20,7 @@ func everyMacSignedIn(f *Scene) {
 		if m.Name == proName {
 			f.Accounts.Machines[i].Accounts = append(f.Accounts.Machines[i].Accounts,
 				own(catalog.ProviderTailscale, []string{"tail3e9a.ts.net"}, nil, "", ""),
-				own(catalog.ProviderCloudflare, []string{"jterrazz.com"}, nil, "", ""),
+				own(catalog.ProviderCloudflare, []string{"example.com"}, nil, "", ""),
 				own(catalog.ProviderDocker, []string{"you"}, nil, "", ""))
 		}
 	}

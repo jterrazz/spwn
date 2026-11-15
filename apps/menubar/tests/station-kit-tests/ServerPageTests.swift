@@ -51,16 +51,16 @@ final class ServerPageTests: XCTestCase {
         XCTAssertEqual(on.nav, "menubar.machine:mac-mini")
         XCTAssertTrue(FactsLine.words(parts).contains("on mac-mini ›"), FactsLine.words(parts))
         XCTAssertEqual(FactsLine.address(try XCTUnwrap(on.nav)).flatMap(FactsLine.page), on.nav)
-        XCTAssertNil(FactsLine.page(try XCTUnwrap(URL(string: "https://jterrazz.com"))))
+        XCTAssertNil(FactsLine.page(try XCTUnwrap(URL(string: "https://example.com"))))
     }
 
     func testEveryPortRowCopiesTheAddressThatReachesItAndAWebOneShowsItsQR() throws {
         let page = try XCTUnwrap(Stories["server.healthy"].state.pushed)
         let rows = try XCTUnwrap(page.section("ports")?.items?.compactMap(\.row))
         let copied = rows.map { page.action("copy:" + ($0.id ?? ""))?.run?.copy ?? "" }
-        XCTAssertEqual(copied, ["https://jterrazz.com", "infra:6443"])
+        XCTAssertEqual(copied, ["https://example.com", "infra:6443"])
         let qr = try XCTUnwrap(page.action(rows[0].quick ?? ""))
-        XCTAssertEqual(PortsSection.qr(qr, of: rows[0], in: page.actions ?? []), "https://jterrazz.com")
+        XCTAssertEqual(PortsSection.qr(qr, of: rows[0], in: page.actions ?? []), "https://example.com")
     }
 
     // invariant: SPEC A4 (Down): the stale gauges say they are the last

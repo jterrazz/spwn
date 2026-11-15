@@ -1,9 +1,8 @@
 [38;2;76;79;105mThis Mac[m[38;2;76;79;105m · [m[38;2;76;79;105m6 background tasks[m[38;2;76;79;105m · [m[38;2;76;79;105m1 failing[m[38;2;76;79;105m · [m[38;2;76;79;105m1 orphan[m
 
 [1;38;2;76;79;105mFailing[m
-  [38;2;156;160;176m[m[38;2;210;15;57m✗[m [1;38;2;76;79;105mcom.jterrazz.brain.x-snapshot[m
-    [38;2;76;79;105muser[m  [38;2;76;79;105mfailing · last exit 2[m  [38;2;108;111;133m~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation background remove com.jterrazz.brain.x-snapshot[m
+  [38;2;156;160;176m[m[38;2;210;15;57m✗[m [1;38;2;76;79;105mcom.example.brain.x-snapshot[m  [38;2;76;79;105muser[m  [38;2;76;79;105mfailing · last exit 2[m  [38;2;108;111;133m~/Library/LaunchA…n.x-snapshot.plist[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation background remove com.example.brain.x-snapshot[m
 [1;38;2;76;79;105mOrphans[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mcom.bjango.istatmenus.installer[m
     [38;2;76;79;105mroot[m  [38;2;76;79;105midle[m  [38;2;76;79;105miStat Menus (gone)[m  [38;2;108;111;133m/Library/LaunchDaemons/com.bjango.istatmenus.installer.plist[m
@@ -14,5 +13,5 @@
 [1;38;2;76;79;105mKnown apps[m  [38;2;64;160;43m●[m [38;2;76;79;105mcom.github.facebook.watchman[m[38;2;76;79;105m · user[m[38;2;76;79;105m · running[m[38;2;76;79;105m · pid 3464[m[38;2;76;79;105m · watchman[m
               [38;2;76;79;105m~/Library/LaunchAgents/com.github.facebook.watchman.plist[m
 [1;38;2;76;79;105mUnknown[m
-  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mcom.jterrazz.brain.sync[m  [38;2;76;79;105muser[m  [38;2;76;79;105midle[m  [38;2;108;111;133m~/Library/LaunchAgents/com.jterrazz.brain.sync.plist[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mcom.jterrazz.brain.late[m  [38;2;76;79;105muser[m  [38;2;76;79;105m?[m     [38;2;108;111;133m~/Library/LaunchAgents/com.jterrazz.brain.late.plist[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mcom.example.brain.sync[m  [38;2;76;79;105muser[m  [38;2;76;79;105midle[m  [38;2;108;111;133m~/Library/LaunchAgents/com.example.brain.sync.plist[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mcom.example.brain.late[m  [38;2;76;79;105muser[m  [38;2;76;79;105m?[m     [38;2;108;111;133m~/Library/LaunchAgents/com.example.brain.late.plist[m

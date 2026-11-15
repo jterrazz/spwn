@@ -22,7 +22,7 @@ final class AtomTests: XCTestCase {
     }
 
     static let heroFacts = [
-        part("infra healthy"), part("jterrazz.com up", short: "site up"), part("2 of 3 Macs"),
+        part("infra healthy"), part("example.com up", short: "site up"), part("2 of 3 Macs"),
         part("3 VMs", pri: 1), part("2 agents working", pri: 2),
     ]
 
@@ -40,11 +40,11 @@ final class AtomTests: XCTestCase {
     }
 
     func testAWidePanelDropsOnlyTheLeastNeededFact() {
-        XCTAssertEqual(fitted(380), "infra healthy / jterrazz.com up / 2 of 3 Macs / 3 VMs")
+        XCTAssertEqual(fitted(380), "infra healthy / example.com up / 2 of 3 Macs / 3 VMs")
     }
 
     func testTheDefaultPanelDropsEveryFactThatMayGoBeforeShorteningOne() {
-        XCTAssertEqual(fitted(340), "infra healthy / jterrazz.com up / 2 of 3 Macs")
+        XCTAssertEqual(fitted(340), "infra healthy / example.com up / 2 of 3 Macs")
     }
 
     func testANarrowPanelRewritesAFactShorterRatherThanCutIt() {

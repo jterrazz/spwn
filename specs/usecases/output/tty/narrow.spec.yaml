@@ -13,8 +13,8 @@ runs:
           This Mac · macbook-pro · 8 things need you · Engine running
 
           Needs you
-            ✗ com.jterrazz.brain.x-snapshot is failing, last exit 2
-              station background remove com.jterrazz.brain.x-snapshot
+            ✗ com.example.brain.x-snapshot is failing, last exit 2
+              station background remove com.example.brain.x-snapshot
             ◐ 1 mise update waiting
               station apps update --manager mise
             ◐ 1 brew update waiting
@@ -34,7 +34,7 @@ runs:
           Awake       ○ sleeps normally
           VMs         ○ api stopped · ● linux-1 running
 
-          → station background remove com.jterrazz.brain.x-snapshot
+          → station background remove com.example.brain.x-snapshot
           → station overview --all  for every line
     - command: '--version >/dev/null; terminal --size 60x60 /usr/bin/env -u NO_COLOR COLUMNS=60 "$STATION" apps'
       stdin: |
@@ -63,10 +63,9 @@ runs:
           This Mac · 14 background tasks · 1 failing · 3 orphans
 
           Failing
-            ✗ com.jterrazz.brain.x-snapshot
-              user  failing · last exit 2
-              ~/…/com.jterrazz.brain.x-snapshot.plist
-              → station background remove com.jterrazz.brain.x-snapshot
+            ✗ com.example.brain.x-snapshot  user    ~/Librar…ot.plist
+              failing · last exit 2
+              → station background remove com.example.brain.x-snapshot
           Orphans
             ◐ com.bjango.istatmenus.installer
               root  not loaded  iStat Menus (gone)
@@ -83,7 +82,7 @@ runs:
                 sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
           Station     ● 1 · com.jterrazz.station.engine
           Known apps  ● 7 · com.adguard.mac.adguard.loginhelper, …
-          Unknown     ● 2 · com.jterrazz.brain.sync, …
+          Unknown     ● 2 · com.example.brain.sync, …
 
           → station background --all  for every row
     - command: '--version >/dev/null; terminal --size 60x40 /usr/bin/env -u NO_COLOR COLUMNS=60 "$STATION" overview --on mac-mini'

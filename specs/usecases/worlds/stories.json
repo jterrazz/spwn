@@ -940,7 +940,7 @@
                         "machine": "infra",
                         "port": 443,
                         "via": "cloudflare-tunnel",
-                        "url": "https://jterrazz.com"
+                        "url": "https://example.com"
                     }
                 ],
                 "uptime": {
@@ -1020,7 +1020,7 @@
                         "version": "3",
                         "lifetime": "always-on",
                         "want": "running",
-                        "check": "https://jterrazz.com/healthz",
+                        "check": "https://example.com/healthz",
                         "created_at": "2026-11-02T10:30:00Z",
                         "purpose": "The cluster's control plane"
                     },
@@ -1526,10 +1526,10 @@
                 "ghcr.io/jterrazz/station-linux:3"
             ],
             "jobs": {
-                "com.jterrazz.brain.x-snapshot": {
-                    "Label": "com.jterrazz.brain.x-snapshot",
+                "com.example.brain.x-snapshot": {
+                    "Label": "com.example.brain.x-snapshot",
                     "Program": "~/.local/bin/x-snapshot",
-                    "File": "~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist",
+                    "File": "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist",
                     "Scope": "user",
                     "PID": 0,
                     "LastExit": 2,
@@ -2080,7 +2080,7 @@
         "station-linux": "3"
     },
     "sites_down": [
-        "jterrazz.com"
+        "example.com"
     ],
     "this_mac": "macbook-pro",
     "user": "you"

@@ -374,16 +374,16 @@
                 "operator:claude:oauth-token": "fake-claude-token-of-this-mac"
             },
             "jobs": {
-                "com.jterrazz.brain.x-snapshot": {
-                    "Label": "com.jterrazz.brain.x-snapshot",
+                "com.example.brain.x-snapshot": {
+                    "Label": "com.example.brain.x-snapshot",
                     "Program": "~/.local/bin/x-snapshot",
-                    "File": "~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist",
+                    "File": "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist",
                     "Scope": "user",
                     "Loaded": true,
                     "LastExit": 2,
                     "ProgramExists": true,
                     "OwnerExists": true,
-                    "Removal": "launchctl bootout gui/501/com.jterrazz.brain.x-snapshot && rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist"
+                    "Removal": "launchctl bootout gui/501/com.example.brain.x-snapshot && rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist"
                 },
                 "com.docker.socket": {
                     "Label": "com.docker.socket",
@@ -490,17 +490,17 @@
                     "OwnerExists": true,
                     "Removal": "launchctl bootout gui/501/com.discord.helper && rm ~/Library/LaunchAgents/com.discord.helper.plist"
                 },
-                "com.jterrazz.brain.sync": {
-                    "Label": "com.jterrazz.brain.sync",
+                "com.example.brain.sync": {
+                    "Label": "com.example.brain.sync",
                     "Program": "~/.local/bin/brain-sync",
-                    "File": "~/Library/LaunchAgents/com.jterrazz.brain.sync.plist",
+                    "File": "~/Library/LaunchAgents/com.example.brain.sync.plist",
                     "Scope": "user",
                     "Loaded": true,
                     "Running": true,
                     "PID": 4120,
                     "ProgramExists": true,
                     "OwnerExists": true,
-                    "Removal": "launchctl bootout gui/501/com.jterrazz.brain.sync && rm ~/Library/LaunchAgents/com.jterrazz.brain.sync.plist"
+                    "Removal": "launchctl bootout gui/501/com.example.brain.sync && rm ~/Library/LaunchAgents/com.example.brain.sync.plist"
                 },
                 "homebrew.mxcl.postgresql@16": {
                     "Label": "homebrew.mxcl.postgresql@16",

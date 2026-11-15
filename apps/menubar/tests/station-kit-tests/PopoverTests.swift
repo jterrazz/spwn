@@ -12,7 +12,7 @@ final class PopoverTests: XCTestCase {
     }
 
     func testTheQRScansBackToTheLinkItShows() throws {
-        for link in ["http://macbook-pro.tail77a797.ts.net:40001", "https://jterrazz.com"] {
+        for link in ["http://macbook-pro.tail77a797.ts.net:40001", "https://example.com"] {
             let modules = try XCTUnwrap(QR.modules(link))
             let big = CIImage(cgImage: modules).samplingNearest().transformed(by: CGAffineTransform(scaleX: 12, y: 12))
             let detector = try XCTUnwrap(CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]))
@@ -33,7 +33,7 @@ final class PopoverTests: XCTestCase {
 
         let server = page("pop.qr.public")
         let traefik = try row("infra:443", of: server)
-        XCTAssertEqual(QRPopover.reach(traefik).link, "jterrazz.com")
+        XCTAssertEqual(QRPopover.reach(traefik).link, "example.com")
         XCTAssertEqual(QRPopover.reach(traefik).line, "Anyone can open it · Cloudflare Tunnel")
         XCTAssertTrue(QRPopover.reach(traefik).public)
         XCTAssertNil(QRPopover.verbs(of: traefik, in: server.actions ?? []).stop, "a public route is declared, never stopped from its QR")

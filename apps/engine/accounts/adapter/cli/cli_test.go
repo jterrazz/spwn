@@ -37,7 +37,7 @@ func printed() map[string]local.Output {
 		"wrangler":                      {Stdout: "You are logged in with an OAuth Token, associated with the email " + sentinel + ".\nToken: " + sentinel + "\n| " + sentinel + " | 0123456789abcdef0123456789abcdef |\n"},
 		"git":                           {Stdout: "you@example.com\n"},
 		"ssh-add":                       {Stdout: "256 SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4 " + sentinel + " (ED25519)\n"},
-		"docker-credential-osxkeychain": {Stdout: `{"https://registry.jterrazz.com":"` + sentinel + `"}`},
+		"docker-credential-osxkeychain": {Stdout: `{"https://registry.example.com":"` + sentinel + `"}`},
 	}
 }
 
