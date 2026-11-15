@@ -1,0 +1,15 @@
+description: 'a server whose check passes heads its row healthy, its line how long it is up'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create srv --server --cpus 2 --memory 4G --disk 20G --check tcp:22 >/dev/null'
+      exit: 0
+    - command: 'world advance 2m'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "srv") | [.Head, .Pending]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{"ThisMac":true}}
+      exit: 0
+      stdout: |
+          [{"Tone":"ok","Sentence":"Healthy.","Line":"Up 2 min."},null]

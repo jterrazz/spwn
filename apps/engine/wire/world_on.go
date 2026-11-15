@@ -139,6 +139,9 @@ type worldMac struct {
 	home string
 	// value: ends the surfaces the world holds open on the running engine.
 	leave func()
+	// value: the readings its engine ran beside its loop during the run,
+	// left for the run's close.
+	besides []func()
 }
 
 // invariant: a run that only looks (--page) reads the
@@ -434,6 +437,46 @@ func (m *worldMac) engineVersion() string {
 func (m *worldMac) stationVersion() string { return m.slice().Station }
 
 func (m *worldMac) absent(program string) bool { return slices.Contains(m.slice().Absent, program) }
+
+// invariant: a reading the engine runs beside its loop is, in a world, run
+// once the command is done, before its engine ends and keeps it: the next
+// command reads it. It runs in the close's own flow, one after the other in
+// the order they were asked, so the clock moves under it only as what it
+// waits on moves it, never by real time; then the clock is back where it
+// was: it takes none of the story's time, as the real one runs beside the
+// command, never in its way.
+func (m *worldMac) beside(f func()) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.besides = append(m.besides, f)
+}
+
+func (m *worldMac) aside() {
+	m.mu.Lock()
+	none := len(m.besides) == 0
+	m.mu.Unlock()
+	if none {
+		return
+	}
+	w := m.run.w
+	w.Lock()
+	was := w.Now
+	w.Unlock()
+	for {
+		m.mu.Lock()
+		if len(m.besides) == 0 {
+			m.mu.Unlock()
+			break
+		}
+		f := m.besides[0]
+		m.besides = m.besides[1:]
+		m.mu.Unlock()
+		f()
+	}
+	w.Lock()
+	w.Now = was
+	w.Unlock()
+}
 
 func (m *worldMac) engineStarted() time.Time {
 	if e := m.slice().Engine; e != nil {
@@ -948,6 +991,7 @@ func (r *worldRun) close(ctx context.Context) error {
 		m := r.mac(name)
 		if _, ok := m.up(ctx); ok {
 			m.settle(ctx)
+			m.aside()
 			m.down(false)
 		}
 	}
@@ -1078,7 +1122,8 @@ func (c worldClock) Sleep(ctx context.Context, d time.Duration) error {
 
 // invariant: a VM of the world whose own slice says what it is answers
 // station's API as `station guest serve --stdio` answers inside it: its calls
-// run over that slice, every value through the wire form; any other line,
+// run over that slice, each exchange from no shared reading, as each is a
+// process there, every value through the wire form; any other line,
 // and that one while a Guest.Serve fault is scripted, is the scripted guest's.
 type worldGuests struct {
 	contract.GuestDialer
@@ -1117,6 +1162,7 @@ func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contra
 		return g.Guest.Exec(ctx, cmd)
 	}
 	far := g.r.mac(g.vm).inVM()
+	far.fresh()
 	var out bytes.Buffer
 	w := cmd.Stdout
 	if w == nil {

@@ -85,6 +85,10 @@ type ExecIn struct {
 	// invariant: what a command inside a VM reads, a secret included: it travels
 	// in the input alone, never in Line.
 	Stdin string `json:"stdin,omitempty"`
+	// value: the call of the guest's own API the exchange carries, when
+	// Line runs it; the engine reads a VM's drift again after one of
+	// Options.Changes.
+	Call string `json:"call,omitempty"`
 }
 
 type ExecOut struct {

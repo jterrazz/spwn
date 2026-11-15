@@ -130,6 +130,14 @@ type VM struct {
 	// when there is too little of it to draw, empty otherwise.
 	Health      *verdict.Verdict `json:",omitempty"`
 	LatencyNote string           `json:",omitempty"`
+	// value: how a running workspace stands with its file, as its Mac's
+	// engine keeps it; nil until that engine read it since its boot.
+	Drift *KeptDrift `json:",omitempty"`
+	// value: the VM in one verdict, its state then how it stands with its
+	// file, and Pending while it runs unread by its engine; judged by
+	// machines.list, nil in any other answer.
+	Head    *verdict.Verdict `json:",omitempty"`
+	Pending bool             `json:",omitempty"`
 	// value: what keeps it, and so whether it is safe to delete; the
 	// sections its page has, by its kind; the gestures its header offers, by
 	// its state; all judged by machines.list, nil in any other answer.

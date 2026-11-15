@@ -207,6 +207,29 @@
       ],
       "type": "object"
     },
+    "machines.KeptDrift": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Differences": {
+          "type": "integer"
+        },
+        "Failed": {
+          "type": "string"
+        },
+        "Unbound": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "At",
+        "Differences"
+      ],
+      "type": "object"
+    },
     "machines.LatencyPoint": {
       "additionalProperties": false,
       "properties": {
@@ -433,6 +456,9 @@
         "Device": {
           "type": "string"
         },
+        "Drift": {
+          "$ref": "#/$defs/machines.KeptDrift"
+        },
         "Gestures": {
           "items": {
             "enum": [
@@ -446,6 +472,9 @@
         },
         "Guest": {
           "type": "string"
+        },
+        "Head": {
+          "$ref": "#/$defs/core.verdict.Verdict"
         },
         "Health": {
           "$ref": "#/$defs/core.verdict.Verdict"
@@ -507,6 +536,9 @@
         },
         "Network": {
           "type": "string"
+        },
+        "Pending": {
+          "type": "boolean"
         },
         "Purpose": {
           "type": "string"

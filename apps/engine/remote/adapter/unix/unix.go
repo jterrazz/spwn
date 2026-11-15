@@ -23,8 +23,9 @@ const (
 
 type Engine interface {
 	// value: runs line inside vm over the engine's own connection to it,
-	// stdin its input; the engine is reached over its unix socket.
-	GuestExec(ctx context.Context, vm, line, stdin string) (stdout string, code int, err error)
+	// stdin its input, carrying call, the request it holds (empty for a
+	// Hello alone); the engine is reached over its unix socket.
+	GuestExec(ctx context.Context, vm, call, line, stdin string) (stdout string, code int, err error)
 }
 
 type Dialer struct {
@@ -109,7 +110,7 @@ func (d Dialer) KindOf(ctx context.Context, vm string) (machine.Kind, error) {
 // value: the Hello a VM's own station answers, alone in its exchange.
 func (d Dialer) far(ctx context.Context, target machine.Ref) (*api.Hello, error) {
 	hello, _ := json.Marshal(api.Frame{V: api.Version, ID: "1", Hello: d.hello()})
-	stdout, code, err := d.engine.GuestExec(ctx, target.Name, Guest, string(hello)+"\n")
+	stdout, code, err := d.engine.GuestExec(ctx, target.Name, "", Guest, string(hello)+"\n")
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +145,7 @@ func (e endpoint) exchange(ctx context.Context, target machine.Ref, request api.
 	if err != nil {
 		return nil, err
 	}
-	stdout, code, err := e.engine.GuestExec(ctx, target.Name, Guest, string(hello)+"\n"+string(body)+"\n")
+	stdout, code, err := e.engine.GuestExec(ctx, target.Name, request.Call+request.Watch, Guest, string(hello)+"\n"+string(body)+"\n")
 	if err != nil {
 		return nil, err
 	}

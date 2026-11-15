@@ -1,0 +1,17 @@
+description: 'a server whose check fails heads its row down, its line why'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world fault CheckRunner.Run 2 times'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "infra") | [.Head, .Pending]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [{"Tone":"bad","Sentence":"infra is down.","Line":"its check failed"},null]

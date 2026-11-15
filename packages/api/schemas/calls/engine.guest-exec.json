@@ -3,6 +3,9 @@
     "engine.ExecIn": {
       "additionalProperties": false,
       "properties": {
+        "call": {
+          "type": "string"
+        },
         "line": {
           "type": "string"
         },

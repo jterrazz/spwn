@@ -201,8 +201,8 @@ func (m machine) imageOf(vm string) string {
 
 type guestRelay struct{ d macEngine }
 
-func (g guestRelay) GuestExec(ctx context.Context, vm, line, stdin string) (stdout string, code int, err error) {
-	out, err := g.d.GuestExec(ctx, vm, line, stdin)
+func (g guestRelay) GuestExec(ctx context.Context, vm, name, line, stdin string) (stdout string, code int, err error) {
+	out, err := g.d.GuestCall(ctx, vm, name, line, stdin)
 	return out.Stdout, out.Code, err
 }
 

@@ -48,6 +48,9 @@ type VMView struct {
 	ReadyAt time.Time `json:"ready_at,omitzero"`
 	// value: the agent its guest last reported it said by (SPEC B5.1).
 	Agent *model.AgentView `json:"agent,omitempty"`
+	// value: how a running workspace stands with its file, as the drift
+	// job last read it since its boot; nil before that reading.
+	Drift *model.KeptDrift `json:"drift,omitempty"`
 }
 
 func SocketPath(state string) string { return path.Join(state, "engine.sock") }

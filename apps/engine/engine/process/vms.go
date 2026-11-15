@@ -80,6 +80,11 @@ type vmState struct {
 	lastLines []string
 	// value: SPEC B5.10: when its create made it ready.
 	readyAt time.Time
+	// value: how it stands with its file at the drift job's last reading;
+	// a call of Options.Changes made it due again; a reading runs now.
+	drift    *model.KeptDrift
+	driftDue bool
+	drifting bool
 }
 
 // invariant: a VM's record changes under d.mu, as a tick reads the store
@@ -128,6 +133,7 @@ func (d *Engine) adopt(ctx context.Context) {
 		v.latency, v.walk, v.down = known.Latency, known.Restart, known.Down
 		v.agents, v.reported = readReport(known.Agents), known.Reported
 		v.cause, v.lastLines, v.readyAt = known.Cause, known.LastLines, known.ReadyAt
+		v.drift = known.Drift
 		d.mu.Lock()
 		d.vms[r.Name] = v
 		if len(known.LastHeard) > 0 {
@@ -349,6 +355,7 @@ func (d *Engine) vmViews() []engine.VMView {
 		view := engine.VMView{
 			Name: name, State: v.state, RunPID: v.runPID(), Holder: v.holder(), Guest: v.guest, IP: v.ip, Detail: v.detail, SSH: v.ssh, Restarts: v.restarts, Check: v.check,
 			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines, ReadyAt: v.readyAt, Agent: agentView(v.agents),
+			Drift: v.keptDriftLocked(),
 		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt
