@@ -18,5 +18,7 @@ runs:
           # Public: reachable from anywhere else, internet or LAN, declared	1 ●	1 ◐
           ●	x	8443	public	caddy	127.0.0.1:8443 this machine	Tailscale Funnel · Funnel lists it
           ◐	x	9443	public	caddy	127.0.0.1:9443 this machine	declared, but Funnel does not list 9443 on x
+          sysctl -n net.inet.ip.portrange.first
+          sysctl -n net.inet.ip.portrange.last
           tailscale serve status --json
           tailscale status --json

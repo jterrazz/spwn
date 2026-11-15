@@ -11,5 +11,7 @@ runs:
           .calls:
               equals: |
                   tailscale status --json
+                  sysctl -n net.inet.ip.portrange.first
+                  sysctl -n net.inet.ip.portrange.last
                   tailscale status --json
                   tailscale serve status --json

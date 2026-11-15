@@ -76,6 +76,15 @@ func QuietWords(n int) string {
 	return strconv.Itoa(n) + " listeners on ports the system keeps for itself"
 }
 
+func QuietHere(n int) string {
+	// value: a Mac's own listeners on ports the system keeps for itself, a
+	// count beside the reserved ports: a Mac's port is never shared.
+	if n == 1 {
+		return "1 more listens on a port the system keeps for itself"
+	}
+	return strconv.Itoa(n) + " more listen on ports the system keeps for itself"
+}
+
 func QuietHow(vm string) string { return "station ports share " + vm + " <port> to share one" }
 
 const TailnetProduct = "Tailscale" // value: the product that carries a share, as the owner reads its name.

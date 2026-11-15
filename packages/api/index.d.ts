@@ -2890,6 +2890,7 @@ export type PortsMacPorts = {
     engine: PortsEngineInfo;
     https: string;
     listening?: PortsMachine[];
+    mac_quiet?: number;
     name: string;
     not_shared?: PortsNotShared[];
     ports?: PortsPort[];

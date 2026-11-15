@@ -45,6 +45,9 @@ type ReserverOptions struct {
 	Listening func(ctx context.Context) ([]ports.Listener, error)
 	// value: the routes a declared port is verified by; nil verifies none.
 	Routes contract.PublicRoutes
+	// value: the ports this Mac's system hands its outgoing connections
+	// from; nil, or a range it cannot read, is macOS's default.
+	Ephemeral func(ctx context.Context) (from, to int, ok bool)
 	// value: the ports the catalog's packages serve on: a row's label.
 	Ports []catalog.PackagePort
 }
@@ -117,11 +120,12 @@ func (s *Reserver) ThisMachine(ctx context.Context) (ports.MacPorts, error) {
 	}
 	view.Name, view.ThisMac, view.Reachable = s.o.ThisMacName, true, true
 	view.Range = s.rangeOf()
-	ps, err := s.survey(ctx, view.Listening)
+	ps, quiet, err := s.survey(ctx, view.Listening)
 	if err != nil {
 		return ports.MacPorts{}, err
 	}
 	view.Ports, view.Listening = ps, nil
+	view.MacQuiet = quiet
 	return view, nil
 }
 
@@ -129,26 +133,32 @@ func (s *Reserver) ThisMachine(ctx context.Context) (ports.MacPorts, error) {
 // read here, its VMs' as its engine heard them, nothing of a VM while the
 // engine is stopped. What listens here that cannot be read fails the read,
 // as an empty list would say nothing listens; a Mac with no reader of its
-// listeners has nothing to say of them.
-func (s *Reserver) survey(ctx context.Context, vms []ports.Machine) ([]ports.Port, error) {
+// listeners has nothing to say of them. quiet counts the Mac's own
+// listeners on its ephemeral range, left out (ports.QuietOnMac).
+func (s *Reserver) survey(ctx context.Context, vms []ports.Machine) (ps []ports.Port, quiet int, err error) {
 	var mine []ports.Listener
 	if s.o.Listening != nil {
-		var err error
 		if mine, err = s.o.Listening(ctx); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 	}
-	thisMac := ports.MacOf(s.o.ThisMacName, mine)
 	var decl []ports.Declaration
 	if s.st.Declarations != nil {
 		decl, _ = s.st.Declarations.List(ctx)
 	}
-	ms := append([]ports.Machine{thisMac}, vms...)
-	ps := ports.Survey(ms, decl)
-	if s.o.Routes == nil {
-		return ps, nil
+	from, to := ports.MacOSEphemeralFrom, ports.MacOSEphemeralTo
+	if s.o.Ephemeral != nil {
+		if f, t, ok := s.o.Ephemeral(ctx); ok {
+			from, to = f, t
+		}
 	}
-	return s.o.Routes.Verify(ctx, ms, ps), nil
+	thisMac, quiet := ports.QuietOnMac(ports.MacOf(s.o.ThisMacName, mine), from, to, decl)
+	ms := append([]ports.Machine{thisMac}, vms...)
+	ps = ports.Survey(ms, decl)
+	if s.o.Routes == nil {
+		return ps, quiet, nil
+	}
+	return s.o.Routes.Verify(ctx, ms, ps), quiet, nil
 }
 
 // invariant: the range is the host's policy and its lease file, so it reads the

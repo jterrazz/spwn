@@ -165,6 +165,9 @@
           },
           "type": "array"
         },
+        "mac_quiet": {
+          "type": "integer"
+        },
         "name": {
           "type": "string"
         },

@@ -85,6 +85,9 @@ type MacPorts struct {
 	// present now, one count per VM: never shared by themselves, never told
 	// port by port.
 	Quiet []Quiet `json:"quiet,omitempty"`
+	// value: this Mac's own listeners on its range of those ports, left out
+	// of Ports the same way, one count.
+	MacQuiet int `json:"mac_quiet,omitempty"`
 	// value: what each VM of this Mac may share, as its engine read its
 	// rights at its last run.
 	Rights []VMRights `json:"rights,omitempty"`
