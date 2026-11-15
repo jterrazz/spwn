@@ -52,8 +52,17 @@ type FileView struct {
 
 type Head struct {
 	Kind   catalog.MachineRole
-	System catalog.SystemSpec
+	System HeadSystem
 	VM     *HeadVM `json:",omitempty"`
+}
+
+// value: the system a chain names: each part is absent when no file of the
+// chain says it.
+
+type HeadSystem struct {
+	OS      catalog.OS   `json:",omitempty"`
+	Version string       `json:",omitempty"`
+	Arch    catalog.Arch `json:",omitempty"`
 }
 
 type HeadVM struct {
@@ -215,7 +224,7 @@ func headOf(m merged) *Head {
 		return nil
 	}
 	at := func(key string) string { return m.values[key].Text }
-	h := &Head{Kind: catalog.MachineRole(at("machine.kind")), System: catalog.SystemSpec{OS: catalog.OS(at("machine.system.os")), Version: at("machine.system.version"), Arch: catalog.Arch(at("machine.system.arch"))}}
+	h := &Head{Kind: catalog.MachineRole(at("machine.kind")), System: HeadSystem{OS: catalog.OS(at("machine.system.os")), Version: at("machine.system.version"), Arch: catalog.Arch(at("machine.system.arch"))}}
 	if h.Kind != catalog.RoleComputer {
 		vm := &HeadVM{Lifetime: catalog.Lifetime(at("vm.lifetime")), Memory: at("vm.resources.memory"), Disk: at("vm.resources.disk"), From: at("vm.image.from")}
 		vm.CPUs, _ = strconv.Atoi(at("vm.resources.cpus"))
