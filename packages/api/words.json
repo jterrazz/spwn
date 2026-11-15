@@ -1593,9 +1593,27 @@
       "Tone": "plain"
     }
   },
+  "OverviewMark": {
+    "can-wait": {
+      "Word": "Upkeep",
+      "Tone": "plain"
+    },
+    "down": {
+      "Word": "Down",
+      "Tone": "bad"
+    },
+    "exposed": {
+      "Word": "Exposed",
+      "Tone": "bad"
+    },
+    "needs-you": {
+      "Word": "Needs you",
+      "Tone": "warn"
+    }
+  },
   "OverviewUpkeep": {
     "can-wait": {
-      "Word": "Can wait",
+      "Word": "Upkeep",
       "Tone": "plain"
     },
     "needs-you": {

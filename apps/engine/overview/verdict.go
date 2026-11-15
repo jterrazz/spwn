@@ -41,6 +41,29 @@ func (Verb) Enum() []string {
 		string(VerbMove), string(VerbStartEngine), string(VerbFix)}
 }
 
+type Mark string
+
+const (
+	MarkExposed Mark = "exposed"
+	MarkDown    Mark = "down"
+)
+
+func (Mark) Enum() []string {
+	return []string{string(MarkExposed), string(MarkDown), string(NeedsYou), string(CanWait)}
+}
+
+func MarkOf(f finding.Finding, vms []VM) Mark {
+	// invariant: a port reachable outside is Exposed and a server that is
+	// down is Down, both red; any other need wears its Upkeep's word.
+	switch {
+	case f.Severity == finding.Broken && f.Section == section.Ports:
+		return MarkExposed
+	case f.Severity == finding.Broken && f.Section == section.Overview && slices.ContainsFunc(vms, func(vm VM) bool { return vm.Name == f.Subject }):
+		return MarkDown
+	}
+	return Mark(UpkeepOf(f))
+}
+
 func urgencyOf(f finding.Finding) finding.Urgency {
 	// invariant: SPEC B5.7: whatever is broken is red, in any section (a
 	// machine down, a port exposed, a sign-in expired, a background task
@@ -139,7 +162,7 @@ func VerdictOf(s Summary) verdict.Verdict {
 		if broken {
 			tone = verdict.Bad
 		}
-		if down, ok := serverDown(s, urgent); ok {
+		if down, ok := serverDown(urgent); ok {
 			line := "The rest is fine."
 			if len(urgent) > 1 {
 				line = more(len(urgent)-1) + " " + line
@@ -157,9 +180,9 @@ func VerdictOf(s Summary) verdict.Verdict {
 	return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceFine, Line: tail}
 }
 
-func serverDown(s Summary, urgent []Need) (Need, bool) {
+func serverDown(urgent []Need) (Need, bool) {
 	for _, n := range urgent {
-		if n.Broken && n.Section == section.Overview && slices.ContainsFunc(s.VMs, func(vm VM) bool { return vm.Name == n.Subject }) {
+		if n.Mark == MarkDown {
 			return n, true
 		}
 	}

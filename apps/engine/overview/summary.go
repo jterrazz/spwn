@@ -84,6 +84,12 @@ type Need struct {
 	// its gesture.
 	Upkeep Upkeep
 	Verb   Verb
+	// value: the word its line wears: Exposed for a port, Down for a
+	// server, else its Upkeep's.
+	Mark Mark
+	// value: the sentence under its title, from its finding; empty when
+	// the finding tells none.
+	Detail string
 	// value: the noun its line names after its machine, the tab its gesture
 	// opens: its section's word, Sign-ins for a sign-in.
 	Noun string
@@ -158,9 +164,15 @@ func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms [
 		all[i].Urgency = urgencyOf(all[i])
 	}
 	for _, f := range finding.Rank(all) {
+		verb, command, path := VerbOf(f), f.Fix.Command, f.Fix.Path
+		if verb == VerbReview {
+			// invariant: a need that is reviewed opens its tab and carries
+			// no command; where to change it stays on its row there.
+			command, path = "", ""
+		}
 		s.Needs = append(s.Needs, Need{Machine: f.Machine.Name, Section: f.Section, Broken: f.Severity == finding.Broken, Severity: f.Severity,
-			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, On: onOf(f), Confirm: f.Fix.Confirm, Command: f.Fix.Command, Path: f.Fix.Path,
-			Upkeep: UpkeepOf(f), Verb: VerbOf(f), Noun: NounOf(f.Section)})
+			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, On: onOf(f), Confirm: f.Fix.Confirm, Command: command, Path: path,
+			Upkeep: UpkeepOf(f), Verb: verb, Noun: NounOf(f.Section), Mark: MarkOf(f, vms), Detail: f.Detail})
 	}
 	s.Verdict, s.Machines = VerdictOf(s), MachinesOf(vms)
 	s.Head.Verdict = HeadOf(s)

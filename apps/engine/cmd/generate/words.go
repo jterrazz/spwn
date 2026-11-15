@@ -213,7 +213,13 @@ func wordedEnums() []worded {
 		}},
 		{overview.Upkeep(""), map[string]word{
 			string(overview.NeedsYou): toned(verdict.Warn, "Needs you"),
-			string(overview.CanWait):  plain("Can wait"),
+			string(overview.CanWait):  plain("Upkeep"),
+		}},
+		{overview.Mark(""), map[string]word{
+			string(overview.MarkExposed): toned(verdict.Bad, "Exposed"),
+			string(overview.MarkDown):    toned(verdict.Bad, "Down"),
+			string(overview.NeedsYou):    toned(verdict.Warn, "Needs you"),
+			string(overview.CanWait):     plain("Upkeep"),
 		}},
 		{overview.Verb(""), map[string]word{
 			string(overview.VerbReview):      plain("Review"),

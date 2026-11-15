@@ -65,6 +65,9 @@ func TestADeclarationTakesARedPortOutOfNeedsYouButNotOutOfPublic(t *testing.T) {
 	if len(found) != 1 || found[0].Subject != "mac-mini:5000" || found[0].Severity != finding.Broken || found[0].Fix.Path == "" {
 		t.Fatalf("findings %+v, want 5000 alone, broken, with where to turn it off", found)
 	}
+	if want := "mac-mini. ControlCenter. Not declared public."; found[0].Detail != want {
+		t.Errorf("detail %q, want %q", found[0].Detail, want)
+	}
 	if ps[1].Class() != ports.Public || ps[1].Red() {
 		t.Errorf("a declared port reachable outside is public and not red: %+v", ps[1])
 	}

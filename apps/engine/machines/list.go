@@ -210,10 +210,21 @@ func serverFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 	case vm.State == Running && vm.CheckStatus.State == CheckFailing:
 		f.Severity, f.Text = finding.Broken, vm.Name+" check failing since "+vm.CheckStatus.Since.Local().Format("15:04")
 		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name}
+		f.Detail = downDetail(ref.On, vm)
 	default:
 		return finding.Finding{}, false
 	}
 	return f, true
+}
+
+func downDetail(mac string, vm VM) string {
+	// invariant: a server whose check fails names its Mac and when the check
+	// began to fail, and says SSH answers only when its connection opened.
+	parts := []string{mac, "Since " + vm.CheckStatus.Since.Local().Format("15:04")}
+	if vm.SSH {
+		parts = append(parts, "SSH still answers")
+	}
+	return strings.Join(parts, ". ") + "."
 }
 
 // value: whether release a is past release b, both vMAJOR.MINOR.PATCH with

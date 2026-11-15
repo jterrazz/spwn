@@ -13,7 +13,7 @@ const PACE = { gestureFrame: 600 };
 
 const needs = region('Needs you');
 
-const waiting = region('Can wait');
+const waiting = region('Upkeep');
 
 const doneHere = region('Done here');
 
