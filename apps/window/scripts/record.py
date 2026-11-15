@@ -19,6 +19,11 @@ that call's files, <world>/<call>.json and <world>/gestures/<call>.json, in the 
 WORLDS adds is recorded by the same command, its folder made; a run over every world removes the folder of a world
 WORLDS no longer names.
 
+`--if-moved`, the form `make generate` runs, records every world unless nothing the run reads and nothing it writes
+moved since one that succeeded: `key` hashes them by content, and a run that succeeds leaves its key in
+.artifacts/window-record.stamp, outside the tracked tree, so a fresh clone always records. A hit prints one line and its
+key; WINDOW_RECORD_FORCE=1 records all the same.
+
 Two runs over the same tree write the same bytes. The world build's clock moves when a watch waits on it
 (apps/engine/wire/world_on.go), and what a watch streams before it settles comes in the scheduler's order, so the
 recorder keeps only what no run decides: of a watch its first answer and its last, and of a watch of SETTLED (one
@@ -38,14 +43,17 @@ password is a plain word (`good`, `nope`), never one shaped like a token.
 """
 
 import concurrent.futures
+import hashlib
 import json
+import os
+import pathlib
 import queue
 import shutil
 import subprocess
 import sys
 import threading
 
-from world import ROOT, WORLDS, sandbox, seeded, world_binary
+from world import ROOT, WORLDS, build_digest, sandbox, seeded, world_binary
 
 out_root = ROOT / "apps" / "window" / "src" / "fixtures" / "worlds"
 GRAPHS = (360 * 10**9, 3600 * 10**9, 86400 * 10**9)
@@ -56,7 +64,8 @@ CLOCKED = {"settings.matrix": "Read", "awake.read": "Now"}
 MACHINES = {"watch": "machines.list", "in": {}}
 QUIET = 10
 UNENDED = {"overview.read"}
-binary = world_binary()
+STAMP = ROOT / ".artifacts" / "window-record.stamp"
+FORCE = "WINDOW_RECORD_FORCE"
 
 
 class Door:
@@ -480,16 +489,53 @@ def record(world, calls):
     return f"{world}: {len(requests)} requests, {len(made)} gestures, {len(files)} files written -> {folder}"
 
 
-USAGE = "usage: record.py [--call=<call>...] [<world>...], a world of world.py's WORLDS"
+def hashed(digest, paths):
+    for path in paths:
+        digest.update(path.relative_to(ROOT).as_posix().encode() + b"\0")
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+
+
+def key():
+    """Everything a run over every world reads and writes, by content in sorted order and never by date: the world
+    build's sources (world.py's build_digest), the Go toolchain that would build it, the scripts of this folder (the
+    recorder, world.py's WORLDS and seeds), every world of specs/usecases/worlds/ a seed is read from, the fake
+    binaries of every fixture WORLDS names, and every file the recordings' folder holds now."""
+    digest = hashlib.sha256(build_digest().encode())
+    go = shutil.which("go")
+    version = subprocess.run([go, "env", "GOVERSION"], capture_output=True, text=True).stdout if go else "none"
+    digest.update(version.encode())
+    fixtures = sorted({fixture for _, fixture, _, _ in WORLDS.values() if fixture})
+    hashed(digest, [
+        *sorted(pathlib.Path(__file__).parent.glob("*.py")),
+        *sorted((ROOT / "specs" / "usecases" / "worlds").glob("*.json")),
+        *[path for fixture in fixtures
+          for path in sorted((ROOT / "specs" / "usecases" / "__fixtures__" / fixture / "bin").rglob("*")) if path.is_file()],
+    ])
+    digest.update(b"outputs\0")
+    hashed(digest, sorted(path for path in out_root.rglob("*") if path.is_file()) if out_root.is_dir() else [])
+    return digest.hexdigest()[:16]
+
+
+USAGE = "usage: record.py [--if-moved] [--call=<call>...] [<world>...], a world of world.py's WORLDS"
 
 if __name__ == "__main__":
     arguments = sys.argv[1:]
     calls = {argument.removeprefix("--call=") for argument in arguments if argument.startswith("--call=")}
     named = [argument for argument in arguments if not argument.startswith("--")]
-    flags = [argument for argument in arguments if argument.startswith("--") and not argument.startswith("--call=")]
+    moved = "--if-moved" in arguments
+    flags = [argument for argument in arguments
+             if argument.startswith("--") and not argument.startswith("--call=") and argument != "--if-moved"]
     unknown = [world for world in named if world not in WORLDS]
-    if flags or unknown:
-        sys.exit(f"{USAGE}; not one: {' '.join(flags + unknown)}")
+    if flags or unknown or (moved and (named or calls)):
+        sys.exit(f"{USAGE}; --if-moved records every world; not one: {' '.join(flags + unknown)}")
+    if moved:
+        was = STAMP.read_text().strip() if STAMP.is_file() else None
+        now = key()
+        if was == now and os.environ.get(FORCE) != "1":
+            print(f"recordings: skipped, nothing they read or hold moved since the run of key {now} ({FORCE}=1 records)")
+            sys.exit(0)
+        STAMP.unlink(missing_ok=True)
+    binary = world_binary()
     print("world build:", binary)
     if not named and not calls and out_root.is_dir():
         for folder in sorted(out_root.iterdir()):
@@ -498,3 +544,8 @@ if __name__ == "__main__":
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
         for line in pool.map(lambda world: record(world, calls), named or list(WORLDS)):
             print(line)
+    if moved:
+        STAMP.parent.mkdir(parents=True, exist_ok=True)
+        now = key()
+        STAMP.write_text(now + "\n")
+        print(f"recordings: recorded, key {now}")
