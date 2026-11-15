@@ -22,7 +22,6 @@ import type { CodeOf, Worded } from './engine-words';
 import { accountSideOf, machineKindOf, macStateOf } from './provisional';
 import {
     APP_WHY_TONES,
-    FOLLOWER_TONES,
     MAC_STATE_TONES,
     NEWEST_TONE,
     OWN_STATE_TONES,
@@ -31,9 +30,7 @@ import {
 } from './tones';
 import {
     APP_WHY_WORDS,
-    differencesWord,
     DIFFERING_WORDS,
-    FOLLOWER_WORDS,
     MAC_STATE_WORDS,
     MACHINE_KIND_WORDS,
     NEWEST_WORD,
@@ -140,15 +137,17 @@ export function verdictShown(verdict: CoreVerdictVerdict): Shown {
 
 export function followerState({
     Differences,
-    Match,
-    Read,
-}: Pick<MachinefileFollower, 'Differences' | 'Match' | 'Read'>): Shown {
-    if (!Read) {
-        return { tone: FOLLOWER_TONES.unread, word: FOLLOWER_WORDS.unread };
+    State,
+}: Pick<MachinefileFollower, 'Differences' | 'State'>): Shown {
+    const said = wordOf('MachinefileFollowerState', State);
+    if (State !== 'differs') {
+        return { tone: toneOf(said), word: said.Word };
     }
-    return Match
-        ? { tone: FOLLOWER_TONES.matches, word: FOLLOWER_WORDS.matches }
-        : { tone: FOLLOWER_TONES.differs, word: differencesWord(Differences) };
+    const { One, Other } = said;
+    return {
+        tone: toneOf(said),
+        word: `${String(Differences)} ${(Differences === 1 ? One : Other) ?? said.Word}`,
+    };
 }
 
 export function fileJoinOf(tone: Tone): string {
