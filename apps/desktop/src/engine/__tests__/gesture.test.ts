@@ -1,7 +1,7 @@
 import type { CoreCallWireError } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { EngineError } from '../engine-error';
+import { EngineError } from '../../domain/engine-error';
 import { askOf, IDLE, step } from '../gesture';
 import type { Ask, GestureEvent, GestureState } from '../gesture';
 

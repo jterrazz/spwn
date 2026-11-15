@@ -1,13 +1,13 @@
 import type { PortsPort, Target } from '@jterrazz/station-api';
 
 import { Panel, Row, StatePill, Value } from '../../design/index';
+import { targetOf } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
 import { isDeclarable, isPortShared } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
 import { portReach, shareToWord } from '../../engine/shown';
 import { PORT_ANSWER_TONES } from '../../engine/tones';
 import { PORT_ANSWER_WORDS } from '../../engine/words';
-import { targetOf } from '../../model/machines';
-import type { Found } from '../../model/machines';
 import type { Route } from '../../shell/route';
 import { ChapterDiffers } from '../kit/chapter-differs';
 import { GestureButton, GestureRow, HeldOutcomes } from '../kit/gestures';

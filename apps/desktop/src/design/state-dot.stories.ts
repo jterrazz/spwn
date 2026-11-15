@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 
-import { TONES } from '../tone';
+import { TONES } from '../domain/tone';
 import type { StateDot } from './state-dot';
 import type { Story } from './story';
 

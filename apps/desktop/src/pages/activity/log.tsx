@@ -2,12 +2,12 @@ import type { MachinesLogInput, MachinesLogOutput, Target } from '@jterrazz/stat
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button, Missing, Panel, SearchField, Switch } from '../../design/index';
-import type { EngineError } from '../../engine/engine-error';
+import type { EngineError } from '../../domain/engine-error';
+import { clock } from '../../domain/format';
+import { targetOf } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
+import { SEPARATOR } from '../../domain/separator';
 import { useRead } from '../../engine/react';
-import { clock } from '../../model/format';
-import { targetOf } from '../../model/machines';
-import type { Found } from '../../model/machines';
-import { SEPARATOR } from '../../separator';
 import { NotGiven, Unanswered } from '../kit/readings';
 import { LineList } from './line-list';
 

@@ -6,7 +6,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import type { MacState } from './provisional';
 import type { OwnState } from './words';
 

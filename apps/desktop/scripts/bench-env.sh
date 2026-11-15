@@ -54,7 +54,7 @@ tauri_inputs_dated() {
     mkdir -p "$stamps"
     mapfile -t inputs < <(find "$window/src-tauri/build.rs" "$window/src-tauri/Cargo.toml" \
         "$window/src-tauri/tauri.conf.json" "$window/src-tauri/src" "$window/src-tauri/capabilities" \
-        "$window/src-tauri/icons" "$window/src/engine/bridged.ts" -type f | sort)
+        "$window/src-tauri/icons" "$window/src/domain/bridged.ts" -type f | sort)
     sum=$(sha256sum "${inputs[@]}" | sha256sum | cut -c1-64)
     key=$(printf %s "$window" | sha256sum | cut -c1-16)
     [ "$(cat "$stamps/$key" 2>/dev/null)" != "$sum" ] || return 0

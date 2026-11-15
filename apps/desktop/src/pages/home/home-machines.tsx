@@ -2,11 +2,11 @@ import type { ActivityReport, MachinesMacView, MachinesVM } from '@jterrazz/stat
 
 import { Bar, Button, Chart, MachineIcon, Panel, Row, RowHead } from '../../design/index';
 import type { Identity } from '../../design/index';
+import { chartedOf, cpuOf, marksOf } from '../../domain/activity/measures';
+import { memory, percent } from '../../domain/format';
 import { machineKindOf } from '../../engine/provisional';
-import { memory, percent } from '../../model/format';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
-import { chartedOf, cpuOf, marksOf } from '../activity/measures';
 import { useActivity } from '../activity/reading';
 import { split } from '../activity/tiles';
 import { useIdentityOf } from '../kit/identity';

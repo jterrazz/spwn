@@ -2,8 +2,8 @@ import type { CancelFrame, Request } from '@jterrazz/station-api';
 import { clock } from '@jterrazz/test';
 import { describe, expect, test, vi } from 'vitest';
 
+import { EngineError } from '../../domain/engine-error';
 import { Client } from '../client';
-import { EngineError } from '../engine-error';
 import type { Link, Receiver, Transport } from '../transport';
 
 type Opened = {

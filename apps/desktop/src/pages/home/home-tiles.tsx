@@ -1,10 +1,10 @@
 import type { ActivityReport, MachinesMacView } from '@jterrazz/station-api';
 
 import { Bar, Tile } from '../../design/index';
+import { bytes, clock, duration, sentence } from '../../domain/format';
 import { useWatch } from '../../engine/react';
 import { AWAKE_ON_TONE } from '../../engine/tones';
 import { AWAKE_WORDS, POWER_SOURCE_WORDS } from '../../engine/words';
-import { bytes, clock, duration, sentence } from '../../model/format';
 import { useActivity } from '../activity/reading';
 import { CpuTile, split, Unknown, unknownOf } from '../activity/tiles';
 import { DiskTile } from '../disk/disk-tile';

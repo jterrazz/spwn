@@ -4,9 +4,9 @@ import type { KeyboardEvent, MouseEvent } from 'react';
 
 import { moved } from '../design/focus';
 import { AppIcon, identityOf, MachineIcon, Modal } from '../design/index';
+import { isSkill } from '../domain/catalog/apps';
+import { machineNamesOf } from '../domain/machines/machines';
 import { useWatch } from '../engine/react';
-import { isSkill } from '../model/apps';
-import { machineNamesOf } from '../model/machines';
 import { everything, matching, resultKey } from './finds';
 import type { Group, Result } from './finds';
 import type { PlainPage, Route } from './route';

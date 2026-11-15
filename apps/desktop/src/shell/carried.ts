@@ -1,5 +1,5 @@
+import { carriedApps, carriedSettings } from '../domain/catalog/carried';
 import { useRead, useWatch } from '../engine/react';
-import { carriedApps, carriedSettings } from '../model/carried';
 
 // value: how many packages of each shelf some machine carries, counted from the wire's own matrix rows; the reads
 // value: are the ones the catalog pages make, shared by the engine's store.

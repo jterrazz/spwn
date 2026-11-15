@@ -3,19 +3,19 @@ import type { ReactElement, ReactNode } from 'react';
 
 import { Bar, Chart, MissingMark, Tile } from '../../design/index';
 import type { Identity } from '../../design/index';
+import { chartedOf, cpuOf, diskOf, marksOf, memoryOf } from '../../domain/activity/measures';
+import type { Held } from '../../domain/activity/measures';
+import { bytes, duration, memory, percent } from '../../domain/format';
+import type { Found } from '../../domain/machines/machines';
+import { SEPARATOR } from '../../domain/separator';
+import type { Tone } from '../../domain/tone';
+import { agoOf, firstUnitOf, shortDay } from '../../domain/when';
 import { ownState } from '../../engine/shown';
 import type { OwnState } from '../../engine/words';
-import { bytes, duration, memory, percent } from '../../model/format';
-import type { Found } from '../../model/machines';
-import { SEPARATOR } from '../../separator';
-import type { Tone } from '../../tone';
 import { useIdentityOf } from '../kit/identity';
 import { Tiles } from '../page';
-import { chartedOf, cpuOf, diskOf, marksOf, memoryOf } from './measures';
-import type { Held } from './measures';
 import { useActivity } from './reading';
 import type { Heard } from './reading';
-import { agoOf, firstUnitOf, shortDay } from './when';
 
 const LAST_BARS = 12;
 

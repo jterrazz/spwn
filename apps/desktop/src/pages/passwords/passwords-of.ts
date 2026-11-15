@@ -5,9 +5,9 @@ import type {
     CallName,
 } from '@jterrazz/station-api';
 
+import { sentence } from '../../domain/format';
+import { shortDay } from '../../domain/when';
 import { codesOf, wordOf } from '../../engine/engine-words';
-import { sentence } from '../../model/format';
-import { shortDay } from '../activity/when';
 
 type GrantTo = AccountsVaultGrant['ToKind'];
 

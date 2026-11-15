@@ -1,7 +1,7 @@
 import type { Target } from '@jterrazz/station-api';
 
+import { EngineError } from '../domain/engine-error';
 import type { In, ReadName, Watch, WatchName } from './client';
-import { EngineError } from './engine-error';
 
 export type Reading<T> =
     | { kind: 'failed'; error: EngineError }

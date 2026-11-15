@@ -1,7 +1,7 @@
 import type { MachinesCallsNewMachine } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { keyOf } from '../../../engine/frame';
+import { keyOf } from '../../../domain/request-key';
 import { recordingsOf } from '../../../fixtures/recordings';
 import {
     askedOf,

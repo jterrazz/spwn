@@ -1,7 +1,7 @@
 import type { CallName, Calls, Progress, Target } from '@jterrazz/station-api';
 
-import type { Bridged } from './bridged';
-import { EngineError } from './engine-error';
+import type { Bridged } from '../domain/bridged';
+import { EngineError } from '../domain/engine-error';
 import { answerOf } from './frame';
 import type { Link, Transport } from './transport';
 import { Watching } from './watch';

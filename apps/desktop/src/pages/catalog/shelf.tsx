@@ -8,14 +8,19 @@ import type {
 import type { ReactNode } from 'react';
 
 import { AppIcon, Row, StatePill, Value } from '../../design/index';
+import {
+    appsOn,
+    carriedApps,
+    carriedSettings,
+    settingsInCatalog,
+} from '../../domain/catalog/carried';
+import { sentence } from '../../domain/format';
 import { countOf } from '../../engine/engine-words';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
 import { appUpdate, kindChipWord } from '../../engine/shown';
 import { APP_STATE_TONES } from '../../engine/tones';
 import { APP_STATE_WORDS } from '../../engine/words';
-import { appsOn, carriedApps, carriedSettings, settingsInCatalog } from '../../model/carried';
-import { sentence } from '../../model/format';
 import type { Route } from '../../shell/route';
 import { Absent, Reading as ReadingVerdict, Unanswered, VerdictHead } from '../kit/readings';
 import { Page } from '../page';

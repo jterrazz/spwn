@@ -1,8 +1,8 @@
 import type { MachinesSSHTarget, PortsSharedPort } from '@jterrazz/station-api';
 
-import { EngineError, WINDOW_FAIL_CODES } from './engine-error';
-import type { WindowFailCode } from './engine-error';
-import { isRecord } from './frame';
+import { EngineError, WINDOW_FAIL_CODES } from '../domain/engine-error';
+import type { WindowFailCode } from '../domain/engine-error';
+import { isRecord } from '../domain/request-key';
 import { shareOpensFromHere } from './provisional';
 import type { Ipc } from './tauri';
 

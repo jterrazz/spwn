@@ -1,7 +1,7 @@
 import { button, component, content } from '@jterrazz/test';
 import { describe, expect, test, vi } from 'vitest';
 
-import { EngineError } from '../../../engine/engine-error';
+import { EngineError } from '../../../domain/engine-error';
 import { Unanswered } from '../readings';
 
 const REFUSED = new EngineError({

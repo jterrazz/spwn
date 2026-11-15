@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
+import { keyOf } from '../../../domain/request-key';
 import { recordingsOf } from '../../../fixtures/recordings';
 import type { Out } from '../../client';
-import { keyOf } from '../../frame';
 import { answerFor, journalOf } from '../journal';
 
 const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'stories', 'two-macs');

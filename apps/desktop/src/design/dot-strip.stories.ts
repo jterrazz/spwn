@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import type { DotStrip } from './dot-strip';
 import type { Story } from './story';
 

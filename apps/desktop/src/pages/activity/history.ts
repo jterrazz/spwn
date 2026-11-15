@@ -1,8 +1,8 @@
 import type { ActivitySample } from '@jterrazz/station-api';
 
-import { bytes, clock, memory } from '../../model/format';
-import { SEPARATOR } from '../../separator';
-import type { Marks } from './measures';
+import type { Marks } from '../../domain/activity/measures';
+import { bytes, clock, memory } from '../../domain/format';
+import { SEPARATOR } from '../../domain/separator';
 
 const NS_PER_MS = 1_000_000;
 

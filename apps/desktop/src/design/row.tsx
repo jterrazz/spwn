@@ -1,6 +1,6 @@
 import type { MouseEvent, ReactNode } from 'react';
 
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import { isCalm, StatePill } from './state-pill';
 import { TypeTag } from './type-tag';
 import { Value } from './value';

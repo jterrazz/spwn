@@ -1,6 +1,6 @@
 import type { Progress } from '@jterrazz/station-api';
 
-import type { EngineError } from './engine-error';
+import type { EngineError } from '../domain/engine-error';
 
 export type AskForm = 'name' | 'yes';
 

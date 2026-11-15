@@ -2,7 +2,7 @@ import type { MachinesMacView } from '@jterrazz/station-api';
 import { useEffect, useState } from 'react';
 
 import { Button } from '../design/index';
-import { findMachine } from '../model/machines';
+import { findMachine } from '../domain/machines/machines';
 import type { Route } from './route';
 import type { Router } from './router';
 

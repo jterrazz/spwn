@@ -1,5 +1,5 @@
+import { matchesQuery } from '../../domain/search';
 import { countOf as counted, nounOf } from '../../engine/engine-words';
-import { matchesQuery } from '../../model/search';
 
 export type Line = { number: number; text: string };
 

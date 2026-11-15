@@ -12,9 +12,9 @@ import {
     TypeTag,
     Value,
 } from '../../design/index';
+import { findMachine, machineNamesOf } from '../../domain/machines/machines';
 import { codesOf, wordOf } from '../../engine/engine-words';
 import { machineKindOf } from '../../engine/provisional';
-import { findMachine, machineNamesOf } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import type { InstallLine, System } from './item-model';

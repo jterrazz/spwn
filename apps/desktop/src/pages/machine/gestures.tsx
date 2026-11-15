@@ -2,10 +2,10 @@ import type { CallName, MachinesMacView, MachinesVM } from '@jterrazz/station-ap
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { targetOf } from '../../domain/machines/machines';
 import { machineKindOf } from '../../engine/provisional';
 import { verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
-import { targetOf } from '../../model/machines';
 import type { Route } from '../../shell/route';
 import { GestureButton, GestureOutcome, marked } from '../kit/gestures';
 

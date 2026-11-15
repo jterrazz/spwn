@@ -2,7 +2,7 @@ import type { AccountsAddFrom, AccountsVaultOffer } from '@jterrazz/station-api'
 import { useState } from 'react';
 
 import { Button, Dialog } from '../../design/index';
-import type { EngineError } from '../../engine/engine-error';
+import type { EngineError } from '../../domain/engine-error';
 import { codesOf } from '../../engine/engine-words';
 import { useWatch } from '../../engine/react';
 import { Reading, Unanswered } from '../kit/readings';

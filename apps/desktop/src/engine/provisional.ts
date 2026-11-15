@@ -20,7 +20,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import type { EngineError } from './engine-error';
+import type { EngineError } from '../domain/engine-error';
 import { codesOf } from './engine-words';
 
 // outside: machines.list sends a Mac's reach as two booleans and no state code; this file alone makes it a code, until

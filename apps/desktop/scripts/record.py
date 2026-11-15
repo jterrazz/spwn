@@ -164,7 +164,7 @@ def vmsOf(listed):
 
 def asks(listed):
     """The reads the window asks of this Mac and its VMs. This Mac's engine is the socket's own, so a read of it
-    names no target, as targetOf (src/model/machines.ts) sends it, and a read two pages ask is asked once. A drift
+    names no target, as targetOf (src/domain/machines/machines.ts) sends it, and a read two pages ask is asked once. A drift
     names its machine in its input and no target, as driftAsked sends it. The New machine sheet watches machines.new
     of the socket's engine, opened anywhere or on one Mac machines.list lists, as askedOf sends it; a sheet opened
     from a machine file names it in From, a request of ALSO."""

@@ -14,7 +14,7 @@ import type { ButtonVariant } from '../../design/button';
 import { Button, ConfirmDialog, Panel, ProgressLine, Row, StatePill } from '../../design/index';
 import type { RowProps } from '../../design/row';
 import { shownOrWithheld } from '../../design/secret';
-import type { EngineError } from '../../engine/engine-error';
+import type { EngineError } from '../../domain/engine-error';
 import { useGestureStore } from '../../engine/react';
 import { ownState } from '../../engine/shown';
 import type { Gesture } from '../../engine/use-gesture';

@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::path::Path;
 
-const BRIDGED: &str = "../src/engine/bridged.ts";
+const BRIDGED: &str = "../src/domain/bridged.ts";
 
 fn bridged() -> Vec<String> {
     let source = fs::read_to_string(BRIDGED).expect("the bridged list is readable");

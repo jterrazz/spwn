@@ -2,12 +2,12 @@ import type { Request } from '@jterrazz/station-api';
 import { component, content, waitUntil } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { keyOf } from '../../domain/request-key';
 import { holdingCall } from '../../fixtures/held-call';
 import { recordingsOf } from '../../fixtures/recordings';
 import { PAGES } from '../../pages/registry';
 import { Window } from '../../shell/window';
 import { Client } from '../client';
-import { keyOf } from '../frame';
 import { EngineProvider, useRead } from '../react';
 import { stagedReplay } from '../replay';
 import type { Recording } from '../replay';

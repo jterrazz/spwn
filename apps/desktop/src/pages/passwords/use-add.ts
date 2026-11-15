@@ -2,7 +2,7 @@ import type { VaultAddInput } from '@jterrazz/station-api';
 import { useCallback, useRef, useState } from 'react';
 import type { RefCallback } from 'react';
 
-import { EngineError } from '../../engine/engine-error';
+import { EngineError } from '../../domain/engine-error';
 import { useClient, useReread } from '../../engine/react';
 import { VAULT_REREADS } from './passwords-of';
 

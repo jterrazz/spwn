@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
 import type { Measured } from '../../design/index';
+import { clock, duration, seconds, sentence } from '../../domain/format';
+import { SEPARATOR } from '../../domain/separator';
+import { between, shortDay } from '../../domain/when';
 import { countOf } from '../../engine/engine-words';
 import { verdictShown, vmCheck, vmSsh, vmState } from '../../engine/shown';
-import { clock, duration, seconds, sentence } from '../../model/format';
-import { SEPARATOR } from '../../separator';
-import { between, shortDay } from '../activity/when';
 
 import styles from './overview.module.css';
 

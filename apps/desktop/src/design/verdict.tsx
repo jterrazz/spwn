@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import { StateDot } from './state-dot';
 
 import styles from './verdict.module.css';

@@ -2,10 +2,10 @@ import type { MachinesMacView, OverviewNeed, OverviewReadOutput } from '@jterraz
 import { useState } from 'react';
 
 import { Switch } from '../../design/index';
+import { canWait, needsYou } from '../../domain/overview/upkeep';
 import { wordOf } from '../../engine/engine-words';
 import { useReach } from '../../engine/react';
 import type { Reading } from '../../engine/react';
-import { canWait, needsYou } from '../../model/upkeep';
 import type { Route } from '../../shell/route';
 import { History } from '../changes/changes';
 import { HeldOutcomes } from '../kit/gestures';

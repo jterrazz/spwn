@@ -1,4 +1,4 @@
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import { capitalised } from './case';
 
 import styles from './state-pill.module.css';

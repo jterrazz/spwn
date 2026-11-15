@@ -16,7 +16,7 @@ import type {
     StationWord,
 } from '@jterrazz/station-api';
 
-import type { Tone } from '../tone';
+import type { Tone } from '../domain/tone';
 import { wordOf } from './engine-words';
 import type { CodeOf, Worded } from './engine-words';
 import { accountSideOf, machineKindOf, macStateOf } from './provisional';

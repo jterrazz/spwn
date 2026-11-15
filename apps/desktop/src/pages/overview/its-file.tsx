@@ -1,10 +1,10 @@
 import type { MachinefileChapter, MachinefileDrift } from '@jterrazz/station-api';
 
 import { Button, Panel, Row, StatePill } from '../../design/index';
+import { driftAsked } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
 import { useRead } from '../../engine/react';
 import { verdictShown } from '../../engine/shown';
-import { driftAsked } from '../../model/machines';
-import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
 import { Unanswered } from '../kit/readings';

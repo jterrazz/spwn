@@ -1,5 +1,5 @@
-import { driftAsked, targetOf } from '../../model/machines';
-import type { Found } from '../../model/machines';
+import { driftAsked, targetOf } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
 import type { Route, Tab } from '../../shell/route';
 import { ActivityTab } from '../activity/activity';
 import { StorageTab } from '../machine-storage/machine-storage';

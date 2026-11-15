@@ -10,14 +10,14 @@ import type {
 import { useState } from 'react';
 
 import { Panel, Row, Screen, Verdict } from '../../design/index';
+import { clock } from '../../domain/format';
+import { SEPARATOR } from '../../domain/separator';
+import { shortDay } from '../../domain/when';
 import type { Reading as Read } from '../../engine/react';
 import { useRead } from '../../engine/react';
 import { chapterNoun, fileJoinOf, verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
-import { clock } from '../../model/format';
-import { SEPARATOR } from '../../separator';
 import { useRouter } from '../../shell/router';
-import { shortDay } from '../activity/when';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { NoVerdict, Reading } from '../kit/readings';
 import { Page } from '../page';

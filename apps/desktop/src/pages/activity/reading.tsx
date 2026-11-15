@@ -8,13 +8,13 @@ import type {
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import type { EngineError } from '../../engine/engine-error';
-import { keyOf } from '../../engine/frame';
+import { spanOf } from '../../domain/activity/measures';
+import type { Span } from '../../domain/activity/measures';
+import type { EngineError } from '../../domain/engine-error';
+import { targetOf } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
+import { keyOf } from '../../domain/request-key';
 import { useWatch } from '../../engine/react';
-import { targetOf } from '../../model/machines';
-import type { Found } from '../../model/machines';
-import { spanOf } from './measures';
-import type { Span } from './measures';
 
 export type Heard = { kind: 'failed'; error: EngineError } | { kind: 'read'; out: ActivityReport };
 

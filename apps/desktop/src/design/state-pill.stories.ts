@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react';
 
-import { TONES } from '../tone';
-import type { Tone } from '../tone';
+import { TONES } from '../domain/tone';
+import type { Tone } from '../domain/tone';
 import type { StatePill } from './state-pill';
 import type { Story } from './story';
 

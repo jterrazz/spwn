@@ -1,14 +1,14 @@
 import type { EngineReadOutput, MachinesMacView, OverviewNeed } from '@jterrazz/station-api';
 
 import { identityOf, MachineIcon, NavItem, StateDot } from '../design/index';
+import { machineNamesOf } from '../domain/machines/machines';
+import { needsYou } from '../domain/overview/upkeep';
+import { SEPARATOR } from '../domain/separator';
 import { failedState } from '../engine/failed';
 import { machineKindOf } from '../engine/provisional';
 import { useReach } from '../engine/react';
 import type { Reading } from '../engine/react';
 import { engineState, macState, ownState, vmState } from '../engine/shown';
-import { machineNamesOf } from '../model/machines';
-import { needsYou } from '../model/upkeep';
-import { SEPARATOR } from '../separator';
 import type { Carried } from './carried';
 import { onListKey } from './keys';
 import { machineRoute } from './route';

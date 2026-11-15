@@ -1,9 +1,9 @@
 import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../design/index';
+import { sentence } from '../../domain/format';
+import { SEPARATOR } from '../../domain/separator';
+import type { Tone } from '../../domain/tone';
 import type { PlanLine } from '../../engine/provisional';
 import { engineShown, kindChipWord } from '../../engine/shown';
-import { sentence } from '../../model/format';
-import { SEPARATOR } from '../../separator';
-import type { Tone } from '../../tone';
 import { countWord } from './model';
 import type { Layer, Shelf } from './model';
 

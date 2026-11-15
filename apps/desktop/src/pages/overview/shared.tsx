@@ -1,13 +1,13 @@
 import { asSentence, Button, Panel, Row } from '../../design/index';
+import { aimed } from '../../domain/machines/aim';
+import { targetOf } from '../../domain/machines/machines';
+import type { Found } from '../../domain/machines/machines';
 import { useRead, useWatch } from '../../engine/react';
-import { targetOf } from '../../model/machines';
-import type { Found } from '../../model/machines';
 import { machineRoute, tabsOf } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
 import { Unanswered } from '../kit/readings';
 import { portsOf } from '../ports/ports-of';
 import { SharedRow } from '../ports/shared-row';
-import { aimed } from '../sign-ins/aim';
 import { rowShown } from '../sign-ins/sign-ins';
 
 import styles from './overview.module.css';

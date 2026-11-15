@@ -1,12 +1,12 @@
 import type { ActivityReport, MachinesVM } from '@jterrazz/station-api';
 
 import { MissingMark, Panel, Row, Value } from '../../design/index';
+import { busiestOf } from '../../domain/activity/measures';
+import type { Found } from '../../domain/machines/machines';
+import { shortDay } from '../../domain/when';
 import { NO_PURPOSE_WORD } from '../../engine/words';
-import type { Found } from '../../model/machines';
 import { BusyShare } from '../activity/busiest';
-import { busiestOf } from '../activity/measures';
 import { useActivity } from '../activity/reading';
-import { shortDay } from '../activity/when';
 
 import styles from './overview.module.css';
 

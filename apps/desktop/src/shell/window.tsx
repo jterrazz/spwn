@@ -3,10 +3,10 @@ import { useCallback, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { Screen } from '../design/index';
+import { findMachine, macsOf } from '../domain/machines/machines';
+import type { Found } from '../domain/machines/machines';
 import { useRead, useWatch } from '../engine/react';
 import type { Reading } from '../engine/react';
-import { findMachine, macsOf } from '../model/machines';
-import type { Found } from '../model/machines';
 import { Boundary } from './boundary';
 import { useCarried } from './carried';
 import { Find } from './find';

@@ -1,6 +1,6 @@
 import type { Request } from '@jterrazz/station-api';
 
-import { EngineError } from './engine-error';
+import { EngineError } from '../domain/engine-error';
 import { answerOf } from './frame';
 import type { Exchange, Receiver, Transport } from './transport';
 
