@@ -72,28 +72,27 @@ export function macStateOf(mac: MachinesMacView): MacState {
     return mac.Reachable ? 'reachable' : 'unreachable';
 }
 
-// outside: a need's fix names its call and a few words (`Args`), not its input, which the menu bar composes in Go
-// outside: (apps/engine/pages/menubar/menubar.go, Update all); until a need carries its `in`, the window does it here,
-// outside: each word to its field by name, disk.move's folder the path its finding names (apps/engine/disk/findings.go).
+// outside: a need's `Args` are its call's input fields, a list field holding the one value given; the call's input
+// outside: type is not on the wire, so each call's reads its fields here, a list field wrapped.
 export function updateInputOf(need: OverviewNeed): AppsUpdateInput | undefined {
     if (need.Call !== 'apps.update') {
         return undefined;
     }
-    const manager = need.Args?.manager ?? '';
+    const manager = need.Args?.Managers ?? '';
     if (manager !== '') {
         return { Managers: [manager] };
     }
-    const name = need.Args?.name ?? '';
+    const name = need.Args?.Names ?? '';
     return name === '' ? undefined : { Names: [name] };
 }
 
 export function moveInputOf(need: OverviewNeed): DiskMoveInput | undefined {
-    const folder = need.Args?.path ?? '';
+    const folder = need.Args?.Folder ?? '';
     return need.Call !== 'disk.move' || folder === '' ? undefined : { Folder: folder };
 }
 
 export function removeInputOf(need: OverviewNeed): BackgroundRemoveInput | undefined {
-    const label = need.Args?.name ?? '';
+    const label = need.Args?.Label ?? '';
     return need.Call !== 'background.remove' || label === '' ? undefined : { Label: label };
 }
 
@@ -103,7 +102,7 @@ export function deleteInputOf(need: OverviewNeed): MachinesDeleteInput | undefin
 }
 
 export function restartInputOf(need: OverviewNeed): MachinesRestartInput | undefined {
-    const name = need.Args?.name ?? '';
+    const name = need.Args?.Name ?? '';
     return need.Call !== 'machines.restart' || name === '' ? undefined : { Name: name };
 }
 

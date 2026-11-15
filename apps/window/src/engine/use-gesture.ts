@@ -13,6 +13,7 @@ import { useClient, useGestureStore, useReread } from './react';
 export type GestureSpec<N extends ReadName> = {
     input: In<N>;
     subject: string;
+    typed?: string | undefined;
     rereads: readonly CallName[];
     target?: Target | undefined;
     kind?: ConfirmKind | undefined;
@@ -33,10 +34,10 @@ export type Gesture<O> = {
     dismiss: () => void;
 };
 
-function firstAsk(confirming: Confirming | undefined, subject: string): Ask | undefined {
+function firstAsk(confirming: Confirming | undefined, name: string): Ask | undefined {
     return confirming?.form === undefined
         ? undefined
-        : { form: confirming.form, name: subject, refusal: undefined };
+        : { form: confirming.form, name, refusal: undefined };
 }
 
 type Maker<N extends ReadName> = {
@@ -116,7 +117,10 @@ export function useGesture<N extends ReadName>(name: N, spec: GestureSpec<N>): G
         key,
         start: () => {
             send({
-                ask: firstAsk(confirmingOf(name, latest.current.kind), latest.current.subject),
+                ask: firstAsk(
+                    confirmingOf(name, latest.current.kind),
+                    latest.current.typed ?? latest.current.subject,
+                ),
                 kind: 'start',
             });
         },
