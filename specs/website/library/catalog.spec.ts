@@ -26,13 +26,37 @@ describe('catalog', () => {
         "D4 waits for a recording of a night that left a version waiting (Line.Waiting), for each app's last move, and for Allow, which no call gives: it writes the owner's file",
     );
 
-    test.todo('D5 waits for the machine files that declare each package, and its source');
+    test('D5 an item names the files that declare it and the machines that carry it', async () => {
+        // Given - the window on gh's page over stories
+        const result = await website.visit(
+            '/?world=stories&page=catalog-apps&item=gh',
+            async (visitor) => {
+                const rail = region('gh in the catalog');
+
+                // When - its rail is read
+                // Then - the files that declare it, and the machines that carry it
+                await visitor.see(within(rail, content('Declared in')));
+                await visitor.see(within(rail, button('studio-linux')));
+                await visitor.see(within(rail, content('3 machines')));
+
+                // When - the file is pressed
+                await visitor.click(within(rail, button('studio-linux')));
+
+                // Then - Machine files opens on it
+                await visitor.see(heading('studio-linux.machine.yaml'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo("D5 waits for a package's source, which no call carries");
 
     test('D13 the search narrows the list as I type, and says when nothing matches', async () => {
         // Given - the window on Apps over two-macs
         const result = await website.visit(
             '/?world=two-macs&page=catalog-apps',
             async (visitor) => {
+                await visitor.click(button('Everything', { exact: false }));
                 await visitor.see(content('lazygit'));
                 await visitor.see(content('ripgrep'));
 
@@ -53,9 +77,16 @@ describe('catalog', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'D13 waits for which machines carry each app, joined as settings.matrix joins settings',
-    );
+    test('D13 by default only what the machines carry is listed, each with how many carry it', async () => {
+        // Given - the window on Apps over stories
+        const result = await website.visit('/?world=stories&page=catalog-apps', async (visitor) => {
+            // When - the list is read
+            // Then - a row says how many of the machines read carry the app, and Everything is offered
+            await visitor.see(content('1 of 2 machines', { exact: false }));
+            await visitor.see(button('Everything', { exact: false }));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test('D14 an app page reads how it is installed and the commands it puts on the path', async () => {
         // Given - the window on node's page over stories
@@ -157,6 +188,7 @@ describe('catalog', () => {
 
             // Then - the page lists the agent skills alone
             await visitor.see(region('Skills'));
+            await visitor.click(button('Everything', { exact: false }));
             await visitor.see(content('agent-browser-skill'));
             await visitor.gone(region('Apps'));
 
@@ -187,6 +219,7 @@ describe('catalog', () => {
     test('D26 a category keeps only its packages, and each category shows its count', async () => {
         // Given - the window on Apps over stories
         const result = await website.visit('/?world=stories&page=catalog-apps', async (visitor) => {
+            await visitor.click(button('Everything', { exact: false }));
             await visitor.see(button('Runtimes7'));
             await visitor.see(button('cocoapods', { exact: false }));
             await visitor.see(button('ripgrep', { exact: false }));
