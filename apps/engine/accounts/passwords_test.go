@@ -25,6 +25,14 @@ func TestThePasswordsVerdictCountsWhatIsGranted(t *testing.T) {
 	}
 }
 
+func TestTheVaultHeadSaysUnderItsCountThatAValueNeverLeavesTheKeychain(t *testing.T) {
+	for name, entries := range map[string][]accounts.VaultEntry{"none": nil, "some": {{}}} {
+		if got := accounts.SummarizeVault(entries).Line; got != "a value never leaves this Mac's Keychain to be shown" {
+			t.Errorf("%s: line %q", name, got)
+		}
+	}
+}
+
 func TestEveryProgramStationSignsInHasAWayInAndOutOfAVM(t *testing.T) {
 	for _, p := range accounts.Programs() {
 		d, ok := p.Delivery()

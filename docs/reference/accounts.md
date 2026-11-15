@@ -44,6 +44,8 @@ Sign out runs the program's own logout (`accounts.logout`) after a confirmation 
 
 The vault is the Keychain entries of one Mac under station's own Keychain name, each value under `vault:<id>`, and a book beside them, `~/.local/state/station/vault.json`, that lists each entry and its grants without a value. It has no sync: each Mac has its own, and the Passwords page shows This Mac's (`Passwords on <mac>`), with no Mac picker. Station is the only owner of the Claude token and of every granted secret; the studio CLI's credential store is not read.
 
+The verdict `vault.list` answers counts the entries (`3 kept, 1 granted`) and says under it, in its `Line`, that a value never leaves this Mac's Keychain to be shown.
+
 Each entry `vault.list` answers says what its removal ends, so the confirmation can word it: `RemoveSentence`, counted from its grants (`Its grants end: 1 machine and 1 agent`, or `Nothing else ends` with none), and `Reach`, `granted` or `not granted`. A grant is only its target; it has no state, since it stays until it is removed.
 
 The Add a password sheet reads one watched call, `vault.new`, of This Mac's engine (a server or a workspace is refused as not for this machine). It answers the `Intro` ("It is kept in <mac>'s Keychain; you can then grant it to a machine."), the `Captures` and the typed way's `Programs`; the sheet words nothing itself. A password enters in one of two ways:
