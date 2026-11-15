@@ -63,10 +63,6 @@ type Survey struct {
 	// told apart; the bytes of station's logs.
 	System int64
 	Logs   int64
-	// value: the disks a Mac's hypervisor holds, nil off a Mac or when it
-	// did not answer; HeldPending while it has not answered yet.
-	Held        *Held
-	HeldPending bool
 }
 
 type Outcome struct {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"runtime"
 	"slices"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -207,6 +208,19 @@ func TestASharedKeyRunsOnce(t *testing.T) {
 	Last(Run(context.Background(), p, report{parts: []string{""}}, []Job[report]{job}, clone))
 	if n := runs.Load(); n != 2 {
 		t.Fatalf("after Forget the key ran %d times in all, want a second run", n)
+	}
+}
+
+func TestAFreshJobRunsForEachReader(t *testing.T) {
+	p := NewPool(context.Background(), &manualClock{}, 4, 1)
+	var runs atomic.Int32
+	job := Job[report]{Key: "disk/station", Fresh: true, Do: func(context.Context) func(*report) {
+		return set(0, strconv.Itoa(int(runs.Add(1))))
+	}}
+	first := Last(Run(context.Background(), p, report{parts: []string{""}}, []Job[report]{job}, clone))
+	second := Last(Run(context.Background(), p, report{parts: []string{""}}, []Job[report]{job}, clone))
+	if first.parts[0] != "1" || second.parts[0] != "2" {
+		t.Fatalf("two readers of a fresh job read %q then %q, want a run each", first.parts[0], second.parts[0])
 	}
 }
 

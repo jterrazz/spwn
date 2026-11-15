@@ -46,6 +46,25 @@ type Held struct {
 	Unused   int64
 }
 
+type HeldState int
+
+const (
+	// value: no hypervisor to ask: a machine that is not a Mac, or a Mac
+	// with none installed.
+	HeldNone HeldState = iota
+	HeldPending
+	// value: the hypervisor failed, or did not answer within its budget.
+	HeldFailed
+	HeldAnswered
+)
+
+type HeldReading struct {
+	// value: what a Mac's hypervisor answered of the disks it holds; Held
+	// is read only once State is HeldAnswered.
+	State HeldState
+	Held  Held
+}
+
 func (h Held) machines() int64 { return sumDisks(h.Machines) }
 
 func (h Held) images() int64 { return sumDisks(h.Images) }

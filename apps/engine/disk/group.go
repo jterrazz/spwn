@@ -52,18 +52,18 @@ type Reading struct {
 	Station *StationPart `json:",omitempty"`
 }
 
-func ReadingOf(total, free int64, s Survey, mac string) Reading {
-	r := Reading{Total: total, Free: free, Rows: Classify(s), Pending: s.HeldPending}
+func ReadingOf(total, free int64, s Survey, h HeldReading, mac string) Reading {
+	// invariant: station's part is there only once the hypervisor answered:
+	// pending, failed or absent, it is nil, never zeros.
+	r := Reading{Total: total, Free: free, Rows: Classify(s), Pending: h.State == HeldPending}
 	for _, t := range s.Rows {
 		r.Pending = r.Pending || t.Pending
 	}
-	var machines int64
-	if s.Held != nil {
-		machines = s.Held.Holding()
-		station := StationOf(total, free, s.Logs, *s.Held, mac)
+	if h.State == HeldAnswered {
+		station := StationOf(total, free, s.Logs, h.Held, mac)
 		r.Station = &station
 	}
-	r.Kinds, r.CanFree = KindsOf(total, free, s, r.Rows, machines, s.Held != nil || s.HeldPending)
+	r.Kinds, r.CanFree = KindsOf(total, free, s, r.Rows, h)
 	return r
 }
 
