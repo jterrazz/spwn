@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	"io"
 	"slices"
@@ -24,6 +25,7 @@ import (
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
+	"github.com/jterrazz/studio-station/apps/engine/overview"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
@@ -61,6 +63,7 @@ func (m machine) router(env kit.Env) *remote.Router {
 		Version: Version(),
 		Label:   m.label,
 		Unborn:  m.unborn,
+		Stopped: m.stopped,
 	})
 	m.far.router = r
 	return r
@@ -89,6 +92,25 @@ func (m machine) unborn(ctx context.Context, vm, name string) (<-chan any, bool)
 		}
 	}()
 	return out, true
+}
+
+// invariant: a VM of this Mac that its engine holds stopped answers its
+// Overview from its Mac's record, its head saying it is stopped; the v2
+// reading, and any other call, goes to its guest, which refuses it.
+func (m machine) stopped(ctx context.Context, vm, name string, in json.RawMessage) (any, bool) {
+	var read overviewcalls.ReadIn
+	if name != overviewcalls.Read.Name || len(in) > 0 && json.Unmarshal(in, &read) != nil || read.V2 {
+		return nil, false
+	}
+	live, err := m.macEngine().VMs(ctx)
+	if err != nil || live[vm].State != engine.StateStopped {
+		return nil, false
+	}
+	found, err := m.machines(false).Lookup(ctx, vm)
+	if err != nil {
+		return nil, false
+	}
+	return overviewcalls.ReadOut{Summary: overview.Stopped(vm, found.Lifetime.Kind())}, true
 }
 
 func (m machine) label(mac string) string {

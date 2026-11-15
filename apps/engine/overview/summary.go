@@ -118,6 +118,14 @@ type Read struct {
 	Findings []finding.Finding
 }
 
+const LineStopped = "Start it to read its pages."
+
+func Stopped(name string, kind machine.Kind) Summary {
+	// value: the Overview of a VM that is stopped, as its Mac answers it
+	// from its record: nothing read inside, its head saying why.
+	return Summary{Head: Head{Name: name, Kind: kind}, Lines: []Line{}, Needs: []Need{}, Verdict: verdict.Verdict{Tone: verdict.Plain, Sentence: name + " is stopped.", Line: LineStopped}}
+}
+
 func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms []VM) Summary {
 	// invariant: the lines keep the one order of the machine's kind; Needs
 	// you is every read's findings and the Overview's own, ranked (§5.1.1).

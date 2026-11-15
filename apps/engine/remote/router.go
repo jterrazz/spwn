@@ -34,6 +34,10 @@ type Reach struct {
 	// create reaches, closed when the create ends; false sends the watch
 	// to its guest.
 	Unborn func(ctx context.Context, vm, call string) (<-chan any, bool)
+	// value: the answer a call of one of this Mac's VMs that is stopped
+	// takes from this Mac's own record, its guest never asked; false sends
+	// the call to its guest, which refuses it as stopped.
+	Stopped func(ctx context.Context, vm, call string, in json.RawMessage) (any, bool)
 }
 
 type Router struct {
@@ -87,6 +91,10 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 	if err != nil {
 		return err
 	}
+	if v, ok := r.stopped(ctx, t, name, raw); ok {
+		call.Set(out, v)
+		return nil
+	}
 	l, err := r.endpoint(ctx, t, name)
 	if err != nil {
 		return r.named(t, err)
@@ -135,6 +143,9 @@ func (r *Router) Watch(ctx context.Context, target machine.Ref, name string, in 
 	}
 	if born, ok := r.unborn(ctx, t, name, guest); ok {
 		return born, nil
+	}
+	if v, ok := r.stopped(ctx, t, name, raw); ok {
+		return once(v), nil
 	}
 	return guest()
 }
@@ -349,6 +360,9 @@ func (r *Router) Serve(ctx context.Context, target machine.Ref, name string, in 
 	if !ok {
 		return serve.Local(r.registry, r.thisMac, r.reach.Version).Invoke(ctx, target, name, in, p)
 	}
+	if v, ok := r.stopped(ctx, vm, name, in); ok {
+		return v, nil
+	}
 	l, err := r.endpoint(ctx, vm, name)
 	if err != nil {
 		return nil, err
@@ -381,6 +395,9 @@ func (r *Router) ServeWatch(ctx context.Context, target machine.Ref, name string
 	}
 	if born, ok := r.unborn(ctx, vm, name, guest); ok {
 		return born, nil
+	}
+	if v, ok := r.stopped(ctx, vm, name, in); ok {
+		return once(v), nil
 	}
 	return guest()
 }
@@ -428,6 +445,23 @@ func (r *Router) unborn(ctx context.Context, vm machine.Ref, name string, guest 
 		}
 	}()
 	return out, true
+}
+
+// invariant: a call of a VM of this Mac that is stopped is answered by
+// Reach.Stopped when it has an answer for it, in this process, once; any
+// other goes to its guest.
+func (r *Router) stopped(ctx context.Context, vm machine.Ref, name string, in json.RawMessage) (any, bool) {
+	if r.reach.Stopped == nil || vm.On == "" || vm.On != r.thisMac.Ref.Name {
+		return nil, false
+	}
+	return r.reach.Stopped(ctx, vm.Name, name, in)
+}
+
+func once(v any) <-chan call.Update[any] {
+	out := make(chan call.Update[any], 1)
+	out <- call.Update[any]{Value: v}
+	close(out)
+	return out
 }
 
 func (r *Router) vm(target machine.Ref) (machine.Ref, bool) {
