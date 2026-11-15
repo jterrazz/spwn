@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -16,6 +17,8 @@ type Deps struct {
 	Known []catalog.App
 	// value: the kind of the machine these calls run on.
 	Kind machine.Kind
+	All  AllMachines
+	Now  func() time.Time
 }
 
 type Apps interface {
@@ -31,5 +34,5 @@ type Apps interface {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.BindWatch(List, d), call.Bind(Show, d), call.Bind(Install, d), call.Bind(Update, d), call.Bind(Remove, d), call.Bind(Move, d)}
+	return []call.Handler{call.BindWatch(List, d), call.Bind(Show, d), call.Bind(Install, d), call.Bind(Update, d), call.Bind(Remove, d), call.Bind(Move, d), call.Bind(Matrix, d)}
 }
