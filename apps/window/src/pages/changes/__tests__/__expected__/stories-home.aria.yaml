@@ -12,7 +12,7 @@
   - text: of 994 GB · machines hold 120 GB
   - region "Needs you":
     - heading "Needs you 2" [level=2]
-    - button "Broken port 5000 is reachable outside Tailscale Ports"
+    - button "Broken port 5000 is reachable outside Tailscale macbook-pro · Ports"
     - text: System Settings > General > AirDrop & Handoff > AirPlay Receiver
     - button "Copy System Settings > General > AirDrop & Handoff > AirPlay Receiver": Copy
     - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
