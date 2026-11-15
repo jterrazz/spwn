@@ -785,6 +785,8 @@ func rules() []rule {
 		{"VocabularyAwake", ruleVocabularySource, "apps/engine/ports/mutant_awake.go", "package ports\n\ntype mutantStrip struct {\n\tHeld bool `json:\"power\"`\n}\n\nconst mutantHeld = \"Power session held\"\n", "apps/engine/ports/mutant_awake.go"},
 		{"VMRecordLocked", ruleVMRecordLocked, "apps/engine/engine/process/mutant_record.go", "package process\n\nfunc mutantWant(v *vmState) string { return v.rec.Want }\n", "apps/engine/engine/process/mutant_record.go"},
 		{"VMRecordLockedName", ruleVMRecordLocked, "apps/engine/engine/process/mutant_name.go", "package process\n\nfunc mutantRename(v *vmState) { v.name = \"other\" }\n", "apps/engine/engine/process/mutant_name.go"},
+		{"FixArgsAreInputs", ruleFixArgsAreInputs, "apps/engine/disk/mutant_fix.go", "package disk\n\nimport \"" + module + "/core/finding\"\n\nvar mutantFix = finding.Fix{Call: \"disk.move\", Args: map[string]string{\"path\": \"~/.tart\"}}\n", "apps/engine/disk/mutant_fix.go"},
+		{"FixArgsAreInputsConfirm", ruleFixArgsAreInputs, "apps/engine/overview/mutant_confirm.go", "package overview\n\nimport \"" + module + "/core/finding\"\n\nvar mutantDelete = finding.Fix{Call: \"machines.delete\", Args: map[string]string{\"VM\": \"linux-1\"}}\n", "apps/engine/overview/mutant_confirm.go"},
 		{"Registries", ruleRegistries, "apps/engine/pages/apps/mutant_registries.go", "package apps\n\nvar mutantRegistry = map[string]int{}\n\nfunc init() { mutantRegistry[\"x\"] = 1 }\n", "apps/engine/pages/apps/mutant_registries.go"},
 	}
 }
