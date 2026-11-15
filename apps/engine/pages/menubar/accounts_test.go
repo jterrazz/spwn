@@ -41,6 +41,25 @@ func TestTheAccountsPageSaysEachMachinesSignInsAndGrants(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A5 Grant a password: the page's To popup swaps between
+// the sheets of the machines it offers, so each machine it names has its
+// sheet on the page.
+func TestEachMachineTheGrantSheetOffersHasItsSheetOnTheAccountsPage(t *testing.T) {
+	s := signInsOfTwo(t)
+	s.Vault = &accounts.VaultRead{Mac: proMac, Entries: []accounts.VaultEntry{{ID: "pw-1", Label: "deploy token", Program: accounts.Programs()[0]}}}
+	s.Offers = map[string]accounts.GrantOffer{"pw-1": offerFor("linux-1", "agent-7f")}
+	p := Accounts(s, AccountsOf{Asks: yesNo}, page.Context{Machine: proMac})
+	to := actionOf(p, ActionGrant).Form.Fields[0]
+	if len(to.Options) != 2 {
+		t.Fatalf("To offers %+v, want linux-1 and agent-7f", to.Options)
+	}
+	for _, o := range to.Options {
+		if sheet := actionOf(p, o.Value); sheet.Sheet != page.SheetGrant || sheet.Run == nil || sheet.Run.In["To"] != o.Label {
+			t.Errorf("To offers %s, whose action is %+v: want the grant sheet to %s", o.Value, sheet, o.Label)
+		}
+	}
+}
+
 // invariant: SPEC A4 A workspace: a running workspace's page carries its
 // header and four segments, its grants under Accounts alone; a stopped one
 // carries no segment.
