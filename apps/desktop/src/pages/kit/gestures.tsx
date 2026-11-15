@@ -10,14 +10,21 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 
-import type { ButtonVariant } from '../../design/button';
-import { Button, ConfirmDialog, Panel, ProgressLine, Row, StatePill } from '../../design/index';
-import type { RowProps } from '../../design/row';
-import { shownOrWithheld } from '../../design/secret';
 import type { EngineError } from '../../domain/engine-error';
-import { useGestureStore } from '../../engine/react';
-import { ownState } from '../../engine/shown';
-import type { Gesture } from '../../engine/use-gesture';
+import { useGestureStore } from '../../presentation/dependencies/dependencies';
+import type { Gesture } from '../../presentation/dependencies/use-gesture';
+import type { ButtonVariant } from '../../presentation/ui/button';
+import {
+    Button,
+    ConfirmDialog,
+    Panel,
+    ProgressLine,
+    Row,
+    StatePill,
+} from '../../presentation/ui/index';
+import type { RowProps } from '../../presentation/ui/row';
+import { shownOrWithheld } from '../../presentation/ui/secret';
+import { ownState } from '../../presentation/words/shown';
 import { Unanswered } from './readings';
 
 import styles from '../page.module.css';

@@ -1,8 +1,11 @@
 import { sentence } from '../../domain/format';
-import { countOf } from '../../engine/engine-words';
-import type { JournalLine, JournalSubjectKind } from '../../engine/kept-journal/journal';
-import { machineRoute } from '../../shell/route';
-import type { PlainPage, Route } from '../../shell/route';
+import type {
+    JournalLine,
+    JournalSubjectKind,
+} from '../../presentation/features/journal/kept-journal/journal';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { PlainPage, Route } from '../../presentation/navigation/route';
+import { countOf } from '../../presentation/words/engine-words';
 
 function onShelf(page: PlainPage): (name: string) => Route {
     return (item) => ({ item, page });

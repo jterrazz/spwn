@@ -6,7 +6,7 @@ import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/rec
 import { recordingOf } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import { tauriOpener } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
-import type { Route } from '../../../shell/route';
+import type { Route } from '../../../presentation/navigation/route';
 import { LOCAL_ELSEWHERE } from '../shared-row';
 
 const recordingFor = await recordingsOf('stories', 'two-macs');

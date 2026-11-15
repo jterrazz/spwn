@@ -1,4 +1,4 @@
-import type { PlainPage } from '../../shell/route';
+import type { PlainPage } from '../../presentation/navigation/route';
 import type { Shelf } from './model';
 
 export const SHELVES = {

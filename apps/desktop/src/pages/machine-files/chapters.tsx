@@ -1,9 +1,9 @@
 import type { MachinefilePlan } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Missing, Panel, Switch } from '../../design/index';
-import { useWatch } from '../../engine/react';
-import type { Route } from '../../shell/route';
+import { useWatch } from '../../presentation/dependencies/dependencies';
+import type { Route } from '../../presentation/navigation/route';
+import { Missing, Panel, Switch } from '../../presentation/ui/index';
 import { LayerList } from '../packages/layers';
 import { countOn, kindsOf, layersOf, onShelf } from '../packages/model';
 import { catalogRouteOf, CHAPTERS, descriptionsOf } from './model';

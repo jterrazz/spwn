@@ -1,12 +1,12 @@
 import type { ActivityReport, MachinesMacView, MachinesVM } from '@jterrazz/station-api';
 
-import { Bar, Button, Chart, MachineIcon, Panel, Row, RowHead } from '../../design/index';
-import type { Identity } from '../../design/index';
 import { chartedOf, cpuOf, marksOf } from '../../domain/activity/measures';
 import { memory, percent } from '../../domain/format';
-import { machineKindOf } from '../../engine/provisional';
-import { machineRoute } from '../../shell/route';
-import type { Route } from '../../shell/route';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route } from '../../presentation/navigation/route';
+import { Bar, Button, Chart, MachineIcon, Panel, Row, RowHead } from '../../presentation/ui/index';
+import type { Identity } from '../../presentation/ui/index';
+import { machineKindOf } from '../../presentation/words/provisional';
 import { useActivity } from '../activity/reading';
 import { split } from '../activity/tiles';
 import { useIdentityOf } from '../kit/identity';

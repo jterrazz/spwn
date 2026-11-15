@@ -1,9 +1,9 @@
 import type { MachinefileDrift, Target } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Panel, Switch } from '../../design/index';
-import { useWatch } from '../../engine/react';
-import type { Reading as Read } from '../../engine/react';
+import { useWatch } from '../../presentation/dependencies/dependencies';
+import type { Reading as Read } from '../../presentation/dependencies/dependencies';
+import { Panel, Switch } from '../../presentation/ui/index';
 import { Unanswered } from '../kit/readings';
 import { LayerList } from './layers';
 import { countOn, differingLinesOf, kindsOf, layersOf, onShelf, SHELVES } from './model';

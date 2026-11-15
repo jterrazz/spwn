@@ -8,14 +8,14 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 
 import type { Reading as Answered } from '../../application/use-cases/entry';
-import { Button, Dialog, FormField, Screen } from '../../design/index';
-import { createRefusalPlaceOf } from '../../engine/provisional';
-import type { RefusalPlace } from '../../engine/provisional';
-import { useReread, useWatch } from '../../engine/react';
-import { useGesture } from '../../engine/use-gesture';
-import type { Gesture } from '../../engine/use-gesture';
-import { machineRoute } from '../../shell/route';
-import type { Route } from '../../shell/route';
+import { useReread, useWatch } from '../../presentation/dependencies/dependencies';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import type { Gesture } from '../../presentation/dependencies/use-gesture';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route } from '../../presentation/navigation/route';
+import { Button, Dialog, FormField, Screen } from '../../presentation/ui/index';
+import { createRefusalPlaceOf } from '../../presentation/words/provisional';
+import type { RefusalPlace } from '../../presentation/words/provisional';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import {

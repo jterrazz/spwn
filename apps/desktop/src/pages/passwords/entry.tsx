@@ -1,10 +1,10 @@
 import type { AccountsVaultEntry, AccountsVaultGrant } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { AppIcon, Button, Facts, Panel } from '../../design/index';
-import { WITHHELD } from '../../design/secret';
-import { useGesture } from '../../engine/use-gesture';
-import type { Route } from '../../shell/route';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import type { Route } from '../../presentation/navigation/route';
+import { AppIcon, Button, Facts, Panel } from '../../presentation/ui/index';
+import { WITHHELD } from '../../presentation/ui/secret';
 import { GestureButton, GestureOutcome, GestureRow, HeldOutcomes } from '../kit/gestures';
 import { Page } from '../page';
 import { GrantSheet } from './grant-sheet';

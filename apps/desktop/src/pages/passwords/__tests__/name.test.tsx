@@ -2,9 +2,9 @@ import { component, content, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
-import { EngineProvider } from '../../../engine/react';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
-import { Window } from '../../../shell/window';
+import { EngineProvider } from '../../../presentation/dependencies/dependencies';
+import { Window } from '../../../presentation/navigation/window';
 import { PAGES } from '../../registry';
 
 const recordingFor = await recordingsOf('two-macs');

@@ -1,8 +1,8 @@
 import type { ActivityReport, CoreFindingFinding } from '@jterrazz/station-api';
 
-import { Panel, Row, Value } from '../../design/index';
 import { fixLine } from '../../domain/format';
-import { engineShown } from '../../engine/shown';
+import { Panel, Row, Value } from '../../presentation/ui/index';
+import { engineShown } from '../../presentation/words/shown';
 import { VerdictHead } from '../kit/readings';
 
 export function Head({ report }: { report: ActivityReport }) {

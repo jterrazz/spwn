@@ -7,17 +7,17 @@ import type {
 } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { MachineIcon, Panel, Row, Switch } from '../../design/index';
 import { bytes, sentence } from '../../domain/format';
 import { targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { shortDay } from '../../domain/when';
-import { countOf } from '../../engine/engine-words';
-import { diskGestureOf, machineKindOf } from '../../engine/provisional';
-import { useReach, useRead, useWatch } from '../../engine/react';
-import type { Reading } from '../../engine/react';
-import { machineRoute } from '../../shell/route';
-import type { Route } from '../../shell/route';
+import { useReach, useRead, useWatch } from '../../presentation/dependencies/dependencies';
+import type { Reading } from '../../presentation/dependencies/dependencies';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route } from '../../presentation/navigation/route';
+import { MachineIcon, Panel, Row, Switch } from '../../presentation/ui/index';
+import { countOf } from '../../presentation/words/engine-words';
+import { diskGestureOf, machineKindOf } from '../../presentation/words/provisional';
 import { rebuildableOf } from '../disk/disk';
 import { Freed, useFreeAll } from '../disk/disk-gestures';
 import { DiskPanel, groupOf, GroupPanel } from '../disk/disk-view';

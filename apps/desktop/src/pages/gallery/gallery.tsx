@@ -1,5 +1,5 @@
-import { Caption, Verdict } from '../../design/index';
-import type { Dependencies } from '../../engine/react';
+import type { Dependencies } from '../../presentation/dependencies/dependencies';
+import { Caption, Verdict } from '../../presentation/ui/index';
 import { Page } from '../page';
 import { ENTRIES } from './entries';
 import { anchorOf, LAYERS } from './entry';

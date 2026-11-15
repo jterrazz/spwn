@@ -1,8 +1,8 @@
 import type { SettingsMatrix, SettingsRow } from '@jterrazz/station-api';
 
-import { Facts, Panel, Row, StatePill, Value } from '../../design/index';
-import { countOf, wordOf } from '../../engine/engine-words';
-import { kindChipWord, reversibleState } from '../../engine/shown';
+import { Facts, Panel, Row, StatePill, Value } from '../../presentation/ui/index';
+import { countOf, wordOf } from '../../presentation/words/engine-words';
+import { kindChipWord, reversibleState } from '../../presentation/words/shown';
 import { needsOf } from './item-model';
 import {
     factOf,

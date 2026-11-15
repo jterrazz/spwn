@@ -1,13 +1,13 @@
 import type { MachinesLatencyPoint, MachinesUptimeDay, MachinesVM } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
-import type { Measured } from '../../design/index';
 import { clock, duration, seconds, sentence } from '../../domain/format';
 import { SEPARATOR } from '../../domain/separator';
 import { between, shortDay } from '../../domain/when';
-import { countOf } from '../../engine/engine-words';
-import { verdictShown, vmCheck, vmSsh, vmState } from '../../engine/shown';
+import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../presentation/ui/index';
+import type { Measured } from '../../presentation/ui/index';
+import { countOf } from '../../presentation/words/engine-words';
+import { verdictShown, vmCheck, vmSsh, vmState } from '../../presentation/words/shown';
 
 import styles from './overview.module.css';
 

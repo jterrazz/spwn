@@ -1,11 +1,11 @@
 import type { AppsReport, MachinesMacView, SettingsRow } from '@jterrazz/station-api';
 
-import { Verdict } from '../../design/index';
 import { isSkill } from '../../domain/catalog/apps';
-import { useReach, useRead, useWatch } from '../../engine/react';
-import type { Reading as Answer } from '../../engine/react';
-import { ownState } from '../../engine/shown';
-import type { Route } from '../../shell/route';
+import { useReach, useRead, useWatch } from '../../presentation/dependencies/dependencies';
+import type { Reading as Answer } from '../../presentation/dependencies/dependencies';
+import type { Route } from '../../presentation/navigation/route';
+import { Verdict } from '../../presentation/ui/index';
+import { ownState } from '../../presentation/words/shown';
 import { Absent, Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { AppItem } from './item-app';

@@ -1,10 +1,10 @@
 import type { MachinefileDiffering, MachinefileDrift } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { AppIcon, Button, Panel, StatePill, Switch, Value } from '../../design/index';
-import type { Identity } from '../../design/index';
-import type { PlanLine } from '../../engine/provisional';
-import { engineShown } from '../../engine/shown';
+import { AppIcon, Button, Panel, StatePill, Switch, Value } from '../../presentation/ui/index';
+import type { Identity } from '../../presentation/ui/index';
+import type { PlanLine } from '../../presentation/words/provisional';
+import { engineShown } from '../../presentation/words/shown';
 import { differencesOf, layersOf } from './model';
 
 import styles from './packages.module.css';

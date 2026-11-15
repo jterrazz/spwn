@@ -1,6 +1,6 @@
 import { driftAsked, targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
-import type { Route, Tab } from '../../shell/route';
+import type { Route, Tab } from '../../presentation/navigation/route';
 import { ActivityTab } from '../activity/activity';
 import { StorageTab } from '../machine-storage/machine-storage';
 import { OverviewTab } from '../overview/overview';

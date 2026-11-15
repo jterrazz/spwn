@@ -1,12 +1,12 @@
 import type { MachinefileChapter, MachinefileDrift } from '@jterrazz/station-api';
 
-import { Button, Panel, Row, StatePill } from '../../design/index';
 import { driftAsked } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
-import { useRead } from '../../engine/react';
-import { verdictShown } from '../../engine/shown';
-import { machineRoute } from '../../shell/route';
-import type { Route, Tab } from '../../shell/route';
+import { useRead } from '../../presentation/dependencies/dependencies';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route, Tab } from '../../presentation/navigation/route';
+import { Button, Panel, Row, StatePill } from '../../presentation/ui/index';
+import { verdictShown } from '../../presentation/words/shown';
 import { Unanswered } from '../kit/readings';
 
 import styles from './overview.module.css';

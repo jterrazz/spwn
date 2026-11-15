@@ -1,7 +1,10 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import type { Fact } from '../../design/facts';
+import { findMachine, machineNamesOf } from '../../domain/machines/machines';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route } from '../../presentation/navigation/route';
+import type { Fact } from '../../presentation/ui/facts';
 import {
     AppIcon,
     Button,
@@ -11,12 +14,9 @@ import {
     MissingMark,
     TypeTag,
     Value,
-} from '../../design/index';
-import { findMachine, machineNamesOf } from '../../domain/machines/machines';
-import { codesOf, wordOf } from '../../engine/engine-words';
-import { machineKindOf } from '../../engine/provisional';
-import { machineRoute } from '../../shell/route';
-import type { Route } from '../../shell/route';
+} from '../../presentation/ui/index';
+import { codesOf, wordOf } from '../../presentation/words/engine-words';
+import { machineKindOf } from '../../presentation/words/provisional';
 import type { InstallLine, System } from './item-model';
 
 import styles from './item.module.css';

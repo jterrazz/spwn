@@ -1,13 +1,13 @@
 import type { MachinefileFileView } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Caption, Missing, Switch } from '../../design/index';
-import { isCalm } from '../../design/state-pill';
-import { wordOf } from '../../engine/engine-words';
-import { useReach, useRead } from '../../engine/react';
-import type { Reading } from '../../engine/react';
-import type { Route } from '../../shell/route';
-import type { Opening } from '../../shell/window';
+import { useReach, useRead } from '../../presentation/dependencies/dependencies';
+import type { Reading } from '../../presentation/dependencies/dependencies';
+import type { Route } from '../../presentation/navigation/route';
+import type { Opening } from '../../presentation/navigation/window';
+import { Caption, Missing, Switch } from '../../presentation/ui/index';
+import { isCalm } from '../../presentation/ui/state-pill';
+import { wordOf } from '../../presentation/words/engine-words';
 import { Absent, Reading as ReadingVerdict, Unanswered, VerdictHead } from '../kit/readings';
 import { layersOf } from '../packages/model';
 import { Page } from '../page';

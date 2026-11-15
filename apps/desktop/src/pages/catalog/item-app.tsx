@@ -1,5 +1,7 @@
 import type { AppsReport, SettingsRow } from '@jterrazz/station-api';
 
+import { sentence } from '../../domain/format';
+import { useRead } from '../../presentation/dependencies/dependencies';
 import {
     AppIcon,
     Button,
@@ -9,14 +11,12 @@ import {
     Row,
     StatePill,
     Value,
-} from '../../design/index';
-import { sentence } from '../../domain/format';
-import { countOf, detailOf, wordOf } from '../../engine/engine-words';
-import type { PlanLine } from '../../engine/provisional';
-import { useRead } from '../../engine/react';
-import { appUpdate, kindChipWord } from '../../engine/shown';
-import { APP_STATE_TONES } from '../../engine/tones';
-import { APP_STATE_WORDS } from '../../engine/words';
+} from '../../presentation/ui/index';
+import { countOf, detailOf, wordOf } from '../../presentation/words/engine-words';
+import type { PlanLine } from '../../presentation/words/provisional';
+import { appUpdate, kindChipWord } from '../../presentation/words/shown';
+import { APP_STATE_TONES } from '../../presentation/words/tones';
+import { APP_STATE_WORDS } from '../../presentation/words/words';
 import { installLinesOf, usedBy } from './item-model';
 import {
     factOf,

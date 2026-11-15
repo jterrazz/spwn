@@ -3,10 +3,10 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { targetOf } from '../../domain/machines/machines';
-import { machineKindOf } from '../../engine/provisional';
-import { verdictShown } from '../../engine/shown';
-import { useGesture } from '../../engine/use-gesture';
-import type { Route } from '../../shell/route';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import type { Route } from '../../presentation/navigation/route';
+import { machineKindOf } from '../../presentation/words/provisional';
+import { verdictShown } from '../../presentation/words/shown';
 import { GestureButton, GestureOutcome, marked } from '../kit/gestures';
 
 import styles from './machine.module.css';

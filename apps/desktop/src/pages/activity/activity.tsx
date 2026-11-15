@@ -1,12 +1,12 @@
 import type { ActivityReport } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Switch } from '../../design/index';
 import { SPANS } from '../../domain/activity/measures';
 import type { Span } from '../../domain/activity/measures';
 import type { Found } from '../../domain/machines/machines';
-import { THIS_MAC_WORD } from '../../engine/words';
-import type { Route } from '../../shell/route';
+import type { Route } from '../../presentation/navigation/route';
+import { Switch } from '../../presentation/ui/index';
+import { THIS_MAC_WORD } from '../../presentation/words/words';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { Busiest } from './busiest';

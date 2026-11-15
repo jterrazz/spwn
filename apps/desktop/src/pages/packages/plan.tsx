@@ -1,12 +1,12 @@
 import type { CallName, MachinefilePlan, Target } from '@jterrazz/station-api';
 
-import { AppIcon, Button, Panel, Row, Tile } from '../../design/index';
-import { headingOf, nounOf, wordOf } from '../../engine/engine-words';
-import type { PlanLine } from '../../engine/provisional';
-import { useRead } from '../../engine/react';
-import type { Reading as Read } from '../../engine/react';
-import { chapterNoun } from '../../engine/shown';
-import { useGesture } from '../../engine/use-gesture';
+import { useRead } from '../../presentation/dependencies/dependencies';
+import type { Reading as Read } from '../../presentation/dependencies/dependencies';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import { AppIcon, Button, Panel, Row, Tile } from '../../presentation/ui/index';
+import { headingOf, nounOf, wordOf } from '../../presentation/words/engine-words';
+import type { PlanLine } from '../../presentation/words/provisional';
+import { chapterNoun } from '../../presentation/words/shown';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page, Tiles } from '../page';

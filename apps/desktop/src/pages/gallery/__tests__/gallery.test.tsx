@@ -5,7 +5,7 @@ import { composeGallerySample } from '../../../composition/compose';
 import { ENTRIES } from '../entries';
 import Gallery from '../gallery';
 
-const design: object = await import('../../../design/index');
+const design: object = await import('../../../presentation/ui/index');
 
 // value: what design exports that draws nothing of its own: Screen is a scope a page's one primary is held in.
 const DRAWS_NOTHING = new Set(['Screen']);

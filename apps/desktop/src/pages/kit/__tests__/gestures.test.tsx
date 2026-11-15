@@ -5,9 +5,9 @@ import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../composition/__tests__/page-over';
 import { composeReplay } from '../../../composition/compose';
-import { EngineProvider } from '../../../engine/react';
-import { useGesture } from '../../../engine/use-gesture';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { EngineProvider } from '../../../presentation/dependencies/dependencies';
+import { useGesture } from '../../../presentation/dependencies/use-gesture';
 import { GestureButton, GestureConfirm, GestureOutcome } from '../gestures';
 
 const recordingFor = await recordingsOf('stories', 'two-macs');

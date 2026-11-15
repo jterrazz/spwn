@@ -7,10 +7,10 @@ import type {
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { Button, Dialog, Picks } from '../../design/index';
-import { wordOf } from '../../engine/engine-words';
-import { useWatch } from '../../engine/react';
-import { useGesture } from '../../engine/use-gesture';
+import { useWatch } from '../../presentation/dependencies/dependencies';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import { Button, Dialog, Picks } from '../../presentation/ui/index';
+import { wordOf } from '../../presentation/words/engine-words';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import { targetId, targetLines, VAULT_REREADS } from './passwords-of';

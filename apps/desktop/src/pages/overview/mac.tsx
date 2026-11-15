@@ -1,17 +1,17 @@
 import type { MachinesVM } from '@jterrazz/station-api';
 
-import { Icon } from '../../design/icon';
-import { MachineIcon, Panel, Row, Tile } from '../../design/index';
 import { duration, sentence } from '../../domain/format';
 import { driftAsked } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { between, firstUnitOf } from '../../domain/when';
-import { nounOf } from '../../engine/engine-words';
-import { machineKindOf } from '../../engine/provisional';
-import { useRead, useWatch } from '../../engine/react';
-import { verdictShown, vmState } from '../../engine/shown';
-import { machineRoute } from '../../shell/route';
-import type { Route } from '../../shell/route';
+import { useRead, useWatch } from '../../presentation/dependencies/dependencies';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route } from '../../presentation/navigation/route';
+import { Icon } from '../../presentation/ui/icon';
+import { MachineIcon, Panel, Row, Tile } from '../../presentation/ui/index';
+import { nounOf } from '../../presentation/words/engine-words';
+import { machineKindOf } from '../../presentation/words/provisional';
+import { verdictShown, vmState } from '../../presentation/words/shown';
 import { useIdentityOf } from '../kit/identity';
 import { Unanswered } from '../kit/readings';
 

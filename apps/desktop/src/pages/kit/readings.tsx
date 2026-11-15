@@ -2,7 +2,11 @@ import type { CoreVerdictVerdict, OverviewSummary } from '@jterrazz/station-api'
 import type { ReactNode } from 'react';
 
 import type { Reach } from '../../application/use-cases/reach';
-import { CopyButton } from '../../design/copy-button';
+import type { EngineError } from '../../domain/engine-error';
+import { clock, fixLine, sentence } from '../../domain/format';
+import { SEPARATOR } from '../../domain/separator';
+import type { Tone } from '../../domain/tone';
+import { CopyButton } from '../../presentation/ui/copy-button';
 import {
     asSentence,
     capitalised,
@@ -11,14 +15,10 @@ import {
     StatePill,
     Value,
     Verdict,
-} from '../../design/index';
-import { shownOrWithheld } from '../../design/secret';
-import type { EngineError } from '../../domain/engine-error';
-import { clock, fixLine, sentence } from '../../domain/format';
-import { SEPARATOR } from '../../domain/separator';
-import type { Tone } from '../../domain/tone';
-import { failedState } from '../../engine/failed';
-import { ownState, verdictShown } from '../../engine/shown';
+} from '../../presentation/ui/index';
+import { shownOrWithheld } from '../../presentation/ui/secret';
+import { failedState } from '../../presentation/words/failed';
+import { ownState, verdictShown } from '../../presentation/words/shown';
 
 import styles from '../page.module.css';
 

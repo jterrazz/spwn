@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
-import { EngineProvider } from '../../../engine/react';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Stage } from '../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
-import { Window } from '../../../shell/window';
+import { EngineProvider } from '../../../presentation/dependencies/dependencies';
+import { Window } from '../../../presentation/navigation/window';
 import { PAGES } from '../../registry';
 import { AddPasswordSheet } from '../add-sheet';
 import { PasswordsPage } from '../passwords';

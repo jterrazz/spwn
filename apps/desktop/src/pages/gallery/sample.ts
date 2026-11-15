@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-import type { Dependencies } from '../../engine/react';
+import type { Dependencies } from '../../presentation/dependencies/dependencies';
 
 export const SampleContext = createContext<Dependencies | null>(null);
 

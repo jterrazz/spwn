@@ -1,13 +1,13 @@
 import type { ActivityReport } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Bar, MachineIcon, Panel, Row, Switch } from '../../design/index';
 import { busiestWithVms, vmOf } from '../../domain/activity/measures';
 import type { Busy } from '../../domain/activity/measures';
 import type { Found } from '../../domain/machines/machines';
-import { machineKindOf } from '../../engine/provisional';
-import { machineRoute } from '../../shell/route';
-import type { Route } from '../../shell/route';
+import { machineRoute } from '../../presentation/navigation/route';
+import type { Route } from '../../presentation/navigation/route';
+import { Bar, MachineIcon, Panel, Row, Switch } from '../../presentation/ui/index';
+import { machineKindOf } from '../../presentation/words/provisional';
 import { useIdentityOf } from '../kit/identity';
 
 import styles from './activity.module.css';

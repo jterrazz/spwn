@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 
-import type { PlainPage } from '../shell/route';
-import { TITLES } from '../shell/window';
-import type { PageProps, Pages } from '../shell/window';
+import type { PlainPage } from '../presentation/navigation/route';
+import { TITLES } from '../presentation/navigation/window';
+import type { PageProps, Pages } from '../presentation/navigation/window';
 import { AddMac } from './add-mac/add-mac';
 import { ItemPage } from './catalog/item';
 import { ShelfPage } from './catalog/shelf';

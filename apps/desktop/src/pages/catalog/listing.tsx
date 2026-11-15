@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { Caption, SearchField, Switch, Value } from '../../design/index';
-import { countOf } from '../../engine/engine-words';
+import { Caption, SearchField, Switch, Value } from '../../presentation/ui/index';
+import { countOf } from '../../presentation/words/engine-words';
 import { categoriesOf, countIn, EVERY_CATEGORY, matches } from './model';
 import type { Package } from './model';
 import { categoryWord } from './shelves';

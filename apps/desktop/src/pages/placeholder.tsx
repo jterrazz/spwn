@@ -1,5 +1,5 @@
-import { Panel, Verdict } from '../design/index';
-import { ownState } from '../engine/shown';
+import { Panel, Verdict } from '../presentation/ui/index';
+import { ownState } from '../presentation/words/shown';
 import { Page } from './page';
 
 export function PlaceholderPage({ title }: { title: string }) {

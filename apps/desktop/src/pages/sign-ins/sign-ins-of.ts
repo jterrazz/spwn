@@ -1,7 +1,7 @@
 import type { AccountsProgramRow } from '@jterrazz/station-api';
 
 import { sentence } from '../../domain/format';
-import { detailOf } from '../../engine/engine-words';
+import { detailOf } from '../../presentation/words/engine-words';
 
 function howOf({ How, EntryLabel }: AccountsProgramRow): string | undefined {
     return How === undefined

@@ -1,12 +1,12 @@
 import type { ActivityReport, ActivitySample } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import { Chart, Missing, MissingMark, Panel } from '../../design/index';
 import { chartedOf, cpuOf, marksOf, memoryOf, spanOf } from '../../domain/activity/measures';
 import type { Marks, Span } from '../../domain/activity/measures';
 import { memory, rate, sentence } from '../../domain/format';
 import { SEPARATOR } from '../../domain/separator';
-import { PRESSURE_WORDS } from '../../engine/words';
+import { Chart, Missing, MissingMark, Panel } from '../../presentation/ui/index';
+import { PRESSURE_WORDS } from '../../presentation/words/words';
 import { countedMarks, keptOver, memoryMarks, strided } from './history';
 import { split } from './tiles';
 

@@ -1,10 +1,10 @@
 import type { MachinefileFileView, MachinefileHead } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import { Icon } from '../../design/icon';
-import { Button, Facts, Switch, Value } from '../../design/index';
-import type { Identity } from '../../design/index';
-import type { Opening } from '../../shell/window';
+import type { Opening } from '../../presentation/navigation/window';
+import { Icon } from '../../presentation/ui/icon';
+import { Button, Facts, Switch, Value } from '../../presentation/ui/index';
+import type { Identity } from '../../presentation/ui/index';
 import { identityAt, lifetimeOf, makesOf, sizeOf, systemOf } from './model';
 
 import styles from './machine-files.module.css';

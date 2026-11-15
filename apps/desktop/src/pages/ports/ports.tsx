@@ -1,14 +1,14 @@
 import type { PortsPort, Target } from '@jterrazz/station-api';
 
-import { Panel, Row, StatePill, Value } from '../../design/index';
 import { targetOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
-import { isDeclarable, isPortShared } from '../../engine/provisional';
-import { useRead, useWatch } from '../../engine/react';
-import { portReach, shareToWord } from '../../engine/shown';
-import { PORT_ANSWER_TONES } from '../../engine/tones';
-import { PORT_ANSWER_WORDS } from '../../engine/words';
-import type { Route } from '../../shell/route';
+import { useRead, useWatch } from '../../presentation/dependencies/dependencies';
+import type { Route } from '../../presentation/navigation/route';
+import { Panel, Row, StatePill, Value } from '../../presentation/ui/index';
+import { isDeclarable, isPortShared } from '../../presentation/words/provisional';
+import { portReach, shareToWord } from '../../presentation/words/shown';
+import { PORT_ANSWER_TONES } from '../../presentation/words/tones';
+import { PORT_ANSWER_WORDS } from '../../presentation/words/words';
 import { ChapterDiffers } from '../kit/chapter-differs';
 import { GestureButton, GestureRow, HeldOutcomes } from '../kit/gestures';
 import { Reading, Unanswered, VerdictHead } from '../kit/readings';

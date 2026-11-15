@@ -1,8 +1,8 @@
 import type { CallName, Target } from '@jterrazz/station-api';
 
-import { EXPOSED_ROUTE } from '../../engine/provisional';
-import { useGesture } from '../../engine/use-gesture';
-import type { Gesture } from '../../engine/use-gesture';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import type { Gesture } from '../../presentation/dependencies/use-gesture';
+import { EXPOSED_ROUTE } from '../../presentation/words/provisional';
 
 const PORT_REREADS: readonly CallName[] = ['ports.list', 'overview.read'];
 

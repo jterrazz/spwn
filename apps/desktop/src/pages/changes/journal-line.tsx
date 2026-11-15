@@ -1,15 +1,18 @@
 import type { CallName, MachinesMacView } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import { Row, StatePill } from '../../design/index';
-import type { RowProps } from '../../design/row';
-import { isCalm } from '../../design/state-pill';
 import { clock } from '../../domain/format';
 import { findMachine, targetOf } from '../../domain/machines/machines';
-import { outcomeShown } from '../../engine/kept-journal/journal';
-import type { JournalLine, JournalRetry } from '../../engine/kept-journal/journal';
-import { useGesture } from '../../engine/use-gesture';
-import type { Route } from '../../shell/route';
+import { useGesture } from '../../presentation/dependencies/use-gesture';
+import { outcomeShown } from '../../presentation/features/journal/kept-journal/journal';
+import type {
+    JournalLine,
+    JournalRetry,
+} from '../../presentation/features/journal/kept-journal/journal';
+import type { Route } from '../../presentation/navigation/route';
+import { Row, StatePill } from '../../presentation/ui/index';
+import type { RowProps } from '../../presentation/ui/row';
+import { isCalm } from '../../presentation/ui/state-pill';
 import { GestureButton, GestureRow } from '../kit/gestures';
 import { changeOf, endOf, routeOfLine } from './model';
 

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
-import { CopyButton } from '../../design/copy-button';
-import { Button } from '../../design/index';
-import { QrCode } from '../../design/qr-code';
 import { SEPARATOR } from '../../domain/separator';
-import type { Openable } from '../../engine/openable';
+import type { Openable } from '../../presentation/kit/openable';
+import { CopyButton } from '../../presentation/ui/copy-button';
+import { Button } from '../../presentation/ui/index';
+import { QrCode } from '../../presentation/ui/qr-code';
 import { OpenButton } from '../kit/opens';
 
 import styles from './ports.module.css';

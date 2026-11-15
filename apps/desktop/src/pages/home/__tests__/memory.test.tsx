@@ -2,8 +2,8 @@ import { component, content, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
-import { EngineProvider } from '../../../engine/react';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
+import { EngineProvider } from '../../../presentation/dependencies/dependencies';
 import { MemoryFreeTile, MemoryPanel } from '../memory';
 
 const recordingFor = await recordingsOf('creating', 'one-mac', 'two-macs');

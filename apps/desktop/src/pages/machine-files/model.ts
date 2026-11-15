@@ -5,12 +5,12 @@ import type {
     MachinefileShelf,
 } from '@jterrazz/station-api';
 
-import type { CodeLine } from '../../design/code-block';
-import { IDENTITIES } from '../../design/index';
-import type { Identity } from '../../design/index';
 import { SEPARATOR } from '../../domain/separator';
-import { wordOf, wordOfSent } from '../../engine/engine-words';
-import type { PlainPage, Route } from '../../shell/route';
+import type { PlainPage, Route } from '../../presentation/navigation/route';
+import type { CodeLine } from '../../presentation/ui/code-block';
+import { IDENTITIES } from '../../presentation/ui/index';
+import type { Identity } from '../../presentation/ui/index';
+import { wordOf, wordOfSent } from '../../presentation/words/engine-words';
 import { SHELVES } from '../packages/model';
 import type { Shelf } from '../packages/model';
 

@@ -1,11 +1,11 @@
 import type { PortsSharedPort, Target } from '@jterrazz/station-api';
 
-import { TypeTag, Value } from '../../design/index';
-import { isCalm } from '../../design/state-pill';
-import { Openable, shareAddressOf } from '../../engine/openable';
-import { shareToWord } from '../../engine/shown';
-import { SHARE_STATE_TONES } from '../../engine/tones';
-import { SHARE_STATE_WORDS } from '../../engine/words';
+import { Openable, shareAddressOf } from '../../presentation/kit/openable';
+import { TypeTag, Value } from '../../presentation/ui/index';
+import { isCalm } from '../../presentation/ui/state-pill';
+import { shareToWord } from '../../presentation/words/shown';
+import { SHARE_STATE_TONES } from '../../presentation/words/tones';
+import { SHARE_STATE_WORDS } from '../../presentation/words/words';
 import { GestureButton, GestureRow } from '../kit/gestures';
 import { Address } from './address';
 import { usePortStop } from './port-gestures';

@@ -1,17 +1,17 @@
-import './design/document.css';
+import './presentation/ui/document.css';
 import { lazy, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { compose, composeGallerySample } from './composition/compose';
-import { EngineProvider } from './engine/react';
 import { PAGES } from './pages/registry';
-import { Boundary } from './shell/boundary';
-import { placeOf, wearDress } from './shell/chrome';
-import { startRoute } from './shell/route';
-import type { Route } from './shell/route';
-import { recalled, remember } from './shell/route-memory';
-import type { Memory } from './shell/route-memory';
-import { Window } from './shell/window';
+import { EngineProvider } from './presentation/dependencies/dependencies';
+import { Boundary } from './presentation/navigation/boundary';
+import { placeOf, wearDress } from './presentation/navigation/chrome';
+import { startRoute } from './presentation/navigation/route';
+import type { Route } from './presentation/navigation/route';
+import { recalled, remember } from './presentation/navigation/route-memory';
+import type { Memory } from './presentation/navigation/route-memory';
+import { Window } from './presentation/navigation/window';
 
 const proof = import.meta.env.MODE !== 'production';
 
