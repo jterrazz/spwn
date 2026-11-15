@@ -27,7 +27,7 @@
   - region "Upgrades":
     - heading "Upgrades" [level=2]
     - button "Upgrade now"
-    - paragraph: Not given yet When it upgrades by itself, and its last run
+    - text: "Never by itself: jterrazz-macbook-pro is bound to no Machinefile."
   - group "Which packages":
     - button "Apps6" [pressed]
     - button "Settings0"
@@ -35,7 +35,7 @@
     - heading "Apps by layer, a later one wins" [level=2]
     - region "jterrazz-base":
       - paragraph: jterrazz-base 2 apps
-      - text: homebrew 5.0.1 jq 1.8.1
+      - text: homebrew 5.0.1 takes every version jq 1.8.1 takes every version
     - region "jterrazz-macbook-pro":
       - paragraph: jterrazz-macbook-pro 4 apps
-      - text: lazygit 0.55.1 bat 0.25.0 ripgrep not installed fd not installed
+      - text: lazygit 0.55.1 takes every version bat 0.25.0 takes every version ripgrep not installed takes every version fd not installed takes every version
