@@ -1,0 +1,26 @@
+description: 'ports.list says what each VM may share and with whom, and the Machinefile that sets it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit macbook-pro machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace }
+          ports: { open: [3000, 3001], to: public }
+      exit: 0
+    - command: 'world listen linux-1 "*:3000" node'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.all.macs[].rights]'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{"AllMachines":true}}
+      exit: 0
+      stdout: |
+          [[{"vm":"linux-1","line":"It may share ports 3000 and 3001 with the internet","by":"linux-1"}],[{"vm":"infra","line":"It shares nothing by itself; you share a port when you need it"}]]
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.all.macs[].rights]'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{"AllMachines":true,"Of":"linux-1"}}
+      exit: 0
+      stdout: |
+          [[{"vm":"linux-1","line":"It may share ports 3000 and 3001 with the internet","by":"linux-1"}]]

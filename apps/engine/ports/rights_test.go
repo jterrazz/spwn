@@ -110,3 +110,22 @@ func TestAnAudienceTheOwnerChoseWinsOverTheRights(t *testing.T) {
 		t.Errorf("a rights-made reservation = %+v, want the rights' public on 443", got)
 	}
 }
+
+// invariant: the rights line names each span, what it excepts and its
+// audience in words, and a machine that opens nothing shares only on demand.
+func TestTheRightsLineSaysWhatAVMMayShareAndWithWhom(t *testing.T) {
+	for _, c := range []struct {
+		r    ports.Rights
+		want string
+	}{
+		{ports.RightsOf(nil, false), "It may share ports 1024 to 65535 with your devices"},
+		{ports.RightsOf(&catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, false), "It may share port 3000 with the internet"},
+		{ports.RightsOf(&catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3999}, {From: 5173, To: 5173}, {From: 8080, To: 8080}}, To: catalog.AudienceLocal, Except: []int{3306, 3307}}, false), "It may share ports 3000 to 3999, 5173 and 8080 except 3306 and 3307 with this Mac only"},
+		{ports.RightsOf(nil, true), "It shares nothing by itself; you share a port when you need it"},
+		{ports.Rights{Refused: "linux-1.machine.yaml:4: no"}, "It shares nothing: linux-1.machine.yaml:4: no"},
+	} {
+		if got := c.r.Line(); got != c.want {
+			t.Errorf("Line() = %q, want %q", got, c.want)
+		}
+	}
+}

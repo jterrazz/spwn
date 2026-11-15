@@ -2897,6 +2897,7 @@ export type PortsMacPorts = {
     quiet?: PortsQuiet[];
     range?: PortsRange;
     reachable: boolean;
+    rights?: PortsVMRights[];
     serve: string;
     shared: PortsSharedPort[] | null;
     this_mac: boolean;
@@ -3008,6 +3009,12 @@ export type PortsStatus = {
 export type PortsURLSet = {
     local: string;
     public: string;
+};
+
+export type PortsVMRights = {
+    by?: string;
+    line: string;
+    vm: string;
 };
 
 export type PortsVerified = {

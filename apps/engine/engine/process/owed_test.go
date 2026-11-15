@@ -54,9 +54,9 @@ func (f *flakyTailnet) Shared(ctx context.Context) ([]ports.Share, error) {
 	return f.keptTailnet.Shared(ctx)
 }
 
-func rightsTo(to catalog.Audience, port int) func(context.Context, string) (*catalog.PortRights, error) {
-	return func(context.Context, string) (*catalog.PortRights, error) {
-		return &catalog.PortRights{Open: catalog.PortSet{{From: port, To: port}}, To: to}, nil
+func rightsTo(to catalog.Audience, port int) func(context.Context, string) (*catalog.PortRights, string, error) {
+	return func(context.Context, string) (*catalog.PortRights, string, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: port, To: port}}, To: to}, "", nil
 	}
 }
 
@@ -77,7 +77,7 @@ func funneledAPIOver(t *testing.T, busy map[int]bool) (harness, *flakyTailnet) {
 	if busy != nil {
 		h.d.h = &busyMac{fakeMac: h.mac, busy: busy}
 	}
-	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, error) {
+	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, string, error) {
 		if vm == "db" {
 			return rightsTo(catalog.AudienceLocal, 5432)(ctx, vm)
 		}
@@ -301,7 +301,7 @@ func TestAnOwedPortIsGivenToNoShareWhileTheTailnetIsUnread(t *testing.T) {
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent}, model.VMRecord{Name: "db", Lifetime: model.Persistent})
 	tn := &flakyTailnet{keptTailnet: &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}}
 	h.d.tn = tn
-	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, error) {
+	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, string, error) {
 		if vm == "db" {
 			return rightsTo(catalog.AudienceLocal, 5432)(ctx, vm)
 		}
@@ -338,7 +338,7 @@ func TestAShareAnOwedEntryHeldIsServedAtTheTickThatRemovesIt(t *testing.T) {
 	h.d.st.Ports = pol
 	tn := &flakyTailnet{keptTailnet: &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}}
 	h.d.tn = tn
-	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, error) {
+	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, string, error) {
 		if vm == "pub" {
 			return rightsTo(catalog.AudiencePublic, 3000)(ctx, vm)
 		}

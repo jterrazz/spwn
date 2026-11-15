@@ -112,8 +112,8 @@ func TestStopSharingAfterARestartRemovesItsFunnelEntry(t *testing.T) {
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
 	tn := funneledFrom40000()
 	h.d.tn = tn
-	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) {
-		return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, nil
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, string, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, "", nil
 	}
 	ctx := t.Context()
 	yes := true
@@ -135,7 +135,7 @@ func TestARightNarrowedAfterARestartUnfunnelsItsPort(t *testing.T) {
 	tn := funneledFrom40000()
 	h.d.tn = tn
 	rights := &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}
-	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) { return rights, nil }
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, string, error) { return rights, "", nil }
 	ctx := t.Context()
 	yes := true
 	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: 3000, MacPort: 40000, To: catalog.AudiencePublic, PublicPort: 443, HTTP: &yes}}
@@ -324,7 +324,7 @@ func TestEveryPathThatDropsAReservationUnsharesItsEntry(t *testing.T) {
 			tn := holding(c.l, c.mode)
 			h.d.tn = tn
 			rights := c.rights
-			h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) { return &rights, nil }
+			h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, string, error) { return &rights, "", nil }
 			ctx := t.Context()
 			h.d.refreshSelf(ctx)
 			h.d.adopt(ctx)
@@ -354,11 +354,11 @@ func TestAnIdleReleaseAtTheFirstTickAfterARestartUnfunnelsItsPort(t *testing.T) 
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent}, model.VMRecord{Name: "web", Lifetime: model.Persistent})
 	tn := funneledFrom40000()
 	h.d.tn = tn
-	h.d.o.Rights = func(_ context.Context, vm string) (*catalog.PortRights, error) {
+	h.d.o.Rights = func(_ context.Context, vm string) (*catalog.PortRights, string, error) {
 		if vm == "web" {
-			return &catalog.PortRights{Open: catalog.PortSet{{From: 5432, To: 5432}}, To: catalog.AudienceLocal}, nil
+			return &catalog.PortRights{Open: catalog.PortSet{{From: 5432, To: 5432}}, To: catalog.AudienceLocal}, "", nil
 		}
-		return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, nil
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, "", nil
 	}
 	ctx := t.Context()
 	yes := true
@@ -441,8 +441,8 @@ func TestAFullVMsRefusedListenersLeaveNothingWhenTheyGo(t *testing.T) {
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
 	h.d.st.Ports = &heldPolicy{g: &ports.PortsGroup{MaxPerVM: 1}}
 	h.d.tn = &fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}
-	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) {
-		return &catalog.PortRights{Open: catalog.PortSet{{From: 9000, To: 9999}}, To: catalog.AudiencePrivate}, nil
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, string, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 9000, To: 9999}}, To: catalog.AudiencePrivate}, "", nil
 	}
 	ctx := t.Context()
 	h.d.refreshSelf(ctx)
@@ -476,8 +476,8 @@ func TestAFullVMsRefusedListenersLeaveNothingWhenTheyGo(t *testing.T) {
 func TestAQuietListenerIsSharedOnlyOnceTheOwnerReservesIt(t *testing.T) {
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
 	h.d.tn = &fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}
-	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) {
-		return &catalog.PortRights{Open: catalog.PortSet{{From: 1024, To: 65535}}, To: catalog.AudiencePrivate}, nil
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, string, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 1024, To: 65535}}, To: catalog.AudiencePrivate}, "", nil
 	}
 	ctx := t.Context()
 	h.d.refreshSelf(ctx)
@@ -543,8 +543,8 @@ func TestASnapshotSharesInPortOrderWhateverItsOwn(t *testing.T) {
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
 	tn := &fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}
 	h.d.tn = tn
-	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) {
-		return &catalog.PortRights{Open: catalog.PortSet{{From: 1024, To: 65535}}, To: catalog.AudiencePrivate}, nil
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, string, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 1024, To: 65535}}, To: catalog.AudiencePrivate}, "", nil
 	}
 	ctx := t.Context()
 	h.d.refreshSelf(ctx)

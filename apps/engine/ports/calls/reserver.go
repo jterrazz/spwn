@@ -103,6 +103,7 @@ func (s *Reserver) ThisMachine(ctx context.Context) (ports.MacPorts, error) {
 		}
 		view.Shared = mine
 		view.Ports = slices.DeleteFunc(view.Ports, func(p ports.Port) bool { return p.Machine.Name != s.o.VMName })
+		view.Rights = slices.DeleteFunc(view.Rights, func(r ports.VMRights) bool { return r.VM != s.o.VMName })
 		view.Listening = nil
 		return view, nil
 	}
