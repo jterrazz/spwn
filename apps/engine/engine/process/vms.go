@@ -50,8 +50,6 @@ type vmState struct {
 	keys    string
 	lastErr string
 	gen     int
-	asked   map[string]chan guestMessage
-	seq     int
 	// value: the folders of its Mac its run shares, as its start read them;
 	// read is false for a run this engine adopted, whose start it did not see.
 	mounts []model.Mount
@@ -718,18 +716,15 @@ func (d *Engine) rehello(v *vmState) {
 }
 
 type guestMessage struct {
-	Type    string               `json:"type"`
-	ID      string               `json:"id"`
-	OK      bool                 `json:"ok"`
-	Result  json.RawMessage      `json:"result"`
-	Error   *enginecalls.OpError `json:"error"`
-	Op      string               `json:"op"`
-	Port    int                  `json:"port"`
-	IP      string               `json:"ip"`
-	Process string               `json:"process"`
-	Quiet   bool                 `json:"quiet"`
-	Ports   []guestPort          `json:"ports"`
-	Agents  []agents.Agent       `json:"agents"`
+	Type    string         `json:"type"`
+	ID      string         `json:"id"`
+	Op      string         `json:"op"`
+	Port    int            `json:"port"`
+	IP      string         `json:"ip"`
+	Process string         `json:"process"`
+	Quiet   bool           `json:"quiet"`
+	Ports   []guestPort    `json:"ports"`
+	Agents  []agents.Agent `json:"agents"`
 }
 
 type guestPort struct {
@@ -801,14 +796,6 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 		d.unlisten(name, m.Port)
 	case "agents":
 		d.heardAgents(ctx, v, m.Agents)
-	case "reply":
-		d.mu.Lock()
-		ch := v.asked[m.ID]
-		delete(v.asked, m.ID)
-		d.mu.Unlock()
-		if ch != nil {
-			ch <- m
-		}
 	case "request":
 		if m.Op == opAgentsHeld {
 			go d.answerGuest(ctx, v, m)
@@ -860,38 +847,6 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 		return d.AgentsHeld(ctx)
 	}
 	return nil, fault(enginecalls.UnknownOp, "unknown op \""+m.Op+"\"", "station ports")
-}
-
-func (d *Engine) askGuest(ctx context.Context, v *vmState, op string, budget time.Duration) (json.RawMessage, error) {
-	ch := make(chan guestMessage, 1)
-	d.mu.Lock()
-	if v.asked == nil {
-		v.asked = map[string]chan guestMessage{}
-	}
-	v.seq++
-	id := "h" + strconv.Itoa(v.seq)
-	v.asked[id] = ch
-	d.mu.Unlock()
-	defer func() {
-		d.mu.Lock()
-		delete(v.asked, id)
-		d.mu.Unlock()
-	}()
-	d.write(v, map[string]any{"v": 1, "type": "request", "id": id, "op": op})
-	wait, cancel := context.WithTimeout(ctx, budget)
-	defer cancel()
-	select {
-	case m := <-ch:
-		if !m.OK {
-			if m.Error != nil {
-				return nil, m.Error
-			}
-			return nil, fault(enginecalls.Internal, v.name+"'s guest refused "+op, "station machines "+v.name)
-		}
-		return m.Result, nil
-	case <-wait.Done():
-		return nil, fault(enginecalls.GuestTimeout, v.name+"'s guest did not answer "+op+" in "+budget.String(), "station machines "+v.name)
-	}
 }
 
 func joinPort(ip string, port int) string {

@@ -35,7 +35,6 @@ func Owns() []Own {
 		served(engine.CallReserve, reflect.TypeFor[engine.ReserveIn](), reflect.TypeFor[ports.SharedPort]()),
 		served(engine.CallRelease, reflect.TypeFor[engine.ReserveIn](), reflect.TypeFor[ports.Reservation]()),
 		served(engine.CallGuestExec, reflect.TypeFor[engine.ExecIn](), reflect.TypeFor[engine.ExecOut]()),
-		served(engine.CallAccounts, none, reflect.TypeFor[engine.AccountsView]()),
 		served(engine.CallStopAll, none, reflect.TypeFor[engine.StopAll]()),
 		served(engine.CallAwakeView, none, reflect.TypeFor[awake.View]()),
 		served(engine.CallKeepAwake, reflect.TypeFor[engine.AwakeIn](), reflect.TypeFor[awake.Awoken]()),

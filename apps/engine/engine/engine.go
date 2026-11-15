@@ -46,16 +46,6 @@ type Remembered struct {
 	Drift *model.KeptDrift `json:"drift,omitempty"`
 }
 
-type VMAccounts struct {
-	Name     string          `json:"name"`
-	Guest    string          `json:"guest"`
-	Accounts json.RawMessage `json:"accounts,omitempty"`
-}
-
-type AccountsView struct {
-	VMs []VMAccounts `json:"vms"`
-}
-
 type Stopped struct {
 	Name     string `json:"name"`
 	Lifetime string `json:"lifetime"`

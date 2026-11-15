@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
@@ -150,9 +149,6 @@ type Mac struct {
 	Overrides map[string]bool `json:"overrides,omitempty"`
 	// value: what station keeps in this Mac's vault, by name.
 	Vault map[string][]byte `json:"vault,omitempty"`
-	// value: who each provider says is signed in, by provider; a provider
-	// absent here has no row on this Mac.
-	Identities map[string]accounts.Identity `json:"identities,omitempty"`
 	// value: what this machine's programs, sign-ins, passwords and grants are.
 	Accounts *Accounts `json:"accounts,omitempty"`
 	// value: the facts this Mac answers, by fact; a fact absent here is one

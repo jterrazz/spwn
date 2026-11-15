@@ -529,46 +529,6 @@ func (d *Engine) accept(ctx context.Context, l Listener) {
 	}
 }
 
-const accountsBudget = 12 * time.Second
-
-// invariant: each running VM is asked by its own guest, all at once, each
-// within accountsBudget; a VM whose guest is not connected is "absent" with
-// no rows. Only the guest's parsed rows travel: never a provider's output.
-func (d *Engine) accounts(ctx context.Context) engine.AccountsView {
-	d.mu.Lock()
-	var running []*vmState
-	for _, v := range d.vms {
-		if v.state == engine.StateRunning {
-			running = append(running, v)
-		}
-	}
-	d.mu.Unlock()
-	out := make([]engine.VMAccounts, len(running))
-	var wg sync.WaitGroup
-	for i, v := range running {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			d.mu.Lock()
-			guest := v.guest
-			d.mu.Unlock()
-			out[i] = engine.VMAccounts{Name: v.name, Guest: engine.GuestAbsent}
-			if guest != engine.GuestConnected {
-				return
-			}
-			rows, err := d.askGuest(ctx, v, "accounts", accountsBudget)
-			if err != nil {
-				d.logf(v.name+" accounts", err.Error())
-				return
-			}
-			out[i] = engine.VMAccounts{Name: v.name, Guest: engine.GuestConnected, Accounts: rows}
-		}()
-	}
-	wg.Wait()
-	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
-	return engine.AccountsView{VMs: out}
-}
-
 // invariant: stop_all stops every VM of this host that runs, at once, with
 // the wish stopped and its disk kept, whatever its lifetime: only a delete
 // destroys. Each answers its own result, so a VM that would not stop keeps

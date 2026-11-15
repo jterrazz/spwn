@@ -342,13 +342,6 @@
       "watch": true
     },
     {
-      "name": "engine.accounts",
-      "schema": "station.engine.accounts/v1",
-      "where": "in-engine",
-      "out": "AccountsView",
-      "own": true
-    },
-    {
       "name": "engine.activity",
       "schema": "station.engine.activity/v1",
       "where": "in-engine",

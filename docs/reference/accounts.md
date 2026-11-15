@@ -87,7 +87,7 @@ A grant's removal undoes it inside the VM; a token stays valid at its provider u
 
 ## Reading accounts
 
-`station accounts` is `accounts.list` of one machine: each program's state, who, its scopes, and how, `own` or `granted` with the password's label. A VM's programs are read by the engine of its Mac, which asks the VM over its one connection and knows what it granted, so no program's output leaves the VM: only the parsed identities and scopes do. Each read is an allowlist of named fields (`apps/engine/accounts/adapter/cli/parse.go`), and any kept value shaped like a secret is replaced by `?`; the shapes are `apps/engine/core/secret`'s, owned by ADR-048.
+`station accounts` is `accounts.list` of one machine: each program's state, who, its scopes, and how, `own` or `granted` with the password's label. A VM's programs are read by the engine of its Mac, which runs each program's read over the VM's one connection and knows what it granted. Each read is the catalog's (`apps/engine/catalog/accounts.go`, a program's `Reads`): a command that never prints a secret, and only the fields it names are kept (`apps/engine/accounts/adapter/cli/signins.go`); any kept value shaped like a secret is replaced by `?`, the shapes being `apps/engine/core/secret`'s, owned by ADR-048.
 
 ## Windows
 
