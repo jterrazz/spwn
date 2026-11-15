@@ -45,17 +45,19 @@ function unhealthy(recording: Recording): Recording {
     return recordingOf(JSON.parse(said));
 }
 
-type Boxes = { start: string; stop: string; tabs: number };
+type Boxes = { lifecycle: string; tabs: number };
 
-function buttonBox(label: string): string {
-    const found = [...document.querySelectorAll('button')].find((one) => one.textContent === label);
+function lifecycleBox(): string {
+    const found = [...document.querySelectorAll('button')].find((one) =>
+        ['Start', 'Stop'].includes(one.textContent ?? ''),
+    );
     const box = found?.getBoundingClientRect();
-    return box === undefined ? 'none' : `${box.x},${box.y} ${box.width}x${box.height}`;
+    return box === undefined ? 'none' : `y${box.y} h${box.height}`;
 }
 
 function headerBoxes(): Boxes {
     const tabs = document.querySelector('[role="tablist"]')?.getBoundingClientRect().y ?? 0;
-    return { start: buttonBox('Start'), stop: buttonBox('Stop'), tabs };
+    return { lifecycle: lifecycleBox(), tabs };
 }
 
 describe('gestures', () => {
@@ -103,9 +105,9 @@ describe('gestures', () => {
             after = headerBoxes();
         });
 
-        // Then - Start, Stop and the tab bar stand where they stood
+        // Then - the gesture the wire lists now stands where Stop stood, and so does the tab bar
         expect(before?.tabs).toBeGreaterThan(0);
-        expect([before?.start, before?.stop]).not.toContain('none');
+        expect(before?.lifecycle).not.toBe('none');
         expect(after).toStrictEqual(before);
     });
 
@@ -248,9 +250,8 @@ describe('gestures', () => {
             async (visitor) => {
                 await visitor.see(heading('linux-1', { exact: false }));
 
-                // When - Stop is confirmed
-                await visitor.click(button('Stop'));
-                await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
+                // When - Start is clicked
+                await visitor.click(button('Start'));
 
                 // Then - the engine's words, and Dismiss clears them
                 const said = content('the engine is stopped on macbook-pro', {
@@ -328,6 +329,31 @@ describe('gestures', () => {
         expect(shows).toBe('ssh admin@linux-1');
         expect(result.html.text).not.toMatch(/class="[^"]*primary/u);
         expect(result.errors.text).toBe('');
+    });
+
+    test('a header draws the gestures the wire lists for its state and no other', async () => {
+        // Given - api stopped and linux-1 running over two-macs
+        const stopped = await component.render(machineOver('two-macs', 'api'), async (visitor) => {
+            // When - a stopped workspace's header is drawn
+            await visitor.see(heading('api Stopped'));
+
+            // Then - its Start only
+            await visitor.see(button('Start'));
+            await visitor.gone(button('Stop'));
+        });
+        const running = await component.render(
+            machineOver('two-macs', 'linux-1'),
+            async (visitor) => {
+                // When - a running workspace's header is drawn
+                await visitor.see(heading('linux-1 Running'));
+
+                // Then - its Stop only
+                await visitor.see(button('Stop'));
+                await visitor.gone(button('Start'));
+            },
+        );
+        expect(stopped.errors.text).toBe('');
+        expect(running.errors.text).toBe('');
     });
 
     test("a Mac's header says what it is, its engine's state, and New machine", async () => {

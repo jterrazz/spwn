@@ -301,7 +301,7 @@ GESTURES = {
         {"call": "accounts.answer", "in": {"Machine": "linux-1", "Exchange": "ex-1", "Code": "nope"}},
     ],
     "engine-stopped": [
-        {"call": "machines.stop", "in": {"VM": "linux-1", "Confirm": "yes"}},
+        {"call": "machines.start", "in": {"VM": "linux-1"}},
         {"call": "engine.start", "in": {}},
     ],
     "one-mac": [

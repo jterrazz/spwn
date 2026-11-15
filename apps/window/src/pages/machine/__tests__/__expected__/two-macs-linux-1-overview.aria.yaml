@@ -3,7 +3,6 @@
   - paragraph:
     - text: workspace · ephemeral · on
     - button "macbook-pro"
-  - button "Start"
   - button "Stop"
   - button "Open in Terminal"
   - tablist "Tabs":

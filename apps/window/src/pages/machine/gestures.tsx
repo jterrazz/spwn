@@ -21,6 +21,12 @@ type Lifecycle = 'restart' | 'start' | 'stop';
 // invariant: found again in the store, which outlives it.
 const LIFECYCLES: readonly Lifecycle[] = ['restart', 'start', 'stop'];
 
+const LABELS: Readonly<Record<Lifecycle, string>> = {
+    restart: 'Restart',
+    start: 'Start',
+    stop: 'Stop',
+};
+
 function useLifecycle({ mac, vm }: VmProps) {
     const target = targetOf({ mac });
     const spec = {
@@ -44,13 +50,15 @@ export function LifecycleGestures({ mac, vm, terminal }: VmProps & { terminal?: 
     const shown = gestures[last];
     const done = shown.state.kind === 'done';
     const leads = vm.Health !== undefined && verdictShown(vm.Health).tone === 'bad';
-    const button = (which: Lifecycle, label: string) => {
+    const button = (which: Lifecycle) => {
+        const label = LABELS[which];
         const primary = which === 'restart' && leads;
         return (
             <GestureButton
                 gesture={marked(gestures[which], () => {
                     setLast(which);
                 })}
+                key={which}
                 label={label}
                 title={`${label} ${vm.Name}?`}
                 variant={primary ? 'primary' : 'plain'}
@@ -62,9 +70,7 @@ export function LifecycleGestures({ mac, vm, terminal }: VmProps & { terminal?: 
         <div className={styles.gestures}>
             <div className={styles.actions}>
                 {done ? <GestureOutcome gesture={shown} /> : null}
-                {button('start', 'Start')}
-                {button('stop', 'Stop')}
-                {machineKindOf(vm) === 'server' ? button('restart', 'Restart') : null}
+                {(vm.Gestures ?? []).map(button)}
                 {terminal}
             </div>
             {done ? null : <GestureOutcome gesture={shown} />}
