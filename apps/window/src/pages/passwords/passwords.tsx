@@ -24,9 +24,6 @@ const COLUMNS = [
     { label: 'Granted to', numeric: true },
 ];
 
-const NO_VALUE_SHOWN =
-    'No value is shown, copied or revealed here: a password is only granted, and removed.';
-
 function EntryRow({ entry, go }: { entry: AccountsVaultEntry; go: Go }) {
     return (
         <Row
@@ -51,17 +48,6 @@ function EntryRow({ entry, go }: { entry: AccountsVaultEntry; go: Go }) {
     );
 }
 
-function NoValueShown() {
-    return (
-        <p className={styles.note}>
-            <span className={styles.lock}>
-                <Icon name="lock" />
-            </span>
-            {NO_VALUE_SHOWN}
-        </p>
-    );
-}
-
 function Vault({ read, go }: { read: AccountsVaultRead; go: Go }) {
     const entries = read.Entries ?? [];
     return (
@@ -80,7 +66,6 @@ function Vault({ read, go }: { read: AccountsVaultRead; go: Go }) {
                     {entries.map((entry) => (
                         <EntryRow entry={entry} go={go} key={entry.ID} />
                     ))}
-                    <NoValueShown />
                 </Panel>
             </HeldOutcomes>
         </Page>
