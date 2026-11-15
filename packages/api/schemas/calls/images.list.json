@@ -1,5 +1,35 @@
 {
   "$defs": {
+    "images.Building": {
+      "additionalProperties": false,
+      "properties": {
+        "Position": {
+          "type": "integer"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Step": {
+          "enum": [
+            "base-system",
+            "packages",
+            "settings",
+            "seal"
+          ],
+          "type": "string"
+        },
+        "Steps": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Position",
+        "Sentence",
+        "Step",
+        "Steps"
+      ],
+      "type": "object"
+    },
     "images.Record": {
       "additionalProperties": false,
       "properties": {
@@ -52,6 +82,19 @@
     "images.Report": {
       "additionalProperties": false,
       "properties": {
+        "Building": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/images.Building"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Deletable": {
+          "type": "boolean"
+        },
         "Mac": {
           "type": "string"
         },
@@ -72,6 +115,8 @@
         }
       },
       "required": [
+        "Building",
+        "Deletable",
         "Mac",
         "Newest",
         "Record",

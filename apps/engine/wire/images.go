@@ -39,6 +39,7 @@ func (m machine) images() *imagescalls.Builder {
 	return imagescalls.NewBuilder(imagesMachine{h: m.sys, keys: openssh.NewKeyGen(m.sys.Run, m.sys.FS)}, imagescalls.Contracts{
 		Hypervisor: hypervisor, Builds: m.buildVMs(hypervisor), Store: m.stores.images,
 		Source: m.imageSource(hypervisor.Name()), Machines: m.stores.machines, Templates: templates{m},
+		Marks: m.stores.marks, Processes: m.processes(),
 	}, m.cat, imagescalls.BuilderOptions{
 		Cache: m.paths.Cache, Key: filepath.Join(m.paths.State, "images", "key"),
 		Version: Version(),

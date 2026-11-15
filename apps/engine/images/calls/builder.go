@@ -32,6 +32,8 @@ type Builder struct {
 	vms       contract.MachineStore
 	templates Templates
 	cat       catalog.Catalog
+	marks     imagescontract.BuildMarks
+	procs     contract.Processes
 	o         BuilderOptions
 }
 
@@ -42,6 +44,10 @@ type Contracts struct {
 	Source     imagescontract.ImageSource
 	Machines   contract.MachineStore
 	Templates  Templates
+	// value: the builds this Mac runs, marked by the process each runs in; and
+	// the Mac's processes, which say whether that process still does.
+	Marks     imagescontract.BuildMarks
+	Processes contract.Processes
 }
 
 type Templates interface {
@@ -81,7 +87,7 @@ type Ran struct {
 }
 
 func NewBuilder(m Machine, c Contracts, cat catalog.Catalog, o BuilderOptions) *Builder {
-	return &Builder{m: m, e: c.Hypervisor, builds: c.Builds, store: c.Store, source: c.Source, vms: c.Machines, templates: c.Templates, cat: cat, o: o}
+	return &Builder{marks: c.Marks, procs: c.Processes, m: m, e: c.Hypervisor, builds: c.Builds, store: c.Store, source: c.Source, vms: c.Machines, templates: c.Templates, cat: cat, o: o}
 }
 
 // invariant: an image is one of the catalog's, by its name or one it was
@@ -142,22 +148,38 @@ func (s *Builder) ListOf(ctx context.Context, disks []contract.Disk) ([]images.R
 	if err != nil {
 		return nil, err
 	}
+	making := s.making(ctx)
 	var out []images.Report
 	for _, img := range list {
 		held, err := s.records(img)
 		if err != nil {
 			return nil, err
 		}
-		for i, r := range held {
-			if size, ok := sizes[DiskName(r.Name, r.Version)]; ok {
-				r.SizeGB = size
-			}
-			vms := users[r.Name+"@"+r.Version]
-			r.Name = img.Name
-			out = append(out, images.Report{Record: r, Newest: i == 0, VMs: vms, Mac: s.o.Mac})
-		}
+		out = append(out, s.reports(img, held, users, making, sizes)...)
 	}
 	return out, nil
+}
+
+func (s *Builder) reports(img catalog.Image, held []images.Record, users map[string][]string, making []images.Making, sizes map[string]int) []images.Report {
+	// invariant: one report for each version held, the newest first, after
+	// one for each version a build is making that is not held yet: a build
+	// records its version before it clears its mark, and the version reads
+	// once.
+	var out []images.Report
+	for _, one := range making {
+		if one.Image == img.Name && !slices.ContainsFunc(held, func(r images.Record) bool { return r.Version == one.Version }) {
+			out = append(out, images.Report{Record: images.Record{Name: img.Name, Version: one.Version}, Mac: s.o.Mac, Building: images.BuildingAt(one.Step)}.Judged())
+		}
+	}
+	for i, r := range held {
+		if size, ok := sizes[DiskName(r.Name, r.Version)]; ok {
+			r.SizeGB = size
+		}
+		vms := users[r.Name+"@"+r.Version]
+		r.Name = img.Name
+		out = append(out, images.Report{Record: r, Newest: i == 0, VMs: vms, Mac: s.o.Mac}.Judged())
+	}
+	return out
 }
 
 func (s *Builder) users() (map[string][]string, error) {
@@ -185,6 +207,16 @@ func (s *Builder) CheckDelete(ctx context.Context, image, version string) error 
 	all, err := s.records(img)
 	if err != nil {
 		return err
+	}
+	users, err := s.users()
+	if err != nil {
+		return err
+	}
+	for _, r := range s.reports(img, all, users, s.making(ctx), nil) {
+		asked := version == "" || r.Record.Version == version
+		if asked && (r.Building != nil || version != "" && !r.Unused()) {
+			return &images.InUseError{Image: image, Version: r.Record.Version, Newest: r.Newest, Building: r.Building != nil, VMs: r.VMs}
+		}
 	}
 	if len(all) == 0 {
 		return &images.NotBuiltError{Image: image}

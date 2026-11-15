@@ -1,7 +1,7 @@
-description: 'a delete on another Mac deletes the version there, This Mac''s kept'
+description: 'a delete on another Mac deletes its versions there, This Mac''s kept'
 env: two-macs
 runs:
-    - command: 'images delete station-linux@2026.11.01 --yes --on mac-mini'
+    - command: 'images delete station-linux --yes --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

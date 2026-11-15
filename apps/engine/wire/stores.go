@@ -96,6 +96,7 @@ type stores struct {
 	prefs        preferences
 	machines     machineStore
 	images       imageStore
+	marks        imagescontract.BuildMarks
 	shares       shareStore
 	book         bookStore
 	reservations reservationStore
@@ -111,6 +112,7 @@ func newStores(files local.FS, p setup.Paths) *stores {
 			Renaming(setupcontract.RetiredGroupName, setupcontract.GroupName).Renaming(portscontract.RetiredGroupPorts, portscontract.GroupPorts),
 		machines:     machinesjsonfile.New(lockable{files}, filepath.Join(p.State, "vms")),
 		images:       imagesjsonfile.New(files, filepath.Join(p.State, "images")),
+		marks:        imagesjsonfile.NewMarks(files, filepath.Join(p.State, "builds")),
 		shares:       accountsjsonfile.NewShares(files, filepath.Join(p.State, "shares.json"), filepath.Join(p.State, "vms")),
 		book:         accountsjsonfile.NewBook(lockable{files}, filepath.Join(p.State, "vault.json")),
 		reservations: portsjsonfile.NewReservations(files, filepath.Join(p.State, "leases.json")),

@@ -83,7 +83,7 @@ type DeleteIn struct {
 
 var Delete = call.Call[Deps, DeleteIn, []images.Record]{
 	Name: "images.delete", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(), Confirm: confirm.DeleteImage,
-	Errors: []fail.Code{Unknown, confirm.YesNeeded},
+	Errors: []fail.Code{Unknown, InUse, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in DeleteIn, _ call.Progress) ([]images.Record, error) {
 		if err := d.Images.CheckDelete(ctx, in.Image, in.Version); err != nil {
 			return nil, Worded(err)

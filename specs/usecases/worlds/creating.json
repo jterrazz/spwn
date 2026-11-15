@@ -7,6 +7,17 @@
             "engine": {
                 "started_at": "2026-11-01T10:00:00Z"
             },
+            "building": [
+                {
+                    "image": "station-linux",
+                    "version": "2026.11.04",
+                    "step": "packages",
+                    "owner": {
+                        "pid": 4242,
+                        "start": "1762250400.120000"
+                    }
+                }
+            ],
             "preferences": {
                 "here": "macbook-pro",
                 "vm_user": "admin"

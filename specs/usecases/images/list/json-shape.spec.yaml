@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           station.images.list/v1
-          mac name newest size_bytes version vms
+          deletable mac name newest size_bytes version vms
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.name) \(.version) \(.newest) \(.size_bytes) \(.vms | join(","))"'''
       exit: 0
       stdout: |

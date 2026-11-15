@@ -1,7 +1,12 @@
 package jsonfile_test
 
 import (
+	"context"
+	"io/fs"
+	"path"
 	"testing"
+
+	"github.com/jterrazz/studio-station/apps/engine/images"
 
 	"github.com/jterrazz/studio-station/apps/engine/images/adapter/jsonfile"
 	"github.com/jterrazz/studio-station/apps/engine/images/contract"
@@ -13,4 +18,36 @@ func TestImageStore(t *testing.T) {
 	contracttest.ImageStore(t, func(t *testing.T) contract.ImageStore {
 		return jsonfile.New(local.New(nil, nil, nil, nil).FS, t.TempDir())
 	})
+}
+
+func TestBuildMarks(t *testing.T) {
+	contracttest.BuildMarks(t, func(t *testing.T) contract.BuildMarks {
+		return jsonfile.NewMarks(local.New(nil, nil, nil, nil).FS, t.TempDir())
+	})
+}
+
+type vanishing struct {
+	jsonfile.Files
+	gone string
+}
+
+func (v vanishing) ReadFile(name string) ([]byte, error) {
+	if path.Base(name) == v.gone {
+		return nil, fs.ErrNotExist
+	}
+	return v.Files.ReadFile(name)
+}
+
+func TestAMarkClearedWhileTheFolderIsReadIsNone(t *testing.T) {
+	ctx, dir := context.Background(), t.TempDir()
+	files := local.New(nil, nil, nil, nil).FS
+	for _, image := range []string{"station-linux", "studio-linux"} {
+		if err := jsonfile.NewMarks(files, dir).Mark(ctx, images.Making{Image: image, Version: "1", Step: images.BuildSeal}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := jsonfile.NewMarks(vanishing{Files: files, gone: "station-linux.json"}, dir).Marked(ctx)
+	if err != nil || len(got) != 1 || got[0].Image != "studio-linux" {
+		t.Fatalf("Marked = %+v, %v; want the mark still there", got, err)
+	}
 }

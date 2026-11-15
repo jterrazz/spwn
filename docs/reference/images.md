@@ -16,10 +16,14 @@ An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac ho
 ```sh
 station images                  # ●  station-linux  2026.11.01  4.0 GB  macbook-pro  api · linux-1
 station images --on mac-mini    # that Mac's alone
-station images --json           # station.images.list/v1: name, version, size_bytes, mac, vms, newest
+station images --json           # station.images.list/v1: name, version, size_bytes, mac, vms, newest, deletable, building
 ```
 
 One row per version per Mac, This Mac first, then every other Mac that answers; an image no Mac holds is one row, `not built yet`. Images live on a Mac: inside a VM the family is refused (exit 2).
+
+A version is deletable when it is not the newest of its image, no machine was made from it and no build is making it; `Report.Unused` in `apps/engine/images/record.go` is that one rule, and `images.list` says it as `Deletable` (`deletable` in `--json`), the same rule that sums what [Disk](disk.md) says can be freed.
+
+An image being built is one more row, the version it will be, at its step: `Step 2 of 4` (`building` in `--json`). The four steps are the build's: Base system (the base pulled, cloned and booted), Packages (the station binary and the plumbing recipe), Settings (the Machinefile's image phase) and Seal (the cleanup, the power off and the record). A build marks its step in a file of `~/.local/state/station/builds/`, with the process it runs in, and clears it when it ends; `images.list` runs at its target, so the process that answers it reads those marks (on This Mac, the CLI's own), not the engine, and a mark whose process no longer runs is no row. The version a build is making is not deletable.
 
 ## Building
 
@@ -65,7 +69,7 @@ station images build station-linux --binary .artifacts/go/station-linux-arm64
 
 ## Cleaning
 
-`station images delete <image>[@<version>]` never touches a VM: a VM is an APFS clone, independent of its image once made. Bare `station images` marks every version older than the newest. Deleting never prunes Tart's cache of the base: that cache is Tart's, emptied by `station disk free tart` ([Disk](disk.md)), and the next build pulls the base again after it.
+`station images delete <image>@<version>` deletes only a deletable version: the newest, one a machine was made from and one a build is making are refused (exit 2, `image.in-use`), naming why, whichever client asks; a bare `<image>` deletes every version, the newest included, but is refused (`image.in-use`, "being built") while a build of that image is making one. A delete never touches a VM: a VM is an APFS clone, independent of its image once made. Bare `station images` marks every version older than the newest. Deleting never prunes Tart's cache of the base: that cache is Tart's, emptied by `station disk free tart` ([Disk](disk.md)), and the next build pulls the base again after it.
 
 ## Related
 

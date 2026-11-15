@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 	"github.com/jterrazz/studio-station/apps/engine/disk"
+	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
@@ -90,6 +91,12 @@ func wordedEnums() []worded {
 			string(machines.BornBooting):  {Word: machines.BornBooting.Word(), Detail: machines.BornBooting.Noun(), Tone: verdict.New},
 			string(machines.BornAddress):  {Word: machines.BornAddress.Word(), Detail: machines.BornAddress.Noun(), Tone: verdict.New},
 			string(machines.BornSSH):      {Word: machines.BornSSH.Word(), Detail: machines.BornSSH.Noun(), Tone: verdict.New},
+		}},
+		{images.BuildStep(""), map[string]word{
+			string(images.BuildBaseSystem): plain(images.BuildBaseSystem.Word()),
+			string(images.BuildPackages):   plain(images.BuildPackages.Word()),
+			string(images.BuildSettings):   plain(images.BuildSettings.Word()),
+			string(images.BuildSeal):       plain(images.BuildSeal.Word()),
 		}},
 		{machinefile.Chapter(""), map[string]word{
 			string(machinefile.ChapterApps):     {Word: "Apps", One: "app", Other: "apps", Tone: verdict.Plain},

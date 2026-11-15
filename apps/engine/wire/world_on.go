@@ -300,6 +300,7 @@ func (m *worldMac) stores(st *stores) {
 	w := m.run.w
 	st.machines = machinesfake.StoreOf(w, m.name)
 	st.images = imagesfake.StoreOf(w, m.name)
+	st.marks = imagesfake.MarksOf(w, m.name)
 	st.shares = accountsfake.SharesOf(w, m.name)
 	st.reservations = portsfake.ReservationsOf(w, m.name)
 	st.declarations = portsfake.DeclarationsOf(w, m.name)

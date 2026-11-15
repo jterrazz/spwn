@@ -42,6 +42,7 @@ type playMac struct {
 	Offline     bool                           `json:"offline,omitempty"`
 	Preferences map[string]any                 `json:"preferences,omitempty"`
 	Images      []string                       `json:"images,omitempty"`
+	Building    []images.Making                `json:"building,omitempty"`
 	VMs         map[string]*playVM             `json:"vms,omitempty"`
 	Jobs        map[string]background.Job      `json:"jobs,omitempty"`
 	Secrets     map[string]string              `json:"secrets,omitempty"`
@@ -430,6 +431,7 @@ const creatingVM = "linux-2"
 func creating(m *playMac) {
 	owner := model.Process{PID: 4242, Start: strconv.FormatInt(storyNow.Add(-20*time.Second).Unix(), 10) + ".000000"}
 	m.Processes = append(m.Processes, owner)
+	m.Building = []images.Making{{Image: "station-linux", Version: "4", Step: images.BuildPackages, Owner: &owner}}
 	purpose, creator := purposeOf(creatingVM)
 	m.VMs[creatingVM] = &playVM{
 		Kept: &playKept{Image: "station-linux", Lifetime: model.Persistent, CreatedAt: storyNow.Add(-20 * time.Second), Purpose: purpose, Creator: creator,
