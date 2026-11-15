@@ -3,6 +3,7 @@ package contract
 import (
 	"context"
 	"encoding/json"
+	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -15,6 +16,23 @@ type Hello struct {
 	// value: the kind of the machine that answers, as its own Profile says;
 	// empty from a binary older than the field.
 	Kind machine.Kind `json:"kind,omitempty"`
+	// value: what its calls read of an input beyond their names
+	// (call.Meta.Abilities); none from a binary older than the field.
+	Abilities []string `json:"abilities,omitempty"`
+}
+
+func (h Hello) Lacks(name string, asks []string) string {
+	// value: the first of the call and the abilities its input asks that
+	// this binary does not serve; empty when it serves them all.
+	if !slices.Contains(h.Calls, name) {
+		return name
+	}
+	for _, a := range asks {
+		if !slices.Contains(h.Abilities, a) {
+			return a
+		}
+	}
+	return ""
 }
 
 type EndpointDialer interface {

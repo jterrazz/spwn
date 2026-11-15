@@ -43,7 +43,7 @@ func (m machine) vmRunning(ctx context.Context, vm string) (bool, error) {
 
 func receives(guest localGuest) func(context.Context, string) (bool, error) {
 	// value: a VM whose station is older than its kind's answer receives.
-	ask := unix.New(sharedGuest{guest}, nil, nil)
+	ask := unix.New(sharedGuest{guest}, nil, nil, nil)
 	return func(ctx context.Context, vm string) (bool, error) {
 		kind, err := ask.KindOf(ctx, vm)
 		if err != nil || kind == "" {

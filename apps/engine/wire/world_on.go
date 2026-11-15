@@ -434,6 +434,11 @@ func (m *worldMac) engineVersion() string {
 	return ""
 }
 
+func (m *worldMac) engineLacks(ability string) bool {
+	e := m.slice().Engine
+	return e != nil && slices.Contains(e.Lacks, ability)
+}
+
 func (m *worldMac) stationVersion() string { return m.slice().Station }
 
 func (m *worldMac) absent(program string) bool { return slices.Contains(m.slice().Absent, program) }

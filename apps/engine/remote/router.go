@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"slices"
 	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -95,7 +94,7 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 		call.Set(out, v)
 		return nil
 	}
-	l, err := r.endpoint(ctx, t, name)
+	l, err := r.endpoint(ctx, t, name, raw)
 	if err != nil {
 		return r.named(t, err)
 	}
@@ -129,7 +128,7 @@ func (r *Router) Watch(ctx context.Context, target machine.Ref, name string, in 
 		return nil, err
 	}
 	guest := func() (<-chan call.Update[any], error) {
-		l, err := r.endpoint(ctx, t, name)
+		l, err := r.endpoint(ctx, t, name, raw)
 		if err != nil {
 			return nil, r.named(t, err)
 		}
@@ -203,13 +202,16 @@ func (r *Router) inEngine(name string) bool {
 	return ok && h.Meta().Where == call.InEngine
 }
 
-func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string) (*link, error) {
-	// invariant: a call the far Hello lacks, or a far release before
-	// api.Floor, is asked again of a fresh connection, so a Mac upgraded since
-	// its connection was opened serves it; a far release before the floor is
-	// refused before any call is sent.
+func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in json.RawMessage) (*link, error) {
+	// invariant: a call the far Hello lacks, an ability its input asks that
+	// the far Hello does not list, or a far release before api.Floor, is
+	// asked again of a fresh connection, so a Mac upgraded since its
+	// connection was opened serves it; a far release before the floor, and a
+	// call or ability the fresh Hello still lacks, is refused before any call
+	// is sent.
+	asks := r.registry.Asks(name, in)
 	l, hello, fresh, err := r.connect(ctx, t)
-	if err == nil && !fresh && (!slices.Contains(hello.Calls, name) || api.BeforeFloor(hello.Version)) {
+	if err == nil && !fresh && (hello.Lacks(name, asks) != "" || api.BeforeFloor(hello.Version)) {
 		r.drop(t.Mac(), l)
 		r.release(l)
 		l, hello, _, err = r.connect(ctx, t)
@@ -225,9 +227,9 @@ func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string) (*lin
 		}
 		return nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
 	}
-	if !slices.Contains(hello.Calls, name) {
+	if lacked := hello.Lacks(name, asks); lacked != "" {
 		r.release(l)
-		detail := map[string]string{"version": hello.Version, "call": name}
+		detail := map[string]string{"version": hello.Version, "call": lacked}
 		if r.reach.Label != nil {
 			detail["label"] = r.reach.Label(t.Mac())
 		}
@@ -348,6 +350,12 @@ func (r *Router) Close() {
 	}
 }
 
+func (r *Router) Asks(name string, in json.RawMessage) []string {
+	// value: what a call's input asks of the binary that runs it, by this
+	// binary's registry (call.Registry.Asks).
+	return r.registry.Asks(name, in)
+}
+
 func (r *Router) Served() contract.Hello {
 	return serve.Local(r.registry, r.thisMac, r.reach.Version).Hello()
 }
@@ -363,7 +371,7 @@ func (r *Router) Serve(ctx context.Context, target machine.Ref, name string, in 
 	if v, ok := r.stopped(ctx, vm, name, in); ok {
 		return v, nil
 	}
-	l, err := r.endpoint(ctx, vm, name)
+	l, err := r.endpoint(ctx, vm, name, in)
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +389,7 @@ func (r *Router) ServeWatch(ctx context.Context, target machine.Ref, name string
 		return serve.Local(r.registry, r.thisMac, r.reach.Version).Watch(ctx, target, name, in, p)
 	}
 	guest := func() (<-chan call.Update[any], error) {
-		l, err := r.endpoint(ctx, vm, name)
+		l, err := r.endpoint(ctx, vm, name, in)
 		if err != nil {
 			return nil, err
 		}

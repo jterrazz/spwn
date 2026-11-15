@@ -39,9 +39,10 @@ type (
 		On   string `json:"on,omitempty"`
 	}
 	frameHello struct {
-		Version string       `json:"version"`
-		Calls   []string     `json:"calls"`
-		Kind    machine.Kind `json:"kind,omitempty"`
+		Version   string       `json:"version"`
+		Calls     []string     `json:"calls"`
+		Kind      machine.Kind `json:"kind,omitempty"`
+		Abilities []string     `json:"abilities,omitempty"`
 	}
 	frameProgress struct {
 		Task   string          `json:"task"`

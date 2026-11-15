@@ -17,7 +17,10 @@ type Hello struct {
 	Executable string    `json:"executable,omitempty"`
 	// value: the names of the Registry's calls this engine serves, never its own.
 	Calls []string `json:"calls,omitempty"`
-	Page  int      `json:"page,omitempty"`
+	// value: the abilities of its own calls it serves (engine.Abilities);
+	// none from an engine older than the field.
+	Abilities []string `json:"abilities,omitempty"`
+	Page      int      `json:"page,omitempty"`
 }
 
 type VMView struct {

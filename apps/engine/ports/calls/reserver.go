@@ -17,8 +17,12 @@ import (
 
 type Engine interface {
 	MacPorts(ctx context.Context) (ports.MacPorts, error)
-	Reserve(ctx context.Context, vm string, port int) (ports.SharedPort, error)
+	Reserve(ctx context.Context, vm string, port int, to catalog.Audience) (ports.SharedPort, error)
 	Release(ctx context.Context, vm string, port int) (ports.Reservation, error)
+	// value: the version this Mac's engine runs, and whether it reads a
+	// reserve's audience; an engine whose hello lists no such ability, or
+	// none, does not.
+	KeepsAudience(ctx context.Context) (version string, keeps bool, err error)
 }
 
 type ReserverOptions struct {
@@ -255,13 +259,31 @@ func (s *Reserver) CheckVM(ctx context.Context, vm string) (mac string, err erro
 	return mac, nil
 }
 
-func (s *Reserver) Share(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
-	v, err := s.d.Reserve(ctx, vm, port)
+func (s *Reserver) Share(ctx context.Context, vm string, port int, to catalog.Audience) (ports.SharedPort, error) {
+	// invariant: an audience is sent only to an engine whose hello says it
+	// reads one: an older engine decodes it as absent and would share with
+	// the rights' audience, a Machinefile's public Funnel kept. A share that
+	// comes back with another audience than the one asked is released and
+	// refused.
+	if to != "" {
+		version, keeps, err := s.d.KeepsAudience(ctx)
+		if err != nil {
+			return ports.SharedPort{}, err
+		}
+		if !keeps {
+			return ports.SharedPort{}, ports.EngineTooOld(s.o.ThisMacName, version)
+		}
+	}
+	v, err := s.d.Reserve(ctx, vm, port, to)
 	var down *ports.MacAwayError
 	if s.inVM() && (errors.Is(err, ports.ErrEngineDown) || errors.As(err, &down)) {
 		return ports.SharedPort{}, &ports.MacAwayError{Mac: s.o.MacName}
 	}
-	return v, err
+	if err != nil || to == "" || v.To == to {
+		return v, err
+	}
+	_, undo := s.d.Release(ctx, vm, port)
+	return ports.SharedPort{}, ports.AudienceNotKept(s.o.ThisMacName, vm, port, to, v.To, undo)
 }
 
 func (s *Reserver) CheckRelease(ctx context.Context, t ports.Target) (mac string, err error) {

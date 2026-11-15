@@ -1,0 +1,19 @@
+description: 'a share the owner opens to public takes the first Funnel port free, and its JSON says it'
+env: two-macs
+runs:
+    - command: 'world listen linux-1 "*:3000" node'
+      exit: 0
+    - command: 'ports share linux-1 3000 --to public'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:443
+    - command: 'ports | /usr/bin/grep "^#\|	3000	"'
+      exit: 0
+      stdout: |
+          # Public: shared with the internet	1 ●
+          ●	linux-1	3000	public	https://macbook-pro.tail1234.ts.net:443	shared	node	probably Node or Next
+          # Private: shared with you on Tailscale	2 ●
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[] | select(.guest_port == 3000) | [.by, .chosen, .to, .public_port]]'' world.json'
+      exit: 0
+      stdout: |
+          [["owner","public","public",443]]

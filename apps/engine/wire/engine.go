@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -108,7 +109,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Remember: func(vm string, port int, stopped bool) error {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
 		},
-		State: m.paths.State, ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Mounts: m.vmMounts, Version: m.engineVersion(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
+		State: m.paths.State, ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Mounts: m.vmMounts, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
 		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(),
 		NeverSleeps:   func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		AccountShares: shares, Peer: m.engineAPI(),
@@ -208,6 +209,15 @@ func (m machine) engineVersion() string {
 		return m.world.engineVersion()
 	}
 	return Version()
+}
+
+// value: the abilities the engine's hello lists: this binary's, but those a
+// world Mac's older engine lacks until it starts again.
+func (m machine) engineAbilities() []string {
+	if m.world == nil {
+		return engine.Abilities()
+	}
+	return slices.DeleteFunc(engine.Abilities(), m.world.engineLacks)
 }
 
 func (m machine) stationVersion() string {
@@ -384,10 +394,18 @@ func (d portsEngine) MacPorts(ctx context.Context) (ports.MacPorts, error) {
 	return v, downAs(err, ports.ErrEngineDown)
 }
 
-func (d portsEngine) Reserve(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
+func (d portsEngine) Reserve(ctx context.Context, vm string, port int, to catalog.Audience) (ports.SharedPort, error) {
 	var v ports.SharedPort
-	err := d.c.do(ctx, engine.CallReserve, engine.ReserveIn{VM: vm, GuestPort: port}, &v)
+	err := d.c.do(ctx, engine.CallReserve, engine.ReserveIn{VM: vm, GuestPort: port, To: to}, &v)
 	return v, downAs(err, ports.ErrEngineDown)
+}
+
+func (d portsEngine) KeepsAudience(ctx context.Context) (version string, keeps bool, err error) {
+	h, err := d.c.Hello(ctx)
+	if err != nil {
+		return "", false, downAs(err, ports.ErrEngineDown)
+	}
+	return h.Version, slices.Contains(h.Abilities, engine.AbilityReserveTo), nil
 }
 
 func (d portsEngine) Release(ctx context.Context, vm string, port int) (ports.Reservation, error) {

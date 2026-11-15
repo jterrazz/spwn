@@ -1,0 +1,11 @@
+description: 'a share that names no audience still reserves on an engine older than its station'
+env: engine-behind
+runs:
+    - command: 'ports share linux-1 3000'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:40000
+    - command: 'ports share infra 8080 --on mac-mini'
+      exit: 0
+      stdout: |
+          https://mac-mini.tail1234.ts.net:40000

@@ -55,7 +55,7 @@ func TestAVMOfThisMacReachedThroughItsEngineKeepsTheEndpointContract(t *testing.
 	contracttest.Endpoint(t, func(_ *testing.T, far *call.Registry, profile machine.Profile, version string) contracttest.EndpointSubject {
 		e := &engine{vm: serve.Local(far, profile, version)}
 		return contracttest.EndpointSubject{
-			Dialer: unix.New(e, e.vm.Hello, nil), Mac: "macbook-pro",
+			Dialer: unix.New(e, e.vm.Hello, nil, nil), Mac: "macbook-pro",
 			Target: machine.Ref{Name: "linux-1", On: "macbook-pro"},
 			Down:   func() { e.down = true },
 		}
@@ -64,7 +64,7 @@ func TestAVMOfThisMacReachedThroughItsEngineKeepsTheEndpointContract(t *testing.
 
 func TestAVMIsAskedForItsOwnCallsOnlyThroughTheGuestServer(t *testing.T) {
 	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.2.0")}
-	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, nil).Dial(t.Context(), "macbook-pro")
+	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, nil, nil).Dial(t.Context(), "macbook-pro")
 	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "ports.declare", nil, nil)
 	var f *fail.Error
 	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Detail["version"] != "v3.2.0" || f.Subject != "linux-1" {
@@ -80,7 +80,7 @@ func TestAVMIsAskedForItsOwnCallsOnlyThroughTheGuestServer(t *testing.T) {
 
 func TestAReplyToAnAgentTravelsOnTheGuestsStdinNeverOnItsCommandLine(t *testing.T) {
 	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.2.0")}
-	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, nil).Dial(t.Context(), "macbook-pro")
+	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, nil, nil).Dial(t.Context(), "macbook-pro")
 	text := "yes, merge it; then `rm -rf build` && say $HOME"
 	in, _ := json.Marshal(map[string]string{"Session": "s-1", "Text": text})
 	_, _ = ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "agents.reply", in, nil)
@@ -95,7 +95,7 @@ func TestAReplyToAnAgentTravelsOnTheGuestsStdinNeverOnItsCommandLine(t *testing.
 
 func TestAGuestOfAReleaseBeforeTheFloorIsRefusedBeforeTheRequestReachesIt(t *testing.T) {
 	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.1.0")}
-	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, imageOf).Dial(t.Context(), "macbook-pro")
+	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, imageOf, nil).Dial(t.Context(), "macbook-pro")
 	in, _ := json.Marshal(contracttest.InstallIn{App: "jq"})
 	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
 	var f *fail.Error
@@ -116,11 +116,31 @@ func imageOf(vm string) string {
 
 func TestAGuestWhoseBinaryTurnsOlderThanTheFloorBetweenTwoExecsIsRefusedAtTheSecond(t *testing.T) {
 	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.3.0"), then: serve.Local(contracttest.Far(), contracttest.Mini, "v3.1.0")}
-	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, imageOf).Dial(t.Context(), "macbook-pro")
+	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, imageOf, nil).Dial(t.Context(), "macbook-pro")
 	in, _ := json.Marshal(contracttest.InstallIn{App: "jq"})
 	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
 	var f *fail.Error
 	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Detail["version"] != "v3.1.0" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "station-linux" {
 		t.Errorf("installing jq on linux-1 whose station became v3.1.0 after its first hello: %v, want far-too-old naming v3.1.0, the floor and its image", err)
+	}
+}
+
+func TestAGuestThatLacksAnAbilityTheInputAsksIsRefusedBeforeTheRequestReachesIt(t *testing.T) {
+	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.3.0")}
+	asks := func(name string, _ json.RawMessage) []string {
+		if name == "apps.install" {
+			return []string{"apps.install.pinned"}
+		}
+		return nil
+	}
+	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, imageOf, asks).Dial(t.Context(), "macbook-pro")
+	in, _ := json.Marshal(contracttest.InstallIn{App: "jq"})
+	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
+	var f *fail.Error
+	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Subject != "linux-1" || f.Detail["call"] != "apps.install.pinned" || f.Detail["image"] != "station-linux" {
+		t.Errorf("installing jq with an ability linux-1 lacks: %v, want far-too-old naming linux-1, the ability and its image", err)
+	}
+	if len(e.stdin) != 1 || strings.Contains(e.stdin[0], "apps.install") {
+		t.Errorf("the guest that lacks the ability was sent %q, want its hello alone", e.stdin)
 	}
 }

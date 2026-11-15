@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/agents"
@@ -68,7 +69,10 @@ func calls(d *Engine, served []string) []call.Handler {
 			return d.Ports(ctx, in.VM), nil
 		}),
 		own(d, engine.CallReserve, func(ctx context.Context, d *Engine, in engine.ReserveIn) (ports.SharedPort, error) {
-			return d.Reserve(ctx, in.VM, in.GuestPort)
+			if in.To != "" && !slices.Contains(in.To.Enum(), string(in.To)) {
+				return ports.SharedPort{}, ports.UnknownAudience(string(in.To))
+			}
+			return d.Reserve(ctx, in.VM, in.GuestPort, in.To)
 		}),
 		own(d, engine.CallRelease, func(ctx context.Context, d *Engine, in engine.ReserveIn) (ports.Reservation, error) {
 			return d.Release(ctx, in.VM, in.GuestPort)
