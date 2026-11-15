@@ -62,16 +62,24 @@ func compose(ctx context.Context, d Deps) (activity.Reading, error) {
 		}
 	}
 	if d.Power != nil {
-		if p, err := d.Power.Read(); err == nil {
-			if d.Power.Capabilities().Thermal {
-				r.Sample.Thermal = p.Thermal
-			}
-			if p.HasBattery {
-				r.Sample.Battery = &activity.Battery{Percent: p.Percent, Charging: p.Charging, OnBattery: p.OnBattery(), Health: p.Health, Cycles: p.Cycles}
-			}
-		}
+		ComposeAwake(&r.Sample, d.Power)
 	}
 	return r, nil
+}
+
+func ComposeAwake(s *activity.Sample, from awakecontract.Power) {
+	// invariant: the one place a sample takes its thermal and battery from
+	// Awake's reading, for a live sample and for a kept one alike.
+	p, err := from.Read()
+	if err != nil {
+		return
+	}
+	if from.Capabilities().Thermal {
+		s.Thermal = p.Thermal
+	}
+	if p.HasBattery {
+		s.Battery = &activity.Battery{Percent: p.Percent, Charging: p.Charging, OnBattery: p.OnBattery(), Health: p.Health, Cycles: p.Cycles}
+	}
 }
 
 // invariant: SPEC B5.3: a Mac's reading carries each VM it runs as the
