@@ -7,8 +7,24 @@ import (
 	pageaccounts "github.com/jterrazz/studio-station/apps/engine/pages/accounts"
 )
 
-func own(provider string, identity, scopes []string, source, detail string) accounts.Account {
-	return accounts.Account{Provider: provider, State: catalog.StateOK, Origin: accounts.OriginOwn, Identity: identity, Scopes: scopes, Source: source, Detail: detail}
+type heldAccount struct {
+	Provider string
+	State    catalog.State
+	Identity []string
+	Scopes   []string
+	Detail   string
+	Granted  bool
+}
+
+type heldMachine struct {
+	Name     string
+	Accounts []heldAccount
+}
+
+type heldReport struct{ Machines []heldMachine }
+
+func own(provider string, identity, scopes []string, detail string) heldAccount {
+	return heldAccount{Provider: provider, State: catalog.StateOK, Identity: identity, Scopes: scopes, Detail: detail}
 }
 
 func listed(rows ...accounts.Facts) pageaccounts.Machine {

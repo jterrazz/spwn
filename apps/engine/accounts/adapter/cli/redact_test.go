@@ -14,16 +14,12 @@ func TestRedactDropsEveryTokenShape(t *testing.T) {
 		"0123456789abcdef0123456789abcdef", "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0MTIz",
 	}
 	for _, s := range shapes {
-		a := accounts.RedactAccount(accounts.Account{Identity: []string{s}, Scopes: []string{"repo", s}, Detail: s, Notes: []string{s}})
-		if a.Identity[0] != accounts.Unknown || a.Scopes[1] != accounts.Unknown || a.Detail != accounts.Unknown || a.Notes[0] != accounts.Unknown || !a.Redacted {
-			t.Errorf("%q survived: %+v", s, a)
-		}
-		if a.Scopes[0] != "repo" {
-			t.Errorf("a plain scope beside %q was dropped", s)
+		if kept, redacted := accounts.Redact(s); kept != accounts.Unknown || !redacted {
+			t.Errorf("%q survived as %q", s, kept)
 		}
 	}
 	for _, s := range []string{"you@example.com", "Jean-Baptiste Terrazzoni", "SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4", "registry.example.com", "read:org"} {
-		if a := accounts.RedactAccount(accounts.Account{Identity: []string{s}}); a.Identity[0] != s || a.Redacted {
+		if kept, redacted := accounts.Redact(s); kept != s || redacted {
 			t.Errorf("an identity %q was taken for a token", s)
 		}
 	}
