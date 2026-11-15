@@ -4,10 +4,14 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"path"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -45,9 +49,9 @@ func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model
 	for _, program := range t.Grants {
 		g := model.FirstStartGrant{Program: program}
 		if s.o.Grant == nil {
-			g.Failed = "this Mac grants no password"
+			g.Code, g.Subject = accounts.GrantCannotDeliver, name
 		} else if err := s.o.Grant(ctx, program, name); err != nil {
-			g.Failed = firstLine(err.Error())
+			g.Code, g.Subject = s.refusal(err, name)
 		}
 		b.Grants = append(b.Grants, g)
 	}
@@ -56,6 +60,19 @@ func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model
 		b.Drift, _ = s.o.Templates.Drift(ctx, t.Name, version)
 	}
 	return b
+}
+
+// invariant: a grant is refused by its code and subject; an error that
+// carries no code is one the grant could not reach the VM through, and
+// its own text is kept in the engine's log, so the cause is not lost.
+func (s *Machinist) refusal(err error, vm string) (code fail.Code, subject string) {
+	var refused *fail.Error
+	if errors.As(err, &refused) && refused.Code != "" {
+		return refused.Code, refused.Subject
+	}
+	line := s.h.Now().UTC().Format(time.RFC3339) + " grant to " + vm + ": " + err.Error() + "\n"
+	_ = s.h.Append(path.Join(s.o.Logs, "engine.log"), line)
+	return accounts.GrantCannotDeliver, vm
 }
 
 // invariant: a sign-in whose read fails is left to the owner too: a

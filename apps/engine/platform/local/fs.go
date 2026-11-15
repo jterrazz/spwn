@@ -28,6 +28,18 @@ func (disk) WriteFile(path string, data []byte, perm fs.FileMode) error {
 	return os.WriteFile(path, data, perm)
 }
 
+func (disk) Append(path string, data []byte, perm fs.FileMode) error {
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+	if err != nil {
+		return err
+	}
+	if _, err := f.Write(data); err != nil {
+		_ = f.Close()
+		return err
+	}
+	return f.Close()
+}
+
 func (disk) Replace(path string, data []byte, perm fs.FileMode) error {
 	return durable{sync: (*os.File).Sync}.replace(path, data, perm)
 }

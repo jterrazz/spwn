@@ -186,7 +186,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return io.Page(pagemachines.Created(created, d.ThisMachine), pagemachines.CreatedContract(schema, created))
+			return io.Page(pagemachines.Created(created, d.ThisMachine, func(g machines.FirstStartGrant) string { return kit.Refusal(g.Code, g.Subject) }), pagemachines.CreatedContract(schema, created))
 		},
 	}, env)
 }

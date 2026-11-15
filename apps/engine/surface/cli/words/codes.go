@@ -401,6 +401,12 @@ func Codes() map[fail.Code]Wording {
 		accounts.GrantNotGranted: func(e *fail.Error) (string, string) {
 			return "that password is not granted to " + e.Subject, "read the vault for its grants"
 		},
+		accounts.GrantNoPassword: func(e *fail.Error) (string, string) {
+			return "no password for " + e.Subject + " in this Mac's vault", "add one to the vault, then grant it"
+		},
+		accounts.GrantManyPasswords: func(e *fail.Error) (string, string) {
+			return "more than one password for " + e.Subject + " in this Mac's vault: grant one from the window", "read the vault for what it keeps"
+		},
 		awakecalls.OutOfBounds: func(e *fail.Error) (string, string) {
 			return "\"" + e.Subject + "\" is not between 1 min and 24 h", "station awake 4h"
 		},

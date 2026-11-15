@@ -41,4 +41,6 @@ const (
 	GrantNoPresence        fail.Code = "grant.no-presence"
 	GrantCannotDeliver     fail.Code = "grant.cannot-deliver"
 	GrantNotGranted        fail.Code = "grant.not-granted"
+	GrantNoPassword        fail.Code = "grant.no-password"
+	GrantManyPasswords     fail.Code = "grant.many-passwords"
 )

@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"errors"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -87,5 +88,32 @@ func TestAWaitForAHeldLockEndsWithItsContext(t *testing.T) {
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("the wait outlived its context")
+	}
+}
+
+// invariant: Append adds to the end of a file another handle has open for
+// appending, and loses neither side's lines.
+func TestAppendKeepsWhatAnotherAppenderWrote(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "engine.log")
+	other, err := os.OpenFile(at, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = other.Close() })
+	for _, write := range []func() error{
+		func() error { _, werr := other.WriteString("other 1\n"); return werr },
+		func() error { return disk{}.Append(at, []byte("engine 1\n"), 0o600) },
+		func() error { _, werr := other.WriteString("other 2\n"); return werr },
+	} {
+		if werr := write(); werr != nil {
+			t.Fatal(werr)
+		}
+	}
+	got, err := os.ReadFile(at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "other 1\nengine 1\nother 2\n"; string(got) != want {
+		t.Fatalf("the log holds %q; want %q", got, want)
 	}
 }

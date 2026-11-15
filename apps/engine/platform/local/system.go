@@ -83,6 +83,10 @@ type FS interface {
 	// value: the file at path replaced whole, at once and durably, with its
 	// own mode and owner; one not there yet is made with perm.
 	Replace(path string, data []byte, perm fs.FileMode) error
+	// value: data added at the end of the file, in one write opened for
+	// appending, so a writer that appends to the same file (a
+	// supervisor's output file) loses nothing; a file not there yet is made with perm.
+	Append(path string, data []byte, perm fs.FileMode) error
 	MkdirAll(path string, perm fs.FileMode) error
 	Remove(path string) error
 	RemoveAll(path string) error

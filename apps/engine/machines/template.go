@@ -1,6 +1,9 @@
 package machines
 
-import "github.com/jterrazz/studio-station/apps/engine/catalog"
+import (
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+)
 
 // value: the Machinefile a workspace is made from (create --from), as the
 // create reads it on its Mac: its name (the image's), its system, what its
@@ -43,8 +46,10 @@ type FirstStart struct {
 
 type FirstStartGrant struct {
 	Program string
-	// value: why it was not granted; empty when it was.
-	Failed string
+	// value: why it was not granted, the refusal's code and its subject,
+	// worded by the binary that prints them; none when it was granted.
+	Code    fail.Code `json:",omitempty"`
+	Subject string    `json:",omitempty"`
 }
 
 // value: a program the Machinefile signs in to that the workspace is not
