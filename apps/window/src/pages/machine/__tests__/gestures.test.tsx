@@ -15,7 +15,8 @@ import { describe, expect, test } from 'vitest';
 
 import { Client } from '../../../engine/client';
 import { EngineProvider } from '../../../engine/react';
-import { replayTransport, stagedReplay } from '../../../engine/replay';
+import { recordingOf, replayTransport, stagedReplay } from '../../../engine/replay';
+import type { Recording } from '../../../engine/replay';
 import { holdingCall } from '../../../fixtures/held-call';
 import { recordingsOf } from '../../../fixtures/recordings';
 import type { Route } from '../../../shell/route';
@@ -34,6 +35,14 @@ function machineOver(world: string, machine: string) {
             <Window initial={initial} pages={PAGES} />
         </EngineProvider>
     );
+}
+
+function unhealthy(recording: Recording): Recording {
+    const said = JSON.stringify(recording).replaceAll(
+        '"Tone":"ok","Sentence":"Healthy."',
+        '"Tone":"bad","Sentence":"Down."',
+    );
+    return recordingOf(JSON.parse(said));
 }
 
 type Boxes = { start: string; stop: string; tabs: number };
@@ -273,6 +282,31 @@ describe('gestures', () => {
             await visitor.gone(dialog('Restart infra?'));
             await visitor.see(content('no machine named "infra"', { exact: false }));
         });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a server whose health verdict is bad leads its header with Restart, and a server whose is not has no primary', async () => {
+        // Given - infra's page over two-macs, once as recorded and once with its health verdict worded bad
+        const sick = unhealthy(recordingFor('two-macs'));
+        const result = await component.render(
+            <EngineProvider client={new Client(replayTransport(sick))}>
+                <Window
+                    initial={{ machine: 'infra', page: 'machine', tab: 'Overview' }}
+                    pages={PAGES}
+                />
+            </EngineProvider>,
+            async (visitor) => {
+                await visitor.see(enabled(button('Restart')));
+            },
+        );
+        const well = await component.render(machineOver('two-macs', 'infra'), async (visitor) => {
+            await visitor.see(enabled(button('Restart')));
+        });
+
+        // Then - Restart alone is the primary of the first, and the second has none
+        expect(result.html.text).toMatch(/<button[^>]*primary[^>]*>Restart</u);
+        expect(result.html.text.match(/class="[^"]*primary/gu)).toHaveLength(1);
+        expect(well.html.text).not.toMatch(/class="[^"]*primary/u);
         expect(result.errors.text).toBe('');
     });
 

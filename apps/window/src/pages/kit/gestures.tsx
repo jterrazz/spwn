@@ -31,6 +31,7 @@ type GestureButtonProps = {
     variant?: ButtonVariant;
     name?: string;
     destroys?: boolean;
+    yields?: boolean;
 };
 
 export function marked(gesture: Gesture<unknown>, mark: () => void): Gesture<unknown> {
@@ -52,6 +53,7 @@ export function GestureButton({
     variant = 'plain',
     name,
     destroys = variant === 'danger',
+    yields = false,
 }: GestureButtonProps) {
     const gestures = useGestureStore();
     const start = () => {
@@ -72,6 +74,7 @@ export function GestureButton({
             name={name}
             onClick={start}
             variant={variant}
+            yields={yields}
         >
             {label}
         </Button>
