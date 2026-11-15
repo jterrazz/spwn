@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { machineKindOf } from '../../engine/provisional';
+import { verdictShown } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import { targetOf } from '../../model/machines';
 import type { Route } from '../../shell/route';
@@ -42,15 +43,21 @@ export function LifecycleGestures({ mac, vm, terminal }: VmProps & { terminal?: 
     );
     const shown = gestures[last];
     const done = shown.state.kind === 'done';
-    const button = (which: Lifecycle, label: string) => (
-        <GestureButton
-            gesture={marked(gestures[which], () => {
-                setLast(which);
-            })}
-            label={label}
-            title={`${label} ${vm.Name}?`}
-        />
-    );
+    const leads = vm.Health !== undefined && verdictShown(vm.Health).tone === 'bad';
+    const button = (which: Lifecycle, label: string) => {
+        const primary = which === 'restart' && leads;
+        return (
+            <GestureButton
+                gesture={marked(gestures[which], () => {
+                    setLast(which);
+                })}
+                label={label}
+                title={`${label} ${vm.Name}?`}
+                variant={primary ? 'primary' : 'plain'}
+                yields={primary}
+            />
+        );
+    };
     return (
         <div className={styles.gestures}>
             <div className={styles.actions}>
