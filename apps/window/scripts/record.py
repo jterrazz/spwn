@@ -19,12 +19,13 @@ that call's files, <world>/<call>.json and <world>/gestures/<call>.json, in the 
 WORLDS adds is recorded by the same command, its folder made; a run over every world removes the folder of a world
 WORLDS no longer names.
 
-The world build's clock moves when a watch waits on it (apps/engine/wire/world_on.go), so two runs do not write the same
-files: a watch the engine ends before a check settles (disk.read) answers pending in one run and
-settled in the other. The recorder keeps of a watch its first answer and its last (what streams between comes in the
-scheduler's order), never counts a read of TIMED as changed by a gesture, and keeps the NOISE field of a gesture's
-last recording: the process number the host gave, which no world decides, and the CLOCKED field of an answer (settings.matrix's Read, the world's clock) as its last
-recording holds it.
+Two runs over the same tree write the same bytes. The world build's clock moves when a watch waits on it
+(apps/engine/wire/world_on.go), and what a watch streams before it settles comes in the scheduler's order, so the
+recorder keeps only what no run decides: of a watch its first answer and its last, and of a watch of SETTLED (one
+whose first answer races its walk, disk.read) its last alone; a gesture's reads in the world's order of asks, judged
+changed by `compared`, never by the clock; no read of TIMED after a gesture; and, as the file's last recording holds
+them, the NOISE field of a gesture (the process number the host gave) and the CLOCKED field of an answer (the world's
+clock: settings.matrix's Read, awake.read's Now).
 
 A far Mac's machine, asked through that door, is answered with This Mac's overview: only This Mac, with no
 target, and its VMs, by name, are asked.
@@ -48,10 +49,10 @@ from world import ROOT, WORLDS, sandbox, seeded, world_binary
 
 out_root = ROOT / "apps" / "window" / "src" / "fixtures" / "worlds"
 GRAPHS = (360 * 10**9, 3600 * 10**9, 86400 * 10**9)
-SETTLED = {"apps.list", "settings.list"}
+SETTLED = {"apps.list", "settings.list", "disk.read"}
 TIMED = {"activity.read", "engine.watch"}
 NOISE = {"engine.start": "PID"}
-CLOCKED = {"settings.matrix": "Read"}
+CLOCKED = {"settings.matrix": "Read", "awake.read": "Now"}
 MACHINES = {"watch": "machines.list", "in": {}}
 QUIET = 10
 UNENDED = {"overview.read"}
@@ -397,6 +398,12 @@ def write(path, world, station, key, items, was):
     path.write_text(f'{head}, {rest}: [\n{lines}\n]}}\n')
 
 
+def compared(request, frames):
+    """A read as a gesture's change is judged: a watch by its settled answer, the CLOCKED field left out, so the
+    world's clock moving under a gesture changes no read."""
+    return unclocked(request, settled(frames) if "watch" in request else frames)
+
+
 def gesture(world, seed, fixture, request, reads, before):
     """The gesture in a fresh world, then every read in that same world, kept when its answer changed: a watch by
     its settled answer, the one a window shows once it has read again. A read the world did not ask before, of a
@@ -411,7 +418,7 @@ def gesture(world, seed, fixture, request, reads, before):
             continue
         [frames] = door.ask([read])
         frames, was = kept(read, frames), before.get(keyOf(read))
-        if was is None or (settled(frames) != settled(was) if "watch" in read else frames != was):
+        if was is None or compared(read, frames) != compared(read, was):
             changed.append({"request": read, "answers": frames})
     door.close()
     return {"request": request, "answers": answers, "after": changed}
