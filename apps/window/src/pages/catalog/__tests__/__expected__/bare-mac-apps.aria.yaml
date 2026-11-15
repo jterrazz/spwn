@@ -1,8 +1,5 @@
 - main:
-  - heading "No verdict from the engine." [level=1]
-  - paragraph:
-    - img "Not given yet"
-    - text: "Everything station knows how to install or set: apps, agent skills and settings, each one a package"
+  - heading "Every app follows its rule." [level=1]
   - searchbox "Search the catalog"
   - group "Show":
     - button "On your machines1"

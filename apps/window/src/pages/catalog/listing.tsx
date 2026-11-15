@@ -79,7 +79,7 @@ function Group<T>({
     );
 }
 
-type Scope = 'carried' | 'every';
+export type Scope = 'carried' | 'every';
 
 // value: the catalog's size and the packages some machine carries are counts of the wire's own rows; a listing given
 // value: `carried` offers the choice between them and everything, and says so under the list while it shows them.
@@ -116,6 +116,29 @@ function footOf(size: number | undefined): string | undefined {
         : `Only what your machines carry is shown. The catalog holds ${countOf('package', size)}.`;
 }
 
+function Groups<T>({
+    shown,
+    packageOf,
+    renderRow,
+}: {
+    shown: readonly T[];
+    packageOf: (item: T) => Package;
+    renderRow: (item: T) => ReactNode;
+}) {
+    const groups = categoriesOf(shown.map(packageOf));
+    if (groups.length === 0) {
+        return <p className={styles.none}>Nothing matches.</p>;
+    }
+    return groups.map((name) => (
+        <Group
+            category={name}
+            key={name}
+            renderRow={renderRow}
+            rows={shown.filter((item) => packageOf(item).category === name)}
+        />
+    ));
+}
+
 export function Listing<T>({
     title,
     items,
@@ -123,8 +146,10 @@ export function Listing<T>({
     size,
     packageOf,
     renderRow,
+    head,
 }: {
     title: string;
+    head: (scope: Scope) => ReactNode;
     items: readonly T[];
     carried?: readonly T[] | undefined;
     size?: number | undefined;
@@ -138,10 +163,10 @@ export function Listing<T>({
     const listed = carrying ? carried : items;
     const packages = listed.map(packageOf);
     const shown = listed.filter((item) => matches(packageOf(item), category, query));
-    const groups = categoriesOf(shown.map(packageOf));
     const foot = carrying ? footOf(size) : undefined;
     return (
         <>
+            {head(carried === undefined ? 'every' : scope)}
             <Filters
                 category={category}
                 packages={packages}
@@ -159,18 +184,7 @@ export function Listing<T>({
                 title={title}
             />
             <section aria-label={title} className={styles.list}>
-                {groups.length === 0 ? (
-                    <p className={styles.none}>Nothing matches.</p>
-                ) : (
-                    groups.map((name) => (
-                        <Group
-                            category={name}
-                            key={name}
-                            renderRow={renderRow}
-                            rows={shown.filter((item) => packageOf(item).category === name)}
-                        />
-                    ))
-                )}
+                <Groups packageOf={packageOf} renderRow={renderRow} shown={shown} />
                 {foot === undefined ? null : <p className={styles.foot}>{foot}</p>}
             </section>
         </>
