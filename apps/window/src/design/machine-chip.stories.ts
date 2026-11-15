@@ -11,7 +11,7 @@ export const MACHINE_CHIP_STORIES: readonly Story<MachineChipProps>[] = [
         name: 'a server',
         props: { identity: 'lilac', kind: 'server', name: 'relay', onOpen: nothing },
     },
-    { name: 'a Mac', props: { kind: 'mac', name: 'jterrazz-macbook-pro', onOpen: nothing } },
+    { name: 'a Mac', props: { kind: 'mac', name: 'macbook-pro', onOpen: nothing } },
     {
         name: 'the system identity',
         props: { identity: 'system', kind: 'workspace', name: 'base', onOpen: nothing },

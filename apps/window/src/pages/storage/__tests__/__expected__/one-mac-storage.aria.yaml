@@ -4,14 +4,14 @@
     - img "Not given yet"
     - text: What follows is what the engine answers, with no sentence that sums it up
   - group "Which Mac":
-    - button "jterrazz-macbook-pro" [pressed]
+    - button "macbook-pro" [pressed]
   - region "Disk":
     - heading "Disk" [level=2]
     - button "Rescan"
     - list "The groups"
   - region "Images":
     - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
-    - paragraph: No image on jterrazz-macbook-pro.
+    - paragraph: No image on macbook-pro.
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
-    - button "jterrazz-macbook-pro the Mac itself"
+    - button "macbook-pro the Mac itself"

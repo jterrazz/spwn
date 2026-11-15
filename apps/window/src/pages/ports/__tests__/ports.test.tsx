@@ -101,10 +101,10 @@ describe('ports', () => {
     test('a Mac where nothing listens says the listing is empty', async () => {
         // Given - This Mac's Ports over one-mac
         const result = await component.render(
-            portsOver('one-mac', 'jterrazz-macbook-pro'),
+            portsOver('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // Then - the empty listing is said, not drawn as zero rows
-                await visitor.see(content('Nothing listed on jterrazz-macbook-pro.'));
+                await visitor.see(content('Nothing listed on macbook-pro.'));
             },
         );
         expect(result.errors.text).toBe('');

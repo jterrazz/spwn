@@ -13,7 +13,7 @@ export const PANEL_STORIES: readonly Story<PanelProps>[] = [
             children: (
                 <>
                     <Row
-                        sentence="jterrazz-macbook-pro · AirPlay Receiver"
+                        sentence="macbook-pro · AirPlay Receiver"
                         state={{ tone: 'bad', word: 'Exposed' }}
                         stateAt="start"
                         title="Port 5000 is reachable from your local network"

@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { EngineError } from '../engine-error';
 import { GestureStore } from '../gesture-store';
 
-const ERASE = 'call disk.erase {"App":"orbstack"} {"name":"jterrazz-macbook-pro"}';
+const ERASE = 'call disk.erase {"App":"orbstack"} {"name":"macbook-pro"}';
 
 const REFUSED = {
     error: new EngineError({ message: 'orbstack has no data station can erase', type: 'refused' }),
@@ -33,7 +33,7 @@ describe('gesture store', () => {
         // Given - a refused erase and a running one, each left by its row
         using _ = clock.run('2026-11-13T10:00:00Z');
         const store = new GestureStore({ grace: 500 });
-        const running = 'call disk.erase {"App":"zed"} {"name":"jterrazz-macbook-pro"}';
+        const running = 'call disk.erase {"App":"zed"} {"name":"macbook-pro"}';
         store.set(ERASE, REFUSED);
         store.set(running, { answer: 'zed', kind: 'running', progress: [] });
         store.subscriberOf(running)(() => {})();

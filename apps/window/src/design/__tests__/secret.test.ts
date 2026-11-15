@@ -25,12 +25,12 @@ describe('secret', () => {
     test('a name, a scope, a path or a command is shown', () => {
         // Given - what an account row carries when nothing leaked
         const values = [
-            'jterrazz',
+            'you',
             'repo, workflow',
             '~/.claude/.credentials.json',
             'keychain: operator:claude:oauth-token',
             'station accounts list --on api',
-            'jterrazz-macbook-pro.tail1234.ts.net',
+            'macbook-pro.tail1234.ts.net',
         ];
 
         // Then - none is withheld
@@ -44,7 +44,7 @@ describe('secret', () => {
             'a3bf4f1b2b0b822cd15d6c15b0f00a08',
         ].join('');
         const values = [
-            '/Users/jterrazz/Developer/studio-os/home/studio/work/worktrees/window-l2/apps',
+            '/Users/you/Developer/studio-os/home/studio/work/worktrees/window-l2/apps',
             '~/Library/Application-Support/com-jterrazz-station-2026/accounts-v2/github',
             `ghcr.io/jterrazz/station@sha256:${digest}`,
             `sha512:${digest}${digest}`,

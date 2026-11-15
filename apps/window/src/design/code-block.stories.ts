@@ -12,7 +12,7 @@ export const CODE_BLOCK_STORIES: readonly Story<CodeBlockProps>[] = [
         props: {
             label: 'A file',
             lines: [
-                { number: 1, text: 'name: jterrazz-base' },
+                { number: 1, text: 'name: base' },
                 { number: 2, text: 'apps: [jq, git, node]' },
             ],
         },

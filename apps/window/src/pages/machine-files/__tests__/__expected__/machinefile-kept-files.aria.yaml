@@ -2,17 +2,17 @@
   - heading "No machine follows a file." [level=1]
   - paragraph: Your machines
   - group "Your machines":
-    - button "jterrazz-macbook-pro" [pressed]
+    - button "macbook-pro" [pressed]
   - paragraph: Mixins
   - group "Mixins":
-    - button "jterrazz-base"
+    - button "base"
   - paragraph: Shipped with station
   - group "Shipped with station":
     - button "station-linux"
     - button "station-macos"
-  - region "jterrazz-macbook-pro.machine.yaml":
-    - heading "jterrazz-macbook-pro.machine.yaml" [level=2]
-    - text: ~/.config/station/machinefiles/jterrazz-macbook-pro.machine.yaml
+  - region "macbook-pro.machine.yaml":
+    - heading "macbook-pro.machine.yaml" [level=2]
+    - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
     - group "How the file is shown":
       - button "Fields" [pressed]
       - button "YAML"
@@ -23,7 +23,7 @@
     - definition: macOS
     - term: Extends
     - definition:
-      - button "jterrazz-base"
+      - button "base"
   - region "Machines that follow it":
     - heading "Machines that follow it" [level=2]
     - paragraph: No machine follows it.
@@ -34,11 +34,11 @@
       - button "Skills0"
       - button "Settings0"
       - button "Access"
-    - region "jterrazz-base":
-      - paragraph: jterrazz-base extended · 2
+    - region "base":
+      - paragraph: base extended · 2
       - button "homebrew manager macOS package manager takes every version"
       - button "jq Command-line JSON processor takes every version"
-    - region "jterrazz-macbook-pro":
-      - paragraph: jterrazz-macbook-pro this file · 2
+    - region "macbook-pro":
+      - paragraph: macbook-pro this file · 2
       - button "lazygit Terminal UI for git takes every version"
       - button "bat Cat clone with syntax highlighting takes every version"

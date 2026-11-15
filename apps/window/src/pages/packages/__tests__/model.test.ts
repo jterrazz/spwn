@@ -50,8 +50,8 @@ describe('model', () => {
         expect(
             layers.map((layer) => [layer.name, layer.identity, layer.lines.length]),
         ).toStrictEqual([
-            ['jterrazz-base', 'blue', 2],
-            ['jterrazz-macbook-pro', 'purple', 4],
+            ['base', 'blue', 2],
+            ['macbook-pro', 'purple', 4],
         ]);
     });
 

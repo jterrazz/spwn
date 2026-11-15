@@ -29,12 +29,12 @@ describe('AddMac', () => {
             await visitor.click(button('Add a Mac'));
             const shut = disabled(button('Add'));
             await visitor.see(within(sheet, shut));
-            await visitor.fill(within(sheet, field('Its Tailscale name')), 'jterrazz-mac-mini');
+            await visitor.fill(within(sheet, field('Its Tailscale name')), 'mac-mini');
             await visitor.click(within(sheet, button('Add')));
 
             // Then - the dialog closes on the mini's page
             await visitor.gone(sheet);
-            await visitor.see(button('New machine on jterrazz-mac-mini'));
+            await visitor.see(button('New machine on mac-mini'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -44,11 +44,11 @@ describe('AddMac', () => {
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
             // When - the mini is added again
             await visitor.click(button('Add a Mac'));
-            await visitor.fill(within(sheet, field('Its Tailscale name')), 'jterrazz-mac-mini');
+            await visitor.fill(within(sheet, field('Its Tailscale name')), 'mac-mini');
             await visitor.click(within(sheet, button('Add')));
 
             // Then - the dialog stays with the refusal
-            const said = content('machine "jterrazz-mac-mini" already exists', { exact: false });
+            const said = content('machine "mac-mini" already exists', { exact: false });
             await visitor.see(within(sheet, said));
         });
         expect(result.errors.text).toBe('');

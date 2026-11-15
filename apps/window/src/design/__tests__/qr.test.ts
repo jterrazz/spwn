@@ -21,7 +21,7 @@ describe('qrOf', () => {
 
     test('a tailnet address grows the version, its finders in three corners', () => {
         // Given - a shared address of 52 bytes
-        const matrix = qrOf('https://jterrazz-macbook-pro.tail1234.ts.net:40012/');
+        const matrix = qrOf('https://macbook-pro.tail1234.ts.net:40012/');
 
         // Then - version 3, 29 modules, each finder's centre dark and its ring light
         const corners = [

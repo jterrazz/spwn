@@ -36,7 +36,7 @@ describe('sign-ins', () => {
     test("this Mac's programs are asked of its own engine", async () => {
         // Given - this Mac's Sign-ins over two-macs
         const result = await component.render(
-            signInsOver('two-macs', 'jterrazz-macbook-pro'),
+            signInsOver('two-macs', 'macbook-pro'),
             async (visitor) => {
                 // When - accounts.list has answered
                 // Then - its verdict and its four programs
@@ -46,7 +46,7 @@ describe('sign-ins', () => {
         );
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(
-            file('./__expected__/two-macs-jterrazz-macbook-pro.aria.yaml'),
+            file('./__expected__/two-macs-macbook-pro.aria.yaml'),
         );
     });
 

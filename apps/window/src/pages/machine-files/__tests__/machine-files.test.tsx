@@ -78,7 +78,7 @@ describe('Machine files', () => {
 
             // When - the mixin the file extends is chosen from its facts
             await visitor.click(
-                within(region('macbook-pro.machine.yaml'), button('jterrazz-base')),
+                within(region('macbook-pro.machine.yaml'), button('base')),
             );
 
             // Then - it makes no machine, and the file that extends it is listed
@@ -160,16 +160,16 @@ describe('Machine files', () => {
     });
 
     test('a route that names a file opens that file, not the one This Mac follows', async () => {
-        // Given - the window opened on Machine files over stories-file, its route naming the mixin jterrazz-base
+        // Given - the window opened on Machine files over stories-file, its route naming the mixin base
         const result = await component.render(
             pageOver(recordingFor('stories-file'), {
-                file: 'jterrazz-base',
+                file: 'base',
                 page: 'machine-files',
             }),
             async (visitor) => {
                 // When - the page has read the file it names
                 // Then - the head is the mixin's, and the engine refuses to read This Mac against it
-                await visitor.see(heading('jterrazz-base.machine.yaml'));
+                await visitor.see(heading('base.machine.yaml'));
                 await visitor.see(
                     content('Refused · extend it from a Machinefile that says its machine'),
                 );
@@ -196,7 +196,7 @@ describe('Machine files', () => {
         // Given - the window on Machine files over bare-mac, which follows no file
         const result = await component.render(windowOver('bare-mac'), async (visitor) => {
             // When - machinefile.explain has refused
-            await visitor.see(heading('no Machinefile named jterrazz-macbook-pro.'));
+            await visitor.see(heading('no Machinefile named macbook-pro.'));
         });
 
         // Then - the page is the refusal, with the hint the engine gave

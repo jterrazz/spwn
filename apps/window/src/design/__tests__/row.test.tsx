@@ -6,7 +6,7 @@ import { Row } from '../row';
 
 const SHORT = 'npm sign-in expired';
 const LONG =
-    'com.jterrazz.brain.x-snapshot is failing, last exit 2, after its third retry this hour';
+    'com.example.brain.x-snapshot is failing, last exit 2, after its third retry this hour';
 
 function leftOf(text: string): number {
     return (

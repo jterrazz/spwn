@@ -72,7 +72,7 @@ describe('Window', () => {
         // Given - the window on This Mac over one-mac
         const result = await component.render(
             windowOver('one-mac', {
-                machine: 'jterrazz-macbook-pro',
+                machine: 'macbook-pro',
                 page: 'machine',
                 tab: 'Overview',
             }),
@@ -91,8 +91,8 @@ describe('Window', () => {
         // Given - the window on Home over mini-offline
         const result = await component.render(windowOver('mini-offline', HOME), async (visitor) => {
             // When - the Mac that does not answer is opened
-            await visitor.click(within(sidebar, button('jterrazz-mac-mini not seen')));
-            await visitor.see(heading('jterrazz-mac-mini Not seen'));
+            await visitor.click(within(sidebar, button('mac-mini not seen')));
+            await visitor.see(heading('mac-mini Not seen'));
         });
 
         // Then - its header says it is not seen, and its Overview that the world holds no answer for it
@@ -112,7 +112,7 @@ describe('Window', () => {
                             error: {
                                 code: 'remote.unreachable',
                                 message: 'mac-mini does not answer',
-                                subject: 'jterrazz-mac-mini',
+                                subject: 'mac-mini',
                                 type: 'unreachable',
                             },
                             v: 2,
@@ -120,7 +120,7 @@ describe('Window', () => {
                     ],
                     request: {
                         in: {},
-                        target: { name: 'jterrazz-mac-mini' },
+                        target: { name: 'mac-mini' },
                         watch: 'overview.read',
                     },
                 },
@@ -134,10 +134,10 @@ describe('Window', () => {
                 <Window initial={HOME} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
-                await visitor.click(within(sidebar, button('jterrazz-mac-mini not seen')));
+                await visitor.click(within(sidebar, button('mac-mini not seen')));
 
                 // Then - its Overview stands on the verdict machines.list gives it, not on the refusal
-                await visitor.see(heading('jterrazz-mac-mini has not been seen for 6 h.'));
+                await visitor.see(heading('mac-mini has not been seen for 6 h.'));
                 await visitor.see(
                     content('Nothing proves it is down: it may be asleep, or off your network.', {
                         exact: false,
@@ -240,8 +240,8 @@ describe('Window', () => {
     test("the mouse's back and forward buttons walk the history", async () => {
         // Given - the window on Home over two-macs, This Mac opened
         const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
-            await visitor.click(within(sidebar, button('jterrazz-macbook-pro online')));
-            await visitor.see(heading('jterrazz-macbook-pro Online'));
+            await visitor.click(within(sidebar, button('macbook-pro online')));
+            await visitor.see(heading('macbook-pro Online'));
 
             // When - the mouse's back button is released, then its forward button
             globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 3 }));
@@ -249,7 +249,7 @@ describe('Window', () => {
             globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 4 }));
 
             // Then - the window is on This Mac again
-            await visitor.see(heading('jterrazz-macbook-pro Online'));
+            await visitor.see(heading('macbook-pro Online'));
             await visitor.see(disabled(forward));
         });
         expect(result.errors.text).toBe('');

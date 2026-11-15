@@ -1,4 +1,4 @@
-- heading "Passwords on jterrazz-macbook-pro" [level=1]
+- heading "Passwords on macbook-pro" [level=1]
 - paragraph:
   - img "3 kept, 1 granted"
   - text: 3 kept, 1 granted.
@@ -11,7 +11,7 @@
   - paragraph: "No value is shown, copied or revealed here: a password is only granted, and removed."
 - dialog "Add a password":
   - heading "Add a password" [level=3]
-  - paragraph: It is kept in jterrazz-macbook-pro's Keychain; you can then grant it to a machine.
+  - paragraph: It is kept in macbook-pro's Keychain; you can then grant it to a machine.
   - region "From":
     - text: From
     - group "From":

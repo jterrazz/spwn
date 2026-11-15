@@ -11,7 +11,7 @@ export const PICKS_STORIES: readonly Story<PicksProps<string>>[] = [
             onChange: nothing,
             options: [
                 { id: 'this', lines: ['4 GB free'], title: 'This Mac' },
-                { id: 'mini', lines: ['36 GB free'], title: 'jterrazz-mac-mini' },
+                { id: 'mini', lines: ['36 GB free'], title: 'mac-mini' },
                 {
                     disabled: true,
                     id: 'air',
@@ -57,7 +57,7 @@ export const PICKS_STORIES: readonly Story<PicksProps<string>>[] = [
             onChange: nothing,
             options: [
                 { id: 'long', lines: ['20 GB free'], title: LONG_NAME },
-                { id: 'mini', title: 'jterrazz-mac-mini' },
+                { id: 'mini', title: 'mac-mini' },
             ],
             value: null,
         },

@@ -14,7 +14,7 @@ describe('machine-storage', () => {
     test('what a Mac holds is one row per app, each with its kinds, its gestures offered', async () => {
         // Given - the window on This Mac's Storage over two-macs
         const result = await component.render(
-            windowOver('two-macs', 'jterrazz-macbook-pro'),
+            windowOver('two-macs', 'macbook-pro'),
             async (visitor) => {
                 // When - its disk has been read
                 await visitor.see(region('By app'));
@@ -49,10 +49,10 @@ describe('machine-storage', () => {
     test('a disk the engine reads as empty says so, and offers nothing to free', async () => {
         // Given - the window on This Mac's Storage over one-mac, whose disk holds no row
         const result = await component.render(
-            windowOver('one-mac', 'jterrazz-macbook-pro'),
+            windowOver('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its disk has been read
-                await visitor.see(content('Nothing listed on jterrazz-macbook-pro.'));
+                await visitor.see(content('Nothing listed on macbook-pro.'));
             },
         );
 
@@ -63,7 +63,7 @@ describe('machine-storage', () => {
     test('a Mac that does not answer shows the transport saying so', async () => {
         // Given - the window on the Mac mini's Storage over mini-offline
         const result = await component.render(
-            windowOver('mini-offline', 'jterrazz-mac-mini'),
+            windowOver('mini-offline', 'mac-mini'),
             async (visitor) => {
                 // When - its read ends with no answer
                 await visitor.see(heading('No answer from the engine.'));

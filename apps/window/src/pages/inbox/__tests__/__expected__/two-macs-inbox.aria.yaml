@@ -5,42 +5,42 @@
     - text: "npm sign-in fails: The token is refused by registry.npmjs.org"
   - group "Which machines":
     - button "All machines" [pressed]
-    - button "jterrazz-macbook-pro"
-    - button "jterrazz-mac-mini"
+    - button "macbook-pro"
+    - button "mac-mini"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
-    - 'button "Broken npm sign-in fails: The token is refused by registry.npmjs.org jterrazz-macbook-pro · Sign-ins"'
+    - 'button "Broken npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"'
     - button "Fix npm": Fix
-    - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 jterrazz-macbook-pro · Background"
-    - button "Remove com.jterrazz.brain.x-snapshot": Remove
+    - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.example.brain.x-snapshot": Remove
   - region "Can wait":
     - heading "Can wait 7" [level=2]
-    - button "Needs a look 1 mise update waiting jterrazz-macbook-pro · Apps"
+    - button "Needs a look 1 mise update waiting macbook-pro · Apps"
     - button "Update mise": Update
-    - button "Needs a look 1 brew update waiting jterrazz-macbook-pro · Apps"
+    - button "Needs a look 1 brew update waiting macbook-pro · Apps"
     - button "Update brew": Update
-    - 'button "Needs a look Firewall: off jterrazz-macbook-pro · Settings"'
+    - 'button "Needs a look Firewall: off macbook-pro · Settings"'
     - text: System Settings > Network > Firewall
     - button "Copy System Settings > Network > Firewall": Copy
-    - button "Needs a look ~/.tart is misplaced jterrazz-macbook-pro · Disk"
+    - button "Needs a look ~/.tart is misplaced macbook-pro · Disk"
     - button "Move ~/.tart": Move
-    - button "Needs a look com.bjango.istatmenus.installer is left over jterrazz-macbook-pro · Background"
+    - button "Needs a look com.bjango.istatmenus.installer is left over macbook-pro · Background"
     - text: sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
     - button "Copy sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist": Copy
-    - button "Needs a look com.docker.socket is left over jterrazz-macbook-pro · Background"
+    - button "Needs a look com.docker.socket is left over macbook-pro · Background"
     - text: sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist
     - button "Copy sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist": Copy
-    - button "Needs a look com.docker.vmnetd is left over jterrazz-macbook-pro · Background"
+    - button "Needs a look com.docker.vmnetd is left over macbook-pro · Background"
     - text: sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
     - button "Copy sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist": Copy
   - region "History":
     - heading "History what happened, newest first" [level=2]
     - region "Last night":
       - heading "Last night 2 moved, 1 failed" [level=3]
-      - button "03:15 mise download timed out Failed jterrazz-macbook-pro"
+      - button "03:15 mise download timed out Failed macbook-pro"
       - button "Retry mise": Retry
       - button "03:12 node 24.11.0 → 24.11.1 4 machines"
-      - button "03:13 gh 2.97.0 → 2.98.0 jterrazz-macbook-pro"
+      - button "03:13 gh 2.97.0 → 2.98.0 macbook-pro"
     - region "Yesterday":
       - heading "Yesterday" [level=3]
       - button "18:02 linux-1 created by agent-7f · run the docs lot"

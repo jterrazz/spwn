@@ -5,8 +5,8 @@
   - button "Storage"
   - group "Machines":
     - heading "Machines" [level=2]
-    - button "jterrazz-macbook-pro online":
-      - text: jterrazz-macbook-pro
+    - button "macbook-pro online":
+      - text: macbook-pro
       - img "online"
     - button "api Stopped":
       - text: api
@@ -14,8 +14,8 @@
     - button "linux-1 Running":
       - text: linux-1
       - img "Running"
-    - button "jterrazz-mac-mini online":
-      - text: jterrazz-mac-mini
+    - button "mac-mini online":
+      - text: mac-mini
       - img "online"
     - button "infra Running":
       - text: infra
@@ -33,12 +33,12 @@
   - button "Show or hide the sidebar"
   - button "Back"
   - button "Forward" [disabled]
-  - button "jterrazz-macbook-pro"
+  - button "macbook-pro"
   - text: api
   - heading "api Stopped" [level=2]
   - paragraph:
     - text: workspace · persistent · on
-    - button "jterrazz-macbook-pro"
+    - button "macbook-pro"
   - button "Start"
   - button "Stop"
   - button "Open in Terminal" [disabled]

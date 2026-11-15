@@ -5,8 +5,8 @@
   - button "Storage"
   - group "Machines":
     - heading "Machines" [level=2]
-    - button "jterrazz-macbook-pro online":
-      - text: jterrazz-macbook-pro
+    - button "macbook-pro online":
+      - text: macbook-pro
       - img "online"
     - button "api Stopped":
       - text: api
@@ -14,8 +14,8 @@
     - button "linux-1 Running":
       - text: linux-1
       - img "Running"
-    - button "jterrazz-mac-mini online":
-      - text: jterrazz-mac-mini
+    - button "mac-mini online":
+      - text: mac-mini
       - img "online"
     - button "infra Running":
       - text: infra
@@ -46,37 +46,37 @@
   - text: of 994 GB · machines hold 100 GB
   - region "Needs you":
     - heading "Needs you 2" [level=2]
-    - 'button "Broken npm sign-in fails: The token is refused by registry.npmjs.org jterrazz-macbook-pro · Sign-ins"'
+    - 'button "Broken npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"'
     - button "Fix npm": Fix
-    - button "Broken com.jterrazz.brain.x-snapshot is failing, last exit 2 jterrazz-macbook-pro · Background"
-    - button "Remove com.jterrazz.brain.x-snapshot": Remove
+    - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.example.brain.x-snapshot": Remove
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]
-    - text: jterrazz-macbook-pro
+    - text: macbook-pro
     - emphasis: 4 GB free
     - text: of 16
-    - img "Memory of jterrazz-macbook-pro, one square per GB"
-    - text: 4 macOS 8 linux-1 4 free jterrazz-mac-mini
+    - img "Memory of macbook-pro, one square per GB"
+    - text: 4 macOS 8 linux-1 4 free mac-mini
     - emphasis: 36 GB free
     - text: of 64
-    - img "Memory of jterrazz-mac-mini, one square per GB"
+    - img "Memory of mac-mini, one square per GB"
     - text: 4 macOS 24 infra 36 free
   - region "Machines":
     - heading "Machines" [level=2]
     - text: Machine What it is for CPU Memory, GB
-    - button "jterrazz-macbook-pro 34 % 78 12.4 / 16":
-      - text: jterrazz-macbook-pro 34 %
-      - meter "Memory of jterrazz-macbook-pro, used of its total"
+    - button "macbook-pro 34 % 78 12.4 / 16":
+      - text: macbook-pro 34 %
+      - meter "Memory of macbook-pro, used of its total"
       - text: 12.4 / 16
     - button "api"
     - button "linux-1"
-    - button "jterrazz-mac-mini"
+    - button "mac-mini"
     - button "infra"
     - button "Add a Mac"
   - region "Last night":
     - heading "Last night 2 moved, 1 failed" [level=2]
     - button "All history"
-    - button "03:15 mise download timed out Failed jterrazz-macbook-pro"
+    - button "03:15 mise download timed out Failed macbook-pro"
     - button "Retry mise": Retry
     - button "03:12 node 24.11.0 → 24.11.1 4 machines"
-    - button "03:13 gh 2.97.0 → 2.98.0 jterrazz-macbook-pro"
+    - button "03:13 gh 2.97.0 → 2.98.0 macbook-pro"

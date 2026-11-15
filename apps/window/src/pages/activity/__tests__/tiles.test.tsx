@@ -11,7 +11,7 @@ describe('tiles', () => {
 
         // When - the tile is drawn
         const result = await component.render(
-            <CpuTile label="CPU, this Mac" name="jterrazz-macbook-pro" report={report} />,
+            <CpuTile label="CPU, this Mac" name="macbook-pro" report={report} />,
         );
 
         // Then - it says the bucket's max, never the bucket's index, and how long ago

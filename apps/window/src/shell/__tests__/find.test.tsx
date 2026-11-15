@@ -110,7 +110,7 @@ describe('Find', () => {
         // Given - New machine opened from Home, a name typed in it
         const result = await component.render(windowOnHome(), async (visitor) => {
             await visitor.click(button('New machine'));
-            const sheet = dialog('New machine on jterrazz-mac-mini');
+            const sheet = dialog('New machine on mac-mini');
             await visitor.see(sheet);
             await visitor.fill(within(sheet, field('Name')), 'gate5');
 

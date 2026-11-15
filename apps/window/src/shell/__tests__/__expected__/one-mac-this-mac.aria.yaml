@@ -5,8 +5,8 @@
   - button "Storage"
   - group "Machines":
     - heading "Machines" [level=2]
-    - button "jterrazz-macbook-pro online":
-      - text: jterrazz-macbook-pro
+    - button "macbook-pro online":
+      - text: macbook-pro
       - img "online"
   - button "Machine files"
   - button "Passwords"
@@ -21,10 +21,10 @@
   - button "Show or hide the sidebar"
   - button "Back" [disabled]
   - button "Forward" [disabled]
-  - text: jterrazz-macbook-pro
-  - heading "jterrazz-macbook-pro Online" [level=2]
+  - text: macbook-pro
+  - heading "macbook-pro Online" [level=2]
   - paragraph: "This Mac · Engine running · Awake: sleeps normally"
-  - button "New machine on jterrazz-macbook-pro": New machine
+  - button "New machine on macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview" [selected]
     - tab "Activity"
@@ -40,4 +40,4 @@
       - paragraph: Not given yet What each machine holds of this Mac's memory.
     - region "Packages":
       - heading "Packages" [level=2]
-      - text: "Not found no Machinefile named jterrazz-macbook-pro. give this machine one: station init --machinefile <name>"
+      - text: "Not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"

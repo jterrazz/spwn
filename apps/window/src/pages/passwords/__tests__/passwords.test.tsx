@@ -15,7 +15,7 @@ describe('passwords', () => {
         // Given - the Passwords page over two-macs
         const result = await component.render(passwordsOver('two-macs'), async (visitor) => {
             // When - vault.list has answered
-            await visitor.see(heading('Passwords on jterrazz-macbook-pro'));
+            await visitor.see(heading('Passwords on macbook-pro'));
 
             // Then - the engine's verdict, and a row a password, with its kind and its grants counted
             await visitor.see(content('3 kept, 1 granted', { exact: false }));
@@ -68,7 +68,7 @@ describe('passwords', () => {
                 await visitor.click(within(asked, button('Remove')));
 
                 // Then - the vault is listed again, without it
-                await visitor.see(heading('Passwords on jterrazz-macbook-pro'));
+                await visitor.see(heading('Passwords on macbook-pro'));
                 await visitor.gone(
                     within(region('Passwords'), button('npm publish', { exact: false })),
                 );

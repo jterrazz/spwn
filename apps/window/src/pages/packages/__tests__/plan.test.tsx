@@ -13,7 +13,7 @@ import { PlanView } from '../plan';
 
 const recordingFor = await recordingsOf('machinefile-differs', 'machinefile-kept');
 
-const MAC = 'jterrazz-macbook-pro';
+const MAC = 'macbook-pro';
 
 function planOver(world: string, name: string, target?: Target) {
     const client = new Client(replayTransport(recordingFor(world)));

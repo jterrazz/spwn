@@ -37,7 +37,7 @@ describe('storage', () => {
             await visitor.see(
                 within(
                     machines,
-                    button('jterrazz-macbook-pro the Mac itself 34.8 GB of caches inside'),
+                    button('macbook-pro the Mac itself 34.8 GB of caches inside'),
                 ),
             );
             await visitor.see(within(machines, button('linux-1 1.5 GB of caches inside 50 GB')));

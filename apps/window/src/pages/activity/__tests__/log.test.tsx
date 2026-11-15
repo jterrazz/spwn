@@ -86,7 +86,7 @@ describe('Log', () => {
     test("a Mac's log is a panel that says what no call reads", async () => {
         // Given - This Mac over one-mac
         const result = await component.render(
-            activityOf('one-mac', 'jterrazz-macbook-pro'),
+            activityOf('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its Activity is shown
                 await visitor.see(heading('No finding from the engine.'));

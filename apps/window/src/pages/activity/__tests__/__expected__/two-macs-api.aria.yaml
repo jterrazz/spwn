@@ -2,7 +2,7 @@
   - heading "api Stopped" [level=2]
   - paragraph:
     - text: workspace · persistent · on
-    - button "jterrazz-macbook-pro"
+    - button "macbook-pro"
   - button "Start"
   - button "Stop"
   - button "Open in Terminal" [disabled]

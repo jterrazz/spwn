@@ -24,7 +24,7 @@ describe('memory', () => {
         // Given - two-macs: 4 of 16 GB free on the MacBook Pro, 36 of 64 on the mini
         const result = await component.render(over('two-macs'), async (visitor) => {
             // When - machines.list has settled with both Macs
-            await visitor.see(within(region('Memory'), content('jterrazz-mac-mini')));
+            await visitor.see(within(region('Memory'), content('mac-mini')));
         });
 
         // Then - the tile sums the rows drawn, and each Mac draws macOS, its machines and its free
@@ -38,13 +38,13 @@ describe('memory', () => {
     test("a Mac Overview's grid is its Mac's alone, and a Mac whose room the engine does not give says so", async () => {
         // Given - the MacBook Pro over creating, then one-mac, whose Mac has no measured memory
         const creating = await component.render(
-            over('creating', 'jterrazz-macbook-pro'),
+            over('creating', 'macbook-pro'),
             async (visitor) => {
                 await visitor.see(content('linux-4', { exact: false }));
             },
         );
         const silent = await component.render(
-            over('one-mac', 'jterrazz-macbook-pro'),
+            over('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - machines.list has answered with no room
                 await visitor.see(content("What each machine holds of this Mac's memory."));

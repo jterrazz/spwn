@@ -2,7 +2,7 @@
   - heading "infra Running" [level=2]
   - paragraph:
     - text: server · always on · on
-    - button "jterrazz-mac-mini"
+    - button "mac-mini"
   - button "Start"
   - button "Stop"
   - button "Restart"

@@ -4,13 +4,13 @@
     - img "Not given yet"
     - text: What follows is what the engine answers, with no sentence that sums it up
   - group "Which Mac":
-    - button "jterrazz-macbook-pro" [pressed]
-    - button "jterrazz-mac-mini"
+    - button "macbook-pro" [pressed]
+    - button "mac-mini"
   - region "Disk":
     - heading "Disk" [level=2]
     - paragraph: 606 GB of 994 GB used
     - button "Rescan"
-    - img "What holds the disk of jterrazz-macbook-pro"
+    - img "What holds the disk of macbook-pro"
     - list "The groups":
       - listitem: Misplaced 73.3 GB
       - listitem: Can rebuild 34.8 GB
@@ -37,6 +37,6 @@
     - button "Delete station-linux 2026.10.20": Delete · frees 3 GB
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
-    - button "jterrazz-macbook-pro the Mac itself 34.8 GB of caches inside"
+    - button "macbook-pro the Mac itself 34.8 GB of caches inside"
     - button "api 50 GB"
     - button "linux-1 1.5 GB of caches inside 50 GB"

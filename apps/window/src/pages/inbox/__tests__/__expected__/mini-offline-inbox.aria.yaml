@@ -5,16 +5,16 @@
     - text: 2 things can wait.
   - group "Which machines":
     - button "All machines" [pressed]
-    - button "jterrazz-macbook-pro"
-    - button "jterrazz-mac-mini"
+    - button "macbook-pro"
+    - button "mac-mini"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
     - paragraph: No need is listed.
   - region "Can wait":
     - heading "Can wait 2" [level=2]
-    - button "Needs a look 1 mise update waiting jterrazz-macbook-pro · Apps"
+    - button "Needs a look 1 mise update waiting macbook-pro · Apps"
     - button "Update mise": Update
-    - button "Needs a look 1 brew update waiting jterrazz-macbook-pro · Apps"
+    - button "Needs a look 1 brew update waiting macbook-pro · Apps"
     - button "Update brew": Update
   - region "History":
     - heading "History what happened, newest first" [level=2]
