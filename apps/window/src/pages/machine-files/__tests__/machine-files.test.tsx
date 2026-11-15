@@ -134,10 +134,10 @@ describe('Machine files', () => {
             // When - the shipped file station-macos is chosen
             await visitor.click(button('station-macos'));
 
-            // Then - the panel carries the engine's sentence
-            await visitor.see(
-                within(region('Machines that follow it'), content('No machine follows it.')),
-            );
+            // Then - the panel carries the engine's sentence alone, an empty list is no gap
+            const followers = region('Machines that follow it');
+            await visitor.see(within(followers, content('No machine follows it.')));
+            await visitor.gone(within(followers, content('Not given yet')));
         });
         expect(result.errors.text).toBe('');
     });
