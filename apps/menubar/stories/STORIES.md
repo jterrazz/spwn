@@ -1320,7 +1320,7 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 ![alert.remove-grant](stories/alert.remove-grant.png)
 
 - **Capture**: [dark](stories/alert.remove-grant.png)
-- **Shows**: Remove GitHub? "The grant ends here; the token stays yours."
+- **Shows**: Remove GitHub? "The grant ends here; the token stays yours." Remove is red, as the grant row's Remove is.
 - **Data**: grant
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Remove" → sheetYes
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
@@ -1423,7 +1423,7 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 ![menu.context.server](stories/menu.context.server.png)
 
 - **Capture**: [dark](stories/menu.context.server.png)
-- **Shows**: A server row: Open, Open Traefik, Copy, Share, Restart (asks), Stop…, Delete….
+- **Shows**: A server row: Open, Open Traefik, Copy, Share, Restart (asks, red as its typed question is), Stop…, Delete….
 - **Data**: server state, ports
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 38%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 52%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "Open ↩"; menu item "Open Traefik"; menu item "Copy"; menu item "Share"; menu item "Restart"; … 2 more
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy

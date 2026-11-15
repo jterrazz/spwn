@@ -91,7 +91,7 @@ station machines edit infra --check infra:6443 # a server's health check, read b
 station machines ssh api # prints the ssh command: ssh admin@api
 station machines restart mac-mini # a Mac: asks naming the VMs that pause, a planned restart that unlocks itself, waits for its station, starts those VMs again; a VM: power off, run
 station machines restart infra --on mac-mini # a server: asks its name typed (--confirm=infra), --yes answers nothing; a workspace asks nothing
-station machines delete api # destroys the VM, its leases and the secrets lent to it
+station machines delete api # destroys the VM, its grants and the accounts its first start shared with it
 station machines api # its Overview, as station overview --on api
 station machines unlock mac-mini # after a power cut, on its last LAN address: you type its password into macOS's pre-boot prompt
 station machines wake macbook-air --tell # a Wake-on-LAN packet from this Mac; told once it answers again

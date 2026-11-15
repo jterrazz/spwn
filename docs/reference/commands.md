@@ -22,7 +22,7 @@ Every command of `station`, grouped as `station help` groups them. The words are
 - One verb per meaning, the [Glossary](../concepts/glossary.md#the-verbs)'s: `apps` install, update, remove; `settings` apply, diff, off; `disk` free, erase, move; a VM create, start, stop, restart, edit, delete. The only other words are the [hidden aliases](#hidden-aliases).
 - Every read takes `--json`. Every destructive action asks on a terminal or takes `--yes`.
 - Every refusal exits 2 before any question; every failure is one `Error:` and one `Hint:`. With `--json`, the same refusal or failure is also the `station.error/v1` document on stdout (`schema`, `type`, `code`, `subject`, `message`, `hint`, `fix`), the exit code unchanged. A question answered no is `Error: <what> kept: you said no`, exit 1.
-- A command that needs an app this Mac lacks is refused before anything runs, exit 2, naming the app and what needs it: `Error: tart is required by machines`, `Hint: station apps install tart`. The needs are the [Glossary](../concepts/glossary.md)'s: the VM verbs that make or run a VM and the image verbs need tart, `ports share` needs Tailscale, `accounts share` the studio CLI. On a terminal the refusal is one line, `○ tart is required by machines · station apps install tart`, then `Install tart now?`: yes installs it as `apps install` does and runs the command again; no ends there, exit 2. A need station installs none of (the studio CLI) is the refusal on a terminal too.
+- A command that needs an app this Mac lacks is refused before anything runs, exit 2, naming the app and what needs it: `Error: tart is required by machines`, `Hint: station apps install tart`. The needs are the [Glossary](../concepts/glossary.md)'s: the VM verbs that make or run a VM and the image verbs need tart, `ports share` needs Tailscale. On a terminal the refusal is one line, `○ tart is required by machines · station apps install tart`, then `Install tart now?`: yes installs it as `apps install` does and runs the command again; no ends there, exit 2. A need station installs none of (the studio CLI) is the refusal on a terminal too.
 - A word station does not know is `Error: unknown command "<word>"` / `Hint: station help`, exit 2; so is `station help <word>`.
 - A word under `disk` that names one of its entries, the verb forgotten, is still refused, but its hint is the command meant: `station disk go` is `"go" is a disk row: say what to do with it`, hint `station disk free go`. Under `apps` the entry is a read: `station apps jq` is jq's detail; under `settings`, a setting's name is its read: `station settings dns`.
 - `--on <machine>` runs any command below on another machine, through its engine, and renders the answer on this one; see [Machines](machines.md#on-another-machine).
@@ -153,12 +153,10 @@ The first line of `station ports` is This Mac's node: signed in with its name an
 ### `station accounts`
 
 ```sh
-station accounts [--all-machines] [--json] # who has access to what here, then the shares with VMs
-station accounts share <account> --with <vm> [--for <duration>] # 12h by default, 1m to 7d
-station accounts take-back <account> --from <vm> [--yes]
+station accounts [--all-machines] [--json] # who is signed in on this machine, and how
 ```
 
-This Mac's GitHub, npm, Claude, Tailscale, Cloudflare, git, ssh and Docker sign-ins, then `# Shared with VMs`: each share with its VM and its time left. `--on <vm>` reads a workspace's own sign-ins, by its guest; `--all-machines` prints one block per Mac and workspace, a server named and not listed, a stopped workspace and a Mac that does not answer each its own line. Identities and scopes only: no token, cookie or key body is ever read into a value, and anything shaped like one reads `?`. `--json` is `station.accounts.read/v1`: `{schema, machine, accounts, shares, share_list}`. A share is asked of the VM's own Mac. `station secrets`, `secrets lend --to` and `secrets recall --from` are hidden aliases of `accounts`, `accounts share` and `accounts take-back` for one release; `secrets allow` and `disallow` are retired (exit 2). See [Accounts](accounts.md#grants).
+One row per program station signs in for (GitHub, npm, Claude, Cloudflare): signed in, signed out or broken, who, its scopes, and how, `own` or `granted` with the password's label. It is `accounts.list` of the machine; `--on <vm>` reads a workspace through the engine of its Mac, which knows what it granted. `--all-machines` prints one block per Mac and workspace, a server named and not listed, a stopped workspace and a Mac that does not answer each its own line. Identities and scopes only: no token, cookie or key body is ever read into a value. `--json` is `station.accounts.list/v1`: `{schema, machine, findings, accounts}`. A sign-in, a sign-out and a grant are the window's and the menu bar's; see [Accounts](accounts.md).
 
 ### `station background`
 
@@ -254,7 +252,6 @@ A v2 word, or a v3.0 one (`setup`), runs its new command with the same arguments
 | `station stop`                        | `station engine stop`                                                                                                                                                                                        |
 | `station start`                       | `station engine start`                                                                                                                                                                                       |
 | `station tools`                       | `station apps`; `install`, `uninstall` and `upgrade --via` run `apps install`, `apps remove` and `apps update --manager`                                                                                     |
-| `station secrets`                     | `station accounts`; `lend --to` and `recall --from` run `accounts share --with` and `accounts take-back --from`                                                                                              |
 | `station config`                      | `station settings`; `install` and `uninstall` run `settings apply` and `settings off`                                                                                                                        |
 | `station power`                       | `station awake`; `awake --for <d>` runs `awake <d>`, `sleep` runs `awake off`                                                                                                                                |
 | `station services`, `station tailnet` | `station ports`; `url` and `release` run `ports share` and `ports stop-sharing`                                                                                                                              |
@@ -265,7 +262,7 @@ A v2 word, or a v3.0 one (`setup`), runs its new command with the same arguments
 | `station run git <shortcut>`          | `git <alias>`, the [Git shortcuts](settings.md#the-packages) setting's alias (`log`, `push`, `status` are `lg`, `pushup`, `st`); refused with `station settings apply git-shortcuts` while it is not applied |
 | `station run docker rm\|rmi\|reset`   | the steps of `dclean`, `dclean-images`, `dreset`, the [Docker shortcuts](settings.md#the-packages), asking as before (`--yes` off a terminal)                                                                |
 
-The words of a kind and a lifetime are not aliased in `--json`: `station.machines.list/v1`, `station.accounts.read/v1` and `station.overview.read/v1` say `computer`, `ephemeral` and `persistent`, and `station.status/v1` keeps its words ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)).
+The words of a kind and a lifetime are not aliased in `--json`: `station.machines.list/v1`, `station.accounts.list/v1` and `station.overview.read/v1` say `computer`, `ephemeral` and `persistent`, and `station.status/v1` keeps its words ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)).
 
 ## Plumbing
 

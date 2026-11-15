@@ -16,7 +16,7 @@
 
 ## What is built
 
-This page is the target. Reading who is signed in, the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone; an agent is no grant target yet, so a grant to one is refused `grant.unknown-agent` and the sheet lists none. Everything else here is not: the Passwords page and the Machinefile's `signins` and `grants`. Until those land, the code still has the tiers and `accounts share`, which the ADR deletes; [its consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
+This page is the target. Reading who is signed in (`accounts.list`), the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone; an agent is no grant target yet, so a grant to one is refused `grant.unknown-agent` and the sheet lists none. Everything else here is not: the Passwords page and the Machinefile's `signins` and `grants`. Until those land, a workspace's first start still copies the accounts its Machinefile's `accounts.share` names through the studio CLI, with the share list and the expiry of those copies; no call shares or takes back an account any more. [The ADR's consequences](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md#consequences) list what goes, and a page that still names `share_list` or `claude-token` describes that old code.
 
 ## Three concepts
 
@@ -85,7 +85,7 @@ A grant's removal undoes it inside the VM; a token stays valid at its provider u
 
 ## Reading accounts
 
-`station accounts` shows who has access to what: each provider's identity on this Mac, then on each of its VMs, and where it comes from, `here` (a sign-in done on that machine), `granted` (with its `until`), or both. A grant in its last hour is `◐ expiring`; one whose end the engine could not carry out is `✗ failing`. A VM is read by its own guest over the engine's session, so no provider's output leaves the VM: only the parsed identities and scopes do. Each read is an allowlist of named fields (`apps/engine/accounts/adapter/cli/parse.go`), and any kept value shaped like a secret is replaced by `?`; the shapes are `apps/engine/core/secret`'s, owned by ADR-048.
+`station accounts` is `accounts.list` of one machine: each program's state, who, its scopes, and how, `own` or `granted` with the password's label. A VM's programs are read by the engine of its Mac, which asks the VM over its one connection and knows what it granted, so no program's output leaves the VM: only the parsed identities and scopes do. Each read is an allowlist of named fields (`apps/engine/accounts/adapter/cli/parse.go`), and any kept value shaped like a secret is replaced by `?`; the shapes are `apps/engine/core/secret`'s, owned by ADR-048.
 
 ## Windows
 
