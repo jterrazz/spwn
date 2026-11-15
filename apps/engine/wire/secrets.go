@@ -16,11 +16,12 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/remote/adapter/unix"
 	accountscmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/accounts"
+	accountslogin "github.com/jterrazz/studio-station/apps/engine/surface/cli/accounts/login"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 )
 
 func accountsCommand(env kit.Env, m machine) *cobra.Command {
-	return accountscmd.Command(accountscmd.Deps{ThisMachine: m.where}, env)
+	return accountscmd.Command(accountscmd.Deps{ThisMachine: m.where}, env, accountslogin.Command(accountslogin.Deps{ThisMachine: m.where}, env))
 }
 
 func (m machine) secretStores() accountscalls.SharingStores {

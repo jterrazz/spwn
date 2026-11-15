@@ -212,6 +212,10 @@ func (s *SignIns) named(machine string) string {
 	return machine
 }
 
+func (s *SignIns) Where(ctx context.Context, machine string) (accounts.Where, bool) {
+	return s.m.Where(ctx, machine)
+}
+
 func (s *SignIns) Login(ctx context.Context, machine string, program accounts.Program) (<-chan contract.LoginUpdate, error) {
 	refuse := func(code fail.Code) error { return accounts.Refusal(fail.Refused, code, string(program)) }
 	where, ok := s.m.Where(ctx, machine)

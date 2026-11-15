@@ -1,0 +1,22 @@
+description: 'station accounts login prints the code and its site, then the row reads signed in'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - engine
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" accounts login gh --on linux-1'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          On linux-1:
+          Enter the code
+            code  WDJB-MJHT
+            site  github.com
+            Waiting for you to enter the GitHub code at github.com
+          On linux-1:
+          This Mac · 1 program · 1 signed in
+
+          Accounts  ● gh · signed in · jterrazz · own

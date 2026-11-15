@@ -1,0 +1,27 @@
+description: 'a broken sign-in names its fix, and that command as written reaches its workspace'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - engine
+    - terminal
+runs:
+    - command: '--version >/dev/null; CMD=$("$STATION" overview --on linux-1 | /usr/bin/grep -o "station accounts login .*"); echo "$CMD"; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 /bin/sh -c "\"$STATION\" ${CMD#station }"'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          station accounts login wrangler --on linux-1
+          On linux-1:
+          Enter the code
+            code  WDJB-MJHT
+            site  dash.cloudflare.com
+            Waiting for you to enter the Cloudflare code at dash.cloudflare.com
+          On linux-1:
+          This Mac · 1 program · 1 signed in
+
+          Accounts  ● wrangler · signed in · jterrazz · own
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["linux-1"].accounts.programs.wrangler.State, .macs["jterrazz-macbook-pro"].accounts.programs.wrangler.State]'' world.json'
+      exit: 0
+      stdout: |
+          ["signed-in","signed-in"]

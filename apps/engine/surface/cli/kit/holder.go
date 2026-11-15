@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/page"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
 
 type Held struct {
@@ -74,4 +75,31 @@ func OnItsMac(ctx context.Context, env Env, vm string, err error) error {
 		detail[k] = v
 	}
 	return fail.New(e.Type, call.VMMacUnreachable, vm, detail)
+}
+
+type Aimed struct {
+	// value: where a call about the target machine is sent, the VM it names
+	// in its input, the machine's name and its kind.
+	At       machine.Ref
+	VM, Name string
+	Kind     machine.Kind
+}
+
+func Aim(ctx context.Context, env Env, self string) Aimed {
+	// invariant: a VM's accounts are the business of the engine of its own
+	// Mac, which knows what it granted and holds a sign-in's exchange; a
+	// Mac's are its own.
+	t := env.Target()
+	name := t.Name
+	if name == "" {
+		name = self
+	}
+	if h, ok := Holder(ctx, env, name); ok {
+		return Aimed{At: machine.Ref{Name: h.Mac}, VM: name, Name: name, Kind: h.Kind}
+	}
+	return Aimed{At: t, Name: name, Kind: machine.Computer}
+}
+
+func NeedsTerminal(subject string) error {
+	return fail.New(fail.NeedsTerminal, words.NeedsTerminal, subject, nil)
 }

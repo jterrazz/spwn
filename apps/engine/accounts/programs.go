@@ -198,6 +198,18 @@ func (StepKind) Enum() []string {
 	return []string{string(StepDeviceCode), string(StepLink), string(StepPaste)}
 }
 
+func (k StepKind) Heading() string {
+	// value: what a step of the kind is headed: what the owner does next.
+	switch k {
+	case StepDeviceCode:
+		return "Enter the code"
+	case StepPaste:
+		return "Paste the code"
+	case StepLink:
+	}
+	return "Open the link"
+}
+
 type Step struct {
 	Kind StepKind
 	// value: the one-time code the owner types at Site, for a device code.
