@@ -35,6 +35,9 @@ type Job[R any] struct {
 	// step; its own answer is the last.
 	Partial func(ctx context.Context, emit func(func(*R))) func(*R)
 	Late    func(*R)
+	// value: the job runs for its own reader, never shared by its key:
+	// what it reads changes between two reads of one pool.
+	Fresh bool
 }
 
 type Clock interface {
@@ -327,7 +330,7 @@ func Run[R any](ctx context.Context, p *Pool, frame R, jobs []Job[R], clone func
 		if j.Partial != nil {
 			do = func(c context.Context) any { return j.Partial(c, emit) }
 		}
-		f := p.start(ctx, j.Lane, j.Key, j.Partial == nil, j.Budget, do)
+		f := p.start(ctx, j.Lane, j.Key, j.Partial == nil && !j.Fresh, j.Budget, do)
 		go func() {
 			answer, late := f.await(ctx)
 			set, ok := answer.(func(*R))

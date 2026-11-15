@@ -59,8 +59,6 @@ type reading struct {
 	listed     bool
 	containers int64
 	system     int64
-	held       *disk.Held
-	waitsHeld  bool
 	// value: no walk has answered on this machine yet, so no row has a
 	// last size to show.
 	fresh bool
@@ -72,13 +70,44 @@ func (s *Surveyor) Watch(ctx context.Context) <-chan disk.Survey {
 
 func (s *Surveyor) Forget() { s.o.Pool.Forget(subject) }
 
+func (s *Surveyor) Held(ctx context.Context) <-chan disk.HeldReading {
+	// invariant: each reader asks the hypervisor itself, never through the
+	// survey a pool shares, so a machine or an image made or deleted since
+	// the last read is seen; the frame is pending, and a machine with no
+	// hypervisor to ask answers none at once.
+	if s.o.Station == nil {
+		out := make(chan disk.HeldReading, 1)
+		out <- disk.HeldReading{State: disk.HeldNone}
+		close(out)
+		return out
+	}
+	job := lanes.Job[disk.HeldReading]{
+		Key: subject + "/station", Lane: lanes.Commands, Fresh: true,
+		Do: func(ctx context.Context) func(*disk.HeldReading) {
+			held, err := s.o.Station.Held(ctx)
+			return func(r *disk.HeldReading) {
+				switch {
+				case err != nil:
+					r.State = disk.HeldFailed
+				case held == nil:
+					r.State = disk.HeldNone
+				default:
+					r.State, r.Held = disk.HeldAnswered, *held
+				}
+			}
+		},
+		Late: func(r *disk.HeldReading) { r.State = disk.HeldFailed },
+	}
+	return lanes.Run(ctx, s.o.Pool, disk.HeldReading{State: disk.HeldPending}, []lanes.Job[disk.HeldReading]{job}, func(r disk.HeldReading) disk.HeldReading { return r })
+}
+
 // invariant: the frame is every placed entry whose declared paths exist, read
 // with a glob and a stat each; one walk then sizes every root of every row and
 // the other caches together, and a row's size fills when its last root
 // answers, its mark when its own tool answers the inventory.
 func (s *Surveyor) watch(ctx context.Context) <-chan disk.Survey {
 	p := s.plan()
-	frame := reading{sizes: make([]int64, len(p.roots)), known: make([]int64, len(p.roots)), containers: pending, system: -1, waitsHeld: s.o.Station != nil}
+	frame := reading{sizes: make([]int64, len(p.roots)), known: make([]int64, len(p.roots)), containers: pending, system: -1}
 	if p.system < 0 {
 		frame.system = s.o.Disk.System(ctx)
 	}
@@ -138,23 +167,8 @@ func (s *Surveyor) watch(ctx context.Context) <-chan disk.Survey {
 			Late: func(r *reading) { r.containers = unmeasured },
 		},
 	}
-	if s.o.Station != nil {
-		jobs = append(jobs, lanes.Job[reading]{
-			Key: subject + "/station", Lane: lanes.Commands,
-			Do: func(ctx context.Context) func(*reading) {
-				held, err := s.o.Station.Held(ctx)
-				return func(r *reading) {
-					r.waitsHeld = false
-					if err == nil {
-						r.held = &held
-					}
-				}
-			},
-			Late: func(r *reading) { r.waitsHeld = false },
-		})
-	}
 	readings := lanes.Run(ctx, s.o.Pool, frame, jobs, func(r reading) reading {
-		return reading{sizes: slices.Clone(r.sizes), known: r.known, fresh: r.fresh, installed: maps.Clone(r.installed), listed: r.listed, containers: r.containers, system: r.system, held: r.held, waitsHeld: r.waitsHeld}
+		return reading{sizes: slices.Clone(r.sizes), known: r.known, fresh: r.fresh, installed: maps.Clone(r.installed), listed: r.listed, containers: r.containers, system: r.system}
 	})
 	out := make(chan disk.Survey)
 	go func() {
@@ -303,7 +317,6 @@ func (s *Surveyor) assemble(p plan, r reading) disk.Survey {
 		}
 	}
 	report.Logs = s.logs(report.Rows)
-	report.Held, report.HeldPending = r.held, r.waitsHeld
 	return report
 }
 

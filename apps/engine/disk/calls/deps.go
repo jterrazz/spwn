@@ -17,6 +17,7 @@ type Deps struct {
 
 type Disk interface {
 	Watch(ctx context.Context) <-chan disk.Survey
+	Held(ctx context.Context) <-chan disk.HeldReading
 	Volume(ctx context.Context) (total, free int64, err error)
 	Free(ctx context.Context, names []string) ([]disk.Outcome, error)
 	CheckRunning(ctx context.Context, name string) error

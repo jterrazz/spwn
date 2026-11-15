@@ -123,11 +123,16 @@ func (s *Builder) all(ctx context.Context) ([]catalog.Image, error) {
 }
 
 func (s *Builder) List(ctx context.Context) ([]images.Report, error) {
+	disks, _ := s.e.Disks(ctx)
+	return s.ListOf(ctx, disks)
+}
+
+func (s *Builder) ListOf(ctx context.Context, disks []contract.Disk) ([]images.Report, error) {
+	// value: the images as List reads them, sized from disks the hypervisor
+	// already listed, so a reader that holds them asks it once.
 	sizes := map[string]int{}
-	if disks, err := s.e.Disks(ctx); err == nil {
-		for _, d := range disks {
-			sizes[d.VM] = int(d.Bytes / 1e9)
-		}
+	for _, d := range disks {
+		sizes[d.VM] = int(d.Bytes / 1e9)
 	}
 	users, err := s.users()
 	if err != nil {

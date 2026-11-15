@@ -38,15 +38,20 @@ type CanFree struct {
 	Sentence string
 }
 
-func KindsOf(total, free int64, s Survey, rows []Row, machines int64, mac bool) ([]Amount, CanFree) {
-	// invariant: a kind this machine cannot measure is absent, never a
-	// guess: the system where the volume cannot tell it apart, and then
-	// your data, which is the remainder and would hold the system too; what
-	// a Mac's machines and images hold, off a Mac.
+func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, CanFree) {
+	// invariant: a kind whose measure has not answered is absent, never a
+	// guess: the system where the volume cannot tell it apart; machines and
+	// images while the hypervisor is pending, failed or late, and on a
+	// machine with none; your data, the remainder, whenever a kind it
+	// subtracts is unknown.
 	caches := Sum(Reading{Rows: rows}.Of(CanRebuild))
 	var apps int64
 	for _, t := range s.Rows {
 		apps += max(t.Install, 0)
+	}
+	machines, held := int64(0), h.State == HeldAnswered
+	if held {
+		machines = h.Held.Holding()
 	}
 	var out []Amount
 	known := s.System >= 0
@@ -54,15 +59,11 @@ func KindsOf(total, free int64, s Survey, rows []Row, machines int64, mac bool) 
 		out = append(out, Amount{Kind: KindSystem, Bytes: s.System})
 	}
 	out = append(out, Amount{Kind: KindApps, Bytes: apps})
-	if known {
-		rest := total - free - s.System - apps - caches
-		if mac {
-			rest -= machines
-		}
-		out = append(out, Amount{Kind: KindYourData, Bytes: max(rest, 0)})
+	if known && (held || h.State == HeldNone) {
+		out = append(out, Amount{Kind: KindYourData, Bytes: max(total-free-s.System-apps-caches-machines, 0)})
 	}
 	out = append(out, Amount{Kind: KindCaches, Bytes: caches})
-	if mac {
+	if held {
 		out = append(out, Amount{Kind: KindMachines, Bytes: machines})
 	}
 	out = append(out, Amount{Kind: KindFree, Bytes: free})

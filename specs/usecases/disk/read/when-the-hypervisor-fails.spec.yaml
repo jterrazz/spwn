@@ -1,0 +1,13 @@
+description: 'a hypervisor that fails leaves no station part, and machines and your data unknown, never 0'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Disks'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {pending: .Pending, kinds: [.Kinds[] | .Kind], station: .Station}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"pending":false,"kinds":["system","apps","caches","free"],"station":null}

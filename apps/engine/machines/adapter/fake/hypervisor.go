@@ -26,6 +26,7 @@ var (
 	ErrHeldName  = errors.New("a VM disk already has this name")
 	ErrScripted  = errors.New("the hypervisor refused to boot it, as the world scripted it")
 	ErrNoAddress = errors.New("the VM got no address, as the world scripted it")
+	ErrNoListing = errors.New("the hypervisor could not list its disks, as the world scripted it")
 )
 
 type Hypervisor struct {
@@ -78,6 +79,9 @@ func (h *Hypervisor) disk(vm string) (*world.VM, bool) {
 func (h *Hypervisor) Disks(context.Context) ([]contract.Disk, error) {
 	h.w.Lock()
 	defer h.w.Unlock()
+	if h.w.Fails("Hypervisor.Disks") {
+		return nil, ErrNoListing
+	}
 	out := []contract.Disk{}
 	for _, vm := range slices.Sorted(maps.Keys(h.thisMac().VMs)) {
 		v := h.thisMac().VMs[vm]

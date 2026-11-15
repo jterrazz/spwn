@@ -73,18 +73,18 @@ func (m machine) appFiles() map[catalog.AppFile]string {
 }
 
 // value: the disks this Mac's hypervisor holds for station, told apart by
-// the machine records and the images' versions; a Mac without the
-// hypervisor holds none.
+// the machine records and the images' versions, from one listing of its
+// disks; a Mac without the hypervisor has none to tell.
 type diskStation struct{ m machine }
 
-func (s diskStation) Held(ctx context.Context) (disk.Held, error) {
+func (s diskStation) Held(ctx context.Context) (*disk.Held, error) {
 	h := s.m.hypervisor()
 	if !h.Installed() {
-		return disk.Held{}, nil
+		return nil, nil
 	}
 	disks, err := h.Disks(ctx)
 	if err != nil {
-		return disk.Held{}, err
+		return nil, err
 	}
 	sizes := make(map[string]int64, len(disks))
 	for _, d := range disks {
@@ -92,11 +92,11 @@ func (s diskStation) Held(ctx context.Context) (disk.Held, error) {
 	}
 	records, err := s.m.stores.machines.ListReadable(ctx)
 	if err != nil {
-		return disk.Held{}, err
+		return nil, err
 	}
-	reports, err := s.m.images().List(ctx)
+	reports, err := s.m.images().ListOf(ctx, disks)
 	if err != nil {
-		return disk.Held{}, err
+		return nil, err
 	}
 	var held disk.Held
 	for _, r := range records {
@@ -115,7 +115,7 @@ func (s diskStation) Held(ctx context.Context) (disk.Held, error) {
 			held.Unused += b
 		}
 	}
-	return held, nil
+	return &held, nil
 }
 
 type inventory struct{ apps *appscalls.Shelf }

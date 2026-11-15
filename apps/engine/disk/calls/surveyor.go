@@ -47,8 +47,8 @@ type SurveyorOptions struct {
 
 type Station interface {
 	// value: the disks this Mac's hypervisor holds for its machines and
-	// images, as it lists them.
-	Held(ctx context.Context) (disk.Held, error)
+	// images, as it lists them; nil when the Mac has no hypervisor.
+	Held(ctx context.Context) (*disk.Held, error)
 }
 
 type Configurer interface {
