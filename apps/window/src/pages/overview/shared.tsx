@@ -44,7 +44,6 @@ export function SharedPorts({ found, vm, go }: Props) {
     }
     const { mac, shared } = portsOf(listing.out, {
         mac: found.mac.Name,
-        thisMac: found.mac.ThisMac,
         vm,
     });
     return (

@@ -71,7 +71,7 @@ const LISTING: PortsListing = {
 describe('ports of', () => {
     test("a Mac's tab holds its own ports, and none of its machines' shares", () => {
         // Given - the listing of a Mac with one workspace
-        const of = portsOf(LISTING, { mac: 'mbp', thisMac: true });
+        const of = portsOf(LISTING, { mac: 'mbp' });
 
         // Then - only port 5000 is its own; the share and the count belong to the workspace
         expect(of.ports.map((row) => row.Port)).toStrictEqual([5000]);
@@ -81,7 +81,7 @@ describe('ports of', () => {
 
     test("a VM's tab holds its ports, its shares and its counts", () => {
         // Given - the same listing, read for the workspace
-        const of = portsOf(LISTING, { mac: 'mbp', thisMac: true, vm: 'workspace' });
+        const of = portsOf(LISTING, { mac: 'mbp', vm: 'workspace' });
 
         // Then - the workspace's port, share and not-shared count
         expect(of.ports.map((row) => row.Port)).toStrictEqual([3000]);
@@ -92,17 +92,7 @@ describe('ports of', () => {
     test('a far Mac the listing does not name holds nothing', () => {
         // Given - the listing of mbp alone
         // Then - no Mac, no row
-        expect(portsOf(LISTING, { mac: 'mini', thisMac: false }).mac).toBeUndefined();
-    });
-
-    test('this Mac, listed with no name, is found by its flag', () => {
-        // Given - a listing whose This Mac came with an empty name
-        const macs = (LISTING.all.macs ?? []).map((mac) => ({ ...mac, name: '' }));
-        const nameless = { ...LISTING, all: { ...LISTING.all, macs } };
-
-        // Then - This Mac is still read; a far Mac of that name is not
-        expect(portsOf(nameless, { mac: 'mbp', thisMac: true }).ports).toHaveLength(1);
-        expect(portsOf(nameless, { mac: 'mbp', thisMac: false }).mac).toBeUndefined();
+        expect(portsOf(LISTING, { mac: 'mini' }).mac).toBeUndefined();
     });
 
     test('a reach the words table lacks is said as the number the engine sent', () => {

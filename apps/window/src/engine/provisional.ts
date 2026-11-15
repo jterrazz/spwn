@@ -16,8 +16,6 @@ import type {
     MachinesRestartInput,
     MachinesVM,
     OverviewNeed,
-    PortsListing,
-    PortsMacPorts,
     PortsPort,
     PortsSharedPort,
 } from '@jterrazz/station-api';
@@ -180,20 +178,6 @@ export function accountSideOf(
         return extra ? 'not-in-the-file' : 'shared';
     }
     return extra ? 'granted' : 'not-signed-in';
-}
-
-// outside: ports.list may name this Mac otherwise than machines.list does (the stories world names it ''), and
-// outside: flags it this_mac: this Mac's ports are the ones it flags, until both calls name a Mac alike.
-export function portsMacOf(
-    listing: PortsListing,
-    name: string,
-    thisMac: boolean,
-): PortsMacPorts | undefined {
-    const macs = listing.all.macs ?? [];
-    return (
-        macs.find((candidate) => candidate.name === name) ??
-        (thisMac ? macs.find((candidate) => candidate.this_mac) : undefined)
-    );
 }
 
 const OUTSIDE_TAILSCALE = 2;
