@@ -141,7 +141,7 @@ deprovision: ## Remove the binary from ~/.local/bin; the user data stays
 		printf "$(DIM)$(BINARY) not found at $(INSTALL_PATH)$(RESET)\n"; \
 	fi
 
-generate: ## Regenerate the catalog's projections
+generate: ## Regenerate the catalog's projections, and on Linux the window's recordings
 	@go run ./apps/engine/cmd/generate
 	@printf "$(GREEN)●$(RESET) Regenerated skills/studio-toolbelt/SKILL.md, docs/reference/footprint.md, packages/api/schemas/station.package.v1.json, packages/api/schemas/station.machinefile.v1.json, apps/engine/remote/api/calls.json, packages/api, the page fixtures, the story worlds' pages and the recorded menubar stream\n"
 	@if $(SDK_PROBE) >/dev/null 2>&1; then \
@@ -151,6 +151,14 @@ generate: ## Regenerate the catalog's projections
 		printf "$(GREEN)●$(RESET) Regenerated apps/menubar/stories/INDEX.md and the stories' previews\n"; \
 	else \
 		printf "menubar: apps/menubar/stories/INDEX.md and the previews not regenerated, no macOS SDK\n"; \
+	fi
+	@if [ "$$(uname)" = Linux ]; then \
+		mkdir -p .artifacts; \
+		python3 -B apps/window/scripts/record.py > .artifacts/window-record.log 2>&1 \
+			|| { tail -30 .artifacts/window-record.log; exit 1; }; \
+		printf "$(GREEN)●$(RESET) Regenerated apps/window/src/fixtures/worlds, the window's recordings over the world build of this tree\n"; \
+	else \
+		printf "window: apps/window/src/fixtures/worlds not regenerated, the world build is recorded in a Linux VM only\n"; \
 	fi
 
 clean: ## Remove build artifacts
