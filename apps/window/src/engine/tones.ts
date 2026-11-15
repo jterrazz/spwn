@@ -105,10 +105,3 @@ export const SHARE_STATE_TONES: Tones<PortsSharedPort['state']> = {
     unknown: 'plain',
     waiting: 'new',
 };
-
-// outside: machinefile.files says a follower matches, differs (a count) or was not read, as facts and no sentence.
-export const FOLLOWER_TONES: Tones<'differs' | 'matches' | 'unread'> = {
-    differs: 'warn',
-    matches: 'ok',
-    unread: 'plain',
-};
