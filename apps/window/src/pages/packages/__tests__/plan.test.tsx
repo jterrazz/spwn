@@ -42,7 +42,7 @@ describe('Plan', () => {
                 await visitor.click(button('Plan'));
                 await visitor.see(heading('To install 2'));
 
-                // When - Apply is clicked, then confirmed in the dialog calls.json asks
+                // When - Apply is clicked, then confirmed in the dialog confirms.json asks
                 await visitor.click(button('Apply'));
                 await visitor.see(asked(MAC));
                 await visitor.click(within(asked(MAC), button('Apply')));

@@ -2,13 +2,12 @@ import type { CallName, Target } from '@jterrazz/station-api';
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 
 import type { Client, In, Out, ReadName } from './client';
-import { isConfirmed } from './confirms';
+import { confirmingOf, consequenceOf } from './confirms';
+import type { Confirming, ConfirmKind } from './confirms';
 import { EngineError } from './engine-error';
-import { consequenceOf } from './engine-words';
 import { keyOf } from './frame';
 import { IDLE, step } from './gesture';
 import type { Ask, GestureEvent, GestureState } from './gesture';
-import { confirmFormOf } from './provisional';
 import { useClient, useGestureStore, useReread } from './react';
 
 export type GestureSpec<N extends ReadName> = {
@@ -16,6 +15,7 @@ export type GestureSpec<N extends ReadName> = {
     subject: string;
     rereads: readonly CallName[];
     target?: Target | undefined;
+    kind?: ConfirmKind | undefined;
     onDone?: (out: Out<N>) => void;
     within?: number;
 };
@@ -33,10 +33,10 @@ export type Gesture<O> = {
     dismiss: () => void;
 };
 
-function firstAsk(name: CallName, subject: string): Ask | undefined {
-    return isConfirmed(name)
-        ? { form: confirmFormOf(name), name: subject, refusal: undefined }
-        : undefined;
+function firstAsk(confirming: Confirming | undefined, subject: string): Ask | undefined {
+    return confirming?.form === undefined
+        ? undefined
+        : { form: confirming.form, name: subject, refusal: undefined };
 }
 
 type Maker<N extends ReadName> = {
@@ -80,6 +80,7 @@ export function useGesture<N extends ReadName>(name: N, spec: GestureSpec<N>): G
     const reread = useReread();
     const gestures = useGestureStore();
     const key = keyOf({ call: name, in: spec.input, target: spec.target });
+    const confirming = confirmingOf(name, spec.kind);
     const held = useSyncExternalStore(gestures.subscriberOf(key), () => gestures.state(key));
     const state = isStateOf(name, held) ? held : IDLE;
     const latest = useRef(spec);
@@ -108,13 +109,16 @@ export function useGesture<N extends ReadName>(name: N, spec: GestureSpec<N>): G
         confirm: (typed) => {
             send({ answer: typed, kind: 'confirm' });
         },
-        consequence: isConfirmed(name) ? consequenceOf(name, spec.subject) : undefined,
+        consequence: consequenceOf(confirming, spec.subject),
         dismiss: () => {
             send({ kind: 'dismiss' });
         },
         key,
         start: () => {
-            send({ ask: firstAsk(name, latest.current.subject), kind: 'start' });
+            send({
+                ask: firstAsk(confirmingOf(name, latest.current.kind), latest.current.subject),
+                kind: 'start',
+            });
         },
         state,
     };
