@@ -7,7 +7,6 @@ import type {
     MachinefileFileView,
 } from '@jterrazz/station-api';
 
-import { carries } from '../../engine/provisional';
 import { SEPARATOR } from '../../separator';
 
 export function rowOf(matrix: AppsMatrix | undefined, name: string): AppsMatrixRow | undefined {
@@ -22,7 +21,7 @@ export function carriedBy(matrix: AppsMatrix | undefined, name: string): string[
     const columns = matrix.Columns ?? [];
     return (row?.Cells ?? []).flatMap((cell, index) => {
         const column = columns[index];
-        return column !== undefined && carries(cell) ? [column.Name] : [];
+        return column !== undefined && cell.Holds ? [column.Name] : [];
     });
 }
 

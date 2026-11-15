@@ -1,5 +1,4 @@
 import type {
-    AppsCell,
     AppsUpdateInput,
     BackgroundRemoveInput,
     DiskMoveInput,
@@ -54,23 +53,6 @@ export type MachineKind = 'server' | 'workspace';
 // outside: machines.list sends no kind; Go reads it off the Lifetime (apps/engine/machines/run.go, Lifetime.Kind).
 export function machineKindOf(vm: Pick<MachinesVM, 'Lifetime'>): MachineKind {
     return vm.Lifetime === 'always-on' ? 'server' : 'workspace';
-}
-
-// outside: apps.matrix sends a cell's state and no flag that its machine carries the app; its Carry counts the states
-// outside: the engine calls installed (apps/engine/apps/state.go, Installed), which this table repeats.
-const CARRYING: Readonly<Record<AppsCell['State'], boolean>> = {
-    '': false,
-    failed: true,
-    'not-installed': false,
-    'not-known': false,
-    'not-managed': true,
-    ok: true,
-    pending: false,
-    'update-available': true,
-};
-
-export function carries(cell: Pick<AppsCell, 'State'>): boolean {
-    return CARRYING[cell.State];
 }
 
 export function macStateOf(mac: MachinesMacView): MacState {
