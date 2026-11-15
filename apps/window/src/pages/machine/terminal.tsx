@@ -25,13 +25,5 @@ export function terminalHeld(vm: MachinesVM, ssh: Reading<MachinesSshOutput>): s
 export function TerminalButton({ vm }: { vm: MachinesVM }) {
     const ssh = useRead('machines.ssh', { Name: vm.Name });
     const openable = vm.SSH && ssh.kind === 'read' ? Openable.ofSsh(ssh.out) : undefined;
-    return (
-        <OpenButton
-            held={terminalHeld(vm, ssh)}
-            label="Open in Terminal"
-            openable={openable}
-            variant="primary"
-            yields
-        />
-    );
+    return <OpenButton held={terminalHeld(vm, ssh)} label="Open in Terminal" openable={openable} />;
 }
