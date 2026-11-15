@@ -5,11 +5,12 @@ the Go sources and kept as <STATION_BENCH or the temp folder>/worlds/station-wor
 copy of the repository whose sources hash the same. In a Linux VM only, as the door asks the spec build's
 environment: HOME, PATH and every station path in a temporary folder, never the user's.
 
-SEEDS adds to a world what the specs' worlds lack for a page: machinefiles on This Mac, the fake binaries
-of a fixture of specs/usecases/__fixtures__/, and edits of its machines (a sign-in in progress, a program signed
-out or broken, an accounts switch the fake reads in apps/engine/world/accounts.go, as the presence check a grant asks, a
-failed sign-in or a failing background task dropped); a
-world of SEEDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise.
+WORLDS is the one list of the worlds the window records, each a world of specs/usecases/worlds/ and what a page
+needs that it lacks: machinefiles on This Mac, the fake binaries of a fixture of specs/usecases/__fixtures__/, and
+edits of its machines (a sign-in in progress, a program signed out or broken, an accounts switch the fake reads in
+apps/engine/world/accounts.go, as the presence check a grant asks, a failed sign-in or a failing background task
+dropped); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
+entry names is served as specs/usecases/worlds/ holds it.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
 """
@@ -159,8 +160,15 @@ def dropped(name, *path):
     return edit
 
 
-SEEDS = {
-    "two-macs": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
+def plain(name):
+    return (name, None, {}, [])
+
+
+WORLDS = {
+    **{name: plain(name) for name in (
+        "bare-mac", "creating", "disk-low", "engine-stopped", "mini-offline", "mini-workspace", "one-mac", "stories",
+    )},
+    "two-macs":("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
                  [exchange("linux-1", "ex-1", "gh", "device-code", "github.com"),
                   broken("jterrazz-macbook-pro", "npm", "jterrazz", "The token is refused by registry.npmjs.org")]),
     "sign-ins": ("two-macs", "homebrew", machine("jterrazz-macbook-pro", ["lazygit", "bat"]),
@@ -176,7 +184,7 @@ SEEDS = {
 
 
 def seeded(world):
-    base, fixture, files, edits = SEEDS.get(world, (world, None, {}, []))
+    base, fixture, files, edits = WORLDS.get(world, plain(world))
     seed = ROOT / "specs" / "usecases" / "worlds" / f"{base}.json"
     if not files and not edits:
         return seed, fixture
