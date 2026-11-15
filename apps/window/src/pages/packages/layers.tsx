@@ -1,7 +1,6 @@
 import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../design/index';
 import type { PlanLine } from '../../engine/provisional';
 import { engineShown, kindChipWord } from '../../engine/shown';
-import { ANY_VERSION_WORD } from '../../engine/words';
 import { SEPARATOR } from '../../separator';
 import type { Tone } from '../../tone';
 import { countWord } from './model';
@@ -56,7 +55,7 @@ function MachineLine({ line, differs }: { line: PlanLine; differs: boolean }) {
                     </Value>
                 ) : null}
             </span>
-            <span />
+            <span className={styles.description}>{line.Step.Rule}</span>
         </div>
     );
 }
@@ -75,9 +74,7 @@ function FileLine({ line, description, open }: FileLineProps) {
             <Name kinded line={line} />
             <span className={styles.description}>{description}</span>
             <span className={styles.end}>
-                <Value look="boxed">
-                    {line.Step.Version === '' ? ANY_VERSION_WORD : line.Step.Version}
-                </Value>
+                {line.Step.Rule === '' ? null : <Value look="boxed">{line.Step.Rule}</Value>}
             </span>
         </button>
     );

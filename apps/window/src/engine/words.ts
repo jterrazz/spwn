@@ -18,8 +18,6 @@ type WordsOfAnOpenCode = Readonly<Partial<Record<number | string, string>>>;
 
 export const NO_STATE_WORD = 'no state given';
 
-export const ANY_VERSION_WORD = 'any version';
-
 // value: what the window says of its own reading of a call or of a gesture's fate, never of an engine code: an
 // value: answer not yet come, none at all, a refusal sent with no type, a slot no call fills, a gesture done or of
 // value: unknown outcome.

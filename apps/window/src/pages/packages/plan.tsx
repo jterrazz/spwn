@@ -1,11 +1,11 @@
-import type { CallName, MachinefilePlan, PageNoun, Target } from '@jterrazz/station-api';
+import type { CallName, MachinefilePlan, Target } from '@jterrazz/station-api';
 
 import { AppIcon, Button, Panel, Row, Tile } from '../../design/index';
 import { headingOf, nounOf, wordOf } from '../../engine/engine-words';
-import { chapterOfKind, layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import type { Reading as Read } from '../../engine/react';
+import { chapterNoun } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
@@ -16,16 +16,15 @@ import styles from './packages.module.css';
 
 type StepsProps = {
     lines: readonly PlanLine[];
-    all: readonly PlanLine[];
     title: string;
     note?: string;
 };
 
-function Steps({ lines, all, title, note = String(lines.length) }: StepsProps) {
+function Steps({ lines, title, note = String(lines.length) }: StepsProps) {
     return (
         <Panel note={note} title={title}>
             {lines.map((line) => {
-                const layer = layerOf(line, all);
+                const layer = line.Step.File.Name;
                 return (
                     <Row
                         key={`${line.Step.Kind}/${line.Step.Package}`}
@@ -86,19 +85,17 @@ function Afterwards({ plan }: { plan: MachinefilePlan }) {
 const UNCHANGED: PlanLine['Action'] = 'keep';
 
 export function PlanSteps({ plan }: { plan: MachinefilePlan }) {
-    const all = [...(plan.Lines ?? []), ...(plan.Extra ?? [])];
     return (
         <>
             {byAction(plan.Lines ?? [])
                 .filter(([action]) => action !== UNCHANGED)
                 .map(([action, lines]) => (
-                    <Steps all={all} key={action} lines={lines} title={headingOf(action)} />
+                    <Steps key={action} lines={lines} title={headingOf(action)} />
                 ))}
             {byAction(plan.Extra ?? [])
                 .filter(([action]) => action !== UNCHANGED)
                 .map(([action, lines]) => (
                     <Steps
-                        all={all}
                         key={`extra/${action}`}
                         lines={lines}
                         note="not in the file"
@@ -162,15 +159,12 @@ function PlanBody({ plan, name }: { plan: Read<MachinefilePlan>; name: string })
 }
 
 export function unitOf(lines: readonly PlanLine[]): string {
-    const shelves = new Set(lines.map((line) => chapterOfKind(line.Step.Kind)));
+    const shelves = new Set(lines.map((line) => line.Step.Chapter));
     const [shelf] = shelves;
-    const noun = shelves.size === 1 && shelf !== undefined ? COUNTED_AS[shelf] : 'package';
-    return nounOf(noun, lines.length);
+    return shelves.size === 1 && shelf !== undefined
+        ? chapterNoun(shelf, lines.length)
+        : nounOf('package', lines.length);
 }
-
-const COUNTED_AS = { apps: 'app', settings: 'setting' } as const satisfies Readonly<
-    Record<ReturnType<typeof chapterOfKind>, PageNoun>
->;
 
 const COUNTED: readonly { action: PlanLine['Action']; foot: string }[] = [
     { action: 'install', foot: 'from the file' },

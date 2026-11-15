@@ -12,7 +12,6 @@ import type {
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
 import { countOf } from '../../engine/engine-words';
-import { layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
 import { shelfWord } from '../../engine/shown';
 
@@ -39,14 +38,13 @@ export function kindsOf(reports: readonly AppsReport[]): Kinds {
 }
 
 export function shelfOf(line: PlanLine, kinds: Kinds): string {
-    return kinds.get(line.Step.Package) === 'skill' ? 'Skills' : shelfWord(line.Step.Kind);
+    return kinds.get(line.Step.Package) === 'skill' ? 'Skills' : shelfWord(line.Step.Chapter);
 }
 
 export function layersOf(plan: MachinefilePlan): readonly Layer[] {
     const groups = new Map<string, PlanLine[]>();
-    const all = plan.Lines ?? [];
-    for (const line of all) {
-        const name = layerOf(line, all);
+    for (const line of plan.Lines ?? []) {
+        const name = line.Step.File.Name;
         groups.set(name, [...(groups.get(name) ?? []), line]);
     }
     const layers = [...groups].map(([name, lines], index) => ({

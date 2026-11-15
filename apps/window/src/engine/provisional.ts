@@ -1,13 +1,11 @@
 import type {
     AppsUpdateInput,
     BackgroundRemoveInput,
-    CatalogKind,
     DiskMoveInput,
     DiskReading,
     DiskRow,
     EngineStartInput,
     ImagesReport,
-    MachinefileChapter,
     MachinefileDiffering,
     MachinefileExtraLine,
     MachinefileLine,
@@ -187,16 +185,6 @@ export function shareEndWordOf(end: ShareEnd, until: string): string {
 
 export type PlanLine = MachinefileExtraLine | MachinefileLine;
 
-// outside: a step's Origin names the Machinefile that lists it, or the package that brought it (homebrew's is jq,
-// outside: "the manager of jq"); a brought line is drawn in its bringer's layer, until each step names its file.
-export function layerOf(line: PlanLine, all: readonly PlanLine[], seen = new Set()): string {
-    const by = all.find((one) => one.Step.Package === line.Step.Origin.Name);
-    seen.add(line.Step.Package);
-    return by === undefined || seen.has(by.Step.Package)
-        ? line.Step.Origin.Name
-        : layerOf(by, all, seen);
-}
-
 export type AccountSide = 'not-in-the-file' | 'not-shared' | 'shared';
 
 // outside: machinefile.drift says an account's difference by its Condition alone, extra where the Mac holds a copy the
@@ -211,11 +199,6 @@ export function accountSideOf(
         return extra ? 'not-in-the-file' : 'shared';
     }
     return extra ? 'shared' : 'not-shared';
-}
-
-// outside: a drift's line names its kind, not its chapter: a setting's is Settings, any other Apps, until it does.
-export function chapterOfKind(kind: CatalogKind): Extract<MachinefileChapter, 'apps' | 'settings'> {
-    return kind === 'setting' ? 'settings' : 'apps';
 }
 
 // outside: ports.list may name this Mac otherwise than machines.list does (the stories world names it ''), and
