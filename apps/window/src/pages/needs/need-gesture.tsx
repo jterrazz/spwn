@@ -56,8 +56,8 @@ function verbOf(need: OverviewNeed): string {
 }
 
 function needTarget(need: OverviewNeed, macs: readonly MachinesMacView[]): Target | undefined {
-    const found = findMachine(macs, need.Machine);
-    return found ? targetOf(found) : { name: need.Machine };
+    const found = findMachine(macs, need.On);
+    return found ? targetOf(found) : { name: need.On };
 }
 
 type FixProps<N extends NeedCall & ReadName> = Props & {
@@ -65,7 +65,6 @@ type FixProps<N extends NeedCall & ReadName> = Props & {
     input: In<N>;
     rereads: readonly CallName[];
     subject?: string | undefined;
-    target?: Target | undefined;
     kind?: ConfirmKind | undefined;
 };
 
@@ -77,7 +76,8 @@ function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
         kind: props.kind,
         rereads,
         subject,
-        target: 'target' in props ? props.target : needTarget(need, macs),
+        target: needTarget(need, macs),
+        typed: need.Confirm === '' ? undefined : need.Confirm,
     });
     const verb = verbOf(need);
     return (
@@ -100,7 +100,6 @@ function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
 function Lifecycle(props: Props) {
     const { need, macs } = props;
     const found = findMachine(macs, need.Machine);
-    const target = found === undefined ? undefined : targetOf({ mac: found.mac });
     const remove = deleteInputOf(need);
     if (found?.vm && remove) {
         return (
@@ -110,7 +109,6 @@ function Lifecycle(props: Props) {
                 input={remove}
                 rereads={LIFECYCLE_REREADS}
                 subject={remove.VM}
-                target={target}
             />
         );
     }
@@ -124,7 +122,6 @@ function Lifecycle(props: Props) {
                 kind={machineKindOf(found.vm)}
                 rereads={LIFECYCLE_REREADS}
                 subject={restart.Name}
-                target={target}
             />
         );
     }

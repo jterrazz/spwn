@@ -14,12 +14,14 @@ const waiting = region('Can wait');
 const doneHere = region('Done here');
 
 const RESTART = {
-    Args: { name: 'infra' },
+    Args: { Name: 'infra' },
     Broken: true,
     Call: 'machines.restart',
     Command: '',
+    Confirm: 'infra',
     Machine: 'infra',
     Noun: 'Overview',
+    On: 'jterrazz-mac-mini',
     Path: '',
     Section: 'overview',
     Severity: 'broken',
@@ -34,8 +36,10 @@ const DELETE = {
     Broken: false,
     Call: 'machines.delete',
     Command: '',
+    Confirm: 'linux-1',
     Machine: 'linux-1',
     Noun: 'Overview',
+    On: 'jterrazz-macbook-pro',
     Path: '',
     Section: 'overview',
     Severity: 'needs-a-look',

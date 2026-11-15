@@ -5,7 +5,7 @@ import { EngineError } from '../../../engine/engine-error';
 import { Unanswered } from '../readings';
 
 const REFUSED = new EngineError({
-    fix: { Args: null, Call: '', Command: 'station engine start', Path: '' },
+    fix: { Args: null, Call: '', Command: 'station engine start', Confirm: '', On: '', Path: '' },
     hint: 'the engine of this Mac is stopped',
     message: 'no engine answers',
     type: 'engine-stopped',
@@ -36,6 +36,8 @@ describe('readings', () => {
                 Args: null,
                 Call: '',
                 Command: 'station engine start',
+                Confirm: '',
+                On: '',
                 Path: `x9${'k7'.repeat(20)}`,
             },
             hint: 'the engine of this Mac is stopped',
