@@ -57,6 +57,10 @@ type Deps struct {
 	// value: every Mac and the VMs on each, as This Mac lists them: the
 	// machines that may follow a Machinefile.
 	AllMachines func(ctx context.Context) (machines.AllMachines, error)
+	// value: the drift of each follower of a file, asked a few at a time,
+	// each within its budget (remote/each): one that does not answer in
+	// time is its own error, never the others' delay.
+	Judge func(ctx context.Context, keys []string, ask func(ctx context.Context, key string) (machinefile.Drift, error)) map[string]Judged
 }
 
 type Vault interface {

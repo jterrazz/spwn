@@ -30,6 +30,32 @@
       ],
       "type": "object"
     },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
     "machinefile.FileView": {
       "additionalProperties": false,
       "properties": {
@@ -106,6 +132,9 @@
         },
         "Text": {
           "type": "string"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
         }
       },
       "required": [
@@ -118,26 +147,39 @@
         "Path",
         "Settings",
         "Shelf",
-        "Text"
+        "Text",
+        "Verdict"
       ],
       "type": "object"
     },
     "machinefile.Follower": {
       "additionalProperties": false,
       "properties": {
+        "Differences": {
+          "type": "integer"
+        },
         "Mac": {
           "type": "string"
         },
         "Machine": {
           "type": "string"
         },
+        "Match": {
+          "type": "boolean"
+        },
+        "Read": {
+          "type": "boolean"
+        },
         "ThisMac": {
           "type": "boolean"
         }
       },
       "required": [
+        "Differences",
         "Mac",
         "Machine",
+        "Match",
+        "Read",
         "ThisMac"
       ],
       "type": "object"

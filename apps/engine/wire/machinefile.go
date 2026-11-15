@@ -21,6 +21,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/output"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/remote/each"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/apply"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/drift"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/explain"
@@ -172,11 +173,20 @@ func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights
 	return rights, nil
 }
 
+func judgeEach(ctx context.Context, keys []string, ask func(ctx context.Context, key string) (machinefile.Drift, error)) map[string]machinefilecalls.Judged {
+	got := each.All(ctx, keys, ask)
+	out := make(map[string]machinefilecalls.Judged, len(got))
+	for k, r := range got {
+		out[k] = machinefilecalls.Judged{Drift: r.Value, Err: r.Err}
+	}
+	return out
+}
+
 func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
 	return machinefilecalls.Deps{
 		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
 		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Locks: m.locks(), Owned: m.owned(), Vault: m.vault(),
-		Password: m.password(), Turn: m.turn(), Shell: m.phaseShell(), Now: m.sys.Clock.Now, Calls: calls, Far: farRouter{m}, MacOf: m.macOf, AllMachines: settingsAllMachines{m}.Machines, Zshrc: m.zshrc(), Home: m.sys.Env.Home(),
+		Password: m.password(), Turn: m.turn(), Shell: m.phaseShell(), Now: m.sys.Clock.Now, Calls: calls, Far: farRouter{m}, MacOf: m.macOf, AllMachines: settingsAllMachines{m}.Machines, Judge: judgeEach, Zshrc: m.zshrc(), Home: m.sys.Env.Home(),
 	}
 }
 
