@@ -1,6 +1,6 @@
 package disk
 
-import "strconv"
+import "github.com/jterrazz/studio-station/apps/engine/core/size"
 
 type Kind string
 
@@ -81,26 +81,5 @@ func canFree(caches int64) CanFree {
 	if caches <= 0 {
 		return CanFree{Sentence: "No cache to free. What is left is yours or the system's."}
 	}
-	return CanFree{Bytes: caches, Sentence: "Caches hold " + Size(caches) + ". Each app rebuilds its own when it needs it."}
+	return CanFree{Bytes: caches, Sentence: "Caches hold " + size.Bytes(caches) + ". Each app rebuilds its own when it needs it."}
 }
-
-func Size(n int64) string {
-	// invariant: decimal units and three figures at most, as every size
-	// station prints reads (ui/atom.Bytes): 388 GB, 73.3 GB, 5.8 GB.
-	const unit = 1000
-	if n < unit {
-		return strconv.FormatInt(max(n, 0), 10) + " B"
-	}
-	value, suffix := float64(n)/unit, 0
-	for value >= unit-0.05 && suffix < len(sizeSuffixes)-1 {
-		value /= unit
-		suffix++
-	}
-	digits := 1
-	if value >= 99.95 {
-		digits = 0
-	}
-	return strconv.FormatFloat(value, 'f', digits, 64) + " " + string(sizeSuffixes[suffix]) + "B"
-}
-
-const sizeSuffixes = "KMGTPE"

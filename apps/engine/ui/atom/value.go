@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/size"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/ui/token"
 )
@@ -110,7 +111,7 @@ func show(v page.Value) string {
 		}
 		return n + " " + v.Unit
 	case page.KindSize:
-		s := Bytes(v.N)
+		s := size.Bytes(v.N)
 		switch {
 		case strings.HasPrefix(v.Unit, "/"):
 			s += v.Unit
@@ -118,7 +119,7 @@ func show(v page.Value) string {
 			s += " " + v.Unit
 		}
 		if v.Of > 0 {
-			s += " of " + Bytes(v.Of)
+			s += " of " + size.Bytes(v.Of)
 		}
 		return s
 	case page.KindRatio:
@@ -340,27 +341,6 @@ func list(items []page.Value, width int) string {
 		}
 	}
 	return End(join(items, Show), width)
-}
-
-func Bytes(n int64) string {
-	// invariant: decimal units, as Finder, df -H and tart print sizes, so a size
-	// station shows reads the same as the one the owner checks it against.
-	const unit = 1000
-	if n < unit {
-		return strconv.FormatInt(n, 10) + " B"
-	}
-	value, suffix := float64(n)/unit, 0
-	for value >= unit-0.05 && suffix < len(byteSuffixes)-1 {
-		value /= unit
-		suffix++
-	}
-	// value: three figures at most, as the vision prints sizes: 388 GB,
-	// 73.3 GB, 5.8 GB.
-	digits := 1
-	if value >= 99.95 {
-		digits = 0
-	}
-	return strconv.FormatFloat(value, 'f', digits, 64) + " " + string(byteSuffixes[suffix]) + "B"
 }
 
 const byteSuffixes = "KMGTPE"
