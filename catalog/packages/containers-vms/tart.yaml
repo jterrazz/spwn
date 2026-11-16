@@ -37,6 +37,7 @@ disk:
               - from: ~/.tart
                 to: '{data}/station/vms'
           then: [tart-launcher]
+          yours: [~/.tart/vms]
         - path: ~/.local/opt
           busy: tart
           move:

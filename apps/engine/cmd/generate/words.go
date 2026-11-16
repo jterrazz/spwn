@@ -183,6 +183,11 @@ func wordedEnums() []worded {
 			string(disk.KindMachines): plain("Machines and images"),
 			string(disk.KindFree):     plain("Free"),
 		}},
+		{disk.FreeableKind(""), map[string]word{
+			string(disk.FreeImage):  plain("Unused image"),
+			string(disk.FreeDisk):   plain("Leftover disk"),
+			string(disk.FreeFolder): plain("Old folder"),
+		}},
 		{disk.Holder(""), map[string]word{
 			string(disk.HolderMachineDisks): plain("Machine disks"),
 			string(disk.HolderImages):       plain("Images"),

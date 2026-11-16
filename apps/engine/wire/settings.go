@@ -127,7 +127,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 	mac := macos.NewMac(m.sys.Run, m.sys.FS, macos.MacOptions{
 		Home:             m.sys.Env.Home(),
 		DNSProfile:       filepath.Join(m.paths.State, "dns", "quad9-dns.mobileconfig"),
-		BackupExclusions: []string{m.paths.Roots.Cache, filepath.Join(m.paths.Data, "vms")},
+		BackupExclusions: []string{m.paths.Roots.Cache, m.hypervisorHome()},
 		Jobs:             m.jobs(settingscalls.ReadBudget),
 		Identity:         m.stores.identity(),
 	})

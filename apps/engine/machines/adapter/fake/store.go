@@ -2,6 +2,7 @@ package fake
 
 import (
 	"context"
+	"errors"
 	"maps"
 	"slices"
 
@@ -45,6 +46,9 @@ func (s *Store) Get(_ context.Context, name string) (machines.Record, error) {
 	s.w.Lock()
 	defer s.w.Unlock()
 	v, ok := s.vms()[name]
+	if ok && v.Unreadable {
+		return machines.Record{}, damaged(name)
+	}
 	if !ok || v.Kept == nil {
 		return machines.Record{}, store.ErrNotFound
 	}
@@ -114,19 +118,32 @@ func (s *Store) put(r machines.Record) {
 	v.Size = machines.Size{CPUs: r.CPUs, Memory: r.MemoryBytes, Disk: r.DiskBytes}
 }
 
-func (s *Store) List(context.Context) ([]machines.Record, error) {
+func (s *Store) List(context.Context) ([]machines.Record, error) { return s.list(false) }
+
+func (s *Store) ListReadable(context.Context) ([]machines.Record, error) { return s.list(true) }
+
+// value: the file a damaged record of the world is read from, as the
+// file store names it under station's state.
+func damaged(name string) error {
+	return &store.UnreadableError{Path: "~/.local/state/station/vms/" + name + ".json", Cause: errors.New("unexpected end of JSON input")}
+}
+
+func (s *Store) list(skipDamaged bool) ([]machines.Record, error) {
 	s.w.Lock()
 	defer s.w.Unlock()
 	out := []machines.Record{}
 	for _, name := range slices.Sorted(maps.Keys(s.vms())) {
-		if v := s.vms()[name]; v.Kept != nil {
+		v := s.vms()[name]
+		switch {
+		case v.Unreadable && !skipDamaged:
+			return nil, damaged(name)
+		case v.Unreadable:
+		case v.Kept != nil:
 			out = append(out, record(name, v))
 		}
 	}
 	return out, nil
 }
-
-func (s *Store) ListReadable(ctx context.Context) ([]machines.Record, error) { return s.List(ctx) }
 
 func (s *Store) Delete(_ context.Context, name string) error {
 	s.w.Lock()

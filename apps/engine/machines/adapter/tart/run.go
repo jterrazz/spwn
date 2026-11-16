@@ -24,7 +24,7 @@ const (
 	watchEvery     = 200 * time.Millisecond
 )
 
-type files struct{ state string }
+type files struct{ state, vms string }
 
 func (f files) runs() string             { return path.Join(f.state, "runs") }
 func (f files) pid(vm string) string     { return path.Join(f.runs(), vm+".pid") }
@@ -32,6 +32,9 @@ func (f files) exit(vm string) string    { return path.Join(f.runs(), vm+".exit"
 func (f files) console(vm string) string { return path.Join(f.state, "consoles", vm) }
 func (f files) log(vm string) string     { return path.Join(f.state, "logs", vm+".log") }
 func (f files) all(vm string) []string   { return []string{f.console(vm), f.pid(vm), f.exit(vm)} }
+func (f files) ledger() string           { return path.Join(f.state, "cloned") }
+func (f files) cloned(vm string) string  { return path.Join(f.ledger(), vm) }
+func (f files) folder(vm string) string  { return path.Join(f.vms, vm) }
 func (f files) drop(fs local.FS, vm string) {
 	for _, file := range f.all(vm) {
 		_ = fs.Remove(file)

@@ -637,6 +637,15 @@ func Codes() map[fail.Code]Wording {
 		diskcalls.NotMisplaced: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not misplaced", "station disk"
 		},
+		diskcalls.NotFreeable: func(e *fail.Error) (string, string) {
+			return e.Subject + " is not freeable: in use, gone or not station's, so nothing is freed", "station disk"
+		},
+		diskcalls.NamesNeeded: func(*fail.Error) (string, string) {
+			return "nothing named: free-unused frees only what it names", "station disk"
+		},
+		diskcalls.RecordUnreadable: func(e *fail.Error) (string, string) {
+			return e.Subject + " cannot be read: nothing is freed until it can", "repair " + e.Subject + " by hand, or remove it: rm " + e.Subject
+		},
 		ports.CodeRangeFull: func(e *fail.Error) (string, string) {
 			return e.Subject + " has " + e.Detail["max"] + " shared ports, the most a VM may", "station ports stop-sharing " + e.Subject + " <port>"
 		},

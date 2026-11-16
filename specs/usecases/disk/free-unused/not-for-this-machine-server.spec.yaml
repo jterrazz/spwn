@@ -1,0 +1,11 @@
+description: 'on a server, free-unused is refused: only a mac makes vms'
+env:
+    - in-server
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["station-linux@2026.10.20"],"Confirm":"station-linux@2026.10.20"}}
+      exit: 0
+      stdout: |
+          {"code":"section.not-for-this-machine","message":"infra is a server: station does not manage its disk"}

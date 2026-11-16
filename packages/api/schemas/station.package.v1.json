@@ -602,6 +602,12 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "yours": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         }
       },
       "required": [

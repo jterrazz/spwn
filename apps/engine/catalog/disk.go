@@ -86,6 +86,9 @@ type Misplaced struct {
 	Prune []string `yaml:"prune,omitempty"`
 	Then  []string `yaml:"then,omitempty"`
 	Free  []Action `yaml:"free,omitempty"`
+	// value: the folders under Path whose entries are the owner's own, a VM
+	// each: while one holds any entry, Path moves and is never freed.
+	Yours []string `yaml:"yours,omitempty"`
 }
 
 type SizeMethod string

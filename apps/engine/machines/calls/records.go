@@ -152,7 +152,7 @@ func stateOf(d contract.Disk) model.VMState {
 		return model.Running
 	case contract.DiskSuspended:
 		return model.Suspended
-	case contract.DiskStopped, diskMissing:
+	case contract.DiskStopped, contract.DiskUnknown, diskMissing:
 	}
 	return model.Stopped
 }

@@ -24,6 +24,11 @@
     "consequence": "The data of %s is deleted for good.",
     "form": "type-name"
   },
+  "disk.free-unused": {
+    "confirm": "free-unused",
+    "consequence": "Deleted for good: %s. No machine and no file of yours is touched.",
+    "form": "type-name"
+  },
   "engine.stop": {
     "confirm": "stop-engine",
     "consequence": "Every VM of this Mac stops, and nothing is shared until the engine starts again.",

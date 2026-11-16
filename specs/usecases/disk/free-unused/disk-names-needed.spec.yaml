@@ -1,0 +1,15 @@
+description: 'free-unused asked no name frees nothing: it frees only what it names'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.names-needed"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["api","linux-1","station-image-station-linux-2026.10.20","station-image-station-linux-2026.11.01"]

@@ -321,6 +321,22 @@
       "in": "FreeIn"
     },
     {
+      "name": "disk.free-unused",
+      "schema": "station.disk.free-unused/v1",
+      "section": "disk",
+      "where": "at-target",
+      "confirm": "free-unused",
+      "consequence": "Deleted for good: %s. No machine and no file of yours is touched.",
+      "errors": [
+        "confirm.mismatch",
+        "confirm.needed",
+        "disk.names-needed",
+        "disk.not-freeable",
+        "disk.record-unreadable"
+      ],
+      "in": "FreeUnusedIn"
+    },
+    {
       "name": "disk.move",
       "schema": "station.disk.move/v1",
       "section": "disk",

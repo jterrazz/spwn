@@ -59,6 +59,12 @@
         "Call": {
           "type": "string"
         },
+        "Frees": {
+          "items": {
+            "$ref": "#/$defs/disk.Freeable"
+          },
+          "type": "array"
+        },
         "Sentence": {
           "type": "string"
         }
@@ -66,6 +72,43 @@
       "required": [
         "Bytes",
         "Sentence"
+      ],
+      "type": "object"
+    },
+    "disk.Freeable": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Holder": {
+          "enum": [
+            "machine-disks",
+            "images",
+            "leftovers",
+            "logs",
+            "this-mac",
+            "free"
+          ],
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "image",
+            "disk",
+            "folder"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Holder",
+        "Kind",
+        "Name"
       ],
       "type": "object"
     },
@@ -90,6 +133,32 @@
       "required": [
         "Bytes",
         "Holder"
+      ],
+      "type": "object"
+    },
+    "disk.Kept": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "VMs": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Name",
+        "Sentence",
+        "VMs"
       ],
       "type": "object"
     },
@@ -202,6 +271,9 @@
     "disk.StationPart": {
       "additionalProperties": false,
       "properties": {
+        "CanFree": {
+          "$ref": "#/$defs/disk.CanFree"
+        },
         "Holds": {
           "items": {
             "$ref": "#/$defs/disk.Holding"
@@ -210,6 +282,15 @@
             "array",
             "null"
           ]
+        },
+        "Itself": {
+          "type": "string"
+        },
+        "Kept": {
+          "items": {
+            "$ref": "#/$defs/disk.Kept"
+          },
+          "type": "array"
         },
         "Machines": {
           "items": {
@@ -228,7 +309,9 @@
         }
       },
       "required": [
+        "CanFree",
         "Holds",
+        "Itself",
         "Machines",
         "Sentence",
         "Verdict"

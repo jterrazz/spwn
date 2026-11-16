@@ -3,7 +3,9 @@ package tart
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	iofs "io/fs"
 	"net/netip"
 	"strconv"
 	"strings"
@@ -36,8 +38,11 @@ type hypervisor struct {
 	files  files
 }
 
-func New(run local.Runner, fs local.FS, clock local.Clock, kernel Kernel, stateDir string) contract.Hypervisor {
-	return &hypervisor{run: run, fs: fs, clock: clock, kernel: kernel, files: files{state: stateDir}}
+func New(run local.Runner, fs local.FS, clock local.Clock, kernel Kernel, stateDir, vmsDir string) contract.Hypervisor {
+	// value: stateDir is station's state folder, where the adapter keeps its
+	// runs and its ledger; vmsDir the folder tart keeps each VM's own folder
+	// in, by the VM's name (<TART_HOME>/vms).
+	return &hypervisor{run: run, fs: fs, clock: clock, kernel: kernel, files: files{state: stateDir, vms: vmsDir}}
 }
 
 // invariant: the tart path is resolved at each call, absolute, because a launchd
@@ -84,8 +89,10 @@ func stateOf(s string) contract.DiskState {
 		return contract.DiskRunning
 	case "suspended":
 		return contract.DiskSuspended
-	default:
+	case "stopped":
 		return contract.DiskStopped
+	default:
+		return contract.DiskUnknown
 	}
 }
 
@@ -129,16 +136,121 @@ func (h *hypervisor) Fetch(ctx context.Context, img imagescontract.ImageLocation
 }
 
 func (h *hypervisor) Clone(ctx context.Context, from imagescontract.ImageLocation, vm string) error {
-	_, err := h.exec(ctx, 0, "clone", from.Ref, vm)
-	return err
+	if _, err := h.exec(ctx, 0, "clone", from.Ref, vm); err != nil {
+		return err
+	}
+	return h.mark(vm)
 }
 
+// invariant: the ledger holds one file per VM this adapter cloned, by the
+// VM's name, written once its clone is made and removed once its delete is
+// done; the file is the identity of the VM's folder the clone made. A VM is
+// the adapter's only while its folder still has that identity: one deleted
+// and made again by hand under the name, or renamed by hand onto it, is not,
+// and its entry is dropped when read.
+//
+// A clone whose folder says no identity keeps no entry: the VM is made, and
+// never offered to free, the safe side of a ledger that cannot tell it.
+func (h *hypervisor) mark(vm string) error {
+	if info, err := h.fs.Stat(h.files.folder(vm)); err == nil {
+		if id, ok := local.IdentityOf(info); ok {
+			return h.keep(vm, id)
+		}
+	}
+	return nil
+}
+
+func (h *hypervisor) keep(vm string, id local.FileID) error {
+	if err := h.fs.MkdirAll(h.files.ledger(), 0o700); err != nil {
+		return err
+	}
+	return h.fs.WriteFile(h.files.cloned(vm), []byte(id), 0o600)
+}
+
+func (h *hypervisor) entry(vm string) (local.FileID, bool) {
+	data, err := h.fs.ReadFile(h.files.cloned(vm))
+	return local.FileID(data), err == nil
+}
+
+func (h *hypervisor) forget(vm string) error {
+	if err := h.fs.Remove(h.files.cloned(vm)); err != nil && !errors.Is(err, iofs.ErrNotExist) {
+		return err
+	}
+	return nil
+}
+
+func (h *hypervisor) Cloned(context.Context) ([]string, error) {
+	entries, err := h.fs.ReadDir(h.files.ledger())
+	if errors.Is(err, iofs.ErrNotExist) {
+		return []string{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(entries))
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		switch h.still(e.Name()) {
+		case held:
+			out = append(out, e.Name())
+		case gone:
+			_ = h.forget(e.Name())
+		case unknown:
+		}
+	}
+	return out, nil
+}
+
+type standing int
+
+const (
+	held standing = iota
+	gone
+	unknown
+)
+
+// invariant: an entry stands while the VM's folder has the identity it
+// keeps; a folder missing, or of another identity, is gone; one the file
+// system cannot say is unknown, never the adapter's this read, and kept.
+func (h *hypervisor) still(vm string) standing {
+	kept, ok := h.entry(vm)
+	if !ok {
+		return unknown
+	}
+	info, err := h.fs.Stat(h.files.folder(vm))
+	switch {
+	case errors.Is(err, iofs.ErrNotExist):
+		return gone
+	case err != nil:
+		return unknown
+	}
+	if id, ok := local.IdentityOf(info); ok && id == kept {
+		return held
+	}
+	return gone
+}
+
+func (h *hypervisor) Forget(_ context.Context, vm string) error { return h.forget(vm) }
+
 func (h *hypervisor) Rename(ctx context.Context, from, to string) error {
+	// invariant: the entry moves with the VM, the identity it keeps unchanged,
+	// as a rename keeps a folder's; a VM the adapter did not clone leaves no
+	// entry under its new name, so one a delete left there is dropped. The
+	// entry is read before the rename, so a read meanwhile cannot lose it.
+	kept, ours := h.entry(from)
 	if _, err := h.exec(ctx, 0, "rename", from, to); err != nil {
 		return err
 	}
 	h.files.drop(h.fs, from)
-	return nil
+	if !ours {
+		return h.forget(to)
+	}
+	if err := h.keep(to, kept); err != nil {
+		return err
+	}
+	return h.forget(from)
 }
 
 func (h *hypervisor) Resize(ctx context.Context, vm string, s machines.Size) error {
@@ -166,12 +278,14 @@ func (h *hypervisor) Delete(ctx context.Context, vm string) error {
 		return err
 	}
 	h.files.drop(h.fs, vm)
-	return nil
+	return h.forget(vm)
 }
 
 func (h *hypervisor) Discard(ctx context.Context, img imagescontract.ImageLocation) error {
-	_, err := h.exec(ctx, 0, "delete", img.Ref)
-	return err
+	if _, err := h.exec(ctx, 0, "delete", img.Ref); err != nil {
+		return err
+	}
+	return h.forget(img.Ref)
 }
 
 func (h *hypervisor) Address(ctx context.Context, vm string, wait time.Duration) (netip.Addr, error) {

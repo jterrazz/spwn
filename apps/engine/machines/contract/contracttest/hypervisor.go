@@ -25,6 +25,10 @@ type Subject struct {
 	End func(r contract.Run, how machines.EndReason)
 	// value: the engine restarting: a new adapter over the same machine.
 	Restart func() contract.Hypervisor
+	// value: the owner's hand, outside the adapter: Gone deletes a VM's disk,
+	// ByHand makes a stopped one under a name that holds none.
+	Gone   func(vm string)
+	ByHand func(vm string)
 }
 
 type progress struct{ steps, done int }
@@ -102,20 +106,76 @@ func Hypervisor(t *testing.T, subject func(t *testing.T) Subject) {
 			t.Errorf("after the delete it holds %v, want none", got)
 		}
 	})
-	t.Run("a renamed VM is held under its new name, a deleted one no longer", func(t *testing.T) {
+	t.Run("a renamed VM is held under its new name, a deleted one no longer, and its ledger follows", func(t *testing.T) {
 		s := subject(t)
 		created(t, s)
+		if got := cloned(t, s.Hypervisor); !slices.Equal(got, []string{VM}) {
+			t.Fatalf("after the clone its ledger holds %v, want [%s]", got, VM)
+		}
 		if err := s.Hypervisor.Rename(t.Context(), VM, Renamed); err != nil {
 			t.Fatal(err)
 		}
 		if got := names(t, s.Hypervisor); !slices.Equal(got, []string{Renamed}) {
 			t.Fatalf("after the rename it holds %v, want [%s]", got, Renamed)
 		}
+		if got := cloned(t, s.Hypervisor); !slices.Equal(got, []string{Renamed}) {
+			t.Fatalf("after the rename its ledger holds %v, want [%s]", got, Renamed)
+		}
 		if err := s.Hypervisor.Delete(t.Context(), Renamed); err != nil {
 			t.Fatal(err)
 		}
 		if got := names(t, s.Hypervisor); len(got) != 0 {
 			t.Errorf("after the delete it holds %v, want none", got)
+		}
+		if got := cloned(t, s.Hypervisor); len(got) != 0 {
+			t.Errorf("after the delete its ledger holds %v, want none", got)
+		}
+	})
+	t.Run("a VM deleted by hand and made again by hand under its name is never one it cloned", func(t *testing.T) {
+		s := subject(t)
+		created(t, s)
+		s.Gone(VM)
+		s.ByHand(VM)
+		if got := cloned(t, s.Hypervisor); len(got) != 0 {
+			t.Fatalf("the VM made by hand reads cloned: %v, want none", got)
+		}
+	})
+	t.Run("a VM it cloned, made again by hand, then renamed through it, is still not one it cloned", func(t *testing.T) {
+		s := subject(t)
+		created(t, s)
+		s.Gone(VM)
+		s.ByHand(VM)
+		if err := s.Hypervisor.Rename(t.Context(), VM, Renamed); err != nil {
+			t.Fatal(err)
+		}
+		if got := cloned(t, s.Hypervisor); len(got) != 0 {
+			t.Fatalf("after the rename it reads cloned: %v, want none", got)
+		}
+	})
+	t.Run("a VM it cloned renamed onto a name a deleted clone left is one it cloned, under that name", func(t *testing.T) {
+		s := subject(t)
+		created(t, s)
+		if err := s.Hypervisor.Clone(t.Context(), image(), Renamed); err != nil {
+			t.Fatal(err)
+		}
+		s.Gone(Renamed)
+		if err := s.Hypervisor.Rename(t.Context(), VM, Renamed); err != nil {
+			t.Fatal(err)
+		}
+		if got := cloned(t, s.Hypervisor); !slices.Equal(got, []string{Renamed}) {
+			t.Fatalf("after the rename its ledger holds %v, want [%s]", got, Renamed)
+		}
+	})
+	t.Run("a VM whose disk is gone is forgotten, and one made by hand under its name later is not cloned", func(t *testing.T) {
+		s := subject(t)
+		created(t, s)
+		s.Gone(VM)
+		if err := s.Hypervisor.Forget(t.Context(), VM); err != nil {
+			t.Fatal(err)
+		}
+		s.ByHand(VM)
+		if got := cloned(t, s.Hypervisor); len(got) != 0 {
+			t.Fatalf("the VM made by hand after the forget reads cloned: %v, want none", got)
 		}
 	})
 }
@@ -179,6 +239,15 @@ func names(t *testing.T, h contract.Hypervisor) []string {
 		out = append(out, d.VM)
 	}
 	return out
+}
+
+func cloned(t *testing.T, h contract.Hypervisor) []string {
+	t.Helper()
+	got, err := h.Cloned(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return got
 }
 
 func state(t *testing.T, h contract.Hypervisor, vm string) contract.DiskState {

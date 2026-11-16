@@ -21,7 +21,7 @@ station images --json           # station.images.list/v1: name, version, size_by
 
 One row per version per Mac, This Mac first, then every other Mac that answers; an image no Mac holds is one row, `not built yet`. Images live on a Mac: inside a VM the family is refused (exit 2).
 
-A version is deletable when it is not the newest of its image, no machine was made from it and no build is making it; `Report.Unused` in `apps/engine/images/record.go` is that one rule, and `images.list` says it as `Deletable` (`deletable` in `--json`), the same rule that sums what [Disk](disk.md) says can be freed.
+A version is deletable when it is not the newest of its image, no machine was made from it and no build is making it; `Report.Unused` in `apps/engine/images/record.go` is that one rule, and `images.list` says it as `Deletable` (`deletable` in `--json`), the same rule that lists the versions [Disk](disk.md#what-nothing-uses) frees with the leftovers, through this delete.
 
 An image being built is one more row, the version it will be, at its step: `Step 2 of 4` (`building` in `--json`). The four steps are the build's: Base system (the base pulled, cloned and booted), Packages (the station binary and the plumbing recipe), Settings (the Machinefile's image phase) and Seal (the cleanup, the power off and the record). A build marks its step in a file of `~/.local/state/station/builds/`, with the process it runs in, and clears it when it ends; `images.list` runs at its target, so the process that answers it reads those marks (on This Mac, the CLI's own), not the engine, and a mark whose process no longer runs is no row. The version a build is making is not deletable.
 

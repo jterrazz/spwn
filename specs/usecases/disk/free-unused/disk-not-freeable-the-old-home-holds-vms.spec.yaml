@@ -1,0 +1,17 @@
+description: 'the hypervisor''s old folder that holds a vm of yours is never freed: refused, and kept'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.local/share/station/vms/vms/linux-1/disk.img"] = 1000000'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["~/.tart"],"Confirm":"~/.tart"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.not-freeable","subject":"~/.tart"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].disk.files | keys[] | select(startswith("~/.tart"))]'' world.json'
+      exit: 0
+      stdout: |
+          ["~/.tart/vms/linux-dev/disk.img"]

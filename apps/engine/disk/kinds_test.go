@@ -71,7 +71,7 @@ func TestAKindWhoseWalkHasNotAnsweredIsAbsentAndYourDataWithIt(t *testing.T) {
 		if !slices.Equal(kindsOf(got), c.want) {
 			t.Errorf("%s unknown: kinds %v, want %v: nothing unknown reads 0", name, kindsOf(got), c.want)
 		}
-		if cachesAbsent := !slices.Contains(c.want, KindCaches); cachesAbsent != (can == CanFree{}) {
+		if cachesAbsent := !slices.Contains(c.want, KindCaches); cachesAbsent != (can.Sentence == "") {
 			t.Errorf("%s unknown: can free %+v while caches are absent %v: it is absent with them", name, can, cachesAbsent)
 		}
 	}
@@ -96,16 +96,30 @@ func TestAReadingHasStationsPartOnlyOnceTheHypervisorAnswered(t *testing.T) {
 }
 
 func TestStationPartLeavesTheMacItselfWhatItsPartsDoNotHold(t *testing.T) {
-	h := Held{Machines: []MachineDisk{{Name: "linux-1", Bytes: 50}}, Images: []MachineDisk{{Name: "img", Bytes: 30}}, Unused: 30}
+	h := Held{
+		Machines: []MachineDisk{{Name: "linux-1", Bytes: 50}}, Images: []MachineDisk{{Name: "img", Bytes: 30}},
+		Unused: []Freeable{{Holder: HolderImages, Kind: FreeImage, Name: "img@1", Bytes: 30}, {Holder: HolderLeftovers, Kind: FreeDisk, Name: "gone", Bytes: 40}},
+	}
 	p := StationOf(1000, 600, 20, h, "mbp")
-	if p.Holds[4] != (Holding{Holder: HolderThisMac, Bytes: 300}) || p.Machines[0] != (MachineDisk{Name: "mbp", Bytes: 300}) {
-		t.Fatalf("the Mac itself %+v, %+v, want 400 used - 50 - 30 - 20", p.Holds[4], p.Machines[0])
+	if p.Holds[2] != (Holding{Holder: HolderLeftovers, Bytes: 40}) || p.Holds[4] != (Holding{Holder: HolderThisMac, Bytes: 260}) || p.Machines[0] != (MachineDisk{Name: "mbp", Bytes: 260}) {
+		t.Fatalf("leftovers %+v, the Mac itself %+v, %+v, want 40 and 400 used - 50 - 30 - 40 - 20", p.Holds[2], p.Holds[4], p.Machines[0])
 	}
-	if p.Verdict.Sentence != "30 B can be freed." {
-		t.Fatalf("verdict %q, want the unused image's bytes", p.Verdict.Sentence)
+	if p.Itself != "This Mac itself holds 260 B." {
+		t.Fatalf("itself %q", p.Itself)
 	}
-	if none := StationOf(1000, 600, 0, Held{}, "mbp"); none.Verdict.Sentence != "Nothing to free." {
-		t.Fatalf("verdict %q, want nothing to free", none.Verdict.Sentence)
+	if p.Verdict.Sentence != "70 B can be freed." || p.CanFree.Bytes != 70 || p.CanFree.Call != FreeUnusedCall || len(p.CanFree.Frees) != 2 {
+		t.Fatalf("verdict %q, can free %+v, want the unused image and the leftover, and the gesture that frees both", p.Verdict.Sentence, p.CanFree)
+	}
+	if p.CanFree.Sentence != "70 B can be freed: 1 unused image and 1 leftover disk." {
+		t.Fatalf("can free says %q", p.CanFree.Sentence)
+	}
+	h.Unread = "~/.local/state/station/vms/x.json"
+	if u := StationOf(1000, 600, 20, h, "mbp"); u.CanFree.Call != "" || u.Verdict.Sentence != "A machine record cannot be read." {
+		t.Fatalf("a record unread: can free %+v, verdict %q, want no gesture and the reason", u.CanFree, u.Verdict.Sentence)
+	}
+	none := StationOf(1000, 600, 0, Held{}, "mbp")
+	if none.Verdict.Sentence != "Nothing to free." || none.CanFree.Call != "" {
+		t.Fatalf("verdict %q, can free %+v, want nothing to free and no gesture", none.Verdict.Sentence, none.CanFree)
 	}
 }
 
@@ -118,11 +132,31 @@ func TestTheCachesCanFreeNamesItsGestureOnlyWhenThereIsSomething(t *testing.T) {
 	}
 }
 
+func TestATestVMIsToldByItsName(t *testing.T) {
+	for name, want := range map[string]bool{"station-e2e-macos-1a2b": true, "station-play": true, "station-player": false, "linux-1": false} {
+		if TestVM(name) != want {
+			t.Errorf("%s: test VM %v, want %v", name, !want, want)
+		}
+	}
+}
+
 func TestAReadingTellsWhatItsVolumeUses(t *testing.T) {
 	if r := ReadingOf(1000, 400, Survey{System: -1}, HeldReading{}, "mbp"); r.Used != 600 {
 		t.Fatalf("used %d, want 1000 total less 400 free", r.Used)
 	}
 	if r := ReadingOf(400, 1000, Survey{System: -1}, HeldReading{}, "mbp"); r.Used != 0 {
 		t.Fatalf("used %d on a volume whose free passes its total, want never below 0", r.Used)
+	}
+}
+
+func TestCanFreeCountsWhatItFreesByKind(t *testing.T) {
+	for want, frees := range map[string][]Freeable{
+		"1 unused image":                                    {{Kind: FreeImage}},
+		"2 unused images and 1 old folder":                  {{Kind: FreeImage}, {Kind: FreeFolder}, {Kind: FreeImage}},
+		"1 unused image, 2 leftover disks and 1 old folder": {{Kind: FreeDisk}, {Kind: FreeImage}, {Kind: FreeDisk}, {Kind: FreeFolder}},
+	} {
+		if got := counted(frees); got != want {
+			t.Errorf("counted %q, want %q", got, want)
+		}
 	}
 }

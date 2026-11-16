@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"path/filepath"
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -13,7 +14,7 @@ import (
 )
 
 func (m machine) hypervisor() contract.Hypervisor {
-	app := tart.New(m.sys.Run, m.sys.FS, m.sys.Clock, processes{darwin.NewTables(m.vars)}, m.paths.State)
+	app := tart.New(m.sys.Run, m.sys.FS, m.sys.Clock, processes{darwin.NewTables(m.vars)}, m.paths.State, filepath.Join(m.hypervisorHome(), "vms"))
 	if m.world != nil {
 		pkg, _ := m.cat.App(catalog.HypervisorApp)
 		install, _ := pkg.InstallOn(catalog.Mac)
@@ -21,6 +22,10 @@ func (m machine) hypervisor() contract.Hypervisor {
 	}
 	return app
 }
+
+// value: the folder the launcher gives the hypervisor as its home
+// (TART_HOME), which keeps each VM's folder under vms/.
+func (m machine) hypervisorHome() string { return filepath.Join(m.paths.Data, "vms") }
 
 type engineHypervisor struct{ contract.Hypervisor }
 

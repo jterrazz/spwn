@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract/contracttest"
@@ -23,6 +24,7 @@ import (
 const (
 	bin   = "/home/o/.local/bin/tart"
 	state = "/s"
+	vms   = "/d/station/vms/vms"
 )
 
 type lockedFS struct {
@@ -52,6 +54,30 @@ func (f *lockedFS) Remove(p string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return f.FS.Remove(p)
+}
+
+func (f *lockedFS) RemoveAll(p string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.FS.RemoveAll(p)
+}
+
+func (f *lockedFS) Rename(from, to string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.FS.Rename(from, to)
+}
+
+func (f *lockedFS) Stat(p string) (fs.FileInfo, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.FS.Stat(p)
+}
+
+func (f *lockedFS) ReadDir(p string) ([]fs.DirEntry, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.FS.ReadDir(p)
 }
 
 type yielding struct{}
@@ -118,7 +144,7 @@ func newMachine(t *testing.T) *machine {
 }
 
 func (m *machine) hypervisor() contract.Hypervisor {
-	return New(m.run, m.fs, yielding{}, m.kernel, state)
+	return New(m.run, m.fs, yielding{}, m.kernel, state, vms)
 }
 
 func (m *machine) listing() local.Output {
@@ -130,6 +156,17 @@ func (m *machine) listing() local.Output {
 	}
 	data, _ := json.Marshal(rows)
 	return local.Output{Stdout: string(data)}
+}
+
+// value: a disk tart holds: its name in the listing, its folder under vms.
+func (m *machine) made(vm string) {
+	m.disks[vm] = "stopped"
+	_ = m.fs.MkdirAll(vms+"/"+vm, 0o755)
+}
+
+func (m *machine) gone(vm string) {
+	delete(m.disks, vm)
+	_ = m.fs.RemoveAll(vms + "/" + vm)
 }
 
 func (m *machine) boot(vm string, extra ...string) {
@@ -158,17 +195,23 @@ func TestTartKeepsTheHypervisorContract(t *testing.T) {
 		m := newMachine(t)
 		vm, renamed := contracttest.VM, contracttest.Renamed
 		m.run.On(bin, "pull", contracttest.Image)
-		m.run.On(bin, "clone", contracttest.Image, vm).Answer(func() local.Output {
-			m.disks[vm] = "stopped"
-			return local.Output{}
-		})
+		for _, name := range []string{vm, renamed} {
+			m.run.On(bin, "clone", contracttest.Image, name).Answer(func() local.Output {
+				m.made(name)
+				return local.Output{}
+			})
+		}
 		m.run.On(bin, "set", vm, "--cpu", "4", "--memory", "8192", "--disk-size", "50")
 		m.run.On(bin, "list", "--source", "local", "--format", "json").Answer(m.listing)
 		m.boot(vm)
 		m.run.On(bin, "ip", vm, "--wait", "5").Reply(local.Output{Stdout: "192.168.64.5\n"})
 		m.run.On(bin, "rename", vm, renamed).Answer(func() local.Output {
+			if _, held := m.disks[renamed]; held {
+				return local.Output{ExitCode: 1, Stderr: "Error: VM \"" + renamed + "\" already exists\n"}
+			}
 			m.disks[renamed] = m.disks[vm]
 			delete(m.disks, vm)
+			_ = m.fs.Rename(vms+"/"+vm, vms+"/"+renamed)
 			return local.Output{}
 		})
 		for _, name := range []string{vm, renamed} {
@@ -176,11 +219,11 @@ func TestTartKeepsTheHypervisorContract(t *testing.T) {
 				if m.disks[name] == "running" {
 					return local.Output{ExitCode: 1, Stderr: "Error: VM \"" + name + "\" is running\n"}
 				}
-				delete(m.disks, name)
+				m.gone(name)
 				return local.Output{}
 			})
 		}
-		return contracttest.Subject{Hypervisor: m.hypervisor(), End: m.end, Restart: m.hypervisor}
+		return contracttest.Subject{Hypervisor: m.hypervisor(), End: m.end, Restart: m.hypervisor, Gone: m.gone, ByHand: m.made}
 	})
 }
 
@@ -360,5 +403,67 @@ func TestTheConsoleIsItsLastMeaningfulLinesThenTheHypervisorsOwn(t *testing.T) {
 	all, _ := h.Console(t.Context(), "dev", 0)
 	if len(all) != 10 || all[0] != "[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x610f0000]" {
 		t.Errorf("the whole log holds %d lines from %q, want 10 from the boot", len(all), all[0])
+	}
+}
+
+func TestAVMMadeByHandIsNeverOneTheAdapterCloned(t *testing.T) {
+	m := newMachine(t)
+	m.disks["by-hand"] = "stopped"
+	m.run.On(bin, "list", "--source", "local", "--format", "json").Answer(m.listing)
+	h := m.hypervisor()
+	if disks, err := h.Disks(t.Context()); err != nil || len(disks) != 1 {
+		t.Fatalf("disks %+v (%v), want the VM made by hand listed", disks, err)
+	}
+	if got, err := h.Cloned(t.Context()); err != nil || len(got) != 0 {
+		t.Fatalf("cloned %v (%v), want none: the adapter made no VM", got, err)
+	}
+}
+
+func TestAStateTheHypervisorSaysThatStationDoesNotKnowIsNeverStopped(t *testing.T) {
+	for said, want := range map[string]contract.DiskState{"stopped": contract.DiskStopped, "Running": contract.DiskRunning, "suspended": contract.DiskSuspended, "starting": contract.DiskUnknown, "": contract.DiskUnknown} {
+		if got := stateOf(said); got != want {
+			t.Errorf("%q reads %q, want %q", said, got, want)
+		}
+	}
+}
+
+func TestAVMMadeByHandRenamedOntoANameADeleteLeftLeavesNoEntryThere(t *testing.T) {
+	m := newMachine(t)
+	m.made("by-hand")
+	_ = m.fs.MkdirAll(state+"/cloned", 0o700)
+	_ = m.fs.WriteFile(state+"/cloned/stale", []byte("folder-0"), 0o600)
+	m.run.On(bin, "rename", "by-hand", "stale").Answer(func() local.Output {
+		m.disks["stale"] = m.disks["by-hand"]
+		delete(m.disks, "by-hand")
+		_ = m.fs.Rename(vms+"/by-hand", vms+"/stale")
+		return local.Output{}
+	})
+	if err := m.hypervisor().Rename(t.Context(), "by-hand", "stale"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.fs.Stat(state + "/cloned/stale"); err == nil {
+		t.Fatal("the entry a delete left under stale stands after a VM made by hand took the name")
+	}
+}
+
+func TestADiscardedImageDiskLeavesNoEntry(t *testing.T) {
+	m := newMachine(t)
+	m.run.On(bin, "clone", contracttest.Image, "station-image-linux-1").Answer(func() local.Output {
+		m.made("station-image-linux-1")
+		return local.Output{}
+	})
+	m.run.On(bin, "delete", "station-image-linux-1").Answer(func() local.Output {
+		m.gone("station-image-linux-1")
+		return local.Output{}
+	})
+	h := m.hypervisor()
+	if err := h.Clone(t.Context(), imagescontract.ImageLocation{Ref: contracttest.Image}, "station-image-linux-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := h.Discard(t.Context(), imagescontract.ImageLocation{Ref: "station-image-linux-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.fs.Stat(state + "/cloned/station-image-linux-1"); err == nil {
+		t.Fatal("the discarded image disk's entry stands")
 	}
 }
