@@ -22,15 +22,16 @@ func UnseenVerdict(h MacView, now time.Time) *verdict.Verdict {
 	case h.Answered.IsZero():
 		v.Sentence = h.Name + " has never answered."
 	case h.Asleep:
-		v.Sentence, v.Line = h.Name+" is asleep.", "It was on battery with its lid closed when last seen, "+silence(now.Sub(h.Answered))+"."
+		v.Sentence, v.Line = h.Name+" is asleep.", "It was on battery with its lid closed when last seen, "+Silence(now.Sub(h.Answered))+"."
 	default:
-		v.Sentence = h.Name + " has not been seen for " + silence(now.Sub(h.Answered)) + "."
+		v.Sentence = h.Name + " has not been seen for " + Silence(now.Sub(h.Answered)) + "."
 	}
 	return &v
 }
 
-func silence(d time.Duration) string {
-	// value: a silence as a page says it: "1 min", "12 min", "3 h", "2 days".
+func Silence(d time.Duration) string {
+	// value: a span as a page says it, a silence or how long a machine is
+	// up: "1 min", "12 min", "3 h", "2 days".
 	switch {
 	case d < time.Hour:
 		return strconv.Itoa(max(int(d/time.Minute), 1)) + " min"
@@ -63,7 +64,7 @@ func SentenceOf(h MacView, now time.Time) string {
 	case h.Answered.IsZero():
 		return "Never seen. Asleep or off the network."
 	case h.Asleep:
-		return "Asleep, not seen for " + silence(now.Sub(h.Answered)) + "."
+		return "Asleep, not seen for " + Silence(now.Sub(h.Answered)) + "."
 	}
-	return "Not seen for " + silence(now.Sub(h.Answered)) + ". Asleep or off the network."
+	return "Not seen for " + Silence(now.Sub(h.Answered)) + ". Asleep or off the network."
 }

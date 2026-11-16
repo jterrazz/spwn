@@ -1,4 +1,4 @@
-description: 'a Mac heads its Overview online with the machines it runs, its line the engine and Awake'
+description: 'a Mac heads its Overview online with the machines it runs, its line how long it is up'
 env:
     - stories
     - engine
@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          {"Tone":"ok","Sentence":"Online, with 2 machines running.","Line":"Engine running. Awake until 18:00, lid closed."}
+          {"Tone":"ok","Sentence":"Online, with 2 machines running.","Line":"Up 3 days."}

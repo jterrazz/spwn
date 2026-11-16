@@ -220,17 +220,7 @@ func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, 
 			reads = append(reads, a.read)
 		}
 	}
-	return overview.Summarize(head, state, own, reads, vms).Told(sentenceOf(all))
-}
-
-func sentenceOf(all *machines.AllMachines) string {
-	if all == nil {
-		return ""
-	}
-	if i := slices.IndexFunc(all.Macs, func(h machines.MacView) bool { return h.ThisMac }); i >= 0 {
-		return all.Macs[i].Sentence
-	}
-	return ""
+	return overview.Summarize(head, state, own, reads, vms)
 }
 
 // value: a Mac's engine as engine.read tells it, and the finding a stopped

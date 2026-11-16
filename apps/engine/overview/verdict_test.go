@@ -63,13 +63,13 @@ func TestTheHeadOfAMacSaysItOnlineWithTheMachinesItRuns(t *testing.T) {
 			t.Errorf("%s: %+v; want %+v", name, got.Head.Verdict, c.want)
 		}
 	}
-	told := overview.Summarize(mac, overview.EngineRunning, nil, nil, []overview.VM{{Name: "a", Running: true}}).Told("Engine running. Awake until 18:00.")
-	if told.Head.Verdict.Line != "Engine running. Awake until 18:00." || told.Head.Verdict.Sentence != "Online, with 1 machine running." {
-		t.Errorf("the Mac's sentence is the line of its head: %+v", told.Head.Verdict)
+	up := mac
+	up.Up = 3*24*time.Hour + 2*time.Hour
+	if got := overview.Summarize(up, overview.EngineRunning, nil, nil, []overview.VM{{Name: "a", Running: true}}).Head.Verdict; got.Line != "Up 3 days." || got.Sentence != "Online, with 1 machine running." {
+		t.Errorf("a Mac's head line is how long it is up: %+v", got)
 	}
-	stopped := overview.Summarize(mac, overview.EngineStopped, nil, nil, nil).Told("Engine stopped.")
-	if stopped.Head.Verdict.Line != overview.LineEngineStopped {
-		t.Errorf("a stopped engine keeps its own line: %+v", stopped.Head.Verdict)
+	if stopped := overview.Summarize(up, overview.EngineStopped, nil, nil, nil).Head.Verdict; stopped.Line != overview.LineEngineStopped {
+		t.Errorf("a stopped engine keeps its own line: %+v", stopped)
 	}
 	inside := overview.Summarize(overview.Head{Name: "linux-1", Kind: machine.Workspace}, overview.EngineNone, nil, nil, nil)
 	if inside.Head.Verdict != nil {
