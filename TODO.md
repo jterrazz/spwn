@@ -53,6 +53,70 @@ work in workspaces.
 It replaces the idea of `station apps install --all`. Starts once the new
 MacBook runs station v3 and the owner opens the design.
 
+## Install and upgrade for customers (designed 2026-11-16)
+Today `scripts/install.sh` is the only install and its re-run the only self-upgrade ([ADR-041](docs/decisions/041-the-lock-is-what-apply-installs.md)): no version folder, no rollback, a checksum from the same origin as the binary (integrity, not authenticity). The design below makes one product version stamp every piece (CLI and engine, guest binary, Station.app, the window, the pinned dependencies), released together. Each lot is one maker, in order.
+
+- **Two doors, one layout**: `curl -fsSL <domain>/install.sh | sh` (the primary door) and a Homebrew cask in `jterrazz/homebrew-station` (`auto_updates true`, so `brew upgrade` leaves it). Both land `~/.local/share/station/versions/<v>/` (`bin/station`, `guest/station-linux-<arch>`, both apps), `~/.local/bin/station` as a symlink flipped atomically, and a receipt `install.json` (`channel: script|brew|dev`). The script unpacks into `<v>.partial` and renames; a `make provision` build is `dev` and never updates. On Linux the script installs the binary only, and inside a VM its Mac's engine owns it.
+- **A signed manifest**: each release ships `manifest.json` signed by an ed25519 key whose public half is embedded, and a stable `latest.json`. The script verifies the signature, then each asset's sha256. An older binary refuses an unknown major and says to reinstall. Customers also need a Developer ID, the hardened runtime and notarisation; the cask needs them to pass Gatekeeper.
+- **The update check**: the engine fetches `latest.json` every 12 h (at start and on wake, up to 1 h of jitter) into `~/.cache/station/update.json`. A command reads that cache with no network, and prints at most one stderr line a day per version, on a TTY only. Silent for `--json`, a pipe, `CI`, a VM guest and the `dev` channel. Offline keeps the last cache; after 14 days Needs you says `updates not checked since <date>`. The menu bar and the window show one upkeep row the badge never counts. Opt-outs: `preferences.json` `updates: {check, apply: night|ask|never}`, `STATION_NO_UPDATE_CHECK=1` (check and line), `STATION_DISABLE_UPDATES=1` (every path, `upgrade --self` included).
+- **The engine is the one updater**; no Sparkle and no Tauri updater (a second channel that cannot move the engine or the guests, and lockstep keeps `page.Revision` compatible). It runs station's own step first in the 03:00 night ([ADR-042](docs/decisions/042-versions-are-semver-ranges-applied-nightly.md)), or on `station upgrade --self`, in this order, each with its health gate and rollback:
+  1. Engine, VMs running: verify the manifest and assets, snapshot the stores, take the machine's turn, write `runs/<vm>.json v1`, flip the symlink, `launchctl kickstart -k`. The VMs survive and `Adopt` re-attaches them (`specs/cli/engine/adopts.spec.yaml`). Gate in 60 s: hello answers the new version, every run adopted with its pid, each guest reconnected. A failed gate or three exits in 5 min flips back, restores the snapshot only if a store's version moved, records `update.rolled-back <v>` and skips that version.
+  2. Station.app: the catalog script's rename lifted into the engine, then `station.updated`; the app relaunches unless its panel is open. Rollback restores `.old`.
+  3. The window: `bundle.active` on and notarised, swapped the same way, "Restart to update" while open.
+  4. The guest binary, over the engine's ssh into `/usr/local/bin/station.new`, sha256 checked in the guest, `station.prev` kept, hello gate in 20 s. A stopped VM is pushed at its next boot, before the boot phase. The guest's own `upgrade --self` refuses.
+  5. Images: `rebuild waiting` is said, never done unasked (`images.rebuild: ask`, `night` opt-in); two versions are kept.
+  6. Dependencies: pinned in the manifest with a sha256, into `deps/<name>/<version>/` behind a `current` symlink, moved only with a station release. A running VM keeps its tart (its wrapper names the versioned path); prune only what no `runs/*.json` names. The unchecked installers (Homebrew, mise.run, herdr) become a `script` method with `url` and `sha256`.
+- **Version skew**: CLI and engine are one binary (skew only between flip and restart; after 60 s the CLI says to run `station engine start`). A guest may lag at any version at or above `api.Floor`, the engine pushes it up, and Floor rises only after a release that pushes guests. The menu bar and the window are lockstep, the engine accepting one `page` revision back. The engine reads `runs/<vm>.json` of N-1 and N+1, and a file it cannot read is `foreign`: never killed, never adopted, shown. Stores expand then contract, a breaking migration spanning two releases, since a store refuses a newer file today.
+- **tart stays an external dependency the user installs** (the owner, 2026-11-16: "pour tart on garde en dépendance, on dira qu'il faut l'installer (cf le machinefile du mac initial, ça sera une dépendance obligatoire)"). It is a required app of the Mac's initial Machinefile, declared there and never bundled in the release. What still applies, in U8: its version is pinned and its sha256 checked in the catalog (today `catalog/packages/containers-vms/tart.yaml` takes `latest` with no checksum). Open: whether the `~/.local/bin/tart` launcher (`TART_HOME`) stays on the PATH. tart is `openai/tart` under FSL-1.1-ALv2 since 2026-04-07, whose Competing Use clause may block customers. A second `Hypervisor` adapter (`vz`, MIT, behind the port; Lima, Apple `container`) waits for that: the port gains `Capabilities()` and each VM record names its `hypervisor`, a VM always booting by its maker. Starts when the licence or the owner of tart turns bad, or a customer is blocked by it.
+- **The 26 scenarios**, each a spec of its tier (the fake world proves sequences, stubs argv, VMs the real restart):
+  - usecases: update-check/cache-not-network, says-once-a-day, silent-cases, offline-keeps-cache; self-upgrade/refuses-bad-asset, gate-fails-rolls-back, crash-loop-rolls-back, store-migration-rollback, night-runs-station-first, apply-never; adopt/foreign-run-file; guest/push-on-upgrade, push-fails-keeps-prev, stopped-vm-updated-at-boot; menubar/relaunch-after-swap; deps/tart-move-spares-running-vm; hypervisor/capability-refusal, vm-keeps-its-maker.
+  - adapters: install/script-verifies-signature, cask-same-layout; adopt/pid-reused-is-not-adopted; deps/tart-pinned-sha.
+  - cli: install/script-versioned-layout; self-upgrade/engine-restart-keeps-vms (extends `adopts.spec.yaml`).
+  - machine (tiers 2 and 3, on a local release server signed with a test key, `STATION_UPDATE_URL` and `STATION_UPDATE_PUBKEY` honoured by test builds only): e2e/upgrade-real-vm, e2e/fresh-mac-install-and-update.
+- **Lots**:
+  - U1: `Adopt` compares `p_starttime` against `runs/<vm>.json v1` (the `.pid` as fallback).
+  - U2: the signed `manifest.json` and `latest.json` in publish.yaml.
+  - U3: the versioned layout and receipt in `install.sh`; the plist names the symlink; prune keeps 2.
+  - U4: the update check: fetch, cache, line, silences, preferences.
+  - U5: `station upgrade --self` and the night's first step, with download, verify, snapshot, flip, kickstart, gate, rollback. It carries the self-replace risk: the release asset with its checksum, replaced by a rename, then the engine restarted (`apps/engine/images/calls/binary.go`'s download lifted to a shared adapter). `station upgrade` today updates what the Machinefile carries, not station.
+  - U6: the guest push, at upgrade and at boot.
+  - U7: the menu bar's lockstep swap in the engine, the `station.updated` event, the relaunch.
+  - U8: dependencies pinned in the manifest (tart's version and sha256 first); the installers with sha256; the launcher question above.
+  - U9: `Hypervisor.Capabilities()` and the per-VM `hypervisor` field.
+  - U10: Developer ID signing and notarisation of the CLI zip, Station.app and the window.
+  - U11: the Homebrew cask, bumped by publish.yaml.
+  - U12: tier 2 and 3 upgrade runs.
+  - U13 (later): a `vz` adapter spike behind the port.
+- **Open owner questions** (none answered yet):
+  1. One updater for the cask too, or brew owns brew installs? Recommendation: station updates both, since brew cannot run the engine restart or the guest push.
+  3. The default apply mode. Recommendation: `night`, with `ask` for teams that change-manage.
+  4. A beta channel? Recommendation: not before the first customer; `stable` only, plus a `--version` pin.
+  5. The Apple Developer ID entity (personal or the company that sells station). Recommendation: the selling entity, decided before U10.
+  6. Images rebuilt at night? Recommendation: `ask`.
+  7. Start L1 and L3 of the Go audit now. Recommendation: yes, their findings shape the other lots.
+
+Starts with U1, the owner's go, and the answers above for U2 onward.
+
+## Go code: lint and modernisation (audited 2026-11-16)
+An audit of `apps/engine` at `3e950d809` found the obvious libraries already in use, so the gains are two defects, stdlib modernisation and lint gaps, not new libraries (the architecture rules allow a third-party import only in adapters, `wire`, the presentation packages and `platform`).
+
+- **Two defects**: `settings/diff.go` `script()` builds an `(n+1)x(m+1)` LCS table, about 72 MB for a 3,000-line `~/.zshrc`, on every `settings diff` and `plan`. `ui/atom/text.go` (`Middle`) and `value.go` (`path`) keep `width-1` runes but measure in cells, so a CJK or emoji name overflows its width.
+- **Lint gaps**: `make lint` runs `GOOS=linux` only, so 13 darwin files (1,002 lines, 3 cgo) are never linted; `modernize` is off (247 `errors.As`, 56 `range strings.Split`, 28 `sort.*`); no `govulncheck` runs anywhere. To add: `nolintlint`, `nilnesserr`, `errchkjson`, `bodyclose`, `noctx`, `fatcontext`, `usetesting`, `durationcheck`, `makezero`, `wastedassign`, `unparam`, each with its `value:` or `hazard:` comment. Not `depguard` nor `forbidigo`: `specs/architecture` owns imports and symbols.
+- **Hand-rolled on purpose**: semver ranges, YAML decode, schemas, atomic writes, process supervision, retries on an injected clock, TOML surgery, ssh, archives, XDG paths, the JSON-RPC frames and the tart adapter stay, because each does what its library does not (vendor versions, the owner's files kept as written, the fenced env, the wire contract) or sits in a layer that refuses third-party imports.
+- **Lots, in order, each one maker, each with a cold `make check` and goldens exact**:
+  - L1: enable `modernize` and `nolintlint`; apply `--fix` except `errorsastype`.
+  - L3: a `GOOS=darwin` pass in `make lint` (cgo on a Mac, `CGO_ENABLED=0` in CI), and its findings.
+  - L4: `settings/diff.go` trims the common prefix and suffix before the table; a 5,000-line benchmark.
+  - L5: `ui/atom` truncation on `x/ansi` (`Truncate`, `TruncateLeft`, `Cut`), `ansi` added to the `ui/atom` row of `importTable`, one wide-rune fixture.
+  - L6: one flock on `unix.Flock` in `platform/local/fs.go`, `ExclusiveWithin` over `Exclusive`, the lock tests under `synctest`.
+  - L2: the `errors.As` to `errors.AsType` sweep (247 sites).
+  - L7: a binary plist's program read through `plutil -convert xml1` in `launchd/plist.go`.
+  - L8: the `tool` directives into a `tools` member module, `govulncheck` in `make check` and CI.
+  - L9: the roster additions above, with their findings fixed (split past about 40).
+  - L10 (optional): `.tar.xz` and `.tar.zst` release assets.
+
+Starts with L1 and L3, then L4 to L6, then L2 and L7 to L9, L10 only if the owner wants the feature.
+
 ## The next minor release: the v2 words go
 The hidden aliases (`status`, `start`, `stop`, `tools`, `config`,
 `run`, `probe`, `--always-on`) and `station.status/v1` are kept for one release ([Commands](docs/reference/commands.md#hidden-aliases)). The next
@@ -192,7 +256,6 @@ becomes the bottleneck.
 - `codex`'s `~/.codex/auth.json` row names the file the login lives in: check on a Mac with a Codex login that this is the file's name (`ls ~/.codex`), and fix the path if it is not.
 - `claude-desktop`'s `vm_bundles` is level `data`: check whether the app downloads it again after a delete (delete it on a Mac and open the app); if it does, the level becomes `cache`.
 - The machine files the window still waits for: its Edit and Allow, which write the owner's files and wait for the owner's word on that.
-- The self-upgrade lot: `station upgrade` updates what the Machinefile carries but not station itself. The plan's first step, station first, is cut from L2.4 and waits for its own lot, which carries the self-replace risk: the release asset with its checksum, replaced by a rename, then the engine restarted on the new version (`apps/engine/images/calls/binary.go`'s download lifted to a shared adapter). Until then re-running the install is station's own upgrade ([ADR-041](docs/decisions/041-the-lock-is-what-apply-installs.md)).
 - The tier-3 proof of `station upgrade`: on a real Mac and a real VM, the managers' real order and that `brew update` refreshes the index now that every bundle runs with `HOMEBREW_NO_AUTO_UPDATE=1` (tier 1 proves the order over the fake world, `specs/usecases/machinefile/upgrade/homebrew-index-first.spec.yaml`, never the argv a real brew gets). Deferred from L2.4, whose plan names it; starts before the lock's release, or with the owner's explicit acceptance of the deferral (ADR-041).
 - The lock beside a template in the shared source (`studio-linux.lock`), and an image built from a lock, wait for `images build <machinefile>` (ADR-041).
 - While Serve reads off because `tailscale status` failed, the tailnet may still hold station's entries, and a release or a narrowed right then leaves its entry live (`unshareLocked` in `apps/engine/engine/process/share.go` unshares only while Serve is on, `refreshSelf` in `engine.go` reads a failed status as off) until Serve reads on again and the reconciliation removes it; meanwhile its port of the Mac is given to no other share only if the engine's last reading of the tailnet listed it (`carriedLocked` in `share.go`), never when no reading was made since the start. Found by the L4.1 re-verify (2026-11-11); starts with the next change to how the engine reads Serve's state.
@@ -208,7 +271,6 @@ becomes the bottleneck.
 - HTTPS mode: if a Mac's `tailscale serve` refuses arbitrary https ports, the default of the `ports` group's `https` becomes `path`.
 - Remove the old Tailscale leftovers by hand when wanted: the `tag:station-vm` tag owner, the VM-join OAuth client, each Mac's userspace node (admin console), `brew uninstall tailscale` (the formula; the app replaces it).
 - The poweroff intent over a FIFO instead of a console file, if the macOS guest's console differs.
-- A second `Hypervisor` adapter (Lima, Apple `container`, Virtualization.framework direct) if tart's licence or owner turns bad.
 - A second `Notifier` adapter (ntfy, to the phone), and a `Jobs` adapter over systemd for a Linux machine that runs an engine.
 - Herdr: `machines create` could run `hc machine add <name> [--temp]`.
 - `ansible` installs on Linux by `mise: pipx:ansible` and names no `requires`, unlike `markitdown` and `browser-use` (`requires: [uv]`), so neither the resolution nor `apps install` brings uv or pipx before it. Starts with the answer, read on a Linux VM: does `mise install pipx:ansible` work with neither uv nor pipx there? If not, `ansible` requires what it leans on, as the other two do.
