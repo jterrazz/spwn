@@ -16,11 +16,10 @@ runs:
     - command: 'settings | /usr/bin/grep -E ''^#|○'''
       exit: 0
       stdout: |
-          # Set by station	9 ●	10 ○
+          # Set by station	9 ●	9 ○
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
-          ○	claude-token	not applied	station settings apply claude-token
           ○	git-signing	not applied · needs gpg	station apps install gpg
           ○	github-login	not applied · needs gh	station apps install gh
           ○	ssh-key	not applied	station settings apply ssh-key

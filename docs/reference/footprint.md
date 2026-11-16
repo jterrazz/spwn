@@ -651,7 +651,6 @@ Erase: none (nothing to erase: its pages are station's, its choices are kept).
 | hushlogin               | `~/.hushlogin`                                                                  | never touched |                                                                          |
 | starship-dotfiles       | `~/.config/starship.toml`                                                       | never touched | the embedded `starship/starship.toml`                                    |
 | tmux-dotfiles           | `~/.tmux.conf`                                                                  | never touched | the embedded `tmux/tmux.conf`                                            |
-| claude-token            | `~/.config/studio-os`                                                           | never touched | `operator:claude:oauth-token` in the OS credential store                 |
 | dns                     | `~/.local/state/station/dns/quad9-dns.mobileconfig`                             | never touched | installed as the profile `com.jterrazz.dns.quad9`                        |
 | git-signing             | `~/.gnupg`                                                                      | never touched |                                                                          |
 | git-signing             | `~/.gitconfig`                                                                  | never touched | `git config --global` user.signingkey, commit.gpgsign                    |

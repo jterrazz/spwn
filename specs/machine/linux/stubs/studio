@@ -1,9 +1,0 @@
-#!/bin/sh
-# The run's Mac credential store: it keeps the Claude token, a placeholder.
-printf 'studio %s\n' "$*" >> "$HOME/.calls"
-[ "$1 $2" = "credentials export" ] || { echo "stub studio: unexpected invocation: $*" >&2; exit 97; }
-shift 2
-for n in "$@"; do
-    [ "$n" = operator:claude:oauth-token ] || { echo "credential $n not found" >&2; exit 1; }
-done
-echo '{"operator:claude:oauth-token":"sk-ant-oat01-e2e-placeholder"}'

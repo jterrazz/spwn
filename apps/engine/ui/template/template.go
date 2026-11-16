@@ -324,7 +324,7 @@ func shown(r page.Row) string {
 }
 
 // invariant: a calm section of one row with nothing to do is one line
-// (vision 07 "Off  ⊘ 1 · Claude token"): its title, then the row's mark,
+// (vision 07 "Off  ⊘ 1 · Tailscale"): its title, then the row's mark,
 // its label unless the title says it, and its cells; a row whose label
 // says the title is the line alone (`– 12 not for this machine · Mac only`);
 // a table, whose columns are headed, keeps its heads.

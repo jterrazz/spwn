@@ -37,7 +37,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "apply [<setting...>]",
 		Short:   "Apply settings here; bare, every one not applied or changed since; one with values asks them on a terminal",
-		Example: "  station settings apply\n  station settings apply starship-dotfiles\n  station settings apply claude-token\n  station settings apply starship-dotfiles --all-machines",
+		Example: "  station settings apply\n  station settings apply starship-dotfiles\n  station settings apply starship-dotfiles --all-machines",
 		Args:    cobra.ArbitraryArgs,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.AllMachines, "all-machines", false, "on every Mac and workspace; servers are skipped, admin settings said with their command")

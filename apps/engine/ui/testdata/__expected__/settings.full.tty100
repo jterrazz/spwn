@@ -2,15 +2,15 @@ This Mac · 16 set by station here · 9 checked · 6 need a look
 
 Needs a look
   ◐ git-shortcuts  changed since 2 d ago                → station settings diff git-shortcuts
-  ◐ claude-token   changed since 2 d ago                → station settings diff claude-token
-  ◐ ssh-key        changed since 2 d ago                → station settings diff ssh-key
-  ◐ tart-launcher  changed since 2 d ago                → station settings diff tart-launcher
+  ◐ dns            changed since 2 d ago                → station settings diff dns
+  ◐ zed-dotfiles   changed since 2 d ago                → station settings diff zed-dotfiles
+  ◐ tailscale-cli  changed since 2 d ago                → station settings diff tailscale-cli
   ◐ firewall       off                                  → System Settings > Network > Firewall
   ◐ screen-lock    locks after 10 min · expected 5 min  → System Settings > Lock Screen
-Set by station  ● 4  ◐ 4  ○ 4  ⊘ 4 · git-shortcuts, claude-token, ssh-key, tart-launcher, …
+Set by station  ● 4  ◐ 4  ○ 4  ⊘ 4 · git-shortcuts, dns, zed-dotfiles, tailscale-cli, …
 Always-on Mac   ○ 5 · for a Mac that hosts servers
 Checked         ● 5  ◐ 2  ⊘ 1  ? 1 · firewall, screen-lock, time-machine, filevault, sip, …
-– 4 not for this machine · VMs only
+– 3 not for this machine · VMs only
 
 → station settings apply  apply the 8
 → station settings --all  for every row

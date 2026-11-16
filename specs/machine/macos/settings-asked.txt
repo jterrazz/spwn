@@ -2,7 +2,6 @@
 # click in System Settings (a guided item, a profile to approve), so a headless run
 # leaves them to the owner; every other one is applied, turned off and applied again.
 github-login
-claude-token
 git-signing
 ssh-key
 spotlight-exclude
