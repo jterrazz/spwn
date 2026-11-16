@@ -110,3 +110,9 @@ func TestAFailedHypervisorLeavesMachinesAndYourDataUnknown(t *testing.T) {
 		t.Fatalf("a failed hypervisor reads %+v, station %+v: want no part, no machines, no your data, nothing pending", got.Kinds, got.Station)
 	}
 }
+
+func TestTheCachesCanFreeNamesTheCallThatFreesThem(t *testing.T) {
+	if Free.Name != disk.FreeCall {
+		t.Fatalf("the call is %q, the reading names %q", Free.Name, disk.FreeCall)
+	}
+}

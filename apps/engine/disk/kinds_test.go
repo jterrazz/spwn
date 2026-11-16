@@ -108,3 +108,21 @@ func TestStationPartLeavesTheMacItselfWhatItsPartsDoNotHold(t *testing.T) {
 		t.Fatalf("verdict %q, want nothing to free", none.Verdict.Sentence)
 	}
 }
+
+func TestTheCachesCanFreeNamesItsGestureOnlyWhenThereIsSomething(t *testing.T) {
+	if got := canFree(10); got.Call != FreeCall {
+		t.Fatalf("caches of 10 B: %+v, want disk.free", got)
+	}
+	if got := canFree(0); got.Call != "" {
+		t.Fatalf("no cache: %+v, want no gesture", got)
+	}
+}
+
+func TestAReadingTellsWhatItsVolumeUses(t *testing.T) {
+	if r := ReadingOf(1000, 400, Survey{System: -1}, HeldReading{}, "mbp"); r.Used != 600 {
+		t.Fatalf("used %d, want 1000 total less 400 free", r.Used)
+	}
+	if r := ReadingOf(400, 1000, Survey{System: -1}, HeldReading{}, "mbp"); r.Used != 0 {
+		t.Fatalf("used %d on a volume whose free passes its total, want never below 0", r.Used)
+	}
+}

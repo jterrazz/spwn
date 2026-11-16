@@ -56,6 +56,9 @@
         "Bytes": {
           "type": "integer"
         },
+        "Call": {
+          "type": "string"
+        },
         "Sentence": {
           "type": "string"
         }
@@ -138,13 +141,17 @@
         },
         "Total": {
           "type": "integer"
+        },
+        "Used": {
+          "type": "integer"
         }
       },
       "required": [
         "Free",
         "Pending",
         "Rows",
-        "Total"
+        "Total",
+        "Used"
       ],
       "type": "object"
     },
