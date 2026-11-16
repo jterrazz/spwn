@@ -32,10 +32,17 @@ type Amount struct {
 	Bytes int64
 }
 
+const (
+	// value: the call a CanFree names, the gesture that frees it.
+	FreeCall = "disk.free"
+)
+
 type CanFree struct {
 	// value: what `disk free` frees here: the Can rebuild rows.
 	Bytes    int64
 	Sentence string
+	// value: the call that frees it; empty when there is nothing to free.
+	Call string `json:",omitempty"`
 }
 
 func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, CanFree) {
@@ -81,5 +88,5 @@ func canFree(caches int64) CanFree {
 	if caches <= 0 {
 		return CanFree{Sentence: "No cache to free. What is left is yours or the system's."}
 	}
-	return CanFree{Bytes: caches, Sentence: "Caches hold " + size.Bytes(caches) + ". Each app rebuilds its own when it needs it."}
+	return CanFree{Bytes: caches, Sentence: "Caches hold " + size.Bytes(caches) + ". Each app rebuilds its own when it needs it.", Call: FreeCall}
 }

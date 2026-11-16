@@ -1013,6 +1013,7 @@ export type DiskCallsReadIn = Record<string, never>;
 
 export type DiskCanFree = {
     Bytes: number;
+    Call?: string;
     Sentence: string;
 };
 
@@ -1052,6 +1053,7 @@ export type DiskReading = {
     Rows: DiskRow[] | null;
     Station?: DiskStationPart;
     Total: number;
+    Used: number;
 };
 
 export type DiskRow = {

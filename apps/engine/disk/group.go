@@ -43,8 +43,10 @@ type Row struct {
 
 type Reading struct {
 	Total, Free int64
-	Rows        []Row
-	Pending     bool
+	// value: what the volume uses, Total less Free, never below 0.
+	Used    int64
+	Rows    []Row
+	Pending bool
 	// value: the machine's disk by kind, and what its caches can free.
 	Kinds   []Amount `json:",omitempty"`
 	CanFree CanFree  `json:",omitempty,omitzero"`
@@ -56,7 +58,7 @@ func ReadingOf(total, free int64, s Survey, h HeldReading, mac string) Reading {
 	// invariant: station's part is there only once the hypervisor and the
 	// walk of its logs answered: pending, failed or absent, it is nil, never
 	// zeros.
-	r := Reading{Total: total, Free: free, Rows: Classify(s), Pending: h.State == HeldPending || s.SystemPending}
+	r := Reading{Total: total, Free: free, Used: max(total-free, 0), Rows: Classify(s), Pending: h.State == HeldPending || s.SystemPending}
 	for _, t := range s.Rows {
 		r.Pending = r.Pending || t.Pending
 	}
