@@ -35,7 +35,7 @@
   - button "Forward" [disabled]
   - text: mac-mini
   - heading "mac-mini Not seen" [level=2]
-  - paragraph
+  - paragraph: Not seen for 6 h. Asleep or off the network.
   - button "New machine on mac-mini": New machine
   - tablist "Tabs":
     - tab "Overview" [selected]

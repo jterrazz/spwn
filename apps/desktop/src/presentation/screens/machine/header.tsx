@@ -1,19 +1,15 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
 import { sentence } from '../../../domain/format';
-import { targetOf } from '../../../domain/machines/machines';
 import type { Found } from '../../../domain/machines/machines';
-import { lineOf } from '../../../domain/overview/overview';
 import { SEPARATOR } from '../../../domain/separator';
-import { useWatch } from '../../dependencies/dependencies';
 import { useIdentityOf } from '../../kit/identity';
 import { machineRoute, TAB_PANEL, tabsOf } from '../../navigation/route';
 import type { Route, Tab } from '../../navigation/route';
 import type { Opening } from '../../navigation/window';
 import { Button, MachineIcon, StatePill, Switch } from '../../ui/index';
-import { wordOf } from '../../words/engine-words';
 import { machineKindOf } from '../../words/provisional';
-import { engineViewWord, macState, vmKindWord, vmLifetimeWord, vmState } from '../../words/shown';
+import { macState, vmKindWord, vmLifetimeWord, vmState } from '../../words/shown';
 import { THIS_MAC_WORD } from '../../words/words';
 import { LifecycleGestures } from './gestures';
 import { TerminalButton } from './terminal';
@@ -27,30 +23,10 @@ type Props = {
     onNewMachine?: ((opening: Opening) => void) | undefined;
 };
 
-function useAwakeWord(mac: MachinesMacView): string | undefined {
-    const overview = useWatch('overview.read', {}, targetOf({ mac }));
-    if (overview.kind !== 'read') {
-        return undefined;
-    }
-    const line = lineOf(overview.out.Summary, 'awake');
-    if (line === undefined) {
-        return undefined;
-    }
-    const words =
-        line.Unread === '' ? sentence((line.Parts ?? []).map((part) => part.Word)) : line.Unread;
-    return words === '' ? undefined : `${wordOf('CoreSectionID', 'awake').Word}: ${words}`;
-}
-
 function MacLine({ mac }: { mac: MachinesMacView }) {
-    const engine = engineViewWord(mac.Engine);
-    const awake = useAwakeWord(mac);
     return (
         <p className={styles.sentence}>
-            {sentence([
-                mac.ThisMac ? THIS_MAC_WORD : undefined,
-                engine === undefined ? undefined : `Engine ${engine}`,
-                awake,
-            ])}
+            {sentence([mac.ThisMac ? THIS_MAC_WORD : undefined, mac.Sentence])}
         </p>
     );
 }
