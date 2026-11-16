@@ -25,9 +25,9 @@ const PAGES = [
 const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Sign-ins', 'Storage'];
 const PARALLEL = 6;
 
-// value: a step a shot takes once its start route has drawn: a button clicked by its whole accessible name, or a key
-// value: pressed, so a dialog or a view a click opens is captured too.
-type Step = { button: string } | { key: string };
+// value: a step a shot takes once its start route has drawn: a button clicked by its whole accessible name, a key
+// value: pressed, or a field filled by its name, so a dialog, a view a click opens or a gesture's outcome is captured too.
+type Step = { button: string } | { field: string; text: string } | { key: string };
 
 type Shot = { name: string; query: string; entries?: boolean; steps?: readonly Step[] };
 
@@ -91,6 +91,21 @@ const OPENED: Readonly<Record<string, readonly Shot[]>> = {
             steps: [{ button: 'Sign in gh' }],
         },
     ],
+    leftovers: [
+        { name: 'storage-free-confirm', query: 'page=storage', steps: [{ button: 'Free 12 GB' }] },
+        {
+            name: 'storage-freed',
+            query: 'page=storage',
+            steps: [
+                { button: 'Free 12 GB' },
+                {
+                    field: 'Type station-linux@2026.10.20, old-vm to confirm',
+                    text: 'station-linux@2026.10.20, old-vm',
+                },
+                { button: 'Free' },
+            ],
+        },
+    ],
     'bare-mac': [
         {
             name: 'dialog-new-machine-start-here',
@@ -152,9 +167,15 @@ function shotsOf(world: string): Shot[] {
 }
 
 async function take(page: Page, step: Step): Promise<void> {
-    await ('key' in step
-        ? page.keyboard.press(step.key)
-        : page.getByRole('button', { exact: true, name: step.button }).click({ timeout: 5000 }));
+    if ('key' in step) {
+        await page.keyboard.press(step.key);
+    } else if ('field' in step) {
+        await page
+            .getByRole('textbox', { exact: true, name: step.field })
+            .fill(step.text, { timeout: 5000 });
+    } else {
+        await page.getByRole('button', { exact: true, name: step.button }).click({ timeout: 5000 });
+    }
     await page.waitForTimeout(300);
 }
 
