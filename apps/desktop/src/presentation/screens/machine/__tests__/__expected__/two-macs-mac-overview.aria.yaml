@@ -9,10 +9,10 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "2 things need you." [level=1]
+  - heading "Online, with 1 machine running." [level=1]
   - paragraph:
-    - img "2 things need you."
-    - text: "npm sign-in fails: The token is refused by registry.npmjs.org"
+    - img "Online, with 1 machine running."
+    - text: Engine running.
   - text: CPU 34% 10 CPUs Memory 12.4GB
   - meter "Memory used of its total"
   - text: of 16 GB Disk 606GB

@@ -1,5 +1,5 @@
 - main:
-  - heading "gh 2.97.0" [level=1]
+  - heading "gh 2.98.0" [level=1]
   - paragraph: GitHub CLI for repository management
   - button "Add to a machine" [disabled]
   - region "How it is installed":
@@ -10,11 +10,11 @@
   - region "Version":
     - heading "Version" [level=2]
     - term: On your machines
-    - definition: 2.97.0
+    - definition: 2.98.0
     - term: Rule
     - definition: takes every version
     - term: Newest
-    - definition: 2.98.0 is out
+    - definition: Not given yet
     - term: Last moved
     - definition: Not given yet
   - region "Settings it comes with":

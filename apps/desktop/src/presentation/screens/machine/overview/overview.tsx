@@ -6,6 +6,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import type { Reading as Answered } from '../../../../application/use-cases/entry';
+import { sentence } from '../../../../domain/format';
 import { isStopped, targetOf } from '../../../../domain/machines/machines';
 import type { Found } from '../../../../domain/machines/machines';
 import { needsYou } from '../../../../domain/overview/upkeep';
@@ -32,9 +33,9 @@ type Go = (to: Route) => void;
 
 type Answer = Answered<OverviewReadOutput>;
 
-type HeadProps = { overview: Answer; name: string; unseen?: CoreVerdictVerdict | undefined };
+type MacHeadProps = { overview: Answer; name: string; unseen?: CoreVerdictVerdict | undefined };
 
-function Head({ overview, name, unseen }: HeadProps) {
+function MacHead({ overview, name, unseen }: MacHeadProps) {
     if (unseen !== undefined) {
         return <VerdictHead size="tab" verdict={unseen} />;
     }
@@ -44,12 +45,21 @@ function Head({ overview, name, unseen }: HeadProps) {
     if (overview.kind === 'reading') {
         return <Reading size="tab" what={name} />;
     }
-    const { Creating, Summary } = overview.out;
-    return Creating === null ? (
-        <SummaryHead size="tab" summary={Summary} />
+    const { Summary } = overview.out;
+    return Summary.Head.Verdict === undefined ? (
+        <NoVerdict size="tab" />
     ) : (
-        <NoVerdict line={Creating.sentence} size="tab" />
+        <SummaryHead size="tab" summary={Summary} verdict={Summary.Head.Verdict} />
     );
+}
+
+function VmHead({ vm, overview }: { vm: MachinesVM; overview?: Answer }) {
+    const birth = overview?.kind === 'read' ? overview.out.Creating?.sentence : undefined;
+    if (vm.Head === undefined) {
+        return <NoVerdict size="tab" {...(birth === undefined ? {} : { line: birth })} />;
+    }
+    const line = sentence([vm.Head.Line, birth]);
+    return <VerdictHead size="tab" verdict={{ ...vm.Head, Line: line }} />;
 }
 
 type NeedsOfProps = {
@@ -83,7 +93,7 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
     const foot = overview.kind === 'read' ? overview.out.Summary.Machines : undefined;
     return (
         <Page>
-            <Head name={name} overview={overview} unseen={found.mac.Unseen} />
+            <MacHead name={name} overview={overview} unseen={found.mac.Unseen} />
             <ActivityTiles
                 disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}
                 found={found}
@@ -109,10 +119,9 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
 type VmProps = { mac: MachinesMacView; vm: MachinesVM; go: Go };
 
 function StoppedOverview({ mac, vm, go }: VmProps) {
-    const overview = useWatch('overview.read', {}, targetOf({ mac, vm }));
     return (
         <Page>
-            <Head name={vm.Name} overview={overview} />
+            <VmHead vm={vm} />
             <FileChapters drift={undefined} go={go} vm={vm.Name} />
             <DeleteGesture go={go} key={vm.Name} mac={mac} vm={vm} />
         </Page>
@@ -126,7 +135,7 @@ function VmOverview({ mac, vm, go }: VmProps) {
     const server = machineKindOf(vm) === 'server';
     return (
         <Page>
-            <Head name={vm.Name} overview={overview} />
+            <VmHead overview={overview} vm={vm} />
             <ActivityTiles
                 disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}
                 found={found}

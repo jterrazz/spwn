@@ -70,7 +70,7 @@ export function InboxPage({ macs, overview, go }: InboxProps) {
             : `None of the needs listed concerns ${chosen} or its machines.`;
     return (
         <Page>
-            <SummaryHead size="page" summary={Summary} />
+            <SummaryHead size="page" summary={Summary} verdict={Summary.Verdict} />
             <Switch
                 all="All machines"
                 label="Which machines"

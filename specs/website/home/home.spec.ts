@@ -15,9 +15,9 @@ describe('home', () => {
         // Given - the window on Home over calm, where every line the engine lists can wait
         const result = await website.visit('/?world=calm&page=home', async (visitor) => {
             // When - I open the window
-            // Then - the verdict says all is well and counts what can wait, and no Needs you is offered
+            // Then - the verdict says all is well and counts the machines, and no Needs you is offered
             await visitor.see(heading('Everything is fine.'));
-            await visitor.see(content('7 things can wait.'));
+            await visitor.see(content('2 machines on 1 Mac'));
             await visitor.gone(needsYou);
         });
         expect(result.errors.text).toBe('');

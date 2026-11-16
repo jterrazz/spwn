@@ -2,7 +2,7 @@
   - heading "2 things need you." [level=1]
   - paragraph:
     - img "2 things need you."
-    - text: port 5000 is reachable outside Tailscale
+    - text: The rest is fine. 4 machines on 1 Mac
   - group "Which machines":
     - button "All machines"
     - button "macbook-pro"

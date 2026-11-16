@@ -12,7 +12,7 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage"
-  - 'heading "wrangler sign-in fails: Refused at the provider." [level=1]'
+  - heading "Running." [level=1]
   - text: CPU 8% 4 CPUs Memory 1.1GB
   - meter "Memory used of its total"
   - text: of 4 GB Disk 7.6GB

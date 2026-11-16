@@ -9,10 +9,10 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "com.example.brain.x-snapshot is failing, last exit 2." [level=1]
+  - heading "Online, with 1 machine running." [level=1]
   - paragraph:
-    - img "com.example.brain.x-snapshot is failing, last exit 2"
-    - text: 7 things can wait.
+    - img "Online, with 1 machine running."
+    - text: Engine running.
   - text: CPU 34% 10 CPUs Memory 12.4GB
   - meter "Memory used of its total"
   - text: of 16 GB Disk 606GB

@@ -2,7 +2,7 @@
   - heading "2 things need you." [level=1]
   - paragraph:
     - img "2 things need you."
-    - text: port 5000 is reachable outside Tailscale
+    - text: The rest is fine. 4 machines on 1 Mac
   - group "Which machines":
     - button "All machines" [pressed]
     - button "macbook-pro"
@@ -16,9 +16,7 @@
     - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Can wait":
-    - heading "Can wait 2" [level=2]
-    - button "Needs a look 1 brew update waiting macbook-pro · Apps"
-    - button "Update brew": Update
+    - heading "Can wait 1" [level=2]
     - 'button "Needs a look Firewall: off macbook-pro · Settings"'
     - text: System Settings > Network > Firewall
     - button "Copy System Settings > Network > Firewall": Copy

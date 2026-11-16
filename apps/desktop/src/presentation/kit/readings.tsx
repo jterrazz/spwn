@@ -49,12 +49,14 @@ export function VerdictHead({
 
 export function SummaryHead({
     summary,
+    verdict,
     size,
 }: {
-    summary: Pick<OverviewSummary, 'Engine' | 'Read' | 'Verdict'>;
+    summary: Pick<OverviewSummary, 'Engine' | 'Read'>;
+    verdict: CoreVerdictVerdict;
     size: 'page' | 'tab';
 }) {
-    const { Engine, Read, Verdict: verdict } = summary;
+    const { Engine, Read } = summary;
     const read = Engine === 'stopped' ? clock(Read) : undefined;
     return (
         <Verdict
