@@ -25,7 +25,7 @@
     - button "Free 34.8 GB"
   - region "Can be freed":
     - heading "Can be freed" [level=2]
-    - text: station-linux@2026.10.20 Images · Unused image 3 GB
+    - text: station-linux@2026.10.20 Unused image 3 GB
   - region "Your data":
     - heading "Your data 5" [level=2]
     - text: xcode ~/Library/Developer/CoreSimulator/Devices 19.1 GB

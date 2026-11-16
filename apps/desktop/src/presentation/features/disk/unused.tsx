@@ -1,6 +1,6 @@
 import type { CallName, DiskCanFree, DiskKept, Target } from '@jterrazz/station-api';
 
-import { bytes, sentence } from '../../../domain/format';
+import { bytes } from '../../../domain/format';
 import { useGesture } from '../../dependencies/use-gesture';
 import { Icon } from '../../ui/icon';
 import { Panel, Row } from '../../ui/index';
@@ -61,10 +61,7 @@ export function UnusedPanel({ canFree }: { canFree: DiskCanFree }) {
                 <Row
                     key={`${one.Holder}/${one.Name}`}
                     lead={<Disc />}
-                    sentence={sentence([
-                        wordOfSent('DiskHolder', one.Holder),
-                        wordOfSent('DiskFreeableKind', one.Kind),
-                    ])}
+                    sentence={wordOfSent('DiskFreeableKind', one.Kind)}
                     title={one.Name}
                     value={bytes(one.Bytes)}
                 />
