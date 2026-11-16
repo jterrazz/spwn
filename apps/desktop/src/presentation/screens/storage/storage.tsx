@@ -16,6 +16,7 @@ import { useReach, useRead, useWatch } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
 import { Freed, useFreeAll } from '../../features/disk/disk-gestures';
 import { DiskPanel, groupOf, GroupPanel } from '../../features/disk/disk-view';
+import { UnusedFoot, UnusedPanel } from '../../features/disk/unused';
 import { HeldOutcomes } from '../../kit/gestures';
 import { useIdentityOf } from '../../kit/identity';
 import {
@@ -43,6 +44,7 @@ type DiskOfProps = { reading: DiskReading; mac: string; target: Target | undefin
 
 function DiskRead({ reading, mac, target }: DiskOfProps) {
     const freeAll = useFreeAll(target);
+    const station = reading.Station?.CanFree;
     const erasable = groupOf(reading, (row) => diskGestureOf(row.Group)?.call === 'disk.erase');
     return (
         <>
@@ -51,11 +53,13 @@ function DiskRead({ reading, mac, target }: DiskOfProps) {
                 freeAll={freeAll}
                 name={mac}
                 reading={reading}
+                station={station === undefined ? null : <UnusedFoot canFree={station} />}
                 sub={reading.Station?.Sentence}
                 title="Disk"
             />
             <HeldOutcomes>
                 <Freed gesture={freeAll} />
+                {station === undefined ? null : <UnusedPanel canFree={station} />}
                 {erasable === undefined ? null : <GroupPanel group={erasable} target={target} />}
             </HeldOutcomes>
         </>
@@ -127,7 +131,12 @@ function useCachesInside(found: Found): null | string {
         return null;
     }
     const { CanFree } = disk.out;
-    return CanFree === undefined ? null : `${bytes(CanFree.Bytes)} of caches inside`;
+    if (CanFree === undefined) {
+        return null;
+    }
+    return CanFree.Call === undefined
+        ? CanFree.Sentence
+        : `${bytes(CanFree.Bytes)} of caches inside`;
 }
 
 function sizeFrom(station: DiskStationPart | undefined, name: string): null | string {

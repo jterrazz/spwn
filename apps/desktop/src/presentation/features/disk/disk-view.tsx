@@ -18,13 +18,13 @@ import pageStyles from '../../ui/page.module.css';
 import styles from './disk.module.css';
 
 function Used({ reading }: { reading: DiskReading }) {
-    const { Free, Total } = reading;
+    const { Total, Used: used } = reading;
     if (Total <= 0) {
         return <span />;
     }
     return (
         <p className={styles.used}>
-            <span className={styles.figure}>{bytes(Total - Free)}</span>
+            <span className={styles.figure}>{bytes(used)}</span>
             {`of ${bytes(Total)} used`}
         </p>
     );
@@ -83,14 +83,14 @@ function Foot({ reading, freeAll, name }: FootProps) {
     return (
         <div className={styles.foot}>
             <p>{CanFree.Sentence}</p>
-            {CanFree.Bytes > 0 ? (
+            {CanFree.Call === undefined ? null : (
                 <FreeAllButton
                     gesture={freeAll}
                     label={`Free ${bytes(CanFree.Bytes)}`}
                     name={name}
                     variant="primary"
                 />
-            ) : null}
+            )}
         </div>
     );
 }
@@ -102,9 +102,10 @@ type DiskPanelProps = {
     freeAll: DiskGesture;
     by: 'holds' | 'kinds';
     sub?: ReactNode;
+    station?: ReactNode;
 };
 
-export function DiskPanel({ reading, name, title, freeAll, by, sub }: DiskPanelProps) {
+export function DiskPanel({ reading, name, title, freeAll, by, sub, station }: DiskPanelProps) {
     const parts = by === 'holds' ? holdPartsOf(reading.Station?.Holds) : kindPartsOf(reading.Kinds);
     const reread = useReread();
     return (
@@ -122,6 +123,7 @@ export function DiskPanel({ reading, name, title, freeAll, by, sub }: DiskPanelP
             {sub === undefined ? null : <p className={styles.sub}>{sub}</p>}
             <DiskBar label={`What holds the disk of ${name}`} parts={parts} total={reading.Total} />
             <Legend parts={parts} />
+            {station}
             <Foot freeAll={freeAll} name={name} reading={reading} />
         </Panel>
     );

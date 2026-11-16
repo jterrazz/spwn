@@ -55,7 +55,7 @@ function Read({ reading, name, target, vm, go }: ReadProps) {
                     freeAll={freeAll}
                     name={name}
                     reading={reading}
-                    sub={vm ? <Inside go={go} /> : reading.Station?.Sentence}
+                    sub={vm ? <Inside go={go} /> : reading.Station?.Itself}
                     title="Storage"
                 />
                 <HeldOutcomes>
