@@ -119,8 +119,8 @@ export function isPortShared(port: PortsPort, shares: readonly PortsSharedPort[]
     return shares.some((share) => share.guest_port === port.Port);
 }
 
-export type DiskCall = 'disk.erase' | 'disk.free' | 'disk.move';
-export type DiskGesture = { call: DiskCall; danger: boolean };
+export type DiskCall = 'disk.erase' | 'disk.free' | 'disk.free-unused' | 'disk.move';
+export type DiskGesture = { call: Exclude<DiskCall, 'disk.free-unused'>; danger: boolean };
 
 // outside: a disk.read row carries no gesture: what each group allows, and whether it destroys, is this table's
 // outside: until DiskRow names its gesture (apps/engine/disk/group.go).

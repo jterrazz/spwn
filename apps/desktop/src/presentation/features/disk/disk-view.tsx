@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { bytes, sentence } from '../../../domain/format';
 import { SEPARATOR } from '../../../domain/separator';
 import { useReread } from '../../dependencies/dependencies';
+import type { ButtonVariant } from '../../ui/button';
 import { AppIcon, Button, Panel, ShareBar, TypeTag } from '../../ui/index';
 import type { SharePart } from '../../ui/index';
 import { detailOf, wordOf } from '../../words/engine-words';
@@ -73,9 +74,14 @@ function Legend({ parts }: { parts: readonly Part[] }) {
     );
 }
 
-type FootProps = { reading: DiskReading; freeAll: DiskGesture; name: string };
+type FootProps = {
+    reading: DiskReading;
+    freeAll: DiskGesture;
+    name: string;
+    variant: ButtonVariant;
+};
 
-function Foot({ reading, freeAll, name }: FootProps) {
+function Foot({ reading, freeAll, name, variant }: FootProps) {
     const { CanFree } = reading;
     if (CanFree === undefined) {
         return null;
@@ -88,7 +94,7 @@ function Foot({ reading, freeAll, name }: FootProps) {
                     gesture={freeAll}
                     label={`Free ${bytes(CanFree.Bytes)}`}
                     name={name}
-                    variant="primary"
+                    variant={variant}
                 />
             )}
         </div>
@@ -103,9 +109,19 @@ type DiskPanelProps = {
     by: 'holds' | 'kinds';
     sub?: ReactNode;
     station?: ReactNode;
+    freeAllVariant?: ButtonVariant;
 };
 
-export function DiskPanel({ reading, name, title, freeAll, by, sub, station }: DiskPanelProps) {
+export function DiskPanel({
+    reading,
+    name,
+    title,
+    freeAll,
+    by,
+    sub,
+    station,
+    freeAllVariant = 'primary',
+}: DiskPanelProps) {
     const parts = by === 'holds' ? holdPartsOf(reading.Station?.Holds) : kindPartsOf(reading.Kinds);
     const reread = useReread();
     return (
@@ -124,7 +140,7 @@ export function DiskPanel({ reading, name, title, freeAll, by, sub, station }: D
             <DiskBar label={`What holds the disk of ${name}`} parts={parts} total={reading.Total} />
             <Legend parts={parts} />
             {station}
-            <Foot freeAll={freeAll} name={name} reading={reading} />
+            <Foot freeAll={freeAll} name={name} reading={reading} variant={freeAllVariant} />
         </Panel>
     );
 }

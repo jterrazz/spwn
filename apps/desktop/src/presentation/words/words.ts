@@ -96,12 +96,14 @@ export function newestOutWord(newest: string): string {
 export const DISK_GESTURE_VERBS: Words<DiskCall> = {
     'disk.erase': 'Erase',
     'disk.free': 'Free',
+    'disk.free-unused': 'Free',
     'disk.move': 'Move',
 };
 
 export const DISK_GESTURE_LABELS: Words<DiskCall> = {
     'disk.erase': 'Erase…',
     'disk.free': 'Free',
+    'disk.free-unused': 'Free',
     'disk.move': 'Move',
 };
 

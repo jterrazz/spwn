@@ -12,7 +12,9 @@ import { useClient, useGestureStore, useReread } from './dependencies';
 
 export type GestureSpec<N extends ReadName> = {
     input: In<N>;
-    subject: string;
+    // invariant: undefined when the engine names what it asks about: the call is sent unanswered first, and the
+    // invariant: question is the engine's confirm.needed, its subject the one typed and put in the consequence.
+    subject: string | undefined;
     typed?: string | undefined;
     rereads: readonly CallName[];
     target?: Target | undefined;
@@ -26,7 +28,7 @@ const GESTURE_WITHIN = 10 * 60_000;
 
 export type Gesture<O> = {
     key: string;
-    consequence: string | undefined;
+    consequence: (ask: Ask) => string | undefined;
     state: GestureState<O>;
     start: () => void;
     confirm: (typed: string) => void;
@@ -34,8 +36,8 @@ export type Gesture<O> = {
     dismiss: () => void;
 };
 
-function firstAsk(confirming: Confirming | undefined, name: string): Ask | undefined {
-    return confirming?.form === undefined
+function firstAsk(confirming: Confirming | undefined, name: string | undefined): Ask | undefined {
+    return confirming?.form === undefined || name === undefined
         ? undefined
         : { form: confirming.form, name, refusal: undefined };
 }
@@ -110,7 +112,7 @@ export function useGesture<N extends ReadName>(name: N, spec: GestureSpec<N>): G
         confirm: (typed) => {
             send({ answer: typed, kind: 'confirm' });
         },
-        consequence: consequenceOf(confirming, spec.subject),
+        consequence: (ask) => consequenceOf(confirming, spec.subject ?? ask.name),
         dismiss: () => {
             send({ kind: 'dismiss' });
         },

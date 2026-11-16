@@ -92,21 +92,22 @@ describe('Storage', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("what nothing uses is drawn as the engine lists it, each under its holder's word", async () => {
+    test("what nothing uses is drawn as the engine lists it, each under its holder's and its kind's word", async () => {
         // Given - Storage over two-macs, where one image version is used by nothing
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
             // When - its disk has been read
             const freed = region('Can be freed');
 
-            // Then - Station's sentence in the Disk panel, its one row, and the caches Free the one primary
+            // Then - Station's sentence in the Disk panel with its Free, its one row, and the caches Free beside it
             await visitor.see(
                 within(region('Disk'), content('3.0 GB can be freed: 1 unused image.')),
             );
             await visitor.see(within(freed, content('station-linux@2026.10.20')));
-            await visitor.see(within(freed, content('Images')));
+            await visitor.see(within(freed, content('Images · Unused image')));
             await visitor.see(within(freed, content('3 GB')));
             await visitor.see(enabled(button('Free 34.8 GB')));
-            await visitor.gone(button('Free 3 GB'));
+            await visitor.see(enabled(button('Free 3 GB')));
+            await visitor.gone(region('Kept'));
         });
         expect(result.errors.text).toBe('');
     });

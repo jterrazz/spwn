@@ -18,6 +18,7 @@ export const BRIDGED = [
     'background.remove',
     'disk.erase',
     'disk.free',
+    'disk.free-unused',
     'disk.move',
     'disk.read',
     'engine.events',
