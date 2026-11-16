@@ -74,8 +74,14 @@ class Door:
     def __init__(self, seed, fixture):
         self.home, env = sandbox(seed, fixture)
         # invariant: the world's engines take one turn before the door opens, as a Mac's engine has run before
-        # the window does: what an engine keeps beside its loop (a VM's drift) is kept when it is asked.
+        # the window does: what an engine keeps beside its loop (a VM's drift) is kept when it is asked. That turn
+        # is the engine's life before the story, so the story's clock is given back as the seed holds it: the
+        # turn's ticks move it, and the history the seed holds would read stale at the moment the window asks.
         subprocess.run([str(binary), "--version"], cwd=self.home, env=env, stdout=subprocess.DEVNULL, check=True)
+        world = self.home / "world.json"
+        kept = json.loads(world.read_text())
+        kept["now"] = json.loads(pathlib.Path(seed).read_text())["now"]
+        world.write_text(json.dumps(kept, indent=2) + "\n")
         self.process = subprocess.Popen(
             [str(binary), "guest", "serve", "--stdio"], cwd=self.home, env=env,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
