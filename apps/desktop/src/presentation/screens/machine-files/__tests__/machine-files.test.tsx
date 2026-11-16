@@ -99,7 +99,7 @@ describe('Machine files', () => {
 
             // Then - the engine's word for what it makes, its size, and the image it starts from
             const head = region('station-linux.machine.yaml');
-            await visitor.see(within(head, content('Workspace')));
+            await visitor.see(within(head, content('a workspace')));
             await visitor.see(within(head, content('4 CPU · 8G · 20G')));
             await visitor.see(within(head, content('ghcr.io/cirruslabs/ubuntu:24.04')));
         });

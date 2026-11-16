@@ -81,12 +81,12 @@ describe('model', () => {
 
         // Then - the role and the system, the size apart, a Mac having none
         expect([makesOf(workspace), systemOf(workspace), sizeOf(workspace)]).toStrictEqual([
-            'Workspace',
+            'a workspace',
             'Ubuntu 24.04 · arm64',
             '4 CPU · 4G · 20G',
         ]);
         expect([makesOf(mac), systemOf(mac), sizeOf(mac)]).toStrictEqual([
-            'Computer',
+            'a Mac',
             'macOS · arm64',
             '',
         ]);
