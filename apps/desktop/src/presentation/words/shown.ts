@@ -159,10 +159,6 @@ export function chapterNoun(chapter: MachinefileChapter, count: number): string 
     return (count === 1 ? One : Other) ?? chapter;
 }
 
-export function engineViewWord({ State }: MachinesEngineView): string | undefined {
-    return State === undefined ? undefined : wordOf('EngineReadState', State).Word;
-}
-
 export function engineViewStopped({ State }: MachinesEngineView): boolean {
     return State === 'stopped';
 }

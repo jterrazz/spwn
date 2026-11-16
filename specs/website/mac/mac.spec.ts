@@ -29,8 +29,8 @@ describe('mac', () => {
             '/?world=two-macs&machine=macbook-pro&tab=Overview',
             async (visitor) => {
                 // When - the page is read
-                // Then - its line says it sleeps normally
-                await visitor.see(content('This Mac · Engine running · Awake: sleeps normally'));
+                // Then - its line is the engine's sentence, which keeps nothing awake to say
+                await visitor.see(content('This Mac · Engine running.'));
             },
         );
         const awake = await website.visit(
@@ -38,7 +38,7 @@ describe('mac', () => {
             async (visitor) => {
                 // When - the page is read
                 // Then - its line says until when it stays awake
-                await visitor.see(content('Awake: until 18:00', { exact: false }));
+                await visitor.see(content('This Mac · Engine running. Awake until 18:00.'));
             },
         );
         expect(sleeps.errors.text).toBe('');
