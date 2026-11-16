@@ -136,18 +136,24 @@ func (m machine) engine(env kit.Env) *process.Engine {
 }
 
 // invariant: a workspace's reading of its file is machinefile.drift's
-// count over every chapter: only a refusal that no file is bound to it
-// reads unbound; any other is the failure, worded as the CLI words it.
+// count over every chapter: it reads unbound only when no Machinefile is
+// named after the VM and none is bound to it, the refusal naming the VM
+// itself, by no extends and no path; any other refusal, a missing extends
+// or a bound file gone, is the failure, worded as the CLI words it.
 func keptDrift(ctx context.Context, calls call.Router, vm string) model.KeptDrift {
 	out, err := call.Invoke(ctx, calls, coremachine.Ref{}, machinefilecalls.Drift, machinefilecalls.DriftIn{Machine: vm}, nil)
-	var refused *fail.Error
 	switch {
 	case err == nil:
 		return model.KeptDrift{Differences: out.Differences}
-	case errors.As(err, &refused) && refused.Code == machinefilecalls.NotFound:
+	case unbound(err, vm):
 		return model.KeptDrift{Unbound: true}
 	}
 	return model.KeptDrift{Failed: kit.Translate(err, "").Message}
+}
+
+func unbound(err error, vm string) bool {
+	var refused *fail.Error
+	return errors.As(err, &refused) && refused.Code == machinefilecalls.NotFound && refused.Subject == vm && refused.Detail["by"] == "" && refused.Detail["path"] == ""
 }
 
 // value: the calls whose end on a VM changes how it stands with its file.

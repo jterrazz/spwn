@@ -1,0 +1,20 @@
+description: 'a running VM whose file extends one no source holds heads its row warn, its line naming both'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-dev.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-dev
+          machine: { kind: workspace }
+          extends: [no-such-file]
+      exit: 0
+    - command: 'world advance 11m'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "linux-1") | [.Head, .Pending]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{"ThisMac":true}}
+      exit: 0
+      stdout: |
+          [{"Tone":"warn","Sentence":"Running, but its file did not read.","Line":"linux-dev extends no-such-file, which no source holds"},null]
