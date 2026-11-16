@@ -125,6 +125,10 @@
     "machinefile.Follower": {
       "additionalProperties": false,
       "properties": {
+        "Applied": {
+          "format": "date-time",
+          "type": "string"
+        },
         "Differences": {
           "type": "integer"
         },

@@ -3,6 +3,7 @@ package machinefile
 import (
 	"slices"
 	"strconv"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
@@ -108,7 +109,8 @@ func (FollowerState) Enum() []string {
 
 // value: a machine that follows a Machinefile: a Mac bound to it, a VM
 // made from it, by its name and the Mac it runs on; how it stands with the
-// file and, when it differs, how many lines.
+// file and, when it differs, how many lines; and when it last applied the
+// file, absent when it never did.
 
 type Follower struct {
 	Machine     string
@@ -116,6 +118,7 @@ type Follower struct {
 	ThisMac     bool
 	State       FollowerState
 	Differences int
+	Applied     *time.Time `json:",omitempty"`
 }
 
 func Following(machine, mac string, thisMac bool) Follower {
@@ -126,6 +129,7 @@ func (f Follower) Judged(d Drift) Follower {
 	// invariant: a follower matches its file exactly when its drift counts
 	// no difference: the one count machinefile.drift answers.
 	f.Differences = d.Differences
+	f.Applied = d.Applied
 	f.State = FollowerMatches
 	if d.Differences > 0 {
 		f.State = FollowerDiffers

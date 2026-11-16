@@ -1,0 +1,30 @@
+description: 'a follower says when it applied its file once it did, and carries no key before the first apply'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {name: "macbook-pro", bound_at: "2026-10-29T10:30:00Z"}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''[.out.Files[] | .Followers[] | {Machine, applied: has("Applied")}]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          [{"Machine":"macbook-pro","applied":false}]
+    - command: 'apply --machinefile macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ●	gh	2.98.0	brew
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''[.out.Files[] | .Followers[] | {Machine, applied: (.Applied | type)}]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          [{"Machine":"macbook-pro","applied":"string"}]
