@@ -45,11 +45,11 @@ describe('unused', () => {
                 // When - its disk has been read
                 await visitor.see(within(disk, sentence));
 
-                // Then - Station's Free and the caches' Free, and each row worded by its holder and its kind
+                // Then - Station's Free and the caches' Free, and each row worded by its kind alone
                 await visitor.see(within(disk, freeStation));
                 await visitor.see(within(disk, freeCaches));
-                await visitor.see(within(freed, content('Images · Unused image')));
-                await visitor.see(within(freed, content('Leftovers · Leftover disk')));
+                await visitor.see(within(freed, content('Unused image')));
+                await visitor.see(within(freed, content('Leftover disk')));
             },
         );
         expect(result.html.text).toMatch(/class="[^"]*primary[^"]*"[^>]*>Free 12 GB</u);
@@ -144,7 +144,7 @@ describe('unused', () => {
         const result = await component.render(
             storageOver(recordingFor('old-home-running')),
             async (visitor) => {
-                await visitor.see(within(freed, content('Leftovers · Old folder')));
+                await visitor.see(within(freed, content('Old folder')));
 
                 // When - Free 7 GB is confirmed with the engine's subject typed
                 await visitor.click(within(disk, button('Free 7 GB')));

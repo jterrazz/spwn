@@ -103,7 +103,7 @@ describe('Storage', () => {
                 within(region('Disk'), content('3.0 GB can be freed: 1 unused image.')),
             );
             await visitor.see(within(freed, content('station-linux@2026.10.20')));
-            await visitor.see(within(freed, content('Images · Unused image')));
+            await visitor.see(within(freed, content('Unused image')));
             await visitor.see(within(freed, content('3 GB')));
             await visitor.see(enabled(button('Free 34.8 GB')));
             await visitor.see(enabled(button('Free 3 GB')));
