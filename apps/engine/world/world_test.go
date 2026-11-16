@@ -152,3 +152,12 @@ func TestAnotherHypervisorStandsInWhereStationsOwnWas(t *testing.T) {
 		t.Errorf("the Mac with no hypervisor has %q, want none still", got)
 	}
 }
+
+func TestTwoMacsHoldingOneVMNameAnswerTheFirstByName(t *testing.T) {
+	for range 64 {
+		w := seeded(t, `{"this_mac": "mbp", "macs": {"mbp": {"vms": {"linux-1": {"disk": true}}}, "aa-mini": {"vms": {"linux-1": {"disk": true}}}, "zz-mini": {"vms": {"linux-1": {"disk": true}}}}}`)
+		if got := w.Holder("linux-1"); got != "aa-mini" {
+			t.Fatalf("Holder(linux-1) = %q, want aa-mini", got)
+		}
+	}
+}

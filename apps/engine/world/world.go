@@ -2,6 +2,8 @@ package world
 
 import (
 	"encoding/json"
+	"maps"
+	"slices"
 	"sync"
 	"time"
 
@@ -614,9 +616,11 @@ func (w *World) Pause() {
 func (w *World) OnPause(f func()) { w.paused = f }
 
 func (w *World) Holder(vm string) string {
-	// value: the Mac that holds vm, empty when none does.
-	for name, m := range w.Macs {
-		if _, ok := m.VMs[vm]; ok {
+	// value: the Mac that holds vm, empty when none does; of two Macs that
+	// each hold a VM of that name, the first by name, so a run never
+	// depends on the map's order.
+	for _, name := range slices.Sorted(maps.Keys(w.Macs)) {
+		if _, ok := w.Macs[name].VMs[vm]; ok {
 			return name
 		}
 	}
