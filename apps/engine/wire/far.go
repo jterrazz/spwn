@@ -27,5 +27,5 @@ func (m machine) farMac(env kit.Env, w *worldMac) farMac {
 	fenv := kit.Env{Out: env.Out, On: &kit.On{ThisMachine: there.thisMac()}, Self: there.profile.Ref}
 	r := there.router(fenv)
 	fenv.Calls = r
-	return farMac{registry: there.registry(fenv), profile: there.profile, start: func() *process.Engine { return there.engine(fenv) }, relay: served{r}, fresh: func() { there.pool.Forget("") }}
+	return farMac{registry: there.registry(fenv), profile: there.profile, start: func() *process.Engine { return there.engine(fenv) }, relay: served{r: r}, fresh: func() { there.pool.Forget("") }}
 }

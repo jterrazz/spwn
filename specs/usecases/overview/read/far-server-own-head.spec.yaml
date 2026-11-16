@@ -1,0 +1,11 @@
+description: 'the window reads a server on another Mac from the server itself: its own head'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Head.Name, .Head.Kind, [.Lines[].Section]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"overview.read","target":{"name":"infra"},"in":{}}
+      exit: 0
+      stdout: |
+          ["infra","server",["activity","ports","ssh"]]

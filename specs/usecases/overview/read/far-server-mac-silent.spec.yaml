@@ -1,0 +1,17 @@
+description: 'the window''s read of a silent Mac, or of its server, is refused, never This Mac''s'
+env:
+    - mini-offline
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out.Summary.Head.Name else .error | [.code, .subject, .message] end'''
+      stdin: |
+          {"v":2,"id":"1","call":"overview.read","target":{"name":"mac-mini"},"in":{}}
+      exit: 0
+      stdout: |
+          ["remote.unreachable","mac-mini","mac-mini does not answer"]
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out.Summary.Head.Name else .error | [.code, .subject, .message] end'''
+      stdin: |
+          {"v":2,"id":"1","call":"overview.read","target":{"name":"infra"},"in":{}}
+      exit: 0
+      stdout: |
+          ["remote.vm-mac-unreachable","infra","infra is on mac-mini, which does not answer"]

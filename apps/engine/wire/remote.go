@@ -325,28 +325,62 @@ func orNone(err error) error {
 }
 
 // invariant: a server runs each frame through this run's Router: a call
-// for this machine here, one for its VM over its engine's connection.
-type served struct{ r *remote.Router }
+// for this machine here, one for its VM over its engine's connection. A
+// door onto the engine socket also sends a frame for another Mac, or for
+// a VM of another Mac, through that Router, as the socket's Far does.
+type served struct {
+	r *remote.Router
+	// value: the frames that name another Mac or its VM, which ride the
+	// Router; nil runs every frame by the Router's own serving rule.
+	far func(coremachine.Ref) bool
+}
 
 func (s served) Hello() contract.Hello { return s.r.Served() }
 
 func (s served) Invoke(ctx context.Context, target coremachine.Ref, name string, in json.RawMessage, p call.Progress) (any, error) {
+	if s.far != nil && s.far(target) {
+		var out json.RawMessage
+		if err := s.r.Invoke(ctx, target, name, in, &out, p); err != nil {
+			return nil, err
+		}
+		return out, nil
+	}
 	return s.r.Serve(ctx, target, name, in, p)
 }
 
 func (s served) Watch(ctx context.Context, target coremachine.Ref, name string, in json.RawMessage, p call.Progress) (<-chan call.Update[any], error) {
+	if s.far != nil && s.far(target) {
+		return s.r.Watch(ctx, target, name, in, p)
+	}
 	return s.r.ServeWatch(ctx, target, name, in, p)
 }
 
-func serveFrames(env kit.Env) func(ctx context.Context, in io.Reader, out io.Writer) error {
+func serveFrames(env kit.Env, far func(coremachine.Ref) bool) func(ctx context.Context, in io.Reader, out io.Writer) error {
 	return func(ctx context.Context, in io.Reader, out io.Writer) error {
 		r, _ := env.Calls.(*remote.Router)
-		return serve.Stream(ctx, in, out, served{r}, func(err error) *fail.Error { return kit.Translate(err, "") })
+		return serve.Stream(ctx, in, out, served{r: r, far: far}, func(err error) *fail.Error { return kit.Translate(err, "") })
+	}
+}
+
+// invariant: a world run on a Mac is the window's door onto its engine
+// socket, so a frame there for another Mac, or for a VM of another Mac, is
+// answered by that machine as the socket answers it; any other run's
+// stdio door answers for its own machine and its VMs alone.
+func (m machine) socketDoor() func(coremachine.Ref) bool {
+	if m.world == nil || m.kind != catalog.Mac {
+		return nil
+	}
+	return func(t coremachine.Ref) bool {
+		if t.Name == "" || t.Name == m.profile.Ref.Name {
+			return false
+		}
+		ref, _ := m.locate(t.Name)
+		return ref.On != m.profile.Ref.Name
 	}
 }
 
 func engineCommand(env kit.Env, m machine) *cobra.Command {
-	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env)}, env))
+	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, nil)}, env))
 }
 
 // value: a run that serves frames on its stdout: nothing else of it may write there.
