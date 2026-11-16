@@ -22,7 +22,7 @@ func TestTheVerdictSaysTheEngineFirstThenWhatNeedsYou(t *testing.T) {
 	exposed := finding.Finding{Machine: machine.Ref{Name: "macbook"}, Section: section.Ports, Severity: finding.Broken, Subject: "5432", Text: "port 5432 is reachable"}
 	expired := finding.Finding{Machine: machine.Ref{Name: "macbook"}, Section: section.Accounts, Severity: finding.Broken, Subject: "github", Text: "github expired"}
 	vms := []overview.VM{{Name: "infra", Running: true}}
-	const rest = "1 machine on 1 Mac"
+	const rest = "1 machine on macbook"
 	for name, c := range map[string]struct {
 		engine overview.Engine
 		own    []finding.Finding
