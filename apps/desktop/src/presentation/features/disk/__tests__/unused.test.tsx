@@ -1,118 +1,39 @@
-import type { Request } from '@jterrazz/station-api';
-import {
-    button,
-    component,
-    content,
-    dialog,
-    disabled,
-    enabled,
-    field,
-    heading,
-    region,
-    within,
-} from '@jterrazz/test';
+import { button, component, content, dialog, field, heading, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { pageOver } from '../../../../composition/__tests__/page-over';
-import { isRecord } from '../../../../domain/request-key';
-import { documentPresence } from '../../../../infrastructure/outbound/document-presence/document-presence';
-import { Client } from '../../../../infrastructure/outbound/engine-link/client';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
-import { stagedReplay } from '../../../../infrastructure/outbound/engine-replay/replay';
-import type { Recording, Stage } from '../../../../infrastructure/outbound/engine-replay/replay';
-import { NO_OPENER } from '../../../../infrastructure/outbound/opener-tauri/tauri-opener';
-import { EngineProvider } from '../../../dependencies/dependencies';
-import { Window } from '../../../navigation/window';
-import { PAGES } from '../../../screens/registry';
+import {
+    answeredBy,
+    disk,
+    done,
+    eachAsking,
+    everyOutcomeBroken,
+    freeCaches,
+    freed,
+    freeHeld,
+    freeIt,
+    freesAsked,
+    freeStation,
+    HELLO_AGAIN,
+    kept,
+    NAMES,
+    narrowedTo,
+    readsAsked,
+    sentTo,
+    staged,
+    storageOn,
+    storageOver,
+    SUBJECT,
+    withStation,
+} from './unused-stage';
 
 const recordingFor = await recordingsOf(
     'leftovers',
     'leftover-running',
     'old-home-running',
     'record-unreadable',
+    'two-macs',
 );
-
-const SUBJECT = 'station-linux@2026.10.20, old-vm';
-
-const NAMES = ['station-linux@2026.10.20', 'old-vm'];
-
-function staged(recording: Recording): Stage {
-    return stagedReplay(recording, {
-        hello: { pid: 41, started_at: '2026-11-16T09:00:00Z', version: 'dev' },
-        kind: 'open',
-        refused: undefined,
-        socket: 'replay',
-    });
-}
-
-function storageOn(stage: Stage) {
-    const dependencies = {
-        engine: new Client(stage.transport),
-        opener: NO_OPENER,
-        presence: documentPresence(),
-    };
-    return (
-        <EngineProvider dependencies={dependencies}>
-            <Window initial={{ page: 'storage' }} pages={PAGES} />
-        </EngineProvider>
-    );
-}
-
-function storageOver(recording: Recording) {
-    return pageOver(recording, { page: 'storage' });
-}
-
-function freesAsked(stage: Stage): readonly unknown[] {
-    return stage
-        .asked()
-        .flatMap((request: Request) =>
-            'call' in request && request.call === 'disk.free-unused' ? [request.in] : [],
-        );
-}
-
-function readsAsked(stage: Stage, read: string): number {
-    return stage
-        .asked()
-        .filter(
-            (request) =>
-                ('call' in request && request.call === read) ||
-                ('watch' in request && request.watch === read),
-        ).length;
-}
-
-function answeredBy(recording: Recording, other: Recording): Recording {
-    return { ...recording, gestures: other.gestures ?? [] };
-}
-
-function withStation(recording: Recording, change: (station: Record<string, unknown>) => unknown) {
-    return {
-        ...recording,
-        exchanges: recording.exchanges.map((exchange) =>
-            exchange.request.watch === 'disk.read'
-                ? {
-                      ...exchange,
-                      answers: exchange.answers.map((answer: unknown) =>
-                          isRecord(answer) && isRecord(answer.out) && isRecord(answer.out.Station)
-                              ? {
-                                    ...answer,
-                                    out: { ...answer.out, Station: change(answer.out.Station) },
-                                }
-                              : answer,
-                      ),
-                  }
-                : exchange,
-        ),
-    };
-}
-
-const disk = region('Disk');
-const freed = region('Can be freed');
-const kept = region('Kept');
-const done = region('Done here');
-const freeIt = enabled(button('Free'));
-const freeHeld = disabled(button('Free'));
-const freeStation = enabled(button('Free 12 GB'));
-const freeCaches = enabled(button('Free 34.8 GB'));
 
 describe('unused', () => {
     test('its Free is offered by the Call as the primary, the caches Free drawn plain beside it', async () => {
@@ -157,8 +78,8 @@ describe('unused', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("its gesture sends exactly the engine's names, asks the engine's subject typed, and reads again", async () => {
-        // Given - Storage over leftovers, its requests kept
+    test("its gesture sends exactly the engine's names, none of Kept, asks the engine's subject typed, and reads again", async () => {
+        // Given - Storage over leftovers, ~/.tart kept beside the two rows to free, its requests kept
         const stage = staged(recordingFor('leftovers'));
         const consequence = content(
             `Deleted for good: ${SUBJECT}. No machine and no file of yours is touched.`,
@@ -166,6 +87,7 @@ describe('unused', () => {
         let before = { disks: 0, images: 0 };
         const result = await component.render(storageOn(stage), async (visitor) => {
             await visitor.see(within(freed, content('old-vm')));
+            await visitor.see(within(kept, content('~/.tart')));
             before = {
                 disks: readsAsked(stage, 'disk.read'),
                 images: readsAsked(stage, 'images.list'),
@@ -295,6 +217,78 @@ describe('unused', () => {
             await visitor.gone(freed);
         });
         expect(result.html.text).toMatch(/class="[^"]*primary[^"]*"[^>]*>Free 34.8 GB</u);
+        expect(result.errors.text).toBe('');
+    });
+
+    test('every outcome broken is held as failed with its reason, and no done sits beside the button', async () => {
+        // Given - Storage over old-home-running, every outcome of its free broken and the rows still listed
+        const subject = 'station-linux@2026.10.20, ~/.tart';
+        const page = storageOver(everyOutcomeBroken(recordingFor('old-home-running')));
+        const result = await component.render(page, async (visitor) => {
+            // When - Free 7 GB is confirmed with the engine's subject typed
+            await visitor.click(within(disk, button('Free 7 GB')));
+            const asked = dialog('Free 7 GB on macbook-pro?');
+            await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
+            await visitor.click(within(asked, freeIt));
+
+            // Then - each reason is held, the rows stay listed, and the Disk panel says nothing is done
+            await visitor.see(within(done, content('the image is in use')));
+            await visitor.see(within(done, content('tart is running')));
+            await visitor.see(within(freed, content('~/.tart')));
+            await visitor.gone(within(disk, content('done')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('the other Mac, chosen once a question is cancelled, is sent its own names and never the first', async () => {
+        // Given - Storage over two-macs, the mini holding an image of its own to free
+        const own = 'station-linux@2026.10.20';
+        const other = 'mini-image@2026.10.01';
+        const stage = staged(eachAsking(recordingFor('two-macs'), own, other));
+        const result = await component.render(storageOn(stage), async (visitor) => {
+            await visitor.click(within(disk, button('Free 3 GB')));
+            const asked = dialog('Free 3 GB on macbook-pro?');
+            await visitor.see(within(asked, field(`Type ${own} to confirm`)));
+
+            // When - the question is cancelled (its modal covers the picker), the mini chosen, its Free pressed
+            await visitor.click(within(asked, button('Cancel')));
+            await visitor.click(button('mac-mini'));
+            await visitor.click(within(disk, button('Free 2 GB')));
+            const miniAsked = dialog('Free 2 GB on mac-mini?');
+            await visitor.see(within(miniAsked, field(`Type ${other} to confirm`)));
+        });
+
+        // Then - each Mac was sent its own names alone
+        expect(sentTo(stage)).toStrictEqual([
+            { names: [own], target: undefined },
+            { names: [other], target: { name: 'mac-mini' } },
+        ]);
+        expect(result.errors.text).toBe('');
+    });
+
+    test('names that change under the open question are asked again with the new subject, nothing done', async () => {
+        // Given - Storage over leftovers, the question open for both names, the next read listing the image only
+        const first = 'station-linux@2026.10.20';
+        const stage = staged(recordingFor('leftovers'));
+        const result = await component.render(storageOn(stage), async (visitor) => {
+            await visitor.click(within(disk, freeStation));
+            const asked = dialog('Free 12 GB on macbook-pro?');
+            await visitor.fill(within(asked, field(`Type ${SUBJECT} to confirm`)), SUBJECT);
+
+            // When - the names change, and the old subject is confirmed
+            stage.restart(HELLO_AGAIN, narrowedTo(recordingFor('leftovers'), first, SUBJECT));
+            await visitor.see(within(disk, button('Free 3 GB')));
+            await visitor.click(within(asked, freeIt));
+
+            // Then - the engine says mismatch, the question asks again for the new subject, nothing is done
+            await visitor.see(within(asked, field(`Type ${first} to confirm`)));
+            await visitor.see(within(asked, freeHeld));
+            await visitor.gone(done);
+        });
+        expect(freesAsked(stage)).toStrictEqual([
+            { Names: NAMES },
+            { Confirm: SUBJECT, Names: [first] },
+        ]);
         expect(result.errors.text).toBe('');
     });
 });
