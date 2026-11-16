@@ -84,7 +84,7 @@ func runLine(vm VM, now time.Time) string {
 		parts = append(parts, purpose)
 	}
 	if !vm.BootAt.IsZero() && now.After(vm.BootAt) {
-		parts = append(parts, "Up "+silence(now.Sub(vm.BootAt)))
+		parts = append(parts, "Up "+Silence(now.Sub(vm.BootAt)))
 	}
 	if len(parts) == 0 {
 		return ""

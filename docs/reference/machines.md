@@ -41,7 +41,7 @@ A Mac that falls silent is shown as it last answered: for 30 s since its last an
 
 `station machines <machine>` is that machine's Overview, the one `station overview --on <machine>` prints.
 
-A Mac's Overview opens on its own head, `Summary.Head.Verdict`, apart from what needs you (`Summary.Verdict`): `Online, with N machines running.`, its line the Mac's sentence (`Engine running. Awake until 18:00.`, the one `machines.list` carries as `Sentence`), or, its engine stopped, `The engine is stopped.`. A Mac that does not answer is told by its `Unseen` verdict in `machines.list`, never down. A VM's Overview carries none.
+A Mac's Overview opens on its own head, `Summary.Head.Verdict`, apart from what needs you (`Summary.Verdict`): `Online, with N machines running.`, its line how long the Mac is up (`Up 3 days.`), none where that is not known, or, its engine stopped, `The engine is stopped.`. A Mac that does not answer is told by its `Unseen` verdict in `machines.list`, never down. A VM's Overview carries none.
 
 `machines.list` tells each Mac in one sentence, its `Sentence`, the line under its name in the window's header. A Mac that answers says its engine, `Engine running.`, `Engine stopped.` or `Engine not installed.`, then, while its engine runs, how it sleeps, its `Awake`: `Awake until 18:00.` (`Awake until linux-1 is done.` for a run it follows), with `, lid closed` when the keep-awake holds it lid closed, `Never sleeps.`, `Awake stopped, lid closed on battery.` for 10 min after a guard ended a keep-awake, else `Sleeps normally.`. A Mac that does not answer says since when: `Not seen for 12 min. Asleep or off the network.`, `Asleep, not seen for 2 h.` when it was last on battery with its lid closed, or `Never seen. Asleep or off the network.`.
 

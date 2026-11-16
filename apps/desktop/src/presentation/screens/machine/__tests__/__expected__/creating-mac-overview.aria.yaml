@@ -10,9 +10,6 @@
     - tab "Sign-ins"
     - tab "Storage"
   - heading "Online, with no machine running." [level=1]
-  - paragraph:
-    - img "Online, with no machine running."
-    - text: Engine running. Sleeps normally.
   - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 2machines 2 stopped
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]

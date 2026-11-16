@@ -34,9 +34,6 @@
     - tab "Storage"
   - tabpanel "Overview":
     - heading "Online, with no machine running." [level=1]
-    - paragraph:
-      - img "Online, with no machine running."
-      - text: Engine running. Sleeps normally.
     - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 0machines
     - region "Memory":
       - heading "Memory" [level=2]
