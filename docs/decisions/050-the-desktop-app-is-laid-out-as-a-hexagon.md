@@ -7,6 +7,8 @@
 
 The TypeScript member that draws the desktop window was named `apps/window`, after the one thing it shows, while its siblings are named for their surface: `apps/menubar` and `apps/engine`. Its `src/` grew by the kind of file (`engine`, `design`, `shell`, `pages`, `model`), a layout the dependency rules read only from the member's own folder.
 
+On 2026-11-16, `@jterrazz/typescript` 12.3.0 closed that: the root's `typescript check` judges the member's layers too, and its derived hexagonal map spares `__tests__/` and has a `presentation/kit/`.
+
 ## Decision
 
 The owner decided on 2026-11-15 ("parfait ton idée", after seeing the tree).

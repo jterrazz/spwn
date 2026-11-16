@@ -49,7 +49,7 @@ A test waits on a region (`within(region('…'), content('…'))`, a heading, a 
 
 ## The root's findings
 
-The root's count is not the window's to clear: a finding outside `apps/desktop` belongs to the root's gate, `make check`. It is 0 on a fresh copy, as it is on the main it was cut from, every copy resolving `@jterrazz/typescript` 12.2.0 (measured 2026-11-13 in the VM `design`). The window's layers are not in that count: the root's check does not read them yet ([the dependency rule](../README.md#the-dependency-rule)).
+The root's count is not the window's to clear: a finding outside `apps/desktop` belongs to the root's gate, `make check`. It is 0 on a fresh copy, as it is on the main it was cut from, every copy resolving `@jterrazz/typescript` 12.3.0 (measured 2026-11-16 in the VM `design`). The window's own findings, its layers among them ([the dependency rule](../README.md#the-dependency-rule)), are counted apart: the root's check reads them too, and `check.sh` prints them as `window findings`.
 
 ## How long the Tauri window takes to open
 

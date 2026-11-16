@@ -24,26 +24,21 @@ The desktop window of station: a Tauri 2 shell around a React page set, and a cl
 
 Each row is a layer of `typescript.architecture` in this folder's `studio.config.ts`, so `typescript check` run from `apps/desktop` fails an import that crosses it as `architecture/<name>`. A spec under `__tests__/` stands outside the map.
 
-| From                                                        | Never imports                                                                                          | Layer                              |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------- |
-| `src/presentation/ui/`                                      | anything of the app but `src/domain/tone.ts` and `src/domain/separator.ts`                             | `ui-knows-no-app`                  |
-| `src/domain/`                                               | anything else of `src/`                                                                                | `domain-imports-no-layer`          |
-| `src/application/`                                          | anything of `src/` but `src/domain/` and `src/application/`                                            | `use-cases-see-domain-and-ports`   |
-| `src/infrastructure/`                                       | `src/presentation/`                                                                                    | `adapters-draw-nothing`            |
-| any module but `src/composition/` and `src/infrastructure/` | `src/infrastructure/`                                                                                  | `only-composition-builds-adapters` |
-| any module but `src/main.tsx` and `src/composition/`        | `src/composition/`                                                                                     | `only-main-composes`               |
-| `src/presentation/words/`                                   | `ui/`, `navigation/`, `kit/`, `features/` and `screens/` of `src/presentation/`                        | `words-draw-nothing`               |
-| `src/presentation/dependencies/`                            | `ui/`, `navigation/`, `kit/`, `features/` and `screens/` of `src/presentation/`                        | `dependencies-draw-nothing`        |
-| `src/presentation/navigation/`                              | `src/presentation/screens/`: `main.tsx` hands it `PAGES`                                               | `navigation-knows-no-screen`       |
-| `src/presentation/kit/`                                     | `features/`, `screens/` and `navigation/` of `src/presentation/`                                       | `kit-knows-no-feature`             |
-| `src/presentation/features/<x>/`                            | another `features/<y>/`, and any `screens/`                                                            | `feature-is-independent`           |
-| `src/presentation/screens/<x>/`                             | another `screens/<y>/` (the machine's tabs are one screen); only `screens/registry.tsx` names them all | `screen-is-independent`            |
+| From                             | Never imports                                                                                          | Layer                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------- |
+| `src/presentation/ui/`           | anything of the app but `src/domain/tone.ts` and `src/domain/separator.ts`                             | `ui-knows-no-app`            |
+| `src/infrastructure/`            | `src/presentation/`                                                                                    | `adapters-draw-nothing`      |
+| `src/presentation/words/`        | `ui/`, `navigation/`, `kit/`, `features/` and `screens/` of `src/presentation/`                        | `words-draw-nothing`         |
+| `src/presentation/dependencies/` | `ui/`, `navigation/`, `kit/`, `features/` and `screens/` of `src/presentation/`                        | `dependencies-draw-nothing`  |
+| `src/presentation/navigation/`   | `src/presentation/screens/`: `main.tsx` hands it `PAGES`                                               | `navigation-knows-no-screen` |
+| `src/presentation/features/<x>/` | another `features/<y>/`, and any `screens/`                                                            | `feature-is-independent`     |
+| `src/presentation/screens/<x>/`  | another `screens/<y>/` (the machine's tabs are one screen); only `screens/registry.tsx` names them all | `screen-is-independent`      |
 
-The quality package's own hexagonal map is off (`hexagonal: false`): derived from this tree, it would refuse the specs, which cross the layers by design; the rows above hold the hexagon instead, each sparing `__tests__/`.
+The rest of the hexagon is the toolchain's own map, derived from this tree and sparing `__tests__/` at every boundary: `hexagonal-domain-is-pure`, `hexagonal-use-case-reaches-ports`, `hexagonal-composition-wires-infrastructure` (only `src/composition/` imports `src/infrastructure/`), `hexagonal-composition-is-the-root` (only `src/main.tsx` imports `src/composition/`), `hexagonal-kit-knows-no-feature` (`src/presentation/kit/` is what features and screens share) and `hexagonal-feature-is-independent` (a feature never imports another feature). The rows above are what that map does not say, and `feature-is-independent` adds the one crossing it leaves open, a feature importing a screen.
 
 `main.tsx` asks `compose` for the window's dependencies (the engine, the opener, the presence) and hands them to `EngineProvider` (`src/presentation/dependencies/dependencies.tsx`); a component reaches them through its hooks, and whether an engine answers by `useReach()`, never by a prop.
 
-The root's `typescript check`, the one `make check` runs, does not read a member's layers yet: on 2026-11-13 a probe import crossing `model-is-pure` and `shell-knows-no-page` was refused from `apps/desktop` and passed from the root. The rule holds in the gate once `@jterrazz/typescript` reads each member's `typescript.architecture` from the member's folder, and an import from `src/presentation/words/` into `src/presentation/ui/` failing the root's check as `architecture/words-draw-nothing` proves it.
+The root's `typescript check`, the one `make check` runs, judges both maps: since `@jterrazz/typescript` 12.3.0 each unit, the root and every member, is read once from its own folder, so an import crossing a layer fails the root gate as `architecture(<rule>)`. A probe of 2026-11-16, a file of `src/domain/` importing `src/presentation/kit/`, was refused from the root.
 
 ## The law
 
