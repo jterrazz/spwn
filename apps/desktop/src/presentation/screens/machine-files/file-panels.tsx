@@ -1,5 +1,7 @@
 import type { MachinefileFileView } from '@jterrazz/station-api';
 
+import { sentence } from '../../../domain/format';
+import { dayAndClock } from '../../../domain/when';
 import { machineRoute } from '../../navigation/route';
 import type { Route } from '../../navigation/route';
 import { Icon } from '../../ui/icon';
@@ -116,11 +118,12 @@ export function Followers({ view, go }: { view: MachinefileFileView; go: (to: Ro
                             onOpen={() => {
                                 go(machineRoute(follower.Machine, 'Packages'));
                             }}
-                            sentence={
+                            sentence={sentence([
                                 follower.Machine === follower.Mac
                                     ? THE_MAC_ITSELF_WORD
-                                    : `on ${follower.Mac}`
-                            }
+                                    : `on ${follower.Mac}`,
+                                appliedOf(follower.Applied),
+                            ])}
                             size="slim"
                             state={{ ...followerState(follower), calm: 'pill' }}
                             title={follower.Machine}
@@ -130,6 +133,11 @@ export function Followers({ view, go }: { view: MachinefileFileView; go: (to: Ro
             )}
         </Panel>
     );
+}
+
+function appliedOf(at: string | undefined): string | undefined {
+    const when = dayAndClock(at);
+    return when === undefined ? undefined : `applied ${when}`;
 }
 
 export function Users({
