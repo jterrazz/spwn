@@ -125,18 +125,17 @@ function Images({ images, mac }: ImagesProps) {
     );
 }
 
-function useCachesInside(found: Found): null | string {
+type Caches = { pill: null | string; said: string | undefined };
+
+function useCachesInside(found: Found): Caches {
     const disk = useWatch('disk.read', {}, targetOf(found));
-    if (disk.kind !== 'read') {
-        return null;
+    const canFree = disk.kind === 'read' ? disk.out.CanFree : undefined;
+    if (canFree === undefined) {
+        return { pill: null, said: undefined };
     }
-    const { CanFree } = disk.out;
-    if (CanFree === undefined) {
-        return null;
-    }
-    return CanFree.Call === undefined
-        ? CanFree.Sentence
-        : `${bytes(CanFree.Bytes)} of caches inside`;
+    return canFree.Call === undefined
+        ? { pill: null, said: canFree.Sentence }
+        : { pill: `${bytes(canFree.Bytes)} of caches inside`, said: undefined };
 }
 
 function sizeFrom(station: DiskStationPart | undefined, name: string): null | string {
@@ -150,12 +149,12 @@ function MacLine({ mac, station, go }: LineProps) {
     const caches = useCachesInside({ mac });
     return (
         <Row
-            kind={caches}
+            kind={caches.pill}
             lead={<MachineIcon kind="mac" />}
             onOpen={() => {
                 go(machineRoute(mac.Name, 'Storage'));
             }}
-            sentence="the Mac itself"
+            sentence={sentence(['the Mac itself', caches.said])}
             title={mac.Name}
             value={sizeFrom(station, mac.Name)}
         />
@@ -167,12 +166,12 @@ function VmLine({ mac, vm, station, go }: LineProps & { vm: MachinesVM }) {
     const caches = useCachesInside({ mac, vm });
     return (
         <Row
-            kind={caches}
+            kind={caches.pill}
             lead={<MachineIcon identity={identityOf(vm.Name)} kind={machineKindOf(vm)} />}
             onOpen={() => {
                 go(machineRoute(vm.Name, 'Storage'));
             }}
-            sentence={vm.Purpose}
+            sentence={sentence([vm.Purpose, caches.said])}
             title={vm.Name}
             value={sizeFrom(station, vm.Name)}
         />

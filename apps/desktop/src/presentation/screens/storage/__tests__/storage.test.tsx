@@ -77,7 +77,7 @@ describe('Storage', () => {
                 // When - the disks have been read
                 await visitor.see(within(region('Machines'), content('linux-1')));
 
-                // Then - no Free of the caches, and each machine's pill is the engine's own sentence
+                // Then - no Free of the caches, and each machine says the engine's own sentence, no pill
                 await visitor.gone(button('Free 34.8 GB'));
                 await visitor.see(
                     within(
