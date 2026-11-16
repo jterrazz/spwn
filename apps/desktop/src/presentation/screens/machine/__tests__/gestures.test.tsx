@@ -260,7 +260,7 @@ describe('gestures', () => {
         const result = await component.render(
             machineOver('engine-stopped', 'linux-1'),
             async (visitor) => {
-                await visitor.see(heading('linux-1', { exact: false }));
+                await visitor.see(heading('linux-1 Stopped'));
 
                 // When - Start is clicked
                 await visitor.click(button('Start'));

@@ -52,7 +52,7 @@ export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomePro
     const thisMac = macs.find((mac) => mac.ThisMac);
     return (
         <Page>
-            <SummaryHead size="page" summary={Summary} />
+            <SummaryHead size="page" summary={Summary} verdict={Summary.Verdict} />
             {thisMac ? <HomeTiles mac={thisMac} /> : null}
             <StartHere go={go} macs={macs} onNewMachine={onNewMachine} />
             <HeldOutcomes>

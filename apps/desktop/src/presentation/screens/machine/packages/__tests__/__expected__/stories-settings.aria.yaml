@@ -9,25 +9,25 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage"
-  - heading "2 differences from macbook-pro." [level=1]:
-    - text: 2 differences from
+  - heading "1 difference from macbook-pro." [level=1]:
+    - text: 1 difference from
     - button "macbook-pro"
     - text: .
   - paragraph:
-    - img "2 differences"
-    - text: 3 of 5 apps match · 0 of 1 setting match · Its machine file is
+    - img "1 difference"
+    - text: 4 of 5 apps match · 0 of 1 setting match · Its machine file is
     - button "macbook-pro"
   - region "Differs from its file":
-    - heading "Differs from its file 3" [level=2]
+    - heading "Differs from its file 2" [level=2]
     - group "Which side changes":
       - button "Change the machine" [pressed]
       - button "Change the file"
-    - text: The file says This machine has The machine will gh macbook-pro Outdated 2.97.0 Keep it bat macbook-pro Not installed Install it git-shortcuts macbook-pro Not installed Set it Apply will install 2.
+    - text: The file says This machine has The machine will bat macbook-pro Not installed Install it git-shortcuts macbook-pro Not installed Set it Apply will install 2.
     - button "Plan"
   - region "Upgrades":
     - heading "Upgrades" [level=2]
     - button "Upgrade now"
-    - text: Every night at 03:00, as macbook-pro allows. macbook-pro File
+    - text: Every night at 03:00, as macbook-pro allows. macbook-pro File 1 app moved. 7 Nov · 10:30 Last run
   - group "Which packages":
     - button "Apps5"
     - button "Settings1" [pressed]

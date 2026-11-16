@@ -2,7 +2,7 @@
   - heading "Everything is fine." [level=1]
   - paragraph:
     - img "Everything is fine."
-    - text: 2 things can wait.
+    - text: 2 machines on 1 Mac
   - group "Which machines":
     - button "All machines" [pressed]
     - button "macbook-pro"

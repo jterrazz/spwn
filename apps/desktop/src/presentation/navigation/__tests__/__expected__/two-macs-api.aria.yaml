@@ -52,7 +52,7 @@
     - heading "api is stopped." [level=1]
     - paragraph:
       - img "api is stopped."
-      - text: Start it to read its pages.
+      - text: It holds no memory. Start it to use it again.
     - region "Its file":
       - heading "Its file" [level=2]
       - button "Plan"

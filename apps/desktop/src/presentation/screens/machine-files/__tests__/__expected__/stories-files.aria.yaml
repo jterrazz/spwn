@@ -33,7 +33,7 @@
       - button "base"
   - region "Machines that follow it":
     - heading "Machines that follow it 1 machine differs." [level=2]
-    - button "macbook-pro 3 differences"
+    - button "macbook-pro 2 differences"
   - region "What it puts on a machine":
     - heading "What it puts on a machine the boxed values are the ones you set" [level=2]
     - group "Chapter":

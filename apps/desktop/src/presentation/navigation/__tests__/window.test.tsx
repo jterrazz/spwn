@@ -77,7 +77,7 @@ describe('Window', () => {
             }),
             async (visitor) => {
                 // When - its overview has been read
-                await visitor.see(content('This Mac is ready.'));
+                await visitor.see(heading('Online, with no machine running.'));
                 await visitor.see(region('Packages'));
             },
         );

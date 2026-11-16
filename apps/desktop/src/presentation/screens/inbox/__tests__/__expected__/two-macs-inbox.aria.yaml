@@ -2,7 +2,7 @@
   - heading "2 things need you." [level=1]
   - paragraph:
     - img "2 things need you."
-    - text: "npm sign-in fails: The token is refused by registry.npmjs.org"
+    - text: The rest is fine. 2 machines on 1 Mac
   - group "Which machines":
     - button "All machines" [pressed]
     - button "macbook-pro"

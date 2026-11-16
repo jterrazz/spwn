@@ -94,7 +94,7 @@ describe('machine', () => {
             overviewOver('stories', 'linux-1'),
             async (visitor) => {
                 // When - its overview and its file have been read
-                await visitor.see(content('Everything is fine.'));
+                await visitor.see(heading('Running, with 8 differences from its file.'));
                 await visitor.see(content('Why it exists'));
                 await visitor.see(content('8 differences from linux-dev.'));
             },
@@ -107,7 +107,7 @@ describe('machine', () => {
 
     test("a server's Overview draws its health, its check's latency and its last days", async () => {
         // Given - infra's Overview over two-macs, a server on the other Mac, read 3 s after its check
-        using _ = clock.at('2026-11-04T10:00:07Z');
+        using _ = clock.at('2026-11-04T10:00:04Z');
         const result = await component.render(
             overviewOver('two-macs', 'infra'),
             async (visitor) => {
