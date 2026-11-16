@@ -18,6 +18,19 @@
                     }
                 }
             ],
+            "disk": {
+                "total": 994000000000,
+                "free": 412000000000,
+                "system": 21400000000,
+                "files": {
+                    "~/Library/Caches/go-build/00/a": 8200000000,
+                    "~/Library/Caches/Homebrew/downloads/x": 1400000000,
+                    "~/.cache/npm/_cacache/x": 600000000,
+                    "~/Library/Developer/CoreSimulator/Devices/A/data": 6300000000,
+                    "~/.claude/projects/x": 2100000000,
+                    "~/.local/state/station/logs/engine.log": 120000000
+                }
+            },
             "preferences": {
                 "here": "macbook-pro",
                 "vm_user": "admin"
