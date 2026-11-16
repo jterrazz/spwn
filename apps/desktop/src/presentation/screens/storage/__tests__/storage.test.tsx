@@ -100,12 +100,7 @@ describe('Storage', () => {
 
             // Then - Station's sentence in the Disk panel, its one row, and the caches Free the one primary
             await visitor.see(
-                within(
-                    region('Disk'),
-                    content(
-                        'Images no machine is made from and leftovers no machine names hold 3.0 GB.',
-                    ),
-                ),
+                within(region('Disk'), content('3.0 GB can be freed: 1 unused image.')),
             );
             await visitor.see(within(freed, content('station-linux@2026.10.20')));
             await visitor.see(within(freed, content('Images')));

@@ -19,7 +19,7 @@
       - listitem: Station logs 0 B
       - listitem: The Mac itself 499 GB
       - listitem: Free 388 GB
-    - paragraph: Images no machine is made from and leftovers no machine names hold 3.0 GB.
+    - paragraph: "3.0 GB can be freed: 1 unused image."
     - paragraph: Caches hold 34.8 GB. Each app rebuilds its own when it needs it.
     - button "Free 34.8 GB"
   - region "Can be freed":
