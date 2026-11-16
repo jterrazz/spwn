@@ -21,11 +21,11 @@ export function DiskTile({ label, shows, target, held }: DiskTileProps) {
     if (disk.kind !== 'read') {
         return <Unknown label={label} state={disk.kind === 'failed' ? 'no-answer' : 'reading'} />;
     }
-    const { Free, Total } = disk.out;
+    const { Free, Total, Used } = disk.out;
     if (Total <= 0 || Free < 0) {
         return <NotGivenTile label={label} />;
     }
-    const { value, unit } = split(bytes(shows === 'free' ? Free : Total - Free));
+    const { value, unit } = split(bytes(shows === 'free' ? Free : Used));
     return (
         <Tile
             foot={sentence([
@@ -38,7 +38,7 @@ export function DiskTile({ label, shows, target, held }: DiskTileProps) {
             viz={
                 <Bar
                     label={`${label}: used of its total`}
-                    percent={((Total - Free) / Total) * 100}
+                    percent={(Used / Total) * 100}
                     width="fixed"
                 />
             }

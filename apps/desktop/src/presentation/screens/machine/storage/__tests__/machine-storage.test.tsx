@@ -30,6 +30,25 @@ describe('machine-storage', () => {
         await expect(result.tree).toMatch(file('./__expected__/two-macs-this-mac.aria.yaml'));
     });
 
+    test("a Mac's Storage tab says what the Mac itself holds, the page's sentence left to Storage", async () => {
+        // Given - the window on This Mac's Storage over two-macs
+        const result = await component.render(
+            windowOver('two-macs', 'macbook-pro'),
+            async (visitor) => {
+                // When - its disk has been read
+                await visitor.see(region('By app'));
+
+                // Then - Itself under the figure, and not what station holds outside any machine
+                const storage = region('Storage');
+                await visitor.see(within(storage, content('This Mac itself holds 499 GB.')));
+                await visitor.gone(
+                    within(storage, content('Outside any machine', { exact: false })),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test("a machine's disk says it is one file on its Mac, read in Storage", async () => {
         // Given - the window on linux-1's Storage over two-macs
         const result = await component.render(

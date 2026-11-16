@@ -12,7 +12,7 @@
   - region "Storage":
     - heading "Storage" [level=2]
     - button "Rescan"
-    - paragraph: "Outside any machine, station holds 0 B: machine disks, images, leftovers and its logs"
+    - paragraph: This Mac itself holds 0 B.
     - list "The parts":
       - listitem: Apps 0 B
       - listitem: Caches 0 B

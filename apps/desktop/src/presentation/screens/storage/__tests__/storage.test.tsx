@@ -1,4 +1,4 @@
-import { button, component, content, file, heading, region, within } from '@jterrazz/test';
+import { button, component, content, enabled, file, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
@@ -23,7 +23,118 @@ function reversedAnswer(answer: unknown): unknown {
     };
 }
 
+function withDisk(world: string, change: (out: Record<string, unknown>) => unknown) {
+    const recording = recordingFor(world);
+    return {
+        ...recording,
+        exchanges: recording.exchanges.map((exchange) =>
+            exchange.request.watch === 'disk.read'
+                ? {
+                      ...exchange,
+                      answers: exchange.answers.map((answer: unknown) =>
+                          isRecord(answer) && isRecord(answer.out)
+                              ? { ...answer, out: change(answer.out) }
+                              : answer,
+                      ),
+                  }
+                : exchange,
+        ),
+    };
+}
+
+function withoutCall(out: Record<string, unknown>): unknown {
+    if (!isRecord(out.CanFree)) {
+        return out;
+    }
+    const { Call: _call, ...canFree } = out.CanFree;
+    return { ...out, CanFree: canFree };
+}
+
 describe('Storage', () => {
+    test('the hero is the volume the engine says is used, never the window reckoning it', async () => {
+        // Given - Storage over two-macs, whose Mac the engine says uses 500 GB of 994 GB
+        const used = withDisk('two-macs', (out) =>
+            out.Total === 994_000_000_000 ? { ...out, Used: 500_000_000_000 } : out,
+        );
+        const result = await component.render(
+            pageOver(used, { page: 'storage' }),
+            async (visitor) => {
+                // When - its disk has been read
+                // Then - the figure is Used, not Total less Free (606 GB)
+                await visitor.see(within(region('Disk'), content('500 GB')));
+                await visitor.gone(within(region('Disk'), content('606 GB')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('the caches Free is offered by its Call, and a machine with none says the engine sentence', async () => {
+        // Given - Storage over two-macs, its caches still holding bytes but no CanFree naming a call
+        const uncalled = withDisk('two-macs', withoutCall);
+        const result = await component.render(
+            pageOver(uncalled, { page: 'storage' }),
+            async (visitor) => {
+                // When - the disks have been read
+                await visitor.see(within(region('Machines'), content('linux-1')));
+
+                // Then - no Free of the caches, and each machine's pill is the engine's own sentence
+                await visitor.gone(button('Free 34.8 GB'));
+                await visitor.see(
+                    within(
+                        region('Machines'),
+                        button(
+                            'linux-1 Caches hold 1.5 GB. Each app rebuilds its own when it needs it. 50 GB',
+                        ),
+                    ),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("what nothing uses is drawn as the engine lists it, each under its holder's word", async () => {
+        // Given - Storage over two-macs, where one image version is used by nothing
+        const result = await component.render(storageOver('two-macs'), async (visitor) => {
+            // When - its disk has been read
+            const freed = region('Can be freed');
+
+            // Then - Station's sentence in the Disk panel, its one row, and the caches Free the one primary
+            await visitor.see(
+                within(
+                    region('Disk'),
+                    content(
+                        'Images no machine is made from and leftovers no machine names hold 3.0 GB.',
+                    ),
+                ),
+            );
+            await visitor.see(within(freed, content('station-linux@2026.10.20')));
+            await visitor.see(within(freed, content('Images')));
+            await visitor.see(within(freed, content('3 GB')));
+            await visitor.see(enabled(button('Free 34.8 GB')));
+            await visitor.gone(button('Free 3 GB'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a Mac with nothing unused draws no Can be freed', async () => {
+        // Given - Storage over creating, whose station part has nothing to free
+        const result = await component.render(storageOver('creating'), async (visitor) => {
+            // When - its disk has been read
+            await visitor.see(
+                within(
+                    region('Disk'),
+                    content(
+                        "Every image and every disk station holds is a machine's or the newest.",
+                    ),
+                ),
+            );
+
+            // Then - no panel of what nothing uses
+            await visitor.gone(region('Can be freed'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test("a Mac's disk is its volume, what can be freed, its data to erase, its images and its machines", async () => {
         // Given - Storage over two-macs
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
