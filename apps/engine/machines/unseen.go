@@ -43,7 +43,7 @@ func silence(d time.Duration) string {
 func SentenceOf(h MacView, now time.Time) string {
 	// value: the one sentence a Mac is told by in the list of machines: a
 	// Mac that does not answer says since when it is not seen, one that
-	// answers its engine and what keeps it awake.
+	// answers its engine and how it sleeps.
 	if h.ThisMac || h.Reachable {
 		parts := []string{}
 		switch h.Engine.State {

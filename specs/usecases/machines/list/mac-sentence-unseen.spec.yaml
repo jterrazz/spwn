@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          [["macbook-pro","Engine running."],["mac-mini","Not seen for 6 h. Asleep or off the network."]]
+          [["macbook-pro","Engine running. Sleeps normally."],["mac-mini","Not seen for 6 h. Asleep or off the network."]]

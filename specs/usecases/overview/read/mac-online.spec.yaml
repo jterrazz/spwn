@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          {"Tone":"ok","Sentence":"Online, with 2 machines running.","Line":"Engine running. Awake until 18:00."}
+          {"Tone":"ok","Sentence":"Online, with 2 machines running.","Line":"Engine running. Awake until 18:00, lid closed."}

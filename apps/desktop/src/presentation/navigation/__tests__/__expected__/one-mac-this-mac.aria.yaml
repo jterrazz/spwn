@@ -23,7 +23,7 @@
   - button "Forward" [disabled]
   - text: macbook-pro
   - heading "macbook-pro Online" [level=2]
-  - paragraph: This Mac · Engine running.
+  - paragraph: This Mac · Engine running. Sleeps normally.
   - button "New machine on macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview" [selected]
@@ -36,7 +36,7 @@
     - heading "Online, with no machine running." [level=1]
     - paragraph:
       - img "Online, with no machine running."
-      - text: Engine running.
+      - text: Engine running. Sleeps normally.
     - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 0machines
     - region "Memory":
       - heading "Memory" [level=2]

@@ -32,8 +32,8 @@ func (m machine) awakeDeps() awakecalls.Deps {
 	}
 }
 
-// value: what keeps this Mac awake in words, as its engine says it; empty
-// where it cannot be read.
+// value: how this Mac sleeps in words, as its engine says it; empty where
+// it cannot be read.
 func (m machine) awakePhrase(ctx context.Context) string {
 	w := m.awakeWaker()
 	if w.Check() != nil {

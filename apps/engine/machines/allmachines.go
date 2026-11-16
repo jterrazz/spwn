@@ -228,11 +228,12 @@ type MacView struct {
 	// it is not seen, and that nothing proves it is down; nil while it
 	// answers.
 	Unseen *verdict.Verdict `json:",omitempty"`
-	// value: what keeps it awake, in words ("awake until 18:00", "never
-	// sleeps"), as it read itself; empty when nothing does.
+	// value: how it sleeps, in words ("awake until 18:00, lid closed",
+	// "never sleeps", "sleeps normally"), as it read itself; empty when
+	// its engine does not say.
 	Awake string `json:",omitempty"`
 	// value: the Mac in one sentence, judged by machines.list: its engine
-	// and what keeps it awake, or since when it is not seen.
+	// and how it sleeps, or since when it is not seen.
 	Sentence string `json:",omitempty"`
 }
 
