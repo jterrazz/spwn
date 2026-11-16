@@ -67,7 +67,7 @@ describe('machine files', () => {
             '/?world=stories&page=machine-files&file=macbook-pro',
             async (visitor) => {
                 const file = region('macbook-pro.machine.yaml');
-                await visitor.see(within(file, content('Computer')));
+                await visitor.see(within(file, content('a Mac')));
 
                 // When - its head is read
                 // Then - its head offers no New machine
@@ -95,7 +95,7 @@ describe('machine files', () => {
                 // When - its head is read
                 // Then - its description, what it makes, its size and its image
                 await visitor.see(within(file, content('A Linux workspace', { exact: false })));
-                await visitor.see(within(file, content('Workspace')));
+                await visitor.see(within(file, content('a workspace')));
                 await visitor.see(within(file, content('4 CPU · 8G · 20G')));
                 await visitor.see(within(file, content('ghcr.io/cirruslabs/ubuntu:24.04')));
             },

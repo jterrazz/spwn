@@ -105,9 +105,9 @@ func wordedEnums() []worded {
 			string(machinefile.ChapterAccounts): {Word: "Accounts", One: "account", Other: "accounts", Tone: verdict.Plain},
 		}},
 		{catalog.MachineRole(""), map[string]word{
-			string(catalog.RoleComputer):  plain("Computer"),
-			string(catalog.RoleWorkspace): plain("Workspace"),
-			string(catalog.RoleServer):    plain("Server"),
+			string(catalog.RoleComputer):  plain("a Mac"),
+			string(catalog.RoleWorkspace): plain("a workspace"),
+			string(catalog.RoleServer):    plain("a server"),
 		}},
 		{catalog.Lifetime(""), map[string]word{
 			string(catalog.LifetimeEphemeral):  {Word: machines.Ephemeral.Word(), Detail: "Deleted when it powers off", Tone: verdict.Plain},

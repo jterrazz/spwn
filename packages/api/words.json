@@ -290,15 +290,15 @@
   },
   "CatalogMachineRole": {
     "computer": {
-      "Word": "Computer",
+      "Word": "a Mac",
       "Tone": "plain"
     },
     "server": {
-      "Word": "Server",
+      "Word": "a server",
       "Tone": "plain"
     },
     "workspace": {
-      "Word": "Workspace",
+      "Word": "a workspace",
       "Tone": "plain"
     }
   },
