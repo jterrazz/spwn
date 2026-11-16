@@ -1,6 +1,7 @@
 package wire
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -23,6 +24,18 @@ func TestAVMReadsUnboundOnlyWhenNoFileIsNamedAfterItAndNoneIsBound(t *testing.T)
 	for _, c := range cases {
 		if got := unbound(c.err, "linux-1"); got != c.want {
 			t.Errorf("%s: unbound %v, want %v", c.name, got, c.want)
+		}
+	}
+}
+
+func TestEveryCallThatChangesAMachineMakesItsReadingDue(t *testing.T) {
+	got := driftChanges()
+	for _, name := range []string{
+		"machinefile.apply", "machinefile.upgrade", "apps.install", "apps.remove", "apps.update", "apps.move",
+		"settings.apply", "settings.off", "settings.run-containers",
+	} {
+		if !slices.Contains(got, name) {
+			t.Errorf("%s ends on a machine without making its reading due: %v", name, got)
 		}
 	}
 }
