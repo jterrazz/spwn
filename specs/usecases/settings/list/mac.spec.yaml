@@ -4,14 +4,13 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by station	19 ○
+          # Set by station	18 ○
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
           ○	hushlogin	not applied	station settings apply hushlogin
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
-          ○	claude-token	not applied	station settings apply claude-token
           ○	dns	not applied	station settings apply dns
           ○	git-signing	not applied · needs gpg	station apps install gpg
           ○	github-login	not applied · needs gh	station apps install gh

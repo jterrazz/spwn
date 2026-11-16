@@ -1,12 +1,12 @@
 description: 'off a terminal, a setting that asks a value is refused before any question or effect'
 env: two-macs
 runs:
-    - command: 'settings apply claude-token </dev/null'
+    - command: 'settings apply autologin </dev/null'
       exit: 2
       stderr: |
-          Error: claude-token asks a value: run it on a terminal
-          Hint: station settings apply claude-token
-    - command: 'settings claude-token --json | /usr/bin/jq -r .setting.state'
+          Error: autologin asks a value: run it on a terminal
+          Hint: station settings apply autologin
+    - command: 'settings autologin --json | /usr/bin/jq -r .setting.state'
       exit: 0
       stdout: |
           not-applied

@@ -102,5 +102,3 @@ var Providers = []Provider{
 	{ID: ProviderCloudflare, Label: "Cloudflare"},
 	{ID: ProviderDocker, Label: "Docker"},
 }
-
-const ClaudeTokenName = "operator:claude:oauth-token"

@@ -33,7 +33,6 @@ A setting that does not live on this machine's kind reads Not for this machine, 
 | `never-sleeps`              | Mac        | the engine keeps the Mac awake, its servers with it; no admin, applied from any Mac                                                                                                                                                           | yes        |
 | `lock-after-login`          | Mac        | lock the screen after the automatic login; admin                                                                                                                                                                                              | yes        |
 | `sshd`                      | Mac        | Remote Login; admin                                                                                                                                                                                                                           | yes        |
-| `claude-token`              | Mac        | the Claude Code token, kept in the studio CLI's credential store; no VM reads it since the Machinefile's grants replaced the share list                                                                                                       | yes        |
 | `git-shortcuts`             | all        | station's `[alias]` block in `~/.gitconfig`: wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup                                                                                                                                     | yes        |
 | `docker-shortcuts`          | all        | `dclean`, `dclean-images`, `dreset` in a block of `~/.zshrc` (`station:docker-shortcuts`), each asks y/n before it removes every container, image, or both                                                                                    | yes        |
 | `agent-hooks`               | VMs        | station's hook in `~/.claude/settings.json` (beside the owner's keys) and `notify` in `~/.codex/config.toml` (never one the owner set), for the apps installed of the two; it needs one of them                                               | yes        |
@@ -65,7 +64,7 @@ The `settings.matrix` call reads each setting on every machine, a cell per machi
 
 ## Values
 
-A package with inputs (`autologin`, `claude-token`) or an interactive procedure (`git-signing`, `ssh-key`, `github-login`) runs on a terminal only. A form asks each value, a password is never echoed, and `AGENT_PASSWORD` pre-fills the autologin password. Off a terminal the command exits 2 with `Hint: run it on a terminal`.
+A package with inputs (`autologin`) or an interactive procedure (`git-signing`, `ssh-key`, `github-login`) runs on a terminal only. A form asks each value, a password is never echoed, and `AGENT_PASSWORD` pre-fills the autologin password. Off a terminal the command exits 2 with `Hint: run it on a terminal`.
 
 There is no flag to pass a value: a secret never travels in argv or shell history ([ADR-009](../decisions/009-one-bootstrap-verb-and-no-values-in-argv.md)).
 

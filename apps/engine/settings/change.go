@@ -73,12 +73,6 @@ type ChangeStep struct {
 	Detail string
 }
 
-type StudioMissingError struct{ Package string }
-
-func (e *StudioMissingError) Error() string {
-	return e.Package + " is kept by the studio CLI, which is not on PATH"
-}
-
 func Sets(it catalog.Setting) []KeyValue {
 	// value: the values station sets for a setting that writes no file.
 	out := make([]KeyValue, len(it.Sets))

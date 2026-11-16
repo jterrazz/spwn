@@ -7,7 +7,7 @@
 # a folder of the run, so the owner's Tailscale, keychain and pmset are never
 # reached; their tart keeps its VMs in the run's own store.
 # outside: the tailnet, the credential store and Claude's sign-in of the Mac are
-# stubs (tailscale, studio, claude in the Mac's bin): what a VM receives is real.
+# stubs (tailscale, claude in the Mac's bin): what a VM receives is real.
 
 mac="$work/mac"
 far="$work/far"

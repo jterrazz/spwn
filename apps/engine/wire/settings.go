@@ -30,7 +30,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/neversleeps"
 	settingstailscale "github.com/jterrazz/studio-station/apps/engine/settings/adapter/tailscale"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/touch"
-	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/vault"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
@@ -134,7 +133,6 @@ func settingAppliers(m machine) []settingscontract.Applier {
 	appliers = append(appliers, mac.Appliers()...)
 	appliers = append(appliers, settingsdefaults.NewDock(m.sys.Run)...)
 	return append(appliers,
-		vault.NewClaudeToken(m.sys.Run),
 		git.NewSigning(m.sys.Run, m.stores.identity()),
 		git.NewLogin(m.sys.Run, m.sharedRead()),
 		settingstailscale.New(m.sys.FS, settingstailscale.Options{

@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "ok",
-            "label": "34 settings on 4 machines",
+            "label": "33 settings on 4 machines",
             "cells": [
               {
                 "kind": "list",
@@ -95,14 +95,14 @@
         },
         {
           "row": {
-            "id": "macbook-pro/claude-token",
+            "id": "macbook-pro/dns",
             "mark": "attention",
             "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "claude-token"
+                "text": "dns"
               },
               {
                 "kind": "text",
@@ -111,20 +111,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff claude-token"
+              "command": "station settings diff dns"
             }
           }
         },
         {
           "row": {
-            "id": "macbook-pro/ssh-key",
+            "id": "macbook-pro/zed-dotfiles",
             "mark": "attention",
             "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "ssh-key"
+                "text": "zed-dotfiles"
               },
               {
                 "kind": "text",
@@ -133,20 +133,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key"
+              "command": "station settings diff zed-dotfiles"
             }
           }
         },
         {
           "row": {
-            "id": "macbook-pro/tart-launcher",
+            "id": "macbook-pro/tailscale-cli",
             "mark": "attention",
             "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "tart-launcher"
+                "text": "tailscale-cli"
               },
               {
                 "kind": "text",
@@ -155,7 +155,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher"
+              "command": "station settings diff tailscale-cli"
             }
           }
         },
@@ -243,14 +243,14 @@
         },
         {
           "row": {
-            "id": "mac-mini/claude-token",
+            "id": "mac-mini/dns",
             "mark": "attention",
             "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "claude-token"
+                "text": "dns"
               },
               {
                 "kind": "text",
@@ -259,20 +259,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff claude-token --on mac-mini"
+              "command": "station settings diff dns --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "mac-mini/ssh-key",
+            "id": "mac-mini/zed-dotfiles",
             "mark": "attention",
             "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "ssh-key"
+                "text": "zed-dotfiles"
               },
               {
                 "kind": "text",
@@ -281,20 +281,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key --on mac-mini"
+              "command": "station settings diff zed-dotfiles --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "mac-mini/tart-launcher",
+            "id": "mac-mini/tailscale-cli",
             "mark": "attention",
             "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "tart-launcher"
+                "text": "tailscale-cli"
               },
               {
                 "kind": "text",
@@ -303,7 +303,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher --on mac-mini"
+              "command": "station settings diff tailscale-cli --on mac-mini"
             }
           }
         },
@@ -391,14 +391,14 @@
         },
         {
           "row": {
-            "id": "linux-1/claude-token",
+            "id": "linux-1/dns",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "claude-token"
+                "text": "dns"
               },
               {
                 "kind": "text",
@@ -407,20 +407,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff claude-token --on linux-1"
+              "command": "station settings diff dns --on linux-1"
             }
           }
         },
         {
           "row": {
-            "id": "linux-1/ssh-key",
+            "id": "linux-1/zed-dotfiles",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "ssh-key"
+                "text": "zed-dotfiles"
               },
               {
                 "kind": "text",
@@ -429,20 +429,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key --on linux-1"
+              "command": "station settings diff zed-dotfiles --on linux-1"
             }
           }
         },
         {
           "row": {
-            "id": "linux-1/tart-launcher",
+            "id": "linux-1/tailscale-cli",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "tart-launcher"
+                "text": "tailscale-cli"
               },
               {
                 "kind": "text",
@@ -451,7 +451,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher --on linux-1"
+              "command": "station settings diff tailscale-cli --on linux-1"
             }
           }
         },
@@ -479,14 +479,14 @@
         },
         {
           "row": {
-            "id": "api/claude-token",
+            "id": "api/dns",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "claude-token"
+                "text": "dns"
               },
               {
                 "kind": "text",
@@ -501,14 +501,14 @@
         },
         {
           "row": {
-            "id": "api/ssh-key",
+            "id": "api/zed-dotfiles",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "ssh-key"
+                "text": "zed-dotfiles"
               },
               {
                 "kind": "text",
@@ -523,14 +523,14 @@
         },
         {
           "row": {
-            "id": "api/tart-launcher",
+            "id": "api/tailscale-cli",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "tart-launcher"
+                "text": "tailscale-cli"
               },
               {
                 "kind": "text",
@@ -777,9 +777,9 @@
         },
         {
           "row": {
-            "id": "claude-token",
+            "id": "dns",
             "mark": "attention",
-            "label": "claude-token",
+            "label": "dns",
             "cells": [
               {
                 "kind": "text",
@@ -807,9 +807,9 @@
         },
         {
           "row": {
-            "id": "ssh-key",
+            "id": "zed-dotfiles",
             "mark": "attention",
-            "label": "ssh-key",
+            "label": "zed-dotfiles",
             "cells": [
               {
                 "kind": "text",
@@ -837,9 +837,9 @@
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "tailscale-cli",
             "mark": "attention",
-            "label": "tart-launcher",
+            "label": "tailscale-cli",
             "cells": [
               {
                 "kind": "text",
@@ -869,7 +869,7 @@
           "row": {
             "id": "folded",
             "mark": "absent",
-            "label": "16 more",
+            "label": "15 more",
             "cells": [
               {
                 "kind": "text",
@@ -1128,7 +1128,6 @@
         "hushlogin",
         "starship-dotfiles",
         "tmux-dotfiles",
-        "claude-token",
         "dns",
         "git-signing",
         "github-login",
@@ -1162,7 +1161,6 @@
         "hushlogin",
         "starship-dotfiles",
         "tmux-dotfiles",
-        "claude-token",
         "dns",
         "git-signing",
         "github-login",

@@ -97,7 +97,6 @@ const (
 	ProcNeverSleeps          Procedure = "never-sleeps"
 	ProcLockAfterLogin       Procedure = "lock-after-login"
 	ProcSshd                 Procedure = "sshd"
-	ProcClaudeToken          Procedure = "claude-token"
 	ProcBackupExclusions     Procedure = "backup-exclusions"
 	ProcTailscaleCLI         Procedure = "tailscale-cli"
 )
@@ -120,7 +119,7 @@ func Procedures() []string {
 	return []string{
 		string(ProcGitSigning), string(ProcSSHKey), string(ProcGitHubLogin), string(ProcSpotlight), string(ProcDNS),
 		string(ProcDockReset), string(ProcDockSpacer), string(ProcAutologin), string(ProcRestartAfterPowerCut),
-		string(ProcNeverSleeps), string(ProcLockAfterLogin), string(ProcSshd), string(ProcClaudeToken),
+		string(ProcNeverSleeps), string(ProcLockAfterLogin), string(ProcSshd),
 		string(ProcBackupExclusions), string(ProcTailscaleCLI),
 	}
 }
