@@ -1,4 +1,4 @@
-import { seconds } from './format';
+import { clock, seconds } from './format';
 
 const MONTHS = [
     'Jan',
@@ -27,6 +27,12 @@ function dateOf(at: string | undefined): Date | undefined {
 export function shortDay(at: string | undefined): string | undefined {
     const date = dateOf(at);
     return date ? `${String(date.getDate())} ${MONTHS[date.getMonth()] ?? ''}` : undefined;
+}
+
+export function dayAndClock(at: string | undefined): string | undefined {
+    const day = shortDay(at);
+    const time = clock(at);
+    return day === undefined || time === undefined ? undefined : `${day}, ${time}`;
 }
 
 export function between(from: string | undefined, to: string | undefined): number | undefined {

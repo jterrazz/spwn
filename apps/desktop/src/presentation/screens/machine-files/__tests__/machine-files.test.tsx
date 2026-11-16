@@ -124,6 +124,70 @@ describe('Machine files', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test('a follower that applied the file says when, on its own row, before its differences', async () => {
+        // Given - the window on Machine files over stories-file, whose follower macbook-pro applied it on 6 Nov at 09:12
+        const result = await component.render(windowOver('stories-file'), async (visitor) => {
+            await visitor.see(content('ghostty'));
+
+            // Then - the row names the Mac itself, then the apply time, then its count of differences
+            await visitor.see(
+                within(
+                    region('Machines that follow it'),
+                    button('macbook-pro the Mac itself · applied 6 Nov, 09:12 3 differences'),
+                ),
+            );
+            await visitor.gone(
+                within(region('What it puts on a machine'), content('applied', { exact: false })),
+            );
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a follower that never applied the file draws no apply time', async () => {
+        // Given - the window on Machine files over stories-file, where agent-7f and linux-1 follow linux-dev and carry no apply
+        const result = await component.render(windowOver('stories-file'), async (visitor) => {
+            await visitor.see(content('ghostty'));
+
+            // When - linux-dev is chosen
+            await visitor.click(button('linux-dev', { exact: false }));
+
+            // Then - each row is its Mac and its differences, and nothing about an apply
+            const followers = region('Machines that follow it');
+            await visitor.see(within(followers, button('agent-7f on macbook-pro 2 differences')));
+            await visitor.see(within(followers, button('linux-1 on macbook-pro 8 differences')));
+            await visitor.gone(within(followers, content('applied', { exact: false })));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('the shipped files carry the engine description in their head', async () => {
+        // Given - the window on Machine files over stories-file
+        const result = await component.render(windowOver('stories-file'), async (visitor) => {
+            await visitor.see(content('ghostty'));
+
+            // When - each shipped file is chosen
+            await visitor.click(button('station-linux'));
+            await visitor.see(
+                within(
+                    region('station-linux.machine.yaml'),
+                    content(
+                        "A Linux workspace with the runtime manager, git, zsh, Docker and headless Chromium's libraries",
+                    ),
+                ),
+            );
+            await visitor.click(button('station-macos'));
+
+            // Then - the head reads the description the wire gives
+            await visitor.see(
+                within(
+                    region('station-macos.machine.yaml'),
+                    content('A macOS workspace with Homebrew, git and zsh'),
+                ),
+            );
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test('a file no machine follows says so, in the engine words', async () => {
         // Given - the window on Machine files over stories-file
         const result = await component.render(windowOver('stories-file'), async (visitor) => {
