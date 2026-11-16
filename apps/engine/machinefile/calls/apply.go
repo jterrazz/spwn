@@ -121,6 +121,11 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		if err := relock(ctx, d, plan, out.Done); err != nil {
 			return out, err
 		}
+		if ctx.Err() == nil {
+			if err := d.Ledger.PutApply(ctx, plan.Name, d.Now().UTC()); err != nil {
+				return out, err
+			}
+		}
 		if n, ran, err := d.Ledger.Night(ctx); err == nil && ran && n.Machinefile == plan.Name {
 			_ = d.Ledger.Write(context.WithoutCancel(ctx), n.Reread(plan))
 		}

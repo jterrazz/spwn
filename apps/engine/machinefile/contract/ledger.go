@@ -2,6 +2,7 @@ package contract
 
 import (
 	"context"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 )
@@ -16,6 +17,8 @@ type Ledger interface {
 	// invariant: the last night the engine's upgrade recorded, as the last
 	// Write left it; none written reads as none (false) with no error.
 	Night(ctx context.Context) (machinefile.Night, bool, error)
+	LastApply(ctx context.Context, file string) (time.Time, bool, error)
+	PutApply(ctx context.Context, file string, at time.Time) error
 	Write(ctx context.Context, n machinefile.Night) error
 	// invariant: the blocks of ~/.zshrc apply wrote, by id; a block written
 	// again replaces the earlier record of its id, and deleting an id never

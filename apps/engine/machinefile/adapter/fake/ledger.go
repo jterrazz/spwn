@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
@@ -64,6 +65,24 @@ func (l *Ledger) Write(_ context.Context, n machinefile.Night) error {
 	l.w.Lock()
 	defer l.w.Unlock()
 	l.w.Mac(l.mac).Store().Night = &n
+	return nil
+}
+
+func (l *Ledger) LastApply(_ context.Context, file string) (time.Time, bool, error) {
+	l.w.Lock()
+	defer l.w.Unlock()
+	at, ok := l.w.Mac(l.mac).Store().Applies[file]
+	return at, ok, nil
+}
+
+func (l *Ledger) PutApply(_ context.Context, file string, at time.Time) error {
+	l.w.Lock()
+	defer l.w.Unlock()
+	st := l.w.Mac(l.mac).Store()
+	if st.Applies == nil {
+		st.Applies = map[string]time.Time{}
+	}
+	st.Applies[file] = at
 	return nil
 }
 

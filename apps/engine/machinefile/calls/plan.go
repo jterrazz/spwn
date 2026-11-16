@@ -225,10 +225,27 @@ func accessOf(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.A
 	return access, nil
 }
 
+// value: the plan of a Machinefile against this machine, with when the
+// machine last applied it.
+func judged(ctx context.Context, d Deps, asked string, phase catalog.Phase) (machinefile.Plan, error) {
+	p, err := judgedOnce(ctx, d, asked, phase)
+	if err != nil {
+		return machinefile.Plan{}, err
+	}
+	at, ok, err := d.Ledger.LastApply(ctx, p.Name)
+	if err != nil {
+		return machinefile.Plan{}, err
+	}
+	if ok {
+		p.Applied = &at
+	}
+	return p, nil
+}
+
 // invariant: whether a line run as root asks a password is the machine's
 // answer, read once and only for a plan a sudo need is in; a read that
 // cannot tell asks it, so a run off a terminal is refused as before.
-func judged(ctx context.Context, d Deps, asked string, phase catalog.Phase) (machinefile.Plan, error) {
+func judgedOnce(ctx context.Context, d Deps, asked string, phase catalog.Phase) (machinefile.Plan, error) {
 	r, cat, err := resolveIn(ctx, d, asked)
 	if err != nil {
 		return machinefile.Plan{}, err

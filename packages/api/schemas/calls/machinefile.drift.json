@@ -904,6 +904,10 @@
     "machinefile.Drift": {
       "additionalProperties": false,
       "properties": {
+        "Applied": {
+          "format": "date-time",
+          "type": "string"
+        },
         "Apply": {
           "$ref": "#/$defs/machinefile.Applying"
         },
@@ -1136,6 +1140,10 @@
     "machinefile.Plan": {
       "additionalProperties": false,
       "properties": {
+        "Applied": {
+          "format": "date-time",
+          "type": "string"
+        },
         "Blocks": {
           "items": {
             "$ref": "#/$defs/machinefile.Block"

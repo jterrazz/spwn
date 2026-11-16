@@ -295,6 +295,8 @@ type Stores struct {
 	Ledger []machinefile.Installed `json:"ledger,omitempty"`
 	// value: the last night the engine's upgrade recorded.
 	Night *machinefile.Night `json:"night,omitempty"`
+	// value: when each Machinefile was last applied, by its name.
+	Applies map[string]time.Time `json:"applies,omitempty"`
 	// value: the blocks of ~/.zshrc apply wrote, by id.
 	Blocks []machinefile.Written `json:"blocks,omitempty"`
 }
