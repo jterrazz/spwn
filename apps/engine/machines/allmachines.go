@@ -149,6 +149,17 @@ type VM struct {
 	UsedBytes int64 `json:",omitempty"`
 }
 
+type KeptDrift struct {
+	// value: how a running workspace stands with its Machinefile, as its
+	// Mac's engine last read it: when, how many differences every chapter
+	// counts, that it is bound to no file (none is named after it and
+	// none bound to it), or why its file did not read.
+	At          time.Time
+	Differences int
+	Unbound     bool   `json:",omitempty"`
+	Failed      string `json:",omitempty"`
+}
+
 type AgentView struct {
 	State string
 	Task  string
