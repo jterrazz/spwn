@@ -1,4 +1,4 @@
-import { button, content, heading, region, within } from '@jterrazz/test';
+import { button, content, dialog, field, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -23,9 +23,27 @@ describe('storage', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'D9 waits for what nothing uses on disk.read, the leftovers of deleted VMs among it, and a gesture to free it',
-    );
+    test('D9 what nothing uses is freed by its names typed, and the verdict reads nothing to free', async () => {
+        // Given - Storage over leftovers, an unused image and the disk of a deleted VM
+        const subject = 'station-linux@2026.10.20, old-vm';
+        const result = await website.visit('/?world=leftovers&page=storage', async (visitor) => {
+            await visitor.see(heading('12.0 GB can be freed.'));
+
+            // When - Free 12 GB is pressed, and the names the engine asks are typed
+            await visitor.click(within(region('Disk'), button('Free 12 GB')));
+            const asked = dialog('Free 12 GB on macbook-pro?');
+            await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
+            await visitor.click(within(asked, button('Free')));
+
+            // Then - the verdict reads nothing to free, nothing is left to free, and what went is held
+            await visitor.see(heading('Nothing to free.'));
+            await visitor.gone(region('Can be freed'));
+            await visitor.see(within(region('Done here'), content('old-vm')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo('D9 waits for a kept journal on the wire, so Changes records what was freed');
 
     test.todo('D10 waits for a recording of the disk of the other Mac');
 

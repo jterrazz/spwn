@@ -20,11 +20,12 @@
       - listitem: The Mac itself 499 GB
       - listitem: Free 388 GB
     - paragraph: "3.0 GB can be freed: 1 unused image."
+    - button "Free 3 GB"
     - paragraph: Caches hold 34.8 GB. Each app rebuilds its own when it needs it.
     - button "Free 34.8 GB"
   - region "Can be freed":
     - heading "Can be freed" [level=2]
-    - text: station-linux@2026.10.20 Images 3 GB
+    - text: station-linux@2026.10.20 Images · Unused image 3 GB
   - region "Your data":
     - heading "Your data 5" [level=2]
     - text: xcode ~/Library/Developer/CoreSimulator/Devices 19.1 GB

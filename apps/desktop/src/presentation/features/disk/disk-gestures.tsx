@@ -195,9 +195,15 @@ export function useFreeAll(target: Target | undefined): DiskGesture {
     return useGesture('disk.free', { input: {}, rereads: FREE_REREADS, subject: '', target });
 }
 
-type FreeAllProps = { gesture: DiskGesture; label: string; name: string; variant?: ButtonVariant };
+type FreeAllProps = {
+    gesture: DiskGesture;
+    label: string;
+    name: string;
+    variant?: ButtonVariant;
+    verb?: string | undefined;
+};
 
-export function FreeAllButton({ gesture, label, name, variant = 'plain' }: FreeAllProps) {
+export function FreeAllButton({ gesture, label, name, variant = 'plain', verb }: FreeAllProps) {
     return (
         <span className={pageStyles.outcome}>
             <GestureOutcome gesture={gesture} />
@@ -206,6 +212,7 @@ export function FreeAllButton({ gesture, label, name, variant = 'plain' }: FreeA
                 label={label}
                 title={`${label} on ${name}?`}
                 variant={variant}
+                verb={verb}
             />
         </span>
     );
