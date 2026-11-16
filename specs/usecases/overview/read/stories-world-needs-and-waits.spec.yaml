@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          [{"Tone":"bad","Sentence":"2 things need you.","Line":"The rest is fine. 4 machines on macbook-pro"},[["macbook-pro:5000","needs-you","review"],["com.example.brain.x-snapshot","needs-you","remove"],["brew","can-wait","update"],["firewall","can-wait","fix"]]]
+          [{"Tone":"bad","Sentence":"2 things need you.","Line":"The rest is fine. 4 machines on macbook-pro"},[["macbook-pro:5000","needs-you","review"],["com.example.brain.x-snapshot","needs-you","remove"],["brew","can-wait","update"],["node","can-wait","fix"],["firewall","can-wait","fix"]]]

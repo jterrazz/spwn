@@ -1575,7 +1575,31 @@
                         "http": true,
                         "reserved_at": "2026-11-07T08:30:00Z"
                     }
-                ]
+                ],
+                "night": {
+                    "at": "2026-11-07T03:00:09Z",
+                    "machinefile": "macbook-pro",
+                    "moved": [
+                        {
+                            "app": "gh",
+                            "was": "2.96.1",
+                            "now": "2.97.0",
+                            "range": "latest"
+                        }
+                    ],
+                    "waiting": [
+                        {
+                            "app": "node",
+                            "newest": "25.1.0",
+                            "range": "24",
+                            "moved": "25",
+                            "file": "~/.config/station/machinefiles/macbook-pro.machine.yaml"
+                        }
+                    ]
+                },
+                "applies": {
+                    "macbook-pro": "2026-11-06T09:12:00Z"
+                }
             },
             "tailnet": {
                 "self": {
