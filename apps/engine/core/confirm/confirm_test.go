@@ -32,6 +32,7 @@ func TestEachGestureAsksWhatItsKindNeeds(t *testing.T) {
 		{"erase an app's data", confirm.Erase, machine.Computer, confirm.TypeName},
 		{"build the image a create needs", confirm.BuildImage, machine.Workspace, confirm.YesNo},
 		{"delete the ephemeral workspaces whose agent finished", confirm.Cleanup, machine.Computer, confirm.YesNo},
+		{"free what nothing uses on a Mac", confirm.FreeUnused, machine.Computer, confirm.TypeName},
 	} {
 		if got := confirm.For(c.action, c.kind); got != c.want {
 			t.Errorf("%s asks %s, want %s", c.gesture, got, c.want)
@@ -104,7 +105,7 @@ func TestEveryConfirmationSaysWhatItsGestureDoes(t *testing.T) {
 	for _, a := range []confirm.Action{confirm.Install, confirm.Share, confirm.Start, confirm.Restart, confirm.Edit, confirm.Remove,
 		confirm.StopSharing, confirm.SignOut, confirm.RemovePassword, confirm.RemoveGrant, confirm.Undeclare, confirm.OffHere, confirm.Overwrite,
 		confirm.Forget, confirm.DeleteImage, confirm.RestartMac, confirm.RestartServer, confirm.StopEngine, confirm.Stop, confirm.StopAgent, confirm.Delete, confirm.Erase,
-		confirm.BuildImage, confirm.Cleanup} {
+		confirm.BuildImage, confirm.Cleanup, confirm.FreeUnused} {
 		if c := a.Consequence(); c == "" || !strings.HasSuffix(c, ".") {
 			t.Errorf("%s says %q: every confirmation says what it does, in one sentence", a, c)
 		}

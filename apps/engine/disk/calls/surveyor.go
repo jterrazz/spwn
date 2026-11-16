@@ -49,6 +49,9 @@ type Station interface {
 	// value: the disks this Mac's hypervisor holds for its machines and
 	// images, as it lists them; nil when the Mac has no hypervisor.
 	Held(ctx context.Context) (*disk.Held, error)
+	// value: each thing deleted, its outcome in the order asked; a refusal
+	// is that one's broken outcome, and the others still go.
+	Free(ctx context.Context, frees []disk.Freeable) []disk.Outcome
 }
 
 type Configurer interface {
@@ -442,6 +445,27 @@ func (s *Surveyor) move(ctx context.Context, e disk.Entry, st catalog.Misplaced)
 		return disk.Outcome{Name: shown, Result: catalog.StateOK, Detail: "nothing to move: its rebuildable files freed"}, nil
 	}
 	return disk.Outcome{Name: shown, Result: catalog.StateOK, Detail: "moved to " + to}, nil
+}
+
+func (s *Surveyor) Unused(ctx context.Context) ([]disk.Freeable, error) {
+	if s.o.Station == nil {
+		return nil, nil
+	}
+	held, err := s.o.Station.Held(ctx)
+	if err != nil || held == nil {
+		return nil, err
+	}
+	if held.Unread != "" {
+		return nil, &disk.UnreadRecordError{Path: held.Unread}
+	}
+	return held.Unused, nil
+}
+
+func (s *Surveyor) FreeUnused(ctx context.Context, frees []disk.Freeable) []disk.Outcome {
+	if s.o.Station == nil {
+		return nil
+	}
+	return s.o.Station.Free(ctx, frees)
 }
 
 func (s *Surveyor) Volume(ctx context.Context) (total, free int64, err error) {

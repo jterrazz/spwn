@@ -868,6 +868,15 @@
             "array",
             "null"
           ]
+        },
+        "Yours": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         }
       },
       "required": [
@@ -876,7 +885,8 @@
         "Move",
         "Path",
         "Prune",
-        "Then"
+        "Then",
+        "Yours"
       ],
       "type": "object"
     },
@@ -1175,10 +1185,13 @@
             "confirm.yes-needed",
             "disk.app-running",
             "disk.lives-elsewhere",
+            "disk.names-needed",
             "disk.never-touched",
+            "disk.not-freeable",
             "disk.not-misplaced",
             "disk.nothing-to-erase",
             "disk.nothing-to-free",
+            "disk.record-unreadable",
             "disk.unknown",
             "engine.start-failed",
             "grant.cannot-deliver",

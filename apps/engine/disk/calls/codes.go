@@ -15,6 +15,14 @@ const (
 	NothingToErase fail.Code = "disk.nothing-to-erase"
 	AppRunning     fail.Code = "disk.app-running"
 	NotMisplaced   fail.Code = "disk.not-misplaced"
+	// value: a name free-unused was asked that is not among what nothing
+	// uses: a machine is made from it or names it, it runs, it is gone, or
+	// station did not make it.
+	NotFreeable fail.Code = "disk.not-freeable"
+	// value: free-unused was asked no name: it frees only what it names.
+	NamesNeeded fail.Code = "disk.names-needed"
+	// value: a machine record cannot be read, so no disk is known unused.
+	RecordUnreadable fail.Code = "disk.record-unreadable"
 )
 
 func coded(err error) error {
@@ -27,6 +35,7 @@ func coded(err error) error {
 	var nothingToErase *disk.NothingToEraseError
 	var running *disk.RunningError
 	var placed *disk.NotMisplacedError
+	var unread *disk.UnreadRecordError
 	switch {
 	case errors.As(err, &unknown):
 		return fail.New(fail.NotFound, Unknown, unknown.Name, nil)
@@ -42,6 +51,8 @@ func coded(err error) error {
 		return fail.New(fail.Failed, AppRunning, running.Name, map[string]string{"process": running.Process, "verb": running.Verb, "subject": running.Subject})
 	case errors.As(err, &placed):
 		return fail.New(fail.Refused, NotMisplaced, placed.Path, nil)
+	case errors.As(err, &unread):
+		return fail.New(fail.Failed, RecordUnreadable, unread.Path, nil)
 	}
 	return err
 }

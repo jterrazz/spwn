@@ -227,9 +227,18 @@ func (s *Machinist) Remove(ctx context.Context, name string) (model.DeleteReport
 			return report, err
 		}
 	}
-	if s.engineState(ctx, name) != diskMissing {
+	missing := s.engineState(ctx, name) == diskMissing
+	if !missing {
 		if err := s.engine.Delete(ctx, name); err != nil {
 			return report, err
+		}
+	}
+	if missing {
+		// invariant: a disk already gone, deleted by hand, leaves no entry in
+		// the hypervisor's ledger: a VM made by hand later under the name is
+		// never taken for the one station cloned.
+		if err := s.engine.Forget(ctx, name); err != nil {
+			report.Warnings = append(report.Warnings, err.Error())
 		}
 	}
 	if s.rel != nil {

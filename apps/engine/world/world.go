@@ -132,6 +132,10 @@ type Mac struct {
 	Clones map[string]string `json:"clones,omitempty"`
 	// value: the images the hypervisor holds, by reference.
 	Images []string `json:"images,omitempty"`
+	// value: the VMs station's hypervisor adapter cloned here and has not
+	// deleted since, by name, each with the Born of the disk it cloned: its
+	// ledger, which a VM made or renamed by hand never enters.
+	Cloned map[string]int `json:"cloned,omitempty"`
 	// value: the image builds this Mac is at when the world opens, each at
 	// its step.
 	Building []images.Making `json:"building,omitempty"`
@@ -350,6 +354,14 @@ type VM struct {
 	Kept *Kept `json:"kept,omitempty"`
 	// value: the hypervisor holds its disk.
 	Disk bool `json:"disk,omitempty"`
+	// value: which disk it is, as its folder's identity tells one from
+	// another: a clone gives each a number of the world's own, and a disk
+	// made by hand has none (0), so one deleted and made again under the
+	// name is never the disk the ledger kept.
+	Born int `json:"born,omitempty"`
+	// value: its record's file does not parse: the store sees a file of
+	// that name and never a record.
+	Unreadable bool `json:"unreadable,omitempty"`
 	// value: a create cloned it from an image in this world: once its
 	// guest serves station's API it is a machine of its own, a workspace or
 	// a server on Linux, sized as it was made.

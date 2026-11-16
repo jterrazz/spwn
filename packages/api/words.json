@@ -535,8 +535,18 @@
       "Detail": "disk",
       "Tone": "plain"
     },
+    "disk.names-needed": {
+      "Word": "names needed",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
     "disk.never-touched": {
       "Word": "never touched",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "disk.not-freeable": {
+      "Word": "not freeable",
       "Detail": "disk",
       "Tone": "plain"
     },
@@ -552,6 +562,11 @@
     },
     "disk.nothing-to-free": {
       "Word": "nothing to free",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
+    "disk.record-unreadable": {
+      "Word": "record unreadable",
       "Detail": "disk",
       "Tone": "plain"
     },
@@ -1234,6 +1249,20 @@
     },
     "ssh": {
       "Word": "SSH",
+      "Tone": "plain"
+    }
+  },
+  "DiskFreeableKind": {
+    "disk": {
+      "Word": "Leftover disk",
+      "Tone": "plain"
+    },
+    "folder": {
+      "Word": "Old folder",
+      "Tone": "plain"
+    },
+    "image": {
+      "Word": "Unused image",
       "Tone": "plain"
     }
   },

@@ -1,0 +1,17 @@
+description: 'a name a machine record holds is refused before anything goes: a machine''s disk is never freed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["old-vm"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}} | .macs["macbook-pro"].cloned = {"old-vm": 901} | .macs["macbook-pro"].vms["old-vm"].born = 901'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["old-vm","linux-1"],"Confirm":"old-vm, linux-1"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.not-freeable","subject":"linux-1"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["api","linux-1","old-vm","station-image-station-linux-2026.10.20","station-image-station-linux-2026.11.01"]

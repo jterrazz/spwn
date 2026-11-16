@@ -22,6 +22,16 @@ func TestTheFakeHypervisorKeepsTheContract(t *testing.T) {
 				End(r, end)
 			},
 			Restart: func() contract.Hypervisor { return HypervisorOf(w, "mac-mini", "vz", nil) },
+			Gone: func(vm string) {
+				w.Lock()
+				defer w.Unlock()
+				delete(w.Mac("mac-mini").VMs, vm)
+			},
+			ByHand: func(vm string) {
+				w.Lock()
+				defer w.Unlock()
+				w.Mac("mac-mini").VMs[vm] = &world.VM{Disk: true}
+			},
 		}
 	})
 }

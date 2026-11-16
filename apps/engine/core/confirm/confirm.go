@@ -40,6 +40,9 @@ const (
 	BuildImage Action = "build-image"
 	// value: delete the ephemeral workspaces whose agent finished, in one question.
 	Cleanup Action = "cleanup"
+	// value: delete what nothing uses on a Mac: the image versions no
+	// machine is made from, and the leftovers.
+	FreeUnused Action = "free-unused"
 )
 
 type Level string
@@ -65,7 +68,7 @@ func For(a Action, k machine.Kind) Level {
 	switch a {
 	case Install, Share, Start, Restart, Edit:
 		return None
-	case Delete, Erase, RestartServer:
+	case Delete, Erase, RestartServer, FreeUnused:
 		return TypeName
 	case Stop:
 		if k == machine.Server {
@@ -207,6 +210,8 @@ func (a Action) Consequence() string {
 		return "%s is built first, which takes several minutes."
 	case Cleanup:
 		return "Every ephemeral workspace whose agent finished is deleted."
+	case FreeUnused:
+		return "Deleted for good: %s. No machine and no file of yours is touched."
 	}
 	return ""
 }

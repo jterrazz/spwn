@@ -19,6 +19,15 @@ type Hypervisor interface {
 	Disks(ctx context.Context) ([]Disk, error)
 	Fetch(ctx context.Context, img imagescontract.ImageLocation, p call.Progress) error
 	Clone(ctx context.Context, from imagescontract.ImageLocation, vm string) error
+	// invariant: Cloned is every VM this adapter cloned on this Mac and has
+	// not deleted since, under the name a rename of its gave it, while the
+	// disk under that name is still the one it cloned: a VM made or renamed
+	// by hand, outside it, is never one, even under a name the adapter once
+	// cloned.
+	Cloned(ctx context.Context) ([]string, error)
+	// invariant: Forget drops vm from what Cloned says, its disk already
+	// gone: a delete that found no disk leaves no entry behind.
+	Forget(ctx context.Context, vm string) error
 	Resize(ctx context.Context, vm string, s machines.Size) error
 	Rename(ctx context.Context, from, to string) error
 	Boot(ctx context.Context, vm string, o BootOptions) (Run, error)
@@ -40,6 +49,9 @@ const (
 	DiskRunning   DiskState = "running"
 	DiskStopped   DiskState = "stopped"
 	DiskSuspended DiskState = "suspended"
+	// value: a state the hypervisor said that station does not know: in
+	// use, never read as stopped.
+	DiskUnknown DiskState = "unknown"
 )
 
 type Disk struct {

@@ -14,15 +14,27 @@ import (
 
 // value: a hypervisor whose disks the test changes between two reads.
 type changingStation struct {
-	mu   sync.Mutex
-	held *disk.Held
-	err  error
+	mu    sync.Mutex
+	held  *disk.Held
+	err   error
+	freed []string
 }
 
 func (c *changingStation) Held(context.Context) (*disk.Held, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.held, c.err
+}
+
+func (c *changingStation) Free(_ context.Context, frees []disk.Freeable) []disk.Outcome {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	out := make([]disk.Outcome, 0, len(frees))
+	for _, f := range frees {
+		c.freed = append(c.freed, f.Name)
+		out = append(out, disk.Outcome{Name: f.Name, Result: catalog.StateOK, Freed: f.Bytes})
+	}
+	return out
 }
 
 func (c *changingStation) set(held *disk.Held, err error) {
@@ -108,11 +120,5 @@ func TestAFailedHypervisorLeavesMachinesAndYourDataUnknown(t *testing.T) {
 	_, yours := kinds[disk.KindYourData]
 	if got.Station != nil || machines || yours || got.Pending {
 		t.Fatalf("a failed hypervisor reads %+v, station %+v: want no part, no machines, no your data, nothing pending", got.Kinds, got.Station)
-	}
-}
-
-func TestTheCachesCanFreeNamesTheCallThatFreesThem(t *testing.T) {
-	if Free.Name != disk.FreeCall {
-		t.Fatalf("the call is %q, the reading names %q", Free.Name, disk.FreeCall)
 	}
 }

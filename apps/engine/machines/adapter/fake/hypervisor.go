@@ -129,7 +129,11 @@ func (h *Hypervisor) Clone(ctx context.Context, from imagescontract.ImageLocatio
 		v = &world.VM{}
 		m.VMs[vm] = v
 	}
-	v.Disk, v.Made = true, true
+	v.Disk, v.Made, v.Born = true, true, h.nextBorn()
+	if m.Cloned == nil {
+		m.Cloned = map[string]int{}
+	}
+	m.Cloned[vm] = v.Born
 	if fresh := m.Fresh; !fromDisk && fresh != nil {
 		v.Size = fresh.Size
 		if v.Guest == nil && fresh.Guest != nil {
@@ -170,7 +174,52 @@ func (h *Hypervisor) Rename(_ context.Context, from, to string) error {
 		v.Kept = kept.Kept
 	}
 	m.VMs[to] = v
+	born, ours := m.Cloned[from]
+	delete(m.Cloned, from)
+	delete(m.Cloned, to)
+	if ours {
+		m.Cloned[to] = born
+	}
 	return nil
+}
+
+func (h *Hypervisor) Cloned(context.Context) ([]string, error) {
+	// invariant: the hypervisor adapter's rule: an entry stands while the disk
+	// under its name is the one it cloned (its Born); any other is dropped.
+	h.w.Lock()
+	defer h.w.Unlock()
+	m := h.thisMac()
+	out := []string{}
+	for _, name := range slices.Sorted(maps.Keys(m.Cloned)) {
+		if v, ok := h.disk(name); ok && v.Born != 0 && v.Born == m.Cloned[name] {
+			out = append(out, name)
+			continue
+		}
+		delete(m.Cloned, name)
+	}
+	return out, nil
+}
+
+func (h *Hypervisor) Forget(_ context.Context, vm string) error {
+	h.w.Lock()
+	defer h.w.Unlock()
+	delete(h.thisMac().Cloned, vm)
+	return nil
+}
+
+// value: births count up over the whole world, as pids do, so no two
+// disks ever share one.
+func (h *Hypervisor) nextBorn() int {
+	top := 0
+	for _, m := range h.w.Macs {
+		for _, v := range m.VMs {
+			top = max(top, v.Born)
+		}
+		for _, born := range m.Cloned {
+			top = max(top, born)
+		}
+	}
+	return top + 1
 }
 
 func (h *Hypervisor) Boot(ctx context.Context, vm string, opts contract.BootOptions) (contract.Run, error) {
@@ -279,9 +328,11 @@ func (h *Hypervisor) Delete(_ context.Context, vm string) error {
 	if v.Running() {
 		return ErrRunning
 	}
-	v.Disk, v.PID, v.Ended = false, 0, nil
+	v.Disk, v.PID, v.Ended, v.Born = false, 0, nil, 0
+	m := h.thisMac()
+	delete(m.Cloned, vm)
 	if v.Kept == nil {
-		delete(h.thisMac().VMs, vm)
+		delete(m.VMs, vm)
 	}
 	return nil
 }
@@ -291,6 +342,7 @@ func (h *Hypervisor) Discard(_ context.Context, img imagescontract.ImageLocation
 	defer h.w.Unlock()
 	m := h.thisMac()
 	m.Images = slices.DeleteFunc(m.Images, func(ref string) bool { return ref == img.Ref })
+	delete(m.Cloned, img.Ref)
 	if v, ok := m.VMs[img.Ref]; ok && v.Kept == nil {
 		delete(m.VMs, img.Ref)
 	}

@@ -1,0 +1,17 @@
+description: 'while the hypervisor runs, its old folder is not erased: that one fails, and the folder stays'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.local/share/station/vms/vms/linux-1/disk.img"] = 1000000 | del(.macs["macbook-pro"].disk.files["~/.tart/vms/linux-dev/disk.img"]) | .macs["macbook-pro"].disk.files["~/.tart/cache/OCIs/ghcr.io/x/disk.img"] = 4000000000 | .macs["macbook-pro"].disk.running = ["tart"]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.[] | [.Name, .Result, .Reason]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["~/.tart"],"Confirm":"~/.tart"}}
+      exit: 0
+      stdout: |
+          [["~/.tart","broken","tart is running"]]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].disk.files | keys[] | select(startswith("~/.tart"))]'' world.json'
+      exit: 0
+      stdout: |
+          ["~/.tart/cache/OCIs/ghcr.io/x/disk.img"]

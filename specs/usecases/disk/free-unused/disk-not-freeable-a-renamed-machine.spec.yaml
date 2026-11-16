@@ -1,0 +1,17 @@
+description: 'a machine''s disk renamed by hand is not the one station made: it is not freed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].cloned = {"linux-1": 901} | .macs["macbook-pro"].vms["renamed"] = {"disk": true, "size": .macs["macbook-pro"].vms["linux-1"].size} | .macs["macbook-pro"].vms["linux-1"].disk = false | .macs["macbook-pro"].vms["linux-1"].pid = 0 | .macs["macbook-pro"].vms["linux-1"].born = 901'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["renamed"],"Confirm":"renamed"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.not-freeable","subject":"renamed"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["renamed"].disk'' world.json'
+      exit: 0
+      stdout: |
+          true

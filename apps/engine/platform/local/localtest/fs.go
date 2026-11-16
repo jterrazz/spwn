@@ -5,13 +5,19 @@ import (
 	"io/fs"
 	"maps"
 	"path"
+	"strconv"
 	"strings"
 	"testing/fstest"
 	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
 
 type FS struct {
 	Files fstest.MapFS
+	// value: how many folders MkdirAll made, each its own identity: a
+	// folder deleted and made again is another, as on a real disk.
+	made int
 }
 
 func NewFS() *FS { return &FS{Files: fstest.MapFS{}} }
@@ -46,7 +52,8 @@ func (f *FS) Replace(p string, data []byte, perm fs.FileMode) error {
 
 func (f *FS) MkdirAll(p string, perm fs.FileMode) error {
 	if _, ok := f.Files[key(p)]; !ok {
-		f.Files[key(p)] = &fstest.MapFile{Mode: fs.ModeDir | perm}
+		f.made++
+		f.Files[key(p)] = &fstest.MapFile{Mode: fs.ModeDir | perm, Sys: local.FileID("folder-" + strconv.Itoa(f.made))}
 	}
 	return nil
 }

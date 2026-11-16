@@ -41,3 +41,9 @@ func (e *RunningError) Error() string { return e.Process + " is running" }
 type NotMisplacedError struct{ Path string }
 
 func (e *NotMisplacedError) Error() string { return e.Path + " is not misplaced" }
+
+type UnreadRecordError struct{ Path string }
+
+func (e *UnreadRecordError) Error() string {
+	return e.Path + " cannot be read: nothing is freed until it can"
+}

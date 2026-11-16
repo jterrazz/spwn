@@ -33,16 +33,19 @@ type Amount struct {
 }
 
 const (
-	// value: the call a CanFree names, the gesture that frees it.
-	FreeCall = "disk.free"
+	// value: the calls a CanFree names, each the gesture that frees it.
+	FreeCall       = "disk.free"
+	FreeUnusedCall = "disk.free-unused"
 )
 
 type CanFree struct {
-	// value: what `disk free` frees here: the Can rebuild rows.
+	// value: what a gesture frees here: the Can rebuild rows for `disk
+	// free`, what nothing uses for `disk free-unused`.
 	Bytes    int64
 	Sentence string
 	// value: the call that frees it; empty when there is nothing to free.
-	Call string `json:",omitempty"`
+	Call  string     `json:",omitempty"`
+	Frees []Freeable `json:",omitempty"`
 }
 
 func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, CanFree) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 
@@ -16,6 +17,11 @@ const (
 )
 
 func DiskName(image, version string) string { return imagePrefix + image + "-" + version }
+
+func Owns(disk string) bool {
+	// value: a disk the images family names: an image version's, or a build's.
+	return strings.HasPrefix(disk, imagePrefix) || strings.HasPrefix(disk, buildPrefix)
+}
 
 // invariant: an image's versions are those held under its name, the
 // newest first.

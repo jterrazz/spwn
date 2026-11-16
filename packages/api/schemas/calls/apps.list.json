@@ -517,6 +517,15 @@
             "array",
             "null"
           ]
+        },
+        "Yours": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         }
       },
       "required": [
@@ -525,7 +534,8 @@
         "Move",
         "Path",
         "Prune",
-        "Then"
+        "Then",
+        "Yours"
       ],
       "type": "object"
     },
