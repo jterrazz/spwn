@@ -17,7 +17,7 @@ describe('home', () => {
             // When - I open the window
             // Then - the verdict says all is well and counts the machines, and no Needs you is offered
             await visitor.see(heading('Everything is fine.'));
-            await visitor.see(content('2 machines on 1 Mac'));
+            await visitor.see(content('2 machines on macbook-pro'));
             await visitor.gone(needsYou);
         });
         expect(result.errors.text).toBe('');

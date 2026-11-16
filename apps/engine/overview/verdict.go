@@ -197,13 +197,16 @@ func more(n int) string {
 }
 
 func machinesLine(s Summary) string {
-	if len(s.VMs) == 0 {
+	// invariant: the count is of the machines this Overview's Mac holds, the
+	// only ones whose needs it reads, so it names that Mac, never a count
+	// of Macs it has not read.
+	switch len(s.VMs) {
+	case 0:
 		return ""
+	case 1:
+		return "1 machine on " + s.Head.Name
 	}
-	if len(s.VMs) == 1 {
-		return "1 machine on 1 Mac"
-	}
-	return strconv.Itoa(len(s.VMs)) + " machines on 1 Mac"
+	return strconv.Itoa(len(s.VMs)) + " machines on " + s.Head.Name
 }
 
 func things(n int, one, other string) string {
