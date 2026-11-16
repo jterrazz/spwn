@@ -166,8 +166,44 @@ def dropped(name, *path):
     return edit
 
 
+def leftover(name, vm, size):
+    """A stopped disk station cloned that no machine record names, as a machine delete that did not finish leaves it."""
+    def edit(content):
+        held = content["macs"][name]
+        held["vms"][vm] = {"disk": True, "born": 901, "size": {"CPUs": 0, "Memory": 0, "Disk": size}}
+        held["cloned"] = {**held.get("cloned", {}), vm: 901}
+    return edit
+
+
+def holds_file(name, path, size):
+    def edit(content):
+        content["macs"][name]["disk"]["files"][path] = size
+    return edit
+
+
+def started(name, vm):
+    def edit(content):
+        content["macs"][name]["vms"][vm]["pid"] = 4711
+    return edit
+
+
+def unreadable(name, vm):
+    def edit(content):
+        content["macs"][name]["vms"][vm]["unreadable"] = True
+    return edit
+
+
+def running(name, *processes):
+    def edit(content):
+        content["macs"][name]["disk"]["running"] = list(processes)
+    return edit
+
+
 def plain(name):
     return (name, None, {}, [])
+
+
+STATION_VM = "~/.local/share/station/vms/vms/linux-1/disk.img"
 
 
 WORLDS = {
@@ -186,6 +222,18 @@ WORLDS = {
     "machinefile-differs": ("two-macs", "homebrew", applied(["lazygit", "bat", "ripgrep", "fd"]), []),
     "presence-refused": ("two-macs", None, {}, [switched("presence", "refused")]),
     "stories-file": ("stories", "homebrew", machine("macbook-pro", ["gh", "lazygit", "ghostty"], "settings: { git-shortcuts: {} }\n"), []),
+    "leftovers": ("two-macs", None, {}, [leftover("macbook-pro", "old-vm", 9000000000),
+                                         holds_file("macbook-pro", STATION_VM, 1000000)]),
+    "old-home-running": ("two-macs", None, {}, [holds_file("macbook-pro", STATION_VM, 1000000),
+                                                dropped("macbook-pro", "disk", "files", "~/.tart/vms/linux-dev/disk.img"),
+                                                holds_file("macbook-pro", "~/.tart/cache/OCIs/ghcr.io/x/disk.img", 4000000000),
+                                                running("macbook-pro", "tart")]),
+    "leftover-running": ("two-macs", None, {}, [leftover("macbook-pro", "old-vm", 9000000000),
+                                                holds_file("macbook-pro", STATION_VM, 1000000),
+                                                started("macbook-pro", "old-vm")]),
+    "record-unreadable": ("two-macs", None, {}, [leftover("macbook-pro", "old-vm", 9000000000),
+                                                 holds_file("macbook-pro", STATION_VM, 1000000),
+                                                 unreadable("macbook-pro", "api")]),
 }
 
 
