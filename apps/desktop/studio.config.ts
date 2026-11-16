@@ -7,9 +7,6 @@ export default defineConfig({
     presets: [test()],
     typescript: {
         architecture: {
-            // hazard: the hexagonal map derived from src/ refuses a spec that crosses its layers, so the layers below
-            // hazard: hold the hexagon, each sparing the specs.
-            hexagonal: false,
             layers: [
                 {
                     name: 'ui-knows-no-app',
@@ -23,49 +20,11 @@ export default defineConfig({
                     read: 'docs/concepts/architecture.md#the-tree',
                 },
                 {
-                    name: 'domain-imports-no-layer',
-                    from: { path: '^src/domain/', pathNot: '/__tests__/' },
-                    to: { path: '^src/', pathNot: '^src/domain/' },
-                    why: 'the domain is plain functions and types over values: no word, no drawing, no link, and no other layer of the app',
-                    fix: 'move the code that reads the engine to src/presentation/dependencies/, or the drawing to src/presentation/ui/ (apps/desktop/README.md, The dependency rule)',
-                    read: 'docs/concepts/architecture.md#the-tree',
-                },
-                {
-                    name: 'use-cases-see-domain-and-ports',
-                    from: { path: '^src/application/', pathNot: '/__tests__/' },
-                    to: { path: '^src/', pathNot: '^src/(domain|application)/' },
-                    why: 'a use case reads the engine, the opener and the presence through its ports alone, and draws nothing',
-                    fix: 'name what the use case needs in a port of src/application/ports/ and let src/composition/ hand it the adapter (apps/desktop/README.md, The dependency rule)',
-                    read: 'docs/concepts/architecture.md#the-tree',
-                },
-                {
                     name: 'adapters-draw-nothing',
                     from: { path: '^src/infrastructure/', pathNot: '/__tests__/' },
                     to: { path: '^src/presentation/' },
                     why: "an adapter speaks to the engine's socket, the Tauri shell or the document, and answers in the ports' types; the words and the drawing are the app's",
                     fix: "return the port's type and let the hooks of src/presentation/dependencies/ or a screen word and draw it (apps/desktop/README.md, The dependency rule)",
-                    read: 'docs/concepts/architecture.md#the-tree',
-                },
-                {
-                    name: 'only-composition-builds-adapters',
-                    from: {
-                        path: '^src/',
-                        pathNot: ['^src/composition/', '^src/infrastructure/', '/__tests__/'],
-                    },
-                    to: { path: '^src/infrastructure/' },
-                    why: 'the adapters are built in one place, src/composition/compose.ts, and every other module reads them through a port',
-                    fix: 'take the port from the provider (src/presentation/dependencies/dependencies.tsx), or build the adapter in src/composition/compose.ts (apps/desktop/README.md, The dependency rule)',
-                    read: 'docs/concepts/architecture.md#the-tree',
-                },
-                {
-                    name: 'only-main-composes',
-                    from: {
-                        path: '^src/',
-                        pathNot: ['^src/main[.]tsx$', '^src/composition/', '/__tests__/'],
-                    },
-                    to: { path: '^src/composition/' },
-                    why: 'the window is composed once, by src/main.tsx, which hands the dependencies to the provider',
-                    fix: 'read the dependencies through the provider, or take them as a prop from src/main.tsx (apps/desktop/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',
                 },
                 {
@@ -94,14 +53,6 @@ export default defineConfig({
                     to: { path: '^src/presentation/screens/' },
                     why: 'the screens are handed to the navigation by src/presentation/screens/registry.tsx, so the navigation never imports one back',
                     fix: 'add the screen to the registry, or move what the navigation needs out of src/presentation/screens/ (apps/desktop/README.md, The dependency rule)',
-                    read: 'docs/concepts/architecture.md#the-tree',
-                },
-                {
-                    name: 'kit-knows-no-feature',
-                    from: { path: '^src/presentation/kit/', pathNot: '/__tests__/' },
-                    to: { path: '^src/presentation/(features|screens|navigation)/' },
-                    why: 'the kit is what several features and screens share, so it never reaches up into one of them nor into the navigation',
-                    fix: 'move the code the kit needs down into the kit, or move the piece that needs a feature into that feature (apps/desktop/README.md, The dependency rule)',
                     read: 'docs/concepts/architecture.md#the-tree',
                 },
                 {
