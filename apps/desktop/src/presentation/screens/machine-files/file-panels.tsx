@@ -6,6 +6,7 @@ import { Icon } from '../../ui/icon';
 import { CodeBlock, Missing, Panel, Row, Switch, Value } from '../../ui/index';
 import { countOf } from '../../words/engine-words';
 import { followerState } from '../../words/shown';
+import { THE_MAC_ITSELF_WORD } from '../../words/words';
 import type { Shown } from './file-head';
 import { extendedBy, linesOf } from './model';
 
@@ -116,7 +117,9 @@ export function Followers({ view, go }: { view: MachinefileFileView; go: (to: Ro
                                 go(machineRoute(follower.Machine, 'Packages'));
                             }}
                             sentence={
-                                follower.Machine === follower.Mac ? undefined : `on ${follower.Mac}`
+                                follower.Machine === follower.Mac
+                                    ? THE_MAC_ITSELF_WORD
+                                    : `on ${follower.Mac}`
                             }
                             size="slim"
                             state={{ ...followerState(follower), calm: 'pill' }}
