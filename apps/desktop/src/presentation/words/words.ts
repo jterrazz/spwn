@@ -41,6 +41,8 @@ export const DISK_PENDING_WORD = 'reading';
 
 export const THIS_MAC_WORD = 'This Mac';
 
+export const THE_MAC_ITSELF_WORD = 'the Mac itself';
+
 export const NO_PURPOSE_WORD = 'No purpose given';
 
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;

@@ -32,6 +32,7 @@ import { MachineIcon, Panel, Row, Switch } from '../../ui/index';
 import { Page } from '../../ui/page';
 import { countOf } from '../../words/engine-words';
 import { diskGestureOf, machineKindOf } from '../../words/provisional';
+import { THE_MAC_ITSELF_WORD } from '../../words/words';
 import { BuildingLine } from './building-line';
 import { chosenMac, imagesOn } from './chosen';
 import { ImageLine } from './image-gesture';
@@ -162,7 +163,7 @@ function MacLine({ mac, station, go }: LineProps) {
             onOpen={() => {
                 go(machineRoute(mac.Name, 'Storage'));
             }}
-            sentence={sentence(['the Mac itself', caches.said])}
+            sentence={sentence([THE_MAC_ITSELF_WORD, caches.said])}
             title={mac.Name}
             value={sizeFrom(station, mac.Name)}
         />
