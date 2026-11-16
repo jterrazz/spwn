@@ -143,6 +143,9 @@ type Plan struct {
 	Passwordless bool
 	// value: the owner's lines of every phase the Machinefile says.
 	Scripts []Script
+	// value: when this machine last applied the Machinefile; absent when
+	// it never did.
+	Applied *time.Time `json:",omitempty"`
 }
 
 func (p Plan) WithWaiting(n Nights) Plan {

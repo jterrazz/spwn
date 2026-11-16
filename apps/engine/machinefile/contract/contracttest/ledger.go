@@ -70,6 +70,27 @@ func Ledger(t *testing.T, open func(t *testing.T) contract.Ledger) {
 			t.Errorf("List after a night = %+v, %v", list, err)
 		}
 	})
+	t.Run("an apply recorded is read back by its Machinefile, the latest replacing, the others untouched", func(t *testing.T) {
+		l := open(t)
+		if _, ok, err := l.LastApply(ctx, "laptop"); ok || err != nil {
+			t.Errorf("LastApply before any = %v, %v; want none", ok, err)
+		}
+		first := time.Date(2026, 11, 6, 9, 12, 0, 0, time.UTC)
+		later := first.AddDate(0, 0, 1)
+		for _, rec := range []struct {
+			file string
+			at   time.Time
+		}{{"laptop", first}, {"base", first}, {"laptop", later}} {
+			if err := l.PutApply(ctx, rec.file, rec.at); err != nil {
+				t.Fatalf("PutApply: %v", err)
+			}
+		}
+		for file, want := range map[string]time.Time{"laptop": later, "base": first} {
+			if got, ok, err := l.LastApply(ctx, file); !ok || err != nil || !got.Equal(want) {
+				t.Errorf("LastApply(%s) = %v, %v, %v; want %v", file, got, ok, err, want)
+			}
+		}
+	})
 	t.Run("a block written is listed by id beside the installs, and written again replaces it", func(t *testing.T) {
 		l := open(t)
 		if err := l.Put(ctx, installed("jq", "first")); err != nil {

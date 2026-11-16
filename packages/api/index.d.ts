@@ -1509,6 +1509,7 @@ export type MachinefileDone = {
 };
 
 export type MachinefileDrift = {
+    Applied?: string;
     Apply: MachinefileApplying;
     Chapters: MachinefileChapterDrift[] | null;
     Differences: number;
@@ -1647,6 +1648,7 @@ export type MachinefileOrigin = {
 };
 
 export type MachinefilePlan = {
+    Applied?: string;
     Blocks: MachinefileBlock[] | null;
     Extra: MachinefileExtraLine[] | null;
     Lines: MachinefileLine[] | null;

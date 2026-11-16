@@ -922,6 +922,10 @@
     "machinefile.Plan": {
       "additionalProperties": false,
       "properties": {
+        "Applied": {
+          "format": "date-time",
+          "type": "string"
+        },
         "Blocks": {
           "items": {
             "$ref": "#/$defs/machinefile.Block"

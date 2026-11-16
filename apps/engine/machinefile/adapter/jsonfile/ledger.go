@@ -8,6 +8,7 @@ import (
 	"path"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -47,6 +48,8 @@ type file struct {
 	Blocks    []machinefile.Written   `json:"blocks,omitempty"`
 	// value: the last night the engine's upgrade recorded.
 	Night *machinefile.Night `json:"night,omitempty"`
+	// value: when each Machinefile was last applied here, by its name.
+	Applies map[string]time.Time `json:"applies,omitempty"`
 }
 
 func (l *Ledger) read() (file, error) {
@@ -127,6 +130,22 @@ func (l *Ledger) Night(context.Context) (machinefile.Night, bool, error) {
 func (l *Ledger) Write(_ context.Context, n machinefile.Night) error {
 	return l.change(func(f *file) bool {
 		f.Night = &n
+		return true
+	})
+}
+
+func (l *Ledger) LastApply(_ context.Context, name string) (time.Time, bool, error) {
+	f, err := l.read()
+	at, ok := f.Applies[name]
+	return at, ok, err
+}
+
+func (l *Ledger) PutApply(_ context.Context, name string, at time.Time) error {
+	return l.change(func(f *file) bool {
+		if f.Applies == nil {
+			f.Applies = map[string]time.Time{}
+		}
+		f.Applies[name] = at
 		return true
 	})
 }

@@ -2,6 +2,7 @@ package machinefile_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
@@ -151,5 +152,16 @@ func TestADriftWithoutItsMacsReadSaysSo(t *testing.T) {
 	}
 	if want := "Matches linux-dev. Its ports and accounts are read from its Mac."; d.Verdict.Sentence != want {
 		t.Errorf("%q; want %q", d.Verdict.Sentence, want)
+	}
+}
+
+func TestADriftSaysWhenItsMachineLastAppliedTheFileAndNotInItsPlan(t *testing.T) {
+	at := time.Date(2026, 11, 6, 9, 12, 0, 0, time.UTC)
+	d := machinefile.DriftOf(machinefile.Plan{Name: "linux-dev", Applied: &at}, nil)
+	if d.Applied == nil || !d.Applied.Equal(at) || d.Plan.Applied != nil {
+		t.Errorf("drift applied %v, its plan's %v; want %v and none", d.Applied, d.Plan.Applied, at)
+	}
+	if never := machinefile.DriftOf(machinefile.Plan{Name: "linux-dev"}, nil); never.Applied != nil {
+		t.Errorf("a file never applied reads applied %v", never.Applied)
 	}
 }

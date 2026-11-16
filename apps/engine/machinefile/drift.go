@@ -3,6 +3,7 @@ package machinefile
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
@@ -29,11 +30,13 @@ func (Chapter) Enum() []string {
 // value: a machine against its Machinefile: the machine, the plan its
 // packages read as, each chapter with what differs in it, how many lines
 // differ in all, what apply would do with them, and the verdict that says
-// it; and whether the machine upgrades by itself what the file lists.
+// it; whether the machine upgrades by itself what the file lists; and
+// when the machine last applied the file, absent when it never did.
 
 type Drift struct {
 	Machine     string
 	Plan        Plan
+	Applied     *time.Time `json:",omitempty"`
 	Chapters    []ChapterDrift
 	Differences int
 	Apply       Applying
@@ -160,7 +163,8 @@ func DriftOf(p Plan, access *Access) Drift {
 			c.Matching++
 		}
 	}
-	d := Drift{Plan: p, Apply: apply.worded()}
+	d := Drift{Plan: p, Applied: p.Applied, Apply: apply.worded()}
+	d.Plan.Applied = nil
 	order := []Chapter{ChapterApps, ChapterSettings}
 	if access != nil {
 		chapters[ChapterPorts], chapters[ChapterAccounts] = access.ports(), access.accounts()

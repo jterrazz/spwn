@@ -72,6 +72,10 @@ func (*ledger) Night(context.Context) (machinefile.Night, bool, error) {
 	return machinefile.Night{}, false, nil
 }
 func (*ledger) Write(context.Context, machinefile.Night) error { return nil }
+func (*ledger) LastApply(context.Context, string) (time.Time, bool, error) {
+	return time.Time{}, false, nil
+}
+func (*ledger) PutApply(context.Context, string, time.Time) error { return nil }
 func (l *ledger) Delete(_ context.Context, pkg string) error {
 	l.deleted = append(l.deleted, pkg)
 	return nil
