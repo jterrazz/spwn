@@ -10,16 +10,6 @@ import (
 
 const LineStopped = "It holds no memory. Start it to use it again."
 
-type KeptDrift struct {
-	// value: how a running workspace stands with its Machinefile, as its
-	// Mac's engine last read it: when, how many differences every chapter
-	// counts, that no file is bound to it, or why its file did not read.
-	At          time.Time
-	Differences int
-	Unbound     bool   `json:",omitempty"`
-	Failed      string `json:",omitempty"`
-}
-
 func HeadOf(vm VM, now time.Time) (head verdict.Verdict, pending bool) {
 	// invariant: a VM's head is its state first (restarting or creating,
 	// down, stopped), then, running, how it stands with its file as its
