@@ -180,8 +180,12 @@ func PlayWorld(base []byte) []byte {
 			m.Files = ownerFiles()
 			m.Preferences["machinefile"] = map[string]any{"name": proName, "bound_at": storyNow.Add(-9 * 24 * time.Hour)}
 			m.Jobs = map[string]background.Job{"com.example.brain.x-snapshot": {Label: "com.example.brain.x-snapshot", Program: "~/.local/bin/x-snapshot", File: "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist", Scope: "user", Loaded: true, LastExit: 2, ProgramExists: true, OwnerExists: true}}
+			// invariant: lazygit, which this Mac's overlay takes out of its
+			// file, is behind and stays so through the engine's night, which
+			// moves only what the file lists: the world keeps one app whose
+			// newest version is out.
 			m.Apps = map[catalog.Method]*playApps{
-				catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0", "lazygit": "0.55.1"}, Behind: map[string]string{"gh": "2.98.0"}},
+				catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0", "lazygit": "0.55.1"}, Behind: map[string]string{"gh": "2.98.0", "lazygit": "0.56.0"}},
 				catalog.MethodCask: {Installed: map[string]string{"ghostty": "1.2.0"}, Behind: map[string]string{"ghostty": "1.2.1"}},
 			}
 		} else {
