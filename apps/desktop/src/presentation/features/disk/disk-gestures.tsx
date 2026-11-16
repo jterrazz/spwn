@@ -206,7 +206,7 @@ type FreeAllProps = {
 export function FreeAllButton({ gesture, label, name, variant = 'plain', verb }: FreeAllProps) {
     return (
         <span className={pageStyles.outcome}>
-            <GestureOutcome gesture={gesture} />
+            {gesture.state.kind === 'done' ? null : <GestureOutcome gesture={gesture} />}
             <GestureButton
                 gesture={gesture}
                 label={label}
