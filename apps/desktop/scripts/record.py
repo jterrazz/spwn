@@ -335,6 +335,20 @@ GESTURES = {
         {"call": "disk.free", "in": {}},
         {"call": "disk.move", "in": {"Folder": "~/.tart"}},
     ],
+    "leftovers": [
+        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "old-vm"]}},
+        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "old-vm"], "Confirm": "station-linux@2026.10.20, old-vm"}},
+    ],
+    "old-home-running": [
+        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "~/.tart"]}},
+        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "~/.tart"], "Confirm": "station-linux@2026.10.20, ~/.tart"}},
+    ],
+    "leftover-running": [
+        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "old-vm"]}},
+    ],
+    "record-unreadable": [
+        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "old-vm"]}},
+    ],
 }
 
 

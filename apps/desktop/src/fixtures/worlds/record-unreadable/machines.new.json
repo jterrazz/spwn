@@ -1,0 +1,3 @@
+{"world": "record-unreadable", "station": "dev", "exchanges": [
+{"request":{"watch":"machines.new","in":{}},"answers":[{"v":2,"error":{"message":"cannot read the VM record ~/.local/state/station/vms/api.json: unexpected end of JSON input","hint":"repair or move away \"~/.local/state/station/vms/api.json\"","exit":1}}]}
+]}
