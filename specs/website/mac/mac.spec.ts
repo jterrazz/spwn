@@ -29,16 +29,18 @@ describe('mac', () => {
             '/?world=two-macs&machine=macbook-pro&tab=Overview',
             async (visitor) => {
                 // When - the page is read
-                // Then - its line is the engine's sentence, which keeps nothing awake to say
-                await visitor.see(content('This Mac · Engine running.'));
+                // Then - its line is the engine's sentence: it sleeps normally
+                await visitor.see(content('This Mac · Engine running. Sleeps normally.'));
             },
         );
         const awake = await website.visit(
             '/?world=stories&machine=macbook-pro&tab=Overview',
             async (visitor) => {
                 // When - the page is read
-                // Then - its line says until when it stays awake
-                await visitor.see(content('This Mac · Engine running. Awake until 18:00.'));
+                // Then - its line says until when it stays awake, and that it does so lid closed
+                await visitor.see(
+                    content('This Mac · Engine running. Awake until 18:00, lid closed.'),
+                );
             },
         );
         expect(sleeps.errors.text).toBe('');

@@ -11,7 +11,8 @@ func TestAMacIsToldInOneSentence(t *testing.T) {
 		mac  MacView
 		want string
 	}{
-		"engine and awake": {MacView{ThisMac: true, Engine: EngineView{State: EngineRunning}, Awake: "awake until 18:00"}, "Engine running. Awake until 18:00."},
+		"engine and awake": {MacView{ThisMac: true, Engine: EngineView{State: EngineRunning}, Awake: "awake until 18:00, lid closed"}, "Engine running. Awake until 18:00, lid closed."},
+		"sleeps normally":  {MacView{Reachable: true, Engine: EngineView{State: EngineRunning}, Awake: "sleeps normally"}, "Engine running. Sleeps normally."},
 		"engine alone":     {MacView{Reachable: true, Engine: EngineView{State: EngineRunning}}, "Engine running."},
 		"engine stopped":   {MacView{ThisMac: true, Engine: EngineView{State: EngineStopped}}, "Engine stopped."},
 		"engine unknown":   {MacView{ThisMac: true}, ""},

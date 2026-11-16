@@ -1,4 +1,4 @@
-description: 'machines.list tells each Mac in one sentence: its engine, and what keeps it awake'
+description: 'machines.list tells each Mac in one sentence: its engine, and how it sleeps'
 env:
     - stories
     - engine
@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          [["macbook-pro","Engine running. Awake until 18:00."],["mac-mini","Engine running. Never sleeps."],["macbook-air","Asleep, not seen for 2 h."]]
+          [["macbook-pro","Engine running. Awake until 18:00, lid closed."],["mac-mini","Engine running. Never sleeps."],["macbook-air","Asleep, not seen for 2 h."]]

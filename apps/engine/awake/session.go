@@ -122,16 +122,26 @@ func (r Report) Until() string {
 }
 
 func (r Report) Phrase() string {
-	// value: what keeps this Mac awake, in words ("awake until 18:00",
-	// "never sleeps"); empty when nothing does.
+	// value: how this Mac sleeps, in the words its Awake line says: "never
+	// sleeps", "awake until 18:00" and ", lid closed" when the session
+	// holds it so, "awake stopped" with the guard's words while that end
+	// is told, else "sleeps normally".
 	switch r.Mode() {
 	case NeverSleeps:
 		return "never sleeps"
 	case AwakeUntil:
+		if r.Session.Lid {
+			return "awake " + r.Until() + ", lid closed"
+		}
 		return "awake " + r.Until()
-	case SleepsNormally, StoppedByGuard:
+	case StoppedByGuard:
+		if r.LastEnd.Detail != "" {
+			return "awake stopped, " + r.LastEnd.Detail
+		}
+		return "awake stopped"
+	case SleepsNormally:
 	}
-	return ""
+	return "sleeps normally"
 }
 
 func (r Report) Mode() Mode { return ModeOf(r.Now, r.NeverSleeps, r.Session, r.LastEnd) }
