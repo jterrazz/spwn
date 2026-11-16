@@ -31,6 +31,7 @@ import { MachineIcon, Panel, Row, Switch } from '../../ui/index';
 import { Page } from '../../ui/page';
 import { countOf } from '../../words/engine-words';
 import { diskGestureOf, machineKindOf } from '../../words/provisional';
+import { BuildingLine } from './building-line';
 import { chosenMac, imagesOn } from './chosen';
 import { ImageLine } from './image-gesture';
 
@@ -102,14 +103,19 @@ function Images({ images, mac }: ImagesProps) {
             {mine.length === 0 ? (
                 <p className={styles.none}>No image on {mac.Name}.</p>
             ) : (
-                mine.map((image) => (
-                    <ImageLine
-                        image={image}
-                        key={`${image.Record.name}@${image.Record.version}`}
-                        mac={mac}
-                        sentence={imageSentence(image)}
-                    />
-                ))
+                mine.map((image) => {
+                    const key = `${image.Record.name}@${image.Record.version}`;
+                    return image.Building === null ? (
+                        <ImageLine
+                            image={image}
+                            key={key}
+                            mac={mac}
+                            sentence={imageSentence(image)}
+                        />
+                    ) : (
+                        <BuildingLine building={image.Building} image={image} key={key} />
+                    );
+                })
             )}
         </Panel>
     );

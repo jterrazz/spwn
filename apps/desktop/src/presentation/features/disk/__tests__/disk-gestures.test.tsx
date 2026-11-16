@@ -166,6 +166,58 @@ describe('disk gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test('a delete of an image the engine refuses as in use shows its sentence and its hint, and the row as it was', async () => {
+        // Given - Storage over two-macs, where the engine answers the delete with image.in-use
+        const recording = recordingFor('two-macs');
+        const refusing = {
+            ...recording,
+            gestures: (recording.gestures ?? []).map((gesture) =>
+                gesture.request.call === 'images.delete'
+                    ? {
+                          ...gesture,
+                          after: [],
+                          answers: [
+                              {
+                                  error: {
+                                      code: 'image.in-use',
+                                      detail: { version: '2026.10.20', vms: 'linux-1' },
+                                      hint: 'station images lists the versions you can delete',
+                                      message:
+                                          'image station-linux 2026.10.20 has machines made from it: linux-1',
+                                      subject: 'station-linux',
+                                      type: 'refused',
+                                  },
+                                  v: 2,
+                              },
+                          ],
+                      }
+                    : gesture,
+            ),
+        };
+        const result = await component.render(
+            pageOver(refusing, { page: 'storage' }),
+            async (visitor) => {
+                const images = region('Images');
+                await visitor.see(within(images, content('2026.10.20')));
+
+                // When - its Delete is clicked, then confirmed
+                await visitor.click(within(images, button('Delete station-linux 2026.10.20')));
+                const asked = dialog('Delete station-linux 2026.10.20?');
+                await visitor.click(within(asked, button('Delete')));
+
+                // Then - the engine's sentence and its hint, and the row is still listed
+                await visitor.see(
+                    within(images, content('has machines made from it: linux-1', { exact: false })),
+                );
+                await visitor.see(
+                    within(images, content('station images lists the versions you can delete')),
+                );
+                await visitor.see(within(images, button('Delete station-linux 2026.10.20')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
     test('delete of an image asks yes, then the image leaves the list and its outcome stays above it', async () => {
         // Given - Storage over two-macs, two versions of station-linux built
         const result = await component.render(storageOver('two-macs'), async (visitor) => {

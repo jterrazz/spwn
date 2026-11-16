@@ -2,12 +2,25 @@ import { button, component, content, file, heading, region, within } from '@jter
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
+import { isRecord } from '../../../../domain/request-key';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
 
 const recordingFor = await recordingsOf('creating', 'mini-offline', 'one-mac', 'two-macs');
 
 function storageOver(world: string) {
     return pageOver(recordingFor(world), { page: 'storage' });
+}
+
+function reversedAnswer(answer: unknown): unknown {
+    if (!isRecord(answer) || !Array.isArray(answer.out)) {
+        return answer;
+    }
+    return {
+        ...answer,
+        out: answer.out.map((image: unknown) =>
+            isRecord(image) ? { ...image, Deletable: image.Deletable !== true } : image,
+        ),
+    };
 }
 
 describe('Storage', () => {
@@ -25,6 +38,58 @@ describe('Storage', () => {
         expect(result.content.text).not.toContain('Move');
         expect(result.content.text).not.toContain('What holds the disk');
         await expect(result.tree).toMatch(file('./__expected__/two-macs-storage.aria.yaml'));
+    });
+
+    test("an image's Delete is offered exactly when the engine says it is deletable", async () => {
+        // Given - Storage over two-macs, whose older version is deletable and whose newest is not
+        const recording = recordingFor('two-macs');
+        const flipped = {
+            ...recording,
+            exchanges: recording.exchanges.map((exchange) =>
+                exchange.request.call === 'images.list'
+                    ? {
+                          ...exchange,
+                          answers: exchange.answers.map(reversedAnswer),
+                      }
+                    : exchange,
+            ),
+        };
+
+        const images = region('Images');
+        const older = within(images, button('Delete station-linux 2026.10.20'));
+        const newest = within(images, button('Delete station-linux 2026.11.01'));
+
+        // When - the answer is drawn as recorded, then with every Deletable reversed
+        const asked = await component.render(storageOver('two-macs'), async (visitor) => {
+            // Then - Delete is on the version the engine marked, and not on the other
+            await visitor.see(older);
+            await visitor.gone(newest);
+        });
+        const reversed = await component.render(
+            pageOver(flipped, { page: 'storage' }),
+            async (visitor) => {
+                await visitor.see(newest);
+                await visitor.gone(older);
+            },
+        );
+        expect(asked.errors.text).toBe('');
+        expect(reversed.errors.text).toBe('');
+    });
+
+    test('an image being built is one row at its step, with no date, size or Delete', async () => {
+        // Given - Storage over creating, a build held at Packages
+        const images = region('Images');
+        const result = await component.render(storageOver('creating'), async (visitor) => {
+            // When - its images have been read
+            await visitor.see(within(images, content('Packages · Step 2 of 4')));
+
+            // Then - the engine's step and sentence stand, nothing of a built image does
+            await visitor.see(within(images, content('2026.11.04')));
+            await visitor.gone(within(images, content('built 0', { exact: false })));
+            await visitor.gone(within(images, content('GB', { exact: false })));
+            await visitor.gone(within(images, button('Delete station-linux 2026.11.04')));
+        });
+        expect(result.errors.text).toBe('');
     });
 
     test('a machine of the Mac opens its own Storage tab', async () => {

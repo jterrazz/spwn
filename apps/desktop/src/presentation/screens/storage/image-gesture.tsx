@@ -6,7 +6,6 @@ import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../kit/gestures';
 import { Icon } from '../../ui/icon';
 import { StatePill } from '../../ui/index';
-import { isDeletable } from '../../words/provisional';
 import { newestState } from '../../words/shown';
 
 import styles from '../../features/disk/disk.module.css';
@@ -43,7 +42,7 @@ export function ImageLine({ image, mac, sentence }: ImageLineProps) {
             trail={
                 <span className={styles.trail}>
                     {newest === null ? null : <StatePill {...newest} />}
-                    {isDeletable(image) ? (
+                    {image.Deletable ? (
                         <GestureButton
                             destroys
                             gesture={remove}
