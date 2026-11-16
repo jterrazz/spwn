@@ -1545,6 +1545,7 @@ export type MachinefileFileView = {
 };
 
 export type MachinefileFollower = {
+    Applied?: string;
     Differences: number;
     Mac: string;
     Machine: string;
