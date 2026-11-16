@@ -15,6 +15,7 @@ import (
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/images"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
@@ -102,6 +103,10 @@ type playStores struct {
 	Reservations []ports.Reservation     `json:"reservations,omitempty"`
 	Declarations []ports.Declaration     `json:"declarations,omitempty"`
 	Uptime       map[string]model.Uptime `json:"uptime,omitempty"`
+	// value: the last night the engine's upgrade recorded, and when each
+	// Machinefile was last applied.
+	Night   *machinefile.Night   `json:"night,omitempty"`
+	Applies map[string]time.Time `json:"applies,omitempty"`
 }
 
 type playVM struct {
@@ -178,6 +183,15 @@ func PlayWorld(base []byte) []byte {
 			m.Engine.Awake = &awake.Kept{Session: f.Awake.Session}
 			m.Disk = &playDisk{Total: 994e9, Free: 388e9}
 			m.Files = ownerFiles()
+			// invariant: the Mac has run its night since 03:00 of the story's
+			// day, so the clock moving an hour runs none: an app moved, and
+			// node, which its file holds on 24, waiting for 25.
+			m.Stores.Night = &machinefile.Night{
+				At: storyNow.Add(-7*time.Hour - 30*time.Minute + 9*time.Second), Machinefile: proName,
+				Moved:   []machinefile.Moved{{App: "gh", Was: "2.96.1", Now: "2.97.0", Range: "latest"}},
+				Waiting: []machinefile.Waiting{{App: "node", Newest: "25.1.0", Range: "24", Moved: "25", File: "~/.config/station/machinefiles/" + proName + ".machine.yaml"}},
+			}
+			m.Stores.Applies = map[string]time.Time{proName: storyNow.Add(-24*time.Hour - 78*time.Minute)}
 			m.Preferences["machinefile"] = map[string]any{"name": proName, "bound_at": storyNow.Add(-9 * 24 * time.Hour)}
 			m.Jobs = map[string]background.Job{"com.example.brain.x-snapshot": {Label: "com.example.brain.x-snapshot", Program: "~/.local/bin/x-snapshot", File: "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist", Scope: "user", Loaded: true, LastExit: 2, ProgramExists: true, OwnerExists: true}}
 			// invariant: lazygit, which this Mac's overlay takes out of its

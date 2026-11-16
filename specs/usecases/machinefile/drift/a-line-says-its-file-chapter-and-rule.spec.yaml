@@ -3,7 +3,7 @@ env:
     - stories
     - engine
 runs:
-    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | (.Plan.Lines[] | {package: .Step.Package, chapter: .Step.Chapter, file: .Step.File.Name, rule: .Step.Rule}), .Upgrades'''
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | (.Plan.Lines[] | {package: .Step.Package, chapter: .Step.Chapter, file: .Step.File.Name, rule: .Step.Rule}), (.Upgrades | del(.Last.At))'''
       stdin: |
           {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
       exit: 0
@@ -12,4 +12,4 @@ runs:
           {"package":"jq","chapter":"apps","file":"base","rule":"takes every version"}
           {"package":"gh","chapter":"apps","file":"base","rule":"takes every version"}
           {"package":"bat","chapter":"apps","file":"macbook-pro","rule":"takes every version"}
-          {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows."}
+          {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows.","Last":{"Verdict":{"Tone":"warn","Sentence":"1 app moved.","Line":"1 app waits for you."}}}

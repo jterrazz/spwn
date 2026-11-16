@@ -15,9 +15,12 @@
     - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Upkeep":
-    - heading "Upkeep 2" [level=2]
-    - button "Needs a look 1 brew update waiting macbook-pro · Apps"
+    - heading "Upkeep 3" [level=2]
+    - button "Needs a look 2 brew updates waiting macbook-pro · Apps"
     - button "Update brew": Update
+    - 'button "Needs a look node 25.1.0 available: change ''24'' to ''25'' macbook-pro · Apps"'
+    - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
+    - button "Copy ~/.config/station/machinefiles/macbook-pro.machine.yaml": Copy
     - 'button "Needs a look Firewall: off macbook-pro · Settings"'
     - text: System Settings > Network > Firewall
     - button "Copy System Settings > Network > Firewall": Copy
