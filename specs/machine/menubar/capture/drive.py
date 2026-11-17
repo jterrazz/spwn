@@ -31,7 +31,7 @@ STORY = os.environ.get("STATION_CAPTURE_PAGE", "home.exposed")
 PAGE = f"~/station/apps/menubar/stories/pages/machines.{STORY}.menubar.json"
 # value: the panel's top-left in M1's scene, from the item, as StatusPanel
 # places it: its right edge under the item's, 6 pt under the menu bar.
-DROP, MARGIN, WIDTH = 6, 8, 340
+DROP, MARGIN, WIDTH = 6, 8, 322
 # value: the Apple menu opens at the bar's left, 30.5 pt under the top (the Tahoe
 # capture, refs/passwords-tahoe rows 6 and 9); the native shots lay the desk's
 # scene under it as under the panel.
