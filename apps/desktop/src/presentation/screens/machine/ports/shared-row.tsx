@@ -1,14 +1,15 @@
-import type { PortsSharedPort, Target } from '@jterrazz/station-api';
+import type { CatalogAudience, PortsSharedPort, Target } from '@jterrazz/station-api';
 
+import type { Gesture } from '../../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../../kit/gestures';
 import { Openable, shareAddressOf } from '../../../kit/openable';
-import { TypeTag, Value } from '../../../ui/index';
+import { Switch, TypeTag, Value } from '../../../ui/index';
 import { isCalm } from '../../../ui/state-pill';
 import { shareToWord } from '../../../words/shown';
 import { SHARE_STATE_TONES } from '../../../words/tones';
-import { SHARE_STATE_WORDS } from '../../../words/words';
+import { SHARE_REACH_GESTURE_WORDS, SHARE_STATE_WORDS } from '../../../words/words';
 import { Address } from './address';
-import { usePortStop } from './port-gestures';
+import { usePortReach, usePortStop } from './port-gestures';
 
 import styles from './ports.module.css';
 
@@ -37,20 +38,76 @@ type SharedRowProps = {
     compact?: boolean;
 };
 
-export function SharedRow({ share, target, onThisMac, compact = false }: SharedRowProps) {
+const REACHES = ['local', 'private'] as const satisfies readonly CatalogAudience[];
+
+const REACH_OPTIONS = REACHES.map((id) => ({ id, label: shareToWord(id) }));
+
+function isReach(to: CatalogAudience): to is (typeof REACHES)[number] {
+    return REACHES.some((reach) => reach === to);
+}
+
+function Reach({
+    share,
+    disabled,
+    onPick,
+}: {
+    share: PortsSharedPort;
+    disabled: boolean;
+    onPick: (to: (typeof REACHES)[number]) => void;
+}) {
     const { to } = share;
-    const label = share.label ?? '';
-    const stop = usePortStop({ port: share.guest_port, target, vm: share.vm });
-    const stopButton = (
+    if (to === undefined) {
+        return null;
+    }
+    if (!isReach(to)) {
+        return <TypeTag>{shareToWord(to)}</TypeTag>;
+    }
+    return (
+        <Switch
+            disabled={disabled}
+            label={`${SHARE_REACH_GESTURE_WORDS.who} ${share.vm}:${share.guest_port}`}
+            onChange={(next) => {
+                if (next !== to) {
+                    onPick(next);
+                }
+            }}
+            options={REACH_OPTIONS}
+            surface="bare"
+            value={to}
+        />
+    );
+}
+
+function StopButton({ gesture, share }: { gesture: Gesture<unknown>; share: PortsSharedPort }) {
+    return (
         <GestureButton
-            gesture={stop}
+            gesture={gesture}
             label="Stop sharing"
             title={`Stop sharing ${share.vm}:${share.guest_port}?`}
             variant="link"
         />
     );
+}
+
+function useReaches(at: { vm: string; port: number; target: Target | undefined }) {
+    const reaches = {
+        local: usePortReach({ ...at, to: 'local' }),
+        private: usePortReach({ ...at, to: 'private' }),
+    };
+    const moving = [reaches.local, reaches.private].find(
+        ({ state }) => state.kind !== 'idle' && state.kind !== 'done',
+    );
+    return { moving, reaches };
+}
+
+export function SharedRow({ share, target, onThisMac, compact = false }: SharedRowProps) {
+    const { to } = share;
+    const label = share.label ?? '';
+    const stop = usePortStop({ port: share.guest_port, target, vm: share.vm });
+    const { reaches, moving } = useReaches({ port: share.guest_port, target, vm: share.vm });
+    const stopButton = <StopButton gesture={stop} share={share} />;
     const row = {
-        gesture: stop,
+        gesture: moving ?? stop,
         lead: <Value look="raised">{`:${share.guest_port}`}</Value>,
         leadSize: 'value',
         state: {
@@ -84,7 +141,13 @@ export function SharedRow({ share, target, onThisMac, compact = false }: SharedR
                 sentence={<Value>{shareAddressOf(share)}</Value>}
                 trail={
                     <span className={styles.trail}>
-                        {to === undefined ? null : <TypeTag>{shareToWord(to)}</TypeTag>}
+                        <Reach
+                            disabled={moving?.state.kind === 'running'}
+                            onPick={(next) => {
+                                reaches[next].start();
+                            }}
+                            share={share}
+                        />
                         {stopButton}
                     </span>
                 }

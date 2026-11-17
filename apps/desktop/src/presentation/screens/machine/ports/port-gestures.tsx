@@ -1,4 +1,4 @@
-import type { CallName, Target } from '@jterrazz/station-api';
+import type { CallName, CatalogAudience, Target } from '@jterrazz/station-api';
 
 import { useGesture } from '../../../dependencies/use-gesture';
 import type { Gesture } from '../../../dependencies/use-gesture';
@@ -24,6 +24,17 @@ export function usePortDeclare({ machine, port, target }: DeclaredOf): Gesture<u
         input: { Machine: machine, Port: String(port), Via: EXPOSED_ROUTE },
         rereads: PORT_REREADS,
         subject: `${machine}:${port}`,
+        target,
+    });
+}
+
+type ReachOf = PortOf & { to: CatalogAudience };
+
+export function usePortReach({ vm, port, target, to }: ReachOf): Gesture<unknown> {
+    return useGesture('ports.share', {
+        input: { Port: String(port), To: to, VM: vm },
+        rereads: [...PORT_REREADS, 'machinefile.drift'],
+        subject: `${vm}:${port}`,
         target,
     });
 }

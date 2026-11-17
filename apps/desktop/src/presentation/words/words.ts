@@ -70,6 +70,8 @@ export const AWAKE_GESTURE_WORDS = {
     stop: 'Stop keeping awake',
 } as const;
 
+export const SHARE_REACH_GESTURE_WORDS = { who: 'Who reaches' } as const;
+
 export const POWER_SOURCE_WORDS: WordsOfAnOpenCode = { ac: 'on power', battery: 'on battery' };
 
 export const SSH_WORDS = { answers: 'answers', silent: 'does not answer' } as const;
