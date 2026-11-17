@@ -179,7 +179,19 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('M5 waits for the values of an Activity page of a Mac not seen, said unknown');
+    test('M5 the Activity of a Mac not seen draws no value, and says the Mac does not answer', async () => {
+        // Given - the window on mac-mini's Activity over mini-offline, where its activity.read is refused as unreachable
+        const result = await website.visit(
+            '/?world=mini-offline&machine=mac-mini&tab=Activity',
+            async (visitor) => {
+                // When - the tab is read
+                // Then - its head says the Mac does not answer, and no measure is drawn
+                await visitor.see(heading('mac-mini does not answer.'));
+                await visitor.gone(region('Memory'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('M6 a stopped engine reads Engine stopped in the sidebar and offers Start the engine', async () => {
         // Given - the window on Home over engine-stopped
@@ -236,7 +248,26 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("M7 waits for a kind per disk row and the machine's own share, on disk.read");
+    test('M7 the bar of a Mac holds what the disk holds, by the kinds the engine gives', async () => {
+        // Given - the Storage tab of This Mac over two-macs, whose disk.read gives system, apps, data, caches, machines and free
+        const result = await website.visit(
+            '/?world=two-macs&machine=macbook-pro&tab=Storage',
+            async (visitor) => {
+                // When - the tab is read
+                const storage = region('Storage');
+
+                // Then - each kind is named with its bytes, and the Mac says what it holds itself
+                for (const kind of ['System', 'Your data', 'Caches', 'Machines and images']) {
+                    await visitor.see(within(storage, content(kind)));
+                }
+                for (const size of ['21.4 GB', '443 GB', '107 GB']) {
+                    await visitor.see(within(storage, content(size)));
+                }
+                await visitor.see(within(storage, content('This Mac itself holds 499 GB.')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo('M7 waits for a kept journal that records a Free, read in Changes');
 
@@ -261,9 +292,29 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'M9 waits for a recording of a Mac that lists what listens on it, each with its word',
-    );
+    test('M9 a Mac lists what listens on it, each port with the word of its reach', async () => {
+        // Given - the window over stories, where macbook-pro lists ControlCenter on :5000, reached outside Tailscale, and mac-mini screensharingd on :5900, private
+        const exposed = await website.visit(
+            '/?world=stories&machine=macbook-pro&tab=Ports',
+            async (visitor) => {
+                // When - the list is read
+                // Then - the exposed port is there with its word
+                const listening = region('What listens on this Mac');
+                await visitor.see(within(listening, content('ControlCenter', { exact: false })));
+                await visitor.see(within(listening, content('Outside Tailscale')));
+            },
+        );
+        const hidden = await website.visit(
+            '/?world=stories&machine=mac-mini&tab=Ports',
+            async (visitor) => {
+                const listening = region('What listens on this Mac');
+                await visitor.see(within(listening, content('screensharingd', { exact: false })));
+                await visitor.see(within(listening, content('Private')));
+            },
+        );
+        expect(exposed.errors.text).toBe('');
+        expect(hidden.errors.text).toBe('');
+    });
 
     test("M10 a Mac's Sign-ins tab lists each program with its state and the action the engine names", async () => {
         // Given - the Sign-ins tab of This Mac over two-macs

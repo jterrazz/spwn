@@ -1,4 +1,4 @@
-import { content, main, region, within } from '@jterrazz/test';
+import { content, heading, main, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -68,5 +68,17 @@ describe('tabs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('A6 waits for a verdict and its line on ports.list, saying the tab holds nothing');
+    test('A6 a tab with nothing in it says so in its head', async () => {
+        // Given - the Ports tab of mac-mini over two-macs, where its ports.list answers that nothing listens
+        const result = await website.visit(
+            '/?world=two-macs&machine=mac-mini&tab=Ports',
+            async (visitor) => {
+                // When - the tab is read
+                // Then - its head carries the engine's verdict and its line
+                await visitor.see(heading('Nothing listens on this machine.'));
+                await visitor.see(content('A port is listed as soon as something listens on it.'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 });

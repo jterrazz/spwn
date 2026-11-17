@@ -45,7 +45,22 @@ describe('storage', () => {
 
     test.todo('D9 waits for a kept journal on the wire, so Changes records what was freed');
 
-    test.todo('D10 waits for a recording of the disk of the other Mac');
+    test('D10 choosing the other Mac at the top shows its own disk and its verdict', async () => {
+        // Given - Storage over two-macs, where mac-mini's disk.read is recorded and has nothing to free
+        const result = await website.visit('/?world=two-macs&page=storage', async (visitor) => {
+            await visitor.see(heading('3.0 GB can be freed.'));
+
+            // When - mac-mini is chosen
+            await visitor.click(button('mac-mini'));
+
+            // Then - its verdict heads the page, and the disk says what station holds outside any machine on it
+            await visitor.see(heading('Nothing to free.'));
+            await visitor.see(
+                within(region('Disk'), content('station holds 84.0 GB', { exact: false })),
+            );
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test('D22 a machine of Storage opens its own Storage tab', async () => {
         // Given - Storage over two-macs, where linux-1 holds 50 GB
