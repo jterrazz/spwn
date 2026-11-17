@@ -76,14 +76,14 @@ describe('packages', () => {
 
     test.todo('W13 waits for a recording of an app no file lists');
 
-    test('W14 the apps are grouped by layer, each with its count', async () => {
+    test('W14 the apps are grouped by file, each with its count', async () => {
         // Given - the Packages tab of This Mac over machinefile-differs
         const result = await website.visit(DIFFERS, async (visitor) => {
             // When - Apps is read
             const apps = region('Apps');
             await visitor.see(apps);
 
-            // Then - each layer is a group, in the order they apply, with its apps and versions
+            // Then - each file is a group, in the order they apply, with its apps and versions
             const base = within(apps, region('base'));
             const own = within(apps, region('macbook-pro'));
             await visitor.see(within(base, content('2 apps')));

@@ -27,7 +27,7 @@ describe('Machine files', () => {
             await visitor.see(content('lazygit'));
         });
 
-        // Then - the file, its layers and This Mac's lines, and no verdict the engine did not give
+        // Then - the file, its files and This Mac's lines, and no verdict the engine did not give
         await expect(result.tree).toMatch(file('./__expected__/machinefile-kept-files.aria.yaml'));
     });
 
@@ -47,7 +47,7 @@ describe('Machine files', () => {
         );
     });
 
-    test('a Mac behind its file shows what is outdated, each file tab in its layer colour', async () => {
+    test('a Mac behind its file shows what is outdated, each file tab in its file colour', async () => {
         // Given - the window on Machine files over stories-file, where gh and ghostty are behind
         const result = await component.render(windowOver('stories-file'), async (visitor) => {
             // When - the drift has answered

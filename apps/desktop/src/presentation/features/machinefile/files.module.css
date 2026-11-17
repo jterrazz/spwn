@@ -1,7 +1,7 @@
-.layers {
+.planFiles {
     padding-bottom: var(--space-10);
 }
-.layer + .layer {
+.planFile + .planFile {
     margin-top: var(--space-10);
     padding-top: var(--space-14);
     border-top: 1px solid var(--line);

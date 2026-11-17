@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import { useReach, useRead } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
-import { layersOf } from '../../features/machinefile/model';
+import { planFilesOf } from '../../features/machinefile/model';
 import { Absent, Reading as ReadingVerdict, Unanswered, VerdictHead } from '../../kit/readings';
 import type { Route } from '../../navigation/route';
 import type { Opening } from '../../navigation/window';
@@ -82,7 +82,9 @@ function File({
     const drift = useRead('machinefile.drift', { Machinefile: file });
     const identities: Identities = new Map(
         drift.kind === 'read'
-            ? layersOf(drift.out.Plan).map((layer) => [layer.name, layer.identity] as const)
+            ? planFilesOf(drift.out.Plan).map(
+                  (planFile) => [planFile.name, planFile.identity] as const,
+              )
             : [],
     );
     return (

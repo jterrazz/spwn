@@ -2,8 +2,8 @@ import type { MachinefilePlan } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { useWatch } from '../../dependencies/dependencies';
-import { LayerList } from '../../features/machinefile/layers';
-import { countOn, kindsOf, layersOf, onShelf } from '../../features/machinefile/model';
+import { PlanFileList } from '../../features/machinefile/files';
+import { countOn, kindsOf, onShelf, planFilesOf } from '../../features/machinefile/model';
 import type { Route } from '../../navigation/route';
 import { Missing, Panel, Switch } from '../../ui/index';
 import { catalogRouteOf, CHAPTERS, descriptionsOf } from './model';
@@ -22,7 +22,7 @@ export function Chapters({
     const apps = useWatch('apps.list', {});
     const reports = apps.kind === 'read' ? (apps.out ?? []) : [];
     const kinds = kindsOf(reports);
-    const layers = layersOf(plan);
+    const planFiles = planFilesOf(plan);
     return (
         <Panel
             action={
@@ -30,7 +30,7 @@ export function Chapters({
                     label="Chapter"
                     onChange={setChapter}
                     options={CHAPTERS.map((id) => ({
-                        count: id === 'Access' ? undefined : countOn(layers, id, kinds),
+                        count: id === 'Access' ? undefined : countOn(planFiles, id, kinds),
                         id,
                         label: id,
                     }))}
@@ -44,8 +44,7 @@ export function Chapters({
             {chapter === 'Access' ? (
                 <Missing>The accounts it shares and the ports it opens</Missing>
             ) : (
-                <LayerList
-                    layers={onShelf(layers, chapter, kinds)}
+                <PlanFileList
                     look={{
                         descriptions: descriptionsOf(reports),
                         file,
@@ -54,6 +53,7 @@ export function Chapters({
                             go(catalogRouteOf(chapter, name));
                         },
                     }}
+                    planFiles={onShelf(planFiles, chapter, kinds)}
                     shelf={chapter}
                 />
             )}

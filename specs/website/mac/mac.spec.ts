@@ -362,13 +362,13 @@ describe('mac', () => {
 
     test.todo('M11 waits for a recording of enough samples for the four curves to be drawn');
 
-    test('M12 the Packages tab of a Mac that matches its file says so, then lists its upgrades and its apps by layer', async () => {
+    test('M12 the Packages tab of a Mac that matches its file says so, then lists its upgrades and its apps by file', async () => {
         // Given - the Packages tab of This Mac over two-macs
         const result = await website.visit(
             '/?world=two-macs&machine=macbook-pro&tab=Packages',
             async (visitor) => {
                 // When - the tab is read
-                // Then - the head matches, then upgrades, then the apps under each layer
+                // Then - the head matches, then upgrades, then the apps under each file
                 await visitor.see(content('4 of 4 apps match', { exact: false }));
                 await visitor.see(region('Upgrades'));
                 const apps = region('Apps');
