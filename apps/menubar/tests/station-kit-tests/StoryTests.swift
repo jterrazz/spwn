@@ -21,6 +21,13 @@ struct Heights: Decodable {
         try JSONDecoder().decode(Heights.self, from: Data(contentsOf: Tree.storyGoldens.appendingPathComponent("heights.json")))
     }
 
+    // value: under STATION_UPDATE_GOLDENS=1 the file is rewritten from the heights the
+    // station-kit render measures, one entry per story in the story list's order.
+    static func document(_ stories: [StoryFile], measured: [String: Double]) -> String {
+        let rows = stories.map { "  \"\($0.id)\": \(Int((measured[$0.id] ?? 0).rounded()))" }.joined(separator: ",\n")
+        return "{\n \"schema\": \"station.story-heights/v1\",\n \"source\": \"the station-kit render at its commit\",\n \"unit\": \"pt\",\n \"heights\": {\n\(rows)\n }\n}\n"
+    }
+
     func audit(_ stories: [StoryFile], measured: [String: Double]) -> [String] {
         var findings: [String] = []
         for story in stories where story.group != .shell && story.heightNote == nil {
@@ -224,7 +231,19 @@ final class StoryTests: XCTestCase {
         let stories = try stories()
         var measured: [String: Double] = [:]
         for story in stories where panel(story) { measured[story.id] = height(story) }
+        if Golden.update {
+            try Heights.document(stories.map(\.file), measured: measured)
+                .write(to: Tree.storyGoldens.appendingPathComponent("heights.json"), atomically: true, encoding: .utf8)
+        }
         XCTAssertEqual(try Heights.load().audit(stories.map(\.file), measured: measured), [])
+    }
+
+    func testTheHeightsFileIsWrittenFromTheMeasuredHeights() throws {
+        let page = ["pages/fleet.menubar.json"]
+        let stories = [StoryFile(id: "home.needs", group: .home, note: "n", pages: page), StoryFile(id: "menubar.count", group: .shell, note: "n", pages: page)]
+        let text = Heights.document(stories, measured: ["home.needs": 641.6])
+        XCTAssertEqual(text, "{\n \"schema\": \"station.story-heights/v1\",\n \"source\": \"the station-kit render at its commit\",\n \"unit\": \"pt\",\n \"heights\": {\n  \"home.needs\": 642,\n  \"menubar.count\": 0\n }\n}\n")
+        XCTAssertEqual(try JSONDecoder().decode(Heights.self, from: Data(text.utf8)).heights, ["home.needs": 642, "menubar.count": 0])
     }
 
     func testTheSizeCheckHoldsATargetStoryToItsHeightUnlessItSaysWhy() throws {
