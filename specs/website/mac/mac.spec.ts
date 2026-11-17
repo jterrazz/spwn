@@ -89,8 +89,6 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('M2 waits for a choice that ends with a run, on awake.read');
-
     test('M3 the machines of a Mac are listed with their creator and their state', async () => {
         // Given - the window on This Mac's page over two-macs, which holds api and linux-1
         const result = await website.visit(
