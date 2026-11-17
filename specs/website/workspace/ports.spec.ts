@@ -85,7 +85,30 @@ describe('ports', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("W18 Public waits for the engine's confirmation of a public share");
+    test('W18 Public moves a share to the public address, with no confirmation asked', async () => {
+        // Given - linux-1's Ports over two-macs, :5173 recorded shared Private, and its move to Public recorded answered at once, its public address the Mac's on port 443
+        const result = await website.visit(
+            '/?world=two-macs&machine=linux-1&tab=Ports&pace=600',
+            async (visitor) => {
+                const shared = within(region('Shared'), region('Port 5173'));
+                await visitor.see(
+                    within(shared, content('https://macbook-pro.tail1234.ts.net:40001')),
+                );
+
+                // When - Public is pressed on it
+                await visitor.click(within(shared, button('Public')));
+
+                // Then - its address is the public one the recording gives, the devices network's gone
+                await visitor.see(
+                    within(shared, content('https://macbook-pro.tail1234.ts.net:443')),
+                );
+                await visitor.gone(
+                    within(shared, content('https://macbook-pro.tail1234.ts.net:40001')),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('W19 Stop sharing moves a port to Listening, not shared, where it stays', async () => {
         // Given - linux-1's Ports over two-macs, :5173 shared
