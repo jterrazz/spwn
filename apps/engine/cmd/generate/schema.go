@@ -253,8 +253,8 @@ func (r *reflector) zeroable(t reflect.Type, s map[string]any) map[string]any {
 // invariant: a worded enum is one the engine never writes as its zero, so a
 // client draws each of its values by its word and none is a guess. A VM's
 // lifetime is set at its create, and the store's migrator rewrites an
-// older record's word; an Origin on the wire takes its layer from the
-// layer it was read in; a machine's kind, system and architecture come
+// older record's word; an Origin on the wire takes its kind from the
+// source it was read in; a machine's kind, system and architecture come
 // from the catalog's own; a drift's chapter is named by the drift that
 // counts it. A verdict always carries its tone, the one closed enum that
 // is not worded, since it is how a word is drawn. The worlds' answers are

@@ -1532,9 +1532,9 @@ export type MachinefileFileView = {
     Extends: string[] | null;
     Followers: MachinefileFollower[] | null;
     Head?: MachinefileHead;
-    Layer: 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
     Local?: MachinefileLocal;
     Name: string;
+    Origin: 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
     Path: string;
     Settings: string[] | null;
     Shelf: 'yours' | 'mixin' | 'shipped';
@@ -1642,7 +1642,7 @@ export type MachinefileNight = {
 
 export type MachinefileOrigin = {
     File: string;
-    Layer: 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
+    Kind: 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
     Name: string;
 };
 
@@ -3703,9 +3703,9 @@ export type MachinefileFileSide = 'shared' | 'not-in-the-file';
 
 export type MachinefileFollowerState = 'matches' | 'differs' | 'unread';
 
-export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
-
 export type MachinefileMacSide = 'granted' | 'not-signed-in';
+
+export type MachinefileOriginKind = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
 
 export type MachinefileShelf = 'yours' | 'mixin' | 'shipped';
 
@@ -3780,8 +3780,8 @@ export type StationWords = {
     MachinefileCondition: Record<MachinefileCondition, StationWord>;
     MachinefileFileSide: Record<MachinefileFileSide, StationWord>;
     MachinefileFollowerState: Record<MachinefileFollowerState, StationWord>;
-    MachinefileLayer: Record<MachinefileLayer, StationWord>;
     MachinefileMacSide: Record<MachinefileMacSide, StationWord>;
+    MachinefileOriginKind: Record<MachinefileOriginKind, StationWord>;
     MachinefileShelf: Record<MachinefileShelf, StationWord>;
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
     MachinesCheckState: Record<MachinesCheckState, StationWord>;

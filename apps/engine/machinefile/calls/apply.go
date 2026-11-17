@@ -204,8 +204,8 @@ func refusedOffTerminal(asked []machinefile.Asked, verb string) error {
 }
 
 // invariant: a Machinefile named by its path is copied into the owner's
-// folder under its name, so every later read finds it in the user layer;
-// the machine is bound to the name, never to the path.
+// folder under its name, so every later read finds it among the
+// owner's own files; the machine is bound to the name, never to the path.
 func bind(ctx context.Context, d Deps, asked, name string) error {
 	if isPath(asked) {
 		_, tree, err := named(ctx, d, asked)

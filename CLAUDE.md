@@ -8,7 +8,7 @@ A Go CLI that sets up and runs a Mac, its VMs (servers and workspaces) and the o
 - **A use case is a call.** `<family>.<verb>`, reached through the Router, which runs it in this process, at its target, or in a Mac's engine; every surface makes the same call.
 - **Add to the catalog, not to command code.** An app (agent skills included, its disk row in the same file) or a setting is one package file, `catalog/packages/<category>/<name>.yaml` (`station.package/v1`); images are still values in `apps/engine/catalog/`, and a dev server's port and env are its package's `ports`.
 - **Capabilities, never model names.** What a machine can do is its `Profile`; a section a kind does not have is refused as not for this machine.
-- **The binary is hermetic.** The catalog's packages, the built-in Machinefiles, dotfiles and VM recipes are embedded; nothing reads a file inside the clone. The owner's packages and Machinefiles (`~/.config/station/`) and the shared source are layers above them ([`docs/reference/machinefiles.md`](docs/reference/machinefiles.md)).
+- **The binary is hermetic.** The catalog's packages, the built-in Machinefiles, dotfiles and VM recipes are embedded; nothing reads a file inside the clone. The owner's packages and Machinefiles (`~/.config/station/`) and the shared source stand above them ([`docs/reference/machinefiles.md`](docs/reference/machinefiles.md)).
 - **The words are the glossary's.** One word per concept ([`docs/concepts/glossary.md`](docs/concepts/glossary.md)); the retired words are refused by `specs/architecture/`.
 - **A use case is proved over a world.** Every outcome of every call has its story under `specs/usecases/`, told over the fake world; an adapter's argv is proved once in `specs/adapters/`.
 

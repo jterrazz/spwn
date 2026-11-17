@@ -62,8 +62,8 @@ methods:
 
 func library(t *testing.T, user, builtin map[string]string) machinefile.Library {
 	t.Helper()
-	tree := func(layer machinefile.Layer, root string, files map[string]string) machinefile.Tree {
-		tr := machinefile.Tree{Layer: layer, Root: root}
+	tree := func(origin machinefile.OriginKind, root string, files map[string]string) machinefile.Tree {
+		tr := machinefile.Tree{Kind: origin, Root: root}
 		for p, body := range files {
 			tr.Files = append(tr.Files, machinefile.File{Path: p, Body: []byte(body)})
 		}
@@ -143,7 +143,7 @@ func TestALaterFileReplacesAndAnOverlayAddsAndRemoves(t *testing.T) {
 	if v := got["vm.resources.cpus"]; v.Text != "8" || v.Origin.Name != "top" {
 		t.Errorf("cpus %+v, want top's 8", v)
 	}
-	if v := got["vm.network"]; v.Text != "nat" || v.Origin.Layer != machinefile.Builtin {
+	if v := got["vm.network"]; v.Text != "nat" || v.Origin.Kind != machinefile.Builtin {
 		t.Errorf("network %+v, want base's nat", v)
 	}
 	if v := got["apps.fd"]; v.Text != "listed" || v.Origin.Name != "top" {
@@ -152,7 +152,7 @@ func TestALaterFileReplacesAndAnOverlayAddsAndRemoves(t *testing.T) {
 	if v := got["apps.packages"]; v.Text != "the manager of fd" {
 		t.Errorf("packages %+v: the overlay removed it as listed, and fd's manager brings it back", v)
 	}
-	if v := got["apps.releases"]; v.Origin.Layer != machinefile.Overlay {
+	if v := got["apps.releases"]; v.Origin.Kind != machinefile.Overlay {
 		t.Errorf("releases %+v, want the overlay's", v)
 	}
 }
@@ -197,7 +197,7 @@ func TestAccountsAndPortsAreReplacedWhole(t *testing.T) {
 	var got []string
 	for _, v := range r.Values {
 		if strings.HasPrefix(v.Key, "accounts.") || strings.HasPrefix(v.Key, "ports.") {
-			got = append(got, v.Key+"="+v.Text+"@"+string(v.Origin.Layer))
+			got = append(got, v.Key+"="+v.Text+"@"+string(v.Origin.Kind))
 		}
 	}
 	want := []string{"accounts.grants.claude=granted@overlay", "ports.open=8080@overlay", "ports.to=local@overlay"}
@@ -217,7 +217,7 @@ func TestAFileThatIsNoYAMLIsNotRead(t *testing.T) {
 		t.Errorf("chose %s", got)
 	}
 	for _, p := range []string{"machinefiles/b.yml", "catalog/command-line/jq.yml"} {
-		_, err := machinefile.Load([]machinefile.Tree{{Layer: machinefile.User, Root: "~/.config/station", Files: []machinefile.File{{Path: p, Body: []byte("x: 1\n")}}}})
+		_, err := machinefile.Load([]machinefile.Tree{{Kind: machinefile.User, Root: "~/.config/station", Files: []machinefile.File{{Path: p, Body: []byte("x: 1\n")}}}})
 		var refused *machinefile.RefusedFileError
 		if !errors.As(err, &refused) {
 			t.Errorf("%s read with %v, want it refused: a .yml file was meant to be read", p, err)

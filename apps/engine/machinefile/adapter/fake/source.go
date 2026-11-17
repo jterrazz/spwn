@@ -105,8 +105,8 @@ func (s Shared) clone() (string, error) {
 	return m.Clones[s.src.URL], nil
 }
 
-func tree(layer machinefile.Layer, root string, files map[string]string) machinefile.Tree {
-	t := machinefile.Tree{Layer: layer, Root: root}
+func tree(origin machinefile.OriginKind, root string, files map[string]string) machinefile.Tree {
+	t := machinefile.Tree{Kind: origin, Root: root}
 	for p, body := range files {
 		if strings.HasPrefix(p, "catalog/") || strings.HasPrefix(p, "machinefiles/") {
 			t.Files = append(t.Files, machinefile.File{Path: p, Body: []byte(body)})

@@ -1482,7 +1482,17 @@
       "Tone": "plain"
     }
   },
-  "MachinefileLayer": {
+  "MachinefileMacSide": {
+    "granted": {
+      "Word": "Granted",
+      "Tone": "plain"
+    },
+    "not-signed-in": {
+      "Word": "Not signed in",
+      "Tone": "plain"
+    }
+  },
+  "MachinefileOriginKind": {
     "built-in": {
       "Word": "built into station",
       "Tone": "plain"
@@ -1509,16 +1519,6 @@
     },
     "user": {
       "Word": "~/.config/station",
-      "Tone": "plain"
-    }
-  },
-  "MachinefileMacSide": {
-    "granted": {
-      "Word": "Granted",
-      "Tone": "plain"
-    },
-    "not-signed-in": {
-      "Word": "Not signed in",
       "Tone": "plain"
     }
   },

@@ -1104,7 +1104,7 @@
         "File": {
           "type": "string"
         },
-        "Layer": {
+        "Kind": {
           "enum": [
             "overlay",
             "user",
@@ -1122,7 +1122,7 @@
       },
       "required": [
         "File",
-        "Layer",
+        "Kind",
         "Name"
       ],
       "type": "object"

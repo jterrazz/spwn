@@ -56,7 +56,7 @@ func toned(t verdict.Tone, w string) word { return word{Word: w, Tone: t} }
 // a value its enum does not have; words_test.go holds both.
 func wordedEnums() []worded {
 	return []worded{
-		{machinefile.Layer(""), map[string]word{
+		{machinefile.OriginKind(""), map[string]word{
 			string(machinefile.Overlay):     plain("this machine's own changes"),
 			string(machinefile.User):        plain("~/.config/station"),
 			string(machinefile.Shared):      plain("a shared source"),

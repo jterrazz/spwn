@@ -31,7 +31,7 @@ apps/engine/
   overview/  the Overview's read (overview/calls), which composes every section's own read
   vault/     the vault.* calls (vault/calls) over accounts' Passwords contract
   grants/    the grants.* calls (grants/calls) over accounts' Grants contract
-  machinefile/ what a machine carries: its sources in layers (the contract Source), the resolution of
+  machinefile/ what a machine carries: its sources, strongest first (the contract Source), the resolution of
              a Machinefile against the catalog into the steps of a plan, explain, and plan, apply
              and drift, which read and act through apps' and settings' calls, never their adapters;
              the ledger of what apply installed
@@ -241,7 +241,7 @@ Fang renders the help, the version and the completion script, and handles the in
 
 The catalog is what station can put on a machine, and each of its packages is one file: `catalog/packages/<category>/<name>.yaml`, in the schema `station.package/v1`, a manager, an app (agent skills included) or a setting, with its methods and, for an app, its disk row. The catalog defines; a Machinefile chooses, and never defines a package ([ADR-031](../decisions/031-the-catalog-defines-the-machinefile-chooses.md)).
 
-The packages are embedded, so the binary reads no file of the clone. Above them stand the owner's own packages, `~/.config/station/catalog/<category>/<name>.yaml`, each replacing the built-in package of its name whole ([Machinefiles](../reference/machinefiles.md#sources-and-layers)). `wire` loads them once a run, through the strict decoder (every key known, no anchor or merge key, YAML 1.2 scalars, a newer schema refused with `update station`), and hands the one `catalog.Catalog` value to every reader. Its JSON Schema, `packages/api/schemas/station.package.v1.json`, is projected from the decoder's Go types.
+The packages are embedded, so the binary reads no file of the clone. Above them stand the owner's own packages, `~/.config/station/catalog/<category>/<name>.yaml`, each replacing the built-in package of its name whole ([Machinefiles](../reference/machinefiles.md#sources-and-origins)). `wire` loads them once a run, through the strict decoder (every key known, no anchor or merge key, YAML 1.2 scalars, a newer schema refused with `update station`), and hands the one `catalog.Catalog` value to every reader. Its JSON Schema, `packages/api/schemas/station.package.v1.json`, is projected from the decoder's Go types.
 
 A package's file is data: behaviour chosen by data belongs to a family, picked from a closed union (the method's manager key, a setting's effect), and no Go value of the catalog carries a function, which a test says. **Add to the catalog, not to command code**: one package file gives an app a row in `station apps`, a count in the Overview, an install, a remove, an update and its Disk row, because all of them read the same package. Each method's selector says where the package lives on (`mac-only`, `every-machine`, `vms-only`), so one binary lists and installs only what fits its machine. Images and dev-server profiles are still Go values of `apps/engine/catalog/`, carried by the same `catalog.Catalog` value, never read as a package list. The package format, every key of it, is [The catalog's package format](../reference/catalog.md). Which folder a change opens is [Develop](../guides/develop.md#where-a-change-goes)'s.
 

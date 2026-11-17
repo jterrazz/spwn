@@ -8,8 +8,8 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 )
 
-func tree(layer machinefile.Layer, files map[string]string) machinefile.Tree {
-	t := machinefile.Tree{Layer: layer, Root: string(layer)}
+func tree(origin machinefile.OriginKind, files map[string]string) machinefile.Tree {
+	t := machinefile.Tree{Kind: origin, Root: string(origin)}
 	for p, body := range files {
 		t.Files = append(t.Files, machinefile.File{Path: p, Body: []byte(body)})
 	}

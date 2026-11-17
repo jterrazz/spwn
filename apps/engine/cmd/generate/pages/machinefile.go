@@ -6,14 +6,14 @@ import (
 )
 
 func explained() []machinefile.Value {
-	linux := machinefile.Origin{Name: "station-linux", Layer: machinefile.Builtin, File: "built-in/machinefiles/station-linux.machine.yaml"}
-	mine := machinefile.Origin{Name: "studio-linux", Layer: machinefile.User, File: "~/.config/station/machinefiles/studio-linux.machine.yaml"}
+	linux := machinefile.Origin{Name: "station-linux", Kind: machinefile.Builtin, File: "built-in/machinefiles/station-linux.machine.yaml"}
+	mine := machinefile.Origin{Name: "studio-linux", Kind: machinefile.User, File: "~/.config/station/machinefiles/studio-linux.machine.yaml"}
 	return []machinefile.Value{
 		{Key: "machine.kind", Text: "workspace", Origin: linux},
 		{Key: "machine.system.os", Text: "ubuntu", Origin: linux},
 		{Key: "vm.resources.cpus", Text: "8", Origin: mine},
 		{Key: "apps.jq", Text: "listed", Origin: mine},
-		{Key: "apps.jq.method", Text: "github-release", Origin: machinefile.Origin{Name: "jq", Layer: machinefile.User, File: "~/.config/station/catalog/command-line/jq.yaml"}},
+		{Key: "apps.jq.method", Text: "github-release", Origin: machinefile.Origin{Name: "jq", Kind: machinefile.User, File: "~/.config/station/catalog/command-line/jq.yaml"}},
 		{Key: "apps.git", Text: "optional, no method for ubuntu 24.04", Origin: linux},
 	}
 }
