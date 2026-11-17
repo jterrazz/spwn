@@ -2,6 +2,7 @@ import { button, clock, component, content, file, heading, region, within } from
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../../composition/__tests__/page-over';
+import { unansweredAt } from '../../../../../infrastructure/outbound/engine-replay/__tests__/unanswered';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
 import type { Recording } from '../../../../../infrastructure/outbound/engine-replay/replay';
 
@@ -73,9 +74,10 @@ describe('Activity', () => {
     });
 
     test('a Mac that does not answer is no answer, never a zero', async () => {
-        // Given - the Mac mini over mini-offline, which does not answer
+        // Given - the Mac mini over mini-offline, no read asked at it ever answered
+        const unanswered = unansweredAt(recordingFor('mini-offline'), 'mac-mini');
         const result = await component.render(
-            activityOf('mini-offline', 'mac-mini'),
+            pageOver(unanswered, { machine: 'mac-mini', page: 'machine', tab: 'Activity' }),
             async (visitor) => {
                 // When - its activity is asked
                 await visitor.see(heading('No answer from the engine.'));

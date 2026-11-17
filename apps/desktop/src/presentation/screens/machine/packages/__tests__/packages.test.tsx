@@ -146,7 +146,7 @@ describe('Packages', () => {
             },
         );
 
-        // Then - each read says it was not answered, and nothing is invented in its place
+        // Then - each read carries the refusal it came back with, and nothing is invented in its place
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-mini.aria.yaml'));
     });
 

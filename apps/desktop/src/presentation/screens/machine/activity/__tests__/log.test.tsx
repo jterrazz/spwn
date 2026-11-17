@@ -104,22 +104,22 @@ describe('Log', () => {
     });
 
     test('a VM of a Mac that is not This Mac is read at that Mac', async () => {
-        // Given - infra over mini-offline, a VM of the Mac mini, which the recording does not answer for
+        // Given - infra over mini-offline, a VM of the Mac mini, which does not answer
         const result = await component.render(
             activityOf('mini-offline', 'infra'),
             async (visitor) => {
                 // When - its Activity is shown
-                await visitor.see(heading('No answer from the engine.'));
+                await visitor.see(heading('mac-mini does not answer.'));
                 await visitor.see(
                     within(
                         region('What infra prints'),
-                        content('No answer from the engine', { exact: false }),
+                        content('mac-mini does not answer.', { exact: false }),
                     ),
                 );
             },
         );
 
-        // Then - its log is asked at the Mac mini, and the panel shows that it went unanswered
+        // Then - its log is asked at the Mac mini, and the panel shows the refusal that came from there
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-infra.aria.yaml'));
     });
 });

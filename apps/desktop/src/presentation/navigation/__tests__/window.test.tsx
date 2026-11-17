@@ -94,38 +94,13 @@ describe('Window', () => {
             await visitor.see(heading('mac-mini Not seen'));
         });
 
-        // Then - its header says it is not seen, and its Overview that the world holds no answer for it
+        // Then - its header says it is not seen, and its Overview carries the refusal its reads came back with
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-mini.aria.yaml'));
     });
 
     test("a far Mac not seen heads its Overview with the engine's verdict, whatever its overview answers", async () => {
         // Given - mini-offline, whose mini's overview.read answers remote.unreachable
-        const recording = recordingFor('mini-offline');
-        const unreachable: Recording = {
-            ...recording,
-            exchanges: [
-                ...recording.exchanges,
-                {
-                    answers: [
-                        {
-                            error: {
-                                code: 'remote.unreachable',
-                                message: 'mac-mini does not answer',
-                                subject: 'mac-mini',
-                                type: 'unreachable',
-                            },
-                            v: 2,
-                        },
-                    ],
-                    request: {
-                        in: {},
-                        target: { name: 'mac-mini' },
-                        watch: 'overview.read',
-                    },
-                },
-            ],
-        };
-        const dependencies = composeReplay({ recording: unreachable });
+        const dependencies = composeReplay({ recording: recordingFor('mini-offline') });
 
         // When - the mini is opened
         const result = await component.render(
@@ -142,7 +117,7 @@ describe('Window', () => {
                         exact: false,
                     }),
                 );
-                await visitor.gone(content('Unreachable', { exact: false }));
+                await visitor.gone(heading('mac-mini does not answer.'));
             },
         );
         expect(result.errors.text).toBe('');

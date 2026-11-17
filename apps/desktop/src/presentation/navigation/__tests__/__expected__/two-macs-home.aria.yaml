@@ -70,7 +70,10 @@
       - text: 12.4 / 16
     - button "api"
     - button "linux-1"
-    - button "mac-mini"
+    - button "mac-mini 21 % 41 26 / 64":
+      - text: mac-mini 21 %
+      - meter "Memory of mac-mini, used of its total"
+      - text: 26 / 64
     - button "infra"
     - button "Add a Mac"
   - region "Last night":

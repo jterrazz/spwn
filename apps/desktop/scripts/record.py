@@ -32,8 +32,8 @@ changed by `compared`, never by the clock; no read of TIMED after a gesture; and
 them, the NOISE field of a gesture (the process number the host gave) and the CLOCKED field of an answer (the world's
 clock: settings.matrix's Read, awake.read's Now).
 
-A far Mac's machine, asked through that door, is answered with This Mac's overview: only This Mac, with no
-target, and its VMs, by name, are asked.
+In a world run that door is a Mac's engine socket: a frame for another Mac, or for a VM of another Mac, rides the
+world's far dialer and is answered there, so every Mac machines.list lists and every VM of each is asked, by name.
 
 A sign-in call names its VM in `Machine` to this Mac's engine and takes no target: accounts.list is asked for This Mac
 and once per VM of every Mac, accounts.login and accounts.logout carry their `Machine`, and the `sign-ins` world
@@ -172,14 +172,18 @@ def vmsOf(listed):
 
 
 def asks(listed):
-    """The reads the window asks of this Mac and its VMs. This Mac's engine is the socket's own, so a read of it
-    names no target, as targetOf (src/domain/machines/machines.ts) sends it, and a read two pages ask is asked once. A drift
-    names its machine in its input and no target, as driftAsked sends it. The New machine sheet watches machines.new
-    of the socket's engine, opened anywhere or on one Mac machines.list lists, as askedOf sends it; a sheet opened
-    from a machine file names it in From, a request of ALSO."""
+    """The reads the window asks of every Mac machines.list lists and of every VM of each. This Mac's engine is the
+    socket's own, so a read of it names no target, and a far Mac or a VM is named in the target, as targetOf
+    (src/domain/machines/machines.ts) sends it; a read two pages ask is asked once. A drift names its machine in its
+    input and no target, as driftAsked sends it. A VM's activity and its log are asked at its Mac, as useActivity
+    and VmLog send them. The New machine sheet watches machines.new of the socket's engine, opened anywhere or on one
+    Mac machines.list lists, as askedOf sends it; a sheet opened from a machine file names it in From, a request of
+    ALSO."""
     here = thisMac(listed)
-    vms = [(mac, vm) for mac in here for vm in mac.get("VMs") or []]
-    targets = [{} for _ in here] + [at(vm["Name"]) for _, vm in vms]
+    macs = allMacs(listed)
+    far = [mac["Name"] for mac in macs if not mac.get("ThisMac")]
+    vms = [(mac, vm) for mac in macs for vm in mac.get("VMs") or []]
+    targets = [onMac(mac) for mac in macs] + [at(vm["Name"]) for _, vm in vms]
     return list({keyOf(request): request for request in [
         {"watch": "overview.read", "in": {}},
         {"call": "engine.read", "in": {}},
@@ -193,22 +197,22 @@ def asks(listed):
         {"call": "machinefile.explain", "in": {}},
         {"call": "machinefile.files", "in": {}},
         {"watch": "engine.watch", "in": {"machines": []}},
-        *[{"watch": "engine.watch", "in": {"machines": [vm["Name"]]}} for _, vm in vms],
+        *[{"watch": "engine.watch", "in": {"machines": [name]}} for name in [*far, *[vm["Name"] for _, vm in vms]]],
         *[{kind: call, "in": {}, **target} for target in targets for kind, call in (
             ("watch", "overview.read"), ("watch", "apps.list"), ("watch", "settings.list"),
             ("call", "machinefile.plan"), ("call", "machinefile.explain"), ("watch", "disk.read"),
         )],
         {"call": "machinefile.drift", "in": {}},
-        *[{"call": "machinefile.drift", "in": {"Machine": vm["Name"]}} for _, vm in vms],
+        *[{"call": "machinefile.drift", "in": {"Machine": name}} for name in [*far, *[vm["Name"] for _, vm in vms]]],
         *[{"call": call, "in": {"Machinefile": "station-macos"}}
           for _ in here for call in ("machinefile.drift", "machinefile.plan")],
         *[{"watch": "activity.read", "in": {"graph": graph}, **target} for target in targets for graph in GRAPHS],
-        *[{"watch": "activity.read", "in": {"graph": graph, "of": vm["Name"], "machine": {"Name": vm["Name"], "On": mac["Name"]}}}
+        *[{"watch": "activity.read", "in": {"graph": graph, "of": vm["Name"], "machine": {"Name": vm["Name"], "On": mac["Name"]}}, **onMac(mac)}
           for mac, vm in vms for graph in GRAPHS],
         *[{"watch": "activity.read", "in": {"history": True}, **target} for target in targets],
-        *[{"watch": "activity.read", "in": {"history": True, "of": vm["Name"], "machine": {"Name": vm["Name"], "On": mac["Name"]}}}
+        *[{"watch": "activity.read", "in": {"history": True, "of": vm["Name"], "machine": {"Name": vm["Name"], "On": mac["Name"]}}, **onMac(mac)}
           for mac, vm in vms],
-        *[{"call": "machines.log", "in": {"VM": vm["Name"]}} for _, vm in vms],
+        *[{"call": "machines.log", "in": {"VM": vm["Name"]}, **onMac(mac)} for mac, vm in vms],
         *[{"call": "machines.ssh", "in": {"Name": name}} for name in vmsOf(listed)],
         *[{"watch": "accounts.list", "in": {}} for _ in here],
         *[{"watch": "accounts.list", "in": {"Machine": name}} for name in vmsOf(listed)],
@@ -368,9 +372,18 @@ def keyOf(request):
     return json.dumps(request, sort_keys=True)
 
 
-def thisMac(listed):
+def allMacs(listed):
     out = last_out(listed) or {}
-    return [mac for mac in (out.get("All") or {}).get("Macs") or [] if mac.get("ThisMac")]
+    return [mac for mac in (out.get("All") or {}).get("Macs") or [] if mac.get("Name")]
+
+
+def thisMac(listed):
+    return [mac for mac in allMacs(listed) if mac.get("ThisMac")]
+
+
+def onMac(mac):
+    """The target a read of a Mac names, as targetOf sends it: none for This Mac, the Mac's name for a far one."""
+    return {} if mac.get("ThisMac") else at(mac["Name"])
 
 
 def without(value, field):

@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
 import { isRecord } from '../../../../domain/request-key';
+import { unansweredAt } from '../../../../infrastructure/outbound/engine-replay/__tests__/unanswered';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
 
 const recordingFor = await recordingsOf('creating', 'mini-offline', 'one-mac', 'two-macs');
@@ -229,18 +230,22 @@ describe('Storage', () => {
     });
 
     test('a Mac the world holds no answer for shows that no answer came', async () => {
-        // Given - Storage over mini-offline
-        const result = await component.render(storageOver('mini-offline'), async (visitor) => {
-            await visitor.see(heading('Nothing to free.'));
+        // Given - Storage over mini-offline, no read asked at the Mac mini ever answered
+        const unanswered = unansweredAt(recordingFor('mini-offline'), 'mac-mini');
+        const result = await component.render(
+            pageOver(unanswered, { page: 'storage' }),
+            async (visitor) => {
+                await visitor.see(heading('Nothing to free.'));
 
-            // When - the Mac mini, which does not answer, is chosen
-            await visitor.click(button('mac-mini'));
+                // When - the Mac mini, which does not answer, is chosen
+                await visitor.click(button('mac-mini'));
 
-            // Then - its disk is no answer, it has no verdict, and its machines are still listed
-            await visitor.see(heading('No answer from the engine.'));
-            await visitor.see(heading('No verdict from the engine.'));
-            await visitor.see(within(region('Machines'), content('infra')));
-        });
+                // Then - its disk is no answer, it has no verdict, and its machines are still listed
+                await visitor.see(heading('No answer from the engine.'));
+                await visitor.see(heading('No verdict from the engine.'));
+                await visitor.see(within(region('Machines'), content('infra')));
+            },
+        );
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-storage.aria.yaml'));
     });
 
