@@ -1376,6 +1376,9 @@
             "null"
           ]
         },
+        "Optional": {
+          "type": "boolean"
+        },
         "Origin": {
           "$ref": "#/$defs/machinefile.Origin"
         },
@@ -1456,6 +1459,7 @@
         "Locked",
         "Method",
         "Needs",
+        "Optional",
         "Origin",
         "Package",
         "Phase",
