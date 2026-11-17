@@ -188,6 +188,7 @@ export function PackagesTab({ name, target, asked }: Asked) {
         <Screen>
             {planning ? (
                 <PlanView
+                    asked={asked}
                     back={() => {
                         setPlanning(false);
                     }}

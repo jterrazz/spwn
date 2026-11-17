@@ -19,7 +19,12 @@ function planOver(world: string, name: string, target?: Target) {
     return (
         <EngineProvider dependencies={dependencies}>
             <Screen>
-                <PlanView back={() => undefined} name={name} target={target} />
+                <PlanView
+                    asked={target === undefined ? {} : { Machine: name }}
+                    back={() => undefined}
+                    name={name}
+                    target={target}
+                />
             </Screen>
             <GestureConfirm />
         </EngineProvider>
@@ -49,6 +54,22 @@ describe('Plan', () => {
                 // Then - the dialog closes and the engine's answer settles the gesture done
                 await visitor.gone(asked(MAC));
                 await visitor.see(content('Done'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("the closing bar says what an apply leaves, in the engine's words, beside Back and Apply", async () => {
+        // Given - the plan of This Mac over machinefile-differs, whose drift recording gives Apply.Stays
+        const result = await component.render(
+            planOver('machinefile-differs', MAC),
+            async (visitor) => {
+                await visitor.see(heading('To install 2'));
+
+                // Then - the bar carries the sentence the engine words, and the two buttons
+                await visitor.see(content('Nothing is removed. 4 apps stay as they are.'));
+                await visitor.see(button('Back'));
+                await visitor.see(button('Apply'));
             },
         );
         expect(result.errors.text).toBe('');
