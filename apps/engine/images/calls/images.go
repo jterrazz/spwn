@@ -13,8 +13,10 @@ type ListIn struct{}
 
 var List = call.Call[Deps, ListIn, []images.Report]{
 	Name: "images.list", Where: call.AtTarget, Applies: images.Applies,
+	Errors: []fail.Code{OldRecord},
 	Run: func(ctx context.Context, d Deps, _ ListIn, _ call.Progress) ([]images.Report, error) {
-		return d.Images.List(ctx)
+		reports, err := d.Images.List(ctx)
+		return reports, Worded(err)
 	},
 }
 
@@ -44,7 +46,7 @@ type UpdateIn struct {
 
 var Update = call.Call[Deps, UpdateIn, []images.Update]{
 	Name: "images.update", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(),
-	Errors: []fail.Code{Unknown},
+	Errors: []fail.Code{Unknown, OldRecord},
 	Run: func(ctx context.Context, d Deps, in UpdateIn, p call.Progress) ([]images.Update, error) {
 		steps := stepper(p)
 		updates, err := d.Images.Update(ctx, in.Names, steps.step)
@@ -83,7 +85,7 @@ type DeleteIn struct {
 
 var Delete = call.Call[Deps, DeleteIn, []images.Record]{
 	Name: "images.delete", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(), Confirm: confirm.DeleteImage,
-	Errors: []fail.Code{Unknown, InUse, confirm.YesNeeded},
+	Errors: []fail.Code{Unknown, InUse, OldRecord, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in DeleteIn, _ call.Progress) ([]images.Record, error) {
 		if err := d.Images.CheckDelete(ctx, in.Image, in.Version); err != nil {
 			return nil, Worded(err)

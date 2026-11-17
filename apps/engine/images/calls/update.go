@@ -105,7 +105,7 @@ func (s *Builder) updateOne(ctx context.Context, name string, progress func(imag
 		return failed("keeping the fetched image", err)
 	}
 	_ = s.e.Discard(ctx, at)
-	rec := images.Record{Name: name, Version: latest.Version, BuiltAt: s.m.Now().UTC().Truncate(time.Second), Fetched: true}
+	rec := images.Record{Name: name, Version: latest.Version, Distro: img.Distro, DistroVersion: img.DistroVersion, BuiltAt: s.m.Now().UTC().Truncate(time.Second), Fetched: true}
 	if disks, err := s.e.Disks(ctx); err == nil {
 		for _, d := range disks {
 			if d.VM == disk {

@@ -39,7 +39,7 @@ func heldBuilder(t *testing.T, versions ...string) (*Builder, *imagesfake.Marks)
 	held, marks := imagesfake.NewStore(), imagesfake.NewMarks()
 	vms := madeFrom{records: []machines.Record{{Name: "api", Image: "base-ubuntu", Version: "2026.10.20"}}}
 	for _, v := range versions {
-		if err := held.Put(ctx, images.Record{Name: "base-ubuntu", Version: v}); err != nil {
+		if err := held.Put(ctx, images.Record{Name: "base-ubuntu", Version: v, Distro: catalog.DistroUbuntu}); err != nil {
 			t.Fatal(err)
 		}
 	}

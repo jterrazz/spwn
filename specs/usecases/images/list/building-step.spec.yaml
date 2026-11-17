@@ -17,4 +17,4 @@ runs:
     - command: 'images --json | /usr/bin/jq -c ''.images'''
       exit: 0
       stdout: |
-          [{"name":"base-ubuntu","version":"2026.11.04","size_bytes":0,"mac":"macbook-pro","vms":[],"newest":false,"deletable":false,"building":"Step 2 of 4"}]
+          [{"name":"base-ubuntu","version":"2026.11.04","distro":"ubuntu","size_bytes":0,"mac":"macbook-pro","vms":[],"newest":false,"deletable":false,"building":"Step 2 of 4"}]

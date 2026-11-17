@@ -60,6 +60,9 @@ func (s *Store) read(at string) (images.Record, error) {
 	if _, err := store.Current(f.V, Version); err != nil {
 		return images.Record{}, fmt.Errorf("image record %s: %w", at, err)
 	}
+	if !f.Distro.Known() {
+		return images.Record{}, &images.OldRecordError{Image: path.Base(path.Dir(at)), Version: strings.TrimSuffix(path.Base(at), ".json"), File: at}
+	}
 	return f.Record, nil
 }
 

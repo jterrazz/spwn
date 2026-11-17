@@ -620,6 +620,7 @@
         "image.binary-not-found",
         "image.no-linux-binary",
         "image.no-recipe",
+        "image.old-record",
         "image.unknown"
       ],
       "in": "BuildIn"
@@ -633,6 +634,7 @@
       "errors": [
         "confirm.yes-needed",
         "image.in-use",
+        "image.old-record",
         "image.unknown"
       ],
       "in": "DeleteIn"
@@ -641,6 +643,9 @@
       "name": "images.list",
       "schema": "station.images.list/v1",
       "where": "at-target",
+      "errors": [
+        "image.old-record"
+      ],
       "in": "ListIn"
     },
     {
@@ -648,6 +653,7 @@
       "schema": "station.images.update/v1",
       "where": "in-engine",
       "errors": [
+        "image.old-record",
         "image.unknown"
       ],
       "in": "UpdateIn"

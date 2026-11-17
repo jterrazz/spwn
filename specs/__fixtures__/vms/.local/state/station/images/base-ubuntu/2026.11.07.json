@@ -1,6 +1,8 @@
 {
   "name": "base-ubuntu",
   "version": "2026.11.07",
+  "distro": "ubuntu",
+  "distro_version": "24.04",
   "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
   "station": "v3.0.0",
   "recipe_sha": "0000000000000000000000000000000000000000000000000000000000000000",

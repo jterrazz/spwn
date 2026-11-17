@@ -16,7 +16,7 @@ An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac ho
 ```sh
 station images                  # ●  base-ubuntu  2026.11.01  4.0 GB  macbook-pro  api · linux-1
 station images --on mac-mini    # that Mac's alone
-station images --json           # station.images.list/v1: name, version, size_bytes, mac, vms, newest, deletable, building
+station images --json           # station.images.list/v1: name, version, distro, size_bytes, mac, vms, newest, deletable, building
 ```
 
 One row per version per Mac, This Mac first, then every other Mac that answers; an image no Mac holds is one row, `not built yet`. Images live on a Mac: inside a VM the family is refused (exit 2).
@@ -36,6 +36,8 @@ station images build studio-linux     # a Machinefile of yours or of the shared 
 An image is built from a Machinefile of a VM that says `vm.image.from`, the upstream its disk starts from (`ghcr.io/cirruslabs/ubuntu:24.04`, pulled once, about 5 GB, and cloned for the build), read from every source as `station plan` reads it: a name no source holds is `no image "<name>"`, and a Machinefile that makes no image (a mixin, a computer's, a VM's with no `vm.image.from`) is refused naming why, both exit 2. The version is the UTC date, `2026.11.07`, with `.2` for a second build the same day. The record keeps the upstream, the Machinefile, the hash of the recipe files and the hash of the Machinefile's chain (every file it extends, its overlay) and lock, so a bare `build` rebuilds an image whose recipe, Machinefile or lock changed; it also keeps the lock the build VM wrote once its image phase ran, the versions the image carries. Images need Tart: `station apps install tart`.
 
 `base-ubuntu` and `base-macos` are the built-in images' only names: `linux`, `station-linux` and `macos` name no image, in any images command or in `machines create --image` (`unknown image "macos"`), and an image built under an old name is no longer read ([ADR-051](../decisions/051-a-machine-is-a-base-and-its-machinefiles.md), a proposal).
+
+Every record names the image's distro, `ubuntu`, `debian` or `macos` (`catalog.Distro`, worded Ubuntu, Debian and macOS), and its version, the built-in image's Machinefile's `system.version` (`24.04`; none yet for `base-macos`); the image of a Machinefile of yours is the distro of the recipe it is built with. A record that names no distro, one an older station wrote, is read no more: every images command that reads its image exits 2 with `image.old-record`, naming the file and `station images delete <image>@<version>`, the one gesture it lets through while no machine was made from that version and no build is making it. That delete removes the record and the version's disk; the next create that needs the image builds it again.
 
 `base-macos` has no recipe: a macOS workspace starts from `ghcr.io/cirruslabs/macos-tahoe-base` (the `base-macos` Machinefile's `vm.image.from`), as Cirrus Labs made it. Its `admin` has a passwordless sudo because that base ships `/etc/sudoers.d/admin-nopasswd`, not because station set it, so `station apply` there asks no password only while that file stays ([ADR-034](../decisions/034-apply-carries-a-machinefile-the-ledger-bounds-removal.md)). Station building it, with its sshd password login off, is [ADR-051](../decisions/051-a-machine-is-a-base-and-its-machinefiles.md)'s proposal.
 

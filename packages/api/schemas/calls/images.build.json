@@ -7,6 +7,17 @@
           "format": "date-time",
           "type": "string"
         },
+        "distro": {
+          "enum": [
+            "ubuntu",
+            "debian",
+            "macos"
+          ],
+          "type": "string"
+        },
+        "distro_version": {
+          "type": "string"
+        },
         "fetched": {
           "type": "boolean"
         },
@@ -40,6 +51,7 @@
       },
       "required": [
         "built_at",
+        "distro",
         "name",
         "recipe_sha",
         "size_gb",

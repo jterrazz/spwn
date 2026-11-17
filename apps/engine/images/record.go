@@ -1,10 +1,11 @@
 package images
 
 import (
-	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
 type Ref struct {
@@ -15,11 +16,15 @@ type Ref struct {
 func (r Ref) String() string { return r.Name + "@" + r.Version }
 
 type Record struct {
-	Name      string `json:"name"`
-	Version   string `json:"version"`
-	Upstream  string `json:"upstream"`
-	Station   string `json:"station"`
-	RecipeSHA string `json:"recipe_sha"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	// value: the distro the image is, which every record names, and its
+	// version, empty while the image's Machinefile says none.
+	Distro        catalog.Distro `json:"distro"`
+	DistroVersion string         `json:"distro_version,omitempty"`
+	Upstream      string         `json:"upstream"`
+	Station       string         `json:"station"`
+	RecipeSHA     string         `json:"recipe_sha"`
 	// value: the Machinefile the image was made from, the hash of its
 	// chain and lock as the build read them, and the lock the build VM
 	// wrote once its image phase ran: what the image carries.
@@ -31,22 +36,6 @@ type Record struct {
 	// value: fetched from the registry that releases the image, not built
 	// here.
 	Fetched bool `json:"fetched,omitempty"`
-}
-
-func (r *Record) UnmarshalJSON(data []byte) error {
-	// value: alias of v2's `published` key of an image record, read as
-	// fetched; the next write says fetched.
-	type plain Record
-	var v struct {
-		plain
-		Published bool `json:"published"`
-	}
-	if err := json.Unmarshal(data, &v); err != nil {
-		return err
-	}
-	*r = Record(v.plain)
-	r.Fetched = r.Fetched || v.Published
-	return nil
 }
 
 func (r Record) Ref() Ref { return Ref{Name: r.Name, Version: r.Version} }

@@ -1215,6 +1215,7 @@
             "image.no-hypervisor",
             "image.no-linux-binary",
             "image.no-recipe",
+            "image.old-record",
             "image.unknown",
             "internal",
             "login.already-signed-in",

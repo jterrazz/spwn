@@ -226,6 +226,20 @@
       "Tone": "plain"
     }
   },
+  "CatalogDistro": {
+    "debian": {
+      "Word": "Debian",
+      "Tone": "plain"
+    },
+    "macos": {
+      "Word": "macOS",
+      "Tone": "plain"
+    },
+    "ubuntu": {
+      "Word": "Ubuntu",
+      "Tone": "plain"
+    }
+  },
   "CatalogKind": {
     "app": {
       "Word": "app",
@@ -679,6 +693,11 @@
     },
     "image.no-recipe": {
       "Word": "no recipe",
+      "Detail": "image",
+      "Tone": "plain"
+    },
+    "image.old-record": {
+      "Word": "old record",
       "Detail": "image",
       "Tone": "plain"
     },

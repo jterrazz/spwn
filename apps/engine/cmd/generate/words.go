@@ -109,6 +109,11 @@ func wordedEnums() []worded {
 			string(catalog.RoleWorkspace): plain("a workspace"),
 			string(catalog.RoleServer):    plain("a server"),
 		}},
+		{catalog.Distro(""), map[string]word{
+			string(catalog.DistroUbuntu): plain(catalog.DistroUbuntu.Word()),
+			string(catalog.DistroDebian): plain(catalog.DistroDebian.Word()),
+			string(catalog.DistroMacOS):  plain(catalog.DistroMacOS.Word()),
+		}},
 		{catalog.Lifetime(""), map[string]word{
 			string(catalog.LifetimeEphemeral):  {Word: machines.Ephemeral.Word(), Detail: "Deleted when it powers off", Tone: verdict.Plain},
 			string(catalog.LifetimePersistent): {Word: machines.Persistent.Word(), Detail: "Stays until you delete it", Tone: verdict.Plain},

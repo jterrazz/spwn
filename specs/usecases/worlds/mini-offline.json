@@ -113,6 +113,8 @@
                     {
                         "name": "base-ubuntu",
                         "version": "1",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
                         "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "",
                         "recipe_sha": "",
@@ -189,6 +191,8 @@
                     {
                         "name": "base-ubuntu",
                         "version": "1",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
                         "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "",
                         "recipe_sha": "",

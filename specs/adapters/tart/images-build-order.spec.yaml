@@ -60,7 +60,7 @@ runs:
       exit: 0
       stdout: |
           1
-    - command: '--version > /dev/null; /usr/bin/jq -r ''[.name, .upstream, (.recipe_sha | length), .machinefile, (.machinefile_sha | length), (.lock | split("\n") | .[0])] | join(" ")'' .local/state/station/images/base-ubuntu/$(/bin/date -u +%Y.%m.%d).json'
+    - command: '--version > /dev/null; /usr/bin/jq -r ''[.name, .distro, .distro_version, .upstream, (.recipe_sha | length), .machinefile, (.machinefile_sha | length), (.lock | split("\n") | .[0])] | join(" ")'' .local/state/station/images/base-ubuntu/$(/bin/date -u +%Y.%m.%d).json'
       exit: 0
       stdout: |
-          base-ubuntu ghcr.io/cirruslabs/ubuntu:24.04 64 base-ubuntu 64 lock: station.lock/v1
+          base-ubuntu ubuntu 24.04 ghcr.io/cirruslabs/ubuntu:24.04 64 base-ubuntu 64 lock: station.lock/v1

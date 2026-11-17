@@ -607,7 +607,6 @@ func legacyEncodings() []string {
 	return []string{
 		"apps/engine/catalog StatusV1Kind",
 		"apps/engine/engine/process hello",
-		"apps/engine/images UnmarshalJSON",
 		"apps/engine/pages/apps AppStatusJSON",
 		"apps/engine/pages/apps statusV1Category",
 		"apps/engine/pages/home SnapshotJSON",

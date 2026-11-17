@@ -12,13 +12,14 @@ import (
 )
 
 type ImageJSON struct {
-	Name      string   `json:"name"`
-	Version   string   `json:"version"`
-	SizeBytes int64    `json:"size_bytes"`
-	Mac       string   `json:"mac"`
-	VMs       []string `json:"vms"`
-	Newest    bool     `json:"newest"`
-	Deletable bool     `json:"deletable"`
+	Name      string         `json:"name"`
+	Version   string         `json:"version"`
+	Distro    catalog.Distro `json:"distro"`
+	SizeBytes int64          `json:"size_bytes"`
+	Mac       string         `json:"mac"`
+	VMs       []string       `json:"vms"`
+	Newest    bool           `json:"newest"`
+	Deletable bool           `json:"deletable"`
 	// value: the step a build that is making this version is at, "Step 2 of 4".
 	Building string `json:"building,omitempty"`
 }
@@ -34,6 +35,7 @@ func ListContract(reports []images.Report) ListJSON {
 		one := ImageJSON{
 			Name:      r.Record.Name,
 			Version:   r.Record.Version,
+			Distro:    r.Record.Distro,
 			SizeBytes: int64(r.Record.SizeGB) * 1_000_000_000,
 			Mac:       r.Mac,
 			VMs:       append([]string{}, r.VMs...),

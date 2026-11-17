@@ -19,6 +19,7 @@ func TestEachRefusalOfABuildCarriesItsCode(t *testing.T) {
 		{&images.BinaryNotFoundError{Path: "/tmp/station"}, BinaryNotFound, "/tmp/station"},
 		{&images.NoRecipeError{Image: "base-macos"}, NoRecipe, "base-macos"},
 		{&images.NoEngineError{Hypervisor: "hv"}, NoHypervisor, "hv"},
+		{&images.OldRecordError{Image: "base-ubuntu", Version: "2026.10.20", File: "/state/images/base-ubuntu/2026.10.20.json"}, OldRecord, "base-ubuntu"},
 	} {
 		var got *fail.Error
 		if !errors.As(Worded(c.err), &got) {
