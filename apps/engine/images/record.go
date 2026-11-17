@@ -17,7 +17,7 @@ func (r Ref) String() string { return r.Name + "@" + r.Version }
 type Record struct {
 	Name      string `json:"name"`
 	Version   string `json:"version"`
-	Base      string `json:"base"`
+	Upstream  string `json:"upstream"`
 	Station   string `json:"station"`
 	RecipeSHA string `json:"recipe_sha"`
 	// value: the Machinefile the image was made from, the hash of its

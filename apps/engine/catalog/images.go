@@ -18,10 +18,10 @@ type Image struct {
 	// value: Recipe, Cleanup and Firstboot empty: station builds no such
 	// image; it is only fetched where it is published. Machinefile, the
 	// built-in template it is made from, its name the image's.
-	Name, Base, Recipe, Bake, Cleanup, Firstboot string
-	Machinefile                                  string
-	Defaults                                     ImageDefaults
-	Kind                                         MachineKind
+	Name, Recipe, Bake, Cleanup, Firstboot string
+	Machinefile                            string
+	Defaults                               ImageDefaults
+	Kind                                   MachineKind
 }
 
 //go:embed images

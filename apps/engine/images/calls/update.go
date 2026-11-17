@@ -106,7 +106,6 @@ func (s *Builder) updateOne(ctx context.Context, name string, progress func(imag
 	}
 	_ = s.e.Discard(ctx, at)
 	rec := images.Record{Name: name, Version: latest.Version, BuiltAt: s.m.Now().UTC().Truncate(time.Second), Fetched: true}
-	rec.Base = img.Base
 	if disks, err := s.e.Disks(ctx); err == nil {
 		for _, d := range disks {
 			if d.VM == disk {

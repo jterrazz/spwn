@@ -1343,7 +1343,6 @@ export type ImagesCallsUpdateIn = {
 };
 
 export type ImagesRecord = {
-    base: string;
     built_at: string;
     fetched?: boolean;
     lock?: string;
@@ -1353,6 +1352,7 @@ export type ImagesRecord = {
     recipe_sha: string;
     size_gb: number;
     station: string;
+    upstream: string;
     version: string;
 };
 
