@@ -9,11 +9,11 @@ importers:
   .:
     devDependencies:
       '@jterrazz/test':
-        specifier: ^19.0.0
-        version: 19.0.0(@jterrazz/typescript@12.0.1(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
+        specifier: ^19.0.1
+        version: 19.0.1(@jterrazz/typescript@12.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       '@jterrazz/typescript':
-        specifier: ^12.0.1
-        version: 12.0.1(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
+        specifier: ^12.3.0
+        version: 12.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       turbo:
         specifier: 2.11.7
         version: 2.11.7
@@ -956,8 +956,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@jterrazz/test@19.0.0':
-    resolution: {integrity: sha512-PgZk5lDkXx+xmvoFAy5o3kdPszaOiHx+wX7PfsOIkbqcw0yWMRjBWLKzSxGfPiqPW/yQ3XY9RWd2jfYPfkXzzQ==}
+  '@jterrazz/test@19.0.1':
+    resolution: {integrity: sha512-eS0geeVgrFt3TkTkDAsCK+L+4bWWzfTadohdjxVyi6HiXuSLKGppql6/d6pM30vCuoLY7doSJo6ctaOptpQTZA==}
     engines: {node: '>=24'}
     peerDependencies:
       '@jterrazz/typescript': ^12.0.0
@@ -1003,8 +1003,8 @@ packages:
       webdriverio:
         optional: true
 
-  '@jterrazz/typescript@12.0.1':
-    resolution: {integrity: sha512-lSGILrWqxChEnNwSd5xTKn6m1eyPh+tDcYI+4Px7/StKh7BmARdjERqakPd0BWpz97zjljh8riciEzfunWUc7g==}
+  '@jterrazz/typescript@12.3.0':
+    resolution: {integrity: sha512-9VzXPk9BoFtj9Dyd4+XFeC1AhtVbe/LA/46ijlKtkBGecWWQdTSabLJVWPKCzmySrlUGuYFcd6n0xkXisMl1oQ==}
     engines: {node: '>=24.0.0'}
     hasBin: true
 
@@ -5835,9 +5835,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@jterrazz/test@19.0.0(@jterrazz/typescript@12.0.1(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@jterrazz/test@19.0.1(@jterrazz/typescript@12.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@jterrazz/typescript': 12.0.1(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
+      '@jterrazz/typescript': 12.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       '@oxlint/plugins': 1.89.0
       msw: 3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))
       oxc-parser: 0.150.0
@@ -5856,7 +5856,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@jterrazz/typescript@12.0.1(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@jterrazz/typescript@12.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
       '@arethetypeswrong/cli': 0.18.5
       '@ls-lint/ls-lint': 2.3.1
