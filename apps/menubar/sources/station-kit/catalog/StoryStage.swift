@@ -57,7 +57,7 @@ public struct StoryDeskView: View {
     public var body: some View {
         switch desk {
         case .flat:
-            Rectangle().fill(Token.Glass.wallBase(scheme)[0])
+            Rectangle().fill(Token.Glass.desk(scheme))
         case .wallpaper:
             ZStack {
                 LinearGradient(colors: Token.Glass.wallBase(scheme), startPoint: Token.Glass.wallStart, endPoint: Token.Glass.wallEnd)

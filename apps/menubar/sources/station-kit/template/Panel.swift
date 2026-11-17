@@ -366,7 +366,7 @@ struct PanelPane: ViewModifier {
                 if tokens.solid {
                     shape.strokeBorder(tokens.color.hair, lineWidth: Token.Pane.solidEdge)
                 } else {
-                    shape.strokeBorder(LinearGradient(stops: Token.Pane.rim(scheme), startPoint: .top, endPoint: .bottom), lineWidth: Token.Pane.rimWidth)
+                    shape.strokeBorder(Token.Pane.rim(scheme), lineWidth: Token.Pane.rimWidth)
                 }
             }
     }

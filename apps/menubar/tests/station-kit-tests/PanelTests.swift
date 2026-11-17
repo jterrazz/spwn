@@ -72,7 +72,7 @@ final class PanelTests: XCTestCase {
         }
         XCTAssertEqual(try alpha(still: false, below: false), 0)
         XCTAssertEqual(try alpha(still: false, below: true), 0)
-        XCTAssertGreaterThanOrEqual(Double(try alpha(still: true, below: false)) / 255, 0.80)
+        XCTAssertEqual(Double(try alpha(still: true, below: false)) / 255, 0.60, accuracy: 0.01)
         XCTAssertGreaterThan(try alpha(still: true, below: true), 0)
     }
 
