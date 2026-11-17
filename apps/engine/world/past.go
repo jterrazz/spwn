@@ -49,7 +49,7 @@ func (w *World) unfold() {
 			if e.Activity == nil {
 				e.Activity = map[string]activity.Kept{}
 			}
-			e.Activity[name] = w.past(p, *on.Meter, e.StartedAt, w.runsOf(mac, name))
+			e.Activity[name] = w.past(p, *on.Meter, on.Disk, e.StartedAt, w.runsOf(mac, name))
 		}
 		e.Past = nil
 	}
@@ -69,12 +69,18 @@ func (w *World) runsOf(mac, name string) map[int]string {
 	return out
 }
 
-func (w *World) past(p activity.Profile, meter Meter, started time.Time, runs map[int]string) activity.Kept {
+func (w *World) past(p activity.Profile, meter Meter, disk *Disk, started time.Time, runs map[int]string) activity.Kept {
 	// invariant: never before the engine started nor the machine booted,
 	// and its newest point is the very sample the meter answers at now, so
 	// the engine's first live sample after it reads no reset nor jump.
 	now := w.Now
 	answer := meter.Answers(now)
+	// invariant: a kept point is what the machine's activity.sample
+	// answered, its free space composed in from its disk as the Disk family
+	// reads it, a server's as a workspace's.
+	if disk != nil {
+		answer.DiskTotal, answer.DiskFree = disk.Total, disk.Free
+	}
 	from := now.Add(-activity.CoarseEvery * (activity.CoarsePoints - 1))
 	for _, t := range []time.Time{started, answer.Boot} {
 		if t.After(from) {

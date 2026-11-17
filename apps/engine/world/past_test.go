@@ -124,3 +124,17 @@ func TestAPastIsSpentAndNeverReplacesWhatTheEngineKeeps(t *testing.T) {
 		t.Error("the past unfolded reads back other than it was written")
 	}
 }
+
+func TestAServersPastCarriesItsDiskAsItsSampleComposesIt(t *testing.T) {
+	doc := strings.Replace(withPast, `"vm1": {"meter": {`, `"vm1": {"self": {"kind": "server"}, "disk": {"total": 80000000000, "free": 44000000000}, "meter": {`, 1)
+	k := pastOf(t, doc, "vm1")
+	points := append(k.Series.Coarse(), k.Series.Fine()...)
+	if len(points) == 0 {
+		t.Fatal("the server's past holds no point")
+	}
+	for _, s := range append(points, k.Last.Sample) {
+		if s.DiskTotal != 80_000_000_000 || s.DiskFree != 44_000_000_000 {
+			t.Fatalf("a kept point of the server at %v reads %d free of %d, want 44 GB free of 80 GB", s.At, s.DiskFree, s.DiskTotal)
+		}
+	}
+}
