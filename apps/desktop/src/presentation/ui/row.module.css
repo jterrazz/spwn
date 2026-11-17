@@ -91,19 +91,6 @@
     min-height: 40px;
     padding-block: var(--space-4);
 }
-.fleet {
-    --column-name: minmax(0, 1.3fr);
-    --column-cells: minmax(0, 1.6fr) 112px 150px;
-    column-gap: var(--space-16);
-    min-height: 40px;
-    padding-block: var(--space-4);
-}
-.fleet.leadMachine {
-    --column-lead: calc(20px + var(--space-10) - var(--space-16));
-}
-.fleet.nested.leadMachine {
-    --column-lead: calc(34px + var(--space-10) - var(--space-16));
-}
 .passwords {
     --column-lead: 24px;
     --column-name: minmax(0, 1.4fr);

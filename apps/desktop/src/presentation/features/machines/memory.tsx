@@ -94,27 +94,15 @@ function holdersOf(
     ];
 }
 
-export function MemoryPanel({ macs, only }: { macs: readonly MachinesMacView[]; only?: string }) {
+export function MemoryPanel({ macs, only }: { macs: readonly MachinesMacView[]; only: string }) {
     const rooms = useRooms();
     const identityOf = useIdentityOf();
     if (rooms === 'reading') {
         return null;
     }
-    const shown =
-        rooms === 'no-answer'
-            ? []
-            : rooms.filter((room) => only === undefined || room.Mac === only);
+    const shown = rooms === 'no-answer' ? [] : rooms.filter((room) => room.Mac === only);
     if (shown.length === 0) {
-        return (
-            <NotGiven
-                title="Memory"
-                what={
-                    only === undefined
-                        ? "What each machine holds, against each Mac's total"
-                        : "What each machine holds of this Mac's memory."
-                }
-            />
-        );
+        return <NotGiven title="Memory" what="What each machine holds of this Mac's memory." />;
     }
     return (
         <Panel note="one square, one GB" padded title="Memory">

@@ -16,59 +16,50 @@
     - text: Review
     - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
-  - region "Memory":
-    - heading "Memory one square, one GB" [level=2]
-    - text: macbook-pro
-    - emphasis: 20 GB free
-    - text: of 48
-    - img "Memory of macbook-pro, one square per GB"
-    - text: 4 macOS 8 agent-7f, 5 used 8 linux-1, 5 used 8 linux-2 20 free mac-mini
-    - emphasis: 24 GB free
-    - text: of 64
-    - img "Memory of mac-mini, one square per GB"
-    - text: 4 macOS 24 infra, 16 used 8 linux-3, 5 used 4 review-bot, 3 used 24 free macbook-air
-    - emphasis: 20 GB free
-    - text: of 24
-    - img "Memory of macbook-air, one square per GB"
-    - text: 4 macOS 20 free
+  - group "Macs":
+    - button "macbook-pro · 4 machines · online": macbook-pro 4 machines online
+    - button "mac-mini · 3 machines · online": mac-mini 3 machines online
+    - button "macbook-air · 0 machines · asleep": macbook-air 0 machines asleep
+    - text: 7 machines This Mac
   - region "Machines":
-    - heading "Machines" [level=2]
-    - text: Machine What it is for CPU Memory, GB
-    - button "macbook-pro CPU of macbook-pro, its last bars 22 % 67 32 / 48":
-      - text: macbook-pro
-      - img "CPU of macbook-pro, its last bars"
-      - text: 22 %
-      - meter "Memory of macbook-pro, used of its total"
-      - text: 32 / 48
-    - button "agent-7f Write the changelog of v4 1 % 67 5.3 / 8":
-      - text: agent-7f Write the changelog of v4 1 %
-      - meter "Memory of agent-7f, used of its total"
-      - text: 5.3 / 8
-    - button "api The API's staging copy"
-    - button "linux-1 Lot L2.5, settings from a machine file 9 % 67 5.3 / 8":
-      - text: linux-1 Lot L2.5, settings from a machine file 9 %
-      - meter "Memory of linux-1, used of its total"
-      - text: 5.3 / 8
-    - button "linux-2 Lot L3, the Machines page"
-    - button "mac-mini CPU of mac-mini, its last bars 36 % 67 42.7 / 64":
-      - text: mac-mini
-      - img "CPU of mac-mini, its last bars"
-      - text: 36 %
-      - meter "Memory of mac-mini, used of its total"
-      - text: 42.7 / 64
-    - button "infra The cluster's control plane 10 % 67 16 / 24":
-      - text: infra The cluster's control plane 10 %
-      - meter "Memory of infra, used of its total"
-      - text: 16 / 24
-    - button "linux-3 Refresh the auth token 17 % 67 5.3 / 8":
-      - text: linux-3 Refresh the auth token 17 %
-      - meter "Memory of linux-3, used of its total"
-      - text: 5.3 / 8
-    - button "review-bot Review every pull request of studio-station 0.9 % 67 2.7 / 4":
-      - text: review-bot Review every pull request of studio-station 0.9 %
-      - meter "Memory of review-bot, used of its total"
-      - text: 2.7 / 4
+    - button "macbook-pro"
+    - text: 22 %
+    - img "Memory of macbook-pro"
+    - text: 20 free
+    - button "agent-7f"
+    - text: Write the changelog of v4 Running 1 %
+    - img "Memory of agent-7f"
+    - text: 5.3 / 8
+    - button "api"
+    - text: The API's staging copy Stopped
+    - img "Memory of api"
+    - button "linux-1"
+    - text: Lot L2.5, settings from a machine file Running 9 %
+    - img "Memory of linux-1"
+    - text: 5.3 / 8
+    - button "linux-2"
+    - text: Lot L3, the Machines page Creating
+    - img "Memory of linux-2"
+    - text: of 8
+    - button "mac-mini"
+    - text: 36 %
+    - img "Memory of mac-mini"
+    - text: 24 free
+    - button "infra"
+    - text: The cluster's control plane Running 10 %
+    - img "Memory of infra"
+    - text: 16 / 24
+    - button "linux-3"
+    - text: Refresh the auth token Running 17 %
+    - img "Memory of linux-3"
+    - text: 5.3 / 8
+    - button "review-bot"
+    - text: Review every pull request of studio-station Running 0.9 %
+    - img "Memory of review-bot"
+    - text: 2.7 / 4
     - button "macbook-air"
+    - img "Memory of macbook-air"
+    - text: 20 free
   - region "Last night":
     - heading "Last night 3 moved, 1 held, 1 failed" [level=2]
     - button "All history"

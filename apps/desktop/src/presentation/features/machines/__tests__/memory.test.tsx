@@ -8,28 +8,28 @@ import { MemoryFreeTile, MemoryPanel } from '../memory';
 
 const recordingFor = await recordingsOf('creating', 'one-mac', 'two-macs');
 
-function over(world: string, only?: string) {
+function over(world: string, only: string) {
     const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
         <EngineProvider dependencies={dependencies}>
             <MemoryFreeTile />
-            {only === undefined ? <MemoryPanel macs={[]} /> : <MemoryPanel macs={[]} only={only} />}
+            <MemoryPanel macs={[]} only={only} />
         </EngineProvider>
     );
 }
 
 describe('memory', () => {
-    test("the free memory is each Mac's room summed, and each Mac's grid draws what machines.list measures", async () => {
+    test("the free memory is each Mac's room summed, and a Mac's grid draws what machines.list measures of it alone", async () => {
         // Given - two-macs: 4 of 16 GB free on the MacBook Pro, 36 of 64 on the mini
-        const result = await component.render(over('two-macs'), async (visitor) => {
+        const result = await component.render(over('two-macs', 'mac-mini'), async (visitor) => {
             // When - machines.list has settled with both Macs
             await visitor.see(within(region('Memory'), content('mac-mini')));
         });
 
-        // Then - the tile sums the rows drawn, and each Mac draws macOS, its machines and its free
-        expect(result.content.text).toMatch(/Memory free\s*40\s*GB/u);
-        expect(result.content.text).toContain('of 80');
-        expect(result.content.text).toMatch(/\b4 GB free\s*of 16[\s\S]*36 GB free\s*of 64/u);
+        // Then - the tile sums both Macs, and the mini's grid draws macOS, its machines and its free
+        expect(result.content.text).toMatch(/Memory free\s*40\s*GB[\s\S]*of 80/u);
+        expect(result.content.text).toMatch(/\b36 GB free\s*of 64/u);
+        expect(result.content.text).not.toMatch(/\b4 GB free\s*of 16/u);
         expect(result.content.text).toMatch(/24\s*infra/u);
         expect(result.content.text).not.toContain('room for');
     });

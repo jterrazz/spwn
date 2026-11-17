@@ -3,10 +3,11 @@ import type {
     ActivityReport,
     ActivitySample,
     EngineWatchInput,
+    MachinesMacView,
     Target,
 } from '@jterrazz/station-api';
 import { useCallback, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { spanOf } from '../../../domain/activity/measures';
 import type { Span } from '../../../domain/activity/measures';
@@ -90,7 +91,7 @@ function inputOf(mac: string, vm: string | undefined, span: Span): ActivityReadI
 export function useActivity(
     found: Found,
     span: Span,
-): { readers: ReactNode; shown: Heard | undefined } {
+): { readers: ReactElement; shown: Heard | undefined } {
     const name = found.vm?.Name ?? found.mac.Name;
     const mac = found.mac.Name;
     const vm = found.vm?.Name;
@@ -118,4 +119,45 @@ export function useActivity(
         </>
     );
     return { readers, shown: unkept ? second.shown : first.shown };
+}
+
+type HeardOn = (mac: string, heard: Heard | undefined) => void;
+
+function MacReader({ mac, span, heard }: { mac: MachinesMacView; span: Span; heard: HeardOn }) {
+    const { readers, shown } = useActivity({ mac }, span);
+    useEffect(() => {
+        heard(mac.Name, shown);
+    }, [heard, mac.Name, shown]);
+    return readers;
+}
+
+function withHeard(
+    kept: ReadonlyMap<string, Heard>,
+    mac: string,
+    heard: Heard | undefined,
+): ReadonlyMap<string, Heard> {
+    if (kept.get(mac) === heard) {
+        return kept;
+    }
+    const next = new Map(kept);
+    if (heard === undefined) {
+        next.delete(mac);
+    } else {
+        next.set(mac, heard);
+    }
+    return next;
+}
+
+export function useActivities(
+    macs: readonly MachinesMacView[],
+    span: Span,
+): { readers: ReactNode; shown: ReadonlyMap<string, Heard> } {
+    const [shown, setShown] = useState<ReadonlyMap<string, Heard>>(new Map());
+    const heard = useCallback<HeardOn>((mac, one) => {
+        setShown((kept) => withHeard(kept, mac, one));
+    }, []);
+    const readers = macs.map((mac) => (
+        <MacReader heard={heard} key={mac.Name} mac={mac} span={span} />
+    ));
+    return { readers, shown };
 }
