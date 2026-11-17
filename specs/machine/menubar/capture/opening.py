@@ -6,7 +6,8 @@ place in every frame where it shows (within MOVE px) and as sharp as in the last
 (SCORE), the title's contrast never falls, the panel is whole on its first visible
 frame (the title at WHOLE of its final contrast: glass and content arrive together,
 as Passwords' panel does on Tahoe), the status item, once highlighted, stays so to
-the last frame, and the app's own log shows one glass frame on every display tick.
+the last frame, the app's own log shows one glass frame on every display tick, and
+that glass's top sits TOP pt under the screen's.
 """
 
 import re
@@ -32,6 +33,8 @@ BAR_PT = 30
 # process), before main's build and after it alike, so it is held from its first frame.
 PILL = 0.04
 PILL_PT = (4, 26)
+# value: in pt, Passwords' panel's top under the screen's top on Tahoe.
+TOP = 31
 
 
 def gray(rgb):
@@ -114,6 +117,17 @@ def ticks(log):
     return [m.group(1) for m in re.finditer(r" open t=\d+ frame=\d+ glass=(.*)", log)]
 
 
+def top(log):
+    """The glass's top under the screen's, in pt, from the app's screen line and its
+    first logged glass frame."""
+    screen = re.search(r" screen x=\S+ y=\S+ w=\S+ h=([\d.]+)", log)
+    glass = ticks(log)
+    if screen is None or not glass:
+        return None
+    y, h = re.match(r"x=\S+ y=([\d.-]+) w=\S+ h=([\d.]+)", glass[0]).groups()
+    return round(float(screen.group(1)) - float(y) - float(h), 1)
+
+
 def measure(frames, scale, log, item):
     """frames[0] is the closed screen, the others follow the click; item is the status
     item's first and last column in the frames. Returns the numbers and the verdict."""
@@ -159,6 +173,7 @@ def measure(frames, scale, log, item):
         "pill_min": round(min(pills[lit:], default=0), 3),
         "log_ticks": len(ticks(log)),
         "log_distinct_frames": len(seen),
+        "top_pt": top(log),
     }
     checks = {
         "outline": off <= BOX,
@@ -167,6 +182,7 @@ def measure(frames, scale, log, item):
         "whole": alphas[0] >= WHOLE,
         "highlight": lit < len(pills) and out["pill_min"] >= PILL,
         "ticks": out["log_ticks"] > 0 and len(seen) == 1,
+        "top": out["top_pt"] == TOP,
     }
     out["checks"] = checks
     out["pass"] = all(checks.values())
