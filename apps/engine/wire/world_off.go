@@ -48,6 +48,7 @@ func (*worldRun) close(context.Context) error    { return nil }
 
 func (*worldMac) system(h local.System, _ catalog.Catalog) local.System  { return h }
 func (*worldMac) handOver(context.Context) error                         { return nil }
+func (*worldMac) runs() bool                                             { return false }
 func (*worldMac) beside(f func())                                        { f() }
 func (*worldMac) watch([]string) func()                                  { return func() {} }
 func (*worldMac) stores(*stores)                                         {}

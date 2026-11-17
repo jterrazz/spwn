@@ -6,6 +6,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	"io"
 	"slices"
@@ -329,16 +330,38 @@ func orNone(err error) error {
 // door onto the engine socket also sends a frame for another Mac, or for
 // a VM of another Mac, through that Router, as the socket's Far does.
 type served struct {
-	r *remote.Router
-	// value: the frames that name another Mac or its VM, which ride the
-	// Router; nil runs every frame by the Router's own serving rule.
+	r    *remote.Router
+	door door
+}
+
+// value: a door onto the engine socket: the frames that name another Mac
+// or its VM, which ride the Router, and whether This Mac's engine answers
+// them; a zero door runs every frame by the Router's own serving rule.
+type door struct {
 	far func(coremachine.Ref) bool
+	up  func() bool
+}
+
+// invariant: a far frame is answered by the engine's socket, so with This
+// Mac's engine not running it is refused as an absent socket refuses it.
+func (d door) rides(target coremachine.Ref) (bool, error) {
+	if d.far == nil || !d.far(target) {
+		return false, nil
+	}
+	if !d.up() {
+		return true, &enginecalls.DownError{}
+	}
+	return true, nil
 }
 
 func (s served) Hello() contract.Hello { return s.r.Served() }
 
 func (s served) Invoke(ctx context.Context, target coremachine.Ref, name string, in json.RawMessage, p call.Progress) (any, error) {
-	if s.far != nil && s.far(target) {
+	far, err := s.door.rides(target)
+	if err != nil {
+		return nil, err
+	}
+	if far {
 		var out json.RawMessage
 		if err := s.r.Invoke(ctx, target, name, in, &out, p); err != nil {
 			return nil, err
@@ -349,38 +372,43 @@ func (s served) Invoke(ctx context.Context, target coremachine.Ref, name string,
 }
 
 func (s served) Watch(ctx context.Context, target coremachine.Ref, name string, in json.RawMessage, p call.Progress) (<-chan call.Update[any], error) {
-	if s.far != nil && s.far(target) {
+	far, err := s.door.rides(target)
+	if err != nil {
+		return nil, err
+	}
+	if far {
 		return s.r.Watch(ctx, target, name, in, p)
 	}
 	return s.r.ServeWatch(ctx, target, name, in, p)
 }
 
-func serveFrames(env kit.Env, far func(coremachine.Ref) bool) func(ctx context.Context, in io.Reader, out io.Writer) error {
+func serveFrames(env kit.Env, d door) func(ctx context.Context, in io.Reader, out io.Writer) error {
 	return func(ctx context.Context, in io.Reader, out io.Writer) error {
 		r, _ := env.Calls.(*remote.Router)
-		return serve.Stream(ctx, in, out, served{r: r, far: far}, func(err error) *fail.Error { return kit.Translate(err, "") })
+		return serve.Stream(ctx, in, out, served{r: r, door: d}, func(err error) *fail.Error { return kit.Translate(err, "") })
 	}
 }
 
 // invariant: a world run on a Mac is the window's door onto its engine
 // socket, so a frame there for another Mac, or for a VM of another Mac, is
-// answered by that machine as the socket answers it; any other run's
-// stdio door answers for its own machine and its VMs alone.
-func (m machine) socketDoor() func(coremachine.Ref) bool {
+// answered by that machine as the socket answers it, while the world says
+// This Mac's engine runs; any other run's stdio door answers for its own
+// machine and its VMs alone.
+func (m machine) socketDoor() door {
 	if m.world == nil || m.kind != catalog.Mac {
-		return nil
+		return door{}
 	}
-	return func(t coremachine.Ref) bool {
+	return door{far: func(t coremachine.Ref) bool {
 		if t.Name == "" || t.Name == m.profile.Ref.Name {
 			return false
 		}
 		ref, _ := m.locate(t.Name)
 		return ref.On != m.profile.Ref.Name
-	}
+	}, up: m.world.runs}
 }
 
 func engineCommand(env kit.Env, m machine) *cobra.Command {
-	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, nil)}, env))
+	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, door{})}, env))
 }
 
 // value: a run that serves frames on its stdout: nothing else of it may write there.
