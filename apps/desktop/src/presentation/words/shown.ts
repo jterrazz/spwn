@@ -8,6 +8,7 @@ import type {
     MachinefileChapter,
     MachinefileDiffering,
     MachinefileFollower,
+    MachinefileStep,
     MachinesEngineView,
     MachinesMacView,
     MachinesVM,
@@ -209,4 +210,8 @@ export function kindChipWord(kind: CatalogKind): string {
 
 export function shelfWord(chapter: MachinefileChapter): string {
     return wordOf('MachinefileChapter', chapter).Word;
+}
+
+export function stepBoxed(step: MachinefileStep): string {
+    return step.Version === '' ? step.Rule : step.Version;
 }
