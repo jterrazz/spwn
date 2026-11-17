@@ -325,10 +325,10 @@ struct EdgeFade: View {
     }
 }
 
-// invariant: live the pane paints nothing: the window's glass, tinted by
-// the app (ADR-036), is the panel's one background, and a fill or a rim
+// invariant: live the pane paints nothing: the window's glass (ADR-036),
+// untinted (ADR-053), is the panel's one background, and a fill or a rim
 // over it doubles that background. Drawn still, the plate, shadows, outline
-// and rim stand in for that tinted glass.
+// and rim stand in for that glass.
 struct PanelPane: ViewModifier {
     var bare = false
     @Environment(\.stationStill) private var still

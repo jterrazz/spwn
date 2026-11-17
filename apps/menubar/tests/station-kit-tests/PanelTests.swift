@@ -58,10 +58,10 @@ final class PanelTests: XCTestCase {
         }
     }
 
-    // invariant: live the panel paints nothing, so the window's tinted
-    // glass is its one background; drawn still, it draws that tinted glass,
-    // the plate over the stand-in's shadows and rim.
-    func testLiveThePanelPaintsNothingAndDrawnStillItsTintedGlass() throws {
+    // invariant: live the panel paints nothing, so the window's glass is
+    // its one background; drawn still, it draws that glass, the plate over
+    // the stand-in's shadows and rim.
+    func testLiveThePanelPaintsNothingAndDrawnStillItsGlass() throws {
         func alpha(still: Bool, below: Bool) throws -> UInt8 {
             let pane = Panel { Color.clear.frame(width: Token.Metric.Panel.width, height: 120) }.padding(60)
             let renderer = ImageRenderer(content: pane.stationTheme(.dark).environment(\.stationStill, still))

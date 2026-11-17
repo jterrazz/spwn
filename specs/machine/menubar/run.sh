@@ -20,7 +20,7 @@
 #   serving home.exposed, on M1's three wallpapers; the captures, compare
 #   sheets and contrast table (capture/measure.py) land in
 #   .artifacts/e2e/menubar-<label>/capture/. STATION_CAPTURE_SET picks the
-#   shots (walls,behave,trial by default; sweep, a11y and old drive.py names),
+#   shots (walls,behave,trial by default; a11y and old drive.py names),
 #   STATION_CAPTURE_ITEM=x,y,w,h gives old's item frame, STATION_CAPTURE_PAGE=<story>
 #   the home story served (home.exposed by default). native and opening add the wash
 #   and zoom measures (capture/tint.py, opening.py), which fail the run when they fail.
