@@ -6,7 +6,7 @@
     "note": "The panel grows out of the status item: scale .96 to 1 with opacity on smooth, caught at 120 ms of its 340.",
     "pages": ["pages/machines.home.menubar.json"],
     "play": {
-        "from": "menubar.count",
+        "from": "menubar.fine",
         "gesture": "click the status item"
     },
     "samples": {

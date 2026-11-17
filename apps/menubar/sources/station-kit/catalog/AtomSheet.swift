@@ -9,7 +9,7 @@ public struct AtomSheet: View {
     public init(_ family: Family) { self.family = family }
 
     static let signals: [String?] = [nil, "active", "waits", "failing", "well", "faint", "done"]
-    static let kinds = ["laptop", "desktop", "server", "workspace", "agent", "symbol:\(Token.Symbol.terminal)"]
+    static let kinds = ["laptop", "desktop", "server", "workspace", "symbol:\(Token.Symbol.terminal)"]
     static let samples: [String: Double] = ["cpu:this-mac": 37, "cpu:mac-mini": 82, "cpu:linux-1": 34, "free:mac-mini": 19, "left:s2": 1350]
 
     static func glyph(_ kind: String, signal: String? = nil, dot: String? = nil, ring: String? = nil, spin: Bool? = nil, progress: Int? = nil) -> Glyph {
@@ -86,8 +86,8 @@ public struct AtomSheet: View {
             }
             card {
                 line {
-                    GlyphView(Self.glyph("agent", signal: "active", dot: "fill"))
-                    GlyphView(Self.glyph("agent", signal: "waits", dot: "fill"))
+                    GlyphView(Self.glyph("workspace", signal: "active", dot: "fill"))
+                    GlyphView(Self.glyph("workspace", signal: "waits", dot: "fill"))
                     GlyphView(Self.glyph("workspace", spin: true))
                     GlyphView(Self.glyph("workspace", progress: 400))
                     GlyphView(Self.glyph("server", signal: "failing", dot: "ping"))

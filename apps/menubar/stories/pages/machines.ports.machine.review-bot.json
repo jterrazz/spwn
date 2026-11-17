@@ -29,68 +29,8 @@
           "kind": "text",
           "text": "up 2 hr",
           "pri": 3
-        },
-        {
-          "kind": "text",
-          "text": "1 agent"
         }
       ]
-    },
-    {
-      "id": "agents",
-      "title": "Agents",
-      "caption": [
-        {
-          "kind": "list",
-          "items": [
-            {
-              "kind": "text",
-              "text": "1 waiting",
-              "signal": "waits"
-            }
-          ]
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "review-bot",
-            "mark": "ok",
-            "label": "review-bot",
-            "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "PR #42 is ready, tests pass",
-                  "signal": "waits"
-                }
-              ]
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "waits"
-            },
-            "quick": "attach:review-bot",
-            "nav": "menubar.agent:review-bot"
-          }
-        }
-      ],
-      "uncounted": true,
-      "segment": "overview",
-      "card": "flush"
     },
     {
       "id": "gauges",
@@ -1744,7 +1684,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops. Its disk is kept."
+            "text": "Its disk is kept."
           }
         ],
         "yes": "Stop review-bot",
@@ -1773,7 +1713,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 grant made to it."
+            "text": "This can't be undone. It goes with its disk (40 GB) and 1 grant made to it."
           }
         ],
         "danger": true,
@@ -1793,63 +1733,6 @@
         "target": {
           "name": "mac-mini"
         }
-      }
-    },
-    {
-      "key": "shift+cmd+n",
-      "label": "New agent",
-      "on": "page",
-      "priority": 2,
-      "mutates": true,
-      "id": "new-agent",
-      "run": {
-        "call": "agents.start",
-        "in": {
-          "On": "review-bot"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "form": {
-        "title": "New agent on review-bot",
-        "fields": [
-          {
-            "key": "Task",
-            "label": "Task",
-            "kind": "text",
-            "note": "empty, it waits for a prompt"
-          }
-        ]
-      },
-      "icon": "plus"
-    },
-    {
-      "key": "cmd+enter",
-      "label": "Open review-bot in Terminal",
-      "on": "row",
-      "rows": [
-        "review-bot"
-      ],
-      "priority": 2,
-      "id": "attach:review-bot",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "agents",
-          "attach",
-          "review-bot"
-        ]
-      },
-      "icon": "terminal",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "review-bot opened in Terminal"
-          }
-        ]
       }
     },
     {
@@ -1939,7 +1822,6 @@
       "icon": "ellipsis",
       "submenu": [
         "title:review-bot",
-        "new-agent",
         "copy-ssh@menu",
         "share-port@menu",
         "-",
@@ -2017,7 +1899,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops. Its disk is kept."
+            "text": "Its disk is kept."
           }
         ],
         "yes": "Stop review-bot",
@@ -2047,7 +1929,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 grant made to it."
+            "text": "This can't be undone. It goes with its disk (40 GB) and 1 grant made to it."
           }
         ],
         "danger": true,
@@ -2075,8 +1957,8 @@
   "header": {
     "back": "All machines",
     "glyph": {
-      "kind": "agent",
-      "signal": "waits"
+      "kind": "workspace",
+      "signal": "quiet"
     },
     "buttons": [
       "menu"

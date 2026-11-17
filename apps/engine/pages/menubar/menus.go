@@ -309,9 +309,6 @@ func vmPageMenu(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page 
 	key := "menu"
 	var pm menu
 	pm.title(vm.Name, vm.Name+" on "+model.Label(*m.All, h))
-	if a, ok := pageAction(p, ActionNewAgent); ok {
-		pm.item(a.ID)
-	}
 	if ssh := sshOf(p); ssh != "" && vm.Lifetime.Kind() != machine.Server {
 		pm.add(page.Action{ID: menuID(ActionCopySSH, key), Label: "Copy ssh command", Icon: "doc.on.doc", On: OnMenu, Run: &page.Run{Copy: ssh}, Hud: hud("Copied " + ssh)})
 	}

@@ -3,7 +3,6 @@ package pages
 import (
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
@@ -27,9 +26,8 @@ func homeWorlds() []World {
 		home("machines.home.recovered", infraRecovered),
 		home("machines.home.exposed", airPlayExposed),
 		home("machines.home.down-exposed", infraDown, airPlayExposed),
-		home("machines.home.merged", reviewMerged),
-		home("machines.home.many", manyNeeds),
 		home("machines.home.fine", nothingNeedsYou),
+		home("machines.home.cleanup", ephemeralsStopped),
 		home("machines.home.empty", thisMacAlone),
 		home("machines.home.loading", miniSilent),
 	}
@@ -45,19 +43,6 @@ func homeScene(f *Scene) {
 		case airName:
 			f.All.Macs[i].Asleep, f.All.Macs[i].Laptop = true, true
 		}
-		for j, vm := range h.VMs {
-			if step, ok := homeSteps()[vm.Name]; ok && vm.Agent != nil {
-				f.All.Macs[i].VMs[j].Agent.Step = step
-			}
-		}
-	}
-}
-
-// value: the step each working agent of the home stories is at.
-func homeSteps() map[string][]string {
-	return map[string][]string{
-		"linux-1": {"running tests", "41/58 pass"},
-		"linux-3": {"editing src/auth/refresh.ts"},
 	}
 }
 
@@ -72,16 +57,16 @@ func airPlayExposed(f *Scene) {
 	pro.Ports = append(pro.Ports, ports.Port{Machine: coremachine.Ref{Name: proName}, Port: 5000, Process: "ControlCenter", Binds: []string{"0.0.0.0"}, Reach: ports.Outside, Answer: ports.Answers})
 }
 
-func reviewMerged(f *Scene) {
-	bot := &f.All.Macs[1].VMs[2]
-	bot.Agent = &model.AgentView{State: model.AgentFinished, Task: bot.Agent.Task, Ended: storyNow.Add(-3 * time.Minute), Reason: "merged PR #42"}
-	a := agentIn(f, "review-bot")
-	a.State, a.Ask, a.Ended, a.Reason = agents.Finished, nil, bot.Agent.Ended, bot.Agent.Reason
-}
-
-func manyNeeds(f *Scene) {
-	linux3 := &f.All.Macs[1].VMs[1]
-	linux3.Agent = &model.AgentView{State: "waiting", Task: linux3.Agent.Task, Ask: "asks which token store to use", Since: storyNow.Add(-2 * time.Minute)}
+// value: Clean up's world: agent-7f stopped on This Mac and linux-3 on
+// mac-mini, linux-1 still running.
+func ephemeralsStopped(f *Scene) {
+	for i := range f.All.Macs {
+		for j, vm := range f.All.Macs[i].VMs {
+			if vm.Name == "agent-7f" || vm.Name == "linux-3" {
+				f.All.Macs[i].VMs[j].State = model.Stopped
+			}
+		}
+	}
 }
 
 func miniSilent(f *Scene) {

@@ -22,11 +22,9 @@ type Urgency string
 
 const (
 	// value: SPEC B5.7: what makes a finding a need of Needs you rather
-	// than upkeep: red (a server down, a port exposed), what blocks the
-	// owner (an agent waiting on them), what expires (a lease ending).
-	// Upkeep has none.
+	// than upkeep: red (a server down, a port exposed), what expires (a
+	// lease ending). Upkeep has none.
 	Red      Urgency = "red"
-	Blocking Urgency = "blocking"
 	Expiring Urgency = "expiring"
 )
 
@@ -73,16 +71,15 @@ func Rank(fs []Finding) []Finding {
 }
 
 func RankBy[T any](xs []T, of func(T) Finding) []T {
-	// invariant: SPEC §5.1.1 under B5.7. Red first, then what blocks the
-	// owner, then what expires, the soonest first, then the rest; then broken
+	// invariant: SPEC §5.1.1 under B5.7. Red first, then what expires, the soonest first, then the rest; then broken
 	// before needs a look; then the one section order; then the Macs in the
 	// order they first appear (This Mac first, as every read lists it), each
 	// Mac before its VMs. Ties keep their order.
 	urgencyAt := func(u Urgency) int {
-		if i := slices.Index([]Urgency{Red, Blocking, Expiring}, u); i >= 0 {
+		if i := slices.Index([]Urgency{Red, Expiring}, u); i >= 0 {
 			return i
 		}
-		return 3
+		return 2
 	}
 	return rank(xs, of, func(a, b Finding) int {
 		if d := urgencyAt(a.Urgency) - urgencyAt(b.Urgency); d != 0 {

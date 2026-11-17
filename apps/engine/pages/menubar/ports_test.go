@@ -354,7 +354,7 @@ func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
 		t.Fatalf("a share's card line names its audience: %+v", c)
 	}
 	menu := action(p, ActionMenu)
-	if menu == nil || !slices.Equal(menuWords(p, menu.Submenu), []string{"linux-1 on This Mac", "New agent...", "Copy ssh command", "Share a port...", "-", "Stop...", "-", "Delete... (red)"}) {
+	if menu == nil || !slices.Equal(menuWords(p, menu.Submenu), []string{"linux-1 on This Mac", "Copy ssh command", "Share a port...", "-", "Stop...", "-", "Delete... (red)"}) {
 		t.Fatalf("menu %q", menuWords(p, menu.Submenu))
 	}
 	f.Macs[0].Shared, f.Macs[0].Ports = nil, nil

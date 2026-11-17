@@ -19,7 +19,7 @@
         },
         {
           "kind": "text",
-          "text": "1 thing"
+          "text": "nothing blocks a server"
         }
       ]
     },
@@ -40,28 +40,9 @@
       ],
       "items": [
         {
-          "row": {
-            "id": "waiting:review-bot",
-            "mark": "attention",
-            "label": "review-bot",
-            "detail": {
-              "kind": "text",
-              "text": "PR #42 is ready"
-            },
-            "reason": "waiting",
-            "glyph": {
-              "kind": "symbol:text.bubble",
-              "signal": "waits"
-            },
-            "verb": "waiting:review-bot",
-            "nav": "menubar.machine:review-bot"
+          "empty": {
+            "text": "Nothing needs you"
           }
-        }
-      ],
-      "counts": [
-        {
-          "mark": "attention",
-          "n": 1
         }
       ],
       "card": "flush"
@@ -188,15 +169,6 @@
     }
   ],
   "actions": [
-    {
-      "label": "Review",
-      "on": "row",
-      "rows": [
-        "waiting:review-bot"
-      ],
-      "id": "waiting:review-bot",
-      "default": true
-    },
     {
       "label": "How to",
       "on": "row",

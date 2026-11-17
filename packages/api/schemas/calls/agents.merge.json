@@ -39,6 +39,14 @@
           "type": "string"
         },
         "state": {
+          "enum": [
+            "",
+            "finished",
+            "running",
+            "starting",
+            "waiting",
+            "working"
+          ],
           "type": "string"
         },
         "steps": {

@@ -8,25 +8,7 @@ import SwiftUI
 
 #Preview("accounts.signing-in") { StoryStage(Stories["accounts.signing-in"]) }
 
-#Preview("agent.finished") { StoryStage(Stories["agent.finished"]) }
-
-#Preview("agent.remote") { StoryStage(Stories["agent.remote"]) }
-
-#Preview("agent.waiting.merged") { StoryStage(Stories["agent.waiting.merged"]) }
-
-#Preview("agent.waiting.pr-opened") { StoryStage(Stories["agent.waiting.pr-opened"]) }
-
-#Preview("agent.waiting.replied") { StoryStage(Stories["agent.waiting.replied"]) }
-
-#Preview("agent.waiting.reply") { StoryStage(Stories["agent.waiting.reply"]) }
-
-#Preview("agent.waiting") { StoryStage(Stories["agent.waiting"]) }
-
-#Preview("agent.working") { StoryStage(Stories["agent.working"]) }
-
 #Preview("alert.delete-server") { StoryStage(Stories["alert.delete-server"]) }
-
-#Preview("alert.delete-vm.agents") { StoryStage(Stories["alert.delete-vm.agents"]) }
 
 #Preview("alert.delete-vm.ephemeral") { StoryStage(Stories["alert.delete-vm.ephemeral"]) }
 
@@ -41,8 +23,6 @@ import SwiftUI
 #Preview("alert.restart-mac") { StoryStage(Stories["alert.restart-mac"]) }
 
 #Preview("alert.restart-server") { StoryStage(Stories["alert.restart-server"]) }
-
-#Preview("alert.stop-agent") { StoryStage(Stories["alert.stop-agent"]) }
 
 #Preview("alert.stop-all.server") { StoryStage(Stories["alert.stop-all.server"]) }
 
@@ -82,14 +62,6 @@ import SwiftUI
 
 #Preview("find.type-to-find") { StoryStage(Stories["find.type-to-find"]) }
 
-#Preview("home.agent-born") { StoryStage(Stories["home.agent-born"]) }
-
-#Preview("home.agent-creating") { StoryStage(Stories["home.agent-creating"]) }
-
-#Preview("home.agents-folded") { StoryStage(Stories["home.agents-folded"]) }
-
-#Preview("home.agents-unfolded") { StoryStage(Stories["home.agents-unfolded"]) }
-
 #Preview("home.awake-off") { StoryStage(Stories["home.awake-off"]) }
 
 #Preview("home.down-and-exposed") { StoryStage(Stories["home.down-and-exposed"]) }
@@ -109,8 +81,6 @@ import SwiftUI
 #Preview("home.loaded") { StoryStage(Stories["home.loaded"]) }
 
 #Preview("home.loading") { StoryStage(Stories["home.loading"]) }
-
-#Preview("home.many-needs") { StoryStage(Stories["home.many-needs"]) }
 
 #Preview("home.needs") { StoryStage(Stories["home.needs"]) }
 
@@ -201,8 +171,6 @@ import SwiftUI
 #Preview("menu.share-port.of") { StoryStage(Stories["menu.share-port.of"]) }
 
 #Preview("menu.station") { StoryStage(Stories["menu.station"]) }
-
-#Preview("menubar.count") { StoryStage(Stories["menubar.count"]) }
 
 #Preview("menubar.down") { StoryStage(Stories["menubar.down"]) }
 
@@ -298,8 +266,6 @@ import SwiftUI
 
 #Preview("transition.menu") { StoryStage(Stories["transition.menu"]) }
 
-#Preview("transition.need-collapse") { StoryStage(Stories["transition.need-collapse"]) }
-
 #Preview("transition.panel-close") { StoryStage(Stories["transition.panel-close"]) }
 
 #Preview("transition.panel-open") { StoryStage(Stories["transition.panel-open"]) }
@@ -316,11 +282,9 @@ import SwiftUI
 
 #Preview("transition.sheet") { StoryStage(Stories["transition.sheet"]) }
 
-#Preview("workspace.agents.finished") { StoryStage(Stories["workspace.agents.finished"]) }
+#Preview("workspace.ephemeral") { StoryStage(Stories["workspace.ephemeral"]) }
 
-#Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
-
-#Preview("workspace.hook-missing") { StoryStage(Stories["workspace.hook-missing"]) }
+#Preview("workspace.overview") { StoryStage(Stories["workspace.overview"]) }
 
 #Preview("workspace.started") { StoryStage(Stories["workspace.started"]) }
 

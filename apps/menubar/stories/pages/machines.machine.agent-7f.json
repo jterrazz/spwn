@@ -29,71 +29,8 @@
           "kind": "text",
           "text": "up 2 hr",
           "pri": 3
-        },
-        {
-          "kind": "text",
-          "text": "no agent running"
         }
       ]
-    },
-    {
-      "id": "agents",
-      "title": "Agents",
-      "caption": [
-        {
-          "kind": "list",
-          "items": [
-            {
-              "kind": "text",
-              "text": "1 finished"
-            }
-          ]
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "agent-7f",
-            "mark": "ok",
-            "label": "agent-7f",
-            "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "finished"
-                },
-                {
-                  "kind": "text",
-                  "text": "tests pass"
-                }
-              ]
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "done"
-            },
-            "verb": "forget:agent-7f",
-            "nav": "menubar.agent:agent-7f",
-            "signal": "done"
-          }
-        }
-      ],
-      "uncounted": true,
-      "segment": "overview",
-      "card": "flush"
     },
     {
       "id": "gauges",
@@ -1824,60 +1761,6 @@
       }
     },
     {
-      "key": "shift+cmd+n",
-      "label": "New agent",
-      "on": "page",
-      "priority": 2,
-      "mutates": true,
-      "id": "new-agent",
-      "run": {
-        "call": "agents.start",
-        "in": {
-          "On": "agent-7f"
-        }
-      },
-      "form": {
-        "title": "New agent on agent-7f",
-        "fields": [
-          {
-            "key": "Task",
-            "label": "Task",
-            "kind": "text",
-            "note": "empty, it waits for a prompt"
-          }
-        ]
-      },
-      "icon": "plus"
-    },
-    {
-      "label": "Clean up",
-      "on": "row",
-      "rows": [
-        "agent-7f"
-      ],
-      "priority": 3,
-      "mutates": true,
-      "id": "forget:agent-7f",
-      "run": {
-        "call": "agents.forget",
-        "in": {
-          "Agent": "agent-7f"
-        },
-        "target": {
-          "name": "agent-7f"
-        }
-      },
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "agent-7f cleaned up"
-          }
-        ]
-      }
-    },
-    {
       "label": "Share a port",
       "on": "page",
       "priority": 3,
@@ -2081,7 +1964,6 @@
       "icon": "ellipsis",
       "submenu": [
         "title:agent-7f",
-        "new-agent",
         "copy-ssh@menu",
         "share-port@menu",
         "grant@menu",

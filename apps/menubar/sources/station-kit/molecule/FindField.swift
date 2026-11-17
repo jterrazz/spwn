@@ -128,7 +128,6 @@ public struct FindResult: View {
             switch GlyphView.drawn(g) {
             case let .chip(kind, brand): LogoChip(kind, brand)
             case let .symbol(name): mark(Image(systemName: name), g)
-            case let .custom(name): mark(Image(name, bundle: .module), g)
             case let .mac(lid): mark(Image(systemName: Token.Object.mac(lid: lid)), g)
             }
         } else if let mark = entry.row.mark {

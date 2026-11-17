@@ -19,7 +19,6 @@ final class FindTests: XCTestCase {
     // action and New VM on the two roomiest Macs.
     func testNothingTypedListsTheNeedsTheRecentMachinesAndTheActionsAtHand() throws {
         XCTAssertEqual(said(try index().results(query: "", recent: Self.recent)), [
-            "Needs you:", "Review review-bot · PR #42 is ready",
             "Recent:", "linux-1", "mac-mini", "infra",
             "Actions:", "Keep This Mac awake 4 hr", "New VM on This Mac", "New VM on mac-mini",
         ])
@@ -29,7 +28,7 @@ final class FindTests: XCTestCase {
     // "Restart infra".
     func testADownServerLeadsTheNeeds() throws {
         let groups = try index("machines.find.down").results(query: "", recent: Self.recent)
-        XCTAssertEqual(groups.first?.entries.map(\.title), ["Restart infra", "Review review-bot · PR #42 is ready"])
+        XCTAssertEqual(groups.first?.entries.map(\.title), ["Restart infra"])
     }
 
     // invariant: SPEC B5.21: Recent is the app's own list, the machines it

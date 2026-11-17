@@ -140,16 +140,8 @@ func deleteServer(vm model.VM, ports int) alert {
 	return alert{Gesture: "delete", Kind: machine.Server, Name: vm.Name, Question: "Delete " + vm.Name + "?", Says: []string{says}, Verb: "Delete " + vm.Name, Danger: true}
 }
 
-func stopWorkspace(vm model.VM, on string, live []string, shared int) alert {
-	var says []string
-	switch len(live) {
-	case 0:
-	case 1:
-		says = append(says, "Its agent "+live[0]+" stops.")
-	default:
-		says = append(says, "Its agents "+and(live)+" stop.")
-	}
-	says = append(says, "Its disk is kept.")
+func stopWorkspace(vm model.VM, on string, shared int) alert {
+	says := []string{"Its disk is kept."}
 	if shared > 0 {
 		says = append(says, counted(shared, "shared port", "shared ports")+" "+pluralVerb(shared, "stops", "stop")+" answering until it starts again.")
 	}
@@ -160,15 +152,7 @@ func stopWorkspace(vm model.VM, on string, live []string, shared int) alert {
 	return a
 }
 
-func deleteWorkspace(vm model.VM, live []string, shared, grants int) alert {
-	var says []string
-	switch len(live) {
-	case 0:
-	case 1:
-		says = append(says, "Its agent "+live[0]+" stops first.")
-	default:
-		says = append(says, "Its agents stop first: "+strings.Join(live, ", ")+".")
-	}
+func deleteWorkspace(vm model.VM, shared, grants int) alert {
 	goes := []string{disk(vm)}
 	if shared > 0 {
 		goes = append(goes, counted(shared, "shared port", "shared ports"))
@@ -176,17 +160,12 @@ func deleteWorkspace(vm model.VM, live []string, shared, grants int) alert {
 	if grants > 0 {
 		goes = append(goes, counted(grants, "grant", "grants")+" made to it")
 	}
-	says = append(says, "This can't be undone. It goes with "+and(goes)+".")
+	says := []string{"This can't be undone. It goes with " + and(goes) + "."}
 	a := alert{Gesture: "delete", Kind: vm.Lifetime.Kind(), Name: vm.Name, Question: "Delete " + vm.Name + "?", Says: says, Verb: "Delete " + vm.Name, Danger: true}
 	if vm.Lifetime == model.Ephemeral {
 		a.Facts = []string{FactEphemeral}
 	}
 	return a
-}
-
-func stopAgent(name string) alert {
-	return alert{Gesture: "stop-agent", Kind: machine.Workspace, Name: name, Question: "Stop the agent " + name + "?",
-		Says: []string{"Its terminal closes; its workspace keeps running."}, Verb: "Stop", Danger: true}
 }
 
 // value: Stop everything on one Mac: its running workspaces stop and keep
@@ -246,7 +225,7 @@ const (
 // Forget… of another Mac, Stop everything… while a workspace runs on it.
 func macAlerts(m Machine, h model.MacView, label string) []page.Action {
 	var running, servers []string
-	for _, vm := range liveFirst(h.VMs) {
+	for _, vm := range h.VMs {
 		switch {
 		case vm.Lifetime.Kind() == machine.Server:
 			servers = append(servers, vm.Name)

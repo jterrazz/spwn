@@ -36,52 +36,6 @@
       ]
     },
     {
-      "id": "needs-you",
-      "title": "Needs you",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "1",
-          "signal": "waits"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "waiting:review-bot",
-            "mark": "attention",
-            "label": "review-bot",
-            "detail": {
-              "kind": "text",
-              "text": "PR #42 is ready"
-            },
-            "reason": "waiting",
-            "glyph": {
-              "kind": "symbol:text.bubble",
-              "signal": "waits"
-            },
-            "verb": "waiting:review-bot",
-            "nav": "menubar.machine:review-bot"
-          }
-        }
-      ],
-      "uncounted": true,
-      "segment": "overview",
-      "card": "flush"
-    },
-    {
       "id": "gauges",
       "title": "Gauges",
       "items": [
@@ -243,12 +197,21 @@
               }
             ],
             "detail": {
-              "kind": "text",
-              "text": "refresh the auth token"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "running"
+                },
+                {
+                  "kind": "text",
+                  "text": "ephemeral"
+                }
+              ]
             },
             "glyph": {
-              "kind": "agent",
-              "signal": "active"
+              "signal": "well",
+              "dot": "fill"
             },
             "trail": "cpu",
             "quick": "attach:linux-3",
@@ -256,7 +219,7 @@
             "menu": [
               "title:linux-3",
               "open:linux-3",
-              "attach:linux-3@linux-3",
+              "open-station@linux-3",
               "open-link@linux-3",
               "-",
               "copy-of:linux-3",
@@ -273,20 +236,37 @@
             "id": "review-bot",
             "mark": "ok",
             "label": "review-bot",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 20,
+                "live": "cpuh:review-bot"
+              }
+            ],
             "detail": {
-              "kind": "text",
-              "text": "fixes the token refresh"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "running"
+                },
+                {
+                  "kind": "text",
+                  "text": "persistent"
+                }
+              ]
             },
             "glyph": {
-              "kind": "agent",
-              "signal": "waits"
+              "signal": "well",
+              "dot": "fill"
             },
+            "trail": "cpu",
             "quick": "attach:review-bot",
             "nav": "menubar.machine:review-bot",
             "menu": [
               "title:review-bot",
               "open:review-bot",
-              "attach:review-bot@review-bot",
+              "open-station@review-bot",
               "-",
               "copy-of:review-bot",
               "share-of:review-bot",
@@ -1892,7 +1872,7 @@
               "text": "4 cores"
             },
             "glyph": {
-              "kind": "agent"
+              "kind": "workspace"
             },
             "trail": "cpu",
             "nav": "menubar.machine:linux-3"
@@ -1953,7 +1933,7 @@
               "text": "2 cores"
             },
             "glyph": {
-              "kind": "agent"
+              "kind": "workspace"
             },
             "trail": "cpu",
             "nav": "menubar.machine:review-bot"
@@ -2349,15 +2329,6 @@
     }
   ],
   "actions": [
-    {
-      "label": "Review",
-      "on": "row",
-      "rows": [
-        "waiting:review-bot"
-      ],
-      "id": "waiting:review-bot",
-      "default": true
-    },
     {
       "key": "cmd+n",
       "label": "New VM",
@@ -4814,12 +4785,11 @@
       "label": "Open in Terminal",
       "on": "menu",
       "priority": 2,
-      "id": "attach:linux-3@linux-3",
+      "id": "open-station@linux-3",
       "run": {
         "terminal": true,
         "argv": [
-          "agents",
-          "attach",
+          "--on",
           "linux-3"
         ]
       },
@@ -4961,7 +4931,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-3 stops. Its disk is kept. 1 shared port stops answering until it starts again."
+            "text": "Its disk is kept. 1 shared port stops answering until it starts again."
           }
         ],
         "yes": "Stop linux-3",
@@ -4991,7 +4961,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-3 stops first. This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 grant made to it."
+            "text": "This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 grant made to it."
           }
         ],
         "danger": true,
@@ -5032,12 +5002,11 @@
       "label": "Open in Terminal",
       "on": "menu",
       "priority": 2,
-      "id": "attach:review-bot@review-bot",
+      "id": "open-station@review-bot",
       "run": {
         "terminal": true,
         "argv": [
-          "agents",
-          "attach",
+          "--on",
           "review-bot"
         ]
       },
@@ -5144,7 +5113,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops. Its disk is kept."
+            "text": "Its disk is kept."
           }
         ],
         "yes": "Stop review-bot",
@@ -5174,7 +5143,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 grant made to it."
+            "text": "This can't be undone. It goes with its disk (40 GB) and 1 grant made to it."
           }
         ],
         "danger": true,
@@ -5234,8 +5203,8 @@
   "live": [
     "cpuh:infra",
     "cpuh:linux-3",
-    "cpu:mac-mini",
     "cpuh:review-bot",
+    "cpu:mac-mini",
     "free:mac-mini",
     "net:mac-mini"
   ]

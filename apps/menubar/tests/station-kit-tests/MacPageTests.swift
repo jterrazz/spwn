@@ -88,7 +88,7 @@ final class MacPageTests: XCTestCase {
         let grants = MacPage.sections(page, segment: "accounts").flatMap(\.rows).filter { !($0.menu ?? []).isEmpty }
         XCTAssertEqual(grants.map(\.label), ["GitHub", "Claude"])
         let overview = MacPage.sections(page, segment: "overview").compactMap(\.id)
-        XCTAssertEqual(overview, ["agents", "gauges", "ports", "footnote"])
+        XCTAssertEqual(overview, ["gauges", "ports", "footnote"])
         var picked = state
         picked.segment = "accounts"
         let drawn = try [state, picked].map { s in

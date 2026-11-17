@@ -35,7 +35,7 @@ final class MoleculeTests: XCTestCase {
 
     @MainActor
     func testNothingInARowMovesUnderThePointer() {
-        for row in Sheet.agents + Sheet.accessories {
+        for row in Sheet.workspaces + Sheet.accessories {
             let rest = Self.frames(row, highlighted: false)
             let lit = Self.frames(row, highlighted: true)
             XCTAssertFalse(rest.isEmpty, row.id ?? "")
@@ -55,26 +55,26 @@ final class MoleculeTests: XCTestCase {
 
     @MainActor
     func testEveryRowOfThePanelHasOneLeftEdge() {
-        let edges = Set((Sheet.agents + Sheet.accessories).map { Self.frames($0, highlighted: false)[.name]?.minX ?? -1 })
+        let edges = Set((Sheet.workspaces + Sheet.accessories).map { Self.frames($0, highlighted: false)[.name]?.minX ?? -1 })
         XCTAssertEqual(edges, [Token.Metric.Row.padding + Token.Metric.Row.accessory + Token.Metric.Row.gap])
     }
 
     @MainActor
     func testARowWithAVerbHasNoChevronAndARowThatPushesHasOne() throws {
-        let verb = try XCTUnwrap(Sheet.agents.last)
-        let nav = try XCTUnwrap(Sheet.agents.first)
+        let verb = try XCTUnwrap(Sheet.workspaces.last)
+        let nav = try XCTUnwrap(Sheet.workspaces.first)
         XCTAssertGreaterThan(Self.frames(verb, highlighted: false)[.control]?.width ?? 0, Token.Metric.Control.verbMinWidth - 1)
         XCTAssertLessThan(Self.frames(nav, highlighted: false)[.control]?.width ?? .infinity, Token.Metric.Row.accessory)
     }
 
     @MainActor
-    func testAFinishedAgentThatAlsoPushesShowsItsVerbAndNoChevron() throws {
-        var finished = try XCTUnwrap(Sheet.agents.last)
-        XCTAssertEqual(finished.verb, "delete")
-        finished.nav = "menubar.machine:agent-7f"
-        let alone = Self.frames(finished, highlighted: false)
-        finished.nav = nil
-        XCTAssertEqual(alone[.control], Self.frames(finished, highlighted: false)[.control])
+    func testAStoppedWorkspaceThatAlsoPushesShowsItsVerbAndNoChevron() throws {
+        var stopped = try XCTUnwrap(Sheet.workspaces.last)
+        XCTAssertEqual(stopped.verb, "delete")
+        stopped.nav = "menubar.machine:old"
+        let alone = Self.frames(stopped, highlighted: false)
+        stopped.nav = nil
+        XCTAssertEqual(alone[.control], Self.frames(stopped, highlighted: false)[.control])
     }
 
     func testOnlyATintedRowHidesTheHairlinesAroundIt() throws {

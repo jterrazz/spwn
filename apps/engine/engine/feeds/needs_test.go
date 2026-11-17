@@ -24,14 +24,12 @@ func watchNeeds(t *testing.T, w *world, subject string) page.Page {
 
 // invariant: SPEC B5.7: the needs page is read from the fleet, every Mac's
 // ports and Overview, each through its own engine: infra down on
-// mac-mini comes first, then linux-1 waiting on This Mac; This Mac's updates
-// are upkeep; a Mac that does not answer is asked nothing, and no sign-in is
-// read at all.
-func TestTheNeedsPageReadsEveryMacThroughItsEngineAndRanksWhatNeedsYou(t *testing.T) {
+// mac-mini is the one need; This Mac's updates are upkeep; a Mac that does
+// not answer is asked nothing, and no sign-in is read at all.
+func TestTheNeedsPageReadsEveryMacThroughItsEngine(t *testing.T) {
 	w := twoMacsSignedIn()
 	w.infra = []machines.VM{infraAt(machines.Stopped, 5)}
 	w.infra[0].Restarts.Looping = true
-	w.here[0].Agent = &machines.AgentView{State: "waiting", Ask: "PR #42 is ready"}
 	w.updates = true
 
 	p := watchNeeds(t, w, "")
@@ -39,7 +37,7 @@ func TestTheNeedsPageReadsEveryMacThroughItsEngineAndRanksWhatNeedsYou(t *testin
 	if p.Error != nil {
 		t.Fatalf("the needs page failed: %s", p.Error.Message)
 	}
-	if got, want := rowIDs(p, pagemenubar.SectionNeeds), []string{"down:infra", "waiting:linux-1"}; !slices.Equal(got, want) {
+	if got, want := rowIDs(p, pagemenubar.SectionNeeds), []string{"down:infra"}; !slices.Equal(got, want) {
 		t.Errorf("needs %v, want %v", got, want)
 	}
 	if got := rowIDs(p, pagemenubar.SectionUpkeep); len(got) != 1 {

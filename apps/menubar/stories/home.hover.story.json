@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.hover",
-    "note": "Hovering an agent row: it tints, Open in Terminal fades in beside its CPU.",
+    "note": "Hovering a workspace row: it tints, Open in Terminal fades in beside its CPU.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

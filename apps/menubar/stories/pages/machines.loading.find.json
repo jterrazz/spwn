@@ -9,49 +9,6 @@
   "state": "ready",
   "sections": [
     {
-      "id": "needs-you",
-      "title": "Needs you",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "listing",
-          "keep": 100
-        },
-        {
-          "key": "tags",
-          "label": "tags",
-          "kind": "list",
-          "show": "pipe"
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "waiting:review-bot",
-            "mark": "attention",
-            "label": "Review review-bot",
-            "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "PR #42 is ready"
-                }
-              ]
-            },
-            "reason": "waiting",
-            "glyph": {
-              "kind": "symbol:text.bubble",
-              "signal": "waits"
-            },
-            "verb": "need:waiting:review-bot",
-            "nav": "menubar.machine:review-bot"
-          }
-        }
-      ],
-      "uncounted": true
-    },
-    {
       "id": "machines",
       "title": "Machines",
       "columns": [
@@ -193,11 +150,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "agent"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "finished"
+                    "text": "running"
                   },
                   {
                     "kind": "text",
@@ -215,7 +168,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "finished"
+                  "text": "running"
                 },
                 {
                   "kind": "text",
@@ -224,8 +177,8 @@
               ]
             },
             "glyph": {
-              "kind": "agent",
-              "signal": "done",
+              "kind": "workspace",
+              "signal": "well",
               "dot": "fill"
             },
             "verb": "open:agent-7f",
@@ -288,11 +241,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "agent"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "working"
+                    "text": "running"
                   },
                   {
                     "kind": "text",
@@ -310,7 +259,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "working"
+                  "text": "running"
                 },
                 {
                   "kind": "text",
@@ -319,8 +268,8 @@
               ]
             },
             "glyph": {
-              "kind": "agent",
-              "signal": "active",
+              "kind": "workspace",
+              "signal": "well",
               "dot": "fill"
             },
             "verb": "open:linux-1",
@@ -383,11 +332,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "agent"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "working"
+                    "text": "running"
                   },
                   {
                     "kind": "text",
@@ -405,7 +350,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "working"
+                  "text": "running"
                 },
                 {
                   "kind": "text",
@@ -414,8 +359,8 @@
               ]
             },
             "glyph": {
-              "kind": "agent",
-              "signal": "active",
+              "kind": "workspace",
+              "signal": "well",
               "dot": "fill"
             },
             "verb": "open:linux-3",
@@ -433,11 +378,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "agent"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "waiting"
+                    "text": "running"
                   },
                   {
                     "kind": "text",
@@ -455,7 +396,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "waiting"
+                  "text": "running"
                 },
                 {
                   "kind": "text",
@@ -464,8 +405,8 @@
               ]
             },
             "glyph": {
-              "kind": "agent",
-              "signal": "waits",
+              "kind": "workspace",
+              "signal": "well",
               "dot": "fill"
             },
             "verb": "open:review-bot",
@@ -1661,15 +1602,6 @@
     }
   ],
   "actions": [
-    {
-      "label": "Review",
-      "on": "row",
-      "rows": [
-        "waiting:review-bot"
-      ],
-      "id": "need:waiting:review-bot",
-      "default": true
-    },
     {
       "key": "cmd+1",
       "label": "Open",

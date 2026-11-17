@@ -14,8 +14,6 @@ import (
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
-	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -108,8 +106,6 @@ type world struct {
 	reads map[string][]activitycalls.ReadIn
 	// value: each Mac's Awake, by name; a Mac absent does not answer.
 	awake map[string]awake.Report
-	// value: the fleet's agents; nil does not answer.
-	agents []agents.Agent
 }
 
 func (w *world) machines(here bool) machines.AllMachines {
@@ -170,13 +166,6 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 			head.Up = 21 * 24 * time.Hour
 		}
 		return overviewcalls.ReadOut{Summary: overview.Summary{Head: head, Needs: needs}}
-	case agentscalls.List.Name:
-		w.mu.Lock()
-		defer w.mu.Unlock()
-		if w.agents == nil {
-			return nil
-		}
-		return slices.Clone(w.agents)
 	case awakecalls.Read.Name:
 		w.mu.Lock()
 		defer w.mu.Unlock()

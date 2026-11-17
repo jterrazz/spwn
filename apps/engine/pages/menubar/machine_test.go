@@ -26,14 +26,12 @@ const (
 func macFleet() *model.AllMachines {
 	server := model.VM{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running, Want: "running", Resources: model.Resources{MemoryBytes: 24 << 30},
 		BootAt: macNow.Add(-12 * 24 * time.Hour), CheckStatus: model.CheckStatus{State: model.CheckPassing}}
-	waits := model.VM{Name: "review-bot", Lifetime: model.Persistent, State: model.Running, Resources: model.Resources{MemoryBytes: 4 << 30},
-		Agent: &model.AgentView{State: "waiting", Task: "fixes the token refresh", Ask: "PR #42 is ready", Since: macNow.Add(-6 * time.Minute)}}
-	works := model.VM{Name: "linux-3", Lifetime: model.Ephemeral, State: model.Running, Resources: model.Resources{MemoryBytes: 8 << 30},
-		Agent: &model.AgentView{State: "working", Task: "refresh the auth token"}}
+	docs := model.VM{Name: "review-bot", Lifetime: model.Persistent, State: model.Running, Resources: model.Resources{MemoryBytes: 4 << 30}}
+	works := model.VM{Name: "linux-3", Lifetime: model.Ephemeral, State: model.Running, Resources: model.Resources{MemoryBytes: 8 << 30}}
 	return &model.AllMachines{Read: macNow, Macs: []model.MacView{
 		{Name: proMac, User: "you", ThisMac: true, Reachable: true, Answered: macNow, Laptop: true, Hardware: coremachine.Hardware{Model: "Mac16,5", Chip: "Apple M4 Max", Memory: 48 << 30}},
 		{Name: miniMac, User: "you", Reachable: true, Answered: macNow, Hardware: coremachine.Hardware{Model: "Mac16,11", Chip: "Apple M4 Pro", Memory: 64 << 30},
-			VMs: []model.VM{works, waits, server}},
+			VMs: []model.VM{works, docs, server}},
 		{Name: airMac, User: "you", Answered: macNow.Add(-2 * time.Hour), Asleep: true, Laptop: true},
 	}}
 }
@@ -104,6 +102,7 @@ func TestAMacsNeedsAreItsOwnRedFirstThreeBeforeTheFold(t *testing.T) {
 			{Name: miniMac, Ports: []ports.Port{
 				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8080, Process: "node", Reach: ports.Outside},
 				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8081, Process: "node", Reach: ports.Outside},
+				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8082, Process: "node", Reach: ports.Outside},
 			}},
 		}}
 	})
@@ -111,8 +110,8 @@ func TestAMacsNeedsAreItsOwnRedFirstThreeBeforeTheFold(t *testing.T) {
 	if needs == nil {
 		t.Fatal("no Needs you on a Mac whose server is down")
 	}
-	if got := labels(needs.Items); !slices.Equal(got, []string{"infra", "Port 8080 exposed", "Port 8081 exposed", "review-bot"}) {
-		t.Fatalf("needs %q, want infra down first, then the two exposed ports, then the wait; This Mac's port is not the mini's", got)
+	if got := labels(needs.Items); !slices.Equal(got, []string{"infra", "Port 8080 exposed", "Port 8081 exposed", "Port 8082 exposed"}) {
+		t.Fatalf("needs %q, want infra down first, then the three exposed ports; This Mac's port is not the mini's", got)
 	}
 	if needs.Top != 3 || needs.Rest == nil || needs.Rest.Row.Label != "1 more" || needs.Rest.Row.Detail.Text != "Show less" {
 		t.Fatalf("fold top %d rest %+v, want three rows then 1 more", needs.Top, needs.Rest)
@@ -129,32 +128,23 @@ func TestAMacsNeedsAreItsOwnRedFirstThreeBeforeTheFold(t *testing.T) {
 	}
 }
 
-// invariant: SPEC A4: This Mac's VMs read the working one first with its
-// agent's step, then the finished, then the stopped, and every row, the
-// finished one too, opens its VM's page.
-func TestAMacsVMsListTheWorkingFirstAndEachOpensItsPage(t *testing.T) {
+// invariant: SPEC A4: a Mac's VMs read its servers first, then the
+// running, then the stopped, and every row opens its VM's page.
+func TestAMacsVMsListTheRunningFirstAndEachOpensItsPage(t *testing.T) {
 	p := macPageOf(t, proMac, func(m *Machine) {
 		m.All.Macs[0].VMs = []model.VM{
-			{Name: "agent-7f", Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: model.AgentFinished, Reason: "tests pass"}},
 			{Name: "api", Lifetime: model.Persistent, State: model.Stopped},
-			{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running,
-				Agent: &model.AgentView{State: "working", Task: "builds the landing page", Step: []string{"running tests", "41/58 pass"}}},
+			{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 		}
 	})
 	vms := sectionOf(p, SectionVMs)
-	if got := labels(vms.Items); !slices.Equal(got, []string{"linux-1", "agent-7f", "api"}) {
-		t.Fatalf("VMs %q, want the working linux-1, then the finished agent-7f, then the stopped api", got)
-	}
-	if d := words(vms.Items[0].Row.Detail); d != "running tests | 41/58 pass" {
-		t.Errorf("linux-1 reads %q, want its agent's step as Home says it", d)
+	if got := labels(vms.Items); !slices.Equal(got, []string{"linux-1", "api"}) {
+		t.Fatalf("VMs %q, want the running linux-1, then the stopped api", got)
 	}
 	for _, it := range vms.Items {
 		if want := machinePage(it.Row.Label); it.Row.Nav != want {
 			t.Errorf("%s's row opens %q, want its page %q", it.Row.Label, it.Row.Nav, want)
 		}
-	}
-	if finished := vms.Items[1].Row; finished.Verb != ActionCleanup {
-		t.Errorf("agent-7f's row offers %q, want Clean up beside its way in", finished.Verb)
 	}
 }
 
@@ -167,6 +157,7 @@ func TestAnExposedPortLeadsThisMacsNeeds(t *testing.T) {
 			{Name: miniMac, Ports: []ports.Port{
 				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8080, Process: "node", Reach: ports.Outside},
 				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8081, Process: "node", Reach: ports.Outside},
+				{Machine: coremachine.Ref{Name: "linux-3", On: miniMac}, Port: 8082, Process: "node", Reach: ports.Outside},
 			}},
 		}}
 	})

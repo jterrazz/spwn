@@ -33,7 +33,7 @@ func consequence(c *page.Confirm) string {
 
 func TestAnEphemeralWorkspacesDeleteAsksYesOrNoAndListsWhatGoesWithIt(t *testing.T) {
 	vm := model.VM{Name: "agent-7f", Lifetime: model.Ephemeral, SizeGB: 12}
-	a := deleteWorkspace(vm, nil, 2, 2).action(graded, page.Action{Run: &page.Run{In: map[string]string{"VM": "agent-7f"}}})
+	a := deleteWorkspace(vm, 2, 2).action(graded, page.Action{Run: &page.Run{In: map[string]string{"VM": "agent-7f"}}})
 	if a.Confirm.Type != "" || !a.Confirm.Danger || a.Confirm.Yes != "Delete agent-7f" {
 		t.Fatalf("an ephemeral workspace's delete asks %+v, want yes or no, red, Delete agent-7f", a.Confirm)
 	}
@@ -47,7 +47,7 @@ func TestAnEphemeralWorkspacesDeleteAsksYesOrNoAndListsWhatGoesWithIt(t *testing
 
 func TestAPersistentWorkspacesDeleteAsksItsNameTyped(t *testing.T) {
 	vm := model.VM{Name: "api", Lifetime: model.Persistent, SizeGB: 24}
-	a := deleteWorkspace(vm, nil, 0, 0).action(graded, page.Action{Run: &page.Run{In: map[string]string{}}})
+	a := deleteWorkspace(vm, 0, 0).action(graded, page.Action{Run: &page.Run{In: map[string]string{}}})
 	if a.Confirm.Type != "api" || consequence(a.Confirm) != "This can't be undone. It goes with its disk (24 GB)." {
 		t.Errorf("a persistent workspace's delete asks %+v", a.Confirm)
 	}
@@ -56,15 +56,15 @@ func TestAPersistentWorkspacesDeleteAsksItsNameTyped(t *testing.T) {
 	}
 }
 
-func TestStoppingOrDeletingAVMNamesTheAgentsThatStopWithIt(t *testing.T) {
+func TestStoppingOrDeletingAWorkspaceNamesWhatGoesAndWhatStaysQuiet(t *testing.T) {
 	vm := model.VM{Name: "linux-1", Lifetime: model.Ephemeral, SizeGB: 16}
 	for _, c := range []struct {
 		alert alert
 		want  string
 	}{
-		{deleteWorkspace(vm, []string{"linux-1", "docs-bot"}, 2, 0), "Its agents stop first: linux-1, docs-bot. This can't be undone. It goes with its disk (16 GB) and 2 shared ports."},
-		{stopWorkspace(vm, "This Mac", []string{"linux-1"}, 2), "Its agent linux-1 stops. Its disk is kept. 2 shared ports stop answering until it starts again."},
-		{stopWorkspace(vm, "This Mac", nil, 1), "Its disk is kept. 1 shared port stops answering until it starts again."},
+		{deleteWorkspace(vm, 2, 0), "This can't be undone. It goes with its disk (16 GB) and 2 shared ports."},
+		{stopWorkspace(vm, "This Mac", 2), "Its disk is kept. 2 shared ports stop answering until it starts again."},
+		{stopWorkspace(vm, "This Mac", 1), "Its disk is kept. 1 shared port stops answering until it starts again."},
 	} {
 		if got := consequence(c.alert.confirm(graded)); got != c.want {
 			t.Errorf("says %q, want %q", got, c.want)

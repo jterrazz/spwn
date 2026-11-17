@@ -8,8 +8,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
-	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -128,7 +126,6 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 		kept, kerr := call.Read(ctx, f.o.Calls, at, activitycalls.Read, activitycalls.ReadIn{History: true, Graph: 6 * time.Minute, Quick: true}, nil)
 		var signed *pagemenubar.SignIns
 		var held *awake.Report
-		var hosted []agents.Agent
 		h, isMac := macNamed(listed.All, f.m.Name)
 		if ferr == nil && isMac {
 			all := f.o.signIns(ctx, listed.All, "")
@@ -141,11 +138,6 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 				signed = &all
 			}
 		}
-		if ferr == nil {
-			if read, err := call.Invoke(ctx, f.o.Calls, machine.Ref{}, agentscalls.List, agentscalls.ListIn{}, nil); err == nil {
-				hosted = append([]agents.Agent{}, read...)
-			}
-		}
 		if ferr == nil && h.Name != "" {
 			if r, err := call.Read(ctx, f.o.Calls, macRef(h), awakecalls.Read, awakecalls.ReadIn{}, nil); err == nil {
 				r.Mac = h.Name
@@ -153,7 +145,7 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 			}
 		}
 		f.send(ctx, func(m *pagemenubar.Machine) {
-			m.Zone, m.SignIns, m.Awake, m.Agents = f.o.zone(), signed, held, hosted
+			m.Zone, m.SignIns, m.Awake = f.o.zone(), signed, held
 			if ferr == nil {
 				m.All = &listed.All
 			}

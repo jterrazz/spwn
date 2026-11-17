@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
@@ -83,8 +82,8 @@ func overviewActions(m Machine, h model.MacView, label string) []page.Action {
 			out = append(out, attach(h, vm))
 		}
 	}
-	if slices.ContainsFunc(h.VMs, model.VM.Finished) {
-		out = append(out, cleanupSheet(ActionCleanup, *m.All, cleanupsOf([]model.MacView{h}, m.Agents), m.Now, true))
+	if c := cleanupsOf([]model.MacView{h}); c[0].any() {
+		out = append(out, cleanupSheet(ActionCleanup, *m.All, c, m.Now, true))
 	}
 	if a, ok := o.awakeAction(); ok {
 		out = append(out, a)
@@ -204,25 +203,19 @@ func (o macOverview) vms() page.Section {
 	return s
 }
 
-// value: a VM's place on its Mac's card: servers first, then the VMs an
-// agent works or waits in, the other running ones, the finished, then the
-// stopped (SPEC A4's linux-1, agent-7f, api).
+// value: a VM's place on its Mac's card: servers first, then the running
+// ones, then the stopped (SPEC A4's linux-1, agent-7f, api).
 func rank(vm model.VM) int {
 	switch {
 	case vm.Lifetime == model.AlwaysOn:
 		return 0
 	case vm.State != model.Running && vm.State != model.Creating:
-		return 4
-	case vm.Finished():
-		return 3
-	case vm.Agent != nil:
-		return 1
+		return 2
 	}
-	return 2
+	return 1
 }
 
-// value: a VM on its Mac's page: the agent mark or the status dot, what
-// it does now, its CPU as a share of the Mac, Open in Terminal in its
+// value: a VM on its Mac's page: the status dot, what it does now, its CPU as a share of the Mac, Open in Terminal in its
 // quick slot; a creating VM its ring and birth bar, a ready one its check.
 func (o macOverview) vmRow(vm model.VM) page.Row {
 	row := page.Row{ID: vm.Name, Label: vm.Name, Mark: page.OK, Nav: machinePage(vm.Name), Trail: "cpu",
@@ -264,21 +257,6 @@ func (o macOverview) vmRow(vm model.VM) page.Row {
 		row.Glyph = page.Glyph{Dot: page.DotSquare, Signal: page.SignalQuiet}
 		row.Detail = page.Texts("stopped", life)
 		row.Cells, row.Trail = nil, ""
-	case vm.Finished():
-		row.Glyph = page.Glyph{Kind: "symbol:checkmark", Signal: page.SignalDone}
-		row.Signal = page.SignalDone
-		row.Detail = page.Texts("finished", cmpWord(vm.Agent.Reason, "done"))
-		row.Verb, row.Cells, row.Trail = ActionCleanup, nil, ""
-	case vm.Agent != nil && vm.Agent.State == string(agents.Waiting):
-		row.Glyph = page.Glyph{Kind: "agent", Signal: page.SignalWaits}
-		row.Detail = page.Text(cmpWord(vm.Agent.Task, "waits for you"))
-		row.Cells, row.Trail = nil, ""
-	case vm.Agent != nil:
-		row.Glyph = page.Glyph{Kind: "agent", Signal: page.SignalActive}
-		row.Detail = page.Text(cmpWord(vm.Agent.Task, "working"))
-		if len(vm.Agent.Step) > 0 {
-			row.Detail = page.Texts(vm.Agent.Step...)
-		}
 	default:
 		row.Glyph = page.Glyph{Dot: page.DotFill, Signal: page.SignalWell}
 		row.Detail = page.Texts("running", life)
@@ -383,14 +361,10 @@ func (o macOverview) awakeRow() (page.Row, bool) {
 	return row, true
 }
 
-// value: what pauses if the Mac sleeps: its working agents, by name.
+// value: what pauses if the Mac sleeps: its running VMs that are not
+// always on, by name, the rule Awake reads.
 func (o macOverview) pauses() string {
-	var working []string
-	for _, vm := range o.h.VMs {
-		if vm.State == model.Running && vm.Agent != nil && vm.Agent.State == string(agents.Working) {
-			working = append(working, vm.Name)
-		}
-	}
+	working := model.Pausing(o.h.VMs)
 	if len(working) == 0 {
 		return "nothing pauses if it sleeps"
 	}

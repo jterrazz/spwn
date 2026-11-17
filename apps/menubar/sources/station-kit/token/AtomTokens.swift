@@ -5,7 +5,6 @@ extension Token {
         public static func mac(lid: Bool) -> String { lid ? "laptopcomputer" : "macmini" }
         public static let server = "server.rack"
         public static let workspace = "shippingbox"
-        public static let agent = "station.agent"
         public static let unknown = "questionmark"
         public static let account = "key"
         public static let port = "web"

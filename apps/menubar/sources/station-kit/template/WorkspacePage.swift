@@ -1,8 +1,8 @@
 import SwiftUI
 
 // invariant: SPEC A4, B1: a workspace's page: its header, then the
-// sections of the segment picked, its agents first on its Overview; the
-// segment is the client's own, so a pick asks the engine nothing.
+// sections of the segment picked; the segment is the client's own, so a
+// pick asks the engine nothing.
 struct WorkspacePage: View {
     let page: Page
     let state: PanelState
@@ -74,7 +74,6 @@ struct WorkspacePage: View {
         switch (s.segment, s.id) {
         case ("ports", _), (_, "ports"): MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
         case ("accounts", _): MacAccounts(section: s, page: page, busy: state.busy, run: run)
-        case (_, "agents"): WorkspaceAgents(section: s, actions: page.actions ?? [], open: handlers.push, run: run)
         case (_, "stopped"):
             ForEach(Array((s.items ?? []).compactMap(\.empty).enumerated()), id: \.offset) { _, empty in
                 Card(flush: false) { EmptyState(empty, actions: page.actions ?? []) { run($0, nil) } }
@@ -83,46 +82,6 @@ struct WorkspacePage: View {
         }
     }
 }
-
-// invariant: SPEC A4: a workspace's Agents card: its label, its counts
-// and the round + that starts one more, then one row per agent; with none,
-// the one line that offers the first; a row opens its agent's page.
-struct WorkspaceAgents: View {
-    let section: Section
-    let actions: [Action]
-    let open: (String) -> Void
-    let run: (Action, Row?) -> Void
-    @Environment(\.stationTokens) private var tokens
-
-    var start: Action? { actions.first { $0.id == "new-agent" } }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
-            HStack(spacing: Token.Metric.Wait.headGap) {
-                CardLabel(section.title ?? "", value: section.caption ?? [])
-                if let start, section.card != "empty" {
-                    RoundButton(Token.Symbol.plus, size: .small) { run(start, nil) }.accessibilityLabel(start.label ?? "")
-                }
-            }
-            if let empty = section.items?.first?.empty {
-                Card(flush: false) {
-                    HStack {
-                        Text(verbatim: empty.text ?? "").font(Token.Role.emptyGrey.font).foregroundStyle(tokens.tone(Token.Role.emptyGrey.tone))
-                        Spacer(minLength: 0)
-                        if let start { VerbButton(start.label ?? "") { run(start, nil) } }
-                    }
-                }
-            } else {
-                Card {
-                    RowStack(section.rows, columns: section.columns ?? [], actions: actions, open: { row in row.nav.map(open) }) { action in
-                        run(action, section.rows.first { $0.verb == action.id || $0.quick == action.id })
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 // value: a pushed page's footer: its copy line and big button when the
 // page has them, then the status line.

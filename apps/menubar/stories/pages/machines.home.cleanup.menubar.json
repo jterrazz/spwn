@@ -103,49 +103,31 @@
         {
           "row": {
             "id": "hero",
-            "mark": "attention",
-            "label": "2 things need you",
-            "reason": "waiting",
+            "mark": "ok",
+            "label": "All machines are fine",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "infra healthy"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 12 days",
+                  "pri": 3
+                },
+                {
+                  "kind": "text",
+                  "text": "2 of 3 Macs awake",
+                  "pri": 1
+                }
+              ]
+            },
             "glyph": {
-              "kind": "symbol:exclamationmark.circle.fill",
-              "signal": "waits"
+              "kind": "symbol:checkmark.circle.fill",
+              "signal": "well"
             }
-          }
-        },
-        {
-          "row": {
-            "id": "waiting:linux-3",
-            "mark": "attention",
-            "label": "linux-3",
-            "detail": {
-              "kind": "text",
-              "text": "asks which token store to use"
-            },
-            "reason": "waiting",
-            "glyph": {
-              "kind": "symbol:text.bubble",
-              "signal": "waits"
-            },
-            "verb": "waiting:linux-3",
-            "nav": "menubar.machine:linux-3"
-          }
-        },
-        {
-          "row": {
-            "id": "waiting:review-bot",
-            "mark": "attention",
-            "label": "review-bot",
-            "detail": {
-              "kind": "text",
-              "text": "PR #42 is ready"
-            },
-            "reason": "waiting",
-            "glyph": {
-              "kind": "symbol:text.bubble",
-              "signal": "waits"
-            },
-            "verb": "waiting:review-bot",
-            "nav": "menubar.machine:review-bot"
           }
         }
       ],
@@ -245,119 +227,6 @@
       "card": "tiles"
     },
     {
-      "id": "agents",
-      "title": "Agents",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "1 working"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "cpu",
-          "kind": "percent",
-          "keep": 20
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "linux-3",
-            "mark": "ok",
-            "label": "linux-3",
-            "detail": {
-              "kind": "text",
-              "text": "refresh the auth token"
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "waits"
-            },
-            "mac": "mac-mini",
-            "quick": "attach:linux-3",
-            "nav": "menubar.machine:linux-3"
-          }
-        },
-        {
-          "row": {
-            "id": "review-bot",
-            "mark": "ok",
-            "label": "review-bot",
-            "detail": {
-              "kind": "text",
-              "text": "fixes the token refresh"
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "waits"
-            },
-            "mac": "mac-mini",
-            "quick": "attach:review-bot",
-            "nav": "menubar.machine:review-bot"
-          }
-        },
-        {
-          "row": {
-            "id": "linux-1",
-            "mark": "ok",
-            "label": "linux-1",
-            "cells": [
-              {
-                "kind": "none",
-                "live": "cpuh:linux-1"
-              }
-            ],
-            "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "running tests"
-                },
-                {
-                  "kind": "text",
-                  "text": "41/58 pass"
-                }
-              ]
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "active"
-            },
-            "mac": "This Mac",
-            "trail": "cpu",
-            "quick": "attach:linux-1",
-            "nav": "menubar.machine:linux-1"
-          }
-        },
-        {
-          "row": {
-            "id": "agent-7f",
-            "mark": "ok",
-            "label": "agent-7f",
-            "detail": {
-              "kind": "text",
-              "text": "tests pass"
-            },
-            "glyph": {
-              "kind": "symbol:checkmark",
-              "signal": "done"
-            },
-            "verb": "cleanup:macbook-pro",
-            "signal": "done"
-          }
-        }
-      ],
-      "uncounted": true,
-      "card": "flush"
-    },
-    {
       "id": "servers",
       "title": "Servers",
       "columns": [
@@ -443,16 +312,12 @@
             "cells": [
               {
                 "kind": "text",
-                "text": "28 GB free"
+                "text": "36 GB free"
               }
             ],
             "detail": {
               "kind": "list",
               "items": [
-                {
-                  "kind": "text",
-                  "text": "1 working"
-                },
                 {
                   "kind": "text",
                   "text": "4 upkeep",
@@ -483,17 +348,12 @@
             "cells": [
               {
                 "kind": "text",
-                "text": "24 GB free"
+                "text": "32 GB free"
               }
             ],
             "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "2 waiting"
-                }
-              ]
+              "kind": "text",
+              "text": "3 VMs"
             },
             "glyph": {
               "kind": "desktop",
@@ -747,7 +607,7 @@
                     {
                       "row": {
                         "id": "agent-7f",
-                        "mark": "ok",
+                        "mark": "absent",
                         "label": "agent-7f",
                         "cells": [
                           {
@@ -763,11 +623,12 @@
                               },
                               {
                                 "kind": "text",
-                                "text": "Running"
+                                "text": "Stopped"
                               }
                             ]
                           }
-                        ]
+                        ],
+                        "reason": "stopped"
                       }
                     },
                     {
@@ -884,33 +745,6 @@
                   "items": [
                     {
                       "row": {
-                        "id": "linux-3",
-                        "mark": "ok",
-                        "label": "linux-3",
-                        "cells": [
-                          {
-                            "kind": "text",
-                            "text": "Workspace"
-                          },
-                          {
-                            "kind": "list",
-                            "items": [
-                              {
-                                "kind": "text",
-                                "text": "Ephemeral"
-                              },
-                              {
-                                "kind": "count",
-                                "n": 1,
-                                "unit": "port shared"
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "row": {
                         "id": "review-bot",
                         "mark": "ok",
                         "label": "review-bot",
@@ -933,6 +767,33 @@
                             ]
                           }
                         ]
+                      }
+                    },
+                    {
+                      "row": {
+                        "id": "linux-3",
+                        "mark": "absent",
+                        "label": "linux-3",
+                        "cells": [
+                          {
+                            "kind": "text",
+                            "text": "Workspace"
+                          },
+                          {
+                            "kind": "list",
+                            "items": [
+                              {
+                                "kind": "text",
+                                "text": "Ephemeral"
+                              },
+                              {
+                                "kind": "text",
+                                "text": "Stopped"
+                              }
+                            ]
+                          }
+                        ],
+                        "reason": "stopped"
                       }
                     }
                   ]
@@ -965,7 +826,7 @@
       "counts": [
         {
           "mark": "ok",
-          "n": 6
+          "n": 4
         },
         {
           "mark": "attention",
@@ -973,7 +834,7 @@
         },
         {
           "mark": "absent",
-          "n": 1
+          "n": 3
         },
         {
           "mark": "broken",
@@ -1007,12 +868,12 @@
               {
                 "value": "new-vm",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-vm:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -1101,8 +962,8 @@
                   8,
                   12
                 ],
-                "limit": 28,
-                "limit_note": "Over 28 GB would squeeze This Mac"
+                "limit": 36,
+                "limit_note": "Over 36 GB would squeeze This Mac"
               },
               {
                 "key": "Request.Name",
@@ -1189,12 +1050,12 @@
               {
                 "value": "new-vm",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-vm:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -1283,8 +1144,8 @@
                   8,
                   12
                 ],
-                "limit": 28,
-                "limit_note": "Over 28 GB would squeeze This Mac"
+                "limit": 36,
+                "limit_note": "Over 36 GB would squeeze This Mac"
               },
               {
                 "key": "Request.Name",
@@ -1367,12 +1228,12 @@
               {
                 "value": "new-vm",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-vm:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -1461,8 +1322,8 @@
                   8,
                   12
                 ],
-                "limit": 28,
-                "limit_note": "Over 28 GB would squeeze This Mac"
+                "limit": 36,
+                "limit_note": "Over 36 GB would squeeze This Mac"
               },
               {
                 "key": "Request.Name",
@@ -1550,12 +1411,12 @@
               {
                 "value": "new-vm",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-vm:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -1644,8 +1505,8 @@
                   8,
                   12
                 ],
-                "limit": 28,
-                "limit_note": "Over 28 GB would squeeze This Mac"
+                "limit": 36,
+                "limit_note": "Over 36 GB would squeeze This Mac"
               },
               {
                 "key": "Request.Name",
@@ -1721,12 +1582,12 @@
               {
                 "value": "new-server:macbook-pro",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-server:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -1817,8 +1678,8 @@
                   8,
                   12
                 ],
-                "limit": 28,
-                "limit_note": "Over 28 GB would squeeze This Mac"
+                "limit": 36,
+                "limit_note": "Over 36 GB would squeeze This Mac"
               }
             ],
             "summary": {
@@ -1885,12 +1746,12 @@
               {
                 "value": "new-server:macbook-pro",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-server:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -1981,8 +1842,8 @@
                   8,
                   12
                 ],
-                "limit": 28,
-                "limit_note": "Over 28 GB would squeeze This Mac"
+                "limit": 36,
+                "limit_note": "Over 36 GB would squeeze This Mac"
               }
             ],
             "summary": {
@@ -2050,12 +1911,12 @@
               {
                 "value": "new-vm",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-vm:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -2144,8 +2005,8 @@
                   8,
                   12
                 ],
-                "limit": 24,
-                "limit_note": "Over 24 GB would squeeze mac-mini"
+                "limit": 32,
+                "limit_note": "Over 32 GB would squeeze mac-mini"
               },
               {
                 "key": "Request.Name",
@@ -2239,12 +2100,12 @@
               {
                 "value": "new-vm",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-vm:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -2333,8 +2194,8 @@
                   8,
                   12
                 ],
-                "limit": 24,
-                "limit_note": "Over 24 GB would squeeze mac-mini"
+                "limit": 32,
+                "limit_note": "Over 32 GB would squeeze mac-mini"
               },
               {
                 "key": "Request.Name",
@@ -2413,12 +2274,12 @@
               {
                 "value": "new-server:macbook-pro",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-server:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -2509,8 +2370,8 @@
                   8,
                   12
                 ],
-                "limit": 24,
-                "limit_note": "Over 24 GB would squeeze mac-mini"
+                "limit": 32,
+                "limit_note": "Over 32 GB would squeeze mac-mini"
               }
             ],
             "summary": {
@@ -2582,12 +2443,12 @@
               {
                 "value": "new-server:macbook-pro",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-server:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -2678,8 +2539,8 @@
                   8,
                   12
                 ],
-                "limit": 24,
-                "limit_note": "Over 24 GB would squeeze mac-mini"
+                "limit": 32,
+                "limit_note": "Over 32 GB would squeeze mac-mini"
               }
             ],
             "summary": {
@@ -2739,10 +2600,6 @@
           },
           {
             "kind": "text",
-            "text": "agent-7f will stop; its disk is kept"
-          },
-          {
-            "kind": "text",
             "text": "Awake ends; the engine stays off until you log in again or run"
           },
           {
@@ -2776,24 +2633,6 @@
       "run": {
         "call": "apps.update"
       }
-    },
-    {
-      "label": "Review",
-      "on": "row",
-      "rows": [
-        "waiting:linux-3"
-      ],
-      "id": "waiting:linux-3",
-      "default": true
-    },
-    {
-      "label": "Review",
-      "on": "row",
-      "rows": [
-        "waiting:review-bot"
-      ],
-      "id": "waiting:review-bot",
-      "default": true
     },
     {
       "label": "Keep This Mac awake",
@@ -2868,36 +2707,6 @@
     },
     {
       "key": "cmd+enter",
-      "label": "Open linux-3 in Terminal",
-      "on": "row",
-      "rows": [
-        "linux-3"
-      ],
-      "priority": 2,
-      "id": "attach:linux-3",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "--on",
-          "linux-3"
-        ],
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "icon": "terminal",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "linux-3 opened in Terminal"
-          }
-        ]
-      }
-    },
-    {
-      "key": "cmd+enter",
       "label": "Open review-bot in Terminal",
       "on": "row",
       "rows": [
@@ -2937,58 +2746,32 @@
         "in": {
           "Confirm": "yes",
           "VMs": "[\"agent-7f\"]"
-        },
-        "and": [
-          {
-            "call": "agents.forget",
-            "in": {
-              "Agent": "agent-7f"
-            },
-            "target": {
-              "name": "agent-7f"
-            }
-          }
-        ]
+        }
       },
       "form": {
         "title": "Clean up on This Mac",
         "fields": [
           {
-            "key": "Agent",
-            "label": "Finished agents",
-            "kind": "multiselect",
-            "options": [
-              {
-                "value": "agent-7f",
-                "label": "agent-7f",
-                "note": "on agent-7f{sep}finished 12 min ago{sep}tests pass",
-                "of": "agent-7f"
-              }
-            ],
-            "note": "each is forgotten; its workspace stays",
-            "follows": "VMs"
-          },
-          {
             "key": "VMs",
-            "label": "Empty ephemeral workspaces",
+            "label": "Stopped ephemeral workspaces",
             "kind": "multiselect",
             "options": [
               {
                 "value": "agent-7f",
                 "label": "agent-7f",
-                "note": "idle 12 min{sep}42.9 GB disk"
+                "note": "stopped{sep}42.9 GB disk"
               }
             ],
             "default": "agent-7f",
-            "note": "no live agent; each goes with its disk, its ports and the accounts lent to it"
+            "note": "each goes with its disk, its ports and the accounts lent to it"
           },
           {
             "key": "stays",
             "kind": "note",
-            "note": "linux-1 has a working agent, so it stays."
+            "note": "linux-1 is still running, so it stays."
           }
         ],
-        "subtitle": "Finished agents and empty ephemeral workspaces.",
+        "subtitle": "Stopped ephemeral workspaces.",
         "primary": [
           {
             "when": {
@@ -2997,13 +2780,54 @@
             },
             "label": "Delete 1 ephemeral workspace",
             "danger": true
-          },
+          }
+        ]
+      },
+      "sheet": "cleanup"
+    },
+    {
+      "label": "Clean up",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "cleanup:mac-mini",
+      "run": {
+        "call": "machines.cleanup",
+        "in": {
+          "Confirm": "yes",
+          "VMs": "[\"linux-3\"]"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Clean up on mac-mini",
+        "fields": [
+          {
+            "key": "VMs",
+            "label": "Stopped ephemeral workspaces",
+            "kind": "multiselect",
+            "options": [
+              {
+                "value": "linux-3",
+                "label": "linux-3",
+                "note": "stopped{sep}42.9 GB disk"
+              }
+            ],
+            "default": "linux-3",
+            "note": "each goes with its disk, its ports and the accounts lent to it"
+          }
+        ],
+        "subtitle": "Stopped ephemeral workspaces.",
+        "primary": [
           {
             "when": {
-              "key": "Agent",
+              "key": "VMs",
               "count": 1
             },
-            "label": "Forget 1 agent"
+            "label": "Delete 1 ephemeral workspace",
+            "danger": true
           }
         ]
       },
@@ -3023,12 +2847,13 @@
         },
         "and": [
           {
-            "call": "agents.forget",
+            "call": "machines.cleanup",
             "in": {
-              "Agent": "agent-7f"
+              "Confirm": "yes",
+              "VMs": "[\"linux-3\"]"
             },
             "target": {
-              "name": "agent-7f"
+              "name": "mac-mini"
             }
           }
         ]
@@ -3037,42 +2862,40 @@
         "title": "Clean up",
         "fields": [
           {
-            "key": "Agent",
-            "label": "Finished agents",
-            "kind": "multiselect",
-            "options": [
-              {
-                "value": "agent-7f",
-                "label": "agent-7f",
-                "note": "on agent-7f{sep}finished 12 min ago{sep}tests pass",
-                "of": "agent-7f"
-              }
-            ],
-            "note": "each is forgotten; its workspace stays",
-            "follows": "VMs"
-          },
-          {
             "key": "VMs",
-            "label": "Empty ephemeral workspaces",
+            "label": "Stopped ephemeral workspaces",
             "kind": "multiselect",
             "options": [
               {
                 "value": "agent-7f",
                 "label": "agent-7f",
-                "note": "This Mac{sep}idle 12 min{sep}42.9 GB disk"
+                "note": "This Mac{sep}stopped{sep}42.9 GB disk"
+              },
+              {
+                "value": "linux-3",
+                "label": "linux-3",
+                "note": "mac-mini{sep}stopped{sep}42.9 GB disk"
               }
             ],
-            "default": "agent-7f",
-            "note": "no live agent; each goes with its disk, its ports and the accounts lent to it"
+            "default": "agent-7f,linux-3",
+            "note": "each goes with its disk, its ports and the accounts lent to it"
           },
           {
             "key": "stays",
             "kind": "note",
-            "note": "linux-1, linux-3 and review-bot have a live agent, so they stay."
+            "note": "linux-1 is still running, so it stays."
           }
         ],
-        "subtitle": "Finished agents and empty ephemeral workspaces.",
+        "subtitle": "Stopped ephemeral workspaces.",
         "primary": [
+          {
+            "when": {
+              "key": "VMs",
+              "count": 2
+            },
+            "label": "Delete 2 ephemeral workspaces",
+            "danger": true
+          },
           {
             "when": {
               "key": "VMs",
@@ -3080,13 +2903,6 @@
             },
             "label": "Delete 1 ephemeral workspace",
             "danger": true
-          },
-          {
-            "when": {
-              "key": "Agent",
-              "count": 1
-            },
-            "label": "Forget 1 agent"
           }
         ]
       },
@@ -3204,12 +3020,12 @@
               {
                 "value": "new-vm",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-vm:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -3298,8 +3114,8 @@
                   8,
                   12
                 ],
-                "limit": 28,
-                "limit_note": "Over 28 GB would squeeze This Mac"
+                "limit": 36,
+                "limit_note": "Over 36 GB would squeeze This Mac"
               },
               {
                 "key": "Request.Name",
@@ -3605,12 +3421,12 @@
               {
                 "value": "new-vm",
                 "label": "This Mac",
-                "note": "28 GB free"
+                "note": "36 GB free"
               },
               {
                 "value": "new-vm:mac-mini",
                 "label": "mac-mini",
-                "note": "24 GB free"
+                "note": "32 GB free"
               },
               {
                 "label": "macbook-air",
@@ -3699,8 +3515,8 @@
                   8,
                   12
                 ],
-                "limit": 24,
-                "limit_note": "Over 24 GB would squeeze mac-mini"
+                "limit": 32,
+                "limit_note": "Over 32 GB would squeeze mac-mini"
               },
               {
                 "key": "Request.Name",
@@ -3896,8 +3712,8 @@
     }
   ],
   "badge": {
-    "needs": 2,
-    "label": "station, 2 things need you"
+    "needs": 0,
+    "label": "all machines are fine"
   },
   "header": {
     "buttons": [
@@ -3908,7 +3724,6 @@
     "cpu:macbook-pro",
     "memory:macbook-pro",
     "net:macbook-pro",
-    "cpuh:linux-1",
     "cpu:mac-mini",
     "cpu:macbook-air"
   ]

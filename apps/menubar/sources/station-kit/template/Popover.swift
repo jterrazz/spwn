@@ -7,7 +7,6 @@ public enum Connection: Equatable, Sendable {
 public enum PageID {
     public static let home = "menubar"
     public static let machine = "menubar.machine"
-    public static let agent = "menubar.agent"
     public static let find = "menubar.find"
 
     // value: the watch name of one machine's page (SPEC §10.3).
@@ -67,10 +66,6 @@ public struct PanelState: Equatable, Sendable {
     // Terminal runs the login): each reads its busy words until the page
     // no longer offers it.
     public var pending: [String] = []
-    // value: the agents whose PR was opened from their page, and the reply
-    // being typed: the client's own until it is sent.
-    public var prOpened: [String] = []
-    public var reply = ""
     public var about: String?
     // value: Find, open in the panel's place, and the engine's index it
     // finds in (`menubar.find`), read while it is open.

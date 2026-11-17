@@ -78,12 +78,6 @@ public struct ChartSheet: View {
 
     static let days: [Day] = (0..<30).map { i in day(i, i == 9 || i == 21 ? "restart" : i == 29 ? "down" : i < 3 ? "none" : "ok") }
 
-    static let agent: Glyph = {
-        var g = Glyph()
-        g.kind = "agent"
-        return g
-    }()
-
     static func process(_ label: String, glyph kind: String, detail: String? = nil, cpu: Double, nav: String? = nil) -> Item {
         var row = Row()
         row.id = label
@@ -107,8 +101,8 @@ public struct ChartSheet: View {
         s.items = [
             process("mds_stores", glyph: "symbol:cpu", cpu: 2),
             process("infra", glyph: "server", detail: "8 cores", cpu: 15, nav: "menubar.machine:infra"),
-            process("linux-3", glyph: "agent", detail: "4 cores", cpu: 52, nav: "menubar.machine:linux-3"),
-            process("review-bot", glyph: "agent", detail: "4 cores", cpu: 2, nav: "menubar.machine:review-bot"),
+            process("linux-3", glyph: "workspace", detail: "4 cores", cpu: 52, nav: "menubar.machine:linux-3"),
+            process("review-bot", glyph: "workspace", detail: "4 cores", cpu: 2, nav: "menubar.machine:review-bot"),
         ]
         return s
     }()

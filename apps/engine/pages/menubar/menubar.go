@@ -1,7 +1,6 @@
 package menubar
 
 import (
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"slices"
 	"strconv"
 	"strings"
@@ -51,9 +50,6 @@ type Reading struct {
 	Away []overview.Summary
 	// value: every machine's sign-ins and grants, and This Mac's vault.
 	SignIns *SignIns
-	// value: the fleet's agents by their own names, which Clean up forgets;
-	// nil until read.
-	Agents []agents.Agent
 	// value: when the page is drawn and the zone its hours are said in; a
 	// page never reads the clock.
 	Now  time.Time
@@ -511,7 +507,7 @@ func stopAll(r Reading) page.Action {
 			if !h.ThisMac {
 				continue
 			}
-			for _, vm := range liveFirst(h.VMs) {
+			for _, vm := range h.VMs {
 				switch {
 				case vm.State != model.Running:
 				case vm.Lifetime == model.AlwaysOn:

@@ -159,11 +159,10 @@ final class StoryTests: XCTestCase {
             $0[$1.id] = MenuBarIcon.of(connection: $1.state.connection, page: $1.state.page).label
         }
         XCTAssertEqual(labels, [
-            "menubar.count": "station, 1 thing needs you",
             "menubar.down": "station, infra down",
             "menubar.restarting": "infra restarting, 2 of 4 checks",
             "menubar.fine": "all machines are fine",
-            "menubar.open": "station, 1 thing needs you",
+            "menubar.open": "all machines are fine",
         ])
     }
 
@@ -240,10 +239,10 @@ final class StoryTests: XCTestCase {
 
     func testTheHeightsFileIsWrittenFromTheMeasuredHeights() throws {
         let page = ["pages/fleet.menubar.json"]
-        let stories = [StoryFile(id: "home.needs", group: .home, note: "n", pages: page), StoryFile(id: "menubar.count", group: .shell, note: "n", pages: page)]
+        let stories = [StoryFile(id: "home.needs", group: .home, note: "n", pages: page), StoryFile(id: "menubar.down", group: .shell, note: "n", pages: page)]
         let text = Heights.document(stories, measured: ["home.needs": 641.6])
-        XCTAssertEqual(text, "{\n \"schema\": \"station.story-heights/v1\",\n \"source\": \"the station-kit render at its commit\",\n \"unit\": \"pt\",\n \"heights\": {\n  \"home.needs\": 642,\n  \"menubar.count\": 0\n }\n}\n")
-        XCTAssertEqual(try JSONDecoder().decode(Heights.self, from: Data(text.utf8)).heights, ["home.needs": 642, "menubar.count": 0])
+        XCTAssertEqual(text, "{\n \"schema\": \"station.story-heights/v1\",\n \"source\": \"the station-kit render at its commit\",\n \"unit\": \"pt\",\n \"heights\": {\n  \"home.needs\": 642,\n  \"menubar.down\": 0\n }\n}\n")
+        XCTAssertEqual(try JSONDecoder().decode(Heights.self, from: Data(text.utf8)).heights, ["home.needs": 642, "menubar.down": 0])
     }
 
     func testTheSizeCheckHoldsATargetStoryToItsHeightUnlessItSaysWhy() throws {
@@ -253,12 +252,12 @@ final class StoryTests: XCTestCase {
             StoryFile(id: "home.needs", group: .home, note: "n", pages: page),
             StoryFile(id: "home.fine", group: .home, note: "n", pages: page),
             StoryFile(id: "home.empty", group: .home, note: "n", pages: page, heightNote: "the empty state keeps the footer"),
-            StoryFile(id: "menubar.count", group: .shell, note: "n", pages: page),
+            StoryFile(id: "menubar.down", group: .shell, note: "n", pages: page),
             StoryFile(id: "home.unknown", group: .home, note: "n", pages: page),
         ]
-        let measured = ["home.needs": 642.0, "home.fine": 600, "home.empty": 200]
+        let measured = ["home.needs": 455.0, "home.fine": 600, "home.empty": 200]
         XCTAssertEqual(heights.audit(stories, measured: measured), [
-            "home.fine: 600 pt tall, the prototype's 637 pt (a heightNote names a difference on purpose)",
+            "home.fine: 600 pt tall, the prototype's 455 pt (a heightNote names a difference on purpose)",
             "home.unknown: no prototype height in heights.json",
         ])
     }

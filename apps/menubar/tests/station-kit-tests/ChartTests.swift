@@ -5,7 +5,6 @@ import XCTest
 final class ChartTests: XCTestCase {
     @MainActor
     func testEveryChartIsDrawnInBothSchemesAndNonePaintsThePlaceholder() throws {
-        _ = Snapshot.render(AnyView(GlyphView(ChartSheet.agent)), scheme: .dark, desk: false)
         let failures = try ChartSheet.Family.allCases.flatMap { family in
             try [ColorScheme.dark, .light].compactMap { scheme in
                 try Golden.check("kit/charts-\(family.rawValue)", AnyView(ChartSheet(family).stationAccessibility()), scheme: scheme, desk: false)

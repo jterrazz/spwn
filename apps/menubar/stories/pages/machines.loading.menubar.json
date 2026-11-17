@@ -103,29 +103,17 @@
         {
           "row": {
             "id": "hero",
-            "mark": "attention",
-            "label": "review-bot is waiting",
+            "mark": "ok",
+            "label": "All machines are fine",
             "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "PR #42 is ready"
-                },
-                {
-                  "kind": "text",
-                  "text": "6 min",
-                  "pri": 1
-                }
-              ]
+              "kind": "text",
+              "text": "checking macbook-air",
+              "signal": "stale"
             },
-            "reason": "waiting",
             "glyph": {
-              "kind": "symbol:exclamationmark.circle.fill",
-              "signal": "waits"
-            },
-            "verb": "waiting:review-bot",
-            "nav": "menubar.machine:review-bot"
+              "kind": "symbol:checkmark.circle.fill",
+              "signal": "well"
+            }
           }
         }
       ],
@@ -225,117 +213,6 @@
       "card": "tiles"
     },
     {
-      "id": "agents",
-      "title": "Agents",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "2 working"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "cpu",
-          "kind": "percent",
-          "keep": 20
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "review-bot",
-            "mark": "ok",
-            "label": "review-bot",
-            "detail": {
-              "kind": "text",
-              "text": "fixes the token refresh"
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "waits"
-            },
-            "mac": "mac-mini",
-            "quick": "attach:review-bot",
-            "nav": "menubar.machine:review-bot"
-          }
-        },
-        {
-          "row": {
-            "id": "linux-1",
-            "mark": "ok",
-            "label": "linux-1",
-            "cells": [
-              {
-                "kind": "none",
-                "live": "cpuh:linux-1"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "fix the flaky e2e test"
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "active"
-            },
-            "mac": "This Mac",
-            "trail": "cpu",
-            "quick": "attach:linux-1",
-            "nav": "menubar.machine:linux-1"
-          }
-        },
-        {
-          "row": {
-            "id": "linux-3",
-            "mark": "ok",
-            "label": "linux-3",
-            "cells": [
-              {
-                "kind": "none",
-                "live": "cpuh:linux-3"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "refresh the auth token"
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "active"
-            },
-            "mac": "mac-mini",
-            "trail": "cpu",
-            "quick": "attach:linux-3",
-            "nav": "menubar.machine:linux-3"
-          }
-        },
-        {
-          "row": {
-            "id": "agent-7f",
-            "mark": "ok",
-            "label": "agent-7f",
-            "detail": {
-              "kind": "text",
-              "text": "tests pass"
-            },
-            "glyph": {
-              "kind": "symbol:checkmark",
-              "signal": "done"
-            },
-            "verb": "cleanup:macbook-pro",
-            "signal": "done"
-          }
-        }
-      ],
-      "uncounted": true,
-      "card": "flush"
-    },
-    {
       "id": "servers",
       "title": "Servers",
       "columns": [
@@ -423,10 +300,6 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "1 working"
-                },
-                {
-                  "kind": "text",
                   "text": "4 upkeep",
                   "pri": 1
                 }
@@ -453,17 +326,8 @@
             "mark": "ok",
             "label": "mac-mini",
             "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "1 working"
-                },
-                {
-                  "kind": "text",
-                  "text": "1 waiting"
-                }
-              ]
+              "kind": "text",
+              "text": "3 VMs"
             },
             "glyph": {
               "kind": "desktop",
@@ -3377,15 +3241,6 @@
       }
     },
     {
-      "label": "Review",
-      "on": "row",
-      "rows": [
-        "waiting:review-bot"
-      ],
-      "id": "waiting:review-bot",
-      "default": true
-    },
-    {
       "label": "Keep This Mac awake",
       "on": "row",
       "rows": [
@@ -3422,6 +3277,33 @@
           {
             "kind": "text",
             "text": "linux-1 opened in Terminal"
+          }
+        ]
+      }
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open agent-7f in Terminal",
+      "on": "row",
+      "rows": [
+        "agent-7f"
+      ],
+      "priority": 2,
+      "id": "attach:agent-7f",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "agent-7f"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f opened in Terminal"
           }
         ]
       }
@@ -3515,172 +3397,6 @@
           }
         ]
       }
-    },
-    {
-      "label": "Clean up",
-      "on": "page",
-      "priority": 3,
-      "mutates": true,
-      "id": "cleanup:macbook-pro",
-      "run": {
-        "call": "machines.cleanup",
-        "in": {
-          "Confirm": "yes",
-          "VMs": "[\"agent-7f\"]"
-        },
-        "and": [
-          {
-            "call": "agents.forget",
-            "in": {
-              "Agent": "agent-7f"
-            },
-            "target": {
-              "name": "agent-7f"
-            }
-          }
-        ]
-      },
-      "form": {
-        "title": "Clean up on This Mac",
-        "fields": [
-          {
-            "key": "Agent",
-            "label": "Finished agents",
-            "kind": "multiselect",
-            "options": [
-              {
-                "value": "agent-7f",
-                "label": "agent-7f",
-                "note": "on agent-7f{sep}finished 12 min ago{sep}tests pass",
-                "of": "agent-7f"
-              }
-            ],
-            "note": "each is forgotten; its workspace stays",
-            "follows": "VMs"
-          },
-          {
-            "key": "VMs",
-            "label": "Empty ephemeral workspaces",
-            "kind": "multiselect",
-            "options": [
-              {
-                "value": "agent-7f",
-                "label": "agent-7f",
-                "note": "idle 12 min{sep}42.9 GB disk"
-              }
-            ],
-            "default": "agent-7f",
-            "note": "no live agent; each goes with its disk, its ports and the accounts lent to it"
-          },
-          {
-            "key": "stays",
-            "kind": "note",
-            "note": "linux-1 has a working agent, so it stays."
-          }
-        ],
-        "subtitle": "Finished agents and empty ephemeral workspaces.",
-        "primary": [
-          {
-            "when": {
-              "key": "VMs",
-              "count": 1
-            },
-            "label": "Delete 1 ephemeral workspace",
-            "danger": true
-          },
-          {
-            "when": {
-              "key": "Agent",
-              "count": 1
-            },
-            "label": "Forget 1 agent"
-          }
-        ]
-      },
-      "sheet": "cleanup"
-    },
-    {
-      "label": "Clean up",
-      "on": "page",
-      "priority": 3,
-      "mutates": true,
-      "id": "cleanup",
-      "run": {
-        "call": "machines.cleanup",
-        "in": {
-          "Confirm": "yes",
-          "VMs": "[\"agent-7f\"]"
-        },
-        "and": [
-          {
-            "call": "agents.forget",
-            "in": {
-              "Agent": "agent-7f"
-            },
-            "target": {
-              "name": "agent-7f"
-            }
-          }
-        ]
-      },
-      "form": {
-        "title": "Clean up",
-        "fields": [
-          {
-            "key": "Agent",
-            "label": "Finished agents",
-            "kind": "multiselect",
-            "options": [
-              {
-                "value": "agent-7f",
-                "label": "agent-7f",
-                "note": "on agent-7f{sep}finished 12 min ago{sep}tests pass",
-                "of": "agent-7f"
-              }
-            ],
-            "note": "each is forgotten; its workspace stays",
-            "follows": "VMs"
-          },
-          {
-            "key": "VMs",
-            "label": "Empty ephemeral workspaces",
-            "kind": "multiselect",
-            "options": [
-              {
-                "value": "agent-7f",
-                "label": "agent-7f",
-                "note": "This Mac{sep}idle 12 min{sep}42.9 GB disk"
-              }
-            ],
-            "default": "agent-7f",
-            "note": "no live agent; each goes with its disk, its ports and the accounts lent to it"
-          },
-          {
-            "key": "stays",
-            "kind": "note",
-            "note": "linux-1, linux-3 and review-bot have a live agent, so they stay."
-          }
-        ],
-        "subtitle": "Finished agents and empty ephemeral workspaces.",
-        "primary": [
-          {
-            "when": {
-              "key": "VMs",
-              "count": 1
-            },
-            "label": "Delete 1 ephemeral workspace",
-            "danger": true
-          },
-          {
-            "when": {
-              "key": "Agent",
-              "count": 1
-            },
-            "label": "Forget 1 agent"
-          }
-        ]
-      },
-      "sheet": "cleanup"
     },
     {
       "label": "Add a Mac",
@@ -4646,8 +4362,8 @@
     }
   ],
   "badge": {
-    "needs": 1,
-    "label": "station, 1 thing needs you"
+    "needs": 0,
+    "label": "all machines are fine"
   },
   "header": {
     "buttons": [
@@ -4663,8 +4379,6 @@
     "cpu:macbook-pro",
     "memory:macbook-pro",
     "net:macbook-pro",
-    "cpuh:linux-1",
-    "cpuh:linux-3",
     "cpu:mac-mini",
     "cpu:macbook-air"
   ]

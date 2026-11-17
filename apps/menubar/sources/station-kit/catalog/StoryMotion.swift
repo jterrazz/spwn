@@ -8,7 +8,6 @@ public enum StoryMotion: String, CaseIterable, Sendable {
     case panelClose = "panel-close"
     case push, pop, jump, segment, sheet, alert, find, menu
     case heroMorph = "hero-morph"
-    case needCollapse = "need-collapse"
     case rowLeave = "row-leave"
 
     public static let reduced = "reduce-motion."
@@ -83,7 +82,7 @@ struct TransitionView: View {
             rest(story, Caught(time: time, layer: true))
         case .heroMorph:
             rest(story, Caught(time: time, hero: true))
-        case .needCollapse, .rowLeave:
+        case .rowLeave:
             rest(story, Caught(time: time, row: story.ui.leaving))
         }
     }

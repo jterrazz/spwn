@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.needs",
-    "note": "The daily home: two things need you, each with its verb.",
+    "note": "The daily home: nothing red needs you, so the hero says all machines are fine; four upkeep items wait apart.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,
@@ -9,5 +9,6 @@
         "cpuh:linux-1": 37,
         "cpuh:linux-3": 60
     },
-    "schema": "station.story/v1"
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
 }

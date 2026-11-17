@@ -82,7 +82,7 @@ public enum PanelOrder {
         guard let home = PanelKeys.home(state) else { return rows(of: shown, segment: state.segment).map { .row($0.id ?? "") } }
         let hero = (home.section(HomePage.hero)?.rows ?? []).dropFirst().filter { $0.nav != nil || $0.verb != nil }.map { PanelFocus.row($0.id ?? "") }
         let tiles = (home.section(HomeCards.tiles)?.items ?? []).compactMap { $0.tile?.nav }.map(PanelFocus.control)
-        let cards = HomeCards.navigable(home, unfolded: Set(state.unfolded)).map { PanelFocus.row($0.id ?? "") }
+        let cards = HomeCards.navigable(home).map { PanelFocus.row($0.id ?? "") }
         return hero + tiles + cards
     }
 
@@ -129,7 +129,7 @@ public enum PanelOrder {
 
 public enum PanelKeys {
     public static let shortcuts = ["cmd+[", "cmd+0", "cmd+1", "cmd+2", "cmd+3", "cmd+4", "cmd+5", "cmd+6", "cmd+7", "cmd+8", "cmd+9",
-                                   "cmd+i", "cmd+p", "cmd+u", "cmd+e", "cmd+t", "shift+cmd+n", "cmd+enter"]
+                                   "cmd+i", "cmd+p", "cmd+u", "cmd+e", "cmd+t", "cmd+enter"]
 
     static let pages = ["cmd+i": Navigation.activity, "cmd+p": Navigation.ports, "cmd+u": Navigation.accounts, "cmd+e": Navigation.awake]
 
@@ -218,9 +218,9 @@ public enum PanelKeys {
         case "enter", "space": return pressed(focus, state)
         case "cmd+enter":
             if case let .row(id)? = focus, let quick = shown.flatMap({ row(id, in: $0) })?.row.quick { return .run(quick) }
-            guard shown?.id == PageID.agent || shown?.context?.kind == "workspace", let attach = keyed(key, in: shown) else { return .none }
+            guard shown?.context?.kind == "workspace", let attach = keyed(key, in: shown) else { return .none }
             return .run(attach.id ?? "")
-        case "cmd+n", "shift+cmd+n", "cmd+t":
+        case "cmd+n", "cmd+t":
             return keyed(key, in: shown).map { .run($0.id ?? "") } ?? .none
         case "cmd+0":
             return state.pushed != nil ? .home : .none

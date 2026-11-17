@@ -1,6 +1,6 @@
 {
     "group": "alert",
-    "heightNote": "the page under it is agent-7f's v4 workspace page (P9), taller than the prototype's finished ephemeral workspace; the alert is the prototype's",
+    "heightNote": "the page under it is agent-7f's workspace page (P9); the alert is the prototype's",
     "id": "alert.delete-vm.ephemeral",
     "note": "Delete agent-7f? An ephemeral workspace asks yes or no: it goes with its disk.",
     "pages": ["pages/machines.machine.agent-7f.json"],

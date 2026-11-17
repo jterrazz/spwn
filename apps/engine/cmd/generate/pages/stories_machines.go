@@ -246,11 +246,11 @@ func proActivity() pageactivity.View {
 }
 
 func (f Scene) reading() pagemenubar.Reading {
-	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, SignIns: f.signIns(f.SignedIn), Agents: f.Agents, Asks: Levels}
+	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, SignIns: f.signIns(f.SignedIn), Asks: Levels}
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {
-	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, SignIns: f.signIns(true), Now: storyNow, Zone: time.UTC, Agents: f.Agents}
+	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, SignIns: f.signIns(true), Now: storyNow, Zone: time.UTC}
 	if h, ok := f.History[name]; ok {
 		m.Activity = &h
 	}
@@ -344,9 +344,6 @@ func (f Scene) draw() []Fixture {
 			out = append(out, Fixture{Name: "machine." + vm.Name, Page: pagemenubar.MachinePage(f.machine(vm.Name))})
 		}
 	}
-	for _, a := range f.Agents {
-		out = append(out, Fixture{Name: "agent." + a.Name, Page: pagemenubar.AgentPage(f.agent(a.Name))})
-	}
 	return out
 }
 
@@ -382,13 +379,6 @@ func infraDown(f *Scene) {
 }
 
 func nothingNeedsYou(f *Scene) {
-	for i, h := range f.All.Macs {
-		for j, vm := range h.VMs {
-			if vm.Agent != nil && vm.Agent.State == "waiting" {
-				f.All.Macs[i].VMs[j].Agent = &model.AgentView{State: "working", Task: vm.Agent.Task}
-			}
-		}
-	}
 	f.Home.Needs = nil
 	f.Home.Lines[1].Parts = f.Home.Lines[1].Parts[:1]
 	f.Home.Lines[2].Parts[1] = overview.Part{State: catalog.StateOK, N: 12, Of: 12, Key: "applied", Counted: true}

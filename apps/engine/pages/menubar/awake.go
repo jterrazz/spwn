@@ -127,7 +127,7 @@ func macCard(mac, name string, row page.Row) page.Section {
 func thisMac(r awake.Report) page.Section {
 	s := page.Section{ID: SectionThisMac, Title: page.ThisMac, Card: page.CardFlush, Uncounted: true, Columns: awakeColumns()}
 	held := r.Session != nil && r.Mode() == awake.AwakeUntil
-	keep := page.Row{ID: r.Mac, Label: "Keep This Mac awake", Glyph: sun(held), Cells: switched(held), Detail: page.Text("Stays on after agents finish"), Mark: page.OK}
+	keep := page.Row{ID: r.Mac, Label: "Keep This Mac awake", Glyph: sun(held), Cells: switched(held), Detail: page.Text("Stays on for a while"), Mark: page.OK}
 	switch {
 	case r.Engine == awake.EngineReading:
 		keep.Mark, keep.Detail = page.Awaiting, page.Pending()

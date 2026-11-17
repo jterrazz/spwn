@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -76,8 +75,6 @@ type Machine struct {
 	Zone  *time.Location
 	Now   time.Time
 	Asks  Levels
-	// value: a workspace's page: the fleet's agents, nil until they are read.
-	Agents []agents.Agent
 }
 
 func MachinePage(m Machine) page.Page {
@@ -150,11 +147,8 @@ func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
 	}
 	if p.Header == nil {
 		glyph := page.Glyph{Kind: "workspace"}
-		switch {
-		case vm.Lifetime.Kind() == machine.Server:
+		if vm.Lifetime.Kind() == machine.Server {
 			glyph.Kind = "server"
-		case vm.Agent != nil && !vm.Finished():
-			glyph.Kind = "agent"
 		}
 		p.Header = &page.Header{Back: model.Label(*m.All, h), Glyph: glyph}
 	}

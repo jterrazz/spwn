@@ -25,6 +25,13 @@
           "type": "string"
         },
         "State": {
+          "enum": [
+            "finished",
+            "running",
+            "starting",
+            "waiting",
+            "working"
+          ],
           "type": "string"
         }
       },
