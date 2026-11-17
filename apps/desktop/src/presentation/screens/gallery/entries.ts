@@ -25,6 +25,8 @@ import { Facts } from '../../ui/facts';
 import { FACTS_STORIES } from '../../ui/facts.stories';
 import { Field } from '../../ui/field';
 import { FIELD_STORIES } from '../../ui/field.stories';
+import { FleetBoard } from '../../ui/fleet-board';
+import { FLEET_BOARD_STORIES } from '../../ui/fleet-board.stories';
 import { FormField } from '../../ui/form-field';
 import { FORM_FIELD_STORIES } from '../../ui/form-field.stories';
 import { Icon } from '../../ui/icon';
@@ -39,6 +41,8 @@ import { MemoryGrid } from '../../ui/memory-grid';
 import { MEMORY_GRID_STORIES } from '../../ui/memory-grid.stories';
 import { MemoryPick } from '../../ui/memory-pick';
 import { MEMORY_PICK_STORIES } from '../../ui/memory-pick.stories';
+import { MemoryTrack } from '../../ui/memory-track';
+import { MEMORY_TRACK_STORIES } from '../../ui/memory-track.stories';
 import { Missing, MissingMark } from '../../ui/missing';
 import { MISSING_MARK_STORIES, MISSING_STORIES } from '../../ui/missing.stories';
 import { NavItem } from '../../ui/nav-item';
@@ -59,6 +63,8 @@ import { StateDot } from '../../ui/state-dot';
 import { STATE_DOT_STORIES } from '../../ui/state-dot.stories';
 import { StatePill } from '../../ui/state-pill';
 import { STATE_PILL_STORIES } from '../../ui/state-pill.stories';
+import { StateSign } from '../../ui/state-sign';
+import { STATE_SIGN_STORIES } from '../../ui/state-sign.stories';
 import { Switch } from '../../ui/switch';
 import { SWITCH_STORIES } from '../../ui/switch.stories';
 import { Tile } from '../../ui/tile';
@@ -80,6 +86,7 @@ export const ENTRIES: readonly Entry[] = [
     entry('MachineChip', 'Marks', { Component: MachineChip, stories: MACHINE_CHIP_STORIES }),
     entry('StateDot', 'Marks', { Component: StateDot, stories: STATE_DOT_STORIES }),
     entry('StatePill', 'Marks', { Component: StatePill, stories: STATE_PILL_STORIES }),
+    entry('StateSign', 'Marks', { Component: StateSign, stories: STATE_SIGN_STORIES }),
     entry('TypeTag', 'Marks', { Component: TypeTag, stories: TYPE_TAG_STORIES }),
     entry('Value', 'Marks', { Component: Value, frame: 'meter', stories: VALUE_STORIES }),
     entry('DotStrip', 'Marks', { Component: DotStrip, stories: DOT_STRIP_STORIES }),
@@ -103,6 +110,11 @@ export const ENTRIES: readonly Entry[] = [
         Component: MemoryPick,
         frame: 'block',
         stories: MEMORY_PICK_STORIES,
+    }),
+    entry('MemoryTrack', 'Measures', {
+        Component: MemoryTrack,
+        frame: 'meter',
+        stories: MEMORY_TRACK_STORIES,
     }),
     entry('ProgressLine', 'Measures', {
         Component: ProgressLine,
@@ -140,6 +152,11 @@ export const ENTRIES: readonly Entry[] = [
         stories: ROW_HEAD_STORIES,
     }),
     entry('Facts', 'Containers', { Component: Facts, frame: 'block', stories: FACTS_STORIES }),
+    entry('FleetBoard', 'Containers', {
+        Component: FleetBoard,
+        frame: 'block',
+        stories: FLEET_BOARD_STORIES,
+    }),
     entry('CodeBlock', 'Containers', {
         Component: CodeBlock,
         frame: 'block',

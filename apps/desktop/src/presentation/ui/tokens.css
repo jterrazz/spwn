@@ -11,6 +11,8 @@
 
     --line: rgb(255 255 255 / 6%);
     --line-2: rgb(255 255 255 / 12%);
+    --dot: rgb(255 255 255 / 13%);
+    --wash: rgb(255 255 255 / 5%);
 
     --t1: #f5f5f5;
     --t2: #b9b9bc;
@@ -95,6 +97,29 @@ html[data-material='vibrant'] {
     --ground-window: transparent;
     --ground: color-mix(in srgb, var(--canvas) var(--material-canvas), transparent);
     --ground-sidebar: color-mix(in srgb, var(--canvas) var(--material-sidebar), transparent);
+}
+
+/* value: the landing's warmer palette, the one Home's fleet board is drawn in: the semantic tokens its pieces read */
+[data-scheme='landing'] {
+    --panel: #0d0d0e;
+    --inset: #161617;
+    --system: #6b6a66;
+
+    --line: rgb(243 242 237 / 12%);
+    --line-2: rgb(243 242 237 / 24%);
+    --dot: rgb(243 242 237 / 13%);
+    --wash: rgb(243 242 237 / 5%);
+
+    --t1: #f3f2ed;
+    --t2: #cfcec8;
+    --t3: #a3a29c;
+
+    --warn: #ff9f0a;
+    --bad: #ff453a;
+    --new: #0a84ff;
+
+    --you: #f4e6c9;
+    --you-glow: 0 0 0 4px rgb(255 243 220 / 8%), 0 0 16px 5px rgb(255 243 220 / 28%);
 }
 
 [data-identity='blue'] {
