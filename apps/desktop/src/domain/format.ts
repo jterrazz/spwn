@@ -39,12 +39,16 @@ export function bytes(value: number): string {
     return `${decimal(Math.round((value / scale.of) * 10) / 10)} ${scale.unit}`;
 }
 
+export function gigabytes(value: number): string {
+    return decimal(Math.round((value / GIB) * 10) / 10);
+}
+
 export function memory(value: number): string {
     if (value <= 0) {
         return '0 B';
     }
     if (value >= GIB / 10) {
-        return `${decimal(Math.round((value / GIB) * 10) / 10)} GB`;
+        return `${gigabytes(value)} GB`;
     }
     return `${String(Math.round(value / MIB))} MB`;
 }

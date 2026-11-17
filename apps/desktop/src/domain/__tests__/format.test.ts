@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { bytes, duration, memory, percent, rate, seconds } from '../format';
+import { bytes, duration, gigabytes, memory, percent, rate, seconds } from '../format';
 
 describe('format', () => {
     test('raw bytes read in decimal units, as the engine prints them', () => {
@@ -31,6 +31,17 @@ describe('format', () => {
         expect(memory(52_428_800)).toBe('50 MB');
         expect(seconds(10_000_000_000)).toBe('10 s');
         expect(seconds(1_800_000_000_000)).toBe('30 min');
+    });
+
+    test('a memory figure is a number of GB, even under a tenth of one', () => {
+        // Given - 5.3 GB, 16 GB and 500 MB, in bytes
+        const sizes = [5_726_623_061, 17_179_869_184, 524_288_000];
+
+        // When - each is shown as a figure in GB
+        const shown = sizes.map(gigabytes);
+
+        // Then - each is a number of GB, one decimal under 100, never a figure in another unit
+        expect(shown).toStrictEqual(['5.3', '16', '0.5']);
     });
 
     test('a duration leaves out a second unit that reads zero', () => {
