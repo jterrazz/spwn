@@ -40,7 +40,8 @@ func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
 	// facts (how many public, how many on the tailnet, red how many
 	// exposed), then the ports body every page of ports shares; its footer
 	// is Full list in Terminal and Share a port…. Scoped to a machine it
-	// lists that machine's ports alone.
+	// lists that machine's ports alone. The scope's word is the fact a
+	// narrow header drops first: the way back already names it.
 	sc := portsScope{Self: thisMac.Machine, Now: of.Now}
 	where := "All machines"
 	if of.Machine != "" {
@@ -54,7 +55,7 @@ func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
 		}
 	}
 	b := portsOf(l.AllMachines, sc)
-	facts := []page.Value{page.Text(where), page.Text(strconv.Itoa(b.Public) + " public"), page.Text(strconv.Itoa(b.Private) + " on your tailnet")}
+	facts := []page.Value{dropFirst(page.Text(where), 1), page.Text(strconv.Itoa(b.Public) + " public"), page.Text(strconv.Itoa(b.Private) + " on your tailnet")}
 	if b.Exposed > 0 {
 		facts = append(facts, signaled(page.Text(strconv.Itoa(b.Exposed)+" exposed"), page.SignalFailing))
 	}

@@ -15,7 +15,8 @@
       "caption": [
         {
           "kind": "text",
-          "text": "mac-mini"
+          "text": "mac-mini",
+          "pri": 1
         },
         {
           "kind": "text",

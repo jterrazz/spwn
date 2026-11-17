@@ -15,7 +15,8 @@
       "caption": [
         {
           "kind": "text",
-          "text": "linux-1"
+          "text": "linux-1",
+          "pri": 1
         },
         {
           "kind": "text",

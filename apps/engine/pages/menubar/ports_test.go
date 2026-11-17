@@ -86,8 +86,8 @@ func TestEveryPortOfTheFleetIsListedOnceInItsReach(t *testing.T) {
 			t.Errorf("%s lists %q, want %q", section, got, want)
 		}
 	}
-	if facts := sectionOf(p, SectionSummary).Caption; len(facts) != 4 || facts[1].Text != "1 public" || facts[2].Text != "2 on your tailnet" ||
-		facts[3].Text != "1 exposed" || facts[3].Signal != page.SignalFailing {
+	if facts := sectionOf(p, SectionSummary).Caption; len(facts) != 4 || facts[0].Pri != 1 || facts[1].Pri != 0 || facts[1].Text != "1 public" ||
+		facts[2].Text != "2 on your tailnet" || facts[3].Text != "1 exposed" || facts[3].Signal != page.SignalFailing {
 		t.Fatalf("facts %v", facts)
 	}
 }
