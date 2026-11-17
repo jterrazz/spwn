@@ -23,6 +23,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     private let closed: () -> Void
     private let report: ((String) -> Void)?
     private var outside: Any?
+    private var press: Any?
     private var anchor = CGPoint.zero
     private var placing = false
     private var pending: CGSize?
@@ -61,7 +62,25 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         item.button?.target = self
         item.button?.action = #selector(clicked(_:))
         item.button?.sendAction(on: [.leftMouseDown, .rightMouseDown])
+        // hazard: the status button tracks a click it receives and, when the click is
+        // released, puts its highlight back as it was before the press, so the pill went
+        // out for about a frame after each opening (capture runs mb1b-mut2, mb1b-cap6).
+        // The press on the item is taken before the button sees it, and the highlight is
+        // driven by the panel alone: lit while it is shown, out when it hides.
+        press = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            let window = event.windowNumber
+            let point = event.locationInWindow
+            let taken = MainActor.assumeIsolated { self?.take(window: window, at: point) ?? false }
+            return taken ? nil : event
+        }
         if report != nil { announce(tries: 60) }
+    }
+
+    private func take(window: Int, at point: CGPoint) -> Bool {
+        guard let button = item.button, let bar = button.window, bar.windowNumber == window,
+              button.bounds.contains(button.convert(point, from: nil)) else { return false }
+        clicked(nil)
+        return true
     }
 
     // hazard: a status item the bar has not placed yet has no screen and a frame past the
@@ -90,8 +109,10 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         if shown { hide() } else { show() }
     }
 
-    // invariant: each opening holds a new content, so its first frame is
-    // the panel's opening (PanelOpening) and no state of the last one shows.
+    // invariant: each opening holds a new content, so no state of the last
+    // one shows, and the panel is ordered in whole: glass and content on its
+    // first frame, nothing scaled or faded, as the system's own extras open
+    // (Passwords on Tahoe, no intermediate frame). It closes as they do, at once.
     func show() {
         guard !shown, let button = item.button, let spot, let bar = button.window else { return }
         let view = PanelHosting(rootView: content())
@@ -112,9 +133,9 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         // in view (run mb1-cap6: 630 pt to 455 over 21 frames).
         panel.layoutIfNeeded()
         view.tell()
+        button.highlight(true)
         NSApp.activate()
         panel.makeKeyAndOrderFront(nil)
-        DispatchQueue.main.async { button.highlight(true) }
         outside = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) { [weak self] _ in
             MainActor.assumeIsolated { self?.hide() }
         }

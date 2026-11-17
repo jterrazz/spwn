@@ -19,6 +19,7 @@ public struct MotionSheet: View {
     }
 
     public static let exempt: [String: String] = [
+        "M1": "the panel opens whole on its first frame, as the system's extras do: nothing moves",
         "M13": "a number rolls by contentTransition, which draws its end state",
         "M14": "a symbol flips by contentTransition, which draws its end state",
         "M16": "Spinner turns on a TimelineView, still at a fixed angle",
@@ -84,9 +85,6 @@ public struct MotionSheet: View {
     }
 
     public static let cells: [Cell] = [
-        Cell(id: "M1", title: "panel open") { t, r in
-            AnyView(Sample(lit: true).modifier(PanelAppear(progress: PanelAppear.frozen(t, closing: false, reduce: r))))
-        },
         Cell(id: "M2", title: "push") { t, r in
             AnyView(ZStack {
                 Sample().modifier(PushTransition(progress: PushTransition.frozen(t, role: .under, way: .push, reduce: r), role: .under))

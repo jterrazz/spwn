@@ -109,9 +109,9 @@ final class Trial: ObservableObject {
 }
 
 // invariant: under any STATION_TRIAL_ flag, each opening logs one line per display
-// frame, `open t=<ms since the window was shown> frame=<n> glass=<x y w h>`, for the
-// fade's length (stretched by STATION_TRIAL_SLOW) and half a second more, so the
-// capture rig reads whether the panel's outline moves between two frames.
+// frame, `open t=<ms since the window was shown> frame=<n> glass=<x y w h>`, for its
+// first `span` seconds, so the capture rig reads whether the panel's outline moves
+// between two frames.
 @MainActor
 final class OpeningLog: NSObject {
     private var link: CADisplayLink?
@@ -119,6 +119,9 @@ final class OpeningLog: NSObject {
     private var frames = 0
     private var report: ((String) -> Void)?
     private weak var panel: NSWindow?
+
+    // value: past the height's own 340 ms morph, which the first sizes of a content can start.
+    static let span = 1.0
 
     func begin(_ panel: NSWindow, report: @escaping (String) -> Void) {
         end()
@@ -138,7 +141,7 @@ final class OpeningLog: NSObject {
     @objc private func tick(_: CADisplayLink) {
         guard let panel else { return end() }
         let t = Date().timeIntervalSince(started)
-        guard t < Token.Motion.smoothDuration * Token.Motion.slow + 0.5 else { return end() }
+        guard t < Self.span else { return end() }
         frames += 1
         let glass = panel.frame.insetBy(dx: StatusPanel.shade, dy: StatusPanel.shade)
         report?("open t=\(Int(t * 1000)) frame=\(frames) glass=\(StatusPanel.frame(glass))")

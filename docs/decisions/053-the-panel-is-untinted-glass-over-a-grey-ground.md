@@ -45,4 +45,4 @@ It supersedes ADR-036's Decisions 1 and 2. The glass stays the panel's one glass
 - The bars no longer ask the panel to match the menu's own blue cast on the light walls; they refuse a cast added on top of it, the owner's complaint.
 - The panel's own colour moves between runs: the tinted build's dark wall read 4.23 in one run and 1.33 in the next. A margin of 0.31 and 0.22 above the pick is one run's evidence, and a red wash on the pick is read against a second run before the bars move.
 - Every golden and `heights.json` were re-recorded at 322 pt; no story was added or removed.
-- The opening's zoom is not touched here: it stays the other half of the owner's complaint, until the opening is a fade with no scale.
+- The opening's zoom, the other half of the owner's complaint, is not touched here: [ADR-036](036-the-menu-bar-owns-its-glass-panel.md) orders the panel in whole, nothing scaled or faded.

@@ -17,7 +17,7 @@ final class MotionTests: XCTestCase {
         XCTAssertEqual(Set(drawn).count, drawn.count)
         XCTAssertTrue(exempt.isDisjoint(with: drawn))
         XCTAssertEqual(exempt.union(drawn), Set((1...31).map { "M\($0)" }))
-        XCTAssertEqual(exempt, ["M13", "M14", "M16", "M29"])
+        XCTAssertEqual(exempt, ["M1", "M13", "M14", "M16", "M29"])
     }
 
     @MainActor
@@ -29,7 +29,7 @@ final class MotionTests: XCTestCase {
     }
 
     func testTheLiveAppAnimatesAMovementThroughItsProgress() {
-        var m = PanelAppear(progress: 0)
+        var m = PushTransition(progress: 0, role: .top)
         m.animatableData = 0.4
         XCTAssertEqual(m.progress, 0.4)
     }
@@ -42,37 +42,26 @@ final class MotionTests: XCTestCase {
         XCTAssertGreaterThan(Self.smooth(0.35), 0.5, "smooth is front-loaded: past half its way at a third of its time")
     }
 
-    func testThePanelGrowsOutOfItsItemAndClosesToASlighterScale() {
-        for t in Self.moments {
-            let look = PanelAppear.look(PanelAppear.frozen(t, closing: false), reduce: false)
-            near(look.opacity, Self.smooth(t), "opacity at \(t)")
-            near(look.scale.width, 0.96 + 0.04 * Self.smooth(t), "scale at \(t)")
-        }
-        let closed = PanelAppear.look(PanelAppear.frozen(1, closing: true), closing: true, reduce: false)
-        near(closed.scale.width, 0.98, "closed")
-        near(closed.opacity, 0, "closed")
-        near(PanelAppear.frozen(0.35, closing: true), 1 - Self.snappy(0.35), "it closes on snappy")
-    }
-
-    // invariant: play round V2 [transition.panel-open]: the panel the
-    // owner opens from the menu bar grows out of its item, as the catalogue
-    // draws it, never shown whole on its first frame.
-    func testTheAppsPanelGrowsOutOfItsItemEachTimeItOpens() throws {
+    // invariant: the panel the owner opens from the menu bar is shown whole,
+    // as the system's extras are: the app's panel carries no movement of its
+    // own, and the window is ordered in and out with no animation.
+    func testThePanelOpensWholeAndClosesAtOnce() throws {
         let app = try String(contentsOf: Tree.app.appendingPathComponent("App.swift"), encoding: .utf8)
         let panel = try XCTUnwrap(app.range(of: "Popover(model.state"))
         let theme = try XCTUnwrap(app.range(of: ".stationSystemTheme()", range: panel.upperBound..<app.endIndex))
-        XCTAssertTrue(app[panel.upperBound..<theme.lowerBound].contains(".modifier(PanelOpening())"), "the app's panel opens without M1")
-    }
-
-    // invariant: the capture rig stretches only the panel's opening, by STATION_TRIAL_SLOW,
-    // never below the real 340 ms.
-    func testTheRigStretchesTheOpeningAndNeverShrinksIt() throws {
-        near(Token.Motion.slowdown(nil), 1, "unset")
-        near(Token.Motion.slowdown("10"), 10, "ten")
-        near(Token.Motion.slowdown("0.2"), 1, "below one")
-        near(Token.Motion.slowdown("fast"), 1, "unreadable")
-        let motion = try String(contentsOf: Tree.sources.appendingPathComponent("motion/PageMotion.swift"), encoding: .utf8)
-        XCTAssertTrue(motion.contains(".speed(1 / Token.Motion.slow)"), "the opening ignores STATION_TRIAL_SLOW")
+        let chain = app[panel.upperBound..<theme.lowerBound]
+        for moving in [".modifier(", "scaleEffect", "transition", "animation", "opacity"] {
+            XCTAssertFalse(chain.contains(moving), "the app's panel moves on opening: \(moving)")
+        }
+        let window = try String(contentsOf: Tree.app.appendingPathComponent("StatusPanel.swift"), encoding: .utf8)
+        for verb in ["func show()", "func hide()"] {
+            let start = try XCTUnwrap(window.range(of: verb))
+            let end = try XCTUnwrap(window.range(of: "\n    }\n", range: start.upperBound..<window.endIndex))
+            let body = window[start.upperBound..<end.lowerBound]
+            for moving in ["animator()", "alphaValue", "NSAnimationContext", "animationBehavior"] {
+                XCTAssertFalse(body.contains(moving), "\(verb) animates the window: \(moving)")
+            }
+        }
     }
 
     func testAPushedPageSlidesInOpaqueOverThePageBelowWhichDimsAThirdAway() {
@@ -319,7 +308,6 @@ final class MotionTests: XCTestCase {
     func testUnderReduceMotionEveryMovementIsADissolve() {
         let t = 0.35
         let looks: [(String, Look)] = [
-            ("panel", PanelAppear.look(t, reduce: true)),
             ("push", PushTransition.look(t, role: .top, way: .push, reduce: true)),
             ("segment", SegmentSlide.look(t, forward: true, reduce: true)),
             ("fold", Fold.look(t, reduce: true)),
@@ -345,6 +333,6 @@ final class MotionTests: XCTestCase {
             XCTAssertEqual(look.reveal, 1, name)
         }
         XCTAssertLessThan(Fold.look(t, reduce: true).height, 1, "a fold's height still eases")
-        near(PanelAppear.frozen(t, closing: false, reduce: true), UnitCurve.easeInOut.value(at: t), "on the reduced ease")
+        near(PushTransition.frozen(t, role: .top, way: .push, reduce: true), UnitCurve.easeInOut.value(at: t), "on the reduced ease")
     }
 }

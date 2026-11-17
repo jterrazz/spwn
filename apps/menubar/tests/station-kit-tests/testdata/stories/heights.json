@@ -135,8 +135,6 @@
   "transition.hero-morph": 455,
   "transition.jump": 447,
   "transition.menu": 455,
-  "transition.panel-close": 455,
-  "transition.panel-open": 455,
   "transition.pop": 453,
   "transition.push": 438,
   "transition.reduce-motion.push": 443,

@@ -68,7 +68,6 @@ struct ModelPanel: View {
     var body: some View {
         Popover(model.state, handlers: handlers)
             .environment(\.stationLive, model.live)
-            .modifier(PanelOpening())
             .stationSystemTheme()
             .stationSystemAccessibility()
     }
