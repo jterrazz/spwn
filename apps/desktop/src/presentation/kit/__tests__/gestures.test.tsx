@@ -15,7 +15,7 @@ const recordingFor = await recordingsOf('stories', 'two-macs');
 const erasing = dialog('Erase orbstack?');
 const refusal = content('has no data station can erase', { exact: false });
 
-function Erase({ label }: { label: string }) {
+function Erase({ label, held }: { label: string; held?: string }) {
     const erase = useGesture('disk.erase', {
         input: { App: 'orbstack' },
         rereads: [],
@@ -25,6 +25,7 @@ function Erase({ label }: { label: string }) {
         <div>
             <GestureButton
                 gesture={erase}
+                held={held}
                 label={label}
                 title="Erase orbstack?"
                 variant="danger"
@@ -159,6 +160,25 @@ describe('gestures', () => {
 
         // Then - one dialog is open, not one per button
         expect(result.html.text.match(/role="dialog"/gu)).toHaveLength(1);
+    });
+
+    test('a button handed a hold says it in its dialog before anything is sent', async () => {
+        // Given - an erase of orbstack handed the sentence of a hold, over two-macs
+        const result = await component.render(
+            over(<Erase held="It is held by its lot." label="Erase…" />),
+            async (visitor) => {
+                // When - the button is pressed
+                await visitor.click(button('Erase…'));
+
+                // Then - the dialog says the hold, once, and asks the name typed
+                await visitor.see(
+                    within(erasing, content('It is held by its lot.', { exact: false })),
+                );
+                await visitor.see(within(erasing, field('Type orbstack to confirm')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+        expect(result.html.text.match(/It is held by its lot\./gu)).toHaveLength(1);
     });
 
     test('a refusal outlives its row leaving and coming back', async () => {

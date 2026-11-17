@@ -92,6 +92,7 @@ export function DeleteGesture({ mac, vm, go }: VmProps & { go: (to: Route) => vo
         <div className={styles.destructive}>
             <GestureButton
                 gesture={remove}
+                held={vm.Hold?.Sentence}
                 label={`Delete ${vm.Name}…`}
                 title={`Delete ${vm.Name}?`}
                 variant="danger"
