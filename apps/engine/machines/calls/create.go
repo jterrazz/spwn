@@ -204,8 +204,8 @@ func unaskedSize(img catalog.Image, server bool, asked model.Resources) model.Re
 func (s *Machinist) Unasked(ctx context.Context, from string) (model.Unasked, error) {
 	// value: what a create of a workspace from that machine file makes
 	// when asked nothing else, its name aside: its file, image, size and
-	// lifetime; the built-in image whose own file it is, which a server
-	// may be made of.
+	// lifetime; the built-in Linux image whose own file it is, which a
+	// server may be made of.
 	r, _, err := s.fromTemplate(ctx, model.CreateRequest{From: cmp.Or(from, catalog.LinuxImage)})
 	if err != nil {
 		return model.Unasked{}, err
@@ -218,7 +218,7 @@ func (s *Machinist) Unasked(ctx context.Context, from string) (model.Unasked, er
 	r.Size = unaskedSize(img, false, r.Size)
 	out := model.Unasked{Request: r, Kind: img.Kind}
 	for _, builtin := range s.o.Images {
-		if builtin.Name == img.Name && builtin.Machinefile == r.From {
+		if builtin.Name == img.Name && builtin.Machinefile == r.From && builtin.Kind == catalog.Linux {
 			out.Builtin = builtin.Name
 		}
 	}

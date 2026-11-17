@@ -25,7 +25,7 @@
     - button "Free 34.8 GB"
   - region "Can be freed":
     - heading "Can be freed" [level=2]
-    - text: station-linux@2026.10.20 Unused image 3 GB
+    - text: base-ubuntu@2026.10.20 Unused image 3 GB
   - region "Your data":
     - heading "Your data 5" [level=2]
     - text: xcode ~/Library/Developer/CoreSimulator/Devices 19.1 GB
@@ -40,8 +40,8 @@
     - button "Erase… zed": Erase…
   - region "Images":
     - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
-    - text: station-linux 2026.11.01 built 1 Nov · 4 GB · 2 machines made from it Newest station-linux 2026.10.20 built 20 Oct · 3 GB · no machine made from it
-    - button "Delete station-linux 2026.10.20": Delete · frees 3 GB
+    - text: base-ubuntu 2026.11.01 built 1 Nov · 4 GB · 2 machines made from it Newest base-ubuntu 2026.10.20 built 20 Oct · 3 GB · no machine made from it
+    - button "Delete base-ubuntu 2026.10.20": Delete · frees 3 GB
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
     - button "macbook-pro the Mac itself 34.8 GB of caches inside 499 GB"

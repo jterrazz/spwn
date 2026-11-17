@@ -124,7 +124,7 @@ func TestCreateChildProcess(t *testing.T) {
 		}
 	}
 	w := &world.World{ThisMac: "mac"}
-	w.Mac("mac").Images = []string{"station-linux"}
+	w.Mac("mac").Images = []string{"base-ubuntu"}
 	prefs := notedPrefs{}
 	p := machinescalls.Prefs{Name: setupcontract.Name(prefs), Macs: machinescontract.Macs(prefs), VMUser: machinescontract.VMUser(prefs)}
 	if err := p.Name.Set("mac"); err != nil {
@@ -132,7 +132,7 @@ func TestCreateChildProcess(t *testing.T) {
 	}
 	records := filepath.Join(meet, "vms")
 	store := machinesjsonfile.New(&lockstep{lockable: lockable{sys.FS}, sys: sys, meet: meet, me: me, other: other, recordsDir: records}, records)
-	linux := catalog.Image{Name: "station-linux", Kind: catalog.Linux, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
+	linux := catalog.Image{Name: "base-ubuntu", Kind: catalog.Linux, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
 	m := machinescalls.New(macSystem{sys}, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, store, nil, unbuilt{}, answering{}, nil, machinescalls.Options{
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux}, KnownHosts: filepath.Join(meet, me+".known_hosts"), Logs: filepath.Join(meet, me+".logs"),
 		Hardware:  func(context.Context) coremachine.Hardware { return coremachine.Hardware{Memory: 16 << 30, CPUs: 8} },
@@ -141,7 +141,7 @@ func TestCreateChildProcess(t *testing.T) {
 	built := false
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	_, err := m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: me, Size: model.Resources{MemoryBytes: 8 << 30}}, func(ctx context.Context, _ func(string)) error {
+	_, err := m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: me, Size: model.Resources{MemoryBytes: 8 << 30}}, func(ctx context.Context, _ func(string)) error {
 		built = true
 		_ = sys.FS.WriteFile(filepath.Join(meet, "built."+me), nil, 0o600)
 		for ctx.Err() == nil {

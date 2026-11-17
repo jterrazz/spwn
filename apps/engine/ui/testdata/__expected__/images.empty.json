@@ -38,11 +38,11 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "station-linux not built yet"
+                    "text": "base-ubuntu not built yet"
                   },
                   {
                     "kind": "text",
-                    "text": "macos not built yet"
+                    "text": "base-macos not built yet"
                   }
                 ]
               }
@@ -92,9 +92,9 @@
       "items": [
         {
           "row": {
-            "id": "station-linux",
+            "id": "base-ubuntu",
             "mark": "absent",
-            "label": "station-linux",
+            "label": "base-ubuntu",
             "detail": {
               "kind": "text",
               "text": "not built yet"
@@ -104,9 +104,9 @@
         },
         {
           "row": {
-            "id": "macos",
+            "id": "base-macos",
             "mark": "absent",
-            "label": "macos",
+            "label": "base-macos",
             "detail": {
               "kind": "text",
               "text": "not built yet"

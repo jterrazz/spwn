@@ -2,11 +2,11 @@ description: 'a build on another Mac makes the image there, This Mac''s untouche
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'images build station-linux --binary $HOME/station-linux --on mac-mini'
+    - command: 'images build base-ubuntu --binary $HOME/station-linux --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	station-linux	2026.11.04	built
+          ●	base-ubuntu	2026.11.04	built
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version)"'''
       exit: 0
       stdout: |

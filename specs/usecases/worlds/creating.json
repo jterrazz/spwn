@@ -9,7 +9,7 @@
             },
             "building": [
                 {
-                    "image": "station-linux",
+                    "image": "base-ubuntu",
                     "version": "2026.11.04",
                     "step": "packages",
                     "owner": {
@@ -64,7 +64,7 @@
             "vms": {
                 "linux-4": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "2026.11.01",
                         "lifetime": "ephemeral",
                         "created_at": "2026-11-04T10:00:00Z",
@@ -90,7 +90,7 @@
                 },
                 "linux-5": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "lifetime": "persistent",
                         "created_at": "2026-11-04T10:00:01Z",
                         "purpose": "Lot shell, one block per package",

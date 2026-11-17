@@ -7,13 +7,13 @@ runs:
           machinefile: station.machinefile/v1
           name: studio-linux
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
-          extends: [station-linux]
+          extends: [base-ubuntu]
           apps: [jq]
       exit: 0
     - command: 'images build --binary $HOME/station-linux'
       exit: 0
       stdout: |
-          ●	station-linux	2026.11.04	built
+          ●	base-ubuntu	2026.11.04	built
           ●	studio-linux	2026.11.04	built
     - command: 'images build --binary $HOME/station-linux'
       exit: 0
@@ -24,7 +24,7 @@ runs:
           machinefile: station.machinefile/v1
           name: studio-linux
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
-          extends: [station-linux]
+          extends: [base-ubuntu]
           apps: [jq, fd]
       exit: 0
     - command: 'images build --binary $HOME/station-linux'

@@ -104,8 +104,8 @@ const OPENED: Readonly<Record<string, readonly Shot[]>> = {
             steps: [
                 { button: 'Free 12 GB' },
                 {
-                    field: 'Type station-linux@2026.10.20, old-vm to confirm',
-                    text: 'station-linux@2026.10.20, old-vm',
+                    field: 'Type base-ubuntu@2026.10.20, old-vm to confirm',
+                    text: 'base-ubuntu@2026.10.20, old-vm',
                 },
                 { button: 'Free' },
             ],

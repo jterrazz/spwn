@@ -25,7 +25,7 @@ describe('storage', () => {
 
     test('D9 what nothing uses is freed by its names typed, and the verdict reads nothing to free', async () => {
         // Given - Storage over leftovers, an unused image and the disk of a deleted VM
-        const subject = 'station-linux@2026.10.20, old-vm';
+        const subject = 'base-ubuntu@2026.10.20, old-vm';
         const result = await website.visit('/?world=leftovers&page=storage', async (visitor) => {
             await visitor.see(heading('12.0 GB can be freed.'));
 

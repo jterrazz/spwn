@@ -127,7 +127,7 @@ say "-- the engine of this build runs for $mac (pid $engine_pid)"
 
 case_begin image-build IM-09 ADR-044
 # value: the owner's template, read through the run's own user source: it extends
-# station-linux and bakes what it bakes, shares a folder of the Mac read-only, and
+# base-ubuntu and bakes what it bakes, shares a folder of the Mac read-only, and
 # its own lines run at the image's build (run.image) and at a first start (run.boot,
 # a clone of a repository the shared folder holds); the build's own minutes, against
 # its bound (images/calls/build.go: 30 min the recipe, 30 the image phase).
@@ -138,7 +138,7 @@ cat > "$mac/.config/station/machinefiles/studio-linux.machine.yaml" << 'YAML'
 machinefile: station.machinefile/v1
 name: studio-linux
 machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
-extends: [station-linux]
+extends: [base-ubuntu]
 vm:
   lifetime: persistent
   resources: { cpus: 4, memory: 4G, disk: 30G }
@@ -241,7 +241,7 @@ case_pass
 
 
 case_begin chromium-headless ADR-044
-# value: headless Chromium launches on the libraries station-linux bakes alone: no
+# value: headless Chromium launches on the libraries base-ubuntu bakes alone: no
 # `playwright install-deps`, which would install them as root.
 # hazard: playwright 1.55.0's browser install never ends on Node 26 (the archive is
 # downloaded, its extraction waits forever); a release that knows the Node the catalog

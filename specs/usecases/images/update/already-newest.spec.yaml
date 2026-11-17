@@ -1,14 +1,14 @@
 description: 'an image at its newest released version is said so, nothing fetched; bare asks every image held'
 env: two-macs
 runs:
-    - command: 'images update station-linux'
+    - command: 'images update base-ubuntu'
       exit: 0
       stdout: |
-          ●	station-linux	2026.11.03	fetched
+          ●	base-ubuntu	2026.11.03	fetched
     - command: 'images update'
       exit: 0
       stdout: |
-          ●	station-linux	2026.11.03	is the newest
+          ●	base-ubuntu	2026.11.03	is the newest
     - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "macbook-pro")] | length'''
       exit: 0
       stdout: |

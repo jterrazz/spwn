@@ -4,17 +4,17 @@ env: two-macs
 runs:
     - command: 'world fault Guest.Exec 1'
       exit: 0
-    - command: 'images build station-linux --binary $HOME/station-linux'
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
       exit: 1
       stderr: |
-          Error: image station-linux: the recipe failed: the guest connection broke, as the world scripted it
-          Hint: station images build station-linux
+          Error: image base-ubuntu: the recipe failed: the guest connection broke, as the world scripted it
+          Hint: station images build base-ubuntu
     - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | .version'''
       exit: 0
       stdout: |
           2026.11.01
           2026.10.20
-    - command: 'images build station-linux --binary $HOME/station-linux'
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
       exit: 0
       stdout: |
-          ●	station-linux	2026.11.04	built
+          ●	base-ubuntu	2026.11.04	built

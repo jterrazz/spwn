@@ -29,4 +29,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [(.jobs // {} | keys), (.vms | keys)]'' world.json'
       exit: 0
       stdout: |
-          [["com.jterrazz.station.engine"],["linux-1","station-image-station-linux-2026.11.01"]]
+          [["com.jterrazz.station.engine"],["linux-1","station-image-base-ubuntu-2026.11.01"]]

@@ -22,7 +22,7 @@
                 },
                 "vm_user": "admin"
             },
-            "images": ["ghcr.io/jterrazz/station-linux:1"],
+            "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
             "fresh": {
                 "size": {
                     "CPUs": 4,
@@ -42,7 +42,7 @@
             "vms": {
                 "linux-1": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "2026.11.01",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -181,7 +181,7 @@
                 },
                 "api": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "2026.11.01",
                         "lifetime": "persistent",
                         "want": "stopped",
@@ -195,7 +195,7 @@
                     },
                     "guest": {}
                 },
-                "station-image-station-linux-2026.11.01": {
+                "station-image-base-ubuntu-2026.11.01": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -203,7 +203,7 @@
                         "Disk": 4000000000
                     }
                 },
-                "station-image-station-linux-2026.10.20": {
+                "station-image-base-ubuntu-2026.10.20": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -215,7 +215,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "station-linux",
+                        "name": "base-ubuntu",
                         "version": "2026.10.20",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
@@ -224,7 +224,7 @@
                         "size_gb": 3
                     },
                     {
-                        "name": "station-linux",
+                        "name": "base-ubuntu",
                         "version": "2026.11.01",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
@@ -615,7 +615,7 @@
                 "restart-after-power-cut": "autorestart=1\nwomp=1",
                 "autologin": "autoLoginUser=jterrazz.agent\n/etc/kcpassword=present"
             },
-            "images": ["ghcr.io/jterrazz/station-linux:1"],
+            "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
             "fresh": {
                 "size": {
                     "CPUs": 4,
@@ -635,7 +635,7 @@
             "vms": {
                 "infra": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "2026.11.01",
                         "lifetime": "always-on",
                         "want": "running",
@@ -651,7 +651,7 @@
                     "pid": 2001,
                     "guest": {}
                 },
-                "station-image-station-linux-2026.11.01": {
+                "station-image-base-ubuntu-2026.11.01": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -663,7 +663,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "station-linux",
+                        "name": "base-ubuntu",
                         "version": "2026.11.01",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
@@ -720,6 +720,6 @@
     },
     "user": "you",
     "registry": {
-        "station-linux": "2026.11.03"
+        "base-ubuntu": "2026.11.03"
     }
 }

@@ -7,7 +7,7 @@ runs:
           machinefile: station.machinefile/v1
           name: studio-linux
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
-          extends: [station-linux]
+          extends: [base-ubuntu]
           vm: { image: { bake: [mise, git, docker, playwright-deps, jq] } }
           apps: [jq]
       exit: 0

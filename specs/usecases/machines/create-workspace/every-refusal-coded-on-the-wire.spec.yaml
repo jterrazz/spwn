@@ -5,8 +5,8 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''map(select(.error) | {id, type: .error.type, code: .error.code, subject: .error.subject}) | sort_by(.id) | .[]'''
       stdin: |
-          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"api","Image":"station-linux"},"Confirm":"yes"}}
-          {"v":2,"id":"2","call":"machines.create-server","in":{"Image":"station-linux"}}
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"api","Image":"base-ubuntu"},"Confirm":"yes"}}
+          {"v":2,"id":"2","call":"machines.create-server","in":{"Image":"base-ubuntu"}}
           {"v":2,"id":"3","call":"machines.create-workspace","in":{"Request":{"Name":"api","Image":"linux"}}}
       exit: 0
       stdout: |

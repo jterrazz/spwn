@@ -6,7 +6,7 @@ import (
 )
 
 func explained() []machinefile.Value {
-	linux := machinefile.Origin{Name: "station-linux", Kind: machinefile.Builtin, File: "built-in/machinefiles/station-linux.machine.yaml"}
+	linux := machinefile.Origin{Name: "base-ubuntu", Kind: machinefile.Builtin, File: "built-in/machinefiles/base-ubuntu.machine.yaml"}
 	mine := machinefile.Origin{Name: "studio-linux", Kind: machinefile.User, File: "~/.config/station/machinefiles/studio-linux.machine.yaml"}
 	return []machinefile.Value{
 		{Key: "machine.kind", Text: "workspace", Origin: linux},

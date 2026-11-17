@@ -1,5 +1,5 @@
 machinefile: station.machinefile/v1
-name: station-linux
+name: base-ubuntu
 description: A Linux workspace with the runtime manager, git, zsh, Docker and headless Chromium's libraries
 machine:
     kind: workspace

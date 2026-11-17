@@ -183,8 +183,8 @@ describe('disk gestures', () => {
                                       detail: { version: '2026.10.20', vms: 'linux-1' },
                                       hint: 'station images lists the versions you can delete',
                                       message:
-                                          'image station-linux 2026.10.20 has machines made from it: linux-1',
-                                      subject: 'station-linux',
+                                          'image base-ubuntu 2026.10.20 has machines made from it: linux-1',
+                                      subject: 'base-ubuntu',
                                       type: 'refused',
                                   },
                                   v: 2,
@@ -201,8 +201,8 @@ describe('disk gestures', () => {
                 await visitor.see(within(images, content('2026.10.20')));
 
                 // When - its Delete is clicked, then confirmed
-                await visitor.click(within(images, button('Delete station-linux 2026.10.20')));
-                const asked = dialog('Delete station-linux 2026.10.20?');
+                await visitor.click(within(images, button('Delete base-ubuntu 2026.10.20')));
+                const asked = dialog('Delete base-ubuntu 2026.10.20?');
                 await visitor.click(within(asked, button('Delete')));
 
                 // Then - the engine's sentence and its hint, and the row is still listed
@@ -212,28 +212,28 @@ describe('disk gestures', () => {
                 await visitor.see(
                     within(images, content('station images lists the versions you can delete')),
                 );
-                await visitor.see(within(images, button('Delete station-linux 2026.10.20')));
+                await visitor.see(within(images, button('Delete base-ubuntu 2026.10.20')));
             },
         );
         expect(result.errors.text).toBe('');
     });
 
     test('delete of an image asks yes, then the image leaves the list and its outcome stays above it', async () => {
-        // Given - Storage over two-macs, two versions of station-linux built
+        // Given - Storage over two-macs, two versions of base-ubuntu built
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
             const images = region('Images');
             await visitor.see(within(images, content('2026.10.20')));
 
             // When - its Delete is clicked, then confirmed
-            await visitor.click(within(images, button('Delete station-linux 2026.10.20')));
-            const asked = dialog('Delete station-linux 2026.10.20?');
+            await visitor.click(within(images, button('Delete base-ubuntu 2026.10.20')));
+            const asked = dialog('Delete base-ubuntu 2026.10.20?');
             await visitor.click(within(asked, button('Delete')));
 
             // Then - images.list read again holds the newest alone, and the delete's outcome is held above it
             await visitor.gone(asked);
             await visitor.gone(within(images, content('2026.10.20')));
             await visitor.see(within(images, content('2026.11.01')));
-            await visitor.see(within(region('Done here'), content('station-linux 2026.10.20')));
+            await visitor.see(within(region('Done here'), content('base-ubuntu 2026.10.20')));
         });
         expect(result.errors.text).toBe('');
     });

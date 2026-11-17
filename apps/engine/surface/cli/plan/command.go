@@ -58,7 +58,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "plan",
 		Short:   "What station apply would do here: what it asks of you, installs, sets and adopts",
-		Example: "  station plan\n  station plan --diff\n  station plan --machinefile station-macos",
+		Example: "  station plan\n  station plan --diff\n  station plan --machinefile base-macos",
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile planned, by its name or its file (default: the one this machine carries)")

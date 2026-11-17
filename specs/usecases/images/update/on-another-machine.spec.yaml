@@ -1,11 +1,11 @@
 description: 'an update on another Mac fetches the image there, This Mac''s untouched'
 env: two-macs
 runs:
-    - command: 'images update station-linux --on mac-mini'
+    - command: 'images update base-ubuntu --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	station-linux	2026.11.03	fetched
+          ●	base-ubuntu	2026.11.03	fetched
     - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.newest) | "\(.mac) \(.version)"'''
       exit: 0
       stdout: |

@@ -3,14 +3,14 @@ env:
     - two-macs
     - engine
 runs:
-    - command: 'images build macos'
+    - command: 'images build base-macos'
       exit: 2
       stderr: |
-          Error: station has no recipe for macos: it is fetched, never built here
-          Hint: station images update macos
+          Error: station has no recipe for base-macos: it is fetched, never built here
+          Hint: station images update base-macos
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
       stdin: |
-          {"v":2,"id":"1","call":"images.build","in":{"Names":["macos"]}}
+          {"v":2,"id":"1","call":"images.build","in":{"Names":["base-macos"]}}
       exit: 0
       stdout: |
-          {"code":"image.no-recipe","subject":"macos","message":"station has no recipe for macos: it is fetched, never built here"}
+          {"code":"image.no-recipe","subject":"base-macos","message":"station has no recipe for base-macos: it is fetched, never built here"}

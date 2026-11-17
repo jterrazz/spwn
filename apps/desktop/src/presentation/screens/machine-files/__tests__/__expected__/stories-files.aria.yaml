@@ -15,8 +15,8 @@
     - button "base"
   - paragraph: Shipped with station
   - group "Shipped with station":
-    - button "station-linux"
-    - button "station-macos"
+    - button "base-macos"
+    - button "base-ubuntu"
   - region "macbook-pro.machine.yaml":
     - heading "macbook-pro.machine.yaml" [level=2]
     - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml

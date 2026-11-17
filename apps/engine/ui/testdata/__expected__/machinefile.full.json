@@ -48,7 +48,7 @@
               },
               {
                 "kind": "text",
-                "text": "station-linux"
+                "text": "base-ubuntu"
               }
             ]
           }
@@ -68,7 +68,7 @@
               },
               {
                 "kind": "text",
-                "text": "station-linux"
+                "text": "base-ubuntu"
               }
             ]
           }
@@ -148,7 +148,7 @@
               },
               {
                 "kind": "text",
-                "text": "station-linux"
+                "text": "base-ubuntu"
               }
             ]
           }

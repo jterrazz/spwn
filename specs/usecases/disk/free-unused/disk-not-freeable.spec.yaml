@@ -14,4 +14,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms | keys'' world.json'
       exit: 0
       stdout: |
-          ["api","linux-1","old-vm","station-image-station-linux-2026.10.20","station-image-station-linux-2026.11.01"]
+          ["api","linux-1","old-vm","station-image-base-ubuntu-2026.10.20","station-image-base-ubuntu-2026.11.01"]

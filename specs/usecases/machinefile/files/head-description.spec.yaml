@@ -9,9 +9,9 @@ runs:
       exit: 0
       stdout: |
           {"name":"base","shelf":"yours","description":""}
+          {"name":"base-macos","shelf":"shipped","description":"A macOS workspace with Homebrew, git and zsh"}
+          {"name":"base-ubuntu","shelf":"shipped","description":"A Linux workspace with the runtime manager, git, zsh, Docker and headless Chromium's libraries"}
           {"name":"linux-1","shelf":"yours","description":""}
           {"name":"linux-dev","shelf":"yours","description":""}
           {"name":"macbook-pro","shelf":"yours","description":""}
-          {"name":"station-linux","shelf":"shipped","description":"A Linux workspace with the runtime manager, git, zsh, Docker and headless Chromium's libraries"}
-          {"name":"station-macos","shelf":"shipped","description":"A macOS workspace with Homebrew, git and zsh"}
           {"name":"studio-linux","shelf":"yours","description":""}

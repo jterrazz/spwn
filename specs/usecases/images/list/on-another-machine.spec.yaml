@@ -5,5 +5,5 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	station-linux	2026.11.01	4.0 GB	mac-mini	infra
-          ○	macos				not built yet
+          ●	base-ubuntu	2026.11.01	4.0 GB	mac-mini	infra
+          ○	base-macos				not built yet

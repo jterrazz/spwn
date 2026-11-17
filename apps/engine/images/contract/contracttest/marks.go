@@ -29,7 +29,7 @@ func BuildMarks(t *testing.T, open func(t *testing.T) contract.BuildMarks) {
 		b := open(t)
 		for _, m := range []images.Making{
 			{Image: "linux", Version: "2026.11.01", Step: images.BuildBaseSystem, Owner: owner},
-			{Image: "macos", Version: "1", Step: images.BuildSeal, Owner: owner},
+			{Image: "base-macos", Version: "1", Step: images.BuildSeal, Owner: owner},
 			{Image: "linux", Version: "2026.11.01", Step: images.BuildSettings, Owner: owner},
 		} {
 			if err := b.Mark(ctx, m); err != nil {

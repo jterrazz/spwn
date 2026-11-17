@@ -17,8 +17,8 @@ func TestARefusalOfACreateCarriesItsCodeAndItsMac(t *testing.T) {
 		detail  map[string]string
 	}{
 		{&model.TooBigError{Mac: "mac-mini", AskedGB: 60, LeftGB: 36}, NotEnoughMemory, "mac-mini", map[string]string{"asked_gb": "60", "left_gb": "36"}},
-		{&model.NoImageError{Image: "station-linux", Mac: "mac-mini"}, NoImage, "station-linux", map[string]string{"mac": "mac-mini", "fetched": ""}},
-		{&model.NoImageError{Image: "macos", Mac: "mac-mini", Fetched: true}, NoImage, "macos", map[string]string{"mac": "mac-mini", "fetched": "yes"}},
+		{&model.NoImageError{Image: "base-ubuntu", Mac: "mac-mini"}, NoImage, "base-ubuntu", map[string]string{"mac": "mac-mini", "fetched": ""}},
+		{&model.NoImageError{Image: "base-macos", Mac: "mac-mini", Fetched: true}, NoImage, "base-macos", map[string]string{"mac": "mac-mini", "fetched": "yes"}},
 		{&model.EngineDownError{Mac: "mac-mini", Installed: true}, EngineDown, "mac-mini", map[string]string{"installed": "yes"}},
 		{&model.BadLifetimeError{Value: "forever"}, BadLifetime, "forever", nil},
 		{ServerNeedsNameRule, ServerNeedsName, "", nil},

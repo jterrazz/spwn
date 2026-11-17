@@ -1,8 +1,8 @@
 description: 'a linux image no registry releases is said so, and the way out is to build it on this Mac'
 env: one-mac
 runs:
-    - command: 'images update station-linux'
+    - command: 'images update base-ubuntu'
       exit: 1
       stderr: |
-          Error: image station-linux is not released
-          Hint: station images build station-linux
+          Error: image base-ubuntu is not released
+          Hint: station images build base-ubuntu

@@ -37,31 +37,31 @@ func heldBuilder(t *testing.T, versions ...string) (*Builder, *imagesfake.Marks)
 	t.Helper()
 	ctx := context.Background()
 	held, marks := imagesfake.NewStore(), imagesfake.NewMarks()
-	vms := madeFrom{records: []machines.Record{{Name: "api", Image: "station-linux", Version: "2026.10.20"}}}
+	vms := madeFrom{records: []machines.Record{{Name: "api", Image: "base-ubuntu", Version: "2026.10.20"}}}
 	for _, v := range versions {
-		if err := held.Put(ctx, images.Record{Name: "station-linux", Version: v}); err != nil {
+		if err := held.Put(ctx, images.Record{Name: "base-ubuntu", Version: v}); err != nil {
 			t.Fatal(err)
 		}
 	}
 	s := &Builder{
 		store: held, vms: vms, marks: marks, procs: running{10: true}, templates: noTemplates{},
-		cat: catalog.Catalog{Images: []catalog.Image{{Name: "station-linux"}}}, o: BuilderOptions{Mac: "macbook-pro"},
+		cat: catalog.Catalog{Images: []catalog.Image{{Name: "base-ubuntu"}}}, o: BuilderOptions{Mac: "macbook-pro"},
 	}
 	return s, marks
 }
 
 func TestDeleteRefusesEveryVersionTheRuleKeeps(t *testing.T) {
 	s, marks := heldBuilder(t, "2026.11.01", "2026.10.20", "2026.10.01")
-	if err := marks.Mark(context.Background(), images.Making{Image: "station-linux", Version: "2026.11.04", Step: images.BuildPackages, Owner: &machines.Process{PID: 10}}); err != nil {
+	if err := marks.Mark(context.Background(), images.Making{Image: "base-ubuntu", Version: "2026.11.04", Step: images.BuildPackages, Owner: &machines.Process{PID: 10}}); err != nil {
 		t.Fatal(err)
 	}
 	for version, want := range map[string]*images.InUseError{
-		"2026.11.04": {Image: "station-linux", Version: "2026.11.04", Building: true},
-		"2026.11.01": {Image: "station-linux", Version: "2026.11.01", Newest: true},
-		"2026.10.20": {Image: "station-linux", Version: "2026.10.20", VMs: []string{"api"}},
+		"2026.11.04": {Image: "base-ubuntu", Version: "2026.11.04", Building: true},
+		"2026.11.01": {Image: "base-ubuntu", Version: "2026.11.01", Newest: true},
+		"2026.10.20": {Image: "base-ubuntu", Version: "2026.10.20", VMs: []string{"api"}},
 		"2026.10.01": nil,
 	} {
-		err := s.CheckDelete(context.Background(), "station-linux", version)
+		err := s.CheckDelete(context.Background(), "base-ubuntu", version)
 		var got *images.InUseError
 		if want == nil {
 			if err != nil {
@@ -77,9 +77,9 @@ func TestDeleteRefusesEveryVersionTheRuleKeeps(t *testing.T) {
 
 func TestTheInUseRefusalSaysWhy(t *testing.T) {
 	for want, e := range map[string]images.InUseError{
-		"image station-linux 2026.11.04 is being built":                                    {Image: "station-linux", Version: "2026.11.04", Building: true},
-		"image station-linux 2026.11.01 is the newest: the next machines are made from it": {Image: "station-linux", Version: "2026.11.01", Newest: true},
-		"image station-linux 2026.10.20 has machines made from it: api, ci and linux-1":    {Image: "station-linux", Version: "2026.10.20", VMs: []string{"api", "ci", "linux-1"}},
+		"image base-ubuntu 2026.11.04 is being built":                                    {Image: "base-ubuntu", Version: "2026.11.04", Building: true},
+		"image base-ubuntu 2026.11.01 is the newest: the next machines are made from it": {Image: "base-ubuntu", Version: "2026.11.01", Newest: true},
+		"image base-ubuntu 2026.10.20 has machines made from it: api, ci and linux-1":    {Image: "base-ubuntu", Version: "2026.10.20", VMs: []string{"api", "ci", "linux-1"}},
 	} {
 		if got := e.Error(); got != want {
 			t.Errorf("%q, want %q", got, want)
@@ -89,7 +89,7 @@ func TestTheInUseRefusalSaysWhy(t *testing.T) {
 
 func TestAVersionABuildHasRecordedReadsOnce(t *testing.T) {
 	s, marks := heldBuilder(t, "2026.11.04", "2026.11.01")
-	if err := marks.Mark(context.Background(), images.Making{Image: "station-linux", Version: "2026.11.04", Step: images.BuildSeal, Owner: &machines.Process{PID: 10}}); err != nil {
+	if err := marks.Mark(context.Background(), images.Making{Image: "base-ubuntu", Version: "2026.11.04", Step: images.BuildSeal, Owner: &machines.Process{PID: 10}}); err != nil {
 		t.Fatal(err)
 	}
 	reports, err := s.ListOf(context.Background(), nil)

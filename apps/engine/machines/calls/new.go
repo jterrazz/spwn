@@ -12,7 +12,7 @@ import (
 )
 
 type NewIn struct {
-	// value: the machine file the new VM follows; empty for station-linux.
+	// value: the machine file the new VM follows; empty for base-ubuntu.
 	From string
 	// value: the Mac the sheet is opened from; empty for none.
 	On string

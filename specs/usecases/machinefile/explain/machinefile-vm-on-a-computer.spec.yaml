@@ -6,10 +6,10 @@ runs:
           machinefile: station.machinefile/v1
           name: macbook-pro
           machine: { kind: computer, system: { os: macos } }
-          extends: [station-macos]
+          extends: [base-macos]
       exit: 0
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: macbook-pro is a computer, and built-in/machinefiles/station-macos.machine.yaml says vm: vm is a workspace's or a server's
+          Error: macbook-pro is a computer, and built-in/machinefiles/base-macos.machine.yaml says vm: vm is a workspace's or a server's
           Hint: remove vm, or say kind: workspace or server

@@ -33,7 +33,7 @@ const recordingFor = await recordingsOf(
 function builtIn<N extends 'machinefile.drift' | 'machinefile.plan'>(call: N): Out<N> {
     const asked = keyOf({
         call,
-        in: { Machinefile: 'station-macos' },
+        in: { Machinefile: 'base-macos' },
     });
     const exchange = recordingFor('two-macs').exchanges.find((one) => keyOf(one.request) === asked);
     const answer = exchange?.answers.find(
@@ -151,7 +151,7 @@ describe('Packages', () => {
     });
 
     test("what differs from a file says what the machine would do, and the file's side is not given", async () => {
-        // Given - the drift of This Mac from the built-in station-macos, read over two-macs
+        // Given - the drift of This Mac from the built-in base-macos, read over two-macs
         let planned = false;
         const drift = builtIn('machinefile.drift');
         const result = await component.render(
@@ -174,11 +174,11 @@ describe('Packages', () => {
 
         // Then - each missing item says what the machine would do, and Plan opens the plan
         expect(planned).toBe(true);
-        await expect(result.tree).toMatch(file('./__expected__/station-macos-differs.aria.yaml'));
+        await expect(result.tree).toMatch(file('./__expected__/base-macos-differs.aria.yaml'));
     });
 
     test('a plan is its steps that change something, grouped by what each does, each from its layer', async () => {
-        // Given - the plan of the built-in station-macos for This Mac, read over two-macs
+        // Given - the plan of the built-in base-macos for This Mac, read over two-macs
         const plan = builtIn('machinefile.plan');
 
         // When - it is drawn
@@ -187,11 +187,11 @@ describe('Packages', () => {
         });
 
         // Then - its installs and its settings, each from the file whose layer lists it, what stays left out
-        await expect(result.tree).toMatch(file('./__expected__/station-macos-plan.aria.yaml'));
+        await expect(result.tree).toMatch(file('./__expected__/base-macos-plan.aria.yaml'));
     });
 
     test("a count's unit is the shelf its lines are on, packages when they are on both", () => {
-        // Given - the built-in station-macos plan's installs and settings
+        // Given - the built-in base-macos plan's installs and settings
         const lines = builtIn('machinefile.plan').Lines ?? [];
         const installs = lines.filter((line) => line.Step.Kind !== 'setting');
         const settings = lines.filter((line) => line.Step.Kind === 'setting');

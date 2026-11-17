@@ -7,7 +7,7 @@ runs:
           machinefile: station.machinefile/v1
           name: studio-linux
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
-          extends: [station-linux]
+          extends: [base-ubuntu]
           vm: { resources: { memory: 4G }, image: { bake: [mise, git] } }
       exit: 0
     - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
@@ -19,7 +19,7 @@ runs:
           machinefile: station.machinefile/v1
           name: studio-linux
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
-          extends: [station-linux]
+          extends: [base-ubuntu]
           vm: { resources: { memory: 4G }, image: { bake: [mise, git, jq] } }
       exit: 0
     - command: 'machines create --memory 4G web --from studio-linux'

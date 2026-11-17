@@ -14,7 +14,7 @@ import (
 
 func unusedStation() *changingStation {
 	return &changingStation{held: &disk.Held{Unused: []disk.Freeable{
-		{Holder: disk.HolderImages, Kind: disk.FreeImage, Name: "station-linux@2026.10.20", Bytes: 30},
+		{Holder: disk.HolderImages, Kind: disk.FreeImage, Name: "base-ubuntu@2026.10.20", Bytes: 30},
 		{Holder: disk.HolderLeftovers, Kind: disk.FreeDisk, Name: "gone", Bytes: 40},
 	}}}
 }
@@ -25,25 +25,25 @@ func freeUnused(s *Surveyor, in FreeUnusedIn) ([]disk.Outcome, error) {
 
 func TestFreeUnusedAsksTheNamesTypedThenFreesThem(t *testing.T) {
 	station := unusedStation()
-	both := []string{"station-linux@2026.10.20", "gone", "gone"}
+	both := []string{"base-ubuntu@2026.10.20", "gone", "gone"}
 	_, err := freeUnused(onMac(station), FreeUnusedIn{Names: both, Confirm: confirm.Yes})
 	var asked *fail.Error
-	if !errors.As(err, &asked) || asked.Code != confirm.Needed || asked.Subject != "station-linux@2026.10.20, gone" || len(station.freed) != 0 {
+	if !errors.As(err, &asked) || asked.Code != confirm.Needed || asked.Subject != "base-ubuntu@2026.10.20, gone" || len(station.freed) != 0 {
 		t.Fatalf("answered yes: %v, freed %v; want the names asked typed, each once, and nothing freed", err, station.freed)
 	}
 	answer, ok := confirm.Answer(err)
-	if !ok || answer != "station-linux@2026.10.20, gone" {
+	if !ok || answer != "base-ubuntu@2026.10.20, gone" {
 		t.Fatalf("the asking side answers %q (%v), want the names it was shown", answer, ok)
 	}
 	out, err := freeUnused(onMac(station), FreeUnusedIn{Names: both, Confirm: answer})
-	if err != nil || len(out) != 2 || !slices.Equal(station.freed, []string{"station-linux@2026.10.20", "gone"}) {
+	if err != nil || len(out) != 2 || !slices.Equal(station.freed, []string{"base-ubuntu@2026.10.20", "gone"}) {
 		t.Fatalf("typed: %v %+v, freed %v; want both freed once", err, out, station.freed)
 	}
 }
 
 func TestATypedAnswerFreesOnlyTheSetItNamed(t *testing.T) {
 	station := unusedStation()
-	_, err := freeUnused(onMac(station), FreeUnusedIn{Names: []string{"station-linux@2026.10.20", "gone"}, Confirm: "gone"})
+	_, err := freeUnused(onMac(station), FreeUnusedIn{Names: []string{"base-ubuntu@2026.10.20", "gone"}, Confirm: "gone"})
 	var refused *fail.Error
 	if !errors.As(err, &refused) || refused.Code != confirm.Mismatch || len(station.freed) != 0 {
 		t.Fatalf("typed gone for both: %v, freed %v; want a mismatch and nothing freed", err, station.freed)

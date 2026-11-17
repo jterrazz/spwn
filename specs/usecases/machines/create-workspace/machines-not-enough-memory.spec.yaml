@@ -16,7 +16,7 @@ runs:
           ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, detail}'''
       stdin: |
-          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"big","Image":"station-linux","Size":{"MemoryBytes":64424509440}},"Confirm":"yes"}}
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"big","Image":"base-ubuntu","Size":{"MemoryBytes":64424509440}},"Confirm":"yes"}}
       exit: 0
       stdout: |
           {"code":"machines.not-enough-memory","subject":"macbook-pro","detail":{"asked_gb":"60","left_gb":"4"}}

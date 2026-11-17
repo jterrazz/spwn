@@ -9,7 +9,7 @@ env:
 runs:
     - command: 'world hold Hypervisor.Clone'
       exit: 0
-    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" images build station-linux --binary $HOME/station-linux'
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" images build base-ubuntu --binary $HOME/station-linux'
       stdin: |
           see cloning
           run "$STATION" images --json | /usr/bin/jq -c '[.images[] | select(.building != null) | [.name, .version, .building, .deletable]]' >seen
@@ -17,12 +17,12 @@ runs:
           scrollback
       exit: 1
       stdout: |
-          Error: image station-linux: cloning the base failed: context canceled
-          Hint: station images build station-linux
+          Error: image base-ubuntu: cloning the base failed: context canceled
+          Hint: station images build base-ubuntu
     - command: '--version >/dev/null; /bin/cat seen'
       exit: 0
       stdout: |
-          [["station-linux","2026.11.04","Step 1 of 4",false]]
+          [["base-ubuntu","2026.11.04","Step 1 of 4",false]]
     - command: 'images --json | /usr/bin/jq -c ''[.images[] | .building]'''
       exit: 0
       stdout: |

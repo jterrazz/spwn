@@ -3,16 +3,16 @@ fixture:
     - ./__fixtures__/stub/
     - ./__fixtures__/source/
 runs:
-    - command: 'explain machine.kind --machinefile station-macos'
+    - command: 'explain machine.kind --machinefile base-macos'
       exit: 0
       stdout: |
-          # station-macos
-          	machine.kind	workspace	built-in	station-macos
-    - command: 'explain machine.kind --machinefile station-macos'
+          # base-macos
+          	machine.kind	workspace	built-in	base-macos
+    - command: 'explain machine.kind --machinefile base-macos'
       exit: 0
       stdout: |
-          # station-macos
-          	machine.kind	workspace	built-in	station-macos
+          # base-macos
+          	machine.kind	workspace	built-in	base-macos
       files:
           .calls:
               equals: |

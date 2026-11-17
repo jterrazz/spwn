@@ -32,11 +32,11 @@
                 },
                 "vm_user": "admin"
             },
-            "images": ["ghcr.io/jterrazz/station-linux:1"],
+            "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
             "vms": {
                 "linux-1": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "1",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -53,7 +53,7 @@
                 },
                 "api": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "1",
                         "lifetime": "persistent",
                         "want": "stopped",
@@ -110,7 +110,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "station-linux",
+                        "name": "base-ubuntu",
                         "version": "1",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "",
@@ -160,11 +160,11 @@
                 "power": "autorestart=1\nsleep=0\ndisplaysleep=5\ndisksleep=0\npowernap=0\nwomp=1",
                 "autologin": "autoLoginUser=jterrazz.agent\n/etc/kcpassword=present"
             },
-            "images": ["ghcr.io/jterrazz/station-linux:1"],
+            "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
             "vms": {
                 "infra": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "1",
                         "lifetime": "always-on",
                         "want": "running",
@@ -186,7 +186,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "station-linux",
+                        "name": "base-ubuntu",
                         "version": "1",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "",

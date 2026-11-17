@@ -7,12 +7,12 @@ All machines
   └─ ○ api      persistent            stopped      -              4 cpus · 8 GB · 42.9 GB
   ◐ mac-mini    Mac                   unreachable  100.98.133.20  -
 Images
-                   version       size  on
-  ● station-linux  2026.11.01  4.0 GB  macbook-pro  linux-1 · api
-  ○ station-linux  2026.10.20  4.0 GB  macbook-pro  older
-    → station images delete station-linux@2026.10.20
-  ● station-linux  2026.11.01  4.0 GB  mac-mini     infra
-  ○ macos                                           not built yet
+                 version       size  on
+  ● base-ubuntu  2026.11.01  4.0 GB  macbook-pro  linux-1 · api
+  ○ base-ubuntu  2026.10.20  4.0 GB  macbook-pro  older
+    → station images delete base-ubuntu@2026.10.20
+  ● base-ubuntu  2026.11.01  4.0 GB  mac-mini     infra
+  ○ base-macos                                    not built yet
 Tailscale
   ● Tailscale        Running · macbook-pro.tail1234.ts.net
   ● node             macbook  100.98.133.14

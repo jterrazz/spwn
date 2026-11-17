@@ -44,15 +44,15 @@ function onOf(answer: MachinesCallsNewMachine) {
 
 describe('model', () => {
     test('the Mac asked is the one picked, else the one the sheet was opened on, and a file opened from is kept', () => {
-        // Given - a sheet opened on the mini from the station-linux file
+        // Given - a sheet opened on the mini from the base-ubuntu file
 
         // When - it asks before and after This Mac is picked
-        const opened = askedOf({ from: 'station-linux', on: MINI }, EMPTY_DRAFT);
-        const picked = askedOf({ from: 'station-linux', on: MINI }, { ...EMPTY_DRAFT, on: PRO });
+        const opened = askedOf({ from: 'base-ubuntu', on: MINI }, EMPTY_DRAFT);
+        const picked = askedOf({ from: 'base-ubuntu', on: MINI }, { ...EMPTY_DRAFT, on: PRO });
 
         // Then - the pick wins, and an opening with neither asks nothing
-        expect(opened).toStrictEqual({ From: 'station-linux', On: MINI });
-        expect(picked).toStrictEqual({ From: 'station-linux', On: PRO });
+        expect(opened).toStrictEqual({ From: 'base-ubuntu', On: MINI });
+        expect(picked).toStrictEqual({ From: 'base-ubuntu', On: PRO });
         expect(askedOf({}, EMPTY_DRAFT)).toStrictEqual({});
     });
 
@@ -71,9 +71,9 @@ describe('model', () => {
 
         // Then - the name and file the engine names, no size, and a server carries its image and no lifetime
         expect(workspace).toStrictEqual({
-            Request: { From: 'station-linux', Lifetime: 'ephemeral', Name: 'linux-2' },
+            Request: { From: 'base-ubuntu', Lifetime: 'ephemeral', Name: 'linux-2' },
         });
-        expect(server).toStrictEqual({ Image: 'station-linux', Name: 'linux-2' });
+        expect(server).toStrictEqual({ Image: 'base-ubuntu', Name: 'linux-2' });
     });
 
     test('a purpose and a memory off the default are sent, trimmed and in bytes', () => {
@@ -91,7 +91,7 @@ describe('model', () => {
         // Then - every field the owner gave is carried
         expect(workspace).toStrictEqual({
             Request: {
-                From: 'station-linux',
+                From: 'base-ubuntu',
                 Lifetime: 'ephemeral',
                 Name: 'gate5',
                 Purpose: 'Lot L6',

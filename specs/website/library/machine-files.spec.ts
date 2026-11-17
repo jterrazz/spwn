@@ -86,11 +86,11 @@ describe('machine files', () => {
     );
 
     test('D11 a file says what it makes, its system, size and the image it starts from', async () => {
-        // Given - the window on the shipped file station-linux over stories-file
+        // Given - the window on the shipped file base-ubuntu over stories-file
         const result = await website.visit(
-            '/?world=stories-file&page=machine-files&file=station-linux',
+            '/?world=stories-file&page=machine-files&file=base-ubuntu',
             async (visitor) => {
-                const file = region('station-linux.machine.yaml');
+                const file = region('base-ubuntu.machine.yaml');
 
                 // When - its head is read
                 // Then - its description, what it makes, its size and its image
@@ -156,14 +156,14 @@ describe('machine files', () => {
                 await visitor.see(content('Your machines'));
                 await visitor.see(content('Mixins'));
                 await visitor.see(content('Shipped with station'));
-                await visitor.see(button('station-macos'));
+                await visitor.see(button('base-macos'));
                 await visitor.see(button('linux-dev 2 machines differ.'));
 
                 // When - another tab is pressed
-                await visitor.click(button('station-linux'));
+                await visitor.click(button('base-ubuntu'));
 
                 // Then - the panel changes in place
-                await visitor.see(heading('station-linux.machine.yaml'));
+                await visitor.see(heading('base-ubuntu.machine.yaml'));
             },
         );
         expect(result.errors.text).toBe('');

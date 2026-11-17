@@ -103,7 +103,7 @@ describe('Storage', () => {
             await visitor.see(
                 within(region('Disk'), content('3.0 GB can be freed: 1 unused image.')),
             );
-            await visitor.see(within(freed, content('station-linux@2026.10.20')));
+            await visitor.see(within(freed, content('base-ubuntu@2026.10.20')));
             await visitor.see(within(freed, content('Unused image')));
             await visitor.see(within(freed, content('3 GB')));
             await visitor.see(enabled(button('Free 34.8 GB')));
@@ -164,8 +164,8 @@ describe('Storage', () => {
         };
 
         const images = region('Images');
-        const older = within(images, button('Delete station-linux 2026.10.20'));
-        const newest = within(images, button('Delete station-linux 2026.11.01'));
+        const older = within(images, button('Delete base-ubuntu 2026.10.20'));
+        const newest = within(images, button('Delete base-ubuntu 2026.11.01'));
 
         // When - the answer is drawn as recorded, then with every Deletable reversed
         const asked = await component.render(storageOver('two-macs'), async (visitor) => {
@@ -195,7 +195,7 @@ describe('Storage', () => {
             await visitor.see(within(images, content('2026.11.04')));
             await visitor.gone(within(images, content('built 0', { exact: false })));
             await visitor.gone(within(images, content('GB', { exact: false })));
-            await visitor.gone(within(images, button('Delete station-linux 2026.11.04')));
+            await visitor.gone(within(images, button('Delete base-ubuntu 2026.11.04')));
         });
         expect(result.errors.text).toBe('');
     });

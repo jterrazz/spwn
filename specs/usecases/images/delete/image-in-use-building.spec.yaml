@@ -1,8 +1,8 @@
 description: 'a version a build is making is refused Delete, as no client may take it from the build'
 env: creating
 runs:
-    - command: 'images delete station-linux@2026.11.04 --yes'
+    - command: 'images delete base-ubuntu@2026.11.04 --yes'
       exit: 2
       stderr: |
-          Error: image station-linux 2026.11.04 is being built
+          Error: image base-ubuntu 2026.11.04 is being built
           Hint: station images lists the versions you can delete

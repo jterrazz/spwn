@@ -10,7 +10,7 @@ runs:
           Hint: station machines create <name> --server
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
       stdin: |
-          {"v":2,"id":"1","call":"machines.create-server","in":{"Image":"station-linux"}}
+          {"v":2,"id":"1","call":"machines.create-server","in":{"Image":"base-ubuntu"}}
       exit: 0
       stdout: |
           {"code":"machines.server-needs-name","subject":null,"message":"a server needs a name"}

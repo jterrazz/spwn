@@ -1,4 +1,4 @@
-description: 'machines.new offers station-linux on the roomiest Mac, a silent one disabled with why'
+description: 'machines.new offers base-ubuntu on the roomiest Mac, a silent one disabled with why'
 env:
     - two-macs
     - engine
@@ -10,4 +10,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.new","in":{}}
       exit: 0
       stdout: |
-          {"From":"station-linux","Name":"linux-2","Size":{"CPUs":4,"MemoryBytes":8589934592,"DiskBytes":20000000000},"Lifetime":"ephemeral","Lifetimes":["ephemeral","persistent"],"MinMemory":2147483648,"Mac":"macbook-pro","Server":{"Image":"station-linux","Size":{"CPUs":4,"MemoryBytes":8589934592,"DiskBytes":50000000000}},"On":[{"Mac":"macbook-pro","Ready":true,"Verdict":"","MaxMemory":4294967296,"RoomFor":"small","Server":"no-room"},{"Mac":"mac-mini","Ready":false,"Verdict":"mac-mini does not answer","MaxMemory":0,"RoomFor":null,"Server":null}]}
+          {"From":"base-ubuntu","Name":"linux-2","Size":{"CPUs":4,"MemoryBytes":8589934592,"DiskBytes":20000000000},"Lifetime":"ephemeral","Lifetimes":["ephemeral","persistent"],"MinMemory":2147483648,"Mac":"macbook-pro","Server":{"Image":"base-ubuntu","Size":{"CPUs":4,"MemoryBytes":8589934592,"DiskBytes":50000000000}},"On":[{"Mac":"macbook-pro","Ready":true,"Verdict":"","MaxMemory":4294967296,"RoomFor":"small","Server":"no-room"},{"Mac":"mac-mini","Ready":false,"Verdict":"mac-mini does not answer","MaxMemory":0,"RoomFor":null,"Server":null}]}

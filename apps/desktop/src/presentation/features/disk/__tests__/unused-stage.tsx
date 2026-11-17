@@ -14,9 +14,9 @@ import { PAGES } from '../../../screens/registry';
 
 export type Free = { Holder: string; Kind: string; Name: string; Bytes: number };
 
-export const SUBJECT = 'station-linux@2026.10.20, old-vm';
+export const SUBJECT = 'base-ubuntu@2026.10.20, old-vm';
 
-export const NAMES = ['station-linux@2026.10.20', 'old-vm'];
+export const NAMES = ['base-ubuntu@2026.10.20', 'old-vm'];
 
 export const disk = region('Disk');
 export const freed = region('Can be freed');
@@ -207,7 +207,7 @@ export function everyOutcomeBroken(recording: Recording): Recording {
                           {
                               v: 2,
                               out: [
-                                  broken('station-linux@2026.10.20', 'the image is in use'),
+                                  broken('base-ubuntu@2026.10.20', 'the image is in use'),
                                   broken('~/.tart', 'tart is running'),
                               ],
                           },

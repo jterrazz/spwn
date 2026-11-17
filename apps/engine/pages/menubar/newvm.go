@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 )
@@ -112,7 +113,7 @@ func (s vmSheet) kind(h model.MacView, picked string) page.Field {
 }
 
 func system(key string) page.Field {
-	return page.Field{Key: key, Label: "System", Kind: page.FieldSegmented, Default: "station-linux", Options: []page.Option{{Value: "station-linux", Label: "Linux"}, {Value: "macos", Label: "macOS"}}}
+	return page.Field{Key: key, Label: "System", Kind: page.FieldSegmented, Default: catalog.LinuxImage, Options: []page.Option{{Value: catalog.LinuxImage, Label: "Linux"}, {Value: catalog.MacOSImage, Label: "macOS"}}}
 }
 
 // invariant: SPEC A9 1-8: every stop labeled, the part past the Mac's

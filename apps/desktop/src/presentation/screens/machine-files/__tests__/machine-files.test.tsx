@@ -78,7 +78,7 @@ describe('Machine files', () => {
             await visitor.see(content('Your machines'));
             await visitor.see(content('Mixins'));
             await visitor.see(content('Shipped with station'));
-            await visitor.see(button('station-linux'));
+            await visitor.see(button('base-ubuntu'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -106,11 +106,11 @@ describe('Machine files', () => {
         const result = await component.render(windowOver('stories-file'), async (visitor) => {
             await visitor.see(content('ghostty'));
 
-            // When - the shipped workspace file station-linux is chosen
-            await visitor.click(button('station-linux'));
+            // When - the shipped workspace file base-ubuntu is chosen
+            await visitor.click(button('base-ubuntu'));
 
             // Then - the engine's word for what it makes, its size, and the image it starts from
-            const head = region('station-linux.machine.yaml');
+            const head = region('base-ubuntu.machine.yaml');
             await visitor.see(within(head, content('a workspace')));
             await visitor.see(within(head, content('4 CPU · 8G · 20G')));
             await visitor.see(within(head, content('ghcr.io/cirruslabs/ubuntu:24.04')));
@@ -178,21 +178,21 @@ describe('Machine files', () => {
             await visitor.see(content('ghostty'));
 
             // When - each shipped file is chosen
-            await visitor.click(button('station-linux'));
+            await visitor.click(button('base-ubuntu'));
             await visitor.see(
                 within(
-                    region('station-linux.machine.yaml'),
+                    region('base-ubuntu.machine.yaml'),
                     content(
                         "A Linux workspace with the runtime manager, git, zsh, Docker and headless Chromium's libraries",
                     ),
                 ),
             );
-            await visitor.click(button('station-macos'));
+            await visitor.click(button('base-macos'));
 
             // Then - the head reads the description the wire gives
             await visitor.see(
                 within(
-                    region('station-macos.machine.yaml'),
+                    region('base-macos.machine.yaml'),
                     content('A macOS workspace with Homebrew, git and zsh'),
                 ),
             );
@@ -205,8 +205,8 @@ describe('Machine files', () => {
         const result = await component.render(windowOver('stories-file'), async (visitor) => {
             await visitor.see(content('ghostty'));
 
-            // When - the shipped file station-macos is chosen
-            await visitor.click(button('station-macos'));
+            // When - the shipped file base-macos is chosen
+            await visitor.click(button('base-macos'));
 
             // Then - the panel carries the engine's sentence alone, an empty list is no gap
             const followers = region('Machines that follow it');

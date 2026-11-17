@@ -1,5 +1,5 @@
 machinefile: station.machinefile/v1
-name: station-macos
+name: base-macos
 description: A macOS workspace with Homebrew, git and zsh
 machine:
     kind: workspace

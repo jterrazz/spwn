@@ -51,7 +51,7 @@ vm: # HOW it runs (a VM's alone)
         - { computer: ~/Developer/studio-os, guest: ~/Developer/studio-os }
         - { computer: ~/Documents/refs, guest: ~/refs, read-only: true }
 
-extends: [station-linux, base] # WHAT it inherits
+extends: [base-ubuntu, base] # WHAT it inherits
 prefer: [mise] # method keys tried first (rare)
 
 apps: # WHAT it carries
@@ -128,7 +128,7 @@ Files are read from three sources, strongest first:
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `user`     | `~/.config/station/catalog/<category>/<name>.yaml` and `~/.config/station/machinefiles/<name>.machine.yaml`, the owner's files                                          |
 | `shared`   | a git repository named in `preferences.json`'s `machinefile` group ([Preferences](preferences.md)), cloned into `~/.cache/station/sources/<name>` at its default branch |
-| `built-in` | station's own, embedded in the binary: the catalog's packages, and the Machinefiles `station-linux` and `station-macos`                                                 |
+| `built-in` | station's own, embedded in the binary: the catalog's packages, and the Machinefiles `base-ubuntu` and `base-macos`                                                      |
 
 A same-name file of a stronger source replaces a weaker one whole, a package as a Machinefile: there is no merge between sources. Only a `.yaml` file of a source's `catalog/` and `machinefiles/` is read, and a file of `machinefiles/` is a Machinefile only as `<name>.machine.yaml` (or its overlay, `<name>.local.yaml`): any other `.yaml` there is refused with its path, never read as one, and with the name to rename it to (`laptop.yaml` is `laptop.machine.yaml`): a README, a lockfile or any other entry beside them is skipped whatever its type (a link, a pipe), and a `.yml` file is refused, since its owner meant it to be read. Of the entries read, only regular files are, and anything else is refused with its path: a pipe, a device, a link to a folder, and every link of the shared source, whose content is the remote's. In your own folders a link to a regular file is followed, so your Machinefiles and packages may live in a dotfiles repository. A value's origin is the kind of source it was read in, its file, and the Machinefile or package that says it: the `overlay` origin is the overlay above, `this machine` a system value a Machinefile does not say, `catalog` a package a step brings in, and `lock` the method and version the lock holds an app by.
 
@@ -136,7 +136,7 @@ The shared source follows its default branch, and you never name a commit, a bra
 
 Reading a source runs no code of it. Its `name` is a Machinefile's kind of name (lower-case words joined by dashes), so its clone is one folder of the cache and never a path or a flag; its `url` is passed after `--`; git runs with no hook (`core.hooksPath=/dev/null`), no submodule, and no transport but https and ssh (`protocol.allow=never`): a `url` that is not `https://`, `ssh://` or `user@domain:path` (an `ext::` command, a `file://` folder) is refused before git runs. A clone already there is trusted only untouched: one holding a change, or a file git does not track or ignores, is refused, and station clones it again once it is deleted.
 
-The built-in Machinefiles are workspaces to extend: `station-linux` (Ubuntu 24.04 arm64, `nat`, mise, git where it has a method, Oh My Zsh, the git shortcuts and `hushlogin`) and `station-macos` (macOS arm64, bridged, Homebrew, git, Oh My Zsh, the same settings).
+The built-in Machinefiles are workspaces to extend: `base-ubuntu` (Ubuntu 24.04 arm64, `nat`, mise, git where it has a method, Oh My Zsh, the git shortcuts and `hushlogin`) and `base-macos` (macOS arm64, bridged, Homebrew, git, Oh My Zsh, the same settings).
 
 ## The resolution
 
