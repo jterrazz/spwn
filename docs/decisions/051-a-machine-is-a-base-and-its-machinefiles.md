@@ -1,6 +1,6 @@
 # ADR-051: A machine is a base and its Machinefiles, one base per distro
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-17
 
 ## Context
@@ -26,7 +26,7 @@ object per call while an ASIF disk is in the tart home, none with raw disks (tar
 
 The owner settled the model on 2026-11-17, by boundary rather than by measurement: "c'est
 juste par frontière très nettes que je veux la distinction, ya des bases par distro et c'est
-tout". The same day he accepted the lot plan's seven questions as recommended, the Xcode copy
+tout". The same day the owner accepted the lot plan's seven questions as recommended, the Xcode copy
 of point 6 among them.
 
 1. **The bases are three, one per distro: `base-ubuntu` (24.04), `base-debian` (13) and
