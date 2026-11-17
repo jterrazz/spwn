@@ -1,4 +1,9 @@
-import type { CallName, MachinefilePlan, Target } from '@jterrazz/station-api';
+import type {
+    CallName,
+    MachinefileDriftInput,
+    MachinefilePlan,
+    Target,
+} from '@jterrazz/station-api';
 
 import { useRead } from '../../../dependencies/dependencies';
 import type { Reading as Read } from '../../../dependencies/dependencies';
@@ -109,18 +114,26 @@ export function PlanSteps({ plan }: { plan: MachinefilePlan }) {
 
 const APPLY_REREADS: readonly CallName[] = ['machinefile.drift', 'machinefile.plan'];
 
-type PlanProps = { target: Target | undefined; name: string; back: () => void };
+type PlanProps = {
+    target: Target | undefined;
+    name: string;
+    asked: MachinefileDriftInput;
+    back: () => void;
+};
 
-function PlanBar({ target, name, back }: PlanProps) {
+function PlanBar({ target, name, asked, back }: PlanProps) {
     const apply = useGesture('machinefile.apply', {
         input: {},
         rereads: APPLY_REREADS,
         subject: name,
         target,
     });
+    const drift = useRead('machinefile.drift', asked);
+    const stays = drift.kind === 'read' ? drift.out.Apply.Stays : '';
     return (
         <div className={styles.foot}>
             <span className={styles.item}>
+                {stays === '' ? null : <span className={styles.muted}>{stays}</span>}
                 <GestureOutcome gesture={apply} />
             </span>
             <span className={styles.item}>
