@@ -53,7 +53,7 @@ describe('home', () => {
     });
 
     test.todo(
-        'H3 waits for a far Mac whose overview is recorded: stories gives infra on mac-mini a failing check, but the recorder answers a far Mac with This Mac overview, which lists no line for infra',
+        "H3 waits for This Mac's overview.read to carry a far Mac's server need (infra on mac-mini in stories)",
     );
 
     test('H4 Memory reads, per Mac, the GB left and who holds what', async () => {
