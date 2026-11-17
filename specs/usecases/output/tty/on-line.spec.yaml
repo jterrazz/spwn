@@ -22,11 +22,14 @@ runs:
       exit: 0
       stdout: |
           On mac-mini:
-          2 machines · 2 running · 0 stopped · nothing needs you
+          5 machines · 4 running · 1 stopped · nothing needs you
 
-              MACHINE   KIND    STATE                CPU    MEMORY
-            ● mac-mini  Mac     Engine running
-            └─ ● infra  Server  Running · always on  8 CPU  24 GB
+              MACHINE      KIND       STATE                 CPU    MEMORY
+            ● mac-mini     Mac        Engine running
+            └─ ● infra     Server     Running · always on   8 CPU  24 GB
+            ● macbook-pro  Mac        Engine running
+            ├─ ○ api       Workspace  Stopped · persistent  4 CPU  8 GB
+            └─ ● linux-1   Workspace  Running · ephemeral   4 CPU  8 GB
     - command: '--version >/dev/null; "$STATION" apps --on mac-mini | /usr/bin/head -1; "$STATION" disk --on linux-1 | /usr/bin/head -1; "$STATION" apps | /usr/bin/head -1; "$STATION" apps --on this-mac | /usr/bin/head -1'
       exit: 0
       stdout: |

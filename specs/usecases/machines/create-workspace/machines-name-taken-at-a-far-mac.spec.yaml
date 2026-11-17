@@ -1,0 +1,8 @@
+description: 'a name a VM of This Mac holds is refused at another Mac: every Mac knows the others'
+env: two-macs
+runs:
+    - command: 'machines create linux-1 --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: "linux-1" is taken (on macbook-pro)
+          Hint: pick another name

@@ -797,6 +797,23 @@
                 "Source": "ac"
             },
             "preferences": {
+                "macs": {
+                    "macbook-air": {
+                        "answered": "2026-11-07T08:30:00Z",
+                        "asleep": true,
+                        "hardware": {
+                            "Model": "Mac15,12",
+                            "Chip": "Apple M3",
+                            "Memory": 25769803776,
+                            "CPUs": 8
+                        },
+                        "laptop": true,
+                        "user": "you"
+                    },
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
                 "never_sleeps": true,
                 "ports": {
                     "not_shared": [
@@ -1147,6 +1164,15 @@
             },
             "offline": true,
             "preferences": {
+                "macs": {
+                    "mac-mini": {
+                        "lan": "192.168.1.20",
+                        "user": "you"
+                    },
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
                 "vm_user": "admin"
             },
             "self": {

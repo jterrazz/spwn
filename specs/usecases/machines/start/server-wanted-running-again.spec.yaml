@@ -19,6 +19,9 @@ runs:
           	On mac-mini:
           ●	mac-mini	Mac	mac-mini	Engine running
           ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {running: (.pid > 0), want: .kept.want}'' world.json'
       exit: 0
       stdout: |

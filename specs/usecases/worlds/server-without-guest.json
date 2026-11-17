@@ -429,6 +429,11 @@
             },
             "preferences": {
                 "here": "mac-mini",
+                "macs": {
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
                 "vm_user": "admin"
             },
             "facts": {

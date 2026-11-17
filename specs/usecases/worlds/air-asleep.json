@@ -30,6 +30,11 @@
             },
             "preferences": {
                 "here": "macbook-air",
+                "macs": {
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
                 "vm_user": "admin"
             },
             "power": {

@@ -3,6 +3,7 @@ package pages
 import (
 	"bytes"
 	"encoding/json"
+	"maps"
 	"strconv"
 	"time"
 
@@ -164,8 +165,9 @@ func PlayWorld(base []byte) []byte {
 				Preferences: map[string]any{"vm_user": "admin"}, Self: &playSelf{Hardware: hw}}
 			continue
 		}
-		if !h.ThisMac {
-			known[h.Name] = map[string]any{"user": h.User, "lan": h.LAN}
+		known[h.Name] = map[string]any{"user": h.User, "lan": h.LAN}
+		if h.ThisMac {
+			known[h.Name] = map[string]any{"user": h.User}
 		}
 		m := &playMac{
 			Engine:      &playEngine{Version: stationVer, StartedAt: storyNow.Add(-macUp(f, h.Name))},
@@ -270,7 +272,13 @@ func PlayWorld(base []byte) []byte {
 		}
 		w.Macs[h.Name] = m
 	}
-	w.Macs[proName].Preferences["macs"] = known
+	// invariant: every Mac of the world knows every other one, so a name
+	// any of them holds is held at each.
+	for name := range known {
+		peers := maps.Clone(known)
+		delete(peers, name)
+		w.Macs[name].Preferences["macs"] = peers
+	}
 	// value: one port this Mac opens to its LAN, a need beside the failing
 	// server's, so one world shows what needs you beside what can wait.
 	w.Macs[proName].Listening = append(w.Macs[proName].Listening, ports.Listener{Port: 5000, Bind: "*", Process: "ControlCenter", PID: 588})

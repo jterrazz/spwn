@@ -115,6 +115,11 @@
             },
             "preferences": {
                 "here": "mac-mini",
+                "macs": {
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
                 "never_sleeps": true,
                 "vm_user": "admin"
             },
