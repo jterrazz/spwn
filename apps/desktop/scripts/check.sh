@@ -39,9 +39,9 @@ check=$?
 build=$?
 timeout 520 npm --workspace specs exec -- vitest --run --project website >"$logs/scenarios.log" 2>&1
 scenarios=$?
-if [ -s "$HOME/.cargo/env" ]; then
+if [ -s "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
     # shellcheck disable=SC1091
-    source "$HOME/.cargo/env"
+    source "${CARGO_HOME:-$HOME/.cargo}/env"
 fi
 tauri_inputs_dated
 (cd "$window/src-tauri" && CARGO_TARGET_DIR=$bench/tauri-target timeout 520 cargo test -j "${WINDOW_CARGO_JOBS:-3}") \

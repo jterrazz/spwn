@@ -18,9 +18,9 @@ tauri_close() {
 
 tauri_open() {
     local world=$1
-    if [ -s "$HOME/.cargo/env" ]; then
+    if [ -s "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
         # shellcheck disable=SC1091
-        source "$HOME/.cargo/env"
+        source "${CARGO_HOME:-$HOME/.cargo}/env"
     fi
     trap tauri_close EXIT
     mkdir -p "$window/.artifacts"

@@ -43,6 +43,10 @@ ssh design 'cd window-<lot>/repo/apps/desktop && bash scripts/check.sh'
 
 `check.sh` and `check-quick.sh` run `bench-setup.sh` first, so a copy synced again needs nothing else.
 
+The scripts take the toolchain the host declares: `NVM_DIR` for node, `CARGO_HOME` for cargo and a Go already on `PATH`. A host that declares none gets `~/.nvm`, `~/.cargo` and `~/go-sdk`.
+
+The first `fix.sh` on a fresh copy reports one root finding: `docs/guides/test.md` names the proof build's folder under `.artifacts`, which exists only after the first build. Run `check.sh` once, then `fix.sh` is clean.
+
 Run `check.sh` once WITHOUT `--update` before your first change: its failures are the ones you start from, and a golden that `--update` rewrites later is then yours to read, never one you inherited unseen. Once you change a page, `--update` rewrites its goldens, and you look at each before you commit it.
 
 A test waits on a region (`within(region('…'), content('…'))`, a heading, a button by its name), never on a text that a row splits across elements: `content()` matches one element's text, so a sentence drawn as a title, a chip and a sentence is never seen whole, and the wait times out.

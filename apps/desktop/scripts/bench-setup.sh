@@ -24,9 +24,9 @@ if ! ls "$PLAYWRIGHT_BROWSERS_PATH" 2>/dev/null | grep -q chromium_headless_shel
     step playwright "chromium in $PLAYWRIGHT_BROWSERS_PATH"
 fi
 
-if [ -s "$HOME/.cargo/env" ]; then
+if [ -s "${CARGO_HOME:-$HOME/.cargo}/env" ]; then
     # shellcheck disable=SC1091
-    source "$HOME/.cargo/env"
+    source "${CARGO_HOME:-$HOME/.cargo}/env"
 fi
 if command -v rustup >/dev/null && ! rustup component list --installed | grep -q '^clippy'; then
     rustup component add rustfmt clippy >"$bench/rustup.log" 2>&1
