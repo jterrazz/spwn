@@ -1714,6 +1714,7 @@ export type MachinefileStep = {
     Locked: string;
     Method: string;
     Needs: ('sudo' | 'terminal' | 'license' | 'app-store-login')[] | null;
+    Optional: boolean;
     Origin: MachinefileOrigin;
     Package: string;
     Phase: '' | 'image' | 'boot' | 'apply';

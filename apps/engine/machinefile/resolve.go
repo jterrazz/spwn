@@ -66,6 +66,9 @@ type Step struct {
 	Why      string
 	Values   map[string]catalog.OptionValue
 	From     string
+	// value: the Machinefile marks the package optional: it is planned
+	// where a method exists, and skipped where none does.
+	Optional bool
 	// value: where the step was asked (a Machinefile, or the package that
 	// brings it in), and where its package is defined.
 	Origin, Defined Origin
@@ -560,7 +563,7 @@ func (p *planner) app(e catalog.AppEntry, o Origin, why string) error {
 		}
 		return err
 	}
-	step.Origin, step.Values = o, e.Options
+	step.Origin, step.Values, step.Optional = o, e.Options, e.Optional
 	p.add(step)
 	return nil
 }
@@ -583,7 +586,7 @@ func (p *planner) setting(name string, e catalog.SettingEntry, o Origin) error {
 		}
 		return err
 	}
-	step.Origin, step.Values, step.From = o, e.Values, e.From
+	step.Origin, step.Values, step.From, step.Optional = o, e.Values, e.From, e.Optional
 	p.add(step)
 	return nil
 }

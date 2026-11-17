@@ -251,6 +251,23 @@ func TestAnOptionalAppWhoseManagerHasNoMethodSaysWhatItHas(t *testing.T) {
 	}
 }
 
+func TestAStepSaysItsPackageIsOptional(t *testing.T) {
+	for _, c := range []struct {
+		apps     string
+		optional bool
+	}{{"[{ name: fd, optional: true }]", true}, {"[fd]", false}} {
+		file := machine("a", "{ os: macos }", c.apps)
+		r, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.machine.yaml": file}, nil), "a", machinefile.Machine{}, machinefile.Lock{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		i := slices.IndexFunc(r.Steps, func(s machinefile.Step) bool { return s.Package == "fd" })
+		if i < 0 || r.Steps[i].Optional != c.optional {
+			t.Errorf("%s: steps %+v, want fd with Optional %v", c.apps, r.Steps, c.optional)
+		}
+	}
+}
+
 func TestAPackageProvidedByAnotherBringsItInFirst(t *testing.T) {
 	// invariant: provided-by is a link like requires: its provider is
 	// resolved into the plan and runs before it.
