@@ -1,0 +1,17 @@
+description: 'the window''s read of another Mac is refused while This Mac''s engine is stopped, as with no socket'
+env:
+    - engine-stopped
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out.Summary.Head.Name else .error | [.code, .message] end'''
+      stdin: |
+          {"v":2,"id":"1","call":"overview.read","target":{"name":"mac-mini"},"in":{}}
+      exit: 0
+      stdout: |
+          [null,"the engine is not running"]
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out.Summary.Head | [.Name, .Verdict.Sentence] else .error | [.code, .message] end'''
+      stdin: |
+          {"v":2,"id":"1","call":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          ["macbook-pro","The engine is stopped."]
