@@ -110,12 +110,11 @@ func awakeAliases(env kit.Env, m machine) []*cobra.Command {
 // own Awake through its engine; a Mac that does not answer is said so, and
 // This Mac's own refusal is the command's.
 func (m machine) everyMacAwake(ctx context.Context, env kit.Env) (pageawake.AllMachines, error) {
-	f := pageawake.AllMachines{Now: m.sys.Clock.Now(), Zone: time.Local}
+	f := pageawake.AllMachines{Now: m.sys.Clock.Now(), Zone: time.Local, This: m.where.Machine}
 	thisMac, err := call.Read(ctx, env.Calls, env.Self, awakecalls.Read, awakecalls.ReadIn{}, nil)
 	if err != nil {
 		return f, err
 	}
-	thisMac.ThisMac = true
 	f.Reports = append(f.Reports, thisMac)
 	known := m.machines(false)
 	others := known.OtherMacs()

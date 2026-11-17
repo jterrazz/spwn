@@ -65,7 +65,7 @@ func findFleet() FindReading {
 	}}
 	entry := accounts.VaultEntry{ID: "pw-1", Label: "deploy token", Program: accounts.Programs()[0]}
 	signIns := &SignIns{Vault: &accounts.VaultRead{Mac: findPro, Entries: []accounts.VaultEntry{entry}}, Offers: map[string]accounts.GrantOffer{"pw-1": offerFor("linux-1", "agent-7f")}}
-	held := &awake.Report{Engine: awake.EngineRunning, Mac: findPro, ThisMac: true,
+	held := &awake.Report{Engine: awake.EngineRunning, Mac: findPro,
 		Session: &awake.Session{Lid: true, StartedAt: findNow.Add(-time.Hour), Until: time.Date(2026, 11, 7, 18, 0, 0, 0, time.UTC)}}
 	return FindReading{Reading: Reading{All: &all, Ports: &listed, SignIns: signIns, Awake: held}, Now: findNow, Zone: time.UTC, Asks: asksYesNo}
 }

@@ -43,6 +43,8 @@ const (
 	untilHour  = 18
 )
 
+func isThisMac(f pageawake.AllMachines, r awake.Report) bool { return f.This != "" && r.Mac == f.This }
+
 func Awake(f pageawake.AllMachines, ctx page.Context) page.Page {
 	// invariant: SPEC A4 Awake · All Macs: This Mac first, its switch, the
 	// picker, Lid closed and On battery only where its capabilities have
@@ -54,14 +56,14 @@ func Awake(f pageawake.AllMachines, ctx page.Context) page.Page {
 	if f.Label == nil {
 		self := ""
 		for _, r := range f.Reports {
-			if r.ThisMac {
+			if isThisMac(f, r) {
 				self = r.Mac
 			}
 		}
 		f.Label = func(mac string) string { return page.MacName(mac, self) }
 	}
 	for _, r := range f.Reports {
-		if r.ThisMac {
+		if isThisMac(f, r) {
 			p.Sections = append(p.Sections, thisMac(r))
 			if s, ok := pausing(r); ok {
 				p.Sections = append(p.Sections, s)

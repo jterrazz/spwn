@@ -91,8 +91,8 @@ func TestHomeListsRunningWorkspacesFirst(t *testing.T) {
 
 // invariant: the Awake page names another Mac as Home does (`mac-mini`).
 func TestAwakeNamesMacsAsHomeDoes(t *testing.T) {
-	f := pageawake.AllMachines{Reports: []awake.Report{
-		{Mac: "macbook-pro", ThisMac: true, Caps: machine.Capabilities{Thermal: true}},
+	f := pageawake.AllMachines{This: "macbook-pro", Reports: []awake.Report{
+		{Mac: "macbook-pro", Caps: machine.Capabilities{Thermal: true}},
 		{Mac: "mac-mini", NeverSleeps: true},
 	}}
 	p := Awake(f, page.Context{})

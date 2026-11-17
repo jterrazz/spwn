@@ -151,7 +151,7 @@ func TestAServerRowsMenuOnHomeRestartsAsItsPageDoes(t *testing.T) {
 // until the hour, the term in force picked; then Awake of all Macs.
 func TestTheAwakeTilesMenuOffersItsTerms(t *testing.T) {
 	w := newHeroWorld()
-	w.r.Awake = &awake.Report{Now: heroNow, Engine: awake.EngineRunning, Mac: heroPro, ThisMac: true, Caps: coremachine.Capabilities{Engine: true},
+	w.r.Awake = &awake.Report{Now: heroNow, Engine: awake.EngineRunning, Mac: heroPro, Caps: coremachine.Capabilities{Engine: true},
 		Session: &awake.Session{StartedAt: heroNow.Add(-time.Hour), For: 4 * time.Hour, Until: heroNow.Add(3 * time.Hour)}}
 	p := homeOf(t, w)
 	got := menuWords(p, actionOf(p, ActionMenu+":"+TileAwake).Submenu)

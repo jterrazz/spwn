@@ -54,7 +54,7 @@ func TestTheHUDSaysWhatAGestureDidInTheWordsOfTheStories(t *testing.T) {
 func TestATileSaysWhatItShowsAndItsShortcutInItsTooltip(t *testing.T) {
 	w := newHeroWorld()
 	w.r.Ports.Macs = []ports.MacPorts{{Name: heroPro, ThisMac: true, Shared: []ports.SharedPort{{VM: "linux-1", GuestPort: 5173}, {VM: "linux-1", GuestPort: 3000}}}}
-	w.r.Awake = &awake.Report{Mac: heroPro, ThisMac: true, Engine: awake.EngineRunning, Zone: time.UTC, Session: &awake.Session{Until: time.Date(2026, 11, 7, 18, 0, 0, 0, time.UTC)}}
+	w.r.Awake = &awake.Report{Mac: heroPro, Engine: awake.EngineRunning, Zone: time.UTC, Session: &awake.Session{Until: time.Date(2026, 11, 7, 18, 0, 0, 0, time.UTC)}}
 	p := homeOf(t, w)
 	want := map[string]struct {
 		words []string

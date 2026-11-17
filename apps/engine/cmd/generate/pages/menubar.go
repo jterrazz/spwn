@@ -106,7 +106,7 @@ func twoMacsSummary(updates bool) overview.Summary {
 
 func thisMacAwake() *awake.Report {
 	until := time.Date(2026, 11, 3, 18, 0, 0, 0, time.UTC)
-	return &awake.Report{Now: keepAwakeNow, Engine: awake.EngineRunning, Mac: thisMacName, ThisMac: true, Reading: thisMacReading(),
+	return &awake.Report{Now: keepAwakeNow, Engine: awake.EngineRunning, Mac: thisMacName, Reading: thisMacReading(),
 		Session: &awake.Session{Lid: true, StartedAt: keepAwakeNow.Add(-time.Hour), Until: until, By: "station awake --until 18:00 --lid"}}
 }
 
@@ -121,7 +121,7 @@ func twoMacsReading(updates bool) pagemenubar.Reading {
 
 func menubarReadings() (frame, quiet, full pagemenubar.Reading) {
 	off := keepAwakeReport(awake.EngineRunning, nil, thisMacReading())
-	off.Engine, off.ThisMac, off.Mac = awake.EngineRunning, true, thisMacName
+	off.Engine, off.Mac = awake.EngineRunning, thisMacName
 	calm := overviewOf(false)
 	calm.Lines = calm.Lines[:1]
 	calm.VMs = nil

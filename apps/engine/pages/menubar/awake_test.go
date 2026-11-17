@@ -18,8 +18,8 @@ import (
 func TestAwakeOffersTheSwitchesThisMacHas(t *testing.T) {
 	now := time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)
 	offered := func(caps machine.Capabilities) []string {
-		r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Reading: awake.Reading{Source: "ac"}, Caps: caps}
-		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}}, page.Context{Machine: "this"})
+		r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Reading: awake.Reading{Source: "ac"}, Caps: caps}
+		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"})
 		ids := make([]string, 0, len(p.Actions))
 		for _, a := range p.Actions {
 			ids = append(ids, a.ID)
@@ -39,8 +39,8 @@ func TestAwakeOffersTheSwitchesThisMacHas(t *testing.T) {
 func TestKeepAwakeForPicksTheTermInForce(t *testing.T) {
 	now := time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)
 	picked := func(s *awake.Session) []string {
-		r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Reading: awake.Reading{Source: "ac"}, Caps: machine.Capabilities{Engine: true}, Session: s}
-		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}}, page.Context{Machine: "this"})
+		r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Reading: awake.Reading{Source: "ac"}, Caps: machine.Capabilities{Engine: true}, Session: s}
+		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"})
 		var ids []string
 		for _, a := range p.Actions {
 			if a.Picked {
@@ -77,10 +77,10 @@ func TestKeepAwakeForPicksTheTermInForce(t *testing.T) {
 func TestAwakeSendsTheEndItHoldsUntil(t *testing.T) {
 	now := time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)
 	until := time.Date(2026, 11, 3, 14, 30, 0, 0, time.UTC)
-	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Reading: awake.Reading{Source: "ac"},
+	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Reading: awake.Reading{Source: "ac"},
 		Caps:    machine.Capabilities{Engine: true, Lid: true, Battery: true},
 		Session: &awake.Session{StartedAt: now.Add(-time.Hour), Until: until, For: 4 * time.Hour}}
-	p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}}, page.Context{Machine: "this"})
+	p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"})
 	for _, a := range p.Actions {
 		switch a.ID {
 		case ActionUntil:
@@ -101,7 +101,7 @@ func awakeOf(t *testing.T, reports []awake.Report, silent ...pageawake.Silent) p
 	page.Strict(true)
 	defer page.Strict(false)
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	return Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: reports, Silent: silent}, page.Context{Machine: "this"})
+	return Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: reports, This: "this", Silent: silent}, page.Context{Machine: "this"})
 }
 
 func notes(s *page.Section) []string {
@@ -119,7 +119,7 @@ func notes(s *page.Section) []string {
 // Until 18:00 in one unit.
 func TestAwakeUntilARunSaysTheRunItFollows(t *testing.T) {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Caps: machine.Capabilities{Engine: true},
+	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Caps: machine.Capabilities{Engine: true},
 		Session: &awake.Session{StartedAt: now, Until: now.Add(24 * time.Hour), Run: "linux-1"}}
 	p := awakeOf(t, []awake.Report{r})
 	if got := notes(sectionOf(p, SectionThisMac)); !slices.Equal(got, []string{"Until linux-1 is done"}) {
@@ -155,7 +155,7 @@ func pickerOf(p page.Page) (labels, picked []string) {
 func TestAwakeUntilKeepsItsHourWhileATermHolds(t *testing.T) {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
 	held := func(s *awake.Session) page.Page {
-		return awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Caps: machine.Capabilities{Engine: true}, Session: s}})
+		return awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", Caps: machine.Capabilities{Engine: true}, Session: s}})
 	}
 	labels, picked := pickerOf(held(&awake.Session{StartedAt: now, Until: now.Add(4 * time.Hour), For: 4 * time.Hour}))
 	if want := []string{"1 hr", "4 hr", "Until 18:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"4 hr"}) {
@@ -171,7 +171,7 @@ func TestAwakeUntilKeepsItsHourWhileATermHolds(t *testing.T) {
 // and the page has no footer.
 func TestAwakePauseLineListsOnlyRunningWork(t *testing.T) {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Pauses: []string{"linux-1"}}
+	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Pauses: []string{"linux-1"}}
 	p := awakeOf(t, []awake.Report{r})
 	if got := notes(sectionOf(p, SectionPauses)); !slices.Equal(got, []string{"linux-1 pauses while This Mac sleeps."}) {
 		t.Fatalf("the pause line says %q", got)
@@ -179,11 +179,11 @@ func TestAwakePauseLineListsOnlyRunningWork(t *testing.T) {
 	if p.Footer != nil {
 		t.Fatalf("Awake has a footer: %+v", p.Footer)
 	}
-	two := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Pauses: []string{"agent-7f", "linux-1"}}})
+	two := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", Pauses: []string{"agent-7f", "linux-1"}}})
 	if got := notes(sectionOf(two, SectionPauses)); !slices.Equal(got, []string{"agent-7f and linux-1 pause while This Mac sleeps."}) {
 		t.Fatalf("two running workspaces say %q", got)
 	}
-	if s := sectionOf(awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true}}), SectionPauses); s != nil {
+	if s := sectionOf(awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this"}}), SectionPauses); s != nil {
 		t.Fatalf("nothing running still says %q", notes(s))
 	}
 }
@@ -193,7 +193,7 @@ func TestAwakePauseLineListsOnlyRunningWork(t *testing.T) {
 // with no switch, never down.
 func TestAwakeSaysEachMacsPolicyAndDependants(t *testing.T) {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	this := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true}
+	this := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this"}
 	mini := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "mac-mini", NeverSleeps: true, NeverHeld: true, Servers: []string{"infra"}}
 	p := awakeOf(t, []awake.Report{this, mini}, pageawake.Silent{Mac: "macbook-air", Why: "no answer", Asleep: true, Answered: now.Add(-2 * time.Hour)})
 	row := sectionOf(p, "mac-mini").Items[0].Row
