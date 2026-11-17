@@ -1079,35 +1079,6 @@
         },
         {
           "row": {
-            "id": "awake-run:linux-1",
-            "label": "Awake until linux-1 ends",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "awake"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "caffeinate"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "run"
-                  }
-                ]
-              }
-            ],
-            "glyph": {
-              "kind": "symbol:sun.max"
-            },
-            "verb": "awake-run:linux-1"
-          }
-        },
-        {
-          "row": {
             "id": "new-vm:macbook-pro",
             "label": "New VM on This Mac",
             "cells": [
@@ -2194,30 +2165,6 @@
           {
             "kind": "text",
             "text": "This Mac stays awake until 14:30"
-          }
-        ]
-      }
-    },
-    {
-      "label": "Keep awake",
-      "on": "row",
-      "rows": [
-        "awake-run:linux-1"
-      ],
-      "mutates": true,
-      "id": "awake-run:linux-1",
-      "run": {
-        "call": "awake.keep",
-        "in": {
-          "Run": "linux-1"
-        }
-      },
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "This Mac stays awake until linux-1 is done"
           }
         ]
       }

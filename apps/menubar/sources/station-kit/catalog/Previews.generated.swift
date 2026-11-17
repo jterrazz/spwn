@@ -62,8 +62,6 @@ import SwiftUI
 
 #Preview("awake.off") { StoryStage(Stories["awake.off"]) }
 
-#Preview("awake.until-run") { StoryStage(Stories["awake.until-run"]) }
-
 #Preview("find.action") { StoryStage(Stories["find.action"]) }
 
 #Preview("find.awake") { StoryStage(Stories["find.awake"]) }

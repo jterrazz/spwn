@@ -122,8 +122,8 @@ func macCard(mac, name string, row page.Row) page.Section {
 	return page.Section{ID: mac, Title: name, Card: page.CardFlush, Uncounted: true, Columns: awakeColumns(), Items: []page.Item{{Row: &row}}}
 }
 
-// value: This Mac's card: Keep This Mac awake and its switch, the line
-// that says the run it follows, then the switches its capabilities allow.
+// value: This Mac's card: Keep This Mac awake and its switch, then the
+// switches its capabilities allow.
 func thisMac(r awake.Report) page.Section {
 	s := page.Section{ID: SectionThisMac, Title: page.ThisMac, Card: page.CardFlush, Uncounted: true, Columns: awakeColumns()}
 	held := r.Session != nil && r.Mode() == awake.AwakeUntil
@@ -140,9 +140,6 @@ func thisMac(r awake.Report) page.Section {
 		keep.Verb = ActionKeepOn
 	}
 	s.Items = append(s.Items, page.Item{Row: &keep})
-	if held && r.Session.Run != "" {
-		s.Items = append(s.Items, page.Item{Note: &page.Note{Text: "Until " + r.Session.Run + " is done"}})
-	}
 	lid, battery := held && r.Session.Lid, held && r.Session.Battery
 	if r.Caps.Lid {
 		row := page.Row{ID: RowLid, Label: "Stay awake with the lid closed", Glyph: symbol("laptopcomputer", page.SignalQuiet), Cells: switched(lid), Verb: ActionLid, Mark: page.OK}
@@ -203,9 +200,6 @@ func otherMac(r awake.Report, zone *time.Location) page.Row {
 			zone = time.UTC
 		}
 		row.Label, row.Glyph, row.Cells, row.Mark = "Awake until "+r.Session.Until.In(zone).Format("15:04"), sun(true), switched(true), page.OK
-		if r.Session.Run != "" {
-			row.Label = "Awake until " + r.Session.Run + " is done"
-		}
 	case r.Mode() == awake.StoppedByGuard:
 		row.Mark, row.Reason = page.Attention, page.Guard
 		row.Detail = page.Texts("Awake stopped", r.LastEnd.Detail)
@@ -238,8 +232,7 @@ func flags(lid, battery bool) map[string]string {
 
 // invariant: a keep-awake keeps the switches as they are; a switch keeps
 // the end the keep-awake holds until, or starts the one Until offers. The
-// term in force is the one picked; one that follows a run picks none.
-// Until says the time it holds until when it is the term in force, else
+// term in force is the one picked. Until says the time it holds until when it is the term in force, else
 // the one its form offers first.
 func keeps(r awake.Report, now time.Time, zone *time.Location) []page.Action {
 	if zone == nil {
@@ -250,21 +243,20 @@ func keeps(r awake.Report, now time.Time, zone *time.Location) []page.Action {
 	if held {
 		lid, battery = r.Session.Lid, r.Session.Battery
 	}
-	follows := held && r.Session.Run != ""
 	rows := []string{r.Mac}
 	var out []page.Action
 	picked := false
 	for _, t := range terms() {
 		in := flags(lid, battery)
 		in["For"] = nanos(t)
-		on := held && !follows && asked(*r.Session) == t
+		on := held && asked(*r.Session) == t
 		picked = picked || on
 		out = append(out, page.Action{ID: ActionKeep + strings.TrimSuffix(t.String(), "0m0s"), Label: pageTerm(t), On: page.OnRow, Rows: rows, Priority: 1, Mutates: true, Picked: on, Run: &page.Run{Call: CallKeepAwake, In: in}})
 	}
 	field := untilField(now, zone)
 	end := field.Default
 	until := "Until " + optionLabel(field, end)
-	untilPicked := held && !follows && !picked
+	untilPicked := held && !picked
 	if untilPicked {
 		until = "Until " + r.Session.Until.In(zone).Format("15:04")
 	}

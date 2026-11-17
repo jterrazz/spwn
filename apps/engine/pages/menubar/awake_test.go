@@ -61,14 +61,6 @@ func TestKeepAwakeForPicksTheTermInForce(t *testing.T) {
 	if got := picked(nil); len(got) != 0 {
 		t.Fatalf("no session picks %q, want none", got)
 	}
-	if got := picked(&awake.Session{StartedAt: now, Until: now.Add(24 * time.Hour), Run: "linux-1"}); len(got) != 0 {
-		t.Fatalf("a keep-awake that follows a run picks %q, want none", got)
-	}
-	for _, d := range []time.Duration{time.Hour, 4 * time.Hour} {
-		if got := picked(&awake.Session{StartedAt: now, Until: now.Add(d), Run: "linux-1"}); len(got) != 0 {
-			t.Fatalf("a run held for %s picks %q, want none", d, got)
-		}
-	}
 }
 
 // invariant: Until's hours are sent as the hour itself, and a switch
@@ -112,28 +104,6 @@ func notes(s *page.Section) []string {
 		}
 	}
 	return out
-}
-
-// invariant: SPEC B5.14, A9 2-11: a keep-awake that follows a run picks no
-// term and says the run it follows; the picker offers 1 hr, 4 hr and
-// Until 18:00 in one unit.
-func TestAwakeUntilARunSaysTheRunItFollows(t *testing.T) {
-	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Caps: machine.Capabilities{Engine: true},
-		Session: &awake.Session{StartedAt: now, Until: now.Add(24 * time.Hour), Run: "linux-1"}}
-	p := awakeOf(t, []awake.Report{r})
-	if got := notes(sectionOf(p, SectionThisMac)); !slices.Equal(got, []string{"Until linux-1 is done"}) {
-		t.Fatalf("This Mac's card says %q", got)
-	}
-	var labels []string
-	for _, a := range p.Actions {
-		if strings.HasPrefix(a.ID, "keep") && a.ID != ActionKeepOn {
-			labels = append(labels, a.Label)
-		}
-	}
-	if want := []string{"1 hr", "4 hr", "Until 18:00"}; !slices.Equal(labels, want) {
-		t.Fatalf("the picker offers %q, want %q", labels, want)
-	}
 }
 
 func pickerOf(p page.Page) (labels, picked []string) {
