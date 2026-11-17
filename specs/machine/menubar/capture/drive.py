@@ -111,6 +111,16 @@ class Rig:
         self.fb = self.vnc.screen.size
         self.say(f"   framebuffer now {self.fb[0]}x{self.fb[1]}")
 
+    # hazard: the server sends a client only the rectangles that changed, whatever the
+    # refresh asks, so the copy of a screen that has not moved since the display was set
+    # keeps the login's wallpaper and no status item (runs mb1b-cap, mb1b-cap2); a new
+    # connection starts from the whole screen.
+    def reconnect(self):
+        self.vnc.disconnect()
+        self.vnc = api.connect(self.server, password=self.password)
+        self.vnc.refreshScreen()
+        self.say(f"   reconnected, framebuffer {self.vnc.screen.size[0]}x{self.vnc.screen.size[1]}")
+
     def wake(self):
         self.vnc.mouseMove(self.fb[0] // 2, self.fb[1] // 2)
         self.vnc.mouseMove(self.fb[0] // 2 + 4, self.fb[1] // 2 + 4)
@@ -333,6 +343,7 @@ class Rig:
             self.vnc.refreshScreen()
             return self.vnc.screen.convert("RGB").crop(box)
 
+        self.reconnect()
         frames = [(0.0, grab())]
         t0 = time.time()
         self.click_item(item, hold=HOLD)
