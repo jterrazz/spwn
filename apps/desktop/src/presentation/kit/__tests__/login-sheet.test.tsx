@@ -24,20 +24,23 @@ const DEVICE_CODE = 'Sign in to gh on linux-1';
 
 describe('login sheet', () => {
     test('a device code is shown with its copy, and the sheet closes once the engine signs in', async () => {
-        // Given - linux-1's Sign-ins over two-macs, gh signed out
+        // Given - linux-1's Sign-ins over two-macs, gh signed out, its device-code step carrying the Line "Enter this code at github.com. linux-1 signs in by itself once you approve it."
         const result = await component.render(signInsOver('two-macs'), async (visitor) => {
             // When - Sign in of gh is clicked
             await visitor.click(within(region('Sign-ins'), button('Sign in gh')));
 
-            // Then - the engine's step: its heading and detail, its status line, its code to copy, its site to open, then the sheet goes
+            // Then - the engine's Line says the step, the window adds no heading of its own, its code to copy, its site to open, then the sheet goes
             const sheet = dialog(DEVICE_CODE);
-            await visitor.see(within(sheet, content('Enter the code')));
             await visitor.see(
-                within(sheet, content('Type it on the page that opened', { exact: false })),
+                within(
+                    sheet,
+                    content(
+                        'Enter this code at github.com. linux-1 signs in by itself once you approve it.',
+                        { exact: false },
+                    ),
+                ),
             );
-            await visitor.see(
-                within(sheet, content('Waiting for you to enter the', { exact: false })),
-            );
+            await visitor.gone(within(sheet, content('Enter the code')));
             await visitor.see(within(sheet, content('WDJB-MJHT')));
             await visitor.see(within(sheet, button('Copy code')));
             await visitor.see(within(sheet, button('Open github.com')));
