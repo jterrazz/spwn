@@ -161,6 +161,10 @@
           "type": "string"
         },
         "Network": {
+          "enum": [
+            "nat",
+            "bridged"
+          ],
           "type": "string"
         },
         "Purpose": {

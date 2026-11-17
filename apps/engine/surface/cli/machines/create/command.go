@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -137,7 +138,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					env.Out.Now(nowWords(in))
 				}
 			}
-			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: in.Network, Size: r, Check: in.Check, Server: in.Server, Purpose: in.Purpose, Creator: d.Session}
+			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: catalog.Network(in.Network), Size: r, Check: in.Check, Server: in.Server, Purpose: in.Purpose, Creator: d.Session}
 			return from(in)
 		},
 		Validate: func(ctx context.Context, in *Input) error {

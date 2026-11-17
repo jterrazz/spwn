@@ -268,7 +268,7 @@ type CreateRequest struct {
 	Image, Name string
 	// value: a workspace's, ephemeral or persistent; a server's is always on.
 	Lifetime Lifetime
-	Network  string
+	Network  catalog.Network
 	Size     Resources
 	// value: the create makes a server, which is always on.
 	Server bool

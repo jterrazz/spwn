@@ -1820,7 +1820,7 @@ export type MachinesCallsCreateServerIn = {
     Creator?: string;
     Image?: string;
     Name?: string;
-    Network?: string;
+    Network?: 'nat' | 'bridged';
     Purpose?: string;
     Size?: MachinesResourcesInput;
 };
@@ -1983,7 +1983,7 @@ export type MachinesCreateRequest = {
     Image?: string;
     Lifetime?: 'ephemeral' | 'persistent' | 'always-on';
     Name?: string;
-    Network?: string;
+    Network?: 'nat' | 'bridged';
     Purpose?: string;
     Server?: boolean;
     Size?: MachinesResourcesInput;

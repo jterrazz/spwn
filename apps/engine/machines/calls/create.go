@@ -90,17 +90,17 @@ func (s *Machinist) fromTemplate(ctx context.Context, r model.CreateRequest) (mo
 	return r, &t, nil
 }
 
-func networkFor(img catalog.Image, asked string) (string, error) {
+func networkFor(img catalog.Image, asked catalog.Network) (catalog.Network, error) {
 	switch asked {
-	case "", model.NetworkNAT:
-		return model.NetworkNAT, nil
-	case model.Bridged:
+	case "", catalog.NetworkNAT:
+		return catalog.NetworkNAT, nil
+	case catalog.NetworkBridged:
 		if img.Kind != catalog.MacOS {
-			return asked, &model.BadNetworkError{Value: asked, Bridge: true}
+			return asked, &model.BadNetworkError{Value: string(asked), Bridge: true}
 		}
-		return model.Bridged, nil
+		return catalog.NetworkBridged, nil
 	default:
-		return asked, &model.BadNetworkError{Value: asked}
+		return asked, &model.BadNetworkError{Value: string(asked)}
 	}
 }
 
@@ -138,7 +138,7 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 	switch {
 	case server && r.Name == "":
 		return r, claims{}, ServerNeedsNameRule
-	case server && r.Network == model.Bridged:
+	case server && r.Network == catalog.NetworkBridged:
 		return r, claims{}, ServerBridgedRule
 	case !server && r.Check != "":
 		return r, claims{}, CheckForServersRule
@@ -432,7 +432,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	server := r.Lifetime == model.AlwaysOn
 	owner := s.self()
 	rec := model.VMRecord{
-		Name: r.Name, Image: r.Image, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check,
+		Name: r.Name, Image: r.Image, Lifetime: r.Lifetime, Network: string(r.Network), Check: r.Check,
 		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second), Template: r.From,
 		Purpose: r.Purpose, Creator: r.Creator, Owner: owner,
 	}
@@ -566,7 +566,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	return model.Created{
 		VM: model.VM{
 			Name: r.Name, Image: r.Image, Version: version, Mac: s.thisMac(cfg), Kind: img.Kind, Lifetime: r.Lifetime,
-			State: model.Running, Resources: r.Size, Network: r.Network, IP: ip, Check: model.ShownCheck(r.Check), CreatedAt: rec.CreatedAt,
+			State: model.Running, Resources: r.Size, Network: string(r.Network), IP: ip, Check: model.ShownCheck(r.Check), CreatedAt: rec.CreatedAt,
 			Purpose: r.Purpose, Creator: model.CreatorOf(r.Creator), Machinefile: r.From,
 		},
 		Ports: reserved,
