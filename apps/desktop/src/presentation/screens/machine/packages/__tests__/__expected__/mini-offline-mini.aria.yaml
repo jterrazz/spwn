@@ -19,5 +19,5 @@
     - button "Upgrade now"
     - paragraph: What the engine answered is below
   - region "Apps":
-    - heading "Apps by layer, a later one wins" [level=2]
+    - heading "Apps by file, a later one wins" [level=2]
     - text: Unreachable mac-mini does not answer. station machines mac-mini

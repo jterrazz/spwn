@@ -33,7 +33,7 @@
     - button "Apps6" [pressed]
     - button "Settings0"
   - region "Apps":
-    - heading "Apps by layer, a later one wins" [level=2]
+    - heading "Apps by file, a later one wins" [level=2]
     - region "base":
       - paragraph: base 2 apps
       - text: homebrew 5.0.1 takes every version jq 1.8.1 takes every version

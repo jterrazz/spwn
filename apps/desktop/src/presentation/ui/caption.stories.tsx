@@ -8,7 +8,7 @@ import { Value } from './value';
 export const CAPTION_STORIES: readonly Story<ComponentProps<typeof Caption>>[] = [
     { name: 'a word', props: { children: 'Managers' } },
     {
-        name: 'a layer: its value, its count, its dots',
+        name: 'a file: its value, its count, its dots',
         props: {
             children: (
                 <>

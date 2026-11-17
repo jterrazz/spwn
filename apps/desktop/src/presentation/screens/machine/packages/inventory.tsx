@@ -18,7 +18,7 @@ import { Panel, Switch } from '../../../ui/index';
 
 import styles from './packages.module.css';
 
-const BY_FILE = 'by layer, a later one wins';
+const BY_FILE = 'by file, a later one wins';
 
 function Lines({
     drift,

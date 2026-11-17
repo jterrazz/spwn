@@ -18,7 +18,7 @@ export type Look =
       }
     | { kind: 'machine'; differing: ReadonlySet<PlanLine> };
 
-const NO_FILE_WORD = 'in no layer';
+const NO_FILE_WORD = 'in no file';
 const THIS_FILE_WORD = 'this file';
 const EXTENDED_WORD = 'extended';
 
