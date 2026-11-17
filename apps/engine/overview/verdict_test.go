@@ -147,13 +147,9 @@ func TestAWorkspaceIsIdleAnHourAfterItsAgentFinished(t *testing.T) {
 	}
 }
 
-func TestAnAwakeSessionThatFollowsARunEndsWithIt(t *testing.T) {
+func TestAnAwakeSessionSaysTheHourItEnds(t *testing.T) {
 	now := time.Date(2026, 11, 14, 18, 0, 0, 0, time.UTC)
-	r := awake.Report{Now: now, Engine: awake.EngineRunning, Session: &awake.Session{Until: now.Add(24 * time.Hour), Run: "linux-1"}}
-	if got := overview.AwakeRead(r, machine.Ref{Name: "macbook"}).Line.Parts[0].Word; got != "until linux-1 is done" {
-		t.Errorf("a session following linux-1's run says %q", got)
-	}
-	r.Session.Run = ""
+	r := awake.Report{Now: now, Engine: awake.EngineRunning, Session: &awake.Session{Until: now.Add(24 * time.Hour)}}
 	if got := overview.AwakeRead(r, machine.Ref{Name: "macbook"}).Line.Parts[0].Word; !strings.HasPrefix(got, "until 18:00") {
 		t.Errorf("a session for a time says %q", got)
 	}

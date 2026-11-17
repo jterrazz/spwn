@@ -15,11 +15,10 @@ import (
 
 func (d *Engine) newAwake() *awakecalls.Keeper {
 	return awakecalls.NewKeeper(d.o.Power, d.h, awakecalls.KeeperOptions{
-		Log:     func(m string) { d.logf("awake", m) },
-		Notice:  func(e awake.End) { d.told(engine.NoticeAwakeEnded, engine.AwakeStopped(e.Detail)) },
-		Told:    func(text string) { d.told(engine.NoticeNeverSleeps, text) },
-		Change:  d.hub.changed,
-		Working: d.working,
+		Log:    func(m string) { d.logf("awake", m) },
+		Notice: func(e awake.End) { d.told(engine.NoticeAwakeEnded, engine.AwakeStopped(e.Detail)) },
+		Told:   func(text string) { d.told(engine.NoticeNeverSleeps, text) },
+		Change: d.hub.changed,
 	})
 }
 
@@ -61,7 +60,7 @@ func (d *Engine) watchAwake(ctx context.Context) {
 }
 
 func (d *Engine) keepAwake(r engine.AwakeIn) (awake.Awoken, error) {
-	req := awake.Request{Lid: r.Lid, Battery: r.Battery, For: time.Duration(r.For) * time.Second, By: r.By, Run: r.Run}
+	req := awake.Request{Lid: r.Lid, Battery: r.Battery, For: time.Duration(r.For) * time.Second, By: r.By}
 	if r.Until != nil {
 		req.Until = *r.Until
 	}
@@ -70,10 +69,7 @@ func (d *Engine) keepAwake(r engine.AwakeIn) (awake.Awoken, error) {
 	var rng *awake.RangeError
 	var guard *awake.GuardError
 	var none *awake.UnsupportedError
-	var run *awake.RunError
 	switch {
-	case errors.As(err, &run):
-		return s, fault(enginecalls.AwakeRun, run.Error(), "station awake 4h")
 	case errors.As(err, &rng):
 		return s, fault(enginecalls.AwakeRange, rng.Error(), "station awake 4h")
 	case errors.As(err, &guard):

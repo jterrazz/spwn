@@ -18,7 +18,6 @@ const (
 	IgnoredPort      fail.Code = "ignored_port"
 	NotAllowed       fail.Code = "not_allowed"
 	RangeFull        fail.Code = "range_full"
-	AwakeRun         fail.Code = "awake_run"
 	AwakeRange       fail.Code = "awake_range"
 	AwakeGuard       fail.Code = "awake_guard"
 	AwakeUnsupported fail.Code = "awake_unsupported"

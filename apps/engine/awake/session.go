@@ -19,9 +19,6 @@ type Request struct {
 	// value: the term as the owner said it (4h, until 18:00), for the words
 	// of its refusal.
 	Words string
-	// value: the VM whose agent the keep-awake follows: it ends when that
-	// agent leaves working, at the latest after Longest.
-	Run string
 }
 
 type Session struct {
@@ -33,8 +30,6 @@ type Session struct {
 	// value: the term the owner asked for last (1 h, 4 h, or the time
 	// left until the hour picked): what Keep awake for… shows chosen.
 	For time.Duration `json:"for,omitempty"`
-	// value: the VM whose agent it follows (until linux-1 is done).
-	Run string `json:"run,omitempty"`
 }
 
 type End struct {
@@ -104,14 +99,10 @@ type Report struct {
 }
 
 func (r Report) Until() string {
-	// invariant: a session that follows a run ends with it, whatever its 24 h
-	// bound says, in the words the Awake page says it.
+	// value: the hour the session ends, in the words the Awake page says it.
 	s := r.Session
 	if s == nil {
 		return ""
-	}
-	if s.Run != "" {
-		return "until " + s.Run + " is done"
 	}
 	zone := r.Zone
 	if zone == nil {

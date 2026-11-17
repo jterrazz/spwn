@@ -41,7 +41,7 @@ func TestAnEngineRefusalIsTitledByHandNeverReadFromItsName(t *testing.T) {
 	for _, code := range []fail.Code{
 		enginecalls.StartFailed, enginecalls.VMStopped, enginecalls.UnknownVM, enginecalls.UnknownOp,
 		enginecalls.UnknownPage, enginecalls.GuestAbsent, enginecalls.GuestTimeout, enginecalls.IgnoredPort,
-		enginecalls.NotAllowed, enginecalls.RangeFull, enginecalls.AwakeRun, enginecalls.AwakeRange,
+		enginecalls.NotAllowed, enginecalls.RangeFull, enginecalls.AwakeRange,
 		enginecalls.AwakeGuard, enginecalls.AwakeUnsupported, enginecalls.Internal,
 	} {
 		name, family := words.Title(code)

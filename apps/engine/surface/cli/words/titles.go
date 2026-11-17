@@ -68,8 +68,6 @@ func engineTitle(code fail.Code) (string, bool) {
 		return "Port outside its rights", true
 	case enginecalls.RangeFull:
 		return "No free port", true
-	case enginecalls.AwakeRun:
-		return "Awake cannot run", true
 	case enginecalls.AwakeRange:
 		return "Awake duration out of range", true
 	case enginecalls.AwakeGuard:
