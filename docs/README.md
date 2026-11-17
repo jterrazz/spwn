@@ -101,7 +101,8 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [047 A catalog entry is a package, and a machine file is `<name>.machine.yaml`](decisions/047-a-catalog-entry-is-a-package-a-machine-file-is-name-machine-yaml.md) (Accepted)
 - [048 The engine withholds a secret before any answer](decisions/048-the-engine-withholds-a-secret-before-any-answer.md) (Proposed)
 - [049 A VM signs itself in, and the vault grants the rest](decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md) (Proposed)
-- [051 A machine is a base and its Machinefiles, one base per distro](decisions/051-a-machine-is-a-base-and-its-machinefiles.md) (Proposed)
-- [052 Station keeps no agents; another binary owns them](decisions/052-station-keeps-no-agents.md) (Proposed)
+- [050 The desktop app is laid out as a hexagon](decisions/050-the-desktop-app-is-laid-out-as-a-hexagon.md) (Accepted)
+- [051 A machine is a base and its Machinefiles, one base per distro](decisions/051-a-machine-is-a-base-and-its-machinefiles.md) (Accepted)
+- [052 Station keeps no agents; another binary owns them](decisions/052-station-keeps-no-agents.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
