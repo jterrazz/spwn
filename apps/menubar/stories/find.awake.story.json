@@ -1,6 +1,5 @@
 {
     "group": "find",
-    "heightNote": "30 pt shorter than the prototype: its Awake until linux-1 ends row is gone, as every keep-awake ends at a time",
     "id": "find.awake",
     "note": "Find \"awake\": Keep This Mac awake 4 hr, and the Awake page.",
     "pages": ["pages/machines.find.find.json"],
