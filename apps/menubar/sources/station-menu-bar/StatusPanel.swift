@@ -15,6 +15,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     private let panel = GlassPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
     private let glass = NSGlassEffectView()
     private let backdrop = Backdrop()
+    private let opening = OpeningLog()
     private let content: () -> AnyView
     private let opened: () -> Void
     private let closed: () -> Void
@@ -53,12 +54,21 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         item.button?.target = self
         item.button?.action = #selector(clicked(_:))
         item.button?.sendAction(on: [.leftMouseDown, .rightMouseDown])
-        if report != nil {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                guard let self, let spot = self.spot else { return }
-                self.report?("item \(Self.frame(spot))")
-                if let screen = self.item.button?.window?.screen { self.report?("screen \(Self.frame(screen.frame))") }
+        if report != nil { announce(tries: 60) }
+    }
+
+    // hazard: a status item the bar has not placed yet has no screen and a frame past the
+    // screen's top (y 772 on a 768 pt screen), so the rig is told its place only once it is
+    // on a screen, a second at a time, instead of once at launch.
+    private func announce(tries: Int) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self else { return }
+            guard let spot = self.spot, let screen = self.item.button?.window?.screen else {
+                if tries > 0 { self.announce(tries: tries - 1) }
+                return
             }
+            self.report?("item \(Self.frame(spot))")
+            self.report?("screen \(Self.frame(screen.frame))")
         }
     }
 
@@ -94,11 +104,13 @@ final class StatusPanel: NSObject, NSWindowDelegate {
             MainActor.assumeIsolated { self?.hide() }
         }
         report?("opened key=\(panel.isKeyWindow)")
+        if let report { opening.begin(panel, report: report) }
         opened()
     }
 
     func hide() {
         guard shown else { return }
+        opening.end()
         panel.orderOut(nil)
         glass.contentView = nil
         if let outside { NSEvent.removeMonitor(outside) }

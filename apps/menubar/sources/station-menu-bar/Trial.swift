@@ -110,3 +110,40 @@ final class Trial: ObservableObject {
         return seconds(usage.ru_utime) + seconds(usage.ru_stime)
     }
 }
+
+// invariant: under any STATION_TRIAL_ flag, each opening logs one line per display
+// frame, `open t=<ms since the window was shown> frame=<n> glass=<x y w h>`, for the
+// fade's length (stretched by STATION_TRIAL_SLOW) and half a second more, so the
+// capture rig reads whether the panel's outline moves between two frames.
+@MainActor
+final class OpeningLog: NSObject {
+    private var link: CADisplayLink?
+    private var started = Date()
+    private var frames = 0
+    private var report: ((String) -> Void)?
+    private weak var panel: NSWindow?
+
+    func begin(_ panel: NSWindow, report: @escaping (String) -> Void) {
+        end()
+        self.panel = panel
+        self.report = report
+        started = Date()
+        frames = 0
+        link = panel.displayLink(target: self, selector: #selector(tick(_:)))
+        link?.add(to: .main, forMode: .common)
+    }
+
+    func end() {
+        link?.invalidate()
+        link = nil
+    }
+
+    @objc private func tick(_: CADisplayLink) {
+        guard let panel else { return end() }
+        let t = Date().timeIntervalSince(started)
+        guard t < Token.Motion.smoothDuration * Token.Motion.slow + 0.5 else { return end() }
+        frames += 1
+        let glass = panel.frame.insetBy(dx: StatusPanel.shade, dy: StatusPanel.shade)
+        report?("open t=\(Int(t * 1000)) frame=\(frames) glass=\(StatusPanel.frame(glass))")
+    }
+}

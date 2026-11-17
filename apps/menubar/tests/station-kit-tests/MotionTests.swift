@@ -64,6 +64,17 @@ final class MotionTests: XCTestCase {
         XCTAssertTrue(app[panel.upperBound..<theme.lowerBound].contains(".modifier(PanelOpening())"), "the app's panel opens without M1")
     }
 
+    // invariant: the capture rig stretches only the panel's opening, by STATION_TRIAL_SLOW,
+    // never below the real 340 ms.
+    func testTheRigStretchesTheOpeningAndNeverShrinksIt() throws {
+        near(Token.Motion.slowdown(nil), 1, "unset")
+        near(Token.Motion.slowdown("10"), 10, "ten")
+        near(Token.Motion.slowdown("0.2"), 1, "below one")
+        near(Token.Motion.slowdown("fast"), 1, "unreadable")
+        let motion = try String(contentsOf: Tree.sources.appendingPathComponent("motion/PageMotion.swift"), encoding: .utf8)
+        XCTAssertTrue(motion.contains(".speed(1 / Token.Motion.slow)"), "the opening ignores STATION_TRIAL_SLOW")
+    }
+
     func testAPushedPageSlidesInOpaqueOverThePageBelowWhichDimsAThirdAway() {
         for t in Self.moments {
             let p = Self.smooth(t)
