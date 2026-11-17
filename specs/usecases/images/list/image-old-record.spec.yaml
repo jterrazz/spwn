@@ -1,0 +1,28 @@
+description: 'a record an older station wrote stops the list, naming its file and the delete that ends it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit macbook-pro images/base-ubuntu/2026.09.01.json'
+      stdin: |
+          {
+              "name": "base-ubuntu",
+              "version": "2026.09.01",
+              "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+              "station": "v3.0.0",
+              "recipe_sha": "",
+              "built_at": "2026-09-01T08:00:00Z",
+              "size_gb": 4
+          }
+      exit: 0
+    - command: 'images'
+      exit: 2
+      stderr: |
+          Error: ~/.local/state/station/images/base-ubuntu/2026.09.01.json is a record an older station wrote: it names no distro
+          Hint: station images delete base-ubuntu@2026.09.01
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"images.list","in":{}}
+      exit: 0
+      stdout: |
+          {"code":"image.old-record","subject":"base-ubuntu"}

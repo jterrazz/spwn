@@ -31,6 +31,16 @@ func (e *InUseError) Error() string {
 	return said + " has machines made from it: " + names
 }
 
+// value: a record of a version that names no distro this station knows:
+// an older station wrote it, and it is read no more; deleting the version
+// is the way out.
+
+type OldRecordError struct{ Image, Version, File string }
+
+func (e *OldRecordError) Error() string {
+	return e.File + " is a record an older station wrote: it names no distro"
+}
+
 type NotBuiltError struct{ Image string }
 
 func (e *NotBuiltError) Error() string { return "image " + e.Image + " is not built here" }

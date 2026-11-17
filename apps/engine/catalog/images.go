@@ -22,6 +22,39 @@ type Image struct {
 	Machinefile                            string
 	Defaults                               ImageDefaults
 	Kind                                   MachineKind
+	// value: the distro the image is, and its version as its Machinefile's
+	// `system.version` says it; empty while that file says none.
+	Distro        Distro
+	DistroVersion string
+}
+
+// value: the distribution a base image is, one base per distro; a
+// machine's `system.os` names the same systems, `any` beside them.
+
+type Distro string
+
+const (
+	DistroUbuntu Distro = "ubuntu"
+	DistroDebian Distro = "debian"
+	DistroMacOS  Distro = "macos"
+)
+
+func (Distro) Enum() []string {
+	return []string{string(DistroUbuntu), string(DistroDebian), string(DistroMacOS)}
+}
+
+func (d Distro) Known() bool { return slices.Contains(d.Enum(), string(d)) }
+
+func (d Distro) Word() string {
+	switch d {
+	case DistroUbuntu:
+		return "Ubuntu"
+	case DistroDebian:
+		return "Debian"
+	case DistroMacOS:
+		return "macOS"
+	}
+	return string(d)
 }
 
 //go:embed images
@@ -45,17 +78,19 @@ var builtinImages = []Image{
 		Cleanup:     "images/linux-cleanup.sh",
 		Firstboot:   "images/linux-firstboot.sh",
 		Kind:        Linux,
+		Distro:      DistroUbuntu,
 	},
 	{
 		Name:        MacOSImage,
 		Machinefile: MacOSImage,
 		Kind:        MacOS,
+		Distro:      DistroMacOS,
 	},
 }
 
 func sizedImages(files fs.FS) ([]Image, error) {
 	// invariant: a built-in image is sized by its Machinefile alone, its
-	// vm's resources.
+	// vm's resources, and its distro's version is that file's.
 	out := slices.Clone(builtinImages)
 	for i, img := range out {
 		file := path.Join("machines", img.Machinefile+MachinefileSuffix)
@@ -72,6 +107,9 @@ func sizedImages(files fs.FS) ([]Image, error) {
 		}
 		r := mf.VM.Resources
 		out[i].Defaults = ImageDefaults{CPUs: r.CPUs, MemoryBytes: r.Memory.bytes(1024), DiskBytes: r.Disk.bytes(1000)}
+		if mf.Machine != nil && mf.Machine.System != nil {
+			out[i].DistroVersion = mf.Machine.System.Version
+		}
 	}
 	return out, nil
 }

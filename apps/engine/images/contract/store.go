@@ -7,7 +7,9 @@ import (
 )
 
 type ImageStore interface {
-	// invariant: a version never put answers store.ErrNotFound.
+	// invariant: a version never put answers store.ErrNotFound, and one
+	// whose record names no distro this station knows answers
+	// images.OldRecordError, from Get and from List alike.
 	Get(ctx context.Context, image, version string) (images.Record, error)
 	// invariant: putting a version again replaces its record.
 	Put(ctx context.Context, r images.Record) error

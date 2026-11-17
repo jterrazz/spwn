@@ -168,7 +168,7 @@ func (s *Builder) reports(img catalog.Image, held []images.Record, users map[str
 	var out []images.Report
 	for _, one := range making {
 		if one.Image == img.Name && !slices.ContainsFunc(held, func(r images.Record) bool { return r.Version == one.Version }) {
-			out = append(out, images.Report{Record: images.Record{Name: img.Name, Version: one.Version}, Mac: s.o.Mac, Building: images.BuildingAt(one.Step)}.Judged())
+			out = append(out, images.Report{Record: images.Record{Name: img.Name, Version: one.Version, Distro: img.Distro, DistroVersion: img.DistroVersion}, Mac: s.o.Mac, Building: images.BuildingAt(one.Step)}.Judged())
 		}
 	}
 	for i, r := range held {
@@ -198,11 +198,23 @@ func (s *Builder) users() (map[string][]string, error) {
 	return out, nil
 }
 
+// invariant: a version whose record an older station wrote is judged by
+// what is known of it without reading it, its machines and its build;
+// that is the way out its refusal names.
+func (s *Builder) old(ctx context.Context, image, version string) bool {
+	var old *images.OldRecordError
+	_, err := s.store.Get(ctx, image, version)
+	return version != "" && errors.As(err, &old)
+}
+
 func (s *Builder) CheckDelete(ctx context.Context, image, version string) error {
 	img, err := s.image(ctx, image)
 	var none *images.NoRecipeError
 	if err != nil && !errors.As(err, &none) {
 		return err
+	}
+	if s.old(ctx, image, version) {
+		return s.checkOld(ctx, image, version)
 	}
 	all, err := s.records(img)
 	if err != nil {
@@ -227,6 +239,19 @@ func (s *Builder) CheckDelete(ctx context.Context, image, version string) error 
 	return nil
 }
 
+func (s *Builder) checkOld(ctx context.Context, image, version string) error {
+	users, err := s.users()
+	if err != nil {
+		return err
+	}
+	vms := users[image+"@"+version]
+	building := slices.ContainsFunc(s.making(ctx), func(m images.Making) bool { return m.Image == image && m.Version == version })
+	if building || len(vms) > 0 {
+		return &images.InUseError{Image: image, Version: version, Building: building, VMs: vms}
+	}
+	return nil
+}
+
 func (s *Builder) Delete(ctx context.Context, image, version string) ([]images.Record, error) {
 	if err := s.CheckDelete(ctx, image, version); err != nil {
 		return nil, err
@@ -234,10 +259,13 @@ func (s *Builder) Delete(ctx context.Context, image, version string) ([]images.R
 	if _, err := s.e.Version(ctx); err != nil {
 		return nil, &images.NoEngineError{Hypervisor: s.e.Name(), Cause: err}
 	}
-	img, _ := s.image(ctx, image)
-	all, err := s.records(img)
-	if err != nil {
-		return nil, err
+	all := []images.Record{{Name: image, Version: version}}
+	if !s.old(ctx, image, version) {
+		img, _ := s.image(ctx, image)
+		var err error
+		if all, err = s.records(img); err != nil {
+			return nil, err
+		}
 	}
 	present, err := s.e.Disks(ctx)
 	if err != nil {

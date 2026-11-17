@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/images/contract"
@@ -14,7 +16,7 @@ import (
 
 func built(version string) images.Record {
 	return images.Record{
-		Name: "linux", Version: version, Upstream: "ubuntu:24.04", Station: "1.4.0", RecipeSHA: "abc123",
+		Name: "linux", Version: version, Distro: catalog.DistroUbuntu, DistroVersion: "24.04", Upstream: "ubuntu:24.04", Station: "1.4.0", RecipeSHA: "abc123",
 		BuiltAt: time.Date(2026, 11, 1, 9, 0, 0, 0, time.UTC), SizeGB: 12,
 	}
 }
@@ -74,6 +76,33 @@ func ImageStore(t *testing.T, open func(t *testing.T) contract.ImageStore) {
 		}
 		if list, _ := s.List(ctx, "linux"); len(list) != 0 {
 			t.Errorf("List = %+v; want empty", list)
+		}
+	})
+
+	t.Run("a record that names no distro is refused, naming its version, until it is deleted", func(t *testing.T) {
+		s := open(t)
+		old := built("2026.10.20")
+		old.Distro = ""
+		for _, r := range []images.Record{old, built("2026.11.01")} {
+			if err := s.Put(ctx, r); err != nil {
+				t.Fatalf("Put %s: %v", r.Version, err)
+			}
+		}
+		var refused *images.OldRecordError
+		if _, err := s.Get(ctx, "linux", "2026.10.20"); !errors.As(err, &refused) || refused.Image != "linux" || refused.Version != "2026.10.20" || !strings.HasSuffix(refused.File, "linux/2026.10.20.json") {
+			t.Errorf("Get = %v; want the old record refused, naming its file", err)
+		}
+		if _, err := s.List(ctx, "linux"); !errors.As(err, &refused) || refused.Version != "2026.10.20" {
+			t.Errorf("List = %v; want the old record refused", err)
+		}
+		if got, err := s.Get(ctx, "linux", "2026.11.01"); err != nil || got.Distro != catalog.DistroUbuntu {
+			t.Errorf("Get of the other version = %+v, %v; want it read", got, err)
+		}
+		if err := s.Delete(ctx, "linux", "2026.10.20"); err != nil {
+			t.Fatalf("Delete: %v", err)
+		}
+		if list, err := s.List(ctx, "linux"); err != nil || len(list) != 1 {
+			t.Errorf("List after Delete = %+v, %v; want the other version alone", list, err)
 		}
 	})
 }

@@ -153,6 +153,8 @@
                     {
                         "name": "base-ubuntu",
                         "version": "2026.10.20",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
                         "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
                         "recipe_sha": "",
@@ -162,6 +164,8 @@
                     {
                         "name": "base-ubuntu",
                         "version": "2026.11.01",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
                         "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
                         "recipe_sha": "",
@@ -663,6 +667,8 @@
                     {
                         "name": "base-ubuntu",
                         "version": "2026.11.01",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
                         "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
                         "recipe_sha": "",

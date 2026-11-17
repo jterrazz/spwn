@@ -349,9 +349,9 @@ func sshPages() []Fixture {
 
 func imageReports() []images.Report {
 	return []images.Report{
-		{Record: images.Record{Name: "base-ubuntu", Version: "2026.11.01", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"linux-1", "api"}, Mac: "macbook-pro"},
-		{Record: images.Record{Name: "base-ubuntu", Version: "2026.10.20", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-240", BuiltAt: built.AddDate(0, 0, -20), SizeGB: 4}, Mac: "macbook-pro"},
-		{Record: images.Record{Name: "base-ubuntu", Version: "2026.11.01", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"infra"}, Mac: "mac-mini"},
+		{Record: images.Record{Name: "base-ubuntu", Version: "2026.11.01", Distro: catalog.DistroUbuntu, DistroVersion: "24.04", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"linux-1", "api"}, Mac: "macbook-pro"},
+		{Record: images.Record{Name: "base-ubuntu", Version: "2026.10.20", Distro: catalog.DistroUbuntu, DistroVersion: "24.04", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-240", BuiltAt: built.AddDate(0, 0, -20), SizeGB: 4}, Mac: "macbook-pro"},
+		{Record: images.Record{Name: "base-ubuntu", Version: "2026.11.01", Distro: catalog.DistroUbuntu, DistroVersion: "24.04", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"infra"}, Mac: "mac-mini"},
 	}
 }
 
