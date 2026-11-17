@@ -1,0 +1,14 @@
+description: 'awake takes no term that follows a VM: --until-done is refused, and nothing is held'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
+      exit: 0
+    - command: 'awake --until-done linux-1'
+      exit: 2
+      stderr: |
+          Error: unknown flag: --until-done
+          Hint: run station awake --help
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          null
