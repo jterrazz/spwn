@@ -38,16 +38,13 @@ struct Coverage {
         "mac.unreachable", "mac.disk-locked", "engine.stopped", "server.loop",
         "section.apps", "section.settings", "section.disk", "section.background",
         "sheet.move-folder", "mac.disk-low", "mac.ready.failing", "server.activity.silent",
-        "mac.many-workspaces", "home.many-macs", "mac.mini.stale", "workspace.hook-missing",
+        "mac.many-workspaces", "home.many-macs", "mac.mini.stale",
     ]
 
-    // value: the stories A2 designed after the prototype that no lot has
+    // value: the stories designed after the prototype that no lot has
     // built yet, pending in the output beside the gaps; one leaves the
     // list as it goes green, and the list only shrinks.
-    static let unbuilt = [
-        "agents.list", "agents.empty", "sheet.new-agent", "sheet.new-agent.new",
-        "menu.context.agent", "menu.page.agent", "menu.new-agent.on",
-    ]
+    static let unbuilt: [String] = []
 
     let ids: [String]
     let excluded: [String]
@@ -174,7 +171,7 @@ final class StoryCoverageTests: XCTestCase {
 
     func testEveryStoryIsGreen() throws {
         let coverage = try coverage()
-        XCTAssertEqual(coverage.ids.count, 174, "STORIES.md holds the 178 stories of v4, A2 the 19 it added and the 9 it retired, the gaps mac.mini.stale and workspace.hook-missing, the refused catalog file need L2.2 added and ports.audiences, which ADR-039 adds, less the seven stories of the lease, the New VM sharing and the Extend need that grants replaced, and the Awake that followed a run")
+        XCTAssertEqual(coverage.ids.count, 149, "STORIES.md holds 148 stories and phone.explainer")
         let (findings, tally) = coverage.audit()
         let gaps = Coverage.gaps.filter { !coverage.ids.contains($0) }
         print("stories: \(tally.green) green, \(tally.pending) unbuilt pending: \(coverage.unbuilt.joined(separator: ", ")); \(tally.orphans) orphans; \(gaps.count) gap ids pending: \(gaps.joined(separator: ", "))")
@@ -186,7 +183,7 @@ final class StoryCoverageTests: XCTestCase {
     // from a story and is caught at a moment of its run.
     func testEveryTransitionNamesAMovementTheKitDraws() throws {
         let ids = try catalogue().entries.filter { $0.section.hasPrefix("Transitions") }.map(\.id)
-        XCTAssertEqual(ids.count, 14)
+        XCTAssertEqual(ids.count, 13)
         XCTAssertEqual(ids.filter { StoryMotion.of($0) == nil }, [], "a transition no movement draws")
         XCTAssertEqual(Set(ids.compactMap { StoryMotion.of($0)?.motion }), Set(StoryMotion.allCases))
         XCTAssertEqual(ids.filter { StoryMotion.of($0)?.reduce == true }, ["transition.reduce-motion.push"])

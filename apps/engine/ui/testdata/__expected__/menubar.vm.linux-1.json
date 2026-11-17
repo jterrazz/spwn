@@ -24,41 +24,8 @@
           "text": "on This Mac",
           "pri": 2,
           "nav": "menubar.machine:macbook-pro"
-        },
-        {
-          "kind": "text",
-          "text": "no agent running"
         }
       ]
-    },
-    {
-      "id": "agents",
-      "title": "Agents",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "empty": {
-            "text": "No agent on linux-1",
-            "actions": [
-              "new-agent"
-            ]
-          }
-        }
-      ],
-      "uncounted": true,
-      "segment": "overview",
-      "card": "empty"
     },
     {
       "id": "gauges",
@@ -838,32 +805,6 @@
       }
     },
     {
-      "key": "shift+cmd+n",
-      "label": "New agent",
-      "on": "page",
-      "priority": 2,
-      "mutates": true,
-      "id": "new-agent",
-      "run": {
-        "call": "agents.start",
-        "in": {
-          "On": "linux-1"
-        }
-      },
-      "form": {
-        "title": "New agent on linux-1",
-        "fields": [
-          {
-            "key": "Task",
-            "label": "Task",
-            "kind": "text",
-            "note": "empty, it waits for a prompt"
-          }
-        ]
-      },
-      "icon": "plus"
-    },
-    {
       "label": "Share a port",
       "on": "page",
       "priority": 3,
@@ -1140,7 +1081,6 @@
       "icon": "ellipsis",
       "submenu": [
         "title:linux-1",
-        "new-agent",
         "copy-ssh@menu",
         "share-port@menu",
         "-",

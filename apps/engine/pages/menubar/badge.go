@@ -8,11 +8,10 @@ import (
 )
 
 // invariant: SPEC A3, B5.7: the status item counts what needs you, the
-// number the hero says, and never the upkeep: a server down, a port
-// exposed, an agent waiting on you, a copy shared for less than 30 min
-// more. A server down or a port exposed tints it red; a server restarting
-// turns the busy mark in place of its red and is not counted. Its label
-// says the one signal it shows. nil until the machines are read.
+// number the hero says, and never the upkeep: a server down or a port
+// exposed, each tinting it red; a server restarting turns the busy mark in
+// place of its red and is not counted. Its label says the one signal it
+// shows. nil until the machines are read.
 func badge(r Reading) *page.Badge {
 	if r.All == nil {
 		return nil
@@ -48,10 +47,6 @@ func badge(r Reading) *page.Badge {
 	case restarting != nil:
 		b.Restarting = true
 		b.Label = restarting.Name + " restarting, " + restarting.Restart.Counted() + " checks"
-	case b.Needs == 1:
-		b.Label = "station, 1 thing needs you"
-	case b.Needs > 1:
-		b.Label = "station, " + strconv.Itoa(b.Needs) + " things need you"
 	default:
 		b.Label = "all machines are fine"
 	}

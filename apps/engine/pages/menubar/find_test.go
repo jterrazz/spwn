@@ -30,27 +30,29 @@ func asksYesNo(gesture string, k machine.Kind, _ ...string) string {
 	return LevelNone
 }
 
-// value: the prototype's fleet: This Mac with linux-1 at work and agent-7f
-// finished, mac-mini with infra healthy, linux-3 at work and review-bot
-// waiting on its PR, macbook-air asleep; Vite of linux-1 shared, Postgres
+// value: the prototype's fleet: This Mac with linux-1 running and agent-7f
+// stopped, mac-mini with infra healthy, linux-3 and review-bot running,
+// macbook-air asleep; Vite of linux-1 shared, Postgres
 // listening in linux-3; This Mac awake until 18:00 and a password of its
 // vault that fits linux-1 and agent-7f.
 func findFleet() FindReading {
-	vm := func(name, mac string, life model.Lifetime, memory int64, agent *model.AgentView) model.VM {
-		return model.VM{Name: name, Mac: mac, Lifetime: life, State: model.Running, Resources: model.Resources{MemoryBytes: memory * gib}, Agent: agent}
+	vm := func(name, mac string, life model.Lifetime, memory int64) model.VM {
+		return model.VM{Name: name, Mac: mac, Lifetime: life, State: model.Running, Resources: model.Resources{MemoryBytes: memory * gib}}
 	}
-	infra := vm("infra", findMini, model.AlwaysOn, 24, nil)
+	stopped := vm("agent-7f", findPro, model.Ephemeral, 8)
+	stopped.State = model.Stopped
+	infra := vm("infra", findMini, model.AlwaysOn, 24)
 	infra.Want, infra.Guest, infra.SSH, infra.IP = "running", "connected", true, "192.168.64.7"
 	infra.CheckStatus = model.CheckStatus{State: model.CheckPassing}
 	all := model.AllMachines{Macs: []model.MacView{
 		{Name: findPro, User: "you", ThisMac: true, Reachable: true, Laptop: true, Hardware: machine.Hardware{Memory: 48 * gib}, VMs: []model.VM{
-			vm("linux-1", findPro, model.Ephemeral, 8, &model.AgentView{State: "working"}),
-			vm("agent-7f", findPro, model.Ephemeral, 8, &model.AgentView{State: model.AgentFinished, Ended: findNow.Add(-12 * time.Minute), Reason: "tests pass"}),
+			vm("linux-1", findPro, model.Ephemeral, 8),
+			stopped,
 		}},
 		{Name: findMini, User: "you", Reachable: true, Hardware: machine.Hardware{Memory: 64 * gib}, VMs: []model.VM{
 			infra,
-			vm("linux-3", findMini, model.Ephemeral, 8, &model.AgentView{State: "working"}),
-			vm("review-bot", findMini, model.Persistent, 4, &model.AgentView{State: "waiting", Ask: "PR #42 is ready", Since: findNow.Add(-6 * time.Minute)}),
+			vm("linux-3", findMini, model.Ephemeral, 8),
+			vm("review-bot", findMini, model.Persistent, 4),
 		}},
 		{Name: findAir, User: "you", Laptop: true, Answered: findNow.Add(-2 * time.Hour)},
 	}}
@@ -140,18 +142,16 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 		section string
 		want    []findSaid
 	}{
-		{FindNeeds, []findSaid{
-			{"Review review-bot", "PR #42 is ready", "Review", "", ""},
-		}},
+		{FindNeeds, nil},
 		{FindMachines, []findSaid{
-			{"This Mac", "2 VMs | 28 GB free", "Open", "cmd+1", ""},
+			{"This Mac", "2 VMs | 36 GB free", "Open", "cmd+1", ""},
 			{"mac-mini", "3 VMs | 24 GB free", "Open", "cmd+2", ""},
 			{"macbook-air", "asleep | seen 2 hr ago", "Open", "cmd+3", ""},
-			{"agent-7f", "finished | This Mac", "Open", "", "Open in Terminal"},
-			{"linux-1", "working | This Mac", "Open", "", "Open in Terminal"},
+			{"agent-7f", "stopped | This Mac", "Open", "", ""},
+			{"linux-1", "running | This Mac", "Open", "", "Open in Terminal"},
 			{"infra", "healthy | mac-mini", "Open", "", ""},
-			{"linux-3", "working | mac-mini", "Open", "", "Open in Terminal"},
-			{"review-bot", "waiting | mac-mini", "Open", "", "Open in Terminal"},
+			{"linux-3", "running | mac-mini", "Open", "", "Open in Terminal"},
+			{"review-bot", "running | mac-mini", "Open", "", "Open in Terminal"},
 		}},
 		{FindPorts, []findSaid{
 			{"Vite", "linux-1:5173", "Open", "", "Copy link"},
@@ -169,7 +169,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 		}},
 		{FindActions, []findSaid{
 			{"Keep This Mac awake 4 hr", "", "Keep awake", "", ""},
-			{"New VM on This Mac", "28 GB free", "New VM", "cmd+n", ""},
+			{"New VM on This Mac", "36 GB free", "New VM", "cmd+n", ""},
 			{"New VM on mac-mini", "24 GB free", "New VM", "", ""},
 			{"Restart infra", "asks first", "Restart", "", ""},
 			{"Clean up ephemeral workspaces on This Mac", "", "Clean up", "", ""},
@@ -181,9 +181,6 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 		}
 	}
 	if got, want := entries(t, p, FindVerbs), []findSaid{
-		{"Open agent-7f in Terminal", "", "Open in Terminal", "cmd+enter", ""},
-		{"Share a port of agent-7f", "", "Share", "", ""},
-		{"Grant a password to agent-7f", "", "Run", "", ""},
 		{"Open linux-1 in Terminal", "", "Open in Terminal", "cmd+enter", ""},
 		{"Share a port of linux-1", "", "Share", "", ""},
 		{"Grant a password to linux-1", "", "Run", "", ""},
@@ -196,8 +193,8 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 	}; !slices.Equal(got, want) {
 		t.Errorf("the VMs' verbs:\n got %+v\nwant %+v", got, want)
 	}
-	if r := findRow(p, FindMachines, "linux-1"); r == nil || r.Nav != "menubar.machine:linux-1" || !strings.Contains(words(r.Cells[0]), "agent") {
-		t.Errorf("linux-1's entry %+v, want its page and the tag agent", r)
+	if r := findRow(p, FindMachines, "linux-1"); r == nil || r.Nav != "menubar.machine:linux-1" || !strings.Contains(words(r.Cells[0]), "workspace") {
+		t.Errorf("linux-1's entry %+v, want its page and the tag workspace", r)
 	}
 	if r := findRow(p, FindPorts, "listening:linux-3:5432"); r == nil || !strings.Contains(words(r.Cells[0]), "| 5432 |") {
 		t.Errorf("Postgres's entry %+v, want it found by its number", r)
@@ -212,15 +209,12 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 		t.Fatalf("the Find index fails its checks: %v", err)
 	}
 	needs := entries(t, p, FindNeeds)
-	if len(needs) != 2 || needs[0] != (findSaid{"Restart infra", "down since 15:10", "Restart", "", ""}) || needs[1].title != "Review review-bot" {
-		t.Errorf("Find's needs %+v, want Restart infra first, then Review review-bot", needs)
+	if len(needs) != 1 || needs[0] != (findSaid{"Restart infra", "down since 15:10", "Restart", "", ""}) {
+		t.Errorf("Find's needs %+v, want Restart infra alone", needs)
 	}
 	restart := findRow(p, FindNeeds, "down:infra")
 	if restart == nil || restart.Mark != page.Broken {
 		t.Errorf("infra's need %+v, want the red mark of a broken machine", restart)
-	}
-	if r := findRow(p, FindNeeds, "waiting:review-bot"); r == nil || r.Mark != page.Attention {
-		t.Errorf("review-bot's need %+v, want the orange mark of a wait", r)
 	}
 	for _, a := range p.Actions {
 		if restart != nil && a.ID == restart.Verb && (a.Confirm == nil || a.Confirm.Type != "infra" || a.Run == nil || a.Run.Call != CallRestartVM) {
@@ -285,11 +279,10 @@ func TestFindGivesNewVMToTheRoomiestMac(t *testing.T) {
 	}
 }
 
-// invariant: an asleep Mac offers no clean-up, finished ephemeral workspaces or not.
+// invariant: an asleep Mac offers no clean-up, stopped ephemeral workspaces or not.
 func TestFindOffersNoCleanUpOnAnAsleepMac(t *testing.T) {
 	r := findFleet()
-	r.All.Macs[2].VMs = []model.VM{{Name: "agent-9a", Mac: findAir, Lifetime: model.Ephemeral, State: model.Running,
-		Agent: &model.AgentView{State: model.AgentFinished, Ended: findNow.Add(-3 * time.Hour)}}}
+	r.All.Macs[2].VMs = []model.VM{{Name: "agent-9a", Mac: findAir, Lifetime: model.Ephemeral, State: model.Stopped}}
 	p := Find(r, page.Context{Machine: findPro, Kind: "computer"})
 	if row := findRow(p, FindActions, "cleanup:"+findAir); row != nil {
 		t.Errorf("the asleep macbook-air offers %+v, want no clean-up", row)
@@ -321,7 +314,7 @@ func TestFindsActionsThatAskFirstCarryTheirQuestion(t *testing.T) {
 }
 
 // invariant: SPEC A6 [find.awake]: every keep-awake Find offers ends at a
-// time, a length or an hour, even with an agent at work on This Mac.
+// time, a length or an hour.
 func TestFindKeepsThisMacAwakeByATimeOnly(t *testing.T) {
 	for name, r := range map[string]FindReading{"a session": findFleet(), "no session": func() FindReading {
 		r := findFleet()

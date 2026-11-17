@@ -23,19 +23,17 @@ const (
 var needsNow = time.Date(2026, 11, 7, 14, 10, 0, 0, time.UTC)
 
 // value: the prototype's fleet on its worst day: infra down on mac-mini,
-// This Mac's AirPlay Receiver reachable from outside, review-bot waiting
-// on its PR, and This Mac's upkeep.
+// This Mac's AirPlay Receiver reachable from outside, and This Mac's
+// upkeep.
 func needsFleet() NeedsReading {
 	infra := model.VM{Name: "infra", Mac: needsMini, Lifetime: model.AlwaysOn, State: model.Stopped, Want: "running", Cause: "out of memory",
 		Restarts: model.Restarts{Count: 5, Streak: 5, Looping: true}, CheckStatus: model.CheckStatus{State: model.CheckFailing, Since: needsNow.Add(-8 * time.Minute)}}
-	bot := model.VM{Name: "review-bot", Mac: needsMini, Lifetime: model.Persistent, State: model.Running,
-		Agent: &model.AgentView{State: "waiting", Ask: "PR #42 is ready", Since: needsNow.Add(-6 * time.Minute)}}
 	all := model.AllMachines{Macs: []model.MacView{
 		{Name: needsPro, ThisMac: true, Reachable: true, VMs: []model.VM{
-			{Name: "linux-1", Mac: needsPro, Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: "working"}},
+			{Name: "linux-1", Mac: needsPro, Lifetime: model.Ephemeral, State: model.Running},
 		}},
-		{Name: needsMini, Reachable: true, VMs: []model.VM{infra, bot,
-			{Name: "linux-3", Mac: needsMini, Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: "working"}},
+		{Name: needsMini, Reachable: true, VMs: []model.VM{infra,
+			{Name: "linux-3", Mac: needsMini, Lifetime: model.Ephemeral, State: model.Running},
 		}},
 	}}
 	exposed := ports.AllMachines{Macs: []ports.MacPorts{{Name: needsPro, ThisMac: true, Reachable: true, Ports: []ports.Port{
@@ -53,9 +51,9 @@ func needsFleet() NeedsReading {
 	return NeedsReading{Now: needsNow, Zone: time.UTC, All: &all, Ports: &exposed, Overviews: []overview.Summary{home, mini}}
 }
 
-// invariant: SPEC B5.7: the needs come red first (two reds never merged),
-// then what blocks you; each with its verb and its three wordings: the
-// hero's, the row's and Find's.
+// invariant: SPEC B5.7: every need is red, a server down first (two reds
+// never merged); each with its verb and its three wordings: the hero's,
+// the row's and Find's.
 func TestTheFleetsNeedsComeInThePrototypesOrderWithTheirVerbsAndThreeWordings(t *testing.T) {
 	needs, _ := needsOf(needsFleet(), needsPro)
 
@@ -67,7 +65,6 @@ func TestTheFleetsNeedsComeInThePrototypesOrderWithTheirVerbsAndThreeWordings(t 
 	want := []said{
 		{"infra is down", "infra", "down since 14:02", "Restart infra", "Restart"},
 		{"Port 5000 is exposed", "This Mac", "port 5000 exposed", "Port 5000 is exposed", "Review"},
-		{"review-bot is waiting", "review-bot", "PR #42 is ready", "Review review-bot | PR #42 is ready", "Review"},
 	}
 	if !slices.Equal(got, want) {
 		t.Fatalf("the needs say\n%v\nwant\n%v", got, want)
@@ -78,14 +75,8 @@ func TestTheFleetsNeedsComeInThePrototypesOrderWithTheirVerbsAndThreeWordings(t 
 	if facts := texts(needs[1].Facts); !slices.Equal(facts, []string{"This Mac", "AirPlay Receiver"}) {
 		t.Errorf("the exposed port's facts %q", facts)
 	}
-	if facts := texts(needs[2].Facts); !slices.Equal(facts, []string{"PR #42 is ready", "6 min"}) {
-		t.Errorf("review-bot's facts %q", facts)
-	}
 	if run := needs[0].Verb.Run; run == nil || run.Call != CallRestartVM || run.Target == nil || run.Target.Name != needsMini {
 		t.Errorf("Restart infra runs %+v, want machines.restart on mac-mini", run)
-	}
-	if needs[2].Verb.Run != nil || needs[2].Nav != "menubar.machine:review-bot" {
-		t.Errorf("Review review-bot opens %q and runs %+v, want its page and no call", needs[2].Nav, needs[2].Verb.Run)
 	}
 }
 
@@ -157,13 +148,13 @@ func TestTheNeedsPageListsEveryNeedThenUpkeepAndAMacsPageOnlyItsOwn(t *testing.T
 			t.Errorf("%s: %v", p.ID, err)
 		}
 	}
-	if got := len(rows(all, SectionNeeds)); got != 3 {
-		t.Errorf("menubar.needs lists %d needs, want 3", got)
+	if got := len(rows(all, SectionNeeds)); got != 2 {
+		t.Errorf("menubar.needs lists %d needs, want 2", got)
 	}
 	if got := len(rows(all, SectionUpkeep)); got != 4 {
 		t.Errorf("menubar.needs lists %d upkeep items, want 4", got)
 	}
-	if got, want := rows(mini, SectionNeeds), []string{"infra | down since 14:02 [down:infra]", "review-bot | PR #42 is ready [waiting:review-bot]"}; !slices.Equal(got, want) {
+	if got, want := rows(mini, SectionNeeds), []string{"infra | down since 14:02 [down:infra]"}; !slices.Equal(got, want) {
 		t.Errorf("mac-mini's needs %q, want %q", got, want)
 	}
 	if got := rows(pro, SectionUpkeep); len(got) == 0 || got[0] != "Firewall off | station never changes it for you [upkeep:"+needsPro+"/settings/4]" {

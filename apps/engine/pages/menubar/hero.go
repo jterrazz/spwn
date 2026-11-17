@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -15,8 +14,6 @@ const (
 	SectionHero = "hero"
 	RowHero     = "hero"
 	LinkNeeds   = "more-needs"
-
-	heroRows = 3
 )
 
 // value: what the hero is reading, by Reading: the needs ranked, the Mac
@@ -62,10 +59,8 @@ func (r Reading) now() time.Time {
 }
 
 // invariant: SPEC A4 Home 1: the hero is decided from the ranked needs, in
-// one order: a server restarting, a red need (the first ranked; two reds
-// are never merged), exactly one need, several (the count, the badge's
-// number, then at most three rows and a link to the rest), nothing (the
-// fleet's facts). An empty fleet has no hero but the empty state. A Mac
+// one order: a server restarting, a need (each is red: the first ranked
+// carries it, two are never merged), nothing (the fleet's facts). An empty fleet has no hero but the empty state. A Mac
 // still answering dims the needs that are of it and says it checks it.
 func hero(r Reading, self string, ranked []Need) (page.Section, *page.Value, bool) {
 	s := page.Section{ID: SectionHero, Title: "Needs you", Role: page.Summary, Card: page.CardHero, Columns: columns()}
@@ -114,29 +109,12 @@ func (h heroReading) top() (page.Row, []page.Item) {
 			Detail: page.List(dropFirst(page.Text("on "+page.MacName(mac, h.self)), 2), page.Text(strings.ToLower(vm.Restart.Name())), page.Text(vm.Restart.Counted()))}
 		return head, h.also(h.needs)
 	}
-	for i, n := range h.needs {
-		if n.Finding.Urgency != finding.Red {
-			continue
-		}
-		others := append(append([]Need{}, h.needs[:i]...), h.needs[i+1:]...)
-		head := page.Row{ID: RowHero, Label: n.Hero, Mark: page.Broken, Reason: reasonOf(n.Finding), Glyph: n.Glyph, Detail: heroFacts(n.Facts), Verb: n.Verb.ID, Nav: n.Nav}
-		return head, h.also(others)
-	}
-	switch len(h.needs) {
-	case 0:
-		return page.Row{ID: RowHero, Label: "All machines are fine", Mark: page.OK, Glyph: symbol("checkmark.circle.fill", page.SignalWell), Detail: h.fine()}, nil
-	case 1:
+	if len(h.needs) > 0 {
 		n := h.needs[0]
-		head := page.Row{ID: RowHero, Label: n.Hero, Mark: page.Attention, Reason: reasonOf(n.Finding), Glyph: symbol("exclamationmark.circle.fill", page.SignalWaits),
-			Detail: heroFacts(n.Facts), Verb: n.Verb.ID, Nav: n.Nav, Signal: h.signal(n)}
-		return head, nil
+		head := page.Row{ID: RowHero, Label: n.Hero, Mark: page.Broken, Reason: reasonOf(n.Finding), Glyph: n.Glyph, Detail: heroFacts(n.Facts), Verb: n.Verb.ID, Nav: n.Nav}
+		return head, h.also(h.needs[1:])
 	}
-	head := page.Row{ID: RowHero, Label: things(len(h.needs)), Mark: page.Attention, Reason: page.Waiting, Glyph: symbol("exclamationmark.circle.fill", page.SignalWaits)}
-	rows := h.rows(h.needs[:min(heroRows, len(h.needs))])
-	if rest := len(h.needs) - heroRows; rest > 0 {
-		rows = append(rows, page.Item{Link: &page.Link{Label: moreNeedYou(rest), Page: NeedsID, Row: LinkNeeds}})
-	}
-	return head, rows
+	return page.Row{ID: RowHero, Label: "All machines are fine", Mark: page.OK, Glyph: symbol("checkmark.circle.fill", page.SignalWell), Detail: h.fine()}, nil
 }
 
 // value: the needs a busy or red hero leaves: the one row itself, or
@@ -160,10 +138,7 @@ func (h heroReading) also(others []Need) []page.Item {
 func (h heroReading) rows(ns []Need) []page.Item {
 	out := make([]page.Item, 0, len(ns))
 	for _, n := range ns {
-		row := page.Row{ID: n.Key, Label: n.Subject, Detail: page.Text(n.What), Glyph: n.Glyph, Verb: n.Verb.ID, Nav: n.Nav, Mark: page.Attention, Reason: reasonOf(n.Finding), Signal: h.signal(n)}
-		if n.Finding.Urgency == finding.Red {
-			row.Mark = page.Broken
-		}
+		row := page.Row{ID: n.Key, Label: n.Subject, Detail: page.Text(n.What), Glyph: n.Glyph, Verb: n.Verb.ID, Nav: n.Nav, Mark: page.Broken, Reason: reasonOf(n.Finding), Signal: h.signal(n)}
 		out = append(out, page.Item{Row: &row})
 	}
 	return out
@@ -183,8 +158,8 @@ func (h heroReading) signal(n Need) page.Signal {
 }
 
 // value: the fine hero's one facts line: each server's health and how long
-// it is up (dropped first), whether every Mac is awake, the agents at work;
-// a Mac still answering is the whole line.
+// it is up (dropped first), whether every Mac is awake; a Mac still
+// answering is the whole line.
 func (h heroReading) fine() page.Value {
 	if h.stale != "" {
 		v := page.Text("checking " + h.stale)
@@ -192,15 +167,12 @@ func (h heroReading) fine() page.Value {
 		return v
 	}
 	var parts []page.Value
-	awake, working, servers := 0, 0, 0
+	awake, servers := 0, 0
 	for _, m := range h.r.All.Macs {
 		if !m.Asleep {
 			awake++
 		}
 		for _, vm := range m.VMs {
-			if vm.Agent != nil && vm.Agent.State == "working" {
-				working++
-			}
 			if vm.Lifetime != model.AlwaysOn {
 				continue
 			}
@@ -223,9 +195,6 @@ func (h heroReading) fine() page.Value {
 			said = strconv.Itoa(awake) + " of " + strconv.Itoa(n) + " Macs awake"
 		}
 		parts = append(parts, dropFirst(page.Text(said), 1))
-	}
-	if working > 0 {
-		parts = append(parts, dropFirst(page.Text(counted(working, "agent working", "agents working")), 2))
 	}
 	if servers == 0 {
 		vms := 0

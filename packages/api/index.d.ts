@@ -264,7 +264,7 @@ export type AgentsAgent = {
     reason?: string;
     session: string;
     since?: string;
-    state: string;
+    state: '' | 'finished' | 'running' | 'starting' | 'waiting' | 'working';
     steps?: AgentsStep[];
     task?: string;
     terminal?: string;
@@ -305,7 +305,7 @@ export type AgentsCallsRecordIn = {
 export type AgentsCallsRecorded = {
     Kept: boolean;
     Session?: string;
-    State?: string;
+    State?: 'finished' | 'running' | 'starting' | 'waiting' | 'working';
 };
 
 export type AgentsCallsReplyIn = {
@@ -930,7 +930,7 @@ export type CoreFindingFinding = {
     Severity: 'broken' | 'needs-a-look';
     Subject: string;
     Text: string;
-    Urgency: '' | 'blocking' | 'expiring' | 'red';
+    Urgency: '' | 'expiring' | 'red';
 };
 
 export type CoreFindingFix = {

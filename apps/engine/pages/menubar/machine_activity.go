@@ -372,14 +372,10 @@ func vmNamed(h model.MacView, name string) (model.VM, bool) {
 	return model.VM{}, false
 }
 
-// value: a VM among the processes: the agent mark while it hosts a live
-// agent, else its kind's glyph.
+// value: a VM among the processes: its kind's glyph.
 func processGlyph(vm model.VM) page.Glyph {
-	switch {
-	case vm.Lifetime.Kind() == machine.Server:
+	if vm.Lifetime.Kind() == machine.Server {
 		return page.Glyph{Kind: "server"}
-	case vm.Agent != nil && !vm.Finished():
-		return page.Glyph{Kind: "agent"}
 	}
 	return page.Glyph{Kind: "workspace"}
 }

@@ -33,13 +33,10 @@ public struct MachineHeader: View {
         return line
     }
 
-    // value: the page's mark: a symbol, or the agent's own.
+    // value: the page's mark: a symbol.
     static func image(_ glyph: Glyph) -> Image? {
-        switch GlyphView.drawn(glyph) {
-        case let .symbol(name): Image(systemName: name)
-        case let .custom(name): Image(name, bundle: .module)
-        default: nil
-        }
+        guard case let .symbol(name) = GlyphView.drawn(glyph) else { return nil }
+        return Image(systemName: name)
     }
 
     public var body: some View {

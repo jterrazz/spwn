@@ -5,8 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
-	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -187,19 +185,12 @@ func (f *menubar) remote(ctx context.Context, in engine.FeedInput) {
 		fl, sv, ferr, serr := f.read(ctx, false)
 		macs, away := f.awake(ctx, fl), f.away(ctx, fl)
 		signIns := f.o.signIns(ctx, fl, "")
-		kept, aerr := call.Invoke(ctx, f.o.Calls, machine.Ref{}, agentscalls.List, agentscalls.ListIn{}, nil)
 		f.update(ctx, func(r *pagemenubar.Reading) {
 			if ferr == nil {
 				r.All = &fl
 				r.Macs = macs
 				r.Away = away
 				r.SignIns = &signIns
-			}
-			if aerr == nil {
-				r.Agents = kept
-				if r.Agents == nil {
-					r.Agents = []agents.Agent{}
-				}
 			}
 			if serr == nil {
 				r.Ports = &sv

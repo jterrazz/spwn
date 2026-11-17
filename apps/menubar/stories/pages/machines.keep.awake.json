@@ -51,7 +51,7 @@
             ],
             "detail": {
               "kind": "text",
-              "text": "Stays on after agents finish"
+              "text": "Stays on for a while"
             },
             "glyph": {
               "kind": "symbol:sun.max",

@@ -49,10 +49,6 @@ func actionOf(p page.Page, id string) page.Action {
 	return page.Action{}
 }
 
-func agent(name, state, task string) model.VM {
-	return model.VM{Name: name, Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: state, Task: task}}
-}
-
 func rowWords(s page.Section) []string {
 	var out []string
 	for _, it := range s.Items {
@@ -81,81 +77,12 @@ func tile(t *testing.T, p page.Page, caption string) page.Tile {
 	return page.Tile{}
 }
 
-// invariant: SPEC A4 Home: under the hero, the tiles, the agents, the
-// servers, the Macs, in that order.
-func TestHomeListsItsTilesThenItsAgentsServersAndMacs(t *testing.T) {
+// invariant: SPEC A4 Home: under the hero, the tiles, the servers, the
+// Macs, in that order.
+func TestHomeListsItsTilesThenItsServersAndMacs(t *testing.T) {
 	got := sectionIDs(homeOf(t, newHeroWorld()))
-	if want := []string{SectionHero, SectionTiles, SectionAgents, SectionServers, SectionMacs}; !reflect.DeepEqual(got[:5], want) {
+	if want := []string{SectionHero, SectionTiles, SectionServers, SectionMacs}; !reflect.DeepEqual(got[:4], want) {
 		t.Fatalf("sections %v, want %v first", got, want)
-	}
-}
-
-// invariant: SPEC A4 Home 3: past three live agents two stay, then the
-// finished one, the others folded behind the line that names them.
-func TestPastThreeLiveAgentsTwoStayAndTheRestFold(t *testing.T) {
-	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute)
-	done := agent("agent-7f", model.AgentFinished, "the changelog")
-	done.Agent.Reason = "tests pass"
-	w.r.All.Macs[0].VMs = append(w.r.All.Macs[0].VMs, done)
-	w.mini().VMs = append(w.mini().VMs, agent("linux-3", "working", "the auth token"), agent("linux-5", "working", "the db schema"))
-	s := homeSection(t, homeOf(t, w), SectionAgents)
-	ids := make([]string, 0, len(s.Items))
-	for _, it := range s.Items {
-		ids = append(ids, it.Row.ID)
-	}
-	if want := []string{"review-bot", "linux-1", "agent-7f", "linux-3", "linux-5"}; !reflect.DeepEqual(ids, want) {
-		t.Fatalf("agents %v, want %v", ids, want)
-	}
-	if s.Top != 3 || s.Rest == nil || s.Rest.Row.Label != "2 more" || s.Rest.Row.Cells[0].Text != "linux-3, linux-5" || s.Rest.Row.Detail.Text != "Show less" {
-		t.Fatalf("fold top %d rest %+v", s.Top, s.Rest)
-	}
-	if got := s.Caption[0].Text; got != "3 working" {
-		t.Fatalf("caption %q", got)
-	}
-}
-
-// invariant: three live agents or fewer never fold, the finished last.
-func TestThreeLiveAgentsShowWhole(t *testing.T) {
-	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", 6*time.Minute)
-	w.r.All.Macs[0].VMs = append([]model.VM{agent("agent-7f", model.AgentFinished, "")}, w.r.All.Macs[0].VMs...)
-	w.mini().VMs = append(w.mini().VMs, agent("linux-3", "working", "the auth token"))
-	s := homeSection(t, homeOf(t, w), SectionAgents)
-	if s.Rest != nil || s.Top != 0 {
-		t.Fatalf("folded %d %+v", s.Top, s.Rest)
-	}
-	got := rowWords(s)
-	if want := []string{"review-bot | waits for you", "linux-1 | working", "linux-3 | the auth token", "agent-7f | done"}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("rows %q, want %q", got, want)
-	}
-}
-
-// invariant: a working agent says its current step and its VM's CPU; a
-// waiting one only its task; a starting one its ring and its task; a
-// finished one its end, its Clean up, no page and no terminal.
-func TestAnAgentRowSaysWhatItsAgentDoes(t *testing.T) {
-	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", time.Minute)
-	w.r.All.Macs[0].VMs[0].Agent.Step = []string{"running tests", "41/58 pass"}
-	born := agent("linux-4", "working", "fix the flaky test")
-	born.State, born.Birth = model.Creating, &model.Birth{Progress: 400}
-	done := agent("agent-7f", model.AgentFinished, "")
-	done.Agent.Reason = "tests pass"
-	w.mini().VMs = append(w.mini().VMs, born)
-	w.r.All.Macs[0].VMs = append(w.r.All.Macs[0].VMs, done)
-	rows := map[string]page.Row{}
-	for _, it := range homeSection(t, homeOf(t, w), SectionAgents).Items {
-		rows[it.Row.ID] = *it.Row
-	}
-	if r := rows["linux-1"]; r.Trail != "cpu" || r.Cells[0].Live != "cpuh:linux-1" || r.Detail.Items[0].Text != "running tests" || r.Mac != page.ThisMac || r.Quick != ActionAttach+"linux-1" {
-		t.Fatalf("working %+v", r)
-	}
-	if r := rows["review-bot"]; r.Trail != "" || r.Glyph.Signal != page.SignalWaits || r.Mac != "mac-mini" {
-		t.Fatalf("waiting %+v", r)
-	}
-	if r := rows["linux-4"]; r.Glyph.Progress != 400 || r.Detail.Items[0].Text != "starting" || r.Detail.Items[1].Text != "fix the flaky test" {
-		t.Fatalf("starting %+v", r)
-	}
-	if r := rows["agent-7f"]; r.Detail.Text != "tests pass" || r.Verb != ActionCleanup+":"+heroPro || r.Nav != "" || r.Quick != "" {
-		t.Fatalf("finished %+v", r)
 	}
 }
 
@@ -186,16 +113,16 @@ func TestAServerRowSaysItsHealth(t *testing.T) {
 	}
 }
 
-// invariant: SPEC A4 Home 5: a Mac's row says its agents at work and
-// waiting, its memory free for a new VM and offers New VM there; an
+// invariant: SPEC A4 Home 5: a Mac's row says how many VMs it runs, its
+// memory free for a new VM and offers New VM there; an
 // asleep one says when it was seen; one Mac alone adds Add a Mac.
 func TestAMacRowSaysWhatRunsThere(t *testing.T) {
-	w := newHeroWorld().waiting("review-bot", "PR #42 is ready", time.Minute)
+	w := newHeroWorld()
 	air := model.MacView{Name: "macbook-air", Asleep: true, Answered: heroNow.Add(-2 * time.Hour), Laptop: true}
 	w.r.All.Macs = append(w.r.All.Macs, air)
 	s := homeSection(t, homeOf(t, w), SectionMacs)
 	got := rowWords(s)
-	if want := []string{"This Mac | 1 working", "mac-mini | 1 waiting", "macbook-air | asleep | seen 2 hr ago"}; !reflect.DeepEqual(got, want) {
+	if want := []string{"This Mac | 1 VM", "mac-mini | 1 VM", "macbook-air | asleep | seen 2 hr ago"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("macs %q, want %q", got, want)
 	}
 	mini := s.Items[1].Row

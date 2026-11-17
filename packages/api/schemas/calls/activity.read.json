@@ -462,7 +462,6 @@
         "Urgency": {
           "enum": [
             "",
-            "blocking",
             "expiring",
             "red"
           ],

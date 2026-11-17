@@ -103,18 +103,18 @@ public struct MoleculeSheet: View {
         action("new-vm-here", "New VM on This Mac", icon: Token.Symbol.plus),
     ]
 
-    static let agents: [Row] = [
-        row("review-bot", glyph: glyph("agent", signal: "waits"), sub: text("fixes the token refresh"), mac: "mac-mini", nav: "menubar.machine:review-bot"),
-        row("linux-1", glyph: glyph("agent", signal: "active"), sub: list(text("running tests"), text("41/58 pass")), mac: "This Mac", cells: [percent(370)], trail: "value", quick: "terminal", nav: "menubar.machine:linux-1"),
-        row("linux-3", glyph: glyph("agent", signal: "active"), sub: text("editing src/auth/refresh.ts"), mac: "mac-mini", cells: [percent(600)], trail: "value", quick: "terminal", nav: "menubar.machine:linux-3"),
-        row("agent-7f", glyph: glyph("symbol:\(Token.Symbol.check)", signal: "faint"), sub: text("tests pass"), verb: "delete", signal: "done"),
+    static let workspaces: [Row] = [
+        row("linux-1", glyph: glyph("workspace", signal: "active"), sub: list(text("running"), text("ephemeral")), mac: "This Mac", cells: [percent(370)], trail: "value", quick: "terminal", nav: "menubar.machine:linux-1"),
+        row("linux-3", glyph: glyph("workspace", signal: "active"), sub: text("running"), mac: "mac-mini", cells: [percent(600)], trail: "value", quick: "terminal", nav: "menubar.machine:linux-3"),
+        row("api", glyph: glyph("workspace", signal: "faint"), sub: text("stopped"), mac: "mac-mini", nav: "menubar.machine:api", signal: "faint"),
+        row("old", glyph: glyph("workspace", signal: "faint"), sub: text("stopped"), verb: "delete", signal: "faint"),
     ]
 
     static let accessories: [Row] = [
         row("infra", glyph: glyph(signal: "well", dot: "fill"), sub: list(text("healthy"), text("up 12 days"), text("2 ports")), nav: "menubar.machine:infra"),
         row("infra", glyph: glyph(signal: "failing", dot: "fill"), sub: text("down since 14:02", signal: "failing"), verb: "restart", id: "infra-down"),
-        row("This Mac", glyph: glyph("laptop", ring: "cpu:this-mac"), sub: list(text("1 working"), text("4 upkeep")), cells: [free(23)], trail: "value", quick: "new-vm", nav: "menubar.machine:this-mac"),
-        row("mac-mini", glyph: glyph("desktop", ring: "cpu:mac-mini"), sub: list(text("1 working"), text("1 waiting")), cells: [free(19)], trail: "value", quick: "new-vm", nav: "menubar.machine:mac-mini", signal: "stale"),
+        row("This Mac", glyph: glyph("laptop", ring: "cpu:this-mac"), sub: list(text("1 VM"), text("4 upkeep")), cells: [free(23)], trail: "value", quick: "new-vm", nav: "menubar.machine:this-mac"),
+        row("mac-mini", glyph: glyph("desktop", ring: "cpu:mac-mini"), sub: list(text("2 VMs")), cells: [free(19)], trail: "value", quick: "new-vm", nav: "menubar.machine:mac-mini", signal: "stale"),
         row("air", glyph: glyph("laptop", signal: "asleep", ring: "cpu:air"), sub: list(text("asleep"), text("seen 2 hr ago")), nav: "menubar.machine:air", signal: "asleep"),
         row("Vite", glyph: glyph("port:Vite"), sub: text("linux-1:5173"), verb: "share"),
         row("Keep this Mac awake", glyph: glyph("symbol:\(Token.Symbol.awake)", signal: "faint"), sub: text("until 18:00"), nav: "menubar.awake"),
@@ -129,7 +129,7 @@ public struct MoleculeSheet: View {
 
     var rows: some View {
         VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
-            card { RowStack(Self.agents, columns: Self.columns, actions: Self.actions, highlighted: "linux-3") }
+            card { RowStack(Self.workspaces, columns: Self.columns, actions: Self.actions, highlighted: "linux-3") }
             card { RowStack(Self.accessories, columns: Self.columns, actions: Self.actions, highlighted: "This Mac") }
         }
     }
@@ -137,7 +137,7 @@ public struct MoleculeSheet: View {
     var lists: some View {
         VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
             card {
-                NeedRow(Self.row("review-bot", glyph: Self.glyph("symbol:\(Token.Symbol.share)", signal: "waits"), sub: Self.text("PR #42 is ready"), verb: "review"), actions: Self.actions)
+                NeedRow(Self.row("This Mac", glyph: Self.glyph("symbol:\(Token.Symbol.globe)", signal: "failing"), sub: Self.text("port 5000 exposed"), verb: "review"), actions: Self.actions)
                 NeedRow(Self.row("linux-1", glyph: Self.glyph("symbol:\(Token.Symbol.thermo)", signal: "waits"), sub: Self.list(Self.text("Claude ends in 23 min"), Self.text("on This Mac", pri: 1)), verb: "extend"), actions: Self.actions)
             }
             card {

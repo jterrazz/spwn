@@ -307,67 +307,6 @@ for state in State.allCases {
     try (contents + "\n").write(to: set.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
 }
 
-func agentTemplate() -> String {
-    let regular = masters.first { $0.name == "Regular-M" }!
-    let k = regular.outer / 7.75
-    func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * k, y: y * k) }
-    let lines = CGMutablePath()
-    lines.addLines(between: [p(8.4, 5.9), p(13.6, 8.7), p(13.6, 14.6), p(8.4, 17.4), p(3.2, 14.6), p(3.2, 8.7)])
-    lines.closeSubpath()
-    lines.addLines(between: [p(3.3, 8.7), p(8.4, 11.5), p(13.5, 8.7)])
-    lines.addLines(between: [p(8.4, 11.5), p(8.4, 17.3)])
-    let cube = lines.copy(strokingWithWidth: regular.stroke, lineCap: .round, lineJoin: .round, miterLimit: 10)
-    let sparkle = CGMutablePath()
-    sparkle.move(to: p(15.4, 1.2))
-    sparkle.addCurve(to: p(18.7, 4.5), control1: p(15.7, 3.1), control2: p(16.8, 4.2))
-    sparkle.addCurve(to: p(15.4, 7.8), control1: p(16.8, 4.8), control2: p(15.7, 5.9))
-    sparkle.addCurve(to: p(12.1, 4.5), control1: p(15.1, 5.9), control2: p(14.0, 4.8))
-    sparkle.addCurve(to: p(15.4, 1.2), control1: p(14.0, 4.2), control2: p(15.1, 3.1))
-    sparkle.closeSubpath()
-    let mark = cube.union(sparkle)
-    let box = mark.boundingBoxOfPath
-    var d = ""
-    func q(_ pt: CGPoint) -> String { "\(f(pt.x - box.minX + regular.bearing)) \(f(pt.y - box.midY - capHeight / 2))" }
-    mark.applyWithBlock { e in
-        let pts = e.pointee.points
-        switch e.pointee.type {
-        case .moveToPoint: d += "M\(q(pts[0]))"
-        case .addLineToPoint: d += "L\(q(pts[0]))"
-        case .addQuadCurveToPoint: d += "Q\(q(pts[0])) \(q(pts[1]))"
-        case .addCurveToPoint: d += "C\(q(pts[0])) \(q(pts[1])) \(q(pts[2]))"
-        case .closeSubpath: d += "Z"
-        @unknown default: break
-        }
-    }
-    let line = "style=\"fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;\""
-    let left = regular.column, right = left + box.width + 2 * regular.bearing
-    let top = f(regular.baseline - 95), bottom = f(regular.baseline + 24)
-    let baselines = sizes.map { size in
-        "  <line id=\"Baseline-\(size.name)\" \(line) x1=\"263\" x2=\"3036\" y1=\"\(f(size.baseline))\" y2=\"\(f(size.baseline))\"/>\n"
-            + "  <line id=\"Capline-\(size.name)\" \(line) x1=\"263\" x2=\"3036\" y1=\"\(f(size.baseline - capHeight))\" y2=\"\(f(size.baseline - capHeight))\"/>\n"
-    }.joined()
-    return """
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="3300" height="2200">
-     <g id="Notes">
-      <text id="template-version" style="stroke:none;fill:black;font-family:sans-serif;font-size:13;" transform="matrix(1 0 0 1 2952 1933)">Template v.3.0</text>
-      <text style="stroke:none;fill:black;font-family:sans-serif;font-size:13;" transform="matrix(1 0 0 1 2952 1951)">station.agent</text>
-     </g>
-     <g id="Guides">
-    \(baselines)      <line id="left-margin-Regular-M" \(line) x1="\(f(left))" x2="\(f(left))" y1="\(top)" y2="\(bottom)"/>
-      <line id="right-margin-Regular-M" \(line) x1="\(f(right))" x2="\(f(right))" y1="\(top)" y2="\(bottom)"/>
-     </g>
-     <g id="Symbols">
-      <g id="Regular-M" transform="matrix(1 0 0 1 \(f(left)) \(f(regular.baseline)))">
-       <path class="monochrome-0 multicolor-0:tintColor hierarchical-0:primary SFSymbolsPreviewWireframe" d="\(d)"/>
-      </g>
-     </g>
-    </svg>
-
-    """
-}
-
 let strokes = "fill=\"none\" stroke=\"#000\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\""
 let marks: [String: String] = [
     "claude": "<g stroke=\"#000\" stroke-width=\"1.9\" stroke-linecap=\"round\">" + [0, 30, 60, 90, 120, 150].map { "<line x1=\"10\" y1=\"2.6\" x2=\"10\" y2=\"17.4\" transform=\"rotate(\($0) 10 10)\"/>" }.joined() + "</g>",
@@ -386,17 +325,6 @@ let marks: [String: String] = [
     "api": "<path \(strokes) d=\"M7.5 4.5c-1.6 0-2.2.8-2.2 2.2v1.6c0 .9-.5 1.5-1.5 1.7 1 .2 1.5.8 1.5 1.7v1.6c0 1.4.6 2.2 2.2 2.2M12.5 4.5c1.6 0 2.2.8 2.2 2.2v1.6c0 .9.5 1.5 1.5 1.7-1 .2-1.5.8-1.5 1.7v1.6c0 1.4-.6 2.2-2.2 2.2\"/>",
     "web": "<g \(strokes)><rect x=\"3\" y=\"4\" width=\"14\" height=\"12\" rx=\"2.4\"/><path d=\"M3 7.6h14\"/></g><circle cx=\"5.4\" cy=\"5.8\" r=\".5\" fill=\"#000\"/><circle cx=\"7.2\" cy=\"5.8\" r=\".5\" fill=\"#000\"/>",
 ]
-
-let agent = catalog.appendingPathComponent("station.agent.symbolset")
-try fm.createDirectory(at: agent, withIntermediateDirectories: true)
-try agentTemplate().write(to: agent.appendingPathComponent("station.agent.svg"), atomically: true, encoding: .utf8)
-try """
-{
-    "info": { "author": "xcode", "version": 1 },
-    "symbols": [{ "filename": "station.agent.svg", "idiom": "universal" }]
-}
-
-""".write(to: agent.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
 
 for (service, body) in marks.sorted(by: { $0.key < $1.key }) {
     let name = "station.mark.\(service)"

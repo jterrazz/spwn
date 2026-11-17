@@ -1,12 +1,9 @@
 package menubar
 
 import (
-	"slices"
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -16,7 +13,6 @@ import (
 
 const (
 	SectionTiles   = "tiles"
-	SectionAgents  = "agents"
 	SectionServers = "servers"
 	SectionMacs    = "macs"
 
@@ -24,15 +20,9 @@ const (
 	TileAccounts = "accounts"
 	TileAwake    = "awake"
 
-	RowMoreAgents = "more-agents"
-	RowAddMac     = "add-mac"
+	RowAddMac = "add-mac"
 
 	ActionNewVMOn = "new-vm:"
-
-	// value: SPEC A4 Home 3: past three live agents, two stay and the
-	// others fold.
-	agentsFold = 3
-	agentsKept = 2
 )
 
 // value: what Home's sections below the hero read: the fleet, This Mac's
@@ -45,7 +35,7 @@ type homeReading struct {
 }
 
 // invariant: SPEC A4 Home 2-5: under the hero, the three tiles, then the
-// agents, the servers and the Macs, each one flush card; the empty fleet
+// servers and the Macs, each one flush card; the empty fleet
 // keeps only its Macs.
 func homeSections(r Reading, self string, upkeep []Need) ([]page.Section, []page.Action) {
 	if r.All == nil {
@@ -59,9 +49,6 @@ func homeSections(r Reading, self string, upkeep []Need) ([]page.Section, []page
 		sections = append(sections, tiles)
 		actions = append(actions, toggle)
 	}
-	if s, ok := h.agents(); ok {
-		sections = append(sections, s)
-	}
 	if s, ok := h.servers(); ok {
 		sections = append(sections, s)
 	}
@@ -70,14 +57,14 @@ func homeSections(r Reading, self string, upkeep []Need) ([]page.Section, []page
 	actions = append(actions, more...)
 	for _, m := range r.All.Macs {
 		for _, vm := range m.VMs {
-			if alive(vm) && !vm.Finished() {
+			if alive(vm) {
 				actions = append(actions, attach(m, vm))
 			}
 		}
 	}
-	every, cleans := cleanupsOf(r.All.Macs, r.Agents), false
+	every, cleans := cleanupsOf(r.All.Macs), false
 	for _, c := range every {
-		if len(c.finished) > 0 || slices.ContainsFunc(c.mac.VMs, model.VM.Finished) {
+		if c.any() {
 			actions = append(actions, cleanupSheet(ActionCleanup+":"+c.mac.Name, *r.All, []cleanupOf{c}, h.now, true))
 		}
 		cleans = cleans || c.any()
@@ -218,137 +205,6 @@ func (h homeReading) awakeToggle() page.Action {
 	return a
 }
 
-// value: an agent of the fleet as Home lists it: the VM it runs on, and
-// that VM's Mac.
-type homeAgent struct {
-	vm  model.VM
-	mac model.MacView
-}
-
-func (a homeAgent) state() string {
-	switch {
-	case a.vm.Finished():
-		return model.AgentFinished
-	case a.vm.State == model.Creating:
-		return string(agents.Starting)
-	}
-	return a.vm.Agent.State
-}
-
-func agentRank(a homeAgent) int {
-	switch a.state() {
-	case string(agents.Waiting):
-		return 0
-	case string(agents.Starting):
-		return 2
-	case model.AgentFinished:
-		return 3
-	}
-	return 1
-}
-
-// invariant: SPEC A4 Home 3: one row per agent, never per VM, ordered
-// waiting, working, starting, then finished; past three live agents the
-// first two stay, then the finished ones, the other live ones folded
-// behind "N more" which names them.
-func (h homeReading) agents() (page.Section, bool) {
-	var all []homeAgent
-	for _, m := range h.r.All.Macs {
-		for _, vm := range m.VMs {
-			if vm.Agent != nil {
-				all = append(all, homeAgent{vm: vm, mac: m})
-			}
-		}
-	}
-	if len(all) == 0 {
-		return page.Section{}, false
-	}
-	slices.SortStableFunc(all, func(a, b homeAgent) int { return agentRank(a) - agentRank(b) })
-	var livers, done []homeAgent
-	working := 0
-	for _, a := range all {
-		switch a.state() {
-		case model.AgentFinished:
-			done = append(done, a)
-		case string(agents.Working), string(agents.Running):
-			working++
-			livers = append(livers, a)
-		default:
-			livers = append(livers, a)
-		}
-	}
-	s := page.Section{ID: SectionAgents, Title: "Agents", Card: page.CardFlush, Columns: vmColumns(), Uncounted: true}
-	if working > 0 {
-		s.Caption = []page.Value{page.Text(strconv.Itoa(working) + " working")}
-	}
-	shown, folded := livers, []homeAgent(nil)
-	if len(livers) > agentsFold {
-		shown, folded = livers[:agentsKept], livers[agentsKept:]
-	}
-	for _, a := range append(append(slices.Clone(shown), done...), folded...) {
-		row := h.agentRow(a)
-		s.Items = append(s.Items, page.Item{Row: &row})
-	}
-	if len(folded) > 0 {
-		names := make([]string, 0, len(folded))
-		for _, a := range folded {
-			names = append(names, a.vm.Name)
-		}
-		s.Top = len(shown) + len(done)
-		s.Rest = &page.Item{Row: &page.Row{ID: RowMoreAgents, Label: strconv.Itoa(len(folded)) + " more", Detail: page.Text("Show less"), Cells: []page.Value{page.Text(strings.Join(names, ", "))}}}
-	}
-	return s, true
-}
-
-func (h homeReading) agentRow(a homeAgent) page.Row {
-	vm := a.vm
-	row := page.Row{ID: vm.Name, Label: vm.Name, Mark: page.OK, Mac: model.Label(*h.r.All, a.mac), Nav: machinePage(vm.Name)}
-	if alive(vm) && !vm.Finished() {
-		row.Quick = ActionAttach + vm.Name
-	}
-	switch a.state() {
-	case model.AgentFinished:
-		row.Mac, row.Detail = "", page.Text(cmpWord(vm.Agent.Reason, "done"))
-		row.Glyph = page.Glyph{Kind: "symbol:checkmark", Signal: page.SignalDone}
-		row.Signal, row.Verb, row.Nav = page.SignalDone, ActionCleanup+":"+a.mac.Name, ""
-	case string(agents.Waiting):
-		row.Glyph = page.Glyph{Kind: "agent", Signal: page.SignalWaits}
-		row.Detail = page.Text(cmpWord(vm.Agent.Task, "waits for you"))
-	case string(agents.Starting):
-		progress := 0
-		if vm.Birth != nil {
-			progress = vm.Birth.Progress
-		}
-		row.Glyph = page.Glyph{Dot: page.DotRing, Progress: progress, Signal: page.SignalActive}
-		row.Detail = page.Texts("starting", cmpWord(vm.Agent.Task, "a new task"))
-	default:
-		row.Glyph = page.Glyph{Kind: "agent", Signal: page.SignalActive}
-		row.Detail = page.Text(cmpWord(vm.Agent.Task, "working"))
-		if len(vm.Agent.Step) > 0 {
-			row.Detail = page.Texts(vm.Agent.Step...)
-		}
-		row.Trail, row.Cells = "cpu", []page.Value{h.cpu(vm)}
-	}
-	if h.stale(a.mac) {
-		row.Signal = page.SignalStale
-	}
-	return row
-}
-
-// value: a VM's CPU as a share of its Mac, This Mac's from its last
-// reading, every one read live under its key.
-func (h homeReading) cpu(vm model.VM) page.Value {
-	v := page.None()
-	if n := len(h.r.Samples); n > 0 {
-		for _, u := range h.r.Samples[n-1].VMs {
-			if u.VM == vm.Name {
-				v = page.Percent(int64(u.CPU * 10))
-			}
-		}
-	}
-	return live(v, engine.LiveKey(engine.LiveCPUMac, vm.Name))
-}
-
 func (h homeReading) stale(m model.MacView) bool {
 	return !m.Asleep && model.Unheard(m, h.now)
 }
@@ -466,20 +322,13 @@ func (h homeReading) macRow(m model.MacView) page.Row {
 	return row
 }
 
-// value: a Mac's sub line, by priority: what is down there, its agents at
-// work and waiting, its upkeep (dropped first); with none of them, how
-// many VMs it holds.
+// value: a Mac's sub line, by priority: what is down there, its upkeep
+// (dropped first); with none of them, how many VMs it holds.
 func (h homeReading) macFacts(m model.MacView) page.Value {
-	down, working, waiting := 0, 0, 0
+	down := 0
 	for _, vm := range m.VMs {
-		switch {
-		case vm.Lifetime == model.AlwaysOn && model.Down(vm):
+		if vm.Lifetime == model.AlwaysOn && model.Down(vm) {
 			down++
-		case vm.Agent == nil || vm.Finished() || vm.State == model.Creating:
-		case vm.Agent.State == string(agents.Waiting):
-			waiting++
-		default:
-			working++
 		}
 	}
 	var parts []page.Value
@@ -487,12 +336,6 @@ func (h homeReading) macFacts(m model.MacView) page.Value {
 		v := page.Text(strconv.Itoa(down) + " down")
 		v.Signal = page.SignalFailing
 		parts = append(parts, v)
-	}
-	if working > 0 {
-		parts = append(parts, page.Text(strconv.Itoa(working)+" working"))
-	}
-	if waiting > 0 {
-		parts = append(parts, page.Text(strconv.Itoa(waiting)+" waiting"))
 	}
 	if n := len(scoped(h.upkeep, m.Name)); n > 0 {
 		parts = append(parts, dropFirst(page.Text(strconv.Itoa(n)+" upkeep"), 1))

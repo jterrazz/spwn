@@ -19,7 +19,7 @@
         },
         {
           "kind": "text",
-          "text": "2 things, most urgent first"
+          "text": "1 thing"
         }
       ]
     },
@@ -56,31 +56,9 @@
             "verb": "down:infra",
             "nav": "menubar.machine:infra"
           }
-        },
-        {
-          "row": {
-            "id": "waiting:review-bot",
-            "mark": "attention",
-            "label": "review-bot",
-            "detail": {
-              "kind": "text",
-              "text": "PR #42 is ready"
-            },
-            "reason": "waiting",
-            "glyph": {
-              "kind": "symbol:text.bubble",
-              "signal": "waits"
-            },
-            "verb": "waiting:review-bot",
-            "nav": "menubar.machine:review-bot"
-          }
         }
       ],
       "counts": [
-        {
-          "mark": "attention",
-          "n": 1
-        },
         {
           "mark": "broken",
           "n": 1
@@ -223,15 +201,6 @@
           "name": "mac-mini"
         }
       },
-      "default": true
-    },
-    {
-      "label": "Review",
-      "on": "row",
-      "rows": [
-        "waiting:review-bot"
-      ],
-      "id": "waiting:review-bot",
       "default": true
     },
     {

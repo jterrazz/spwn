@@ -11,7 +11,7 @@ extension Token {
         public static let show = "Show"
         public static let open = "Open"
         public static let wordBreaks = CharacterSet.whitespaces.union(CharacterSet(charactersIn: "\u{00B7}:-"))
-        public static let hint = "Try a machine name, a port number, or \u{201C}agent\u{201D}."
+        public static let hint = "Try a machine name, a port number, or \u{201C}ports\u{201D}."
         public static func noMatch(_ query: String) -> String { "No match for \(query)" }
         public static func more(_ n: Int) -> String { "Show \(n) more" }
 

@@ -2,17 +2,11 @@
     "freeze": 0.3,
     "group": "transition",
     "id": "transition.row-leave",
-    "note": "agent-7f deleted: its row slides 10 pt right, fades and collapses, and the rows below close up.",
-    "pages": ["pages/machines.home.menubar.json"],
+    "note": "agent-7f deleted from This Mac's page: its row slides 10 pt right, fades and collapses, and the rows below close up.",
+    "pages": ["pages/machines.macs.machine.macbook-pro.json"],
     "play": {
-        "from": "home.needs",
+        "from": "mac.this.overview",
         "gesture": "confirm Delete agent-7f"
-    },
-    "samples": {
-        "cpu:mac-mini": 55,
-        "cpu:macbook-pro": 30,
-        "cpuh:linux-1": 37,
-        "cpuh:linux-3": 60
     },
     "schema": "station.story/v1",
     "ui": {

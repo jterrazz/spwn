@@ -1,13 +1,12 @@
 package pages
 
 import (
-	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 )
 
 // value: the worlds of Home's sections and of the Needs you page: the home
-// scene with more agents, an agent being born, Awake off; the fleet's needs
-// many, then its updates installed.
+// scene with Awake off; the fleet's updates installed, then the owner's
+// package file refused.
 func needsWorlds() []World {
 	home := func(name string, edits ...func(*Scene)) World {
 		return World{Name: name, Edit: func(f *Scene) {
@@ -21,27 +20,10 @@ func needsWorlds() []World {
 		return World{Name: name, Edit: edit, Pages: []string{"needs"}}
 	}
 	return []World{
-		home("machines.home.four-agents", twoMoreAgents),
-		home("machines.home.creating", linux4Creating),
-		home("machines.home.born", linux4Ready, linux4Reads),
 		home("machines.home.awake-off", awakeOff),
 		needs("machines.needs.updated", updatesInstalled),
 		needs("machines.needs.catalog-refused", catalogRefused),
 	}
-}
-
-func twoMoreAgents(f *Scene) {
-	mini := &f.All.Macs[1]
-	for _, w := range []struct{ name, task, ip string }{{"linux-5", "migrates the db schema", "192.168.64.10"}, {"linux-6", "writes the changelog", "192.168.64.11"}} {
-		vm := sceneVM(w.name, miniMac, model.Ephemeral, model.Running, 2, 4, w.ip)
-		vm.Agent = &model.AgentView{State: "working", Task: w.task}
-		mini.VMs = append(mini.VMs, vm)
-	}
-}
-
-func linux4Reads(f *Scene) {
-	vms := f.All.Macs[1].VMs
-	vms[len(vms)-1].Agent.Step = []string{"reading the repository"}
 }
 
 func awakeOff(f *Scene) {

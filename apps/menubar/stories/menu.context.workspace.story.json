@@ -1,6 +1,6 @@
 {
     "group": "menu",
-    "heightNote": "drawn on This Mac's page, whose VMs card holds linux-1: since A2 Home lists agents, so a workspace's row is right-clicked on its Mac's page",
+    "heightNote": "drawn on This Mac's page, whose VMs card holds linux-1, so a workspace's row is right-clicked on its Mac's page",
     "id": "menu.context.workspace",
     "note": "Right-click linux-1 on This Mac's VMs: Open, Open in Terminal, Open Vite; Copy ›, Share ›; Stop…; Delete… in red.",
     "pages": ["pages/machines.macs.machine.macbook-pro.json"],

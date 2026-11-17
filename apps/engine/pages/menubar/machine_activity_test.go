@@ -188,8 +188,8 @@ func TestAMacsBusiestProcessesHoldItsVMsWhichOpenTheirPages(t *testing.T) {
 	if got := labels(s.Items); !slices.Equal(got, []string{"linux-3", "infra", "mds_stores"}) {
 		t.Fatalf("processes %q, want linux-3 once, by its name, then infra, then mds_stores", got)
 	}
-	if r := s.Items[0].Row; r.Nav != machinePage("linux-3") || r.Glyph.Kind != "agent" || r.Cells[0].Live != "cpuh:linux-3" {
-		t.Fatalf("linux-3 %+v, want the agent mark, its share of the Mac live, opening its page", r)
+	if r := s.Items[0].Row; r.Nav != machinePage("linux-3") || r.Glyph.Kind != "workspace" || r.Cells[0].Live != "cpuh:linux-3" {
+		t.Fatalf("linux-3 %+v, want the workspace mark, its share of the Mac live, opening its page", r)
 	}
 	memory := sectionOf(p, SectionMemory).Items[0].Gauge
 	parts := memory.Bar.Items
@@ -224,8 +224,8 @@ func TestAVMsActivityIsMeasuredInsideItAndUpdatesItsGuest(t *testing.T) {
 	ws := macPageOf(t, "linux-3", func(m *Machine) {
 		m.Summary = &overview.Summary{Head: overview.Head{Name: "linux-3"}, Needs: []overview.Need{{Machine: "linux-3", Section: "apps", Subject: "updates", Text: "2 app updates", Call: CallUpdate}}}
 	})
-	if len(ws.Segments) != 4 || ws.Header.Glyph.Kind != "agent" {
-		t.Fatalf("linux-3 segments %+v glyph %+v, want four segments under the agent mark", ws.Segments, ws.Header.Glyph)
+	if len(ws.Segments) != 4 || ws.Header.Glyph.Kind != "workspace" {
+		t.Fatalf("linux-3 segments %+v glyph %+v, want four segments under the workspace mark", ws.Segments, ws.Header.Glyph)
 	}
 	upkeep := sectionOf(ws, SectionGuestUpkeep)
 	if upkeep == nil || upkeep.Items[0].Row.Label != "2 app updates" || upkeep.Items[0].Row.Verb != ActionUpdateGuest {

@@ -200,7 +200,6 @@ public struct LogoChip: View {
 public struct GlyphView: View {
     public enum Drawn: Equatable, Sendable {
         case symbol(String)
-        case custom(String)
         case chip(LogoChip.Kind, String)
         case mac(lid: Bool)
     }
@@ -221,7 +220,6 @@ public struct GlyphView: View {
         case "laptop", "desktop": return glyph.ring != nil ? .mac(lid: kind == "laptop") : .symbol(Token.Object.mac(lid: kind == "laptop"))
         case "server": return .symbol(Token.Object.server)
         case "workspace": return .symbol(Token.Object.workspace)
-        case "agent": return .custom(Token.Object.agent)
         default: return .symbol(Token.Object.unknown)
         }
     }
@@ -239,7 +237,6 @@ public struct GlyphView: View {
         case let .mac(lid):
             MacRing(lid: lid, share: (samples[glyph.ring ?? ""] ?? 0) / Token.Metric.Marks.percent, asleep: glyph.signal == "asleep")
         case let .symbol(name): slot(Image(systemName: name))
-        case let .custom(name): slot(Image(name, bundle: .module))
         }
     }
 

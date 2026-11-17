@@ -50,7 +50,7 @@ extension Story {
         let bottom = pages.first
         let over = pages.count > 1 ? pages.last : nil
         var state: PanelState
-        if over == nil, let bottom, bottom.id == PageID.machine || bottom.id == PageID.agent {
+        if over == nil, let bottom, bottom.id == PageID.machine {
             state = PanelState(page: nil, connection: connection, pushed: bottom)
         } else {
             state = PanelState(page: bottom, connection: connection, pushed: over)
@@ -71,8 +71,6 @@ extension Story {
         state.lit = ui.hover
         if let window = ui.window, let machine = state.shown?.context?.machine { state.windows[machine] = window }
         state.pending = ui.pending ?? []
-        state.prOpened = ui.prOpened ?? []
-        state.reply = ui.reply ?? ""
         if let sheet = ui.sheet {
             state.confirming = sheet.id
             if let answers = sheet.answers { state.answers[sheet.id] = answers }
@@ -102,7 +100,7 @@ public struct StoryView: View {
         motion = rest ? nil : StoryMotion.of(story.id)
     }
 
-    static func panel(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.machine || page.id == PageID.agent }
+    static func panel(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.machine }
 
     public var body: some View {
         SwiftUI.Group {

@@ -1,6 +1,6 @@
 import SwiftUI
 
-// invariant: an agent's last steps: when, in one column, what it did, in
+// invariant: a run's last steps: when, in one column, what it did, in
 // one text x; the step running in t1, its diff after it.
 public struct StepSlots: View {
     let steps: [Step]

@@ -226,18 +226,11 @@ func (f finder) vm(h model.MacView, vm model.VM) entry {
 	word, signal, dot := f.state(vm)
 	kind := vm.Lifetime.Kind()
 	glyph := "workspace"
-	switch {
-	case kind == machine.Server:
+	if kind == machine.Server {
 		glyph = "server"
-	case vm.Agent != nil:
-		glyph = "agent"
 	}
 	row := page.Row{ID: vm.Name, Label: vm.Name, Detail: page.Texts(word, f.mac(h.Name)), Glyph: page.Glyph{Kind: glyph, Signal: signal, Dot: dot}, Nav: machinePage(vm.Name)}
-	tags := []string{}
-	if vm.Agent != nil {
-		tags = append(tags, "agent")
-	}
-	tags = append(tags, strings.Fields(word)[0], "vm", strings.ToLower(model.KindWord(kind)))
+	tags := []string{strings.Fields(word)[0], "vm", strings.ToLower(model.KindWord(kind))}
 	e := entry{row: row, tags: tags, verb: opens("open:"+vm.Name, "")}
 	if kind != machine.Server && vm.State == model.Running {
 		attach := attachOf(vm)
@@ -247,7 +240,7 @@ func (f finder) vm(h model.MacView, vm model.VM) entry {
 }
 
 // value: a VM's state in a word or two, as its row says it: a down server
-// since when, a server's health, an agent's state, else the VM's own.
+// since when, a server's health, else the VM's own.
 func (f finder) state(vm model.VM) (string, page.Signal, page.Dot) {
 	switch {
 	case model.Down(vm):
@@ -262,12 +255,6 @@ func (f finder) state(vm model.VM) (string, page.Signal, page.Dot) {
 			return h, page.SignalWaits, page.DotFill
 		}
 		return "healthy", page.SignalWell, page.DotFill
-	case vm.Agent != nil && vm.Agent.State == model.AgentFinished:
-		return vm.Agent.State, page.SignalDone, page.DotFill
-	case vm.Agent != nil && vm.Agent.State == "waiting":
-		return vm.Agent.State, page.SignalWaits, page.DotFill
-	case vm.Agent != nil && vm.Agent.State != "":
-		return vm.Agent.State, page.SignalActive, page.DotFill
 	}
 	return string(vm.State), page.SignalWell, page.DotFill
 }
@@ -391,10 +378,9 @@ func (f finder) sections() []entry {
 
 func (f finder) actions() []entry {
 	// value: SPEC B5.6's actions available now: This Mac's keep-awake, never
-	// shortening the term it holds, and the one that follows its agent at
-	// work; New VM on each awake Mac, the roomiest first and on ⌘N; each
-	// server's restart, asking first while it is healthy; each Mac's
-	// clean-up of its finished ephemeral workspaces.
+	// shortening the term it holds; New VM on each awake Mac, the roomiest
+	// first and on ⌘N; each server's restart, asking first while it is
+	// healthy; each Mac's clean-up of its stopped ephemeral workspaces.
 	out := f.awake()
 	roomiest := model.Roomiest(*f.r.All)
 	if roomiest == "" {

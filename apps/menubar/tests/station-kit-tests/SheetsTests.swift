@@ -26,23 +26,20 @@ final class SheetsTests: XCTestCase {
     func testPickingAnotherWorkspaceGrantsToIt() throws {
         let (page, action, answers) = try sheet("sheet.grant", "grant")
         let to = try XCTUnwrap(answers.field("To"))
-        let agent = try XCTUnwrap(to.options?.first { $0.label == "agent-7f" }?.value)
-        let other = try XCTUnwrap(page.action(agent))
+        let pick = try XCTUnwrap(to.options?.first { $0.label == "agent-7f" }?.value)
+        let other = try XCTUnwrap(page.action(pick))
         XCTAssertEqual(other.run?.call, "grants.add")
         XCTAssertEqual(other.run?.in?["To"], "agent-7f")
         XCTAssertEqual(action.run?.in?["To"], "linux-1")
     }
 
-    func testCleanUpSaysWhatItDeletesAndForgetsAsTheOwnerChecks() throws {
+    func testCleanUpSaysWhatItDeletesAsTheOwnerChecks() throws {
         let (_, action, answers) = try sheet("sheet.cleanup.mac", "cleanup:macbook-pro")
         XCTAssertEqual(answers.primary?.label, "Delete 1 ephemeral workspace")
         XCTAssertEqual(answers.primary?.danger, true)
-        let agents = try XCTUnwrap(answers.field("Agent"))
-        XCTAssertEqual(answers.picked(agents), ["agent-7f"], "the ephemeral workspace checked carries its finished agent")
-        XCTAssertTrue(answers.follows(agents, try XCTUnwrap(agents.options?.first)))
+        XCTAssertEqual(answers.picked(try XCTUnwrap(answers.field("VMs"))), ["agent-7f"])
         var kept = answers
         kept.given["VMs"] = ""
-        XCTAssertEqual(kept.picked(agents), [], "unchecked, the ephemeral workspace leaves its agent to the owner")
         XCTAssertNil(kept.primary, "nothing checked, the button says nothing it would do")
         XCTAssertEqual(action.run?.call, "machines.cleanup")
     }
@@ -54,18 +51,9 @@ final class SheetsTests: XCTestCase {
         }
     }
 
-    func testCleanUpDeletesTheEphemeralCheckedAndItsAgentGoesWithIt() throws {
+    func testCleanUpDeletesTheEphemeralCheckedAndAsksNothingUnchecked() throws {
         let (_, action, _) = try sheet("sheet.cleanup.mac", "cleanup:macbook-pro")
         XCTAssertEqual(try calls(action, [:]), [#"machines.cleanup Confirm=yes VMs=["agent-7f"]"#])
-        XCTAssertEqual(try calls(action, ["Agent": "agent-7f"]), [#"machines.cleanup Confirm=yes VMs=["agent-7f"]"#], "an agent its ephemeral workspace takes is not forgotten apart")
-    }
-
-    func testCleanUpKeepsTheEphemeralUncheckedAndForgetsTheAgentChecked() throws {
-        let (_, action, form) = try sheet("sheet.cleanup.mac", "cleanup:macbook-pro")
-        var kept = form
-        kept.given = ["VMs": "", "Agent": "agent-7f"]
-        XCTAssertEqual(kept.primary?.label, "Forget 1 agent")
-        XCTAssertEqual(try calls(action, kept.given), ["agents.forget Agent=agent-7f"])
         XCTAssertEqual(try calls(action, ["VMs": ""]), [], "nothing checked, nothing is asked")
     }
 
@@ -74,9 +62,6 @@ final class SheetsTests: XCTestCase {
         XCTAssertEqual(ActionRunner.narrowed(fixed, by: ["VMs": #"["old"]"#], checks: ["VMs"]), ["VMs": #"["old"]"#, "Confirm": "yes"])
         XCTAssertNil(ActionRunner.narrowed(fixed, by: ["VMs": #"["linux-1"]"#], checks: ["VMs"]), "a Mac with nothing checked is not asked")
         XCTAssertNil(ActionRunner.narrowed(fixed, by: [:], checks: ["VMs"]), "an ephemeral workspace unchecked is not deleted")
-        XCTAssertEqual(ActionRunner.narrowed(["Agent": "docs"], by: ["Agent": #"["docs"]"#], checks: ["Agent"]), ["Agent": "docs"])
-        XCTAssertNil(ActionRunner.narrowed(["Agent": "docs"], by: ["Agent": #"["agent-7f"]"#], checks: ["Agent"]), "an agent unchecked is not forgotten")
-        XCTAssertNil(ActionRunner.narrowed(["Agent": "docs"], by: [:], checks: ["Agent"]), "no agent checked, none is forgotten")
     }
 
     func testAHintsCommandIsThePagesOwn() throws {

@@ -1,7 +1,7 @@
 import SwiftUI
 
 // invariant: SPEC A4's Home: the hero the engine decides first; below it,
-// the tiles and the agents', servers' and Macs' cards, the menu's lines
+// the tiles and the servers' and Macs' cards, the menu's lines
 // only while the station menu is open. A page from an engine that sends
 // no cards keeps the machines' list, the Awake and Accounts tiles and the
 // menu; one that sends no hero, the three measures and what needs you.
@@ -10,7 +10,6 @@ struct HomePage: View {
     let state: PanelState
     let handlers: PopoverHandlers
     @State private var unfolded = false
-    @State private var folds: Set<String>
     @Environment(\.stationFocus) private var focus
     @Environment(\.stationPalette) private var palette
     @Environment(\.stationStill) private var still
@@ -19,7 +18,6 @@ struct HomePage: View {
         self.page = page
         self.state = state
         self.handlers = handlers
-        _folds = State(initialValue: Set(state.unfolded))
     }
 
     // value: SPEC A4's Home below the hero: its tiles and its cards, once
@@ -73,17 +71,13 @@ struct HomePage: View {
         }
     }
 
-    // value: SPEC A4 Home 2-5: the tiles, then the agents, the servers and
-    // the Macs, each its card.
+    // value: SPEC A4 Home 2-5: the tiles, then the servers and the Macs,
+    // each its card.
     @ViewBuilder
     var sections: some View {
         let actions = page.actions ?? []
         if let tiles = page.section(HomeCards.tiles) {
             TileStrip(tiles, actions: actions, run: { perform($0, handlers) }, open: { go($0, handlers) })
-        }
-        if let agents = page.section(HomeCards.agents) {
-            AgentsCard(agents, actions: actions, open: folds.contains(HomeCards.agents), lit: litID, fold: { fold(HomeCards.agents) },
-                       run: { a, _ in perform(a, handlers) }, go: { go($0, handlers) })
         }
         if let servers = page.section(HomeCards.servers) {
             ServersCard(servers, actions: actions, lit: litID, go: { go($0, handlers) })
@@ -91,10 +85,6 @@ struct HomePage: View {
         if let macs = page.section(HomeCards.macs) {
             MacsCard(macs, actions: actions, lit: litID, run: { a, _ in perform(a, handlers) }, go: { go($0, handlers) })
         }
-    }
-
-    func fold(_ id: String) {
-        if folds.contains(id) { folds.remove(id) } else { folds.insert(id) }
     }
 
     // value: the engine does not answer: what is wrong in a sentence and

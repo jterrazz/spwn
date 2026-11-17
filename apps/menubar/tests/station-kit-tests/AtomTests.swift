@@ -23,7 +23,7 @@ final class AtomTests: XCTestCase {
 
     static let heroFacts = [
         part("infra healthy"), part("example.com up", short: "site up"), part("2 of 3 Macs"),
-        part("3 VMs", pri: 1), part("2 agents working", pri: 2),
+        part("3 VMs", pri: 1), part("2 servers healthy", pri: 2),
     ]
 
     static func measure(_ text: String) -> CGFloat {

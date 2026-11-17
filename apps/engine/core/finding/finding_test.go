@@ -83,7 +83,7 @@ func TestNeedsYouListsEachMacFollowedByItsOwnVMsThenTheNextMac(t *testing.T) {
 	}
 }
 
-func TestNeedsYouRanksRedThenWhatBlocksYouThenWhatExpiresSoonestFirst(t *testing.T) {
+func TestNeedsYouRanksRedThenWhatExpiresSoonestFirst(t *testing.T) {
 	mini := machine.Ref{Name: "mac-mini"}
 	this := machine.Ref{Name: "macbook-pro"}
 	at := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
@@ -92,12 +92,11 @@ func TestNeedsYouRanksRedThenWhatBlocksYouThenWhatExpiresSoonestFirst(t *testing
 		read []finding.Finding
 		want []string
 	}{
-		{"a lease, a wait, a down server and an exposed port", []finding.Finding{
+		{"a lease, a down server and an exposed port", []finding.Finding{
 			{Machine: machine.Ref{Name: "linux-1", On: this.Name}, Section: section.Accounts, Urgency: finding.Expiring, Ends: at.Add(24 * time.Minute), Subject: "token"},
-			{Machine: machine.Ref{Name: "review-bot", On: mini.Name}, Section: section.Overview, Urgency: finding.Blocking, Subject: "review-bot"},
 			{Machine: this, Section: section.Ports, Severity: finding.Broken, Urgency: finding.Red, Subject: "5000"},
 			{Machine: machine.Ref{Name: "infra", On: mini.Name}, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: "infra"},
-		}, []string{"infra", "5000", "review-bot", "token"}},
+		}, []string{"infra", "5000", "token"}},
 		{"two reds are never merged, each keeps its row", []finding.Finding{
 			{Machine: machine.Ref{Name: "infra", On: mini.Name}, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: "infra"},
 			{Machine: machine.Ref{Name: "db", On: mini.Name}, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: "db"},

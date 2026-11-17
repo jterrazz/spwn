@@ -29,66 +29,8 @@
           "kind": "text",
           "text": "up 2 hr",
           "pri": 3
-        },
-        {
-          "kind": "text",
-          "text": "1 agent"
         }
       ]
-    },
-    {
-      "id": "agents",
-      "title": "Agents",
-      "caption": [
-        {
-          "kind": "list",
-          "items": [
-            {
-              "kind": "text",
-              "text": "1 working"
-            }
-          ]
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "linux-3",
-            "mark": "ok",
-            "label": "linux-3",
-            "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "editing src/auth/refresh.ts"
-                }
-              ]
-            },
-            "glyph": {
-              "kind": "agent",
-              "signal": "active"
-            },
-            "quick": "attach:linux-3",
-            "nav": "menubar.agent:linux-3"
-          }
-        }
-      ],
-      "uncounted": true,
-      "segment": "overview",
-      "card": "flush"
     },
     {
       "id": "gauges",
@@ -1845,7 +1787,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-3 stops. Its disk is kept. 1 shared port stops answering until it starts again."
+            "text": "Its disk is kept. 1 shared port stops answering until it starts again."
           }
         ],
         "yes": "Stop linux-3",
@@ -1874,7 +1816,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-3 stops first. This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 grant made to it."
+            "text": "This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 grant made to it."
           }
         ],
         "danger": true,
@@ -1894,63 +1836,6 @@
         "target": {
           "name": "mac-mini"
         }
-      }
-    },
-    {
-      "key": "shift+cmd+n",
-      "label": "New agent",
-      "on": "page",
-      "priority": 2,
-      "mutates": true,
-      "id": "new-agent",
-      "run": {
-        "call": "agents.start",
-        "in": {
-          "On": "linux-3"
-        },
-        "target": {
-          "name": "mac-mini"
-        }
-      },
-      "form": {
-        "title": "New agent on linux-3",
-        "fields": [
-          {
-            "key": "Task",
-            "label": "Task",
-            "kind": "text",
-            "note": "empty, it waits for a prompt"
-          }
-        ]
-      },
-      "icon": "plus"
-    },
-    {
-      "key": "cmd+enter",
-      "label": "Open linux-3 in Terminal",
-      "on": "row",
-      "rows": [
-        "linux-3"
-      ],
-      "priority": 2,
-      "id": "attach:linux-3",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "agents",
-          "attach",
-          "linux-3"
-        ]
-      },
-      "icon": "terminal",
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "linux-3 opened in Terminal"
-          }
-        ]
       }
     },
     {
@@ -2150,7 +2035,6 @@
       "icon": "ellipsis",
       "submenu": [
         "title:linux-3",
-        "new-agent",
         "copy-ssh@menu",
         "share-port@menu",
         "-",
@@ -2238,7 +2122,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-3 stops. Its disk is kept. 1 shared port stops answering until it starts again."
+            "text": "Its disk is kept. 1 shared port stops answering until it starts again."
           }
         ],
         "yes": "Stop linux-3",
@@ -2268,7 +2152,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-3 stops first. This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 grant made to it."
+            "text": "This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 grant made to it."
           }
         ],
         "danger": true,
@@ -2296,8 +2180,8 @@
   "header": {
     "back": "All machines",
     "glyph": {
-      "kind": "agent",
-      "signal": "active"
+      "kind": "workspace",
+      "signal": "quiet"
     },
     "buttons": [
       "menu"

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -79,10 +78,9 @@ func (n Need) of(name string) bool {
 
 func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 	// invariant: SPEC B5.7: what needs the owner, ranked by finding.Rank (a
-	// server down, a port exposed, an agent waiting on the owner), and
-	// upkeep apart, ranked by finding.RankUpkeep, never in the badge. Two
-	// reds are two needs. A server restarting is not one, even while it is
-	// still stopped.
+	// server down, a port exposed), and upkeep apart, ranked by
+	// finding.RankUpkeep, never in the badge. Two reds are two needs. A
+	// server restarting is not one, even while it is still stopped.
 	w := needSaid{r: r, self: self}
 	if r.All != nil {
 		for _, h := range r.All.Macs {
@@ -91,8 +89,6 @@ func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 				case vm.Lifetime == model.AlwaysOn && vm.Restart != nil:
 				case model.Down(vm):
 					needs = append(needs, w.down(h, vm))
-				case vm.Agent != nil && vm.Agent.State == string(agents.Waiting):
-					needs = append(needs, w.waiting(h, vm))
 				}
 			}
 		}
@@ -150,25 +146,6 @@ func (w needSaid) down(h model.MacView, vm model.VM) Need {
 		Key:     key, Glyph: symbol("xmark.octagon.fill", page.SignalFailing), Hero: vm.Name + " is down", Subject: vm.Name, What: what,
 		Find: []string{VerbRestart + " " + vm.Name}, Facts: facts, Nav: machinePage(vm.Name), Scope: []string{h.Name, vm.Name},
 		Verb: verb,
-	}
-}
-
-func (w needSaid) waiting(h model.MacView, vm model.VM) Need {
-	a := vm.Agent
-	what := a.Ask
-	if what == "" {
-		what = "waits for your review"
-	}
-	facts := []page.Value{page.Text(what)}
-	if !a.Since.IsZero() {
-		facts = append(facts, page.Text(minutes(w.r.Now.Sub(a.Since))))
-	}
-	key := "waiting:" + vm.Name
-	return Need{
-		Finding: finding.Finding{Machine: machine.Ref{Name: vm.Name, On: h.Name}, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Blocking, Subject: vm.Name},
-		Key:     key, Glyph: symbol("text.bubble", page.SignalWaits), Hero: vm.Name + " is waiting", Subject: vm.Name, What: what,
-		Find: []string{VerbReview + " " + vm.Name, what}, Facts: facts, Nav: machinePage(vm.Name), Scope: []string{h.Name, vm.Name},
-		Verb: page.Action{ID: key, Label: VerbReview, On: page.OnRow, Rows: []string{key}, Default: true},
 	}
 }
 
@@ -344,7 +321,7 @@ func NeedsPage(r NeedsReading, of string, thisMac page.Context) page.Page {
 	if of != "" {
 		p.Header.Back = where
 	}
-	facts := []page.Value{page.Text(where), page.Text("nothing blocks an agent or a server")}
+	facts := []page.Value{page.Text(where), page.Text("nothing blocks a server")}
 	if len(needs) > 0 {
 		facts[1] = page.Text(thingsFirst(len(needs)))
 	}
@@ -408,8 +385,6 @@ func reasonOf(f finding.Finding) page.Reason {
 		return page.Exposed
 	case f.Urgency == finding.Red:
 		return page.Down
-	case f.Urgency == finding.Blocking:
-		return page.Waiting
 	case f.Urgency == finding.Expiring:
 		return page.Expiring
 	case f.Severity == finding.Broken:
