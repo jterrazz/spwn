@@ -6,7 +6,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import type { AccountSide, DiskCall, MacState } from './provisional';
+import type { DiskCall, MacState } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
 
@@ -166,12 +166,6 @@ export const SHARE_STATE_WORDS: Words<PortsSharedPort['state']> = {
     waiting: 'waiting',
 };
 
-// outside: machinefile.drift words a port's audience and no side left out, nor an account's (provisional.ts,
-// outside: accountSideOf): these are the words of what it leaves unsaid, until each side carries its own.
-export const DIFFERING_WORDS: Words<'not-shared' | AccountSide> = {
-    granted: 'Granted',
-    'not-in-the-file': 'Not in the file',
-    'not-shared': 'Not shared',
-    'not-signed-in': 'Not signed in',
-    shared: 'Shared',
-};
+// outside: machinefile.drift words a port's audience and an account's side, and leaves the side of what it does not
+// outside: hold empty: this is the word of that nothing.
+export const NOT_SHARED_WORD = 'Not shared';

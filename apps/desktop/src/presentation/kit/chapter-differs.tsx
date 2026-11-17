@@ -4,8 +4,7 @@ import { driftAsked } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { useRead } from '../dependencies/dependencies';
 import { AppIcon, Panel, StatePill, Value } from '../ui/index';
-import { accountSideOf } from '../words/provisional';
-import { differingSide } from '../words/shown';
+import { differingLeftOut, differingSide } from '../words/shown';
 import type { DifferingSide, SharedChapter } from '../words/shown';
 
 import styles from './chapter-differs.module.css';
@@ -45,8 +44,7 @@ function Side({
     side: DifferingSide;
 }) {
     const shown = differingSide(chapter, side, differing);
-    const absent = chapter === 'accounts' && accountSideOf(side, differing) === 'not-in-the-file';
-    if (absent) {
+    if (differingLeftOut(chapter, side, differing)) {
         return <span className={styles.hint}>{shown.word}</span>;
     }
     return (

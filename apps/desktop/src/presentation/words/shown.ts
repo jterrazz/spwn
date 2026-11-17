@@ -19,7 +19,7 @@ import type {
 import type { Tone } from '../../domain/tone';
 import { wordOf } from './engine-words';
 import type { CodeOf, Worded } from './engine-words';
-import { accountSideOf, machineKindOf, macStateOf } from './provisional';
+import { machineKindOf, macStateOf } from './provisional';
 import {
     APP_WHY_TONES,
     MAC_STATE_TONES,
@@ -30,12 +30,12 @@ import {
 } from './tones';
 import {
     APP_WHY_WORDS,
-    DIFFERING_WORDS,
     MAC_STATE_WORDS,
     MACHINE_KIND_WORDS,
     NEWEST_WORD,
     newestOutWord,
     NO_STATE_WORD,
+    NOT_SHARED_WORD,
     OWN_STATE_WORDS,
     PORT_REACH_WORDS,
     REVERSIBLE_WORD,
@@ -168,8 +168,16 @@ export type DifferingSide = 'asked' | 'seen';
 
 function portSide(to: CatalogAudience | undefined): Shown {
     return to === undefined
-        ? { tone: 'plain', word: DIFFERING_WORDS['not-shared'] }
+        ? { tone: 'plain', word: NOT_SHARED_WORD }
         : engineShown('CatalogAudience', to);
+}
+
+export function differingLeftOut(
+    chapter: SharedChapter,
+    side: DifferingSide,
+    differing: MachinefileDiffering,
+): boolean {
+    return chapter === 'accounts' && side === 'asked' && differing.AskedAs === 'not-in-the-file';
 }
 
 export function differingSide(
@@ -180,7 +188,14 @@ export function differingSide(
     if (chapter === 'ports') {
         return portSide(side === 'asked' ? differing.AskedTo : differing.SeenTo);
     }
-    return { tone: 'plain', word: DIFFERING_WORDS[accountSideOf(side, differing)] };
+    if (side === 'asked') {
+        return differing.AskedAs === undefined
+            ? { tone: 'plain', word: NOT_SHARED_WORD }
+            : engineShown('MachinefileFileSide', differing.AskedAs);
+    }
+    return differing.SeenAs === undefined
+        ? { tone: 'plain', word: NOT_SHARED_WORD }
+        : engineShown('MachinefileMacSide', differing.SeenAs);
 }
 
 export function shareToWord(to: CatalogAudience): string {
