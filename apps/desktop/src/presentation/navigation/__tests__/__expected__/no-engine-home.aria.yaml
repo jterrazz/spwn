@@ -2,16 +2,16 @@
   - button "Find"
   - button "Home"
   - button "Inbox"
-  - button "Storage"
-  - group "Machines":
-    - heading "Machines" [level=2]
   - button "Machine files"
   - button "Passwords"
+  - group "Machines":
+    - heading "Machines" [level=2]
   - group "Catalog":
     - heading "Catalog" [level=2]
     - button "Apps"
     - button "Skills"
     - button "Settings"
+  - button "Storage"
   - img "No answer"
   - text: No engine answers at /run/engine.sock
 - main:

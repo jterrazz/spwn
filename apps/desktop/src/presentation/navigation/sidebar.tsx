@@ -52,7 +52,8 @@ function Places({ needs, place }: { needs: readonly OverviewNeed[]; place: Place
                 icon="inbox"
                 label="Inbox"
             />
-            <NavItem {...place('storage')} icon="disc" label="Storage" />
+            <NavItem {...place('machine-files')} icon="file" label="Machine files" />
+            <NavItem {...place('passwords')} icon="key" label="Passwords" />
         </div>
     );
 }
@@ -100,11 +101,10 @@ function Machines({ macs, route, go }: Pick<SidebarProps, 'go' | 'macs' | 'route
     );
 }
 
-function MachineFiles({ place }: { place: Place }) {
+function Storage({ place }: { place: Place }) {
     return (
-        <div className={styles.group}>
-            <NavItem {...place('machine-files')} icon="file" label="Machine files" />
-            <NavItem {...place('passwords')} icon="key" label="Passwords" />
+        <div className={styles.pinned}>
+            <NavItem {...place('storage')} icon="disc" label="Storage" />
         </div>
     );
 }
@@ -204,10 +204,12 @@ export function Sidebar({ carried, macs, needs, engine, route, go, onFind }: Sid
                 <span>Find</span>
                 <kbd aria-hidden="true">⌘K</kbd>
             </button>
-            <Places needs={needs} place={place} />
-            <Machines go={go} macs={macs} route={route} />
-            <MachineFiles place={place} />
-            <Catalog carried={carried} place={place} />
+            <div className={styles.list}>
+                <Places needs={needs} place={place} />
+                <Machines go={go} macs={macs} route={route} />
+                <Catalog carried={carried} place={place} />
+            </div>
+            <Storage place={place} />
             <Engine engine={engine} />
         </nav>
     );

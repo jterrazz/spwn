@@ -8,6 +8,18 @@
     overflow-y: auto;
     background: var(--ground-sidebar);
 }
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    flex: 1 1 0;
+    min-height: 160px;
+    overflow-y: auto;
+}
+.pinned {
+    flex: none;
+    margin-top: auto;
+}
 .lights {
     height: var(--space-14);
     flex: none;
