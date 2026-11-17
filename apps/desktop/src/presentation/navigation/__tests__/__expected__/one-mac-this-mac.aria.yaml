@@ -2,19 +2,19 @@
   - button "Find"
   - button "Home"
   - button "Inbox"
-  - button "Storage"
+  - button "Machine files"
+  - button "Passwords"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
-  - button "Machine files"
-  - button "Passwords"
   - group "Catalog":
     - heading "Catalog" [level=2]
     - button "Apps 1"
     - button "Skills 0"
     - button "Settings 1"
+  - button "Storage"
   - img "running"
   - text: Engine running · dev
 - main:
