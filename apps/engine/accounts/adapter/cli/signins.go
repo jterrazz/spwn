@@ -360,7 +360,7 @@ func (s *SignIns) step(ctx context.Context, session io.Reader, p catalog.LoginPr
 			}
 		}
 		if ex.kind == accounts.StepDeviceCode && step.Code != "" || ex.kind != accounts.StepDeviceCode && s.linkOf(id) != "" {
-			step.Line = ex.program.StepLine(ex.kind, p.Site)
+			step.Line = ex.program.StepLine(ex.kind, p.Site, s.named(ex.machine))
 			return step, nil
 		}
 	}

@@ -32,7 +32,7 @@ A row offers only an action the engine would accept: sign in, sign in again, rem
 
 A sign-in is a login the program runs inside the machine. `accounts.login` is a call of the engine of the machine's own Mac, naming the VM in `Machine`: that engine starts the program over its one connection to the VM, reads its output and its errors as they arrive, and streams a step to the window. It runs the program found on the machine's `PATH`, never a version manager's shim, so cancelling the login stops the program itself (a SIGTERM, then the connection's close):
 
-- a **device code**: the window shows the code, and Open takes you to the provider's device page;
+- a **device code**: the window shows the code, and Open takes you to the provider's device page; its status line reads `Enter this code at github.com. linux-1 signs in by itself once you approve it.`;
 - a **link**: the VM's own link, the first the program prints on its site or a subdomain of it (another link the program prints is skipped), opened by the engine of the VM's Mac, only to a site the catalog allows; a program that prints links only off its site is refused;
 - a **paste**: the program asks for a code you copy back, which `accounts.answer` writes to the program's input, one line, never to a command line. A program that would open a browser finds `true` as its browser, which opens nothing and leaves nothing behind.
 
