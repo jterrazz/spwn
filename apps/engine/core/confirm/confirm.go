@@ -38,7 +38,7 @@ const (
 	Erase         Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.
 	BuildImage Action = "build-image"
-	// value: delete the ephemeral workspaces whose agent finished, in one question.
+	// value: delete the stopped ephemeral workspaces, in one question.
 	Cleanup Action = "cleanup"
 	// value: delete what nothing uses on a Mac: the image versions no
 	// machine is made from, and the leftovers.
@@ -209,7 +209,7 @@ func (a Action) Consequence() string {
 	case BuildImage:
 		return "%s is built first, which takes several minutes."
 	case Cleanup:
-		return "Every ephemeral workspace whose agent finished is deleted."
+		return "Every stopped ephemeral workspace is deleted."
 	case FreeUnused:
 		return "Deleted for good: %s. No machine and no file of yours is touched."
 	}

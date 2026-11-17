@@ -50,7 +50,7 @@ type Machines interface {
 	// else; base-ubuntu's for none.
 	Unasked(ctx context.Context, from string) (machines.Unasked, error)
 	// value: the name a create of that kind takes unasked over the fleet f.
-	NameFor(ctx context.Context, kind catalog.MachineKind, f machines.AllMachines) (string, error)
+	NameFor(kind catalog.MachineKind, f machines.AllMachines) (string, error)
 	// value: build is nil when the image is built, or when the owner was
 	// not asked to build it.
 	Create(ctx context.Context, r machines.CreateRequest, build ImageBuild, progress func(machines.Step)) (machines.Created, error)

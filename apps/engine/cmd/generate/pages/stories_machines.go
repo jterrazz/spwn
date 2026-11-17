@@ -77,13 +77,9 @@ func sceneMachines() model.AllMachines {
 	infra.BootAt = storyNow.Add(-12 * 24 * time.Hour)
 	infra.CheckStatus = model.CheckStatus{State: model.CheckPassing, At: storyNow.Add(-40 * time.Second), Answer: "200"}
 	linux1 := sceneVM("linux-1", proName, model.Ephemeral, model.Running, 4, 8, "192.168.64.5")
-	linux1.Agent = &model.AgentView{State: "working", Task: "fix the flaky e2e test"}
 	agent7f := sceneVM("agent-7f", proName, model.Ephemeral, model.Running, 4, 8, "192.168.64.6")
-	agent7f.Agent = &model.AgentView{State: model.AgentFinished, Task: "write the changelog", Ended: storyNow.Add(-12 * time.Minute), Reason: "tests pass"}
 	linux3 := sceneVM("linux-3", miniMac, model.Ephemeral, model.Running, 4, 8, "192.168.64.8")
-	linux3.Agent = &model.AgentView{State: "working", Task: "refresh the auth token"}
 	bot := sceneVM("review-bot", miniMac, model.Persistent, model.Running, 2, 4, "192.168.64.9")
-	bot.Agent = &model.AgentView{State: "waiting", Task: "fixes the token refresh", Ask: "PR #42 is ready", Since: storyNow.Add(-6 * time.Minute)}
 	return model.AllMachines{Read: storyNow, Macs: []model.MacView{
 		{Name: proName, User: "you", StationVersion: stationVer, ThisMac: true, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.14"}, VMs: []model.VM{
 			linux1,

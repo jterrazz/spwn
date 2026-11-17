@@ -35,24 +35,6 @@ const RESTART = {
     Verb: 'restart',
 };
 
-const DELETE = {
-    Args: { VM: 'linux-1' },
-    Broken: false,
-    Call: 'machines.delete',
-    Command: '',
-    Confirm: 'linux-1',
-    Machine: 'linux-1',
-    Noun: 'Overview',
-    On: 'macbook-pro',
-    Path: '',
-    Section: 'overview',
-    Severity: 'needs-a-look',
-    Subject: 'linux-1',
-    Text: 'linux-1 has been idle for 5 h and holds 10 GB',
-    Upkeep: 'can-wait',
-    Verb: 'delete',
-};
-
 function recordOf(value: unknown): Record<string, unknown> | undefined {
     return typeof value === 'object' && value !== null
         ? Object.fromEntries(Object.entries(value))
@@ -188,8 +170,8 @@ describe('NeedLine', () => {
     });
 
     test("a server's failing check is restarted from its need, through the dialog its page asks, and it is the one bright button", async () => {
-        // Given - the Inbox over two-macs, where infra's check fails and linux-1 has sat idle
-        const recording = withNeeds(recordingFor('two-macs'), [RESTART, DELETE]);
+        // Given - the Inbox over two-macs, its one need infra's failing check
+        const recording = withNeeds(recordingFor('two-macs'), [RESTART]);
         let bright: string[] = [];
         const result = await component.render(
             pageOver(recording, { page: 'inbox' }),
@@ -223,30 +205,6 @@ describe('NeedLine', () => {
                 const sheet = dialog('Sign in to npm on macbook-pro');
                 await visitor.see(sheet);
                 await visitor.gone(sheet);
-            },
-        );
-        expect(result.errors.text).toBe('');
-    });
-
-    test('an idle workspace is deleted from its need only by its name typed, and the dialog can be left', async () => {
-        // Given - the same Inbox, linux-1's delete waiting among the needs that can wait
-        const recording = withNeeds(recordingFor('two-macs'), [RESTART, DELETE]);
-        const result = await component.render(
-            pageOver(recording, { page: 'inbox' }),
-            async (visitor) => {
-                await visitor.see(
-                    within(waiting, content('linux-1 has been idle for 5 h', { exact: false })),
-                );
-
-                // When - its Delete is clicked, then the dialog is cancelled
-                await visitor.click(within(waiting, button('Delete linux-1')));
-                const asked = dialog('Delete linux-1?');
-                await visitor.see(within(asked, field('Type linux-1 to confirm')));
-                await visitor.click(within(asked, button('Cancel')));
-
-                // Then - nothing is sent, and the need stays
-                await visitor.gone(dialog());
-                await visitor.see(within(waiting, button('Delete linux-1')));
             },
         );
         expect(result.errors.text).toBe('');

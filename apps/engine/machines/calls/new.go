@@ -91,7 +91,7 @@ var NewSheet = call.Watch[Deps, NewIn, NewMachine]{
 			}
 		}
 		sheet := func(f machines.AllMachines) call.Update[NewMachine] {
-			name, err := d.Machines.NameFor(ctx, unasked.Kind, f)
+			name, err := d.Machines.NameFor(unasked.Kind, f)
 			if err != nil {
 				return call.Update[NewMachine]{Err: err}
 			}
@@ -145,7 +145,7 @@ func newOn(f machines.AllMachines, h machines.MacView, server *NewServer) NewOn 
 	room := machines.RoomOf(h.Name, c)
 	o.Room, o.MaxMemory, o.Ready = &room, c.Free, machines.Takes(h)
 	if !o.Ready {
-		o.Verdict = verdict.Verdict{Tone: verdict.Bad, Sentence: "No room on " + label + ". Choose the other one, or reclaim an idle machine first."}
+		o.Verdict = verdict.Verdict{Tone: verdict.Bad, Sentence: "No room on " + label + ". Choose the other one, or delete a stopped one first."}
 	}
 	if server != nil {
 		o.Server = &NewServerOn{Fit: machines.FitOf(server.Size, c), Verdict: verdict.Verdict{Tone: verdict.Plain}}

@@ -502,7 +502,7 @@ func Codes() map[fail.Code]Wording {
 			return "machine " + name + " already exists", "station machines forget " + e.Subject + " first, to change it"
 		},
 		machinescalls.NotFinished: func(e *fail.Error) (string, string) {
-			return e.Subject + " stays: only an ephemeral workspace that is stopped, or whose agent finished, is deleted by a cleanup", "station machines cleanup"
+			return e.Subject + " stays: only a stopped ephemeral workspace is deleted by a cleanup", "station machines cleanup"
 		},
 		agentscalls.UnknownAgent: func(e *fail.Error) (string, string) {
 			return "no agent named \"" + e.Subject + "\"", "station agents"

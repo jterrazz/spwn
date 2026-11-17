@@ -234,7 +234,7 @@ func Judged(f AllMachines) AllMachines {
 			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j]), LatencyNote(vms[j])
 			head, pending := HeadOf(vms[j], f.Read)
 			vms[j].Head, vms[j].Pending = &head, pending
-			hold, sections := HoldOf(vms[j], f.Read), SectionsOf(vms[j])
+			hold, sections := HoldOf(vms[j]), SectionsOf(vms[j])
 			vms[j].Hold, vms[j].Sections, vms[j].Gestures = &hold, &sections, GesturesOf(vms[j])
 		}
 		macs[i].VMs = vms

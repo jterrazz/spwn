@@ -51,7 +51,7 @@
   },
   "machines.cleanup": {
     "confirm": "cleanup",
-    "consequence": "Every ephemeral workspace whose agent finished is deleted.",
+    "consequence": "Every stopped ephemeral workspace is deleted.",
     "form": "yes-no"
   },
   "machines.create-server": {

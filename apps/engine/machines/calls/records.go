@@ -72,7 +72,7 @@ func (s *Machinist) HoldOf(ctx context.Context, name string) (model.Hold, bool) 
 	_, live := s.engineView(ctx)
 	for _, vm := range s.vmsOf(s.ThisMacName(), stored, s.disks(ctx), live) {
 		if vm.Name == name {
-			return model.HoldOf(vm, s.h.Now()), true
+			return model.HoldOf(vm), true
 		}
 	}
 	return model.Hold{}, false
@@ -131,7 +131,7 @@ func (s *Machinist) vmsOf(mac string, stored []model.Record, disks map[string]co
 			vm.Guest, vm.IP, vm.Detail = d.Guest, d.IP, d.Detail
 			vm.SSH, vm.Restarts, vm.CheckStatus, vm.BootAt = d.SSH, d.Restarts, d.Check, d.BootAt
 			vm.Latency, vm.Restart = d.Latency, d.Restart
-			vm.Cause, vm.LastLines, vm.ReadyAt, vm.Agent = d.Cause, d.LastLines, d.ReadyAt, d.Agent
+			vm.Cause, vm.LastLines, vm.ReadyAt = d.Cause, d.LastLines, d.ReadyAt
 			vm.Drift = d.Drift
 		}
 		out = append(out, model.Born(vm, r.Birth, s.runs(r.Owner)))

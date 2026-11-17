@@ -119,7 +119,7 @@ describe('ConfirmDialog', () => {
         // Given - the confirm of a delete of a held machine
         const result = await component.render(
             <ConfirmDialog
-                held="It is held by its agent: work may be in progress."
+                held="It is held by its lot, by studio-os-43: work may be in progress."
                 onCancel={ignored}
                 onConfirm={ignored}
                 said="linux-1 and everything on its disk are deleted for good."
@@ -133,7 +133,7 @@ describe('ConfirmDialog', () => {
 
         // Then - both sentences are drawn, the hold last
         expect(result.html.text).toMatch(
-            /linux-1 and everything on its disk are deleted for good\. It is held by its agent: work may be in progress\./u,
+            /linux-1 and everything on its disk are deleted for good\. It is held by its lot, by studio-os-43: work may be in progress\./u,
         );
     });
 });

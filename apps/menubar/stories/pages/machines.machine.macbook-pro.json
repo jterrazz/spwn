@@ -276,7 +276,7 @@
             ],
             "detail": {
               "kind": "text",
-              "text": "linux-1 pauses if it sleeps"
+              "text": "agent-7f, linux-1 pause if it sleeps"
             },
             "glyph": {
               "kind": "symbol:sun.max",

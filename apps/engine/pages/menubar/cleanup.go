@@ -3,7 +3,6 @@ package menubar
 import (
 	"encoding/json"
 	"strings"
-	"time"
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -43,7 +42,7 @@ func (c cleanupOf) any() bool { return len(c.gone) > 0 }
 // checked, each going with its disk, its ports and the accounts lent to
 // it; the note names what stays. The button is worded from what is
 // checked, red. One Mac's, or every Mac's when scoped to none.
-func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Time, scoped bool) page.Action {
+func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, scoped bool) page.Action {
 	vmsField := page.Field{Key: "VMs", Label: "Stopped ephemeral workspaces", Kind: page.FieldMulti, Note: "each goes with its disk, its ports and the accounts lent to it"}
 	var runs []page.Run
 	var running []string
@@ -55,7 +54,7 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 			if !scoped {
 				parts = append(parts, label)
 			}
-			parts = append(parts, "stopped", pagemachines.DiskSize(model.CandidateOf(vm, now).DiskBytes).Text+" disk")
+			parts = append(parts, "stopped", pagemachines.DiskSize(model.CandidateOf(vm).DiskBytes).Text+" disk")
 			vmsField.Options = append(vmsField.Options, page.Option{Value: vm.Name, Label: vm.Name, Note: strings.Join(parts, "{sep}")})
 			names = append(names, vm.Name)
 		}

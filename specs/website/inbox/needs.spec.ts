@@ -66,10 +66,6 @@ describe('needs', () => {
 
     test.todo("N5 waits for each line's version rule on machinefile.drift");
 
-    test.todo(
-        'N6 waits for a recording of an idle VM among the needs, and a kept journal for Changes',
-    );
-
     test('N7 a program signed out offers Sign in, and its sheet shows the engine code and the site to open', async () => {
         // Given - linux-1's Sign-ins over two-macs, gh signed out
         const result = await website.visit(

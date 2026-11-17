@@ -79,7 +79,7 @@ func (m machine) runningWorkspaces(ctx context.Context) []string {
 	vms := make([]model.VM, 0, len(records))
 	for _, r := range records {
 		v := live[r.Name]
-		vm := model.VM{Name: r.Name, Lifetime: r.Lifetime, Agent: v.Agent}
+		vm := model.VM{Name: r.Name, Lifetime: r.Lifetime}
 		if v.State == engine.StateRunning {
 			vm.State = model.Running
 		}

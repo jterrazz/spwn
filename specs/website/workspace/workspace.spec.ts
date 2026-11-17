@@ -38,7 +38,7 @@ describe('workspace', () => {
     });
 
     test('W2 a workspace says who holds it and whether it is safe to delete', async () => {
-        // Given - the window on the stories world, where linux-1 is held by a session and agent-7f has finished
+        // Given - the window on the stories world, where linux-1 is held by a session and review-bot, persistent, by none
         const held = await website.visit(
             '/?world=stories&machine=linux-1&tab=Overview',
             async (visitor) => {
@@ -52,17 +52,17 @@ describe('workspace', () => {
                 );
             },
         );
-        const finished = await website.visit(
-            '/?world=stories&machine=agent-7f&tab=Overview',
+        const yours = await website.visit(
+            '/?world=stories&machine=review-bot&tab=Overview',
             async (visitor) => {
-                // Then - the hold of a finished one says it is safe to delete
+                // Then - the hold of one no session holds says it is yours, and stays until you delete it
                 await visitor.see(
-                    within(region('Why it exists'), content('Its agent finished. Safe to delete.')),
+                    within(region('Why it exists'), content('Yours. Stays until you delete it.')),
                 );
             },
         );
         expect(held.errors.text).toBe('');
-        expect(finished.errors.text).toBe('');
+        expect(yours.errors.text).toBe('');
     });
 
     test('W3 Delete of a held workspace says who holds it before it asks for its name', async () => {
