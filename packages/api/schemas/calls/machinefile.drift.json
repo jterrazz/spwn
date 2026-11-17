@@ -696,6 +696,9 @@
         },
         "Sentence": {
           "type": "string"
+        },
+        "Stays": {
+          "type": "string"
         }
       },
       "required": [
@@ -703,7 +706,8 @@
         "Install",
         "Leave",
         "Remove",
-        "Sentence"
+        "Sentence",
+        "Stays"
       ],
       "type": "object"
     },

@@ -1395,6 +1395,7 @@ export type MachinefileApplying = {
     Leave: number;
     Remove: number;
     Sentence: string;
+    Stays: string;
 };
 
 export type MachinefileAsked = {
