@@ -5,7 +5,6 @@ import type {
     DiskMoveInput,
     DiskRow,
     EngineStartInput,
-    MachinefileDiffering,
     MachinefileExtraLine,
     MachinefileLine,
     MachinesDeleteInput,
@@ -141,22 +140,6 @@ export function freesWhole(group: DiskRow['Group']): boolean {
 }
 
 export type PlanLine = MachinefileExtraLine | MachinefileLine;
-
-export type AccountSide = 'granted' | 'not-in-the-file' | 'not-signed-in' | 'shared';
-
-// outside: machinefile.drift says an account's difference by its Condition alone, extra where the machine holds a
-// outside: grant the file does not share, absent where the file shares a sign-in the machine does not hold: each side
-// outside: is read from it, until a difference carries the word of each side.
-export function accountSideOf(
-    side: 'asked' | 'seen',
-    differing: MachinefileDiffering,
-): AccountSide {
-    const extra = differing.Condition === 'extra';
-    if (side === 'asked') {
-        return extra ? 'not-in-the-file' : 'shared';
-    }
-    return extra ? 'granted' : 'not-signed-in';
-}
 
 const OUTSIDE_TAILSCALE = 2;
 
