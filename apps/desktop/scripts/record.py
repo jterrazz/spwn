@@ -280,6 +280,7 @@ GESTURES = {
         {"call": "disk.erase", "in": {"App": "orbstack", "Confirm": "orbstack"}},
         {"call": "images.delete", "in": {"Image": "station-linux", "Version": "2026.10.20", "Confirm": "yes"}},
         {"call": "ports.stop-sharing", "in": {"VM": "linux-1", "Port": "5173", "Confirm": "yes"}},
+        {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "local"}},
         {"watch": "accounts.login", "in": {"Program": "gh", "Machine": "linux-1"}},
         {"watch": "accounts.login", "in": {"Program": "npm"}},
         {"call": "accounts.open", "in": {"Machine": "linux-1", "Exchange": "ex-1"}},
@@ -303,6 +304,9 @@ GESTURES = {
     ],
     "range-full": [
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "9000"}},
+    ],
+    "share-local": [
+        {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "private"}},
     ],
     "presence-refused": [
         {"call": "grants.add", "in": {"Entry": "pw-1", "ToKind": "machine", "To": "linux-1"}},

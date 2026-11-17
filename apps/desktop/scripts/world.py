@@ -206,6 +206,16 @@ def listens(name, vm, port, process):
     return edit
 
 
+def kept_local(name, vm, port):
+    """A share its owner chose `local`, as `ports share --to local` leaves it: reserved so, and on no tailnet share."""
+    def edit(content):
+        held = content["macs"][name]
+        reserved = next(r for r in held["stores"]["reservations"] if r["vm"] == vm and r["guest_port"] == port)
+        reserved.update({"by": "owner", "chosen": "local", "to": "local"})
+        held["tailnet"]["shares"] = [s for s in held["tailnet"]["shares"] if s["Reserved"] != reserved["host_port"]]
+    return edit
+
+
 def plain(name):
     return (name, None, {}, [])
 
@@ -240,6 +250,7 @@ WORLDS = {
     "record-unreadable": ("two-macs", None, {}, [leftover("macbook-pro", "old-vm", 9000000000),
                                                  holds_file("macbook-pro", STATION_VM, 1000000),
                                                  unreadable("macbook-pro", "api")]),
+    "share-local": ("two-macs", None, {}, [kept_local("macbook-pro", "linux-1", 5173)]),
     "range-full": ("range-full", None, {}, [listens("macbook-pro", "linux-1", 9000, "node")]),
 }
 
