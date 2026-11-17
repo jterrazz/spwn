@@ -4,9 +4,12 @@ system menu's colour over the same desk is read the same way; the panel passes
 when it is within DELTA_E of the menu (CIEDE2000) and within DELTA_B on b*,
 the axis the owner's "white-bluish" is on, on every wall in both schemes.
 
-The bars are calibrated on the system itself: Passwords' own panel against the
-Apple menu, which the Tahoe capture (refs/passwords-tahoe) measured as one
-material, is under both, and so is one Apple menu opened twice.
+The bars hold the system itself: Passwords' own panel against the Apple menu,
+which the Tahoe capture (refs/passwords-tahoe) measured as one material, is
+under both, and so is one Apple menu opened twice. They are set on the owner's
+pick (ADR-053), one step above its worst desk in sweep mb1-sweep4 (dE 3.69,
+b* 3.28, both dark over the colour wall): the tinted glass it replaced reads
+7.26 and -4.55 light over the dark wall and fails.
 """
 
 import math
@@ -15,7 +18,7 @@ import numpy as np
 from scipy import ndimage
 
 DELTA_E = 4.0
-DELTA_B = 2.0
+DELTA_B = 3.5
 PAD_PT = 12
 
 

@@ -2,9 +2,10 @@
 python3 -I measure_test.py.
 run.sh --capture runs it before it boots anything.
 
-The wash bars must hold the system's own pairs and refuse the build the baseline
-records (baseline.json, the numbers of the capture at 47bedbecd); the zoom measure must
-refuse a title that scales as the panel opens and accept one that does not.
+The wash bars must hold the system's own pairs and the owner's pick, and refuse the
+builds the baseline records (baseline.json: the capture at 47bedbecd, and the tinted
+glass of sweep mb1-sweep4); the zoom measure must refuse a title that scales as the
+panel opens and accept one that does not.
 """
 
 import json
@@ -37,6 +38,13 @@ class Wash(unittest.TestCase):
         # the pale desks hide a white tint and the panel's own colour moves between runs (dark-dark
         # read 4.23 in one and 1.33 in the next): the three desks that failed in both runs must fail
         self.assertTrue({"dark-color", "light-dark", "light-color"} <= failing, failing)
+
+    def test_the_owners_pick_passes_on_every_desk_and_the_tint_it_replaced_fails(self):
+        round6 = json.load(open(os.path.join(HERE, "baseline.json")))["round6"]
+        verdicts = {k: {row["name"]: tint.verdict(np.array(row["panel_lab"]), np.array(row["menu_lab"]))["pass"] for row in round6[k]} for k in ("pick", "tint")}
+        self.assertEqual(len(verdicts["pick"]), 6)
+        self.assertTrue(all(verdicts["pick"].values()), verdicts["pick"])
+        self.assertFalse(verdicts["tint"]["light-dark"], verdicts["tint"])
 
     def test_the_menu_against_itself_passes_on_the_recorded_noise(self):
         base = json.load(open(os.path.join(HERE, "baseline.json")))["tint"]

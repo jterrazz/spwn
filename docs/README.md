@@ -104,5 +104,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [050 The desktop app is laid out as a hexagon](decisions/050-the-desktop-app-is-laid-out-as-a-hexagon.md) (Accepted)
 - [051 A machine is a base and its Machinefiles, one base per distro](decisions/051-a-machine-is-a-base-and-its-machinefiles.md) (Accepted)
 - [052 Station keeps no agents; another binary owns them](decisions/052-station-keeps-no-agents.md) (Accepted)
+- [053 The panel is the untinted system glass over a hue-free grey, with no white card](decisions/053-the-panel-is-untinted-glass-over-a-grey-ground.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

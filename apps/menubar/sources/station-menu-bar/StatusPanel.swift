@@ -5,16 +5,17 @@ import SwiftUI
 
 // invariant: ADR-036 and ADR-053: the app owns its status item and the
 // panel under it. The panel's one background is the system glass, an
-// NSGlassEffectView with no tint of its own, the material a system menu
-// shows over the same desk, and the SwiftUI content is that glass's
-// contentView, so AppKit keeps it legible as the glass adapts and the
-// owner's Liquid Glass, Reduce Transparency and Increase Contrast settings
-// act on it. Nothing paints over the glass.
+// NSGlassEffectView with no tint of its own, over a ground of the system's
+// window colour at Token.Glass.ground's alpha; the SwiftUI content lies on
+// that ground, inside the glass's contentView, so AppKit keeps it legible
+// as the glass adapts and the owner's Liquid Glass, Reduce Transparency and
+// Increase Contrast settings act on it.
 @MainActor
 final class StatusPanel: NSObject, NSWindowDelegate {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-    private let panel = GlassPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
+    private let panel = KeyPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
     private let glass = NSGlassEffectView()
+    private let ground = Ground()
     private let backdrop = Backdrop()
     private let opening = OpeningLog()
     private let content: () -> AnyView
@@ -47,6 +48,11 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         panel.hidesOnDeactivate = false
         glass.style = .regular
         glass.cornerRadius = Token.Glass.window
+        glass.contentView = ground
+        ground.wantsLayer = true
+        ground.layer?.cornerRadius = Token.Glass.window
+        ground.layer?.cornerCurve = .continuous
+        ground.layer?.masksToBounds = true
         backdrop.addSubview(glass)
         backdrop.outside = { [weak self] in self?.hide() }
         panel.contentView = backdrop
@@ -91,12 +97,21 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         let view = PanelHosting(rootView: content())
         view.sizingOptions = [.intrinsicContentSize]
         view.resized = { [weak self] size in self?.fit(size) }
-        glass.contentView = view
+        view.frame = ground.bounds
+        ground.addSubview(view)
         let size = view.fittingSize
         let room = (bar.screen ?? NSScreen.main)?.visibleFrame ?? spot
         anchor = CGPoint(x: min(max(spot.maxX - size.width, room.minX + Self.margin), room.maxX - Self.margin - size.width), y: spot.minY - Self.drop)
         report?("item \(Self.frame(spot))")
         fit(size)
+        // invariant: the panel is ordered front at the content's own height.
+        // The first size is the cap, asked before the page is measured; the
+        // content asks its own in the layout that placing the first runs,
+        // and since it tells that only on the next turn, the size is read
+        // here, out of every pass, or the panel opened at the cap and shrank
+        // in view (run mb1-cap6: 630 pt to 455 over 21 frames).
+        panel.layoutIfNeeded()
+        view.tell()
         NSApp.activate()
         panel.makeKeyAndOrderFront(nil)
         DispatchQueue.main.async { button.highlight(true) }
@@ -112,7 +127,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         guard shown else { return }
         opening.end()
         panel.orderOut(nil)
-        glass.contentView = nil
+        for view in ground.subviews { view.removeFromSuperview() }
         if let outside { NSEvent.removeMonitor(outside) }
         outside = nil
         item.button?.highlight(false)
@@ -137,8 +152,8 @@ final class StatusPanel: NSObject, NSWindowDelegate {
             return
         }
         placing = true
-        let glassFrame = CGRect(x: anchor.x, y: anchor.y - size.height, width: size.width, height: size.height)
-        let frame = glassFrame.insetBy(dx: -Self.shade, dy: -Self.shade)
+        let area = CGRect(x: anchor.x, y: anchor.y - size.height, width: size.width, height: size.height)
+        let frame = area.insetBy(dx: -Self.shade, dy: -Self.shade)
         if shown, frame != panel.frame, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
             NSAnimationContext.runAnimationGroup { context in
                 let p = Token.Motion.smoothPoints.map { Float($0) }
@@ -150,7 +165,8 @@ final class StatusPanel: NSObject, NSWindowDelegate {
             panel.setFrame(frame, display: true)
         }
         placing = false
-        report?("glass \(Self.frame(glassFrame)) window \(Self.frame(frame)) key=\(panel.isKeyWindow)")
+        panel.invalidateShadow()
+        report?("glass \(Self.frame(area)) window \(Self.frame(frame)) key=\(panel.isKeyWindow)")
         if let next = pending {
             pending = nil
             fit(next)
@@ -191,7 +207,32 @@ final class Backdrop: NSView {
     override func rightMouseDown(with _: NSEvent) { outside?() }
 }
 
-final class GlassPanel: NSPanel {
+// invariant: the ground is the glass's contentView: it paints the system's
+// window colour at Token.Glass.ground over the whole glass, under the
+// content it holds at its own size, and takes no click.
+final class Ground: NSView {
+    override func setFrameSize(_ size: NSSize) {
+        super.setFrameSize(size)
+        needsLayout = true
+    }
+
+    override func layout() {
+        super.layout()
+        for view in subviews where view.frame != bounds { view.frame = bounds }
+    }
+
+    override func draw(_: NSRect) {
+        Token.Glass.ground.setFill()
+        bounds.fill(using: .sourceOver)
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        needsDisplay = true
+    }
+}
+
+final class KeyPanel: NSPanel {
     var cancelled: (() -> Void)?
 
     override var canBecomeKey: Bool { true }
@@ -203,9 +244,15 @@ final class GlassPanel: NSPanel {
 // never pushes the window through Auto Layout (which would grow it from
 // its bottom edge), and every size the content asks, on any constraint or
 // layout pass, is told to the panel, which moves to it with its top pinned.
+// hazard: the glass sizes its contentView by constraints, so a window frame
+// set from inside the content's own constraint or layout pass dirties them
+// mid-update, and AppKit kills the app (runs mb1-sweep, mb1-sweep2): every
+// size is told on the next turn of the run loop, out of every pass, one
+// turn's asks coalesced into the last.
 final class PanelHosting: NSHostingView<AnyView> {
     var resized: ((CGSize) -> Void)?
     private var told = CGSize.zero
+    private var queued = false
 
     required init(rootView: AnyView) {
         super.init(rootView: rootView)
@@ -220,17 +267,26 @@ final class PanelHosting: NSHostingView<AnyView> {
 
     override func invalidateIntrinsicContentSize() {
         super.invalidateIntrinsicContentSize()
-        tell()
+        later()
     }
 
     override func updateConstraints() {
         super.updateConstraints()
-        tell()
+        later()
     }
 
     override func layout() {
         super.layout()
-        tell()
+        later()
+    }
+
+    private func later() {
+        guard !queued else { return }
+        queued = true
+        DispatchQueue.main.async { [weak self] in
+            self?.queued = false
+            self?.tell()
+        }
     }
 
     func tell() {

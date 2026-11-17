@@ -198,6 +198,20 @@ public enum Token {
         // (refs/passwords-tahoe row 3), larger than a system menu's 12.
         public static let window: CGFloat = 18
 
+        // value: the ground the live panel lays under its content, inside the
+        // glass: the system's window colour, which carries no hue in either
+        // appearance, at 0.6, the owner's pick of round 6's board (ADR-053).
+        // hazard: resolved in the appearance it is drawn in: the system colour
+        // given its alpha once, at launch, read the same white in light and
+        // in dark (AppGlassTests, run mb1-upd3).
+        public static let ground = NSColor(name: nil) { appearance in
+            var color = NSColor.clear
+            appearance.performAsCurrentDrawingAppearance {
+                color = NSColor.windowBackgroundColor.usingColorSpace(.sRGB)?.withAlphaComponent(0.6) ?? .clear
+            }
+            return color
+        }
+
         // value: the Catalog's flat desk, a neutral grey, so the material
         // over it shows no colour the desk did not give it.
         public static func desk(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0x2C2C2E : 0x9A9A9E) }
