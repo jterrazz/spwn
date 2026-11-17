@@ -1,0 +1,161 @@
+.register {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.line {
+    position: relative;
+    display: grid;
+    grid-template-columns:
+        minmax(118px, 1.1fr) minmax(0, 1.5fr) 118px 46px minmax(120px, 2fr)
+        70px;
+    gap: 14px;
+    align-items: center;
+    padding: 9px 8px;
+    margin: 0 -8px;
+    border-top: 1px solid var(--line);
+    font: 400 13px/19px var(--font-sans);
+    color: var(--t2);
+    min-width: 0;
+}
+.mac {
+    border-top-color: var(--line-2);
+    padding-top: 13px;
+}
+.group:first-child > .mac {
+    border-top: 0;
+    padding-top: 2px;
+}
+.machine {
+    cursor: pointer;
+    transition: background 0.18s;
+}
+.machine:hover,
+.machine:has(.opener:focus-visible),
+.machine[data-open] {
+    background: var(--wash);
+}
+.name {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--t1);
+    font-weight: 600;
+    min-width: 0;
+    white-space: nowrap;
+}
+.machine .name {
+    font-weight: 500;
+    padding-left: 12px;
+}
+.macName,
+.opener {
+    all: unset;
+    cursor: pointer;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.macName:hover,
+.macName:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+.opener::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+}
+.swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c, var(--t3));
+    flex: none;
+}
+.glow {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--you);
+    box-shadow: var(--you-glow);
+    flex: none;
+    display: inline-block;
+}
+.what {
+    color: var(--t3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.state {
+    font: 400 12px/17px var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+.ok {
+    color: var(--t2);
+}
+.plain {
+    color: var(--t3);
+}
+.warn {
+    color: var(--warn);
+}
+.bad {
+    color: var(--bad);
+}
+.new {
+    color: var(--new);
+}
+.figure {
+    font: 400 12px/17px var(--font-mono);
+    color: var(--t3);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 4px 0 14px 20px;
+    font-size: 13.5px;
+    line-height: 20px;
+    color: var(--t1);
+}
+.said {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.saidLine {
+    color: var(--t3);
+    font-size: 13px;
+}
+@container fleet (max-width: 600px) {
+    .line {
+        grid-template-columns: minmax(0, 1fr) 112px minmax(56px, 0.8fr);
+    }
+    .line > :nth-child(2),
+    .line > :nth-child(4),
+    .line > :nth-child(6) {
+        display: none;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .machine {
+        transition: none;
+    }
+}
