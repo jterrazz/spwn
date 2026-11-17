@@ -1485,12 +1485,14 @@ export type MachinefileChapterDrift = {
 export type MachinefileDiffering = {
     Account: string;
     Asked: string;
+    AskedAs?: 'shared' | 'not-in-the-file';
     AskedTo?: 'local' | 'private' | 'public';
     Block: string;
     Condition: 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
     Package: string;
     Port: number;
     Seen: string;
+    SeenAs?: 'granted' | 'not-signed-in';
     SeenTo?: 'local' | 'private' | 'public';
 };
 
@@ -3699,9 +3701,13 @@ export type MachinefileChapter = 'apps' | 'settings' | 'ports' | 'accounts';
 
 export type MachinefileCondition = 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
 
+export type MachinefileFileSide = 'shared' | 'not-in-the-file';
+
 export type MachinefileFollowerState = 'matches' | 'differs' | 'unread';
 
 export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
+
+export type MachinefileMacSide = 'granted' | 'not-signed-in';
 
 export type MachinefileShelf = 'yours' | 'mixin' | 'shipped';
 
@@ -3774,8 +3780,10 @@ export type StationWords = {
     MachinefileAction: Record<MachinefileAction, StationWord>;
     MachinefileChapter: Record<MachinefileChapter, StationWord>;
     MachinefileCondition: Record<MachinefileCondition, StationWord>;
+    MachinefileFileSide: Record<MachinefileFileSide, StationWord>;
     MachinefileFollowerState: Record<MachinefileFollowerState, StationWord>;
     MachinefileLayer: Record<MachinefileLayer, StationWord>;
+    MachinefileMacSide: Record<MachinefileMacSide, StationWord>;
     MachinefileShelf: Record<MachinefileShelf, StationWord>;
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
     MachinesCheckState: Record<MachinesCheckState, StationWord>;
