@@ -22,7 +22,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Agents (fleet)** (2): `agents.list`, `agents.empty`
 - **Ports (fleet and scoped)** (5): `ports.all`, `ports.all.exposed`, `ports.all.down`, `ports.shared-new`, `ports.audiences`
 - **Accounts** (3): `accounts.all`, `accounts.signing-in`, `accounts.signed-in`
-- **Awake** (4): `awake.all`, `awake.off`, `awake.4h`, `awake.until-run`
+- **Awake** (3): `awake.all`, `awake.off`, `awake.4h`
 - **Sheets** (16): `sheet.new-vm`, `sheet.new-vm.options`, `sheet.new-vm.server`, `sheet.new-vm.first`, `sheet.new-agent`, `sheet.new-agent.new`, `sheet.grant`, `sheet.grant.vm`, `sheet.share-port`, `sheet.share-port.vm`, `sheet.share-port.empty`, `sheet.cleanup.mac`, `sheet.cleanup.all`, `sheet.hint.add-mac`, `sheet.hint.firewall`, `sheet.hint.declare-public`
 - **Confirmations (alerts)** (16): `alert.restart-server`, `alert.stop-server`, `alert.stop-server.typed`, `alert.delete-server`, `alert.stop-vm`, `alert.stop-agent`, `alert.delete-vm.ephemeral`, `alert.delete-vm.persistent`, `alert.delete-vm.agents`, `alert.stop-all`, `alert.stop-all.server`, `alert.restart-mac`, `alert.forget-mac`, `alert.remove-grant`, `alert.stop-share`, `alert.let-sleep`
 - **Menus** (24): `menu.station`, `menu.context.workspace`, `menu.context.workspace.copy`, `menu.context.workspace.share`, `menu.context.stopped`, `menu.context.agent`, `menu.context.server`, `menu.context.server.down`, `menu.context.mac`, `menu.context.mac.asleep`, `menu.context.grant`, `menu.awake`, `menu.page.mac`, `menu.page.this-mac`, `menu.page.mac.asleep`, `menu.page.workspace`, `menu.page.agent`, `menu.page.server`, `menu.page.ports`, `menu.new-vm.on`, `menu.new-vm.create`, `menu.new-agent.on`, `menu.grant.to`, `menu.share-port.of`
@@ -978,17 +978,6 @@ Every agent of the fleet, the page behind home's Agents label (SPEC §A4, `stati
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: #panel: height 447px → 689px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .place.nav: CSS background-color 120 ms; .fwrap.morph: CSS morph 340 ms linear (esc)
 
-### `awake.until-run`
-
-![awake.until-run](stories/awake.until-run.png)
-
-- **Capture**: [dark](stories/awake.until-run.png)
-- **Shows**: Awake until linux-1 is done: no segment selected, a line says it follows the run.
-- **Data**: awake mode run, the agent it follows
-- **Interactions**: "All machines" → back; "Keep This Mac awake (switch)" → awakeToggle; "1 hr" → awakeFor(1h); "4 hr" → awakeFor(4h); "Until 18:00" → awakeFor(until); "Stay awake with the lid closed (switch)" → awakeOpt(lid); "Stay awake on battery (switch)" → awakeOpt(battery); "Keep mac-mini awake" → awakeChange(mac-mini)
-- **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
-- **Leaves**: #panel: height 463px → 689px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .fwrap.morph: CSS morph 340 ms linear (esc)
-
 ## Sheets
 
 Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab cycles inside the sheet only, esc cancels.
@@ -1478,9 +1467,9 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 ![menu.awake](stories/menu.awake.png)
 
 - **Capture**: [dark](stories/menu.awake.png)
-- **Shows**: Right-click the Awake tile: Keep This Mac awake: For 1 hr, For 4 hr, ✓ Until 18:00, Until linux-1 is done, then Turn off / Awake settings.
-- **Data**: awake mode; the running agent on This Mac
-- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 39%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 52%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "For 1 hr"; menu item "For 4 hr"; menu item "Until 18:00"; menu item "Until linux-1 is done"; menu item "Let it sleep"; … 1 more
+- **Shows**: Right-click the Awake tile: Keep This Mac awake: For 1 hr, For 4 hr, ✓ Until 18:00, then Turn off / Awake settings.
+- **Data**: awake mode
+- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 39%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 52%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "For 1 hr"; menu item "For 4 hr"; menu item "Until 18:00"; menu item "Let it sleep"; … 1 more
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy; .place.nav: CSS background-color 120 ms
 - **Leaves**: no recorded animation (esc)
 
@@ -1745,9 +1734,9 @@ Keys: type to filter, ↑ ↓ move, ↩ run, ⌘↩ attach a workspace, esc clos
 ![find.awake](stories/find.awake.png)
 
 - **Capture**: [dark](stories/find.awake.png)
-- **Shows**: Find "awake": Keep This Mac awake 1 hr / 4 hr / until linux-1 ends, and the Awake section.
+- **Shows**: Find "awake": Keep This Mac awake 4 hr, and the Awake section.
 - **Data**: actions
-- **Interactions**: field "Find a machine, a port, an action…"; result "Awake until linux-1 ends"; result "Keep This Mac awake 4 hr"; result "Awake · All Macs"
+- **Interactions**: field "Find a machine, a port, an action…"; result "Keep This Mac awake 4 hr"; result "Awake · All Macs"
 - **Enters**: #panel: height 400px → 520px 200 ms snappy
 - **Leaves**: #panel: height 226px → 689px 340 ms smooth; .page: opacity 0 → 1 340 ms smooth; .findwrap.leaving: opacity 1 → 0 200 ms snappy (esc)
 
@@ -2005,7 +1994,7 @@ Every transient confirmation the prototype fires, read from its code: the gestur
 | Reply sent to a waiting agent | bubble → bubble.left | Sent to review-bot · it works on it |
 | Merge PR | checkf → checkmark.circle.fill | PR #42 merged · review-bot finished |
 | Update (upkeep) | checkf → checkmark.circle.fill | Everything is up to date |
-| Awake on (switch, tile, menu, Find) | sun → sun.max | This Mac stays awake until 18:00 / This Mac stays awake until linux-1 is done |
+| Awake on (switch, tile, menu, Find) | sun → sun.max | This Mac stays awake until 18:00 |
 | Awake off | moon → moon | This Mac may sleep |
 | Let mac-mini sleep confirmed | moon → moon | Kept as it was (prototype) |
 | Wake (asleep Mac) | wake → (custom, or power) | Wake-on-LAN sent to macbook-air |

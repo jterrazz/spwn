@@ -169,7 +169,6 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 		}},
 		{FindActions, []findSaid{
 			{"Keep This Mac awake 4 hr", "", "Keep awake", "", ""},
-			{"Awake until linux-1 ends", "", "Keep awake", "", ""},
 			{"New VM on This Mac", "28 GB free", "New VM", "cmd+n", ""},
 			{"New VM on mac-mini", "24 GB free", "New VM", "", ""},
 			{"Restart infra", "asks first", "Restart", "", ""},
@@ -321,24 +320,32 @@ func TestFindsActionsThatAskFirstCarryTheirQuestion(t *testing.T) {
 	}
 }
 
-// invariant: SPEC A6 [find.awake]: Find offers to keep This Mac awake until
-// its agent at work ends, which follows that run, and offers it no more
-// once the keep-awake already follows it.
-func TestFindKeepsThisMacAwakeUntilItsAgentAtWorkEnds(t *testing.T) {
-	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "computer"})
-	row := findRow(p, FindActions, "awake-run:linux-1")
-	if row == nil || row.Label != "Awake until linux-1 ends" {
-		t.Fatalf("Find's actions lack Awake until linux-1 ends: %+v", row)
-	}
-	for _, a := range p.Actions {
-		if a.ID == row.Verb && (a.Run == nil || a.Run.Call != CallKeepAwake || a.Run.In["Run"] != "linux-1" || a.Run.In["Lid"] != "true") {
-			t.Errorf("Awake until linux-1 ends runs %+v, want awake.keep following linux-1 with the lid closed as held", a.Run)
+// invariant: SPEC A6 [find.awake]: every keep-awake Find offers ends at a
+// time, a length or an hour, even with an agent at work on This Mac.
+func TestFindKeepsThisMacAwakeByATimeOnly(t *testing.T) {
+	for name, r := range map[string]FindReading{"a session": findFleet(), "no session": func() FindReading {
+		r := findFleet()
+		r.Awake.Session = nil
+		return r
+	}()} {
+		keeps := 0
+		for _, a := range Find(r, page.Context{Machine: findPro, Kind: "computer"}).Actions {
+			if a.Run == nil || a.Run.Call != CallKeepAwake {
+				continue
+			}
+			keeps++
+			for key := range a.Run.In {
+				if !slices.Contains([]string{"For", "Until", "Lid", "Battery", "By"}, key) {
+					t.Errorf("%s: Find's %s keeps awake by %q, which is no time", name, a.ID, key)
+				}
+			}
+			if a.Run.In["For"] == "" && a.Run.In["Until"] == "" {
+				t.Errorf("%s: Find's %s keeps awake with no end: %+v", name, a.ID, a.Run.In)
+			}
 		}
-	}
-	r := findFleet()
-	r.Awake.Session.Run = "linux-1"
-	if row := findRow(Find(r, page.Context{Machine: findPro, Kind: "computer"}), FindActions, "awake-run:linux-1"); row != nil {
-		t.Errorf("a keep-awake that follows linux-1 is offered again: %+v", row)
+		if keeps != 1 {
+			t.Errorf("%s: Find offers %d keep-awakes, want the one 4 hr or its extension", name, keeps)
+		}
 	}
 }
 

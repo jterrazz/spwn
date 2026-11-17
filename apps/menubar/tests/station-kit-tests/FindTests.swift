@@ -44,13 +44,13 @@ final class FindTests: XCTestCase {
     // found by a word's start, then by what its title holds, then by a tag.
     func testAQueryRanksPrefixThenWordThenSubstringThenTag() throws {
         let e = { (title: String, tags: [String]) in FindEntry(row: Row(), group: FindIndex.actions, title: title, address: nil, scope: nil, tags: tags, prefix: nil) }
-        XCTAssertEqual(FindIndex.score(e("Awake until linux-1 ends", []), query: "awake"), 0)
+        XCTAssertEqual(FindIndex.score(e("Awake · All Macs", []), query: "awake"), 0)
         XCTAssertEqual(FindIndex.score(e("Keep This Mac awake 4 hr", []), query: "awake"), 1)
         XCTAssertEqual(FindIndex.score(e("mac-mini", []), query: "ini"), 2)
         XCTAssertEqual(FindIndex.score(e("New VM on This Mac", ["create"]), query: "cre"), 3)
         XCTAssertNil(FindIndex.score(e("New VM on This Mac", ["create"]), query: "zzzq"))
         XCTAssertEqual(said(try index().results(query: "awake", recent: [])), [
-            "Actions:", "Awake until linux-1 ends", "Keep This Mac awake 4 hr", "Sections:", "Awake · All Macs",
+            "Actions:", "Keep This Mac awake 4 hr", "Sections:", "Awake · All Macs",
         ])
     }
 
@@ -76,12 +76,12 @@ final class FindTests: XCTestCase {
         XCTAssertEqual(said(find.results(query: "linux", recent: [])), [
             "Machines:", "linux-1", "linux-3",
             "Ports:", "Vite · linux-1:5173", "Port 3000 · linux-1:3000", "Port 8080 · linux-3:8080", "Show 3 more",
-            "Actions:", "Open linux-1 in Terminal", "Share a port of linux-1", "Grant a password to linux-1", "Show 3 more",
+            "Actions:", "Open linux-1 in Terminal", "Share a port of linux-1", "Grant a password to linux-1", "Show 2 more",
         ])
         let open = find.results(query: "linux", recent: [], open: [FindIndex.ports])
         XCTAssertEqual(open.first { $0.id == FindIndex.ports }?.entries.count, 6)
         XCTAssertEqual(open.first { $0.id == FindIndex.ports }?.more, 0)
-        XCTAssertEqual(open.first { $0.id == FindIndex.actions }?.more, 3)
+        XCTAssertEqual(open.first { $0.id == FindIndex.actions }?.more, 2)
         XCTAssertEqual(FindIndex.lines(open).count, 12)
     }
 
@@ -90,7 +90,7 @@ final class FindTests: XCTestCase {
     func testOneLetterAddsNoVerbs() throws {
         let groups = try index().results(query: "l", recent: [])
         XCTAssertFalse(groups.flatMap(\.entries).contains { $0.group == FindIndex.verbs })
-        XCTAssertEqual(groups.first { $0.id == FindIndex.actions }?.entries.map(\.title), ["Awake until linux-1 ends", "Clean up ephemeral workspaces on This Mac"])
+        XCTAssertEqual(groups.first { $0.id == FindIndex.actions }?.entries.map(\.title), ["Clean up ephemeral workspaces on This Mac"])
     }
 
     // invariant: the keys never leave the lines drawn; typing starts over

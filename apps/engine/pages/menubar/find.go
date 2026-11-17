@@ -465,34 +465,7 @@ func (f finder) awake() []entry {
 	}
 	verb := page.Action{ID: "awake-for", Label: "Keep awake", Mutates: true, Run: &page.Run{Call: CallKeepAwake, In: in},
 		Hud: hud("This Mac stays awake until " + f.at(until))}
-	out := []entry{{row: page.Row{ID: "awake", Label: label, Glyph: symbol("sun.max", "")}, tags: []string{"awake", "caffeinate", "keep"}, verb: verb}}
-	if run, ok := f.working(); ok && (r.Session == nil || r.Session.Run != run) {
-		in := map[string]string{"Run": run}
-		if s := r.Session; s != nil {
-			in = flags(s.Lid, s.Battery)
-			in["Run"] = run
-		}
-		follow := page.Action{ID: "awake-run:" + run, Label: "Keep awake", Mutates: true, Run: &page.Run{Call: CallKeepAwake, In: in},
-			Hud: hud("This Mac stays awake until " + run + " is done")}
-		out = append(out, entry{row: page.Row{ID: "awake-run:" + run, Label: "Awake until " + run + " ends", Glyph: symbol("sun.max", "")}, tags: []string{"awake", "caffeinate", "run"}, verb: follow})
-	}
-	return out
-}
-
-// value: the first VM of This Mac whose agent is at work: the run a
-// keep-awake can follow.
-func (f finder) working() (string, bool) {
-	for _, h := range f.r.All.Macs {
-		if !h.ThisMac {
-			continue
-		}
-		for _, vm := range model.Ordered(h.VMs) {
-			if vm.State == model.Running && vm.Agent != nil && vm.Agent.State == "working" {
-				return vm.Name, true
-			}
-		}
-	}
-	return "", false
+	return []entry{{row: page.Row{ID: "awake", Label: label, Glyph: symbol("sun.max", "")}, tags: []string{"awake", "caffeinate", "keep"}, verb: verb}}
 }
 
 func (f finder) restart(h model.MacView, vm model.VM) entry {
