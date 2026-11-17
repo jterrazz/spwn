@@ -1,6 +1,6 @@
 # ADR-045: The agents family retires, and an agent is a package
 
-**Status:** Proposed
+**Status:** Superseded by [ADR-052](052-station-keeps-no-agents.md)
 **Date:** 2026-11-13
 
 ## Context
