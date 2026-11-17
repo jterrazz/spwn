@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { pageOver } from '../../../../../composition/__tests__/page-over';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
 
-const recordingFor = await recordingsOf('range-full', 'stories', 'two-macs');
+const recordingFor = await recordingsOf('range-full', 'share-local', 'stories', 'two-macs');
 
 function portsOver(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Ports' });
@@ -82,6 +82,56 @@ describe('port gestures', () => {
             await visitor.gone(asked);
             await visitor.gone(region('Port 5173'));
             await visitor.see(region('Port 7000'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test("a share's reach moves to Local, and the switch and the address follow", async () => {
+        // Given - linux-1's Ports over two-macs, port 5173 recorded Private
+        const result = await component.render(portsOver('two-macs', 'linux-1'), async (visitor) => {
+            const shared = region('Port 5173');
+            await visitor.see(within(shared, content('https://macbook-pro.tail1234.ts.net:40001')));
+
+            // When - Local is clicked
+            await visitor.click(within(shared, button('Local')));
+
+            // Then - ports.list, read again, gives it the Mac's own address, and Stop sharing stays offered
+            await visitor.see(within(shared, content('http://127.0.0.1:40001')));
+            await visitor.see(within(shared, button('Stop sharing')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a share that starts Local reads Local, and Private moves it', async () => {
+        // Given - linux-1's Ports over share-local, port 5173 recorded Local
+        const result = await component.render(
+            portsOver('share-local', 'linux-1'),
+            async (visitor) => {
+                const shared = region('Port 5173');
+                await visitor.see(within(shared, content('http://127.0.0.1:40001')));
+
+                // When - Private is clicked
+                await visitor.click(within(shared, button('Private')));
+
+                // Then - it is shared on the devices network
+                await visitor.see(
+                    within(shared, content('https://macbook-pro.tail1234.ts.net:40001')),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a share made public offers no switch, its reach stays a tag', async () => {
+        // Given - linux-1's Ports over stories, port 3000 recorded shared Public
+        const result = await component.render(portsOver('stories', 'linux-1'), async (visitor) => {
+            const shared = region('Port 3000');
+            await visitor.see(within(shared, content('Public')));
+
+            // When - the row is read
+            // Then - neither Local nor Private is offered on it
+            await visitor.gone(within(shared, button('Local')));
+            await visitor.gone(within(shared, button('Private')));
         });
         expect(result.errors.text).toBe('');
     });

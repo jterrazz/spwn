@@ -27,7 +27,10 @@
       - text: ·
       - button "QR code"
     - region "Port 5173":
-      - text: :5173 Vite node https://macbook-pro.tail77a797.ts.net:40001 Private
+      - text: :5173 Vite node https://macbook-pro.tail77a797.ts.net:40001
+      - group "Who reaches linux-1:5173":
+        - button "Local"
+        - button "Private" [pressed]
       - button "Stop sharing"
       - button "Copy https://macbook-pro.tail77a797.ts.net:40001": Copy
       - text: ·
