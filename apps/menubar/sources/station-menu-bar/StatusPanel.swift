@@ -200,10 +200,10 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         String(format: "x=%.1f y=%.1f w=%.1f h=%.1f", r.minX, r.minY, r.width, r.height)
     }
 
-    // value: the panel's right edge under the item's, 6 pt under the menu
-    // bar, as the capture read MenuBarExtra's window (run old459); the
-    // least room to the screen's edge.
-    static let drop: CGFloat = 6
+    // value: the panel's right edge under the item's and its top 31 pt under
+    // the screen's, 5 pt under the item, as Passwords' panel hangs on Tahoe
+    // (refs/passwords-tahoe); the least room to the screen's edge.
+    static let drop: CGFloat = 5
     static let margin: CGFloat = 8
     // value: past the glass's shadow, which the capture reads fading out
     // within it on every side.

@@ -178,7 +178,7 @@ def zoom(out):
     json.dump({"pass": ok, "rows": rows}, open(os.path.join(out, "opening-measure.json"), "w"), indent=1)
     print("\nzoom: the opening, frame by frame")
     for r in rows:
-        keys = ("frames", "visible_from", "fade_frames", "first_alpha", "outline_px", "title_move_px", "title_score_min", "alpha_fall", "pill_from", "pill_min", "log_ticks", "log_distinct_frames", "checks", "why")
+        keys = ("frames", "visible_from", "fade_frames", "first_alpha", "outline_px", "title_move_px", "title_score_min", "alpha_fall", "pill_from", "pill_min", "log_ticks", "log_distinct_frames", "top_pt", "checks", "why")
         print(f"  {r['name']}: " + ", ".join(f"{k}={r[k]}" for k in keys if k in r))
     print(f"{'PASS' if ok else 'FAIL'} zoom")
     return ok

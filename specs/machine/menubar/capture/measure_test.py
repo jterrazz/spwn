@@ -5,8 +5,8 @@ run.sh --capture runs it before it boots anything.
 The wash bars must hold the system's own pairs and the owner's pick, and refuse the
 builds the baseline records (baseline.json: the capture at 47bedbecd, and the tinted
 glass of sweep mb1-sweep4); the zoom measure must refuse a title that scales or fades in
-as the panel opens, and an item that drops its highlight, and accept a panel shown whole
-under a lit item.
+as the panel opens, and an item that drops its highlight, or a panel whose top is not
+Passwords', and accept a panel shown whole under a lit item.
 """
 
 import json
@@ -89,7 +89,8 @@ def run(shifts, alphas, lits=None, log=""):
     return opening.measure(frames, 1.0, log, ITEM)
 
 
-ONE_GLASS = "x open t=1 frame=1 glass=x=1 y=2 w=3 h=4\nx open t=2 frame=2 glass=x=1 y=2 w=3 h=4\n"
+SCREEN = "x screen x=0.0 y=0.0 w=1024.0 h=768.0\n"
+ONE_GLASS = SCREEN + "x open t=1 frame=1 glass=x=458.0 y=106.0 w=340.0 h=631.0\nx open t=2 frame=2 glass=x=458.0 y=106.0 w=340.0 h=631.0\n"
 
 
 class Zoom(unittest.TestCase):
@@ -144,6 +145,17 @@ class Zoom(unittest.TestCase):
     def test_a_log_with_two_glass_frames_fails(self):
         log = "x open t=1 frame=1 glass=x=1 y=2 w=3 h=4\nx open t=2 frame=2 glass=x=1 y=2 w=3 h=5\n"
         self.assertFalse(run([1.0] * 12, [1.0] * 12, log=log)["checks"]["ticks"])
+
+    def test_a_panel_a_point_lower_than_passwords_fails(self):
+        log = SCREEN + "x open t=1 frame=1 glass=x=458.0 y=106.0 w=340.0 h=630.0\n"
+        out = run([1.0] * 12, [1.0] * 12, log=log)
+        self.assertEqual(out["top_pt"], 32.0)
+        self.assertFalse(out["checks"]["top"], out)
+
+    def test_a_log_with_no_screen_line_fails_the_top(self):
+        out = run([1.0] * 12, [1.0] * 12, log=ONE_GLASS.replace(SCREEN, ""))
+        self.assertIsNone(out["top_pt"])
+        self.assertFalse(out["checks"]["top"], out)
 
     def test_the_recorded_baseline_fails(self):
         base = json.load(open(os.path.join(HERE, "baseline.json")))["opening"]
