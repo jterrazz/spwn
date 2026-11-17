@@ -3,7 +3,7 @@ import { SEPARATOR } from '../../../domain/separator';
 import type { Tone } from '../../../domain/tone';
 import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../ui/index';
 import type { PlanLine } from '../../words/provisional';
-import { engineShown, kindChipWord } from '../../words/shown';
+import { engineShown, kindChipWord, stepBoxed } from '../../words/shown';
 import { countWord } from './model';
 import type { Layer, Shelf } from './model';
 
@@ -64,6 +64,7 @@ function MachineLine({ line, differs }: { line: PlanLine; differs: boolean }) {
 type FileLineProps = { line: PlanLine; description: string; open: (name: string) => void };
 
 function FileLine({ line, description, open }: FileLineProps) {
+    const boxed = stepBoxed(line.Step);
     return (
         <button
             className={`${styles.line} ${styles.file} ${styles.opens}`}
@@ -75,7 +76,7 @@ function FileLine({ line, description, open }: FileLineProps) {
             <Name kinded line={line} />
             <span className={styles.description}>{description}</span>
             <span className={styles.end}>
-                {line.Step.Rule === '' ? null : <Value look="boxed">{line.Step.Rule}</Value>}
+                {boxed === '' ? null : <Value look="boxed">{boxed}</Value>}
             </span>
         </button>
     );

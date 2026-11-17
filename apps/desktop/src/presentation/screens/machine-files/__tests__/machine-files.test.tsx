@@ -8,6 +8,7 @@ const recordingFor = await recordingsOf(
     'bare-mac',
     'machinefile-differs',
     'machinefile-kept',
+    'ranged-apps',
     'stories-file',
     'two-macs',
 );
@@ -55,6 +56,17 @@ describe('Machine files', () => {
 
         // Then - the outdated lines, and no panel the mockup does not draw
         await expect(result.tree).toMatch(file('./__expected__/stories-files.aria.yaml'));
+    });
+
+    test("an app held on a range boxes the range as the file writes it, the others the engine's rule", async () => {
+        // Given - the window on Machine files over ranged-apps, whose plan steps record Version 24 on node and 1.25 on go and none on lazygit
+        const result = await component.render(windowOver('ranged-apps'), async (visitor) => {
+            // When - the drift has answered
+            await visitor.see(content('node'));
+        });
+
+        // Then - each ranged app boxes its range, lazygit its rule
+        await expect(result.tree).toMatch(file('./__expected__/ranged-apps-files.aria.yaml'));
     });
 
     test('every file is a tab under the caption of its shelf, in the engine words', async () => {
