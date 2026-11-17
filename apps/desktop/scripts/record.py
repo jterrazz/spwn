@@ -281,6 +281,7 @@ GESTURES = {
         {"call": "images.delete", "in": {"Image": "station-linux", "Version": "2026.10.20", "Confirm": "yes"}},
         {"call": "ports.stop-sharing", "in": {"VM": "linux-1", "Port": "5173", "Confirm": "yes"}},
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "local"}},
+        {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "public"}},
         {"watch": "accounts.login", "in": {"Program": "gh", "Machine": "linux-1"}},
         {"watch": "accounts.login", "in": {"Program": "npm"}},
         {"call": "accounts.open", "in": {"Machine": "linux-1", "Exchange": "ex-1"}},
