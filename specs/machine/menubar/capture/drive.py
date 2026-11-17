@@ -47,7 +47,8 @@ class Rig:
     def __init__(self, ip, key, url, repo, out):
         self.ip, self.key, self.repo, self.out = ip, key, repo, out
         m = re.match(r"vnc://:([^@]*)@([\d.]+):(\d+)", url)
-        self.vnc = api.connect(f"{m.group(2)}::{m.group(3)}", password=m.group(1))
+        self.server, self.password = f"{m.group(2)}::{m.group(3)}", m.group(1)
+        self.vnc = api.connect(self.server, password=self.password)
         self.vnc.refreshScreen()
         self.fb = self.vnc.screen.size
         print(f"   framebuffer {self.fb[0]}x{self.fb[1]}", flush=True)
@@ -92,7 +93,9 @@ class Rig:
 
     # hazard: the framebuffer is the login screen's 1280 x 720 until the guest's session
     # sets its display (2048 x 1536 here), and a size read at connect time mapped every
-    # click to the wrong pixel (run mb0-cap, 2026-11-17).
+    # click to the wrong pixel (run mb0-cap, 2026-11-17). A connection opened before
+    # that change keeps asking for the old 1280 x 720 alone, so the rest of every shot
+    # stays the frame it first read (run mb1-cap, 2026-11-17): it is opened again.
     def settle(self):
         for _ in range(45):
             self.vnc.refreshScreen()
@@ -100,6 +103,10 @@ class Rig:
                 break
             self.wake()
             time.sleep(2)
+        if self.vnc.screen.size != self.fb:
+            self.vnc.disconnect()
+            self.vnc = api.connect(self.server, password=self.password)
+            self.vnc.refreshScreen()
         self.fb = self.vnc.screen.size
         self.say(f"   framebuffer now {self.fb[0]}x{self.fb[1]}")
 
