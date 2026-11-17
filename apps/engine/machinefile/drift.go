@@ -104,11 +104,13 @@ const (
 func (FileSide) Enum() []string { return []string{string(FileShared), string(FileLacks)} }
 
 // value: what apply would do with the lines that differ, by its verb, and
-// the sentence that says it.
+// the sentence that says it, and the one that says what it leaves: what is
+// removed, and how many apps stay as they are.
 
 type Applying struct {
 	Install, Adopt, Remove, Leave int
 	Sentence                      string
+	Stays                         string
 }
 
 // value: what a VM's Mac holds of what its Machinefile gives it: each port
@@ -190,7 +192,7 @@ func DriftOf(p Plan, access *Access) Drift {
 			c.Matching++
 		}
 	}
-	d := Drift{Plan: p, Applied: p.Applied, Apply: apply.worded()}
+	d := Drift{Plan: p, Applied: p.Applied, Apply: apply.worded(chapters[ChapterApps].Matching)}
 	d.Plan.Applied = nil
 	order := []Chapter{ChapterApps, ChapterSettings}
 	if access != nil {
@@ -292,7 +294,21 @@ func (a *Applying) count(act Action) {
 	}
 }
 
-func (a Applying) worded() Applying {
+func (a Applying) worded(matching int) Applying {
+	// value: what the plan leaves: nothing removed, or how many are, then
+	// the apps that match and stay as they are.
+	a.Stays = "Nothing is removed."
+	if a.Remove > 0 {
+		a.Stays = strconv.Itoa(a.Remove) + " removed."
+	}
+	switch matching {
+	case 0:
+	case 1:
+		a.Stays += " 1 app stays as it is."
+	default:
+		a.Stays += " " + strconv.Itoa(matching) + " apps stay as they are."
+	}
+
 	// value: the mockup's sentence: each verb with its count, in the order
 	// install, adopt, remove, leave; nothing to apply when apply would only
 	// leave lines as they are.

@@ -106,6 +106,31 @@ func TestDriftSaysWhatApplyWouldDo(t *testing.T) {
 	}
 }
 
+func TestDriftSaysWhatApplyLeaves(t *testing.T) {
+	removing := machinefile.ExtraLine{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: "jq"}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.Remove}}
+	for _, c := range []struct {
+		name  string
+		plan  machinefile.Plan
+		stays string
+	}{
+		{"none", machinefile.Plan{}, "Nothing is removed."},
+		{"one stays", machinefile.Plan{Lines: []machinefile.Line{line("jq", catalog.KindApp, machinefile.Present, machinefile.Keep)}}, "Nothing is removed. 1 app stays as it is."},
+		{"two stay beside an install", machinefile.Plan{Lines: []machinefile.Line{
+			line("jq", catalog.KindApp, machinefile.Present, machinefile.Keep),
+			line("tree", catalog.KindApp, machinefile.Present, machinefile.Keep),
+			line("ripgrep", catalog.KindApp, machinefile.Absent, machinefile.Install),
+		}}, "Nothing is removed. 2 apps stay as they are."},
+		{"a removal", machinefile.Plan{Lines: []machinefile.Line{line("jq", catalog.KindApp, machinefile.Present, machinefile.Keep)}, Extra: []machinefile.ExtraLine{removing}}, "1 removed. 1 app stays as it is."},
+		{"a setting is not an app", machinefile.Plan{Lines: []machinefile.Line{line("macos-dock", catalog.KindSetting, machinefile.Present, machinefile.Keep)}}, "Nothing is removed."},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			if got := machinefile.DriftOf(c.plan, nil).Apply.Stays; got != c.stays {
+				t.Errorf("%q; want %q", got, c.stays)
+			}
+		})
+	}
+}
+
 func TestDriftReadsAVMsPortsAndAccountsAgainstItsFile(t *testing.T) {
 	// invariant: a port shared public that the file opens to private
 	// differs, as does an account the file lists that is not signed in and a
