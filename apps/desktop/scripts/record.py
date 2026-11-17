@@ -176,7 +176,8 @@ def asks(listed):
     socket's own, so a read of it names no target, and a far Mac or a VM is named in the target, as targetOf
     (src/domain/machines/machines.ts) sends it; a read two pages ask is asked once. A drift names its machine in its
     input and no target, as driftAsked sends it. A VM's activity and its log are asked at its Mac, as useActivity
-    and VmLog send them. The New machine sheet watches machines.new of the socket's engine, opened anywhere or on one
+    and VmLog send them. A Mac's Awake sheet watches its awake.read, of This Mac's engine for This Mac and named for a
+    far one. The New machine sheet watches machines.new of the socket's engine, opened anywhere or on one
     Mac machines.list lists, as askedOf sends it; a sheet opened from a machine file names it in From, a request of
     ALSO."""
     here = thisMac(listed)
@@ -218,7 +219,7 @@ def asks(listed):
         *[{"watch": "accounts.list", "in": {"Machine": name}} for name in vmsOf(listed)],
         *[{"watch": "vault.list", "in": {}} for _ in here],
         *[{"watch": "vault.new", "in": {}} for _ in here],
-        *[{"watch": "awake.read", "in": {}} for _ in here],
+        *[{"watch": "awake.read", "in": {}, **onMac(mac)} for mac in macs],
         {"watch": "machines.new", "in": {}},
         *[{"watch": "machines.new", "in": {"On": mac}} for mac in macsOf(listed)],
     ]}.values())
@@ -270,6 +271,7 @@ GESTURES = {
         {"call": "machines.delete", "in": {"VM": "api", "Confirm": "api"}},
         {"call": "machines.restart", "in": {"Name": "infra", "Confirm": "infra"}, **at("mac-mini")},
         {"call": "apps.update", "in": {"Managers": ["mise"]}},
+        {"call": "awake.keep", "in": {"For": 14400000000000}},
         {"call": "disk.free", "in": {}},
         {"call": "disk.free", "in": {"Apps": ["go"]}},
         {"call": "disk.free", "in": {}, **at("linux-1")},
@@ -306,6 +308,7 @@ GESTURES = {
         {"call": "grants.add", "in": {"Entry": "pw-1", "ToKind": "machine", "To": "linux-1"}},
     ],
     "stories": [
+        {"call": "awake.off", "in": {}},
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "4321"}},
         {"call": "ports.share", "in": {"VM": "linux-3", "Port": "5432"}, **at("mac-mini")},
         {"call": "ports.declare", "in": {"Machine": "", "Port": "5000", "Via": "lan"}},
