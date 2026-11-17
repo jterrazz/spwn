@@ -48,6 +48,17 @@
     gap: var(--space-8);
     align-items: center;
 }
+.choices {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-8);
+}
+.choice {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
 .gestures {
     display: flex;
     flex-direction: column;

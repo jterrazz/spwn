@@ -73,6 +73,11 @@ const OPENED: Readonly<Record<string, readonly Shot[]>> = {
         },
     ],
     'two-macs': [
+        {
+            name: 'dialog-awake-macbook-pro',
+            query: 'machine=macbook-pro&tab=Overview',
+            steps: [{ button: 'Keep macbook-pro awake' }],
+        },
         { name: 'passwords', query: 'page=passwords' },
         { name: 'password-entry', query: 'page=passwords&item=pw-1' },
         {

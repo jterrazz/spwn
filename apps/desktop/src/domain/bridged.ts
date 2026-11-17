@@ -14,6 +14,8 @@ export const BRIDGED = [
     'apps.list',
     'apps.matrix',
     'apps.update',
+    'awake.keep',
+    'awake.off',
     'awake.read',
     'background.remove',
     'disk.erase',

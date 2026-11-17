@@ -47,7 +47,49 @@ describe('mac', () => {
         expect(awake.errors.text).toBe('');
     });
 
-    test.todo('M2 waits for the choices awake.keep takes, worded');
+    test('M2 Awake keeps the Mac awake for 4 hr, and Home says until when', async () => {
+        // Given - This Mac's page over two-macs, whose awake.read answers three choices and no session
+        const result = await website.visit(
+            '/?world=two-macs&machine=macbook-pro&pace=600',
+            async (visitor) => {
+                // When - Awake… is pressed, then 4 hr in its sheet
+                await visitor.click(button('Keep macbook-pro awake'));
+                const sheet = dialog('Keep macbook-pro awake');
+                await visitor.see(within(sheet, button('4 hr')));
+                await visitor.gone(within(sheet, button('Stop keeping awake')));
+                await visitor.click(within(sheet, button('4 hr')));
+
+                // Then - the sheet closes, and Home's Awake tile says On, until when
+                await visitor.gone(sheet);
+                await visitor.click(within(sidebar, button('Home')));
+                await visitor.see(content('On'));
+                await visitor.see(content('until', { exact: false }));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('M2 a Mac kept awake offers Stop keeping awake, and Home turns the tile off', async () => {
+        // Given - This Mac's page over stories, whose awake.read answers a session
+        const result = await website.visit(
+            '/?world=stories&machine=macbook-pro&pace=600',
+            async (visitor) => {
+                // When - Awake… is pressed, then Stop keeping awake in its sheet
+                await visitor.click(button('Keep macbook-pro awake'));
+                const sheet = dialog('Keep macbook-pro awake');
+                await visitor.click(within(sheet, button('Stop keeping awake')));
+
+                // Then - the sheet closes, and Home's Awake tile no longer says On
+                await visitor.gone(sheet);
+                await visitor.click(within(sidebar, button('Home')));
+                await visitor.see(content('Off'));
+                await visitor.gone(content('On'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo('M2 waits for a choice that ends with a run, on awake.read');
 
     test('M3 the machines of a Mac are listed with their creator and their state', async () => {
         // Given - the window on This Mac's page over two-macs, which holds api and linux-1

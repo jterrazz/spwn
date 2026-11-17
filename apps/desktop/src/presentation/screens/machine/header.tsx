@@ -11,6 +11,7 @@ import { Button, MachineIcon, StatePill, Switch } from '../../ui/index';
 import { machineKindOf } from '../../words/provisional';
 import { macState, vmKindWord, vmLifetimeWord, vmState } from '../../words/shown';
 import { THIS_MAC_WORD } from '../../words/words';
+import { AwakeButton } from './awake';
 import { LifecycleGestures } from './gestures';
 import { TerminalButton } from './terminal';
 
@@ -57,6 +58,7 @@ function Actions({ found, onNewMachine }: Pick<Props, 'found' | 'onNewMachine'>)
     if (!vm) {
         return (
             <div className={styles.actions}>
+                <AwakeButton found={found} />
                 <Button
                     name={`New machine on ${mac.Name}`}
                     onClick={() => {

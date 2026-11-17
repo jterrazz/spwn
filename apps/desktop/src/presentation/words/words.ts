@@ -64,6 +64,12 @@ export const AWAKE_WORDS = {
     on: 'On',
 } as const;
 
+export const AWAKE_GESTURE_WORDS = {
+    close: 'Close',
+    open: 'Awake…',
+    stop: 'Stop keeping awake',
+} as const;
+
 export const POWER_SOURCE_WORDS: WordsOfAnOpenCode = { ac: 'on power', battery: 'on battery' };
 
 export const SSH_WORDS = { answers: 'answers', silent: 'does not answer' } as const;
