@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "16 set by station here"
+                    "text": "15 set by station here"
                   },
                   {
                     "kind": "text",
@@ -333,9 +333,9 @@
         },
         {
           "row": {
-            "id": "agent-hooks",
+            "id": "herdr-machine",
             "mark": "absent",
-            "label": "agent-hooks",
+            "label": "herdr-machine",
             "cells": [
               {
                 "kind": "text",
@@ -343,7 +343,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply agent-hooks"
+              "command": "station settings apply herdr-machine"
             }
           }
         },
@@ -473,19 +473,6 @@
               }
             ]
           }
-        },
-        {
-          "row": {
-            "id": "herdr-machine",
-            "mark": "off-here",
-            "label": "herdr-machine",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "off here"
-              }
-            ]
-          }
         }
       ],
       "counts": [
@@ -503,7 +490,7 @@
         },
         {
           "mark": "off-here",
-          "n": 4
+          "n": 3
         }
       ],
       "pipe_counts": true

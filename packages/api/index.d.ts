@@ -624,10 +624,6 @@ export type CatalogAction = {
     Uses: string;
 };
 
-export type CatalogAgentHooks = {
-    Apps: string[] | null;
-};
-
 export type CatalogApp = {
     AppKind: 'app' | 'manager' | 'skill';
     AppStore: boolean;
@@ -757,7 +753,6 @@ export type CatalogMasMethod = {
 };
 
 export type CatalogMethodSpec = {
-    AgentHooks: CatalogAgentHooks | null;
     Apt: CatalogAptMethod | null;
     Arch?: 'arm64' | 'amd64';
     Brew: string;

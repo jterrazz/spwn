@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "pending",
-            "label": "33 settings on 4 machines",
+            "label": "32 settings on 4 machines",
             "cells": [
               {
                 "kind": "pending"
@@ -730,7 +730,7 @@
           "row": {
             "id": "folded",
             "mark": "pending",
-            "label": "15 more",
+            "label": "14 more",
             "cells": [
               {
                 "kind": "pending"
@@ -1005,7 +1005,6 @@
         "restart-after-power-cut",
         "sshd",
         "tailscale-cli",
-        "agent-hooks",
         "herdr-machine"
       ],
       "priority": 1,
@@ -1038,7 +1037,6 @@
         "restart-after-power-cut",
         "sshd",
         "tailscale-cli",
-        "agent-hooks",
         "herdr-machine",
         "filevault",
         "firewall",

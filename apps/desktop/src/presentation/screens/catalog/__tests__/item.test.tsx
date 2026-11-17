@@ -43,20 +43,20 @@ describe('item', () => {
     });
 
     test("a setting's page says how it is applied, what it changes, and the machines it is for", async () => {
-        // Given - the window on agent-hooks's page over stories
+        // Given - the window on autologin's page over stories, a setting the world records as reversible, writing two files, for a Mac and held by mac-mini alone
         const result = await component.render(
-            windowOver({ item: 'agent-hooks', page: 'catalog-settings' }),
+            windowOver({ item: 'autologin', page: 'catalog-settings' }),
             async (visitor) => {
                 // When - settings.list and settings.matrix have answered
                 await visitor.see(region('What it changes'));
-                await visitor.see(button('linux-1', { exact: true }));
+                await visitor.see(
+                    within(region('autologin in the catalog'), button('mac-mini', { exact: true })),
+                );
             },
         );
 
-        // Then - Can be undone, claude or codex, the two files it writes, its four VMs
-        await expect(result.tree).toMatch(
-            file('./__expected__/stories-item-agent-hooks.aria.yaml'),
-        );
+        // Then - Can be undone, the two files it writes, the machine that holds it
+        await expect(result.tree).toMatch(file('./__expected__/stories-item-autologin.aria.yaml'));
     });
 
     test('a shelf row opens its item, and a chip opens the item it names', async () => {
@@ -65,14 +65,14 @@ describe('item', () => {
             windowOver({ page: 'catalog-settings' }),
             async (visitor) => {
                 await visitor.click(button('Everything', { exact: false }));
-                await visitor.fill(field('Search the catalog'), 'agent-hooks');
+                await visitor.fill(field('Search the catalog'), 'github-login');
 
-                // When - agent-hooks's row, which no machine holds, is chosen, then claude among what it needs
-                await visitor.click(button('agent-hooks', { exact: false }));
-                await visitor.click(button('claude', { exact: true }));
+                // When - github-login's row, which no machine holds and which requires gh, is chosen, then gh among what it needs
+                await visitor.click(button('github-login', { exact: false }));
+                await visitor.click(button('gh', { exact: true }));
 
-                // Then - claude's page, a script fetched from its address
-                await visitor.see(content('https://claude.ai/install.sh'));
+                // Then - gh's page
+                await visitor.see(content('GitHub CLI for repository management'));
             },
         );
         expect(result.errors.text).toBe('');

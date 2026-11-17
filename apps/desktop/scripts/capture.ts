@@ -36,7 +36,7 @@ type Shot = { name: string; query: string; entries?: boolean; steps?: readonly S
 const OPENED: Readonly<Record<string, readonly Shot[]>> = {
     stories: [
         { name: 'catalog-item-node', query: 'page=catalog-apps&item=node' },
-        { name: 'catalog-item-agent-hooks', query: 'page=catalog-settings&item=agent-hooks' },
+        { name: 'catalog-item-autologin', query: 'page=catalog-settings&item=autologin' },
         { name: 'dialog-find', query: 'page=home', steps: [{ key: 'Control+k' }] },
         { name: 'dialog-new-machine-home', query: 'page=home', steps: [{ button: 'New machine' }] },
         {
