@@ -19,7 +19,11 @@
   - region "Shared":
     - heading "Shared" [level=2]
     - region "Port 3000":
-      - text: :3000 Node or Next node https://macbook-pro.tail77a797.ts.net:443 Public
+      - text: :3000 Node or Next node https://macbook-pro.tail77a797.ts.net:443
+      - group "Who reaches linux-1:3000":
+        - button "Local"
+        - button "Private"
+        - button "Public" [pressed]
       - button "Stop sharing"
       - button "Copy https://macbook-pro.tail77a797.ts.net:443": Copy
       - text: ·
@@ -31,6 +35,7 @@
       - group "Who reaches linux-1:5173":
         - button "Local"
         - button "Private" [pressed]
+        - button "Public"
       - button "Stop sharing"
       - button "Copy https://macbook-pro.tail77a797.ts.net:40001": Copy
       - text: ·

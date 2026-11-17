@@ -122,16 +122,16 @@ describe('port gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a share made public offers no switch, its reach stays a tag', async () => {
+    test('a public share draws the switch on Public', async () => {
         // Given - linux-1's Ports over stories, port 3000 recorded shared Public
         const result = await component.render(portsOver('stories', 'linux-1'), async (visitor) => {
             const shared = region('Port 3000');
-            await visitor.see(within(shared, content('Public')));
 
             // When - the row is read
-            // Then - neither Local nor Private is offered on it
-            await visitor.gone(within(shared, button('Local')));
-            await visitor.gone(within(shared, button('Private')));
+            // Then - Local, Private and Public are offered on it, as for any share
+            await visitor.see(within(shared, button('Local')));
+            await visitor.see(within(shared, button('Private')));
+            await visitor.see(within(shared, button('Public')));
         });
         expect(result.errors.text).toBe('');
     });

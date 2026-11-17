@@ -23,6 +23,7 @@
       - group "Who reaches linux-1:5173":
         - button "Local"
         - button "Private" [pressed]
+        - button "Public"
       - button "Stop sharing"
       - button "Copy https://macbook-pro.tail1234.ts.net:40001": Copy
       - text: ·
@@ -35,6 +36,7 @@
       - group "Who reaches linux-1:7000":
         - button "Local"
         - button "Private" [pressed]
+        - button "Public"
       - button "Stop sharing"
       - button "Copy macbook-pro.tail1234.ts.net:40002": Copy
       - text: ·
