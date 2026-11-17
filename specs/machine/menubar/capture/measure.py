@@ -173,12 +173,12 @@ def zoom(out):
         names = sorted(n for n in os.listdir(folder) if n.endswith(".png"))
         frames = [np.array(Image.open(os.path.join(folder, n)).convert("RGB")) for n in names]
         log = open(os.path.join(folder, "app.log"), encoding="utf-8").read()
-        rows.append({"name": meta["name"], **opening.measure(frames, meta["scale"], log)})
+        rows.append({"name": meta["name"], **opening.measure(frames, meta["scale"], log, meta["item_px"])})
     ok = all(r["pass"] for r in rows)
     json.dump({"pass": ok, "rows": rows}, open(os.path.join(out, "opening-measure.json"), "w"), indent=1)
     print("\nzoom: the opening, frame by frame")
     for r in rows:
-        keys = ("frames", "fade_frames", "outline_px", "title_move_px", "title_score_min", "alpha_fall", "log_ticks", "log_distinct_frames", "checks", "why")
+        keys = ("frames", "visible_from", "fade_frames", "first_alpha", "outline_px", "title_move_px", "title_score_min", "alpha_fall", "pill_from", "pill_min", "log_ticks", "log_distinct_frames", "checks", "why")
         print(f"  {r['name']}: " + ", ".join(f"{k}={r[k]}" for k in keys if k in r))
     print(f"{'PASS' if ok else 'FAIL'} zoom")
     return ok

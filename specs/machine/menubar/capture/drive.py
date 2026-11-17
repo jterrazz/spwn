@@ -9,7 +9,7 @@ usage: drive.py <ip> <ssh key> <vnc url> <repo> <out dir> <set> [old item x,y,w,
   build with no frame log: the item's frame is given and the panel is found
   by what the click changed), native (the Apple menu over the same walls, twice,
   for the wash measure) and opening (the panel's opening, sampled frame by
-  frame at STATION_TRIAL_SLOW).
+  frame after a click held as a hand holds it).
 """
 
 import json
@@ -37,10 +37,10 @@ DROP, MARGIN, WIDTH = 6, 8, 322
 # scene under it as under the panel.
 MENU_AT = (5.0, 30.5)
 APPLE = (20, 12)
-# value: the fade is stretched 10 times, 3.4 s, so a VNC grab every 0.1 to 0.3 s
-# lands at least ten frames in it.
-SLOW = 10
 SPAN = 5.0
+# value: a hand's click holds the button about a tenth of a second, through which the
+# status button tracks the mouse and may drop its highlight when it lets go.
+HOLD = 0.15
 
 
 class Rig:
@@ -185,11 +185,16 @@ class Rig:
         s, height = self.scale(item)
         return int(x * s), int((height - y) * s)
 
-    def click_item(self, item):
+    def click_item(self, item, hold=0.0):
         self.wake()
         x, y = self.px(item, item["x"] + item["w"] / 2, item["y"] + item["h"] / 2)
         self.vnc.mouseMove(x, y)
-        self.vnc.mousePress(1)
+        if not hold:
+            self.vnc.mousePress(1)
+            return
+        self.vnc.mouseDown(1)
+        time.sleep(hold)
+        self.vnc.mouseUp(1)
 
     def park(self):
         self.vnc.mouseMove(4, self.fb[1] - 4)
@@ -312,7 +317,7 @@ class Rig:
     def opening(self, scheme, wall):
         name = f"opening-{scheme}-{wall}"
         self.appearance(scheme)
-        line = self.launch({"STATION_TRIAL_FRAMES": "1", "STATION_TRIAL_SLOW": str(SLOW)})
+        line = self.launch({"STATION_TRIAL_FRAMES": "1"})
         item = self.frame(line) if line else None
         if not item:
             self.say(f"FAIL {name}: the app logged no item frame")
@@ -330,7 +335,7 @@ class Rig:
 
         frames = [(0.0, grab())]
         t0 = time.time()
-        self.click_item(item)
+        self.click_item(item, hold=HOLD)
         while time.time() - t0 < SPAN:
             frames.append((time.time() - t0, grab()))
         self.park()
@@ -343,7 +348,8 @@ class Rig:
             f.write(log)
         self.vnc.keyPress("esc")
         time.sleep(1)
-        meta = {"name": name, "scheme": scheme, "wall": wall, "scale": s, "times": [round(t, 3) for t, _ in frames], "slow": SLOW}
+        pill = [int(item["x"] * s) - box[0], int((item["x"] + item["w"]) * s) - box[0]]
+        meta = {"name": name, "scheme": scheme, "wall": wall, "scale": s, "times": [round(t, 3) for t, _ in frames], "item_px": pill}
         self.say(f"-- {name}: {len(frames)} frames in {frames[-1][0]:.1f} s")
         return meta
 
