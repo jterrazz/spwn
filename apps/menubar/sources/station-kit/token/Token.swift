@@ -167,8 +167,7 @@ public enum Token {
         public static let indent: CGFloat = 12
         public static let gap: CGFloat = 8
         public static let row: CGFloat = 22
-        public static let width: CGFloat = 340
-        public static let cap: CGFloat = 560
+        public static let width: CGFloat = 322
         public static let qr: CGFloat = 160
         public static let sparkWidth: CGFloat = 48
         public static let sparkHeight: CGFloat = 12
@@ -195,7 +194,9 @@ public enum Token {
     // app's system glass, which the renderer cannot sample: a
     // translucent pane, its rim and its shadow over the vision's desk.
     public enum Glass {
-        public static let window: CGFloat = 24
+        // value: the panel's corner, the Passwords extra's on Tahoe
+        // (refs/passwords-tahoe row 3), larger than a system menu's 12.
+        public static let window: CGFloat = 18
 
         // value: the Catalog's flat desk, a neutral grey, so the material
         // over it shows no colour the desk did not give it.
@@ -579,8 +580,7 @@ extension Token {
     // value: the v4 metrics (SPEC A1), in points.
     public enum Metric {
         public enum Panel {
-            public static let width: CGFloat = 340
-            public static let radius: CGFloat = 18
+            public static let width: CGFloat = 322
             public static let header = EdgeInsets(top: 10, leading: 14, bottom: 8, trailing: 14)
             public static let body = EdgeInsets(top: 2, leading: 12, bottom: 12, trailing: 12)
             public static let blocks: CGFloat = 8
