@@ -129,6 +129,14 @@ class Zoom(unittest.TestCase):
         self.assertFalse(out["checks"]["highlight"], out)
         self.assertTrue(out["checks"]["whole"], out)
 
+    def test_a_change_in_a_far_corner_is_not_the_panel(self):
+        frames = [np.array(scene(400, 600))] + [frame(1.0, 1.0) for _ in range(12)]
+        for f in frames[1:]:
+            f[580:598, 380:398] = (250, 250, 250)
+        out = opening.measure(frames, 1.0, ONE_GLASS, ITEM)
+        self.assertTrue(out["checks"]["outline"], out)
+        self.assertEqual(out["outline_px"], 0)
+
     def test_a_fade_that_falls_back_fails(self):
         out = run([1.0] * 12, [0.2, 0.5, 0.9, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.0, 1.0])
         self.assertFalse(out["checks"]["rise"])
