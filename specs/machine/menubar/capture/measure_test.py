@@ -4,8 +4,9 @@ run.sh --capture runs it before it boots anything.
 
 The wash bars must hold the system's own pairs and the owner's pick, and refuse the
 builds the baseline records (baseline.json: the capture at 47bedbecd, and the tinted
-glass of sweep mb1-sweep4); the zoom measure must refuse a title that scales as the
-panel opens and accept one that does not.
+glass of sweep mb1-sweep4); the zoom measure must refuse a title that scales or fades in
+as the panel opens, and an item that drops its highlight, and accept a panel shown whole
+under a lit item.
 """
 
 import json
@@ -57,11 +58,17 @@ def scene(width, height):
     return image
 
 
-def frame(shift=1.0, alpha=1.0):
+ITEM = (300, 340)
+
+
+def frame(shift=1.0, alpha=1.0, lit=True):
     """A closed-screen stand-in 400 x 600 with a panel 300 x 500 at (50, 80), its
-    title drawn at `shift` of its size around the panel's top centre."""
+    title drawn at `shift` of its size around the panel's top centre, and the status
+    item's pill over ITEM's columns when lit."""
     img = scene(400, 600)
     draw = ImageDraw.Draw(img)
+    if lit:
+        draw.rounded_rectangle((ITEM[0], 4, ITEM[1], 26), 8, fill=(160, 190, 220))
     draw.rounded_rectangle((50, 80, 350, 580), 20, fill=(230, 235, 240))
     text = Image.new("RGB", (160, 36), (230, 235, 240))
     font = ImageFont.load_default(size=22)
@@ -76,9 +83,13 @@ def frame(shift=1.0, alpha=1.0):
     return np.array(img)
 
 
-def run(shifts, alphas):
-    frames = [np.array(scene(400, 600))] + [frame(s, a) for s, a in zip(shifts, alphas)]
-    return opening.measure(frames, 1.0, "")
+def run(shifts, alphas, lits=None, log=""):
+    lits = lits or [True] * len(shifts)
+    frames = [np.array(scene(400, 600))] + [frame(s, a, lit) for s, a, lit in zip(shifts, alphas, lits)]
+    return opening.measure(frames, 1.0, log, ITEM)
+
+
+ONE_GLASS = "x open t=1 frame=1 glass=x=1 y=2 w=3 h=4\nx open t=2 frame=2 glass=x=1 y=2 w=3 h=4\n"
 
 
 class Zoom(unittest.TestCase):
@@ -90,11 +101,33 @@ class Zoom(unittest.TestCase):
         self.assertFalse(out["pass"])
         self.assertFalse(out["checks"]["title"], out)
 
-    def test_a_title_that_fades_in_place_passes(self):
+    def test_a_title_that_fades_in_place_holds_still_but_is_not_whole(self):
         out = run([1.0] * 12, self.alphas)
         self.assertTrue(out["checks"]["title"], out)
         self.assertTrue(out["checks"]["outline"], out)
         self.assertTrue(out["checks"]["rise"], out)
+        self.assertFalse(out["checks"]["whole"], out)
+        self.assertFalse(out["pass"])
+
+    def test_a_panel_shown_whole_under_a_lit_item_passes(self):
+        out = run([1.0] * 12, [1.0] * 12, log=ONE_GLASS)
+        self.assertTrue(out["pass"], out)
+        self.assertEqual(out["title_move_px"], 0)
+        self.assertGreaterEqual(out["title_score_min"], 0.99)
+
+    def test_a_pill_that_lights_a_frame_after_the_panel_passes(self):
+        out = run([1.0] * 12, [1.0] * 12, lits=[False] * 2 + [True] * 10, log=ONE_GLASS)
+        self.assertTrue(out["checks"]["highlight"], out)
+        self.assertEqual(out["pill_from"], 2)
+
+    def test_an_item_never_lit_fails(self):
+        out = run([1.0] * 12, [1.0] * 12, lits=[False] * 12, log=ONE_GLASS)
+        self.assertFalse(out["checks"]["highlight"], out)
+
+    def test_an_item_that_drops_its_highlight_fails(self):
+        out = run([1.0] * 12, [1.0] * 12, lits=[True] * 3 + [False] * 9, log=ONE_GLASS)
+        self.assertFalse(out["checks"]["highlight"], out)
+        self.assertTrue(out["checks"]["whole"], out)
 
     def test_a_fade_that_falls_back_fails(self):
         out = run([1.0] * 12, [0.2, 0.5, 0.9, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.0, 1.0])
@@ -102,8 +135,7 @@ class Zoom(unittest.TestCase):
 
     def test_a_log_with_two_glass_frames_fails(self):
         log = "x open t=1 frame=1 glass=x=1 y=2 w=3 h=4\nx open t=2 frame=2 glass=x=1 y=2 w=3 h=5\n"
-        frames = [np.array(scene(400, 600))] + [frame(1.0, a) for a in self.alphas]
-        self.assertFalse(opening.measure(frames, 1.0, log)["checks"]["ticks"])
+        self.assertFalse(run([1.0] * 12, [1.0] * 12, log=log)["checks"]["ticks"])
 
     def test_the_recorded_baseline_fails(self):
         base = json.load(open(os.path.join(HERE, "baseline.json")))["opening"]
