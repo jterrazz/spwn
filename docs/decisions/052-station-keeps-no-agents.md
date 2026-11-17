@@ -1,6 +1,6 @@
 # ADR-052: Station keeps no agents; another binary owns them
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-17
 
 ## Context
