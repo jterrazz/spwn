@@ -100,6 +100,23 @@ function StepBody({ found, step }: { found: Found; step: AccountsStep }) {
     }
 }
 
+function Instruction({ step }: { step: AccountsStep }) {
+    switch (step.Kind) {
+        case 'device-code': {
+            return null;
+        }
+        case 'link':
+        case 'paste': {
+            return (
+                <p className={styles.instruction}>
+                    <b>{stepHeadingOf(step.Kind)}</b>
+                    <span>{detailOf('AccountsStepKind', step.Kind)}</span>
+                </p>
+            );
+        }
+    }
+}
+
 function StepOpens({ found, step }: { found: Found; step: AccountsStep }) {
     switch (step.Kind) {
         case 'device-code':
@@ -182,10 +199,7 @@ function Round({ found, program, title, onClose, onNewCode }: RoundProps) {
     const { step } = seen;
     return sheet(
         <div className={styles.body}>
-            <p className={styles.instruction}>
-                <b>{stepHeadingOf(step.Kind)}</b>
-                <span>{detailOf('AccountsStepKind', step.Kind)}</span>
-            </p>
+            <Instruction step={step} />
             <StepBody found={found} step={step} />
         </div>,
         <>
