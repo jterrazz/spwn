@@ -62,7 +62,8 @@ type ChapterDrift struct {
 // version in Seen and Asked, a port's audience in SeenTo and AskedTo, left
 // out where it is not shared or not asked; an account's is its Condition
 // alone, absent where the file shares it and the Mac holds no copy, extra
-// where the Mac holds a copy the file does not share.
+// where the Mac holds a copy the file does not share, and each side in
+// SeenAs and AskedAs.
 
 type Differing struct {
 	Package   string
@@ -74,7 +75,33 @@ type Differing struct {
 	Asked     string
 	SeenTo    catalog.Audience `json:",omitempty"`
 	AskedTo   catalog.Audience `json:",omitempty"`
+	SeenAs    MacSide          `json:",omitempty"`
+	AskedAs   FileSide         `json:",omitempty"`
 }
+
+// value: an account's side on the Mac: its copy is granted there, or the
+// Mac is not signed in.
+
+type MacSide string
+
+const (
+	MacGranted     MacSide = "granted"
+	MacNotSignedIn MacSide = "not-signed-in"
+)
+
+func (MacSide) Enum() []string { return []string{string(MacGranted), string(MacNotSignedIn)} }
+
+// value: an account's side in the file: the file shares it, or does not
+// have it.
+
+type FileSide string
+
+const (
+	FileShared FileSide = "shared"
+	FileLacks  FileSide = "not-in-the-file"
+)
+
+func (FileSide) Enum() []string { return []string{string(FileShared), string(FileLacks)} }
 
 // value: what apply would do with the lines that differ, by its verb, and
 // the sentence that says it.
@@ -211,7 +238,11 @@ func (a Access) accounts() *ChapterDrift {
 			}
 			continue
 		}
-		c.Differing = append(c.Differing, Differing{Account: h.Account, Condition: held(h.Seen, h.Asked)})
+		d := Differing{Account: h.Account, Condition: held(h.Seen, h.Asked), SeenAs: MacNotSignedIn, AskedAs: FileShared}
+		if h.Seen {
+			d.SeenAs, d.AskedAs = MacGranted, FileLacks
+		}
+		c.Differing = append(c.Differing, d)
 	}
 	return c
 }

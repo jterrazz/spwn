@@ -1460,6 +1460,16 @@
       "Tone": "plain"
     }
   },
+  "MachinefileFileSide": {
+    "not-in-the-file": {
+      "Word": "Not in the file",
+      "Tone": "plain"
+    },
+    "shared": {
+      "Word": "Shared",
+      "Tone": "plain"
+    }
+  },
   "MachinefileFollowerState": {
     "differs": {
       "Word": "Differs",
@@ -1503,6 +1513,16 @@
     },
     "user": {
       "Word": "~/.config/station",
+      "Tone": "plain"
+    }
+  },
+  "MachinefileMacSide": {
+    "granted": {
+      "Word": "Granted",
+      "Tone": "plain"
+    },
+    "not-signed-in": {
+      "Word": "Not signed in",
       "Tone": "plain"
     }
   },

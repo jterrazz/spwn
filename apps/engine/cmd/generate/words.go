@@ -123,6 +123,14 @@ func wordedEnums() []worded {
 			string(machinefile.FollowerDiffers): {Word: "Differs", One: "difference", Other: "differences", Tone: verdict.Warn},
 			string(machinefile.FollowerUnread):  plain("Not read"),
 		}},
+		{machinefile.MacSide(""), map[string]word{
+			string(machinefile.MacGranted):     plain("Granted"),
+			string(machinefile.MacNotSignedIn): plain("Not signed in"),
+		}},
+		{machinefile.FileSide(""), map[string]word{
+			string(machinefile.FileShared): plain("Shared"),
+			string(machinefile.FileLacks):  plain("Not in the file"),
+		}},
 		{machinefile.Condition(""), map[string]word{
 			string(machinefile.Present):    toned(verdict.OK, "present"),
 			string(machinefile.Absent):     toned(verdict.Warn, "not installed"),

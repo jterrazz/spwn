@@ -849,6 +849,13 @@
         "Asked": {
           "type": "string"
         },
+        "AskedAs": {
+          "enum": [
+            "shared",
+            "not-in-the-file"
+          ],
+          "type": "string"
+        },
         "AskedTo": {
           "enum": [
             "local",
@@ -879,6 +886,13 @@
           "type": "integer"
         },
         "Seen": {
+          "type": "string"
+        },
+        "SeenAs": {
+          "enum": [
+            "granted",
+            "not-signed-in"
+          ],
           "type": "string"
         },
         "SeenTo": {

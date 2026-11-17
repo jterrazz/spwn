@@ -134,11 +134,11 @@ func TestDriftReadsAVMsPortsAndAccountsAgainstItsFile(t *testing.T) {
 	if accounts.Listed != 2 || accounts.Matching != 1 || len(accounts.Differing) != 2 {
 		t.Fatalf("accounts: %+v", accounts)
 	}
-	if got := accounts.Differing[0]; got.Account != "forge" || got.Condition != machinefile.Absent {
-		t.Errorf("forge reads %+v; want absent, shared by the file", got)
+	if got := accounts.Differing[0]; got.Account != "forge" || got.Condition != machinefile.Absent || got.SeenAs != machinefile.MacNotSignedIn || got.AskedAs != machinefile.FileShared {
+		t.Errorf("forge reads %+v; want absent, not signed in against shared by the file", got)
 	}
-	if got := accounts.Differing[1]; got.Account != "notes" || got.Condition != machinefile.Extra {
-		t.Errorf("notes reads %+v; want extra", got)
+	if got := accounts.Differing[1]; got.Account != "notes" || got.Condition != machinefile.Extra || got.SeenAs != machinefile.MacGranted || got.AskedAs != machinefile.FileLacks {
+		t.Errorf("notes reads %+v; want extra, granted against not in the file", got)
 	}
 	if d.Differences != 3 || d.Verdict.Sentence != "3 differences from linux-dev." {
 		t.Errorf("drift: %d, %q", d.Differences, d.Verdict.Sentence)
