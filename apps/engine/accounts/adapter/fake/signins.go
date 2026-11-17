@@ -156,7 +156,7 @@ func (s *SignIns) Login(ctx context.Context, name string, program accounts.Progr
 	own.Exchanges[id] = &world.Exchange{Program: program, Kind: step.Kind, Site: step.Site, Expires: now.Add(exchangeLife), Asking: step.Kind == accounts.StepPaste, Answer: script.Answer}
 	s.w.Unlock()
 
-	sent := accounts.Step{Kind: step.Kind, Code: step.Code, Site: step.Site, Exchange: id, Expires: now.Add(exchangeLife), Now: now, Line: program.StepLine(step.Kind, step.Site), Title: accounts.LoginTitle(program, target)}
+	sent := accounts.Step{Kind: step.Kind, Code: step.Code, Site: step.Site, Exchange: id, Expires: now.Add(exchangeLife), Now: now, Line: program.StepLine(step.Kind, step.Site, target), Title: accounts.LoginTitle(program, target)}
 	out := make(chan contract.LoginUpdate)
 	go func() {
 		defer close(out)

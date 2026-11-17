@@ -112,12 +112,13 @@ func LoginTitle(p Program, on string) string {
 	return "Sign in to " + string(p) + " on " + on
 }
 
-func (t Program) StepLine(kind StepKind, site string) string {
+func (t Program) StepLine(kind StepKind, site, on string) string {
 	// value: the status line under the code of a login step, worded for
-	// the program and the site the owner is sent to.
+	// the program, the site the owner is sent to and the machine that
+	// signs in.
 	switch kind {
 	case StepDeviceCode:
-		return "Waiting for you to enter the " + t.Label() + " code at " + site
+		return "Enter this code at " + site + ". " + on + " signs in by itself once you approve it."
 	case StepPaste:
 		return "Waiting for the " + t.Label() + " code from " + site
 	case StepLink:

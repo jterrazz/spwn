@@ -69,3 +69,10 @@ func TestALoginStepIsTitledByTheProgramAndTheMachine(t *testing.T) {
 		t.Errorf("%q", got)
 	}
 }
+
+func TestADeviceCodeStepLineSaysWhereToEnterItAndWhoSignsIn(t *testing.T) {
+	line := capturing(t).StepLine(accounts.StepDeviceCode, "github.com", "linux-1")
+	if line != "Enter this code at github.com. linux-1 signs in by itself once you approve it." {
+		t.Errorf("%q", line)
+	}
+}

@@ -10,5 +10,5 @@ runs:
           {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"gh"}}
       exit: 0
       stdout: |
-          {"step":["device-code","WDJB-MJHT","github.com","ex-4","Waiting for you to enter the GitHub code at github.com",true,"Sign in to gh on macbook-pro"]}
+          {"step":["device-code","WDJB-MJHT","github.com","ex-4","Enter this code at github.com. macbook-pro signs in by itself once you approve it.",true,"Sign in to gh on macbook-pro"]}
           {"signed":["gh","signed-in","own","sign-out"]}

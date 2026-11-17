@@ -8,5 +8,5 @@ runs:
           {"v":2,"id":"1","watch":"accounts.login","in":{"Machine":"linux-1","Program":"gh"}}
       exit: 0
       stdout: |
-          {"step":["device-code","github.com","Waiting for you to enter the GitHub code at github.com","Sign in to gh on linux-1"]}
+          {"step":["device-code","github.com","Enter this code at github.com. linux-1 signs in by itself once you approve it.","Sign in to gh on linux-1"]}
           {"signed":["signed-in","sign-out"]}
