@@ -2,6 +2,7 @@ import { button, component, content, enabled, file, heading, region, within } fr
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../../composition/__tests__/page-over';
+import { unansweredAt } from '../../../../../infrastructure/outbound/engine-replay/__tests__/unanswered';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
 
 const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'two-macs');
@@ -80,9 +81,10 @@ describe('machine-storage', () => {
     });
 
     test('a Mac that does not answer shows the transport saying so', async () => {
-        // Given - the window on the Mac mini's Storage over mini-offline
+        // Given - the window on the Mac mini's Storage over mini-offline, no read asked at the mini ever answered
+        const unanswered = unansweredAt(recordingFor('mini-offline'), 'mac-mini');
         const result = await component.render(
-            windowOver('mini-offline', 'mac-mini'),
+            pageOver(unanswered, { machine: 'mac-mini', page: 'machine', tab: 'Storage' }),
             async (visitor) => {
                 // When - its read ends with no answer
                 await visitor.see(heading('No answer from the engine.'));

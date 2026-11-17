@@ -11,7 +11,11 @@
     - tab "Activity"
     - tab "Ports"
   - heading "Healthy." [level=1]
-  - text: CPU no answer Memory no answer Disk no answer Check 41ms passes · 3 s ago
+  - text: CPU 18% 8 CPUs Memory 15GB
+  - meter "Memory used of its total"
+  - text: of 24 GB Disk 36GB
+  - meter "Disk used of its total"
+  - text: of 80 GB Check 41ms passes · 3 s ago
   - region "Health":
     - heading "Health checked 3 s ago" [level=2]
     - text: Healthy. Its state Running Its address 192.168.64.5 SSH Answers Its check Passes
@@ -32,4 +36,13 @@
     - definition: Always on. Stopping it needs its name typed.
     - term: Check
     - definition: https://infra:6443/readyz
+  - region "Busiest now":
+    - heading "Busiest now" [level=2]
+    - text: k3s-server
+    - meter "CPU of k3s-server"
+    - text: 9 % containerd
+    - meter "CPU of containerd"
+    - text: 3 % traefik
+    - meter "CPU of traefik"
+    - text: 1 %
   - button "Delete infra…"

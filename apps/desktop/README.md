@@ -252,7 +252,7 @@ From the Mac, `scripts/look.sh <lot> <test path>` runs the first in the VM and c
 
 A page opens directly in a dev or proof build by its start route, `?world=<world>&page=<page>` (Machine files on one file by `&file=<name>`, a catalog item on its shelf by `&item=<name>`) or `?world=<world>&machine=<name>&tab=<Tab>`.
 
-In the world build the only door is `station guest serve --stdio`, whose Router runs any target that is not a VM in this process. So a call aimed at a far Mac answers with This Mac's data, and a capture of a far Mac's page proves its layout only, never what it shows.
+In the world build the only door is `station guest serve --stdio`, which on a Mac is the engine socket's door: a call aimed at a far Mac, or at a VM of a far Mac, is routed there and answered by that machine, so a recording and a capture of a far machine's page show what that machine says.
 
 ## The design rules
 
