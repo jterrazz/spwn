@@ -783,6 +783,11 @@ extension Token {
         public static let tint = Animation.easeOut(duration: 0.12)
         public static let sample = Animation.linear(duration: 0.2)
 
+        // value: STATION_TRIAL_SLOW=<k> stretches the panel's opening k times, so the
+        // capture rig can sample it frame by frame; below 1 or unreadable it is 1.
+        public static func slowdown(_ raw: String?) -> Double { max(1, Double(raw ?? "") ?? 1) }
+        public static let slow = slowdown(ProcessInfo.processInfo.environment["STATION_TRIAL_SLOW"])
+
         public static let snappyCurve = UnitCurve.bezier(startControlPoint: UnitPoint(x: 0.30, y: 0.90), endControlPoint: UnitPoint(x: 0.30, y: 1))
         public static let smoothCurve = UnitCurve.bezier(startControlPoint: UnitPoint(x: smoothPoints[0], y: smoothPoints[1]), endControlPoint: UnitPoint(x: smoothPoints[2], y: smoothPoints[3]))
         // value: the smooth curve's control points, which the app's window

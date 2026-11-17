@@ -45,7 +45,7 @@ public struct PanelOpening: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .modifier(PanelAppear(progress: shown))
-            .onAppear { withAnimation(tokens.motion(Token.Motion.smooth)) { shown = 1 } }
+            .onAppear { withAnimation(tokens.motion(Token.Motion.smooth).speed(1 / Token.Motion.slow)) { shown = 1 } }
             .onDisappear { shown = 0 }
     }
 }
