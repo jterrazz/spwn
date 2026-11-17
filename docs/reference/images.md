@@ -1,6 +1,6 @@
 # Images
 
-An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac holds its own: built there from a Machinefile, the image named after it, or fetched where a registry offers it ([ADR-044](../decisions/044-an-image-is-baked-from-its-machinefile.md)). Station knows `station-linux`, the built-in Linux workspace's Machinefile, and `macos`, fetched only (station has no recipe for it yet); every Machinefile of yours or of the shared source that says a VM's `vm.image.from` on Ubuntu is an image too (`studio-linux`).
+An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac holds its own: built there from a Machinefile, the image named after it, or fetched where a registry offers it ([ADR-044](../decisions/044-an-image-is-baked-from-its-machinefile.md)). Station knows `station-linux`, the built-in Linux workspace's Machinefile, and `macos`, fetched only (station has no recipe for it yet); every Machinefile of yours or of the shared source that says a VM's `vm.image.from` on Ubuntu is an image too (`studio-linux`). [ADR-051](../decisions/051-a-machine-is-a-base-and-its-machinefiles.md), a proposal, has station build one base per distro instead, macOS included: `base-ubuntu`, `base-debian` and `base-macos`, `clt` and `xcode` becoming Machinefiles.
 
 | Section           | Answers                                                 |
 | ----------------- | ------------------------------------------------------- |
@@ -37,7 +37,7 @@ An image is built from a Machinefile of a VM that says `vm.image.from`, the base
 
 `station-linux` is the built-in Linux image's only name: `linux` names no image, in any images command or in `machines create --image` (`unknown image "linux"`).
 
-`macos` has no recipe: a macOS workspace starts from `ghcr.io/cirruslabs/macos-tahoe-base` (the `station-macos` Machinefile's `vm.image.from`), as Cirrus Labs made it. Its `admin` has a passwordless sudo because that base ships `/etc/sudoers.d/admin-nopasswd`, not because station set it, so `station apply` there asks no password only while that file stays ([ADR-034](../decisions/034-apply-carries-a-machinefile-the-ledger-bounds-removal.md)).
+`macos` has no recipe: a macOS workspace starts from `ghcr.io/cirruslabs/macos-tahoe-base` (the `station-macos` Machinefile's `vm.image.from`), as Cirrus Labs made it. Its `admin` has a passwordless sudo because that base ships `/etc/sudoers.d/admin-nopasswd`, not because station set it, so `station apply` there asks no password only while that file stays ([ADR-034](../decisions/034-apply-carries-a-machinefile-the-ledger-bounds-removal.md)). Station building it, with its sshd password login off, is [ADR-051](../decisions/051-a-machine-is-a-base-and-its-machinefiles.md)'s proposal.
 
 ## Updating
 
