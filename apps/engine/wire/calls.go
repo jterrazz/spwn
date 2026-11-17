@@ -57,7 +57,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 	registry, err := call.NewRegistry(
 		activitycalls.All(m.activityDeps(sections.Meter)),
 		overviewcalls.All(sections),
-		agentscalls.All(agentscalls.Deps{Hooks: []agentscontract.Hooks{m.agentHooks(claudecode.ID), m.agentHooks(codex.ID)}, Journal: m.journal(), Session: m.agentSession(), Forge: m.forge(), Now: m.sys.Clock.Now, Machine: m.profile.Ref.Name, Held: m.heldOnEveryMachine(kind), Kind: kind, Calls: farRouter{m}}),
+		agentscalls.All(agentscalls.Deps{Hooks: []agentscontract.Hooks{m.agentHooks(claudecode.ID), m.agentHooks(codex.ID)}, Journal: m.journal(), Session: m.agentSession(), Forge: m.forge(), Now: m.sys.Clock.Now, Machine: m.profile.Ref.Name, Kind: kind, Calls: farRouter{m}}),
 		accountscalls.All(accountscalls.Deps{SignIns: m.signIns(), Kind: kind}),
 		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),

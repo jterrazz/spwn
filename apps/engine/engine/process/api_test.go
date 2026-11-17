@@ -24,7 +24,7 @@ func TestAGuestsServerAnswersTheGuestsCallsAlone(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := Server(h.d, Serving{Registry: registry, Guest: "api"})
-	for _, name := range []string{engine.CallPorts, engine.CallReserve, engine.CallRelease, engine.CallAgentsHeld} {
+	for _, name := range []string{engine.CallPorts, engine.CallReserve, engine.CallRelease} {
 		if _, ok := s.Calls(name); !ok {
 			t.Errorf("%s is not answered, want it relayed as the guest's", name)
 		}

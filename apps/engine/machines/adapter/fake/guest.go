@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"io/fs"
-	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -175,7 +174,7 @@ func (c *guest) serve(ctx context.Context, cmd contract.GuestCommand) (contract.
 		}()
 	}
 	if cmd.Stdout != nil {
-		if _, err := cmd.Stdout.Write(append(append([]byte(`{"v":1,"type":"ready"}`+"\n"), c.snapshot()...), c.agents()...)); err != nil {
+		if _, err := cmd.Stdout.Write(append([]byte(`{"v":1,"type":"ready"}`+"\n"), c.snapshot()...)); err != nil {
 			return contract.GuestResult{}, err
 		}
 	}
@@ -193,28 +192,6 @@ func (c *guest) snapshot() []byte {
 	found := c.w.Reported(c.name)
 	c.w.Unlock()
 	line, err := json.Marshal(map[string]any{"v": 1, "type": "snapshot", "ports": found})
-	if err != nil {
-		return nil
-	}
-	return append(line, '\n')
-}
-
-// invariant: a guest reports its VM's journal as it is, as the guest's
-// first look at it does: the sessions not past their keep, by name.
-func (c *guest) agents() []byte {
-	c.w.Lock()
-	kept := []any{}
-	if mac := c.w.Holder(c.name); mac != "" {
-		if held := c.w.Macs[mac].VMs[c.name].Agents; held != nil {
-			for _, name := range slices.Sorted(maps.Keys(held.Journal)) {
-				if !held.Journal[name].Expired(c.w.Now) {
-					kept = append(kept, held.Journal[name])
-				}
-			}
-		}
-	}
-	c.w.Unlock()
-	line, err := json.Marshal(map[string]any{"v": 1, "type": "agents", "agents": kept})
 	if err != nil {
 		return nil
 	}

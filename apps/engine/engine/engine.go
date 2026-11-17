@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"encoding/json"
 	"time"
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -37,11 +36,6 @@ type Remembered struct {
 	// value: what it was last heard listening on, so a successor lists
 	// the ports of a VM down or booting again.
 	LastHeard []ports.Listener `json:"last_heard,omitempty"`
-	// value: the last report of its agents' journal its guest sent, and
-	// whether one came: a first report is what the agents were, told of no
-	// change.
-	Agents   json.RawMessage `json:"agents,omitempty"`
-	Reported bool            `json:"reported,omitempty"`
 	// value: how it stood with its file at the drift job's last reading.
 	Drift *model.KeptDrift `json:"drift,omitempty"`
 }

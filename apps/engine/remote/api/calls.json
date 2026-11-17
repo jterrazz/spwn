@@ -365,13 +365,6 @@
       "own": true
     },
     {
-      "name": "engine.agents-held",
-      "schema": "station.engine.agents-held/v1",
-      "where": "in-engine",
-      "out": "Held",
-      "own": true
-    },
-    {
       "name": "engine.awake",
       "schema": "station.engine.awake/v1",
       "where": "in-engine",

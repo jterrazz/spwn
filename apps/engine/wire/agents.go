@@ -2,9 +2,7 @@ package wire
 
 import (
 	"context"
-	"errors"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -13,7 +11,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
-	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	agentscmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/agents"
 	agentsattach "github.com/jterrazz/studio-station/apps/engine/surface/cli/agents/attach"
@@ -92,30 +89,6 @@ func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.R
 	}
 	_, at, err := f.find(ctx, name)
 	return at, err
-}
-
-// value: how long a workspace waits for its Mac's engine to say the names
-// every machine holds; one silent past it holds none.
-const heldBudget = 2 * time.Second
-
-// value: the names every machine holds, which a workspace asks its Mac's
-// engine within heldBudget; a Mac whose engine is down holds none, so the
-// workspace checks its own agents alone: no Mac reaches them meanwhile, and
-// a find refuses a name two agents hold once one does. Nil on a Mac, which
-// reads every machine itself.
-func (m machine) heldOnEveryMachine(kind coremachine.Kind) func(ctx context.Context) (agents.Held, error) {
-	if kind != coremachine.Workspace {
-		return nil
-	}
-	return func(ctx context.Context) (agents.Held, error) {
-		ctx, cancel := context.WithTimeout(ctx, heldBudget)
-		defer cancel()
-		h, err := m.engineAPI().AgentsHeld(ctx)
-		if down := new(enginecalls.DownError); errors.As(err, &down) {
-			return agents.Held{}, nil
-		}
-		return h, err
-	}
 }
 
 // value: the Router a call reaches another machine through: this run's,

@@ -3,7 +3,6 @@ package calls
 import (
 	"reflect"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -43,7 +42,6 @@ func Owns() []Own {
 		served(engine.CallKeepSettings, reflect.TypeFor[engine.KeepSettingsIn](), ok),
 		served(engine.CallLastSettings, reflect.TypeFor[engine.VMIn](), reflect.TypeFor[engine.LastSettingsOut]()),
 		served(engine.CallRefresh, reflect.TypeFor[engine.PagesIn](), ok),
-		served(engine.CallAgentsHeld, none, reflect.TypeFor[agents.Held]()),
 	}
 	for _, verb := range engine.VMVerbs() {
 		out = append(out, served(engine.CallVM(verb), reflect.TypeFor[engine.VMIn](), reflect.TypeFor[*struct{}]()))
