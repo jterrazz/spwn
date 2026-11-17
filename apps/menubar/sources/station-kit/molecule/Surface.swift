@@ -1,7 +1,7 @@
 import SwiftUI
 
-// value: a tile of the vision on the panel's glass: a translucent fill
-// 16 pt round (white at 8 % in dark, 58 % in light), never glass, padded
+// value: a tile of the vision on the panel's glass: the box's fill
+// 16 pt round (Fill.tile, one step off the material), never glass, padded
 // 10 by 12; a finding mixes its colour in. With Reduce Transparency or
 // Increase Contrast, a separator stroke in its place.
 struct TileGround: ViewModifier {
@@ -37,7 +37,7 @@ struct Hover: ViewModifier {
         content
             .contentShape(Rectangle())
             .background {
-                if over { Rectangle().fill(Token.Fill.tile(scheme)) }
+                if over { Rectangle().fill(Token.Fill.hover(scheme)) }
             }
             .onHover { over = $0 }
     }
@@ -55,7 +55,7 @@ extension View {
 
     public func stationHover() -> some View { modifier(Hover()) }
 
-    // value: a field's ground: a tile's fill,
+    // value: a field's ground: the system's control fill,
     // 10 pt round.
     public func stationField() -> some View { modifier(FieldGround()) }
 }
@@ -64,7 +64,7 @@ struct FieldGround: ViewModifier {
     @Environment(\.colorScheme) private var scheme
 
     func body(content: Content) -> some View {
-        content.background(Token.Fill.tile(scheme), in: RoundedRectangle(cornerRadius: Token.Tile.fieldCorner, style: .continuous))
+        content.background(Token.Fill.control(scheme), in: RoundedRectangle(cornerRadius: Token.Tile.fieldCorner, style: .continuous))
     }
 }
 
@@ -416,7 +416,7 @@ public struct StationButton: View {
 
     var fill: AnyShapeStyle {
         if role == .primary { return AnyShapeStyle(palette.accent) }
-        return AnyShapeStyle(wide ? Token.Fill.tile(scheme) : Token.Fill.raised(scheme))
+        return AnyShapeStyle(Token.Fill.raised(scheme))
     }
 
     public var body: some View {
@@ -526,7 +526,7 @@ public struct PlainIcon: View {
                 .frame(width: side, height: side)
                 .background {
                     if round {
-                        Circle().fill(Token.Fill.tile(scheme))
+                        Circle().fill(Token.Fill.control(scheme))
                     } else {
                         RoundedRectangle(cornerRadius: Token.Tile.squareCorner, style: .continuous).fill(Token.Fill.raised(scheme))
                     }

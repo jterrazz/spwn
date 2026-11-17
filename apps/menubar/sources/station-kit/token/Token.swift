@@ -96,19 +96,22 @@ public enum Token {
         public static let headLeading: CGFloat = 1.9
     }
 
-    // value: the vision's fills on the panel's glass: a tile white at 8 %
-    // in dark, 58 % in light; raised (a chosen segment, a small button)
-    // 14 % and 80 %; the hairline between rows; the switch's green.
+    // value: the system's quiet fills on the panel's material (ADR-053, the
+    // round-5 spec): a box one step off the material, white at 5.5 % in
+    // dark and 26 % in light; a control's ground and a small button, the
+    // system's fill, white at 8 % and 12 % in dark, black at 5.5 % and 7 %
+    // in light; the inset highlight a pointer lights, white 9 % or black
+    // 6 %; the hairline between rows.
     public enum Fill {
-        public static func tile(_ scheme: ColorScheme) -> Color { Color.white.opacity(scheme == .dark ? 0.08 : 0.58) }
-        public static func raised(_ scheme: ColorScheme) -> Color { Color.white.opacity(scheme == .dark ? 0.14 : 0.8) }
-        public static func picked(_ scheme: ColorScheme) -> Color { Color.white.opacity(scheme == .dark ? 0.32 : 0.8) }
+        public static func tile(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color.white.opacity(0.055) : Color.white.opacity(0.26) }
+        public static func raised(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.07) }
+        public static func control(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.055) }
+        public static func hover(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color.white.opacity(0.09) : Color.black.opacity(0.06) }
         public static func faint(_ scheme: ColorScheme) -> Color {
             scheme == .dark ? Token.hex(0xEBEBF5).opacity(0.16) : Token.hex(0x3C3C43).opacity(0.18)
         }
         public static let icon = Token.hex(0x1C1C1E)
         public static let iconInk = Color.white
-        public static func edge(_ scheme: ColorScheme) -> Color { Color.white.opacity(scheme == .dark ? 0.14 : 0.7) }
         public static let finding = 0.16
         public static let chip = 0.22
         public static let tag = 0.18
@@ -194,15 +197,9 @@ public enum Token {
     public enum Glass {
         public static let window: CGFloat = 24
 
-        public static func pane(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.hex(0x222328).opacity(0.58) : Token.hex(0xF6F7FB).opacity(0.62) }
-        public static func sheen(_ scheme: ColorScheme) -> [Color] {
-            [Color.white.opacity(scheme == .dark ? 0.06 : 0.35), Color.white.opacity(0)]
-        }
-        public static func edge(_ scheme: ColorScheme) -> Color { Fill.edge(scheme) }
-        // value: the chosen segment of a segmented control, raised off its
-        // track as macOS draws it.
-        public static func knob(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color.white.opacity(0.26) : Color.white }
-        public static func shade(_ scheme: ColorScheme) -> Color { Color.black.opacity(scheme == .dark ? 0.5 : 0.22) }
+        // value: the Catalog's flat desk, a neutral grey, so the material
+        // over it shows no colour the desk did not give it.
+        public static func desk(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0x2C2C2E : 0x9A9A9E) }
 
         // value: the fixed wallpaper an offscreen snapshot draws the panel
         // over, so its glass reads in the PNG (the vision's desk): each
@@ -404,15 +401,13 @@ extension View {
 }
 
 extension Token {
-    // value: the v4 colour table (SPEC A1), by scheme and contrast, drawn
-    // the M1 way: one plate under the content (80 %, M1's 82 % in light
-    // less the 2 % a text-dense frame needs to stay glass), which still
-    // renders draw in place of the live glass,
-    // two text tones, cards and Find edged by a faint line, red only as a
-    // solid fill. A light card is white at 30 %, not M1's 75 %: over the
-    // 80 % plate that would show 5 % of the desk, opaque by the stories'
-    // glass rule, and its edge must stay glass under an alert's scrim too;
-    // the scrims dim a plate that already dims, so 30 % and 12 % are enough.
+    // value: the v4 colour table (SPEC A1), by scheme and contrast, with
+    // the round-5 spec's system material and label colours (ADR-053): one
+    // plate under the content, the material a system menu shows (light
+    // grey at 64 %, near-black at 60 %), which still renders draw in place
+    // of the live glass; labels black or white at 85 %, 58 or 55 % and 25 %;
+    // a box one step off the material (white 26 % in light, 5.5 % in dark)
+    // edged by a 6 or 7.5 % line; red only as a solid fill.
     public struct Colors: Sendable {
         public let panel, panelSolid, panelEdge, sheetSolid, menu: Color
         public let plate, plateSolid: Color
@@ -445,16 +440,16 @@ extension Token {
         let card: Color, card2: Color, edge: Color, hair: Color, t2: Color, q: Color, qq: Color
         switch (dark, ic) {
         case (true, false):
-            card = rgba(255, 255, 255, 0.07); card2 = rgba(255, 255, 255, 0.11); edge = rgba(255, 255, 255, 0.11)
-            hair = rgba(255, 255, 255, 0.12); t2 = rgba(255, 255, 255, 0.72)
+            card = rgba(255, 255, 255, 0.055); card2 = rgba(255, 255, 255, 0.11); edge = rgba(255, 255, 255, 0.075)
+            hair = rgba(255, 255, 255, 0.10); t2 = rgba(255, 255, 255, 0.55)
             q = rgba(255, 255, 255, 0.14); qq = rgba(255, 255, 255, 0.20)
         case (true, true):
             card = hex(0x2C2D33); card2 = hex(0x3A3B41); edge = rgba(255, 255, 255, 0.30)
             hair = rgba(255, 255, 255, 0.30); t2 = rgba(255, 255, 255, 0.82)
             q = rgba(255, 255, 255, 0.18); qq = rgba(255, 255, 255, 0.26)
         case (false, false):
-            card = rgba(255, 255, 255, 0.30); card2 = rgba(255, 255, 255, 0.34); edge = rgba(0, 0, 0, 0.08)
-            hair = rgba(0, 0, 0, 0.10); t2 = rgba(0, 0, 0, 0.62)
+            card = rgba(255, 255, 255, 0.26); card2 = rgba(255, 255, 255, 0.34); edge = rgba(0, 0, 0, 0.06)
+            hair = rgba(0, 0, 0, 0.10); t2 = rgba(0, 0, 0, 0.58)
             q = rgba(0, 0, 0, 0.065); qq = rgba(0, 0, 0, 0.10)
         case (false, true):
             card = hex(0xFFFFFF); card2 = hex(0xF2F2F5); edge = rgba(0, 0, 0, 0.28)
@@ -468,11 +463,11 @@ extension Token {
             panelEdge: dark ? rgba(255, 255, 255, 0.20) : rgba(255, 255, 255, 0.75),
             sheetSolid: dark ? hex(0x272A35) : hex(0xF9F9FB),
             menu: menu,
-            plate: dark ? rgba(16, 16, 20, 0.80) : rgba(250, 250, 252, 0.80),
+            plate: dark ? rgba(32, 32, 34, 0.60) : rgba(244, 244, 244, 0.64),
             plateSolid: dark ? hex(0x101014) : hex(0xFAFAFC),
             card: card, hero: card, card2: card2, edge: edge, hair: hair,
-            t1: dark ? hex(0xFFFFFF) : hex(0x000000), t2: t2, t3: t2,
-            t4: dark ? rgba(235, 235, 245, 0.16) : rgba(60, 60, 67, 0.18),
+            t1: dark ? rgba(255, 255, 255, 0.85) : rgba(0, 0, 0, 0.85), t2: t2, t3: t2,
+            t4: dark ? rgba(255, 255, 255, 0.25) : rgba(0, 0, 0, 0.25),
             q: q, qq: qq,
             key: dark ? rgba(255, 255, 255, 0.14) : rgba(0, 0, 0, 0.07),
             track: dark ? rgba(255, 255, 255, 0.08) : rgba(0, 0, 0, 0.07),

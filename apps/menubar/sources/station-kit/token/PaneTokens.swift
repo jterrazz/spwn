@@ -10,14 +10,9 @@ extension Token {
         public static let opaque = Color.black
         public static let depth = 3
 
-        public static func rim(_ scheme: ColorScheme) -> [Gradient.Stop] {
-            let white = Color.white
-            return scheme == .dark
-                ? [.init(color: white.opacity(0.28), location: 0), .init(color: white.opacity(0.06), location: 0.22),
-                   .init(color: white.opacity(0), location: 0.60), .init(color: white.opacity(0.05), location: 1)]
-                : [.init(color: white.opacity(0.95), location: 0), .init(color: white.opacity(0.35), location: 0.22),
-                   .init(color: white.opacity(0), location: 0.60), .init(color: white.opacity(0), location: 1)]
-        }
+        // value: the material's even inner edge, bright in light as Tahoe draws
+        // it (refs/passwords-tahoe row 13), faint in dark; no top light.
+        public static func rim(_ scheme: ColorScheme) -> Color { Color.white.opacity(scheme == .dark ? 0.09 : 0.55) }
 
         public struct Shade: Sendable {
             public let color: Color
@@ -27,7 +22,7 @@ extension Token {
 
         static let navy = hex(0x14141E)
 
-        public static func ring(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color.black.opacity(0.70) : Color.black.opacity(0.14) }
+        public static func ring(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color.black.opacity(0.70) : Color.black.opacity(0.18) }
 
         public static func shades(_ scheme: ColorScheme) -> [Shade] {
             scheme == .dark

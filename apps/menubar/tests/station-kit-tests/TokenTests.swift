@@ -58,6 +58,27 @@ final class TokenTests: XCTestCase {
         }
     }
 
+    // invariant: ADR-053: no ground is a white card. A box is one step off
+    // the material, white at 26 % at most in light and 5.5 % in dark, and
+    // every other ground in light is the system's dark fill.
+    func testNoGroundIsAWhiteCard() {
+        let environment = EnvironmentValues()
+        func white(_ color: Color) -> Double {
+            let c = color.resolve(in: environment)
+            return min(c.red, c.green, c.blue) > 0.9 ? Double(c.opacity) : 0
+        }
+        let light = Token.resolved(scheme: .light).color, dark = Token.resolved(scheme: .dark).color
+        for (name, box, bound) in [("light tile", Token.Fill.tile(.light), 0.26), ("light card", light.card, 0.26),
+                                   ("dark tile", Token.Fill.tile(.dark), 0.055), ("dark card", dark.card, 0.055)] {
+            XCTAssertLessThanOrEqual(white(box), bound + 0.001, name)
+        }
+        let grounds = [("raised", Token.Fill.raised(.light)), ("control", Token.Fill.control(.light)), ("hover", Token.Fill.hover(.light)),
+                       ("q", light.q), ("qq", light.qq), ("key", light.key), ("track", light.track)]
+        for (name, ground) in grounds {
+            XCTAssertEqual(white(ground), 0, name)
+        }
+    }
+
     func testReduceMotionDissolvesEveryMovement() {
         let reduced = Token.resolved(scheme: .dark, reduceMotion: true)
         XCTAssertEqual(reduced.motion(Token.Motion.smooth), reduced.motion(Token.Motion.snappy))
