@@ -8,7 +8,9 @@ usage: drive.py <ip> <ssh key> <vnc url> <repo> <out dir> <set> [old item x,y,w,
   Transparency, Increase Contrast), sweep (STATION_TRIAL_TINT 0.5 to 0.9),
   trial (ADR-021's height and focus trial), behave (closing gestures), old (a
   build with no frame log: the item's frame is given and the panel is found
-  by what the click changed).
+  by what the click changed), native (the Apple menu over the same walls, twice,
+  for the wash measure) and opening (the panel's opening, sampled frame by
+  frame at STATION_TRIAL_SLOW).
 """
 
 import json
@@ -32,6 +34,15 @@ PAGE = f"~/station/apps/menubar/stories/pages/machines.{STORY}.menubar.json"
 # value: the panel's top-left in M1's scene, from the item, as StatusPanel
 # places it: its right edge under the item's, 6 pt under the menu bar.
 DROP, MARGIN, WIDTH = 6, 8, 340
+# value: the Apple menu opens at the bar's left, 30.5 pt under the top (the Tahoe
+# capture, refs/passwords-tahoe rows 6 and 9); the native shots lay the desk's
+# scene under it as under the panel.
+MENU_AT = (5.0, 30.5)
+APPLE = (20, 12)
+# value: the fade is stretched 10 times, 3.4 s, so a VNC grab every 0.1 to 0.3 s
+# lands at least ten frames in it.
+SLOW = 10
+SPAN = 5.0
 
 
 class Rig:
@@ -79,6 +90,20 @@ class Rig:
         self.gui("osascript ~/cap/quit.scpt")
         self.ssh(f"nohup python3 {CAPTURE}/replay.py {PAGE} ~/.local/state/station/engine.sock {revision} > ~/cap/replay.log 2>&1 < /dev/null &")
         self.wake()
+        self.settle()
+
+    # hazard: the framebuffer is the login screen's 1280 x 720 until the guest's session
+    # sets its display (2048 x 1536 here), and a size read at connect time mapped every
+    # click to the wrong pixel (run mb0-cap, 2026-11-17).
+    def settle(self):
+        for _ in range(45):
+            self.vnc.refreshScreen()
+            if self.vnc.screen.size != (1280, 720):
+                break
+            self.wake()
+            time.sleep(2)
+        self.fb = self.vnc.screen.size
+        self.say(f"   framebuffer now {self.fb[0]}x{self.fb[1]}")
 
     def wake(self):
         self.vnc.mouseMove(self.fb[0] // 2, self.fb[1] // 2)
@@ -103,14 +128,17 @@ class Rig:
         if not any(k.startswith("STATION_TRIAL") for k in env):
             time.sleep(5)
             return None
+        # hazard: the app logs its item before the bar has placed it (a y past the
+        # screen's top) and its screen a moment later; a run that read the first
+        # item with no screen line clicked outside the framebuffer (run mb0-cap, 2026-11-17).
         for _ in range(90):
             time.sleep(1)
-            line = self.last("item ")
-            if line:
-                screen = self.last("screen ")
-                if screen:
-                    self.screen = self.frame(screen)
-                return line
+            line, screen = self.last("item "), self.last("screen ")
+            if line and screen:
+                self.screen = self.frame(screen)
+                if self.frame(line)["y"] + self.frame(line)["h"] <= self.screen["h"]:
+                    self.say(f"   {line.split(' ', 2)[-1]}; {screen.split(' ', 2)[-1]}")
+                    return line
         self.say(f"   no item frame in 90 s; app: {self.ssh('pgrep -lx StationMenuBar; tail -5 ~/cap/app.log ~/cap/app.out 2>&1').strip()}")
         return None
 
@@ -132,7 +160,9 @@ class Rig:
         s, height = self.scale(item)
         width = self.fb[0] / s
         left = min(max(item["x"] + item["w"] - WIDTH, MARGIN), width - MARGIN - WIDTH)
-        top = height - (item["y"] - DROP)
+        self.place(kind, left, height - (item["y"] - DROP))
+
+    def place(self, kind, left, top):
         if self.wall == (kind, left, top):
             return
         self.walls += 1
@@ -202,7 +232,10 @@ class Rig:
         self.vnc.keyPress("esc")
         time.sleep(1)
         closed = None if old_item else bool(self.last("closed"))
-        meta = {"name": name, "story": STORY, "scheme": scheme, "wall": wall, "env": env, "reduce": reduce, "contrast": contrast,
+        s, height = self.scale(item)
+        rect = None if old_item else [int(round(window["x"] * s)), int(round((height - window["y"] - window["h"]) * s)),
+                                      int(round((window["x"] + window["w"]) * s)), int(round((height - window["y"]) * s))]
+        meta = {"name": name, "story": STORY, "rect_px": rect, "scheme": scheme, "wall": wall, "env": env, "reduce": reduce, "contrast": contrast,
                 "a11y_read": read, "item": item, "window": window, "esc_closed": closed}
         if not old_item:
             meta["edge"] = edge
@@ -236,6 +269,73 @@ class Rig:
         diff.paste(0, (0, 0, diff.width, band))
         x0, y0, x1, y1 = diff.getbbox()
         return {"x": x0 / s, "y": height - y1 / s, "w": (x1 - x0) / s, "h": (y1 - y0) / s}
+
+    # value: the Apple menu is the system's own menu on the same material as a
+    # menu bar extra; opened twice per wall, the second take calibrates the noise.
+    def native(self, scheme, wall, take):
+        name = f"native-{scheme}-{wall}-{take}"
+        self.appearance(scheme)
+        self.place(wall, MENU_AT[0], MENU_AT[1])
+        self.park()
+        time.sleep(1)
+        before = self.capture(f"{name}.closed")
+        s, height = self.scale(None)
+        self.wake()
+        self.vnc.mouseMove(int(APPLE[0] * s), int(APPLE[1] * s))
+        self.vnc.mousePress(1)
+        time.sleep(1.5)
+        self.park()
+        time.sleep(0.5)
+        full = self.capture(name)
+        window = self.changed(before, full, None)
+        self.vnc.keyPress("esc")
+        time.sleep(1)
+        rect = [int(round(window["x"] * s)), int(round((height - window["y"] - window["h"]) * s)),
+                int(round((window["x"] + window["w"]) * s)), int(round((height - window["y"]) * s))]
+        meta = {"name": name, "scheme": scheme, "wall": wall, "take": take, "rect_px": rect, "scale": s}
+        self.say(f"-- {name}: {json.dumps(meta)}")
+        return meta
+
+    # value: the opening is read as the pictures the screen shows after the click, taken
+    # as fast as VNC answers, cropped to the panel's columns; the app's own per-display-frame
+    # log of the glass frame comes with them.
+    def opening(self, scheme, wall):
+        name = f"opening-{scheme}-{wall}"
+        self.appearance(scheme)
+        line = self.launch({"STATION_TRIAL_FRAMES": "1", "STATION_TRIAL_SLOW": str(SLOW)})
+        item = self.frame(line) if line else None
+        if not item:
+            self.say(f"FAIL {name}: the app logged no item frame")
+            return None
+        self.set_wall(wall, item)
+        self.park()
+        time.sleep(1)
+        s, height = self.scale(item)
+        left = max(item["x"] + item["w"] - WIDTH - 24, 0)
+        box = (int(left * s), 0, min(int((left + WIDTH + 48) * s), self.fb[0]), self.fb[1])
+
+        def grab():
+            self.vnc.refreshScreen()
+            return self.vnc.screen.convert("RGB").crop(box)
+
+        frames = [(0.0, grab())]
+        t0 = time.time()
+        self.click_item(item)
+        while time.time() - t0 < SPAN:
+            frames.append((time.time() - t0, grab()))
+        self.park()
+        folder = os.path.join(self.out, name)
+        os.makedirs(folder, exist_ok=True)
+        for i, (_, image) in enumerate(frames):
+            image.save(os.path.join(folder, f"f{i:03d}.png"))
+        log = self.ssh("cat ~/cap/app.log")
+        with open(os.path.join(folder, "app.log"), "w", encoding="utf-8") as f:
+            f.write(log)
+        self.vnc.keyPress("esc")
+        time.sleep(1)
+        meta = {"name": name, "scheme": scheme, "wall": wall, "scale": s, "times": [round(t, 3) for t, _ in frames], "slow": SLOW}
+        self.say(f"-- {name}: {len(frames)} frames in {frames[-1][0]:.1f} s")
+        return meta
 
     def behave(self, item):
         results = {}
@@ -310,6 +410,18 @@ def main():
             if "a11y" in sets:
                 shots.append(rig.shot(f"{scheme}-{wall}-rt", scheme, wall, frames, reduce=True))
                 shots.append(rig.shot(f"{scheme}-{wall}-ic", scheme, wall, frames, contrast=True))
+    natives, openings = [], []
+    if "native" in sets:
+        rig.launch(frames)
+        for scheme in SCHEMES:
+            for wall in WALLS:
+                for take in (1, 2):
+                    natives.append(rig.native(scheme, wall, take))
+        json.dump(natives, open(os.path.join(out, "native.json"), "w"), indent=1)
+    if "opening" in sets:
+        for scheme, wall in (("dark", "dark"), ("light", "light")):
+            openings.append(rig.opening(scheme, wall))
+        json.dump([o for o in openings if o], open(os.path.join(out, "opening.json"), "w"), indent=1)
     if "trial" in sets:
         for keyboard in (3, 0):
             rig.trial(keyboard)
@@ -317,7 +429,7 @@ def main():
     json.dump([s for s in shots if s], open(os.path.join(out, "shots.json"), "w"), indent=1)
     rig.vnc.disconnect()
     api.shutdown()
-    failed = [s for s in shots if s is None]
+    failed = [s for s in shots + openings if s is None]
     rig.say(f"-- {len(shots) - len(failed)} shots, {len(failed)} failed")
     sys.exit(1 if failed else 0)
 

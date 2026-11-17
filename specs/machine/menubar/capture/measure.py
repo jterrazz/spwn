@@ -6,6 +6,10 @@ the glass behind the text, the token's colour is composited over each, and the
 WCAG ratio's 10th percentile is the box's value. It prints a table, writes
 measures.json and a compare image per shot: capture | M1 cell | golden.
 
+It then reads the wash (tint.py, from native.json and the walls' shots) and the opening
+(opening.py, from opening.json) when the run took them, prints each with PASS or FAIL
+and its numbers, writes tint.json and opening.json, and exits 1 when either fails.
+
 usage: measure.py <out dir> <goldens dir> [M1 scenes dir]
 """
 
@@ -16,6 +20,11 @@ import sys
 import numpy as np
 from PIL import Image
 from scipy import ndimage
+
+# invariant: run.sh starts this with -I, which leaves the script's folder off the path.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import opening  # noqa: E402
+import tint  # noqa: E402
 
 # value: the tokens' two tones (Token.swift's colour table at 459cb381):
 # t1 white or black, t2 white at 72 % or black at 62 %.
@@ -125,6 +134,56 @@ def compare(name, capture, m1, golden, out):
     sheet.save(os.path.join(out, f"{name}.compare.png"))
 
 
+def wash(out):
+    natives = json.load(open(os.path.join(out, "native.json")))
+    panels = {s["name"]: s for s in json.load(open(os.path.join(out, "shots.json")))}
+    rows = []
+    for scheme in ("dark", "light"):
+        for wall in ("dark", "light", "color"):
+            panel = panels.get(f"{scheme}-{wall}")
+            takes = [n for n in natives if n and n["scheme"] == scheme and n["wall"] == wall]
+            if not panel or len(takes) < 2:
+                rows.append({"name": f"{scheme}-{wall}", "pass": False, "why": "missing shot"})
+                continue
+            image = lambda name: Image.open(os.path.join(out, f"{name}.full.png")).convert("RGB")
+            scale = takes[0]["scale"]
+            box = tint.region([panel["rect_px"], takes[0]["rect_px"], takes[1]["rect_px"]], scale)
+            lab_panel, _ = tint.median_lab(image(panel["name"]), panel["rect_px"], box)
+            lab_menu = [tint.median_lab(image(t["name"]), t["rect_px"], box)[0] for t in takes]
+            row = {"name": f"{scheme}-{wall}", **tint.verdict(lab_panel, lab_menu[0]),
+                   "noise": round(tint.delta_e2000(lab_menu[0], lab_menu[1]), 2),
+                   "panel_lab": [round(float(v), 1) for v in lab_panel], "menu_lab": [round(float(v), 1) for v in lab_menu[0]]}
+            rows.append(row)
+    ok = all(r["pass"] for r in rows)
+    json.dump({"bars": {"dE": tint.DELTA_E, "db": tint.DELTA_B}, "pass": ok, "rows": rows}, open(os.path.join(out, "tint.json"), "w"), indent=1)
+    print(f"\nwash: the panel against the Apple menu over the same desk (dE2000 <= {tint.DELTA_E}, |db*| <= {tint.DELTA_B})")
+    print("| desk | dE2000 | db* | menu noise | panel Lab | menu Lab | |")
+    print("|---|---|---|---|---|---|---|")
+    for r in rows:
+        print(f"| {r['name']} | {r.get('dE', 'n/a')} | {r.get('db', 'n/a')} | {r.get('noise', 'n/a')} | {r.get('panel_lab', '')} | {r.get('menu_lab', '')} | {'pass' if r['pass'] else 'FAIL'} |")
+    print(f"{'PASS' if ok else 'FAIL'} wash")
+    return ok
+
+
+def zoom(out):
+    metas = json.load(open(os.path.join(out, "opening.json")))
+    rows = []
+    for meta in metas:
+        folder = os.path.join(out, meta["name"])
+        names = sorted(n for n in os.listdir(folder) if n.endswith(".png"))
+        frames = [np.array(Image.open(os.path.join(folder, n)).convert("RGB")) for n in names]
+        log = open(os.path.join(folder, "app.log"), encoding="utf-8").read()
+        rows.append({"name": meta["name"], **opening.measure(frames, meta["scale"], log)})
+    ok = all(r["pass"] for r in rows)
+    json.dump({"pass": ok, "rows": rows}, open(os.path.join(out, "opening-measure.json"), "w"), indent=1)
+    print("\nzoom: the opening, frame by frame")
+    for r in rows:
+        keys = ("frames", "fade_frames", "outline_px", "title_move_px", "title_score_min", "alpha_fall", "log_ticks", "log_distinct_frames", "checks", "why")
+        print(f"  {r['name']}: " + ", ".join(f"{k}={r[k]}" for k in keys if k in r))
+    print(f"{'PASS' if ok else 'FAIL'} zoom")
+    return ok
+
+
 def main():
     out, goldens = sys.argv[1], sys.argv[2]
     scenes = sys.argv[3] if len(sys.argv) > 3 else None
@@ -182,3 +241,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+    out = sys.argv[1]
+    verdicts = []
+    if os.path.exists(os.path.join(out, "native.json")):
+        verdicts.append(wash(out))
+    if os.path.exists(os.path.join(out, "opening.json")):
+        verdicts.append(zoom(out))
+    sys.exit(0 if all(verdicts) else 1)
