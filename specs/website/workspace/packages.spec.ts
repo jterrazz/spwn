@@ -97,9 +97,23 @@ describe('packages', () => {
         expect(result.content.text).toContain('takes every version');
     });
 
-    test.todo(
-        'W14 waits for a recording of an app held on a major or a minor, which says "stays on 24, takes minors and fixes"',
-    );
+    test('W14 an app held on a major or a minor says how far it moves', async () => {
+        // Given - the Packages tab of This Mac over ranged-apps, whose plan steps record node on 24 and go on 1.25
+        const result = await website.visit(
+            '/?world=ranged-apps&machine=macbook-pro&tab=Packages',
+            async (visitor) => {
+                // When - Apps is read
+                const apps = region('Apps');
+                await visitor.see(apps);
+
+                // Then - each ranged app carries the engine's rule for its range
+                await visitor.see(within(apps, content('node')));
+                await visitor.see(within(apps, content('stays on 24, takes minors and fixes')));
+                await visitor.see(within(apps, content('stays on 1.25, takes fixes')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo("W15 waits for a call capturing a machine's Packages");
 
