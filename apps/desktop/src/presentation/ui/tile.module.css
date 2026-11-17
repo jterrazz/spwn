@@ -41,6 +41,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.foot.wrapped {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
 .asideOk {
     color: var(--ok);
 }

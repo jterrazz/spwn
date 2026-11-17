@@ -3,7 +3,9 @@ import type { Target } from '@jterrazz/station-api';
 import { bytes, sentence } from '../../../domain/format';
 import { useWatch } from '../../dependencies/dependencies';
 import { NotGivenTile, split, Unknown } from '../../kit/tile-states';
-import { Bar, Tile } from '../../ui/index';
+import { Bar, MissingMark, Tile } from '../../ui/index';
+import { shownOrWithheld } from '../../ui/secret';
+import { failedState } from '../../words/failed';
 
 type Shows = 'free' | 'used';
 
@@ -18,6 +20,19 @@ export type DiskTileProps = {
 // value: the disk sizes of the machines a Mac holds, drawn as they are listed.
 export function DiskTile({ label, shows, target, held }: DiskTileProps) {
     const disk = useWatch('disk.read', {}, target);
+    if (disk.kind === 'failed' && disk.error.wire !== undefined) {
+        const { hint, message } = disk.error.wire;
+        return (
+            <Tile
+                foot={shownOrWithheld(message)}
+                footWrapped={{
+                    title: sentence([shownOrWithheld(message), shownOrWithheld(hint ?? '')]),
+                }}
+                label={label}
+                value={<MissingMark>{failedState(disk.error).word}</MissingMark>}
+            />
+        );
+    }
     if (disk.kind !== 'read') {
         return <Unknown label={label} state={disk.kind === 'failed' ? 'no-answer' : 'reading'} />;
     }

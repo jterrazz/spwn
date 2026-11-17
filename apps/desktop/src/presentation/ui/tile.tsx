@@ -10,12 +10,13 @@ export type TileProps = {
     value: ReactNode;
     unit?: string;
     foot: ReactNode;
+    footWrapped?: { title: string };
     footState?: undefined | { tone: Tone; word: string };
     viz?: ReactNode;
     aside?: { text: string; tone: 'ok' | 'plain' };
 };
 
-export function Tile({ label, value, unit, foot, footState, viz, aside }: TileProps) {
+export function Tile({ label, value, unit, foot, footWrapped, footState, viz, aside }: TileProps) {
     return (
         <div className={styles.tile}>
             <div className={styles.label}>
@@ -33,7 +34,12 @@ export function Tile({ label, value, unit, foot, footState, viz, aside }: TilePr
                 </div>
                 {viz}
             </div>
-            <div className={styles.foot}>
+            <div
+                className={
+                    footWrapped === undefined ? styles.foot : `${styles.foot} ${styles.wrapped}`
+                }
+                title={footWrapped?.title}
+            >
                 {footState === undefined ? null : (
                     <span className={`${styles.footState} ${styles[footState.tone]}`}>
                         {footState.word}
