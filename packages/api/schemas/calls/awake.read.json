@@ -182,9 +182,6 @@
             }
           ]
         },
-        "ThisMac": {
-          "type": "boolean"
-        },
         "Zone": {
           "additionalProperties": false,
           "properties": {},
@@ -209,7 +206,6 @@
         "Reading",
         "Servers",
         "Session",
-        "ThisMac",
         "Zone"
       ],
       "type": "object"

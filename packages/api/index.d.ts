@@ -539,7 +539,6 @@ export type AwakeReport = {
     Reading: AwakeReading;
     Servers: string[] | null;
     Session: AwakeSession | null;
-    ThisMac: boolean;
     Zone: Record<string, never> | null;
 };
 

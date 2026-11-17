@@ -219,7 +219,7 @@ func sceneAccounts() heldReport {
 func proAwake() awake.Report {
 	until := time.Date(2026, 11, 7, 18, 0, 0, 0, time.UTC)
 	reading := awake.Reading{Lid: "open", Source: "ac", HasBattery: true, Percent: 80}
-	return awake.Report{Now: storyNow, Zone: time.UTC, Engine: awake.EngineRunning, Mac: proName, ThisMac: true, Reading: reading,
+	return awake.Report{Now: storyNow, Zone: time.UTC, Engine: awake.EngineRunning, Mac: proName, Reading: reading,
 		Caps:    coremachine.Capabilities{Battery: true, Lid: true, Thermal: true, Engine: true},
 		Session: &awake.Session{Lid: true, StartedAt: storyNow.Add(-time.Hour), Until: until, By: "station awake --until 18:00 --lid"}}
 }
@@ -293,7 +293,7 @@ func (f Scene) portsOf(mac string) ports.Listing {
 // value: Awake as the engine reads it: each Mac that answers by its own
 // report, one that does not as its record last had it.
 func (f Scene) awakeAll() pageawake.AllMachines {
-	all := pageawake.AllMachines{Now: storyNow, Zone: time.UTC, Label: func(mac string) string {
+	all := pageawake.AllMachines{Now: storyNow, Zone: time.UTC, This: proName, Label: func(mac string) string {
 		if h, ok := f.mac(mac); ok {
 			return model.Label(f.All, h)
 		}

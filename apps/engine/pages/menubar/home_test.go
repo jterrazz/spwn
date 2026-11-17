@@ -221,7 +221,7 @@ func TestTheTilesSayOneNumberEach(t *testing.T) {
 		{Machine: machine.Ref{Name: "infra", On: heroPro}, Port: 20241, Process: "connector", Reach: ports.ThisMachine, Device: true},
 	}}}
 	until := heroNow.Add(4*time.Hour + 20*time.Minute)
-	w.r.Awake = &awake.Report{Mac: heroPro, ThisMac: true, Engine: awake.EngineRunning, Session: &awake.Session{Until: until}}
+	w.r.Awake = &awake.Report{Mac: heroPro, Engine: awake.EngineRunning, Session: &awake.Session{Until: until}}
 	p := homeOf(t, w)
 	if got := tile(t, p, "Ports"); got.Number.N != 1 || got.Word != "shared" || got.Nav != PortsID {
 		t.Fatalf("ports %+v", got)

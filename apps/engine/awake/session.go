@@ -91,7 +91,6 @@ type Report struct {
 	// value: the Mac this report is of, This Mac's first; its reported
 	// capabilities and the servers it hosts.
 	Mac         string
-	ThisMac     bool
 	Caps        machine.Capabilities
 	NeverSleeps bool
 	NeverSince  time.Time
