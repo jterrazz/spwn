@@ -199,19 +199,11 @@ type NameTakenError struct {
 	VM   bool
 	Mac  bool
 	// value: the Mac a VM of that name is on, by the Name machines.list
-	// gives it; for an agent, the workspace it runs on.
+	// gives it.
 	On string
-	// value: the agent that holds the name, its own or the name's ·<n>.
-	Agent string
 }
 
 func (e *NameTakenError) Error() string {
-	switch {
-	case e.Agent == e.Name:
-		return "\"" + e.Name + "\" is taken (an agent on " + e.On + ")"
-	case e.Agent != "":
-		return "\"" + e.Name + "\" is taken (agent " + e.Agent + " on " + e.On + ")"
-	}
 	if e.Mac {
 		return "\"" + e.Name + "\" already names a Mac"
 	}

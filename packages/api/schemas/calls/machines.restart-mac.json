@@ -414,12 +414,6 @@
             }
           ]
         },
-        "Agents": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
         "Birth": {
           "anyOf": [
             {

@@ -25,8 +25,6 @@ type Deps struct {
 
 type Input struct {
 	Name, Confirm string
-	// value: the live agents its call named, which stop first.
-	agents string
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
@@ -45,14 +43,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			in.Name = args[0]
 			return nil
 		},
-		Asks: true,
-		Confirm: func(in *Input) string {
-			question := "Stop " + in.Name + "? It is kept, stopped, until you start it"
-			if in.agents != "" {
-				question += ". Its agents stop first: " + in.agents + "."
-			}
-			return question
-		},
+		Asks:     true,
+		Confirm:  func(in *Input) string { return "Stop " + in.Name + "? It is kept, stopped, until you start it" },
 		Verb:     func(*Input) string { return "stop" },
 		Complete: func([]string, string) []string { return d.Names() },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
@@ -71,7 +63,6 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			case typedAsked(err) && in.Confirm == "" && !io.Yes && io.Interactive && io.Prompt != nil:
 				out, err = typed(in.Name, io, stopIt)
 			case yesAsked(err):
-				in.agents = agentsNamed(err)
 				err = io.Confirmed(func(answer string) error {
 					out, err = stopIt(answer)
 					return err
@@ -89,9 +80,6 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					start += " --on " + env.Target().Name
 				}
 				return io.Page(pagemachines.ServerStopped(in.Name, start, d.ThisMachine), nil)
-			}
-			if len(out.Agents)+len(out.Warnings) > 0 {
-				return io.Page(pagemachines.StoppedWithAgents(in.Name, out.Agents, out.Warnings, d.ThisMachine), nil)
 			}
 			return io.Page(pagemachines.Change("stop", in.Name, "stopped, kept", d.ThisMachine), nil)
 		},
@@ -119,12 +107,4 @@ func typedAsked(err error) bool {
 func yesAsked(err error) bool {
 	var e *fail.Error
 	return errors.As(err, &e) && e.Code == confirm.YesNeeded
-}
-
-func agentsNamed(err error) string {
-	var e *fail.Error
-	if errors.As(err, &e) {
-		return e.Detail["agents"]
-	}
-	return ""
 }

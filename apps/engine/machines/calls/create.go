@@ -14,7 +14,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
-	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -225,10 +224,10 @@ func (s *Machinist) Unasked(ctx context.Context, from string) (model.Unasked, er
 	return out, nil
 }
 
-func (s *Machinist) NameFor(ctx context.Context, kind catalog.MachineKind, f model.AllMachines) (string, error) {
+func (s *Machinist) NameFor(_ context.Context, kind catalog.MachineKind, f model.AllMachines) (string, error) {
 	// value: the name a create of that kind takes unasked over the fleet
 	// as read.
-	held, err := s.claimsOf(ctx, f)
+	held, err := s.claimsOf(f)
 	if err != nil {
 		return "", err
 	}
@@ -281,36 +280,21 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 
 // value: every name All machines holds, for a VM's name the Mac it is on,
 // by the Name machines.list gives it, This Mac's included, and every VM's
-// another Mac was last seen holding; and
-// every agent's of a running workspace of a Mac that answers, and those a
-// workspace held when it last stopped, of one stopped or of a silent Mac.
+// another Mac was last seen holding.
 func (s *Machinist) claims(ctx context.Context) (claims, error) {
 	allMachines, err := s.AllMachines(ctx, false)
 	if err != nil {
 		return claims{}, err
 	}
-	return s.claimsOf(ctx, allMachines)
+	return s.claimsOf(allMachines)
 }
 
-func (s *Machinist) claimsOf(ctx context.Context, allMachines model.AllMachines) (claims, error) {
+func (s *Machinist) claimsOf(allMachines model.AllMachines) (claims, error) {
 	c := claims{held: map[string]claim{}, on: map[string]string{}}
 	for _, h := range allMachines.Macs {
 		c.held[h.Name] = claimMac
 		for _, vm := range h.VMs {
 			c.held[vm.Name], c.on[vm.Name] = claimVM, h.Name
-			if vm.Lifetime.Kind() != machine.Workspace {
-				continue
-			}
-			names := vm.Agents
-			if (h.ThisMac || h.Reachable) && vm.State == model.Running {
-				names = nil
-				if s.o.AgentsOf != nil {
-					names = s.o.AgentsOf(ctx, vm.Name)
-				}
-			}
-			for _, name := range names {
-				c.agents = append(c.agents, heldAgent{Name: name, VM: vm.Name})
-			}
 		}
 	}
 	cfg, err := s.prefs()

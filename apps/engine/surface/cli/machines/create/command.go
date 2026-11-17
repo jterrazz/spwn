@@ -45,11 +45,7 @@ type Input struct {
 	Persistent, Server bool
 	// value: v3's --permanent, kept hidden for one release: --persistent.
 	Permanent bool
-	// value: v3's --task and --agent, gone with A2: a create that names
-	// them is refused, pointed to station agents start.
-	Task  string
-	Agent bool
-	CPUs  int
+	CPUs      int
 	// value: v2's --always-on, kept hidden for one release (SPEC §4.3).
 	AlwaysOn bool
 	// value: v2's --lifetime, kept hidden for one release (SPEC §4.3).
@@ -90,24 +86,17 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.Disk, "disk", "", "disk size with its unit, e.g. 50G (default 20G)")
 			f.StringVar(&in.Purpose, "for", "", "what it is for, in your words, kept with the VM")
 			f.StringVar(&in.Network, "network", machines.NetworkNAT, "nat: behind its Mac, no address on your LAN; bridged: its own address on your LAN (macOS images only)")
-			f.StringVar(&in.Task, "task", "", "gone: station agents start \"<task>\" --new")
-			f.BoolVar(&in.Agent, "agent", false, "gone: station agents start \"<task>\" --new")
 			f.StringVar(&in.Name, "name", "", "the workspace's name")
 			f.StringVar(&in.Lifetime, "lifetime", "", "ephemeral or persistent (--persistent)")
 			_ = f.MarkHidden("permanent")
 			_ = f.MarkHidden("name")
 			_ = f.MarkHidden("lifetime")
 			_ = f.MarkHidden("always-on")
-			_ = f.MarkHidden("task")
-			_ = f.MarkHidden("agent")
 		},
 		Read: func(*Input) bool { return false },
 		Bind: func(in *Input, args []string) error {
 			if len(args) == 1 {
 				in.Name = args[0]
-			}
-			if in.Task != "" || in.Agent {
-				return &machines.KindRuleError{Why: "station machines create makes the VM only: an agent is started on it", Fix: taskWords(in)}
 			}
 			if in.Permanent {
 				in.Persistent = true
@@ -211,19 +200,6 @@ func from(in *Input) error {
 		in.request.Network = ""
 	}
 	return nil
-}
-
-// value: the A2 words of a create written with v3's --task.
-func taskWords(in *Input) string {
-	task := in.Task
-	if task == "" {
-		task = "<task>"
-	}
-	words := "station agents start \"" + task + "\" --new"
-	if in.Name != "" {
-		words += " --name " + in.Name
-	}
-	return words
 }
 
 // value: the v3 words of a create written with v2's --always-on.

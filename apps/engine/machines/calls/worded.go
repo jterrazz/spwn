@@ -105,7 +105,7 @@ func Worded(err error) error {
 	case errors.As(err, &bad):
 		return refused(fail.Refused, BadName, bad.Name, nil)
 	case errors.As(err, &taken):
-		return refused(fail.Refused, NameTaken, taken.Name, map[string]string{"by": takenBy(taken), "on": taken.On, "agent": taken.Agent})
+		return refused(fail.Refused, NameTaken, taken.Name, map[string]string{"by": takenBy(taken), "on": taken.On})
 	case errors.As(err, &little):
 		return refused(fail.Refused, TooLittle, strconv.FormatInt(little.AskedBytes, 10), nil)
 	case errors.As(err, &why):
@@ -126,12 +126,10 @@ func yes(b bool) string {
 	return ""
 }
 
-// value: what holds a taken name: a VM, a Mac, an agent, or a Mac this one
+// value: what holds a taken name: a VM, a Mac, or a Mac this one
 // already added.
 func takenBy(e *machines.NameTakenError) string {
 	switch {
-	case e.Agent != "":
-		return "agent"
 	case e.Mac:
 		return "mac"
 	case e.VM:

@@ -55,9 +55,6 @@ type Options struct {
 	Waker contract.Waker
 	// value: this Mac's multiplexer; nil reaches no workspace.
 	Terminals Multiplexer
-	// value: the name of every agent a running workspace holds, finished
-	// ones too; none when it does not answer, nil reads none.
-	AgentsOf func(ctx context.Context, vm string) []string
 	// value: installs this Mac's engine job and starts it, as engine start
 	// does; nil installs none.
 	StartEngine func(ctx context.Context) error

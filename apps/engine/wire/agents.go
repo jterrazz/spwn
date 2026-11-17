@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -92,6 +93,10 @@ func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.R
 	_, at, err := f.find(ctx, name)
 	return at, err
 }
+
+// value: how long a workspace waits for its Mac's engine to say the names
+// every machine holds; one silent past it holds none.
+const heldBudget = 2 * time.Second
 
 // value: the names every machine holds, which a workspace asks its Mac's
 // engine within heldBudget; a Mac whose engine is down holds none, so the

@@ -3,15 +3,6 @@
     "machines.DeleteReport": {
       "additionalProperties": false,
       "properties": {
-        "Agents": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
         "Name": {
           "type": "string"
         },
@@ -26,7 +17,6 @@
         }
       },
       "required": [
-        "Agents",
         "Name",
         "Warnings"
       ],

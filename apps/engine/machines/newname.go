@@ -16,14 +16,12 @@ func FirstFree(image string, free func(string) bool) string {
 }
 
 func Held(f AllMachines) []string {
-	// value: every name the fleet as read holds: each Mac's, each VM's and
-	// each agent a VM keeps a record of, sorted.
+	// value: every name the fleet as read holds: each Mac's and each VM's, sorted.
 	var out []string
 	for _, h := range f.Macs {
 		out = append(out, h.Name)
 		for _, vm := range h.VMs {
 			out = append(out, vm.Name)
-			out = append(out, vm.Agents...)
 		}
 	}
 	slices.Sort(out)

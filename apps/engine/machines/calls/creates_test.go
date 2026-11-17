@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"runtime"
-	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -394,14 +393,13 @@ func TestAVMIsNotDeletedWhileItsCreateRunsAndAGoneRecordIsNeverMadeAgain(t *test
 func TestWhatIsWrittenWhileACreateBootsStaysOrIsRefused(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, true)
-	var edited, kept, stopped error
+	var edited, stopped error
 	var step model.BirthStep
 	b.engine.run = func() {
 		if rec, err := b.store.Get(ctx, "web"); err == nil && rec.Birth != nil {
 			step = rec.Birth.Step
 		}
 		_, edited = b.m.Edit(ctx, "web", model.Change{Resources: model.Resources{MemoryBytes: 8 << 30}})
-		kept = b.m.KeepAgents("web", []string{"docs-bot"})
 		stopped = b.m.StopDirect(ctx, "web")
 	}
 	if _, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web", Lifetime: model.Persistent}, nil, nil); err == nil {
@@ -413,15 +411,15 @@ func TestWhatIsWrittenWhileACreateBootsStaysOrIsRefused(t *testing.T) {
 	if !errors.As(edited, new(*model.BeingCreatedError)) {
 		t.Errorf("machines edit web --memory 8G while web boots: %v; want it refused, being created", edited)
 	}
-	if kept != nil || stopped != nil {
-		t.Fatalf("keep-agents %v, stop %v while web boots; want both done", kept, stopped)
+	if stopped != nil {
+		t.Fatalf("stop %v while web boots; want it done", stopped)
 	}
 	rec, err := b.store.Get(ctx, "web")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rec.MemoryBytes != 4<<30 || rec.Want != model.WantStopped || !slices.Equal(rec.Agents, []string{"docs-bot"}) || rec.Birth != nil {
-		t.Errorf("web after its create: %d bytes, want %q, agents %v, birth %+v; want its 4 GB, stopped, docs-bot kept, no birth", rec.MemoryBytes, rec.Want, rec.Agents, rec.Birth)
+	if rec.MemoryBytes != 4<<30 || rec.Want != model.WantStopped || rec.Birth != nil {
+		t.Errorf("web after its create: %d bytes, want %q, birth %+v; want its 4 GB, stopped, no birth", rec.MemoryBytes, rec.Want, rec.Birth)
 	}
 }
 

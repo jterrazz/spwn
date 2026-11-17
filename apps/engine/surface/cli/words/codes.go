@@ -47,15 +47,6 @@ func typedGesture(action string) (doing, done string, ok bool) {
 	}
 }
 
-// value: SPEC A5: a VM's confirmation names the live agents that stop
-// first; nothing for a VM that hosts none.
-func agentsFirst(e *fail.Error) string {
-	if names := e.Detail["agents"]; names != "" {
-		return " (its agents stop first: " + names + ")"
-	}
-	return ""
-}
-
 // value: a held VM's confirmation says who holds it, in the sentence the
 // engine worded.
 func heldBy(e *fail.Error) string {
@@ -86,7 +77,7 @@ func Codes() map[fail.Code]Wording {
 			if doing, _, ok := typedGesture(e.Detail["action"]); ok && e.Detail["by"] == "yes" {
 				return doing + " a " + machine.Kind(e.Detail["kind"]).Word(machine.OS(e.Detail["os"])) + " needs its name", "--confirm=" + e.Subject
 			}
-			return "refusing without the name typed: " + e.Subject + agentsFirst(e) + heldBy(e), "in a script: --confirm=" + e.Subject
+			return "refusing without the name typed: " + e.Subject + heldBy(e), "in a script: --confirm=" + e.Subject
 		},
 		confirm.Mismatch: func(e *fail.Error) (string, string) {
 			said := "you typed \"" + e.Detail["typed"] + "\", not \"" + e.Subject + "\""
@@ -96,7 +87,7 @@ func Codes() map[fail.Code]Wording {
 			return said, "in a script: --confirm=" + e.Subject
 		},
 		confirm.YesNeeded: func(e *fail.Error) (string, string) {
-			return "refusing without --yes: " + e.Subject + agentsFirst(e), "re-run with --yes"
+			return "refusing without --yes: " + e.Subject, "re-run with --yes"
 		},
 		confirm.Declined: func(e *fail.Error) (string, string) {
 			return e.Subject + " kept: you said no", "--yes skips the question"
@@ -501,13 +492,8 @@ func Codes() map[fail.Code]Wording {
 			return "\"" + e.Subject + "\" is not a valid name", "use lowercase letters, digits and \"-\", 1 to 40 characters"
 		},
 		machinescalls.NameTaken: func(e *fail.Error) (string, string) {
-			name, on, agent := "\""+e.Subject+"\"", e.Detail["on"], e.Detail["agent"]
+			name, on := "\""+e.Subject+"\"", e.Detail["on"]
 			switch e.Detail["by"] {
-			case "agent":
-				if agent == e.Subject {
-					return name + " is taken (an agent on " + on + ")", "pick another name"
-				}
-				return name + " is taken (agent " + agent + " on " + on + ")", "pick another name"
 			case "mac":
 				return name + " already names a Mac", "pick another name"
 			case "vm":
@@ -568,9 +554,6 @@ func Codes() map[fail.Code]Wording {
 				named[i] = e.Subject + " on " + vm
 			}
 			return "more than one agent is named " + e.Subject + ": " + strings.Join(named, " and "), "name its workspace: --on " + strings.Join(on, " or --on ")
-		},
-		agentscalls.NotStopped: func(e *fail.Error) (string, string) {
-			return e.Subject + " did not stop: " + e.Detail["cause"], "station agents stop " + e.Subject
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

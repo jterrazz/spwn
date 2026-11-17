@@ -10,8 +10,7 @@ type MachineStore interface {
 	// invariant: a VM never put answers store.ErrNotFound.
 	Get(ctx context.Context, name string) (machines.Record, error)
 	// invariant: putting a VM again replaces its record and keeps what
-	// another store keeps beside it; a record never holds a share. A put
-	// whose agents are nil keeps the agents its record held.
+	// another store keeps beside it; a record never holds a share.
 	Put(ctx context.Context, r machines.Record) error
 	// invariant: an amend reads a VM's record, changes it and writes it
 	// back as one step no other Amend of any process on this Mac

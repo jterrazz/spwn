@@ -23,9 +23,6 @@ type Record struct {
 	Birth *Birth
 	// value: the process its create runs in, while it runs; nil after.
 	Owner *Process
-	// value: the name of every agent a workspace held when it last stopped,
-	// finished ones too: what it holds while no one reads its journal.
-	Agents []string
 	// value: the Machinefile it was made from (create --from); empty for
 	// one made from an image alone.
 	Template string
@@ -62,8 +59,6 @@ type SeenVM struct {
 	Lifetime    Lifetime            `json:"lifetime"`
 	CPUs        int                 `json:"cpus"`
 	MemoryBytes int64               `json:"memory_bytes"`
-	// value: the agents a stopped workspace of it held, as that Mac last said.
-	Agents []string `json:"agents,omitempty"`
 }
 
 const PurposeMax = 120 // value: the most characters a VM's purpose holds, on one line.
