@@ -3,7 +3,7 @@ import type { CatalogAudience, PortsSharedPort, Target } from '@jterrazz/station
 import type { Gesture } from '../../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../../kit/gestures';
 import { Openable, shareAddressOf } from '../../../kit/openable';
-import { Switch, TypeTag, Value } from '../../../ui/index';
+import { Switch, Value } from '../../../ui/index';
 import { isCalm } from '../../../ui/state-pill';
 import { shareToWord } from '../../../words/shown';
 import { SHARE_STATE_TONES } from '../../../words/tones';
@@ -38,7 +38,7 @@ type SharedRowProps = {
     compact?: boolean;
 };
 
-const REACHES = ['local', 'private'] as const satisfies readonly CatalogAudience[];
+const REACHES = ['local', 'private', 'public'] as const satisfies readonly CatalogAudience[];
 
 const REACH_OPTIONS = REACHES.map((id) => ({ id, label: shareToWord(id) }));
 
@@ -56,11 +56,8 @@ function Reach({
     onPick: (to: (typeof REACHES)[number]) => void;
 }) {
     const { to } = share;
-    if (to === undefined) {
+    if (to === undefined || !isReach(to)) {
         return null;
-    }
-    if (!isReach(to)) {
-        return <TypeTag>{shareToWord(to)}</TypeTag>;
     }
     return (
         <Switch
@@ -93,8 +90,9 @@ function useReaches(at: { vm: string; port: number; target: Target | undefined }
     const reaches = {
         local: usePortReach({ ...at, to: 'local' }),
         private: usePortReach({ ...at, to: 'private' }),
+        public: usePortReach({ ...at, to: 'public' }),
     };
-    const moving = [reaches.local, reaches.private].find(
+    const moving = [reaches.local, reaches.private, reaches.public].find(
         ({ state }) => state.kind !== 'idle' && state.kind !== 'done',
     );
     return { moving, reaches };
