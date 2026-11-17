@@ -50,32 +50,31 @@
     - button "Fix npm": Fix
     - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
-  - region "Memory":
-    - heading "Memory one square, one GB" [level=2]
-    - text: macbook-pro
-    - emphasis: 4 GB free
-    - text: of 16
-    - img "Memory of macbook-pro, one square per GB"
-    - text: 4 macOS 8 linux-1 4 free mac-mini
-    - emphasis: 36 GB free
-    - text: of 64
-    - img "Memory of mac-mini, one square per GB"
-    - text: 4 macOS 24 infra 36 free
+  - group "Macs":
+    - button "macbook-pro · 2 machines · online": macbook-pro 2 machines online
+    - button "mac-mini · 1 machine · online": mac-mini 1 machine online
+    - text: 3 machines This Mac
   - region "Machines":
-    - heading "Machines" [level=2]
-    - text: Machine What it is for CPU Memory, GB
-    - button "macbook-pro 34 % 78 12.4 / 16":
-      - text: macbook-pro 34 %
-      - meter "Memory of macbook-pro, used of its total"
-      - text: 12.4 / 16
+    - button "macbook-pro"
+    - text: 34 %
+    - img "Memory of macbook-pro"
+    - text: 4 free
     - button "api"
+    - text: Stopped
+    - img "Memory of api"
     - button "linux-1"
-    - button "mac-mini 21 % 41 26 / 64":
-      - text: mac-mini 21 %
-      - meter "Memory of mac-mini, used of its total"
-      - text: 26 / 64
+    - text: Running
+    - img "Memory of linux-1"
+    - text: of 8
+    - button "mac-mini"
+    - text: 21 %
+    - img "Memory of mac-mini"
+    - text: 36 free
     - button "infra"
-    - button "Add a Mac"
+    - text: Running
+    - img "Memory of infra"
+    - text: of 24
+  - button "Add a Mac"
   - region "Last night":
     - heading "Last night 2 moved, 1 failed" [level=2]
     - button "All history"

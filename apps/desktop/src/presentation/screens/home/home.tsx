@@ -4,14 +4,13 @@ import { needsYou } from '../../../domain/overview/upkeep';
 import { useReach } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
 import { LastNight } from '../../features/journal/changes';
-import { MemoryPanel } from '../../features/machines/memory';
 import { Needs } from '../../features/overview/needs-panel';
 import { HeldOutcomes } from '../../kit/gestures';
 import { Absent, Reading as ReadingVerdict, SummaryHead, Unanswered } from '../../kit/readings';
 import type { Route } from '../../navigation/route';
 import { newMachineLeads } from '../../navigation/toolbar-action';
 import { Page } from '../../ui/page';
-import { HomeMachines } from './home-machines';
+import { HomeFleet } from './home-fleet';
 import { HomeTiles } from './home-tiles';
 import { holdsNoMachine, StartHere } from './start-here';
 
@@ -64,8 +63,7 @@ export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomePro
                     title="Needs you"
                 />
             </HeldOutcomes>
-            <MemoryPanel macs={macs} />
-            {macs.length > 0 ? <HomeMachines go={go} macs={macs} onAddMac={onAddMac} /> : null}
+            {macs.length > 0 ? <HomeFleet go={go} macs={macs} onAddMac={onAddMac} /> : null}
             {holdsNoMachine(macs) ? null : <LastNight go={go} macs={macs} />}
         </Page>
     );

@@ -98,7 +98,7 @@ describe('workspace', () => {
     test('W4 Stop reads Stopped everywhere, and the memory it held is free on Home', async () => {
         // Given - the window on Home over two-macs, where linux-1 runs and holds 8 GB of its Mac's 16
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
-            await visitor.see(within(region('Memory'), content('4 GB free')));
+            await visitor.see(within(region('Machines'), content('4 free')));
             await visitor.click(within(sidebar, button('linux-1 Running')));
             await visitor.see(heading('linux-1 Running'));
 
@@ -110,7 +110,7 @@ describe('workspace', () => {
             await visitor.see(heading('linux-1 Stopped'));
             await visitor.see(within(sidebar, button('linux-1 Stopped')));
             await visitor.click(within(sidebar, button('Home')));
-            await visitor.see(within(region('Memory'), content('12 GB free')));
+            await visitor.see(within(region('Machines'), content('12 free')));
         });
         expect(result.errors.text).toBe('');
     });

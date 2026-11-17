@@ -7,8 +7,10 @@ const FIRST_RUN = '/?world=bare-mac&page=home';
 const TWO_MACS = '/?world=two-macs&page=home';
 const needsYou = region('Needs you');
 const canWait = region('Upkeep');
-const memory = region('Memory');
+const STORIES = '/?world=stories&page=home';
+const machines = region('Machines');
 const startHere = region('Start here');
+const MINI_CARD = 'mac-mini · 3 machines · online';
 
 describe('home', () => {
     test('H1 the verdict reads Everything is fine. and nothing on Home needs me', async () => {
@@ -56,36 +58,37 @@ describe('home', () => {
         "H3 waits for This Mac's overview.read to carry a far Mac's server need (infra on mac-mini in stories)",
     );
 
-    test('H4 Memory reads, per Mac, the GB left and who holds what', async () => {
-        // Given - the window on Home over two-macs, where linux-1 holds 8 GB of one Mac's 16 and infra 24 of the other's 64
+    test("H4 the Machines board reads each Mac's free GB, and what each machine holds", async () => {
+        // Given - the window on Home over two-macs, where linux-1 holds 8 GB of macbook-pro's 16 and infra 24 of mac-mini's 64, neither use measured
         const result = await website.visit(TWO_MACS, async (visitor) => {
-            // When - I look at Memory
-            await visitor.see(memory);
+            // When - I look at the Machines board
+            await visitor.see(within(machines, button('macbook-pro')));
 
-            // Then - each Mac reads what it has left and what each machine holds, one square per GB
-            await visitor.see(within(memory, content('one square, one GB')));
-            await visitor.see(within(memory, content('4 GB free of 16')));
-            await visitor.see(within(memory, content('8 linux-1')));
-            await visitor.see(within(memory, content('36 GB free of 64')));
-            await visitor.see(within(memory, content('24 infra')));
+            // Then - each Mac's line reads its free, and each machine's line its share
+            await visitor.see(within(machines, content('4 free')));
+            await visitor.see(within(machines, content('36 free')));
+            await visitor.see(within(machines, content('of 8')));
+            await visitor.see(within(machines, content('of 24')));
         });
         expect(result.errors.text).toBe('');
     });
 
-    test('H5 Memory tells what a machine holds from what it uses', async () => {
-        // Given - the window on Home over stories, where agent-7f holds 8 GB of its Mac's and uses 5, infra 24 and uses 16
-        const result = await website.visit('/?world=stories&page=home', async (visitor) => {
-            // When - I look at its squares
-            await visitor.see(memory);
+    test('H5 a machine reads what it uses of what it holds', async () => {
+        // Given - the window on Home over stories, where agent-7f holds 8 GB and uses 5.3, infra holds 24 and uses 16
+        const result = await website.visit(STORIES, async (visitor) => {
+            // When - I look at its line
+            await visitor.see(within(machines, button('agent-7f')));
 
-            // Then - each machine's legend says how many of its squares are used
-            await visitor.see(within(memory, content('8 agent-7f, 5 used')));
-            await visitor.see(within(memory, content('24 infra, 16 used')));
+            // Then - each figure is its use of its share
+            await visitor.see(within(machines, content('16 / 24')));
         });
+        expect(result.content.text).toContain('5.3 / 8');
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('H6 waits for a recording of a VM above 85 % CPU, its usage read by activity.read');
+    test.todo(
+        'H6 waits for a recording of a VM above 85 % CPU, its usage read by activity.read, and for MachinesVM.Standing',
+    );
 
     test.todo(
         'H7 waits for a recording of a create with a purpose, whose reads say Creating, then Running',
@@ -125,7 +128,7 @@ describe('home', () => {
     test('H10 Home offers no Stop and no Delete, only a line may offer one', async () => {
         // Given - the window on Home over two-macs, a running workspace on it
         const result = await website.visit(TWO_MACS, async (visitor) => {
-            await visitor.see(within(region('Machines'), button('linux-1')));
+            await visitor.see(within(machines, button('linux-1')));
 
             // When - I look for Stop or Delete on Home
             // Then - there is none
@@ -188,6 +191,40 @@ describe('home', () => {
             // Then - the catalog's apps are listed, and Start here is left behind
             await visitor.see(region('Apps'));
             await visitor.gone(startHere);
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test("H12 a Mac's card keeps its machines' lines alone, and pressed again shows them all", async () => {
+        // Given - the window on Home over stories, where macbook-pro holds agent-7f and mac-mini holds infra
+        const result = await website.visit(STORIES, async (visitor) => {
+            await visitor.see(within(machines, button('agent-7f')));
+
+            // When - I press the mini's card
+            await visitor.click(button(MINI_CARD));
+
+            // Then - the mini's lines alone stay, until its card is pressed again
+            await visitor.see(within(machines, button('infra')));
+            await visitor.gone(within(machines, button('agent-7f')));
+            await visitor.click(button(MINI_CARD));
+            await visitor.see(within(machines, button('agent-7f')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test("H13 a machine's line opens on the engine's sentence, and its Open leads to the machine", async () => {
+        // Given - the window on Home over stories, where infra's head says it is down
+        const result = await website.visit(STORIES, async (visitor) => {
+            await visitor.see(within(machines, button('infra')));
+
+            // When - I open its line
+            await visitor.click(within(machines, button('infra')));
+
+            // Then - its line says the engine's sentence and line, and its Open leads to its page
+            await visitor.see(within(machines, content('infra is down.')));
+            await visitor.see(within(machines, content('Its check fails since 10:18.')));
+            await visitor.click(within(machines, button('Open infra')));
+            await visitor.see(heading('infra is down.'));
         });
         expect(result.errors.text).toBe('');
     });
