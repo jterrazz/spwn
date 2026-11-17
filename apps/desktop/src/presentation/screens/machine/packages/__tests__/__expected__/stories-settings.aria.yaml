@@ -33,7 +33,7 @@
     - button "Apps5"
     - button "Settings1" [pressed]
   - region "Settings":
-    - heading "Settings by layer, a later one wins" [level=2]
+    - heading "Settings by file, a later one wins" [level=2]
     - region "macbook-pro":
       - paragraph: macbook-pro 1 setting
       - text: git-shortcuts not installed
