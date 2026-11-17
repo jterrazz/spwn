@@ -113,7 +113,7 @@
                     {
                         "name": "base-ubuntu",
                         "version": "1",
-                        "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "",
                         "recipe_sha": "",
                         "built_at": "2026-10-20T09:00:00Z",
@@ -189,7 +189,7 @@
                     {
                         "name": "base-ubuntu",
                         "version": "1",
-                        "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "",
                         "recipe_sha": "",
                         "built_at": "2026-10-20T09:00:00Z",

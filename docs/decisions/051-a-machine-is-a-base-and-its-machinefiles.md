@@ -31,7 +31,7 @@ of point 6 among them.
 
 1. **The bases are three, one per distro: `base-ubuntu` (24.04), `base-debian` (13) and
    `base-macos` (26.6.2).** Nothing else is a base. Station builds every one, macOS
-   included: no base is fetched only. Each vendor image a base starts from is pinned by
+   included: no base is fetched only. Each upstream a base starts from is pinned by
    digest in the base's Machinefile and changes only by a commit.
 2. **A base holds plumbing; everything else is a Machinefile.** Plumbing is what station
    needs to reach, run and apply a machine: the user, the key, sshd, the units, the
@@ -59,8 +59,8 @@ of point 6 among them.
    enter a VM. Simulator platforms are never installed.
 7. **The words follow the boundary.** `station-linux` is renamed `base-ubuntu` and `macos`
    `base-macos`, with no alias: an image built under the old names is no longer read. The
-   upstream disk a base is built from is its **vendor** image, and the record's `base`
-   field is `vendor`, so "base" names only the three per-distro images. "Layer" names only
+   disk a base is built from is its **upstream**, and the record's `base` field is
+   `upstream`, so "base" names only the three per-distro images. "Layer" names only
    a baked Machinefile: where a value of a resolution was read, the resolution's old
    layer, is its **origin** (`machinefile.OriginKind`), renamed on the wire before the
    images are.
@@ -73,10 +73,10 @@ of point 6 among them.
 - A Mac whose Xcode is not the pinned version cannot bake `layer-menubar-rig`; the version and
   the menu bar's goldens move together, by a commit.
 - A clone's private bytes are invisible to `du`: footprint is read by `df` deltas.
-- The vendor image is pruned once its base is built and pulled again at the next build.
+- The upstream is pruned once its base is built and pulled again at the next build.
 - Debian enters the Linux machines: `os: debian` matches them, and every Linux package
   answers for its Debian names.
 - A machine never moves to a new base version by itself; a persistent one moves by a
   recreate, with its work on a data disk once that lands.
 - Ubuntu's minimal cloud image waits for a proven import (network, host keys, user
-  injected before the first boot); the slimmed Cirrus Labs vendor image serves meanwhile.
+  injected before the first boot); the slimmed Cirrus Labs upstream serves meanwhile.

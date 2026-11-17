@@ -3,9 +3,6 @@
     "images.Record": {
       "additionalProperties": false,
       "properties": {
-        "base": {
-          "type": "string"
-        },
         "built_at": {
           "format": "date-time",
           "type": "string"
@@ -34,17 +31,20 @@
         "station": {
           "type": "string"
         },
+        "upstream": {
+          "type": "string"
+        },
         "version": {
           "type": "string"
         }
       },
       "required": [
-        "base",
         "built_at",
         "name",
         "recipe_sha",
         "size_gb",
         "station",
+        "upstream",
         "version"
       ],
       "type": "object"

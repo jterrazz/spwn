@@ -220,7 +220,7 @@ func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progres
 		return failed("renaming the build VM", err)
 	}
 	rec := images.Record{
-		Name: img.Name, Version: version, Base: t.From, Station: s.o.Version, RecipeSHA: sha, BuiltAt: s.m.Now().UTC(),
+		Name: img.Name, Version: version, Upstream: t.From, Station: s.o.Version, RecipeSHA: sha, BuiltAt: s.m.Now().UTC(),
 		Machinefile: t.Name, MachinefileSHA: t.SHA, Lock: lock,
 	}
 	if disks, err := s.e.Disks(ctx); err == nil {

@@ -14,7 +14,7 @@ import (
 
 func built(version string) images.Record {
 	return images.Record{
-		Name: "linux", Version: version, Base: "ubuntu:24.04", Station: "1.4.0", RecipeSHA: "abc123",
+		Name: "linux", Version: version, Upstream: "ubuntu:24.04", Station: "1.4.0", RecipeSHA: "abc123",
 		BuiltAt: time.Date(2026, 11, 1, 9, 0, 0, 0, time.UTC), SizeGB: 12,
 	}
 }

@@ -178,7 +178,7 @@ func PlayWorld(base []byte) []byte {
 			Tailnet:     &playNode{Self: ports.Self{Node: ports.Node{ID: h.Name, Name: h.Name, DNSName: h.Name + tailnet, IP: h.Node.IP, Online: true}, Sharing: ports.SharingState{Backend: "Running", On: true, DNSName: h.Name + tailnet}}},
 			Meter:       playMeterOf(past[h.Name], meterSample(cpu[h.Name], hw.CPUs, hw.Memory, storyNow.Add(-macUp(f, h.Name)))),
 			Facts:       macFacts(h.ThisMac),
-			Stores:      &playStores{Images: []images.Record{{Name: "base-ubuntu", Version: "3", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: stationVer, BuiltAt: storyNow.Add(-6 * 24 * time.Hour), SizeGB: 4}}},
+			Stores:      &playStores{Images: []images.Record{{Name: "base-ubuntu", Version: "3", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: stationVer, BuiltAt: storyNow.Add(-6 * 24 * time.Hour), SizeGB: 4}}},
 		}
 		m.VMs["station-image-base-ubuntu-3"] = &playVM{Disk: true, Size: model.Size{Disk: 4e9}}
 		if h.ThisMac {

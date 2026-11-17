@@ -1,7 +1,7 @@
 {
   "name": "base-ubuntu",
   "version": "2026.11.07",
-  "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+  "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
   "station": "v3.0.1",
   "recipe_sha": "bbbb",
   "built_at": "2026-11-07T09:00:00Z",
