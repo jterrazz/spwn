@@ -42,9 +42,50 @@ describe('ports', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('W7 waits for a call setting a share to Private, from a port that is Local');
+    test('W7 Private moves a share that starts Local to the devices network, and its address with it', async () => {
+        // Given - linux-1's Ports over share-local, :5173 recorded reserved Local, its address the Mac's own
+        const result = await website.visit(
+            '/?world=share-local&machine=linux-1&tab=Ports&pace=600',
+            async (visitor) => {
+                const shared = within(region('Shared'), region('Port 5173'));
+                await visitor.see(within(shared, content('http://127.0.0.1:40001')));
 
-    test.todo("W18 waits for a call setting a share's To");
+                // When - Private is pressed on it
+                await visitor.click(within(shared, button('Private')));
+
+                // Then - its address is the one on the devices network the recording gives
+                await visitor.see(
+                    within(shared, content('https://macbook-pro.tail1234.ts.net:40001')),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('W18 Local moves a share to this Mac only, and its address with it', async () => {
+        // Given - linux-1's Ports over two-macs, :5173 recorded shared Private on the devices network
+        const result = await website.visit(
+            '/?world=two-macs&machine=linux-1&tab=Ports&pace=600',
+            async (visitor) => {
+                const shared = within(region('Shared'), region('Port 5173'));
+                await visitor.see(
+                    within(shared, content('https://macbook-pro.tail1234.ts.net:40001')),
+                );
+
+                // When - Local is pressed on it
+                await visitor.click(within(shared, button('Local')));
+
+                // Then - its address is the one on this Mac the recording gives
+                await visitor.see(within(shared, content('http://127.0.0.1:40001')));
+                await visitor.gone(
+                    within(shared, content('https://macbook-pro.tail1234.ts.net:40001')),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo("W18 Public waits for the engine's confirmation of a public share");
 
     test('W19 Stop sharing moves a port to Listening, not shared, where it stays', async () => {
         // Given - linux-1's Ports over two-macs, :5173 shared
