@@ -1035,6 +1035,14 @@ func (*worldMac) poolContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, pooled{}, true)
 }
 
+// invariant: a watch that follows a VM's create, as the window holds one
+// open, reads the world as it moves and never moves it: a create the seed
+// holds mid-way keeps the clock where the story left it however long the
+// watch stays open.
+func (*worldMac) watchContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, waits{}, true)
+}
+
 type moves struct {
 	mu sync.Mutex
 	ch chan struct{}

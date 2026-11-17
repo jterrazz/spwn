@@ -79,6 +79,7 @@ func (*worldMac) bundler() appscontract.Bundler                          { retur
 func (*worldMac) managers(map[catalog.Method]appscontract.Installer)     {}
 func (*worldMac) budgets() lanes.Clock                                   { return nil }
 func (*worldMac) poolContext(ctx context.Context) context.Context        { return ctx }
+func (*worldMac) watchContext(ctx context.Context) context.Context       { return ctx }
 func (*worldMac) vault() accountscontract.Vault                          { return nil }
 func (*worldMac) signIns(func() time.Time, func(context.Context, time.Duration) error) accountscontract.SignIns {
 	return nil
