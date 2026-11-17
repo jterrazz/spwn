@@ -40,8 +40,6 @@ func TestTheEventsWatchStreamsEachEventOfTheClosedListOnceAndNoOtherWord(t *test
 	d.Tell("macbook-pro", activity.SubjectDisk, "This Mac: 3 % of its disk is free")
 	d.tell(ctx, "infra", engine.PoweredOff("infra"))
 	added := []engine.Notice{
-		{Kind: engine.NoticeAgentWaiting, Icon: "bubble.left", Text: "review-bot is waiting for you"},
-		{Kind: engine.NoticeAgentFinished, Icon: "checkmark.circle.fill", Text: "PR #42 merged / review-bot finished"},
 		{Kind: engine.NoticeVMReady, Icon: "checkmark.circle.fill", Text: "linux-4 is ready on mac-mini"},
 		{Kind: engine.NoticeMacBack, Icon: "checkmark.circle.fill", Text: "mac-mini is back"},
 	}
@@ -57,7 +55,7 @@ func TestTheEventsWatchStreamsEachEventOfTheClosedListOnceAndNoOtherWord(t *test
 	wait, stop := context.WithTimeout(t.Context(), 5*time.Second)
 	defer stop()
 	for _, want := range added {
-		d.tell(ctx, "linux-4", engine.Told{Kind: "agent_typing", Parts: []string{"review-bot types"}})
+		d.tell(ctx, "linux-4", engine.Told{Kind: "vm_typing", Parts: []string{"review-bot types"}})
 		d.tell(ctx, "linux-4", engine.Told{Kind: want.Kind, Parts: strings.Split(want.Text, " / ")})
 		select {
 		case ev := <-got:

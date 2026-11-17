@@ -334,11 +334,6 @@ export type AgentsDiff = {
     plus: number;
 };
 
-export type AgentsHeld = {
-    agents: string[] | null;
-    workspaces: string[] | null;
-};
-
 export type AgentsPR = {
     number: number;
     url: string;
@@ -3318,8 +3313,6 @@ export type DiskReadInput = DiskCallsReadIn;
 export type DiskReadOutput = DiskReading;
 export type EngineActivityInput = Record<string, never>;
 export type EngineActivityOutput = EngineActivityOut;
-export type EngineAgentsHeldInput = Record<string, never>;
-export type EngineAgentsHeldOutput = AgentsHeld;
 export type EngineAwakeInput = Record<string, never>;
 export type EngineAwakeOutput = AwakeView;
 export type EngineAwakeKeepInput = EngineAwakeIn;
@@ -3512,7 +3505,6 @@ export interface Calls {
     'disk.move': { in: DiskMoveInput; out: DiskMoveOutput; watch: false };
     'disk.read': { in: DiskReadInput; out: DiskReadOutput; watch: true };
     'engine.activity': { in: EngineActivityInput; out: EngineActivityOutput; watch: false; own: true };
-    'engine.agents-held': { in: EngineAgentsHeldInput; out: EngineAgentsHeldOutput; watch: false; own: true };
     'engine.awake': { in: EngineAwakeInput; out: EngineAwakeOutput; watch: false; own: true };
     'engine.awake-keep': { in: EngineAwakeKeepInput; out: EngineAwakeKeepOutput; watch: false; own: true };
     'engine.awake-off': { in: EngineAwakeOffInput; out: EngineAwakeOffOutput; watch: false; own: true };

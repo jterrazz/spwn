@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 
@@ -129,9 +128,6 @@ type Options struct {
 	Answers  func(ctx context.Context, mac string) bool
 	ToldBack func(mac string) error
 	Label    func(mac string) string
-	// value: the names every machine's agents and workspaces hold, read
-	// across every Mac; nil holds none.
-	AgentsHeld func(ctx context.Context) (agents.Held, error)
 	// value: how a workspace of this Mac stands with its file, read now;
 	// nil reads none, and the drift job does not run. Changes are the calls
 	// whose end on a VM makes its reading due again, and Beside runs a
@@ -398,7 +394,7 @@ func (d *Engine) Memory() engine.Memory {
 		}
 		out[name] = engine.Remembered{
 			State: v.state, Detail: v.detail, Reruns: v.reruns, RerunAt: v.rerunAt, Restarts: v.restarts, BootAt: v.bootAt, Check: v.check,
-			Latency: v.latency, Restart: v.walk, Down: v.down, Cause: v.cause, LastLines: v.lastLines, LastHeard: heard, Agents: keptReport(v.agents), Reported: v.reported,
+			Latency: v.latency, Restart: v.walk, Down: v.down, Cause: v.cause, LastLines: v.lastLines, LastHeard: heard,
 			ReadyAt: v.readyAt, Drift: v.drift,
 		}
 	}

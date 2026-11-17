@@ -10,8 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
-	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 
@@ -117,9 +115,6 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Listening: m.listeners("/").Read, Declarations: m.stores.declarations.List,
 		Jobs:     jobs,
 		TellBack: m.machines(false).TellBack, Answers: m.answers, ToldBack: m.machines(false).ToldBack, Label: m.label,
-		AgentsHeld: func(ctx context.Context) (agents.Held, error) {
-			return agentscalls.HeldEverywhere(ctx, calls)
-		},
 		Drift:   func(ctx context.Context, vm string) model.KeptDrift { return keptDrift(ctx, calls, vm) },
 		Changes: driftChanges(),
 		Beside:  m.beside(),

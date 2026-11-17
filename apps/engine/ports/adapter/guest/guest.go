@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	"io"
 	"path"
 	"sort"
@@ -40,9 +39,6 @@ type Options struct {
 	Listeners Listeners
 	// value: the ports this VM's containers publish; nil reads none.
 	Containers Containers
-	// value: the journal this VM's agent hooks write, the one store of the
-	// agents the guest reads.
-	Journal agentscontract.Journal
 }
 
 type Listeners interface {
@@ -164,7 +160,6 @@ func (g *session) handle(ctx context.Context, m message) {
 			g.last = g.s.scan(ctx, g.hello, &g.held, true, g.from, g.to)
 			g.send(map[string]any{"v": 1, "type": "snapshot", "ports": g.last})
 			go g.watch(ctx)
-			g.report(ctx)
 		}
 	case "ping":
 		g.send(map[string]any{"v": 1, "type": "pong"})
@@ -177,28 +172,6 @@ func (g *session) handle(ctx context.Context, m message) {
 			ch <- m
 		}
 	}
-}
-
-// invariant: SPEC B5.1: the guest reports its VM's journal with its first
-// snapshot, then again on each change, whole; it never reads the
-// journal's folder itself.
-func (g *session) report(ctx context.Context) {
-	if g.s.o.Journal == nil {
-		return
-	}
-	changes, err := g.s.o.Journal.Watch(ctx)
-	if err != nil {
-		return
-	}
-	send := func(kept any) { g.send(map[string]any{"v": 1, "type": "agents", "agents": kept}) }
-	if first, ok := <-changes; ok {
-		send(first)
-	}
-	go func() {
-		for kept := range changes {
-			send(kept)
-		}
-	}()
 }
 
 func (g *session) watch(ctx context.Context) {
@@ -342,14 +315,13 @@ func (s *Agent) listen(ctx context.Context, g *session, quit context.CancelFunc)
 }
 
 // value: the calls the socket inside a VM serves, in station.api/v2 frames:
-// the four a command here asks its Mac's engine, relayed over the guest
+// the three a command here asks its Mac's engine, relayed over the guest
 // channel, and the quit a newer guest sends the one it replaces.
 const (
-	callPorts      = "engine.ports"
-	callReserve    = "engine.reserve"
-	callRelease    = "engine.release"
-	callAgentsHeld = "engine.agents-held"
-	callQuit       = "guest.quit"
+	callPorts   = "engine.ports"
+	callReserve = "engine.reserve"
+	callRelease = "engine.release"
+	callQuit    = "guest.quit"
 )
 
 type request struct {
@@ -382,7 +354,7 @@ func (g *session) serve(ctx context.Context, conn local.Conn, quit context.Cance
 			return
 		}
 		frame := map[string]any{"v": 2, "id": r.ID}
-		if op, ok := map[string]string{callPorts: "ports", callReserve: "reserve", callRelease: "release", callAgentsHeld: "agents-held"}[r.Call]; !ok || r.V != 2 {
+		if op, ok := map[string]string{callPorts: "ports", callReserve: "reserve", callRelease: "release"}[r.Call]; !ok || r.V != 2 {
 			frame["error"] = fault{Type: "refused", Code: "call.unknown", Message: "no call is named " + r.Call, Hint: "station ports"}
 		} else if reply := g.relay(ctx, op, r.In.Port); reply.OK {
 			frame["out"] = reply.Result

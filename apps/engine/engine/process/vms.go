@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"maps"
 	"net/netip"
 	"slices"
@@ -69,9 +68,6 @@ type vmState struct {
 	walk    *model.RestartWalk
 	down    bool
 	marked  bool
-	// value: the last report of its agents, and whether one came.
-	agents   []agents.Agent
-	reported bool
 	// value: SPEC B5.5: why its record holds it down, and the last lines
 	// its console kept then; empty once it is back.
 	cause     string
@@ -129,7 +125,6 @@ func (d *Engine) adopt(ctx context.Context) {
 		known, remembered := d.memory[r.Name]
 		v.reruns, v.restarts, v.bootAt, v.check = known.Reruns, known.Restarts, known.BootAt, known.Check
 		v.latency, v.walk, v.down = known.Latency, known.Restart, known.Down
-		v.agents, v.reported = readReport(known.Agents), known.Reported
 		v.cause, v.lastLines, v.readyAt = known.Cause, known.LastLines, known.ReadyAt
 		v.drift = known.Drift
 		d.mu.Lock()
@@ -716,15 +711,14 @@ func (d *Engine) rehello(v *vmState) {
 }
 
 type guestMessage struct {
-	Type    string         `json:"type"`
-	ID      string         `json:"id"`
-	Op      string         `json:"op"`
-	Port    int            `json:"port"`
-	IP      string         `json:"ip"`
-	Process string         `json:"process"`
-	Quiet   bool           `json:"quiet"`
-	Ports   []guestPort    `json:"ports"`
-	Agents  []agents.Agent `json:"agents"`
+	Type    string      `json:"type"`
+	ID      string      `json:"id"`
+	Op      string      `json:"op"`
+	Port    int         `json:"port"`
+	IP      string      `json:"ip"`
+	Process string      `json:"process"`
+	Quiet   bool        `json:"quiet"`
+	Ports   []guestPort `json:"ports"`
 }
 
 type guestPort struct {
@@ -794,20 +788,10 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 		d.dropQuiet(name, m.Port)
 		d.hear(name, slices.DeleteFunc(d.heardOf(name), func(l ports.Listener) bool { return l.Port == m.Port }))
 		d.unlisten(name, m.Port)
-	case "agents":
-		d.heardAgents(ctx, v, m.Agents)
 	case "request":
-		if m.Op == opAgentsHeld {
-			go d.answerGuest(ctx, v, m)
-			return
-		}
 		d.answerGuest(ctx, v, m)
 	}
 }
-
-// value: the op whose answer reads every machine, its own guest included,
-// so it is answered beside the guest's session, never in its way.
-const opAgentsHeld = "agents-held"
 
 func (d *Engine) answerGuest(ctx context.Context, v *vmState, m guestMessage) {
 	result, err := d.guestRequest(ctx, v.name, m)
@@ -843,8 +827,6 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 		return d.shareOf(ctx, vm, m.Port, ports.ByRights, "")
 	case "release":
 		return d.stopSharing(ctx, vm, m.Port)
-	case opAgentsHeld:
-		return d.AgentsHeld(ctx)
 	}
 	return nil, fault(enginecalls.UnknownOp, "unknown op \""+m.Op+"\"", "station ports")
 }

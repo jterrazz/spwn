@@ -30,7 +30,7 @@ func (m machine) guest() *guest.Agent {
 	if root == "" {
 		root = "/"
 	}
-	return guest.New(m.sys, guest.Options{State: m.paths.State, PortsEnv: filepath.Join(m.paths.Prefs, "services.env"), Kind: m.kind, Ephemeral: m.ephemeral(root), Version: Version(), Listeners: m.listeners(root), Containers: m.containers(), Journal: m.journal()})
+	return guest.New(m.sys, guest.Options{State: m.paths.State, PortsEnv: filepath.Join(m.paths.Prefs, "services.env"), Kind: m.kind, Ephemeral: m.ephemeral(root), Version: Version(), Listeners: m.listeners(root), Containers: m.containers()})
 }
 
 // value: the ports this VM's containers publish; none in a world.

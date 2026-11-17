@@ -7,7 +7,6 @@ import (
 	"slices"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -98,7 +97,6 @@ func calls(d *Engine, served []string) []call.Handler {
 		own(d, engine.CallRefresh, func(_ context.Context, d *Engine, in engine.PagesIn) (struct{}, error) {
 			return struct{}{}, d.Refresh(in.Pages)
 		}),
-		own(d, engine.CallAgentsHeld, func(ctx context.Context, d *Engine, _ struct{}) (agents.Held, error) { return d.AgentsHeld(ctx) }),
 	)
 	for _, verb := range engine.VMVerbs() {
 		out = append(out, own(d, engine.CallVM(verb), func(ctx context.Context, d *Engine, in engine.VMIn) (*struct{}, error) {
@@ -118,7 +116,7 @@ type Serving struct {
 	// value: the Router a call for another machine rides.
 	Far call.Router
 	// value: the VM whose guest socket this server is: its guest's calls
-	// (engine.ports, engine.reserve, engine.release, engine.agents-held)
+	// (engine.ports, engine.reserve, engine.release)
 	// are answered as the engine answers that guest; empty serves this
 	// Mac's own.
 	Guest string
@@ -177,7 +175,7 @@ func Server(d *Engine, h Serving) serve.Server {
 
 func guestServer(d *Engine, h Serving) serve.Server {
 	byName := map[string]call.Handler{}
-	for name, op := range map[string]string{engine.CallPorts: "ports", engine.CallReserve: "reserve", engine.CallRelease: "release", engine.CallAgentsHeld: opAgentsHeld} {
+	for name, op := range map[string]string{engine.CallPorts: "ports", engine.CallReserve: "reserve", engine.CallRelease: "release"} {
 		byName[name] = own(d, name, func(ctx context.Context, d *Engine, in engine.ReserveIn) (any, error) {
 			return d.guestRequest(ctx, h.Guest, guestMessage{Op: op, Port: in.GuestPort})
 		})
