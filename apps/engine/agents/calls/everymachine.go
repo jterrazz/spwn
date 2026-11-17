@@ -30,7 +30,6 @@ func everyMachine(ctx context.Context, r call.Router, in ListIn) ([]agents.Agent
 			}
 			held.Workspaces = append(held.Workspaces, vm.Name)
 			if !mac.Reachable || vm.State != machines.Running {
-				held.Agents = append(held.Agents, vm.Agents...)
 				continue
 			}
 			var kept []agents.Agent

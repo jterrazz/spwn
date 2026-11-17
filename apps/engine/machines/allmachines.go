@@ -116,9 +116,6 @@ type VM struct {
 	// value: the agent a workspace is said by, as its guest last reported
 	// it; nil while none is known.
 	Agent *AgentView
-	// value: the agents a workspace held when it last stopped, which a
-	// stopped one or one of a silent Mac still holds.
-	Agents []string `json:",omitempty"`
 	// value: what it is for, as its create was told, empty when it was told
 	// nothing; who made it, the session its create named, else you; and
 	// the Machinefile it was made from, empty when none was named.
@@ -283,16 +280,6 @@ type CreateRequest struct {
 	Creator string
 }
 
-type AgentNotStartedError struct {
-	// value: a workspace made and answering, whose agent did not start.
-	Name  string
-	Cause error
-}
-
-func (e *AgentNotStartedError) Error() string {
-	return e.Name + " is ready, but its agent did not start: " + e.Cause.Error()
-}
-
 type ServerLifetimeError struct {
 	// value: a server create that also asks a workspace's lifetime, by its
 	// flag.
@@ -334,9 +321,7 @@ const (
 )
 
 type DeleteReport struct {
-	Name string
-	// value: SPEC B5.22: the agents it hosted, stopped before it went.
-	Agents   []string
+	Name     string
 	Warnings []string
 }
 

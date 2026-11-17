@@ -383,11 +383,6 @@
       "Detail": "agents",
       "Tone": "plain"
     },
-    "agents.not-stopped": {
-      "Word": "not stopped",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
     "agents.unknown-agent": {
       "Word": "unknown agent",
       "Detail": "agents",

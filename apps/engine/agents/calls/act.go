@@ -33,9 +33,6 @@ const (
 	// value: a name two agents of two machines hold, each started inside its
 	// own workspace.
 	Ambiguous fail.Code = "agents.ambiguous"
-	// value: an agent its workspace's stop or delete could not stop first;
-	// the VM goes on.
-	NotStopped fail.Code = "agents.not-stopped"
 )
 
 type ListIn struct {
@@ -260,9 +257,6 @@ func (d Deps) startFromMac(ctx context.Context, in StartIn, p call.Progress) (ag
 	}
 	var a agents.Agent
 	err = d.Calls.Invoke(ctx, machine.Ref{Name: vm}, "agents.start", at, &a, nil)
-	if err != nil && in.New != nil {
-		return a, &machines.AgentNotStartedError{Name: vm, Cause: err}
-	}
 	return a, err
 }
 

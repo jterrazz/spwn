@@ -193,23 +193,7 @@ func orDash(s string) page.Value {
 	return page.Identity(s)
 }
 
-func agentsStopped(names []string) string {
-	// value: SPEC B5.22: the agents a VM's stop or delete stopped first.
-	if len(names) == 1 {
-		return "its agent " + names[0] + " stopped"
-	}
-	return "its agents " + strings.Join(names, ", ") + " stopped"
-}
-
-func StoppedWithAgents(name string, agents, warnings []string, thisMac page.Context) page.Page {
-	row := pages.Done(name, catalog.StateOK, "stopped, kept")
-	if len(agents) > 0 {
-		row.Detail = page.Texts("stopped, kept", agentsStopped(agents))
-	}
-	return pages.Outcome("machines stop", thisMac, nil, append([]page.Row{row}, warned(name, warnings)...), "machines")
-}
-
-// value: a VM's stop or delete warnings, one row each under its own.
+// value: a VM's delete warnings, one row each under its own.
 func warned(name string, warnings []string) []page.Row {
 	rows := make([]page.Row, 0, len(warnings))
 	for i, w := range warnings {
@@ -528,9 +512,6 @@ func serverCreated(c model.Created, rows []page.Row, thisMac page.Context) page.
 func Deleted(r model.DeleteReport, thisMac page.Context) page.Page {
 	rows := make([]page.Row, 0, 1+len(r.Warnings))
 	rows = append(rows, pages.Done(r.Name, catalog.StateOK, "deleted"))
-	if len(r.Agents) > 0 {
-		rows[0].Detail = page.Texts("deleted", agentsStopped(r.Agents))
-	}
 	rows = append(rows, warned(r.Name, r.Warnings)...)
 	return pages.Outcome("machines delete "+r.Name, thisMac, nil, rows, "VMs")
 }

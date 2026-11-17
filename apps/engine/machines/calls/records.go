@@ -15,7 +15,7 @@ func recordOf(r model.Record) model.VMRecord {
 	return model.VMRecord{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		Resources: model.Resources{CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes},
-		CreatedAt: r.CreatedAt, Birth: r.Birth, Owner: r.Owner, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
+		CreatedAt: r.CreatedAt, Birth: r.Birth, Owner: r.Owner, Template: r.Template, Mounts: r.Mounts,
 		Purpose: r.Purpose, Creator: r.Creator,
 	}
 }
@@ -24,7 +24,7 @@ func storedOf(r model.VMRecord) model.Record {
 	return model.Record{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.Resources.CPUs, MemoryBytes: r.Resources.MemoryBytes, DiskBytes: r.Resources.DiskBytes, CreatedAt: r.CreatedAt,
-		Birth: r.Birth, Owner: r.Owner, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
+		Birth: r.Birth, Owner: r.Owner, Template: r.Template, Mounts: r.Mounts,
 		Purpose: r.Purpose, Creator: r.Creator,
 	}
 }
@@ -121,7 +121,7 @@ func (s *Machinist) vmsOf(mac string, stored []model.Record, disks map[string]co
 		vm := model.VM{
 			Name: r.Name, Image: r.Image, Version: r.Version, Mac: mac, Kind: s.kindOfImage(r.Image),
 			Lifetime: r.Lifetime, State: stateOf(info), Resources: r.Resources, SizeGB: int(info.Bytes / 1e9),
-			Network: networkOf(r), Guest: "unknown", Want: r.Want, Check: model.ShownCheck(r.Check), CreatedAt: r.CreatedAt, Agents: r.Agents,
+			Network: networkOf(r), Guest: "unknown", Want: r.Want, Check: model.ShownCheck(r.Check), CreatedAt: r.CreatedAt,
 			Purpose: r.Purpose, Creator: model.CreatorOf(r.Creator), Machinefile: r.Template,
 		}
 		if d, ok := live[r.Name]; ok && live != nil {

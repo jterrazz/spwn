@@ -14,7 +14,6 @@
             "agents.no-terminal",
             "agents.no-text",
             "agents.no-where",
-            "agents.not-stopped",
             "agents.unknown-agent",
             "agents.unknown-app",
             "apps.lives-elsewhere",
@@ -917,12 +916,6 @@
               "type": "null"
             }
           ]
-        },
-        "Agents": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
         },
         "Birth": {
           "anyOf": [

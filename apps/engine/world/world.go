@@ -455,8 +455,6 @@ type Kept struct {
 	Birth     *machines.Birth   `json:"birth,omitempty"`
 	// value: the process its create runs in, while it runs.
 	Owner *machines.Process `json:"owner,omitempty"`
-	// value: the agents a workspace held when it last stopped.
-	Agents []string `json:"agents,omitempty"`
 	// value: the Machinefile it was made from.
 	Template string `json:"template,omitempty"`
 	// value: the folders its last start shared.

@@ -68,7 +68,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		enginecalls.All(enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m, machines: m.machines(false)}, Kind: kind}),
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
 		machinefilecalls.All(m.machinefileDeps(thisMac)),
-		machinescalls.All(machinescalls.Deps{Machines: machineCalls{Machinist: m.machines(env.Interactive), m: m}, Images: createImages{imageBuilder{m.images()}}, Kind: kind, OS: m.profile.System.OS, Laptop: m.profile.Caps.Battery, Agents: farAgents{m}, Holdings: holdings{m}, Now: m.sys.Clock.Now}),
+		machinescalls.All(machinescalls.Deps{Machines: machineCalls{Machinist: m.machines(env.Interactive), m: m}, Images: createImages{imageBuilder{m.images()}}, Kind: kind, OS: m.profile.System.OS, Laptop: m.profile.Caps.Battery, Holdings: holdings{m}, Now: m.sys.Clock.Now}),
 		portscalls.All(portscalls.Deps{Ports: m.portsOf(env), Tailnet: m.tailnetStatus(), Kind: kind,
 			Declarations: m.stores.declarations, Routes: m.routes(), Far: farPorts{m}, Prefs: m.stores.ports()}),
 		setupcalls.All(setupcalls.Deps{Setup: setupInit{setupOf}, Ask: named}),

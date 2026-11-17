@@ -15,36 +15,16 @@
     "machines.calls.StopOut": {
       "additionalProperties": false,
       "properties": {
-        "Agents": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
         "Already": {
           "type": "boolean"
         },
         "Kind": {
           "type": "string"
-        },
-        "Warnings": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
         }
       },
       "required": [
-        "Agents",
         "Already",
-        "Kind",
-        "Warnings"
+        "Kind"
       ],
       "type": "object"
     }

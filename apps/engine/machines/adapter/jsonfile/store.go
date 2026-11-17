@@ -59,7 +59,6 @@ type file struct {
 	CreatedAt   time.Time         `json:"created_at"`
 	Birth       *machines.Birth   `json:"birth,omitempty"`
 	Owner       *machines.Process `json:"owner,omitempty"`
-	Agents      []string          `json:"agents,omitempty"`
 	Template    string            `json:"template,omitempty"`
 	Mounts      []machines.Mount  `json:"mounts,omitempty"`
 	Purpose     string            `json:"purpose,omitempty"`
@@ -70,7 +69,7 @@ type file struct {
 func (f file) record() machines.Record {
 	return machines.Record{
 		Name: f.Name, Image: f.Image, Version: f.Version, Lifetime: f.Lifetime, Want: f.Want, Network: f.Network, Check: f.Check, Env: f.Env,
-		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt, Birth: f.Birth, Owner: f.Owner, Agents: f.Agents, Template: f.Template, Mounts: f.Mounts,
+		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt, Birth: f.Birth, Owner: f.Owner, Template: f.Template, Mounts: f.Mounts,
 		Purpose: f.Purpose, Creator: f.Creator,
 	}
 }
@@ -169,19 +168,10 @@ func (s *Store) Put(_ context.Context, r machines.Record) error {
 }
 
 func (s *Store) put(r machines.Record) error {
-	// invariant: a put without agents keeps those on disk: a stop writes
-	// them, and the engine's record of a run that ends predates them.
-	var held file
-	if current, err := s.files.ReadFile(s.recordFile(r.Name)); err == nil {
-		_ = json.Unmarshal(current, &held)
-	}
-	if r.Agents == nil {
-		r.Agents = held.Agents
-	}
 	data, err := json.MarshalIndent(file{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, CreatedAt: r.CreatedAt,
-		Birth: r.Birth, Owner: r.Owner, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts, Purpose: r.Purpose, Creator: r.Creator, V: Version,
+		Birth: r.Birth, Owner: r.Owner, Template: r.Template, Mounts: r.Mounts, Purpose: r.Purpose, Creator: r.Creator, V: Version,
 	}, "", "  ")
 	if err != nil {
 		return err

@@ -35,9 +35,8 @@ func TestARefusalOfACreateCarriesItsCodeAndItsMac(t *testing.T) {
 		{&model.BadPurposeError{Secret: true}, BadPurpose, "", map[string]string{"secret": "yes"}},
 		{&model.TooLittleMemoryError{AskedBytes: 1 << 30}, TooLittle, "1073741824", nil},
 		{&model.BeingCreatedError{Name: "linux-4", Mac: "mac-mini"}, BeingCreated, "linux-4", map[string]string{"mac": "mac-mini"}},
-		{&model.NameTakenError{Name: "infra", VM: true, On: "mac-mini"}, NameTaken, "infra", map[string]string{"by": "vm", "on": "mac-mini", "agent": ""}},
-		{&model.NameTakenError{Name: "docs-bot", Agent: "docs-bot", On: "linux-1"}, NameTaken, "docs-bot", map[string]string{"by": "agent", "on": "linux-1", "agent": "docs-bot"}},
-		{&model.NameTakenError{Name: "mac-mini"}, NameTaken, "mac-mini", map[string]string{"by": "added", "on": "", "agent": ""}},
+		{&model.NameTakenError{Name: "infra", VM: true, On: "mac-mini"}, NameTaken, "infra", map[string]string{"by": "vm", "on": "mac-mini"}},
+		{&model.NameTakenError{Name: "mac-mini"}, NameTaken, "mac-mini", map[string]string{"by": "added", "on": ""}},
 	} {
 		var got *fail.Error
 		if !errors.As(Worded(c.err), &got) {

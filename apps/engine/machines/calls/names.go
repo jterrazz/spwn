@@ -2,9 +2,7 @@ package calls
 
 import (
 	"maps"
-	"slices"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -16,43 +14,24 @@ const (
 	claimVM
 )
 
-type heldAgent struct{ Name, VM string }
-
 // value: every name a new VM may not take: each Mac's and VM's of the fleet,
-// with the Mac a VM is on, and each agent's of a workspace that answers.
+// with the Mac a VM is on.
 type claims struct {
-	held   map[string]claim
-	on     map[string]string
-	agents []heldAgent
+	held map[string]claim
+	on   map[string]string
 }
 
 // invariant: a name is held by a VM record on any host of the fleet or by a
-// host, and by any agent the VM would give its own agents unasked (SPEC
-// B5.22): its name or its ·<n>, so no agent run by hand on it shares a name;
-// no tailnet node holds a VM's name since VMs left the tailnet.
-func (c claims) agentOf(name string) (heldAgent, bool) {
-	i := slices.IndexFunc(c.agents, func(a heldAgent) bool { return agents.Defaults(name, a.Name) })
-	if i < 0 {
-		return heldAgent{}, false
-	}
-	return c.agents[i], true
-}
-
-func (c claims) free(name string) bool {
-	_, agent := c.agentOf(name)
-	return c.held[name] == unclaimed && !agent
-}
+// host; no tailnet node holds a VM's name since VMs left the tailnet.
+func (c claims) free(name string) bool { return c.held[name] == unclaimed }
 
 func (c claims) taken(name string) *model.NameTakenError {
-	if a, ok := c.agentOf(name); ok && c.held[name] == unclaimed {
-		return &model.NameTakenError{Name: name, Agent: a.Name, On: a.VM}
-	}
 	return &model.NameTakenError{Name: name, VM: c.held[name] == claimVM, Mac: c.held[name] == claimMac, On: c.on[name]}
 }
 
 // value: the claims with each VM This Mac records, on mac.
 func (c claims) with(mac string, records []model.Record) claims {
-	out := claims{held: maps.Clone(c.held), on: maps.Clone(c.on), agents: c.agents}
+	out := claims{held: maps.Clone(c.held), on: maps.Clone(c.on)}
 	if out.held == nil {
 		out.held, out.on = map[string]claim{}, map[string]string{}
 	}
