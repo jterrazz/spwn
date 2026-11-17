@@ -35,40 +35,7 @@ func (g *Grants) entry(id string) (*accounts.VaultEntry, error) {
 	return &own.Passwords[i], nil
 }
 
-func (g *Grants) agentKnown(name, workspace string) bool {
-	vm := mac(g.w, g.mac).VMs[workspace]
-	if vm == nil || vm.Agents == nil {
-		return false
-	}
-	for _, a := range vm.Agents.Journal {
-		if a.Name == name {
-			return true
-		}
-	}
-	return false
-}
-
-func (g *Grants) anyAgent(name string) bool {
-	for _, vm := range mac(g.w, g.mac).VMs {
-		if vm.Agents == nil {
-			continue
-		}
-		for _, a := range vm.Agents.Journal {
-			if a.Name == name {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func (g *Grants) target(in contract.GrantIn) error {
-	if in.ToKind == accounts.ToAgent {
-		if !g.agentKnown(in.To, in.Workspace) {
-			return accounts.Refusal(fail.NotFound, accounts.GrantUnknownAgent, in.To)
-		}
-		return nil
-	}
 	stand, ok := g.reads.standOf(in.To)
 	switch {
 	case !ok:
@@ -85,24 +52,17 @@ func (g *Grants) target(in contract.GrantIn) error {
 	return nil
 }
 
-func (g *Grants) Check(_ context.Context, id string, to accounts.GrantTo, target string) error {
+func (g *Grants) Check(_ context.Context, id, target string) error {
 	g.w.Lock()
 	defer g.w.Unlock()
 	e, err := g.entry(id)
 	if err != nil {
 		return err
 	}
-	switch to {
-	case accounts.ToMachine:
-		if _, ok := g.reads.standOf(target); !ok {
-			return accounts.Refusal(fail.NotFound, accounts.GrantUnknownMachine, target)
-		}
-	case accounts.ToAgent:
-		if !g.anyAgent(target) {
-			return accounts.Refusal(fail.NotFound, accounts.GrantUnknownAgent, target)
-		}
+	if _, ok := g.reads.standOf(target); !ok {
+		return accounts.Refusal(fail.NotFound, accounts.GrantUnknownMachine, target)
 	}
-	if !slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == to && v.To == target }) {
+	if !slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.To == target }) {
 		return accounts.Refusal(fail.NotFound, accounts.GrantNotGranted, target)
 	}
 	return nil
@@ -115,14 +75,14 @@ func rank(name, first string) int {
 	return 1
 }
 
-func (g *Grants) Candidates(_ context.Context, id string) (accounts.Candidates, error) {
+func (g *Grants) Candidates(_ context.Context, id string) ([]accounts.Candidate, error) {
 	g.w.Lock()
 	defer g.w.Unlock()
 	e, err := g.entry(id)
 	if err != nil {
-		return accounts.Candidates{}, err
+		return nil, err
 	}
-	found := accounts.Candidates{AgentGrantable: e.AgentGrantable, List: []accounts.Candidate{}}
+	found := []accounts.Candidate{}
 	parents := slices.SortedFunc(maps.Keys(g.w.Macs), func(a, b string) int {
 		return cmp.Or(cmp.Compare(rank(a, g.mac), rank(b, g.mac)), cmp.Compare(a, b))
 	})
@@ -134,17 +94,8 @@ func (g *Grants) Candidates(_ context.Context, id string) (accounts.Candidates, 
 			}
 			stand, _ := g.reads.standOf(name)
 			facts := state(mac(g.w, name)).Programs[e.Program]
-			granted := slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == name })
-			found.List = append(found.List, accounts.Candidate{ToKind: accounts.ToMachine, To: name, Where: stand, Facts: facts, Granted: granted})
-		}
-	}
-	for _, name := range slices.Sorted(maps.Keys(mac(g.w, g.mac).VMs)) {
-		vm := mac(g.w, g.mac).VMs[name]
-		if vm.Agents == nil {
-			continue
-		}
-		for _, key := range slices.Sorted(maps.Keys(vm.Agents.Journal)) {
-			found.List = append(found.List, accounts.Candidate{ToKind: accounts.ToAgent, To: vm.Agents.Journal[key].Name, Workspace: name})
+			granted := slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.To == name })
+			found = append(found, accounts.Candidate{To: name, Where: stand, Facts: facts, Granted: granted})
 		}
 	}
 	return found, nil
@@ -160,10 +111,7 @@ func (g *Grants) Add(_ context.Context, in contract.GrantIn) (accounts.Granted, 
 	if err := g.target(in); err != nil {
 		return accounts.Granted{}, err
 	}
-	if in.ToKind == accounts.ToAgent && !e.AgentGrantable {
-		return accounts.Granted{}, accounts.Refusal(fail.Refused, accounts.GrantNotAgentGrantable, in.Entry)
-	}
-	if in.ToKind == accounts.ToMachine && state(mac(g.w, in.To)).Programs[e.Program].State == accounts.ProgramSignedIn && state(mac(g.w, in.To)).Programs[e.Program].How == accounts.HowOwn {
+	if state(mac(g.w, in.To)).Programs[e.Program].State == accounts.ProgramSignedIn && state(mac(g.w, in.To)).Programs[e.Program].How == accounts.HowOwn {
 		return accounts.Granted{}, accounts.Refusal(fail.Refused, accounts.GrantSignedInHere, in.To)
 	}
 	own := state(mac(g.w, g.mac))
@@ -176,29 +124,25 @@ func (g *Grants) Add(_ context.Context, in contract.GrantIn) (accounts.Granted, 
 	if slices.Contains(own.Undeliverable, in.To) {
 		return accounts.Granted{}, accounts.Refusal(fail.Failed, accounts.GrantCannotDeliver, in.To)
 	}
-	e.Grants = slices.DeleteFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == in.ToKind && v.To == in.To })
-	e.Grants = append(e.Grants, accounts.VaultGrant{ToKind: in.ToKind, To: in.To, Workspace: in.Workspace})
-	if in.ToKind == accounts.ToMachine {
-		target := state(mac(g.w, in.To))
-		if target.Programs == nil {
-			target.Programs = map[accounts.Program]accounts.Facts{}
-		}
-		target.Programs[e.Program] = accounts.Facts{Program: e.Program, State: accounts.ProgramSignedIn, Who: e.Who, How: accounts.HowGranted, Entry: e.ID, EntryLabel: e.Label}
+	e.Grants = slices.DeleteFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.To == in.To })
+	e.Grants = append(e.Grants, accounts.VaultGrant{To: in.To})
+	target := state(mac(g.w, in.To))
+	if target.Programs == nil {
+		target.Programs = map[accounts.Program]accounts.Facts{}
 	}
+	target.Programs[e.Program] = accounts.Facts{Program: e.Program, State: accounts.ProgramSignedIn, Who: e.Who, How: accounts.HowGranted, Entry: e.ID, EntryLabel: e.Label}
 	return accounts.Granted{}, nil
 }
 
-func (g *Grants) Remove(_ context.Context, id string, to accounts.GrantTo, target string) (accounts.Revoked, error) {
+func (g *Grants) Remove(_ context.Context, id, target string) (accounts.Revoked, error) {
 	g.w.Lock()
 	defer g.w.Unlock()
 	e, err := g.entry(id)
 	if err != nil {
 		return accounts.Revoked{}, err
 	}
-	e.Grants = slices.DeleteFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == to && v.To == target })
-	if to == accounts.ToMachine {
-		delete(state(mac(g.w, target)).Programs, e.Program)
-	}
+	e.Grants = slices.DeleteFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.To == target })
+	delete(state(mac(g.w, target)).Programs, e.Program)
 	return accounts.Revoked{Sentence: accounts.RevokedSentence(e.Program)}, nil
 }
 
@@ -209,7 +153,7 @@ func (g *Grants) Forget(_ context.Context, vm string) error {
 	defer g.w.Unlock()
 	own := state(mac(g.w, g.mac))
 	for i := range own.Passwords {
-		own.Passwords[i].Grants = slices.DeleteFunc(own.Passwords[i].Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == vm })
+		own.Passwords[i].Grants = slices.DeleteFunc(own.Passwords[i].Grants, func(v accounts.VaultGrant) bool { return v.To == vm })
 	}
 	return nil
 }

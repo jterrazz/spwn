@@ -3,7 +3,6 @@ package accounts
 import (
 	"fmt"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -34,15 +33,6 @@ const (
 
 func (AddFrom) Enum() []string { return []string{string(FromSignIn), string(FromTyped)} }
 
-type GrantTo string
-
-const (
-	ToMachine GrantTo = "machine"
-	ToAgent   GrantTo = "agent"
-)
-
-func (GrantTo) Enum() []string { return []string{string(ToMachine), string(ToAgent)} }
-
 type EntryReach string
 
 const (
@@ -55,10 +45,7 @@ func (EntryReach) Enum() []string {
 }
 
 type VaultGrant struct {
-	ToKind GrantTo
-	To     string
-	// value: the workspace an agent's grant is for, empty for a machine's.
-	Workspace string `json:",omitempty"`
+	To string
 }
 
 type VaultEntry struct {
@@ -68,9 +55,7 @@ type VaultEntry struct {
 	Kind    KeyKind
 	Who     string `json:",omitempty"`
 	Added   time.Time
-	// value: whether an agent may be granted it: a fine-grained token, never the owner's own login.
-	AgentGrantable bool
-	Grants         []VaultGrant
+	Grants  []VaultGrant
 	// value: whether any grant was made from it, from its grants.
 	Reach EntryReach
 	// value: the engine's consequence of removing it, counted from its grants.
@@ -113,22 +98,7 @@ func DescribeEntry(e VaultEntry) VaultEntry {
 		return e
 	}
 	e.Reach = ReachGranted
-	machines, agents := 0, 0
-	for _, g := range e.Grants {
-		if g.ToKind == ToAgent {
-			agents++
-		} else {
-			machines++
-		}
-	}
-	parts := make([]string, 0, 2)
-	if machines > 0 {
-		parts = append(parts, counted(machines, "machine", "machines"))
-	}
-	if agents > 0 {
-		parts = append(parts, counted(agents, "agent", "agents"))
-	}
-	e.RemoveSentence = fmt.Sprintf(SentenceRemoveEnds.Text(), strings.Join(parts, " and "))
+	e.RemoveSentence = fmt.Sprintf(SentenceRemoveEnds.Text(), counted(len(e.Grants), "machine", "machines"))
 	return e
 }
 

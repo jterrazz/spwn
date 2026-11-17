@@ -151,7 +151,7 @@ final class PagesTests: XCTestCase {
         XCTAssertNil(remove.confirm?.type)
         let (frames, _) = try await sentAll(remove, label: "mb-remove-grant", reread: [PageID.of("linux-1")])
         XCTAssertEqual(frames.map(\.call), ["grants.remove", "engine.refresh"])
-        XCTAssertEqual(frames.first?.input, ["Entry": "pw-github", "To": "linux-1", "ToKind": "machine", "Confirm": "yes"])
+        XCTAssertEqual(frames.first?.input, ["Entry": "pw-github", "To": "linux-1", "Confirm": "yes"])
         XCTAssertEqual(frames.last?.input, ["pages": ["menubar.machine:linux-1"]])
     }
 

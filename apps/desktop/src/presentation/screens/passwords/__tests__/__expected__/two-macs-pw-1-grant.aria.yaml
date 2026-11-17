@@ -17,7 +17,6 @@
     - button "Grant…"
   - dialog "Grant GitHub deploy":
     - heading "Grant GitHub deploy" [level=3]
-    - paragraph: Machines
     - group "Machines":
       - button "api" [disabled]: api Start the machine first
       - button "linux-1": linux-1 Signed out here

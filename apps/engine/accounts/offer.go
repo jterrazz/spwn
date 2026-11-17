@@ -19,11 +19,8 @@ const (
 func (TargetFit) Enum() []string { return []string{string(TargetFits), string(TargetNo)} }
 
 type Target struct {
-	ToKind GrantTo
-	To     string
-	// value: the workspace an agent works in, empty for a machine.
-	Workspace string `json:",omitempty"`
-	Fit       TargetFit
+	To  string
+	Fit TargetFit
 	// invariant: a target that cannot be picked says why in Line; one that
 	// can says what the grant meets there.
 	Line string
@@ -36,42 +33,26 @@ type GrantOffer struct {
 }
 
 type Candidate struct {
-	ToKind    GrantTo
-	To        string
-	Workspace string
-	Where     Where
+	To    string
+	Where Where
 	// value: what the target's own read says of the entry's program.
 	Facts Facts
 	// value: whether this very password is granted there now.
 	Granted bool
 }
 
-type Candidates struct {
-	// value: whether the password may go to an agent.
-	AgentGrantable bool
-	List           []Candidate
-}
-
 const presenceSentence = "Touch ID will ask you to confirm before the password leaves this Mac"
 
-func Offer(c Candidates) GrantOffer {
-	targets := make([]Target, 0, len(c.List))
-	for _, k := range c.List {
-		targets = append(targets, targetOf(k, c.AgentGrantable))
+func Offer(c []Candidate) GrantOffer {
+	targets := make([]Target, 0, len(c))
+	for _, k := range c {
+		targets = append(targets, targetOf(k))
 	}
 	return GrantOffer{Targets: targets, Presence: presenceSentence}
 }
 
-func targetOf(k Candidate, agentGrantable bool) Target {
-	t := Target{ToKind: k.ToKind, To: k.To, Workspace: k.Workspace, Fit: TargetNo}
-	if k.ToKind == ToAgent {
-		if !agentGrantable {
-			t.Line = "Only a fine-grained token goes to an agent"
-			return t
-		}
-		t.Fit, t.Line = TargetFits, SentenceAgentReach.Text()
-		return t
-	}
+func targetOf(k Candidate) Target {
+	t := Target{To: k.To, Fit: TargetNo}
 	switch {
 	case k.Where.Kind == machine.Server:
 		t.Line = lineServer

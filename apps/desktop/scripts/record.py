@@ -294,9 +294,9 @@ GESTURES = {
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "base-ubuntu", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
         {"call": "vault.remove", "in": {"ID": "pw-2", "Confirm": "yes"}},
-        {"call": "grants.remove", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine", "Confirm": "yes"}},
-        {"call": "grants.add", "in": {"Entry": "pw-1", "To": "linux-1", "ToKind": "machine"}},
-        {"call": "grants.add", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine"}},
+        {"call": "grants.remove", "in": {"Entry": "pw-2", "To": "linux-1", "Confirm": "yes"}},
+        {"call": "grants.add", "in": {"Entry": "pw-1", "To": "linux-1"}},
+        {"call": "grants.add", "in": {"Entry": "pw-2", "To": "linux-1"}},
         {"call": "vault.add", "in": {"Label": "GitHub sign-in", "Program": "gh", "From": "sign-in"}},
         {"call": "vault.add", "in": {"Label": "Cloudflare deploy", "Program": "wrangler", "Kind": "token", "From": "typed", "Value": "good"}},
         {"call": "vault.add", "in": {"Label": "", "Program": "npm", "Kind": "token", "From": "typed", "Value": "good"}},
@@ -310,7 +310,7 @@ GESTURES = {
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "private"}},
     ],
     "presence-refused": [
-        {"call": "grants.add", "in": {"Entry": "pw-1", "ToKind": "machine", "To": "linux-1"}},
+        {"call": "grants.add", "in": {"Entry": "pw-1", "To": "linux-1"}},
     ],
     "stories": [
         {"call": "awake.off", "in": {}},

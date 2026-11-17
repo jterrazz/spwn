@@ -8,7 +8,7 @@ import { AppIcon, Button, Facts, Panel } from '../../ui/index';
 import { Page } from '../../ui/page';
 import { WITHHELD } from '../../ui/secret';
 import { GrantSheet } from './grant-sheet';
-import { aboutEntry, grantedTo, grantLine, kindWord, VAULT_REREADS } from './passwords-of';
+import { aboutEntry, grantedTo, kindWord, VAULT_REREADS } from './passwords-of';
 
 import styles from './passwords.module.css';
 
@@ -16,7 +16,7 @@ type Go = (to: Route) => void;
 
 function GrantRow({ entry, grant }: { entry: AccountsVaultEntry; grant: AccountsVaultGrant }) {
     const remove = useGesture('grants.remove', {
-        input: { Entry: entry.ID, To: grant.To, ToKind: grant.ToKind },
+        input: { Entry: entry.ID, To: grant.To },
         rereads: VAULT_REREADS,
         subject: grant.To,
     });
@@ -25,7 +25,6 @@ function GrantRow({ entry, grant }: { entry: AccountsVaultEntry; grant: Accounts
         <GestureRow
             gesture={remove}
             lead={<AppIcon name={entry.Program} />}
-            sentence={grantLine(grant)}
             title={grant.To}
             trail={
                 <GestureButton
@@ -111,7 +110,7 @@ export function EntryPage({ entry, go }: { entry: AccountsVaultEntry; go: Go }) 
                     {...(grants.length === 0 ? {} : { note: grantedTo(entry) })}
                 >
                     {grants.map((one) => (
-                        <GrantRow entry={entry} grant={one} key={`${one.ToKind}:${one.To}`} />
+                        <GrantRow entry={entry} grant={one} key={one.To} />
                     ))}
                 </Panel>
             </HeldOutcomes>

@@ -5,7 +5,7 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message} end'''
       stdin: |
-          {"v":2,"id":"1","call":"grants.remove","in":{"Entry":"pw-2","ToKind":"machine","To":"linux-1","Confirm":"yes"}}
+          {"v":2,"id":"1","call":"grants.remove","in":{"Entry":"pw-2","To":"linux-1","Confirm":"yes"}}
       exit: 0
       stdout: |
           {"Sentence":"The token stays valid at npm; revoke it there to end it everywhere"}

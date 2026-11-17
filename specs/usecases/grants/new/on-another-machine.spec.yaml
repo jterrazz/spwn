@@ -3,15 +3,15 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].accounts.passwords = [{"ID": "pw-1", "Label": "ci", "Program": "npm", "Kind": "token", "Added": "2026-10-30T09:00:00Z", "AgentGrantable": false, "Grants": []}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].accounts.passwords = [{"ID": "pw-1", "Label": "ci", "Program": "npm", "Kind": "token", "Added": "2026-10-30T09:00:00Z", "Grants": []}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | [.ToKind, .To, .Workspace, .Fit, .Line]'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | [.To, .Fit, .Line]'''
       stdin: |
           {"v":2,"id":"1","watch":"grants.new","in":{"Entry":"pw-1"}}
       exit: 0
       stdout: |
-          ["machine","infra",null,"no","A server keeps its own sign-ins"]
-          ["machine","api",null,"no","It is on macbook-pro: grant from there"]
-          ["machine","linux-1",null,"no","It is on macbook-pro: grant from there"]
+          ["infra","no","A server keeps its own sign-ins"]
+          ["api","no","It is on macbook-pro: grant from there"]
+          ["linux-1","no","It is on macbook-pro: grant from there"]

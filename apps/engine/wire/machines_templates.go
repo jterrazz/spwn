@@ -164,7 +164,7 @@ func (m machine) grantProgram(ctx context.Context, program, vm string) error {
 	default:
 		return accounts.Refusal(fail.Refused, accounts.GrantManyPasswords, program)
 	}
-	_, err = call.Invoke(ctx, r, coremachine.Ref{}, grantscalls.GrantAdd, grantscalls.GrantAddIn{Entry: entries[0].ID, ToKind: accounts.ToMachine, To: vm}, nil)
+	_, err = call.Invoke(ctx, r, coremachine.Ref{}, grantscalls.GrantAdd, grantscalls.GrantAddIn{Entry: entries[0].ID, To: vm}, nil)
 	return err
 }
 

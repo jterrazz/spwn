@@ -4525,8 +4525,7 @@
         "in": {
           "Confirm": "yes",
           "Entry": "pw-claude",
-          "To": "linux-1",
-          "ToKind": "machine"
+          "To": "linux-1"
         }
       },
       "hud": {
@@ -4558,8 +4557,7 @@
         "in": {
           "Confirm": "yes",
           "Entry": "pw-github",
-          "To": "linux-1",
-          "ToKind": "machine"
+          "To": "linux-1"
         }
       },
       "hud": {
@@ -4584,8 +4582,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "linux-1",
-          "ToKind": "machine"
+          "To": "linux-1"
         }
       },
       "form": {
@@ -4673,8 +4670,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "linux-1",
-          "ToKind": "machine"
+          "To": "linux-1"
         }
       },
       "form": {
@@ -4762,8 +4758,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "agent-7f",
-          "ToKind": "machine"
+          "To": "agent-7f"
         }
       },
       "form": {
@@ -5097,8 +5092,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "linux-1",
-          "ToKind": "machine"
+          "To": "linux-1"
         }
       },
       "form": {
@@ -5343,8 +5337,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "agent-7f",
-          "ToKind": "machine"
+          "To": "agent-7f"
         }
       },
       "form": {

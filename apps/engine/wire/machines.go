@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/images"
@@ -428,7 +427,7 @@ func (h holdings) Held(ctx context.Context, vm string) (ports []int, granted []s
 	}
 	for _, e := range vault.Entries {
 		for _, g := range e.Grants {
-			if label := e.Program.Label(); g.ToKind == accounts.ToMachine && g.To == vm && !slices.Contains(granted, label) {
+			if label := e.Program.Label(); g.To == vm && !slices.Contains(granted, label) {
 				granted = append(granted, label)
 			}
 		}

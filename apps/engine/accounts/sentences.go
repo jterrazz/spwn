@@ -8,7 +8,6 @@ const (
 	SentenceSignInsSome       Sentence = "sign-ins-some"
 	SentencePasswordsNone     Sentence = "passwords-none"
 	SentencePasswordsSome     Sentence = "passwords-some"
-	SentenceAgentReach        Sentence = "agent-reach"
 	SentenceCaptureNote       Sentence = "capture-note"
 	SentenceRowSignedByItself Sentence = "row-signed-by-itself"
 	SentenceRowFromPassword   Sentence = "row-from-password"
@@ -34,8 +33,6 @@ func (s Sentence) Text() string {
 		return "No password kept yet"
 	case SentencePasswordsSome:
 		return "%d kept, %d granted"
-	case SentenceAgentReach:
-		return "Only its terminal sees it"
 	case SentenceCaptureNote:
 		return "Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is."
 	case SentenceRowSignedByItself:

@@ -1,9 +1,4 @@
-import type {
-    AccountsGrantOffer,
-    AccountsTarget,
-    AccountsVaultEntry,
-    GrantsAddInput,
-} from '@jterrazz/station-api';
+import type { AccountsGrantOffer, AccountsTarget, AccountsVaultEntry } from '@jterrazz/station-api';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
@@ -12,8 +7,7 @@ import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome } from '../../kit/gestures';
 import { Reading, Unanswered } from '../../kit/readings';
 import { Button, Dialog, Picks } from '../../ui/index';
-import { wordOf } from '../../words/engine-words';
-import { targetId, targetLines, VAULT_REREADS } from './passwords-of';
+import { VAULT_REREADS } from './passwords-of';
 
 import styles from './passwords.module.css';
 
@@ -28,16 +22,6 @@ function canPick({ Fit }: Pick<AccountsTarget, 'Fit'>): boolean {
     }
 }
 
-function grantOf(entry: AccountsVaultEntry, target: AccountsTarget): GrantsAddInput {
-    const workspace = target.Workspace ?? '';
-    return {
-        Entry: entry.ID,
-        To: target.To,
-        ToKind: target.ToKind,
-        ...(workspace === '' ? {} : { Workspace: workspace }),
-    };
-}
-
 type GrantProps = {
     entry: AccountsVaultEntry;
     target: AccountsTarget;
@@ -47,7 +31,7 @@ type GrantProps = {
 
 function Grant({ entry, target, onDone, cancel }: GrantProps) {
     const grant = useGesture('grants.add', {
-        input: grantOf(entry, target),
+        input: { Entry: entry.ID, To: target.To },
         onDone,
         rereads: VAULT_REREADS,
         subject: target.To,
@@ -69,15 +53,6 @@ function Grant({ entry, target, onDone, cancel }: GrantProps) {
     );
 }
 
-type Group = { to: AccountsTarget['ToKind']; targets: readonly AccountsTarget[] };
-
-// invariant: the groups keep the order the engine lists their first target in, and each its targets' order.
-function groupsOf(offer: AccountsGrantOffer): readonly Group[] {
-    const targets = offer.Targets ?? [];
-    const kinds = [...new Set(targets.map((target) => target.ToKind))];
-    return kinds.map((to) => ({ targets: targets.filter((target) => target.ToKind === to), to }));
-}
-
 type OfferProps = {
     offer: AccountsGrantOffer;
     chosen: null | string;
@@ -87,26 +62,18 @@ type OfferProps = {
 function Offer({ offer, chosen, onChoose }: OfferProps) {
     return (
         <div className={styles.picks}>
-            {groupsOf(offer).map(({ to, targets }) => {
-                const label = wordOf('AccountsGrantTo', to).Word;
-                return (
-                    <div key={to}>
-                        <p className={styles.group}>{label}</p>
-                        <Picks
-                            label={label}
-                            look="cards"
-                            onChange={onChoose}
-                            options={targets.map((target) => ({
-                                disabled: !canPick(target),
-                                id: targetId(target),
-                                lines: targetLines(target),
-                                title: target.To,
-                            }))}
-                            value={chosen}
-                        />
-                    </div>
-                );
-            })}
+            <Picks
+                label="Machines"
+                look="cards"
+                onChange={onChoose}
+                options={(offer.Targets ?? []).map((target) => ({
+                    disabled: !canPick(target),
+                    id: target.To,
+                    lines: target.Line === '' ? [] : [target.Line],
+                    title: target.To,
+                }))}
+                value={chosen}
+            />
             {offer.Presence === '' ? null : <p className={styles.presence}>{offer.Presence}</p>}
         </div>
     );
@@ -131,7 +98,7 @@ export function GrantSheet({ entry, onClose }: { entry: AccountsVaultEntry; onCl
             </Dialog>
         );
     }
-    const target = (offered.out.Targets ?? []).find((one) => targetId(one) === chosen);
+    const target = (offered.out.Targets ?? []).find((one) => one.To === chosen);
     const actions =
         target === undefined ? (
             <>

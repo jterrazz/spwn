@@ -236,7 +236,7 @@ func (b accountsBody) remove(m MachineSignIns, r accounts.ProgramRow) (page.Acti
 		c.Danger = true
 	}
 	return page.Action{ID: ActionRemoveGrant + key, Label: VerbRemove, On: page.OnRow, Rows: []string{key}, Mutates: true, Confirm: c, Destructive: c != nil,
-		Run: &page.Run{Call: CallRemoveGrant, In: answered(c, map[string]string{"Entry": r.Entry, "ToKind": string(accounts.ToMachine), "To": m.Name})},
+		Run: &page.Run{Call: CallRemoveGrant, In: answered(c, map[string]string{"Entry": r.Entry, "To": m.Name})},
 		Hud: hud(r.Program.Label() + " removed from " + m.Name)}, true
 }
 
@@ -308,7 +308,7 @@ func (b accountsBody) grantSheet(id, vm string, every []string) page.Action {
 	form := &page.Form{Title: GrantLabel, Subtitle: subtitle, Fields: []page.Field{field, b.passwordsFor(vm)},
 		Primary: []page.Primary{{When: &page.When{Key: "Entry", Set: true}, Label: "Grant {Entry}"}}}
 	return page.Action{ID: id, Label: GrantLabel, On: page.OnRow, Rows: []string{RowGrant}, Mutates: true, Sheet: page.SheetGrant, Form: form,
-		Run: &page.Run{Call: CallGrant, In: map[string]string{"ToKind": string(accounts.ToMachine), "To": vm}}, Hud: hud("Granted {Entry} to " + vm)}
+		Run: &page.Run{Call: CallGrant, In: map[string]string{"To": vm}}, Hud: hud("Granted {Entry} to " + vm)}
 }
 
 func toOption(value, vm string) page.Option {

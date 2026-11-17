@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
@@ -546,7 +545,7 @@ func (f finder) grantPassword(h model.MacView, vm model.VM) (page.Action, bool) 
 		return page.Action{}, false
 	}
 	return page.Action{ID: "verb-grant:" + vm.Name, Label: VerbRun, Mutates: true,
-		Run: &page.Run{Call: CallGrant, In: map[string]string{"ToKind": string(accounts.ToMachine), "To": vm.Name}},
+		Run: &page.Run{Call: CallGrant, In: map[string]string{"To": vm.Name}},
 		Form: &page.Form{Title: GrantLabel + " to " + vm.Name, Subtitle: "From " + f.mac(h.Name), Fields: []page.Field{
 			{Key: "Entry", Label: "Password", Kind: page.FieldSelect, Required: true, Default: opts[0].Value, Options: opts},
 		}}}, true

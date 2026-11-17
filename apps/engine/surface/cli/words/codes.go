@@ -368,9 +368,6 @@ func Codes() map[fail.Code]Wording {
 		accounts.GrantUnknownMachine: func(e *fail.Error) (string, string) {
 			return "no machine named \"" + e.Subject + "\"", "station machines"
 		},
-		accounts.GrantUnknownAgent: func(e *fail.Error) (string, string) {
-			return "no agent named \"" + e.Subject + "\"", "station agents"
-		},
 		accounts.GrantToServer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a server: a grant never reaches it", "give it its secrets with your own tooling"
 		},
@@ -382,9 +379,6 @@ func Codes() map[fail.Code]Wording {
 		},
 		accounts.GrantSignedInHere: func(e *fail.Error) (string, string) {
 			return "that program is already signed in on " + e.Subject, "sign it out there first"
-		},
-		accounts.GrantNotAgentGrantable: func(e *fail.Error) (string, string) {
-			return "password " + e.Subject + " is not one an agent may hold", "an agent holds a fine-grained token only"
 		},
 		accounts.GrantPresenceRefused: func(*fail.Error) (string, string) {
 			return "this Mac did not confirm you are there: nothing was granted", "grant again and confirm on this Mac"
