@@ -76,7 +76,7 @@ func (m machine) unborn(ctx context.Context, vm, name string) (<-chan any, bool)
 	if name != overviewcalls.Read.Name {
 		return nil, false
 	}
-	births, ok := m.machines(false).Births(ctx, vm)
+	births, ok := m.machines(false).Births(m.world.watchContext(ctx), vm)
 	if !ok {
 		return nil, false
 	}
