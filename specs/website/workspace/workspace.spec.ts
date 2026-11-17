@@ -65,9 +65,35 @@ describe('workspace', () => {
         expect(finished.errors.text).toBe('');
     });
 
-    test.todo(
-        "W3 waits for the dialog of a Delete to say who holds the machine: confirms.json words it and holds no holder, though the hold's sentence is on MachinesVM",
-    );
+    test('W3 Delete of a held workspace says who holds it before it asks for its name', async () => {
+        // Given - the window on linux-1 over stories, where linux-1 is held by its lot, by studio-os-fe
+        const result = await website.visit(
+            '/?world=stories&machine=linux-1&tab=Overview',
+            async (visitor) => {
+                // When - Delete is pressed
+                await visitor.click(button('Delete linux-1…'));
+
+                // Then - the dialog says who holds it and asks for the name, its Delete off
+                const confirm = dialog('Delete linux-1?');
+                await visitor.see(
+                    within(
+                        confirm,
+                        content(
+                            'It is held by its lot, by studio-os-fe: work may be in progress.',
+                            {
+                                exact: false,
+                            },
+                        ),
+                    ),
+                );
+                await visitor.see(within(confirm, field('Type linux-1 to confirm')));
+                const remove = within(confirm, button('Delete'));
+                await visitor.see(disabled(remove));
+                await visitor.see(within(confirm, button('Cancel')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('W4 Stop reads Stopped everywhere, and the memory it held is free on Home', async () => {
         // Given - the window on Home over two-macs, where linux-1 runs and holds 8 GB of its Mac's 16

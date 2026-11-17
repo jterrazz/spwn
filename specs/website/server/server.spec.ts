@@ -125,11 +125,20 @@ describe('server', () => {
                 // When - Delete is pressed
                 await visitor.click(button('Delete infra…'));
 
-                // Then - its dialog says what the delete ends
+                // Then - its dialog says what the delete ends, then the hold the engine gives infra
+                const remove = dialog('Delete infra?');
                 await visitor.see(
                     within(
-                        dialog('Delete infra?'),
-                        content('infra and everything on its disk are deleted for good.'),
+                        remove,
+                        content('infra and everything on its disk are deleted for good.', {
+                            exact: false,
+                        }),
+                    ),
+                );
+                await visitor.see(
+                    within(
+                        remove,
+                        content('Always on. Stopping it needs its name typed.', { exact: false }),
                     ),
                 );
             },
