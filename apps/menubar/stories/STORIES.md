@@ -1780,7 +1780,7 @@ Keys: type to filter, ↑ ↓ move, ↩ run, ⌘↩ attach a workspace, esc clos
 - **Capture**: [dark](stories/find.type-to-find.png)
 - **Shows**: Typing a letter on All machines opens Find with that letter.
 - **Data**: as find.machine
-- **Interactions**: field "Find a machine, a port, an action…"; result "linux-1 working · This Mac"; result "linux-3 working · mac-mini"; result "Vite · linux-1:5173"; result "API dev server · linux-1:3000"; result "Preview · linux-3:8080"; result "Show 3 more"; result "Awake until linux-1 ends"; result "Clean up ephemeral workspaces on This Mac…"; result "Ports · All machines"; result "Accounts · All machines"; result "Awake · All Macs"
+- **Interactions**: field "Find a machine, a port, an action…"; result "linux-1 working · This Mac"; result "linux-3 working · mac-mini"; result "Vite · linux-1:5173"; result "API dev server · linux-1:3000"; result "Preview · linux-3:8080"; result "Show 3 more"; result "Clean up ephemeral workspaces on This Mac…"; result "Ports · All machines"; result "Accounts · All machines"; result "Awake · All Macs"
 - **Enters**: .find: opacity 0 → 1 200 ms snappy; .fh: transform translateY(-6px) → none 340 ms smooth; #panel: height 689px → 514px 340 ms smooth
 - **Leaves**: #panel: height 514px → 689px 340 ms smooth; .page: opacity 0 → 1 340 ms smooth; .findwrap.leaving: opacity 1 → 0 200 ms snappy (esc)
 
