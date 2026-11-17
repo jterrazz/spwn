@@ -292,7 +292,6 @@
             "awake.out-of-bounds",
             "awake_guard",
             "awake_range",
-            "awake_run",
             "awake_unsupported",
             "background.is-the-engine",
             "background.root-scope",

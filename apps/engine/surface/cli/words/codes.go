@@ -163,9 +163,6 @@ func Codes() map[fail.Code]Wording {
 		enginecalls.RangeFull: func(e *fail.Error) (string, string) {
 			return carried(e, "no port of the range is free", "station ports")
 		},
-		enginecalls.AwakeRun: func(e *fail.Error) (string, string) {
-			return carried(e, "the awake session cannot run", "station awake 4h")
-		},
 		enginecalls.AwakeRange: func(e *fail.Error) (string, string) {
 			return carried(e, "the awake duration is out of its range", "station awake 4h")
 		},

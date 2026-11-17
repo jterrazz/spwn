@@ -225,9 +225,6 @@
         "lid": {
           "type": "boolean"
         },
-        "run": {
-          "type": "string"
-        },
         "started_at": {
           "format": "date-time",
           "type": "string"

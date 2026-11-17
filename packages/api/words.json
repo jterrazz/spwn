@@ -447,10 +447,6 @@
       "Word": "Awake duration out of range",
       "Tone": "plain"
     },
-    "awake_run": {
-      "Word": "Awake cannot run",
-      "Tone": "plain"
-    },
     "awake_unsupported": {
       "Word": "Awake not supported",
       "Tone": "plain"
