@@ -1,0 +1,101 @@
+{
+    "source": "run mb0-cap on 47bedbecd (today main) with this lot's rig, sets native,opening,walls",
+    "tint": [
+        {
+            "name": "dark-dark",
+            "dE": 1.33,
+            "db": -0.34,
+            "pass": true,
+            "noise": 0.0,
+            "panel_lab": [14.8, 0.7, -2.0],
+            "menu_lab": [15.1, -0.1, -1.6]
+        },
+        {
+            "name": "dark-light",
+            "dE": 1.85,
+            "db": 1.2,
+            "pass": true,
+            "noise": 0.0,
+            "panel_lab": [23.3, 0.0, -2.0],
+            "menu_lab": [24.1, -1.0, -3.2]
+        },
+        {
+            "name": "dark-color",
+            "dE": 2.75,
+            "db": 5.29,
+            "pass": false,
+            "noise": 0.01,
+            "panel_lab": [18.7, 9.0, -20.4],
+            "menu_lab": [18.2, 11.3, -25.7]
+        },
+        {
+            "name": "light-dark",
+            "dE": 6.35,
+            "db": -3.22,
+            "pass": false,
+            "noise": 0.0,
+            "panel_lab": [87.0, 1.8, -4.9],
+            "menu_lab": [95.1, -0.1, -1.7]
+        },
+        {
+            "name": "light-light",
+            "dE": 2.3,
+            "db": 1.76,
+            "pass": true,
+            "noise": 0.0,
+            "panel_lab": [97.1, -0.1, -2.0],
+            "menu_lab": [97.1, -1.3, -3.8]
+        },
+        {
+            "name": "light-color",
+            "dE": 4.1,
+            "db": -2.03,
+            "pass": false,
+            "noise": 0.05,
+            "panel_lab": [90.8, 3.6, -10.2],
+            "menu_lab": [94.6, 1.1, -8.1]
+        }
+    ],
+    "opening": [
+        {
+            "name": "opening-dark-dark",
+            "frames": 207,
+            "visible_from": 1,
+            "fade_frames": 93,
+            "outline_px": 0,
+            "title_move_px": 7,
+            "title_score_min": 0.745,
+            "alpha_fall": 0.0,
+            "log_ticks": 230,
+            "log_distinct_frames": 1,
+            "checks": {
+                "outline": true,
+                "title": false,
+                "rise": true,
+                "frames": true,
+                "ticks": true
+            },
+            "pass": false
+        },
+        {
+            "name": "opening-light-light",
+            "frames": 207,
+            "visible_from": 1,
+            "fade_frames": 90,
+            "outline_px": 0,
+            "title_move_px": 7,
+            "title_score_min": 0.734,
+            "alpha_fall": 0.0,
+            "log_ticks": 230,
+            "log_distinct_frames": 1,
+            "checks": {
+                "outline": true,
+                "title": false,
+                "rise": true,
+                "frames": true,
+                "ticks": true
+            },
+            "pass": false
+        }
+    ]
+}

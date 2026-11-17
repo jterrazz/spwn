@@ -22,7 +22,8 @@
 #   .artifacts/e2e/menubar-<label>/capture/. STATION_CAPTURE_SET picks the
 #   shots (walls,behave,trial by default; sweep, a11y and old drive.py names),
 #   STATION_CAPTURE_ITEM=x,y,w,h gives old's item frame, STATION_CAPTURE_PAGE=<story>
-#   the home story served (home.exposed by default).
+#   the home story served (home.exposed by default). native and opening add the wash
+#   and zoom measures (capture/tint.py, opening.py), which fail the run when they fail.
 set -uo pipefail
 
 label=${1:-}
@@ -147,6 +148,7 @@ if [ $capture -eq 1 ]; then
   [ -n "$url" ] || fail "no vnc:// line in $work/tart.log"
   venv="$out/menubar-venv"
   [ -x "$venv/bin/python" ] || { python3 -m venv "$venv" && "$venv/bin/pip" install -q vncdotool pillow numpy scipy; } >> "$log" 2>&1 || fail "the capture's venv"
+  "$venv/bin/python" -I "$suite/menubar/capture/measure_test.py" >> "$log" 2>&1 || fail "the measures' own test (capture/measure_test.py), see $log"
   t=$SECONDS
   in_vm "zsh -lc 'cd ~/station && make menubar'" >> "$log" 2>&1 || fail "make menubar in the VM"
   say "-- built Station.app in $((SECONDS - t)) s"
@@ -157,7 +159,9 @@ if [ $capture -eq 1 ]; then
   in_vm 'cat ~/cap/replay.log' >> "$log" 2>&1
   "$venv/bin/python" -I "$suite/menubar/capture/measure.py" "$shots" "$repo/apps/menubar/tests/station-kit-tests/testdata/stories" \
     ${STATION_CAPTURE_M1:+"$STATION_CAPTURE_M1"} 2>&1 | tee -a "$log"
+  measured=${PIPESTATUS[0]}
   [ $code -eq 0 ] || fail "capture: drive.py exit $code"
+  [ $measured -eq 0 ] || fail "capture: a measure failed (the wash or the zoom), see $shots"
   say "PASS capture: $shots"
   exit 0
 fi
