@@ -12,11 +12,13 @@ window=$(dirname "$scripts")
 root=$(cd "$window/../.." && pwd)
 bench=$STATION_BENCH
 mkdir -p "$bench"
-if [ -s "$HOME/.nvm/nvm.sh" ]; then
+if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
     # shellcheck disable=SC1091
-    source "$HOME/.nvm/nvm.sh" >/dev/null
+    source "${NVM_DIR:-$HOME/.nvm}/nvm.sh" >/dev/null
 fi
-export PATH=$HOME/go-sdk/go/bin:$PATH
+if [ -d "$HOME/go-sdk/go/bin" ]; then
+    export PATH=$HOME/go-sdk/go/bin:$PATH
+fi
 unset GOFLAGS GOENV GH_TOKEN GITHUB_TOKEN
 # invariant: Go's caches are this copy's own, under its artifacts folder: two copies building at once never write one
 # invariant: cache. A copy's first run seeds them from the shared bench's, hard-linked where the disk allows, else copied.
