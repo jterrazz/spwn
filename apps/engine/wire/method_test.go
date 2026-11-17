@@ -87,7 +87,7 @@ var benchProfile = coremachine.Profile{Ref: coremachine.Ref{Name: "here"}, Kind:
 type ownerFiles struct{ files map[string]string }
 
 func (o ownerFiles) Read(context.Context) (machinefile.Tree, error) {
-	user := machinefile.Tree{Layer: machinefile.User, Root: "~/.config/station"}
+	user := machinefile.Tree{Kind: machinefile.User, Root: "~/.config/station"}
 	for p, body := range o.files {
 		user.Files = append(user.Files, machinefile.File{Path: p, Body: []byte(body)})
 	}
@@ -109,7 +109,7 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 	if err != nil {
 		t.Fatal(err)
 	}
-	user := machinefile.Tree{Layer: machinefile.User, Root: "~/.config/station"}
+	user := machinefile.Tree{Kind: machinefile.User, Root: "~/.config/station"}
 	var listed []string
 	if entry != "" {
 		listed = []string{entry}

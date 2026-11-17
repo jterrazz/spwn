@@ -107,7 +107,7 @@ type ExplainOut struct {
 
 var Explain = call.Call[Deps, ExplainIn, ExplainOut]{
 	// value: each value of a machine's Machinefile, resolved against the
-	// catalog, with the layer and the file it was read from.
+	// catalog, with the origin and the file it was read from.
 	Name: "machinefile.explain", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: append([]fail.Code{UnknownKey}, slices.DeleteFunc(resolution(), func(c fail.Code) bool { return c == Mixin })...),
 	Run: func(ctx context.Context, d Deps, in ExplainIn, _ call.Progress) (ExplainOut, error) {
@@ -153,7 +153,7 @@ func named(ctx context.Context, d Deps, asked string) (name string, path *machin
 	if mf.Name == "" {
 		return "", nil, Worded(&machinefile.RefusedFileError{Format: "machinefile", Err: &catalog.FileError{File: asked, Problem: "names no Machinefile: a file named by its path says its name"}})
 	}
-	return mf.Name, &machinefile.Tree{Layer: machinefile.User, Root: filepath.Dir(asked), Files: []machinefile.File{{Path: "machinefiles/" + mf.Name + catalog.MachinefileSuffix, Body: body, At: asked}}}, nil
+	return mf.Name, &machinefile.Tree{Kind: machinefile.User, Root: filepath.Dir(asked), Files: []machinefile.File{{Path: "machinefiles/" + mf.Name + catalog.MachinefileSuffix, Body: body, At: asked}}}, nil
 }
 
 // value: the Machinefile resolved, with the catalog it was resolved

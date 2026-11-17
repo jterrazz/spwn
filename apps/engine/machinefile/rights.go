@@ -67,7 +67,7 @@ func decodeNamed(trees []Tree, name string, overlay bool) (catalog.Machinefile, 
 		file = machinefilesDir + "/" + name + catalog.OverlaySuffix
 	}
 	for _, t := range trees {
-		if overlay && t.Layer != User {
+		if overlay && t.Kind != User {
 			continue
 		}
 		for _, f := range t.Files {

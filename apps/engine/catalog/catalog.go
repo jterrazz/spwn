@@ -15,7 +15,7 @@ type Catalog struct {
 	Apps     []App
 	Settings []Setting
 	Images   []Image
-	// value: every package as its file says it, and the layer it was read
+	// value: every package as its file says it, and the origin it was read
 	// from, in the lists' order: what the Machinefile's resolution reads.
 	Packages []Placed
 }
@@ -24,9 +24,9 @@ type Catalog struct {
 // module, so the binary reads no file of the clone.
 var builtin = catalogfiles.Files
 
-// value: the layer every built-in file stands in, the weakest.
+// value: the origin every built-in file stands in, the weakest.
 
-const BuiltinLayer = "built-in"
+const BuiltinOrigin = "built-in"
 
 func Builtin() (Catalog, error) { return Load(builtin, "packages") }
 
@@ -37,13 +37,13 @@ func BuiltinFiles() fs.FS {
 }
 
 // value: a package, the file it was read from, its category folder and the
-// layer it stands in.
+// origin it stands in.
 
 type Placed struct {
 	Package Package
 	Folder  string
 	File    string
-	Layer   string
+	Origin  string
 }
 
 func (c Catalog) Package(name string) (Placed, bool) {
@@ -74,16 +74,16 @@ func (c Catalog) Setting(name string) (Setting, bool) {
 }
 
 func Load(fsys fs.FS, root string) (Catalog, error) {
-	pkgs, err := Packages(fsys, root, BuiltinLayer)
+	pkgs, err := Packages(fsys, root, BuiltinOrigin)
 	if err != nil {
 		return Catalog{}, err
 	}
 	return Assemble(pkgs)
 }
 
-func Packages(fsys fs.FS, root, layer string) ([]Placed, error) {
+func Packages(fsys fs.FS, root, origin string) ([]Placed, error) {
 	// value: the packages of one tree, `<root>/<category>/<name>.yaml`, each
-	// decoded strictly, in the layer named.
+	// decoded strictly, in the origin named.
 	folders, err := fs.ReadDir(fsys, root)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func Packages(fsys fs.FS, root, layer string) ([]Placed, error) {
 			if err != nil {
 				return nil, err
 			}
-			p, err := Read(file, folder.Name(), layer, body)
+			p, err := Read(file, folder.Name(), origin, body)
 			if err != nil {
 				return nil, err
 			}
@@ -116,22 +116,22 @@ func Packages(fsys fs.FS, root, layer string) ([]Placed, error) {
 	return pkgs, nil
 }
 
-func Read(file, folder, layer string, body []byte) (Placed, error) {
-	// value: one package file read, in its folder and layer.
+func Read(file, folder, origin string, body []byte) (Placed, error) {
+	// value: one package file read, in its folder and origin.
 	it, err := Decode(file, body)
 	if err != nil {
 		return Placed{}, err
 	}
-	return Placed{Package: it, Folder: folder, File: file, Layer: layer}, nil
+	return Placed{Package: it, Folder: folder, File: file, Origin: origin}, nil
 }
 
-func Over(layers ...[]Placed) []Placed {
-	// invariant: the layers strongest first; a package of a stronger layer
-	// replaces a same-name one of a weaker layer whole, never merged.
+func Over(sources ...[]Placed) []Placed {
+	// invariant: the sources strongest first; a package of a stronger source
+	// replaces a same-name one of a weaker source whole, never merged.
 	var out []Placed
 	seen := map[string]bool{}
-	for _, layer := range layers {
-		for _, p := range layer {
+	for _, origin := range sources {
+		for _, p := range origin {
 			if !seen[p.Package.Name] {
 				seen[p.Package.Name] = true
 				out = append(out, p)

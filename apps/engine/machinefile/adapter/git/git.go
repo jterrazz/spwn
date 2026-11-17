@@ -54,7 +54,7 @@ func (s Source) Read(ctx context.Context) (machinefile.Tree, error) {
 	}
 	files, err := contract.ReadFolders(s.fs, contract.NoLinks, filepath.Join(s.dir, "catalog"), filepath.Join(s.dir, "machinefiles"))
 	return machinefile.Tree{
-		Layer: machinefile.Shared, Root: s.src.Name + "@" + head[:7], Files: files,
+		Kind: machinefile.Shared, Root: s.src.Name + "@" + head[:7], Files: files,
 		Source: &catalog.LockSource{Name: s.src.Name, Commit: head},
 	}, err
 }

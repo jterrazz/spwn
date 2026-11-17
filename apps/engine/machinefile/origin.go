@@ -8,38 +8,47 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
-// value: where a value was read: the owner's overlay, the owner's own
+// value: where one value of a resolution was read: the Machinefile or the
+// package that says it, the kind of source it was read in, and its file.
+
+type Origin struct {
+	Name string
+	Kind OriginKind
+	File string
+}
+
+// value: the kind of source a value was read in: the owner's overlay, the owner's own
 // files, a shared source, station's built-in files; this machine, for a
 // system a Machinefile does not say; the catalog, for a package a step
 // brings in; and the lock, for the method and version it holds an app by.
 
-type Layer string
+type OriginKind string
 
 const (
-	Overlay     Layer = "overlay"
-	User        Layer = "user"
-	Shared      Layer = "shared"
-	Builtin     Layer = catalog.BuiltinLayer
-	ThisMachine Layer = "this machine"
-	Catalog     Layer = "catalog"
-	Locked      Layer = "lock"
+	Overlay     OriginKind = "overlay"
+	User        OriginKind = "user"
+	Shared      OriginKind = "shared"
+	Builtin     OriginKind = catalog.BuiltinOrigin
+	ThisMachine OriginKind = "this machine"
+	Catalog     OriginKind = "catalog"
+	Locked      OriginKind = "lock"
 )
 
-func (Layer) Enum() []string {
+func (OriginKind) Enum() []string {
 	return []string{string(Overlay), string(User), string(Shared), string(Builtin), string(ThisMachine), string(Catalog), string(Locked)}
 }
 
-// value: one source's files: its layer, the words a reader names it by
+// value: one source's files: its kind, the words a reader names it by
 // (`~/.config/station`, `studio@1a2b3c4`, `built-in`), and its files by
 // slash path under it, `catalog/<category>/<name>.yaml` and
 // `machinefiles/<name>.machine.yaml`.
 
 type Tree struct {
-	Layer Layer
+	Kind  OriginKind
 	Root  string
 	Files []File
 	// value: a shared source's name and the commit its files were read
-	// at, as the lock records it; nil for every other layer.
+	// at, as the lock records it; nil for every other source.
 	Source *catalog.LockSource
 }
 
@@ -59,16 +68,16 @@ const (
 // value: a Machinefile and where it was read.
 
 type Placed struct {
-	File  catalog.Machinefile
-	Layer Layer
+	File catalog.Machinefile
+	Kind OriginKind
 	// value: the file as a reader finds it: its tree's root and its path;
 	// and its bytes, as its source holds them.
 	Path string
 	Body []byte
 }
 
-// value: every source read: the catalog in its layers, the Machinefiles by
-// name (the strongest layer's), and the overlays by the name they override.
+// value: every source read: the catalog in its sources, the Machinefiles by
+// name (the strongest source's), and the overlays by the name they override.
 
 type Library struct {
 	Catalog      catalog.Catalog
@@ -115,8 +124,8 @@ func read(p string) bool {
 
 func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 	// invariant: the trees strongest first; a same-name package of a stronger
-	// layer replaces a weaker one whole, as a same-name Machinefile does.
-	layers := make([][]catalog.Placed, 0, len(trees))
+	// source replaces a weaker one whole, as a same-name Machinefile does.
+	sources := make([][]catalog.Placed, 0, len(trees))
 	for _, t := range trees {
 		var pkgs []catalog.Placed
 		for _, f := range t.Files {
@@ -131,15 +140,15 @@ func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 			if !ok || strings.Contains(name, "/") || !strings.HasSuffix(name, ".yaml") {
 				return catalog.Catalog{}, refusedFile(catalogDir, &catalog.FileError{File: t.display(f), Problem: "is no package file: a package is catalog/<category>/<name>.yaml"})
 			}
-			p, err := catalog.Read(t.display(f), folder, string(t.Layer), f.Body)
+			p, err := catalog.Read(t.display(f), folder, string(t.Kind), f.Body)
 			if err != nil {
 				return catalog.Catalog{}, refusedFile(catalogDir, err)
 			}
 			pkgs = append(pkgs, p)
 		}
-		layers = append(layers, pkgs)
+		sources = append(sources, pkgs)
 	}
-	c, err := catalog.Assemble(catalog.Over(layers...))
+	c, err := catalog.Assemble(catalog.Over(sources...))
 	return c, refusedFile(catalogDir, err)
 }
 
@@ -170,12 +179,12 @@ func Load(trees []Tree) (Library, error) {
 				return Library{}, refusedFile("machinefile", err)
 			}
 			name, overlay, _ := catalog.MachinefileOf(path.Base(f.Path))
-			placed := Placed{File: mf, Layer: t.Layer, Path: file, Body: f.Body}
+			placed := Placed{File: mf, Kind: t.Kind, Path: file, Body: f.Body}
 			switch {
-			case overlay && t.Layer != User:
+			case overlay && t.Kind != User:
 				return Library{}, refusedFile("machinefile", &catalog.FileError{File: file, Problem: "an overlay is the owner's alone, in ~/.config/station/machinefiles"})
 			case overlay:
-				placed.Layer = Overlay
+				placed.Kind = Overlay
 				lib.Overlays[name] = placed
 			case lib.Machinefiles[name].Path == "":
 				lib.Machinefiles[name] = placed

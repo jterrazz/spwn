@@ -17,7 +17,7 @@ func (e Embedded) ReadFile(name string) ([]byte, error)       { return fs.ReadFi
 func (e Embedded) Stat(name string) (fs.FileInfo, error)      { return fs.Stat(e.FS, name) }
 
 // value: a source of folders: where its catalog and its Machinefiles are,
-// its layer, and the words a reader names it by.
+// its origin, and the words a reader names it by.
 
 // value: the platform's files, or an embedded tree.
 type folders interface {
@@ -32,15 +32,15 @@ type Source struct {
 	// owner's own allow a link to a file.
 	links                 contract.Links
 	catalog, machinefiles string
-	layer                 machinefile.Layer
+	origin                machinefile.OriginKind
 	root                  string
 }
 
-func New(dir folders, links contract.Links, catalogAt, machinefilesAt string, layer machinefile.Layer, root string) Source {
-	return Source{dir: dir, links: links, catalog: catalogAt, machinefiles: machinefilesAt, layer: layer, root: root}
+func New(dir folders, links contract.Links, catalogAt, machinefilesAt string, origin machinefile.OriginKind, root string) Source {
+	return Source{dir: dir, links: links, catalog: catalogAt, machinefiles: machinefilesAt, origin: origin, root: root}
 }
 
 func (s Source) Read(context.Context) (machinefile.Tree, error) {
 	files, err := contract.ReadFolders(s.dir, s.links, s.catalog, s.machinefiles)
-	return machinefile.Tree{Layer: s.layer, Root: s.root, Files: files}, err
+	return machinefile.Tree{Kind: s.origin, Root: s.root, Files: files}, err
 }

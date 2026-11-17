@@ -27,7 +27,7 @@ func (Shelf) Enum() []string {
 }
 
 // value: one Machinefile as the window shows it: its name, its group, the
-// layer and the path it is read at, its description, the files it
+// origin and the path it is read at, its description, the files it
 // extends, what it makes (nil for a mixin), its text as its source holds
 // it (a secret inside it withheld), the apps and settings it lists itself,
 // this machine's overlay of it, and the machines that follow it.
@@ -35,7 +35,7 @@ func (Shelf) Enum() []string {
 type FileView struct {
 	Name        string
 	Shelf       Shelf
-	Layer       Layer
+	Origin      OriginKind
 	Path        string
 	Description string
 	Extends     []string
@@ -201,7 +201,7 @@ func FilesOf(lib Library) []FileView {
 	for _, name := range sortedNames(lib.Machinefiles) {
 		p := lib.Machinefiles[name]
 		v := FileView{
-			Name: name, Layer: p.Layer, Path: p.Path, Description: p.File.Description, Extends: p.File.Extends,
+			Name: name, Origin: p.Kind, Path: p.Path, Description: p.File.Description, Extends: p.File.Extends,
 			Text: secret.Kept(string(p.Body)), Apps: listedApps(p.File), Settings: listedSettings(p.File),
 		}
 		if files, err := lib.chain(name); err == nil {
@@ -210,7 +210,7 @@ func FilesOf(lib Library) []FileView {
 		switch {
 		case v.Head == nil:
 			v.Shelf = ShelfMixin
-		case p.Layer == Builtin:
+		case p.Kind == Builtin:
 			v.Shelf = ShelfShipped
 		default:
 			v.Shelf = ShelfYours

@@ -11,15 +11,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
-// value: where one value of a resolution was read: the Machinefile or the
-// package that says it, its layer and its file.
-
-type Origin struct {
-	Name  string
-	Layer Layer
-	File  string
-}
-
 // value: one value of a resolved Machinefile, by its key (`vm.network`,
 // `apps.jq.method`), as text, with where it was read.
 
@@ -229,7 +220,7 @@ func originOf(p Placed) Origin {
 	if name == "" {
 		name = p.File.Overrides
 	}
-	return Origin{Name: name, Layer: p.Layer, File: p.Path}
+	return Origin{Name: name, Kind: p.Kind, File: p.Path}
 }
 
 func merge(files []Placed) merged {
@@ -394,7 +385,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 		return Resolved{}, err
 	}
 	top := files[len(files)-1]
-	if top.Layer == Overlay {
+	if top.Kind == Overlay {
 		top = files[len(files)-2]
 	}
 	if top.File.Machine == nil {
@@ -402,7 +393,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	}
 	m := merge(files)
 	if said := m.values["machine.system.os"].Text; said == "" || said == string(this.System.OS) {
-		mine := Origin{Name: name, Layer: ThisMachine}
+		mine := Origin{Name: name, Kind: ThisMachine}
 		for _, kv := range [][2]string{{"os", string(this.System.OS)}, {"version", this.System.Version}, {"arch", string(this.System.Arch)}} {
 			if _, ok := m.values["machine.system."+kv[0]]; !ok && kv[1] != "" {
 				m.put("machine.system."+kv[0], kv[1], mine)
@@ -514,7 +505,7 @@ func (p *planner) pkg(name string, by Origin, where string, want catalog.Kind) (
 }
 
 func packageOrigin(it catalog.Placed) Origin {
-	return Origin{Name: it.Package.Name, Layer: Layer(it.Layer), File: it.File}
+	return Origin{Name: it.Package.Name, Kind: OriginKind(it.Origin), File: it.File}
 }
 
 // invariant: what the image bakes is its bake list and, step by step,
@@ -880,7 +871,7 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		}
 		chose := s.Defined
 		if s.Lock != "" {
-			chose = Origin{Name: r.Name, Layer: Locked, File: s.Lock}
+			chose = Origin{Name: r.Name, Kind: Locked, File: s.Lock}
 		}
 		out = append(out, Value{Key: key, Text: text, Origin: s.Origin}, Value{Key: key + ".method", Text: s.Method, Origin: chose}, Value{Key: key + ".because", Text: s.Chosen, Origin: chose})
 		if s.Locked != "" {

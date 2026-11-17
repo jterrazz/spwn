@@ -37,7 +37,7 @@ machine: { kind: server, system: { os: ubuntu, version: '24.04' } }
 type files struct{}
 
 func (files) Read(context.Context) (machinefile.Tree, error) {
-	return machinefile.Tree{Layer: machinefile.User, Files: []machinefile.File{
+	return machinefile.Tree{Kind: machinefile.User, Files: []machinefile.File{
 		{Path: "machinefiles/linux-dev.machine.yaml", Body: []byte(linuxDev)},
 		{Path: "machinefiles/api-server.machine.yaml", Body: []byte(apiServer)},
 	}}, nil

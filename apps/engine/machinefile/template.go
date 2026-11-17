@@ -74,7 +74,7 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 		h.Write([]byte(file + "\x00"))
 		h.Write(f.Body)
 		h.Write([]byte{0})
-		if f.Layer != Builtin {
+		if f.Kind != Builtin {
 			t.Files = append(t.Files, File{Path: machinefilesDir + "/" + file, Body: f.Body})
 		}
 	}

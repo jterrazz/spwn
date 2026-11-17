@@ -62,7 +62,13 @@
         "Head": {
           "$ref": "#/$defs/machinefile.Head"
         },
-        "Layer": {
+        "Local": {
+          "$ref": "#/$defs/machinefile.Local"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Origin": {
           "enum": [
             "overlay",
             "user",
@@ -72,12 +78,6 @@
             "catalog",
             "lock"
           ],
-          "type": "string"
-        },
-        "Local": {
-          "$ref": "#/$defs/machinefile.Local"
-        },
-        "Name": {
           "type": "string"
         },
         "Path": {
@@ -112,8 +112,8 @@
         "Description",
         "Extends",
         "Followers",
-        "Layer",
         "Name",
+        "Origin",
         "Path",
         "Settings",
         "Shelf",

@@ -22,7 +22,7 @@
           "keep": 40
         },
         {
-          "key": "layer",
+          "key": "origin",
           "kind": "text",
           "keep": 60
         },

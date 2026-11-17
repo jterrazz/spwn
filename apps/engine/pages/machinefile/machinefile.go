@@ -12,16 +12,16 @@ type ValueJSON struct {
 	Value string `json:"value"`
 	// value: the value held a secret and is withheld.
 	Withheld bool   `json:"withheld,omitempty"`
-	Layer    string `json:"layer"`
+	Origin   string `json:"origin"`
 	// value: the Machinefile or the package that says it, and its file.
 	From string `json:"from"`
 	File string `json:"file,omitempty"`
 }
 
 type FileJSON struct {
-	Name  string `json:"name"`
-	Layer string `json:"layer"`
-	File  string `json:"file"`
+	Name   string `json:"name"`
+	Origin string `json:"origin"`
+	File   string `json:"file"`
 }
 
 type ExplainJSON struct {
@@ -34,10 +34,10 @@ type ExplainJSON struct {
 func Contract(name string, files []machinefile.Origin, values []machinefile.Value) ExplainJSON {
 	body := ExplainJSON{Schema: "station.machinefile.explain/v1", Machinefile: name, Files: []FileJSON{}, Values: []ValueJSON{}}
 	for _, f := range files {
-		body.Files = append(body.Files, FileJSON{Name: f.Name, Layer: string(f.Layer), File: f.File})
+		body.Files = append(body.Files, FileJSON{Name: f.Name, Origin: string(f.Kind), File: f.File})
 	}
 	for _, v := range values {
-		body.Values = append(body.Values, ValueJSON{Key: v.Key, Value: v.Text, Withheld: v.Withheld, Layer: string(v.Origin.Layer), From: v.Origin.Name, File: v.Origin.File})
+		body.Values = append(body.Values, ValueJSON{Key: v.Key, Value: v.Text, Withheld: v.Withheld, Origin: string(v.Origin.Kind), From: v.Origin.Name, File: v.Origin.File})
 	}
 	return body
 }
@@ -45,10 +45,10 @@ func Contract(name string, files []machinefile.Origin, values []machinefile.Valu
 func Explain(name, key string, values []machinefile.Value, thisMac page.Context) page.Page {
 	// value: one row per value, its key, the value, and where it was read;
 	// a key asked explains it and every key under it.
-	cols := []page.Column{{Key: "key", Kind: page.KindListing, Keep: 100}, {Key: "value", Kind: page.KindText, Keep: 40}, {Key: "layer", Kind: page.KindText, Keep: 60}, {Key: "from", Kind: page.KindText, Keep: 50}}
+	cols := []page.Column{{Key: "key", Kind: page.KindListing, Keep: 100}, {Key: "value", Kind: page.KindText, Keep: 40}, {Key: "origin", Kind: page.KindText, Keep: 60}, {Key: "from", Kind: page.KindText, Keep: 50}}
 	items := make([]page.Item, 0, len(values))
 	for _, v := range values {
-		row := page.Row{ID: v.Key, Label: v.Key, Cells: []page.Value{page.Text(v.Text), page.Text(string(v.Origin.Layer)), page.Text(v.Origin.Name)}}
+		row := page.Row{ID: v.Key, Label: v.Key, Cells: []page.Value{page.Text(v.Text), page.Text(string(v.Origin.Kind)), page.Text(v.Origin.Name)}}
 		items = append(items, page.Item{Row: &row})
 	}
 	if len(items) == 0 {

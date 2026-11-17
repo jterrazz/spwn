@@ -42,8 +42,8 @@ func Source(t *testing.T, subject Subject) {
 		if !slices.Equal(paths, want) {
 			t.Errorf("read %v, want %v", paths, want)
 		}
-		if tree.Root == "" || tree.Layer == "" {
-			t.Errorf("a tree names its root and its layer: %+v", tree)
+		if tree.Root == "" || tree.Kind == "" {
+			t.Errorf("a tree names its root and its origin: %+v", tree)
 		}
 	})
 	t.Run("a source with neither folder reads no file", func(t *testing.T) {
