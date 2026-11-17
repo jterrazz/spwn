@@ -4,5 +4,5 @@ runs:
     - command: 'machines create infra --server'
       exit: 2
       stderr: |
-          Error: image station-linux is not built on macbook-pro
-          Hint: station images build station-linux
+          Error: image base-ubuntu is not built on macbook-pro
+          Hint: station images build base-ubuntu

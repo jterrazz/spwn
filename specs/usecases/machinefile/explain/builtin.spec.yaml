@@ -1,45 +1,45 @@
 description: 'a built-in Machinefile explained: every value built-in, git skipped where it has no method'
 env: two-macs
 runs:
-    - command: 'explain --machinefile station-linux'
+    - command: 'explain --machinefile base-ubuntu'
       exit: 0
       stdout: |
-          # station-linux
-          	machine.kind	workspace	built-in	station-linux
-          	machine.system.os	ubuntu	built-in	station-linux
-          	machine.system.version	24.04	built-in	station-linux
-          	machine.system.arch	arm64	built-in	station-linux
-          	vm.lifetime	ephemeral	built-in	station-linux
-          	vm.resources.cpus	4	built-in	station-linux
-          	vm.resources.memory	8G	built-in	station-linux
-          	vm.resources.disk	20G	built-in	station-linux
-          	vm.network	nat	built-in	station-linux
-          	vm.image.from	ghcr.io/cirruslabs/ubuntu:24.04	built-in	station-linux
-          	vm.image.bake	mise, git, docker, build-essential, playwright-deps	built-in	station-linux
-          	apps.mise	listed	built-in	station-linux
+          # base-ubuntu
+          	machine.kind	workspace	built-in	base-ubuntu
+          	machine.system.os	ubuntu	built-in	base-ubuntu
+          	machine.system.version	24.04	built-in	base-ubuntu
+          	machine.system.arch	arm64	built-in	base-ubuntu
+          	vm.lifetime	ephemeral	built-in	base-ubuntu
+          	vm.resources.cpus	4	built-in	base-ubuntu
+          	vm.resources.memory	8G	built-in	base-ubuntu
+          	vm.resources.disk	20G	built-in	base-ubuntu
+          	vm.network	nat	built-in	base-ubuntu
+          	vm.image.from	ghcr.io/cirruslabs/ubuntu:24.04	built-in	base-ubuntu
+          	vm.image.bake	mise, git, docker, build-essential, playwright-deps	built-in	base-ubuntu
+          	apps.mise	listed	built-in	base-ubuntu
           	apps.mise.method	script	built-in	mise
           	apps.mise.because	its one method for ubuntu 24.04	built-in	mise
-          	apps.ohmyzsh	listed	built-in	station-linux
+          	apps.ohmyzsh	listed	built-in	base-ubuntu
           	apps.ohmyzsh.method	script	built-in	ohmyzsh
           	apps.ohmyzsh.because	its one method for ubuntu 24.04	built-in	ohmyzsh
-          	apps.docker	listed	built-in	station-linux
+          	apps.docker	listed	built-in	base-ubuntu
           	apps.docker.method	script	built-in	docker
           	apps.docker.because	its one method for ubuntu 24.04	built-in	docker
-          	settings.git-shortcuts	listed	built-in	station-linux
+          	settings.git-shortcuts	listed	built-in	base-ubuntu
           	settings.git-shortcuts.method	git-aliases	built-in	git-shortcuts
           	settings.git-shortcuts.because	its one method for ubuntu 24.04	built-in	git-shortcuts
-          	settings.hushlogin	listed	built-in	station-linux
+          	settings.hushlogin	listed	built-in	base-ubuntu
           	settings.hushlogin.method	file	built-in	hushlogin
           	settings.hushlogin.because	its one method for ubuntu 24.04	built-in	hushlogin
           	apps.apt	the manager of git	built-in	git
           	apps.apt.method	apt	built-in	apt
           	apps.apt.because	its one method for ubuntu 24.04	built-in	apt
-          	apps.git	listed	built-in	station-linux
+          	apps.git	listed	built-in	base-ubuntu
           	apps.git.method	apt	built-in	git
           	apps.git.because	its one method for ubuntu 24.04	built-in	git
-          	apps.build-essential	listed	built-in	station-linux
+          	apps.build-essential	listed	built-in	base-ubuntu
           	apps.build-essential.method	apt	built-in	build-essential
           	apps.build-essential.because	its one method for ubuntu 24.04	built-in	build-essential
-          	apps.playwright-deps	listed	built-in	station-linux
+          	apps.playwright-deps	listed	built-in	base-ubuntu
           	apps.playwright-deps.method	apt	built-in	playwright-deps
           	apps.playwright-deps.because	its one method for ubuntu 24.04	built-in	playwright-deps

@@ -8,7 +8,7 @@ runs:
           machinefile: station.machinefile/v1
           name: docs-bot
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
-          extends: [station-linux]
+          extends: [base-ubuntu]
           vm: { lifetime: persistent, resources: { cpus: 6, memory: 3G, disk: 30G } }
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {From, Size, Lifetime, Server, Servers: [.On[].Server]}'''

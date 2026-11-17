@@ -205,7 +205,7 @@ def asks(listed):
         )],
         {"call": "machinefile.drift", "in": {}},
         *[{"call": "machinefile.drift", "in": {"Machine": name}} for name in [*far, *[vm["Name"] for _, vm in vms]]],
-        *[{"call": call, "in": {"Machinefile": "station-macos"}}
+        *[{"call": call, "in": {"Machinefile": "base-macos"}}
           for _ in here for call in ("machinefile.drift", "machinefile.plan")],
         *[{"watch": "activity.read", "in": {"graph": graph}, **target} for target in targets for graph in GRAPHS],
         *[{"watch": "activity.read", "in": {"graph": graph, "of": vm["Name"], "machine": {"Name": vm["Name"], "On": mac["Name"]}}, **onMac(mac)}
@@ -278,7 +278,7 @@ GESTURES = {
         {"call": "disk.move", "in": {"Folder": "~/.tart"}},
         {"call": "disk.erase", "in": {"App": "ollama", "Confirm": "ollama"}},
         {"call": "disk.erase", "in": {"App": "orbstack", "Confirm": "orbstack"}},
-        {"call": "images.delete", "in": {"Image": "station-linux", "Version": "2026.10.20", "Confirm": "yes"}},
+        {"call": "images.delete", "in": {"Image": "base-ubuntu", "Version": "2026.10.20", "Confirm": "yes"}},
         {"call": "ports.stop-sharing", "in": {"VM": "linux-1", "Port": "5173", "Confirm": "yes"}},
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "local"}},
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "public"}},
@@ -287,11 +287,11 @@ GESTURES = {
         {"call": "accounts.open", "in": {"Machine": "linux-1", "Exchange": "ex-1"}},
         {"call": "accounts.logout", "in": {"Program": "claude", "Machine": "linux-1", "Confirm": "yes"}},
         {"call": "background.remove", "in": {"Label": "com.example.brain.x-snapshot", "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}, "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "infra", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "ephemeral", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}, "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "infra", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("mac-mini")},
+        {"call": "machines.create-server", "in": {"Name": "web", "Image": "base-ubuntu", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
         {"call": "vault.remove", "in": {"ID": "pw-2", "Confirm": "yes"}},
         {"call": "grants.remove", "in": {"Entry": "pw-2", "To": "linux-1", "ToKind": "machine", "Confirm": "yes"}},
@@ -329,7 +329,7 @@ GESTURES = {
         {"call": "engine.start", "in": {}},
     ],
     "one-mac": [
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
     ],
     "creating": [
@@ -351,18 +351,18 @@ GESTURES = {
         {"call": "disk.move", "in": {"Folder": "~/.tart"}},
     ],
     "leftovers": [
-        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "old-vm"]}},
-        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "old-vm"], "Confirm": "station-linux@2026.10.20, old-vm"}},
+        {"call": "disk.free-unused", "in": {"Names": ["base-ubuntu@2026.10.20", "old-vm"]}},
+        {"call": "disk.free-unused", "in": {"Names": ["base-ubuntu@2026.10.20", "old-vm"], "Confirm": "base-ubuntu@2026.10.20, old-vm"}},
     ],
     "old-home-running": [
-        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "~/.tart"]}},
-        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "~/.tart"], "Confirm": "station-linux@2026.10.20, ~/.tart"}},
+        {"call": "disk.free-unused", "in": {"Names": ["base-ubuntu@2026.10.20", "~/.tart"]}},
+        {"call": "disk.free-unused", "in": {"Names": ["base-ubuntu@2026.10.20", "~/.tart"], "Confirm": "base-ubuntu@2026.10.20, ~/.tart"}},
     ],
     "leftover-running": [
-        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "old-vm"]}},
+        {"call": "disk.free-unused", "in": {"Names": ["base-ubuntu@2026.10.20", "old-vm"]}},
     ],
     "record-unreadable": [
-        {"call": "disk.free-unused", "in": {"Names": ["station-linux@2026.10.20", "old-vm"]}},
+        {"call": "disk.free-unused", "in": {"Names": ["base-ubuntu@2026.10.20", "old-vm"]}},
     ],
 }
 

@@ -1,10 +1,10 @@
 description: 'with --yes, deleting a version off a terminal deletes it without a question'
 env: two-macs
 runs:
-    - command: 'images delete station-linux@2026.10.20 --yes </dev/null'
+    - command: 'images delete base-ubuntu@2026.10.20 --yes </dev/null'
       exit: 0
       stdout: |
-          ●	station-linux	2026.10.20	deleted
+          ●	base-ubuntu	2026.10.20	deleted
     - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "macbook-pro") | .version] | join(" ")'''
       exit: 0
       stdout: |

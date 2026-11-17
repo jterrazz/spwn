@@ -27,17 +27,11 @@ type Image struct {
 //go:embed images
 var Recipes embed.FS
 
-// invariant: memory counts in binary gigabytes, as macOS and tart count RAM; a
-// disk in decimal ones, as tart's --disk-size does.
-const (
-	gigabyte = 1000 * 1000 * 1000
-	gibibyte = 1 << 30
-)
-
 // value: the built-in image a workspace is made of when none is named,
-// and its Machinefile's name.
+// and its Machinefile's name; the built-in macOS image, and its.
 const (
-	LinuxImage = "station-linux"
+	LinuxImage = "base-ubuntu"
+	MacOSImage = "base-macos"
 )
 
 // value: the images station knows; an image is no package of the catalog's
@@ -53,20 +47,17 @@ var builtinImages = []Image{
 		Kind:        Linux,
 	},
 	{
-		Name:     "macos",
-		Defaults: ImageDefaults{CPUs: 4, MemoryBytes: 8 * gibibyte, DiskBytes: 80 * gigabyte},
-		Kind:     MacOS,
+		Name:        MacOSImage,
+		Machinefile: MacOSImage,
+		Kind:        MacOS,
 	},
 }
 
 func sizedImages(files fs.FS) ([]Image, error) {
-	// invariant: a built-in image made from a Machinefile is sized by that
-	// file alone, its vm's resources; an image only fetched carries its own.
+	// invariant: a built-in image is sized by its Machinefile alone, its
+	// vm's resources.
 	out := slices.Clone(builtinImages)
 	for i, img := range out {
-		if img.Machinefile == "" {
-			continue
-		}
 		file := path.Join("machines", img.Machinefile+MachinefileSuffix)
 		body, err := fs.ReadFile(files, file)
 		if err != nil {

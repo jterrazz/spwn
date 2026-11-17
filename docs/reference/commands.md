@@ -39,7 +39,7 @@ station machines <machine> [--json] # that machine's Overview, as station overvi
 station machines add <mac> [--user <login>] [--key <file>]
 station machines forget <mac> [--yes]
 
-station machines create [<name>] [--persistent] [--image station-linux | --from <machinefile>] [--for <purpose>] [--cpus <n>] [--memory <size>] [--disk <size>] [--network nat|bridged]
+station machines create [<name>] [--persistent] [--image base-ubuntu | --from <machinefile>] [--for <purpose>] [--cpus <n>] [--memory <size>] [--disk <size>] [--network nat|bridged]
 station machines create <name> --server [--for <purpose>] [--cpus <n>] [--memory <size>] [--disk <size>] [--check <url|host:port>]
 station machines start <vm>
 station machines stop <vm> [--yes | --confirm=<name>]
@@ -61,7 +61,7 @@ station machines remind <mac>
 ```sh
 station agents [--on <workspace>] [--json] # every agent of every machine, or that workspace's
 station agents start "<task>" --on <workspace> [--name <name>] [--app <app>] [--folder <path>]
-station agents start "<task>" --new [--mac <mac>] [--name <name>] [--image station-linux] [--cpus <n>] [--memory <size>] [--disk <size>]
+station agents start "<task>" --new [--mac <mac>] [--name <name>] [--image base-ubuntu] [--cpus <n>] [--memory <size>] [--disk <size>]
 station agents reply <agent> [<text>]
 station agents attach <agent>
 station agents merge <agent>
@@ -189,7 +189,7 @@ station images update [<image...>] # the newest released version
 station images delete <image>[@<version>] [--yes]
 ```
 
-An image is named after the Machinefile it is built from (`station-linux`, `studio-linux`); `linux` names `station-linux` for one release. A bare `build` builds every image that is missing or whose recipe, Machinefile or lock changed; a bare `update` updates every image this Mac holds. A name no source holds a Machinefile of is `no image "debian"`, and a Machinefile that makes no image is refused naming why (both exit 2). See [Images](images.md).
+An image is named after the Machinefile it is built from (`base-ubuntu`, `studio-linux`); `linux`, `station-linux` and `macos` name no image. A bare `build` builds every image that is missing or whose recipe, Machinefile or lock changed; a bare `update` updates every image this Mac holds. A name no source holds a Machinefile of is `no image "debian"`, and a Machinefile that makes no image is refused naming why (both exit 2). See [Images](images.md).
 
 ### `station engine`
 

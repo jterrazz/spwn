@@ -723,7 +723,7 @@
                 }
             },
             "images": [
-                "ghcr.io/jterrazz/station-linux:3"
+                "ghcr.io/jterrazz/station-base-ubuntu:3"
             ],
             "listening": [
                 {
@@ -843,7 +843,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "station-linux",
+                        "name": "base-ubuntu",
                         "version": "3",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v4.0.0",
@@ -946,7 +946,7 @@
             "vms": {
                 "infra": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "3",
                         "lifetime": "always-on",
                         "want": "running",
@@ -1000,7 +1000,7 @@
                 },
                 "linux-3": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -1073,7 +1073,7 @@
                 },
                 "review-bot": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "3",
                         "lifetime": "persistent",
                         "want": "running",
@@ -1147,7 +1147,7 @@
                         }
                     }
                 },
-                "station-image-station-linux-3": {
+                "station-image-base-ubuntu-3": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -1276,7 +1276,7 @@
             },
             "building": [
                 {
-                    "image": "station-linux",
+                    "image": "base-ubuntu",
                     "version": "4",
                     "step": "packages",
                     "owner": {
@@ -1412,7 +1412,7 @@
                 "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [base]\napps: [ripgrep]\n",
                 "machinefiles/macbook-pro.local.yaml": "machinefile: station.machinefile/v1\noverrides: macbook-pro\napps: { add: [bat], remove: [lazygit] }\n",
                 "machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [base]\napps: [lazygit]\n",
-                "machinefiles/studio-linux.machine.yaml": "machinefile: station.machinefile/v1\nname: studio-linux\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [station-linux]\napps: [jq, gh, ripgrep]\n"
+                "machinefiles/studio-linux.machine.yaml": "machinefile: station.machinefile/v1\nname: studio-linux\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [base-ubuntu]\napps: [jq, gh, ripgrep]\n"
             },
             "fresh": {
                 "size": {
@@ -1431,7 +1431,7 @@
                 }
             },
             "images": [
-                "ghcr.io/jterrazz/station-linux:3"
+                "ghcr.io/jterrazz/station-base-ubuntu:3"
             ],
             "jobs": {
                 "com.example.brain.x-snapshot": {
@@ -1575,7 +1575,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "station-linux",
+                        "name": "base-ubuntu",
                         "version": "3",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v4.0.0",
@@ -1672,7 +1672,7 @@
             "vms": {
                 "agent-7f": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -1742,7 +1742,7 @@
                 },
                 "api": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "3",
                         "lifetime": "persistent",
                         "want": "stopped",
@@ -1758,7 +1758,7 @@
                 },
                 "linux-1": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -1868,7 +1868,7 @@
                 },
                 "linux-2": {
                     "kept": {
-                        "image": "station-linux",
+                        "image": "base-ubuntu",
                         "lifetime": "persistent",
                         "created_at": "2026-11-07T10:29:40Z",
                         "purpose": "Lot L3, the Machines page",
@@ -1892,7 +1892,7 @@
                         "Disk": 20000000000
                     }
                 },
-                "station-image-station-linux-3": {
+                "station-image-base-ubuntu-3": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -1981,7 +1981,7 @@
     },
     "now": "2026-11-07T10:30:00Z",
     "registry": {
-        "station-linux": "3"
+        "base-ubuntu": "3"
     },
     "sites_down": [
         "example.com"

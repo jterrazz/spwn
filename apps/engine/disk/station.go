@@ -95,7 +95,7 @@ func (FreeableKind) Enum() []string {
 type Freeable struct {
 	// value: one thing `disk free-unused` deletes, under the holder whose
 	// bytes it counts in, and what it is: an image version
-	// (`station-linux@2026.10.20`), a disk station's hypervisor made that no
+	// (`base-ubuntu@2026.10.20`), a disk station's hypervisor made that no
 	// machine record names, or the hypervisor's old folder (`~/.tart`) once
 	// it holds no VM.
 	Holder Holder

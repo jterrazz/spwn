@@ -99,7 +99,7 @@ func TestAGuestOfAReleaseBeforeTheFloorIsRefusedBeforeTheRequestReachesIt(t *tes
 	in, _ := json.Marshal(contracttest.InstallIn{App: "jq"})
 	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
 	var f *fail.Error
-	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Subject != "linux-1" || f.Detail["version"] != "v3.1.0" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "station-linux" {
+	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Subject != "linux-1" || f.Detail["version"] != "v3.1.0" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "base-ubuntu" {
 		t.Errorf("installing jq on linux-1 at v3.1.0: %v, want far-too-old naming linux-1, v3.1.0, the floor and the image it was made from", err)
 	}
 	if len(e.stdin) != 1 || strings.Contains(e.stdin[0], "apps.install") {
@@ -109,7 +109,7 @@ func TestAGuestOfAReleaseBeforeTheFloorIsRefusedBeforeTheRequestReachesIt(t *tes
 
 func imageOf(vm string) string {
 	if vm == "linux-1" {
-		return "station-linux"
+		return "base-ubuntu"
 	}
 	return ""
 }
@@ -120,7 +120,7 @@ func TestAGuestWhoseBinaryTurnsOlderThanTheFloorBetweenTwoExecsIsRefusedAtTheSec
 	in, _ := json.Marshal(contracttest.InstallIn{App: "jq"})
 	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
 	var f *fail.Error
-	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Detail["version"] != "v3.1.0" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "station-linux" {
+	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Detail["version"] != "v3.1.0" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "base-ubuntu" {
 		t.Errorf("installing jq on linux-1 whose station became v3.1.0 after its first hello: %v, want far-too-old naming v3.1.0, the floor and its image", err)
 	}
 }
@@ -137,7 +137,7 @@ func TestAGuestThatLacksAnAbilityTheInputAsksIsRefusedBeforeTheRequestReachesIt(
 	in, _ := json.Marshal(contracttest.InstallIn{App: "jq"})
 	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
 	var f *fail.Error
-	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Subject != "linux-1" || f.Detail["call"] != "apps.install.pinned" || f.Detail["image"] != "station-linux" {
+	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Subject != "linux-1" || f.Detail["call"] != "apps.install.pinned" || f.Detail["image"] != "base-ubuntu" {
 		t.Errorf("installing jq with an ability linux-1 lacks: %v, want far-too-old naming linux-1, the ability and its image", err)
 	}
 	if len(e.stdin) != 1 || strings.Contains(e.stdin[0], "apps.install") {

@@ -17,7 +17,7 @@ func TestEachRefusalOfABuildCarriesItsCode(t *testing.T) {
 		{&images.UnknownError{Image: "nope"}, Unknown, "nope"},
 		{&images.NoLinuxBinaryError{}, NoLinuxBinary, ""},
 		{&images.BinaryNotFoundError{Path: "/tmp/station"}, BinaryNotFound, "/tmp/station"},
-		{&images.NoRecipeError{Image: "macos"}, NoRecipe, "macos"},
+		{&images.NoRecipeError{Image: "base-macos"}, NoRecipe, "base-macos"},
 		{&images.NoEngineError{Hypervisor: "hv"}, NoHypervisor, "hv"},
 	} {
 		var got *fail.Error

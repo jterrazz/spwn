@@ -11,7 +11,7 @@ const (
 )
 
 // value: the owner's own file a VM is made from: it extends the built-in
-// station-linux, whose vm says its image, so New machine offers it (D3).
+// base-ubuntu, whose vm says its image, so New machine offers it (D3).
 const templateFile = "studio-linux"
 
 // value: the owner's Machinefiles as the play world keeps them on This
@@ -26,7 +26,7 @@ func ownerFiles() map[string]string {
 		file(proName):      "machinefile: station.machinefile/v1\nname: " + proName + "\nmachine: { kind: computer, system: { os: macos } }\nextends: [" + baseFile + "]\napps: [lazygit]\n",
 		file(devFile):      "machinefile: station.machinefile/v1\nname: " + devFile + "\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [" + baseFile + "]\napps: [ripgrep]\n",
 		overlay(proName):   "machinefile: station.machinefile/v1\noverrides: " + proName + "\napps: { add: [bat], remove: [lazygit] }\n",
-		file(templateFile): "machinefile: station.machinefile/v1\nname: " + templateFile + "\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [station-linux]\napps: [jq, gh, ripgrep]\n",
+		file(templateFile): "machinefile: station.machinefile/v1\nname: " + templateFile + "\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [base-ubuntu]\napps: [jq, gh, ripgrep]\n",
 		file(exposedVM):    "machinefile: station.machinefile/v1\nname: " + exposedVM + "\nmachine: { kind: workspace }\nextends: [" + devFile + "]\nports: { open: [3000], to: public }\n",
 	}
 }

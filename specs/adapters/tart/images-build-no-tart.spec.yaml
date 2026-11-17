@@ -1,6 +1,6 @@
 description: 'without tart a build is refused before anything runs, pointing at the app'
 runs:
-    - command: 'images build station-linux --binary x'
+    - command: 'images build base-ubuntu --binary x'
       exit: 2
       stderr: |
           Error: tart is required by images

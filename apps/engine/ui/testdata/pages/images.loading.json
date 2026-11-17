@@ -85,9 +85,9 @@
       "items": [
         {
           "row": {
-            "id": "macbook-pro/station-linux@2026.11.01",
+            "id": "macbook-pro/base-ubuntu@2026.11.01",
             "mark": "pending",
-            "label": "station-linux",
+            "label": "base-ubuntu",
             "cells": [
               {
                 "kind": "pending"
@@ -111,9 +111,9 @@
         },
         {
           "row": {
-            "id": "macbook-pro/station-linux@2026.10.20",
+            "id": "macbook-pro/base-ubuntu@2026.10.20",
             "mark": "pending",
-            "label": "station-linux",
+            "label": "base-ubuntu",
             "cells": [
               {
                 "kind": "pending"
@@ -137,9 +137,9 @@
         },
         {
           "row": {
-            "id": "mac-mini/station-linux@2026.11.01",
+            "id": "mac-mini/base-ubuntu@2026.11.01",
             "mark": "pending",
-            "label": "station-linux",
+            "label": "base-ubuntu",
             "cells": [
               {
                 "kind": "pending"
@@ -163,9 +163,9 @@
         },
         {
           "row": {
-            "id": "macos",
+            "id": "base-macos",
             "mark": "pending",
-            "label": "macos",
+            "label": "base-macos",
             "detail": {
               "kind": "none"
             }

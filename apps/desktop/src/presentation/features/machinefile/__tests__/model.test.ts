@@ -74,9 +74,9 @@ describe('model', () => {
     });
 
     test('a plan groups its steps by the action the engine chose', () => {
-        // Given - the plan of the built-in station-macos read over two-macs
+        // Given - the plan of the built-in base-macos read over two-macs
         const plan = answered('two-macs', {
-            in: { Machinefile: 'station-macos' },
+            in: { Machinefile: 'base-macos' },
             name: 'machinefile.plan',
             watch: false,
         });

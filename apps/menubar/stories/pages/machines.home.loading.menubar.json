@@ -1050,15 +1050,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Request.Size.MemoryBytes",
@@ -1232,15 +1232,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Request.Size.MemoryBytes",
@@ -1410,15 +1410,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Request.Size.MemoryBytes",
@@ -1593,15 +1593,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Request.Size.MemoryBytes",
@@ -1766,15 +1766,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Size.MemoryBytes",
@@ -1930,15 +1930,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Size.MemoryBytes",
@@ -2093,15 +2093,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Request.Size.MemoryBytes",
@@ -2282,15 +2282,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Request.Size.MemoryBytes",
@@ -2458,15 +2458,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Size.MemoryBytes",
@@ -2627,15 +2627,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Size.MemoryBytes",
@@ -3238,15 +3238,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Request.Size.MemoryBytes",
@@ -3639,15 +3639,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "station-linux",
+                    "value": "base-ubuntu",
                     "label": "Linux"
                   },
                   {
-                    "value": "macos",
+                    "value": "base-macos",
                     "label": "macOS"
                   }
                 ],
-                "default": "station-linux"
+                "default": "base-ubuntu"
               },
               {
                 "key": "Request.Size.MemoryBytes",

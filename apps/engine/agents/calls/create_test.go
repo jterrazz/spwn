@@ -37,7 +37,7 @@ func (silent) Done(string, error)  {}
 
 func TestNewMachineWithoutImageAsksForTheDefaultImage(t *testing.T) {
 	for _, c := range []struct{ name, image, want string }{
-		{name: "no image asks the default image", want: "station-linux"},
+		{name: "no image asks the default image", want: "base-ubuntu"},
 		{name: "a named image is kept", image: "custom-image", want: "custom-image"},
 	} {
 		t.Run(c.name, func(t *testing.T) {

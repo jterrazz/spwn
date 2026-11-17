@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "image": "station-linux",
+  "image": "base-ubuntu",
   "version": "2026.11.07",
   "lifetime": "persistent",
   "cpus": 4,

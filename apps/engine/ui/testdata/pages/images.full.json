@@ -42,7 +42,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "macos not built yet"
+                    "text": "base-macos not built yet"
                   }
                 ]
               }
@@ -92,9 +92,9 @@
       "items": [
         {
           "row": {
-            "id": "macbook-pro/station-linux@2026.11.01",
+            "id": "macbook-pro/base-ubuntu@2026.11.01",
             "mark": "ok",
-            "label": "station-linux",
+            "label": "base-ubuntu",
             "cells": [
               {
                 "kind": "version",
@@ -130,9 +130,9 @@
         },
         {
           "row": {
-            "id": "macbook-pro/station-linux@2026.10.20",
+            "id": "macbook-pro/base-ubuntu@2026.10.20",
             "mark": "absent",
-            "label": "station-linux",
+            "label": "base-ubuntu",
             "cells": [
               {
                 "kind": "version",
@@ -157,15 +157,15 @@
             },
             "reason": "outdated",
             "hint": {
-              "command": "station images delete station-linux@2026.10.20"
+              "command": "station images delete base-ubuntu@2026.10.20"
             }
           }
         },
         {
           "row": {
-            "id": "mac-mini/station-linux@2026.11.01",
+            "id": "mac-mini/base-ubuntu@2026.11.01",
             "mark": "ok",
-            "label": "station-linux",
+            "label": "base-ubuntu",
             "cells": [
               {
                 "kind": "version",
@@ -197,9 +197,9 @@
         },
         {
           "row": {
-            "id": "macos",
+            "id": "base-macos",
             "mark": "absent",
-            "label": "macos",
+            "label": "base-macos",
             "detail": {
               "kind": "text",
               "text": "not built yet"

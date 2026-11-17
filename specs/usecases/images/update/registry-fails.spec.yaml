@@ -3,11 +3,11 @@ env: two-macs
 runs:
     - command: 'world fault ImageSource.Latest 1'
       exit: 0
-    - command: 'images update station-linux'
+    - command: 'images update base-ubuntu'
       exit: 1
       stderr: |
-          Error: the registry did not answer for station-linux: the registry does not answer, as the world scripted it
-          Hint: station images update station-linux
+          Error: the registry did not answer for base-ubuntu: the registry does not answer, as the world scripted it
+          Hint: station images update base-ubuntu
     - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | "\(.version) \(.newest)"'''
       exit: 0
       stdout: |

@@ -8,7 +8,7 @@ runs:
           machinefile: station.machinefile/v1
           name: infra-base
           machine: { kind: server, system: { os: ubuntu, version: '24.04' } }
-          extends: [station-linux]
+          extends: [base-ubuntu]
       exit: 0
     - command: 'machines create web --from infra-base'
       exit: 2

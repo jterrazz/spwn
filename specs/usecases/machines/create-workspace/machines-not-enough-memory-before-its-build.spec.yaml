@@ -6,7 +6,7 @@ runs:
           machinefile: station.machinefile/v1
           name: studio-linux
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
-          extends: [station-linux]
+          extends: [base-ubuntu]
       exit: 0
     - command: 'machines create web --from studio-linux --memory 60G --yes'
       exit: 2

@@ -5,11 +5,11 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
       stdin: |
-          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["station-linux@2026.10.20"]}}
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["base-ubuntu@2026.10.20"]}}
       exit: 0
       stdout: |
-          {"code":"confirm.needed","subject":"station-linux@2026.10.20"}
+          {"code":"confirm.needed","subject":"base-ubuntu@2026.10.20"}
     - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].vms | keys[] | select(startswith("station-image"))]'' world.json'
       exit: 0
       stdout: |
-          ["station-image-station-linux-2026.10.20","station-image-station-linux-2026.11.01"]
+          ["station-image-base-ubuntu-2026.10.20","station-image-base-ubuntu-2026.11.01"]

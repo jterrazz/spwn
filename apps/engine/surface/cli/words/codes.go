@@ -30,7 +30,7 @@ import (
 
 type Wording func(e *fail.Error) (message, hint string)
 
-const linuxBinaryHint = "make build-linux, then station images build station-linux --binary .artifacts/go/station-linux-arm64"
+const linuxBinaryHint = "make build-linux, then station images build base-ubuntu --binary .artifacts/go/station-linux-arm64"
 
 // value: how the refusal of a gesture a typed name answers names the doing
 // and the done, by its action.

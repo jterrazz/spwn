@@ -257,7 +257,8 @@ type AllMachines struct {
 type Unasked struct {
 	// value: a create asked for its machine file alone: that file, its
 	// image, size and lifetime, no name; the kind its name is given by;
-	// the built-in image whose own file it is, empty for a user's file.
+	// the built-in Linux image whose own file it is, empty for any other
+	// file.
 	Request CreateRequest
 	Kind    catalog.MachineKind
 	Builtin string

@@ -1,11 +1,11 @@
 description: 'a bare image name deletes every version of it on This Mac; its VMs keep their own disks'
 env: two-macs
 runs:
-    - command: 'images delete station-linux --yes'
+    - command: 'images delete base-ubuntu --yes'
       exit: 0
       stdout: |
-          ●	station-linux	2026.11.01	deleted
-          ●	station-linux	2026.10.20	deleted
+          ●	base-ubuntu	2026.11.01	deleted
+          ●	base-ubuntu	2026.10.20	deleted
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version)"'''
       exit: 0
       stdout: |

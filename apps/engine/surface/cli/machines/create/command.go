@@ -82,7 +82,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.Check, "check", "", "a server's health check: a URL (https://infra:6443/readyz) or host:port")
 			f.BoolVar(&in.AlwaysOn, "always-on", false, "a server (--server)")
 			in.flags = f
-			f.StringVar(&in.Image, "image", "station-linux", "the image the workspace is made from")
+			f.StringVar(&in.Image, "image", "base-ubuntu", "the image the workspace is made from")
 			f.StringVar(&in.From, "from", "", "the Machinefile the workspace is made from: the image built from it, and how its vm says it runs")
 			f.IntVar(&in.CPUs, "cpus", 0, "virtual CPUs (default 4)")
 			f.StringVar(&in.Memory, "memory", "", "memory with its unit, e.g. 8G or 512M (default 8G)")

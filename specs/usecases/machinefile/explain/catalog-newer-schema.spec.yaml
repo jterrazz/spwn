@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"catalog/command-line/jq.yaml": "package: station.package/v2\nkind: app\nname: jq\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'explain --machinefile station-macos'
+    - command: 'explain --machinefile base-macos'
       exit: 2
       stderr: |
           Error: studio@1a2b3c4/catalog/command-line/jq.yaml is station.package/v2, newer than this station reads (station.package/v1)

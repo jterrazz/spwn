@@ -1,6 +1,6 @@
 {
   "name": "linux-1",
-  "image": "station-linux",
+  "image": "base-ubuntu",
   "version": "2026.11.07",
   "lifetime": "ephemeral",
   "cpus": 4,

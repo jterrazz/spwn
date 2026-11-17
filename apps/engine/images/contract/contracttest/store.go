@@ -41,7 +41,7 @@ func ImageStore(t *testing.T, open func(t *testing.T) contract.ImageStore) {
 			}
 		}
 		other := built("2026.11.02")
-		other.Name = "macos"
+		other.Name = "base-macos"
 		if err := s.Put(ctx, other); err != nil {
 			t.Fatalf("Put macos: %v", err)
 		}

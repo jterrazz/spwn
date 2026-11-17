@@ -27,8 +27,8 @@ describe('model', () => {
         const files = [
             view('base', 'mixin'),
             view('macbook-pro', 'yours'),
-            view('station-macos', 'shipped'),
-            view('station-linux', 'shipped'),
+            view('base-macos', 'shipped'),
+            view('base-ubuntu', 'shipped'),
         ];
 
         // When - they are shelved
@@ -41,7 +41,7 @@ describe('model', () => {
         expect(shelves).toStrictEqual([
             ['yours', ['macbook-pro']],
             ['mixin', ['base']],
-            ['shipped', ['station-macos', 'station-linux']],
+            ['shipped', ['base-macos', 'base-ubuntu']],
         ]);
         expect(shelvedOf([view('only', 'yours')])).toHaveLength(1);
     });
@@ -68,7 +68,7 @@ describe('model', () => {
             VM: {
                 CPUs: 4,
                 Disk: '20G',
-                From: 'station-linux',
+                From: 'base-ubuntu',
                 Lifetime: 'ephemeral',
                 Memory: '4G',
             },

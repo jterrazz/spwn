@@ -41,12 +41,12 @@ func (v vanishing) ReadFile(name string) ([]byte, error) {
 func TestAMarkClearedWhileTheFolderIsReadIsNone(t *testing.T) {
 	ctx, dir := context.Background(), t.TempDir()
 	files := local.New(nil, nil, nil, nil).FS
-	for _, image := range []string{"station-linux", "studio-linux"} {
+	for _, image := range []string{"base-ubuntu", "studio-linux"} {
 		if err := jsonfile.NewMarks(files, dir).Mark(ctx, images.Making{Image: image, Version: "1", Step: images.BuildSeal}); err != nil {
 			t.Fatal(err)
 		}
 	}
-	got, err := jsonfile.NewMarks(vanishing{Files: files, gone: "station-linux.json"}, dir).Marked(ctx)
+	got, err := jsonfile.NewMarks(vanishing{Files: files, gone: "base-ubuntu.json"}, dir).Marked(ctx)
 	if err != nil || len(got) != 1 || got[0].Image != "studio-linux" {
 		t.Fatalf("Marked = %+v, %v; want the mark still there", got, err)
 	}

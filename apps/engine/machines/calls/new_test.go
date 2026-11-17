@@ -18,9 +18,9 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
 
-// value: the machine files of a Mac: station-linux's; docs-bot, the
-// owner's own, extending it; and the owner's macos, named after the image
-// station fetches, which has no file of its own.
+// value: the machine files of a Mac: base-ubuntu's; docs-bot, the
+// owner's own, extending it; and base-macos's, the built-in macOS
+// image's own file.
 type files struct{}
 
 func (files) Template(_ context.Context, name string) (model.Template, error) {
@@ -29,8 +29,8 @@ func (files) Template(_ context.Context, name string) (model.Template, error) {
 		return model.Template{Name: name, OS: catalog.OSUbuntu, Lifetime: model.Ephemeral, Size: model.Resources{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 20e9}}, nil
 	case "docs-bot":
 		return model.Template{Name: name, OS: catalog.OSUbuntu, Lifetime: model.Persistent, Size: model.Resources{MemoryBytes: 3 << 30}}, nil
-	case "macos":
-		return model.Template{Name: name, OS: catalog.OSUbuntu}, nil
+	case catalog.MacOSImage:
+		return model.Template{Name: name, OS: catalog.OSMacOS, Lifetime: model.Persistent, Size: model.Resources{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 80e9}}, nil
 	}
 	return model.Template{}, &model.UnknownImageError{Image: name}
 }
@@ -46,7 +46,7 @@ func unasking(t *testing.T) *machines.Machinist {
 		t.Fatal(err)
 	}
 	linux := catalog.Image{Name: catalog.LinuxImage, Machinefile: catalog.LinuxImage, Recipe: "images/linux.sh", Kind: catalog.Linux, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
-	macos := catalog.Image{Name: "macos", Kind: catalog.MacOS, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 80e9}}
+	macos := catalog.Image{Name: catalog.MacOSImage, Machinefile: catalog.MacOSImage, Kind: catalog.MacOS, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 80e9}}
 	return machines.New(&stillMac{at: time.Date(2026, 11, 13, 10, 0, 0, 0, time.UTC)}, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, machinesfake.StoreOf(w, "mac"), noTailnet{}, &images{built: true}, &idleEngine{}, nil, machines.Options{
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux, macos}, KnownHosts: "/state/known_hosts", Logs: "/state/logs", Templates: files{},
 		Hardware: func(context.Context) coremachine.Hardware { return coremachine.Hardware{Memory: 16 << 30, CPUs: 8} },
@@ -61,7 +61,7 @@ func TestACreateAskedNothingButItsFileTakesWhatTheFileSays(t *testing.T) {
 	}
 	r := got.Request
 	if r.From != catalog.LinuxImage || r.Image != catalog.LinuxImage || r.Size.MemoryBytes != 8<<30 || r.Size.DiskBytes != 20e9 || r.Lifetime != model.Ephemeral || got.Builtin != catalog.LinuxImage || got.Kind != catalog.Linux {
-		t.Errorf("no file asked: %+v; want station-linux's own 8 GB, ephemeral, a server offered of its image", got)
+		t.Errorf("no file asked: %+v; want base-ubuntu's own 8 GB, ephemeral, a server offered of its image", got)
 	}
 	own, err := m.Unasked(t.Context(), "docs-bot")
 	if err != nil {
@@ -70,9 +70,9 @@ func TestACreateAskedNothingButItsFileTakesWhatTheFileSays(t *testing.T) {
 	if own.Request.Size.MemoryBytes != 3<<30 || own.Request.Size.CPUs != 4 || own.Request.Lifetime != model.Persistent || own.Builtin != "" {
 		t.Errorf("the owner's docs-bot: %+v; want its 3 GB and persistence, the image's 4 CPUs, and no server", own)
 	}
-	named, err := m.Unasked(t.Context(), "macos")
-	if err != nil || named.Builtin != "" {
-		t.Errorf("the owner's file named macos: %+v, %v; want no server, macos being no built-in image's own file", named, err)
+	mac, err := m.Unasked(t.Context(), catalog.MacOSImage)
+	if err != nil || mac.Request.Image != catalog.MacOSImage || mac.Kind != catalog.MacOS || mac.Builtin != "" {
+		t.Errorf("base-macos: %+v, %v; want its own macOS image and no server, a server being Linux", mac, err)
 	}
 	if _, missing := m.Unasked(t.Context(), "nothing"); !errors.As(missing, new(*model.UnknownImageError)) {
 		t.Errorf("a file that is not there: %v; want its refusal", missing)
@@ -123,7 +123,7 @@ func (s sheetMachines) AllMachinesAsItFills(_ context.Context, _ bool, sofar fun
 }
 
 func (s sheetMachines) Unasked(context.Context, string) (model.Unasked, error) {
-	return model.Unasked{Request: model.CreateRequest{From: "station-linux", Image: "station-linux", Lifetime: model.Ephemeral, Size: model.Resources{CPUs: 4, MemoryBytes: 8 << 30}}, Kind: catalog.Linux, Builtin: s.builtin}, nil
+	return model.Unasked{Request: model.CreateRequest{From: "base-ubuntu", Image: "base-ubuntu", Lifetime: model.Ephemeral, Size: model.Resources{CPUs: 4, MemoryBytes: 8 << 30}}, Kind: catalog.Linux, Builtin: s.builtin}, nil
 }
 
 func (sheetMachines) NameFor(_ context.Context, _ catalog.MachineKind, f model.AllMachines) (string, error) {
@@ -156,7 +156,7 @@ func sheet(t *testing.T, d machines.Deps, in machines.NewIn) []machines.NewMachi
 }
 
 func TestTheNewMachineSheetSaysWhatEachMacTakes(t *testing.T) {
-	got := sheet(t, machines.Deps{Machines: sheetMachines{builtin: "station-linux"}}, machines.NewIn{On: "mac-mini"})
+	got := sheet(t, machines.Deps{Machines: sheetMachines{builtin: "base-ubuntu"}}, machines.NewIn{On: "mac-mini"})
 	if len(got) != 2 || got[0].Name != "linux-1" || len(got[0].On) != 1 {
 		t.Fatalf("%d updates %+v; want This Mac's, then the fleet's, the name given over each", len(got), got)
 	}
@@ -167,8 +167,8 @@ func TestTheNewMachineSheetSaysWhatEachMacTakes(t *testing.T) {
 	if s.Mac != "macbook-pro" {
 		t.Errorf("offered on %q: the mini asked for has 1 GB free, the studio is silent; want This Mac", s.Mac)
 	}
-	if s.Server == nil || s.Server.Image != "station-linux" || s.Server.Size != model.ServerSize() {
-		t.Fatalf("server %+v: want one of station-linux, a server's size", s.Server)
+	if s.Server == nil || s.Server.Image != "base-ubuntu" || s.Server.Size != model.ServerSize() {
+		t.Fatalf("server %+v: want one of base-ubuntu, a server's size", s.Server)
 	}
 	this, mini, studio := s.On[0], s.On[1], s.On[2]
 	if !this.Ready || this.Room == nil || this.MaxMemory != 12<<30 || this.Room.RoomFor != model.RoomForGate || this.Verdict != (verdict.Verdict{Tone: verdict.Plain}) {

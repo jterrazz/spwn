@@ -97,7 +97,7 @@ func creating(t *testing.T, built bool, hardware ...func(context.Context) corema
 	t.Helper()
 	hardware = append(hardware, func(context.Context) coremachine.Hardware { return coremachine.Hardware{Memory: 16 << 30, CPUs: 8} })
 	w := &world.World{ThisMac: "mac"}
-	w.Mac("mac").Images = []string{"station-linux"}
+	w.Mac("mac").Images = []string{"base-ubuntu"}
 	prefs := memoryPrefs{}
 	p := machines.Prefs{Name: setupcontract.Name(prefs), Macs: machinescontract.Macs(prefs), VMUser: machinescontract.VMUser(prefs)}
 	if err := p.Name.Set("mac"); err != nil {
@@ -106,7 +106,7 @@ func creating(t *testing.T, built bool, hardware ...func(context.Context) corema
 	store, img := machinesfake.StoreOf(w, "mac"), &images{built: built}
 	e := &idleEngine{}
 	procs := &processes{self: model.Process{PID: 100, Start: "1763024400.5"}, runs: map[model.Process]bool{}}
-	linux := catalog.Image{Name: "station-linux", Kind: catalog.Linux, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
+	linux := catalog.Image{Name: "base-ubuntu", Kind: catalog.Linux, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
 	mac := &stillMac{at: time.Date(2026, 11, 13, 10, 0, 0, 0, time.UTC)}
 	m := machines.New(mac, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, store, noTailnet{}, img, e, nil, machines.Options{
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux}, KnownHosts: "/state/known_hosts", Logs: "/state/logs",
@@ -119,8 +119,8 @@ func TestAVMKeepsWhatItIsForAndWhoMadeIt(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, true)
 	for _, r := range []model.CreateRequest{
-		{Image: "station-linux", Name: "gate", Purpose: "Lot shell, one block per package", Creator: "studio-os-fe"},
-		{Image: "station-linux", Name: "api"},
+		{Image: "base-ubuntu", Name: "gate", Purpose: "Lot shell, one block per package", Creator: "studio-os-fe"},
+		{Image: "base-ubuntu", Name: "api"},
 	} {
 		if _, err := b.m.Create(ctx, r, nil, nil); !errors.As(err, new(*model.DidNotBootError)) {
 			t.Fatalf("create %s: %v; want it kept, not booted", r.Name, err)
@@ -150,7 +150,7 @@ func TestASessionNameThatIsNoNameOrReadsAsTheOwnerIsRefused(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, true)
 	for _, session := range []string{model.ByOwner, "Lot_Shell", "studio os"} {
-		r := model.CreateRequest{Image: "station-linux", Name: "gate", Creator: session}
+		r := model.CreateRequest{Image: "base-ubuntu", Name: "gate", Creator: session}
 		var bad *model.BadCreatorError
 		if _, err := b.m.Create(ctx, r, nil, nil); !errors.As(err, &bad) || bad.Session != session {
 			t.Errorf("create for the session %q: %v; want it refused for its session's name", session, err)
@@ -199,7 +199,7 @@ func TestACreateHoldsItsRecordWhileItsImageIsBuilt(t *testing.T) {
 		b.img.built = true
 		return nil
 	}
-	_, err := b.m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: "web"}, build, nil)
+	_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, build, nil)
 	if !errors.As(err, new(*model.DidNotBootError)) {
 		t.Fatalf("create: %v; want it built, cloned and kept, not booted", err)
 	}
@@ -222,11 +222,11 @@ func TestACreateWithNoRoomIsRefusedBeforeItsImageIsBuilt(t *testing.T) {
 		built = true
 		return nil
 	}
-	_, err := b.m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: "big", Size: model.Resources{MemoryBytes: 60 << 30}}, build, nil)
+	_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "big", Size: model.Resources{MemoryBytes: 60 << 30}}, build, nil)
 	if !errors.As(err, new(*model.TooBigError)) || built {
 		t.Fatalf("create of 60 GB on a Mac of 16: %v, image built %v; want refused for memory, nothing built", err, built)
 	}
-	if _, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "station-linux", Size: model.Resources{MemoryBytes: 60 << 30}}); !errors.As(err, new(*model.TooBigError)) {
+	if _, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "base-ubuntu", Size: model.Resources{MemoryBytes: 60 << 30}}); !errors.As(err, new(*model.TooBigError)) {
 		t.Errorf("its check: %v; want the memory refusal, asked before the build's question", err)
 	}
 	if _, err := b.store.Get(ctx, "big"); err == nil {
@@ -238,10 +238,10 @@ func TestACreateTakesTheWholeFreeMemoryAndNotAByteMore(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, true)
 	free := int64(12 << 30)
-	if _, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "station-linux", Size: model.Resources{MemoryBytes: free}}); err != nil {
+	if _, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "base-ubuntu", Size: model.Resources{MemoryBytes: free}}); err != nil {
 		t.Errorf("12 GB on a Mac of 16, 12 free: %v; want it to fit", err)
 	}
-	_, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "station-linux", Size: model.Resources{MemoryBytes: free + 1}})
+	_, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "base-ubuntu", Size: model.Resources{MemoryBytes: free + 1}})
 	if tooBig := new(model.TooBigError); !errors.As(err, &tooBig) || tooBig.LeftGB != 12 {
 		t.Errorf("one byte over the free 12 GB: %v; want refused for memory, 12 GB left", err)
 	}
@@ -251,7 +251,7 @@ func TestABuildThatFailsLeavesNoRecord(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, false)
 	failing := errors.New("the recipe failed")
-	_, err := b.m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: "web"}, func(_ context.Context, step func(string)) error {
+	_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(_ context.Context, step func(string)) error {
 		step("image 1 of 3")
 		return failing
 	}, nil)
@@ -272,7 +272,7 @@ func TestACreateInterruptedDuringItsBuildLeavesNoRecord(t *testing.T) {
 	building := make(chan struct{})
 	done := make(chan error, 1)
 	go func() {
-		_, err := b.m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: "web"}, func(ctx context.Context, step func(string)) error {
+		_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(ctx context.Context, step func(string)) error {
 			step("image 1 of 3")
 			close(building)
 			select {
@@ -316,7 +316,7 @@ func beingMade(t *testing.T, step model.BirthStep, runs bool) bench {
 	t.Helper()
 	b := creating(t, true)
 	at := time.Date(2026, 11, 13, 9, 15, 0, 0, time.UTC)
-	rec := model.Record{Name: "web", Image: "station-linux", Lifetime: model.Persistent, CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9, CreatedAt: at, Birth: model.BirthAt(step, true, at), Owner: &maker}
+	rec := model.Record{Name: "web", Image: "base-ubuntu", Lifetime: model.Persistent, CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9, CreatedAt: at, Birth: model.BirthAt(step, true, at), Owner: &maker}
 	if err := b.store.Put(context.Background(), rec); err != nil {
 		t.Fatal(err)
 	}
@@ -370,7 +370,7 @@ func TestAVMIsNotDeletedWhileItsCreateRunsAndAGoneRecordIsNeverMadeAgain(t *test
 	ctx := context.Background()
 	b := creating(t, false)
 	var refused, deleted error
-	_, err := b.m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: "web"}, func(_ context.Context, step func(string)) error {
+	_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(_ context.Context, step func(string)) error {
 		refused = b.m.CheckDelete("web")
 		_, deleted = b.m.Delete(ctx, "web")
 		if err := b.store.Delete(ctx, "web"); err != nil {
@@ -404,7 +404,7 @@ func TestWhatIsWrittenWhileACreateBootsStaysOrIsRefused(t *testing.T) {
 		kept = b.m.KeepAgents("web", []string{"docs-bot"})
 		stopped = b.m.StopDirect(ctx, "web")
 	}
-	if _, err := b.m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: "web", Lifetime: model.Persistent}, nil, nil); err == nil {
+	if _, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web", Lifetime: model.Persistent}, nil, nil); err == nil {
 		t.Fatalf("create of web: %v; want it to end at its run", err)
 	}
 	if step != model.BornBooting {
@@ -428,10 +428,10 @@ func TestWhatIsWrittenWhileACreateBootsStaysOrIsRefused(t *testing.T) {
 func TestASaveOfAVMDeletedMeanwhileLeavesItGone(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, true)
-	if err := b.store.Put(ctx, model.Record{Name: "web", Image: "station-linux", Lifetime: model.Persistent, MemoryBytes: 4 << 30}); err != nil {
+	if err := b.store.Put(ctx, model.Record{Name: "web", Image: "base-ubuntu", Lifetime: model.Persistent, MemoryBytes: 4 << 30}); err != nil {
 		t.Fatal(err)
 	}
-	held := model.VMRecord{Name: "web", Image: "station-linux", Lifetime: model.Persistent, Want: model.WantStopped}
+	held := model.VMRecord{Name: "web", Image: "base-ubuntu", Lifetime: model.Persistent, Want: model.WantStopped}
 	if err := b.store.Delete(ctx, "web"); err != nil {
 		t.Fatal(err)
 	}
@@ -488,7 +488,7 @@ func TestTwoCreatesAtOnceNeverBothTakeTheMemoryLeft(t *testing.T) {
 		for _, name := range []string{"api", "web"} {
 			go func() {
 				ctx := context.WithValue(context.Background(), caller{}, name)
-				_, err := b.m.Create(ctx, model.CreateRequest{Image: "station-linux", Name: name, Size: model.Resources{MemoryBytes: 8 << 30}}, func(context.Context, func(string)) error {
+				_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: name, Size: model.Resources{MemoryBytes: 8 << 30}}, func(context.Context, func(string)) error {
 					building <- name
 					select {
 					case <-release:
@@ -551,7 +551,7 @@ func TestAPurposeIsOneLineOfAtMostItsLimit(t *testing.T) {
 		{"deploys with sk-" + strings.Repeat("station-", 4) + "key", false},
 		{"Lot shell, the token lives in the vault", true},
 	} {
-		_, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "station-linux", Purpose: c.purpose})
+		_, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "base-ubuntu", Purpose: c.purpose})
 		if refused := errors.As(err, new(*model.BadPurposeError)); refused == c.ok {
 			t.Errorf("purpose %q: %v; want refused %v", c.purpose, err, !c.ok)
 		}
@@ -563,7 +563,7 @@ func TestAVMASilentMacHoldsWithNoKindKeepsItsName(t *testing.T) {
 	if err := b.prefs.Macs.Set(map[string]model.MacRecord{"studio": {VMs: []model.SeenVM{{Name: "old", Lifetime: model.Persistent, CPUs: 2, MemoryBytes: 4 << 30}}}}); err != nil {
 		t.Fatal(err)
 	}
-	_, err := b.m.CheckCreate(context.Background(), model.CreateRequest{Image: "station-linux", Name: "old"})
+	_, err := b.m.CheckCreate(context.Background(), model.CreateRequest{Image: "base-ubuntu", Name: "old"})
 	if taken := new(model.NameTakenError); !errors.As(err, &taken) || !taken.VM || taken.On != "studio" {
 		t.Errorf("a create named after the VM silent studio holds with no kind: %v; want the name taken, on studio", err)
 	}

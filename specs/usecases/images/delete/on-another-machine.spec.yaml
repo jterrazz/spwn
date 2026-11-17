@@ -1,11 +1,11 @@
 description: 'a delete on another Mac deletes its versions there, This Mac''s kept'
 env: two-macs
 runs:
-    - command: 'images delete station-linux --yes --on mac-mini'
+    - command: 'images delete base-ubuntu --yes --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	station-linux	2026.11.01	deleted
+          ●	base-ubuntu	2026.11.01	deleted
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version)"'''
       exit: 0
       stdout: |

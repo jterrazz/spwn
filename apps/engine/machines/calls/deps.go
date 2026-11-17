@@ -62,7 +62,7 @@ type Machines interface {
 	Remember(ctx context.Context, f machines.AllMachines) error
 	CheckCreate(ctx context.Context, r machines.CreateRequest) (machines.CreateRequest, error)
 	// value: what a create from that machine file makes asked nothing
-	// else; station-linux's for none.
+	// else; base-ubuntu's for none.
 	Unasked(ctx context.Context, from string) (machines.Unasked, error)
 	// value: the name a create of that kind takes unasked over the fleet f.
 	NameFor(ctx context.Context, kind catalog.MachineKind, f machines.AllMachines) (string, error)

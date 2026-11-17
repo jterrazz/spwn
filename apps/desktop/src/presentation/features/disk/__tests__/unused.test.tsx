@@ -140,7 +140,7 @@ describe('unused', () => {
 
     test('an outcome the engine says broken is held with its reason, the others as freed', async () => {
         // Given - Storage over old-home-running, the old folder and the unused image to free while tart runs
-        const subject = 'station-linux@2026.10.20, ~/.tart';
+        const subject = 'base-ubuntu@2026.10.20, ~/.tart';
         const result = await component.render(
             storageOver(recordingFor('old-home-running')),
             async (visitor) => {
@@ -222,7 +222,7 @@ describe('unused', () => {
 
     test('every outcome broken is held as failed with its reason, and no done sits beside the button', async () => {
         // Given - Storage over old-home-running, every outcome of its free broken and the rows still listed
-        const subject = 'station-linux@2026.10.20, ~/.tart';
+        const subject = 'base-ubuntu@2026.10.20, ~/.tart';
         const page = storageOver(everyOutcomeBroken(recordingFor('old-home-running')));
         const result = await component.render(page, async (visitor) => {
             // When - Free 7 GB is confirmed with the engine's subject typed
@@ -242,7 +242,7 @@ describe('unused', () => {
 
     test('the other Mac, chosen once a question is cancelled, is sent its own names and never the first', async () => {
         // Given - Storage over two-macs, the mini holding an image of its own to free
-        const own = 'station-linux@2026.10.20';
+        const own = 'base-ubuntu@2026.10.20';
         const other = 'mini-image@2026.10.01';
         const stage = staged(eachAsking(recordingFor('two-macs'), own, other));
         const result = await component.render(storageOn(stage), async (visitor) => {
@@ -268,7 +268,7 @@ describe('unused', () => {
 
     test('names that change under the open question are asked again with the new subject, nothing done', async () => {
         // Given - Storage over leftovers, the question open for both names, the next read listing the image only
-        const first = 'station-linux@2026.10.20';
+        const first = 'base-ubuntu@2026.10.20';
         const stage = staged(recordingFor('leftovers'));
         const result = await component.render(storageOn(stage), async (visitor) => {
             await visitor.click(within(disk, freeStation));

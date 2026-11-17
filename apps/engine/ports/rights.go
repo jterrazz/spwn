@@ -18,7 +18,7 @@ type Rights struct {
 	// value: the machine is a server, whose reservations made before they
 	// said who made them are the owner's.
 	Server bool
-	// value: the Machinefile that says them (`station-linux`,
+	// value: the Machinefile that says them (`base-ubuntu`,
 	// `web.local`); empty when no Machinefile names the machine.
 	By string
 }

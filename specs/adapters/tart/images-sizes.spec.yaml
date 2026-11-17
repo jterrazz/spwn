@@ -6,6 +6,6 @@ runs:
     - command: 'images'
       exit: 0
       stdout: |
-          ●	station-linux	2026.11.07	6.0 GB	macbook-pro	api
-          ○	station-linux	2026.11.01	5.0 GB	macbook-pro	older · station images delete station-linux@2026.11.01
-          ○	macos				not built yet
+          ●	base-ubuntu	2026.11.07	6.0 GB	macbook-pro	api
+          ○	base-ubuntu	2026.11.01	5.0 GB	macbook-pro	older · station images delete base-ubuntu@2026.11.01
+          ○	base-macos				not built yet

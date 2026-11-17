@@ -1,4 +1,4 @@
-description: 'linux names no image: the built-in Linux image is station-linux alone'
+description: 'linux names no image: the built-in Linux image is base-ubuntu alone'
 env:
     - two-macs
     - engine
