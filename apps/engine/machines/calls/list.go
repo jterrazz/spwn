@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -89,8 +90,9 @@ var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
 }
 
 type CreateServerIn struct {
-	Name, Image, Network string
-	Size                 machines.Resources
+	Name, Image string
+	Network     catalog.Network
+	Size        machines.Resources
 	// value: its health check, a URL or host:port; empty for none.
 	Check string
 	// value: what it is for, free text; the session that asks for it, by

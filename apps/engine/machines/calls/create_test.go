@@ -14,13 +14,13 @@ func TestBridgedIsForMacOSImagesOnly(t *testing.T) {
 	for _, c := range []struct {
 		name   string
 		img    catalog.Image
-		asked  string
-		want   string
+		asked  catalog.Network
+		want   catalog.Network
 		bridge bool
 	}{
-		{"a VM is behind its Mac by default", linux, "", model.NetworkNAT, false},
-		{"a macOS VM may be bridged", macos, model.Bridged, model.Bridged, false},
-		{"a linux VM is refused bridged", linux, model.Bridged, "", true},
+		{"a VM is behind its Mac by default", linux, "", catalog.NetworkNAT, false},
+		{"a macOS VM may be bridged", macos, catalog.NetworkBridged, catalog.NetworkBridged, false},
+		{"a linux VM is refused bridged", linux, catalog.NetworkBridged, "", true},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			got, err := networkFor(c.img, c.asked)

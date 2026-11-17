@@ -17,7 +17,7 @@ type Template struct {
 	OS       catalog.OS
 	Server   bool
 	Lifetime Lifetime
-	Network  string
+	Network  catalog.Network
 	Size     Resources
 	Mounts   []Mount
 	// value: the programs it signs in to, and those this Mac's vault grants
