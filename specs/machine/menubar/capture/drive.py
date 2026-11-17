@@ -54,6 +54,7 @@ class Rig:
         print(f"   framebuffer {self.fb[0]}x{self.fb[1]}", flush=True)
         self.wall = None
         self.walls = 0
+        self.noitem = 0
         self.screen = None
         self.log = open(os.path.join(out, "drive.log"), "a", encoding="utf-8")
 
@@ -145,6 +146,10 @@ class Rig:
                     self.say(f"   {line.split(' ', 2)[-1]}; {screen.split(' ', 2)[-1]}")
                     return line
         self.say(f"   no item frame in 90 s; app: {self.ssh('pgrep -lx StationMenuBar; tail -5 ~/cap/app.log ~/cap/app.out 2>&1').strip()}")
+        self.noitem += 1
+        self.capture(f"noitem-{self.noitem}")
+        menu = self.gui("defaults read -g _HIHideMenuBar; defaults read com.apple.controlcenter AutoHideMenuBarOption; defaults -currentHost read com.apple.controlcenter")
+        self.say(f"   noitem-{self.noitem}.full.png; menu bar settings: {' '.join(menu.split())[:400]}")
         return None
 
     def last(self, word):
@@ -249,7 +254,7 @@ class Rig:
 
     # invariant: the window's own edge is the wallpaper: its outermost
     # 2 px ring reads the same open as closed, so no square frame shows
-    # past the glass's shadow.
+    # past the panel's shadow.
     def edge(self, before, after, item, frame):
         from PIL import Image, ImageChops
 
