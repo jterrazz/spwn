@@ -26,7 +26,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Menus** (21): `menu.station`, `menu.context.workspace`, `menu.context.workspace.copy`, `menu.context.workspace.share`, `menu.context.stopped`, `menu.context.server`, `menu.context.server.down`, `menu.context.mac`, `menu.context.mac.asleep`, `menu.context.grant`, `menu.awake`, `menu.page.mac`, `menu.page.this-mac`, `menu.page.mac.asleep`, `menu.page.workspace`, `menu.page.server`, `menu.page.ports`, `menu.new-vm.on`, `menu.new-vm.create`, `menu.grant.to`, `menu.share-port.of`
 - **Popovers, tooltips, HUD** (6): `pop.qr`, `pop.qr.public`, `pop.info`, `pop.tooltip`, `pop.hud.copy`, `pop.hud.terminal`
 - **Find (Cmd-K)** (10): `find.empty`, `find.down`, `find.port`, `find.machine`, `find.action`, `find.awake`, `find.keyboard`, `find.more-open`, `find.nomatch`, `find.type-to-find`
-- **Transitions (frozen mid-flight)** (13): `transition.panel-open`, `transition.panel-close`, `transition.push`, `transition.pop`, `transition.jump`, `transition.segment`, `transition.sheet`, `transition.alert`, `transition.find`, `transition.menu`, `transition.hero-morph`, `transition.row-leave`, `transition.reduce-motion.push`
+- **Transitions (frozen mid-flight)** (11): `transition.push`, `transition.pop`, `transition.jump`, `transition.segment`, `transition.sheet`, `transition.alert`, `transition.find`, `transition.menu`, `transition.hero-morph`, `transition.row-leave`, `transition.reduce-motion.push`
 - **Phone (the explainer page)** (1): `phone.explainer`
 
 ## Menu bar and panel shell
@@ -1541,26 +1541,6 @@ Keys: type to filter, ↑ ↓ move, ↩ run, ⌘↩ attach a workspace, esc clos
 - **Leaves**: #panel: height 514px → 689px 340 ms smooth; .page: opacity 0 → 1 340 ms smooth; .findwrap.leaving: opacity 1 → 0 200 ms snappy (esc)
 
 ## Transitions (frozen mid-flight)
-
-### `transition.panel-open`
-
-![transition.panel-open](stories/transition.panel-open.png)
-
-- **Capture**: [dark](stories/transition.panel-open.png)
-- **Shows**: The panel grows out of the status item: scale .96 → 1 with opacity, smooth 340 ms, no overshoot (frozen at ~120 ms).
-- **Data**: none
-- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 39%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 69%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
-- **Enters**: #panel: opacity+transform 0 scale(.96) → 1 none 340 ms smooth; #sItem: CSS background-color 120 ms
-
-### `transition.panel-close`
-
-![transition.panel-close](stories/transition.panel-close.png)
-
-- **Capture**: [dark](stories/transition.panel-close.png)
-- **Shows**: The panel closes: opacity to 0 and scale .98, snappy 200 ms.
-- **Data**: none
-- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 26%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 63%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
-- **Enters**: #panel: opacity+transform 1 none → 0 scale(.98) 200 ms snappy; #sItem: CSS background-color 120 ms
 
 ### `transition.push`
 

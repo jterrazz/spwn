@@ -4,8 +4,6 @@ import SwiftUI
 // as its story is: `transition.<movement>`, or `transition.reduce-motion.
 // <movement>` for its Reduce Motion form.
 public enum StoryMotion: String, CaseIterable, Sendable {
-    case panelOpen = "panel-open"
-    case panelClose = "panel-close"
     case push, pop, jump, segment, sheet, alert, find, menu
     case heroMorph = "hero-morph"
     case rowLeave = "row-leave"
@@ -28,7 +26,7 @@ public enum StoryMotion: String, CaseIterable, Sendable {
     // value: its run, as the live app animates it.
     public var duration: Double {
         switch self {
-        case .panelClose, .menu: Token.Motion.snappyDuration
+        case .menu: Token.Motion.snappyDuration
         case .jump: Token.Motion.jumpInDuration
         default: Token.Motion.smoothDuration
         }
@@ -56,10 +54,6 @@ struct TransitionView: View {
 
     var body: some View {
         switch motion {
-        case .panelOpen:
-            rest(story).modifier(PanelAppear(progress: PanelAppear.frozen(time, closing: false, reduce: reduce), anchor: .top))
-        case .panelClose:
-            rest(story).modifier(PanelAppear(progress: PanelAppear.frozen(time, closing: true, reduce: reduce), closing: true, anchor: .top))
         case .push:
             pair(under: from, top: story, backward: false,
                  PushTransition(progress: PushTransition.frozen(time, role: .under, way: .push, reduce: reduce), role: .under, way: .push),

@@ -1,55 +1,5 @@
 import SwiftUI
 
-// value: M1, the panel grows out of its status item; it closes to a
-// slighter scale on snappy, in the panel of its own (the system's window
-// closes at once).
-public struct PanelAppear: Movement {
-    public var progress: Double
-    public var closing: Bool
-    public var anchor: UnitPoint
-    @Environment(\.stationTokens) private var tokens
-
-    public init(progress: Double, closing: Bool = false, anchor: UnitPoint = .top) {
-        self.progress = progress
-        self.closing = closing
-        self.anchor = anchor
-    }
-
-    public static func look(_ progress: Double, closing: Bool = false, reduce: Bool) -> Look {
-        var look = Look()
-        look.opacity = progress
-        if !reduce { look.scale = Look.scaled(Look.lerp(closing ? Token.Motion.Move.panelClose : Token.Motion.Move.panelFrom, 1, progress)) }
-        return look
-    }
-
-    public static func frozen(_ time: Double, closing: Bool, reduce: Bool = false) -> Double {
-        if reduce { return Token.Motion.freeze(time, Token.Motion.reducedCurve) }
-        return closing ? 1 - Token.Motion.freeze(time, Token.Motion.snappyCurve) : Token.Motion.freeze(time, Token.Motion.smoothCurve)
-    }
-
-    public func body(content: Content) -> some View {
-        content.moved(Self.look(progress, closing: closing, reduce: tokens.reduceMotion), anchor: anchor)
-    }
-}
-
-// invariant: M1 in the live app: each time the system shows the panel's
-// window it grows out of its status item on smooth, from nothing; once
-// hidden it is at its start again, so the next opening's first frame is
-// never the panel whole.
-public struct PanelOpening: ViewModifier {
-    @State private var shown = 0.0
-    @Environment(\.stationTokens) private var tokens
-
-    public init() {}
-
-    public func body(content: Content) -> some View {
-        content
-            .modifier(PanelAppear(progress: shown))
-            .onAppear { withAnimation(tokens.motion(Token.Motion.smooth).speed(1 / Token.Motion.slow)) { shown = 1 } }
-            .onDisappear { shown = 0 }
-    }
-}
-
 // value: M2 and M3, a page pushed or popped: the top page slides on the
 // trailing edge, opaque and shaded; the page under it moves a third and
 // dims. Progress is how far each page is shown, so at a push's moment t the

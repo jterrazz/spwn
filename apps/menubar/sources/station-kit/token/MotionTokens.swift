@@ -74,9 +74,6 @@ extension Token.Motion {
 // movement it belongs to.
 extension Token.Motion {
     public enum Move {
-        public static let panelFrom = 0.96
-        public static let panelClose = 0.98
-
         public static let pushUnder = 0.30
         public static let pushDimAt = 0.30
         public static let pushDim = 0.25

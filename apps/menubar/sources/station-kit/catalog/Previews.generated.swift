@@ -266,10 +266,6 @@ import SwiftUI
 
 #Preview("transition.menu") { StoryStage(Stories["transition.menu"]) }
 
-#Preview("transition.panel-close") { StoryStage(Stories["transition.panel-close"]) }
-
-#Preview("transition.panel-open") { StoryStage(Stories["transition.panel-open"]) }
-
 #Preview("transition.pop") { StoryStage(Stories["transition.pop"]) }
 
 #Preview("transition.push") { StoryStage(Stories["transition.push"]) }
