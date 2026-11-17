@@ -65,12 +65,12 @@ func homeSections(r Reading, self string, upkeep []Need) ([]page.Section, []page
 	every, cleans := cleanupsOf(r.All.Macs), false
 	for _, c := range every {
 		if c.any() {
-			actions = append(actions, cleanupSheet(ActionCleanup+":"+c.mac.Name, *r.All, []cleanupOf{c}, h.now, true))
+			actions = append(actions, cleanupSheet(ActionCleanup+":"+c.mac.Name, *r.All, []cleanupOf{c}, true))
 		}
 		cleans = cleans || c.any()
 	}
 	if cleans {
-		actions = append(actions, cleanupSheet(ActionCleanup, *r.All, every, h.now, false))
+		actions = append(actions, cleanupSheet(ActionCleanup, *r.All, every, false))
 	}
 	return sections, actions
 }

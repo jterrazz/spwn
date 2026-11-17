@@ -303,7 +303,7 @@ func (d macEngine) VMs(ctx context.Context) (map[string]machinescalls.EngineVM, 
 	for _, v := range views {
 		out[v.Name] = machinescalls.EngineVM{
 			State: v.State, Guest: v.Guest, IP: v.IP, Detail: v.Detail, SSH: v.SSH, Restarts: v.Restarts, Check: v.Check, BootAt: v.BootAt,
-			Latency: v.Latency, Restart: v.Restart, Cause: v.Cause, LastLines: v.LastLines, ReadyAt: v.ReadyAt, Agent: v.Agent, Drift: v.Drift,
+			Latency: v.Latency, Restart: v.Restart, Cause: v.Cause, LastLines: v.LastLines, ReadyAt: v.ReadyAt, Drift: v.Drift,
 		}
 	}
 	return out, nil

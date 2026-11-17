@@ -1,33 +1,30 @@
 package machines
 
-import (
-	"testing"
-	"time"
-)
+import "testing"
 
-func TestACandidateCarriesItsIdleTimeAndItsDisk(t *testing.T) {
-	now := time.Date(2026, 11, 7, 14, 10, 0, 0, time.UTC)
-	done := VM{Name: "agent-7f", Lifetime: Ephemeral, State: Running, Resources: Resources{DiskBytes: 12e9},
-		Agent: &AgentView{State: AgentFinished, Ended: now.Add(-12 * time.Minute), Reason: "tests pass"}}
-	c := CandidateOf(done, now)
-	if c.Stopped || c.Idle != 12*time.Minute || c.Reason != "tests pass" || c.DiskBytes != 12e9 {
-		t.Errorf("finished: %+v", c)
+func TestACandidateCarriesItsDisk(t *testing.T) {
+	if c := CandidateOf(VM{Name: "linux-3", Lifetime: Ephemeral, State: Stopped, Resources: Resources{DiskBytes: 12e9}, SizeGB: 20}); c.DiskBytes != 12e9 {
+		t.Errorf("measured: %+v", c)
 	}
-	stopped := CandidateOf(VM{Name: "linux-3", Lifetime: Ephemeral, State: Stopped, SizeGB: 20}, now)
-	if !stopped.Stopped || stopped.Idle != 0 || stopped.DiskBytes != 20e9 {
-		t.Errorf("stopped: %+v", stopped)
+	if c := CandidateOf(VM{Name: "linux-3", Lifetime: Ephemeral, State: Stopped, SizeGB: 20}); c.DiskBytes != 20e9 {
+		t.Errorf("sized: %+v", c)
 	}
 }
 
-// invariant: SPEC B5.9: the note names the agents still running, never a
-// kept VM whose agent finished.
-func TestCleanupNamesOnlyTheAgentsStillRunning(t *testing.T) {
-	_, kept := Cleanup([]VM{
-		{Name: "review-bot", Lifetime: Persistent, State: Running, Agent: &AgentView{State: "waiting"}},
-		{Name: "infra", Lifetime: Persistent, State: Running, Agent: &AgentView{State: AgentFinished}},
-		{Name: "linux-1", Lifetime: Persistent, State: Running},
+// invariant: SPEC B5.9: a cleanup takes the stopped ephemeral workspaces
+// and names the running ones, which stay; a persistent one is neither.
+func TestCleanupTakesTheStoppedEphemeralsAndNamesTheRunningOnes(t *testing.T) {
+	gone, kept := Cleanup([]VM{
+		{Name: "linux-1", Lifetime: Ephemeral, State: Running},
+		{Name: "linux-3", Lifetime: Ephemeral, State: Stopped},
+		{Name: "api", Lifetime: Persistent, State: Stopped},
+		{Name: "infra", Lifetime: AlwaysOn, State: Running},
+		{Name: "linux-4", Lifetime: Ephemeral, State: Creating},
 	})
-	if len(kept) != 1 || kept[0].Name != "review-bot" {
-		t.Errorf("kept %v, want review-bot alone", kept)
+	if len(gone) != 1 || gone[0].Name != "linux-3" {
+		t.Errorf("gone %v, want linux-3 alone", gone)
+	}
+	if len(kept) != 1 || kept[0].Name != "linux-1" {
+		t.Errorf("kept %v, want linux-1 alone", kept)
 	}
 }

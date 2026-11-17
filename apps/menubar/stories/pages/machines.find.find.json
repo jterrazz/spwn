@@ -1114,35 +1114,6 @@
             },
             "verb": "restart:infra"
           }
-        },
-        {
-          "row": {
-            "id": "cleanup:macbook-pro",
-            "label": "Clean up ephemeral workspaces on This Mac",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "delete"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "ephemeral"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "finished"
-                  }
-                ]
-              }
-            ],
-            "glyph": {
-              "kind": "symbol:trash"
-            },
-            "verb": "cleanup:macbook-pro"
-          }
         }
       ],
       "uncounted": true
@@ -2449,49 +2420,6 @@
         },
         "target": {
           "name": "mac-mini"
-        }
-      }
-    },
-    {
-      "label": "Clean up",
-      "on": "row",
-      "rows": [
-        "cleanup:macbook-pro"
-      ],
-      "confirm": {
-        "question": "Delete agent-7f?",
-        "lines": [
-          {
-            "kind": "list",
-            "items": [
-              {
-                "kind": "text",
-                "text": "agent-7f"
-              },
-              {
-                "kind": "text",
-                "text": "finished 12 min ago"
-              },
-              {
-                "kind": "text",
-                "text": "tests pass"
-              },
-              {
-                "kind": "text",
-                "text": "goes with its disk (42.9 GB)"
-              }
-            ]
-          }
-        ],
-        "danger": true,
-        "yes": "Delete"
-      },
-      "mutates": true,
-      "id": "cleanup:macbook-pro",
-      "run": {
-        "call": "machines.cleanup",
-        "in": {
-          "Confirm": "yes"
         }
       }
     },

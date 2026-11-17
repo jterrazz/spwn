@@ -14,16 +14,13 @@ import (
 )
 
 func TestAVMsHoldSaysWhoKeepsItAndWhetherItIsSafeToDelete(t *testing.T) {
-	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	working := &machines.AgentView{State: "working"}
-	finished := func(ago time.Duration) *machines.AgentView {
-		return &machines.AgentView{State: machines.AgentFinished, Ended: now.Add(-ago)}
-	}
 	for name, c := range map[string]struct {
 		vm   machines.VM
 		want machines.Hold
 	}{
 		"a server": {machines.VM{Lifetime: machines.AlwaysOn, State: machines.Running, Creator: "studio-os-fe"},
+			machines.Hold{State: machines.HoldAlwaysOn, Sentence: "Always on. Stopping it needs its name typed."}},
+		"a server being created": {machines.VM{Lifetime: machines.AlwaysOn, State: machines.Creating, Creator: "studio-os-fe"},
 			machines.Hold{State: machines.HoldAlwaysOn, Sentence: "Always on. Stopping it needs its name typed."}},
 		"its Mac not seen": {machines.VM{Lifetime: machines.AlwaysOn, State: machines.UnknownState},
 			machines.Hold{State: machines.HoldNotSeen, Sentence: "Not seen: its Mac does not answer, so nothing says what holds it."}},
@@ -31,16 +28,10 @@ func TestAVMsHoldSaysWhoKeepsItAndWhetherItIsSafeToDelete(t *testing.T) {
 			machines.Hold{State: machines.HoldHeld, By: "studio-os-fe", Sentence: "Being created by studio-os-fe. It cannot be deleted until its create ends."}},
 		"being created by you": {machines.VM{Lifetime: machines.Ephemeral, State: machines.Creating, Creator: machines.ByOwner},
 			machines.Hold{State: machines.HoldHeld, Sentence: "Being created. It cannot be deleted until its create ends."}},
-		"an agent at work in it": {machines.VM{Lifetime: machines.Persistent, State: machines.Running, Creator: "studio-os-fe", Agent: working},
+		"an ephemeral one a session runs": {machines.VM{Lifetime: machines.Ephemeral, State: machines.Running, Creator: "studio-os-fe"},
 			machines.Hold{State: machines.HoldHeld, By: "studio-os-fe", Sentence: "It is held by its lot, by studio-os-fe: work may be in progress."}},
-		"an agent of yours at work": {machines.VM{Lifetime: machines.Persistent, State: machines.Running, Creator: machines.ByOwner, Agent: working},
-			machines.Hold{State: machines.HoldHeld, Sentence: "It is held by its agent: work may be in progress."}},
-		"an ephemeral one a session made": {machines.VM{Lifetime: machines.Ephemeral, State: machines.Running, Creator: "studio-os-fe"},
-			machines.Hold{State: machines.HoldHeld, By: "studio-os-fe", Sentence: "It is held by its lot, by studio-os-fe: work may be in progress."}},
-		"idle five hours": {machines.VM{Lifetime: machines.Ephemeral, State: machines.Running, Creator: "studio-os-fe", Agent: finished(5*time.Hour + 10*time.Minute)},
-			machines.Hold{State: machines.HoldIdle, Sentence: "Idle for 5 h. Safe to delete."}},
-		"its agent just finished": {machines.VM{Lifetime: machines.Ephemeral, State: machines.Running, Creator: "studio-os-fe", Agent: finished(10 * time.Minute)},
-			machines.Hold{State: machines.HoldFree, Sentence: "Its agent finished. Safe to delete."}},
+		"a persistent one a session runs": {machines.VM{Lifetime: machines.Persistent, State: machines.Running, Creator: "studio-os-fe"},
+			machines.Hold{State: machines.HoldYours, Sentence: "Yours. Stays until you delete it."}},
 		"an ephemeral one stopped": {machines.VM{Lifetime: machines.Ephemeral, State: machines.Stopped, Creator: "studio-os-fe"},
 			machines.Hold{State: machines.HoldFree, Sentence: "Stopped. Safe to delete."}},
 		"an ephemeral one of yours": {machines.VM{Lifetime: machines.Ephemeral, State: machines.Running, Creator: machines.ByOwner},
@@ -48,24 +39,9 @@ func TestAVMsHoldSaysWhoKeepsItAndWhetherItIsSafeToDelete(t *testing.T) {
 		"a persistent one": {machines.VM{Lifetime: machines.Persistent, State: machines.Stopped, Creator: "studio-os-fe"},
 			machines.Hold{State: machines.HoldYours, Sentence: "Yours. Stays until you delete it."}},
 	} {
-		if got := machines.HoldOf(c.vm, now); got != c.want {
+		if got := machines.HoldOf(c.vm); got != c.want {
 			t.Errorf("%s: %+v; want %+v", name, got, c.want)
 		}
-	}
-}
-
-func TestAWorkspaceIsIdleAnHourAfterItsAgentFinished(t *testing.T) {
-	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	vm := machines.VM{Lifetime: machines.Ephemeral, State: machines.Running, Agent: &machines.AgentView{State: machines.AgentFinished, Ended: now.Add(-time.Hour)}}
-	if _, idle := machines.IdleFor(vm, now); !idle {
-		t.Errorf("a workspace finished an hour ago is not idle")
-	}
-	vm.Agent.Ended = now.Add(-time.Hour + time.Minute)
-	if _, idle := machines.IdleFor(vm, now); idle {
-		t.Errorf("a workspace finished 59 min ago is idle")
-	}
-	if machines.IdleAfter != time.Hour {
-		t.Errorf("a workspace is idle after %s; the rule says an hour", machines.IdleAfter)
 	}
 }
 

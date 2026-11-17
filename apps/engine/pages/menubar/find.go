@@ -476,13 +476,13 @@ func (f finder) cleanup(h model.MacView) (entry, bool) {
 	}
 	cands := make([]model.Candidate, 0, len(gone))
 	for _, vm := range gone {
-		cands = append(cands, model.CandidateOf(vm, f.r.Now))
+		cands = append(cands, model.CandidateOf(vm))
 	}
 	c := pagemachines.CleanupConfirm(cands)
 	verb := page.Action{ID: "cleanup:" + h.Name, Label: VerbCleanUp, Mutates: true, Confirm: &c,
 		Run: &page.Run{Call: CallCleanup, In: map[string]string{"Confirm": yes}, Target: macTarget(h.Name, f.self)}}
 	row := page.Row{ID: "cleanup:" + h.Name, Label: "Clean up ephemeral workspaces on " + f.mac(h.Name), Glyph: symbol("trash", "")}
-	return entry{row: row, tags: []string{"delete", "ephemeral", "finished"}, verb: verb}, true
+	return entry{row: row, tags: []string{"delete", "ephemeral", "stopped"}, verb: verb}, true
 }
 
 func (f finder) verbs(p *page.Page) page.Section {

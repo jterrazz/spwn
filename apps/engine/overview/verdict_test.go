@@ -10,7 +10,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
-	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 )
 
@@ -95,7 +94,6 @@ func TestOnlyWhatIsRedNeedsYouAndEachNeedHasItsVerb(t *testing.T) {
 		"a task failing":     {finding.Finding{Section: section.Background, Severity: finding.Broken, Fix: finding.Fix{Call: "background.remove"}}, overview.NeedsYou, overview.VerbRemove},
 		"a setting off":      {finding.Finding{Section: section.Settings, Severity: finding.NeedsALook}, overview.CanWait, overview.VerbFix},
 		"updates":            {finding.Finding{Section: section.Apps, Severity: finding.NeedsALook, Fix: finding.Fix{Call: "apps.update"}}, overview.CanWait, overview.VerbUpdate},
-		"an idle workspace":  {finding.Finding{Section: section.Overview, Severity: finding.NeedsALook, Fix: finding.Fix{Call: "machines.delete"}}, overview.CanWait, overview.VerbDelete},
 	} {
 		if got := overview.UpkeepOf(c.f); got != c.upkeep {
 			t.Errorf("%s: %s; want %s", name, got, c.upkeep)
@@ -110,40 +108,6 @@ func TestOnlyWhatIsRedNeedsYouAndEachNeedHasItsVerb(t *testing.T) {
 	}, nil, nil)
 	if s.Needs[0].Subject != "5432" || s.Needs[0].Upkeep != overview.NeedsYou || s.Needs[1].Upkeep != overview.CanWait {
 		t.Errorf("an exposed port ranks after an update: %+v", s.Needs)
-	}
-}
-
-func TestAWorkspaceIsIdleAnHourAfterItsAgentFinished(t *testing.T) {
-	now := time.Date(2026, 11, 14, 18, 0, 0, 0, time.UTC)
-	vm := machines.VM{Name: "linux-1", Lifetime: machines.Persistent, State: machines.Running, Resources: machines.Resources{MemoryBytes: 10 << 30},
-		Agent: &machines.AgentView{State: machines.AgentFinished, Ended: now.Add(-5 * time.Hour)}}
-	f, ok := overview.Idle("macbook", vm, now)
-	if !ok || f.Text != "linux-1 has been idle for 5 h and holds 10 GB" || f.Fix.Call != "machines.delete" || f.Fix.Args["VM"] != "linux-1" || f.Fix.On != "macbook" || f.Fix.Confirm != "linux-1" {
-		t.Fatalf("a workspace finished 5 h ago: %+v, %v", f, ok)
-	}
-	if overview.UpkeepOf(f) != overview.CanWait {
-		t.Errorf("an idle workspace needs you; it can wait")
-	}
-	vm.Agent.Ended = now.Add(-machines.IdleAfter)
-	if _, ok := overview.Idle("macbook", vm, now); !ok {
-		t.Errorf("a workspace finished %s ago is not idle", machines.IdleAfter)
-	}
-	vm.Agent.Ended = now.Add(-machines.IdleAfter + time.Minute)
-	if _, ok := overview.Idle("macbook", vm, now); ok {
-		t.Errorf("a workspace finished under %s ago is idle", machines.IdleAfter)
-	}
-	if machines.IdleAfter != time.Hour {
-		t.Errorf("a workspace is idle after %s; the rule says an hour", machines.IdleAfter)
-	}
-	vm.Agent.Ended = now.Add(-5 * time.Hour)
-	for name, other := range map[string]machines.VM{
-		"a server":          {Name: "infra", Lifetime: machines.AlwaysOn, State: machines.Running, Agent: vm.Agent},
-		"a stopped one":     {Name: "linux-1", State: machines.Stopped, Agent: vm.Agent},
-		"one still at work": {Name: "linux-1", State: machines.Running, Agent: &machines.AgentView{State: "working"}},
-	} {
-		if _, ok := overview.Idle("macbook", other, now); ok {
-			t.Errorf("%s is idle", name)
-		}
 	}
 }
 

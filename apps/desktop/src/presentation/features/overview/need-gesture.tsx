@@ -21,7 +21,6 @@ import { Button, Row, Value } from '../../ui/index';
 import type { RowProps } from '../../ui/row';
 import { wordOf } from '../../words/engine-words';
 import {
-    deleteInputOf,
     loginProgramOf,
     machineKindOf,
     moveInputOf,
@@ -110,18 +109,6 @@ function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
 function Lifecycle(props: Props) {
     const { need, macs } = props;
     const found = findMachine(macs, need.Machine);
-    const remove = deleteInputOf(need);
-    if (found?.vm && remove) {
-        return (
-            <Fix
-                {...props}
-                call="machines.delete"
-                input={remove}
-                rereads={LIFECYCLE_REREADS}
-                subject={remove.VM}
-            />
-        );
-    }
     const restart = restartInputOf(need);
     if (found?.vm && restart) {
         return (
@@ -140,7 +127,7 @@ function Lifecycle(props: Props) {
 
 function Call(props: Props) {
     const { need } = props;
-    if (deleteInputOf(need) || restartInputOf(need)) {
+    if (restartInputOf(need)) {
         return <Lifecycle {...props} />;
     }
     const update = updateInputOf(need);

@@ -3,9 +3,6 @@
     "engine.VMView": {
       "additionalProperties": false,
       "properties": {
-        "agent": {
-          "$ref": "#/$defs/machines.AgentView"
-        },
         "boot_at": {
           "format": "date-time",
           "type": "string"
@@ -73,46 +70,6 @@
         "name",
         "run_pid",
         "state"
-      ],
-      "type": "object"
-    },
-    "machines.AgentView": {
-      "additionalProperties": false,
-      "properties": {
-        "Ask": {
-          "type": "string"
-        },
-        "Ended": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "Reason": {
-          "type": "string"
-        },
-        "Since": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "State": {
-          "type": "string"
-        },
-        "Step": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "Task": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "Ask",
-        "Ended",
-        "Reason",
-        "Since",
-        "State",
-        "Task"
       ],
       "type": "object"
     },

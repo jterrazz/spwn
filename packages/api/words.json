@@ -1589,10 +1589,6 @@
       "Word": "Held",
       "Tone": "warn"
     },
-    "idle": {
-      "Word": "Idle",
-      "Tone": "plain"
-    },
     "not-seen": {
       "Word": "Not seen",
       "Tone": "plain"
@@ -1709,10 +1705,6 @@
     }
   },
   "OverviewVerb": {
-    "delete": {
-      "Word": "Delete",
-      "Tone": "plain"
-    },
     "fix": {
       "Word": "Fix",
       "Tone": "plain"

@@ -43,7 +43,7 @@ func fieldOf(a page.Action, key string) page.Field {
 // note names the ephemeral workspaces that run, which stay.
 func TestCleanUpDeletesEachMacsStoppedEphemerals(t *testing.T) {
 	all := fleetOfTwo()
-	a := cleanupSheet(ActionCleanup, all, cleanupsOf(all.Macs), sheetNow, false)
+	a := cleanupSheet(ActionCleanup, all, cleanupsOf(all.Macs), false)
 	calls := make([]string, 0, 1+len(a.Run.And))
 	calls = append(calls, a.Run.Call+" "+a.Run.In["VMs"])
 	for _, r := range a.Run.And {
@@ -79,7 +79,7 @@ func TestCleanUpDeletesEachMacsStoppedEphemerals(t *testing.T) {
 // ephemeral workspaces say no Mac, and it deletes on that Mac alone.
 func TestCleanUpOnAMacStaysOnThatMac(t *testing.T) {
 	all := fleetOfTwo()
-	a := cleanupSheet(ActionCleanup+":mini", all, cleanupsOf(all.Macs[1:2]), sheetNow, true)
+	a := cleanupSheet(ActionCleanup+":mini", all, cleanupsOf(all.Macs[1:2]), true)
 	if a.Form.Title != "Clean up on mini" || a.Run.Target.Name != "mini" || len(a.Run.And) != 0 || fieldOf(a, "VMs").Options[0].Note != "stopped{sep}8 GB disk" {
 		t.Errorf("Clean up on mini: %+v, runs %+v", a.Form, a.Run)
 	}

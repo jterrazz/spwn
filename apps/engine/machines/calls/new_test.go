@@ -77,7 +77,7 @@ func TestACreateAskedNothingButItsFileTakesWhatTheFileSays(t *testing.T) {
 	if _, missing := m.Unasked(t.Context(), "nothing"); !errors.As(missing, new(*model.UnknownImageError)) {
 		t.Errorf("a file that is not there: %v; want its refusal", missing)
 	}
-	name, err := m.NameFor(t.Context(), catalog.Linux, model.AllMachines{Macs: []model.MacView{{Name: "mac", ThisMac: true, VMs: []model.VM{{Name: "linux-1"}}}}})
+	name, err := m.NameFor(catalog.Linux, model.AllMachines{Macs: []model.MacView{{Name: "mac", ThisMac: true, VMs: []model.VM{{Name: "linux-1"}}}}})
 	if err != nil || name != "linux-2" {
 		t.Errorf("the name over a fleet holding linux-1: %q, %v; want linux-2", name, err)
 	}
@@ -126,7 +126,7 @@ func (s sheetMachines) Unasked(context.Context, string) (model.Unasked, error) {
 	return model.Unasked{Request: model.CreateRequest{From: "base-ubuntu", Image: "base-ubuntu", Lifetime: model.Ephemeral, Size: model.Resources{CPUs: 4, MemoryBytes: 8 << 30}}, Kind: catalog.Linux, Builtin: s.builtin}, nil
 }
 
-func (sheetMachines) NameFor(_ context.Context, _ catalog.MachineKind, f model.AllMachines) (string, error) {
+func (sheetMachines) NameFor(_ catalog.MachineKind, f model.AllMachines) (string, error) {
 	return "linux-" + strconv.Itoa(len(f.Macs)), nil
 }
 
@@ -177,7 +177,7 @@ func TestTheNewMachineSheetSaysWhatEachMacTakes(t *testing.T) {
 	if this.Server == nil || this.Server.Fit != model.FitsIn || this.Server.Verdict != (verdict.Verdict{Tone: verdict.Warn, Sentence: "This Mac may sleep: a server pauses with it."}) {
 		t.Errorf("a server on This Mac %+v: want it to fit, and the laptop's warning", this.Server)
 	}
-	if mini.Ready || mini.Room == nil || mini.MaxMemory != 1<<30 || mini.Verdict != (verdict.Verdict{Tone: verdict.Bad, Sentence: "No room on mac-mini. Choose the other one, or reclaim an idle machine first."}) {
+	if mini.Ready || mini.Room == nil || mini.MaxMemory != 1<<30 || mini.Verdict != (verdict.Verdict{Tone: verdict.Bad, Sentence: "No room on mac-mini. Choose the other one, or delete a stopped one first."}) {
 		t.Errorf("the mini %+v: want its room, not ready, and why", mini)
 	}
 	if mini.Server == nil || mini.Server.Fit != model.NoRoom || mini.Server.Verdict.Tone != verdict.Plain {

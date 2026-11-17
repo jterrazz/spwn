@@ -15,13 +15,6 @@
         "DiskBytes": {
           "type": "integer"
         },
-        "Ended": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "Idle": {
-          "type": "integer"
-        },
         "Name": {
           "type": "string"
         },
@@ -33,23 +26,13 @@
             "array",
             "null"
           ]
-        },
-        "Reason": {
-          "type": "string"
-        },
-        "Stopped": {
-          "type": "boolean"
         }
       },
       "required": [
         "Accounts",
         "DiskBytes",
-        "Ended",
-        "Idle",
         "Name",
-        "Ports",
-        "Reason",
-        "Stopped"
+        "Ports"
       ],
       "type": "object"
     },

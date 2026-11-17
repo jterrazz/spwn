@@ -1,16 +1,14 @@
-description: 'a cleanup on a terminal names each ephemeral workspace, its idle time and its losses, then asks'
+description: 'a cleanup on a terminal names each stopped ephemeral workspace and its losses, then asks'
 fixture:
     - ../../../__fixtures__/terminal/
 env:
     - two-macs
     - terminal
 runs:
-    - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
+    - command: 'machines stop linux-1 --yes'
       exit: 0
-    - command: 'world agent-end linux-1 s-1 "tests pass"'
-      exit: 0
-    - command: 'world advance 12m'
-      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept
     - command: '--version >/dev/null; terminal --size 140x30 "$STATION" machines cleanup'
       stdin: |
           see Delete linux-1?
@@ -19,7 +17,7 @@ runs:
       exit: 0
       stdout: |
           ┃ Delete linux-1?
-          ┃ linux-1 · finished 12 min ago · tests pass · goes with its disk (50 GB), 2 shared ports and 1 grant
+          ┃ linux-1 · stopped · goes with its disk (50 GB), 2 shared ports and 1 grant
           ┃
           ●       linux-1 deleted · with its disk, its ports and its grants
     - command: 'machines | /usr/bin/grep -c linux-1'

@@ -7,7 +7,6 @@ import type {
     EngineStartInput,
     MachinefileExtraLine,
     MachinefileLine,
-    MachinesDeleteInput,
     MachinesFit,
     MachinesMacView,
     MachinesRestartInput,
@@ -91,11 +90,6 @@ export function removeInputOf(need: OverviewNeed): BackgroundRemoveInput | undef
     return need.Call !== 'background.remove' || label === '' ? undefined : { Label: label };
 }
 
-export function deleteInputOf(need: OverviewNeed): MachinesDeleteInput | undefined {
-    const vm = need.Args?.VM ?? '';
-    return need.Call !== 'machines.delete' || vm === '' ? undefined : { VM: vm };
-}
-
 export function restartInputOf(need: OverviewNeed): MachinesRestartInput | undefined {
     const name = need.Args?.Name ?? '';
     return need.Call !== 'machines.restart' || name === '' ? undefined : { Name: name };
@@ -110,7 +104,6 @@ export type NeedCall =
     | 'background.remove'
     | 'disk.move'
     | 'engine.start'
-    | 'machines.delete'
     | 'machines.restart';
 
 // outside: a listening port carries no field saying it is shared (apps/engine/ports/exposure.go, Port).

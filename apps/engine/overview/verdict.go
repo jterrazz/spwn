@@ -4,13 +4,10 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
-	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
-	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 type Upkeep string
@@ -28,7 +25,6 @@ const (
 	VerbReview      Verb = "review"
 	VerbRestart     Verb = "restart"
 	VerbStart       Verb = "start"
-	VerbDelete      Verb = "delete"
 	VerbUpdate      Verb = "update"
 	VerbRemove      Verb = "remove"
 	VerbMove        Verb = "move"
@@ -37,7 +33,7 @@ const (
 )
 
 func (Verb) Enum() []string {
-	return []string{string(VerbReview), string(VerbRestart), string(VerbStart), string(VerbDelete), string(VerbUpdate), string(VerbRemove),
+	return []string{string(VerbReview), string(VerbRestart), string(VerbStart), string(VerbUpdate), string(VerbRemove),
 		string(VerbMove), string(VerbStartEngine), string(VerbFix)}
 }
 
@@ -95,8 +91,6 @@ func VerbOf(f finding.Finding) Verb {
 		return VerbRemove
 	case "disk.move":
 		return VerbMove
-	case "machines.delete":
-		return VerbDelete
 	case "machines.restart":
 		return VerbRestart
 	case "machines.start":
@@ -117,19 +111,6 @@ func NounOf(id section.ID) string {
 		return NounSignIns
 	}
 	return id.Title()
-}
-
-func Idle(mac string, vm machines.VM, now time.Time) (finding.Finding, bool) {
-	// invariant: a workspace idle by machines.IdleFor holds its memory for
-	// nothing: a need that can wait, its gesture the delete.
-	idle, ok := machines.IdleFor(vm, now)
-	if !ok {
-		return finding.Finding{}, false
-	}
-	hours := int(idle / time.Hour)
-	text := vm.Name + " has been idle for " + strconv.Itoa(hours) + " h and holds " + strconv.FormatInt(vm.Resources.MemoryBytes>>30, 10) + " GB"
-	return finding.Finding{Machine: machine.Ref{Name: vm.Name, On: mac}, Section: section.Overview, Severity: finding.NeedsALook, Subject: vm.Name, Text: text,
-		Fix: finding.Fix{Call: "machines.delete", Args: map[string]string{"VM": vm.Name}, On: mac, Confirm: vm.Name}}, true
 }
 
 const (

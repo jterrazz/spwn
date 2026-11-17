@@ -31,7 +31,7 @@ func TestEachGestureAsksWhatItsKindNeeds(t *testing.T) {
 		{"delete an image", confirm.DeleteImage, machine.Computer, confirm.YesNo},
 		{"erase an app's data", confirm.Erase, machine.Computer, confirm.TypeName},
 		{"build the image a create needs", confirm.BuildImage, machine.Workspace, confirm.YesNo},
-		{"delete the ephemeral workspaces whose agent finished", confirm.Cleanup, machine.Computer, confirm.YesNo},
+		{"delete the stopped ephemeral workspaces", confirm.Cleanup, machine.Computer, confirm.YesNo},
 		{"free what nothing uses on a Mac", confirm.FreeUnused, machine.Computer, confirm.TypeName},
 	} {
 		if got := confirm.For(c.action, c.kind); got != c.want {

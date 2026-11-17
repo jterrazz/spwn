@@ -83,7 +83,7 @@ func overviewActions(m Machine, h model.MacView, label string) []page.Action {
 		}
 	}
 	if c := cleanupsOf([]model.MacView{h}); c[0].any() {
-		out = append(out, cleanupSheet(ActionCleanup, *m.All, c, m.Now, true))
+		out = append(out, cleanupSheet(ActionCleanup, *m.All, c, true))
 	}
 	if a, ok := o.awakeAction(); ok {
 		out = append(out, a)

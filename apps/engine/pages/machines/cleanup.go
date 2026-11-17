@@ -3,7 +3,6 @@ package machines
 import (
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -11,7 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/pages"
 )
 
-const cleanupEmpty = "Nothing finished to delete on "
+const cleanupEmpty = "Nothing stopped to delete on "
 
 func Cleaned(out model.Cleaned, mac string, thisMac page.Context) page.Page {
 	// value: SPEC B5.9: each ephemeral workspace deleted, then what stays named.
@@ -46,7 +45,7 @@ func CleanupConfirm(cands []model.Candidate) page.Confirm {
 	// deletes and lists what goes with each one.
 	lines := make([]page.Value, 0, len(cands))
 	for _, c := range cands {
-		lines = append(lines, page.Texts(append([]string{c.Name}, append(idle(c), "goes with "+losses(c))...)...))
+		lines = append(lines, page.Texts(c.Name, "stopped", "goes with "+losses(c)))
 	}
 	return page.Confirm{Question: "Delete " + ephemerals(cands) + "?", Lines: lines, Danger: true, Yes: "Delete"}
 }
@@ -62,27 +61,6 @@ func CleanupRefused(cands []model.Candidate) page.Value {
 		parts = append(parts, c.Name+" goes with "+losses(c))
 	}
 	return page.Text("refusing to delete " + ephemerals(cands) + " without --yes: " + strings.Join(parts, "; "))
-}
-
-func idle(c model.Candidate) []string {
-	// value: why a candidate may go, and since when: "stopped", or
-	// "finished 12 min ago", then how in its agent's words.
-	if c.Stopped && c.Ended.IsZero() {
-		return []string{"stopped"}
-	}
-	return []string{"finished " + ago(c.Idle), c.Reason}
-}
-
-func ago(d time.Duration) string {
-	switch {
-	case d < time.Minute:
-		return "just now"
-	case d < time.Hour:
-		return strconv.Itoa(int(d/time.Minute)) + " min ago"
-	case d < 48*time.Hour:
-		return strconv.Itoa(int(d/time.Hour)) + " hr ago"
-	}
-	return strconv.Itoa(int(d/(24*time.Hour))) + " days ago"
 }
 
 func losses(c model.Candidate) string {

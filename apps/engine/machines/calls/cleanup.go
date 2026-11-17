@@ -4,7 +4,6 @@ import (
 	"context"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
@@ -77,16 +76,12 @@ var Cleanup = call.Call[Deps, CleanupIn, machines.Cleaned]{
 }
 
 func candidates(ctx context.Context, d Deps, gone []machines.VM, pick []string) ([]machines.Candidate, error) {
-	var now time.Time
-	if d.Now != nil {
-		now = d.Now()
-	}
 	var out []machines.Candidate
 	for _, vm := range gone {
 		if !slices.Contains(pick, vm.Name) {
 			continue
 		}
-		c := machines.CandidateOf(vm, now)
+		c := machines.CandidateOf(vm)
 		if d.Holdings != nil {
 			ports, accounts, err := d.Holdings.Held(ctx, vm.Name)
 			if err != nil {

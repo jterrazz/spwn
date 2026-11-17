@@ -224,7 +224,7 @@ func (s *Machinist) Unasked(ctx context.Context, from string) (model.Unasked, er
 	return out, nil
 }
 
-func (s *Machinist) NameFor(_ context.Context, kind catalog.MachineKind, f model.AllMachines) (string, error) {
+func (s *Machinist) NameFor(kind catalog.MachineKind, f model.AllMachines) (string, error) {
 	// value: the name a create of that kind takes unasked over the fleet
 	// as read.
 	held, err := s.claimsOf(f)

@@ -1235,7 +1235,6 @@ export type EngineVMIn = {
 };
 
 export type EngineVMView = {
-    agent?: MachinesAgentView;
     boot_at?: string;
     cause?: string;
     check?: MachinesCheckStatus;
@@ -1754,16 +1753,6 @@ export type MachinesAdded = {
     Version: string;
 };
 
-export type MachinesAgentView = {
-    Ask: string;
-    Ended: string;
-    Reason: string;
-    Since: string;
-    State: string;
-    Step?: string[];
-    Task: string;
-};
-
 export type MachinesAllMachines = {
     Macs: MachinesMacView[] | null;
     Read: string;
@@ -1933,12 +1922,8 @@ export type MachinesCallsWakeIn = {
 export type MachinesCandidate = {
     Accounts: string[] | null;
     DiskBytes: number;
-    Ended: string;
-    Idle: number;
     Name: string;
     Ports: number[] | null;
-    Reason: string;
-    Stopped: boolean;
 };
 
 export type MachinesCapacity = {
@@ -2022,7 +2007,7 @@ export type MachinesFirstStartSignIn = {
 export type MachinesHold = {
     By?: string;
     Sentence: string;
-    State: 'always-on' | 'held' | 'idle' | 'free' | 'yours' | 'not-seen';
+    State: 'always-on' | 'held' | 'free' | 'yours' | 'not-seen';
 };
 
 export type MachinesIncident = {
@@ -2171,7 +2156,6 @@ export type MachinesUptimeDay = {
 };
 
 export type MachinesVM = {
-    Agent: MachinesAgentView | null;
     Birth: MachinesBirth | null;
     BootAt: string;
     Cause: string;
@@ -2312,7 +2296,7 @@ export type OverviewNeed = {
     Subject: string;
     Text: string;
     Upkeep: 'needs-you' | 'can-wait';
-    Verb: 'review' | 'restart' | 'start' | 'delete' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
+    Verb: 'review' | 'restart' | 'start' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
 };
 
 export type OverviewPart = {
@@ -3569,7 +3553,7 @@ export interface Calls {
     'machinefile.plan': { in: MachinefilePlanInput; out: MachinefilePlanOutput; watch: false };
     'machinefile.upgrade': { in: MachinefileUpgradeInput; out: MachinefileUpgradeOutput; watch: false };
     'machines.add': { in: MachinesAddInput; out: MachinesAddOutput; watch: false };
-    'machines.cleanup': { in: MachinesCleanupInput; out: MachinesCleanupOutput; watch: false; confirm: 'cleanup'; consequence: 'Every ephemeral workspace whose agent finished is deleted.' };
+    'machines.cleanup': { in: MachinesCleanupInput; out: MachinesCleanupOutput; watch: false; confirm: 'cleanup'; consequence: 'Every stopped ephemeral workspace is deleted.' };
     'machines.create-server': { in: MachinesCreateServerInput; out: MachinesCreateServerOutput; watch: false; confirm: 'build-image'; consequence: '%s is built first, which takes several minutes.' };
     'machines.create-workspace': { in: MachinesCreateWorkspaceInput; out: MachinesCreateWorkspaceOutput; watch: false; confirm: 'build-image'; consequence: '%s is built first, which takes several minutes.' };
     'machines.delete': { in: MachinesDeleteInput; out: MachinesDeleteOutput; watch: false; confirm: 'delete'; consequence: '%s and everything on its disk are deleted for good.' };
@@ -3700,7 +3684,7 @@ export type MachinesCheckState = 'waiting' | 'passing' | 'failing';
 
 export type MachinesFit = 'fits' | 'no-room';
 
-export type MachinesHoldState = 'always-on' | 'held' | 'idle' | 'free' | 'yours' | 'not-seen';
+export type MachinesHoldState = 'always-on' | 'held' | 'free' | 'yours' | 'not-seen';
 
 export type MachinesLifetime = 'ephemeral' | 'persistent' | 'always-on';
 
@@ -3714,7 +3698,7 @@ export type OverviewMark = 'exposed' | 'down' | 'needs-you' | 'can-wait';
 
 export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
-export type OverviewVerb = 'review' | 'restart' | 'start' | 'delete' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
+export type OverviewVerb = 'review' | 'restart' | 'start' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
 
 export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant';
 

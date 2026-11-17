@@ -8,7 +8,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
-	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 // invariant: SPEC B5.1, B5.22: the engine keeps the last report of each
@@ -73,18 +72,6 @@ func finished(vm string, a agents.Agent) engine.Told {
 		t.Parts = append(t.Parts, a.Reason)
 	}
 	return t
-}
-
-func agentView(kept []agents.Agent) *model.AgentView {
-	a, ok := agents.Speaker(kept)
-	if !ok {
-		return nil
-	}
-	v := model.AgentView{State: string(a.State), Task: a.Task, Ended: a.Ended, Reason: a.Reason, Step: agents.Words(a)}
-	if a.Ask != nil {
-		v.Ask, v.Since = a.Ask.Title, a.Ask.At
-	}
-	return &v
 }
 
 // value: a report as memory keeps it, and back.

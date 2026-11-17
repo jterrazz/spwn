@@ -113,9 +113,6 @@ type VM struct {
 	// create made it ready.
 	Birth   *Birth
 	ReadyAt time.Time
-	// value: the agent a workspace is said by, as its guest last reported
-	// it; nil while none is known.
-	Agent *AgentView
 	// value: what it is for, as its create was told, empty when it was told
 	// nothing; who made it, the session its create named, else you; and
 	// the Machinefile it was made from, empty when none was named.
@@ -157,28 +154,12 @@ type KeptDrift struct {
 	Failed      string `json:",omitempty"`
 }
 
-type AgentView struct {
-	State string
-	Task  string
-	// value: what it waits on the owner for, and since when.
-	Ask   string
-	Since time.Time
-	// value: when it finished, and how, in its app's words.
-	Ended  time.Time
-	Reason string
-	// value: its current step in parts ("running tests", "41/58 pass");
-	// empty before its first.
-	Step []string `json:",omitempty"`
-}
-
-const AgentFinished = "finished"
-
-func (vm VM) Finished() bool { return vm.Agent != nil && vm.Agent.State == AgentFinished }
-
 func Pausing(vms []VM) []string {
+	// value: what pauses while its Mac sleeps: every running VM that is not
+	// always on, by name.
 	var out []string
 	for _, vm := range vms {
-		if vm.Lifetime != AlwaysOn && vm.State == Running && !vm.Finished() {
+		if vm.Lifetime != AlwaysOn && vm.State == Running {
 			out = append(out, vm.Name)
 		}
 	}

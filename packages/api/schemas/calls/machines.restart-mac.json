@@ -26,46 +26,6 @@
       ],
       "type": "object"
     },
-    "machines.AgentView": {
-      "additionalProperties": false,
-      "properties": {
-        "Ask": {
-          "type": "string"
-        },
-        "Ended": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "Reason": {
-          "type": "string"
-        },
-        "Since": {
-          "format": "date-time",
-          "type": "string"
-        },
-        "State": {
-          "type": "string"
-        },
-        "Step": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "Task": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "Ask",
-        "Ended",
-        "Reason",
-        "Since",
-        "State",
-        "Task"
-      ],
-      "type": "object"
-    },
     "machines.Back": {
       "additionalProperties": false,
       "properties": {
@@ -173,7 +133,6 @@
           "enum": [
             "always-on",
             "held",
-            "idle",
             "free",
             "yours",
             "not-seen"
@@ -404,16 +363,6 @@
     "machines.VM": {
       "additionalProperties": false,
       "properties": {
-        "Agent": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/machines.AgentView"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "Birth": {
           "anyOf": [
             {
@@ -592,7 +541,6 @@
         }
       },
       "required": [
-        "Agent",
         "Birth",
         "BootAt",
         "Cause",
