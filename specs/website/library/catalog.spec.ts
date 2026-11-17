@@ -111,22 +111,23 @@ describe('catalog', () => {
     );
 
     test('D15 a setting page reads each file it writes, and that it can be undone', async () => {
-        // Given - the window on agent-hooks's page over stories, a setting that writes two files
+        // Given - the window on autologin's page over stories, a setting that writes two files
         const result = await website.visit(
-            '/?world=stories&page=catalog-settings&item=agent-hooks',
+            '/?world=stories&page=catalog-settings&item=autologin',
             async (visitor) => {
                 // When - the page is read
                 const applied = region('How it is applied');
                 const changes = region('What it changes');
-                await visitor.see(heading('agent-hooks setting'));
+                await visitor.see(heading('autologin setting'));
 
                 // Then - it can be undone, and each file says which part is station's
                 await visitor.see(within(applied, content('Can be undone')));
-                await visitor.see(within(changes, content('~/.claude/settings.json')));
                 await visitor.see(
-                    within(changes, content("station's hook under", { exact: false })),
+                    within(changes, content("the agent user's login password", { exact: false })),
                 );
-                await visitor.see(within(changes, content('~/.codex/config.toml')));
+                await visitor.see(
+                    within(changes, content('/Library/Preferences/com.apple.loginwindow')),
+                );
             },
         );
         expect(result.errors.text).toBe('');

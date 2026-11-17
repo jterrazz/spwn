@@ -1,4 +1,4 @@
-33 settings on 4 machines · 20 need a look · infra is a server: not checked
+32 settings on 4 machines · 20 need a look · infra is a server: not checked
 
 Needs a look
   ◐ This Mac  git-shortcuts  changed since 2 d ago
@@ -48,7 +48,7 @@ Set by station
   ◐ dns            ◐         ◐         ◐        ◐       0/4
   ◐ zed-dotfiles   ◐         ◐         ◐        ◐       0/4
   ◐ tailscale-cli  ◐         ◐         ◐        ◐       0/4
-  ○ 15 more        ○ 4/12    ○ 4/12    ○ 4/12   ○ 4/12  16/48
+  ○ 14 more        ○ 4/11    ○ 4/11    ○ 4/11   ○ 4/11  16/44
 Always-on Mac
                 This Mac  mac-mini  linux-1  api  OK
   ○ 5 settings  ○         ○         –        –    –

@@ -317,7 +317,7 @@ func (m MethodSpec) settingKeys() []string {
 	var keys []string
 	for key, set := range map[string]bool{
 		"file": m.File != nil, "builtin": m.Builtin != "", "macos-defaults": m.MacOSDefaults != nil, "git-aliases": m.GitAliases != nil,
-		"shell": len(m.Shell) > 0 && len(m.appKeys()) == 0, "agent-hooks": m.AgentHooks != nil, "mux-machines": m.MuxMachines != nil,
+		"shell": len(m.Shell) > 0 && len(m.appKeys()) == 0, "mux-machines": m.MuxMachines != nil,
 	} {
 		if set {
 			keys = append(keys, key)

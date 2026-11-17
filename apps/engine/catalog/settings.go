@@ -44,7 +44,6 @@ const (
 	EffectDotfile     EffectKind = "dotfile"
 	EffectGitAliases  EffectKind = "git-aliases"
 	EffectShell       EffectKind = "shell"
-	EffectAgentHooks  EffectKind = "agent-hooks"
 	EffectMuxMachines EffectKind = "mux-machines"
 	// value: no Applier writes it yet: applied, it is refused as unhandled.
 	EffectMacOSDefaults EffectKind = "macos-defaults"
@@ -76,12 +75,6 @@ type GitAlias struct {
 
 type MuxMachines struct{}
 
-type AgentHooks struct {
-	// value: the apps whose agents station hooks, by catalog name; each
-	// installed one gets its hook, the others are left alone.
-	Apps []string `yaml:"apps"`
-}
-
 type Procedure string
 
 const (
@@ -104,7 +97,6 @@ const (
 func (Touch) Kind() EffectKind         { return EffectTouch }
 func (Dotfiles) Kind() EffectKind      { return EffectDotfile }
 func (GitAliases) Kind() EffectKind    { return EffectGitAliases }
-func (AgentHooks) Kind() EffectKind    { return EffectAgentHooks }
 func (MuxMachines) Kind() EffectKind   { return EffectMuxMachines }
 func (MacOSDefaults) Kind() EffectKind { return EffectMacOSDefaults }
 
@@ -181,8 +173,6 @@ type Value struct {
 const GitShortcutsSetting = "git-shortcuts"
 
 const TailscaleCLISetting = "tailscale-cli"
-
-const AgentHooksSetting = "agent-hooks"
 
 const MuxMachinesSetting = "herdr-machine"
 

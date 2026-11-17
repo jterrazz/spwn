@@ -86,21 +86,6 @@
       },
       "type": "object"
     },
-    "AgentHooks": {
-      "additionalProperties": false,
-      "properties": {
-        "apps": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "apps"
-      ],
-      "type": "object"
-    },
     "AptMethod": {
       "additionalProperties": false,
       "properties": {
@@ -401,9 +386,6 @@
     "MethodSpec": {
       "additionalProperties": false,
       "properties": {
-        "agent-hooks": {
-          "$ref": "#/$defs/AgentHooks"
-        },
         "apt": {
           "$ref": "#/$defs/AptMethod"
         },

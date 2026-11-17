@@ -11,7 +11,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/claudecode"
 	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/codex"
 	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
-	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/agenthooks"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/gitaliases"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/muxmachines"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/zshblock"
@@ -114,10 +113,6 @@ func settingAppliers(m machine) []settingscontract.Applier {
 		zshblock.New(m.zshrc(), zshblock.Options{Home: m.sys.Env.Home(), OS: machineOf(m.profile).System.OS, Arch: machineOf(m.profile).System.Arch}),
 		dotfile.New(m.sys.FS, m.sys.Run, dotfile.Options{Home: m.sys.Env.Home(), Ours: files}),
 		neversleeps.New(m.stores.neverSleeps()),
-		agenthooks.New(m.has,
-			agenthooks.Hook{App: claudecode.Program, File: claudecode.File, Hooks: m.agentHooks(claudecode.ID)},
-			agenthooks.Hook{App: codex.Program, File: codex.File, Hooks: m.agentHooks(codex.ID)},
-		),
 		muxmachines.New(m.multiplexer(), m.workspaces),
 	}
 	if m.world != nil {

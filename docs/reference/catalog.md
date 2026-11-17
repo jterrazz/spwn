@@ -121,7 +121,6 @@ A method is a selector, exactly one manager key, and the overrides that keep ins
 | `macos-defaults` | setting      | a `domain`, `this-mac` (its keys of this Mac alone), and its `keys`, each `key`, `type` (`string`, `integer`, `float`, `boolean`), `value`                                                                                                                                                                                                            |
 | `git-aliases`    | setting      | the git config `file` and its `aliases`                                                                                                                                                                                                                                                                                                               |
 | `shell`          | setting      | the identified blocks of `~/.zshrc` the setting writes, `id` and `zsh` each (alone, it is the setting's effect; beside an app's manager key it is a modifier, below)                                                                                                                                                                                  |
-| `agent-hooks`    | setting      | the `apps` whose agents are hooked                                                                                                                                                                                                                                                                                                                    |
 | `mux-machines`   | setting      | `{}`                                                                                                                                                                                                                                                                                                                                                  |
 
 A setting, like an app, may carry a method per system.
@@ -300,9 +299,6 @@ methods:
   git-aliases: { file: ~/.gitconfig, aliases: [{ name: st, command: status }] }
 - os: any
   shell: [{ id: station:docker-shortcuts, zsh: 'dclean() { docker rm -vf $(docker ps -aq); }' }]
-- os: any
-  machine: [workspace, server]
-  agent-hooks: { apps: [claude, codex] }
 - os: macos
   machine: computer
   mux-machines: {}

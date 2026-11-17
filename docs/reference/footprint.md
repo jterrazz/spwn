@@ -673,8 +673,6 @@ Erase: none (nothing to erase: its pages are station's, its choices are kept).
 | never-sleeps            | `~/.config/station/preferences.json`                                            | never touched | `never_sleeps`, the engine holds an idle-sleep assertion while it is set |
 | restart-after-power-cut | `/Library/Preferences/SystemConfiguration/com.apple.PowerManagement.plist`      | never touched | pmset: autorestart, wake for network                                     |
 | sshd                    | `/System/Library/LaunchDaemons/ssh.plist`                                       | never touched | Remote Login, through systemsetup                                        |
-| agent-hooks             | `~/.claude/settings.json`                                                       | never touched | station's hook under `hooks`, every other key the owner's                |
-| agent-hooks             | `~/.codex/config.toml`                                                          | never touched | `notify`, unless the owner set it to another program                     |
 
 ## Home-root exceptions
 

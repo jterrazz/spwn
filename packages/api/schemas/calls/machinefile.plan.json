@@ -1,23 +1,5 @@
 {
   "$defs": {
-    "catalog.AgentHooks": {
-      "additionalProperties": false,
-      "properties": {
-        "Apps": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "Apps"
-      ],
-      "type": "object"
-    },
     "catalog.AptMethod": {
       "additionalProperties": false,
       "properties": {
@@ -267,16 +249,6 @@
     "catalog.MethodSpec": {
       "additionalProperties": false,
       "properties": {
-        "AgentHooks": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/catalog.AgentHooks"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "Apt": {
           "anyOf": [
             {
@@ -500,7 +472,6 @@
         }
       },
       "required": [
-        "AgentHooks",
         "Apt",
         "Brew",
         "Builtin",
