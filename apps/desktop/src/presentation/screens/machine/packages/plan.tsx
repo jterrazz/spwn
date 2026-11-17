@@ -29,7 +29,7 @@ function Steps({ lines, title, note = String(lines.length) }: StepsProps) {
     return (
         <Panel note={note} title={title}>
             {lines.map((line) => {
-                const layer = line.Step.File.Name;
+                const fileName = line.Step.File.Name;
                 return (
                     <Row
                         key={`${line.Step.Kind}/${line.Step.Package}`}
@@ -44,8 +44,8 @@ function Steps({ lines, title, note = String(lines.length) }: StepsProps) {
                         {...(line.Step.Version === '' ? {} : { tag: line.Step.Version })}
                         title={line.Step.Package}
                         trail={
-                            layer === '' ? null : (
-                                <span className={styles.muted}>{`from ${layer}`}</span>
+                            fileName === '' ? null : (
+                                <span className={styles.muted}>{`from ${fileName}`}</span>
                             )
                         }
                     />

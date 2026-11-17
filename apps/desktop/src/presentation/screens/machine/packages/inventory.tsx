@@ -3,13 +3,13 @@ import { useState } from 'react';
 
 import { useWatch } from '../../../dependencies/dependencies';
 import type { Reading as Read } from '../../../dependencies/dependencies';
-import { LayerList } from '../../../features/machinefile/layers';
+import { PlanFileList } from '../../../features/machinefile/files';
 import {
     countOn,
     differingLinesOf,
     kindsOf,
-    layersOf,
     onShelf,
+    planFilesOf,
     SHELVES,
 } from '../../../features/machinefile/model';
 import type { Shelf } from '../../../features/machinefile/model';
@@ -18,7 +18,7 @@ import { Panel, Switch } from '../../../ui/index';
 
 import styles from './packages.module.css';
 
-const BY_LAYER = 'by layer, a later one wins';
+const BY_FILE = 'by layer, a later one wins';
 
 function Lines({
     drift,
@@ -33,23 +33,23 @@ function Lines({
 }) {
     const apps = useWatch('apps.list', {}, target);
     const kinds = kindsOf(apps.kind === 'read' ? (apps.out ?? []) : []);
-    const layers = layersOf(drift.Plan);
+    const planFiles = planFilesOf(drift.Plan);
     return (
         <>
             <Switch
                 label="Which packages"
                 onChange={setShelf}
                 options={SHELVES.map((id) => ({
-                    count: countOn(layers, id, kinds),
+                    count: countOn(planFiles, id, kinds),
                     id,
                     label: id,
                 })).filter((option) => option.id !== 'Skills' || option.count > 0)}
                 value={shelf}
             />
-            <Panel note={BY_LAYER} title={shelf}>
-                <LayerList
-                    layers={onShelf(layers, shelf, kinds)}
+            <Panel note={BY_FILE} title={shelf}>
+                <PlanFileList
                     look={{ differing: differingLinesOf(drift), kind: 'machine' }}
+                    planFiles={onShelf(planFiles, shelf, kinds)}
                     shelf={shelf}
                 />
             </Panel>
@@ -69,7 +69,7 @@ export function Inventory({
         return <Lines drift={drift.out} setShelf={setShelf} shelf={shelf} target={target} />;
     }
     return (
-        <Panel note={BY_LAYER} title={shelf}>
+        <Panel note={BY_FILE} title={shelf}>
             {drift.kind === 'failed' ? (
                 <Unanswered error={drift.error} size="panel" />
             ) : (

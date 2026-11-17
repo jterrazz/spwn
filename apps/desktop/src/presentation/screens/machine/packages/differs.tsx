@@ -1,7 +1,7 @@
 import type { MachinefileDiffering, MachinefileDrift } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { differencesOf, layersOf } from '../../../features/machinefile/model';
+import { differencesOf, planFilesOf } from '../../../features/machinefile/model';
 import { AppIcon, Button, Panel, StatePill, Switch, Value } from '../../../ui/index';
 import type { Identity } from '../../../ui/index';
 import type { PlanLine } from '../../../words/provisional';
@@ -16,9 +16,17 @@ const DIRECTIONS: readonly { id: Direction; label: string }[] = [
     { id: 'file', label: 'Change the file' },
 ];
 
-type Layered = { name: string; identity: Identity | undefined };
+type PlanFileTag = { name: string; identity: Identity | undefined };
 
-function DiffRow({ line, layer, toFile }: { line: PlanLine; layer: Layered; toFile: boolean }) {
+function DiffRow({
+    line,
+    planFile,
+    toFile,
+}: {
+    line: PlanLine;
+    planFile: PlanFileTag;
+    toFile: boolean;
+}) {
     const { Step, Seen } = line;
     return (
         <div className={styles.compare}>
@@ -26,9 +34,9 @@ function DiffRow({ line, layer, toFile }: { line: PlanLine; layer: Layered; toFi
                 <AppIcon kind={Step.Kind} name={Step.Package} />
                 <span className={styles.name}>{Step.Package}</span>
                 {Step.Version === '' ? null : <Value look="raised">{Step.Version}</Value>}
-                {layer.name === '' ? null : (
-                    <Value identity={layer.identity} look="raised">
-                        {layer.name}
+                {planFile.name === '' ? null : (
+                    <Value identity={planFile.identity} look="raised">
+                        {planFile.name}
                     </Value>
                 )}
             </div>
@@ -103,7 +111,9 @@ export function Differs({ drift, onPlan }: { drift: MachinefileDrift; onPlan: ()
         return null;
     }
     const toFile = direction === 'file';
-    const identities = new Map(layersOf(drift.Plan).map((layer) => [layer.name, layer.identity]));
+    const identities = new Map(
+        planFilesOf(drift.Plan).map((planFile) => [planFile.name, planFile.identity]),
+    );
     return (
         <Panel
             action={
@@ -136,8 +146,8 @@ export function Differs({ drift, onPlan }: { drift: MachinefileDrift; onPlan: ()
                 return (
                     <DiffRow
                         key={`${line.Step.Kind}/${line.Step.Package}`}
-                        layer={{ identity: identities.get(name), name }}
                         line={line}
+                        planFile={{ identity: identities.get(name), name }}
                         toFile={toFile}
                     />
                 );

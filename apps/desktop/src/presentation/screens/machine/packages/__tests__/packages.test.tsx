@@ -98,28 +98,28 @@ describe('Packages', () => {
         expect(result.content.text).not.toContain('8 differences from linux-dev.');
     });
 
-    test("a line its machine lacks is a hollow square of its layer and a chip in its version's place", async () => {
+    test("a line its machine lacks is a hollow square of its file and a chip in its version's place", async () => {
         // Given - This Mac's Packages over machinefile-differs, where ripgrep is not installed
         let square = '';
-        let layer = '';
+        let fileHtml = '';
         await component.render(
             windowOver('machinefile-differs', 'macbook-pro'),
             async (visitor) => {
-                // When - its layer is drawn
+                // When - its file is drawn
                 await visitor.see(within(region('macbook-pro'), content('ripgrep')));
                 square =
                     document.querySelector<HTMLElement>('i[title="ripgrep"]')?.dataset.tone ?? '';
-                layer =
+                fileHtml =
                     document.querySelector('section[aria-label="macbook-pro"]')?.innerHTML ?? '';
             },
         );
 
         // Then - its square is hollow in its condition's tone, and the chip says it in the engine's word
         expect(square).toBe('warn');
-        expect(layer).toContain('>not installed<');
+        expect(fileHtml).toContain('>not installed<');
     });
 
-    test("the file's lines switch to its settings, still grouped by the layer that sets each", async () => {
+    test("the file's lines switch to its settings, still grouped by the file that sets each", async () => {
         // Given - the window on This Mac's Packages over stories-file, whose file sets one setting
         const result = await component.render(
             windowOver('stories-file', 'macbook-pro'),
@@ -132,7 +132,7 @@ describe('Packages', () => {
             },
         );
 
-        // Then - the one setting, under the layer of the file that sets it
+        // Then - the one setting, under the file that sets it
         await expect(result.tree).toMatch(file('./__expected__/stories-settings.aria.yaml'));
     });
 
@@ -177,7 +177,7 @@ describe('Packages', () => {
         await expect(result.tree).toMatch(file('./__expected__/base-macos-differs.aria.yaml'));
     });
 
-    test('a plan is its steps that change something, grouped by what each does, each from its layer', async () => {
+    test('a plan is its steps that change something, grouped by what each does, each from its file', async () => {
         // Given - the plan of the built-in base-macos for This Mac, read over two-macs
         const plan = builtIn('machinefile.plan');
 
@@ -186,7 +186,7 @@ describe('Packages', () => {
             await visitor.see(heading('To install 2'));
         });
 
-        // Then - its installs and its settings, each from the file whose layer lists it, what stays left out
+        // Then - its installs and its settings, each from the file that lists it, what stays left out
         await expect(result.tree).toMatch(file('./__expected__/base-macos-plan.aria.yaml'));
     });
 

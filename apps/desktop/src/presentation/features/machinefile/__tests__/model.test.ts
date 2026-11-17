@@ -9,8 +9,8 @@ import {
     countOn,
     differencesOf,
     differingLinesOf,
-    layersOf,
     onShelf,
+    planFilesOf,
     SHELVES,
 } from '../model';
 
@@ -36,19 +36,19 @@ function answered<N extends CallName>(world: string, request: Asked<N>): Out<N> 
 }
 
 describe('model', () => {
-    test("a file's lines are grouped by the layer that sets each, in the engine's order, a colour per position", () => {
+    test("a file's lines are grouped by the file that sets each, in the engine's order, a colour per position", () => {
         // Given - This Mac's drift from its file over machinefile-differs, homebrew brought by jq
         const plan = answered('machinefile-differs', {
             name: 'machinefile.drift',
             watch: false,
         }).Plan;
 
-        // When - its lines are grouped by layer
-        const layers = layersOf(plan);
+        // When - its lines are grouped by file
+        const planFiles = planFilesOf(plan);
 
-        // Then - each file once, as the engine first names it; homebrew sits in the layer of jq, its bringer
+        // Then - each file once, as the engine first names it; homebrew sits in the file of jq, its bringer
         expect(
-            layers.map((layer) => [layer.name, layer.identity, layer.lines.length]),
+            planFiles.map((planFile) => [planFile.name, planFile.identity, planFile.lines.length]),
         ).toStrictEqual([
             ['base', 'blue', 2],
             ['macbook-pro', 'purple', 4],
@@ -57,20 +57,20 @@ describe('model', () => {
 
     test('each shelf holds the lines of its kind, a skill told by its app kind', () => {
         // Given - This Mac's drift over stories-file, its one setting, and gh of the app kind skill
-        const layers = layersOf(
+        const planFiles = planFilesOf(
             answered('stories-file', { name: 'machinefile.drift', watch: false }).Plan,
         );
         const kinds = new Map([['gh', 'skill' as const]]);
 
         // When - the lines are counted on each shelf, and the settings drawn
-        const counts = SHELVES.map((shelf) => countOn(layers, shelf, kinds));
-        const settings = onShelf(layers, 'Settings', kinds);
+        const counts = SHELVES.map((shelf) => countOn(planFiles, shelf, kinds));
+        const settings = onShelf(planFiles, 'Settings', kinds);
 
-        // Then - five apps less the skill, one skill, one setting in the layer that sets it
+        // Then - five apps less the skill, one skill, one setting in the file that sets it
         expect(counts).toStrictEqual([4, 1, 1]);
-        expect(settings.map((layer) => [layer.name, layer.lines[0]?.Step.Package])).toStrictEqual([
-            ['macbook-pro', 'git-shortcuts'],
-        ]);
+        expect(
+            settings.map((planFile) => [planFile.name, planFile.lines[0]?.Step.Package]),
+        ).toStrictEqual([['macbook-pro', 'git-shortcuts']]);
     });
 
     test('a plan groups its steps by the action the engine chose', () => {

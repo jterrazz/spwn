@@ -5,9 +5,9 @@ import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../ui/index';
 import type { PlanLine } from '../../words/provisional';
 import { engineShown, kindChipWord, stepBoxed } from '../../words/shown';
 import { countWord } from './model';
-import type { Layer, Shelf } from './model';
+import type { PlanFile, Shelf } from './model';
 
-import styles from './layers.module.css';
+import styles from './files.module.css';
 
 export type Look =
     | {
@@ -18,7 +18,7 @@ export type Look =
       }
     | { kind: 'machine'; differing: ReadonlySet<PlanLine> };
 
-const NO_LAYER_WORD = 'in no layer';
+const NO_FILE_WORD = 'in no layer';
 const THIS_FILE_WORD = 'this file';
 const EXTENDED_WORD = 'extended';
 
@@ -82,14 +82,14 @@ function FileLine({ line, description, open }: FileLineProps) {
     );
 }
 
-type LayerHeadProps = { layer: Layer; shelf: Shelf; look: Look };
+type PlanFileHeadProps = { planFile: PlanFile; shelf: Shelf; look: Look };
 
-function hollowOf(layer: Layer, look: Look): ReadonlyMap<string, Tone> {
+function hollowOf(planFile: PlanFile, look: Look): ReadonlyMap<string, Tone> {
     if (look.kind !== 'machine') {
         return new Map();
     }
     return new Map(
-        layer.lines
+        planFile.lines
             .filter((line) => notOnTheMachine(line, look.differing))
             .map((line) => [
                 line.Step.Package,
@@ -98,54 +98,54 @@ function hollowOf(layer: Layer, look: Look): ReadonlyMap<string, Tone> {
     );
 }
 
-function countOf(layer: Layer, shelf: Shelf, look: Look): string {
-    if (look.kind === 'machine' || layer.name === '') {
-        return countWord(layer.lines.length, shelf);
+function countOf(planFile: PlanFile, shelf: Shelf, look: Look): string {
+    if (look.kind === 'machine' || planFile.name === '') {
+        return countWord(planFile.lines.length, shelf);
     }
-    const relation = layer.name === look.file ? THIS_FILE_WORD : EXTENDED_WORD;
-    return `${relation}${SEPARATOR}${String(layer.lines.length)}`;
+    const relation = planFile.name === look.file ? THIS_FILE_WORD : EXTENDED_WORD;
+    return `${relation}${SEPARATOR}${String(planFile.lines.length)}`;
 }
 
-function LayerHead({ layer, shelf, look }: LayerHeadProps) {
+function PlanFileHead({ planFile, shelf, look }: PlanFileHeadProps) {
     return (
         <Caption>
-            <Value identity={layer.identity} look="raised">
-                {layer.name === '' ? NO_LAYER_WORD : layer.name}
+            <Value identity={planFile.identity} look="raised">
+                {planFile.name === '' ? NO_FILE_WORD : planFile.name}
             </Value>
-            <span>{countOf(layer, shelf, look)}</span>
+            <span>{countOf(planFile, shelf, look)}</span>
             {look.kind === 'machine' ? (
                 <DotStrip
-                    hollow={hollowOf(layer, look)}
-                    identity={layer.identity}
-                    names={layer.lines.map((line) => line.Step.Package)}
+                    hollow={hollowOf(planFile, look)}
+                    identity={planFile.identity}
+                    names={planFile.lines.map((line) => line.Step.Package)}
                 />
             ) : null}
         </Caption>
     );
 }
 
-export function LayerList({
-    layers,
+export function PlanFileList({
+    planFiles,
     shelf,
     look,
 }: {
-    layers: readonly Layer[];
+    planFiles: readonly PlanFile[];
     shelf: Shelf;
     look: Look;
 }) {
-    if (layers.length === 0) {
+    if (planFiles.length === 0) {
         return <p className={styles.none}>None.</p>;
     }
     return (
-        <div className={styles.layers}>
-            {layers.map((layer) => (
+        <div className={styles.planFiles}>
+            {planFiles.map((planFile) => (
                 <section
-                    aria-label={layer.name === '' ? NO_LAYER_WORD : layer.name}
-                    className={styles.layer}
-                    key={layer.name}
+                    aria-label={planFile.name === '' ? NO_FILE_WORD : planFile.name}
+                    className={styles.planFile}
+                    key={planFile.name}
                 >
-                    <LayerHead layer={layer} look={look} shelf={shelf} />
-                    {layer.lines.map((line) =>
+                    <PlanFileHead look={look} planFile={planFile} shelf={shelf} />
+                    {planFile.lines.map((line) =>
                         look.kind === 'machine' ? (
                             <MachineLine
                                 differs={look.differing.has(line)}
