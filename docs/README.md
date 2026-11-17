@@ -96,11 +96,12 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [042 Versions are semver ranges, applied every night](decisions/042-versions-are-semver-ranges-applied-nightly.md) (Proposed)
 - [043 A shell block is judged against what station last wrote](decisions/043-a-shell-block-is-judged-against-what-station-last-wrote.md) (Proposed)
 - [044 An image is baked from its Machinefile; the recipe is plumbing alone](decisions/044-an-image-is-baked-from-its-machinefile.md) (Proposed)
-- [045 The agents family retires, and an agent is a package](decisions/045-the-agents-family-retires-an-agent-is-a-package.md) (Proposed)
+- [045 The agents family retires, and an agent is a package](decisions/045-the-agents-family-retires-an-agent-is-a-package.md)
 - [046 The repository is a monorepo of members](decisions/046-the-repository-is-a-monorepo-of-members.md) (Proposed)
 - [047 A catalog entry is a package, and a machine file is `<name>.machine.yaml`](decisions/047-a-catalog-entry-is-a-package-a-machine-file-is-name-machine-yaml.md) (Accepted)
 - [048 The engine withholds a secret before any answer](decisions/048-the-engine-withholds-a-secret-before-any-answer.md) (Proposed)
 - [049 A VM signs itself in, and the vault grants the rest](decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md) (Proposed)
 - [051 A machine is a base and its Machinefiles, one base per distro](decisions/051-a-machine-is-a-base-and-its-machinefiles.md) (Proposed)
+- [052 Station keeps no agents; another binary owns them](decisions/052-station-keeps-no-agents.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

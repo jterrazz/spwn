@@ -25,8 +25,7 @@ The families, each with its model, `contract/`, `calls/` and `adapter/<tech>/`:
 apps/engine/
   machines/  apps/  settings/  disk/  ports/  accounts/  background/  awake/  activity/  images/
   agents/    the coding agents of a workspace, each named and in a terminal of its own: Judge folds
-             their hook events into a state, Scrub keeps only what privacy lets through
-             ([ADR-027](../decisions/027-the-agent-hook-keeps-a-scrubbed-line.md)); contracts
+             their hook events into a state, Scrub keeps only what privacy lets through; contracts
              Hooks, Journal, Session, Multiplexer, Forge, Repo
   overview/  the Overview's read (overview/calls), which composes every section's own read
   vault/     the vault.* calls (vault/calls) over accounts' Passwords contract

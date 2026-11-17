@@ -1,6 +1,6 @@
 # ADR-025: Agents have their own lifecycle, apart from their VM
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-052](052-station-keeps-no-agents.md)
 **Date:** 2026-11-08
 
 ## Context

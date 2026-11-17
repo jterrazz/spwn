@@ -1,6 +1,6 @@
 # ADR-027: The agent hook keeps a scrubbed line, never code or commands
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-052](052-station-keeps-no-agents.md)
 **Date:** 2026-11-08
 
 Written 2026-11-10 from DECISIONS K4 and D-v4 (round 14), SPEC v4 §B5.1 and §D3, and `src/agents/scrub.go`.

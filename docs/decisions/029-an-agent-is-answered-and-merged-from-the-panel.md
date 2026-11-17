@@ -1,6 +1,6 @@
 # ADR-029: An agent is answered and merged from the panel
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-052](052-station-keeps-no-agents.md)
 **Date:** 2026-11-08
 
 Written 2026-11-10 from DECISIONS D-v4 (round 14), SPEC v4 §D3, and `src/pages/menubar/agent.go`.

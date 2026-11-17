@@ -1,6 +1,6 @@
 # ADR-024: Agents run in Herdr, and tmux is no adapter
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-052](052-station-keeps-no-agents.md)
 **Date:** 2026-11-08
 
 ## Context
