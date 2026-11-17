@@ -26,7 +26,7 @@ type attrList struct {
 	fork        uint32
 }
 
-func device(dev int32) uint64 {
+func deviceNumber(dev int32) uint64 {
 	return uint64(uint32(dev)) //nolint:gosec // outside: dev_t is a 32-bit id on darwin; only its equality matters.
 }
 
@@ -37,7 +37,7 @@ func lstat(path string) (k kind, bytes int64, dev uint64) {
 	}
 	switch st.Mode & unix.S_IFMT {
 	case unix.S_IFDIR:
-		return kindDir, 0, device(st.Dev)
+		return kindDir, 0, deviceNumber(st.Dev)
 	case unix.S_IFREG:
 		return kindOther, cost(st.Size, st.Blocks*512), 0
 	}
@@ -58,7 +58,7 @@ func readDir(ctx context.Context, dir string, dev uint64, buf []byte, sub func(s
 	// (a simulator runtime under /Library/Developer/CoreSimulator/Volumes), so
 	// another volume is caught on the opened directory's own device.
 	var st unix.Stat_t
-	if unix.Fstat(fd, &st) != nil || device(st.Dev) != dev {
+	if unix.Fstat(fd, &st) != nil || deviceNumber(st.Dev) != dev {
 		return 0
 	}
 	attrs := attrList{
