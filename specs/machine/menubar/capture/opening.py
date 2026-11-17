@@ -19,6 +19,8 @@ BOX = 2
 # which leaves the shadow's halo out: the halo's reach grows 2 pt over the first 0.5 s.
 CHANGED = 48
 MOVE = 1
+# value: in px, 500 pt at 2x; the Dock's indicator is about 740, the panel's glass 500 000.
+SPECK = 2000
 SCORE = 0.97
 WHOLE = 0.95
 RISE = 0.05
@@ -37,10 +39,16 @@ def gray(rgb):
 
 
 def outline(frame, closed, bar):
-    """The bounding box of what changed under the menu bar since the closed frame."""
+    """The bounding box of what changed under the menu bar since the closed frame, less
+    any region smaller than SPECK: a Dock indicator that lit in the corner is no panel
+    (run mb1b-cap4)."""
     diff = np.abs(frame.astype(np.int16) - closed.astype(np.int16)).max(axis=2)
     diff = ndimage.median_filter(diff, size=3) > CHANGED
     diff[:bar] = False
+    labels, count = ndimage.label(diff)
+    if count:
+        sizes = ndimage.sum(diff, labels, range(1, count + 1))
+        diff = np.isin(labels, 1 + np.nonzero(sizes >= SPECK)[0])
     ys, xs = np.nonzero(diff)
     return None if len(ys) < 200 else (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)
 
