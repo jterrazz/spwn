@@ -1,6 +1,7 @@
 - main:
   - heading "macbook-pro Online" [level=2]
   - paragraph: This Mac · Engine running. Sleeps normally.
+  - button "Keep macbook-pro awake": Awake…
   - button "New machine on macbook-pro": New machine
   - tablist "Tabs":
     - tab "Overview" [selected]

@@ -1,6 +1,7 @@
 - main:
   - heading "mac-mini Online" [level=2]
   - paragraph: Engine running. Never sleeps.
+  - button "Keep mac-mini awake": Awake…
   - button "New machine on mac-mini": New machine
   - tablist "Tabs":
     - tab "Overview"
