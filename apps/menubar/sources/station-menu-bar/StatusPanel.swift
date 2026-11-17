@@ -3,12 +3,13 @@ import QuartzCore
 import StationKit
 import SwiftUI
 
-// invariant: ADR-036: the app owns its status item and the panel under
-// it. The panel's one background is the system glass, an
-// NSGlassEffectView tinted to the M1 density, and the SwiftUI content is
-// that glass's contentView, so AppKit keeps it legible as the glass
-// adapts and the owner's Liquid Glass, Reduce Transparency and Increase
-// Contrast settings act on it. Nothing paints over the glass.
+// invariant: ADR-036 and ADR-053: the app owns its status item and the
+// panel under it. The panel's one background is the system glass, an
+// NSGlassEffectView with no tint of its own, the material a system menu
+// shows over the same desk, and the SwiftUI content is that glass's
+// contentView, so AppKit keeps it legible as the glass adapts and the
+// owner's Liquid Glass, Reduce Transparency and Increase Contrast settings
+// act on it. Nothing paints over the glass.
 @MainActor
 final class StatusPanel: NSObject, NSWindowDelegate {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -90,7 +91,6 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         let view = PanelHosting(rootView: content())
         view.sizingOptions = [.intrinsicContentSize]
         view.resized = { [weak self] size in self?.fit(size) }
-        glass.tintColor = Self.tint
         glass.contentView = view
         let size = view.fittingSize
         let room = (bar.screen ?? NSScreen.main)?.visibleFrame ?? spot
@@ -161,14 +161,6 @@ final class StatusPanel: NSObject, NSWindowDelegate {
 
     static func frame(_ r: CGRect) -> String {
         String(format: "x=%.1f y=%.1f w=%.1f h=%.1f", r.minX, r.minY, r.width, r.height)
-    }
-
-    // value: the tint resolves per appearance, so the panel follows the
-    // system's dark or light without being rebuilt.
-    nonisolated static let tint = NSColor(name: nil) { appearance in
-        let dark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        let color = NSColor(Token.Glass.tint(dark ? .dark : .light))
-        return Trial.tint.map { color.withAlphaComponent($0) } ?? color
     }
 
     // value: the panel's right edge under the item's, 6 pt under the menu

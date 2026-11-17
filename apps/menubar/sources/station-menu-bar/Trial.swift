@@ -14,11 +14,8 @@ final class Trial: ObservableObject {
     static let on = environment["STATION_TRIAL"] == "1"
     static let fps = Double(environment["STATION_TRIAL_FPS"] ?? "") ?? 30
     static let cycle = Double(environment["STATION_TRIAL_CYCLE"] ?? "").map { Duration.milliseconds(Int($0 * 1000)) }
-    // value: STATION_TRIAL_TINT=<alpha> sets the glass tint's alpha, with
-    // or without the trial, for the capture rig's calibration sweep; any
-    // STATION_TRIAL_ flag (STATION_TRIAL_FRAMES=1 alone) logs the item's
-    // and the panel's frames, which the rig clicks and crops by.
-    nonisolated static let tint = Double(ProcessInfo.processInfo.environment["STATION_TRIAL_TINT"] ?? "").map { CGFloat($0) }
+    // value: any STATION_TRIAL_ flag (STATION_TRIAL_FRAMES=1 alone) logs
+    // the item's and the panel's frames, which the rig clicks and crops by.
     static let frames = environment.keys.contains { $0.hasPrefix("STATION_TRIAL") }
 
     @Published private(set) var label = NSImage()

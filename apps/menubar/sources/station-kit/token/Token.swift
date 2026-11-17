@@ -189,17 +189,10 @@ public enum Token {
     }
 
     // value: the panel an offscreen snapshot draws in place of the
-    // app's tinted system glass, which the renderer cannot sample: a
+    // app's system glass, which the renderer cannot sample: a
     // translucent pane, its rim and its shadow over the vision's desk.
     public enum Glass {
         public static let window: CGFloat = 24
-
-        // value: the live panel's glass tint, the plate's colour at the
-        // lowest alpha of the capture rig's sweep (run cap3, 2026-11-11:
-        // 0.5, 0.65, 0.8, 0.9) whose second tone holds 4.5:1 over M1's
-        // three wallpapers in both schemes: 0.65, worst 4.90 dark over the
-        // light wallpaper, where 0.5 read 4.42 (ADR-036).
-        public static func tint(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.rgba(16, 16, 20, 0.65) : Token.rgba(250, 250, 252, 0.65) }
 
         public static func pane(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.hex(0x222328).opacity(0.58) : Token.hex(0xF6F7FB).opacity(0.62) }
         public static func sheen(_ scheme: ColorScheme) -> [Color] {
@@ -414,7 +407,7 @@ extension Token {
     // value: the v4 colour table (SPEC A1), by scheme and contrast, drawn
     // the M1 way: one plate under the content (80 %, M1's 82 % in light
     // less the 2 % a text-dense frame needs to stay glass), which still
-    // renders draw in place of the live glass and its tint (Glass.tint),
+    // renders draw in place of the live glass,
     // two text tones, cards and Find edged by a faint line, red only as a
     // solid fill. A light card is white at 30 %, not M1's 75 %: over the
     // 80 % plate that would show 5 % of the desk, opaque by the stories'

@@ -5,8 +5,7 @@ window opens on the Mac, and the guest needs no Screen Recording grant.
 
 usage: drive.py <ip> <ssh key> <vnc url> <repo> <out dir> <set> [old item x,y,w,h]
   set is a comma list of: walls (3 walls x dark/light), a11y (Reduce
-  Transparency, Increase Contrast), sweep (STATION_TRIAL_TINT 0.5 to 0.9),
-  trial (ADR-021's height and focus trial), behave (closing gestures), old (a
+  Transparency, Increase Contrast), trial (ADR-021's height and focus trial), behave (closing gestures), old (a
   build with no frame log: the item's frame is given and the panel is found
   by what the click changed), native (the Apple menu over the same walls, twice,
   for the wash measure) and opening (the panel's opening, sampled frame by
@@ -24,7 +23,6 @@ from vncdotool import api
 
 WALLS = ["dark", "light", "color"]
 SCHEMES = ["dark", "light"]
-TINTS = [0.5, 0.65, 0.8, 0.9]
 APP = "~/station/.artifacts/menubar/Station.app"
 CAPTURE = "~/station/specs/machine/menubar/capture"
 # value: STATION_CAPTURE_PAGE names the home story served, home.exposed by
@@ -404,9 +402,6 @@ def main():
                 shots.append(rig.shot(f"{scheme}-{wall}", scheme, wall, frames))
             if "old" in sets:
                 shots.append(rig.shot(f"old-{scheme}-{wall}", scheme, wall, {}, old_item=old_item))
-            if "sweep" in sets:
-                for tint in TINTS:
-                    shots.append(rig.shot(f"{scheme}-{wall}-t{int(tint * 100)}", scheme, wall, {"STATION_TRIAL_TINT": str(tint)}))
             if "a11y" in sets:
                 shots.append(rig.shot(f"{scheme}-{wall}-rt", scheme, wall, frames, reduce=True))
                 shots.append(rig.shot(f"{scheme}-{wall}-ic", scheme, wall, frames, contrast=True))
