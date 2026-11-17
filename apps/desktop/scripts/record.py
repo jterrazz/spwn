@@ -285,7 +285,7 @@ GESTURES = {
         {"call": "background.remove", "in": {"Label": "com.example.brain.x-snapshot", "Confirm": "yes"}},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "station-linux", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}, "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-1", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "infra", "From": "station-linux", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "station-linux", "Lifetime": "ephemeral", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "station-linux", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
@@ -298,6 +298,9 @@ GESTURES = {
         {"call": "vault.add", "in": {"Label": "", "Program": "npm", "Kind": "token", "From": "typed", "Value": "good"}},
         {"call": "vault.add", "in": {"Label": "GitHub deploy", "Program": "npm", "Kind": "token", "From": "typed", "Value": "good"}},
         {"call": "vault.add", "in": {"Label": "npm deploy", "Program": "npm", "Kind": "token", "From": "typed", "Value": ""}},
+    ],
+    "range-full": [
+        {"call": "ports.share", "in": {"VM": "linux-1", "Port": "9000"}},
     ],
     "presence-refused": [
         {"call": "grants.add", "in": {"Entry": "pw-1", "ToKind": "machine", "To": "linux-1"}},
