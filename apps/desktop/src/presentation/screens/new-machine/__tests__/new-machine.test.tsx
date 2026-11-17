@@ -74,7 +74,7 @@ describe('New machine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("from a Mac's page the create is sent to that Mac, and a refusal naming a Mac is drawn on the On row", async () => {
+    test("from a Mac's page the create is sent to that Mac, and the sheet hands over to the machine it made there", async () => {
         // Given - the mini's page over two-macs
         const result = await component.render(
             windowOver('two-macs', machineRoute('mac-mini')),
@@ -86,26 +86,26 @@ describe('New machine', () => {
                 await visitor.click(within(onMini, button('Launch')));
                 await visitor.click(within(dialog('Launch gate5?'), button('Launch')));
 
-                // Then - the engine's answer to the mini's create names a Mac, so it stands on the On row
-                const said = content('not enough memory on macbook-pro', { exact: false });
-                await visitor.see(within(region('On'), said));
+                // Then - the mini's engine made it, the sheet is gone and gate5's page is open
+                await visitor.gone(onMini);
+                await visitor.see(heading('gate5 Running'));
             },
         );
         expect(result.errors.text).toBe('');
     });
 
     test('a name the engine finds taken is refused in the foot of the sheet, in its words', async () => {
-        // Given - the New machine sheet over two-macs, where linux-1 exists
+        // Given - the New machine sheet over two-macs, where the mini holds infra
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
             await visitor.click(button('New machine'));
 
-            // When - linux-1 is launched on the mini
-            await visitor.fill(within(onMini, field('Name')), 'linux-1');
+            // When - infra is launched on the mini
+            await visitor.fill(within(onMini, field('Name')), 'infra');
             await visitor.click(within(onMini, button('Launch')));
-            await visitor.click(within(dialog('Launch linux-1?'), button('Launch')));
+            await visitor.click(within(dialog('Launch infra?'), button('Launch')));
 
             // Then - the sheet stays, with the engine's refusal, off the On row
-            const said = content('"linux-1" is taken (on macbook-pro)', { exact: false });
+            const said = content('"infra" is taken (on mac-mini)', { exact: false });
             await visitor.see(within(onMini, said));
             await visitor.gone(within(region('On'), said));
         });

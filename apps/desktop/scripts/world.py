@@ -199,6 +199,13 @@ def running(name, *processes):
     return edit
 
 
+def listens(name, vm, port, process):
+    def edit(content):
+        content["macs"][name]["vms"][vm].setdefault("listening", []).append(
+            {"Port": port, "Bind": "0.0.0.0", "Process": process, "PID": 3009})
+    return edit
+
+
 def plain(name):
     return (name, None, {}, [])
 
@@ -233,6 +240,7 @@ WORLDS = {
     "record-unreadable": ("two-macs", None, {}, [leftover("macbook-pro", "old-vm", 9000000000),
                                                  holds_file("macbook-pro", STATION_VM, 1000000),
                                                  unreadable("macbook-pro", "api")]),
+    "range-full": ("range-full", None, {}, [listens("macbook-pro", "linux-1", 9000, "node")]),
 }
 
 

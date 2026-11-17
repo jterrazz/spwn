@@ -279,9 +279,11 @@ describe('gestures', () => {
     });
 
     test("a server's restart is asked first, sent to its Mac, and the engine's answer is shown", async () => {
-        // Given - infra's page over two-macs, a server on mac-mini
+        // Given - infra's page over two-macs, a server on mac-mini whose header says nothing of its uptime
         const result = await component.render(machineOver('two-macs', 'infra'), async (visitor) => {
             await visitor.see(heading('infra', { exact: false }));
+            const restarted = content('Up 1 min.', { exact: false });
+            await visitor.gone(restarted);
 
             // When - Restart is clicked, then confirmed in its dialog by the server's name
             await visitor.click(button('Restart'));
@@ -289,9 +291,10 @@ describe('gestures', () => {
             await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
             await visitor.click(within(confirm, button('Restart')));
 
-            // Then - the world's engine refuses it, and the header says so
+            // Then - mac-mini restarts it, and the header, read again, says Done and the uptime its Mac gives
             await visitor.gone(dialog('Restart infra?'));
-            await visitor.see(content('no machine named "infra"', { exact: false }));
+            await visitor.see(content('Done'));
+            await visitor.see(restarted);
         });
         expect(result.errors.text).toBe('');
     });
