@@ -41,7 +41,7 @@ func grantedRow(t *testing.T, provider, entry string) accounts.ProgramRow {
 func offerFor(vms ...string) accounts.GrantOffer {
 	var offer accounts.GrantOffer
 	for _, vm := range vms {
-		offer.Targets = append(offer.Targets, accounts.Target{ToKind: accounts.ToMachine, To: vm, Fit: accounts.TargetFits, Line: "Signed out here"})
+		offer.Targets = append(offer.Targets, accounts.Target{To: vm, Fit: accounts.TargetFits, Line: "Signed out here"})
 	}
 	offer.Presence = "Touch ID will ask you to confirm before the password leaves this Mac"
 	return offer

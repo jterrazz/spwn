@@ -27,7 +27,7 @@ func twoMacsSignedIn() *world {
 	entry := func(provider string) accounts.VaultEntry {
 		return accounts.VaultEntry{ID: "pw-" + provider, Label: provider + " token", Program: programNamed(provider)}
 	}
-	offer := accounts.Offer(accounts.Candidates{List: []accounts.Candidate{{ToKind: accounts.ToMachine, To: "linux-1"}}})
+	offer := accounts.Offer([]accounts.Candidate{{To: "linux-1"}})
 	return &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{},
 		added: []machines.MacView{{Name: air}},
 		programs: map[string][]accounts.ProgramRow{

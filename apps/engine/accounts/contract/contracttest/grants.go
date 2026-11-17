@@ -27,7 +27,7 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 		return id
 	}
 	to := func(id, vm string) contract.GrantIn {
-		return contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: vm}
+		return contract.GrantIn{Entry: id, To: vm}
 	}
 
 	t.Run("a password the vault does not keep is an unknown entry", func(t *testing.T) {
@@ -49,7 +49,6 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 		}{
 			{to(id, "nowhere"), string(accounts.GrantUnknownMachine)},
 			{to(id, s.Stopped), string(accounts.GrantMachineStopped)},
-			{contract.GrantIn{Entry: id, ToKind: accounts.ToAgent, To: "nobody", Workspace: s.Running}, string(accounts.GrantUnknownAgent)},
 		} {
 			if _, err := s.Grants.Add(ctx, c.in); string(codeOf(err)) != c.want {
 				t.Errorf("Add to %s = %v; want %s", c.in.To, err, c.want)
@@ -63,7 +62,7 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 		if _, err := s.Grants.Add(ctx, to(id, s.Running)); err != nil {
 			t.Fatalf("Add: %v", err)
 		}
-		if refused := s.Grants.Check(ctx, id, accounts.ToMachine, s.Running); refused != nil {
+		if refused := s.Grants.Check(ctx, id, s.Running); refused != nil {
 			t.Fatalf("Check: %v", refused)
 		}
 		e, _ := listed(t, s.Passwords, id)
@@ -75,11 +74,11 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 			t.Fatalf("Candidates: %v", err)
 		}
 		offered := false
-		for _, c := range found.List {
-			offered = offered || c.ToKind == accounts.ToMachine && c.To == s.Running && c.Granted
+		for _, c := range found {
+			offered = offered || c.To == s.Running && c.Granted
 		}
-		if !offered || !found.AgentGrantable {
-			t.Fatalf("Candidates = %+v; want %s granted, the password agent-grantable", found, s.Running)
+		if !offered {
+			t.Fatalf("Candidates = %+v; want %s granted", found, s.Running)
 		}
 	})
 
@@ -89,11 +88,11 @@ func Grants(t *testing.T, subject func(t *testing.T) GrantsSubject) {
 		if _, err := s.Grants.Add(ctx, to(id, s.Running)); err != nil {
 			t.Fatalf("Add: %v", err)
 		}
-		revoked, err := s.Grants.Remove(ctx, id, accounts.ToMachine, s.Running)
+		revoked, err := s.Grants.Remove(ctx, id, s.Running)
 		if err != nil || revoked.Sentence != accounts.RevokedSentence(capturing()) {
 			t.Fatalf("Remove = %+v, %v", revoked, err)
 		}
-		if err := s.Grants.Check(ctx, id, accounts.ToMachine, s.Running); codeOf(err) != accounts.GrantNotGranted {
+		if err := s.Grants.Check(ctx, id, s.Running); codeOf(err) != accounts.GrantNotGranted {
 			t.Fatalf("Check = %v; want %s", err, accounts.GrantNotGranted)
 		}
 	})

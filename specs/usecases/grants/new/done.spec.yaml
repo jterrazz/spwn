@@ -3,11 +3,11 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | [.ToKind, .To, .Workspace, .Fit, .Line]'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | [.To, .Fit, .Line]'''
       stdin: |
           {"v":2,"id":"1","watch":"grants.new","in":{"Entry":"pw-1"}}
       exit: 0
       stdout: |
-          ["machine","api",null,"no","Start the machine first"]
-          ["machine","linux-1",null,"fits","Signed out here"]
-          ["machine","infra",null,"no","A server keeps its own sign-ins"]
+          ["api","no","Start the machine first"]
+          ["linux-1","fits","Signed out here"]
+          ["infra","no","A server keeps its own sign-ins"]

@@ -37,23 +37,12 @@
         },
         "To": {
           "type": "string"
-        },
-        "ToKind": {
-          "enum": [
-            "machine",
-            "agent"
-          ],
-          "type": "string"
-        },
-        "Workspace": {
-          "type": "string"
         }
       },
       "required": [
         "Fit",
         "Line",
-        "To",
-        "ToKind"
+        "To"
       ],
       "type": "object"
     },

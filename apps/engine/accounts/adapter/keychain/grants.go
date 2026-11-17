@@ -69,7 +69,7 @@ func (k *Kept) machines(ctx context.Context) ([]Machine, error) {
 		programs := maps.Clone(m.Programs)
 		for _, e := range b.Entries {
 			f, held := programs[e.Program]
-			i := slices.IndexFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == m.Name })
+			i := slices.IndexFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.To == m.Name })
 			if held && i >= 0 && f.State == accounts.ProgramSignedIn {
 				f.How, f.Entry, f.EntryLabel = accounts.HowGranted, e.ID, e.Label
 				programs[e.Program] = f
@@ -133,16 +133,13 @@ func (k *Kept) takeBack(ctx context.Context, program accounts.Program, vm string
 	return err
 }
 
-func (g *Grants) Check(ctx context.Context, id string, to accounts.GrantTo, target string) error {
+func (g *Grants) Check(ctx context.Context, id, target string) error {
 	e, err := g.k.entry(ctx, id, accounts.GrantUnknownEntry)
 	if err != nil {
 		return err
 	}
-	if slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == to && v.To == target }) {
+	if slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.To == target }) {
 		return nil
-	}
-	if to == accounts.ToAgent {
-		return accounts.Refusal(fail.NotFound, accounts.GrantUnknownAgent, target)
 	}
 	if _, known, err := g.k.lookup(ctx, target); err != nil {
 		return err
@@ -152,30 +149,25 @@ func (g *Grants) Check(ctx context.Context, id string, to accounts.GrantTo, targ
 	return accounts.Refusal(fail.NotFound, accounts.GrantNotGranted, target)
 }
 
-func (g *Grants) Candidates(ctx context.Context, id string) (accounts.Candidates, error) {
-	// value: every machine of this Mac the password could go to; no agent is
-	// listed until an agent has an identity a grant can name.
+func (g *Grants) Candidates(ctx context.Context, id string) ([]accounts.Candidate, error) {
 	e, err := g.k.entry(ctx, id, accounts.GrantUnknownEntry)
 	if err != nil {
-		return accounts.Candidates{}, err
+		return nil, err
 	}
 	all, err := g.k.machines(ctx)
 	if err != nil {
-		return accounts.Candidates{}, err
+		return nil, err
 	}
 	slices.SortFunc(all, func(a, b Machine) int { return strings.Compare(a.Name, b.Name) })
-	found := accounts.Candidates{AgentGrantable: e.AgentGrantable, List: []accounts.Candidate{}}
+	found := []accounts.Candidate{}
 	for _, m := range all {
-		granted := slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == m.Name })
-		found.List = append(found.List, accounts.Candidate{ToKind: accounts.ToMachine, To: m.Name, Where: m.Where, Facts: m.Programs[e.Program], Granted: granted})
+		granted := slices.ContainsFunc(e.Grants, func(v accounts.VaultGrant) bool { return v.To == m.Name })
+		found = append(found, accounts.Candidate{To: m.Name, Where: m.Where, Facts: m.Programs[e.Program], Granted: granted})
 	}
 	return found, nil
 }
 
 func (g *Grants) target(ctx context.Context, in contract.GrantIn) error {
-	if in.ToKind == accounts.ToAgent {
-		return accounts.Refusal(fail.NotFound, accounts.GrantUnknownAgent, in.To)
-	}
 	m, known, err := g.k.lookup(ctx, in.To)
 	switch {
 	case err != nil:
@@ -234,7 +226,7 @@ func (g *Grants) Add(ctx context.Context, in contract.GrantIn) (accounts.Granted
 	err = g.k.book.Change(ctx, func(b *accounts.Book) error {
 		for i := range b.Entries {
 			if b.Entries[i].Program == e.Program {
-				b.Entries[i].Grants = slices.DeleteFunc(b.Entries[i].Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == in.To })
+				b.Entries[i].Grants = slices.DeleteFunc(b.Entries[i].Grants, func(v accounts.VaultGrant) bool { return v.To == in.To })
 			}
 		}
 		b.Owed = slices.DeleteFunc(b.Owed, func(o accounts.Owed) bool { return o.Program == e.Program && o.To == in.To })
@@ -242,17 +234,17 @@ func (g *Grants) Add(ctx context.Context, in contract.GrantIn) (accounts.Granted
 		if !ok {
 			return accounts.Refusal(fail.NotFound, accounts.GrantUnknownEntry, e.ID)
 		}
-		kept.Grants = append(kept.Grants, accounts.VaultGrant{ToKind: accounts.ToMachine, To: in.To})
+		kept.Grants = append(kept.Grants, accounts.VaultGrant{To: in.To})
 		return nil
 	})
 	return accounts.Granted{}, err
 }
 
-func (g *Grants) Remove(ctx context.Context, id string, to accounts.GrantTo, target string) (accounts.Revoked, error) {
+func (g *Grants) Remove(ctx context.Context, id, target string) (accounts.Revoked, error) {
 	// invariant: a removal takes the token out of the machine by its
 	// program's Remove; a machine that cannot be reached owes the removal,
 	// so the expiry takes it out when the machine is back.
-	if err := g.Check(ctx, id, to, target); err != nil {
+	if err := g.Check(ctx, id, target); err != nil {
 		return accounts.Revoked{}, err
 	}
 	e, err := g.k.entry(ctx, id, accounts.GrantUnknownEntry)
@@ -265,7 +257,7 @@ func (g *Grants) Remove(ctx context.Context, id string, to accounts.GrantTo, tar
 		if !ok {
 			return nil
 		}
-		kept.Grants = slices.DeleteFunc(kept.Grants, func(v accounts.VaultGrant) bool { return v.ToKind == to && v.To == target })
+		kept.Grants = slices.DeleteFunc(kept.Grants, func(v accounts.VaultGrant) bool { return v.To == target })
 		if failed {
 			b.Owed = append(b.Owed, accounts.Owed{Program: e.Program, To: target})
 		}
@@ -308,7 +300,7 @@ func (g *Grants) Forget(ctx context.Context, vm string) error {
 	// value: a machine deleted takes what was granted to it with its disk.
 	return g.k.book.Change(ctx, func(b *accounts.Book) error {
 		for i := range b.Entries {
-			b.Entries[i].Grants = slices.DeleteFunc(b.Entries[i].Grants, func(v accounts.VaultGrant) bool { return v.ToKind == accounts.ToMachine && v.To == vm })
+			b.Entries[i].Grants = slices.DeleteFunc(b.Entries[i].Grants, func(v accounts.VaultGrant) bool { return v.To == vm })
 		}
 		b.Owed = slices.DeleteFunc(b.Owed, func(o accounts.Owed) bool { return o.To == vm })
 		return nil

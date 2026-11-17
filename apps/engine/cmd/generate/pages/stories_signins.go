@@ -109,13 +109,13 @@ func (f Scene) vault() (vault *accounts.VaultRead, offers map[string]accounts.Gr
 		}
 		id := entryID(a.Provider)
 		entry := accounts.VaultEntry{ID: id, Label: entryLabel(program), Program: program, Kind: accounts.KeyToken, Added: storyNow, Reach: accounts.ReachNotGranted}
-		var candidates accounts.Candidates
+		var candidates []accounts.Candidate
 		for _, h := range f.All.Macs {
 			for _, vm := range h.VMs {
 				if vm.State != model.Running {
 					continue
 				}
-				c := accounts.Candidate{ToKind: accounts.ToMachine, To: vm.Name, Where: accounts.Where{Kind: vm.Lifetime.Kind()}}
+				c := accounts.Candidate{To: vm.Name, Where: accounts.Where{Kind: vm.Lifetime.Kind()}}
 				if !h.ThisMac {
 					c.Where.FarMac = h.Name
 				}
@@ -127,10 +127,10 @@ func (f Scene) vault() (vault *accounts.VaultRead, offers map[string]accounts.Gr
 					c.Granted = held.Granted
 				}
 				if c.Granted {
-					entry.Grants = append(entry.Grants, accounts.VaultGrant{ToKind: accounts.ToMachine, To: vm.Name})
+					entry.Grants = append(entry.Grants, accounts.VaultGrant{To: vm.Name})
 					entry.Reach = accounts.ReachGranted
 				}
-				candidates.List = append(candidates.List, c)
+				candidates = append(candidates, c)
 			}
 		}
 		read.Entries = append(read.Entries, entry)

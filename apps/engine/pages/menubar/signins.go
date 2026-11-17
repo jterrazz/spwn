@@ -83,7 +83,7 @@ func (s SignIns) targets() []string {
 	}
 	for _, e := range s.Vault.Entries {
 		for _, t := range s.Offers[e.ID].Targets {
-			if t.ToKind == accounts.ToMachine && t.Fit == accounts.TargetFits && !slices.Contains(out, t.To) {
+			if t.Fit == accounts.TargetFits && !slices.Contains(out, t.To) {
 				out = append(out, t.To)
 			}
 		}
@@ -95,7 +95,7 @@ func (s SignIns) targets() []string {
 // line for it there.
 func (s SignIns) fit(entry, to string) (fits bool, line string) {
 	for _, t := range s.Offers[entry].Targets {
-		if t.ToKind == accounts.ToMachine && t.To == to {
+		if t.To == to {
 			return t.Fit == accounts.TargetFits, t.Line
 		}
 	}

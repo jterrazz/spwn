@@ -722,8 +722,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "api",
-          "ToKind": "machine"
+          "To": "api"
         }
       },
       "form": {
@@ -921,8 +920,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "api",
-          "ToKind": "machine"
+          "To": "api"
         }
       },
       "form": {

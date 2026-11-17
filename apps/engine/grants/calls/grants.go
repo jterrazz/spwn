@@ -13,17 +13,15 @@ import (
 )
 
 type GrantAddIn struct {
-	Entry     string
-	ToKind    accounts.GrantTo
-	To        string
-	Workspace string
+	Entry string
+	To    string
 }
 
 var GrantAdd = call.Call[Deps, GrantAddIn, accounts.Granted]{
 	Name: "grants.add", Section: section.Accounts, Where: call.InEngine, Applies: accounts.OnAMac,
-	Errors: []fail.Code{accounts.GrantUnknownEntry, accounts.GrantUnknownMachine, accounts.GrantUnknownAgent, accounts.GrantToServer, accounts.GrantOtherMac, accounts.GrantMachineStopped, accounts.GrantSignedInHere, accounts.GrantNotAgentGrantable, accounts.GrantPresenceRefused, accounts.GrantNoPresence, accounts.GrantCannotDeliver},
+	Errors: []fail.Code{accounts.GrantUnknownEntry, accounts.GrantUnknownMachine, accounts.GrantToServer, accounts.GrantOtherMac, accounts.GrantMachineStopped, accounts.GrantSignedInHere, accounts.GrantPresenceRefused, accounts.GrantNoPresence, accounts.GrantCannotDeliver},
 	Run: func(ctx context.Context, d Deps, in GrantAddIn, _ call.Progress) (accounts.Granted, error) {
-		granted, err := d.Grants.Add(ctx, contract.GrantIn{Entry: in.Entry, ToKind: in.ToKind, To: in.To, Workspace: in.Workspace})
+		granted, err := d.Grants.Add(ctx, contract.GrantIn{Entry: in.Entry, To: in.To})
 		return granted, accounts.Fielded(err)
 	},
 }
@@ -52,24 +50,23 @@ var GrantNew = call.Watch[Deps, GrantNewIn, accounts.GrantOffer]{
 
 type GrantRemoveIn struct {
 	Entry   string
-	ToKind  accounts.GrantTo
 	To      string
 	Confirm string
 }
 
 var GrantRemove = call.Call[Deps, GrantRemoveIn, accounts.Revoked]{
 	Name: "grants.remove", Section: section.Accounts, Where: call.InEngine, Applies: accounts.OnAMac, Confirm: confirm.RemoveGrant,
-	Errors: []fail.Code{accounts.GrantNotGranted, accounts.GrantUnknownEntry, accounts.GrantUnknownMachine, accounts.GrantUnknownAgent, confirm.YesNeeded},
+	Errors: []fail.Code{accounts.GrantNotGranted, accounts.GrantUnknownEntry, accounts.GrantUnknownMachine, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in GrantRemoveIn, _ call.Progress) (accounts.Revoked, error) {
 		// invariant: a removal asks first, since the grant ends; what is not
 		// granted is refused before the question.
-		if err := d.Grants.Check(ctx, in.Entry, in.ToKind, in.To); err != nil {
+		if err := d.Grants.Check(ctx, in.Entry, in.To); err != nil {
 			return accounts.Revoked{}, err
 		}
 		if err := confirm.Require(confirm.For(confirm.RemoveGrant, d.Kind), in.To, in.Confirm); err != nil {
 			return accounts.Revoked{}, err
 		}
-		return d.Grants.Remove(ctx, in.Entry, in.ToKind, in.To)
+		return d.Grants.Remove(ctx, in.Entry, in.To)
 	},
 }
 

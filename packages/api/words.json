@@ -21,21 +21,6 @@
       "Tone": "plain"
     }
   },
-  "AccountsGrantTo": {
-    "agent": {
-      "Word": "Agents",
-      "Detail": "Only its terminal sees it",
-      "One": "agent",
-      "Other": "agents",
-      "Tone": "plain"
-    },
-    "machine": {
-      "Word": "Machines",
-      "One": "machine",
-      "Other": "machines",
-      "Tone": "plain"
-    }
-  },
   "AccountsKeyKind": {
     "api-key": {
       "Word": "API key",
@@ -614,11 +599,6 @@
       "Detail": "grant",
       "Tone": "plain"
     },
-    "grant.not-agent-grantable": {
-      "Word": "not agent grantable",
-      "Detail": "grant",
-      "Tone": "plain"
-    },
     "grant.not-granted": {
       "Word": "not granted",
       "Detail": "grant",
@@ -641,11 +621,6 @@
     },
     "grant.to-server": {
       "Word": "to server",
-      "Detail": "grant",
-      "Tone": "plain"
-    },
-    "grant.unknown-agent": {
-      "Word": "unknown agent",
       "Detail": "grant",
       "Tone": "plain"
     },

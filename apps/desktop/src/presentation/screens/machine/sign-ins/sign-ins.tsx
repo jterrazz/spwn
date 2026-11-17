@@ -163,7 +163,7 @@ function ProgramRow({ row, found, go, onSignIn }: RowProps) {
         subject: row.Program,
     });
     const removeGrant = useGesture('grants.remove', {
-        input: { Entry: row.Entry ?? '', To: found.vm?.Name ?? found.mac.Name, ToKind: 'machine' },
+        input: { Entry: row.Entry ?? '', To: found.vm?.Name ?? found.mac.Name },
         rereads: GRANT_REREADS,
         subject: row.Entry ?? row.Program,
     });

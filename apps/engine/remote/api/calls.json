@@ -571,12 +571,10 @@
         "grant.cannot-deliver",
         "grant.machine-stopped",
         "grant.no-presence",
-        "grant.not-agent-grantable",
         "grant.other-mac",
         "grant.presence-refused",
         "grant.signed-in-here",
         "grant.to-server",
-        "grant.unknown-agent",
         "grant.unknown-entry",
         "grant.unknown-machine"
       ],
@@ -605,7 +603,6 @@
       "errors": [
         "confirm.yes-needed",
         "grant.not-granted",
-        "grant.unknown-agent",
         "grant.unknown-entry",
         "grant.unknown-machine"
       ],

@@ -105,7 +105,7 @@ func TestGrantAPasswordOffersEachMachineThePasswordsThatFit(t *testing.T) {
 	deploy := accounts.VaultEntry{ID: "pw-1", Label: "deploy token", Program: programFor(t, catalog.ProviderGitHub)}
 	mail := accounts.VaultEntry{ID: "pw-2", Label: "mail token", Program: programFor(t, catalog.ProviderClaude)}
 	target := func(vm string, fits accounts.TargetFit, line string) accounts.Target {
-		return accounts.Target{ToKind: accounts.ToMachine, To: vm, Fit: fits, Line: line}
+		return accounts.Target{To: vm, Fit: fits, Line: line}
 	}
 	s := SignIns{
 		Vault: &accounts.VaultRead{Mac: "pro", Entries: []accounts.VaultEntry{deploy, mail}},
@@ -125,7 +125,7 @@ func TestGrantAPasswordOffersEachMachineThePasswordsThatFit(t *testing.T) {
 	}
 	first, docs := sheets[1], sheets[2]
 	pick := first.Form.Fields[1]
-	if first.Sheet != page.SheetGrant || first.Run.Call != CallGrant || first.Run.In["To"] != "linux-1" || first.Run.In["ToKind"] != string(accounts.ToMachine) || first.Form.Fields[0].Default != "grant:linux-1" {
+	if first.Sheet != page.SheetGrant || first.Run.Call != CallGrant || first.Run.In["To"] != "linux-1" || first.Form.Fields[0].Default != "grant:linux-1" {
 		t.Errorf("linux-1's sheet: %+v runs %+v", first.Form, first.Run)
 	}
 	if len(pick.Options) != 2 || pick.Default != "pw-1" || pick.Options[1].Disabled != "It has its own sign-in" || pick.Options[0].Disabled != "" {

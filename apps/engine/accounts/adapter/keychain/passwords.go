@@ -70,7 +70,7 @@ func (p *Passwords) Add(ctx context.Context, in contract.PasswordIn) (string, er
 		if err := p.k.keys.Put(ctx, keyOf(id), value); err != nil {
 			return err
 		}
-		b.Entries = append(b.Entries, accounts.VaultEntry{ID: id, Label: in.Label, Program: in.Program, Kind: in.Kind, Added: p.k.o.Now().UTC().Truncate(time.Second), AgentGrantable: in.Kind == accounts.KeyFineGrained, Grants: []accounts.VaultGrant{}})
+		b.Entries = append(b.Entries, accounts.VaultEntry{ID: id, Label: in.Label, Program: in.Program, Kind: in.Kind, Added: p.k.o.Now().UTC().Truncate(time.Second), Grants: []accounts.VaultGrant{}})
 		return nil
 	})
 	if err != nil {
@@ -96,7 +96,7 @@ func (p *Passwords) Remove(ctx context.Context, id string) ([]accounts.VaultGran
 		}
 		b.Entries = slices.DeleteFunc(b.Entries, func(v accounts.VaultEntry) bool { return v.ID == id })
 		for _, g := range ended {
-			if g.ToKind == accounts.ToMachine && p.k.takeBack(ctx, program, g.To) != nil {
+			if p.k.takeBack(ctx, program, g.To) != nil {
 				b.Owed = append(b.Owed, accounts.Owed{Program: program, To: g.To})
 			}
 		}

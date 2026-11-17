@@ -9,20 +9,19 @@
 | Signing in       | A login run inside the VM, and how its link and code reach you       |
 | The vault        | One per Mac: what it holds, how a secret enters, Touch ID            |
 | Grants           | What a grant gives, how it arrives, how it ends                      |
-| Agents           | Why an agent's grant is the narrowest                                |
 | Where to revoke  | Where each provider lets you invalidate a token                      |
 | Reading accounts | How a machine's sign-ins are read, and what never leaves it          |
 | Windows          | Where each of these shows                                            |
 
 ## What is built
 
-This page is the target. Reading who is signed in (`accounts.list`), the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone; an agent is no grant target yet, so a grant to one is refused `grant.unknown-agent` and the sheet lists none. The Machinefile's `signins` and `grants` are built too: a workspace's first start grants each program of `grants` from this Mac's one password for it and leaves each program of `signins` it is not signed in to with its `station accounts login` command ([the Machinefile's keys](machinefiles.md#the-keys)). A share made before this is never taken back: none had reached a real VM ([ADR-049](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).The Passwords page is not built yet.
+This page is the target. Reading who is signed in (`accounts.list`), the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone. The Machinefile's `signins` and `grants` are built too: a workspace's first start grants each program of `grants` from this Mac's one password for it and leaves each program of `signins` it is not signed in to with its `station accounts login` command ([the Machinefile's keys](machinefiles.md#the-keys)). A share made before this is never taken back: none had reached a real VM ([ADR-049](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).The Passwords page is not built yet.
 
 ## Three concepts
 
 - **Sign-in**: a program's login on one machine, done by the program itself. The catalog owns how each program is read, logged in and logged out (`apps/engine/catalog/accounts.go`); a Machinefile names only which programs a machine signs in to.
 - **Vault entry**: one secret on the owner's Mac, with a label, the program it is for, what kind it is and who it signs in as.
-- **Grant**: an entry given to a machine or an agent, until it is removed.
+- **Grant**: an entry given to a machine, until it is removed.
 
 Per program, a machine is **signed in** (`How: own`), **granted** (`How: granted`, with `Entry` and `EntryLabel` naming the password) or **signed out**. A machine's own sign-in is never a grant: a grant to a VM already signed in is refused.
 
@@ -46,7 +45,7 @@ The vault is the Keychain entries of one Mac under station's own Keychain name, 
 
 The verdict `vault.list` answers counts the entries (`3 kept, 1 granted`) and says under it, in its `Line`, that a value never leaves this Mac's Keychain to be shown.
 
-Each entry `vault.list` answers says what its removal ends, so the confirmation can word it: `RemoveSentence`, counted from its grants (`Its grants end: 1 machine and 1 agent`, or `Nothing else ends` with none), and `Reach`, `granted` or `not granted`. A grant is only its target; it has no state, since it stays until it is removed.
+Each entry `vault.list` answers says what its removal ends, so the confirmation can word it: `RemoveSentence`, counted from its grants (`Its grants end: 2 machines`, or `Nothing else ends` with none), and `Reach`, `granted` or `not granted`. A grant is only its target; it has no state, since it stays until it is removed.
 
 The Add a password sheet reads one watched call, `vault.new`, of This Mac's engine (a server or a workspace is refused as not for this machine). It answers the `Intro` ("It is kept in <mac>'s Keychain; you can then grant it to a machine."), the `Captures` and the typed way's `Programs`; the sheet words nothing itself. A password enters in one of two ways:
 
@@ -59,22 +58,13 @@ Each grant asks for Touch ID first, the engine's own `LAContext` with station's 
 
 ## Grants
 
-A grant gives one entry to one machine or one agent. It has no end of its own: the owner decided on 2026-11-14 that no timing logic expires an account, so a grant stays until `grants.remove`, the removal of its password or the deletion of its VM. Granting again replaces it.
+A grant gives one entry to one machine. It has no end of its own: the owner decided on 2026-11-14 that no timing logic expires an account, so a grant stays until `grants.remove`, the removal of its password or the deletion of its VM. Granting again replaces it.
 
 - **It arrives** over stdin, never an argument: a login with the token for `gh`, a `~/.npmrc` line (mode 0600) for npm, an env file under `~/.config/station/grants/` that the shell block sources for Claude and wrangler.
 - **It leaves** at `grants.remove`, or when the VM's guest connects after a removal it could not receive, by the program's own Remove: a logout, or the deletion of the line or file that holds the secret. A program that reads an env file stops in new shells only, and the sentence of `grants.remove` says so.
 - **It is refused**, before anything is read, for a server, a VM of another Mac, a stopped VM, a VM already signed in, and a secret that cannot be delivered. The refusals of `vault.add` carry `Field` (`label` or `value`) so a form marks the input at fault; those of `grants.add` name none.
 
 Deleting a VM ends its grants with its disk. It is not a revocation: see below.
-
-## Agents
-
-An agent's grant reaches the environment of its own terminal, not the VM's shell, and ends when that terminal stops or at `grants.remove`. It is the narrowest:
-
-- only an entry marked agent-grantable, a fine-grained token, never the owner's own GitHub login;
-- Touch ID at each grant.
-
-An agent, or a prompt injected into it, can send a token it reads anywhere; station screens its own answers, not an agent's traffic.
 
 ## Where to revoke
 

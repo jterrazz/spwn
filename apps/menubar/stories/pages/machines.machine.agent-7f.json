@@ -1818,8 +1818,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "agent-7f",
-          "ToKind": "machine"
+          "To": "agent-7f"
         }
       },
       "form": {
@@ -2052,8 +2051,7 @@
       "run": {
         "call": "grants.add",
         "in": {
-          "To": "agent-7f",
-          "ToKind": "machine"
+          "To": "agent-7f"
         }
       },
       "form": {

@@ -76,7 +76,7 @@ func (p *Passwords) Add(_ context.Context, in contract.PasswordIn) (string, erro
 	}
 	own.Counter++
 	id := "pw-" + strconv.Itoa(own.Counter)
-	entry := accounts.VaultEntry{ID: id, Label: in.Label, Program: in.Program, Kind: in.Kind, Who: who, Added: added, AgentGrantable: in.Kind == accounts.KeyFineGrained}
+	entry := accounts.VaultEntry{ID: id, Label: in.Label, Program: in.Program, Kind: in.Kind, Who: who, Added: added}
 	own.Passwords = append(own.Passwords, entry)
 	return id, nil
 }
@@ -90,9 +90,7 @@ func (p *Passwords) Remove(_ context.Context, id string) ([]accounts.VaultGrant,
 	}
 	entry := p.own().Passwords[i]
 	for _, g := range entry.Grants {
-		if g.ToKind == accounts.ToMachine {
-			delete(state(mac(p.w, g.To)).Programs, entry.Program)
-		}
+		delete(state(mac(p.w, g.To)).Programs, entry.Program)
 	}
 	p.own().Passwords = slices.Delete(p.own().Passwords, i, i+1)
 	return append([]accounts.VaultGrant{}, entry.Grants...), nil

@@ -49,8 +49,8 @@ func Passwords(t *testing.T, subject func(t *testing.T) contract.Passwords) {
 			t.Fatalf("Add = %q, %v", id, err)
 		}
 		e, ok := listed(t, p, id)
-		if !ok || e.Label != "GitHub deploy" || e.Program != capturing() || e.Kind != accounts.KeyFineGrained || !e.AgentGrantable || len(e.Grants) != 0 || e.Grants == nil {
-			t.Fatalf("listed %+v, %v; want the typed password, agent-grantable, no grant", e, ok)
+		if !ok || e.Label != "GitHub deploy" || e.Program != capturing() || e.Kind != accounts.KeyFineGrained || len(e.Grants) != 0 || e.Grants == nil {
+			t.Fatalf("listed %+v, %v; want the typed password, no grant", e, ok)
 		}
 		if err := p.Check(ctx, id); err != nil {
 			t.Fatalf("Check: %v", err)

@@ -13,5 +13,5 @@
   - region "Granted to":
     - heading "Granted to 1 machine" [level=2]
     - button "Grant…"
-    - text: linux-1 machine
+    - text: linux-1
     - button "Remove npm publish from linux-1": Remove

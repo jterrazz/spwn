@@ -48,16 +48,14 @@ type PasswordIn struct {
 }
 
 type Grants interface {
-	Check(ctx context.Context, entry string, to accounts.GrantTo, target string) error
+	Check(ctx context.Context, entry, target string) error
 	Add(ctx context.Context, in GrantIn) (accounts.Granted, error)
-	Remove(ctx context.Context, entry string, to accounts.GrantTo, target string) (accounts.Revoked, error)
-	// value: every machine and agent of this Mac a password could go to, each as the Mac reads it.
-	Candidates(ctx context.Context, entry string) (accounts.Candidates, error)
+	Remove(ctx context.Context, entry, target string) (accounts.Revoked, error)
+	// value: every machine of this Mac a password could go to, each as the Mac reads it.
+	Candidates(ctx context.Context, entry string) ([]accounts.Candidate, error)
 }
 
 type GrantIn struct {
-	Entry     string
-	ToKind    accounts.GrantTo
-	To        string
-	Workspace string
+	Entry string
+	To    string
 }

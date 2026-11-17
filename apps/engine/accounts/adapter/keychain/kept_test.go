@@ -176,7 +176,7 @@ func TestGrants(t *testing.T) {
 func TestAPasswordsValueIsInTheKeychainOnStdinAndNowhereElse(t *testing.T) {
 	r := newRig(t)
 	id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
-	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"}); err != nil {
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"}); err != nil {
 		t.Fatalf("grant: %v", err)
 	}
 	for _, step := range append(slices.Clone(r.steps), r.login.argv...) {
@@ -220,7 +220,7 @@ func TestPresenceIsAskedAfterTheChecksAndBeforeTheKeychainIsRead(t *testing.T) {
 			r.answer = c.answer
 			id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
 			r.steps = nil
-			_, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: c.to})
+			_, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: c.to})
 			if codeOf(err) != c.want {
 				t.Fatalf("Add = %v; want %s", err, c.want)
 			}
@@ -237,7 +237,7 @@ func TestPresenceIsAskedAfterTheChecksAndBeforeTheKeychainIsRead(t *testing.T) {
 	r := newRig(t)
 	id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
 	r.steps = nil
-	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"}); err != nil {
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"}); err != nil {
 		t.Fatalf("Add: %v", err)
 	}
 	asked := slices.Index(r.steps, "presence")
@@ -247,25 +247,10 @@ func TestPresenceIsAskedAfterTheChecksAndBeforeTheKeychainIsRead(t *testing.T) {
 	}
 }
 
-func TestAnAgentIsNoTargetUntilItHasAnIdentity(t *testing.T) {
-	r := newRig(t)
-	id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
-	_, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToAgent, To: "docs-bot", Workspace: "linux-1"})
-	if codeOf(err) != accounts.GrantUnknownAgent || slices.Contains(r.steps, "presence") {
-		t.Fatalf("Add = %v, steps %v; want %s before any sheet", err, r.steps, accounts.GrantUnknownAgent)
-	}
-	found, _ := r.vault.Grants().Candidates(t.Context(), id)
-	for _, c := range found.List {
-		if c.ToKind == accounts.ToAgent {
-			t.Fatalf("an agent is offered: %+v", c)
-		}
-	}
-}
-
 func TestAnEnvironmentFileProgramGetsAFileOfItsOwnAndLosesItByName(t *testing.T) {
 	r := newRig(t)
 	id := r.add(t, accounts.Program(env().Program), "Claude token")
-	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"}); err != nil {
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"}); err != nil {
 		t.Fatalf("Add: %v", err)
 	}
 	line := r.sent[0].line
@@ -275,7 +260,7 @@ func TestAnEnvironmentFileProgramGetsAFileOfItsOwnAndLosesItByName(t *testing.T)
 			t.Errorf("inject %q; want %q", line, want)
 		}
 	}
-	revoked, err := r.vault.Grants().Remove(t.Context(), id, accounts.ToMachine, "linux-1")
+	revoked, err := r.vault.Grants().Remove(t.Context(), id, "linux-1")
 	if err != nil || !strings.Contains(revoked.Sentence, "New shells no longer see it") {
 		t.Fatalf("Remove = %+v, %v", revoked, err)
 	}
@@ -288,7 +273,7 @@ func TestAValueTheShellWouldReadOtherwiseIsNeverSent(t *testing.T) {
 	r := newRig(t)
 	id := r.add(t, accounts.Program(env().Program), "Claude token")
 	r.login.items["vault:"+id] = "FAKE'000"
-	_, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"})
+	_, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"})
 	if codeOf(err) != accounts.GrantCannotDeliver || len(r.sent) != 0 {
 		t.Fatalf("Add = %v, sent %+v; want %s and nothing sent", err, r.sent, accounts.GrantCannotDeliver)
 	}
@@ -298,7 +283,7 @@ func TestAGrantNeverEndsOnItsOwnAndTheRetryTakesOutOnlyWhatIsOwed(t *testing.T) 
 	r := newRig(t)
 	id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
 	g := r.vault.Grants()
-	if _, err := g.Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"}); err != nil {
+	if _, err := g.Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"}); err != nil {
 		t.Fatalf("Add: %v", err)
 	}
 	r.now = r.now.Add(10 * 365 * 24 * time.Hour)
@@ -335,7 +320,7 @@ func TestARemovalThatCannotReachTheMachineIsDueAtItsReturn(t *testing.T) {
 	r := newRig(t)
 	id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
 	g := r.vault.Grants()
-	if _, err := g.Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"}); err != nil {
+	if _, err := g.Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"}); err != nil {
 		t.Fatalf("Add: %v", err)
 	}
 	r.unreach = true
@@ -370,18 +355,18 @@ func TestAGrantGivenAgainIsNoSignInOfTheMachinesOwn(t *testing.T) {
 	r := newRig(t)
 	r.answer = keychain.Given
 	id := r.add(t, accounts.Program(own().Program), "GitHub deploy")
-	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"}); err != nil {
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"}); err != nil {
 		t.Fatalf("grant: %v", err)
 	}
 	r.signedIn["linux-1"], r.signedIn["linux-3"] = true, true
-	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-1"}); err != nil {
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"}); err != nil {
 		t.Fatalf("a grant given again = %v; want it given", err)
 	}
 	found, err := r.vault.Grants().Candidates(t.Context(), id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, c := range found.List {
+	for _, c := range found {
 		switch c.To {
 		case "linux-1":
 			if c.Facts.How != accounts.HowGranted || c.Facts.Entry != id {
@@ -393,7 +378,7 @@ func TestAGrantGivenAgainIsNoSignInOfTheMachinesOwn(t *testing.T) {
 			}
 		}
 	}
-	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, ToKind: accounts.ToMachine, To: "linux-3"}); codeOf(err) != accounts.GrantSignedInHere {
+	if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-3"}); codeOf(err) != accounts.GrantSignedInHere {
 		t.Fatalf("a grant over the machine's own sign-in = %v; want %s", err, accounts.GrantSignedInHere)
 	}
 }

@@ -3,13 +3,13 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].accounts.passwords = [{"ID": "pw-1", "Label": "ci", "Program": "npm", "Kind": "token", "Added": "2026-10-30T09:00:00Z", "AgentGrantable": false, "Grants": [{"ToKind": "machine", "To": "linux-9"}]}] | .macs["mac-mini"].vms["linux-9"] = {"size": {"CPUs": 2, "Memory": 4294967296, "Disk": 20000000000}, "pid": 8}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].accounts.passwords = [{"ID": "pw-1", "Label": "ci", "Program": "npm", "Kind": "token", "Added": "2026-10-30T09:00:00Z", "Grants": [{"To": "linux-9"}]}] | .macs["mac-mini"].vms["linux-9"] = {"size": {"CPUs": 2, "Memory": 4294967296, "Disk": 20000000000}, "pid": 8}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message} end'''
       stdin: |
-          {"v":2,"id":"1","call":"grants.remove","in":{"Entry":"pw-1","ToKind":"machine","To":"linux-9","Confirm":"yes"}}
+          {"v":2,"id":"1","call":"grants.remove","in":{"Entry":"pw-1","To":"linux-9","Confirm":"yes"}}
       exit: 0
       stdout: |
           {"Sentence":"The token stays valid at npm; revoke it there to end it everywhere"}

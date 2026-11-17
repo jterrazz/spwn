@@ -7,9 +7,6 @@
           "format": "date-time",
           "type": "string"
         },
-        "AgentGrantable": {
-          "type": "boolean"
-        },
         "Grants": {
           "items": {
             "$ref": "#/$defs/accounts.VaultGrant"
@@ -60,7 +57,6 @@
       },
       "required": [
         "Added",
-        "AgentGrantable",
         "Grants",
         "ID",
         "Kind",
@@ -76,21 +72,10 @@
       "properties": {
         "To": {
           "type": "string"
-        },
-        "ToKind": {
-          "enum": [
-            "machine",
-            "agent"
-          ],
-          "type": "string"
-        },
-        "Workspace": {
-          "type": "string"
         }
       },
       "required": [
-        "To",
-        "ToKind"
+        "To"
       ],
       "type": "object"
     },
