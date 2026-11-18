@@ -37,6 +37,10 @@ export default defineConfig({
         roots: {
             catalog:
                 'the built-in `spwn:*` catalog the binary embeds: worlds, agents, skills and tools a user installs by name',
+            machines: {
+                reason: 'station, imported with its history: a repository of its own with its own toolchain, gates and `make check`, run from inside it (`make machines-check`), so no root pass reads or rewrites it',
+                verbatim: true,
+            },
             docker: 'the build context of the test image: `make test-image` builds spwn-test:latest, the mock Claude and Codex runtimes baked in, from docker/spwn-test',
             scripts: 'the installer `make install-binary` runs, and the manual-pass harness',
         },
