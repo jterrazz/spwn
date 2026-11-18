@@ -1,10 +1,26 @@
 # Getting started
 
-What a spwn project holds, and the four ideas the rest of the manual builds on. The front page, and why spwn exists, is the [README](../../README.md); worked sessions are [Use cases](use-cases.md).
+What a spwn project holds, and the four ideas the rest of the manual builds on. The front page is the [README](../../README.md); worked sessions are [Use cases](use-cases.md).
+
+## Quickstart
+
+```bash
+curl -fsSL https://spwn.sh/install.sh | bash
+```
+
+Three commands, one working agent. It needs Docker.
+
+| Step | Command          | What it does                                                                                                   |
+| ---- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| 01   | `spwn auth`      | Checks you're signed in to Claude Code (or any supported runtime).                                             |
+| 02   | `spwn init`      | Drops `spwn.yaml` + a starter `neo` agent into the current directory.                                          |
+| 03   | `spwn agent neo` | Opens an interactive session with neo inside a sandboxed Docker world. Container lifecycle is handled for you. |
+
+Prefer a bundled demo? `spwn init matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any template slug in the [catalog](../../catalog/)).
 
 ## The layout
 
-Install spwn and bring up neo as the [quickstart](../../README.md#quickstart) shows. Here's what `spwn init` lays down:
+What `spwn init` lays down:
 
 ```text
 my-project/
