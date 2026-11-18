@@ -66,15 +66,16 @@ func macStandingWords() map[string]word {
 	return out
 }
 
-// invariant: a roll-up's word reads after its N with its own noun ("1
-// machine down", "2 Macs not seen"); empty and fine carry no N.
+// invariant: a roll-up's word is its type's: a state that counts reads
+// after its N with its own noun ("1 machine down", "2 Macs not seen");
+// empty and fine carry no N.
 func rollUpWords() map[string]word {
-	return map[string]word{
-		string(machines.RollUpDown):    {Word: "down", One: "machine down", Other: "machines down", Tone: machines.RollUpDown.Tone()},
-		string(machines.RollUpNotSeen): {Word: "not seen", One: "Mac not seen", Other: "Macs not seen", Tone: machines.RollUpNotSeen.Tone()},
-		string(machines.RollUpEmpty):   toned(machines.RollUpEmpty.Tone(), "no machine yet"),
-		string(machines.RollUpFine):    toned(machines.RollUpFine.Tone(), "all running"),
+	out := map[string]word{}
+	for _, v := range machines.RollUpState("").Enum() {
+		s := machines.RollUpState(v)
+		out[v] = word{Word: s.Word(), One: s.Noun(1), Other: s.Noun(2), Tone: s.Tone()}
 	}
+	return out
 }
 
 func plain(w string) word { return word{Word: w, Tone: verdict.Plain} }

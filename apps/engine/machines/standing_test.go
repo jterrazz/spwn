@@ -218,6 +218,14 @@ func TestEveryMacStandingHasItsLowercaseWordAndTone(t *testing.T) {
 	}
 }
 
+func engineStopped() MacView {
+	return MacView{Reachable: true, Engine: EngineView{State: EngineStopped}}
+}
+
+func engineNotInstalled() MacView {
+	return MacView{Reachable: true, Engine: EngineView{State: EngineNotInstalled}}
+}
+
 func TestARollUpIsItsFirstRuleThatMatchesAndCountsWhatItNames(t *testing.T) {
 	seen := time.Date(2026, 11, 18, 9, 0, 0, 0, time.UTC)
 	online := func(vms ...VM) MacView {
@@ -231,18 +239,23 @@ func TestARollUpIsItsFirstRuleThatMatchesAndCountsWhatItNames(t *testing.T) {
 		macs []MacView
 		want RollUp
 	}{
-		"no Mac":                                   {nil, RollUp{State: RollUpEmpty}},
-		"a Mac with no VM":                         {[]MacView{online()}, RollUp{State: RollUpEmpty}},
-		"every VM up or stopped":                   {[]MacView{online(healthyServer(), stopped)}, RollUp{State: RollUpFine}},
-		"a VM down":                                {[]MacView{online(down, stopped)}, RollUp{State: RollUpDown, N: 1}},
-		"an engine stopped, no VM":                 {[]MacView{{ThisMac: true, Engine: EngineView{State: EngineStopped}}}, RollUp{State: RollUpDown, N: 1}},
-		"an engine not installed and a VM down":    {[]MacView{{ThisMac: true, Engine: EngineView{State: EngineNotInstalled}}, online(down)}, RollUp{State: RollUpDown, N: 2}},
-		"down before not seen":                     {[]MacView{online(down), silent, {}}, RollUp{State: RollUpDown, N: 1}},
-		"two Macs not seen":                        {[]MacView{online(), silent, {}}, RollUp{State: RollUpNotSeen, N: 2}},
-		"a silent Mac's VM counts through its Mac": {[]MacView{silent}, RollUp{State: RollUpNotSeen, N: 1}},
-		"not seen before empty":                    {[]MacView{online(), {}}, RollUp{State: RollUpNotSeen, N: 1}},
-		"an asleep Mac is no fault":                {[]MacView{online(stopped), asleep}, RollUp{State: RollUpFine}},
-		"an asleep Mac's VMs are VMs":              {[]MacView{online(), asleep}, RollUp{State: RollUpFine}},
+		"no Mac":                                        {nil, RollUp{State: RollUpEmpty}},
+		"a Mac with no VM":                              {[]MacView{online()}, RollUp{State: RollUpEmpty}},
+		"every VM up or stopped":                        {[]MacView{online(healthyServer(), stopped)}, RollUp{State: RollUpFine}},
+		"a VM down":                                     {[]MacView{online(down, stopped)}, RollUp{State: RollUpDown, N: 1}},
+		"an engine stopped, no VM":                      {[]MacView{engineStopped()}, RollUp{State: RollUpEngineStopped, N: 1}},
+		"an engine not installed, no VM":                {[]MacView{engineNotInstalled()}, RollUp{State: RollUpEngineNotInstalled, N: 1}},
+		"a VM down before an engine stopped":            {[]MacView{engineStopped(), engineNotInstalled(), online(down)}, RollUp{State: RollUpDown, N: 1}},
+		"an engine stopped before a Mac not seen":       {[]MacView{engineStopped(), silent}, RollUp{State: RollUpEngineStopped, N: 1}},
+		"a Mac not seen before an engine not installed": {[]MacView{engineNotInstalled(), silent, {}}, RollUp{State: RollUpNotSeen, N: 2}},
+		"an engine not installed before empty":          {[]MacView{engineNotInstalled(), online()}, RollUp{State: RollUpEngineNotInstalled, N: 1}},
+		"two engines stopped":                           {[]MacView{engineStopped(), engineStopped(), engineNotInstalled()}, RollUp{State: RollUpEngineStopped, N: 2}},
+		"down before not seen":                          {[]MacView{online(down), silent, {}}, RollUp{State: RollUpDown, N: 1}},
+		"two Macs not seen":                             {[]MacView{online(), silent, {}}, RollUp{State: RollUpNotSeen, N: 2}},
+		"a silent Mac's VM counts through its Mac":      {[]MacView{silent}, RollUp{State: RollUpNotSeen, N: 1}},
+		"not seen before empty":                         {[]MacView{online(), {}}, RollUp{State: RollUpNotSeen, N: 1}},
+		"an asleep Mac is no fault":                     {[]MacView{online(stopped), asleep}, RollUp{State: RollUpFine}},
+		"an asleep Mac's VMs are VMs":                   {[]MacView{online(), asleep}, RollUp{State: RollUpFine}},
 	} {
 		if got := RollUpOf(c.macs); got != c.want {
 			t.Errorf("%s: %+v, want %+v", name, got, c.want)
@@ -250,15 +263,82 @@ func TestARollUpIsItsFirstRuleThatMatchesAndCountsWhatItNames(t *testing.T) {
 	}
 }
 
-func TestEveryRollUpStateHasItsTone(t *testing.T) {
-	want := map[RollUpState]verdict.Tone{RollUpDown: verdict.Bad, RollUpNotSeen: verdict.Warn, RollUpEmpty: verdict.Plain, RollUpFine: verdict.OK}
+func TestEveryRollUpStateHasItsToneAndItsWords(t *testing.T) {
+	want := map[RollUpState]struct {
+		tone      verdict.Tone
+		one, many string
+	}{
+		RollUpDown:               {verdict.Bad, "1 machine down", "2 machines down"},
+		RollUpEngineStopped:      {verdict.Bad, "1 Mac with its engine stopped", "2 Macs with their engine stopped"},
+		RollUpNotSeen:            {verdict.Warn, "1 Mac not seen", "2 Macs not seen"},
+		RollUpEngineNotInstalled: {verdict.Warn, "1 Mac without its engine", "2 Macs without their engine"},
+		RollUpEmpty:              {verdict.Plain, "no machine yet", "no machine yet"},
+		RollUpFine:               {verdict.OK, "all running", "all running"},
+	}
 	values := RollUpState("").Enum()
 	if len(values) != len(want) {
 		t.Fatalf("the roll-up states are %v", values)
 	}
 	for _, v := range values {
-		if got := RollUpState(v).Tone(); got != want[RollUpState(v)] {
-			t.Errorf("%s: %q, want %q", v, got, want[RollUpState(v)])
+		s, w := RollUpState(v), want[RollUpState(v)]
+		if got := s.Tone(); got != w.tone {
+			t.Errorf("%s: %q, want %q", v, got, w.tone)
+		}
+		n := 1
+		if s == RollUpEmpty || s == RollUpFine {
+			n = 0
+		}
+		if one, many := (RollUp{State: s, N: n}).Words(), (RollUp{State: s, N: 2 * n}).Words(); one != w.one || many != w.many {
+			t.Errorf("%s: %q and %q, want %q and %q", v, one, many, w.one, w.many)
+		}
+	}
+}
+
+// invariant: a roll-up's tone is the tone of the worst standing it counts,
+// over every pair of Macs drawn from one of each standing: it never says a
+// set of machines is worse, or better, than the worst of them.
+func TestARollUpTakesTheToneOfTheStandingItCounts(t *testing.T) {
+	seen := time.Date(2026, 11, 18, 9, 0, 0, 0, time.UTC)
+	down := VM{Name: "linux-1", Lifetime: Persistent, State: Stale}
+	pool := map[string]MacView{
+		"online":               {Reachable: true, Engine: EngineView{State: EngineRunning}, VMs: []VM{healthyServer()}},
+		"a VM down":            {Reachable: true, Engine: EngineView{State: EngineRunning}, VMs: []VM{down}},
+		"engine stopped":       engineStopped(),
+		"engine not installed": engineNotInstalled(),
+		"not seen":             {Answered: seen, VMs: []VM{{Name: "infra", Lifetime: AlwaysOn, State: UnknownState}}},
+		"asleep":               {Answered: seen, Asleep: true, VMs: []VM{{Name: "linux-3", State: UnknownState}}},
+	}
+	rank := map[verdict.Tone]int{verdict.Warn: 1, verdict.Bad: 2}
+	for a, x := range pool {
+		for b, y := range pool {
+			worst := verdict.Tone("")
+			for _, h := range []MacView{x, y} {
+				tones := []verdict.Tone{}
+				switch st := MacStandingOf(h); st {
+				case MacNotSeen, MacEngineStopped, MacEngineNotInstalled:
+					tones = append(tones, st.Tone())
+				case MacAsleep, MacOnline:
+				}
+				if MacStandingOf(h) != MacNotSeen && MacStandingOf(h) != MacAsleep {
+					for _, vm := range h.VMs {
+						if StandingOf(vm) == StandingDown {
+							tones = append(tones, StandingDown.Tone())
+						}
+					}
+				}
+				for _, tone := range tones {
+					if rank[tone] > rank[worst] {
+						worst = tone
+					}
+				}
+			}
+			got := RollUpOf([]MacView{x, y})
+			if worst != "" && got.State.Tone() != worst {
+				t.Errorf("%s and %s: %s reads %q, the worst standing it counts is %q", a, b, got.State, got.State.Tone(), worst)
+			}
+			if worst == "" && (got.State != RollUpFine && got.State != RollUpEmpty) {
+				t.Errorf("%s and %s: %s, with no standing to count", a, b, got.State)
+			}
 		}
 	}
 }

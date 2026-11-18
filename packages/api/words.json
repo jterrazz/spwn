@@ -1606,6 +1606,18 @@
       "Word": "no machine yet",
       "Tone": "plain"
     },
+    "engine-not-installed": {
+      "Word": "engine not installed",
+      "One": "Mac without its engine",
+      "Other": "Macs without their engine",
+      "Tone": "warn"
+    },
+    "engine-stopped": {
+      "Word": "engine stopped",
+      "One": "Mac with its engine stopped",
+      "Other": "Macs with their engine stopped",
+      "Tone": "bad"
+    },
     "fine": {
       "Word": "all running",
       "Tone": "ok"
