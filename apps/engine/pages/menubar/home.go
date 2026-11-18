@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -165,18 +166,19 @@ func (h homeReading) accountsTile() *page.Tile {
 func (h homeReading) awakeTile(toggle page.Action) *page.Tile {
 	t := &page.Tile{Caption: "Awake", Toggle: toggle.ID, Nav: AwakeID, Glyph: symbol("moon", page.SignalQuiet), Number: page.Text("Off"), Tip: page.Texts("Awake", durations), Key: keyAwake}
 	r := h.r.Awake
-	if r != nil && r.Session != nil {
-		t.Tip = page.Texts("Awake "+awakeWords(*r), durations)
-	}
-	switch {
-	case r == nil:
+	if r == nil {
 		t.Number = page.Pending()
-	case r.Session != nil:
-		t.Glyph = symbol("sun.max", page.SignalWaits)
-		t.Number, t.Word = page.Text(hoursLeft(r.Session.Until.Sub(h.now))), "left"
-	case r.NeverSleeps:
+		return t
+	}
+	switch r.Mode() {
+	case awake.NeverSleeps:
 		t.Glyph = symbol("sun.max", page.SignalWaits)
 		t.Number = page.Text("Always")
+	case awake.AwakeUntil:
+		t.Tip = page.Texts("Awake "+awakeWords(*r), durations)
+		t.Glyph = symbol("sun.max", page.SignalWaits)
+		t.Number, t.Word = page.Text(hoursLeft(r.Session.Until.Sub(h.now))), "left"
+	case awake.StoppedByGuard, awake.SleepsNormally:
 	}
 	return t
 }
