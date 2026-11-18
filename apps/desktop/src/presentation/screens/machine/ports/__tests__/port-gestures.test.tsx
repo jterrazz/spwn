@@ -21,7 +21,7 @@ describe('port gestures', () => {
 
             // Then - ports.list, read again, lists it among the shares, waiting
             await visitor.see(within(region('Shared'), region('Port 4321')));
-            await visitor.see(within(region('Port 4321'), content('Waiting')));
+            await visitor.see(within(region('Port 4321'), content('waiting')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -62,7 +62,7 @@ describe('port gestures', () => {
 
             // Then - the mini's ports.list, read again, lists it among the shares, waiting
             await visitor.see(within(region('Shared'), region('Port 5432')));
-            await visitor.see(within(region('Port 5432'), content('Waiting')));
+            await visitor.see(within(region('Port 5432'), content('waiting')));
         });
         expect(result.errors.text).toBe('');
     });

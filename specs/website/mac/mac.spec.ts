@@ -158,7 +158,7 @@ describe('mac', () => {
             await visitor.see(
                 within(
                     region('Needs you'),
-                    button('Needs a look Engine stopped', { exact: false }),
+                    button('needs a look Engine stopped', { exact: false }),
                 ),
             );
             await visitor.see(within(region('Needs you'), button('Start the engine engine')));

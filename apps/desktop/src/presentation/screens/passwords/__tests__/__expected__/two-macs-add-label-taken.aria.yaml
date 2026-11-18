@@ -32,6 +32,6 @@
   - textbox "Value"
   - text: Label
   - textbox "Label": GitHub deploy
-  - text: Refused a password is already labeled "GitHub deploy". label it another way
+  - text: refused a password is already labeled "GitHub deploy". label it another way
   - button "Cancel"
   - button "Add password"

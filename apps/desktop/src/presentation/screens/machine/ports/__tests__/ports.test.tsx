@@ -118,7 +118,7 @@ describe('ports', () => {
             await visitor.click(button('Declare :5000 public'));
 
             // Then - it asks nothing, and the engine's answer settles the gesture done on its row
-            await visitor.see(content('Done'));
+            await visitor.see(content('done'));
         });
         expect(result.errors.text).toBe('');
     });

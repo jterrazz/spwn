@@ -27,4 +27,4 @@
     - 'button "linux-5 Lot shell, one block per package · by studio-os-fe Creating: image 1 of 5"'
   - region "Packages":
     - heading "Packages" [level=2]
-    - text: "Not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"
+    - text: "not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"

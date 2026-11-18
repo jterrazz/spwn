@@ -29,7 +29,7 @@
   - text: of 994 GB Its machines 2machines 1 running, 1 stopped
   - region "Needs you, on this Mac":
     - heading "Needs you, on this Mac" [level=2]
-    - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]
@@ -44,4 +44,4 @@
     - button "linux-1 by you running"
   - region "Packages":
     - heading "Packages" [level=2]
-    - text: "Not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"
+    - text: "not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"

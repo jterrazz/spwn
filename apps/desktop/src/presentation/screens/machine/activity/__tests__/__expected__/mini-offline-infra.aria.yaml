@@ -17,4 +17,4 @@
     - group "Which log":
       - button "Console" [pressed]
       - button "Setup run"
-    - text: Unreachable mac-mini does not answer. station machines mac-mini
+    - text: unreachable mac-mini does not answer. station machines mac-mini

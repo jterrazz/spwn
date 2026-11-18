@@ -108,7 +108,7 @@ describe('gestures', () => {
                 await visitor.click(within(asked, button('Sign out')));
 
                 // Then - the row says done where it stands, and no panel repeats it
-                await visitor.see(within(signIns, content('Done')));
+                await visitor.see(within(signIns, content('done')));
                 await visitor.gone(region('Done here'));
                 after = heightOf('Sign-ins');
             },

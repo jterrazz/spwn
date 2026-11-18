@@ -56,4 +56,4 @@
       - button "infra not seen"
     - region "Packages":
       - heading "Packages" [level=2]
-      - text: Unreachable mac-mini does not answer. station machines mac-mini
+      - text: unreachable mac-mini does not answer. station machines mac-mini

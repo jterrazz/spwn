@@ -3,5 +3,5 @@
   - group "Which side changes":
     - button "Change the machine" [pressed]
     - button "Change the file"
-  - text: The file says This machine has The machine will git base-macos Not installed Install it ohmyzsh base-macos Not installed Install it git-shortcuts base-macos Not installed Set it hushlogin base-macos Not installed Set it Apply will install 4.
+  - text: The file says This machine has The machine will git base-macos not installed install it ohmyzsh base-macos not installed install it git-shortcuts base-macos not installed set it hushlogin base-macos not installed set it Apply will install 4.
   - button "Plan"

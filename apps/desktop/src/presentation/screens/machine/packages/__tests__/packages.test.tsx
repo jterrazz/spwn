@@ -213,7 +213,7 @@ describe('Packages', () => {
 
                 // Then - no dialog asks, and the engine's answer settles the gesture done
                 await visitor.gone(dialog('Upgrade what the file of macbook-pro lists?'));
-                await visitor.see(content('Done'));
+                await visitor.see(content('done'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -231,7 +231,7 @@ describe('Packages', () => {
 
                 // Then - the gesture fails on the engine's refusal, never done, and offers to dismiss it
                 await visitor.see(button('Dismiss'));
-                await visitor.gone(content('Done'));
+                await visitor.gone(content('done'));
 
                 // When - it is dismissed
                 await visitor.click(button('Dismiss'));

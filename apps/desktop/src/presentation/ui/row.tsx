@@ -12,7 +12,7 @@ export type RowTemplate = 'catalog' | 'flow' | 'meters' | 'passwords';
 // value: `calm: 'unsaid'` draws no word for a calm state, where the panel's title already says it ("Shared");
 // value: `calm: 'pill'` draws it as a pill of its own tone, where the mockup lists calm and deviating rows alike.
 type Calm = 'pill' | 'unsaid' | 'word';
-type RowState = { tone: Tone; word: string; asWritten?: boolean; calm?: Calm };
+type RowState = { tone: Tone; word: string; calm?: Calm };
 
 // value: a column given `null` is kept empty in this row, so a list whose rows differ still aligns; a column
 // value: left `undefined` is not a column of this list at all. A value given as a string is plain text with
@@ -114,14 +114,7 @@ function StateShown({ state }: { state: RowState }) {
         return null;
     }
     const pill = calm && state.calm === 'pill';
-    return (
-        <StatePill
-            asWritten={state.asWritten ?? false}
-            quiet={!pill}
-            tone={state.tone}
-            word={state.word}
-        />
-    );
+    return <StatePill quiet={!pill} tone={state.tone} word={state.word} />;
 }
 
 function StateCell({ state, at }: { state: null | RowState | undefined; at: 'end' | 'start' }) {

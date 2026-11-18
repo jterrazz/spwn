@@ -18,7 +18,7 @@
   - text: of 80 GB Check 41ms passes · 3 s ago
   - region "Health":
     - heading "Health checked 3 s ago" [level=2]
-    - text: Healthy. Its state healthy Its address 192.168.64.5 SSH Answers Its check Passes
+    - text: Healthy. Its state healthy Its address 192.168.64.5 SSH answers Its check passes
   - region "Check latency":
     - heading "Check latency" [level=2]
     - text: 41 ms now

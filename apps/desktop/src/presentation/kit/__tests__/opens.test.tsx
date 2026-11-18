@@ -96,7 +96,7 @@ describe('opens', () => {
                 await visitor.click(button('Open in Terminal'));
 
                 // Then - the refusal, in its words, with a way to dismiss it
-                await visitor.see(content('Refused'));
+                await visitor.see(content('refused'));
                 await visitor.see(
                     content('The window runs no command holding a line break', { exact: false }),
                 );
@@ -107,6 +107,6 @@ describe('opens', () => {
         expect(invoked).toStrictEqual([
             { args: { command: 'ssh admin@linux-1' }, command: 'open_in_terminal' },
         ]);
-        expect(result.content.text).not.toContain('Done');
+        expect(result.content.text).not.toContain('done');
     });
 });
