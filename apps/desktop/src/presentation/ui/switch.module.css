@@ -12,6 +12,15 @@
     flex-wrap: wrap;
     overflow-x: visible;
 }
+.even {
+    display: flex;
+    align-self: stretch;
+}
+.even .option {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+}
 .inPanel {
     background: var(--inset);
 }
@@ -74,4 +83,24 @@
 .option:disabled[aria-selected='true'] {
     background: var(--raise);
     color: var(--t3);
+}
+.option[aria-busy='true'] {
+    color: var(--t2);
+}
+.spinner {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: var(--space-6);
+    vertical-align: -1px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-2);
+    border-top-color: var(--t2);
+    animation: turn 0.8s linear infinite;
+}
+@keyframes turn {
+    to {
+        transform: rotate(1turn);
+    }
 }
