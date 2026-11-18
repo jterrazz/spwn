@@ -10,7 +10,7 @@ runs:
           ✗	x	Mac	x	Engine not installed
           ○	t	Workspace	x	Stopped · ephemeral	4 CPU	8 GB
           # Needs you
-          ✗	This Mac	has no engine installed	station engine start
+          ◐	This Mac	has no engine installed	station engine start
     - command: 'machines --this-mac --json | /usr/bin/jq -r ''.macs[0].vms[0] | .name + " " + .state'''
       exit: 0
       stdout: |

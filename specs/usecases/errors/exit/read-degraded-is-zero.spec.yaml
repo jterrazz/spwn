@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           ✗	mac-mini	Mac	mac-mini	Unreachable
-          ✗	mac-mini	does not answer
+          ◐	mac-mini	does not answer
     - command: 'world engine-crash macbook-pro'
       exit: 0
     - command: 'machines | /usr/bin/grep macbook-pro'

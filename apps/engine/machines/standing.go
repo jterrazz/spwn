@@ -1,6 +1,10 @@
 package machines
 
-import "github.com/jterrazz/studio-station/apps/engine/core/verdict"
+import (
+	"strings"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
+)
 
 type VMStanding string
 
@@ -81,4 +85,129 @@ func isDown(vm VM) bool {
 	case Suspended, UnknownState, Creating:
 	}
 	return false
+}
+
+type MacStanding string
+
+const (
+	MacAsleep             MacStanding = "asleep"
+	MacNotSeen            MacStanding = "not-seen"
+	MacEngineStopped      MacStanding = "engine-stopped"
+	MacEngineNotInstalled MacStanding = "engine-not-installed"
+	MacOnline             MacStanding = "online"
+)
+
+func (MacStanding) Enum() []string {
+	return []string{string(MacAsleep), string(MacNotSeen), string(MacEngineStopped), string(MacEngineNotInstalled), string(MacOnline)}
+}
+
+func (s MacStanding) Word() string {
+	// value: a Mac's standing as a client says it, a lowercase fragment.
+	return strings.ReplaceAll(string(s), "-", " ")
+}
+
+func (s MacStanding) Tone() verdict.Tone {
+	// invariant: a Mac that does not answer is never bad: nothing proves it
+	// down. Asleep is plain, silent otherwise warn.
+	switch s {
+	case MacOnline:
+		return verdict.OK
+	case MacNotSeen, MacEngineNotInstalled:
+		return verdict.Warn
+	case MacEngineStopped:
+		return verdict.Bad
+	case MacAsleep:
+	}
+	return verdict.Plain
+}
+
+func MacStandingOf(h MacView) MacStanding {
+	// invariant: a Mac has one standing, its first rule that matches: asleep,
+	// not seen, its engine stopped, its engine not installed, online. An
+	// engine this Mac cannot know (another Mac, no hypervisor) reads online.
+	// Its sentence, its Unseen verdict and its findings read it.
+	switch Reach(h) {
+	case ReachAsleep:
+		return MacAsleep
+	case ReachUnreachable:
+		return MacNotSeen
+	}
+	switch h.Engine.State {
+	case EngineStopped:
+		return MacEngineStopped
+	case EngineNotInstalled:
+		return MacEngineNotInstalled
+	case EngineRunning:
+	}
+	return MacOnline
+}
+
+type RollUpState string
+
+const (
+	RollUpDown    RollUpState = "down"
+	RollUpNotSeen RollUpState = "not-seen"
+	RollUpEmpty   RollUpState = "empty"
+	RollUpFine    RollUpState = "fine"
+)
+
+func (RollUpState) Enum() []string {
+	return []string{string(RollUpDown), string(RollUpNotSeen), string(RollUpEmpty), string(RollUpFine)}
+}
+
+func (s RollUpState) Tone() verdict.Tone {
+	switch s {
+	case RollUpDown:
+		return verdict.Bad
+	case RollUpNotSeen:
+		return verdict.Warn
+	case RollUpFine:
+		return verdict.OK
+	case RollUpEmpty:
+	}
+	return verdict.Plain
+}
+
+type RollUp struct {
+	State RollUpState
+	// value: how many machines its state names: the VMs down and the Macs
+	// whose engine is stopped or not installed, or the Macs not seen; absent
+	// for empty and fine.
+	N int `json:",omitempty"`
+}
+
+func RollUpOf(macs []MacView) RollUp {
+	// invariant: how a set of Macs and their VMs stands, read from their
+	// standings alone, its first rule that matches: down (a VM down, or an
+	// engine stopped or not installed), not seen (a Mac not seen), empty (no
+	// VM), fine. A VM of a Mac that does not answer counts through its Mac
+	// only; an asleep Mac is no fault.
+	down, unseen, vms := 0, 0, 0
+	for _, h := range macs {
+		vms += len(h.VMs)
+		switch MacStandingOf(h) {
+		case MacAsleep:
+			continue
+		case MacNotSeen:
+			unseen++
+			continue
+		case MacEngineStopped, MacEngineNotInstalled:
+			down++
+		case MacOnline:
+		}
+		for _, vm := range h.VMs {
+			if StandingOf(vm) == StandingDown {
+				down++
+			}
+		}
+	}
+	switch {
+	case down > 0:
+		return RollUp{State: RollUpDown, N: down}
+	case unseen > 0:
+		return RollUp{State: RollUpNotSeen, N: unseen}
+	case vms == 0:
+		return RollUp{State: RollUpEmpty}
+	}
+	return RollUp{State: RollUpFine}
 }

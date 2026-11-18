@@ -1,0 +1,11 @@
+description: 'each Mac of the stories says its standing and roll-up, and all of them roll up down'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [[.out.All.Macs[] | [.Name, .Standing, .Machines.State, .Machines.N]], [.out.All.Standing.State, .out.All.Standing.N]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [[["macbook-pro","online","fine",null],["mac-mini","online","down",1],["macbook-air","asleep","empty",null]],["down",1]]

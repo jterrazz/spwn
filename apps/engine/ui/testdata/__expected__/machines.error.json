@@ -269,7 +269,7 @@
         {
           "row": {
             "id": "1-mac-mini",
-            "mark": "broken",
+            "mark": "attention",
             "label": "mac-mini",
             "cells": [
               {
@@ -280,7 +280,7 @@
                 "kind": "none"
               }
             ],
-            "reason": "failing"
+            "reason": "degraded"
           }
         }
       ],

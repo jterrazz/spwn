@@ -227,12 +227,20 @@ type MacView struct {
 	// value: the Mac in one sentence, judged by machines.list: its engine
 	// and how it sleeps, or since when it is not seen.
 	Sentence string `json:",omitempty"`
+	// value: the Mac's one standing (MacStandingOf), and the roll-up of
+	// this Mac and its VMs alone (RollUpOf); judged by machines.list, absent
+	// in any other answer.
+	Standing MacStanding `json:",omitempty"`
+	Machines *RollUp     `json:",omitempty"`
 }
 
 type AllMachines struct {
 	Macs []MacView
 	// value: when it was read.
 	Read time.Time
+	// value: the roll-up of every Mac and its VMs (RollUpOf); judged by
+	// machines.list, absent in any other answer.
+	Standing *RollUp `json:",omitempty"`
 }
 
 type Unasked struct {

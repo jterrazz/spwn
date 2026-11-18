@@ -1559,6 +1559,28 @@
       "Tone": "plain"
     }
   },
+  "MachinesMacStanding": {
+    "asleep": {
+      "Word": "asleep",
+      "Tone": "plain"
+    },
+    "engine-not-installed": {
+      "Word": "engine not installed",
+      "Tone": "warn"
+    },
+    "engine-stopped": {
+      "Word": "engine stopped",
+      "Tone": "bad"
+    },
+    "not-seen": {
+      "Word": "not seen",
+      "Tone": "warn"
+    },
+    "online": {
+      "Word": "online",
+      "Tone": "ok"
+    }
+  },
   "MachinesPreset": {
     "gate": {
       "Word": "gate",
@@ -1571,6 +1593,28 @@
     "workspace": {
       "Word": "workspace",
       "Tone": "plain"
+    }
+  },
+  "MachinesRollUpState": {
+    "down": {
+      "Word": "down",
+      "One": "machine down",
+      "Other": "machines down",
+      "Tone": "bad"
+    },
+    "empty": {
+      "Word": "no machine yet",
+      "Tone": "plain"
+    },
+    "fine": {
+      "Word": "all running",
+      "Tone": "ok"
+    },
+    "not-seen": {
+      "Word": "not seen",
+      "One": "Mac not seen",
+      "Other": "Macs not seen",
+      "Tone": "warn"
     }
   },
   "MachinesRoomFor": {

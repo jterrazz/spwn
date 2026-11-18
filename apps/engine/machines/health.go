@@ -227,12 +227,15 @@ func LatencyNote(vm VM) string {
 
 func Judged(f AllMachines) AllMachines {
 	// value: f with each server's health verdict and latency note, each
-	// VM's standing, head, hold and sections, and each silent Mac's verdict, on copies of
+	// VM's standing, head, hold and sections, each Mac's standing, sentence,
+	// roll-up and silent verdict, and the roll-up of them all, on copies of
 	// its Macs and VMs.
 	macs := slices.Clone(f.Macs)
 	for i := range macs {
 		macs[i].Unseen = UnseenVerdict(macs[i], f.Read)
-		macs[i].Sentence = SentenceOf(macs[i], f.Read)
+		macs[i].Sentence, macs[i].Standing = SentenceOf(macs[i], f.Read), MacStandingOf(macs[i])
+		rollUp := RollUpOf(macs[i : i+1])
+		macs[i].Machines = &rollUp
 		vms := slices.Clone(macs[i].VMs)
 		for j := range vms {
 			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j]), LatencyNote(vms[j])
@@ -244,5 +247,7 @@ func Judged(f AllMachines) AllMachines {
 		macs[i].VMs = vms
 	}
 	f.Macs = macs
+	all := RollUpOf(macs)
+	f.Standing = &all
 	return f
 }

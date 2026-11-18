@@ -105,6 +105,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [051 A machine is a base and its Machinefiles, one base per distro](decisions/051-a-machine-is-a-base-and-its-machinefiles.md) (Accepted)
 - [052 Station keeps no agents; another binary owns them](decisions/052-station-keeps-no-agents.md) (Accepted)
 - [053 The panel is the untinted system glass over a hue-free grey, with no white card](decisions/053-the-panel-is-untinted-glass-over-a-grey-ground.md) (Accepted)
-- [054 A VM's standing is one rule, and every verdict reads it](decisions/054-a-vms-standing-is-one-rule.md) (Proposed)
+- [054 A machine's standing is one rule at each level, and every verdict reads it](decisions/054-a-machines-standing-is-one-rule-at-each-level.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

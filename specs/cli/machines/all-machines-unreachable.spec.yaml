@@ -9,7 +9,7 @@ runs:
           ●	x	Mac	x	Online
           ✗	y	Mac	y	Unreachable
           # Needs you
-          ✗	y	does not answer
+          ◐	y	does not answer
     - command: 'machines --json | /usr/bin/jq -r ''.macs[1] | [.name, (.reachable | tostring), (.vms | length | tostring)] | join(" ")'''
       exit: 0
       stdout: |

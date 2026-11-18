@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          [["macbook-pro",null,[["api","stopped","yours"],["linux-1","running","yours"]]],["mac-mini",{"Tone":"plain","Sentence":"mac-mini has not been seen for 6 h.","Line":"Nothing proves it is down: it may be asleep, or off your network."},[["infra","unknown","not-seen"]]]]
+          [["macbook-pro",null,[["api","stopped","yours"],["linux-1","running","yours"]]],["mac-mini",{"Tone":"warn","Sentence":"mac-mini has not been seen for 6 h.","Line":"Nothing proves it is down: it may be asleep, or off your network."},[["infra","unknown","not-seen"]]]]

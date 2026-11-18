@@ -78,7 +78,7 @@ func TestAMacNotSeenIsNeverSaidDown(t *testing.T) {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
 	silent := machines.MacView{Name: "mac-mini", Answered: now.Add(-12 * time.Minute)}
 	got := machines.UnseenVerdict(silent, now)
-	want := verdict.Verdict{Tone: verdict.Plain, Sentence: "mac-mini has not been seen for 12 min.", Line: machines.LineNothingProvesDown}
+	want := verdict.Verdict{Tone: verdict.Warn, Sentence: "mac-mini has not been seen for 12 min.", Line: machines.LineNothingProvesDown}
 	if got == nil || *got != want {
 		t.Errorf("a Mac silent 12 min: %+v; want %+v", got, want)
 	}

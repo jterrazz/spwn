@@ -9,6 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 type Counts struct {
@@ -131,36 +132,27 @@ func Findings(f AllMachines) []finding.Finding {
 		if !h.ThisMac {
 			on = " --on " + label
 		}
-		switch {
-		case Reach(h) == ReachAsleep && !macsServer(h):
-		case !h.Reachable && h.LAN != "" && macsServer(h):
-			add(mac, finding.Broken, label, label+" does not answer", "station machines unlock "+label)
-		case !h.Reachable:
-			add(mac, finding.Broken, label, label+" does not answer", "")
-		case h.Engine.Known() && !h.Engine.Running() && h.Engine.State == EngineNotInstalled && h.ThisMac:
-			add(mac, finding.Broken, label, label+" has no engine installed", "station engine start")
-		case h.Engine.Known() && !h.Engine.Running():
-			add(mac, finding.Broken, label, label+" has its engine stopped", "station engine start"+on)
+		switch s := MacStandingOf(h); s {
+		case MacAsleep, MacNotSeen:
+			switch {
+			case !macsServer(h) && s == MacAsleep:
+			case h.LAN != "" && macsServer(h):
+				add(mac, severityOf(s.Tone()), label, label+" does not answer", "station machines unlock "+label)
+			default:
+				add(mac, severityOf(s.Tone()), label, label+" does not answer", "")
+			}
+		case MacEngineNotInstalled:
+			add(mac, severityOf(s.Tone()), label, label+" has no engine installed", "station engine start"+on)
+		case MacEngineStopped:
+			add(mac, severityOf(s.Tone()), label, label+" has its engine stopped", "station engine start"+on)
+		case MacOnline:
 		}
 		if fix, ok := Behind(h, thisMac); ok && h.Reachable {
 			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: label + " runs " + h.StationVersion, Fix: finding.Fix{Path: fix}})
 		}
 		for _, vm := range Ordered(h.VMs) {
-			ref := machine.Ref{Name: vm.Name, On: h.Name}
-			if f, ok := serverFinding(ref, vm, on); ok {
+			if f, ok := vmFinding(machine.Ref{Name: vm.Name, On: h.Name}, vm, on); ok {
 				out = append(out, f)
-				continue
-			}
-			switch vm.State {
-			case Stale:
-				add(ref, finding.NeedsALook, vm.Name, vm.Name+" ended unexpectedly", "station machines start "+vm.Name+on)
-			case Broken:
-				add(ref, finding.Broken, vm.Name, vm.Name+" "+vm.Detail+", stopped", "station machines delete "+vm.Name+on)
-			case Running:
-				if h := HealthOf(vm); !h.SSH && vm.Guest == "absent" {
-					add(ref, finding.Broken, vm.Name, vm.Name+" fails "+StepSSH, "station machines restart "+vm.Name+on)
-				}
-			case Stopped, Suspended, UnknownState, Creating:
 			}
 		}
 	}
@@ -178,24 +170,43 @@ func Down(vm VM) bool {
 	return StandingOf(vm) == StandingDown
 }
 
-// invariant: a server in a loop, powered off from inside, or whose check
-// fails since it passed needs you (red); a check that has not answered yet
-// is no finding. The engine never restarts it by itself: the restart is the
-// owner's gesture.
-func serverFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
-	if vm.Lifetime != AlwaysOn {
-		return finding.Finding{}, false
+func severityOf(t verdict.Tone) finding.Severity {
+	// invariant: a finding's severity is its machine's standing's tone: bad
+	// is broken, any other tone needs a look, so a finding never says broken
+	// of a machine its standing does not.
+	if t == verdict.Bad {
+		return finding.Broken
 	}
-	f := finding.Finding{Machine: ref, Section: section.Overview, Subject: vm.Name}
+	return finding.NeedsALook
+}
+
+// invariant: what a VM's finding says is read from its facts, its severity
+// from its standing (severityOf). A server in a loop, powered off from
+// inside, or whose check fails since it passed, a VM ended unexpectedly or
+// broken, a running one whose SSH fails, and any other VM down each have
+// one; a check that has not answered yet is none. The engine never restarts
+// a server by itself: the restart is the owner's gesture.
+func vmFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
+	s := StandingOf(vm)
+	f := finding.Finding{Machine: ref, Section: section.Overview, Severity: severityOf(s.Tone()), Subject: vm.Name}
+	server := vm.Lifetime == AlwaysOn
 	switch {
-	case vm.Restarts.Looping:
-		f.Severity, f.Text = finding.Broken, vm.Name+" is in a loop: "+vm.Restarts.InALoop()
-	case vm.State == Stopped && vm.Detail == PoweredOffInside:
-		f.Severity, f.Text, f.Fix = finding.Broken, vm.Name+" "+PoweredOffInside, finding.Fix{Command: "station machines start " + vm.Name + on}
-	case vm.State == Running && vm.CheckStatus.State == CheckFailing:
-		f.Severity, f.Text = finding.Broken, vm.Name+" check failing since "+vm.CheckStatus.Since.Local().Format("15:04")
+	case server && vm.Restarts.Looping:
+		f.Text = vm.Name + " is in a loop: " + vm.Restarts.InALoop()
+	case server && vm.State == Stopped && vm.Detail == PoweredOffInside:
+		f.Text, f.Fix = vm.Name+" "+PoweredOffInside, finding.Fix{Command: "station machines start " + vm.Name + on}
+	case server && vm.State == Running && vm.CheckStatus.State == CheckFailing:
+		f.Text = vm.Name + " check failing since " + vm.CheckStatus.Since.Local().Format("15:04")
 		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name}
 		f.Detail = downDetail(ref.On, vm)
+	case vm.State == Stale:
+		f.Text, f.Fix = vm.Name+" ended unexpectedly", finding.Fix{Command: "station machines start " + vm.Name + on}
+	case vm.State == Broken:
+		f.Text, f.Fix = vm.Name+" "+vm.Detail+", stopped", finding.Fix{Command: "station machines delete " + vm.Name + on}
+	case vm.State == Running && !HealthOf(vm).SSH && vm.Guest == "absent":
+		f.Text, f.Fix = vm.Name+" fails "+StepSSH, finding.Fix{Command: "station machines restart " + vm.Name + on}
+	case s == StandingDown:
+		f.Text, f.Fix = vm.Name+" is down", finding.Fix{Command: "station machines start " + vm.Name + on}
 	default:
 		return finding.Finding{}, false
 	}

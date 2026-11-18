@@ -17,7 +17,7 @@ runs:
           ✗	mac-mini	Mac	mac-mini	Unreachable · last answer 10:00
           ?	infra	Server	mac-mini	Not seen · always on	8 CPU	24 GB
           # Needs you
-          ✗	mac-mini	does not answer	station machines unlock mac-mini
+          ◐	mac-mini	does not answer	station machines unlock mac-mini
     - command: 'world unlock mac-mini'
       exit: 0
     - command: 'machines | /usr/bin/grep -E "mac-mini|infra"'
