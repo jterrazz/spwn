@@ -1,9 +1,8 @@
-◌ Known to station, with a step left
+◌ Known to station
 
 Changes
   ◌ name
   ◌ zshrc
-  ◌ layout
   ◌ relocate
 Machinefile  none bound by init: init --machinefile binds one
 

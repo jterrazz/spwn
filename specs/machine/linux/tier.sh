@@ -36,7 +36,7 @@ home_of() {
   cp "$repo/.artifacts/go/station" "$h/.local/bin/station"
   cp "$suite/linux/stubs/"* "$h/.local/bin/"
   chmod +x "$h/.local/bin/"*
-  printf '{"here":"%s","vm_user":"%s"}\n' "$name" "$vm_user" > "$h/.config/station/preferences.json"
+  printf '{"name":"%s","vm_user":"%s"}\n' "$name" "$vm_user" > "$h/.config/station/preferences.json"
 }
 as() {
   local h=$1

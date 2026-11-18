@@ -11,9 +11,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 
-	"github.com/jterrazz/studio-station/apps/engine/core/store"
-	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
-	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
 	setupcontract "github.com/jterrazz/studio-station/apps/engine/setup/contract"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -21,13 +18,9 @@ import (
 )
 
 const (
-	stepName   = "name"
-	stepZshrc  = "zshrc"
-	stepLayout = "layout"
-	stepKind   = "kind"
-	stepZsh    = "zsh"
-
-	stepPreferences = "preferences"
+	stepName  = "name"
+	stepZshrc = "zshrc"
+	stepKind  = "kind"
 )
 
 type Registrar interface {
@@ -39,18 +32,12 @@ type ProvisionerOptions struct {
 	Kind catalog.MachineKind
 	// value: this machine is a server: its own tooling keeps it, never station.
 	Server bool
-	// value: the preferences' file (a v1 config.json converts only while it
-	// is absent), station's state folder and the user's bin.
+	// value: the preferences' file, station's state folder and the user's bin.
 	PreferencesFile, State string
-	Executable             string
-	Detached               bool
 	Apps                   []catalog.App
 	Expand                 disk.Expander
 	Files                  map[catalog.AppFile]string
 	Configurer             Configurer
-	// value: moves the preferences out of the file station v2 kept them in,
-	// once; nil where there is none to move.
-	MovePreferences func(ctx context.Context) (moved bool, err error)
 	// value: this machine's ~/.zshrc, every write of it one edit under the
 	// lock each station process takes for it.
 	Zshrc Zshrc
@@ -63,30 +50,18 @@ type Zshrc interface {
 }
 
 type ProvisionerPrefs struct {
-	Name     setupcontract.NamePrefs
-	Identity setupcontract.IdentityPrefs
-	Macs     machinescontract.MacsPrefs
-	VMUser   machinescontract.VMUserPrefs
-	Ports    portscontract.PortsPrefs
-	// value: every store station keeps, each brought to its version by the
-	// layout step.
-	Stores []store.Migrator
+	Name setupcontract.NamePrefs
 }
 
 type Provisioner struct {
-	m     Machine
-	p     ProvisionerPrefs
-	vault Vault
-	reg   Registrar
-	o     ProvisionerOptions
+	m   Machine
+	p   ProvisionerPrefs
+	reg Registrar
+	o   ProvisionerOptions
 }
 
-type Vault interface {
-	Forget(ctx context.Context, name string) error
-}
-
-func NewProvisioner(m Machine, p ProvisionerPrefs, v Vault, reg Registrar, o ProvisionerOptions) *Provisioner {
-	return &Provisioner{m: m, p: p, vault: v, reg: reg, o: o}
+func NewProvisioner(m Machine, p ProvisionerPrefs, reg Registrar, o ProvisionerOptions) *Provisioner {
+	return &Provisioner{m: m, p: p, reg: reg, o: o}
 }
 
 type Request struct {
@@ -107,30 +82,10 @@ func (s *Provisioner) CheckName(name string) error {
 	if !s.onMac() {
 		return setup.ErrNameOnVM
 	}
-	if thisMac := s.currentThisMac(); thisMac != "" && thisMac != name {
+	if thisMac, ok := s.reg.ThisMac(); ok && thisMac != name {
 		return &setup.NameMismatchError{Named: thisMac, Asked: name}
 	}
 	return nil
-}
-
-// invariant: a Mac whose settings.json is not written yet but whose v1
-// config.json names it is already registered: the layout step will say so.
-func (s *Provisioner) currentThisMac() string {
-	if thisMac, ok := s.reg.ThisMac(); ok {
-		return thisMac
-	}
-	if s.m.Exists(s.settingsPath()) {
-		return ""
-	}
-	data, found, err := s.m.ReadFile(s.v1Path())
-	if err != nil || !found {
-		return ""
-	}
-	converted, err := setup.ConvertV1(data, s.m.User())
-	if err != nil {
-		return ""
-	}
-	return converted.ThisMachine
 }
 
 func (s *Provisioner) DefaultName(ctx context.Context) string {
@@ -157,57 +112,27 @@ func sanitize(raw string) string {
 }
 
 func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) {
-	moved, err := s.movePreferences(ctx)
-	if err != nil {
-		return setup.Report{Steps: moved}, err
-	}
 	if err := s.CheckName(r.Name); err != nil {
 		return setup.Report{}, err
 	}
 	if s.o.Server {
-		return setup.Report{Steps: append(moved, setup.Step{Name: stepKind, State: catalog.StateOK, Detail: "server: its own tooling keeps it, station sets nothing up"})}, nil
+		return setup.Report{Steps: []setup.Step{{Name: stepKind, State: catalog.StateOK, Detail: "server: its own tooling keeps it, station sets nothing up"}}}, nil
 	}
 	if !s.onMac() {
 		zshrc, err := s.zshrc(ctx)
 		relocate, relocateErr := s.relocate(ctx, r.Interactive)
-		return setup.Report{Steps: append(moved, zshrc, relocate)}, errors.Join(err, relocateErr)
+		return setup.Report{Steps: []setup.Step{zshrc, relocate}}, errors.Join(err, relocateErr)
 	}
-	if r.Name == "" && (!r.Interactive || r.AskName == nil) && s.currentThisMac() == "" && !s.exists(s.settingsPath()) {
-		return setup.Report{Steps: moved}, setup.ErrNeedsName
+	if _, named := s.reg.ThisMac(); r.Name == "" && (!r.Interactive || r.AskName == nil) && !named && !s.exists(s.settingsPath()) {
+		return setup.Report{}, setup.ErrNeedsName
 	}
-	migrated := s.migrateSettings()
-	name, nameErr := s.name(r, migrated != nil)
+	name, nameErr := s.name(r)
 	if nameErr != nil && !isStepFailure(nameErr) {
 		return setup.Report{}, nameErr
 	}
 	zshrc, zshrcErr := s.zshrc(ctx)
-	layout, layoutErr := s.layout(ctx, migrated)
-	var zshErr error
-	if layoutErr == nil && zshrcErr == nil {
-		var retired []setup.Step
-		retired, zshErr = s.retireZshDir(ctx)
-		layout = append(layout, retired...)
-	}
 	relocate, relocateErr := s.relocate(ctx, r.Interactive)
-	steps := append(append([]setup.Step{name, zshrc}, layout...), relocate)
-	return setup.Report{Steps: append(moved, steps...)}, errors.Join(nameErr, zshrcErr, layoutErr, zshErr, relocateErr)
-}
-
-// invariant: the move comes before any step reads a preference, and says so
-// once: a second run has nothing to move, and no row of it.
-func (s *Provisioner) movePreferences(ctx context.Context) ([]setup.Step, error) {
-	if s.o.MovePreferences == nil {
-		return nil, nil
-	}
-	moved, err := s.o.MovePreferences(ctx)
-	if err != nil {
-		step, stepErr := failed(stepPreferences, err)
-		return []setup.Step{step}, stepErr
-	}
-	if !moved {
-		return nil, nil
-	}
-	return []setup.Step{{Name: stepPreferences, State: catalog.StateOK, Detail: "moved settings.json to preferences.json", Changed: true}}, nil
+	return setup.Report{Steps: []setup.Step{name, zshrc, relocate}}, errors.Join(nameErr, zshrcErr, relocateErr)
 }
 
 func isStepFailure(err error) bool {
@@ -215,12 +140,12 @@ func isStepFailure(err error) bool {
 	return errors.As(err, &failed)
 }
 
-func (s *Provisioner) name(r Request, blocked bool) (setup.Step, error) {
+func (s *Provisioner) name(r Request) (setup.Step, error) {
+	if _, err := s.p.Name.Get(); err != nil {
+		return failed(stepName, err)
+	}
 	if thisMac, ok := s.reg.ThisMac(); ok {
 		return setup.Step{Name: stepName, State: catalog.StateOK, Detail: thisMac}, nil
-	}
-	if blocked {
-		return setup.Step{Name: stepName, State: catalog.StateAbsent, Detail: "waits for the layout step"}, nil
 	}
 	name := r.Name
 	if name == "" && r.Interactive && r.AskName != nil {
@@ -278,12 +203,5 @@ func (s *Provisioner) Check(_ context.Context) (setup.Report, error) {
 		zshrc = setup.Step{Name: stepZshrc, State: catalog.StateAbsent, Detail: "station init"}
 	}
 	steps = append(steps, zshrc)
-	if s.onMac() {
-		layout := setup.Step{Name: stepLayout, State: catalog.StateOK}
-		if s.holdsStationFiles() {
-			layout = setup.Step{Name: stepLayout, State: catalog.StateDegraded, Detail: "~/.studio still holds station's files: station init"}
-		}
-		steps = append(steps, layout)
-	}
 	return setup.Report{Steps: steps}, nil
 }

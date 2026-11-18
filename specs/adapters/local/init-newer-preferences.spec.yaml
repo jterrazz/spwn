@@ -1,4 +1,4 @@
-description: 'init refuses a settings.json a newer station wrote, and leaves it as it is'
+description: 'init refuses a preferences.json a newer station wrote, and leaves it as it is'
 fixture:
     - ../__fixtures__/setup-stubs/
     - ./__fixtures__/newer-preferences/
@@ -8,21 +8,20 @@ runs:
     - command: 'init'
       exit: 1
       stdout: |
-          ○	name	not set: station init --name <name>
+          ✗	name	cannot read {{workdir}}/.config/station/preferences.json: written at version 2 by a newer station, this one knows 1
           ●	zshrc
-          ✗	layout	cannot read {{workdir}}/.config/station/preferences.json: written at version 2 by a newer station, this one knows 1
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
           	none bound by init: init --machinefile binds one
       stderr: |
-          Error: init step layout: cannot read {{workdir}}/.config/station/preferences.json: written at version 2 by a newer station, this one knows 1
+          Error: init step name: cannot read {{workdir}}/.config/station/preferences.json: written at version 2 by a newer station, this one knows 1
           Hint: fix it, then run station init again: it resumes
       files:
           .config/station/preferences.json:
               equals: |
                   {
-                    "here": "t",
-                    "hosts": {
+                    "name": "t",
+                    "macs": {
                       "t": {}
                     },
                     "v": 2,

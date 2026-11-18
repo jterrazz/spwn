@@ -33,7 +33,6 @@ type Uptime struct {
 
 var (
 	_ contract.UptimeStore = (*Uptime)(nil)
-	_ store.Migrator       = (*Uptime)(nil)
 )
 
 func NewUptime(files UptimeFiles, file string) *Uptime { return &Uptime{files: files, file: file} }
@@ -59,7 +58,7 @@ func (u *Uptime) load() (map[string]machines.Uptime, error) {
 	}
 	_, version, _ := strings.Cut(f.Schema, "/v")
 	n, _ := strconv.Atoi(version)
-	if _, err := store.Current(n, UptimeVersion); err != nil {
+	if err := store.Current(n, UptimeVersion); err != nil {
 		return nil, &store.UnreadableError{Path: u.file, Cause: err}
 	}
 	if f.Servers == nil {
@@ -112,9 +111,4 @@ func (u *Uptime) Delete(_ context.Context, server string) error {
 	}
 	delete(servers, server)
 	return u.save(servers)
-}
-
-func (u *Uptime) Migrate(context.Context) error {
-	_, err := u.load()
-	return store.OnlyNewer(err)
 }

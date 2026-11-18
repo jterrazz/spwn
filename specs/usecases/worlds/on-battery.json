@@ -14,7 +14,7 @@
                 "Charging": false
             },
             "preferences": {
-                "here": "macbook-pro",
+                "name": "macbook-pro",
                 "macs": {
                     "mac-mini": {
                         "user": "jterrazz.agent"
@@ -432,7 +432,7 @@
                 "Source": "ac"
             },
             "preferences": {
-                "here": "mac-mini",
+                "name": "mac-mini",
                 "macs": {
                     "macbook-pro": {
                         "user": "you"

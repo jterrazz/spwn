@@ -1,9 +1,0 @@
-{
-  "remote": { "mode": "kernel", "auth_method": "authkey", "secret": "fake-node-authkey-123", "hostname": "base-ts" },
-  "user_email": "owner@example.com",
-  "self": "base",
-  "machines": {
-    "base": { "role": "client" },
-    "mini": { "role": "server", "ssh": "agent@mini.local", "identity": "~/.ssh/id_mini" }
-  }
-}

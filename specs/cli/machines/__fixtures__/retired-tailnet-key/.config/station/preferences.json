@@ -1,6 +1,6 @@
 {
-  "here": "x",
-  "hosts": {
+  "name": "x",
+  "macs": {
     "x": {},
     "y": {
       "user": "u"

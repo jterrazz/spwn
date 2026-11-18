@@ -118,12 +118,12 @@ func TestARefusedFileOfTheOwnerIsANeedWithTheFileToFix(t *testing.T) {
 	}
 }
 
-func TestALedgerAnOlderStationWroteIsANeedFixedByInit(t *testing.T) {
+func TestALedgerAnOlderStationWroteIsANeedThatNamesItsFile(t *testing.T) {
 	laptop := machine.Ref{Name: "laptop"}
 	older := &store.UnreadableError{Path: "~/.local/state/station/ledger.json", Cause: &store.OlderError{Version: 1, Current: 2}}
 	found := overview.AppsRead(nil, laptop, nightsOf(machinefilecalls.Nightly{}, older, time.Date(2026, 11, 12, 9, 0, 0, 0, time.UTC))).Findings
-	if len(found) != 1 || found[0].Fix.Command != "station init" || found[0].Severity != finding.Broken || !strings.Contains(found[0].Text, "written at version 1 by an older station") {
-		t.Fatalf("findings %+v, want one broken line saying the ledger's version, fixed by station init", found)
+	if len(found) != 1 || found[0].Fix.Path != older.Path || found[0].Severity != finding.Broken || !strings.Contains(found[0].Text, "written at version 1 by an older station") {
+		t.Fatalf("findings %+v, want one broken line saying the ledger's version, naming its file", found)
 	}
 	if other := overview.AppsRead(nil, laptop, nightsOf(machinefilecalls.Nightly{}, errors.New("no such call"), time.Date(2026, 11, 12, 9, 0, 0, 0, time.UTC))).Findings; len(other) != 0 {
 		t.Errorf("a night that cannot be asked for another reason, yet findings %+v", other)

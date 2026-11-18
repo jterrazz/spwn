@@ -6,7 +6,6 @@ runs:
       stdout: |
           ●	name	m
           ●	zshrc
-          ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart, ~/.local/opt
           # Machinefile
           	none bound by init: init --machinefile binds one
@@ -23,7 +22,6 @@ runs:
       stdout: |
           ●	name	m
           ●	zshrc
-          ●	layout	nothing to retire
           ●	relocate	nothing to do
           # Machinefile
           	none bound by init: init --machinefile binds one

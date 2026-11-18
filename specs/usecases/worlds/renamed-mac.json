@@ -6,7 +6,7 @@
         "macbook": {
             "engine": {},
             "preferences": {
-                "here": "studio-laptop",
+                "name": "studio-laptop",
                 "vm_user": "admin"
             },
             "power": {

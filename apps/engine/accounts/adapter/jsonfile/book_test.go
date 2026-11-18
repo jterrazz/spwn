@@ -60,9 +60,6 @@ func TestABookOfANewerStationIsRefused(t *testing.T) {
 	if _, err := openBook(at, nil).Read(t.Context()); !errors.As(err, &newer) {
 		t.Fatalf("Read = %v; want a newer book refused", err)
 	}
-	if err := openBook(at, nil).Migrate(t.Context()); !errors.As(err, &newer) {
-		t.Fatalf("Migrate = %v; want a newer book refused", err)
-	}
 }
 
 func TestASecondChangeWaitsForTheFirstToWrite(t *testing.T) {

@@ -8,7 +8,6 @@ runs:
       stdout: |
           ●	name	macbook-pro
           ●	zshrc
-          ●	layout	nothing to retire
           ●	relocate	nothing to do
           # Machinefile
           	none bound by init: init --machinefile binds one

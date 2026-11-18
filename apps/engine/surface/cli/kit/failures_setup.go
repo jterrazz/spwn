@@ -11,7 +11,6 @@ func setupFailure(err error) (*fail.Error, bool) {
 	var mismatch *setup.NameMismatchError
 	var bad *setup.BadNameError
 	var step *setup.StepFailedError
-	var different *setup.DifferentContentError
 	var busy *setup.BusyError
 	var exists *setup.DestinationExistsError
 	var cross *setup.CrossDeviceError
@@ -27,8 +26,6 @@ func setupFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &step):
 		hint := "fix it, then run station init again: it resumes"
 		switch {
-		case errors.As(err, &different):
-			hint = "keep one of the two files, then run station init again"
 		case errors.As(err, &busy):
 			hint = "stop the persistent VMs and delete the ephemeral ones (station machines), then station init"
 		case errors.As(err, &exists):

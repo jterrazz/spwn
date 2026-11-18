@@ -19,7 +19,6 @@ type Applied struct {
 
 var (
 	_ contract.AppliedStore = (*Applied)(nil)
-	_ store.Migrator        = (*Applied)(nil)
 )
 
 func AppliedOf(w *world.World, mac string) *Applied { return &Applied{w: w, mac: mac} }
@@ -72,5 +71,3 @@ func (a *Applied) Delete(_ context.Context, setting string) error {
 	delete(a.kept(), setting)
 	return nil
 }
-
-func (a *Applied) Migrate(context.Context) error { return nil }

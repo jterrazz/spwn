@@ -18,7 +18,7 @@ The script reads the latest release tag, downloads `station-<os>-<arch>`, checks
 station init --name macbook
 ```
 
-`init` makes this Mac known to station: it names it, writes the managed block of `~/.zshrc`, moves an old `~/.studio/` to the XDG folders and brings station's stores to their version. It installs no app, runs no package manager and asks no password, and it ends on what the Mac carries: `Machinefile  none bound by init`, then the next steps. Where no terminal can be asked (a script, an ssh command without a terminal), init on a Mac with no name yet is refused, exit 2, before any step: `--name` is how such a run names it; the install stands. It is safe to run again ([Dotfiles](../reference/dotfiles.md)).
+`init` makes this Mac known to station: it names it and writes the managed block of `~/.zshrc`. It installs no app, runs no package manager and asks no password, and it ends on what the Mac carries: `Machinefile  none bound by init`, then the next steps. Where no terminal can be asked (a script, an ssh command without a terminal), init on a Mac with no name yet is refused, exit 2, before any step: `--name` is how such a run names it; the install stands. It is safe to run again ([Dotfiles](../reference/dotfiles.md)).
 
 ## 3. What it carries: its Machinefile
 

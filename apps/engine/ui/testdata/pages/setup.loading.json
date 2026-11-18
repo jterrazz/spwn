@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/init",
             "mark": "pending",
-            "label": "Known to station, with a step left",
+            "label": "Known to station",
             "cells": [
               {
                 "kind": "pending"
@@ -92,21 +92,6 @@
         },
         {
           "row": {
-            "id": "layout",
-            "mark": "pending",
-            "label": "layout",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "relocate",
             "mark": "pending",
             "label": "relocate",
@@ -124,7 +109,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 4
+          "n": 3
         }
       ]
     },

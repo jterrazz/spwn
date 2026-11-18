@@ -23,7 +23,6 @@ type Store struct {
 
 var (
 	_ contract.ImageStore = (*Store)(nil)
-	_ store.Migrator      = (*Store)(nil)
 )
 
 // value: where a record is kept, as a refusal names it; a file of the
@@ -128,5 +127,3 @@ func (s *Store) Delete(_ context.Context, image, version string) error {
 	delete(s.w.Mac(s.mac).Files, path.Join(filedDir, image, version+".json"))
 	return nil
 }
-
-func (s *Store) Migrate(context.Context) error { return nil }

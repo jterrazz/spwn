@@ -8,7 +8,6 @@ runs:
       stdout: |
           ●	name	m
           ●	zshrc
-          ●	layout	nothing to retire
           ✗	relocate	tart is running: its files cannot move under it
           # Machinefile
           	none bound by init: init --machinefile binds one

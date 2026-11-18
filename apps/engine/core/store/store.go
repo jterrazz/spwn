@@ -2,7 +2,6 @@ package store
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"strconv"
@@ -54,15 +53,6 @@ func (e *OlderError) Error() string {
 	return "written at version " + strconv.Itoa(e.Version) + " by an older station, this one reads " + strconv.Itoa(e.Current)
 }
 
-type Migrator interface {
-	// invariant: brings every record of the store to its current version and
-	// leaves a record already there byte for byte; run by setup's layout step
-	// before any call reads the store. A record it cannot read is left as it
-	// is, for the call that reads it to name; only a record a newer station
-	// wrote stops it.
-	Migrate(ctx context.Context) error
-}
-
 func OnlyNewer(err error) error {
 	var newer *NewerError
 	if errors.As(err, &newer) {
@@ -71,14 +61,18 @@ func OnlyNewer(err error) error {
 	return nil
 }
 
-func Current(version, known int) (int, error) {
-	// invariant: a record with no version field is at version 1, the shape
-	// every store had before it carried one, so a store at version 1 writes none.
+func Current(version, known int) error {
+	// invariant: a record with no version field is at version 1, so a store
+	// at version 1 writes none; a record at any other version than the one
+	// this station knows is refused, never read.
 	if version == 0 {
 		version = 1
 	}
 	if version > known {
-		return version, &NewerError{Version: version, Known: known}
+		return &NewerError{Version: version, Known: known}
 	}
-	return version, nil
+	if version < known {
+		return &OlderError{Version: version, Current: known}
+	}
+	return nil
 }

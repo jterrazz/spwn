@@ -1,9 +1,8 @@
-◐ Known to station, with a step left · 1 step left
+✓ Known to station · 2 steps changed
 
 Changes
   ● name      macbook
   ● zshrc     the station block
-  ◐ layout    ~/.tart not moved                     73 GB: move it with station init --move
   ● relocate  bunfig, go env, mise settings, npmrc
 Machinefile  none bound by init: init --machinefile binds one
 

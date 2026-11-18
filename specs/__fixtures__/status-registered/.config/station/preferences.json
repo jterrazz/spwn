@@ -1,6 +1,6 @@
 {
-  "here": "macbook",
-  "hosts": {
+  "name": "macbook",
+  "macs": {
     "macbook": {}
   },
   "vm_user": "tester"

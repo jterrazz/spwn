@@ -5,7 +5,6 @@ station keeps its own choices in one file, `~/.config/station/preferences.json`,
 | Section          | Answers                                           |
 | ---------------- | ------------------------------------------------- |
 | preferences.json | The file, its groups, the family that writes each |
-| Retired names    | What a file an older station wrote becomes        |
 | Environment      | The variables station reads, all resolved once    |
 
 ## preferences.json
@@ -47,11 +46,7 @@ The file is a set of groups. Each is owned by one family and written only by tha
 | `never_sleeps`            | `awake`       | this Mac never sleeps: the engine's `awake` job holds it                                                                                                                                                                                                                                                                                                                                | `settings apply never-sleeps`, `settings off never-sleeps`  |
 | `machinefile`             | `machinefile` | `name`, the Machinefile this machine carries, set by `station init --machinefile` and `station apply --machinefile`, and `bound_at`, when it was bound, past which the engine's first night falls; `source`, the shared source: its `name` and its git `url`, cloned at its default branch into `~/.cache/station/sources/<name>` ([Machinefiles](machinefiles.md#sources-and-origins)) | `name` by apply, `source` by hand                           |
 
-A key no group names is dropped at the next write and at `station init`. A `v` field names the version of the shape the file was written at; absent, it is version 1, and a file a newer station wrote is refused rather than read. A file that does not parse stops every command that reads it with its line, never overwritten.
-
-## Retired names
-
-`station init` on a Mac station v2 set up moves `~/.config/station/settings.json` to `preferences.json` once, byte for byte, only while no `preferences.json` is there, and says so. A group kept under a retired name is read under its new one and written under it at the next write: `here` is `name`, `hosts` is `macs`, `services` is `ports`, and the ports group's `min_port` and `ignored_ports` are removed (a VM's [rights](ports.md#rights-and-audiences) say it now).
+A key no group names is dropped at the next write. A `v` field names the version of the shape the file was written at; absent, it is version 1, and a file a newer station wrote is refused rather than read. A file that does not parse stops every command that reads it with its line, never overwritten.
 
 ## Environment
 
@@ -74,9 +69,7 @@ A key no group names is dropped at the next write and at `station init`. A `v` f
 | `STATION_KERNEL_STUB`                                                  | a folder of recorded kernel tables a Mac's activity is read from, for a spec                                                               |
 | `STATION_POWER_STUB`                                                   | a folder whose files are the IOKit reading and whose calls go to `$HOME/.calls`, for a spec                                                |
 | `STATION_GUEST_SSH_PORT`                                               | the port the engine dials a VM's sshd on (default 22), for a spec's stub sshd                                                              |
-| `STATION_EXECUTABLE`                                                   | the binary `init` runs again detached, for a spec's stub                                                                                   |
 | `STATION_WORLD`, `STATION_WORLD_SEED`, `STATION_WORLD_HYPERVISOR`      | the spec build's world file, its seed and its hypervisor ([Test](../guides/test.md#a-use-case-over-a-world)); the release build reads none |
-| `STATION_XDG_DETACHED`                                                 | internal: `init`'s detached layout step                                                                                                    |
 
 ## Related
 

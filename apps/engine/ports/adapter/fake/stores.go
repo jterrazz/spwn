@@ -73,8 +73,6 @@ func (r *Reservations) Delete(_ context.Context, vm string, guestPort int) error
 	return nil
 }
 
-func (r *Reservations) Migrate(context.Context) error { return nil }
-
 type Declarations struct {
 	w   *world.World
 	mac string
@@ -125,5 +123,3 @@ func (d *Declarations) Delete(_ context.Context, machine string, port int) error
 	*all = slices.DeleteFunc(*all, func(x ports.Declaration) bool { return x.Machine == machine && x.Port == port })
 	return nil
 }
-
-func (d *Declarations) Migrate(context.Context) error { return nil }

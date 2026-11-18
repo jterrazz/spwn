@@ -6,7 +6,7 @@
         "macbook-pro": {
             "engine": {},
             "preferences": {
-                "here": "macbook-pro",
+                "name": "macbook-pro",
                 "vm_user": "admin"
             },
             "power": {
@@ -25,7 +25,7 @@
                 "Source": "ac"
             },
             "preferences": {
-                "here": "mac-mini",
+                "name": "mac-mini",
                 "vm_user": "admin"
             }
         }

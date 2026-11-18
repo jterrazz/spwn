@@ -29,11 +29,12 @@ import (
 )
 
 // value: the last nights as the Overview says them; a ledger an older
-// station wrote holds every night until station init, and says so.
+// station wrote holds every night until it is moved away, and says so.
 func nightsOf(night machinefilecalls.Nightly, err error, now time.Time) overview.Nights {
 	n := overview.NightOf(night.Night, night.Ran && err == nil, now)
-	if older := (*store.OlderError)(nil); errors.As(err, &older) {
-		n.Held = err.Error()
+	older, unreadable := (*store.OlderError)(nil), (*store.UnreadableError)(nil)
+	if errors.As(err, &older) && errors.As(err, &unreadable) {
+		n.Held, n.HeldFile = err.Error(), unreadable.Path
 	}
 	return n
 }

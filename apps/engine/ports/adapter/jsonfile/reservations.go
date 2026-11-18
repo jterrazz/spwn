@@ -22,7 +22,6 @@ type Reservations struct{ list listFile[ports.Reservation] }
 
 var (
 	_ contract.ReservationStore = (*Reservations)(nil)
-	_ store.Migrator            = (*Reservations)(nil)
 )
 
 func NewReservations(files Files, file string) *Reservations {
@@ -68,11 +67,6 @@ func (r *Reservations) Delete(_ context.Context, vm string, guestPort int) error
 		return nil
 	}
 	return r.save(kept)
-}
-
-func (r *Reservations) Migrate(context.Context) error {
-	_, err := r.load()
-	return store.OnlyNewer(err)
 }
 
 // invariant: a reservation's audience is one of catalog.Audience's, or

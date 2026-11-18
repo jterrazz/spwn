@@ -13,11 +13,7 @@ import (
 type setupMachine struct{ h local.System }
 
 func (s setupMachine) Home() string     { return s.h.Env.Home() }
-func (s setupMachine) User() string     { return s.h.Env.User() }
 func (s setupMachine) Hostname() string { return s.h.Env.Hostname() }
-func (s setupMachine) Sleep(ctx context.Context, d time.Duration) error {
-	return s.h.Clock.Sleep(ctx, d)
-}
 
 func (s setupMachine) ReadFile(path string) (data []byte, found bool, err error) {
 	data, err = s.h.FS.ReadFile(path)
@@ -92,12 +88,3 @@ func (s setupMachine) Output(ctx context.Context, name string, args []string, bu
 	out, err := s.h.Run.Output(ctx, local.Cmd{Name: name, Args: args, Timeout: budget})
 	return out.Stdout, out.ExitCode, err
 }
-
-func (s setupMachine) Start(name string, args, env []string, log string) error {
-	_, err := s.h.Run.Start(local.Cmd{Name: name, Args: args, Env: env}, log)
-	return err
-}
-
-func (s setupMachine) Alive(pid int) bool      { return s.h.Run.Alive(pid) }
-func (s setupMachine) Terminate(pid int) error { return s.h.Run.Signal(pid, local.SigTerm) }
-func (s setupMachine) Kill(pid int) error      { return s.h.Run.Signal(pid, local.SigKill) }

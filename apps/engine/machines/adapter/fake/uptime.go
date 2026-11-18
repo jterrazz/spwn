@@ -3,7 +3,6 @@ package fake
 import (
 	"context"
 
-	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -17,7 +16,6 @@ type Uptime struct {
 
 var (
 	_ contract.UptimeStore = (*Uptime)(nil)
-	_ store.Migrator       = (*Uptime)(nil)
 )
 
 func NewUptime() *Uptime { return UptimeOf(&world.World{}, "this-mac") }
@@ -47,5 +45,3 @@ func (u *Uptime) Delete(_ context.Context, server string) error {
 	delete(u.w.Mac(u.mac).Store().Uptime, server)
 	return nil
 }
-
-func (u *Uptime) Migrate(context.Context) error { return nil }

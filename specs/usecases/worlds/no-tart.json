@@ -5,7 +5,7 @@
         "macbook-pro": {
             "engine": {},
             "preferences": {
-                "here": "macbook-pro",
+                "name": "macbook-pro",
                 "vm_user": "admin"
             },
             "hypervisor": "none"

@@ -15,10 +15,10 @@ func TestAFailureWhoseRepairIsUnknownNamesTheCommandsHelp(t *testing.T) {
 	}
 }
 
-func TestAStoreAnOlderStationWroteAsksForStationInit(t *testing.T) {
+func TestAStoreAnOlderStationWroteIsMovedAwayByHand(t *testing.T) {
 	at := "/Users/me/.local/state/station/ledger.json"
 	got := Translate(&store.UnreadableError{Path: at, Cause: &store.OlderError{Version: 1, Current: 2}}, "plan")
-	if got.Hint != "run station init: it brings \""+at+"\" to version 2" {
-		t.Errorf("got %q / %q, want station init as the repair", got.Message, got.Hint)
+	if got.Hint != "move \""+at+"\" away to start afresh" {
+		t.Errorf("got %q / %q, want the file moved away as the repair", got.Message, got.Hint)
 	}
 }

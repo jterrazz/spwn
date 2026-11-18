@@ -16,7 +16,6 @@ type Declarations struct{ list listFile[ports.Declaration] }
 
 var (
 	_ contract.DeclarationStore = (*Declarations)(nil)
-	_ store.Migrator            = (*Declarations)(nil)
 )
 
 func NewDeclarations(files Files, file string) *Declarations {
@@ -62,11 +61,6 @@ func (d *Declarations) Delete(_ context.Context, machine string, port int) error
 		return nil
 	}
 	return d.save(kept)
-}
-
-func (d *Declarations) Migrate(context.Context) error {
-	_, err := d.list.load()
-	return store.OnlyNewer(err)
 }
 
 func (d *Declarations) save(all []ports.Declaration) error {

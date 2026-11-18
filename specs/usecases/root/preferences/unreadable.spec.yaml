@@ -4,7 +4,7 @@ runs:
     - command: 'world edit macbook-pro preferences.json'
       stdin: |
           {
-              "here": "macbook-pro",
+              "name": "macbook-pro",
               "vm_user": "admin",
           }
       exit: 0
@@ -17,7 +17,7 @@ runs:
       exit: 0
       stdout: |+
           {
-              "here": "macbook-pro",
+              "name": "macbook-pro",
               "vm_user": "admin",
           }
 

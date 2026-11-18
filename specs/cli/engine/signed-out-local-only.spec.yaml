@@ -5,7 +5,7 @@ fixture:
     - ../../__fixtures__/serving/
 env: engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "40110-40129"}/'' .config/station/preferences.json; /usr/bin/sed -i.bak ''s/"BackendState":"Running"/"BackendState":"Stopped"/'' answers/tailscale/status.json; "$STATION" engine run 2> daemon.err & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; kill $d; wait $d; /usr/bin/grep tailnet daemon.err | /usr/bin/cut -d" " -f2-'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "40110-40129"}/'' .config/station/preferences.json; /usr/bin/sed -i.bak ''s/"BackendState":"Running"/"BackendState":"Stopped"/'' answers/tailscale/status.json; "$STATION" engine run 2> daemon.err & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; kill $d; wait $d; /usr/bin/grep tailnet daemon.err | /usr/bin/cut -d" " -f2-'
       exit: 0
       stdout: |
           tailnet: Tailscale is signed out: ports are local only

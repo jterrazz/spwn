@@ -35,7 +35,6 @@ type Store struct {
 
 var (
 	_ contract.MachineStore = (*Store)(nil)
-	_ store.Migrator        = (*Store)(nil)
 )
 
 func New(files Files, dir string) *Store {
@@ -83,7 +82,7 @@ func (s *Store) read(at string) (file, error) {
 	if err := json.Unmarshal(data, &f); err != nil {
 		return file{}, &store.UnreadableError{Path: at, Cause: err}
 	}
-	if _, err := store.Current(f.V, Version); err != nil {
+	if err := store.Current(f.V, Version); err != nil {
 		return file{}, &store.UnreadableError{Path: at, Cause: err}
 	}
 	return f, nil
@@ -217,52 +216,6 @@ func (s *Store) list(skipDamaged bool) ([]machines.Record, error) {
 func (s *Store) Delete(_ context.Context, name string) error {
 	if err := s.files.Remove(s.recordFile(name)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
-	}
-	return nil
-}
-
-func lifetimeAlias(l machines.Lifetime) machines.Lifetime {
-	// value: today's word for a lifetime a record says before version 2,
-	// v2's (temporary, lasting) or v3.0's (throwaway, permanent); read by
-	// Migrate alone, which writes today's.
-	switch string(l) {
-	case "temporary", "throwaway":
-		return machines.Ephemeral
-	case "lasting", "permanent":
-		return machines.Persistent
-	}
-	return l
-}
-
-func (s *Store) Migrate(context.Context) error {
-	// invariant: a record written before version 2 is rewritten at it in
-	// today's lifetime words; a record at version 2, or one that cannot be
-	// read, is left as it is.
-	entries, err := s.files.ReadDir(s.dir)
-	if err != nil {
-		return store.OnlyNewer(err)
-	}
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
-			continue
-		}
-		at := path.Join(s.dir, e.Name())
-		f, err := s.read(at)
-		if store.OnlyNewer(err) != nil {
-			return err
-		}
-		if err != nil || f.V >= Version {
-			continue
-		}
-		f.Lifetime = lifetimeAlias(f.Lifetime)
-		f.V = Version
-		data, err := json.MarshalIndent(f, "", "  ")
-		if err != nil {
-			return err
-		}
-		if err := s.files.WriteFile(at, append(data, '\n'), 0o600); err != nil {
-			return err
-		}
 	}
 	return nil
 }

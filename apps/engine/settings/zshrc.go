@@ -20,13 +20,12 @@ func HasBlock(zshrc string) bool {
 
 func UpsertBlock(zshrc string) (updated string, changed bool) {
 	lines := strings.Split(zshrc, "\n")
-	kept := withoutLegacy(lines)
-	if HasBlock(zshrc) && len(kept) == len(lines) && strings.Count(zshrc, blockStart) == 1 && mainFirst(lines) {
+	if HasBlock(zshrc) && strings.Count(zshrc, blockStart) == 1 && mainFirst(lines) {
 		return zshrc, false
 	}
 	var out []string
 	inBlock := false
-	for _, line := range kept {
+	for _, line := range lines {
 		switch {
 		case strings.TrimSpace(line) == blockStart:
 			inBlock = true

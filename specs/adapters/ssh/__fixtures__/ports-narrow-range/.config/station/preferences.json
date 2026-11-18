@@ -1,10 +1,10 @@
 {
-  "here": "x",
-  "hosts": {
+  "name": "x",
+  "macs": {
     "x": {}
   },
   "vm_user": "vmu",
-  "services": {
+  "ports": {
     "range": "41640-41641"
   }
 }

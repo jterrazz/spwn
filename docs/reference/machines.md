@@ -2,18 +2,17 @@
 
 All machines are every machine the owner runs: the physical Macs and the VMs on each. One list shows them, any Mac can drive any other, and a VM is made, run and deleted from the Mac it lives on.
 
-| Section           | Answers                                                      |
-| ----------------- | ------------------------------------------------------------ |
-| Macs and VMs      | What a machine is, and how it is named and reached           |
-| Lifetimes         | When a VM ends: poweroff, reboot, Mac reboot, `delete`       |
-| The commands      | Create, start, stop, restart, delete, unlock                 |
-| `--on`            | Running a command on another machine                         |
-| `station use`     | The machine this terminal's commands run on                  |
-| Tailscale         | The Tailscale app on each Mac, read only                     |
-| SSH               | How one name reaches a Mac, a VM of This Mac, of another Mac |
-| The engine        | The one process per Mac that runs the VMs                    |
-| Round 5 migration | What init retires, and what the owner removes by hand        |
-| Mac readiness     | What a Mac that hosts servers must have, each check measured |
+| Section       | Answers                                                      |
+| ------------- | ------------------------------------------------------------ |
+| Macs and VMs  | What a machine is, and how it is named and reached           |
+| Lifetimes     | When a VM ends: poweroff, reboot, Mac reboot, `delete`       |
+| The commands  | Create, start, stop, restart, delete, unlock                 |
+| `--on`        | Running a command on another machine                         |
+| `station use` | The machine this terminal's commands run on                  |
+| Tailscale     | The Tailscale app on each Mac, read only                     |
+| SSH           | How one name reaches a Mac, a VM of This Mac, of another Mac |
+| The engine    | The one process per Mac that runs the VMs                    |
+| Mac readiness | What a Mac that hosts servers must have, each check measured |
 
 ## Macs and VMs
 
@@ -184,19 +183,6 @@ An editor on a Mac opens the VM by its Remote SSH to the same name: Zed, VS Code
 One engine per Mac, under the launchd agent `com.jterrazz.station.engine`. It is installed the first time it is needed: by the first VM command on a Mac with tart, or by `station engine start` (`● engine installed, running · v3.1.0`), which also brings it to this station's version after an upgrade (`● engine restarted · v3.0.0 to v3.1.0`); `station init` installs no engine. Without launchd on the search path the install says so, `Error: the engine needs launchd: launchctl is not found`, with the folder macOS keeps it in. It runs every VM of the Mac detached (an engine restart never stops a VM), reads how each run ended (the rules of [Lifetimes](#lifetimes)), adopts the running VMs again at its start (its socket appears only once that and the serve reconciliation are done), keeps one ssh connection per running VM to its [guest](ports.md), and holds the reserved ports. It samples the activity of This Mac and of each running VM (from its guest; from its Mac's view of its process while the guest does not answer) every 60 s, every 2 s while a surface shows it (the menu bar open shows This Mac, and a machine's page open in it that machine; the menu bar closed shows none; the terminal UI shows the machine of its Activity or Overview, and All machines every machine of this Mac), and keeps it in its memory alone: the last 6 min every 2 s, the last 24 h every minute; a disk under 5 % free or another finding that breaks is told once. `machines create` returns once that guest is connected and has written the VM's keys block and its ports' env file (60 s, else the VM is kept, failing SSH answers). `machines start` and `restart` return once the new run's guest is connected too: a stop ends the guest's session with its run. That connection shares the VM's host key pin with `ssh`, whichever key type was pinned first. Why a guest does not connect is written to `~/.local/state/station/logs/engine.log`, one timestamped line per new reason. Its `tailscale` calls die with it: each leads its own process group, killed whole when the call ends or times out, and a call a killed engine left running is killed at the next engine start, from its record under `~/.local/state/station/children/`. The CLI is its client over `~/.local/state/station/engine.sock` (protocol `station.api/v2`, [The API](api.md)). With it down, `machines` and `ports` still read the files and show one engine row, and `status` the same row in its Machine section: `◐ engine not installed → station engine start` when the agent's plist is absent, `◐ engine stopped → station engine start` when the plist is there but the job does not answer (another Mac's stopped engine is read and started through it, `station engine start --on <mac>`).
 
 `station engine stop [--yes]` is Stop everything on this Mac: every running workspace stops with its disk kept, an ephemeral one too (only `machines delete` destroys), all at once through the engine's `engine.stop-all`; the Awake session ends and the sharing of their ports with it; then the agent is booted out (`launchctl bootout gui/<uid>/com.jterrazz.station.engine`) and the stop is kept with who asked it, so `station engine` reads `stopped · since 13:40 by the menu bar`. A server is skipped and says so, and while one runs the engine keeps running for it: `infra skipped (server) · the engine keeps running for infra`; `station machines stop infra` stops it. A VM that will not stop keeps the engine running (exit 1). Off a terminal, a stop that would stop a VM needs `--yes`. `station engine start` bootstraps the agent again; the VMs it stopped stay stopped, and a login starts the engine again whatever stopped it.
-
-## The v3 migration
-
-`station init` on a Mac station v2 set up moves, once, and says so: `~/.config/station/settings.json` to `preferences.json` (byte for byte, only while no `preferences.json` is there: `● preferences moved settings.json to preferences.json`). A second run says nothing of it. A `preferences.json` that does not read stops every command that needs it, at its line, and is never rewritten.
-
-## Round 5 migration
-
-`station init` and `station engine start` move a Mac from the earlier rounds and say so, row by row:
-
-- `layout`: the userspace tailscaled station ran is stopped (in the background when it carries the session) and its files removed; its node stays in the [admin console](https://login.tailscale.com/admin/machines) until the owner removes it. The three tailnet keychain accounts are deleted, and the row points at the [OAuth client](https://login.tailscale.com/admin/settings/oauth) to revoke. Every store is brought to its version: `preferences.json` loses any key no group names (the `tailnet` key among them); a record init cannot read is left as it is, for the command that reads it to name, and a record a newer station wrote fails the step.
-- `engine start`: every per-VM agent `com.jterrazz.station.vm.<name>` is booted out and its plist removed, a VM keeping its wanted state, stopped or running; with any of those VMs running the start refuses (`Hint: stop the persistent VMs and delete the ephemeral ones (station machines), then station engine start`), never cutting a VM.
-
-Left to the owner, by hand and whenever wanted: the old VM tag and its ACL lines, the OAuth client and each Mac's old userspace node in the admin console. The Homebrew formula `tailscale` is `apps install tailscale`'s to uninstall once the app is there ([Tailscale](#tailscale)).
 
 ## Mac readiness
 

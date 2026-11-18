@@ -1,9 +1,0 @@
-description: 'while ~/.studio holds the old files, status shows a half-done setup and its repair'
-fixture:
-    - ../../../__fixtures__/status-registered/
-    - ./__fixtures__/status/studio-left/
-runs:
-    - command: 'status --json | /usr/bin/jq -c ''[.setup.state, (.setup.steps | map(.name + ":" + .state))]'''
-      exit: 0
-      stdout: |
-          ["degraded",["name:ok","zshrc:ok","layout:degraded"]]

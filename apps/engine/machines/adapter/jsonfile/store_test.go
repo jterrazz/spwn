@@ -5,11 +5,11 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/jsonfile"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -25,27 +25,23 @@ func TestMachineStore(t *testing.T) {
 	})
 }
 
-func TestAnOldRecordWithItsSharesReadsAndItsPutDropsThem(t *testing.T) {
+func TestARecordAnOlderStationWroteIsRefused(t *testing.T) {
 	dir := t.TempDir()
 	at := filepath.Join(dir, "api.json")
-	_ = os.WriteFile(at, []byte(`{"name":"api","image":"linux","lent":[{"name":"session:a","at":"2026-11-01T09:00:00Z","until":"2026-11-01T17:00:00Z"}]}`), 0o600)
-	s := jsonfile.New(disk(), dir)
-	r, err := s.Get(context.Background(), "api")
-	if err != nil || r.Name != "api" || r.Image != "linux" {
-		t.Fatalf("an old record reads %+v, %v; want api on linux", r, err)
+	old := `{"name":"api","image":"linux","lifetime":"permanent"}`
+	_ = os.WriteFile(at, []byte(old), 0o600)
+	var older *store.OlderError
+	if _, err := jsonfile.New(disk(), dir).Get(context.Background(), "api"); !errors.As(err, &older) || older.Version != 1 || older.Current != 2 {
+		t.Fatalf("Get of a version 1 record = %v; want it refused as older", err)
 	}
-	r.Want = "stopped"
-	if err := s.Put(context.Background(), r); err != nil {
-		t.Fatal(err)
-	}
-	if data, _ := os.ReadFile(at); strings.Contains(string(data), "session:a") || !strings.Contains(string(data), `"want": "stopped"`) {
-		t.Errorf("the put kept the old shares, or lost the change:\n%s", data)
+	if data, _ := os.ReadFile(at); string(data) != old {
+		t.Errorf("the refused record was rewritten:\n%s", data)
 	}
 }
 
 func TestAReadableListingSkipsADamagedRecordButNotANewerOne(t *testing.T) {
 	dir := t.TempDir()
-	_ = os.WriteFile(filepath.Join(dir, "api.json"), []byte(`{"name":"api","image":"linux","version":"2026.11.01"}`), 0o600)
+	_ = os.WriteFile(filepath.Join(dir, "api.json"), []byte(`{"v":2,"name":"api","image":"linux","version":"2026.11.01"}`), 0o600)
 	_ = os.WriteFile(filepath.Join(dir, "x.json"), []byte(`{"name": "x", "ima`), 0o600)
 	s := jsonfile.New(disk(), dir)
 	if _, err := s.List(context.Background()); err == nil {
@@ -58,48 +54,6 @@ func TestAReadableListingSkipsADamagedRecordButNotANewerOne(t *testing.T) {
 	_ = os.WriteFile(filepath.Join(dir, "new.json"), []byte(`{"v":3,"name":"new","image":"linux"}`), 0o600)
 	if _, err := s.ListReadable(context.Background()); err == nil {
 		t.Errorf("ListReadable passed a record a newer station wrote; want it refused")
-	}
-}
-
-func TestMigrateRewritesAnOlderRecordInTodaysLifetimeWordsAndLeavesTheRest(t *testing.T) {
-	dir := t.TempDir()
-	old := map[string]string{
-		"api":   `{"name":"api","image":"linux","lifetime":"permanent","lent":[{"name":"session:a","at":"2026-11-01T09:00:00Z","until":"2026-11-01T17:00:00Z"}]}`,
-		"v2":    `{"name":"v2","image":"linux","lifetime":"lasting"}`,
-		"temp":  `{"name":"temp","image":"linux","lifetime":"throwaway"}`,
-		"v2tmp": `{"name":"v2tmp","image":"linux","lifetime":"temporary"}`,
-		"on":    `{"name":"on","image":"linux","lifetime":"always-on"}`,
-		"today": "{\n  \"name\": \"today\",\n  \"lifetime\": \"ephemeral\",\n  \"v\": 2\n}\n",
-	}
-	for name, body := range old {
-		_ = os.WriteFile(filepath.Join(dir, name+".json"), []byte(body), 0o600)
-	}
-	s := jsonfile.New(disk(), dir)
-	if err := s.Migrate(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	for name, want := range map[string]machines.Lifetime{"api": machines.Persistent, "v2": machines.Persistent, "temp": machines.Ephemeral, "v2tmp": machines.Ephemeral, "on": machines.AlwaysOn} {
-		data, _ := os.ReadFile(filepath.Join(dir, name+".json"))
-		if !strings.Contains(string(data), `"lifetime": "`+string(want)+`"`) || !strings.Contains(string(data), `"v": 2`) {
-			t.Errorf("%s was not rewritten at version 2 with %s:\n%s", name, want, data)
-		}
-	}
-	if r, err := s.Get(context.Background(), "temp"); err != nil || r.Lifetime != machines.Ephemeral {
-		t.Errorf("temp reads %q, %v after the migration; want ephemeral", r.Lifetime, err)
-	}
-	if data, _ := os.ReadFile(filepath.Join(dir, "api.json")); strings.Contains(string(data), "session:a") {
-		t.Errorf("the migration kept the old shares:\n%s", data)
-	}
-	if data, _ := os.ReadFile(filepath.Join(dir, "today.json")); string(data) != old["today"] {
-		t.Errorf("a record already at version 2 changed:\n%s", data)
-	}
-}
-
-func TestMigrateStopsOnARecordANewerStationWrote(t *testing.T) {
-	dir := t.TempDir()
-	_ = os.WriteFile(filepath.Join(dir, "new.json"), []byte(`{"v":3,"name":"new","image":"linux"}`), 0o600)
-	if err := jsonfile.New(disk(), dir).Migrate(context.Background()); err == nil {
-		t.Errorf("Migrate passed a record a newer station wrote; want it stopped")
 	}
 }
 

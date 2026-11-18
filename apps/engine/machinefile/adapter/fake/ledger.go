@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
-	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -22,7 +21,6 @@ type Ledger struct {
 
 var (
 	_ contract.Ledger = (*Ledger)(nil)
-	_ store.Migrator  = (*Ledger)(nil)
 	_ contract.Owned  = Owned{}
 )
 
@@ -108,8 +106,6 @@ func (l *Ledger) DeleteBlock(_ context.Context, id string) error {
 	st.Blocks = slices.DeleteFunc(st.Blocks, func(e machinefile.Written) bool { return e.ID == id })
 	return nil
 }
-
-func (l *Ledger) Migrate(context.Context) error { return nil }
 
 // value: the owner's folder of a Mac of the world: a file named by its
 // path is a station file of that Mac under that path (`world edit <mac>

@@ -37,7 +37,7 @@ func Kitchen() []Fixture {
 				p.Sections[si].Items = []page.Item{{Empty: &page.Empty{Noun: "VMs", Hint: page.Cmd("station machines create")}}}
 			}
 		}))},
-		{"kitchen-sink.error", page.Seal(page.Page{ID: "home", Command: "status", Context: thisMacContext(), Error: &page.Error{Message: "the settings file is not valid JSON", Hint: "repair the JSON of ~/.config/station/settings.json"}})},
+		{"kitchen-sink.error", page.Seal(page.Page{ID: "home", Command: "status", Context: thisMacContext(), Error: &page.Error{Message: "the preferences file is not valid JSON", Hint: "repair the JSON of ~/.config/station/preferences.json"}})},
 		{"kitchen-sink.full", page.Seal(kitchen(func(*page.Page) {}))},
 	}
 }

@@ -7,7 +7,7 @@
   },
   "state": "failed",
   "error": {
-    "message": "the settings file is not valid JSON",
-    "hint": "repair the JSON of ~/.config/station/settings.json"
+    "message": "the preferences file is not valid JSON",
+    "hint": "repair the JSON of ~/.config/station/preferences.json"
   }
 }

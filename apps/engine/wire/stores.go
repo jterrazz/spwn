@@ -10,7 +10,6 @@ import (
 	accountscontract "github.com/jterrazz/studio-station/apps/engine/accounts/contract"
 	corejsonfile "github.com/jterrazz/studio-station/apps/engine/core/adapter/jsonfile"
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
-	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	imagesjsonfile "github.com/jterrazz/studio-station/apps/engine/images/adapter/jsonfile"
 	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
 	machinefilejsonfile "github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/jsonfile"
@@ -26,7 +25,7 @@ import (
 	setupcontract "github.com/jterrazz/studio-station/apps/engine/setup/contract"
 )
 
-// invariant: the preference groups in the order settings.json writes them,
+// invariant: the preference groups in the order preferences.json writes them,
 // each group named by its one owner's contract.
 func preferenceGroups() []string {
 	return []string{
@@ -38,72 +37,27 @@ func preferenceGroups() []string {
 
 type preferences interface {
 	corecontract.Preferences
-	store.Migrator
 	File() string
-	// value: moves the file station v2 kept them in, once; moved is whether
-	// this call moved it.
-	MoveRetired(ctx context.Context) (moved bool, err error)
-}
-
-type machineStore interface {
-	machinescontract.MachineStore
-	store.Migrator
-}
-
-type imageStore interface {
-	imagescontract.ImageStore
-	store.Migrator
-}
-
-type bookStore interface {
-	accountscontract.BookStore
-	store.Migrator
-}
-
-type reservationStore interface {
-	portscontract.ReservationStore
-	store.Migrator
-}
-
-type declarationStore interface {
-	portscontract.DeclarationStore
-	store.Migrator
-}
-
-type uptimeStore interface {
-	machinescontract.UptimeStore
-	store.Migrator
-}
-
-type ledgerStore interface {
-	machinefilecontract.Ledger
-	store.Migrator
-}
-
-type appliedStore interface {
-	settingscontract.AppliedStore
-	store.Migrator
 }
 
 // value: every store station keeps on this machine, each built once here
 // over its file; nothing else constructs one.
 type stores struct {
 	prefs        preferences
-	machines     machineStore
-	images       imageStore
+	machines     machinescontract.MachineStore
+	images       imagescontract.ImageStore
 	marks        imagescontract.BuildMarks
-	book         bookStore
-	reservations reservationStore
-	declarations declarationStore
-	applied      appliedStore
-	uptime       uptimeStore
-	ledger       ledgerStore
+	book         accountscontract.BookStore
+	reservations portscontract.ReservationStore
+	declarations portscontract.DeclarationStore
+	applied      settingscontract.AppliedStore
+	uptime       machinescontract.UptimeStore
+	ledger       machinefilecontract.Ledger
 }
 
 func newStores(files local.FS, p setup.Paths) *stores {
 	return &stores{
-		prefs: corejsonfile.NewPreferences(files, p.Prefs, preferenceGroups()).Renaming(machinescontract.RetiredGroupMacs, machinescontract.GroupMacs).
-			Renaming(setupcontract.RetiredGroupName, setupcontract.GroupName).Renaming(portscontract.RetiredGroupPorts, portscontract.GroupPorts),
+		prefs:        corejsonfile.NewPreferences(files, p.Prefs, preferenceGroups()),
 		machines:     machinesjsonfile.New(lockable{files}, filepath.Join(p.State, "vms")),
 		images:       imagesjsonfile.New(files, filepath.Join(p.State, "images")),
 		marks:        imagesjsonfile.NewMarks(files, filepath.Join(p.State, "builds")),
@@ -123,10 +77,6 @@ func (lockable) Lock(path string) (func(), error) { return local.Exclusive(conte
 
 func (lockable) Hold(ctx context.Context, path string) (func(), error) {
 	return local.Exclusive(ctx, path)
-}
-
-func (s *stores) migrators() []store.Migrator {
-	return []store.Migrator{s.prefs, s.ports(), s.machines, s.images, s.book, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}
 }
 
 func (s *stores) name() setupcontract.NamePrefs         { return setupcontract.Name(s.prefs) }

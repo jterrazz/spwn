@@ -7,7 +7,6 @@ runs:
       stdout: |
           ●	name	m
           ●	zshrc
-          ●	layout	nothing to retire
           ◐	relocate	go env is off (GOENV=off): station writes nothing
           # Machinefile
           	none bound by init: init --machinefile binds one

@@ -146,7 +146,7 @@ func homes() []Fixture {
 	return append(out, states("home-all",
 		pagehome.Snapshot(pendingSnapshot(), thisMacContext(), true),
 		pagehome.Snapshot(calmSnapshot(), thisMacContext(), true),
-		failure("home", "status", "the settings file is not valid JSON", "repair the JSON of ~/.config/station/settings.json"),
+		failure("home", "status", "the preferences file is not valid JSON", "repair the JSON of ~/.config/station/preferences.json"),
 		pagehome.Snapshot(unnamedSnapshot(), thisMacContext(), true))...)
 }
 
@@ -494,7 +494,6 @@ func setupReport() setup.Report {
 	return setup.Report{Steps: []setup.Step{
 		{Name: "name", State: catalog.StateOK, Detail: "macbook"},
 		{Name: "zshrc", State: catalog.StateOK, Detail: "the station block", Changed: true},
-		{Name: "layout", State: catalog.StateDegraded, Detail: "~/." + catalog.HypervisorApp + " not moved", Log: "73 GB: move it with station init --move"},
 		{Name: "relocate", State: catalog.StateOK, Detail: "bunfig, go env, mise settings, npmrc", Changed: true},
 	}}
 }
