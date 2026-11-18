@@ -35,6 +35,32 @@ export const SHARE_BAR_STORIES: readonly Story<ShareBarProps>[] = [
             parts: [
                 { identity: 'teal', key: 'apps', label: 'Apps', size: 212 },
                 { identity: 'pink', key: 'vms', label: 'Machines', size: 180 },
+                { key: 'free', label: 'Free', rest: true, size: 602 },
+            ],
+        },
+    },
+    {
+        name: 'a whole: a tiny part keeps a visible width',
+        props: {
+            label: 'Disk',
+            of: 994,
+            parts: [
+                { identity: 'slate', key: 'system', label: 'System', size: 21 },
+                { identity: 'blue', key: 'apps', label: 'Apps', size: 1 },
+                { identity: 'purple', key: 'data', label: 'Your data', size: 443 },
+                { identity: 'teal', key: 'caches', label: 'Caches', size: 35 },
+                { key: 'free', label: 'Free', rest: true, size: 494 },
+            ],
+        },
+    },
+    {
+        name: 'a whole: one part, then the free well',
+        props: {
+            label: 'Disk',
+            of: 40,
+            parts: [
+                { identity: 'purple', key: 'data', label: 'Your data', size: 10 },
+                { key: 'free', label: 'Free', rest: true, size: 30 },
             ],
         },
     },

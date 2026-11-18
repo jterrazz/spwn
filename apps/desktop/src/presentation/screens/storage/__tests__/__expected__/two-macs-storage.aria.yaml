@@ -11,12 +11,10 @@
     - paragraph: 606 GB of 994 GB used
     - button "Rescan"
     - paragraph: "Outside any machine, station holds 107 GB: machine disks, images, leftovers and its logs"
-    - img "What holds the disk of macbook-pro"
+    - 'img "What holds the disk of macbook-pro: Machine disks 100 GB · Images 7 GB · The Mac itself 499 GB · Free 388 GB"'
     - list "The parts":
       - listitem: Machine disks 100 GB
       - listitem: Images 7 GB
-      - listitem: Leftovers 0 B
-      - listitem: Station logs 0 B
       - listitem: The Mac itself 499 GB
       - listitem: Free 388 GB
     - paragraph: "3.0 GB can be freed: 1 unused image."

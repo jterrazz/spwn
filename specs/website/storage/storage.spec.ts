@@ -93,4 +93,38 @@ describe('storage', () => {
         });
         expect(result.errors.text).toBe('');
     });
+
+    test('D38 a kind that holds nothing on a machine is neither drawn nor listed', async () => {
+        // Given - linux-1's Storage tab over stories, whose disk.read gives system, apps and caches at 0 bytes
+        const result = await website.visit(
+            '/?world=stories&machine=linux-1&tab=Storage',
+            async (visitor) => {
+                // When - the tab is read
+                const storage = region('Storage');
+                await visitor.see(within(storage, content('Your data')));
+
+                // Then - only what holds bytes is listed, and free last
+                await visitor.see(within(storage, content('Free')));
+                for (const kind of ['System', 'Apps', 'Caches']) {
+                    await visitor.gone(within(storage, content(kind)));
+                }
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('D38 a holder that holds nothing on a Mac is neither drawn nor listed', async () => {
+        // Given - Storage over two-macs, whose Station holds give leftovers and logs at 0 bytes
+        const result = await website.visit('/?world=two-macs&page=storage', async (visitor) => {
+            // When - the disk is read
+            const disk = region('Disk');
+            await visitor.see(within(disk, content('Machine disks')));
+
+            // Then - leftovers and logs are gone from it, the others listed
+            await visitor.see(within(disk, content('Images')));
+            await visitor.gone(within(disk, content('Leftovers')));
+            await visitor.gone(within(disk, content('Station logs')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 });

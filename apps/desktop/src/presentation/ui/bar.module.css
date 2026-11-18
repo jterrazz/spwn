@@ -45,38 +45,19 @@
 }
 .whole {
     width: auto;
-    height: 88px;
-    align-items: initial;
+    height: 14px;
+    gap: var(--space-4);
     flex: initial;
-    border-radius: var(--radius-well);
-    background:
-        radial-gradient(circle, var(--line-2) 1.1px, transparent 1.6px) 3px 3px / 8px 8px,
-        var(--inset);
     overflow: hidden;
 }
 .whole .part {
-    flex: initial;
-    width: var(--share);
-    min-width: 5px;
-    box-sizing: border-box;
-    border: 1px solid color-mix(in srgb, var(--c, var(--t3)) 75%, transparent);
-    border-radius: var(--radius-cell);
-    background:
-        radial-gradient(circle, var(--c, var(--t3)) 1.1px, transparent 1.7px) 3px 3px / 8px 8px,
-        linear-gradient(
-            to top,
-            color-mix(in srgb, var(--c, var(--t3)) 34%, var(--inset)),
-            color-mix(in srgb, var(--c, var(--t3)) 9%, var(--inset))
-        );
-}
-.whole .part:first-child {
-    border-radius: var(--radius-well) var(--radius-cell) var(--radius-cell) var(--radius-well);
+    flex: 0 1 var(--share);
+    min-width: var(--space-6);
+    border-radius: var(--radius-icon);
+    background: var(--c, var(--t3));
 }
 .whole .rest {
-    margin-left: auto;
-    border-color: transparent;
-    background: transparent;
-}
-.whole .rest:last-child {
-    border-radius: var(--radius-cell) var(--radius-well) var(--radius-well) var(--radius-cell);
+    flex-grow: 1;
+    background: var(--inset);
+    box-shadow: inset 0 0 0 1px var(--line);
 }

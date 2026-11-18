@@ -15,10 +15,9 @@
     - paragraph: 606 GB of 994 GB used
     - button "Rescan"
     - paragraph: This Mac itself holds 499 GB.
-    - img "What holds the disk of macbook-pro"
+    - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 443 GB · Caches 34.8 GB · Machines and images 107 GB · Free 388 GB"'
     - list "The parts":
       - listitem: System 21.4 GB
-      - listitem: Apps 0 B
       - listitem: Your data 443 GB
       - listitem: Caches 34.8 GB
       - listitem: Machines and images 107 GB

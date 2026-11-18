@@ -1,7 +1,7 @@
 import type { DiskAmount, DiskHolding, DiskRow } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { byApp, groupsOf, holdPartsOf, kindPartsOf, sizeOf } from '../disk';
+import { byApp, groupsOf, holdPartsOf, kindPartsOf, listedOf, sizeOf } from '../disk';
 
 function row(App: string, Group: DiskRow['Group'], change: Partial<DiskRow> = {}): DiskRow {
     return { App, Bytes: 1_000_000_000, Group, MoveTo: '', Paths: [], Pending: false, ...change };
@@ -74,6 +74,23 @@ describe('disk', () => {
         // Then - images then machine disks, and nothing from null
         expect(parts.map((part) => part.key)).toStrictEqual(['images', 'machine-disks']);
         expect(holdPartsOf(null)).toStrictEqual([]);
+    });
+
+    test('a part of no bytes is not listed, but free always is, in the engine order', () => {
+        // Given - kinds where system and caches hold nothing, apps a byte and free nothing
+        const parts = kindPartsOf([
+            { Bytes: 0, Kind: 'system' },
+            { Bytes: 1, Kind: 'apps' },
+            { Bytes: 10_000_000_000, Kind: 'your-data' },
+            { Bytes: 0, Kind: 'caches' },
+            { Bytes: 0, Kind: 'free' },
+        ]);
+
+        // When - the listed parts are kept
+        const listed = listedOf(parts);
+
+        // Then - apps and your data, then free though empty
+        expect(listed.map((part) => part.key)).toStrictEqual(['apps', 'your-data', 'free']);
     });
 
     test("an app's rows are one row, but a misplaced folder stays a row of its own", () => {

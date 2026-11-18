@@ -15,9 +15,6 @@
     - button "Rescan"
     - paragraph: This Mac itself holds 0 B.
     - list "The parts":
-      - listitem: Apps 0 B
-      - listitem: Caches 0 B
-      - listitem: Machines and images 0 B
       - listitem: Free 0 B
     - paragraph: No cache to free. What is left is yours or the system's.
   - region "By app":
