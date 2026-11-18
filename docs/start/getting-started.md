@@ -6,7 +6,7 @@ From a fresh Mac to a machine `station` knows: the one-line install, naming the 
 
 ```sh
 xcode-select --install
-curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh
+curl -fsSL https://spwn.sh/install.sh | bash
 exec zsh
 ```
 

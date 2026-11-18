@@ -94,16 +94,16 @@ func TestACallsInputTravelsOnTheGuestsStdinNeverOnItsCommandLine(t *testing.T) {
 }
 
 func TestAGuestOfAReleaseBeforeTheFloorIsRefusedBeforeTheRequestReachesIt(t *testing.T) {
-	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.1.0")}
+	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v0.0.9")}
 	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, imageOf, nil).Dial(t.Context(), "macbook-pro")
 	in, _ := json.Marshal(contracttest.InstallIn{App: "jq"})
 	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
 	var f *fail.Error
-	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Subject != "linux-1" || f.Detail["version"] != "v3.1.0" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "base-ubuntu" {
-		t.Errorf("installing jq on linux-1 at v3.1.0: %v, want far-too-old naming linux-1, v3.1.0, the floor and the image it was made from", err)
+	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Subject != "linux-1" || f.Detail["version"] != "v0.0.9" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "base-ubuntu" {
+		t.Errorf("installing jq on linux-1 at v0.0.9: %v, want far-too-old naming linux-1, v0.0.9, the floor and the image it was made from", err)
 	}
 	if len(e.stdin) != 1 || strings.Contains(e.stdin[0], "apps.install") {
-		t.Errorf("the guest at v3.1.0 was sent %q, want its hello alone", e.stdin)
+		t.Errorf("the guest at v0.0.9 was sent %q, want its hello alone", e.stdin)
 	}
 }
 
@@ -115,13 +115,13 @@ func imageOf(vm string) string {
 }
 
 func TestAGuestWhoseBinaryTurnsOlderThanTheFloorBetweenTwoExecsIsRefusedAtTheSecond(t *testing.T) {
-	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.3.0"), then: serve.Local(contracttest.Far(), contracttest.Mini, "v3.1.0")}
+	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.3.0"), then: serve.Local(contracttest.Far(), contracttest.Mini, "v0.0.9")}
 	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, imageOf, nil).Dial(t.Context(), "macbook-pro")
 	in, _ := json.Marshal(contracttest.InstallIn{App: "jq"})
 	_, err := ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
 	var f *fail.Error
-	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Detail["version"] != "v3.1.0" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "base-ubuntu" {
-		t.Errorf("installing jq on linux-1 whose station became v3.1.0 after its first hello: %v, want far-too-old naming v3.1.0, the floor and its image", err)
+	if !errors.As(err, &f) || f.Type != fail.FarTooOld || f.Detail["version"] != "v0.0.9" || f.Detail["floor"] != api.Floor || f.Detail["image"] != "base-ubuntu" {
+		t.Errorf("installing jq on linux-1 whose station became v0.0.9 after its first hello: %v, want far-too-old naming v0.0.9, the floor and its image", err)
 	}
 }
 

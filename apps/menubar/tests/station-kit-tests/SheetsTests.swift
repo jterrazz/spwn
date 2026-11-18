@@ -67,7 +67,7 @@ final class SheetsTests: XCTestCase {
     func testAHintsCommandIsThePagesOwn() throws {
         let (_, action, answers) = try sheet("sheet.hint.add-mac", "add-mac")
         let commands = (action.form?.fields ?? []).compactMap(\.hint?.command)
-        XCTAssertEqual(commands, ["curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh", "station machines add <mac>"])
+        XCTAssertEqual(commands, ["curl -fsSL https://spwn.sh/install.sh | bash", "station machines add <mac>"])
         XCTAssertEqual(answers.primary?.label, "Done")
         let (_, declare, _) = try sheet("sheet.hint.declare-public", "declare-public:macbook-pro:5000")
         XCTAssertEqual(declare.form?.fields?.first?.hint?.command, "station ports declare 5000 --via <route>")

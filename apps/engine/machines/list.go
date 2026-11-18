@@ -237,28 +237,77 @@ func newer(a, b string) bool {
 	if pa == nil || pb == nil {
 		return false
 	}
-	return slices.Compare(pa, pb) > 0
+	if c := slices.Compare(pa.core, pb.core); c != 0 {
+		return c > 0
+	}
+	return preceded(pb.pre, pa.pre)
 }
 
-func release(v string) []int {
-	core, ok := strings.CutPrefix(v, "v")
+type semver struct {
+	core []int
+	pre  []string
+}
+
+func release(v string) *semver {
+	// invariant: a station version is vMAJOR.MINOR.PATCH with the pre-release
+	// words semver allows after a dash (v4.0.0-alpha.1); a build suffix or any
+	// other form is no version.
+	rest, ok := strings.CutPrefix(v, "v")
 	if !ok {
 		return nil
 	}
-	core, _, _ = strings.Cut(core, "-")
+	core, pre, dashed := strings.Cut(rest, "-")
 	parts := strings.Split(core, ".")
 	if len(parts) != 3 {
 		return nil
 	}
-	out := make([]int, 0, 3)
+	out := &semver{}
 	for _, p := range parts {
 		n, err := strconv.Atoi(p)
 		if err != nil {
 			return nil
 		}
-		out = append(out, n)
+		out.core = append(out.core, n)
+	}
+	if dashed {
+		if pre == "" {
+			return nil
+		}
+		out.pre = strings.Split(pre, ".")
 	}
 	return out
+}
+
+// value: whether the pre-release words a come before b under semver: a
+// release has none and comes after every pre-release of its numbers; numeric
+// words compare as numbers and sort before the others; a shorter run of equal
+// words comes first.
+func preceded(a, b []string) bool {
+	switch {
+	case len(a) == 0:
+		return false
+	case len(b) == 0:
+		return true
+	}
+	for i := range min(len(a), len(b)) {
+		x, xerr := strconv.Atoi(a[i])
+		y, yerr := strconv.Atoi(b[i])
+		var c int
+		switch {
+		case xerr == nil && yerr == nil:
+			c = cmp.Compare(x, y)
+		case xerr == nil:
+			c = -1
+		case yerr == nil:
+			c = 1
+		default:
+			c = strings.Compare(a[i], b[i])
+		}
+		if c != 0 {
+			return c < 0
+		}
+	}
+	return len(a) < len(b)
 }
 
 type Need struct {

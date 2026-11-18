@@ -14,7 +14,7 @@ This repository ships two artefacts, the `station` binary and the menu bar's `St
 There is no deploy: the release IS the delivery. Pushing a version tag is the whole gesture.
 
 ```sh
-git tag v3.0.0
+git tag v0.21.0-alpha.1
 git push --tags
 ```
 
@@ -24,7 +24,7 @@ git push --tags
 - **Darwin** runs on a GitHub macOS arm64 runner (`macos-26`, the newest Xcode 26 selected). It builds `darwin/arm64` and `darwin/amd64` with cgo, each with Xcode's clang for its arch, so the release's Mac binary has IOKit (Awake's hold and the battery, lid and thermal reads) and LocalAuthentication (the presence a grant asks); a build without cgo has no presence to ask and refuses every grant with `grant.no-presence`. Both are built for macOS 14.0 (Sonoma) and later, `MACOSX_DEPLOYMENT_TARGET=14.0`; the job fails a binary whose build settings do not say `CGO_ENABLED=1` or whose `minos` is not 14.0. `Station.app` keeps its own floor, macOS 26 (`apps/menubar/Package.swift`), since its panel rests on macOS 26 behaviours ([ADR-021](../decisions/021-the-menu-bar-keeps-its-system-window.md)). It then runs `make menubar`, which builds `Station.app` signed ad hoc, and zips it with `ditto` into `Station.app.zip`.
 - **Attach** waits for both, then adds the three darwin assets to the release that Release created, and their lines to its `checksums.txt`, with `gh release upload --clobber`.
 
-Each binary is released as an asset named `station-<os>-<arch>`, beside `Station.app.zip` and one `checksums.txt` for all five; the install script asks for its binary's name and refuses a binary the checksums do not vouch for. The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); `v3.0.0` is released, and the next is `v3.1.0`, the first to write the new words of a machine's kind and lifetime ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)). A release that renames those assets breaks every machine's install path.
+Each binary is released as an asset named `station-<os>-<arch>`, beside `Station.app.zip` and one `checksums.txt` for all five; the install script asks for its binary's name and refuses a binary the checksums do not vouch for. The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); `v0.21.0-alpha.1` is station's first release from jterrazz/spwn, continuing that repository's version line after v0.20.0, with no compatibility kept with the v3 stations before it, and `api.Floor` is `v0.1.0`. A release that renames those assets breaks every machine's install path.
 
 The release is whole once Attach has ended: between Release and Attach, the time Attach runs, the latest release has no darwin asset yet, and an install on a Mac fails at its download.
 

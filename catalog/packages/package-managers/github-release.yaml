@@ -9,7 +9,7 @@ methods:
     # invariant: station is this manager, and the running binary its own
     # release: held at its version, never installed, updated or removed by it.
     - os: any
-      github-release: { repo: jterrazz/studio-station, asset: 'station-{os}-{arch}' }
+      github-release: { repo: jterrazz/spwn, asset: 'station-{os}-{arch}' }
 disk:
     paths:
         - path: '{data}/station/releases'

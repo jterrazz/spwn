@@ -2786,7 +2786,7 @@
             "kind": "command",
             "note": "On the new Mac",
             "hint": {
-              "command": "curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh",
+              "command": "curl -fsSL https://spwn.sh/install.sh | bash",
               "external": true
             }
           },

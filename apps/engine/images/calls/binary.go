@@ -14,10 +14,12 @@ import (
 
 const (
 	releaseAsset = "station-linux-arm64"
-	releaseBase  = "https://github.com/jterrazz/studio-station/releases/download/"
+	releaseBase  = "https://github.com/jterrazz/spwn/releases/download/"
+
+	releaseChecksums = "checksums.txt"
 )
 
-var releaseTag = regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
+var releaseTag = regexp.MustCompile(`^v\d+\.\d+\.\d+(?:-[0-9A-Za-z]+(?:\.[0-9A-Za-z]+)*)?$`)
 
 func (s *Builder) needsBinary(given string) error {
 	if given == "" && !releaseTag.MatchString(s.o.Version) {
@@ -45,13 +47,13 @@ func (s *Builder) download(ctx context.Context, image string) (string, error) {
 		return &images.BuildFailedError{Image: image, Step: "fetching " + releaseAsset + " " + s.o.Version, Cause: cause}
 	}
 	base := releaseBase + s.o.Version + "/"
-	status, sums, err := s.m.Get(ctx, base+"checksums.txt")
+	status, sums, err := s.m.Get(ctx, base+releaseChecksums)
 	if err != nil || status != 200 {
-		return "", fail(statusError(base+"checksums.txt", status, err))
+		return "", fail(statusError(base+releaseChecksums, status, err))
 	}
 	want := checksumOf(string(sums), releaseAsset)
 	if want == "" {
-		return "", fail(fmt.Errorf("checksums.txt lists no %s", releaseAsset))
+		return "", fail(fmt.Errorf("%s lists no %s", releaseChecksums, releaseAsset))
 	}
 	status, body, err := s.m.Get(ctx, base+releaseAsset)
 	if err != nil || status != 200 {
@@ -59,7 +61,7 @@ func (s *Builder) download(ctx context.Context, image string) (string, error) {
 	}
 	sum := sha256.Sum256(body)
 	if got := hex.EncodeToString(sum[:]); got != want {
-		return "", fail(fmt.Errorf("checksum mismatch: checksums.txt says %s, the download is %s", want, got))
+		return "", fail(fmt.Errorf("checksum mismatch: %s says %s, the download is %s", releaseChecksums, want, got))
 	}
 	if err := s.m.Keep(cached, body); err != nil {
 		return "", fail(err)
