@@ -2,6 +2,7 @@ import { button, component, dialog, disabled, enabled, field } from '@jterrazz/t
 import { describe, expect, test, vi } from 'vitest';
 
 import { ConfirmDialog } from '../confirm-dialog';
+import { SECRET_SAMPLE } from '../story';
 
 function ignored(): void {
     return undefined;
@@ -115,7 +116,29 @@ describe('ConfirmDialog', () => {
         expect(result.html.text).not.toMatch(/<label/u);
     });
 
-    test("a hold the engine names is drawn after the gesture's consequence", async () => {
+    test('with no hold, the consequence is the one line under the title', async () => {
+        // Given - the confirm of a delete of a machine nothing holds
+        const result = await component.render(
+            <ConfirmDialog
+                onCancel={ignored}
+                onConfirm={ignored}
+                said="api and everything on its disk are deleted for good."
+                title="Delete api?"
+                verb="Delete"
+            />,
+            async (visitor) => {
+                await visitor.see(dialog('Delete api?'));
+            },
+        );
+
+        // Then - the consequence stands alone, and no warning sign is drawn
+        expect(result.html.text).toMatch(
+            />api and everything on its disk are deleted for good\.<\/p>/u,
+        );
+        expect(result.html.text).not.toMatch(/<svg/u);
+    });
+
+    test('a hold the engine names is drawn as sent, on a warning line of its own under the consequence', async () => {
         // Given - the confirm of a delete of a held machine
         const result = await component.render(
             <ConfirmDialog
@@ -131,9 +154,32 @@ describe('ConfirmDialog', () => {
             },
         );
 
-        // Then - both sentences are drawn, the hold last
+        // Then - the consequence alone in its paragraph, then the hold in its own, after the warn sign
         expect(result.html.text).toMatch(
-            /linux-1 and everything on its disk are deleted for good\. It is held by its lot, by studio-os-43: work may be in progress\./u,
+            />linux-1 and everything on its disk are deleted for good\.<\/p>/u,
         );
+        expect(result.html.text).toMatch(
+            /<p class="[^"]*held[^"]*"><svg[^>]*class="[^"]*warn[^"]*"[\s\S]*?<\/svg><span>It is held by its lot, by studio-os-43: work may be in progress\.<\/span><\/p>/u,
+        );
+    });
+
+    test('a hold shaped like a secret is drawn Withheld', async () => {
+        // Given - the confirm of a delete whose hold sentence is shaped like a token
+        const result = await component.render(
+            <ConfirmDialog
+                held={SECRET_SAMPLE}
+                onCancel={ignored}
+                onConfirm={ignored}
+                title="Delete linux-1?"
+                verb="Delete"
+            />,
+            async (visitor) => {
+                await visitor.see(dialog('Delete linux-1?'));
+            },
+        );
+
+        // Then - the hold's line says Withheld, never the text
+        expect(result.html.text).toMatch(/<span>Withheld<\/span>/u);
+        expect(result.html.text).not.toContain(SECRET_SAMPLE);
     });
 });

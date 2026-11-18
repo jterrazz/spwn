@@ -7,7 +7,7 @@ import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome, marked } from '../../kit/gestures';
 import type { Route } from '../../navigation/route';
 import { machineKindOf } from '../../words/provisional';
-import { verdictShown } from '../../words/shown';
+import { holdAgainst, verdictShown } from '../../words/shown';
 
 import styles from './machine.module.css';
 
@@ -92,7 +92,7 @@ export function DeleteGesture({ mac, vm, go }: VmProps & { go: (to: Route) => vo
         <div className={styles.destructive}>
             <GestureButton
                 gesture={remove}
-                held={vm.Hold?.Sentence}
+                held={holdAgainst(vm.Hold)}
                 label={`Delete ${vm.Name}…`}
                 title={`Delete ${vm.Name}?`}
                 variant="danger"

@@ -10,6 +10,7 @@ import type {
     MachinefileFollower,
     MachinefileStep,
     MachinesEngineView,
+    MachinesHold,
     MachinesMacView,
     MachinesVM,
     OverviewNeed,
@@ -162,6 +163,15 @@ export function chapterNoun(chapter: MachinefileChapter, count: number): string 
 
 export function engineViewStopped({ State }: MachinesEngineView): boolean {
     return State === 'stopped';
+}
+
+// value: the engine's sentence of a hold whose state words.json tones warn or bad, as sent; a calm hold says nothing.
+export function holdAgainst(hold: MachinesHold | undefined): string | undefined {
+    if (hold === undefined) {
+        return undefined;
+    }
+    const { tone } = engineShown('MachinesHoldState', hold.State);
+    return tone === 'warn' || tone === 'bad' ? hold.Sentence : undefined;
 }
 export type SharedChapter = Extract<MachinefileChapter, 'accounts' | 'ports'>;
 

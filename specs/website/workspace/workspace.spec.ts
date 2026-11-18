@@ -73,17 +73,18 @@ describe('workspace', () => {
                 // When - Delete is pressed
                 await visitor.click(button('Delete linux-1…'));
 
-                // Then - the dialog says who holds it and asks for the name, its Delete off
+                // Then - the dialog says what the delete ends, then who holds it on a line of its own, and asks for the name, its Delete off
                 const confirm = dialog('Delete linux-1?');
                 await visitor.see(
                     within(
                         confirm,
-                        content(
-                            'It is held by its lot, by studio-os-fe: work may be in progress.',
-                            {
-                                exact: false,
-                            },
-                        ),
+                        content('linux-1 and everything on its disk are deleted for good.'),
+                    ),
+                );
+                await visitor.see(
+                    within(
+                        confirm,
+                        content('It is held by its lot, by studio-os-fe: work may be in progress.'),
                     ),
                 );
                 await visitor.see(within(confirm, field('Type linux-1 to confirm')));
