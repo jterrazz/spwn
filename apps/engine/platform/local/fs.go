@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -159,16 +160,53 @@ func Erase(paths []string) error {
 }
 
 func Exclusive(ctx context.Context, path string) (release func(), err error) {
+	f, err := lockOpen(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+	return func() {
+		_ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+		_ = f.Close()
+	}, nil
+}
+
+func ExclusiveTransient(ctx context.Context, path string) (release func(), err error) {
+	// invariant: Exclusive's lock, whose file release deletes while the lock is
+	// still held. A holder that waited on a file deleted meanwhile has locked
+	// a name nobody holds: it finds its file is no longer the one at path and
+	// asks again on the new one, so two holders never overlap.
+	for {
+		f, err := lockOpen(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+		held, err := f.Stat()
+		at, atErr := os.Stat(path)
+		if err == nil && atErr == nil && os.SameFile(held, at) {
+			var once sync.Once
+			return func() {
+				once.Do(func() {
+					_ = os.Remove(path)
+					_ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+					_ = f.Close()
+				})
+			}, nil
+		}
+		_ = f.Close()
+	}
+}
+
+func lockOpen(ctx context.Context, path string) (*os.File, error) {
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:gosec // a lock file of station's own state folder.
+	if err != nil {
+		return nil, err
+	}
 	// invariant: an exclusive flock(2) on path, made when missing, held until
 	// release: a second holder, in this process or another, waits for it,
 	// and the kernel lets it go when its process ends, so a crash never
 	// leaves it held. The wait asks the lock again and again, without
 	// blocking, at a growing pause up to lockPause, and ends when ctx does
 	// (it reads interrupted): a blocking flock(2) could not be cut short.
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:gosec // a lock file of station's own state folder.
-	if err != nil {
-		return nil, err
-	}
 	for pause := time.Millisecond; ; pause = min(2*pause, lockPause) {
 		err = syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
 		if !errors.Is(err, syscall.EWOULDBLOCK) {
@@ -182,10 +220,7 @@ func Exclusive(ctx context.Context, path string) (release func(), err error) {
 		_ = f.Close()
 		return nil, err
 	}
-	return func() {
-		_ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
-		_ = f.Close()
-	}, nil
+	return f, nil
 }
 
 // value: the longest pause between two asks of a lock another holds.

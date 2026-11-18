@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sync"
@@ -83,5 +84,20 @@ func TestAWaitForTheZshrcLockEndsWithItsContextAndReadsInterrupted(t *testing.T)
 	}
 	if text, _ := z.Read(t.Context()); text != "mine\n" {
 		t.Errorf("an interrupted edit wrote %q", text)
+	}
+}
+
+func TestAnEditLeavesNoLockFileBehind(t *testing.T) {
+	z := zshrcOnDisk(t)
+	for _, fail := range []bool{false, true} {
+		_ = z.Edit(t.Context(), func(text string) (string, error) {
+			if fail {
+				return "", errors.New("refused")
+			}
+			return text + "more\n", nil
+		})
+		if _, err := z.fs.ReadFile(z.lock); !errors.Is(err, fs.ErrNotExist) {
+			t.Errorf("after an edit that fails %v the lock file stays: %v", fail, err)
+		}
 	}
 }

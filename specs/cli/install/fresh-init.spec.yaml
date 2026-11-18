@@ -35,8 +35,8 @@ runs:
                 },
                 "vm_user": "tester"
               }
-          ~/.local/state/station/
-            + zshrc.lock 0600
+          ~/.local/state/
+            + station/
           ~/Library/Application Support/go/
             + env
               GOPATH={{workdir}}/.local/share/go
