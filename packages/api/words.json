@@ -1669,36 +1669,6 @@
       "Tone": "plain"
     }
   },
-  "MachinesVMState": {
-    "broken": {
-      "Word": "In a loop",
-      "Tone": "bad"
-    },
-    "creating": {
-      "Word": "Creating",
-      "Tone": "new"
-    },
-    "running": {
-      "Word": "Running",
-      "Tone": "ok"
-    },
-    "stale": {
-      "Word": "Ended unexpectedly",
-      "Tone": "warn"
-    },
-    "stopped": {
-      "Word": "Stopped",
-      "Tone": "plain"
-    },
-    "suspended": {
-      "Word": "Suspended",
-      "Tone": "plain"
-    },
-    "unknown": {
-      "Word": "Not seen",
-      "Tone": "plain"
-    }
-  },
   "OverviewMark": {
     "can-wait": {
       "Word": "Upkeep",

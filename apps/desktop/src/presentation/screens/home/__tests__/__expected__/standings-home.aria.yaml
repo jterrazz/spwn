@@ -1,0 +1,29 @@
+- main:
+  - heading "loop-1 is down." [level=1]
+  - paragraph:
+    - img "loop-1 is down."
+    - text: The rest is fine. 3 machines on macbook-pro
+  - text: Memory free Not given yet CPU, this Mac 0% Awake, this Mac Off on power Disk free, this Mac Not given yet
+  - region "Needs you":
+    - heading "Needs you 1" [level=2]
+    - 'button "Broken loop-1 is in a loop: ↺ 0 in 10 min loop-1 · Overview"'
+    - text: Fix
+  - region "Machines":
+    - heading "Machines 3" [level=2]
+    - group "Macs":
+      - button "macbook-pro · 3 machines · 1 machine down": macbook-pro 3 machines 1 machine down
+      - button "mac-mini · no machine yet": mac-mini no machine yet
+      - text: 1 machine down This Mac
+    - button "macbook-pro"
+    - text: 1 machine down 0 %
+    - button "loop-1"
+    - text: down
+    - button "restart-1"
+    - text: restarting
+    - button "suspended-1"
+    - text: suspended
+    - button "mac-mini"
+    - text: 0 %
+  - region "Last night":
+    - heading "Last night" [level=2]
+    - paragraph: Not given yet What moved, held or failed overnight

@@ -88,7 +88,7 @@ describe('gestures', () => {
                 // Then - the engine's machines.list, read again, says it is stopped
                 await visitor.gone(dialog('Stop linux-1?'));
                 await visitor.see(heading('linux-1 Stopped'));
-                await visitor.see(within(sidebar, button('linux-1 Stopped')));
+                await visitor.see(within(sidebar, button('linux-1 stopped')));
                 await visitor.see(content('Done'));
             },
         );
@@ -225,7 +225,7 @@ describe('gestures', () => {
             await visitor.click(within(asked, button('Delete')));
 
             // Then - Home, and api is no machine of the sidebar any more
-            const gone = within(sidebar, button('api Stopped'));
+            const gone = within(sidebar, button('api stopped'));
             await visitor.see(content('2 things need you.'));
             await visitor.gone(gone);
         });

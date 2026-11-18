@@ -6,7 +6,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import type { DiskCall, MacState } from './provisional';
+import type { DiskCall } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
 
@@ -46,12 +46,6 @@ export const THE_MAC_ITSELF_WORD = 'the Mac itself';
 export const NO_PURPOSE_WORD = 'No purpose given';
 
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;
-
-export const MAC_STATE_WORDS: Words<MacState> = {
-    asleep: 'asleep',
-    reachable: 'online',
-    unreachable: 'not seen',
-};
 
 export const MACHINE_KIND_WORDS: WordsOfAnOpenCode = {
     server: 'server',

@@ -6,12 +6,23 @@ import { LONG_NAME } from './story';
 // value: placed as shares of each Mac, macOS first.
 
 const RUNNING: FleetState = { tone: 'ok', word: 'running' };
-const NEEDS_YOU: FleetState = { tone: 'warn', word: 'needs you' };
+const HEALTHY: FleetState = { tone: 'ok', word: 'healthy' };
 const CREATING: FleetState = { tone: 'new', word: 'creating' };
+const RESTARTING: FleetState = { tone: 'new', word: 'restarting' };
 const STOPPED: FleetState = { tone: 'plain', word: 'stopped' };
+const SUSPENDED: FleetState = { tone: 'plain', word: 'suspended' };
 const DOWN: FleetState = { tone: 'bad', word: 'down' };
 const NOT_SEEN: FleetState = { tone: 'plain', word: 'not seen' };
+
+export const ASLEEP: FleetState = { tone: 'plain', word: 'asleep' };
+export const MAC_NOT_SEEN: FleetState = { tone: 'warn', word: 'not seen' };
+export const ENGINE_STOPPED: FleetState = { tone: 'bad', word: 'engine stopped' };
+export const ENGINE_NOT_INSTALLED: FleetState = { tone: 'warn', word: 'engine not installed' };
+
 export const ALL_RUNNING: FleetState = { tone: 'ok', word: 'all running' };
+export const NO_MACHINE_YET: FleetState = { tone: 'plain', word: 'no machine yet' };
+export const ONE_DOWN: FleetState = { tone: 'bad', word: '1 machine down' };
+export const ONE_MAC_NOT_SEEN: FleetState = { tone: 'warn', word: '1 Mac not seen' };
 
 type Drawn = {
     name: string;
@@ -28,7 +39,7 @@ type Drawn = {
 type MacDrawn = {
     name: string;
     total: number;
-    kind: string;
+    kind?: string | undefined;
     state: FleetState;
     cpu: string;
     thisMac?: boolean;
@@ -90,8 +101,7 @@ export const LINUX_1: Drawn = {
     line: 'Apply it from its Packages tab.',
     name: 'linux-1',
     purpose: 'Lot L2.5, settings from a machine file',
-    sentence: 'Its machine file changed: 2 apps are waiting to be applied.',
-    state: NEEDS_YOU,
+    sentence: 'Running, with 2 differences from its file.',
     used: 5.3,
 };
 export const LINUX_2: Drawn = {
@@ -110,12 +120,30 @@ export const API: Drawn = {
     sentence: 'Stopped. It reserves no memory.',
     state: STOPPED,
 };
+export const SLEEPER: Drawn = {
+    identity: 'sky',
+    name: 'notes',
+    purpose: 'Draft the release notes',
+    sentence: 'Suspended.',
+    state: SUSPENDED,
+};
+export const RESTARTED: Drawn = {
+    gb: 8,
+    identity: 'teal',
+    name: 'gate-1',
+    purpose: 'Run the checks of every lot',
+    sentence: 'Restarting.',
+    state: RESTARTING,
+    used: 1.2,
+};
 const INFRA: Drawn = {
     cpu: '10 %',
     gb: 24,
     identity: 'pink',
     name: 'infra',
     purpose: "The cluster's control plane",
+    sentence: 'Healthy.',
+    state: HEALTHY,
     used: 16,
 };
 export const DOWN_INFRA: Drawn = {
@@ -149,7 +177,7 @@ export const PRO: MacDrawn = {
     cpu: '22 %',
     kind: '4 machines',
     name: 'macbook-pro',
-    state: { tone: 'warn', word: '1 needs you' },
+    state: ALL_RUNNING,
     thisMac: true,
     total: 48,
 };
@@ -162,9 +190,8 @@ export const MINI: MacDrawn = {
 };
 export const AIR: MacDrawn = {
     cpu: '3 %',
-    kind: 'Mac',
     name: 'macbook-air',
-    state: { tone: 'plain', word: 'no machine yet' },
+    state: NO_MACHINE_YET,
     total: 24,
 };
 
@@ -182,7 +209,7 @@ export const STUDIO_MAC = macOf(
         kind: '2 machines',
         measured: false,
         name: 'studio-mac',
-        state: NOT_SEEN,
+        state: MAC_NOT_SEEN,
         total: 32,
     },
     [

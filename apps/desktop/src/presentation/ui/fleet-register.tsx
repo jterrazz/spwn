@@ -32,7 +32,7 @@ export type FleetMachine = {
 export type FleetMac = {
     name: string;
     thisMac: boolean;
-    kind: string;
+    kind?: string | undefined;
     state: FleetState;
     cpu: string;
     free: string;

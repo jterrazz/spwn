@@ -31,11 +31,11 @@ const MACS: readonly FleetMac[] = [
                 purpose: 'Settings from a machine file',
                 sentence: 'Its machine file changed: 2 apps are waiting to be applied.',
                 share: { at: 0.25, used: 0.66, width: 0.1667 },
-                state: { tone: 'warn', word: 'needs you' },
+                state: { tone: 'bad', word: 'down' },
             },
         ],
         name: 'macbook-pro',
-        state: { tone: 'warn', word: '1 needs you' },
+        state: { tone: 'bad', word: '1 machine down' },
         system: { at: 0, used: 1, width: 0.0833 },
         thisMac: true,
     },
@@ -60,10 +60,19 @@ const MACS: readonly FleetMac[] = [
         system: { at: 0, used: 1, width: 0.0625 },
         thisMac: false,
     },
+    {
+        cpu: '3 %',
+        free: '20 free',
+        machines: [],
+        name: 'macbook-air',
+        state: { tone: 'plain', word: 'no machine yet' },
+        thisMac: false,
+    },
 ];
 
 const MINI_CARD = 'mac-mini · 1 machine · all running';
-const PRO_CARD = 'macbook-pro · 2 machines · 1 needs you';
+const PRO_CARD = 'macbook-pro · 2 machines · 1 machine down';
+const AIR_CARD = 'macbook-air · no machine yet';
 
 type Seen = { rows: string[]; pressed: (null | string)[]; expanded: (null | string)[] };
 
@@ -84,15 +93,33 @@ function board(onOpen: (name: string) => void = () => undefined) {
             macs={MACS}
             onOpen={onOpen}
             onOpenMac={() => undefined}
-            summary="3 machines · 2 Macs"
+            standing={{ tone: 'bad', word: '1 machine down' }}
             thisMac="this Mac"
         />
     );
 }
 
 describe('FleetBoard', () => {
+    test("a Mac's card names its count of machines only when it has one, and the stage says the roll-up given", async () => {
+        // Given - a board of three Macs, the air with no machine, all machines rolled up as one down
+        let cards: (null | string)[] = [];
+        let foot: null | string | undefined;
+        await component.render(board(), async (visitor) => {
+            // When - the stage is read
+            await visitor.see(button(AIR_CARD));
+            cards = [...document.querySelectorAll('[aria-pressed]')].map((one) =>
+                one.getAttribute('aria-label'),
+            );
+            foot = document.querySelector('[aria-label="Macs"]')?.lastElementChild?.textContent;
+        });
+
+        // Then - each card's name, count and state, the air's with no count, and the roll-up beside This Mac
+        expect(cards).toStrictEqual([PRO_CARD, MINI_CARD, AIR_CARD]);
+        expect(foot).toBe('1 machine downthis Mac');
+    });
+
     test('the panel is headed Machines and counts every machine, a Mac chosen or not', async () => {
-        // Given - a board of two Macs, three machines in all
+        // Given - a board of three Macs, three machines in all
         const result = await component.render(board(), async (visitor) => {
             await visitor.see(within(region('Machines'), heading('Machines 3')));
 
@@ -106,7 +133,7 @@ describe('FleetBoard', () => {
     });
 
     test('a Mac pressed keeps its rows alone, and pressed again shows every Mac', async () => {
-        // Given - a board of two Macs, three machines in all
+        // Given - a board of three Macs, three machines in all
         const states: Seen[] = [];
         await component.render(board(), async (visitor) => {
             // When - the mini's card is pressed, then pressed again
@@ -121,13 +148,13 @@ describe('FleetBoard', () => {
         expect(states).toStrictEqual([
             {
                 expanded: ['false', 'false', 'false'],
-                pressed: ['false', 'false'],
+                pressed: ['false', 'false', 'false'],
                 rows: ['agent-7f', 'linux-1', 'infra'],
             },
-            { expanded: ['false'], pressed: ['false', 'true'], rows: ['infra'] },
+            { expanded: ['false'], pressed: ['false', 'true', 'false'], rows: ['infra'] },
             {
                 expanded: ['false', 'false', 'false'],
-                pressed: ['false', 'false'],
+                pressed: ['false', 'false', 'false'],
                 rows: ['agent-7f', 'linux-1', 'infra'],
             },
         ]);
@@ -156,7 +183,7 @@ describe('FleetBoard', () => {
         expect(states).toStrictEqual([
             {
                 expanded: ['false', 'true', 'false'],
-                pressed: ['false', 'false'],
+                pressed: ['false', 'false', 'false'],
                 rows: ['agent-7f', 'linux-1', 'infra'],
             },
         ]);
@@ -181,12 +208,12 @@ describe('FleetBoard', () => {
         expect(states).toStrictEqual([
             {
                 expanded: ['false', 'false', 'false'],
-                pressed: ['false', 'false'],
+                pressed: ['false', 'false', 'false'],
                 rows: ['agent-7f', 'linux-1', 'infra'],
             },
             {
                 expanded: ['false', 'false'],
-                pressed: ['true', 'false'],
+                pressed: ['true', 'false', 'false'],
                 rows: ['agent-7f', 'linux-1'],
             },
         ]);

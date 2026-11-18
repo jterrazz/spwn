@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { SEPARATOR } from '../../domain/separator';
 import { FleetRegister, Glow } from './fleet-register';
-import type { FleetMac } from './fleet-register';
+import type { FleetMac, FleetState } from './fleet-register';
 import { Panel } from './panel';
 import { StateSign } from './state-sign';
 
@@ -13,7 +13,7 @@ export type { FleetMac, FleetMachine, FleetShare, FleetState } from './fleet-reg
 
 export type FleetBoardProps = {
     macs: readonly FleetMac[];
-    summary: string;
+    standing?: FleetState | undefined;
     thisMac: string;
     onOpen: (name: string) => void;
     onOpenMac: (name: string) => void;
@@ -30,6 +30,15 @@ const CARD_LOOKS = {
     warn: styles.ringWarn,
 };
 
+function Said({ state }: { state: FleetState }) {
+    return (
+        <span className={`${styles.said} ${styles[state.tone]}`}>
+            <StateSign tone={state.tone} />
+            {state.word}
+        </span>
+    );
+}
+
 function MacCard({
     mac,
     chosen,
@@ -39,9 +48,10 @@ function MacCard({
     chosen: boolean;
     onChoose: () => void;
 }) {
+    const label = [mac.name, mac.kind, mac.state.word].filter((part) => part !== undefined);
     return (
         <button
-            aria-label={[mac.name, mac.kind, mac.state.word].join(SEPARATOR)}
+            aria-label={label.join(SEPARATOR)}
             aria-pressed={chosen}
             className={`${styles.card} ${CARD_LOOKS[mac.state.tone]}`}
             onClick={onChoose}
@@ -51,11 +61,8 @@ function MacCard({
                 <span className={styles.cut}>{mac.name}</span>
                 {mac.thisMac ? <Glow /> : null}
             </b>
-            <small className={styles.kind}>{mac.kind}</small>
-            <span className={`${styles.said} ${styles[mac.state.tone]}`}>
-                <StateSign tone={mac.state.tone} />
-                {mac.state.word}
-            </span>
+            {mac.kind === undefined ? null : <small className={styles.kind}>{mac.kind}</small>}
+            <Said state={mac.state} />
         </button>
     );
 }
@@ -64,11 +71,11 @@ type StageProps = {
     macs: readonly FleetMac[];
     chosen: null | string;
     onChoose: (name: string) => void;
-    summary: string;
+    standing: FleetState | undefined;
     thisMac: string;
 };
 
-function Stage({ macs, chosen, onChoose, summary, thisMac }: StageProps) {
+function Stage({ macs, chosen, onChoose, standing, thisMac }: StageProps) {
     return (
         <div aria-label="Macs" className={styles.stage} role="group">
             <div className={styles.deck}>
@@ -84,7 +91,7 @@ function Stage({ macs, chosen, onChoose, summary, thisMac }: StageProps) {
                 ))}
             </div>
             <div className={styles.foot}>
-                <span>{summary}</span>
+                {standing === undefined ? <span /> : <Said state={standing} />}
                 {macs.some((mac) => mac.thisMac) ? (
                     <span className={styles.here}>
                         <Glow />
@@ -102,7 +109,7 @@ function toggled(current: null | string, name: string): null | string {
 
 export function FleetBoard({
     macs,
-    summary,
+    standing,
     thisMac,
     onOpen,
     onOpenMac,
@@ -124,7 +131,7 @@ export function FleetBoard({
                         setChosen(toggled(chosen, name));
                         setOpened(null);
                     }}
-                    summary={summary}
+                    standing={standing}
                     thisMac={thisMac}
                 />
                 <FleetRegister

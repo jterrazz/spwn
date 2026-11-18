@@ -3544,8 +3544,6 @@ export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
 export type MachinesVMStanding = 'not-seen' | 'restarting' | 'creating' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
 
-export type MachinesVMState = 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
-
 export type OverviewMark = 'exposed' | 'down' | 'needs-you' | 'can-wait';
 
 export type OverviewUpkeep = 'needs-you' | 'can-wait';
@@ -3614,7 +3612,6 @@ export type StationWords = {
     MachinesRollUpState: Record<MachinesRollUpState, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
     MachinesVMStanding: Record<MachinesVMStanding, StationWord>;
-    MachinesVMState: Record<MachinesVMState, StationWord>;
     OverviewMark: Record<OverviewMark, StationWord>;
     OverviewUpkeep: Record<OverviewUpkeep, StationWord>;
     OverviewVerb: Record<OverviewVerb, StationWord>;

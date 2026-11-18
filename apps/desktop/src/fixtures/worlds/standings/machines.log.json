@@ -1,0 +1,5 @@
+{"world": "standings", "station": "dev", "exchanges": [
+{"request":{"call":"machines.log","in":{"VM":"loop-1"}},"answers":[{"v":2,"out":{"Lines":null}}]},
+{"request":{"call":"machines.log","in":{"VM":"restart-1"}},"answers":[{"v":2,"out":{"Lines":null}}]},
+{"request":{"call":"machines.log","in":{"VM":"suspended-1"}},"answers":[{"v":2,"out":{"Lines":null}}]}
+]}

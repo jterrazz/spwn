@@ -72,6 +72,8 @@ export function outcomeShown(outcome: JournalOutcome): Shown {
     return { tone: said.Tone, word: said.Word };
 }
 
+const UNHEARD: ReadonlySet<string> = new Set(['asleep', 'not-seen']);
+
 export type JournalAnswer = {
     fleet: string;
     out: (macs: readonly MachinesMacView[]) => JournalReadOutput;
@@ -84,7 +86,7 @@ export function fleetOf(macs: readonly MachinesMacView[]): string {
     return macs
         .map((mac) => {
             const vms = (mac.VMs ?? []).map((vm) => vm.Name).join(',');
-            return mac.Reachable && !mac.Asleep ? vms : `${vms}?`;
+            return UNHEARD.has(mac.Standing ?? '') ? `${vms}?` : vms;
         })
         .join(' | ');
 }

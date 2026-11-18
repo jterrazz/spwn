@@ -9,18 +9,18 @@
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
-    - button "api Stopped":
+    - button "api stopped":
       - text: api
-      - img "Stopped"
-    - button "linux-1 Running":
+      - img "stopped"
+    - button "linux-1 running":
       - text: linux-1
-      - img "Running"
+      - img "running"
     - button "mac-mini not seen":
       - text: mac-mini
       - img "not seen"
-    - button "infra Not seen":
+    - button "infra not seen":
       - text: infra
-      - img "Not seen"
+      - img "not seen"
   - group "Catalog":
     - heading "Catalog" [level=2]
     - button "Apps 9"

@@ -147,7 +147,7 @@ describe('New machine', () => {
 
             // Then - the sheet hands over to web's page
             await visitor.gone(onThisMac);
-            await visitor.see(heading('web Running'));
+            await visitor.see(heading('web Healthy'));
         });
         expect(result.errors.text).toBe('');
     });
