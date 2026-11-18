@@ -1999,7 +1999,7 @@ export type MachinesRestarts = {
 
 export type MachinesRollUp = {
     N?: number;
-    State: 'down' | 'not-seen' | 'empty' | 'fine';
+    State: 'down' | 'engine-stopped' | 'not-seen' | 'engine-not-installed' | 'empty' | 'fine';
 };
 
 export type MachinesRoom = {
@@ -3540,7 +3540,7 @@ export type MachinesMacStanding = 'asleep' | 'not-seen' | 'engine-stopped' | 'en
 
 export type MachinesPreset = 'small' | 'workspace' | 'gate';
 
-export type MachinesRollUpState = 'down' | 'not-seen' | 'empty' | 'fine';
+export type MachinesRollUpState = 'down' | 'engine-stopped' | 'not-seen' | 'engine-not-installed' | 'empty' | 'fine';
 
 export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 

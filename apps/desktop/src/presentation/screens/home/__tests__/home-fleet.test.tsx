@@ -189,7 +189,7 @@ describe('home-fleet', () => {
     });
 
     test("a bare Mac is one card with no machine and no count, saying its own standing, and the stage the engine's roll-up", async () => {
-        // Given - Home over bare-mac, whose one Mac lists no machine and stands engine not installed, all machines rolled up as one down
+        // Given - Home over bare-mac, whose one Mac lists no machine and stands engine not installed, all machines rolled up as one Mac without its engine
         const states: Board[] = [];
         const result = await component.render(homeOver('bare-mac'), async (visitor) => {
             // When - the fleet is drawn
@@ -202,7 +202,7 @@ describe('home-fleet', () => {
             {
                 cards: ['macbook-pro · engine not installed'],
                 expanded: [],
-                foot: '1 machine downThis Mac',
+                foot: '1 Mac without its engineThis Mac',
                 lines: [],
                 pressed: ['false'],
             },

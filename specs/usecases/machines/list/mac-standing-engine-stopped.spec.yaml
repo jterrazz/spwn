@@ -1,4 +1,4 @@
-description: 'a Mac whose engine is stopped reads engine-stopped, and all of it rolls up down'
+description: 'a Mac whose engine is stopped reads engine-stopped, and rolls up with its engine stopped'
 env:
     - engine-stopped
     - engine
@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          [[["macbook-pro","engine-stopped","down",1],["mac-mini","online","fine",null]],["down",1]]
+          [[["macbook-pro","engine-stopped","engine-stopped",1],["mac-mini","online","fine",null]],["engine-stopped",1]]

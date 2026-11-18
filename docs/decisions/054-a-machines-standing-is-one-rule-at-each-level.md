@@ -47,13 +47,21 @@ machines stand, so each client counted its own.
    branch of `Findings` switch on it with no default. Tones: `online` ok, `asleep` plain, `not-seen` warn (a Mac that is
    silent and not asleep is worth a look, never down), `engine-stopped` bad, `engine-not-installed` warn.
 6. **A set of machines rolls up to one standing**, `RollUp{State, N}` (`MachinesRollUp`), read from the Mac and VM
-   standings alone, the first rule that matches: `down` (a VM down, or an engine stopped or not installed), `not-seen`
-   (a Mac not seen), `empty` (no VM at all), `fine`. `N` counts what the state names. A VM of a Mac that does not
-   answer counts through its Mac, and an asleep Mac is no fault. `machines.list` carries the roll-up of every Mac as
-   `AllMachines.Standing`, and each Mac's own as `MacView.Machines`. Its words carry their noun through `One` and
-   `Other` (`1 machine down`, `2 Macs not seen`, `no machine yet`, `all running`), so a client draws `N` and the word
-   and never makes its own plural. Tones: `down` bad, `not-seen` warn, `empty` plain, `fine` ok. The word `fleet` is
-   retired, so the type is named for what it does.
+   standings alone, the first rule that matches, bad before warn: `down` (a VM down), `engine-stopped` (a Mac whose
+   engine is stopped), `not-seen` (a Mac not seen), `engine-not-installed` (a Mac whose engine is not installed),
+   `empty` (no VM at all), `fine`. A Mac not seen comes before a Mac without its engine, since a silent Mac may hide a
+   VM down and a missing engine is a known gap in its setup. `N` counts what the state names: VMs for `down`, Macs
+   for the others. A VM of a Mac that does not answer counts through its Mac, and an asleep Mac is no fault.
+   `machines.list` carries the roll-up of every Mac as `AllMachines.Standing`, and each Mac's own as
+   `MacView.Machines`. The word `fleet` is retired, so the type is named for what it does.
+
+    Its words live on the type (`Word()`, `Noun(n)`) and carry their noun through `One` and `Other`
+    (`1 machine down`, `1 Mac with its engine stopped`, `2 Macs not seen`, `1 Mac without its engine`,
+    `no machine yet`, `all running`), so a client draws `N` and the word and never makes its own plural. A state that
+    counts takes the tone of the standing it counts: `down` and `engine-stopped` bad, `not-seen` and
+    `engine-not-installed` warn; `empty` plain, `fine` ok. So a roll-up never says a Mac worse than its own standing
+    does: a Mac whose engine is not installed is not a machine down.
+
 7. **A finding's severity is its machine's standing's tone**: broken where it is bad, needs a look otherwise
    (`severityOf`). What a finding says is still read from the facts; that it is broken is not. So a workspace ended
    unexpectedly is broken (its standing is down), a running VM whose SSH fails needs a look (its standing is running;
@@ -71,6 +79,7 @@ machines stand, so each client counted its own.
   to the standing.
 - A test over every combination of reach, sleep, engine and a hosted server holds a Mac's `Unseen` and its findings
   to its standing, and one over the VM cross product holds every VM finding broken exactly when its standing is down.
+- A test over every pair of Macs, one of each standing, holds a roll-up's tone to the worst standing it counts.
 - A Mac's sentences are byte-identical. What moves: a far Mac whose engine is not installed `has no engine installed`;
   `Unseen` of a Mac not seen and not asleep is warn; the findings' severities above, in the CLI's Needs you, the
   Overview's and the menu bar's needs.
