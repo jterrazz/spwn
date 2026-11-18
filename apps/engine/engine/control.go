@@ -48,10 +48,10 @@ type StartReport struct {
 
 type Installed struct {
 	// value: what bringing the engine's job to this station changed: written
-	// for the first time (or changed), moved from v2's label, restarted, and
-	// the version it ran before ("" when it did not answer).
-	Written, Moved, Restarted bool
-	From                      string
+	// for the first time (or changed), restarted, and the version it ran
+	// before ("" when it did not answer).
+	Written, Restarted bool
+	From               string
 }
 
 type StartFailedError struct {

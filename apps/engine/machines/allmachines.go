@@ -9,8 +9,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
-const SuperviseRetired = "supervise is retired: the engine supervises VMs (station engine start)"
-
 type Node struct {
 	Online bool
 	IP     string

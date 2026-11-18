@@ -231,14 +231,6 @@ func engineRunCommand(env kit.Env, m machine) *cobra.Command {
 	return enginerun.Command(enginerun.Deps{Engine: m.engine(env)}, env)
 }
 
-// invariant: a v2 job runs `station engine` until setup moves it to the
-// engine's label; it runs the engine, hidden, for one release.
-func retiredEngineCommand(env kit.Env, m machine) *cobra.Command {
-	cmd := engineRunCommand(env, m)
-	cmd.Use = kit.RetiredEngineCommand
-	return cmd
-}
-
 // invariant: the retry job takes out the removals a grant still owes a
 // machine, each by its program's Remove; a VM owes none, and a world's
 // grants only go with their machine.
@@ -430,8 +422,7 @@ func (r reservationReleaser) forgetDeclarations(ctx context.Context, vm string) 
 }
 
 type engineInstaller struct {
-	m        machine
-	machines *machinescalls.Machinist
+	m machine
 }
 
 func (i engineInstaller) env() map[string]string {
@@ -444,39 +435,19 @@ func (i engineInstaller) env() map[string]string {
 	return env
 }
 
-// invariant: ONE engine per system, after migrating the round-3 per-VM
-// agents; it restarts the engine only when its plist changed or it runs
-// another version, and the VMs survive that restart.
+// invariant: ONE engine per system; it restarts the engine only when its
+// plist changed or it runs another version, and the VMs survive that restart.
 func (i engineInstaller) Install(ctx context.Context) (engine.Installed, error) {
 	jobs := i.m.jobs(0)
 	if !jobs.Present() {
 		names := jobs.Names()
 		return engine.Installed{}, &enginecalls.NoJobManagerError{Manager: names.Manager, Command: names.Command}
 	}
-	if _, err := i.machines.MigrateAgents(ctx); err != nil {
-		return engine.Installed{}, err
-	}
-	moved, err := i.retire(ctx, jobs)
-	if err != nil {
-		return engine.Installed{}, startFailed(err)
-	}
-	done, err := i.install(ctx, jobs)
-	done.Moved = moved
-	return done, err
+	return i.install(ctx, jobs)
 }
 
 func startFailed(cause error) error {
 	return &engine.StartFailedError{Last: cause.Error(), Cause: cause}
-}
-
-// invariant: the job station v2 named com.jterrazz.station.daemon is
-// removed once, before the engine's own is written: one engine per Mac.
-func (i engineInstaller) retire(ctx context.Context, jobs contract.Jobs) (bool, error) {
-	ref := contract.Ref{Domain: contract.Domain{UID: i.m.sys.Env.Euid()}, Label: catalog.RetiredEngineLabel, File: catalog.RetiredEnginePlist(i.m.sys.Env.Home())}
-	if _, err := i.m.sys.FS.Stat(ref.File); err != nil && !jobs.Read(ctx, ref).Loaded {
-		return false, nil
-	}
-	return true, jobs.Remove(ctx, ref)
 }
 
 func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {

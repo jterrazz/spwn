@@ -157,9 +157,6 @@ func Start(r engine.StartReport, thisMac page.Context) page.Page {
 	case r.Already:
 		words[0] = "already running"
 	}
-	if r.Installed.Moved {
-		words = append(words, "its job moved to "+catalog.EngineLabel)
-	}
 	row := pages.Done(Row, catalog.StateOK, "running")
 	row.Detail = page.Texts(words...)
 	return pages.Outcome("engine start", thisMac, nil, []page.Row{row}, "engine to start")

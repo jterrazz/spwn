@@ -213,8 +213,6 @@ var SSHDisk = Disk{
 	NoErase: appsNoErase,
 }
 
-const StationRetiredNote = "The keychain entry `station` holds nothing since round 5: `station init` removes the three tailnet accounts the earlier rounds kept there, and `station engine start` retires round 3's per-VM launchd agents, `~/Library/LaunchAgents/com.jterrazz.station.vm.*.plist`: booted out and removed, the one engine runs every VM."
-
 var HomeExceptions = []Exception{
 	{Path: ".ssh", Reason: "the owner's keys and ssh_config"},
 	{Path: "Applications", Reason: "macOS's folder for one user's apps: station-menubar puts Station.app there"},

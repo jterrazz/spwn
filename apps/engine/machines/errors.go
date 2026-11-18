@@ -8,12 +8,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
-type RunningUnderAgentError struct{ Names []string }
-
-func (e *RunningUnderAgentError) Error() string {
-	return strings.Join(e.Names, ", ") + " still runs under its round-3 agent"
-}
-
 type EngineDownError struct {
 	Mac       string
 	Installed bool

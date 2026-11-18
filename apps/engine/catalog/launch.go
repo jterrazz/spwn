@@ -36,18 +36,11 @@ const StationLaunchPrefix = "com.jterrazz.station."
 
 const EngineLabel = StationLaunchPrefix + "engine"
 
-const (
-	// value: the label station v2 gave the engine's job; setup moves it once.
-	RetiredEngineLabel = "com.jterrazz.station.daemon"
-)
-
 func EnginePlist(home string) string {
 	// value: the one engine's launchd agent: its first start writes it, a stopped engine
 	// keeps it, so its presence tells "stopped" from "not installed" (R9.D3).
 	return agentPlist(home, EngineLabel)
 }
-
-func RetiredEnginePlist(home string) string { return agentPlist(home, RetiredEngineLabel) }
 
 func agentPlist(home, label string) string {
 	return path.Join(home, "Library", "LaunchAgents", label+".plist")

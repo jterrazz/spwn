@@ -62,22 +62,16 @@ func (e Env) Target() machine.Ref {
 
 func (e Env) Far() bool { return e.Target() != e.Self }
 
-const (
-	// value: alias of v2's `station daemon`, the engine run under its old
-	// name for one release.
-	RetiredEngineCommand = "daemon"
-)
-
 func refusesOn(path string) bool {
 	fields := strings.Fields(path)
 	if len(fields) == 0 {
 		return false
 	}
 	switch fields[0] {
-	case "shell", "completion", "help", RetiredEngineCommand, "guest", "use":
+	case "shell", "completion", "help", "guest", "use":
 		return true
 	}
-	return len(fields) > 1 && (fields[0] == "machines" && (fields[1] == "supervise" || fields[1] == "pipe") ||
+	return len(fields) > 1 && (fields[0] == "machines" && fields[1] == "pipe" ||
 		fields[0] == "engine" && (fields[1] == "run" || fields[1] == "attach"))
 }
 

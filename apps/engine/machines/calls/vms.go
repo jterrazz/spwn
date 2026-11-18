@@ -103,7 +103,6 @@ func (s *Machinist) StopDirect(ctx context.Context, name string) error {
 	if err := s.powerOff(ctx, name); err != nil {
 		return err
 	}
-	s.retireAgent(ctx, name)
 	return nil
 }
 
@@ -212,7 +211,6 @@ func (s *Machinist) Remove(ctx context.Context, name string) (model.DeleteReport
 	// the disk, record, files and block go, and the VM's leases and their serve
 	// entries are released.
 	report := model.DeleteReport{Name: name}
-	s.retireAgent(ctx, name)
 	if s.engineState(ctx, name) == contract.DiskRunning {
 		if err := s.engine.Shutdown(ctx, name, hardStopWait); err != nil {
 			return report, err

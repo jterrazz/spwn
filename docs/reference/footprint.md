@@ -53,8 +53,6 @@ Paths under `~/.config`, `~/.local/share`, `~/.local/state` and `~/.cache` follo
 | `~/.local/state/station/zshrc.lock`                        | your data     | empty: the lock every station process takes in turn to rewrite `~/.zshrc`                                                                                                                  |
 | `~/.local/bin/station`                                     | installed     | removed by `station apps remove`                                                                                                                                                           |
 
-The keychain entry `station` holds nothing since round 5: `station init` removes the three tailnet accounts the earlier rounds kept there, and `station engine start` retires round 3's per-VM launchd agents, `~/Library/LaunchAgents/com.jterrazz.station.vm.*.plist`: booted out and removed, the one engine runs every VM.
-
 ## Apps
 
 ### apt

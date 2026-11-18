@@ -5,18 +5,6 @@
         "macbook-pro": {
             "files": {
                 "settings.json": "{\n  \"here\": \"macbook-pro\",\n  \"hosts\": {\n    \"macbook-pro\": {}\n  },\n  \"vm_user\": \"admin\"\n}\n"
-            },
-            "jobs": {
-                "com.jterrazz.station.daemon": {
-                    "Label": "com.jterrazz.station.daemon",
-                    "Program": "station",
-                    "Scope": "user",
-                    "PID": 41,
-                    "Running": true,
-                    "Loaded": true,
-                    "ProgramExists": true,
-                    "OwnerExists": true
-                }
             }
         }
     },
