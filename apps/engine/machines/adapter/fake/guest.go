@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"slices"
@@ -105,6 +106,13 @@ func (g *Guests) Add(vm string) *VM {
 	return v
 }
 
+func (g *Guests) notApproved(vm string) bool {
+	g.w.Lock()
+	defer g.w.Unlock()
+	mac := g.w.Holder(vm)
+	return mac != "" && g.w.Macs[mac].LocalNetwork == machines.LocalNetworkNotApproved
+}
+
 func (g *Guests) answering(vm string) (*world.Guest, bool) {
 	g.w.Lock()
 	defer g.w.Unlock()
@@ -121,6 +129,9 @@ func (g *Guests) Dial(_ context.Context, t contract.GuestTarget) (contract.Guest
 	g.w.Unlock()
 	if refused {
 		return nil, ErrRefused
+	}
+	if g.notApproved(t.VM) {
+		return nil, fmt.Errorf("%w: dial %s", contract.ErrLocalNetwork, t.Address)
 	}
 	wg, ok := g.answering(t.VM)
 	if !ok {

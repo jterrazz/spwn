@@ -188,6 +188,10 @@ type Mac struct {
 	// value: the hardware address each Wake-on-LAN packet this Mac sent
 	// named, in order.
 	WakeSent []string `json:"wake_sent,omitempty"`
+	// value: how this Mac stands with macOS's Local Network approval of
+	// station; empty, a read that cannot tell. While not approved, its
+	// engine's dial to any of its VMs is refused.
+	LocalNetwork machines.LocalNetwork `json:"local_network,omitempty"`
 }
 
 type Self struct {

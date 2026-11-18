@@ -168,6 +168,32 @@ func Pausing(vms []VM) []string {
 	return out
 }
 
+type GuestBlock string
+
+const (
+	// value: what refuses a VM's guest its connection, as its Mac's engine
+	// met it: its Mac has not approved station for Local Network.
+	LocalNetworkBlock GuestBlock = "local-network"
+)
+
+type LocalNetwork string
+
+const (
+	// value: how a Mac stands with macOS's Local Network approval of
+	// station, as its engine read it; empty where the read cannot tell
+	// (off a Mac).
+	LocalNetworkApproved    LocalNetwork = "approved"
+	LocalNetworkNotApproved LocalNetwork = "not-approved"
+)
+
+func NotApproved(mac string) string { return mac + " has not approved station for Local Network" }
+
+func LocalNetworkFix(mac string) string {
+	// value: the one gesture that lifts the block, on the Mac itself, named
+	// by its name: the engine that words it may be another Mac's.
+	return "approve station on " + mac + "'s screen, or in System Settings > Privacy & Security > Local Network"
+}
+
 type EngineState string
 
 const (

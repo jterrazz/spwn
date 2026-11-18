@@ -296,6 +296,7 @@
             "image.old-record",
             "image.unknown",
             "internal",
+            "local_network",
             "login.already-signed-in",
             "login.busy",
             "login.code-refused",

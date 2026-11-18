@@ -15,6 +15,7 @@ const (
 	UnknownPage      fail.Code = "unknown_page"
 	GuestAbsent      fail.Code = "guest_absent"
 	GuestTimeout     fail.Code = "guest_timeout"
+	LocalNetwork     fail.Code = "local_network"
 	IgnoredPort      fail.Code = "ignored_port"
 	NotAllowed       fail.Code = "not_allowed"
 	RangeFull        fail.Code = "range_full"

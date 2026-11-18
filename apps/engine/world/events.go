@@ -61,6 +61,7 @@ func events() []event {
 		{"reads", []string{"<mac>", "<fact>", "<value>"}, reads},
 		{"unopened", []string{"<mac>", "<app>"}, unopened},
 		{"certificate", []string{"<mac>", "pending|issued"}, certificate},
+		{"local-network", []string{"<mac>", "approved|not-approved"}, localNetwork},
 		{"admin", []string{"on|off"}, admin},
 	}
 }
@@ -535,4 +536,17 @@ func certificate(w *World, args []string) error {
 		return nil
 	}
 	return fmt.Errorf("world certificate: %q is not pending or issued", args[1])
+}
+
+func localNetwork(w *World, args []string) error {
+	m, err := w.known(args[0])
+	if err != nil {
+		return err
+	}
+	switch v := machines.LocalNetwork(args[1]); v {
+	case machines.LocalNetworkApproved, machines.LocalNetworkNotApproved:
+		m.LocalNetwork = v
+		return nil
+	}
+	return fmt.Errorf("world local-network: %q is not approved or not-approved", args[1])
 }
