@@ -9,8 +9,11 @@ set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 id "$VM_USER" >/dev/null 2>&1 || useradd --create-home --shell /bin/zsh "$VM_USER"
-echo "$VM_USER ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$VM_USER"
-chmod 0440 "/etc/sudoers.d/$VM_USER"
+# hazard: sudo's includedir skips a file whose name holds a dot, and a user's name may hold one: the rule lives in a file of a fixed name.
+echo "$VM_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/60-station-user
+chmod 0440 /etc/sudoers.d/60-station-user
+visudo -cf /etc/sudoers.d/60-station-user
+sudo -u "$VM_USER" sudo -k -n true || { echo "sudo asks $VM_USER a password: /etc/sudoers.d/60-station-user is not read" >&2; exit 1; }
 install -d -m 0700 -o "$VM_USER" -g "$VM_USER" "/home/$VM_USER/.ssh"
 printf '%s\n' "$IMAGE_KEY" > "/home/$VM_USER/.ssh/authorized_keys"
 chown "$VM_USER:$VM_USER" "/home/$VM_USER/.ssh/authorized_keys"
