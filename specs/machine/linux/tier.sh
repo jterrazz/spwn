@@ -9,6 +9,7 @@
 # outside: the tailnet, the credential store and Claude's sign-in of the Mac are
 # stubs (tailscale, claude in the Mac's bin): what a VM receives is real.
 
+vm_user=e2e.user
 mac="$work/mac"
 far="$work/far"
 real_tart=""
@@ -35,7 +36,7 @@ home_of() {
   cp "$repo/.artifacts/go/station" "$h/.local/bin/station"
   cp "$suite/linux/stubs/"* "$h/.local/bin/"
   chmod +x "$h/.local/bin/"*
-  printf '{"here":"%s","vm_user":"e2e"}\n' "$name" > "$h/.config/station/preferences.json"
+  printf '{"here":"%s","vm_user":"%s"}\n' "$name" "$vm_user" > "$h/.config/station/preferences.json"
 }
 as() {
   local h=$1
@@ -79,13 +80,13 @@ key="$mac/.local/state/station/images/key"
 vm_ssh() {
   local vm=$1
   shift
-  on_mac /usr/bin/timeout -k 10 600 /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "e2e@$vm" "$@"
+  on_mac /usr/bin/timeout -k 10 600 /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$@"
 }
 in_vm() { vm_ssh "$1" "$2" < /dev/null; }
 # value: in_vm_for <seconds> <vm> <command>: in_vm with a bound of its own.
 in_vm_for() {
   local secs=$1 vm=$2
-  on_mac /usr/bin/timeout -k 10 "$secs" /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "e2e@$vm" "$3" < /dev/null
+  on_mac /usr/bin/timeout -k 10 "$secs" /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$3" < /dev/null
 }
 
 # invariant: a GITHUB_TOKEN the runner holds reaches the station of a workspace, so its
