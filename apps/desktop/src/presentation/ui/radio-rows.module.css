@@ -1,0 +1,82 @@
+.rows {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-well);
+    overflow: hidden;
+}
+
+.row {
+    display: flex;
+    gap: var(--space-10);
+    align-items: center;
+    min-width: 0;
+    padding: var(--space-10) var(--space-12);
+    font-size: var(--text-body);
+    border-top: 1px solid var(--line);
+    transition: background var(--motion-hover);
+}
+
+.row:first-child {
+    border-top: 0;
+}
+
+.open {
+    cursor: pointer;
+    background: var(--raise);
+}
+
+.open:hover {
+    background: var(--raise-2);
+}
+
+.open .line {
+    color: var(--t2);
+}
+
+.ring {
+    appearance: none;
+    flex: none;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    border: 1.5px solid var(--t4);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+}
+
+.ring:checked {
+    border-color: var(--new);
+    background: radial-gradient(circle, var(--new) 0 38%, transparent 44%);
+}
+
+.ring:disabled {
+    border-color: transparent;
+    cursor: default;
+}
+
+.title {
+    flex: none;
+    max-width: 50%;
+    overflow: hidden;
+    color: var(--t1);
+    font-weight: var(--weight-medium);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.line {
+    flex: 1;
+    min-width: 0;
+    color: var(--t3);
+    font-size: var(--text-label);
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.held .title {
+    color: var(--t3);
+    font-weight: var(--weight-regular);
+}

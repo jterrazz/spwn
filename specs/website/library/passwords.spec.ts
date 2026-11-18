@@ -78,7 +78,7 @@ describe('passwords', () => {
             async (visitor) => {
                 await visitor.click(button('Grant…'));
                 const sheet = dialog('Grant GitHub deploy');
-                await visitor.click(within(sheet, button('linux-1', { exact: false })));
+                await visitor.click(within(sheet, field('linux-1')));
 
                 // When - the grant to linux-1 is sent
                 await visitor.click(within(sheet, button('Grant to linux-1')));
@@ -102,10 +102,10 @@ describe('passwords', () => {
                 await visitor.click(button('Grant…'));
                 const sheet = dialog('Grant Claude Max');
 
-                // Then - each machine is held with why, and nothing can be granted
+                // Then - each machine is held with why, none can be chosen, and nothing can be granted
                 await visitor.see(within(sheet, content('It has its own sign-in')));
                 await visitor.see(within(sheet, content('Start the machine first')));
-                const held = disabled(button('linux-1', { exact: false }));
+                const held = disabled(field('linux-1'));
                 const grant = disabled(button('Grant'));
                 await visitor.see(within(sheet, held));
                 await visitor.see(within(sheet, grant));

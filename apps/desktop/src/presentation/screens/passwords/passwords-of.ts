@@ -1,4 +1,4 @@
-import type { AccountsVaultEntry, CallName } from '@jterrazz/station-api';
+import type { AccountsTarget, AccountsVaultEntry, CallName } from '@jterrazz/station-api';
 
 import { sentence } from '../../../domain/format';
 import { shortDay } from '../../../domain/when';
@@ -13,6 +13,32 @@ export function grantedTo(entry: Pick<AccountsVaultEntry, 'Grants' | 'Reach'>): 
         return wordOf('AccountsEntryReach', entry.Reach).Word;
     }
     return countOf('machine', count);
+}
+
+export type TargetRow = { held: boolean; id: string; line: string; title: string };
+
+function canPick({ Fit }: Pick<AccountsTarget, 'Fit'>): boolean {
+    switch (Fit) {
+        case 'fits': {
+            return true;
+        }
+        case 'no': {
+            return false;
+        }
+    }
+}
+
+// invariant: the targets that fit come first, the rest after them, each group in the engine's order.
+export function targetRowsOf(
+    targets: readonly Pick<AccountsTarget, 'Fit' | 'Line' | 'To'>[],
+): readonly TargetRow[] {
+    const rows = targets.map((target) => ({
+        held: !canPick(target),
+        id: target.To,
+        line: target.Line,
+        title: target.To,
+    }));
+    return [...rows.filter((row) => !row.held), ...rows.filter((row) => row.held)];
 }
 
 export function kindWord(entry: Pick<AccountsVaultEntry, 'Kind'>): string {

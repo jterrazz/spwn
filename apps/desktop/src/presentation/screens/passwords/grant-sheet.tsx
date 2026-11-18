@@ -6,21 +6,10 @@ import { useWatch } from '../../dependencies/dependencies';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome } from '../../kit/gestures';
 import { Reading, Unanswered } from '../../kit/readings';
-import { Button, Dialog, Picks } from '../../ui/index';
-import { VAULT_REREADS } from './passwords-of';
+import { Button, Dialog, RadioRows } from '../../ui/index';
+import { targetRowsOf, VAULT_REREADS } from './passwords-of';
 
 import styles from './passwords.module.css';
-
-function canPick({ Fit }: Pick<AccountsTarget, 'Fit'>): boolean {
-    switch (Fit) {
-        case 'fits': {
-            return true;
-        }
-        case 'no': {
-            return false;
-        }
-    }
-}
 
 type GrantProps = {
     entry: AccountsVaultEntry;
@@ -62,16 +51,10 @@ type OfferProps = {
 function Offer({ offer, chosen, onChoose }: OfferProps) {
     return (
         <div className={styles.picks}>
-            <Picks
+            <RadioRows
                 label="Machines"
-                look="cards"
                 onChange={onChoose}
-                options={(offer.Targets ?? []).map((target) => ({
-                    disabled: !canPick(target),
-                    id: target.To,
-                    lines: target.Line === '' ? [] : [target.Line],
-                    title: target.To,
-                }))}
+                rows={targetRowsOf(offer.Targets ?? [])}
                 value={chosen}
             />
             {offer.Presence === '' ? null : <p className={styles.presence}>{offer.Presence}</p>}

@@ -17,10 +17,13 @@
     - button "Grant…"
   - dialog "Grant GitHub deploy":
     - heading "Grant GitHub deploy" [level=3]
-    - group "Machines":
-      - button "api" [disabled]: api Start the machine first
-      - button "linux-1": linux-1 Signed out here
-      - button "infra" [disabled]: infra A server keeps its own sign-ins
+    - radiogroup "Machines":
+      - radio "linux-1"
+      - text: linux-1 Signed out here
+      - radio "api" [disabled]
+      - text: api Start the machine first
+      - radio "infra" [disabled]
+      - text: infra A server keeps its own sign-ins
     - paragraph: Touch ID will ask you to confirm before the password leaves this Mac
     - button "Cancel"
     - button "Grant" [disabled]

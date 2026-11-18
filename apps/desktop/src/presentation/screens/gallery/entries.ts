@@ -55,6 +55,8 @@ import { ProgressLine } from '../../ui/progress-line';
 import { PROGRESS_LINE_STORIES } from '../../ui/progress-line.stories';
 import { QrCode } from '../../ui/qr-code';
 import { QR_CODE_STORIES } from '../../ui/qr-code.stories';
+import { RadioRows } from '../../ui/radio-rows';
+import { RADIO_ROWS_STORIES } from '../../ui/radio-rows.stories';
 import { Row, RowHead } from '../../ui/row';
 import { ROW_HEAD_STORIES, ROW_STORIES } from '../../ui/row.stories';
 import { SearchField } from '../../ui/search-field';
@@ -127,6 +129,11 @@ export const ENTRIES: readonly Entry[] = [
     entry('OpenButton', 'Controls', { Component: OpenButtonSample, stories: OPEN_BUTTON_STORIES }),
     entry('Switch', 'Controls', { Component: Switch, frame: 'block', stories: SWITCH_STORIES }),
     entry('Picks', 'Controls', { Component: Picks, frame: 'block', stories: PICKS_STORIES }),
+    entry('RadioRows', 'Controls', {
+        Component: RadioRows,
+        frame: 'block',
+        stories: RADIO_ROWS_STORIES,
+    }),
     entry('NavItem', 'Controls', { Component: NavItem, frame: 'nav', stories: NAV_ITEM_STORIES }),
     entry('SearchField', 'Controls', {
         Component: SearchField,

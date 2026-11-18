@@ -161,7 +161,7 @@ describe('workspace', () => {
                 const sheet = dialog('Grant GitHub deploy');
 
                 // When - linux-1 is picked and granted
-                await visitor.click(within(sheet, button('linux-1', { exact: false })));
+                await visitor.click(within(sheet, field('linux-1')));
                 await visitor.click(within(sheet, button('Grant to linux-1')));
 
                 // Then - the sheet goes, and linux-1 holds it
