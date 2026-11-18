@@ -80,7 +80,7 @@ wait:
 }
 
 // value: the machine each key is read on: its own, but a VM's share of its
-// Mac (SPEC B5.3) on the Mac that runs it, which the tick finds once per VM;
+// Mac (SPEC B5.3) and the memory its process holds there on the Mac that runs it, which the tick finds once per VM;
 // a key whose machine is not known yet is left out of the tick.
 func (l *Live) machinesOf(ctx context.Context, keys []string) map[string]string {
 	of := map[string]string{}
@@ -89,7 +89,7 @@ func (l *Live) machinesOf(ctx context.Context, keys []string) map[string]string 
 		if m == "" {
 			continue
 		}
-		if measure == engine.LiveCPUMac {
+		if measure == engine.LiveCPUMac || measure == engine.LiveMemMac {
 			mac, ok := l.macOf(ctx, m)
 			if !ok {
 				continue

@@ -75,7 +75,7 @@ func (f *fleet) Invoke(ctx context.Context, target machine.Ref, name string, _, 
 	if !ok {
 		return errors.New("a sample answers a reading")
 	}
-	vms := map[string][]activity.VMUsage{thisMac: {{VM: "linux-1", Usage: activity.Usage{CPU: 9}}}, mini: {{VM: "infra", Usage: activity.Usage{CPU: 20}}}}[at]
+	vms := map[string][]activity.VMUsage{thisMac: {{VM: "linux-1", Usage: activity.Usage{CPU: 9, Memory: 6 * gb}}}, mini: {{VM: "infra", Usage: activity.Usage{CPU: 20, Memory: 9 * gb}}}}[at]
 	*r = activity.Reading{Sample: activity.Sample{At: when, CPUBusy: busy * 300, CPUTotal: busy * 1000, MemUsed: memory / 4, MemTotal: memory}, VMs: vms}
 	return nil
 }
@@ -160,7 +160,7 @@ func TestAVMsShareOfItsMacIsReadOnThatMacAndItsOwnCoresInsideIt(t *testing.T) {
 		mac, ok := macs[vm]
 		return mac, ok
 	}}
-	keys := []string{"cpu:linux-1", "cpuh:infra", "cpuh:linux-1", "cpuh:" + mini}
+	keys := []string{"cpu:linux-1", "cpuh:infra", "cpuh:linux-1", "cpuh:" + mini, "memh:infra", "memh:linux-1", "memh:" + mini}
 	live.Sample(t.Context(), keys)
 	tick := live.Sample(t.Context(), keys)
 	if got := lead(tick, "cpuh:linux-1"); got.Kind != page.KindPercent || got.N != 90 {
@@ -174,6 +174,15 @@ func TestAVMsShareOfItsMacIsReadOnThatMacAndItsOwnCoresInsideIt(t *testing.T) {
 	}
 	if _, ok := tick.Values["cpuh:"+mini]; ok {
 		t.Errorf("a Mac's share of a Mac is %+v; want none: the key names a VM", tick.Values["cpuh:"+mini])
+	}
+	if got := lead(tick, "memh:infra"); got.Kind != page.KindSize || got.N != 9*gb || len(got.Items) != 0 {
+		t.Errorf("infra's memory is %+v; want the 9 GB the mini reads its process holding", got)
+	}
+	if got := lead(tick, "memh:linux-1"); got.Kind != page.KindSize || got.N != 6*gb || len(got.Items) != 0 {
+		t.Errorf("linux-1's memory is %+v; want the 6 GB This Mac reads its process holding", got)
+	}
+	if _, ok := tick.Values["memh:"+mini]; ok {
+		t.Errorf("a Mac's held memory is %+v; want none: the key names a VM", tick.Values["memh:"+mini])
 	}
 	f.mu.Lock()
 	defer f.mu.Unlock()
