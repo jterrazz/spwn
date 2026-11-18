@@ -1,0 +1,43 @@
+description: 'init over an empty home writes exactly these files and nothing else'
+fixture: ./__fixtures__/home-diff/
+env: engine
+runs:
+    - command: '--version >/dev/null; home-diff mark; USER=tester "$STATION" init --name m </dev/null >/dev/null; home-diff'
+      exit: 0
+      stdout: |
+          ~/
+            + .bunfig.toml
+              # >>> station >>>
+              [install]
+              globalDir = "{{workdir}}/.local/share/bun/install/global"
+              globalBinDir = "{{workdir}}/.local/share/bun/bin"
+
+              [install.cache]
+              dir = "{{workdir}}/.cache/bun/install"
+              # <<< station <<<
+            + .npmrc
+              cache={{workdir}}/.cache/npm
+            + .zshrc
+              # >>> station >>>
+              export PATH="$HOME/.local/bin:$PATH"
+              command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
+              # <<< station <<<
+          ~/.config/mise/
+            + config.toml
+              [settings]
+              go_set_gobin = false
+          ~/.config/station/
+            + preferences.json 0600
+              {
+                "name": "m",
+                "macs": {
+                  "m": {}
+                },
+                "vm_user": "tester"
+              }
+          ~/.local/state/station/
+            + zshrc.lock 0600
+          ~/Library/Application Support/go/
+            + env
+              GOPATH={{workdir}}/.local/share/go
+              GOMODCACHE={{workdir}}/.cache/go/mod

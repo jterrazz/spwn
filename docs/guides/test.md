@@ -8,6 +8,7 @@ Three tiers prove station, each with one purpose, and a fourth rig runs the menu
 | The two suites           | What `make test` runs, and in which order              |
 | A scenario is a document | The `<case>.spec.yaml` form and how it is regenerated  |
 | The fenced run           | Why no spec reaches the real machine                   |
+| A diff of HOME           | `home-diff`: a spec states exactly what a run changed  |
 | A use case over a world  | `specs/usecases/`, the spec build and its fake world   |
 | The stubs                | How a spec scripts a system program                    |
 | The window's scenarios   | `specs/website/`, the window's proof build in Chromium |
@@ -58,6 +59,37 @@ A document may stand on ground of its own: `fixture: ./__fixtures__/<case>/` spr
 ## The fenced run
 
 No spec reaches the real machine. A run's environment is the runner's defaults, what its document states, and of the runner's own variables only the temp root `@jterrazz/test` points `TMPDIR`, `TMP` and `TEMP` at: every other variable of the runner is unset, so a cache folder a gate exports (`GOMODCACHE`, `GOCACHE`, `npm_config_cache`) is never the folder a fixture's stub empties, and GitHub's Ubuntu runners' `XDG_CONFIG_HOME` never makes every run share one folder of preferences (`specs/cli/root/runs-inherit-no-runner-variable.spec.yaml` lists what a run holds). The runner sets `HOME` to the run's working directory; the `terminal` env names the terminal `xterm-256color` with `COLORTERM=truecolor`. It sets `PATH` to its `bin/` alone (the fixture's stubs), and `STATION_SYSTEM_DIRS` to nothing, so a system program no fixture stubs is "not found" alike on a Mac and on the Linux CI runner (the manager folders the binary adds to its own search, `/opt/homebrew/bin` and `/usr/local/bin`, are read under that root too, so a fixture's installer lands a manager in `root/opt/homebrew/bin` and never meets the owner's), and `STATION_SYSTEM_ROOT` to the run's `root/`, so `/Applications`, `/opt/homebrew` and `/Library` are read there and the owner's own apps are neither listed nor sized; the disk is the staged volume's, a Mac's 1 TiB with half of it free, whatever disk the machine running the spec has, so no finding or number of a spec depends on its free space. `STATION_POWER_STUB` points the IOKit contract at the run's stub folder (a fixture writes one): its files are the reading, every assertion and clamshell call is a line of `.calls`, and with no such folder the run has no IOKit contract at all, so no spec takes a real assertion. `STATION_KERNEL_STUB` points a Mac's counters and process tables at the run's `kernel/` folder, recorded kernel tables (`counters.json`, and `procs.json`, the process tables successive reads walk through), and with no such folder the kernel answers nothing, so no spec reads the real machine's activity. It also pins `NO_COLOR=1`, `COLUMNS=80`, `TZ=UTC` and `STATION_MACHINE_KIND=mac`, so every stream is the pipe form and a document means the same thing on every machine: the pinned kind also picks the adapter the machine reads itself with, so a Linux runner reads a pinned Mac as a Mac. A fixture's script holds to the same rule: it calls what a Mac and an Ubuntu runner answer alike (`perl` for a date, a crop by character or a unix socket, `ls -l` for a mode), never a BSD-only or GNU-only flag.
+
+## A diff of HOME
+
+A spec that installs or sets up states the whole change a run made to `HOME` as its `stdout:`, so a file written that nobody expected turns the spec red; `files:` judges one listed path at a time and cannot say that.
+
+`specs/cli/install/__fixtures__/home-diff/` is the ground that holds `home-diff`, spread into the run like any fixture. `home-diff mark` copies `HOME` into the run's own `TMPDIR`, and `home-diff` alone prints what `HOME` became since the mark. The stubs (`bin/`), `.calls` and the mark itself are left out of both sides: a stub is not the machine, and `.calls` is asserted with `files:`.
+
+```yaml
+# specs/cli/install/fresh-init.spec.yaml (shortened)
+runs:
+    - command: '--version >/dev/null; home-diff mark; "$STATION" init --name m </dev/null >/dev/null; home-diff'
+      stdout: |
+          ~/.config/station/
+            + preferences.json 0600
+              ...
+```
+
+The output is one block per folder, folders and names sorted bytewise, and a folder no block names is unchanged: that is the exactness. Each line states one change under its folder.
+
+| Line                 | Means                                                                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `+ name`             | A file added; a text file under 4 KiB shows its content, indented, anything else one `<n> bytes sha256 <hex>` line                |
+| `- name`             | A file removed                                                                                                                    |
+| `~ name`             | A file changed; a text file under 4 KiB shows a unified diff from its first `@@`, anything else `before -> after` size and sha256 |
+| `+ name/`, `- name/` | An empty folder added or removed; a folder with files is never listed, its files say it                                           |
+| `+ name -> target`   | A symlink added, `~` when its target changed                                                                                      |
+| `keychain` block     | The entries of the `security` stub, by `service/account` alone                                                                    |
+
+A mode follows the name only when it is not `0644` or when it changed, so a file the binary writes private reads `0600` and an ordinary one carries no noise. No time, owner or inode is ever printed, and a secret is never printed: the `security` stub of `specs/adapters/__fixtures__/setup-stubs/` keeps an entry as an empty file `.keychain/<service>/<account>`, its value reaching `.calls` through the stdin it was sent on and nowhere else.
+
+`TEST_UPDATE=1` rewrites the diff like any stream, and the review of that rewrite is the review of what the run changed. `home-diff` computes its unified diffs itself, in the form `diff -u` prints with three lines of context, so no platform's `diff` can change a golden; a mode reads with the group and other write bits cleared, so a runner's umask changes none either.
 
 ## A use case over a world
 
