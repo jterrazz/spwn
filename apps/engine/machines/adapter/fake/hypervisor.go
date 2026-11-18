@@ -89,8 +89,11 @@ func (h *Hypervisor) Disks(context.Context) ([]contract.Disk, error) {
 			continue
 		}
 		state := contract.DiskStopped
-		if v.Running() {
+		switch {
+		case v.Running():
 			state = contract.DiskRunning
+		case v.Suspended:
+			state = contract.DiskSuspended
 		}
 		out = append(out, contract.Disk{VM: vm, Bytes: v.Size.Disk, State: state})
 	}

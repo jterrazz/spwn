@@ -1,0 +1,111 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook-pro",
+    "user": "you",
+    "macs": {
+        "macbook-pro": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z",
+                "memory": {
+                    "loop-1": {
+                        "state": "broken",
+                        "restarts": {
+                            "looping": true
+                        }
+                    },
+                    "restart-1": {
+                        "state": "running",
+                        "down": true,
+                        "restart": {
+                            "step": 2,
+                            "at": "2026-11-04T09:59:00Z"
+                        }
+                    }
+                }
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            },
+            "preferences": {
+                "here": "macbook-pro",
+                "macs": {
+                    "mac-mini": {
+                        "user": "jterrazz.agent"
+                    }
+                },
+                "vm_user": "admin"
+            },
+            "vms": {
+                "loop-1": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "1",
+                        "lifetime": "always-on",
+                        "want": "running",
+                        "created_at": "2026-10-20T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 50000000000
+                    }
+                },
+                "restart-1": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "1",
+                        "lifetime": "always-on",
+                        "want": "running",
+                        "created_at": "2026-10-20T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 50000000000
+                    },
+                    "pid": 1001
+                },
+                "suspended-1": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "1",
+                        "lifetime": "persistent",
+                        "want": "stopped",
+                        "created_at": "2026-10-20T09:00:00Z"
+                    },
+                    "disk": true,
+                    "suspended": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 50000000000
+                    },
+                    "guest": {}
+                }
+            }
+        },
+        "mac-mini": {
+            "engine": {
+                "started_at": "2026-10-23T09:00:00Z"
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "preferences": {
+                "here": "mac-mini",
+                "macs": {
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
+                "vm_user": "admin"
+            }
+        }
+    }
+}
