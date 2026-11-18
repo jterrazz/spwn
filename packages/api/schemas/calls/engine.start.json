@@ -29,6 +29,9 @@
         "Installed": {
           "$ref": "#/$defs/engine.Installed"
         },
+        "LocalNetwork": {
+          "type": "string"
+        },
         "PID": {
           "type": "integer"
         },
@@ -39,6 +42,7 @@
       "required": [
         "Already",
         "Installed",
+        "LocalNetwork",
         "PID",
         "Version"
       ],

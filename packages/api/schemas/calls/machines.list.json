@@ -424,6 +424,9 @@
     "machines.EngineView": {
       "additionalProperties": false,
       "properties": {
+        "LocalNetwork": {
+          "type": "string"
+        },
         "State": {
           "enum": [
             "running",

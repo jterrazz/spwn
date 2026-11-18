@@ -53,7 +53,9 @@ func (unbuilt) KeyPath() string { return "/nowhere/station" }
 
 type answering struct{}
 
-func (answering) Ping(context.Context) (string, error) { return "1.0.0", nil }
+func (answering) Hello(context.Context) (model.EngineView, error) {
+	return model.EngineView{State: model.EngineRunning, Version: "1.0.0"}, nil
+}
 func (answering) VMs(context.Context) (map[string]machinescalls.EngineVM, error) {
 	return map[string]machinescalls.EngineVM{}, nil
 }

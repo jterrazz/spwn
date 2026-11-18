@@ -49,6 +49,9 @@ func (e *idleEngine) Ping(context.Context) (string, error) {
 	}
 	return "1.0.0", nil
 }
+func (*idleEngine) Hello(context.Context) (model.EngineView, error) {
+	return model.EngineView{State: model.EngineRunning, Version: "1.0.0"}, nil
+}
 func (*idleEngine) VMs(context.Context) (map[string]machines.EngineVM, error) {
 	return map[string]machines.EngineVM{}, nil
 }

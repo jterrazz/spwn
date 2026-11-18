@@ -16,6 +16,7 @@ runs:
           ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
           ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB
           # Needs you
+          ◐	This Mac	macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
           ◐	linux-1	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
           ◐	linux-2	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
     - command: 'world local-network macbook-pro approved'

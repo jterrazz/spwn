@@ -3,6 +3,7 @@ package machines
 import (
 	"testing"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
 
@@ -37,5 +38,26 @@ func TestABlockedServerFailsSSHWithItsMacNamed(t *testing.T) {
 	server.Blocked = ""
 	if v := HealthVerdict(server); v.Line != "" {
 		t.Errorf("a server whose SSH fails otherwise says %q", v.Line)
+	}
+}
+
+func TestAMacWhoseEngineReadsNoApprovalNeedsALookNamingIt(t *testing.T) {
+	for _, tc := range []struct {
+		read LocalNetwork
+		want bool
+	}{{LocalNetworkNotApproved, true}, {LocalNetworkApproved, false}, {"", false}} {
+		mac := MacView{Name: "mac-mini", ThisMac: true, Reachable: true, Engine: EngineView{State: EngineRunning, LocalNetwork: tc.read}}
+		var got []finding.Finding
+		for _, f := range Findings(AllMachines{Macs: []MacView{mac}}) {
+			if f.Fix.Path == fixOnMini {
+				got = append(got, f)
+			}
+		}
+		switch {
+		case tc.want && (len(got) != 1 || got[0].Text != "mac-mini has not approved station for Local Network" || got[0].Severity != finding.NeedsALook):
+			t.Errorf("read %q: %+v, want one look naming mac-mini", tc.read, got)
+		case !tc.want && len(got) != 0:
+			t.Errorf("read %q: %+v, want none", tc.read, got)
+		}
 	}
 }

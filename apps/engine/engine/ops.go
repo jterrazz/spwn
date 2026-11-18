@@ -21,6 +21,9 @@ type Hello struct {
 	// none from an engine older than the field.
 	Abilities []string `json:"abilities,omitempty"`
 	Page      int      `json:"page,omitempty"`
+	// value: how its Mac stands with macOS's Local Network approval of
+	// station, as the engine last read it; empty where it cannot tell.
+	LocalNetwork model.LocalNetwork `json:"local_network,omitempty"`
 }
 
 type VMView struct {

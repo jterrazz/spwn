@@ -113,7 +113,7 @@ func (s *Machinist) engineView(ctx context.Context) (info model.EngineView, live
 	if !s.engine.Installed() {
 		return model.EngineView{}, nil
 	}
-	version, err := s.engineAPI.Ping(ctx)
+	info, err := s.engineAPI.Hello(ctx)
 	if err != nil {
 		if !s.h.Exists(catalog.EnginePlist(s.h.Home())) {
 			return model.EngineView{State: model.EngineNotInstalled}, nil
@@ -122,9 +122,9 @@ func (s *Machinist) engineView(ctx context.Context) (info model.EngineView, live
 	}
 	live, err = s.engineAPI.VMs(ctx)
 	if err != nil {
-		return model.EngineView{State: model.EngineRunning, Version: version}, nil
+		return info, nil
 	}
-	return model.EngineView{State: model.EngineRunning, Version: version}, live
+	return info, live
 }
 
 func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answers map[string]model.MacView) model.MacView {

@@ -1025,6 +1025,7 @@ export type EngineHello = {
     abilities?: string[];
     calls?: string[];
     executable?: string;
+    local_network?: string;
     page?: number;
     pid: number;
     started_at: string;
@@ -1088,6 +1089,7 @@ export type EngineReserveIn = {
 export type EngineStartReport = {
     Already: boolean;
     Installed: EngineInstalled;
+    LocalNetwork: string;
     PID: number;
     Version: string;
 };
@@ -1871,6 +1873,7 @@ export type MachinesEdited = {
 };
 
 export type MachinesEngineView = {
+    LocalNetwork?: string;
     State?: 'running' | 'stopped' | 'not-installed';
     Version: string;
 };

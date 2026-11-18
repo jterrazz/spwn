@@ -115,9 +115,10 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Listening: m.listeners("/").Read, Declarations: m.stores.declarations.List,
 		Jobs:     jobs,
 		TellBack: m.machines(false).TellBack, Answers: m.answers, ToldBack: m.machines(false).ToldBack, Label: m.label,
-		Drift:   func(ctx context.Context, vm string) model.KeptDrift { return keptDrift(ctx, calls, vm) },
-		Changes: driftChanges(),
-		Beside:  m.beside(),
+		Drift:        func(ctx context.Context, vm string) model.KeptDrift { return keptDrift(ctx, calls, vm) },
+		Changes:      driftChanges(),
+		Beside:       m.beside(),
+		LocalNetwork: m.localNetwork(),
 	})
 	if m.world == nil && m.kind == catalog.Mac {
 		owed.g = m.vaultKept(d).Grants()
