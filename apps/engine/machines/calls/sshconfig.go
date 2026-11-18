@@ -26,7 +26,7 @@ func (s *Machinist) SSHBlocks(ctx context.Context, f model.AllMachines) error {
 			blocks = append(blocks, contract.MachineBlock{Name: mac.Name, User: h.User, Key: h.Key})
 		}
 		for _, vm := range mac.VMs {
-			blocks = append(blocks, contract.MachineBlock{Name: vm.Name, User: s.vmUser(cfg), Key: key, Behind: mac.Name, ThisMac: mac.ThisMac})
+			blocks = append(blocks, contract.MachineBlock{Name: vm.Name, User: s.guestUser(cfg, mac.Name), Key: key, Behind: mac.Name, ThisMac: mac.ThisMac})
 		}
 	}
 	write := s.o.SSHConfig.Put

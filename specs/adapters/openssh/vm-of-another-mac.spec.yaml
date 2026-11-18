@@ -1,4 +1,4 @@
-description: 'bare machines writes a block for a VM of another Mac, with the VM login'
+description: 'bare machines writes a block for a VM of another Mac, with the login of the Mac that hosts it'
 fixture:
     - ../../__fixtures__/hosts-x-y/
     - ../../__fixtures__/machines-stubs/
@@ -25,7 +25,7 @@ runs:
                   # >>> jterrazz machine w >>>
                   Host w
                     HostName w
-                    User vmu
+                    User u
                     IdentityFile ~/.ssh/id_ed25519
                     ServerAliveInterval 30
                     ServerAliveCountMax 3
