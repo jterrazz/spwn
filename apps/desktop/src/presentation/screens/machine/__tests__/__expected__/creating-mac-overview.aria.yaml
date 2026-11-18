@@ -11,7 +11,7 @@
     - tab "Sign-ins"
     - tab "Storage"
   - heading "Online, with no machine running." [level=1]
-  - text: CPU 0% Memory Not given yet Disk 582GB
+  - text: CPU 0% Memory not given yet Disk 582GB
   - meter "Disk used of its total"
   - text: of 994 GB Its machines 2machines 2 stopped
   - region "Memory":

@@ -24,9 +24,9 @@ describe('changes', () => {
         await expect(result.tree).toMatch(file('./__expected__/stories-history.aria.yaml'));
 
         // And - a held line draws the engine's word as a plain tag, a failed one as a pill
-        expect(result.html.text).toMatch(/<span class="[^"]*_end_[^"]*">Held</u);
-        expect(result.html.text).not.toMatch(/_pill_[^>]*>Held</u);
-        expect(result.html.text).toMatch(/_pill_[^>]*>Failed</u);
+        expect(result.html.text).toMatch(/<span class="[^"]*_end_[^"]*">held</u);
+        expect(result.html.text).not.toMatch(/_pill_[^>]*>held</u);
+        expect(result.html.text).toMatch(/_pill_[^>]*>failed</u);
     });
 
     test("home draws the last night alone, with the night's first three lines", async () => {
@@ -70,7 +70,7 @@ describe('changes', () => {
                 // When - Retry is pressed
                 await visitor.click(within(history, button('Retry mise')));
 
-                // Then - apps.update has answered and the line says Done
+                // Then - apps.update has answered and the line says done
                 await visitor.see(within(history, content('done')));
             },
         );
@@ -138,12 +138,12 @@ describe('changes', () => {
 
         // When - Home, then the Inbox, are drawn once the listing is done
         const home = await component.render(pageOver(world, { page: 'home' }), async (visitor) => {
-            await visitor.see(within(lastNight, content('Not given yet')));
+            await visitor.see(within(lastNight, content('not given yet')));
         });
         const inbox = await component.render(
             pageOver(world, { page: 'inbox' }),
             async (visitor) => {
-                await visitor.see(within(history, content('Not given yet')));
+                await visitor.see(within(history, content('not given yet')));
             },
         );
 

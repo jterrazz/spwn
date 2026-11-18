@@ -3,7 +3,7 @@
   - paragraph:
     - img "loop-1 is down."
     - text: The rest is fine. 3 machines on macbook-pro
-  - text: Memory free Not given yet CPU, this Mac 0% Awake, this Mac Off on power Disk free, this Mac Not given yet
+  - text: Memory free not given yet CPU, this Mac 0% Awake, this Mac Off on power Disk free, this Mac not given yet
   - region "Needs you":
     - heading "Needs you 1" [level=2]
     - 'button "broken loop-1 is in a loop: ↺ 5 in 10 min loop-1 · Overview"'
@@ -26,4 +26,4 @@
     - text: 0 %
   - region "Last night":
     - heading "Last night" [level=2]
-    - paragraph: Not given yet What moved, held or failed overnight
+    - paragraph: not given yet What moved, held or failed overnight

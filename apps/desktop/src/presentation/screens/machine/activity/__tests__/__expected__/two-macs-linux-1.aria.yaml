@@ -20,19 +20,19 @@
   - region "CPU":
     - heading "CPU" [level=2]
     - text: 4 CPUs · load 0.3 8%
-    - paragraph: "Not given yet No chart: the engine keeps no history of it over this window."
+    - paragraph: "not given yet No chart: the engine keeps no history of it over this window."
   - region "Memory":
     - heading "Memory" [level=2]
     - text: pressure normal · no swap 1.1GB of 4
-    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+    - paragraph: "not given yet No chart: the engine kept fewer than two samples of it over this window."
   - region "Disk":
     - heading "Disk" [level=2]
     - text: 400 KB/s written 200KB/s read
-    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+    - paragraph: "not given yet No chart: the engine kept fewer than two samples of it over this window."
   - region "Network":
     - heading "Network" [level=2]
     - text: 100 KB/s out 300KB/s in
-    - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
+    - paragraph: "not given yet No chart: the engine kept fewer than two samples of it over this window."
   - region "Busiest":
     - heading "Busiest" [level=2]
     - group "Busiest by":

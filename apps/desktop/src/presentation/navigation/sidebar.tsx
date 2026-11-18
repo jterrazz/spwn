@@ -156,7 +156,7 @@ function Engine({ engine }: Pick<SidebarProps, 'engine'>) {
         return (
             <div className={styles.foot}>
                 <StateDot tone={tone} word={word} />
-                <span className={styles.footText}>Engine {word.toLowerCase()}</span>
+                <span className={styles.footText}>Engine {word}</span>
             </div>
         );
     }

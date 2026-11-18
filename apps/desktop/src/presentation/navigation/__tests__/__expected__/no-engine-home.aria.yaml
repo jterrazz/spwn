@@ -12,7 +12,7 @@
     - button "Skills"
     - button "Settings"
   - button "Storage"
-  - img "No answer"
+  - img "no answer"
   - text: No engine answers at /run/engine.sock
 - main:
   - button "Show or hide the sidebar"
@@ -22,5 +22,5 @@
   - button "New machine"
   - heading "No engine answers at /run/engine.sock." [level=1]
   - paragraph:
-    - img "No answer"
+    - img "no answer"
     - text: connection refused · trying again in 4 s

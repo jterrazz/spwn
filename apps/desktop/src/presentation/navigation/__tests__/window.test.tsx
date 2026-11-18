@@ -164,8 +164,8 @@ describe('Window', () => {
             },
         );
 
-        // Then - the foot's dot is labelled Connecting, never Reading
-        expect(result.tree.text).toMatch(/img "Connecting"\n\s*- text: Engine connecting/u);
+        // Then - the foot's dot is labelled connecting, never reading
+        expect(result.tree.text).toMatch(/img "connecting"\n\s*- text: Engine connecting/u);
     });
 
     test("an engine.read the engine refuses is the foot line's error, in the engine's words", async () => {

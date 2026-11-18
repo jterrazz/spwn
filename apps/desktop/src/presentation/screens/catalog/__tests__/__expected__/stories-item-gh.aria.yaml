@@ -16,7 +16,7 @@
     - term: Newest
     - definition: 2.98.0 is out
     - term: Last moved
-    - definition: Not given yet
+    - definition: not given yet
   - region "Settings it comes with":
     - heading "Settings it comes with proposed once it is installed" [level=2]
     - button "github-login setting The GitHub CLI logged in over SSH"
@@ -39,4 +39,4 @@
       - button "agent-7f"
       - button "linux-1"
     - term: Comes from
-    - definition: Not given yet
+    - definition: not given yet

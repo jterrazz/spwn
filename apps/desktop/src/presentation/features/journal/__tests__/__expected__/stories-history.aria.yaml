@@ -32,12 +32,12 @@
       - button "14:06 infra restarted by you"
     - region "Last night":
       - heading "Last night 3 moved, 1 held, 1 failed" [level=3]
-      - button "03:15 ripgrep download timed out Failed linux-1"
+      - button "03:15 ripgrep download timed out failed linux-1"
       - button "Retry ripgrep": Retry
       - button "03:12 node 24.11.0 → 24.11.1 6 machines"
       - button "03:12 gh 2.97.0 → 2.98.0 macbook-pro"
       - button "03:13 uv 0.9.7 → 0.9.9 5 machines"
-      - button "03:14 orbstack updates itself Held macbook-pro"
+      - button "03:14 orbstack updates itself held macbook-pro"
     - region "Yesterday":
       - heading "Yesterday" [level=3]
       - button "18:02 linux-3 created by agent-7f · review the docs lot"

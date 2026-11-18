@@ -61,9 +61,9 @@ export type JournalReadOutput = { Groups: JournalGroup[] | null };
 
 export const JOURNAL_WORDS: { JournalOutcome: Readonly<Record<JournalOutcome, StationWord>> } = {
     JournalOutcome: {
-        done: { Tone: 'plain', Word: 'Done' },
-        failed: { Tone: 'bad', Word: 'Failed' },
-        held: { Tone: 'warn', Word: 'Held' },
+        done: { Tone: 'plain', Word: 'done' },
+        failed: { Tone: 'bad', Word: 'failed' },
+        held: { Tone: 'warn', Word: 'held' },
     },
 };
 
