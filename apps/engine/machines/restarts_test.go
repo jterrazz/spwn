@@ -66,6 +66,58 @@ func TestTheFifthRestartWithinTenMinutesIsALoopThatWaitsAMinute(t *testing.T) {
 	}
 }
 
+func TestALoopCountsTheRestartsInItsWindowNotSinceBoot(t *testing.T) {
+	now := time.Date(2026, 11, 7, 14, 0, 0, 0, time.UTC)
+	r := Restarts{}.After(time.Second, now).After(time.Second, now.Add(time.Minute))
+	for i := range 5 {
+		r = r.After(time.Second, now.Add(30*time.Minute+time.Duration(i)*time.Minute))
+	}
+	if r.Count != 7 || !r.Looping {
+		t.Fatalf("↺ %d, looping %v; want 7 and a loop", r.Count, r.Looping)
+	}
+	if got := r.InALoop(); got != "↺ 5 in 10 min" {
+		t.Errorf("InALoop = %q", got)
+	}
+}
+
+// invariant: a loop always holds the restarts that made it one: over every
+// sequence of six restarts, steady runs and reboots, bunched or spread, a
+// record that is Looping has at least LoopBudget recent restarts, which is
+// what InALoop prints.
+func TestALoopingRecordHoldsTheRestartsThatMadeItALoop(t *testing.T) {
+	start := time.Date(2026, 11, 7, 14, 0, 0, 0, time.UTC)
+	steps := []func(Restarts, time.Time) Restarts{
+		func(r Restarts, at time.Time) Restarts { return r.After(time.Second, at) },
+		func(r Restarts, at time.Time) Restarts { return r.After(SteadyRun, at) },
+		func(r Restarts, at time.Time) Restarts { return r.Steady(time.Second, at) },
+		func(r Restarts, at time.Time) Restarts { return r.Steady(SteadyRun, at) },
+		func(r Restarts, at time.Time) Restarts { return r.Rebooted(at) },
+	}
+	gaps := []time.Duration{time.Minute, 3 * time.Minute}
+	loops := 0
+	var walk func(r Restarts, at time.Time, depth int, path []int)
+	walk = func(r Restarts, at time.Time, depth int, path []int) {
+		if r.Looping {
+			loops++
+			if len(r.Recent) < LoopBudget {
+				t.Fatalf("steps %v: looping with %d recent restarts", path, len(r.Recent))
+			}
+		}
+		if depth == 6 {
+			return
+		}
+		for i, step := range steps {
+			for j, gap := range gaps {
+				walk(step(r, at.Add(gap)), at.Add(gap), depth+1, slices.Concat(path, []int{i*len(gaps) + j}))
+			}
+		}
+	}
+	walk(Restarts{}, start, 0, nil)
+	if loops == 0 {
+		t.Fatal("no sequence made a loop")
+	}
+}
+
 func TestARebootFromInsideIsCountedWithNoWait(t *testing.T) {
 	now := time.Date(2026, 11, 7, 14, 0, 0, 0, time.UTC)
 	r := Restarts{}.After(time.Second, now).Rebooted(now.Add(time.Minute))
