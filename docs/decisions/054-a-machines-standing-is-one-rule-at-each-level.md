@@ -62,6 +62,9 @@ machines stand, so each client counted its own.
     `engine-not-installed` warn; `empty` plain, `fine` ok. So a roll-up never says a Mac worse than its own standing
     does: a Mac whose engine is not installed is not a machine down.
 
+    Home's head says the roll-up of the other Macs too, only when `overview.read` is asked with `Elsewhere`: the engine
+    words it (`Elsewhere, 1 machine down.`) and the window draws it, and it claims nothing of them while their read runs.
+
 7. **A finding's severity is its machine's standing's tone**: broken where it is bad, needs a look otherwise
    (`severityOf`). What a finding says is still read from the facts; that it is broken is not. So a workspace ended
    unexpectedly is broken (its standing is down), a running VM whose SSH fails needs a look (its standing is running;

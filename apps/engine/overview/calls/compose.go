@@ -91,10 +91,11 @@ type answer struct {
 	read      overview.Read
 	err       error
 	all       *machines.AllMachines
+	elsewhere *machines.RollUp
 	readiness []overview.Check
 }
 
-func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overview.Summary {
+func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context, elsewhere bool) <-chan overview.Summary {
 	// invariant: overview.read owns no fact: every line is a section's own
 	// read through the Router, in the one order of the machine's kind; the
 	// first value has every line pending, each answer fills its own, and the
@@ -126,16 +127,23 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 			reading = &out
 		}
 	}
-	answers := make(chan answer, len(ids)+1)
+	asked := elsewhere && kind == machine.Computer
+	left := len(ids)
+	if kind == machine.Computer {
+		left += 2
+	}
+	if asked {
+		left++
+	}
+	// invariant: one slot per sender, so a Compose the caller leaves strands none.
+	answers := make(chan answer, left)
 	for _, id := range ids {
 		go func() {
 			read, err := reads[id](ctx, r.d.Calls, self)
 			answers <- answer{id: id, read: read, err: err}
 		}()
 	}
-	left := len(ids)
 	if kind == machine.Computer {
-		left++
 		go func() {
 			out, err := call.Read(ctx, r.d.Calls, machine.Ref{}, machinescalls.List, machinescalls.ListIn{ThisMac: true, Unwritten: true}, nil)
 			if err != nil {
@@ -144,7 +152,20 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 			}
 			answers <- answer{all: &out.All}
 		}()
-		left++
+		if asked {
+			go func() {
+				// invariant: only the final fleet is judged: a partial one
+				// leaves out the Macs not yet heard, which would read as fine.
+				out, err := call.Read(ctx, r.d.Calls, machine.Ref{}, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil)
+				if err != nil {
+					answers <- answer{err: err}
+					return
+				}
+				others := slices.DeleteFunc(slices.Clone(out.All.Macs), func(h machines.MacView) bool { return h.ThisMac })
+				roll := machines.RollUpOf(others)
+				answers <- answer{elsewhere: &roll}
+			}()
+		}
 		go func() { answers <- answer{readiness: r.readiness(ctx)} }()
 	}
 	out := make(chan overview.Summary)
@@ -152,9 +173,15 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 		defer close(out)
 		got := map[section.ID]answer{}
 		var all *machines.AllMachines
+		// invariant: the other Macs not asked are the zero roll-up (today's
+		// wording), asked and not yet read are nil, then their roll-up.
+		var others *machines.RollUp
+		if !asked {
+			others = &machines.RollUp{}
+		}
 		var readiness []overview.Check
 		send := func() bool {
-			sum := summarize(head, ids, got, reading, all, r.d.Refused)
+			sum := summarize(head, ids, got, reading, all, others, r.d.Refused)
 			sum.Readiness, sum.Read = readiness, now
 			select {
 			case out <- sum:
@@ -176,6 +203,8 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 			switch {
 			case a.all != nil:
 				all = a.all
+			case a.elsewhere != nil:
+				others = a.elsewhere
 			case a.readiness != nil:
 				readiness = a.readiness
 			case a.id != "":
@@ -189,7 +218,7 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 	return out
 }
 
-func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, reading *engine.Reading, all *machines.AllMachines, refused *Refusal) overview.Summary {
+func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, reading *engine.Reading, all *machines.AllMachines, rest *machines.RollUp, refused *Refusal) overview.Summary {
 	state, own := engineOf(head, reading)
 	if refused != nil {
 		// invariant: a file of the owner's refused is never silent where the
@@ -220,7 +249,7 @@ func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, 
 			reads = append(reads, a.read)
 		}
 	}
-	return overview.Summarize(head, state, own, reads, vms)
+	return overview.Summarize(head, state, own, reads, vms, rest)
 }
 
 // value: a Mac's engine as engine.read tells it, and the finding a stopped

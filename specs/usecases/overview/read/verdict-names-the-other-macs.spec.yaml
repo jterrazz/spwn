@@ -1,0 +1,11 @@
+description: 'a Mac not seen is named by the head of Home when nothing else needs you'
+env:
+    - mini-offline
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c -s ''[.[] | select(.out) | .out.Summary] | {fine: [.[].Verdict | select(.Sentence == "Everything is fine." or ((.Line // "") | startswith("The rest is fine.")))] | length, sentences: (map(.Verdict.Sentence) | unique), pending: (last | .Lines | map(select(.Pending)) | length)}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{"Elsewhere":true}}
+      exit: 0
+      stdout: |
+          {"fine":0,"sentences":["Elsewhere, 1 Mac not seen.","Reading macbook-pro."],"pending":0}

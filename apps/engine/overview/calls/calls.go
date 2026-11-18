@@ -29,6 +29,9 @@ type ReadIn struct {
 	// value: the v2 reading instead, which only the status alias's
 	// station.status/v1 still draws.
 	V2 bool
+	// value: the other Macs asked too, their roll-up said in the verdict:
+	// the estate's head.
+	Elsewhere bool
 }
 
 type ReadOut struct {
@@ -47,7 +50,7 @@ var Read = call.Watch[*Overview, ReadIn, ReadOut]{
 			r.Forget()
 		}
 		if !in.V2 {
-			return call.Updates(ctx, mapped(ctx, r.Compose(ctx), func(s overview.Summary) ReadOut { return ReadOut{Summary: s} })), nil
+			return call.Updates(ctx, mapped(ctx, r.Compose(ctx, in.Elsewhere), func(s overview.Summary) ReadOut { return ReadOut{Summary: s} })), nil
 		}
 		return call.Updates(ctx, mapped(ctx, r.Watch(ctx), func(s Snapshot) ReadOut { return ReadOut{V2: &s} })), nil
 	},
