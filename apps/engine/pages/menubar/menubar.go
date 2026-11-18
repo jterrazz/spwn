@@ -439,15 +439,12 @@ func needsMark(needs []overview.Need) (page.Mark, page.Reason) {
 }
 
 func awakeWords(r awake.Report) string {
-	switch {
-	case r.Session != nil:
-		zone := r.Zone
-		if zone == nil {
-			zone = time.UTC
-		}
-		return "until " + r.Session.Until.In(zone).Format("15:04")
-	case r.NeverSleeps:
+	switch r.Mode() {
+	case awake.NeverSleeps:
 		return "never sleeps"
+	case awake.AwakeUntil:
+		return r.Until()
+	case awake.StoppedByGuard, awake.SleepsNormally:
 	}
 	return ""
 }

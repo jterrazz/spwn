@@ -173,3 +173,13 @@ func TestTheTilesSayOneNumberEach(t *testing.T) {
 		t.Fatalf("off %+v, its switch %+v", got, toggle)
 	}
 }
+
+// invariant: the Awake tile says how This Mac sleeps by awake.ModeOf's
+// order: Never sleeps wins over a keep-awake.
+func TestTheAwakeTileSaysAlwaysWhileTheMacNeverSleeps(t *testing.T) {
+	w := newHeroWorld()
+	w.r.Awake = &awake.Report{Now: heroNow, Mac: heroPro, Engine: awake.EngineRunning, NeverSleeps: true, NeverHeld: true, Session: &awake.Session{Until: heroNow.Add(2 * time.Hour)}}
+	if got := tile(t, homeOf(t, w), "Awake"); got.Number.Text != "Always" || got.Word != "" {
+		t.Fatalf("awake %+v", got)
+	}
+}
