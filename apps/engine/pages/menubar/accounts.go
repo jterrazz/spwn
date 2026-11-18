@@ -57,7 +57,7 @@ func Accounts(s SignIns, of AccountsOf, thisMac page.Context) page.Page {
 	if of.VM != "" {
 		where = of.VM
 	}
-	p := page.Page{ID: AccountsID, Command: "accounts", Context: thisMac, Header: &page.Header{Back: "All machines", Glyph: symbol("key", "")}}
+	p := page.Page{ID: AccountsID, Command: "accounts", Context: thisMac, Header: &page.Header{Back: Back, Title: "Accounts", Glyph: symbol("key", "")}}
 	p.Sections = append([]page.Section{{ID: SectionSummary, Title: "Accounts", Role: page.Summary, Caption: b.facts(where)}}, b.sections()...)
 	p.Actions = b.actions()
 	full := page.Action{ID: ActionFullList, Label: FullListInTerminal, Icon: "arrow.up.forward", On: page.OnPage, Priority: 2, Run: &page.Run{Terminal: true, Argv: []string{"accounts", "--all-machines"}}}

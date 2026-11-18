@@ -693,7 +693,8 @@
     "label": "Station, 1 needs you"
   },
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "linux-1",
     "glyph": {
       "kind": "workspace"
     },

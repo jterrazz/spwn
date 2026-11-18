@@ -15,6 +15,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "asleep",
+          "signal": "quiet"
+        },
+        {
+          "kind": "text",
           "text": "MacBook Air",
           "pri": 1
         },
@@ -200,7 +205,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "macbook-air",
     "glyph": {
       "kind": "laptop"
     },

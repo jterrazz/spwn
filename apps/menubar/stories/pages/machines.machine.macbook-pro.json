@@ -15,6 +15,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "online",
+          "signal": "well"
+        },
+        {
+          "kind": "text",
           "text": "up 3 days",
           "pri": 4
         }
@@ -6151,7 +6156,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "This Mac",
     "glyph": {
       "kind": "desktop"
     },

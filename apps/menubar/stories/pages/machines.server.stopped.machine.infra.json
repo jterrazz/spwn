@@ -16,6 +16,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "stopped",
+          "signal": "quiet"
+        },
+        {
+          "kind": "text",
           "text": "server"
         },
         {
@@ -23,10 +28,6 @@
           "text": "on mac-mini",
           "pri": 1,
           "nav": "menubar.machine:mac-mini"
-        },
-        {
-          "kind": "text",
-          "text": "stopped"
         },
         {
           "kind": "text",
@@ -649,7 +650,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "infra",
     "glyph": {
       "kind": "server"
     },

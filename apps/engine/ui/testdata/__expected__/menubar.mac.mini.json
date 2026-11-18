@@ -11,7 +11,14 @@
     {
       "id": "summary",
       "title": "mac-mini",
-      "role": "summary"
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "online",
+          "signal": "well"
+        }
+      ]
     },
     {
       "id": "gauges",
@@ -2524,7 +2531,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "mac-mini",
     "glyph": {
       "kind": "desktop"
     },

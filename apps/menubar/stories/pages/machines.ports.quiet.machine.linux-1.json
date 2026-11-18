@@ -16,6 +16,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "running",
+          "signal": "well"
+        },
+        {
+          "kind": "text",
           "text": "ephemeral",
           "pri": 1
         },
@@ -2692,7 +2697,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "linux-1",
     "glyph": {
       "kind": "workspace",
       "signal": "quiet"

@@ -16,6 +16,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "running",
+          "signal": "well"
+        },
+        {
+          "kind": "text",
           "text": "persistent",
           "pri": 1
         },
@@ -2035,7 +2040,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "review-bot",
     "glyph": {
       "kind": "workspace",
       "signal": "quiet"

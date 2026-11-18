@@ -317,10 +317,7 @@ func NeedsPage(r NeedsReading, of string, thisMac page.Context) page.Page {
 			}
 		}
 	}
-	p := page.Page{ID: NeedsID, Command: "menubar", Context: thisMac, Header: &page.Header{Back: "All machines", Glyph: symbol("exclamationmark.circle.fill", page.SignalWaits)}}
-	if of != "" {
-		p.Header.Back = where
-	}
+	p := page.Page{ID: NeedsID, Command: "menubar", Context: thisMac, Header: &page.Header{Back: Back, Title: "Needs you", Glyph: symbol("exclamationmark.circle.fill", page.SignalWaits)}}
 	facts := []page.Value{page.Text(where), page.Text("nothing blocks a server")}
 	if len(needs) > 0 {
 		facts[1] = page.Text(thingsFirst(len(needs)))

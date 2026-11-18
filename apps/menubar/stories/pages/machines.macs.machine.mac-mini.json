@@ -15,6 +15,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "online",
+          "signal": "well"
+        },
+        {
+          "kind": "text",
           "text": "Mac mini",
           "pri": 1
         },
@@ -5169,7 +5174,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "mac-mini",
     "glyph": {
       "kind": "desktop"
     },

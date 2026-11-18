@@ -37,6 +37,8 @@ const (
 	CallWake    = "machines.wake"
 	CallRemind  = "machines.remind"
 
+	Back = "Back"
+
 	SectionMachine  = "machine"
 	SectionSummary  = "summary"
 	SectionActivity = "activity"
@@ -150,7 +152,7 @@ func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
 		if vm.Lifetime.Kind() == machine.Server {
 			glyph.Kind = "server"
 		}
-		p.Header = &page.Header{Back: model.Label(*m.All, h), Glyph: glyph}
+		p.Header = &page.Header{Back: Back, Title: vm.Name, Glyph: glyph}
 	}
 	p.Segments = segments()
 	if vm.Lifetime.Kind() == machine.Server {
@@ -175,6 +177,35 @@ func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
 	return page.Seal(p)
 }
 
+// value: the page signal a verdict's tone draws as.
+func toneSignal(t string) page.Signal {
+	switch t {
+	case "ok":
+		return page.SignalWell
+	case "new":
+		return page.SignalActive
+	case "warn":
+		return page.SignalWaits
+	case "bad":
+		return page.SignalFailing
+	case "plain":
+	}
+	return page.SignalQuiet
+}
+
+// value: a standing's word, in its tone's signal, as the first fragment of a
+// machine page's subtitle; nothing while the engine sent no standing.
+func standingPart(word, tone string) []page.Value {
+	if word == "" {
+		return nil
+	}
+	return []page.Value{signaled(page.Text(word), toneSignal(tone))}
+}
+
+func vmStanding(vm model.VM) []page.Value {
+	return standingPart(vm.Standing.Word(), string(vm.Standing.Tone()))
+}
+
 func sectionHas(p page.Page, id string) bool {
 	return slices.ContainsFunc(p.Sections, func(s page.Section) bool { return s.ID == id })
 }
@@ -186,7 +217,7 @@ func vmFacts(m Machine, vm model.VM) []page.Value {
 	if vm.Lifetime.Kind() == machine.Server {
 		word = "server"
 	}
-	out := []page.Value{page.Text(word)}
+	out := append(vmStanding(vm), page.Text(word))
 	if !vm.BootAt.IsZero() && m.Now.After(vm.BootAt) {
 		out = append(out, page.Text("up "+days(m.Now.Sub(vm.BootAt))))
 	}
@@ -209,7 +240,7 @@ func macPage(m Machine, h model.MacView) page.Page {
 	// from has its gauges and rows drawn stale, and no marking in its header.
 	label := model.Label(*m.All, h)
 	p := page.Page{ID: MachineID, Command: "menubar", Context: page.Context{Machine: h.Name, Kind: string(machine.Computer)}}
-	p.Header = &page.Header{Back: "All machines", Glyph: page.Glyph{Kind: lid(h)}}
+	p.Header = &page.Header{Back: Back, Title: label, Glyph: page.Glyph{Kind: lid(h)}}
 	stale := model.Unheard(h, m.All.Read)
 	p.Sections = []page.Section{{ID: SectionSummary, Title: label, Role: page.Summary, Caption: facts(m, h)}}
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + label, Icon: "ellipsis", On: page.OnPage}
@@ -272,7 +303,7 @@ func segments() []page.Segment {
 // Max · 48 GB"), then how long it has run, or when it was last seen
 // while it sleeps or does not answer.
 func facts(m Machine, h model.MacView) []page.Value {
-	var out []page.Value
+	out := standingPart(h.Standing.Word(), string(h.Standing.Tone()))
 	hw := h.Hardware
 	part := func(text string, pri int) {
 		v := page.Text(text)

@@ -60,7 +60,7 @@ func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
 		facts = append(facts, signaled(page.Text(strconv.Itoa(b.Exposed)+" exposed"), page.SignalFailing))
 	}
 	p := page.Page{ID: PortsID, Command: "menubar", Context: thisMac,
-		Header: &page.Header{Back: "All machines", Glyph: page.Glyph{Kind: "symbol:network"}, Buttons: []string{ActionMenu}},
+		Header: &page.Header{Back: Back, Title: "Ports", Glyph: page.Glyph{Kind: "symbol:network"}, Buttons: []string{ActionMenu}},
 		Footer: &page.Footer{Kind: page.FooterTerminals, Buttons: []string{ActionFullList, ActionShare}}}
 	p.Sections = append([]page.Section{{ID: SectionSummary, Title: "Ports", Role: page.Summary, Caption: facts}}, b.Sections...)
 	full := []string{"ports"}

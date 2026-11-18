@@ -45,7 +45,7 @@ func Awake(f pageawake.AllMachines, ctx page.Context) page.Page {
 	// them (E1), then the running work that pauses while it sleeps; then
 	// each other Mac on its own card by its policy and what depends on it,
 	// with Change… on its switch. No footer (judges r4 #11).
-	p := page.Page{ID: AwakeID, Command: "awake", Context: ctx, Header: &page.Header{Back: "All machines", Glyph: symbol("sun.max", page.SignalQuiet)}}
+	p := page.Page{ID: AwakeID, Command: "awake", Context: ctx, Header: &page.Header{Back: Back, Title: "Awake", Glyph: symbol("sun.max", page.SignalQuiet)}}
 	p.Sections = []page.Section{{ID: SectionSummary, Title: "Awake", Role: page.Summary, Caption: []page.Value{page.Text("All Macs"), page.Text("which may sleep, and what pauses")}}}
 	if f.Label == nil {
 		self := ""

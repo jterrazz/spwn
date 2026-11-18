@@ -814,6 +814,9 @@
         },
         "stale": {
           "$ref": "#/$defs/page.Value"
+        },
+        "title": {
+          "type": "string"
         }
       },
       "type": "object"
