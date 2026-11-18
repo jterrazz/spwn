@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { SEPARATOR } from '../../domain/separator';
 import { FleetRegister, Glow } from './fleet-register';
 import type { FleetMac } from './fleet-register';
+import { Panel } from './panel';
 import { StateSign } from './state-sign';
 
 import styles from './fleet-board.module.css';
@@ -112,28 +113,31 @@ export function FleetBoard({
     const [chosen, setChosen] = useState<null | string>(chosenAtFirst ?? null);
     const [opened, setOpened] = useState<null | string>(openedAtFirst ?? null);
     const shown = chosen === null ? macs : macs.filter((mac) => mac.name === chosen);
+    const count = macs.reduce((sum, mac) => sum + mac.machines.length, 0);
     return (
-        <div className={styles.board} data-scheme="landing">
-            <Stage
-                chosen={chosen}
-                macs={macs}
-                onChoose={(name) => {
-                    setChosen(toggled(chosen, name));
-                    setOpened(null);
-                }}
-                summary={summary}
-                thisMac={thisMac}
-            />
-            <FleetRegister
-                macs={shown}
-                onOpen={onOpen}
-                onOpenMac={onOpenMac}
-                onToggle={(name) => {
-                    setOpened(toggled(opened, name));
-                }}
-                opened={opened}
-            />
-            {foot === undefined ? null : <div className={styles.end}>{foot}</div>}
-        </div>
+        <Panel note={String(count)} padded title="Machines">
+            <div className={styles.board}>
+                <Stage
+                    chosen={chosen}
+                    macs={macs}
+                    onChoose={(name) => {
+                        setChosen(toggled(chosen, name));
+                        setOpened(null);
+                    }}
+                    summary={summary}
+                    thisMac={thisMac}
+                />
+                <FleetRegister
+                    macs={shown}
+                    onOpen={onOpen}
+                    onOpenMac={onOpenMac}
+                    onToggle={(name) => {
+                        setOpened(toggled(opened, name));
+                    }}
+                    opened={opened}
+                />
+                {foot === undefined ? null : <div className={styles.end}>{foot}</div>}
+            </div>
+        </Panel>
     );
 }

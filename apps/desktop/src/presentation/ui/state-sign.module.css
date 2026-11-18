@@ -3,7 +3,7 @@
     flex: none;
 }
 .ok {
-    color: var(--t2);
+    color: var(--ok);
 }
 .plain {
     color: var(--t3);

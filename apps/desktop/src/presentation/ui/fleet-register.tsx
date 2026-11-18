@@ -169,7 +169,7 @@ export type FleetRegisterProps = Opening & {
 
 export function FleetRegister({ macs, onOpenMac, ...opening }: FleetRegisterProps) {
     return (
-        <section aria-label="Machines" className={styles.register}>
+        <div className={styles.register}>
             {macs.map((mac) => (
                 <div className={styles.group} key={mac.name}>
                     <MacLine mac={mac} onOpenMac={onOpenMac} />
@@ -183,6 +183,6 @@ export function FleetRegister({ macs, onOpenMac, ...opening }: FleetRegisterProp
                     ))}
                 </div>
             ))}
-        </section>
+        </div>
     );
 }

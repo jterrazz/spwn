@@ -50,11 +50,12 @@
     - button "Fix npm": Fix
     - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
-  - group "Macs":
-    - button "macbook-pro · 2 machines · online": macbook-pro 2 machines online
-    - button "mac-mini · 1 machine · online": mac-mini 1 machine online
-    - text: 3 machines This Mac
   - region "Machines":
+    - heading "Machines 3" [level=2]
+    - group "Macs":
+      - button "macbook-pro · 2 machines · online": macbook-pro 2 machines online
+      - button "mac-mini · 1 machine · online": mac-mini 1 machine online
+      - text: 3 machines This Mac
     - button "macbook-pro"
     - text: 34 %
     - img "Memory of macbook-pro"
@@ -74,7 +75,7 @@
     - text: Running
     - img "Memory of infra"
     - text: of 24
-  - button "Add a Mac"
+    - button "Add a Mac"
   - region "Last night":
     - heading "Last night 2 moved, 1 failed" [level=2]
     - button "All history"
