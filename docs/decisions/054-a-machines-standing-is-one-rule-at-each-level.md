@@ -1,6 +1,6 @@
 # ADR-054: A machine's standing is one rule at each level, and every verdict reads it
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-18
 
 ## Context
