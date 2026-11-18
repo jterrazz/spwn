@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	// value: the first release a station speaks to, the one whose wire says
-	// package where v3.1.0 said item (ADR-047); a peer of an older release
-	// is refused, never translated.
-	Floor = "v3.2.0"
+	// value: the first release a station speaks to: the first of the one
+	// version line, which restarted at v0.1.0 with no compatibility kept with
+	// the v3 stations before it; a peer of an older release is refused, never
+	// translated.
+	Floor = "v0.1.0"
 )
 
 var releaseShape = regexp.MustCompile(`^v(\d+)\.(\d+)\.(\d+)$`)

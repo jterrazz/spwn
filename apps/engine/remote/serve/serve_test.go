@@ -220,13 +220,13 @@ func streamed(t *testing.T, caller string) (frames map[string]api.Frame, ran int
 }
 
 func TestACallerOfAReleaseBeforeTheFloorIsAnsweredItsHelloAndRefusedEveryCall(t *testing.T) {
-	frames, ran := streamed(t, "v3.1.0")
+	frames, ran := streamed(t, "v0.0.9")
 	if frames["1"].Hello == nil || frames["1"].Hello.Version != "v3.3.0" {
-		t.Errorf("the hello of a caller at v3.1.0 was answered %+v, want this station's hello", frames["1"])
+		t.Errorf("the hello of a caller at v0.0.9 was answered %+v, want this station's hello", frames["1"])
 	}
 	refused := frames["2"].Error
-	if ran != 0 || refused == nil || refused.Code != call.CallerTooOld || refused.Detail["version"] != "v3.1.0" || refused.Detail["floor"] != api.Floor {
-		t.Errorf("a call from a caller at v3.1.0 ran %d times and answered %+v, want it refused unrun as %s", ran, refused, call.CallerTooOld)
+	if ran != 0 || refused == nil || refused.Code != call.CallerTooOld || refused.Detail["version"] != "v0.0.9" || refused.Detail["floor"] != api.Floor {
+		t.Errorf("a call from a caller at v0.0.9 ran %d times and answered %+v, want it refused unrun as %s", ran, refused, call.CallerTooOld)
 	}
 	frames, ran = streamed(t, "dev")
 	if ran != 1 || frames["2"].Error != nil {

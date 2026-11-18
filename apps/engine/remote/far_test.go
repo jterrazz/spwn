@@ -86,11 +86,11 @@ func TestAFarBinaryWithoutTheCallIsTooOldAndSaysItsVersion(t *testing.T) {
 }
 
 func TestAFarReleaseBeforeTheFloorIsRefusedAndABuildOfNoReleaseIsServed(t *testing.T) {
-	r, macs, _, ran := laptopReaching(t, "v3.1.0")
+	r, macs, _, ran := laptopReaching(t, "v0.0.9")
 	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil)
 	var e *fail.Error
-	if !errors.As(err, &e) || e.Type != fail.FarTooOld || e.Subject != mini || e.Detail["version"] != "v3.1.0" || e.Detail["floor"] != api.Floor {
-		t.Errorf("installing jq on a mini at v3.1.0: %v, want far-too-old naming the mini, v3.1.0 and the floor", err)
+	if !errors.As(err, &e) || e.Type != fail.FarTooOld || e.Subject != mini || e.Detail["version"] != "v0.0.9" || e.Detail["floor"] != api.Floor {
+		t.Errorf("installing jq on a mini at v0.0.9: %v, want far-too-old naming the mini, v0.0.9 and the floor", err)
 	}
 	macs.Serve(mini, fake.Mac{Registry: contracttest.Far(), Profile: contracttest.Mini, Version: "dev"})
 	if out, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil); err != nil || out.App != "jq" || *ran != 0 {

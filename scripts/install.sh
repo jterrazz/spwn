@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
 
-REPO="jterrazz/studio-station"
+REPO="jterrazz/spwn"
+CHECKSUMS="checksums.txt"
 BINARY="station"
 INSTALL_DIR="$HOME/.local/bin"
 
@@ -39,12 +40,12 @@ else
 
   BASE_URL="https://github.com/$REPO/releases/download/$TAG"
   curl -fsSL "$BASE_URL/$ASSET" -o "$WORK/$ASSET"
-  curl -fsSL "$BASE_URL/checksums.txt" -o "$WORK/checksums.txt"
+  curl -fsSL "$BASE_URL/$CHECKSUMS" -o "$WORK/$CHECKSUMS"
 
-  # invariant: a binary whose line is missing from checksums.txt, or whose hash differs, is never installed.
-  EXPECTED="$(awk -v asset="$ASSET" '$2 == asset { print $1 }' "$WORK/checksums.txt")"
+  # invariant: a binary whose line is missing from $CHECKSUMS, or whose hash differs, is never installed.
+  EXPECTED="$(awk -v asset="$ASSET" '$2 == asset { print $1 }' "$WORK/$CHECKSUMS")"
   if [ -z "$EXPECTED" ]; then
-    fail "checksums.txt has no line for $ASSET · nothing installed"
+    fail "$CHECKSUMS has no line for $ASSET · nothing installed"
   fi
   if command -v sha256sum >/dev/null 2>&1; then
     ACTUAL="$(sha256sum "$WORK/$ASSET" | awk '{ print $1 }')"

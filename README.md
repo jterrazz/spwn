@@ -8,7 +8,7 @@ A single CLI to set up and run a Mac, its VMs and your other Macs: the apps and 
 
 ```sh
 xcode-select --install
-curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh
+curl -fsSL https://spwn.sh/install.sh | bash
 exec zsh
 station init --name macbook
 ```
