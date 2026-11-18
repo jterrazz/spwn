@@ -3080,11 +3080,20 @@ export type SettingsRowInput = {
 };
 
 export type SetupCallsInitIn = {
+    Confirm?: string;
     Interactive?: boolean;
     Name?: string;
+    Plan?: boolean;
+};
+
+export type SetupMove = {
+    Bytes: number;
+    From: string;
+    To: string;
 };
 
 export type SetupReport = {
+    Moves: SetupMove[] | null;
     Steps: SetupStep[] | null;
 };
 
@@ -3440,7 +3449,7 @@ export interface Calls {
     'settings.run-git': { in: SettingsRunGitInput; out: SettingsRunGitOutput; watch: false };
     'settings.show': { in: SettingsShowInput; out: SettingsShowOutput; watch: false };
     'settings.zsh-block': { in: SettingsZshBlockInput; out: SettingsZshBlockOutput; watch: false };
-    'setup.init': { in: SetupInitInput; out: SetupInitOutput; watch: false };
+    'setup.init': { in: SetupInitInput; out: SetupInitOutput; watch: false; confirm: 'relocate'; consequence: 'Moved where each app now looks, one rename each: %s.' };
     'vault.add': { in: VaultAddInput; out: VaultAddOutput; watch: false };
     'vault.list': { in: VaultListInput; out: VaultListOutput; watch: true };
     'vault.new': { in: VaultNewInput; out: VaultNewOutput; watch: true };

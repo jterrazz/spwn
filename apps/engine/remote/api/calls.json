@@ -1066,6 +1066,11 @@
       "name": "setup.init",
       "schema": "station.setup.init/v1",
       "where": "at-target",
+      "confirm": "relocate",
+      "consequence": "Moved where each app now looks, one rename each: %s.",
+      "errors": [
+        "confirm.yes-needed"
+      ],
       "in": "InitIn",
       "out": "Report"
     },

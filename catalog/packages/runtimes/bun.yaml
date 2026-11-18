@@ -42,7 +42,9 @@ disk:
                 to: '{data}/bun/install/global'
               - from: ~/.bun/bin/*
                 to: '{data}/bun/bin'
-          prune: [~/.bun/bin, ~/.bun/install, ~/.bun]
+              - from: ~/.bun/install/cache/*
+                to: '{cache}/bun/install'
+          prune: [~/.bun/bin, ~/.bun/install/cache, ~/.bun/install, ~/.bun]
           free:
-              - delete: [~/.bun/install/cache]
+              - delete: [~/.bun/install/cache, ~/.bun/_bun]
                 prune: [~/.bun/bin, ~/.bun/install, ~/.bun]

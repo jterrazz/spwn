@@ -128,6 +128,11 @@
     "consequence": "%s leaves this machine; its data stays.",
     "form": "yes-no"
   },
+  "setup.init": {
+    "confirm": "relocate",
+    "consequence": "Moved where each app now looks, one rename each: %s.",
+    "form": "yes-no"
+  },
   "vault.remove": {
     "confirm": "remove-password",
     "consequence": "%s leaves this Mac's vault, and every grant made from it ends.",

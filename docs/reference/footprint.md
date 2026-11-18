@@ -140,45 +140,45 @@ Free: `uv cache clean`. Erase: none (what uv installs is apps: station apps remo
 
 ### bun
 
-| Path                                | Group         | Note                                                                                                                                        |
-| ----------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `~/.cache/bun/install`              | can rebuild   |                                                                                                                                             |
-| `~/Library/Caches/bun`              | can rebuild   | macOS                                                                                                                                       |
-| `~/.bunfig.toml`                    | never touched |                                                                                                                                             |
-| `~/.local/share/bun/install/global` | installed     | removed by `station apps remove`                                                                                                            |
-| `~/.local/share/bun/bin`            | installed     | removed by `station apps remove`                                                                                                            |
-| `~/.bun`                            | misplaced     | `station disk move ~/.bun` moves `~/.bun/install/global` to `~/.local/share/bun/install/global`, `~/.bun/bin/*` to `~/.local/share/bun/bin` |
+| Path                                | Group         | Note                                                                                                                                                                                            |
+| ----------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `~/.cache/bun/install`              | can rebuild   |                                                                                                                                                                                                 |
+| `~/Library/Caches/bun`              | can rebuild   | macOS                                                                                                                                                                                           |
+| `~/.bunfig.toml`                    | never touched |                                                                                                                                                                                                 |
+| `~/.local/share/bun/install/global` | installed     | removed by `station apps remove`                                                                                                                                                                |
+| `~/.local/share/bun/bin`            | installed     | removed by `station apps remove`                                                                                                                                                                |
+| `~/.bun`                            | misplaced     | `station disk move ~/.bun` moves `~/.bun/install/global` to `~/.local/share/bun/install/global`, `~/.bun/bin/*` to `~/.local/share/bun/bin`, `~/.bun/install/cache/*` to `~/.cache/bun/install` |
 
 Free: `bun pm cache rm`, delete `~/Library/Caches/bun/*`. Erase: none (bun's globals are apps: station apps remove <app>).
 
 ### go
 
-| Path                                         | Group         | Note                                                                   |
-| -------------------------------------------- | ------------- | ---------------------------------------------------------------------- |
-| `~/Library/Caches/go-build`                  | can rebuild   | macOS                                                                  |
-| `~/.cache/go-build`                          | can rebuild   | linux                                                                  |
-| `~/.cache/go/mod`                            | can rebuild   |                                                                        |
-| `~/Library/Caches/gopls`                     | can rebuild   | macOS; gopls's index                                                   |
-| `~/.cache/gopls`                             | can rebuild   | linux; gopls's index                                                   |
-| `~/Library/Caches/goimports`                 | can rebuild   | macOS                                                                  |
-| `~/.cache/goimports`                         | can rebuild   | linux                                                                  |
-| `~/.local/share/go/bin/*`                    | your data     | what go install put there                                              |
-| `~/.local/share/go/pkg`                      | your data     | the checksum database's state                                          |
-| `~/Library/Application Support/go/env`       | never touched | macOS                                                                  |
-| `~/.config/go/env`                           | never touched | linux                                                                  |
-| `~/Library/Application Support/go/telemetry` | never touched | macOS; Go's telemetry mode and counters                                |
-| `~/.config/go/telemetry`                     | never touched | linux; Go's telemetry mode and counters                                |
-| `~/go`                                       | misplaced     | `station disk move ~/go` moves `~/go/bin/*` to `~/.local/share/go/bin` |
+| Path                                         | Group         | Note                                                                                                                                                               |
+| -------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `~/Library/Caches/go-build`                  | can rebuild   | macOS                                                                                                                                                              |
+| `~/.cache/go-build`                          | can rebuild   | linux                                                                                                                                                              |
+| `~/.cache/go/mod`                            | can rebuild   |                                                                                                                                                                    |
+| `~/Library/Caches/gopls`                     | can rebuild   | macOS; gopls's index                                                                                                                                               |
+| `~/.cache/gopls`                             | can rebuild   | linux; gopls's index                                                                                                                                               |
+| `~/Library/Caches/goimports`                 | can rebuild   | macOS                                                                                                                                                              |
+| `~/.cache/goimports`                         | can rebuild   | linux                                                                                                                                                              |
+| `~/.local/share/go/bin/*`                    | your data     | what go install put there                                                                                                                                          |
+| `~/.local/share/go/pkg`                      | your data     | the checksum database's state                                                                                                                                      |
+| `~/Library/Application Support/go/env`       | never touched | macOS                                                                                                                                                              |
+| `~/.config/go/env`                           | never touched | linux                                                                                                                                                              |
+| `~/Library/Application Support/go/telemetry` | never touched | macOS; Go's telemetry mode and counters                                                                                                                            |
+| `~/.config/go/telemetry`                     | never touched | linux; Go's telemetry mode and counters                                                                                                                            |
+| `~/go`                                       | misplaced     | `station disk move ~/go` moves `~/go/bin/*` to `~/.local/share/go/bin`, `~/go/pkg/mod/*` to `~/.cache/go/mod`, `~/go/pkg/sumdb/*` to `~/.local/share/go/pkg/sumdb` |
 
 Free: `go clean -cache -modcache`, delete `~/Library/Caches/go-build/*`, delete `~/Library/Caches/gopls/*`, delete `~/Library/Caches/goimports/*`, delete `~/.cache/go-build/*`, delete `~/.cache/gopls/*`, delete `~/.cache/goimports/*`. Erase: delete `~/.local/share/go/bin/*`, delete `~/.local/share/go/pkg/*`.
 
 ### node
 
-| Path           | Group         | Note                           |
-| -------------- | ------------- | ------------------------------ |
-| `~/.cache/npm` | can rebuild   |                                |
-| `~/.npmrc`     | never touched | may hold registry tokens       |
-| `~/.npm`       | misplaced     | `station disk free` empties it |
+| Path           | Group         | Note                                                          |
+| -------------- | ------------- | ------------------------------------------------------------- |
+| `~/.cache/npm` | can rebuild   |                                                               |
+| `~/.npmrc`     | never touched | may hold registry tokens                                      |
+| `~/.npm`       | misplaced     | `station disk move ~/.npm` moves `~/.npm/*` to `~/.cache/npm` |
 
 Free: `npm cache clean --force`, delete `~/.cache/npm/*`. Erase: none (npm's globals are apps: station apps remove <app>).
 

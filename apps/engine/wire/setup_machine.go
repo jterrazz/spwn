@@ -79,6 +79,8 @@ func (s setupMachine) Remove(path string) (bool, error) {
 	return err == nil, err
 }
 
+func (s setupMachine) RemoveAll(path string) error { return s.h.FS.RemoveAll(path) }
+
 func (s setupMachine) Rename(from, to string) (bool, error) {
 	err := s.h.FS.Rename(from, to)
 	return errors.Is(err, local.ErrCrossDevice), err

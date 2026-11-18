@@ -9,9 +9,11 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
-    - command: 'init --name macbook-pro --machinefile downloads/laptop.machine.yaml'
+    - command: 'init --yes --name macbook-pro --machinefile downloads/laptop.machine.yaml'
       exit: 0
       stdout: |
+          # To move
+          ○	~/.tart	to ~/.local/share/station/vms	73.3 GB
           ●	name	macbook-pro
           ●	zshrc
           ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart

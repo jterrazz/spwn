@@ -10,7 +10,7 @@ runs:
     - command: 'disk move ~/go'
       exit: 0
       stdout: |
-          ●	~/go	nothing to move: its rebuildable files freed
+          ●	~/go	moved to ~/.cache/go/mod
       files:
           go: absent
           .npm/_cacache/x: exists
@@ -22,7 +22,7 @@ runs:
     - command: 'disk move ~/.npm'
       exit: 0
       stdout: |
-          ●	~/.npm	nothing to move: its rebuildable files freed
+          ●	~/.npm	moved to ~/.cache/npm
       files:
           .npm: absent
           .calls: absent
@@ -33,5 +33,5 @@ runs:
     - command: 'disk free go'
       exit: 0
       stdout: |
-          ○	go	not installed
-          ●	Freed	0 B	nothing is lost
+          ●	go	2 B freed
+          ●	Freed	2 B	nothing is lost

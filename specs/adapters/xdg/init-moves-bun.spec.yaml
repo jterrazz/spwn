@@ -2,9 +2,13 @@ description: 'init moves what bun put in ~/.bun so its relative bin links still 
 runs:
     - command: '--version >/dev/null; /bin/mkdir -p .bun/install/global/node_modules/skills .bun/install/cache/x .bun/bin && echo skills-cli > .bun/install/global/node_modules/skills/cli.mjs && echo x > .bun/install/cache/x/f && /bin/ln -s ../install/global/node_modules/skills/cli.mjs .bun/bin/skills'
       exit: 0
-    - command: 'init --name m </dev/null'
+    - command: 'init --name m --yes </dev/null'
       exit: 0
       stdout: |
+          # To move
+          ○	~/.bun/install/global	to ~/.local/share/bun/install/global	11 B
+          ○	~/.bun/bin	to ~/.local/share/bun/bin	0 B
+          ○	~/.bun/install/cache	to ~/.cache/bun/install	2 B
           ●	name	m
           ●	zshrc
           ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.bun

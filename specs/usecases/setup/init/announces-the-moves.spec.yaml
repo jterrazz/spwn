@@ -1,0 +1,22 @@
+description: 'init says what it moves, from where to where and its size, before it moves anything'
+env: fresh
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files = {"~/.bun/install/global/node_modules/skills/cli.mjs": 180000000, "~/.bun/bin/bun": 52000000, "~/.bun/install/cache/skills@1.0.0/package.json": 64000, "~/.bun/_bun": 8000, "~/go/bin/golangci-lint": 59000000, "~/go/pkg/mod/cache/download/x": 2300000, "~/go/pkg/sumdb/sum.golang.org/latest": 4000, "~/.npm/_cacache/index-v5/x": 800000}'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'init --name macbook-pro --yes'
+      exit: 0
+      stdout: |
+          # To move
+          ○	~/.bun/install/global	to ~/.local/share/bun/install/global	180 MB
+          ○	~/.bun/bin	to ~/.local/share/bun/bin	52.0 MB
+          ○	~/.bun/install/cache	to ~/.cache/bun/install	64.0 KB
+          ○	~/.bun/_bun	deleted: its app writes it again	8.0 KB
+          ○	~/go/bin	to ~/.local/share/go/bin	59.0 MB
+          ○	~/go/pkg/mod	to ~/.cache/go/mod	2.3 MB
+          ○	~/go/pkg/sumdb	to ~/.local/share/go/pkg/sumdb	4.0 KB
+          ○	~/.npm	to ~/.cache/npm	800 KB
+          ●	name	macbook-pro
+          ●	zshrc
+          ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.bun, ~/go, ~/.npm
+          # Machinefile
+          	none bound by init: init --machinefile binds one

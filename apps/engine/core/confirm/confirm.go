@@ -42,6 +42,9 @@ const (
 	// value: delete what nothing uses on a Mac: the image versions no
 	// machine is made from, and the leftovers.
 	FreeUnused Action = "free-unused"
+	// value: move the apps' files out of the home root, to where the
+	// settings init writes make each app look.
+	Relocate Action = "relocate"
 )
 
 type Level string
@@ -209,6 +212,8 @@ func (a Action) Consequence() string {
 		return "Every stopped ephemeral workspace is deleted."
 	case FreeUnused:
 		return "Deleted for good: %s. No machine and no file of yours is touched."
+	case Relocate:
+		return "Moved where each app now looks, one rename each: %s."
 	}
 	return ""
 }

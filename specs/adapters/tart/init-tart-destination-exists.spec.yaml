@@ -3,9 +3,12 @@ fixture:
     - ./__fixtures__/tart-store/
     - ./__fixtures__/vms-taken/
 runs:
-    - command: 'init --name m </dev/null'
+    - command: 'init --name m --yes </dev/null'
       exit: 1
       stdout: |
+          # To move
+          ○	~/.local/opt/tart.app	to ~/.local/share/station/tart/tart.app	20 B
+          ○	~/.local/opt/LICENSE	to ~/.local/share/station/tart/LICENSE	8 B
           ●	name	m
           ●	zshrc
           ✗	relocate	~/.local/share/station/vms already exists
