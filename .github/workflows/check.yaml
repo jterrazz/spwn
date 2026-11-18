@@ -172,6 +172,22 @@ jobs:
                   path: .artifacts/turbo
                   key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
+    # value: station, under machines/, keeps its own toolchain (Go from machines/go.work, npm, its Makefile), so this one job runs the shared check action inside it, as station's own workflow did at its root; the pnpm invariant above is the root's alone
+    machines:
+        name: Machines
+        runs-on: ubuntu-26.04-arm
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - uses: jterrazz/studio-actions/actions/check@main
+              with:
+                  working-directory: machines
+                  go-version-file: machines/go.work
+                  browsers: 'true'
+                  dockerfile: ''
+                  report: check-machines
+
     build:
         name: Build
         runs-on: ubuntu-26.04-arm
