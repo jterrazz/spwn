@@ -1,105 +1,89 @@
-<h1 align="center">spwn</h1>
+<h1 align="center">
+  <img src="docs/_assets/readme/mark.png" alt="" width="72"><br>
+  spwn
+</h1>
 
 <p align="center">
-  AI agents orchestration as code. One source, run anywhere.
+  <a href="https://spwn.sh"><b>Website</b></a> ·
+  <a href="https://spwn.sh/docs"><b>Docs</b></a> ·
+  <a href="#the-six-apps"><b>The six apps</b></a>
 </p>
 
-<p align="center">
-  <a href="#quickstart"><strong>Quickstart</strong></a> &middot;
-  <a href="docs/start/getting-started.md"><strong>Getting started</strong></a> &middot;
-  <a href="https://spwn.sh/docs"><strong>Docs</strong></a> &middot;
-  <a href="https://spwn.sh/manifesto"><strong>Manifesto</strong></a> &middot;
-  <a href="CONTRIBUTING.md"><strong>Contributing</strong></a>
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/_assets/readme/hero-dark.png">
+  <img src="docs/_assets/readme/hero-light.png" alt="Stay you, at scale. Doing more is easy now. Still knowing what you’re doing isn’t. spwn is the set of abstractions, rules and controls that gets you there. Machines, agents, teams: one file each. Beside it, Station: one file, one machine, ready for the job." width="830">
+</picture>
 
-<p align="center">
-  <a href="https://github.com/jterrazz/spwn/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a>
-  <a href="https://github.com/jterrazz/spwn/stargazers"><img src="https://img.shields.io/github/stars/jterrazz/spwn?style=flat" alt="Stars" /></a>
-  <a href="https://github.com/jterrazz/spwn/releases"><img src="https://img.shields.io/github/v/release/jterrazz/spwn?style=flat" alt="Release" /></a>
-</p>
-
-<br/>
-
-<p align="center">
-  <img src="docs/_assets/hero-v2.gif" alt="spwn - spawning an agent" width="560" />
-</p>
-
-<br/>
-
-## Agents orchestration as code
-
-The real power of AI isn't the model. It's the model _plus everything around it_. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
-
-With spwn, **you build that environment, block by block**. Stack `spwn:python` with `spwn:qmd`, add a local `tool/ffmpeg`, pin a few skills and a soul, and your agent wakes up inside a sandbox assembled exactly for its job. Two agents in the same project can live in two totally different worlds: one talks to Postgres and runs tests, the other compiles video. Every block is a declarative file, reviewed in PRs, pinned in lockfiles, swapped like Lego.
-
-Spawn it, commit it to git, ship it. If Terraform is infrastructure as code, spwn is **agents orchestration as code**: the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
-
-<br/>
-
-## Quickstart
-
-```bash
+```sh
 curl -fsSL https://spwn.sh/install.sh | bash
 ```
 
-Three commands. One working agent.
+Two commands, one per running app: `spwn-machines` (short: `machines`) and `spwn-agents` (short: `agents`). One install puts both on your path.
 
-|        | Step               | Command          | What it does                                                                                                   |
-| ------ | ------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| **01** | Log in             | `spwn auth`      | Checks you're signed in to Claude Code (or any supported runtime).                                             |
-| **02** | Scaffold a project | `spwn init`      | Drops `spwn.yaml` + a starter `neo` agent into the current directory.                                          |
-| **03** | Talk to your agent | `spwn agent neo` | Opens an interactive session with neo inside a sandboxed Docker world. Container lifecycle is handled for you. |
+> [!NOTE]
+> **Alpha.** Two apps run today, Station and Agents. Wiki, OS, Specs and Design are in progress: their rows say so, and nothing here claims more. Expect rough edges, and [open an issue](https://github.com/jterrazz/spwn/issues) where you hit one.
 
-Prefer a bundled demo? `spwn init matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any template slug in the [catalog](catalog/)).
+## The six apps
 
-What lands in your project, and the four ideas behind it, is [Getting started](docs/start/getting-started.md).
+| App                               | What it does                 | State         | Command         | Folder                        |
+| --------------------------------- | ---------------------------- | ------------- | --------------- | ----------------------------- |
+| [**Station**](machines/README.md) | Machines built from one file | **Running**   | `spwn-machines` | `machines/`                   |
+| [**Agents**](docs/README.md)      | One agent, any harness       | **Running**   | `spwn-agents`   | `apps/cli/` (later `agents/`) |
+| **Wiki**                          | Each fact in one place       | _In progress_ | ·               | ·                             |
+| **OS**                            | One place to run it all      | _In progress_ | ·               | ·                             |
+| **Specs**                         | Proof it is as asked         | _In progress_ | ·               | ·                             |
+| **Design**                        | One family of shapes         | _In progress_ | ·               | ·                             |
 
-> **Requirements:** Docker
+## Commands, by app
 
-<br/>
+<details open>
+<summary><b>Station</b> · <code>spwn-machines</code> · machines built from one file</summary>
 
-## Features
+```sh
+spwn-machines init                                          # make this machine known
+spwn-machines machines                                      # all machines: every Mac, its VMs, what needs you
+spwn-machines machines create qa --from qa.machine.yaml     # a machine from its Machinefile
+spwn-machines apply                                         # carry out this machine's Machinefile
+spwn-machines overview                                      # this machine at a glance
+```
 
-- **Agents as Code.** Commit agents alongside your app, review behavior changes in PRs, ship the same mind to every machine.
-- **Composable environment.** Stack `spwn:python`, `spwn:qmd`, `tool/ffmpeg`, whatever your agent needs. Each one wakes up in a sandbox assembled for its job.
-- **Reproducible.** One `spwn build` produces a Docker image, or a runtime-native tree (claude-code, codex and the others) if you skip Docker. Byte-identical on every machine.
-- **Worlds.** Bundle agents, workspaces, and knowledge into a world. `spwn up` deploys them together, `spwn down` tears it all down.
-- **Persistent.** Memory is a folder of markdown files. Readable, diffable, and alive across restarts.
-- **Checked.** `spwn check` walks your project and surfaces bad refs, missing files, or lockfile drift before spawn.
-- **Automations.** Wake an agent on a cron tick or a filesystem event. `worlds.<name>.automations` in spwn.yaml; receipts in `.spwn/runs.jsonl`; `spwn automation daemon` runs the engine. [Full guide](docs/guides/automations.md).
+Every command: [Station's command reference](machines/docs/reference/commands.md) · it runs on a Mac, and its VMs run on a hypervisor (`tart` today), see [the glossary](machines/docs/concepts/glossary.md).
 
-> _"The next breakthrough isn't smarter models. It's richer worlds."_
+</details>
 
-<br/>
+<details>
+<summary><b>Agents</b> · <code>spwn-agents</code> · one agent, any harness</summary>
 
-## Two products, one repository
+```sh
+spwn-agents auth            # check your agent runtime sign-in
+spwn-agents init            # a project and its first agent, neo
+spwn-agents agent neo       # talk to neo, in a sandboxed world
+spwn-agents build           # one portable artifact
+spwn-agents up              # bring a world up; down tears it down
+spwn-agents check           # bad refs, missing files, lockfile drift
+```
 
-This repository ships two binaries from one release:
+Every command: [Agents' command reference](docs/reference/commands.md) · runs on Claude Code or Codex · needs Docker · first steps in [Getting started](docs/start/getting-started.md).
 
-| Product | Binary    | Lives in                                                   | Built and checked with                                                        |
-| ------- | --------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| spwn    | `spwn`    | the root: `apps/`, `packages/`, `catalog/`, `specs/`       | `make build`, `make check`                                                    |
-| station | `station` | [`machines/`](machines/README.md), its own tree and manual | `make machines-build`, `make machines-check` (or `make -C machines <target>`) |
+</details>
 
-Station moved in from `jterrazz/studio-station` with its history; the two still cohabit under their own names, and the renames come later ([ADR-017](docs/decisions/017-one-repository-station-moves-in-under-machines.md)). One `v*` tag releases both ([Release](docs/guides/release.md)).
+## Repository map
 
-<br/>
+```text
+machines/     Station: its code and its own manual, machines/docs/
+apps/         Agents' surfaces: cli (the command), api, gate, web, spwn-cookie-sync
+packages/     Agents: the packages behind them
+catalog/      Agents: the blocks an agent is made of
+docs/         the manual of the repository and of Agents
+specs/        the suites that prove Agents
+```
 
-## Learn more
+The Agents code sits at the root today, and `machines/` holds Station. Next: Agents moves to `agents/`, and `app/` becomes a desktop app named spwn.
 
-- [Getting started](docs/start/getting-started.md): the four ideas behind spwn, an agent's files, a world, and how one source reaches every runtime.
-- [Use cases](docs/start/use-cases.md): a scientist composed from blocks, an agent shipped with its repo, a forked mind, a sealed room for untrusted code.
-- [The manual](docs/README.md): guides, concepts and the reference, from the [primitives](docs/reference/primitives.md) to [every command](docs/reference/commands.md).
-- [Contributing](CONTRIBUTING.md): set-up, tests and conventions.
+## Contributing
 
-<br/>
+Build, test and release are the manual's: [Contributing](CONTRIBUTING.md), then [Develop](docs/guides/develop.md), [Test](docs/guides/test.md) and [Release](docs/guides/release.md). Station keeps its own loop, [Develop](machines/docs/guides/develop.md). Why the two share one repository: [ADR-017](docs/decisions/017-one-repository-station-moves-in-under-machines.md).
 
-## Community
+## License
 
-- [Website](https://spwn.sh) &middot; [Docs](https://spwn.sh/docs) &middot; [Manifesto](https://spwn.sh/manifesto) &middot; [Issues](https://github.com/jterrazz/spwn/issues)
-
----
-
-<p align="center">
-  <sub>Open source. Self-hosted. Built for people who want to give agents a world, not a wrapper.</sub>
-</p>
+MIT, see [LICENSE](LICENSE).
