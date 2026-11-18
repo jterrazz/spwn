@@ -57,17 +57,13 @@ func ended(e *awake.End, zone *time.Location) page.Value {
 	return page.Texts("ended "+clock(e.At, zone), e.Detail)
 }
 
-func stopped(r awake.Report) bool {
-	return r.Engine == awake.EngineStopped || r.Engine == awake.EngineAbsent
-}
-
 func engineHint() *page.Hint { return page.Cmd("station engine start") }
 
 func sessionRows(r awake.Report) []page.Row {
 	switch {
 	case r.Engine == awake.EnginePending:
 		return []page.Row{{ID: RowAwake, Label: RowAwake, Mark: page.Awaiting, Cells: []page.Value{page.Pending()}}}
-	case stopped(r):
+	case r.EngineDown():
 		return []page.Row{{ID: RowAwake, Label: RowAwake, Mark: page.Attention, Reason: page.Stopped, Cells: []page.Value{page.Unknown(), page.Text("engine " + r.Engine)}, Hint: engineHint()}}
 	case r.Session == nil:
 		return []page.Row{{ID: RowAwake, Label: RowAwake, Mark: page.OK, Cells: []page.Value{page.Off(), ended(r.LastEnd, r.Zone)}, Hint: page.Cmd("station awake 4h")}}

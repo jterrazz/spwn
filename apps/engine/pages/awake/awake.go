@@ -71,10 +71,6 @@ func clock(t, now time.Time, zone *time.Location) string {
 	return words
 }
 
-func stopped(r awake.Report) bool {
-	return r.Engine != "" && r.Engine != awake.EngineRunning && r.Engine != awake.EngineReading
-}
-
 func until(s awake.Session, now time.Time, zone *time.Location) []string {
 	words := []string{"Awake until " + clock(s.Until, now, zone)}
 	if s.Lid {
@@ -115,7 +111,7 @@ func Row(r awake.Report) page.Row {
 	switch {
 	case r.Engine == awake.EngineReading:
 		row.Mark, row.Cells = page.Awaiting, []page.Value{page.Pending()}
-	case stopped(r):
+	case r.EngineDown():
 		row.Mark, row.Cells = page.Absent, []page.Value{page.Texts("Sleeps normally", "the engine is stopped")}
 		row.Hint = page.Cmd("station engine start")
 	default:
@@ -193,7 +189,7 @@ func Page(f AllMachines, thisMac page.Context) page.Page {
 	// invariant: each Mac's line is the page's first (vision 07 "station
 	// awake"): the Macs are a banner, drawn flush with no title.
 	sections := []page.Section{{ID: "awake", Role: page.Banner, Columns: columns(), Items: items}}
-	if len(f.Reports) > 0 && f.isThisMac(f.Reports[0]) && !stopped(f.Reports[0]) && f.Reports[0].Engine != awake.EngineReading {
+	if len(f.Reports) > 0 && f.isThisMac(f.Reports[0]) && !f.Reports[0].EngineDown() && f.Reports[0].Engine != awake.EngineReading {
 		sections = append(sections, reading(f.Reports[0], f.name(f.Reports[0])))
 	}
 	p := page.Page{ID: "awake", Command: "awake", Context: thisMac, Sections: sections, Hints: f.next(), Actions: f.actions()}
@@ -284,7 +280,7 @@ func (f AllMachines) macJSON(r awake.Report) MacJSON {
 	if m.Pauses == nil {
 		m.Pauses = []string{}
 	}
-	if stopped(r) {
+	if r.EngineDown() {
 		m.Mode = awake.SleepsNormally
 	}
 	if s := r.Session; s != nil && m.Mode == awake.AwakeUntil {

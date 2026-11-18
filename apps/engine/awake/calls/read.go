@@ -21,7 +21,7 @@ var Read = call.Watch[Deps, ReadIn, awake.Report]{
 			defer close(out)
 			for r := range d.Holder.Read(ctx) {
 				r.Mac, r.Caps, r.Servers, r.Pauses = d.Mac, d.Caps, servers, pauses
-				r.Choices = awake.Choices(r.Now, r.Zone)
+				r.Choices, r.Verdict = awake.Choices(r.Now, r.Zone, r.Keeping()), awake.VerdictOf(r)
 				select {
 				case out <- r:
 				case <-ctx.Done():

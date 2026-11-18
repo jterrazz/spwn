@@ -382,6 +382,7 @@ export type AwakeCallsReadIn = Record<string, never>;
 export type AwakeChoice = {
     For?: number;
     Label: string;
+    Picked?: boolean;
     Until?: string;
 };
 
@@ -423,6 +424,7 @@ export type AwakeReport = {
     Reading: AwakeReading;
     Servers: string[] | null;
     Session: AwakeSession | null;
+    Verdict?: CoreVerdictVerdict;
     Zone: Record<string, never> | null;
 };
 

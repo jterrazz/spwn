@@ -34,10 +34,7 @@ const (
 	neverSleeps = "never-sleeps"
 )
 
-// value: the terms the picker offers, then how many whole hours Until
-// offers from the next one (SPEC A9 2-11: `1 hr · 4 hr · Until 18:00`).
-func terms() []time.Duration { return []time.Duration{time.Hour, 4 * time.Hour} }
-
+// value: how many whole hours Until offers from the next one.
 const untilHours = 8
 
 func isThisMac(f pageawake.AllMachines, r awake.Report) bool { return f.This != "" && r.Mac == f.This }
@@ -123,12 +120,12 @@ func macCard(mac, name string, row page.Row) page.Section {
 // switches its capabilities allow.
 func thisMac(r awake.Report) page.Section {
 	s := page.Section{ID: SectionThisMac, Title: page.ThisMac, Card: page.CardFlush, Uncounted: true, Columns: awakeColumns()}
-	held := r.Session != nil && r.Mode() == awake.AwakeUntil
+	held := r.Keeping() != nil
 	keep := page.Row{ID: r.Mac, Label: "Keep This Mac awake", Glyph: sun(held), Cells: switched(held), Detail: page.Text("Stays on for a while"), Mark: page.OK}
 	switch {
 	case r.Engine == awake.EngineReading:
 		keep.Mark, keep.Detail = page.Awaiting, page.Pending()
-	case stoppedEngine(r):
+	case r.EngineDown():
 		keep.Mark, keep.Detail = page.Absent, page.Text("the engine is stopped")
 		keep.Hint = page.Cmd("station engine start")
 	case held:
@@ -159,10 +156,6 @@ func pausing(r awake.Report) (page.Section, bool) {
 	return page.Section{ID: SectionPauses, Title: "While This Mac sleeps", Uncounted: true, Items: []page.Item{{Note: &page.Note{Text: line}}}}, true
 }
 
-func stoppedEngine(r awake.Report) bool {
-	return r.Engine != "" && r.Engine != awake.EngineRunning && r.Engine != awake.EngineReading
-}
-
 // value: what depends on a Mac: the servers it hosts, else the running
 // work that pauses, else nothing.
 func dependants(servers, pauses []string) string {
@@ -176,33 +169,47 @@ func dependants(servers, pauses []string) string {
 }
 
 // value: another Mac's card row: its policy, what depends on it, its
-// switch on while it stays awake.
+// switch on while it stays awake; its mark the tone of its verdict.
 func otherMac(r awake.Report, zone *time.Location) page.Row {
-	row := page.Row{ID: r.Mac, Label: "May sleep", Glyph: sun(false), Cells: switched(false), Mark: page.Absent, Detail: page.Text(dependants(r.Servers, r.Pauses))}
+	row := page.Row{ID: r.Mac, Label: "May sleep", Glyph: sun(false), Cells: switched(false), Detail: page.Text(dependants(r.Servers, r.Pauses))}
+	row.Mark, row.Reason = markOf(r)
+	r.Zone = zone
+	said := r.Clauses()
 	switch {
 	case r.Engine == awake.EngineReading:
-		row.Label, row.Mark, row.Detail = "Checking", page.Awaiting, page.Pending()
+		row.Label, row.Detail = "Checking", page.Pending()
 		row.Cells = nil
-	case stoppedEngine(r):
+	case r.EngineDown():
 		row.Detail = page.Texts("the engine is stopped", dependants(r.Servers, r.Pauses))
 		row.Hint = page.Cmd("station engine start")
-	case r.Mode() == awake.NeverSleeps:
-		row.Label, row.Glyph, row.Cells, row.Mark = "Never sleeps", sun(true), switched(true), page.OK
-		if !r.NeverHeld {
-			row.Mark, row.Reason = page.Attention, page.Guard
-			row.Detail = page.Texts("let go while the battery is low", dependants(r.Servers, r.Pauses))
+	case r.Mode() == awake.NeverSleeps, r.Mode() == awake.AwakeUntil:
+		row.Label, row.Glyph, row.Cells = capital(said[0]), sun(true), switched(true)
+		if r.Mode() == awake.NeverSleeps && len(said) > 1 {
+			row.Detail = page.Texts(append(said[1:], dependants(r.Servers, r.Pauses))...)
 		}
-	case r.Mode() == awake.AwakeUntil:
-		if zone == nil {
-			zone = time.UTC
-		}
-		row.Label, row.Glyph, row.Cells, row.Mark = "Awake until "+r.Session.Until.In(zone).Format("15:04"), sun(true), switched(true), page.OK
 	case r.Mode() == awake.StoppedByGuard:
-		row.Mark, row.Reason = page.Attention, page.Guard
-		row.Detail = page.Texts("Awake stopped", r.LastEnd.Detail)
+		row.Detail = page.Texts(append([]string{capital(said[0])}, said[1:]...)...)
 	}
 	return row
 }
+
+// value: the mark a Mac's card row takes from the tone of its Awake
+// verdict: awaiting while there is none, OK, Attention for a guard, else
+// Absent.
+func markOf(r awake.Report) (page.Mark, page.Reason) {
+	v := awake.VerdictOf(r)
+	switch {
+	case v == nil:
+		return page.Awaiting, ""
+	case v.Tone == "ok":
+		return page.OK, ""
+	case v.Tone == "warn":
+		return page.Attention, page.Guard
+	}
+	return page.Absent, ""
+}
+
+func capital(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
 
 // value: a Mac that did not answer: asleep, when it was last seen and
 // what depended on it then, dimmed; else not answering, and why.
@@ -229,39 +236,37 @@ func flags(lid, battery bool) map[string]string {
 
 // invariant: a keep-awake keeps the switches as they are; a switch keeps
 // the end the keep-awake holds until, or starts the one Until offers. The
-// term in force is the one picked. Until says the time it holds until when it is the term in force, else
-// the one its form offers first.
+// terms and the one picked are awake.Choices': Until offers the hour it
+// offers, and says the hour a keep-awake holds until when it is picked.
 func keeps(r awake.Report, now time.Time, zone *time.Location) []page.Action {
 	if zone == nil {
 		zone = time.UTC
 	}
 	var lid, battery bool
-	held := r.Session != nil && r.Mode() == awake.AwakeUntil
+	kept := r.Keeping()
+	held := kept != nil
 	if held {
-		lid, battery = r.Session.Lid, r.Session.Battery
+		lid, battery = kept.Lid, kept.Battery
 	}
 	rows := []string{r.Mac}
 	var out []page.Action
-	picked := false
-	for _, t := range terms() {
+	choices := awake.Choices(now, zone, kept)
+	for _, c := range choices {
+		if c.For == 0 {
+			continue
+		}
 		in := flags(lid, battery)
-		in["For"] = nanos(t)
-		on := held && asked(*r.Session) == t
-		picked = picked || on
-		out = append(out, page.Action{ID: ActionKeep + strings.TrimSuffix(t.String(), "0m0s"), Label: pageTerm(t), On: page.OnRow, Rows: rows, Priority: 1, Mutates: true, Picked: on, Run: &page.Run{Call: CallKeepAwake, In: in}})
+		in["For"] = nanos(c.For)
+		out = append(out, page.Action{ID: ActionKeep + strings.TrimSuffix(c.For.String(), "0m0s"), Label: c.Label, On: page.OnRow, Rows: rows, Priority: 1, Mutates: true, Picked: c.Picked, Run: &page.Run{Call: CallKeepAwake, In: in}})
 	}
 	field := untilField(now, zone)
 	end := field.Default
-	until := "Until " + optionLabel(field, end)
-	untilPicked := held && !picked
-	if untilPicked {
-		until = "Until " + r.Session.Until.In(zone).Format("15:04")
-	}
-	out = append(out, page.Action{ID: ActionUntil, Label: until, On: page.OnRow, Rows: rows, Priority: 1, Mutates: true, Picked: untilPicked,
+	until := choices[len(choices)-1]
+	out = append(out, page.Action{ID: ActionUntil, Label: until.Label, On: page.OnRow, Rows: rows, Priority: 1, Mutates: true, Picked: until.Picked,
 		Form: &page.Form{Title: "Keep awake until", Fields: []page.Field{field}}, Run: &page.Run{Call: CallKeepAwake, In: flags(lid, battery)}})
 	term := func(in map[string]string) map[string]string {
 		if held {
-			in["Until"] = moment(r.Session.Until)
+			in["Until"] = moment(kept.Until)
 		} else {
 			in["Until"] = end
 		}
@@ -282,17 +287,6 @@ func keeps(r awake.Report, now time.Time, zone *time.Location) []page.Action {
 	return out
 }
 
-// value: the term a session was asked for: its own word, else its span
-// from its start.
-func asked(s awake.Session) time.Duration {
-	if s.For > 0 {
-		return s.For.Round(time.Minute)
-	}
-	return s.Until.Sub(s.StartedAt).Round(time.Minute)
-}
-
-func pageTerm(d time.Duration) string { return strconv.Itoa(int(d.Hours())) + " hr" }
-
 // value: Until's hours from the next one, and the end awake.UntilOffered
 // gives, the one it opens on; that end closes the list when it comes
 // later.
@@ -311,20 +305,11 @@ func untilField(now time.Time, zone *time.Location) page.Field {
 	return page.Field{Key: "Until", Label: "Until", Kind: page.FieldSelect, Options: opts, Default: def}
 }
 
-func optionLabel(f page.Field, value string) string {
-	for _, o := range f.Options {
-		if o.Value == value {
-			return o.Label
-		}
-	}
-	return value
-}
-
 // invariant: AW-21: Change… on a Mac that never sleeps lets it sleep again,
 // a y/n that names each server it hosts, which pauses while it sleeps; on
 // one that sleeps it keeps it awake for good. It runs on that Mac.
 func change(r awake.Report, name string) (page.Action, bool) {
-	if r.Engine == awake.EngineReading || (r.Engine != "" && r.Engine != awake.EngineRunning) {
+	if r.Engine == awake.EngineReading || r.EngineDown() {
 		return page.Action{}, false
 	}
 	run := &page.Run{Target: &page.Target{Name: r.Mac}, In: map[string]string{"Names": `["` + neverSleeps + `"]`, "Confirm": "yes"}}
