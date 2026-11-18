@@ -1,9 +1,11 @@
 package awake
 
 import (
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 const DefaultFor = 4 * time.Hour
@@ -30,6 +32,15 @@ type Session struct {
 	// value: the term the owner asked for last (1 h, 4 h, or the time
 	// left until the hour picked): what Keep awake for… shows chosen.
 	For time.Duration `json:"for,omitempty"`
+}
+
+func (s Session) Asked() time.Duration {
+	// value: the term a session was asked for: its own word, else its span
+	// from its start, to the minute.
+	if s.For > 0 {
+		return s.For.Round(time.Minute)
+	}
+	return s.Until.Sub(s.StartedAt).Round(time.Minute)
 }
 
 type End struct {
@@ -96,6 +107,15 @@ type Report struct {
 	Pauses []string
 	// value: the terms Keep awake for… offers, each one awake.keep takes.
 	Choices []Choice
+	// value: how this Mac stands awake, VerdictOf's; nil while its engine
+	// reads.
+	Verdict *verdict.Verdict `json:",omitempty"`
+}
+
+func (r Report) EngineDown() bool {
+	// value: the engine is stopped or not installed: it neither runs nor
+	// reads.
+	return r.Engine != "" && r.Engine != EngineRunning && r.Engine != EngineReading
 }
 
 func (r Report) Until() string {
@@ -111,27 +131,46 @@ func (r Report) Until() string {
 	return "until " + s.Until.In(zone).Format("15:04")
 }
 
-func (r Report) Phrase() string {
-	// value: how this Mac sleeps, in the words its Awake line says: "never
-	// sleeps", "awake until 18:00" and ", lid closed" when the session
-	// holds it so, "awake stopped" with the guard's words while that end
-	// is told, else "sleeps normally".
+func (r Report) Phrase() string { return strings.Join(r.Clauses(), ", ") }
+
+func (r Report) Clauses() []string {
+	// value: how this Mac sleeps, in the words its Awake line says, clause
+	// by clause: "never sleeps" and "let go while the battery is low" while
+	// the battery guard lets the policy go, "awake until 18:00" and "lid
+	// closed" when the session holds it so, "awake stopped" with the guard's
+	// words while that end is told, else "sleeps normally", as with its
+	// engine down.
+	if r.EngineDown() {
+		return []string{"sleeps normally"}
+	}
 	switch r.Mode() {
 	case NeverSleeps:
-		return "never sleeps"
+		if !r.NeverHeld {
+			return []string{"never sleeps", "let go while the battery is low"}
+		}
+		return []string{"never sleeps"}
 	case AwakeUntil:
 		if r.Session.Lid {
-			return "awake " + r.Until() + ", lid closed"
+			return []string{"awake " + r.Until(), "lid closed"}
 		}
-		return "awake " + r.Until()
+		return []string{"awake " + r.Until()}
 	case StoppedByGuard:
 		if r.LastEnd.Detail != "" {
-			return "awake stopped, " + r.LastEnd.Detail
+			return []string{"awake stopped", r.LastEnd.Detail}
 		}
-		return "awake stopped"
+		return []string{"awake stopped"}
 	case SleepsNormally:
 	}
-	return "sleeps normally"
+	return []string{"sleeps normally"}
+}
+
+func (r Report) Keeping() *Session {
+	// value: the keep-awake that holds this Mac now; nil without one, and
+	// under Never sleeps, which wins over it.
+	if r.Mode() != AwakeUntil {
+		return nil
+	}
+	return r.Session
 }
 
 func (r Report) Mode() Mode { return ModeOf(r.Now, r.NeverSleeps, r.Session, r.LastEnd) }

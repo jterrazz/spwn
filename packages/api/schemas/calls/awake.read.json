@@ -9,6 +9,9 @@
         "Label": {
           "type": "string"
         },
+        "Picked": {
+          "type": "boolean"
+        },
         "Until": {
           "type": "string"
         }
@@ -182,6 +185,9 @@
             }
           ]
         },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
         "Zone": {
           "additionalProperties": false,
           "properties": {},
@@ -273,6 +279,32 @@
         "Jobs",
         "Lid",
         "Thermal"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
       ],
       "type": "object"
     }

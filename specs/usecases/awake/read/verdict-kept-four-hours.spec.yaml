@@ -1,0 +1,15 @@
+description: 'a keep-awake asked for 4h reads ok, awake until its end, with 4 hr the one term picked'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'awake 4h'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 14:00
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Mac, .Verdict, [.Choices[] | select(.Picked) | .Label]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"awake.read","in":{}}
+      exit: 0
+      stdout: |
+          ["macbook-pro",{"Tone":"ok","Sentence":"Awake until 14:00."},["4 hr"]]

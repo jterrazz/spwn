@@ -15,7 +15,9 @@ func TestAMacSaysHowItSleepsInTheWordsOfItsAwakeLine(t *testing.T) {
 		want   string
 	}{
 		"nothing keeps it":   {awake.Report{Now: now}, "sleeps normally"},
-		"never sleeps":       {awake.Report{Now: now, NeverSleeps: true}, "never sleeps"},
+		"never sleeps":       {awake.Report{Now: now, NeverSleeps: true, NeverHeld: true}, "never sleeps"},
+		"let go":             {awake.Report{Now: now, NeverSleeps: true}, "never sleeps, let go while the battery is low"},
+		"engine stopped":     {awake.Report{Now: now, Engine: awake.EngineStopped, NeverSleeps: true, NeverHeld: true}, "sleeps normally"},
 		"until an hour":      {awake.Report{Now: now, Session: &awake.Session{Until: until}}, "awake until 18:00"},
 		"lid closed":         {awake.Report{Now: now, Session: &awake.Session{Until: until, Lid: true}}, "awake until 18:00, lid closed"},
 		"stopped by guard":   {awake.Report{Now: now, LastEnd: &awake.End{At: now.Add(-time.Minute), Reason: awake.Lid, Detail: "lid closed on battery"}}, "awake stopped, lid closed on battery"},

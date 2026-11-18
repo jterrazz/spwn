@@ -52,6 +52,8 @@ type Choice struct {
 	For time.Duration `json:",omitempty"`
 	// value: the term as the moment it ends, RFC 3339; empty when For says it.
 	Until string `json:",omitempty"`
+	// value: the term of the keep-awake that holds the Mac now.
+	Picked bool `json:",omitempty"`
 }
 
 func UntilOffered(now time.Time, zone *time.Location) time.Time {
@@ -68,15 +70,32 @@ func UntilOffered(now time.Time, zone *time.Location) time.Time {
 	return end
 }
 
-func Choices(now time.Time, zone *time.Location) []Choice {
+func Choices(now time.Time, zone *time.Location, held *Session) []Choice {
 	// invariant: the terms a page offers are the ones awake.keep takes, each
 	// as keep would end it: a length, or the end UntilOffered gives.
+	// With a keep-awake held, the length it was asked for is picked, else
+	// Until is, saying the hour it holds until: at most one is picked.
+	if zone == nil {
+		zone = time.UTC
+	}
 	end := UntilOffered(now, zone)
-	return []Choice{
+	out := []Choice{
 		{Label: "1 hr", For: time.Hour},
 		{Label: "4 hr", For: 4 * time.Hour},
 		{Label: "Until " + end.Format("15:04"), Until: end.Format(time.RFC3339)},
 	}
+	if held == nil {
+		return out
+	}
+	for i := range out[:2] {
+		if held.Asked() == out[i].For {
+			out[i].Picked = true
+			return out
+		}
+	}
+	at := held.Until.In(zone)
+	out[2] = Choice{Label: "Until " + at.Format("15:04"), Until: at.Format(time.RFC3339), Picked: true}
+	return out
 }
 
 func Bounded(d time.Duration) (time.Duration, error) {

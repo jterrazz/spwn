@@ -270,7 +270,7 @@ func BackgroundRead(tasks []background.Task, m machine.Ref) Read {
 func AwakeRead(r awake.Report, m machine.Ref) Read {
 	// invariant: Awake is the engine's: with the engine stopped its line
 	// says so rather than read off.
-	if r.Engine != "" && r.Engine != awake.EngineRunning && r.Engine != awake.EngineReading {
+	if r.EngineDown() {
 		return Unread(section.Awake, "needs the engine")
 	}
 	var parts []Part

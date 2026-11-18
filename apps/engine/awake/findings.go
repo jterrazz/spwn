@@ -19,12 +19,22 @@ func Findings(r Report, m machine.Ref) []finding.Finding {
 		f.Fix = finding.Fix{Command: "station awake"}
 		return []finding.Finding{f}
 	case AwakeUntil:
-		rd := r.Reading
-		if r.Caps.Battery && rd.OnBattery() && rd.Percent <= BatteryWarns && rd.Percent > BatteryEnds {
-			f.Text = "Awake: battery " + strconv.Itoa(rd.Percent) + " %, it stops at " + strconv.Itoa(BatteryEnds) + " %"
+		if near := BatteryNear(r); near != "" {
+			f.Text = "Awake: " + near
 			return []finding.Finding{f}
 		}
 	case NeverSleeps, SleepsNormally:
 	}
 	return nil
+}
+
+func BatteryNear(r Report) string {
+	// value: the battery near the end its guard puts to a keep-awake, in
+	// words (battery 25 %, it stops at 20 %), on a Mac that reports a
+	// battery and runs on it; empty otherwise.
+	rd := r.Reading
+	if !r.Caps.Battery || !rd.OnBattery() || rd.Percent > BatteryWarns || rd.Percent <= BatteryEnds {
+		return ""
+	}
+	return "battery " + strconv.Itoa(rd.Percent) + " %, it stops at " + strconv.Itoa(BatteryEnds) + " %"
 }

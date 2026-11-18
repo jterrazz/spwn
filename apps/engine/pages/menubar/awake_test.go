@@ -183,7 +183,38 @@ func TestAwakeSaysEachMacsPolicyAndDependants(t *testing.T) {
 	}
 }
 
-// invariant: Until opens on the end awake.UntilOffered gives, the next 18:00,
+// invariant: another Mac's card row is marked by the tone of its Awake
+// verdict, over every mode, engine state, policy hold, battery and guard:
+// awaiting while there is none, ok OK, warn Attention, plain Absent.
+func TestAMacsCardRowIsMarkedByTheToneOfItsVerdict(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	marks := map[string]page.Mark{"ok": page.OK, "warn": page.Attention, "plain": page.Absent}
+	for _, engine := range []string{awake.EngineReading, awake.EngineStopped, awake.EngineAbsent, awake.EngineRunning} {
+		for bits := range 1 << 6 {
+			on := func(i int) bool { return bits&(1<<i) != 0 }
+			r := awake.Report{Now: now, Engine: engine, Mac: "mini", Caps: machine.Capabilities{Engine: true, Battery: true}, NeverSleeps: on(0), NeverHeld: on(1),
+				Reading: awake.Reading{HasBattery: true, Source: "ac", Percent: 80, LowPower: on(5)}}
+			if on(2) {
+				r.Session = &awake.Session{StartedAt: now, Until: now.Add(4 * time.Hour)}
+			}
+			if on(3) {
+				r.LastEnd = &awake.End{At: now.Add(-time.Minute), Reason: awake.Thermal, Detail: "thermal serious"}
+			}
+			if on(4) {
+				r.Reading.Source, r.Reading.Percent = "battery", 25
+			}
+			want := page.Awaiting
+			if v := awake.VerdictOf(r); v != nil {
+				want = marks[string(v.Tone)]
+			}
+			if got := otherMac(r, time.UTC); got.Mark != want {
+				t.Errorf("%s %06b: %s; its verdict says %s", engine, bits, got.Mark, want)
+			}
+		}
+	}
+}
+
+// invariant: Until opens on the end awake.Choices offers, the next 18:00,
 // which closes its hours when it comes after them.
 func TestUntilOpensOnTheEndAwakeOffers(t *testing.T) {
 	for name, c := range map[string]struct {
