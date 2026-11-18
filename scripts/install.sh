@@ -59,7 +59,6 @@ fi
 mkdir -p "$INSTALL_DIR"
 mv "$WORK/$ASSET" "$INSTALL_DIR/$BINARY"
 chmod +x "$INSTALL_DIR/$BINARY"
-rm -f "$HOME/.studio/bin/workstation"
 echo "● station $TAG in ~/.local/bin"
 
 # outside: ~/.local/bin may not be on PATH yet on a fresh machine, so init runs by path
