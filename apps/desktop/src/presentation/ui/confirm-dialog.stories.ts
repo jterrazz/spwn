@@ -21,6 +21,27 @@ export const CONFIRM_DIALOG_STORIES: readonly Story<ConfirmDialogProps>[] = [
         },
     },
     {
+        name: 'a delete nothing holds, its consequence alone',
+        props: {
+            ...SHARED,
+            said: 'api and everything on its disk are deleted for good.',
+            title: 'Delete api?',
+            typed: 'api',
+            verb: 'Delete',
+        },
+    },
+    {
+        name: "a delete of a held machine, the engine's hold on its own warning line",
+        props: {
+            ...SHARED,
+            held: 'It is held by its lot, by studio-os-fe: work may be in progress.',
+            said: 'linux-1 and everything on its disk are deleted for good.',
+            title: 'Delete linux-1?',
+            typed: 'linux-1',
+            verb: 'Delete',
+        },
+    },
+    {
         name: 'withheld consequence',
         props: { ...SHARED, said: SECRET_SAMPLE, title: 'Revoke the token?', verb: 'Revoke' },
     },

@@ -5,6 +5,9 @@ import { asSentence } from './case';
 import { Dialog } from './dialog';
 import { FormField } from './form-field';
 import { shownOrWithheld } from './secret';
+import { StateSign } from './state-sign';
+
+import styles from './confirm-dialog.module.css';
 
 export type ConfirmDialogProps = {
     title: string;
@@ -16,6 +19,18 @@ export type ConfirmDialogProps = {
     onCancel: () => void;
     onConfirm: (typed: string) => void;
 };
+
+function Held({ held }: { held: string | undefined }) {
+    if ((held ?? '') === '') {
+        return null;
+    }
+    return (
+        <p className={styles.held}>
+            <StateSign tone="warn" />
+            <span>{shownOrWithheld(held ?? '')}</span>
+        </p>
+    );
+}
 
 export function ConfirmDialog({
     title,
@@ -48,15 +63,13 @@ export function ConfirmDialog({
                     </>
                 }
                 consequence={
-                    [said, held]
-                        .filter((line) => (line ?? '') !== '')
-                        .map((line) => asSentence(shownOrWithheld(line ?? '')))
-                        .join(' ') || undefined
+                    (said ?? '') === '' ? undefined : asSentence(shownOrWithheld(said ?? ''))
                 }
                 onClose={onCancel}
                 opensOn="dialog"
                 title={title}
             >
+                <Held held={held} />
                 {typed === undefined ? null : (
                     <FormField
                         label={`Type ${typed} to confirm`}
