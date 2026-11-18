@@ -109,9 +109,8 @@ type Mac struct {
 	Passwordless bool `json:"passwordless,omitempty"`
 	// value: a Mac that restarts does not answer until then.
 	Back time.Time `json:"back,omitzero"`
-	// value: the machines this Mac's multiplexer reaches, by name, and the
-	// terminals the owner's terminal was put on, each "<machine>/<terminal>".
-	Reached  []string `json:"reached,omitempty"`
+	// value: the terminals the owner's terminal was put on, each
+	// "<machine>/<terminal>".
 	Attached []string `json:"attached,omitempty"`
 	// value: the hypervisor this Mac has: empty, the one station is built
 	// with; none, no hypervisor installed; another name, a second fake that

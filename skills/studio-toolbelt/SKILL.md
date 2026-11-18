@@ -122,7 +122,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **gemini**: Google's CLI coding agent
 - **herdr**: Agent multiplexer that lives in your terminal
 - **herdr-app**: Desktop app that keeps coding agents running in the background
-- **herdr-core**: Herdr's agent engine, the hc command station drives
+- **herdr-core**: Herdr's engine and its hc command
 - **hermes**: Self-improving AI agent with persistent memory
 - **opencode**: Open-source AI coding agent CLI
 

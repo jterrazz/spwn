@@ -22,30 +22,6 @@ func NewMultiplexer() *Multiplexer {
 
 func MultiplexerOf(w *world.World, mac string) *Multiplexer { return &Multiplexer{w: w, mac: mac} }
 
-func (h *Multiplexer) Machines(context.Context) ([]string, error) {
-	h.w.Lock()
-	defer h.w.Unlock()
-	return slices.Clone(h.w.Mac(h.mac).Reached), nil
-}
-
-func (h *Multiplexer) Add(_ context.Context, machine string) error {
-	h.w.Lock()
-	defer h.w.Unlock()
-	m := h.w.Mac(h.mac)
-	if !slices.Contains(m.Reached, machine) {
-		m.Reached = append(m.Reached, machine)
-	}
-	return nil
-}
-
-func (h *Multiplexer) Remove(_ context.Context, machine string) error {
-	h.w.Lock()
-	defer h.w.Unlock()
-	m := h.w.Mac(h.mac)
-	m.Reached = slices.DeleteFunc(m.Reached, func(n string) bool { return n == machine })
-	return nil
-}
-
 func (h *Multiplexer) Attach(_ context.Context, machine, terminal string) error {
 	h.w.Lock()
 	defer h.w.Unlock()
@@ -56,12 +32,6 @@ func (h *Multiplexer) Attach(_ context.Context, machine, terminal string) error 
 	}
 	m.Attached = append(m.Attached, address)
 	return nil
-}
-
-func (h *Multiplexer) Reached() []string {
-	h.w.Lock()
-	defer h.w.Unlock()
-	return slices.Clone(h.w.Mac(h.mac).Reached)
 }
 
 func (h *Multiplexer) Attached() []string {

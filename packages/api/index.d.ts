@@ -757,7 +757,6 @@ export type CatalogMethodSpec = {
     Machine: ('computer' | 'workspace' | 'server')[] | null;
     Mas: CatalogMasMethod | null;
     Mise: CatalogMiseMethod | null;
-    MuxMachines: CatalogMuxMachines | null;
     Needs: ('sudo' | 'terminal' | 'license' | 'app-store-login')[] | null;
     Npm: string;
     OS?: 'macos' | 'ubuntu' | 'debian' | 'any';
@@ -794,8 +793,6 @@ export type CatalogMove = {
     From: string;
     To: string;
 };
-
-export type CatalogMuxMachines = Record<string, never>;
 
 export type CatalogRelocation = {
     File: '' | 'go-env' | 'npmrc' | 'bunfig' | 'mise settings';

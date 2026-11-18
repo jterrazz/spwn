@@ -104,8 +104,6 @@ func Session(t *testing.T, open func(t *testing.T) SessionSubject) {
 
 type MultiplexerSubject struct {
 	Multiplexer contract.Multiplexer
-	// value: the machines the multiplexer reaches now, by name.
-	Reached func() []string
 	// value: the terminals the owner's terminal was put on, each
 	// "<machine>/<terminal>", or the terminal alone on this machine.
 	Attached func() []string
@@ -113,26 +111,6 @@ type MultiplexerSubject struct {
 
 func Multiplexer(t *testing.T, open func(t *testing.T) MultiplexerSubject) {
 	ctx := context.Background()
-
-	t.Run("a machine added is reached once, and forgotten when removed", func(t *testing.T) {
-		h := open(t)
-		for range 2 {
-			if err := h.Multiplexer.Add(ctx, "linux-1"); err != nil {
-				t.Fatalf("Add: %v", err)
-			}
-		}
-		if got, err := h.Multiplexer.Machines(ctx); err != nil || !slices.Equal(got, []string{"linux-1"}) {
-			t.Errorf("machines %q (%v), want linux-1 once", got, err)
-		}
-		for range 2 {
-			if err := h.Multiplexer.Remove(ctx, "linux-1"); err != nil {
-				t.Fatalf("Remove: %v", err)
-			}
-		}
-		if got := h.Reached(); len(got) != 0 {
-			t.Errorf("reached %q, want none", got)
-		}
-	})
 
 	t.Run("attach puts the owner's terminal on a terminal of a machine, or of this one", func(t *testing.T) {
 		h := open(t)

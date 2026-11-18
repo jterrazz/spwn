@@ -1,4 +1,4 @@
-# Set by station	4 ●	4 ◐	4 ○	3 ⊘
+# Set by station	4 ●	4 ◐	3 ○	3 ⊘
 ◐	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts
 ◐	dns	changed since 2 d ago	station settings diff dns
 ◐	zed-dotfiles	changed since 2 d ago	station settings diff zed-dotfiles
@@ -6,7 +6,6 @@
 ○	ghostty-dotfiles	not applied	station settings apply ghostty-dotfiles
 ○	git-signing	not applied	station settings apply git-signing
 ○	backup-exclusions	not applied	station settings apply backup-exclusions
-○	herdr-machine	not applied	station settings apply herdr-machine
 ●	docker-shortcuts	applied · ~/.docker-shortcuts
 ●	tmux-dotfiles	applied · ~/.tmux-dotfiles
 ●	ssh-key	applied · ~/.ssh-key

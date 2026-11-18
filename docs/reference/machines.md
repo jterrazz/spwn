@@ -10,7 +10,7 @@ All machines are every machine the owner runs: the physical Macs and the VMs on 
 | `--on`            | Running a command on another machine                         |
 | `station use`     | The machine this terminal's commands run on                  |
 | Tailscale         | The Tailscale app on each Mac, read only                     |
-| SSH and Herdr     | How one name reaches a Mac, a VM of This Mac, of another Mac |
+| SSH               | How one name reaches a Mac, a VM of This Mac, of another Mac |
 | The engine        | The one process per Mac that runs the VMs                    |
 | Round 5 migration | What init retires, and what the owner removes by hand        |
 | Mac readiness     | What a Mac that hosts servers must have, each check measured |
@@ -19,7 +19,7 @@ All machines are every machine the owner runs: the physical Macs and the VMs on 
 
 A Mac registers itself with `station init --name <name>`; another Mac is added by its Tailscale name with `station machines add <mac> [--user <login>] [--key <file>]`, once its ssh and its station answer, and forgotten with `forget`, which never reaches it. A VM is cloned from an [image](images.md) on a chosen Mac. A machine's kind is `mac`, `server` or `workspace` ([ADR-017](../decisions/017-servers-and-workspaces.md)); its system, `macOS` or `Linux`, is its own word. A VM learns its kind from the file its Mac wrote at create; a macOS VM is told from a Mac by `kern.hv_vmm_present`. A VM refuses the commands that only Macs do, with a hint to run it on its Mac.
 
-A machine has one name, used for `preferences.json`, the `~/.ssh/config` block, Herdr and `--on`; a Mac's name is also its tailnet node. A VM is never on the tailnet: it is reached through its Mac. Every VM has the one login `vm_user`; a Mac's login is its own `--user`.
+A machine has one name, used for `preferences.json`, the `~/.ssh/config` block and `--on`; a Mac's name is also its tailnet node. A VM is never on the tailnet: it is reached through its Mac. Every VM has the one login `vm_user`; a Mac's login is its own `--user`.
 
 `station machines` is All machines: a first line that counts the machines, the running, the stopped and what needs you; each Mac with its VMs under it, in the columns MACHINE, KIND, STATE, CPU and MEMORY; then Needs you. A Mac that does not answer in 5 seconds keeps its row, `✗ Unreachable`, and is a finding, never a failure; a Mac that runs another station says which and where to update it. Piped, each machine is one record (glyph, name, kind, its Mac, state, CPU, memory); `--json` is `station.machines.list/v1`.
 
@@ -143,7 +143,7 @@ Every `tailscale` call, the engine's included, runs the CLI resolved at that cal
 
 With the App Store app, the setting `tailscale-cli`, which `apps install tailscale` applies once the app is installed (`station settings apply tailscale-cli` when the app came another way), makes `tailscale` answer in a terminal, an IDE and `studio doctor` by writing `~/.local/bin/tailscale`, two lines, `#!/bin/sh` and `exec /Applications/Tailscale.app/Contents/MacOS/Tailscale "$@"`: a symlink to that executable crashes (`bundleIdentifier is unknown to the registry`), so a symlink found there is replaced, the script's exact bytes are adopted, and a file station did not write, or another `tailscale` on PATH, is left alone. Until it is written the setting reads Not applied; `station settings off tailscale-cli` removes only station's script. `apps install tailscale` also uninstalls the Homebrew formula `tailscale` (an older CLI the app supersedes) once the app is installed: `● tailscale formula  uninstalled: the app replaces it`; the formula alone stays, `◐ tailscale formula installed, app absent`.
 
-## SSH and Herdr
+## SSH
 
 Station writes one managed block per machine in `~/.ssh/config` on every Mac, refreshed by a bare `machines` and after every change, so `ssh api` works on every machine. Every block pins its host key in `~/.local/state/station/known_hosts/<name>` (`StrictHostKeyChecking accept-new`). The three shapes:
 
@@ -160,7 +160,7 @@ Host api # a VM of mac-mini, seen from macbook: one hop
  ProxyCommand ssh mac-mini -- "sh -c 'PATH=\"\$HOME/.local/bin:/usr/local/bin:\$PATH\" exec station \"\$@\"' station machines pipe api"
 ```
 
-`station machines pipe <vm>` (hidden plumbing) carries ssh's bytes to the VM's current ip behind its own Mac; it never needs the engine. A VM trusts its Mac's key and every line of the Mac's own `~/.ssh/authorized_keys` through a managed block of its `~/.ssh/authorized_keys` (`# >>> station hosts >>>`), written by the guest, so whoever may log into a Mac may reach its VMs. Herdr drives that same ssh: a workspace made on a Mac is a machine of that Mac's Herdr at once (`hc machine add --install --name <vm> <vm>`, which copies `hc` into it when it has none), and is forgotten when it is deleted (`hc machine rm <vm>`), its terminals left running; the setting `herdr-machine` checks that every workspace of the Mac is reached, and applies what is missing. Agents run in Herdr terminals of their workspace ([Settings](settings.md#the-packages)). `station machines ssh <machine>` prints the command, never runs it, so `$(station machines ssh api)` does.
+`station machines pipe <vm>` (hidden plumbing) carries ssh's bytes to the VM's current ip behind its own Mac; it never needs the engine. A VM trusts its Mac's key and every line of the Mac's own `~/.ssh/authorized_keys` through a managed block of its `~/.ssh/authorized_keys` (`# >>> station hosts >>>`), written by the guest, so whoever may log into a Mac may reach its VMs. `station machines ssh <machine>` prints the command, never runs it, so `$(station machines ssh api)` does.
 
 ## Files and editors
 

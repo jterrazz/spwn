@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "15 set by station here"
+                    "text": "14 set by station here"
                   },
                   {
                     "kind": "text",
@@ -333,22 +333,6 @@
         },
         {
           "row": {
-            "id": "herdr-machine",
-            "mark": "absent",
-            "label": "herdr-machine",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "not applied"
-              }
-            ],
-            "hint": {
-              "command": "station settings apply herdr-machine"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "docker-shortcuts",
             "mark": "ok",
             "label": "docker-shortcuts",
@@ -486,7 +470,7 @@
         },
         {
           "mark": "absent",
-          "n": 4
+          "n": 3
         },
         {
           "mark": "off-here",
@@ -820,7 +804,7 @@
   "hints": [
     {
       "command": "station settings apply",
-      "text": "apply the 8"
+      "text": "apply the 7"
     },
     {
       "command": "station settings --all",

@@ -16,11 +16,10 @@ import (
 
 type core struct {
 	// value: a recorded herdr-core: its terminals, what each shows and
-	// says, the machines it reaches, and every command line hc ran.
+	// says, and every command line hc ran.
 	terminals []map[string]any
 	opened    []string
 	typed     []contracttest.Typed
-	machines  []string
 	attached  []string
 	lines     []string
 }
@@ -84,30 +83,6 @@ func (c *core) play(cmd local.Cmd) (local.Output, error) {
 	switch {
 	case len(args) == 1 && args[0] == "connect":
 		return c.connect(cmd.Stdin), nil
-	case len(args) >= 2 && args[0] == "machine" && args[1] == "ls":
-		var list []map[string]string
-		for _, m := range c.machines {
-			list = append(list, map[string]string{"name": m, "state": "connected"})
-		}
-		data, _ := json.Marshal(map[string]any{"machines": list})
-		return local.Output{Stdout: string(data)}, nil
-	case len(args) >= 2 && args[0] == "machine" && args[1] == "add":
-		name := args[len(args)-1]
-		if slices.Contains(c.machines, name) {
-			return local.Output{ExitCode: 1, Stderr: "already_added"}, nil
-		}
-		if !slices.Contains(args, "--install") || !slices.Contains(args, "--name") {
-			return local.Output{ExitCode: 1, Stderr: "hc_missing"}, nil
-		}
-		c.machines = append(c.machines, name)
-		return local.Output{Stdout: "{}"}, nil
-	case len(args) >= 2 && args[0] == "machine" && args[1] == "rm":
-		name := args[len(args)-1]
-		if !slices.Contains(c.machines, name) {
-			return local.Output{ExitCode: 1, Stderr: "machine_unknown"}, nil
-		}
-		c.machines = slices.DeleteFunc(c.machines, func(m string) bool { return m == name })
-		return local.Output{Stdout: "{}"}, nil
 	case len(args) == 2 && args[0] == "attach":
 		c.attached = append(c.attached, args[1])
 		return local.Output{}, nil
@@ -141,7 +116,6 @@ func TestMultiplexer(t *testing.T) {
 		c := &core{}
 		return contracttest.MultiplexerSubject{
 			Multiplexer: herdr.NewMultiplexer(local.Played(c.play, "hc")),
-			Reached:     func() []string { return c.machines },
 			Attached:    func() []string { return c.attached },
 		}
 	})
@@ -180,15 +154,5 @@ func TestAnAnswerOfAnErrorIsTheError(t *testing.T) {
 	err := herdr.NewSession(run).Send(context.Background(), "t1", "yes")
 	if err == nil || !strings.Contains(err.Error(), "blocked") {
 		t.Errorf("Send: %v, want the core's refusal", err)
-	}
-}
-
-func TestAMacWithoutHcReachesNoMachineAndForgetsNothing(t *testing.T) {
-	m := herdr.NewMultiplexer(local.Played(func(local.Cmd) (local.Output, error) { return local.Output{}, nil }))
-	if got, err := m.Machines(context.Background()); err != nil || got != nil {
-		t.Errorf("machines %q (%v), want none and no error", got, err)
-	}
-	if err := m.Remove(context.Background(), "linux-1"); err != nil {
-		t.Errorf("Remove: %v, want nothing to forget", err)
 	}
 }

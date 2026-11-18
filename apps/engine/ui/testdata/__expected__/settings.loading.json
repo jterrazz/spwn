@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "18 set by station here"
+                    "text": "17 set by station here"
                   },
                   {
                     "kind": "text",
@@ -240,22 +240,12 @@
               "kind": "pending"
             }
           }
-        },
-        {
-          "row": {
-            "id": "herdr-machine",
-            "mark": "pending",
-            "label": "herdr-machine",
-            "detail": {
-              "kind": "pending"
-            }
-          }
         }
       ],
       "counts": [
         {
           "mark": "pending",
-          "n": 18
+          "n": 17
         }
       ],
       "pipe_counts": true

@@ -26,16 +26,6 @@ type Session interface {
 }
 
 type Multiplexer interface {
-	// value: the multiplexer of this Mac, and the machines it reaches by
-	// their names.
-	//
-	// invariant: Machines lists the names the multiplexer reaches; Add makes it
-	// reach one more, over the ssh its name already reaches, and Remove
-	// forgets one, its terminals left running there. Adding a name it
-	// reaches, or removing one it does not, changes nothing.
-	Machines(ctx context.Context) ([]string, error)
-	Add(ctx context.Context, machine string) error
-	Remove(ctx context.Context, machine string) error
 	// invariant: Attach puts the owner's terminal on the terminal at that
 	// address of machine until they detach; an empty machine is this one.
 	Attach(ctx context.Context, machine, terminal string) error
