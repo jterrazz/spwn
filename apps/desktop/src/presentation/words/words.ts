@@ -60,6 +60,7 @@ export const AWAKE_WORDS = {
 
 export const AWAKE_GESTURE_WORDS = {
     close: 'Close',
+    howLong: 'How long',
     open: 'Awake…',
     stop: 'Stop keeping awake',
 } as const;

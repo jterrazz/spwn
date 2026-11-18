@@ -1,0 +1,54 @@
+- main:
+  - heading "macbook-pro online" [level=2]
+  - paragraph: This Mac · Engine running. Awake until 18:00, lid closed.
+  - button "Keep macbook-pro awake": Awake…
+  - dialog "Keep macbook-pro awake":
+    - heading "Keep macbook-pro awake" [level=3]
+    - paragraph: Awake until 18:00, lid closed.
+    - group "How long":
+      - button "1 hr"
+      - button "4 hr"
+      - button "Until 18:00" [pressed]
+    - button "Stop keeping awake"
+    - button "Close"
+  - button "New machine on macbook-pro": New machine
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "Online, with 2 machines running." [level=1]
+  - paragraph:
+    - img "Online, with 2 machines running."
+    - text: Up 3 days.
+  - text: CPU 22%
+  - img "CPU of macbook-pro, its last bars"
+  - text: Peak 48 % · 25 min ago Memory 32GB
+  - meter "Memory used of its total"
+  - text: of 48 GB Disk 606GB
+  - meter "Disk used of its total"
+  - text: of 994 GB Its machines 4machines 2 running, 2 stopped
+  - region "Needs you, on this Mac":
+    - heading "Needs you, on this Mac" [level=2]
+    - button "Broken port 5000 is reachable outside Tailscale macbook-pro · Ports"
+    - text: Review
+    - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.example.brain.x-snapshot": Remove
+  - region "Memory":
+    - heading "Memory one square, one GB" [level=2]
+    - text: macbook-pro
+    - emphasis: 20 GB free
+    - text: of 48
+    - img "Memory of macbook-pro, one square per GB"
+    - text: 4 macOS 8 agent-7f, 5 used 8 linux-1, 5 used 8 linux-2 20 free
+  - region "Its machines":
+    - heading "Its machines" [level=2]
+    - button "agent-7f Write the changelog of v4 · by studio-os-43 running · up 2 h"
+    - button "api The API's staging copy · by you stopped"
+    - button "linux-1 Lot L2.5, settings from a machine file · by studio-os-fe running · up 2 h"
+    - 'button "linux-2 Lot L3, the Machines page · by studio-os-fe Creating: image 1 of 5"'
+  - region "Packages":
+    - heading "Packages" [level=2]
+    - button "Follows macbook-pro its apps, settings and the values you set are read in Machine files 3 differences from macbook-pro."

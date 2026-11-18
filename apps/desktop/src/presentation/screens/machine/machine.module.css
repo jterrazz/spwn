@@ -48,16 +48,35 @@
     gap: var(--space-8);
     align-items: center;
 }
-.choices {
+.awakeState {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.awakeSentence {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    color: var(--t1);
+}
+.awakeLine {
+    margin: 0;
+    padding-left: calc(14px + var(--space-8));
+    color: var(--t3);
+    font-size: var(--text-label);
+}
+.awakeOutcomes {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-8);
 }
-.choice {
-    display: flex;
-    align-items: center;
-    gap: var(--space-8);
+.awakeOutcomes:empty {
+    display: none;
+}
+.stopKeeping {
+    margin-right: auto;
 }
 .gestures {
     display: flex;

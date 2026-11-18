@@ -45,6 +45,31 @@ export function marked(gesture: Gesture<unknown>, mark: () => void): Gesture<unk
     };
 }
 
+type Asking = {
+    title: string;
+    verb: string;
+    consequence?: string | undefined;
+    held?: string | undefined;
+    destroys: boolean;
+};
+
+export function useStart(): (gesture: Gesture<unknown>, asking: Asking) => void {
+    const gestures = useGestureStore();
+    return (gesture, { title, verb, consequence, held, destroys }) => {
+        gestures.askedBy({
+            cancel: gesture.cancel,
+            confirm: gesture.confirm,
+            consequence: (ask) => consequence ?? gesture.consequence(ask),
+            destroys,
+            held,
+            key: gesture.key,
+            title,
+            verb,
+        });
+        gesture.start();
+    };
+}
+
 export function GestureButton({
     gesture,
     label,
@@ -57,19 +82,9 @@ export function GestureButton({
     destroys = variant === 'danger',
     yields = false,
 }: GestureButtonProps) {
-    const gestures = useGestureStore();
+    const started = useStart();
     const start = () => {
-        gestures.askedBy({
-            cancel: gesture.cancel,
-            confirm: gesture.confirm,
-            consequence: (ask) => consequence ?? gesture.consequence(ask),
-            destroys,
-            held,
-            key: gesture.key,
-            title,
-            verb,
-        });
-        gesture.start();
+        started(gesture, { consequence, destroys, held, title, verb });
     };
     return (
         <Button
