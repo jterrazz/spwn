@@ -25,6 +25,12 @@ const FILES = [
     { count: 5, id: 'built-in', label: 'Built-in' },
 ];
 
+const TERMS = [
+    { id: '1h', label: '1 hr' },
+    { id: '4h', label: '4 hr' },
+    { id: 'until', label: 'Until 18:00' },
+];
+
 export const SWITCH_STORIES: readonly Story<SwitchProps<string>>[] = [
     {
         name: 'filter, all chosen',
@@ -92,6 +98,28 @@ export const SWITCH_STORIES: readonly Story<SwitchProps<string>>[] = [
             options: WRAPPED,
             value: 'runtimes',
             wrap: true,
+        },
+    },
+    {
+        name: 'even, one chosen',
+        props: {
+            even: true,
+            label: 'How long',
+            onChange: nothing,
+            options: TERMS,
+            surface: 'panel',
+            value: 'until',
+        },
+    },
+    {
+        name: 'even, none chosen, one running',
+        props: {
+            even: true,
+            label: 'How long',
+            onChange: nothing,
+            options: TERMS.map((term) => (term.id === '4h' ? { ...term, busy: true } : term)),
+            surface: 'panel',
+            value: null,
         },
     },
     { name: 'empty', props: { label: 'No option', onChange: nothing, options: [], value: '' } },
