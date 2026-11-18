@@ -159,9 +159,11 @@ points at the most recent published manifest.
 | `beta`    | `vX.Y.Z-beta.N`        | `spwn upgrade --channel beta`     |
 | `nightly` | `vX.Y.Z-nightly.STAMP` | Reserved; not yet wired           |
 
-GoReleaser's `prerelease: auto` automatically marks any tag with a hyphen
-as a GitHub prerelease, so the stable "latest" endpoint still returns only
-`vX.Y.Z` tags.
+GoReleaser's `prerelease: false` and `make_latest: true` publish every
+tag as a normal release marked latest, hyphenated tags included, so the
+stable "latest" endpoint returns the newest tag whatever its label. The
+word `alpha`, `beta` or `rc` in the tag carries the state, not GitHub's
+prerelease flag.
 
 ---
 

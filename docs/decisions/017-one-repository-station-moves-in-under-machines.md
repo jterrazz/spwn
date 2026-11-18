@@ -26,7 +26,7 @@ Station's whole tree moves into this repository under one prefix, `machines/`, w
 
 ## Consequences
 
-- One release number serves two products, so it must climb past both histories: spwn's `v1.0.0-rc1` and station's `v3.1.0` put the first unified tag at `v4.0.0-alpha.1`.
+- One release number serves two products, and the line restarts: with no real users and no backward compatibility, the first unified tag is `v0.1.0-alpha.1`, below spwn's `v1.0.0-rc1` and station's `v3.1.0`; the two installed station hosts are reinstalled by hand. The alpha is published as a normal release marked latest, not a pre-release, so `releases/latest` (station's installer, its menubar script and its release fetcher) returns it; the word `alpha` carries the state. The old spwn releases are kept and retitled as legacy, their tags untouched.
 - Station's code still names its old repository where it fetches its own release (`apps/engine/images/calls/binary.go`), and refuses a tag with a pre-release label there; until that changes, an image built from an alpha needs its linux binary given by hand.
 - Station keeps its own Go version (1.27, from `machines/go.work`) beside spwn's (1.25); CI provisions each from its own file.
 - The GoReleaser changelog of the first unified tag reads station's whole imported history as new commits.
