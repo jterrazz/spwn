@@ -172,6 +172,8 @@ import SwiftUI
 
 #Preview("menu.station") { StoryStage(Stories["menu.station"]) }
 
+#Preview("menubar.connecting") { StoryStage(Stories["menubar.connecting"]) }
+
 #Preview("menubar.down") { StoryStage(Stories["menubar.down"]) }
 
 #Preview("menubar.fine") { StoryStage(Stories["menubar.fine"]) }
@@ -179,6 +181,8 @@ import SwiftUI
 #Preview("menubar.open") { StoryStage(Stories["menubar.open"]) }
 
 #Preview("menubar.restarting") { StoryStage(Stories["menubar.restarting"]) }
+
+#Preview("menubar.stopped") { StoryStage(Stories["menubar.stopped"]) }
 
 #Preview("needs.all") { StoryStage(Stories["needs.all"]) }
 
