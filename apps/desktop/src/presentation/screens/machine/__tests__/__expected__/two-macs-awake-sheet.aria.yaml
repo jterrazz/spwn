@@ -4,9 +4,11 @@
   - button "Keep macbook-pro awake": Awake…
   - dialog "Keep macbook-pro awake":
     - heading "Keep macbook-pro awake" [level=3]
-    - button "1 hr"
-    - button "4 hr"
-    - button "Until 18:00"
+    - paragraph: Sleeps normally.
+    - group "How long":
+      - button "1 hr"
+      - button "4 hr"
+      - button "Until 18:00"
     - button "Close"
   - button "New machine on macbook-pro": New machine
   - tablist "Tabs":

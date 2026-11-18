@@ -1,0 +1,47 @@
+- main:
+  - heading "macbook-pro online" [level=2]
+  - paragraph: This Mac · Engine running. Awake stopped, battery 18 %.
+  - button "Keep macbook-pro awake": Awake…
+  - dialog "Keep macbook-pro awake":
+    - heading "Keep macbook-pro awake" [level=3]
+    - paragraph: Awake stopped, battery 18 %.
+    - group "How long":
+      - button "1 hr"
+      - button "4 hr"
+      - button "Until 18:00"
+    - button "Close"
+  - button "New machine on macbook-pro": New machine
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "Online, with 1 machine running." [level=1]
+  - paragraph:
+    - img "Online, with 1 machine running."
+    - text: Up 3 days.
+  - text: CPU 34% 10 CPUs Memory 12.4GB
+  - meter "Memory used of its total"
+  - text: of 16 GB Disk 606GB
+  - meter "Disk used of its total"
+  - text: of 994 GB Its machines 2machines 1 running, 1 stopped
+  - region "Needs you, on this Mac":
+    - heading "Needs you, on this Mac" [level=2]
+    - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.example.brain.x-snapshot": Remove
+  - region "Memory":
+    - heading "Memory one square, one GB" [level=2]
+    - text: macbook-pro
+    - emphasis: 4 GB free
+    - text: of 16
+    - img "Memory of macbook-pro, one square per GB"
+    - text: 4 macOS 8 linux-1 4 free
+  - region "Its machines":
+    - heading "Its machines" [level=2]
+    - button "api by you stopped"
+    - button "linux-1 by you running"
+  - region "Packages":
+    - heading "Packages" [level=2]
+    - text: "Not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"
