@@ -1,0 +1,245 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Digest::SHA qw(sha256_hex);
+use File::Copy qw(copy);
+use File::Path qw(make_path remove_tree);
+
+my $home = $ENV{HOME} // die "home-diff: HOME is not set\n";
+my $tmp  = $ENV{TMPDIR} // die "home-diff: TMPDIR is not set\n";
+my $mark = "$tmp/home-before";
+my $inline_limit = 4096;
+my $plain_mode = 0644;
+my %skip = ('bin' => 1, '.calls' => 1);
+
+sub skipped {
+    my ($root, $path) = @_;
+    my ($top) = split m{/}, $path;
+    return 1 if $skip{$top};
+    return 1 if $root eq $home && index("$root/$path/", "$mark/") == 0;
+    return 0;
+}
+
+sub slurp {
+    my ($file) = @_;
+    open my $fh, '<:raw', $file or die "home-diff: cannot read $file: $!\n";
+    local $/;
+    my $data = <$fh>;
+    close $fh;
+    return $data;
+}
+
+sub scan {
+    my ($root) = @_;
+    my %tree;
+    my $walk;
+    $walk = sub {
+        my ($dir) = @_;
+        opendir my $dh, $dir eq '' ? $root : "$root/$dir" or die "home-diff: cannot read $root/$dir: $!\n";
+        my @names = sort grep { $_ ne '.' && $_ ne '..' } readdir $dh;
+        closedir $dh;
+        my $kept = 0;
+        for my $name (@names) {
+            my $path = $dir eq '' ? $name : "$dir/$name";
+            next if skipped($root, $path);
+            $kept++;
+            my @st = lstat "$root/$path";
+            if (-l _) {
+                $tree{$path} = { type => 'link', target => readlink("$root/$path") };
+            } elsif (-d _) {
+                $tree{$path} = { type => 'dir' } if !$walk->($path);
+            } else {
+                $tree{$path} = { type => 'file', mode => $st[2] & 07755, size => $st[7] };
+            }
+        }
+        return $kept;
+    };
+    $walk->('');
+    return \%tree;
+}
+
+sub mark {
+    remove_tree($mark);
+    make_path($mark);
+    my $tree = scan($home);
+    for my $path (sort keys %$tree) {
+        my $entry = $tree->{$path};
+        my $to = "$mark/$path";
+        if ($entry->{type} eq 'dir') {
+            make_path($to);
+        } elsif ($entry->{type} eq 'link') {
+            my ($parent) = $to =~ m{^(.*)/[^/]*$};
+            make_path($parent);
+            symlink $entry->{target}, $to or die "home-diff: cannot mark $path: $!\n";
+        } else {
+            my ($parent) = $to =~ m{^(.*)/[^/]*$};
+            make_path($parent);
+            copy("$home/$path", $to) or die "home-diff: cannot mark $path: $!\n";
+            chmod $entry->{mode}, $to;
+        }
+    }
+}
+
+sub is_text {
+    my ($data) = @_;
+    return length($data) < $inline_limit && $data !~ /\0/ && $data =~ /\A(?:[\x09\x0a\x0d\x20-\x7e]|[\xc2-\xf4][\x80-\xbf]+)*\z/;
+}
+
+sub rows {
+    my ($text, $indent, $blank) = @_;
+    my @out;
+    for my $line (split /\n/, $text, -1) {
+        push @out, $line eq '' || (defined $blank && $line eq $blank) ? '' : "$indent$line";
+    }
+    pop @out if @out && $out[-1] eq '' && $text =~ /\n\z/;
+    push @out, "$indent\\ No newline at end of file" if length $text && $text !~ /\n\z/;
+    return @out;
+}
+
+sub shown_mode {
+    my ($entry, $before) = @_;
+    return '' if $entry->{mode} == $plain_mode && (!$before || $before->{mode} == $plain_mode);
+    return sprintf ' %04o', $entry->{mode};
+}
+
+sub digest_line {
+    my ($file, $size) = @_;
+    return "$size bytes sha256 " . sha256_hex(slurp($file));
+}
+
+sub edit_script {
+    my ($old, $new) = @_;
+    my ($n, $m) = (scalar @$old, scalar @$new);
+    my @lcs = map { [ (0) x ($m + 1) ] } 0 .. $n;
+    for my $i (reverse 0 .. $n - 1) {
+        for my $j (reverse 0 .. $m - 1) {
+            $lcs[$i][$j] = $old->[$i] eq $new->[$j]
+                ? $lcs[$i + 1][$j + 1] + 1
+                : ($lcs[$i + 1][$j] >= $lcs[$i][$j + 1] ? $lcs[$i + 1][$j] : $lcs[$i][$j + 1]);
+        }
+    }
+    my (@ops, $i, $j);
+    ($i, $j) = (0, 0);
+    while ($i < $n || $j < $m) {
+        if ($i < $n && $j < $m && $old->[$i] eq $new->[$j]) { push @ops, [ ' ', $old->[$i] ]; $i++; $j++ }
+        elsif ($i < $n && ($j == $m || $lcs[$i + 1][$j] >= $lcs[$i][$j + 1])) { push @ops, [ '-', $old->[$i] ]; $i++ }
+        else { push @ops, [ '+', $new->[$j] ]; $j++ }
+    }
+    return @ops;
+}
+
+sub span {
+    my ($start, $count) = @_;
+    return $count == 1 ? "$start" : $count == 0 ? ($start - 1) . ",0" : "$start,$count";
+}
+
+sub unified {
+    my ($old, $new) = @_;
+    my @ops = edit_script([ split /^/, slurp($old) ], [ split /^/, slurp($new) ]);
+    my $context = 3;
+    my @changed = grep { $ops[$_][0] ne ' ' } 0 .. $#ops;
+    my (@hunks, $from, $to);
+    for my $at (@changed) {
+        my ($lo, $hi) = ($at - $context, $at + $context);
+        $lo = 0 if $lo < 0;
+        $hi = $#ops if $hi > $#ops;
+        if (defined $to && $lo <= $to + 1) { $to = $hi }
+        else { push @hunks, [ $from, $to ] if defined $from; ($from, $to) = ($lo, $hi) }
+    }
+    push @hunks, [ $from, $to ] if defined $from;
+    my $out = '';
+    for my $hunk (@hunks) {
+        my ($lo, $hi) = @$hunk;
+        my ($old_start, $new_start) = (1, 1);
+        for my $op (@ops[ 0 .. $lo - 1 ]) {
+            $old_start++ if $op->[0] ne '+';
+            $new_start++ if $op->[0] ne '-';
+        }
+        my @body = @ops[ $lo .. $hi ];
+        my $old_count = grep { $_->[0] ne '+' } @body;
+        my $new_count = grep { $_->[0] ne '-' } @body;
+        $out .= "@@ -" . span($old_start, $old_count) . " +" . span($new_start, $new_count) . " @@\n";
+        for my $op (@body) {
+            my ($mark, $line) = @$op;
+            $out .= "$mark$line";
+            $out .= "\n\\ No newline at end of file\n" if $line !~ /\n\z/;
+        }
+    }
+    return $out;
+}
+
+sub diff_home {
+    -d $mark or die "home-diff: no mark: run home-diff mark first\n";
+    my $before = scan($mark);
+    my $after  = scan($home);
+    my (%groups, %keychain);
+    my $note = sub {
+        my ($path, @lines) = @_;
+        my ($dir, $name) = $path =~ m{^(?:(.*)/)?([^/]*)$};
+        push @{ $groups{ defined $dir ? "~/$dir/" : '~/' } }, [ $name, @lines ];
+    };
+    my $keychain = sub {
+        my ($sign, $path) = @_;
+        (my $entry = $path) =~ s{^\.keychain/}{};
+        push @{ $groups{keychain} }, [ $entry, "$sign $entry" ];
+    };
+    for my $path (sort keys %{ { %$before, %$after } }) {
+        my ($old, $new) = ($before->{$path}, $after->{$path});
+        my $in_keychain = $path =~ m{^\.keychain/};
+        if ($old && $new && $old->{type} eq $new->{type}) {
+            next if $new->{type} eq 'dir';
+            if ($new->{type} eq 'link') {
+                next if $old->{target} eq $new->{target};
+                $note->($path, "~ " . (split m{/}, $path)[-1] . " -> $new->{target}");
+                next;
+            }
+            my $a = slurp("$mark/$path");
+            my $b = slurp("$home/$path");
+            next if $a eq $b && $old->{mode} == $new->{mode};
+            my $name = (split m{/}, $path)[-1];
+            my $head = "~ $name" . shown_mode($new, $old);
+            if ($a eq $b) {
+                $note->($path, $head);
+            } elsif (is_text($a) && is_text($b)) {
+                $note->($path, $head, rows(unified("$mark/$path", "$home/$path"), '  ', ' '));
+            } else {
+                $note->($path, $head, "  " . digest_line("$mark/$path", $old->{size}) . " -> " . digest_line("$home/$path", $new->{size}));
+            }
+            next;
+        }
+        if ($old) {
+            my $name = (split m{/}, $path)[-1];
+            if ($in_keychain) { $keychain->('-', $path); next }
+            my $what = $old->{type} eq 'dir' ? "$name/" : $old->{type} eq 'link' ? "$name -> $old->{target}" : $name;
+            $note->($path, "- $what");
+        }
+        if ($new) {
+            my $name = (split m{/}, $path)[-1];
+            if ($in_keychain) { $keychain->('+', $path); next }
+            if ($new->{type} eq 'dir') { $note->($path, "+ $name/"); next }
+            if ($new->{type} eq 'link') { $note->($path, "+ $name -> $new->{target}"); next }
+            my $data = slurp("$home/$path");
+            my $head = "+ $name" . shown_mode($new, undef);
+            if (is_text($data)) {
+                $note->($path, $head, rows($data, '  '));
+            } else {
+                $note->($path, $head, "  " . digest_line("$home/$path", $new->{size}));
+            }
+        }
+    }
+    my @order = sort { $a cmp $b } grep { $_ ne 'keychain' } keys %groups;
+    push @order, 'keychain' if $groups{keychain};
+    for my $group (@order) {
+        print "$group\n";
+        for my $row (@{ $groups{$group} }) {
+            my ($name, $first, @rest) = @$row;
+            print "  $first\n";
+            print $_ eq '' ? "\n" : "  $_\n" for @rest;
+        }
+    }
+}
+
+my $verb = shift @ARGV // '';
+if ($verb eq 'mark') { mark() }
+elsif ($verb eq '') { diff_home() }
+else { die "usage: home-diff [mark]\n" }
