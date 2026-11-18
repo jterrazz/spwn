@@ -44,7 +44,6 @@ public struct Look: Equatable, Sendable {
     public var height = 1.0
     public var reveal = 1.0
     public var tint = 0.0
-    public var shade = 0.0
 
     public init() {}
 

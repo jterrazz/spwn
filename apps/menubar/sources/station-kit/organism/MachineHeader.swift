@@ -1,7 +1,7 @@
 import SwiftUI
 
 // invariant: SPEC A4: a machine page's header: the way back, the
-// machine's glyph and name, its buttons (New VM, its menu), its facts, a
+// machine's glyph and its title (the H1 the engine sent), its buttons (New VM, its menu), its facts, a
 // fact that links pushing its page, and its segments.
 public struct MachineHeader: View {
     let page: Page
@@ -33,6 +33,9 @@ public struct MachineHeader: View {
         return line
     }
 
+    // value: the H1 of a subpage: the title the engine sent in its header.
+    public static func title(_ page: Page) -> String { page.header?.title ?? "" }
+
     // value: the page's mark: a symbol.
     static func image(_ glyph: Glyph) -> Image? {
         guard case let .symbol(name) = GlyphView.drawn(glyph) else { return nil }
@@ -60,7 +63,7 @@ public struct MachineHeader: View {
                         .foregroundStyle(glyph.signal.map { $0 == "active" ? tokens.color.t2 : tokens.signal($0) } ?? tokens.color.t2)
                         .frame(width: m.glyphSlot)
                 }
-                Text(summary?.title ?? "").font(Token.Role.pageTitle.font).foregroundStyle(tokens.tone(Token.Role.pageTitle.tone)).lineLimit(1)
+                Text(Self.title(page)).font(Token.Role.pageTitle.font).tracking(Token.Role.pageTitle.tracking).foregroundStyle(tokens.tone(Token.Role.pageTitle.tone)).lineLimit(1)
                 Spacer(minLength: 0)
                 HStack(spacing: m.buttonsGap) {
                     ForEach(Array((page.header?.buttons ?? []).compactMap { page.action($0) }.enumerated()), id: \.offset) { _, a in

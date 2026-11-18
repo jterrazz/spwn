@@ -119,6 +119,18 @@ final class MacPageTests: XCTestCase {
         XCTAssertFalse(facts.contains { $0.text == "checking" })
     }
 
+    // invariant: every subpage says Back and draws the title its header
+    // carries as its H1.
+    func testEverySubpageDrawsItsHeadersTitleAsItsH1() throws {
+        let titles = ["mac.this.overview": "This Mac", "mac.mini.overview": "mac-mini", "server.healthy": "infra", "workspace.overview": "linux-1",
+                      "needs.all": "Needs you", "ports.all": "Ports", "accounts.all": "Accounts"]
+        for (story, title) in titles.sorted(by: { $0.key < $1.key }) {
+            let page = try XCTUnwrap(Stories[story].state.shown, story)
+            XCTAssertEqual(page.header?.back, "Back", story)
+            XCTAssertEqual(MachineHeader.title(page), title, story)
+        }
+    }
+
     // invariant: SPEC A4: mac-mini never sleeps, so its upkeep unfolds to
     // its readiness after Settings, Background, Apps and Disk.
     func testAMacThatNeverSleepsUnfoldsItsUpkeepToItsReadiness() throws {
