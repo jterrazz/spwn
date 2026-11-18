@@ -188,6 +188,18 @@ func (s *Machinist) vmUser(cfg prefsView) string {
 	return s.o.User
 }
 
+// invariant: a guest's user is the OS user of the Mac it runs on, so a VM on
+// another Mac is reached as that Mac's recorded user; a record with no user falls
+// back to this Mac's VM user, the only one known.
+func (s *Machinist) guestUser(cfg prefsView, mac string) string {
+	if mac != cfg.ThisMachine {
+		if u := cfg.Macs[mac].User; u != "" {
+			return u
+		}
+	}
+	return s.vmUser(cfg)
+}
+
 func (s *Machinist) CheckMac() error {
 	if s.o.ThisMachine != catalog.Mac {
 		return &model.OnlyOnMacError{ThisMachine: s.o.ThisMachine}

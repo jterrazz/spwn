@@ -10,11 +10,11 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          ssh admin@infra
+          ssh jterrazz.agent@infra
     - command: 'machines ssh infra'
       exit: 0
       stdout: |
-          ssh admin@infra
+          ssh jterrazz.agent@infra
     - command: 'machines ssh infra --json'
       exit: 0
       stdout: |
@@ -30,7 +30,7 @@ runs:
             },
             "findings": [],
             "name": "infra",
-            "user": "admin",
+            "user": "jterrazz.agent",
             "address": "infra",
-            "command": "ssh admin@infra"
+            "command": "ssh jterrazz.agent@infra"
           }

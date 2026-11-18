@@ -22,8 +22,8 @@ func (s *Machinist) SSH(ctx context.Context, name string) (model.SSHTarget, erro
 	m, err := s.lookup(name)
 	var unknown *model.UnknownMachineError
 	if errors.As(err, &unknown) {
-		if _, ok := s.macOf(ctx, name); ok {
-			return sshTarget(s.vmUser(cfg), name), nil
+		if mac, ok := s.macOf(ctx, name); ok {
+			return sshTarget(s.guestUser(cfg, mac), name), nil
 		}
 	}
 	if err != nil {

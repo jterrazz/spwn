@@ -15,7 +15,7 @@ runs:
                   - |-
                     Host linux-1
                       HostName linux-1
-                      User vmu
+                      User u
     - command: '--version > /dev/null; /usr/bin/head -n 1 .calls'
       exit: 0
       stdout: |
