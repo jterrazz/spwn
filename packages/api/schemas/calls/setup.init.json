@@ -1,8 +1,37 @@
 {
   "$defs": {
+    "setup.Move": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "From": {
+          "type": "string"
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "From",
+        "To"
+      ],
+      "type": "object"
+    },
     "setup.Report": {
       "additionalProperties": false,
       "properties": {
+        "Moves": {
+          "items": {
+            "$ref": "#/$defs/setup.Move"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Steps": {
           "items": {
             "$ref": "#/$defs/setup.Step"
@@ -14,6 +43,7 @@
         }
       },
       "required": [
+        "Moves",
         "Steps"
       ],
       "type": "object"
@@ -58,11 +88,17 @@
     "setup.calls.InitIn": {
       "additionalProperties": false,
       "properties": {
+        "Confirm": {
+          "type": "string"
+        },
         "Interactive": {
           "type": "boolean"
         },
         "Name": {
           "type": "string"
+        },
+        "Plan": {
+          "type": "boolean"
         }
       },
       "type": "object"

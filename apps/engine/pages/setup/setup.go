@@ -90,3 +90,22 @@ func NameForm(suggestion string) page.Form {
 		Note: "lowercase letters, digits and -, as in macbook or mac-mini",
 	}}}
 }
+
+func Moves(moves []setup.Move, thisMac page.Context) page.Page {
+	// value: what init takes out of the home root, said before anything
+	// moves: each folder, where it goes, and its size.
+	rows := make([]page.Row, 0, len(moves))
+	for _, m := range moves {
+		where := "deleted: its app writes it again"
+		if m.To != "" {
+			where = "to " + m.To
+		}
+		rows = append(rows, page.Row{ID: m.From, Mark: page.Absent, Label: m.From, Cells: []page.Value{page.Text(where), page.Size(m.Bytes)}})
+	}
+	items := make([]page.Item, 0, len(rows))
+	for i := range rows {
+		items = append(items, page.Item{Row: &rows[i]})
+	}
+	columns := []page.Column{{Key: "from", Kind: page.KindText, Keep: 100}, {Key: "to", Kind: page.KindText, Keep: 60}, {Key: "size", Kind: page.KindSize, Keep: 20}}
+	return page.Seal(page.Page{Command: "init", Context: thisMac, Sections: []page.Section{{ID: "moves", Title: "To move", Fold: page.Open, Columns: columns, Items: items}}})
+}

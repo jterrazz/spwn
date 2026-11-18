@@ -24,6 +24,7 @@ type Machine interface {
 	Glob(pattern string) []string
 	// value: removed is false, and err nil, when there was nothing at path.
 	Remove(path string) (removed bool, err error)
+	RemoveAll(path string) error
 	// value: crossDevice is true when from and to are on two volumes.
 	Rename(from, to string) (crossDevice bool, err error)
 	// value: name run with args within budget: its stdout and its exit code.

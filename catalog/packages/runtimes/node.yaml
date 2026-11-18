@@ -30,6 +30,10 @@ disk:
           value: '{cache}/npm'
     misplaced:
         - path: ~/.npm
+          move:
+              - from: ~/.npm/*
+                to: '{cache}/npm'
+          prune: [~/.npm]
           free:
               - run: [npm, cache, clean, --force, --cache, ~/.npm]
                 uses: npm

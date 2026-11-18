@@ -1,9 +1,13 @@
 description: 'init moves the old Tart store and app into station''s data folder by rename, never pulls'
 fixture: ./__fixtures__/tart-store/
 runs:
-    - command: 'init --name m </dev/null'
+    - command: 'init --name m --yes </dev/null'
       exit: 0
       stdout: |
+          # To move
+          ○	~/.tart	to ~/.local/share/station/vms	20 B
+          ○	~/.local/opt/tart.app	to ~/.local/share/station/tart/tart.app	20 B
+          ○	~/.local/opt/LICENSE	to ~/.local/share/station/tart/LICENSE	8 B
           ●	name	m
           ●	zshrc
           ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart, ~/.local/opt

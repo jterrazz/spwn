@@ -79,7 +79,11 @@ disk:
           move:
               - from: ~/go/bin/*
                 to: '{data}/go/bin'
-          prune: [~/go/bin, ~/go]
+              - from: ~/go/pkg/mod/*
+                to: '{cache}/go/mod'
+              - from: ~/go/pkg/sumdb/*
+                to: '{data}/go/pkg/sumdb'
+          prune: [~/go/bin, ~/go/pkg/mod, ~/go/pkg/sumdb, ~/go/pkg, ~/go]
           free:
               - run: [go, clean, -modcache]
                 env: [GOMODCACHE=~/go/pkg/mod, GOFLAGS=-modcacherw]

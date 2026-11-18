@@ -40,7 +40,12 @@ func setupOf(env kit.Env, m machine) *setupcalls.Provisioner {
 		Expand:     m.expander(),
 		Files:      m.appFiles(),
 		Configurer: setupSettingsWriter{settings: settingsOf(m)},
-		Zshrc:      m.zshrc(),
+		Size: func(ctx context.Context, p string) int64 {
+			bytes := int64(-1)
+			m.disk().Sizes(ctx, []string{p}, func(_ int, b int64) { bytes = b })
+			return bytes
+		},
+		Zshrc: m.zshrc(),
 	})
 }
 

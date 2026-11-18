@@ -38,6 +38,9 @@ type ProvisionerOptions struct {
 	Expand                 disk.Expander
 	Files                  map[catalog.AppFile]string
 	Configurer             Configurer
+	// value: the bytes under path as `station disk` measures them, -1 past
+	// ctx; nil measures nothing.
+	Size func(ctx context.Context, path string) int64
 	// value: this machine's ~/.zshrc, every write of it one edit under the
 	// lock each station process takes for it.
 	Zshrc Zshrc

@@ -5,8 +5,8 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	~/go	nothing to move: its rebuildable files freed
+          ●	~/go	moved to ~/.cache/go/mod
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].disk.files | keys'' world.json'
       exit: 0
       stdout: |
-          ["~/.claude/projects/x","~/Library/Caches/Homebrew/downloads/x"]
+          ["~/.cache/go/mod/cache/x","~/.claude/projects/x","~/Library/Caches/Homebrew/downloads/x"]

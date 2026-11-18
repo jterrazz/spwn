@@ -9,6 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	pagesetup "github.com/jterrazz/studio-station/apps/engine/pages/setup"
+	"github.com/jterrazz/studio-station/apps/engine/setup"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 )
@@ -32,17 +33,33 @@ func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
 	return kit.Leaf[Input]{
 		Use:     "init",
 		Short:   "Make this machine known to station: its name, the ~/.zshrc block, the XDG folders",
-		Example: "  station init\n  station init --name macbook\n  station init --machinefile macbook-pro",
+		Example: "  station init\n  station init --name macbook --yes\n  station init --machinefile macbook-pro",
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Name, "name", "", "the name this Mac takes (asked on a terminal when omitted)")
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile this machine carries, by its name or its file: its plan is printed, then applied")
 		},
+		Asks:    true,
+		Confirm: func(*Input) string { return "Move them?" },
+		Verb:    func(*Input) string { return "move the apps' files" },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			if note != "" && !io.JSON && !io.PageJSON {
 				io.Note(note)
 			}
-			report, err := call.Invoke(ctx, env.Calls, env.Target(), setupcalls.Init, setupcalls.InitIn{Name: in.Name, Interactive: io.Interactive}, nil)
+			plan, err := call.Invoke(ctx, env.Calls, env.Target(), setupcalls.Init, setupcalls.InitIn{Name: in.Name, Plan: true}, nil)
+			if err != nil {
+				return err
+			}
+			if len(plan.Moves) > 0 {
+				if shown := io.Page(pagesetup.Moves(plan.Moves, d.ThisMachine), nil); shown != nil {
+					return shown
+				}
+			}
+			var report setup.Report
+			err = io.Confirmed(func(answer string) (err error) {
+				report, err = call.Invoke(ctx, env.Calls, env.Target(), setupcalls.Init, setupcalls.InitIn{Name: in.Name, Interactive: io.Interactive, Confirm: answer}, nil)
+				return err
+			})
 			if len(report.Steps) > 0 {
 				if answerErr := io.Page(pagesetup.Outcome(report, d.ThisMachine, in.Machinefile), nil); answerErr != nil {
 					return answerErr

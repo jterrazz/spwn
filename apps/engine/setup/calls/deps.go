@@ -16,6 +16,7 @@ type Deps struct {
 
 type Setup interface {
 	CheckName(name string) error
+	Moves(ctx context.Context) []setup.Move
 	Init(ctx context.Context, name string, interactive bool, ask func() (string, error)) (setup.Report, error)
 }
 
