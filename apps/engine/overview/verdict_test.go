@@ -10,10 +10,15 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 )
 
-var mac = overview.Head{Name: "macbook", Kind: machine.Computer, ThisMac: true}
+var (
+	mac = overview.Head{Name: "macbook", Kind: machine.Computer, ThisMac: true}
+	// value: the other Macs not asked: the zero roll-up.
+	notAsked = &machines.RollUp{}
+)
 
 func TestTheVerdictSaysTheEngineFirstThenWhatNeedsYou(t *testing.T) {
 	down := finding.Finding{Machine: machine.Ref{Name: "infra", On: "macbook"}, Section: section.Overview, Severity: finding.Broken, Subject: "infra", Text: "infra is in a loop"}
@@ -38,7 +43,7 @@ func TestTheVerdictSaysTheEngineFirstThenWhatNeedsYou(t *testing.T) {
 		"the engine stopped": {overview.EngineStopped, []finding.Finding{down}, vms, verdict.Verdict{Tone: verdict.Bad, Sentence: overview.SentenceEngineStopped, Line: overview.LineEngineStopped}},
 		"VMs not read yet":   {overview.EngineRunning, nil, nil, verdict.Verdict{Tone: verdict.OK, Sentence: overview.SentenceFine}},
 	} {
-		if got := overview.Summarize(mac, c.engine, c.own, nil, c.vms).Verdict; got != c.want {
+		if got := overview.Summarize(mac, c.engine, c.own, nil, c.vms, notAsked).Verdict; got != c.want {
 			t.Errorf("%s: %+v; want %+v", name, got, c.want)
 		}
 	}
@@ -57,20 +62,20 @@ func TestTheHeadOfAMacSaysItOnlineWithTheMachinesItRuns(t *testing.T) {
 		"not read yet":       {overview.EngineRunning, nil, verdict.Verdict{Tone: verdict.OK, Sentence: "Online."}},
 		"the engine stopped": {overview.EngineStopped, two, verdict.Verdict{Tone: verdict.Bad, Sentence: overview.SentenceEngineStopped, Line: overview.LineEngineStopped}},
 	} {
-		got := overview.Summarize(mac, c.engine, nil, nil, c.vms)
+		got := overview.Summarize(mac, c.engine, nil, nil, c.vms, notAsked)
 		if got.Head.Verdict == nil || *got.Head.Verdict != c.want {
 			t.Errorf("%s: %+v; want %+v", name, got.Head.Verdict, c.want)
 		}
 	}
 	up := mac
 	up.Up = 3*24*time.Hour + 2*time.Hour
-	if got := overview.Summarize(up, overview.EngineRunning, nil, nil, []overview.VM{{Name: "a", Running: true}}).Head.Verdict; got.Line != "Up 3 days." || got.Sentence != "Online, with 1 machine running." {
+	if got := overview.Summarize(up, overview.EngineRunning, nil, nil, []overview.VM{{Name: "a", Running: true}}, notAsked).Head.Verdict; got.Line != "Up 3 days." || got.Sentence != "Online, with 1 machine running." {
 		t.Errorf("a Mac's head line is how long it is up: %+v", got)
 	}
-	if stopped := overview.Summarize(up, overview.EngineStopped, nil, nil, nil).Head.Verdict; stopped.Line != overview.LineEngineStopped {
+	if stopped := overview.Summarize(up, overview.EngineStopped, nil, nil, nil, notAsked).Head.Verdict; stopped.Line != overview.LineEngineStopped {
 		t.Errorf("a stopped engine keeps its own line: %+v", stopped)
 	}
-	inside := overview.Summarize(overview.Head{Name: "linux-1", Kind: machine.Workspace}, overview.EngineNone, nil, nil, nil)
+	inside := overview.Summarize(overview.Head{Name: "linux-1", Kind: machine.Workspace}, overview.EngineNone, nil, nil, nil, notAsked)
 	if inside.Head.Verdict != nil {
 		t.Errorf("a VM's head is its Mac's to say: %+v", inside.Head.Verdict)
 	}
@@ -105,7 +110,7 @@ func TestOnlyWhatIsRedNeedsYouAndEachNeedHasItsVerb(t *testing.T) {
 	s := overview.Summarize(mac, overview.EngineRunning, []finding.Finding{
 		{Section: section.Apps, Severity: finding.NeedsALook, Subject: "jq"},
 		{Section: section.Ports, Severity: finding.Broken, Subject: "5432"},
-	}, nil, nil)
+	}, nil, nil, notAsked)
 	if s.Needs[0].Subject != "5432" || s.Needs[0].Upkeep != overview.NeedsYou || s.Needs[1].Upkeep != overview.CanWait {
 		t.Errorf("an exposed port ranks after an update: %+v", s.Needs)
 	}
@@ -123,7 +128,7 @@ func TestASignInNeedNamesTheSignInsTabItOpens(t *testing.T) {
 	s := overview.Summarize(mac, overview.EngineRunning, []finding.Finding{
 		{Section: section.Accounts, Severity: finding.Broken, Subject: "docs-bot", Text: "docs-bot sign-in expired"},
 		{Section: section.Apps, Severity: finding.NeedsALook, Subject: "jq"},
-	}, nil, nil)
+	}, nil, nil, notAsked)
 	nouns := map[string]string{}
 	for _, n := range s.Needs {
 		nouns[n.Subject] = n.Noun
@@ -140,7 +145,7 @@ func TestAMacsMachinesAreCountedRunningThenStopped(t *testing.T) {
 		"2 stopped":            {{Name: "api"}, {Name: "linux-1"}},
 		"":                     {},
 	} {
-		if got := overview.Summarize(mac, overview.EngineRunning, nil, nil, vms).Machines; got != want {
+		if got := overview.Summarize(mac, overview.EngineRunning, nil, nil, vms, notAsked).Machines; got != want {
 			t.Errorf("%v: %q; want %q", vms, got, want)
 		}
 	}
@@ -154,7 +159,7 @@ func TestANeedWearsExposedForAPortDownForAServerElseItsUpkeepWord(t *testing.T) 
 	expiring := finding.Finding{Machine: ref, Section: section.Accounts, Urgency: finding.Expiring, Subject: "token"}
 	update := finding.Finding{Machine: ref, Section: section.Apps, Severity: finding.NeedsALook, Subject: "lazygit"}
 	got := map[string]overview.Need{}
-	for _, n := range overview.Summarize(mac, overview.EngineRunning, []finding.Finding{exposed, down, macDown, expiring, update}, nil, []overview.VM{{Name: "infra", Running: true}}).Needs {
+	for _, n := range overview.Summarize(mac, overview.EngineRunning, []finding.Finding{exposed, down, macDown, expiring, update}, nil, []overview.VM{{Name: "infra", Running: true}}, notAsked).Needs {
 		got[n.Subject] = n
 	}
 	for subject, want := range map[string]overview.Mark{
@@ -170,5 +175,33 @@ func TestANeedWearsExposedForAPortDownForAServerElseItsUpkeepWord(t *testing.T) 
 	}
 	if n := got["macbook:5000"]; n.Detail != exposed.Detail || n.Verb != overview.VerbReview || n.Noun != "Ports" || n.Command != "" || n.Path != "" {
 		t.Errorf("an exposed port is reviewed on Ports with its detail and no command: %+v", n)
+	}
+}
+
+func TestTheVerdictSaysTheOtherMacsOnlyWhenTheyAreAsked(t *testing.T) {
+	own := finding.Finding{Machine: machine.Ref{Name: "macbook"}, Section: section.Ports, Severity: finding.Broken, Subject: "5432", Text: "port 5432 is reachable"}
+	upkeep := finding.Finding{Machine: machine.Ref{Name: "macbook"}, Section: section.Apps, Severity: finding.NeedsALook, Subject: "lazygit", Text: "3 outdated"}
+	vms := []overview.VM{{Name: "infra", Running: true}}
+	const here = "1 machine on macbook"
+	roll := func(state machines.RollUpState, n int) *machines.RollUp { return &machines.RollUp{State: state, N: n} }
+	for name, c := range map[string]struct {
+		own       []finding.Finding
+		elsewhere *machines.RollUp
+		want      verdict.Verdict
+	}{
+		"not asked keeps today's wording":      {[]finding.Finding{own}, notAsked, verdict.Verdict{Tone: verdict.Bad, Sentence: "1 thing needs you.", Line: "The rest is fine. " + here}},
+		"pending claims no fine":               {[]finding.Finding{own}, nil, verdict.Verdict{Tone: verdict.Bad, Sentence: "1 thing needs you.", Line: here}},
+		"pending reads, never fine":            {nil, nil, verdict.Verdict{Tone: verdict.Plain, Sentence: "Reading macbook.", Line: here}},
+		"fine elsewhere is the rest fine":      {[]finding.Finding{own}, roll(machines.RollUpFine, 0), verdict.Verdict{Tone: verdict.Bad, Sentence: "1 thing needs you.", Line: "The rest is fine. " + here}},
+		"empty elsewhere is the rest fine":     {[]finding.Finding{own}, roll(machines.RollUpEmpty, 0), verdict.Verdict{Tone: verdict.Bad, Sentence: "1 thing needs you.", Line: "The rest is fine. " + here}},
+		"a machine down elsewhere, here needs": {[]finding.Finding{own}, roll(machines.RollUpDown, 1), verdict.Verdict{Tone: verdict.Bad, Sentence: "1 thing needs you.", Line: "Elsewhere, 1 machine down. " + here}},
+		"a worse elsewhere lifts the tone":     {[]finding.Finding{{Machine: machine.Ref{Name: "macbook"}, Section: section.Settings, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: "dock", Text: "dock"}}, roll(machines.RollUpDown, 2), verdict.Verdict{Tone: verdict.Bad, Sentence: "1 thing needs you.", Line: "Elsewhere, 2 machines down. " + here}},
+		"nothing here, a Mac not seen":         {nil, roll(machines.RollUpNotSeen, 1), verdict.Verdict{Tone: verdict.Warn, Sentence: "Elsewhere, 1 Mac not seen.", Line: here}},
+		"upkeep here, a Mac not seen":          {[]finding.Finding{upkeep}, roll(machines.RollUpNotSeen, 2), verdict.Verdict{Tone: verdict.Warn, Sentence: "Elsewhere, 2 Macs not seen.", Line: here}},
+		"nothing here, all fine elsewhere":     {nil, roll(machines.RollUpFine, 0), verdict.Verdict{Tone: verdict.OK, Sentence: overview.SentenceFine, Line: here}},
+	} {
+		if got := overview.Summarize(mac, overview.EngineRunning, c.own, nil, vms, c.elsewhere).Verdict; got != c.want {
+			t.Errorf("%s: %+v; want %+v", name, got, c.want)
+		}
 	}
 }

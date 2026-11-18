@@ -2121,6 +2121,7 @@ export type OverviewAwakeState = {
 };
 
 export type OverviewCallsReadIn = {
+    Elsewhere?: boolean;
     Fresh?: boolean;
     V2?: boolean;
 };

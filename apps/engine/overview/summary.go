@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 type Summary struct {
@@ -140,7 +141,7 @@ func Stopped(name string, kind machine.Kind) Summary {
 	return Summary{Head: Head{Name: name, Kind: kind}, Lines: []Line{}, Needs: []Need{}, Verdict: verdict.Verdict{Tone: verdict.Plain, Sentence: name + " is stopped.", Line: LineStopped}}
 }
 
-func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms []VM) Summary {
+func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms []VM, elsewhere *machines.RollUp) Summary {
 	// invariant: the lines keep the one order of the machine's kind; Needs
 	// you is every read's findings and the Overview's own, ranked (§5.1.1).
 	s := Summary{Head: m, Engine: engine, VMs: vms, Lines: []Line{}, Needs: []Need{}}
@@ -174,7 +175,7 @@ func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms [
 			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, On: onOf(f), Confirm: f.Fix.Confirm, Command: command, Path: path,
 			Upkeep: UpkeepOf(f), Verb: verb, Noun: NounOf(f.Section), Mark: MarkOf(f, vms), Detail: f.Detail})
 	}
-	s.Verdict, s.Machines = VerdictOf(s), MachinesOf(vms)
+	s.Verdict, s.Machines = VerdictOf(s, elsewhere), MachinesOf(vms)
 	s.Head.Verdict = HeadOf(s)
 	return s
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 type Upkeep string
@@ -120,12 +121,17 @@ const (
 	SentenceReady         = "This Mac is ready."
 )
 
-func VerdictOf(s Summary) verdict.Verdict {
+func VerdictOf(s Summary, elsewhere *machines.RollUp) verdict.Verdict {
 	// invariant: the head of Home: the engine stopped first, then what needs
-	// you: a server down by its name, else the count; a reading still
+	// you: a server down by its name, else the count; the other Macs' roll-up
+	// next, said as "Elsewhere" when it is not fine; a reading still
 	// running, then a Mac with no machine yet ready, else all is well. What
 	// is left past the first is said as the rest, the machines counted, and
 	// what can wait stays the client's count of the can-wait needs.
+	// elsewhere is in three states: the zero roll-up when the other Macs are
+	// not asked (today's wording, scoped to this Mac), nil while they are
+	// asked and still read (the verdict claims nothing of them), else their
+	// roll-up.
 	if s.Engine == EngineStopped {
 		return verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceEngineStopped, Line: LineEngineStopped}
 	}
@@ -138,22 +144,39 @@ func VerdictOf(s Summary) verdict.Verdict {
 		}
 	}
 	tail := machinesLine(s)
+	claim, unknown := "", elsewhere == nil
+	var claimTone verdict.Tone
+	if elsewhere != nil {
+		switch elsewhere.State {
+		case "", machines.RollUpFine, machines.RollUpEmpty:
+		default:
+			claim, claimTone = "Elsewhere, "+elsewhere.Words()+".", elsewhere.State.Tone()
+		}
+	}
+	rest := claim
+	switch {
+	case unknown:
+	case claim == "":
+		rest = "The rest is fine."
+	}
 	if len(urgent) > 0 {
 		tone := verdict.Warn
-		if broken {
+		if broken || claimTone == verdict.Bad {
 			tone = verdict.Bad
 		}
 		if down, ok := serverDown(urgent); ok {
-			line := "The rest is fine."
+			line := rest
 			if len(urgent) > 1 {
 				line = more(len(urgent)-1) + " " + line
 			}
 			return verdict.Verdict{Tone: verdict.Bad, Sentence: down.Subject + " is down.", Line: strings.TrimSpace(line + " " + tail)}
 		}
-		return verdict.Verdict{Tone: tone, Sentence: things(len(urgent), "needs", "need") + " you.", Line: strings.TrimSpace("The rest is fine. " + tail)}
+		return verdict.Verdict{Tone: tone, Sentence: things(len(urgent), "needs", "need") + " you.", Line: strings.TrimSpace(rest + " " + tail)}
 	}
 	switch {
-	case s.Pending:
+	case claim != "":
+		return verdict.Verdict{Tone: claimTone, Sentence: claim, Line: tail}
+	case s.Pending || unknown:
 		return verdict.Verdict{Tone: verdict.Plain, Sentence: "Reading " + s.Head.Name + ".", Line: tail}
 	case s.Head.Mac() && s.Head.ThisMac && s.VMs != nil && len(s.VMs) == 0:
 		return verdict.Verdict{Tone: verdict.OK, Sentence: SentenceReady}
