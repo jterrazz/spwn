@@ -541,12 +541,6 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 			env = kept.Env
 		}
 	}
-	// invariant: a workspace made is a machine this Mac's multiplexer
-	// reaches, by its name, over the ssh block just written; a multiplexer that
-	// cannot add it leaves the herdr-machine setting to say so.
-	if r.Lifetime != model.AlwaysOn && s.o.Terminals != nil {
-		_ = s.o.Terminals.Add(ctx, r.Name)
-	}
 	return model.Created{
 		VM: model.VM{
 			Name: r.Name, Image: r.Image, Version: version, Mac: s.thisMac(cfg), Kind: img.Kind, Lifetime: r.Lifetime,

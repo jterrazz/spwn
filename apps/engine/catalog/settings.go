@@ -40,11 +40,10 @@ type Effect interface{ Kind() EffectKind }
 type EffectKind string
 
 const (
-	EffectTouch       EffectKind = "touch"
-	EffectDotfile     EffectKind = "dotfile"
-	EffectGitAliases  EffectKind = "git-aliases"
-	EffectShell       EffectKind = "shell"
-	EffectMuxMachines EffectKind = "mux-machines"
+	EffectTouch      EffectKind = "touch"
+	EffectDotfile    EffectKind = "dotfile"
+	EffectGitAliases EffectKind = "git-aliases"
+	EffectShell      EffectKind = "shell"
 	// value: no Applier writes it yet: applied, it is refused as unhandled.
 	EffectMacOSDefaults EffectKind = "macos-defaults"
 )
@@ -73,8 +72,6 @@ type GitAlias struct {
 	Command string `yaml:"command"`
 }
 
-type MuxMachines struct{}
-
 type Procedure string
 
 const (
@@ -97,7 +94,6 @@ const (
 func (Touch) Kind() EffectKind         { return EffectTouch }
 func (Dotfiles) Kind() EffectKind      { return EffectDotfile }
 func (GitAliases) Kind() EffectKind    { return EffectGitAliases }
-func (MuxMachines) Kind() EffectKind   { return EffectMuxMachines }
 func (MacOSDefaults) Kind() EffectKind { return EffectMacOSDefaults }
 
 func (p Procedure) Kind() EffectKind { return EffectKind("procedure:" + string(p)) }
@@ -173,8 +169,6 @@ type Value struct {
 const GitShortcutsSetting = "git-shortcuts"
 
 const TailscaleCLISetting = "tailscale-cli"
-
-const MuxMachinesSetting = "herdr-machine"
 
 const GitShortcutsGroup = "git" // value: the group of v2's run shortcuts, now git's own aliases, and the program each alias is said with.
 

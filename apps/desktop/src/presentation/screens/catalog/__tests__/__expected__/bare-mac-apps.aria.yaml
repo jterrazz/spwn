@@ -91,7 +91,7 @@
     - button "gemini Google's CLI coding agent Not installed"
     - button "herdr Agent multiplexer that lives in your terminal Not installed"
     - button "herdr-app Desktop app that keeps coding agents running in the background Not installed"
-    - button "herdr-core Herdr's agent engine, the hc command station drives Not installed"
+    - button "herdr-core Herdr's engine and its hc command Not installed"
     - button "opencode Open-source AI coding agent CLI Not installed"
     - paragraph: AI Tooling 5
     - button "inferrs TurboQuant LLM inference server Not installed"

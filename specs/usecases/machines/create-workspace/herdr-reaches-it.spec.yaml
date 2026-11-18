@@ -1,9 +1,0 @@
-description: 'a workspace made is a machine Herdr reaches on this Mac, by its name'
-env: two-macs
-runs:
-    - command: 'machines create --memory 4G >/dev/null'
-      exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].reached'' world.json'
-      exit: 0
-      stdout: |
-          ["linux-2"]

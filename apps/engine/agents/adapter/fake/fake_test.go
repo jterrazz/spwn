@@ -63,6 +63,6 @@ func TestRepo(t *testing.T) {
 func TestMultiplexer(t *testing.T) {
 	contracttest.Multiplexer(t, func(*testing.T) contracttest.MultiplexerSubject {
 		h := fake.NewMultiplexer()
-		return contracttest.MultiplexerSubject{Multiplexer: h, Reached: h.Reached, Attached: h.Attached}
+		return contracttest.MultiplexerSubject{Multiplexer: h, Attached: h.Attached}
 	})
 }

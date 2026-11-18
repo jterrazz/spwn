@@ -33,8 +33,10 @@ oui stp".
 - **What a machine installs stays a package.** The agent apps (`claude`, `codex`, `herdr`...)
   and the agent skills stay catalog apps, installed, checked and updated as any other.
 - **Station keeps what is not an agent's:** a VM's creator (`STATION_SESSION`, the lot that
-  made it) and the hold it gives, grants to a machine, and, pending its own answer, Herdr's
-  reach of a workspace (the `herdr-machine` setting).
+  made it) and the hold it gives, and grants to a machine.
+- **Herdr stays a package, never station's wiring.** Station does not reach a workspace from
+  Herdr: the `herdr-machine` setting and the `hc machine` calls go, and a machine that wants
+  Herdr carries it by its Machinefile.
 - **No compatibility.** Nothing is kept for a client that speaks of agents, and no alias or
   deprecated word stays. The removal lands one commit per unit, each message saying what went
   and why, so git can find and restore it.

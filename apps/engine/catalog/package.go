@@ -339,7 +339,6 @@ type MethodSpec struct {
 	Builtin       Procedure            `yaml:"builtin,omitempty"`
 	MacOSDefaults *MacOSDefaults       `yaml:"macos-defaults,omitempty"`
 	GitAliases    *GitAliases          `yaml:"git-aliases,omitempty"`
-	MuxMachines   *MuxMachines         `yaml:"mux-machines,omitempty"`
 	// value: the identified blocks of ~/.zshrc this method writes beside
 	// what it installs (an app), or alone (a setting).
 	Shell []ShellBlock `yaml:"shell,omitempty"`

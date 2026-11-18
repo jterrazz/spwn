@@ -360,16 +360,6 @@
             }
           ]
         },
-        "MuxMachines": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/catalog.MuxMachines"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "Needs": {
           "items": {
             "enum": [
@@ -485,7 +475,6 @@
         "Machine",
         "Mas",
         "Mise",
-        "MuxMachines",
         "Needs",
         "Npm",
         "Package",
@@ -517,11 +506,6 @@
         "Name",
         "Version"
       ],
-      "type": "object"
-    },
-    "catalog.MuxMachines": {
-      "additionalProperties": false,
-      "properties": {},
       "type": "object"
     },
     "catalog.ScriptMethod": {

@@ -53,8 +53,6 @@ type Options struct {
 	Uptime contract.UptimeStore
 	// value: what sends a Wake-on-LAN packet from this Mac; nil sends none.
 	Waker contract.Waker
-	// value: this Mac's multiplexer; nil reaches no workspace.
-	Terminals Multiplexer
 	// value: installs this Mac's engine job and starts it, as engine start
 	// does; nil installs none.
 	StartEngine func(ctx context.Context) error
@@ -78,13 +76,6 @@ type Templates interface {
 	// value: what the image's version was baked from that its Machinefile
 	// no longer says, one line a package.
 	Drift(ctx context.Context, name, version string) ([]string, error)
-}
-
-type Multiplexer interface {
-	// value: makes this Mac's multiplexer reach a workspace by its name,
-	// and forget it.
-	Add(ctx context.Context, machine string) error
-	Remove(ctx context.Context, machine string) error
 }
 
 type Nodes interface {

@@ -457,9 +457,6 @@
         "mise": {
           "$ref": "#/$defs/MiseMethod"
         },
-        "mux-machines": {
-          "$ref": "#/$defs/MuxMachines"
-        },
         "needs": {
           "items": {
             "enum": [
@@ -611,11 +608,6 @@
         "from",
         "to"
       ],
-      "type": "object"
-    },
-    "MuxMachines": {
-      "additionalProperties": false,
-      "properties": {},
       "type": "object"
     },
     "Option": {

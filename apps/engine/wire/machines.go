@@ -77,7 +77,6 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Uses:        m.vmUses,
 		Uptime:      m.stores.uptime,
 		Waker:       m.waker(),
-		Terminals:   m.multiplexer(),
 		StartEngine: m.startEngine,
 		Templates:   machineTemplates{m},
 		Grant:       m.grantProgram,

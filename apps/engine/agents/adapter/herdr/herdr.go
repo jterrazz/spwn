@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"slices"
 	"strings"
 	"time"
 
@@ -26,8 +25,6 @@ const (
 	// prompt; past it the prompt is typed anyway.
 	ready  = 60
 	budget = 10 * time.Second
-	// value: an add copies hc to the machine when it has none.
-	addBudget = 3 * time.Minute
 )
 
 type Runner interface {
@@ -180,59 +177,6 @@ type Multiplexer struct{ run Runner }
 var _ contract.Multiplexer = (*Multiplexer)(nil)
 
 func NewMultiplexer(run Runner) *Multiplexer { return &Multiplexer{run: run} }
-
-func (h *Multiplexer) hc(ctx context.Context, wait time.Duration, args ...string) (local.Output, error) {
-	out, err := h.run.Output(ctx, local.Cmd{Name: hc, Args: args, Timeout: wait})
-	if err != nil {
-		return out, err
-	}
-	if out.ExitCode != 0 {
-		return out, errors.New("hc " + strings.Join(args[:2], " ") + ": " + strings.TrimSpace(out.Stderr+" "+out.Stdout))
-	}
-	return out, nil
-}
-
-func (h *Multiplexer) Machines(ctx context.Context) ([]string, error) {
-	// invariant: a Mac without hc reaches no machine.
-	out, err := h.hc(ctx, budget, "machine", "ls", "--json")
-	if errors.Is(err, local.ErrNotFound) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	var list struct {
-		Machines []struct {
-			Name string `json:"name"`
-		} `json:"machines"`
-	}
-	if err := json.Unmarshal([]byte(out.Stdout), &list); err != nil {
-		return nil, errors.New("hc machine ls: " + err.Error())
-	}
-	var names []string
-	for _, m := range list.Machines {
-		names = append(names, m.Name)
-	}
-	return names, nil
-}
-
-func (h *Multiplexer) Add(ctx context.Context, machine string) error {
-	names, err := h.Machines(ctx)
-	if err != nil || slices.Contains(names, machine) {
-		return err
-	}
-	_, err = h.hc(ctx, addBudget, "machine", "add", "--install", "--json", "--name", machine, machine)
-	return err
-}
-
-func (h *Multiplexer) Remove(ctx context.Context, machine string) error {
-	names, err := h.Machines(ctx)
-	if err != nil || !slices.Contains(names, machine) {
-		return err
-	}
-	_, err = h.hc(ctx, budget, "machine", "rm", "--json", machine)
-	return err
-}
 
 func (h *Multiplexer) Attach(ctx context.Context, machine, terminal string) error {
 	address := terminal

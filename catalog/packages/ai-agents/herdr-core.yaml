@@ -1,14 +1,13 @@
 package: station.package/v1
 kind: app
 name: herdr-core
-description: "Herdr's agent engine, the hc command station drives"
+description: "Herdr's engine and its hc command"
 provides: [hc]
 version-read:
     pattern: (\d+\.\d+\.\d+\S*)
 # outside: herdr-core ships no GitHub release, so a machine with no
 # herdr-app installs hc by the project's own installer, which checks the
-# archive against its manifest; the herdr-machine setting's copy from a Mac
-# (`hc machine add --install`) stays the way for a VM made before.
+# archive against its manifest.
 methods:
     - os: macos
       machine: computer

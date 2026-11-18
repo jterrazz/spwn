@@ -4,7 +4,7 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by station	18 ○
+          # Set by station	17 ○
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
@@ -22,7 +22,6 @@ runs:
           ○	dock-spacer	not applied	station settings apply dock-spacer
           ○	tart-launcher	not applied	station settings apply tart-launcher
           ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
-          ○	herdr-machine	not applied · needs herdr-core	station apps install herdr-core
           # Always-on Mac
           ○	Always-on Mac	5 · for a Mac that hosts servers
           # Checked	8 ●	1 ◐

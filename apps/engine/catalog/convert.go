@@ -127,8 +127,6 @@ func (m MethodSpec) effect() Effect {
 		return *m.GitAliases
 	case len(m.Shell) > 0:
 		return ShellBlocks{Blocks: m.Shell}
-	case m.MuxMachines != nil:
-		return MuxMachines{}
 	case m.MacOSDefaults != nil:
 		return *m.MacOSDefaults
 	}

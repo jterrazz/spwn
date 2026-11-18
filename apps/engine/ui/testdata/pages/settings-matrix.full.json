@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "ok",
-            "label": "32 settings on 4 machines",
+            "label": "31 settings on 4 machines",
             "cells": [
               {
                 "kind": "list",
@@ -869,31 +869,31 @@
           "row": {
             "id": "folded",
             "mark": "absent",
-            "label": "14 more",
+            "label": "13 more",
             "cells": [
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/10",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/10",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/10",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/10",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "16/44"
+                "text": "16/40"
               }
             ]
           }
@@ -1143,8 +1143,7 @@
         "never-sleeps",
         "restart-after-power-cut",
         "sshd",
-        "tailscale-cli",
-        "herdr-machine"
+        "tailscale-cli"
       ],
       "priority": 1,
       "mutates": true
@@ -1176,7 +1175,6 @@
         "restart-after-power-cut",
         "sshd",
         "tailscale-cli",
-        "herdr-machine",
         "filevault",
         "firewall",
         "sip",

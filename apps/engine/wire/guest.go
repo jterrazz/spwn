@@ -77,7 +77,7 @@ func (m machine) agentSession() agentscontract.Session {
 	return herdr.NewSession(m.sys.Run)
 }
 
-// value: the multiplexer of this machine, the one the owner's Herdr is.
+// value: where the owner's terminal attaches to an agent's.
 func (m machine) multiplexer() agentscontract.Multiplexer {
 	if m.world != nil {
 		return m.world.multiplexer()

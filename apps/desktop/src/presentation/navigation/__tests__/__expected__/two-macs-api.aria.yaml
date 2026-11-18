@@ -25,7 +25,7 @@
     - heading "Catalog" [level=2]
     - button "Apps 10"
     - button "Skills 0"
-    - button "Settings 4"
+    - button "Settings 3"
   - button "Storage"
   - img "running"
   - text: Engine running · dev
