@@ -581,7 +581,7 @@ func (s *Machinist) unhealthy(ctx context.Context, name string, cause error) err
 	if _, err := s.engine.Address(ctx, name, 0); err != nil {
 		return &model.UnhealthyError{Name: name, Step: model.StepAddress, Detail: "none after 60 s"}
 	}
-	return s.sshFails(ctx, name, "none after 30 s")
+	return s.sshFails(ctx, name, "none after 60 s")
 }
 
 // invariant: a VM whose SSH fails because its Mac has not approved station
