@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/netip"
@@ -29,10 +30,12 @@ const (
 type dialer struct {
 	files   local.FS
 	sockets local.Sockets
+	// value: the system the dial runs on, whose refusal names its block.
+	goos string
 }
 
-func New(files local.FS, sockets local.Sockets) contract.GuestDialer {
-	return dialer{files: files, sockets: sockets}
+func New(files local.FS, sockets local.Sockets, goos string) contract.GuestDialer {
+	return dialer{files: files, sockets: sockets, goos: goos}
 }
 
 type client struct {
@@ -147,6 +150,9 @@ func (d dialer) Dial(ctx context.Context, t contract.GuestTarget) (contract.Gues
 	}
 	addr := t.Address.String()
 	conn, err := d.sockets.DialTCP(ctx, addr, 10*time.Second)
+	if local.BlockedByLocalNetwork(d.goos, err) {
+		return nil, fmt.Errorf("%w: %w", contract.ErrLocalNetwork, err)
+	}
 	if err != nil {
 		return nil, err
 	}
