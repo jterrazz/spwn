@@ -1,4 +1,15 @@
-import { button, component, content, dialog, file, region, within } from '@jterrazz/test';
+import {
+    button,
+    component,
+    content,
+    dialog,
+    disabled,
+    enabled,
+    field,
+    file,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
@@ -15,15 +26,20 @@ function refusedEntry(item: string) {
 }
 
 describe('grant sheet', () => {
-    test("the picker draws every target the engine offers, one that does not fit held with the engine's line", async () => {
+    test("the picker lists every target the engine offers, those that fit first, one that does not held with the engine's line", async () => {
         // Given - GitHub deploy's page over two-macs
         const result = await component.render(entryOver('pw-1'), async (visitor) => {
             // When - Grant… is clicked
             await visitor.click(button('Grant…'));
 
-            // Then - the machines, linux-1 to pick, api and infra held with why, and the engine's presence sentence
+            // Then - the machines, linux-1 a radio to choose, api and infra held with why, and the engine's presence sentence
             const sheet = dialog('Grant GitHub deploy');
-            await visitor.see(within(sheet, button('linux-1', { exact: false })));
+            const fits = enabled(field('linux-1'));
+            const stopped = disabled(field('api'));
+            const server = disabled(field('infra'));
+            await visitor.see(within(sheet, fits));
+            await visitor.see(within(sheet, stopped));
+            await visitor.see(within(sheet, server));
             await visitor.see(within(sheet, content('Start the machine first')));
             await visitor.see(within(sheet, content('A server keeps its own sign-ins')));
             await visitor.see(within(sheet, content('Touch ID will ask you', { exact: false })));
@@ -40,7 +56,7 @@ describe('grant sheet', () => {
             const sheet = dialog('Grant GitHub deploy');
 
             // When - linux-1 is picked and granted
-            await visitor.click(within(sheet, button('linux-1', { exact: false })));
+            await visitor.click(within(sheet, field('linux-1')));
             await visitor.click(within(sheet, button('Grant to linux-1')));
 
             // Then - the sheet is gone, and the password is granted to linux-1
@@ -55,7 +71,7 @@ describe('grant sheet', () => {
         const result = await component.render(refusedEntry('pw-1'), async (visitor) => {
             await visitor.click(button('Grant…'));
             const sheet = dialog('Grant GitHub deploy');
-            await visitor.click(within(sheet, button('linux-1', { exact: false })));
+            await visitor.click(within(sheet, field('linux-1')));
 
             // When - the grant to linux-1 is sent
             await visitor.click(within(sheet, button('Grant to linux-1')));
@@ -78,8 +94,11 @@ describe('grant sheet', () => {
             // When - the targets are drawn
             await visitor.see(within(sheet, content('It has its own sign-in')));
 
-            // Then - no grant can be sent
-            await visitor.see(within(sheet, button('Grant')));
+            // Then - no machine can be chosen, and no grant can be sent
+            const held = disabled(field('linux-1'));
+            const grant = disabled(button('Grant'));
+            await visitor.see(within(sheet, held));
+            await visitor.see(within(sheet, grant));
         });
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(file('./__expected__/two-macs-pw-3-grant.aria.yaml'));

@@ -33,6 +33,7 @@ export { NavItem } from './nav-item';
 export { Panel } from './panel';
 export { type Pick, Picks } from './picks';
 export { ProgressLine } from './progress-line';
+export { type RadioRow, RadioRows } from './radio-rows';
 export { Row, RowHead } from './row';
 export { SearchField } from './search-field';
 export { StateDot } from './state-dot';
