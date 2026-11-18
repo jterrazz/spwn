@@ -108,9 +108,8 @@ const (
 )
 
 type Badge struct {
-	// value: what the menu bar's icon says of the page's machines: how many
-	// things need you, and whether a server is down, which wins over the count.
-	Needs      int    `json:"needs"`
+	// value: what the menu bar's icon says of the page's machines: whether a
+	// server is down or a port exposed, which wins over a restart.
 	Down       bool   `json:"down,omitempty"`
 	Restarting bool   `json:"restarting,omitempty"`
 	Label      string `json:"label,omitempty"`

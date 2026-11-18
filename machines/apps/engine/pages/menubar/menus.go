@@ -27,9 +27,8 @@ const (
 
 	MenuSeparator = "-"
 
-	appLogin     = "app:login"
-	appSparkline = "app:sparkline"
-	appQuit      = "app:quit"
+	appLogin = "app:login"
+	appQuit  = "app:quit"
 )
 
 // value: a menu's list being built: its entries in order, a separator
@@ -356,7 +355,6 @@ func homeMenus(r Reading, p page.Page) page.Page {
 	}
 	sm.next()
 	sm.add(page.Action{ID: appLogin, Label: "Open at login", On: OnMenu})
-	sm.add(page.Action{ID: appSparkline, Label: "CPU in the menu bar", On: OnMenu})
 	sm.next()
 	sm.add(page.Action{ID: appQuit, Label: "Quit station", Key: "cmd+q", On: OnMenu})
 	p.Actions = append(p.Actions, sm.added...)

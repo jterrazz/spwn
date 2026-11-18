@@ -2867,11 +2867,6 @@
       "id": "app:login"
     },
     {
-      "label": "CPU in the menu bar",
-      "on": "menu",
-      "id": "app:sparkline"
-    },
-    {
       "key": "cmd+q",
       "label": "Quit station",
       "on": "menu",
@@ -2888,7 +2883,6 @@
         "open-station@menu",
         "-",
         "app:login",
-        "app:sparkline",
         "-",
         "app:quit"
       ]
@@ -3540,7 +3534,6 @@
     }
   ],
   "badge": {
-    "needs": 2,
     "down": true,
     "label": "station, infra down"
   },

@@ -2326,7 +2326,6 @@ export type PageAnomaly = {
 export type PageBadge = {
     down?: boolean;
     label?: string;
-    needs: number;
     restarting?: boolean;
 };
 

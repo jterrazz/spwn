@@ -37,8 +37,8 @@ func TestStopEverythingOnThisMacSaysItsServerIsSkipped(t *testing.T) {
 
 // invariant: AP-23: once Update all has run, the line of the app updates
 // leaves Needs you and Update all goes with it; the badge, which never
-// counts upkeep, says nothing of either.
-func TestUpdateAllLeavesNeedsYouAndTheBadgeNeverCountedIt(t *testing.T) {
+// judged upkeep, says nothing of either.
+func TestUpdateAllLeavesNeedsYouAndTheBadgeNeverJudgedIt(t *testing.T) {
 	needs := []overview.Need{
 		{Section: "apps", Subject: "updates", Text: "2 app updates", Call: CallUpdate},
 		{Section: "disk", Subject: "misplaced", Text: "a folder is misplaced", Call: "disk.move"},
@@ -46,8 +46,8 @@ func TestUpdateAllLeavesNeedsYouAndTheBadgeNeverCountedIt(t *testing.T) {
 	before, after := overview.Summary{Needs: needs}, overview.Summary{Needs: needs[1:]}
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "macbook-pro", ThisMac: true}}}
 	was, is := Page(Reading{Home: &before, All: fleet}, page.Context{}), Page(Reading{Home: &after, All: fleet}, page.Context{})
-	if was.Badge.Needs != 0 || is.Badge.Needs != 0 {
-		t.Fatalf("badge %d then %d, want 0 then 0", was.Badge.Needs, is.Badge.Needs)
+	if *was.Badge != *is.Badge || was.Badge.Down || was.Badge.Restarting {
+		t.Fatalf("badge %+v then %+v, want the same, neither down nor restarting", was.Badge, is.Badge)
 	}
 	has := func(p page.Page) bool {
 		return slices.ContainsFunc(p.Actions, func(a page.Action) bool { return strings.HasPrefix(a.ID, ActionUpdateAll) && a.Run.Call == CallUpdate })

@@ -136,11 +136,8 @@ func equal(t *testing.T, got, want heroSaid) {
 // itself, its words as the title, its facts (the last dropped first), its
 // fix.
 func TestOneNeedIsTheHeroWithItsFactsAndItsVerb(t *testing.T) {
-	got, p := said(t, newHeroWorld().exposed())
+	got, _ := said(t, newHeroWorld().exposed())
 	equal(t, got, heroSaid{title: "Port 5000 is exposed", facts: "This Mac | AirPlay Receiver^1", verb: "Review"})
-	if p.Badge.Needs != 1 {
-		t.Fatalf("the badge says %d, the hero 1", p.Badge.Needs)
-	}
 }
 
 // invariant: the first ranked need carries the hero with its fix; the
@@ -171,7 +168,7 @@ func TestAServerRestartingFromDownIsNeitherANeedNorCounted(t *testing.T) {
 	if got.title != "Restarting infra" || len(got.rows) != 0 || got.link != "" {
 		t.Fatalf("hero %+v", got)
 	}
-	if b := p.Badge; b == nil || b.Needs != 0 || !b.Restarting || b.Down {
+	if b := p.Badge; b == nil || !b.Restarting || b.Down {
 		t.Fatalf("badge %+v", p.Badge)
 	}
 }

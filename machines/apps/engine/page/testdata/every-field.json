@@ -687,10 +687,9 @@
     }
   ],
   "badge": {
-    "needs": 1,
     "down": true,
     "restarting": true,
-    "label": "Station, 1 needs you"
+    "label": "Station, infra down"
   },
   "header": {
     "back": "Back",

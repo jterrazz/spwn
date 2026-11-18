@@ -95,7 +95,7 @@ func everyField() page.Page {
 			{ID: "menu", Label: "More", Submenu: []string{"copy", "logs"}},
 			{ID: "attach", Label: "Attach", Disabled: "Needs infra running"},
 		},
-		Badge:    &page.Badge{Needs: 1, Down: true, Restarting: true, Label: "Station, 1 needs you"},
+		Badge:    &page.Badge{Down: true, Restarting: true, Label: "Station, infra down"},
 		Header:   &page.Header{Back: "Back", Title: "linux-1", Glyph: page.Glyph{Kind: "workspace"}, Buttons: []string{"new-vm", "menu"}, Stale: &page.Value{Kind: page.KindAge, N: 40, Text: "seen 40 s ago, checking"}},
 		Segments: []page.Segment{{ID: "overview", Label: "Overview", Picked: true}, {ID: "activity", Label: "Activity", Key: "cmd+i"}},
 		Footer:   &page.Footer{Kind: page.FooterSSH, Copy: &page.Value{Kind: page.KindCommand, Text: "linux-1.local"}, Note: "Needs infra running", Buttons: []string{"attach"}},

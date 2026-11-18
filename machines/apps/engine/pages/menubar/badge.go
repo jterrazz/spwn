@@ -7,11 +7,10 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/page"
 )
 
-// invariant: SPEC A3, B5.7: the status item counts what needs you, the
-// number the hero says, and never the upkeep: a server down or a port
-// exposed, each tinting it red; a server restarting turns the busy mark in
-// place of its red and is not counted. Its label says the one signal it
-// shows. nil until the machines are read.
+// invariant: SPEC A3, B5.7: the status item says one signal and counts
+// nothing: a server down or a port exposed slashes the mark; a server
+// restarting lights its dots in a wave in place of the slash. Its label
+// says the one signal it shows. nil until the machines are read.
 func badge(r Reading) *page.Badge {
 	if r.All == nil {
 		return nil
@@ -39,8 +38,7 @@ func badge(r Reading) *page.Badge {
 			}
 		}
 	}
-	ranked, _ := needsOf(r.needsReading(), "")
-	b := page.Badge{Needs: len(ranked), Down: len(reds) > 0}
+	b := page.Badge{Down: len(reds) > 0}
 	switch {
 	case b.Down:
 		b.Label = "station, " + reds[0]

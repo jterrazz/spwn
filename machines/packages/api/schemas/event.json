@@ -249,16 +249,10 @@
         "label": {
           "type": "string"
         },
-        "needs": {
-          "type": "integer"
-        },
         "restarting": {
           "type": "boolean"
         }
       },
-      "required": [
-        "needs"
-      ],
       "type": "object"
     },
     "page.Chart": {

@@ -109,11 +109,11 @@ func TestAServersMenuNamesItsMacThenItsVerbs(t *testing.T) {
 }
 
 // invariant: SPEC A5: the station menu: New VM..., Add a Mac..., Open
-// station in Terminal; then the app's own Open at login and CPU in the
-// menu bar; Quit station last.
+// station in Terminal; then the app's own Open at login; Quit station
+// last.
 func TestTheStationMenuListsItsVerbsThenTheAppsOwn(t *testing.T) {
 	got := pageMenu(homeOf(t, newHeroWorld()))
-	want := []string{"New VM...", "Add a Mac...", "Open station in Terminal", "-", "Open at login", "CPU in the menu bar", "-", "Quit station"}
+	want := []string{"New VM...", "Add a Mac...", "Open station in Terminal", "-", "Open at login", "-", "Quit station"}
 	if !slices.Equal(got, want) {
 		t.Fatalf("the station menu %q", got)
 	}
