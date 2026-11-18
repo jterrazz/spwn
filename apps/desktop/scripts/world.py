@@ -9,7 +9,7 @@ WORLDS is the one list of the worlds the window records, each a world of specs/u
 needs that it lacks: machinefiles on This Mac, the fake binaries of a fixture of specs/usecases/__fixtures__/, and
 edits of its machines (a sign-in in progress, a program signed out or broken, an accounts switch the fake reads in
 apps/engine/world/accounts.go, as the presence check a grant asks, a failed sign-in or a failing background task
-dropped); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
+dropped, what a Mac's engine keeps of Awake); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
 entry names is served as specs/usecases/worlds/ holds it.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
@@ -216,6 +216,14 @@ def kept_local(name, vm, port):
     return edit
 
 
+def kept_awake(name, **kept):
+    """What a Mac's engine holds of Awake between two commands (a keep-awake running, the end of the last one), as
+    the engine keeps it in the world."""
+    def edit(content):
+        content["macs"][name]["engine"]["awake"] = kept
+    return edit
+
+
 def plain(name):
     return (name, None, {}, [])
 
@@ -256,6 +264,11 @@ WORLDS = {
                                                  unreadable("macbook-pro", "api")]),
     "share-local": ("two-macs", None, {}, [kept_local("macbook-pro", "linux-1", 5173)]),
     "range-full": ("range-full", None, {}, [listens("macbook-pro", "linux-1", 9000, "node")]),
+    "kept-four-hours": ("two-macs", None, {}, [kept_awake("macbook-pro", session={
+        "lid": False, "battery": False, "started_at": "2026-11-04T10:00:00Z", "until": "2026-11-04T14:00:00Z",
+        "by": "station awake 4h", "for": 4 * 3600 * 10**9})]),
+    "awake-stopped": ("two-macs", None, {}, [kept_awake("macbook-pro", last_end={
+        "at": "2026-11-04T09:58:00Z", "reason": "battery", "detail": "battery 18 %"})]),
 }
 
 
