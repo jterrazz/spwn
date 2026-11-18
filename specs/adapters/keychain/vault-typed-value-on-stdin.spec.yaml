@@ -12,3 +12,5 @@ runs:
           security -i
           add-generic-password -U -s station -a "vault:pw-1" -w "FAKE000"
           0
+      files:
+          .keychain/station/vault:pw-1: exists

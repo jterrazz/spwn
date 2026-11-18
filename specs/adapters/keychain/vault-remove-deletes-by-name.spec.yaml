@@ -17,3 +17,5 @@ runs:
           {"Removed":[]}
           security delete-generic-password -s station -a vault:pw-1
           []
+      files:
+          .keychain/station/vault:pw-1: absent
