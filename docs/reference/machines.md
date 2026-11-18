@@ -150,7 +150,7 @@ With the App Store app, the setting `tailscale-cli`, which `apps install tailsca
 
 ## SSH
 
-Station writes one managed block per machine in `~/.ssh/config` on every Mac, refreshed by a bare `machines` and after every change, so `ssh api` works on every machine. Every block pins its host key in `~/.local/state/station/known_hosts/<name>` (`StrictHostKeyChecking accept-new`). The three shapes:
+Station writes one managed block per machine in `~/.ssh/config` on every Mac, refreshed by a bare `machines` and after every change, so `ssh api` works on every machine. A block carries `IdentitiesOnly yes` beside its `IdentityFile` when `machines add --key` named the key, so an ssh agent holding many keys offers that one first and never runs out of attempts; without `--key` the block names `~/.ssh/id_ed25519` and nothing else. Every block pins its host key in `~/.local/state/station/known_hosts/<name>` (`StrictHostKeyChecking accept-new`). The three shapes:
 
 ```text
 Host mac-mini # a host: its sshd, reached by its MagicDNS name
