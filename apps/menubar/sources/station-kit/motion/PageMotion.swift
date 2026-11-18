@@ -1,7 +1,7 @@
 import SwiftUI
 
 // value: M2 and M3, a page pushed or popped: the top page slides on the
-// trailing edge, opaque and shaded; the page under it moves a third and
+// trailing edge over the panel's own material, with no fill and no shadow; the page under it moves a third and
 // dims. Progress is how far each page is shown, so at a push's moment t the
 // top page is at pace(t) and the page under at 1 - pace(t).
 public struct PushTransition: Movement {
@@ -35,7 +35,6 @@ public struct PushTransition: Movement {
         case (.top, _):
             look.slide = 1 - progress
             look.opacity = way == .push ? 1 : Look.lerp(m.popFade, 1, progress)
-            look.shade = progress < 1 ? 1 : 0
         case (.under, .push):
             let gone = 1 - progress
             look.slide = -m.pushUnder * gone
@@ -54,10 +53,7 @@ public struct PushTransition: Movement {
 
     public func body(content: Content) -> some View {
         let look = Self.look(progress, role: role, way: way, reduce: tokens.reduceMotion)
-        content
-            .background(look.shade > 0 ? Token.Motion.slide(tokens.scheme) : Color.clear)
-            .shadow(color: Token.Motion.slideShade(look.shade), radius: Token.Motion.Move.slideShadowRadius, x: Token.Motion.Move.slideShadowX)
-            .moved(look)
+        content.moved(look)
     }
 }
 

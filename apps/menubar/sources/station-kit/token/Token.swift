@@ -552,7 +552,7 @@ extension Token {
         public var font: Font { .system(size: size, weight: weight, design: design).monospacedDigit() }
 
         public static let heroTitle = Role(17, .bold, .t1, tracking: -0.17)
-        public static let pageTitle = Role(17, .bold, .t1)
+        public static let pageTitle = Role(22, .bold, .t1, tracking: -0.40)
         public static let homeTitle = Role(13, .bold, .t1)
         public static let sectionLabel = Role(12, .semibold, .section)
         public static let sectionValue = Role(12, .medium, .t3)

@@ -7,10 +7,10 @@ extension Token.Metric {
         public static let backGap: CGFloat = 3
         public static let backBottom: CGFloat = 8
         public static let glyph: CGFloat = 20
-        public static let glyphSlot: CGFloat = 24
+        public static let glyphSlot: CGFloat = 28
         public static let titleGap: CGFloat = 8
         public static let title: CGFloat = 28
-        public static let factsTop: CGFloat = 2
+        public static let factsTop: CGFloat = 4
         public static let segmentsTop: CGFloat = 10
         public static let buttonsGap: CGFloat = 6
     }

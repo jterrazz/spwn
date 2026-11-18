@@ -36,7 +36,7 @@ struct MachineContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Token.Tile.section) {
             if let error = page.error { ErrorLine(error) }
-            if segment == nil, let head { header(head) }
+            if segment == nil, let head, let top = page.header { header(head, top) }
             if loading {
                 skeleton
             } else {
@@ -123,7 +123,7 @@ struct MachineContent: View {
         .accessibilityLabel("Reading")
     }
 
-    func header(_ s: Section) -> some View {
+    func header(_ s: Section, _ top: Header) -> some View {
         let row = s.items?.first?.row
         let mark = row?.mark ?? .ok
         var caption = (s.caption ?? []).map { Format.show($0) }
@@ -132,8 +132,7 @@ struct MachineContent: View {
             badge = "Server"
             caption.removeFirst()
         }
-        let back = state.back ?? Self.all
-        return PageHeader(back: back, title: s.title ?? "", subtitle: Self.subtitle(caption), symbol: Token.Symbol.machine(page.context?.kind),
+        return PageHeader(back: top.back ?? "", title: top.title ?? "", subtitle: Self.subtitle(caption), symbol: Token.Symbol.machine(page.context?.kind),
                           badge: badge, action: handlers.back) {
             if let doing = Self.doing(state.running ?? state.settling) {
                 StateWord(doing, mark: .pending)
@@ -160,10 +159,6 @@ struct MachineContent: View {
         default: nil
         }
     }
-
-    // value: where a page goes back to: All machines, or for a server the
-    // Mac it lives on (vision panels c and f).
-    static let all = "All machines"
 
     func words(_ v: Value?) -> String { v.map { Format.show($0, now: now) } ?? "" }
 

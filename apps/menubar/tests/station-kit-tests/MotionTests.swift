@@ -64,7 +64,7 @@ final class MotionTests: XCTestCase {
         }
     }
 
-    func testAPushedPageSlidesInOpaqueOverThePageBelowWhichDimsAThirdAway() {
+    func testAPushedPageSlidesInOverThePageBelowWhichDimsAThirdAway() {
         for t in Self.moments {
             let p = Self.smooth(t)
             let top = PushTransition.look(PushTransition.frozen(t, role: .top, way: .push), role: .top, way: .push, reduce: false)
@@ -75,8 +75,18 @@ final class MotionTests: XCTestCase {
             let dim = p <= 0.3 ? 1 - 0.75 * p / 0.3 : 0.25 * (1 - (p - 0.3) / 0.7)
             near(under.opacity, dim, "the page below's dim at \(t)")
         }
-        XCTAssertEqual(PushTransition.look(0.5, role: .top, way: .push, reduce: false).shade, 1, "a sliding page casts its shade")
-        XCTAssertEqual(PushTransition.look(1, role: .top, way: .push, reduce: false).shade, 0, "a page at rest casts none")
+    }
+
+    // invariant: a pushed page slides on the panel's own material: its movement
+    // paints no fill and casts no shadow.
+    func testAPushedPageCarriesNoOpaqueFillAndNoShadow() throws {
+        let motion = try String(contentsOf: Tree.sources.appendingPathComponent("motion/PageMotion.swift"), encoding: .utf8)
+        let start = try XCTUnwrap(motion.range(of: "public struct PushTransition"))
+        let end = try XCTUnwrap(motion.range(of: "public struct JumpTransition", range: start.upperBound..<motion.endIndex))
+        let body = motion[start.upperBound..<end.lowerBound]
+        for paint in [".background(", ".shadow(", "Token.Motion.slide"] {
+            XCTAssertFalse(body.contains(paint), "a pushed page paints: \(paint)")
+        }
     }
 
     func testAPoppedPageLeavesRightFadingWhileThePageBelowReturns() {

@@ -78,9 +78,6 @@ extension Token.Motion {
         public static let pushDimAt = 0.30
         public static let pushDim = 0.25
         public static let popFade = 0.6
-        public static let slideShadow = 0.16
-        public static let slideShadowRadius: CGFloat = 24
-        public static let slideShadowX: CGFloat = -10
 
         public static let segmentShift: CGFloat = 10
 
@@ -114,8 +111,6 @@ extension Token.Motion {
         public static let footerRise: CGFloat = 4
     }
 
-    public static func slide(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.rgba(30, 31, 38, 1) : Token.rgba(232, 236, 248, 1) }
-    public static func slideShade(_ share: Double) -> Color { Token.rgba(0, 0, 0, Move.slideShadow * share) }
     public static func shimmer(_ share: Double) -> Color { Token.rgba(255, 255, 255, share) }
 }
 
