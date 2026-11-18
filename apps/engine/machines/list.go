@@ -175,22 +175,7 @@ func macsServer(h MacView) bool {
 }
 
 func Down(vm VM) bool {
-	// value: a server is down when it is in a loop, powered off from inside,
-	// or not running while its record wants it running (SPEC §10.1's red
-	// badge).
-	if vm.Lifetime != AlwaysOn {
-		return false
-	}
-	switch vm.State {
-	case Broken, Stale:
-		return true
-	case Stopped:
-		return vm.Restarts.Looping || vm.Detail == PoweredOffInside || Wanted(vm) == "running"
-	case Running:
-		return vm.Restarts.Looping
-	case Suspended, UnknownState, Creating:
-	}
-	return false
+	return StandingOf(vm) == StandingDown
 }
 
 // invariant: a server in a loop, powered off from inside, or whose check

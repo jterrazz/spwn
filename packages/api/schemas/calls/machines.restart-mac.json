@@ -515,6 +515,19 @@
         "SizeGB": {
           "type": "integer"
         },
+        "Standing": {
+          "enum": [
+            "not-seen",
+            "restarting",
+            "creating",
+            "down",
+            "stopped",
+            "suspended",
+            "healthy",
+            "running"
+          ],
+          "type": "string"
+        },
         "State": {
           "enum": [
             "running",

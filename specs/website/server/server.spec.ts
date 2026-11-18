@@ -45,8 +45,10 @@ describe('server', () => {
             '/?world=stories&machine=infra&tab=Overview',
             async (visitor) => {
                 // When - I open it
-                // Then - its health says the engine's sentence of the failing check
-                await visitor.see(content('Its check fails.'));
+                // Then - its health says it is down, and the engine's line of the failing check
+                const health = region('Health');
+                await visitor.see(within(health, content('Down.')));
+                await visitor.see(within(health, content('Its check fails since 10:18.')));
             },
         );
         expect(result.errors.text).toBe('');

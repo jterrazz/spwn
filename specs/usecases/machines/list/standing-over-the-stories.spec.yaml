@@ -1,0 +1,17 @@
+description: 'each VM of the stories says its standing, infra down under its failing check'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | [.Name, .Standing]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [["agent-7f","running"],["api","stopped"],["linux-1","running"],["linux-2","creating"],["infra","down"],["linux-3","running"],["review-bot","running"]]
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "infra") | [.State, .CheckStatus.state, .Standing, .Head.Tone, .Head.Sentence, .Health.Sentence]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          ["running","failing","down","bad","infra is down.","Down."]
