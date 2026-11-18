@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -335,5 +336,39 @@ func TestACommandEndedByItsContextIsToldToStopBeforeItsSessionCloses(t *testing.
 func dial(t *testing.T) contract.GuestDialer {
 	t.Helper()
 	h := local.New(nil, nil, io.Discard, io.Discard)
-	return New(h.FS, h.Sockets)
+	return New(h.FS, h.Sockets, "darwin")
+}
+
+func dialRefused(t *testing.T, goos string, err error) error {
+	t.Helper()
+	h := local.New(nil, nil, io.Discard, io.Discard)
+	_, got := New(h.FS, localtest.Refusing(h.Sockets, err), goos).Dial(context.Background(), contract.GuestTarget{
+		VM: "linux-2", Address: netip.MustParseAddrPort("192.168.64.3:22"), User: "admin", Password: "admin",
+	})
+	if got == nil {
+		t.Fatal("Dial answered; want its refusal")
+	}
+	return got
+}
+
+func TestADialTheMacRefusesForLocalNetworkSaysSo(t *testing.T) {
+	err := dialRefused(t, "darwin", localtest.Unreachable())
+	if !errors.Is(err, contract.ErrLocalNetwork) {
+		t.Fatalf("Dial = %v; want the Local Network block", err)
+	}
+	if !strings.Contains(err.Error(), "no route to host") {
+		t.Errorf("Dial = %v; want the dial's own error kept beside the block", err)
+	}
+}
+
+func TestAnUnreachableRouteOffAMacIsNoLocalNetworkBlock(t *testing.T) {
+	if err := dialRefused(t, "linux", localtest.Unreachable()); errors.Is(err, contract.ErrLocalNetwork) {
+		t.Fatalf("Dial on linux = %v; want a plain refusal", err)
+	}
+}
+
+func TestARefusedDialOnAMacIsNoLocalNetworkBlock(t *testing.T) {
+	if err := dialRefused(t, "darwin", localtest.Refused()); errors.Is(err, contract.ErrLocalNetwork) {
+		t.Fatalf("Dial = %v; want a plain refusal", err)
+	}
 }

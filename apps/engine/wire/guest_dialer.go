@@ -20,7 +20,7 @@ func (m machine) guestDialer() contract.GuestDialer {
 	if m.world != nil {
 		return m.world.guests()
 	}
-	return ssh.New(m.sys.FS, m.sys.Sockets)
+	return ssh.New(m.sys.FS, m.sys.Sockets, m.sys.Env.GOOS())
 }
 
 type engineGuests struct {

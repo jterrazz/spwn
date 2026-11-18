@@ -2,9 +2,16 @@ package contract
 
 import (
 	"context"
+	"errors"
 	"io"
 	"io/fs"
 	"net/netip"
+)
+
+var (
+	// value: a dial its Mac refused because it has not approved station for
+	// Local Network; the dial's own error is wrapped beside it.
+	ErrLocalNetwork = errors.New("the Mac has not approved station for Local Network")
 )
 
 type GuestDialer interface {
