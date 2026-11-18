@@ -19,5 +19,5 @@ export const MISSING_STORIES: readonly Story<ComponentProps<typeof Missing>>[] =
 
 export const MISSING_MARK_STORIES: readonly Story<ComponentProps<typeof MissingMark>>[] = [
     { name: 'its own word', props: {} },
-    { name: 'another word', props: { children: 'Not measured' } },
+    { name: 'another word', props: { children: 'not measured' } },
 ];

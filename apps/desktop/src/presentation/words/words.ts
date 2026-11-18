@@ -20,22 +20,22 @@ export const NO_STATE_WORD = 'no state given';
 // value: answer not yet come, none at all, a refusal sent with no type, a slot no call fills, a gesture done or of
 // value: unknown outcome.
 export const OWN_STATE_WORDS = {
-    connecting: 'Connecting',
+    connecting: 'connecting',
     done: 'done',
-    'engine-absent': 'No answer',
+    'engine-absent': 'no answer',
     'no-answer': 'no answer',
-    'not-given': 'Not given yet',
-    'not-measured': 'Not measured',
-    'not-wired': 'Not wired',
-    reading: 'Reading',
+    'not-given': 'not given yet',
+    'not-measured': 'not measured',
+    'not-wired': 'not wired',
+    reading: 'reading',
     unknown: 'unknown',
     untyped: 'error',
-    'window-error': 'Error',
+    'window-error': 'error',
 } as const;
 
 export type OwnState = keyof typeof OWN_STATE_WORDS;
 
-export const NEWEST_WORD = 'Newest';
+export const NEWEST_WORD = 'newest';
 
 export const DISK_PENDING_WORD = 'reading';
 

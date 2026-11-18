@@ -12,11 +12,11 @@
     - term: On your machines
     - definition: not installed
     - term: Rule
-    - definition: Not given yet
+    - definition: not given yet
     - term: Newest
-    - definition: Not given yet
+    - definition: not given yet
     - term: Last moved
-    - definition: Not given yet
+    - definition: not given yet
   - region "What it keeps on disk":
     - heading "What it keeps on disk" [level=2]
     - button "Storage"
@@ -27,8 +27,8 @@
     - term: Category
     - definition: Runtimes
     - term: Declared in
-    - definition: Not given yet
+    - definition: not given yet
     - term: 0 machines
-    - definition: Not given yet
+    - definition: not given yet
     - term: Comes from
-    - definition: Not given yet
+    - definition: not given yet

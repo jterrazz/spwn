@@ -211,7 +211,7 @@ describe('Machine files', () => {
             // Then - the panel carries the engine's sentence alone, an empty list is no gap
             const followers = region('Machines that follow it');
             await visitor.see(within(followers, content('No machine follows it.')));
-            await visitor.gone(within(followers, content('Not given yet')));
+            await visitor.gone(within(followers, content('not given yet')));
         });
         expect(result.errors.text).toBe('');
     });

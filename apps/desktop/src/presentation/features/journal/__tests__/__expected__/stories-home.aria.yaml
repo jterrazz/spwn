@@ -64,7 +64,7 @@
   - region "Last night":
     - heading "Last night 3 moved, 1 held, 1 failed" [level=2]
     - button "All history"
-    - button "03:15 ripgrep download timed out Failed linux-1"
+    - button "03:15 ripgrep download timed out failed linux-1"
     - button "Retry ripgrep": Retry
     - button "03:12 node 24.11.0 → 24.11.1 6 machines"
     - button "03:12 gh 2.97.0 → 2.98.0 macbook-pro"

@@ -35,10 +35,10 @@
     - tab "Storage"
   - tabpanel "Overview":
     - heading "Online, with no machine running." [level=1]
-    - text: CPU 0% Memory Not given yet Disk Not given yet Its machines 0machines
+    - text: CPU 0% Memory not given yet Disk not given yet Its machines 0machines
     - region "Memory":
       - heading "Memory" [level=2]
-      - paragraph: Not given yet What each machine holds of this Mac's memory.
+      - paragraph: not given yet What each machine holds of this Mac's memory.
     - region "Packages":
       - heading "Packages" [level=2]
       - text: "not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"

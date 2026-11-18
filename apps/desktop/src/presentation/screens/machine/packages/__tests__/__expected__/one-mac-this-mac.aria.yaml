@@ -12,7 +12,7 @@
     - tab "Storage"
   - heading "No verdict from the engine." [level=1]
   - paragraph:
-    - img "Not given yet"
+    - img "not given yet"
     - text: What the engine answered is below
   - region "Upgrades":
     - heading "Upgrades" [level=2]

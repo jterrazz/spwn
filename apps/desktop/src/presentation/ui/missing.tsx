@@ -11,6 +11,6 @@ export function Missing({ children }: { children: ReactNode }) {
     );
 }
 
-export function MissingMark({ children = 'Not given yet' }: { children?: string }) {
+export function MissingMark({ children = 'not given yet' }: { children?: string }) {
     return <span className={styles.mark}>{children}</span>;
 }
