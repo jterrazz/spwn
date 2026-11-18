@@ -860,20 +860,11 @@
         "log": {
           "$ref": "#/$defs/page.Log"
         },
-        "message": {
-          "$ref": "#/$defs/page.Message"
-        },
         "note": {
           "$ref": "#/$defs/page.Note"
         },
         "row": {
           "$ref": "#/$defs/page.Row"
-        },
-        "steps": {
-          "items": {
-            "$ref": "#/$defs/page.Step"
-          },
-          "type": "array"
         },
         "tile": {
           "$ref": "#/$defs/page.Tile"
@@ -926,27 +917,6 @@
       },
       "type": "object"
     },
-    "page.Message": {
-      "additionalProperties": false,
-      "properties": {
-        "body": {
-          "type": "string"
-        },
-        "pr": {
-          "$ref": "#/$defs/page.PR"
-        },
-        "reply": {
-          "type": "boolean"
-        },
-        "since": {
-          "$ref": "#/$defs/page.Value"
-        },
-        "title": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
     "page.Note": {
       "additionalProperties": false,
       "properties": {
@@ -975,30 +945,6 @@
           "type": "string"
         },
         "value": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "page.PR": {
-      "additionalProperties": false,
-      "properties": {
-        "files": {
-          "type": "integer"
-        },
-        "minus": {
-          "type": "integer"
-        },
-        "number": {
-          "type": "integer"
-        },
-        "opened": {
-          "$ref": "#/$defs/page.Value"
-        },
-        "plus": {
-          "type": "integer"
-        },
-        "url": {
           "type": "string"
         }
       },
@@ -1334,24 +1280,6 @@
           "type": "array"
         },
         "unit": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "page.Step": {
-      "additionalProperties": false,
-      "properties": {
-        "at": {
-          "$ref": "#/$defs/page.Value"
-        },
-        "current": {
-          "type": "boolean"
-        },
-        "diff": {
-          "type": "string"
-        },
-        "text": {
           "type": "string"
         }
       },

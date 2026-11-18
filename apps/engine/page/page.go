@@ -235,20 +235,18 @@ const (
 )
 
 type Item struct {
-	Row     *Row     `json:"row,omitempty"`
-	Fact    *Fact    `json:"fact,omitempty"`
-	Group   *Group   `json:"group,omitempty"`
-	Empty   *Empty   `json:"empty,omitempty"`
-	Error   *Error   `json:"error,omitempty"`
-	Note    *Note    `json:"note,omitempty"`
-	Link    *Link    `json:"link,omitempty"`
-	Tile    *Tile    `json:"tile,omitempty"`
-	Gauge   *Gauge   `json:"gauge,omitempty"`
-	Chart   *Chart   `json:"chart,omitempty"`
-	Message *Message `json:"message,omitempty"`
-	Steps   []Step   `json:"steps,omitempty"`
-	Log     *Log     `json:"log,omitempty"`
-	Uptime  *Uptime  `json:"uptime,omitempty"`
+	Row    *Row    `json:"row,omitempty"`
+	Fact   *Fact   `json:"fact,omitempty"`
+	Group  *Group  `json:"group,omitempty"`
+	Empty  *Empty  `json:"empty,omitempty"`
+	Error  *Error  `json:"error,omitempty"`
+	Note   *Note   `json:"note,omitempty"`
+	Link   *Link   `json:"link,omitempty"`
+	Tile   *Tile   `json:"tile,omitempty"`
+	Gauge  *Gauge  `json:"gauge,omitempty"`
+	Chart  *Chart  `json:"chart,omitempty"`
+	Log    *Log    `json:"log,omitempty"`
+	Uptime *Uptime `json:"uptime,omitempty"`
 }
 
 type Tile struct {
@@ -311,30 +309,6 @@ type Anomaly struct {
 	From     int    `json:"from"`
 	To       int    `json:"to"`
 	Sentence string `json:"sentence,omitempty"`
-}
-
-type Message struct {
-	Title string `json:"title,omitempty"`
-	Body  string `json:"body,omitempty"`
-	Since Value  `json:"since,omitzero"`
-	PR    *PR    `json:"pr,omitempty"`
-	Reply bool   `json:"reply,omitempty"`
-}
-
-type PR struct {
-	Number int    `json:"number,omitempty"`
-	URL    string `json:"url,omitempty"`
-	Files  int    `json:"files,omitempty"`
-	Plus   int    `json:"plus,omitempty"`
-	Minus  int    `json:"minus,omitempty"`
-	Opened Value  `json:"opened,omitzero"`
-}
-
-type Step struct {
-	At      Value  `json:"at,omitzero"`
-	Text    string `json:"text,omitempty"`
-	Diff    string `json:"diff,omitempty"`
-	Current bool   `json:"current,omitempty"`
 }
 
 type Log struct {

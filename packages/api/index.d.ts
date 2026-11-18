@@ -2482,10 +2482,8 @@ export type PageItem = {
     group?: PageGroup;
     link?: PageLink;
     log?: PageLog;
-    message?: PageMessage;
     note?: PageNote;
     row?: PageRow;
-    steps?: PageStep[];
     tile?: PageTile;
     uptime?: PageUptime;
 };
@@ -2505,14 +2503,6 @@ export type PageLog = {
     more?: string;
 };
 
-export type PageMessage = {
-    body?: string;
-    pr?: PagePR;
-    reply?: boolean;
-    since?: PageValue;
-    title?: string;
-};
-
 export type PageNote = {
     text?: string;
 };
@@ -2524,15 +2514,6 @@ export type PageOption = {
     note?: string;
     of?: string;
     value?: string;
-};
-
-export type PagePR = {
-    files?: number;
-    minus?: number;
-    number?: number;
-    opened?: PageValue;
-    plus?: number;
-    url?: string;
 };
 
 export type PagePeak = {
@@ -2617,13 +2598,6 @@ export type PageSeries = {
     key?: string;
     points?: number[];
     unit?: string;
-};
-
-export type PageStep = {
-    at?: PageValue;
-    current?: boolean;
-    diff?: string;
-    text?: string;
 };
 
 export type PageStrip = {

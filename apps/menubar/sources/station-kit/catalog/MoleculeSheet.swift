@@ -158,29 +158,10 @@ public struct MoleculeSheet: View {
                 CheckRow(Self.row("Check passes", sub: Self.text("502"), signal: "failing"))
             }
             card(flush: false) {
-                StepSlots(Self.steps)
-            }
-            card(flush: false) {
                 LogLines(Self.log, more: Self.actions.first { $0.id == "log" })
             }
         }
     }
-
-    static let steps: [Step] = {
-        func step(_ at: String, _ text: String, diff: String? = nil, current: Bool? = nil) -> Step {
-            var s = Step()
-            s.at = MoleculeSheet.text(at)
-            s.text = text
-            s.diff = diff
-            s.current = current
-            return s
-        }
-        return [
-            step("now", "running tests\(Token.Glyph.sep)41/58 pass", current: true),
-            step("3 min ago", "edited src/pages/index.astro", diff: "+86 -12"),
-            step("7 min ago", "added the pricing section"),
-        ]
-    }()
 
     static let log: Log = {
         var l = Log()

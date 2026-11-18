@@ -156,7 +156,7 @@ func Check(p Page) error {
 func checkItem(s Section, it Item, judged bool, rows map[string]bool, depth int) error {
 	set := 0
 	for _, ok := range []bool{it.Row != nil, it.Fact != nil, it.Group != nil, it.Empty != nil, it.Error != nil, it.Note != nil, it.Link != nil,
-		it.Tile != nil, it.Gauge != nil, it.Chart != nil, it.Message != nil, it.Steps != nil, it.Log != nil, it.Uptime != nil} {
+		it.Tile != nil, it.Gauge != nil, it.Chart != nil, it.Log != nil, it.Uptime != nil} {
 		if ok {
 			set++
 		}
