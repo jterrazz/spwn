@@ -10,12 +10,16 @@ const recordingFor = await recordingsOf('sign-ins', 'two-macs');
 // value: each frame of a watch held this long, so a step is on screen before the next one replaces it.
 const PACE = { gestureFrame: 600 };
 
-function signInsOver(world: string) {
+// hazard: the recorded sign-in ends on its expiry, one frame after the step that asks the code. A test that types into
+// that step holds each frame this long, so the step is still there when a loaded bench clicks Continue.
+const HELD = { gestureFrame: 5000 };
+
+function signInsOver(world: string, pace = PACE) {
     return pageOver(
         recordingFor(world),
         { machine: 'linux-1', page: 'machine', tab: 'Sign-ins' },
         NO_OPENER,
-        PACE,
+        pace,
     );
 }
 
@@ -52,7 +56,7 @@ describe('login sheet', () => {
 
     test('a paste-back code goes through a password field the page never holds', async () => {
         // Given - claude's sign-in on linux-1 over sign-ins, asking its code back
-        const result = await component.render(signInsOver('sign-ins'), async (visitor) => {
+        const result = await component.render(signInsOver('sign-ins', HELD), async (visitor) => {
             await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
             const sheet = dialog(PASTE);
             await visitor.see(within(sheet, content('Paste the code')));
@@ -74,7 +78,7 @@ describe('login sheet', () => {
 
     test('a refused code is said, and the field is left empty for another', async () => {
         // Given - claude's sign-in on linux-1 over sign-ins
-        const result = await component.render(signInsOver('sign-ins'), async (visitor) => {
+        const result = await component.render(signInsOver('sign-ins', HELD), async (visitor) => {
             await visitor.click(within(region('Sign-ins'), button('Sign in claude')));
             const sheet = dialog(PASTE);
 
