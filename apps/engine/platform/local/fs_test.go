@@ -3,8 +3,11 @@ package local
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -115,5 +118,52 @@ func TestAppendKeepsWhatAnotherAppenderWrote(t *testing.T) {
 	}
 	if want := "other 1\nengine 1\nother 2\n"; string(got) != want {
 		t.Fatalf("the log holds %q; want %q", got, want)
+	}
+}
+
+func TestATransientLockIsDeletedWhenReleasedAndNeverHeldTwice(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "x.lock")
+	const holders = 16
+	var inside, overlap atomic.Int32
+	var all sync.WaitGroup
+	for range holders {
+		all.Go(func() {
+			release, err := ExclusiveTransient(t.Context(), at)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if inside.Add(1) > 1 {
+				overlap.Add(1)
+			}
+			time.Sleep(2 * time.Millisecond)
+			inside.Add(-1)
+			release()
+		})
+	}
+	all.Wait()
+	if overlap.Load() != 0 {
+		t.Errorf("%d holders overlapped", overlap.Load())
+	}
+	if _, err := os.Stat(at); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("the lock file outlived its last release: %v", err)
+	}
+}
+
+func TestAReleasedTransientLockReleasedAgainLeavesTheNextHoldersFile(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "x.lock")
+	first, err := ExclusiveTransient(t.Context(), at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	first()
+	second, err := ExclusiveTransient(t.Context(), at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer second()
+	first()
+	if _, err := os.Stat(at); err != nil {
+		t.Errorf("a second release removed the lock file another holder owns: %v", err)
 	}
 }
