@@ -73,11 +73,14 @@ func (c *sshFile) block(b contract.MachineBlock) string {
 		lines = append(lines, "  User "+b.User)
 	}
 	key := b.Key
-	if key == "" {
-		key = defaultKey
+	identity := []string{"  IdentityFile " + defaultKey}
+	if key != "" {
+		// invariant: a key the owner named is the only one offered, so an agent
+		// holding many keys never exhausts the server's attempts before it.
+		identity = []string{"  IdentityFile " + key, "  IdentitiesOnly yes"}
 	}
+	lines = append(lines, identity...)
 	lines = append(lines,
-		"  IdentityFile "+key,
 		"  ServerAliveInterval 30",
 		"  ServerAliveCountMax 3",
 		"  UserKnownHostsFile "+c.tilde(path.Join(c.o.KnownHosts, b.Name)),
