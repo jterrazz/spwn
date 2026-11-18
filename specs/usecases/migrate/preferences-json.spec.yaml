@@ -10,4 +10,4 @@ runs:
       stdout: |
           ✗	macbook-pro	Mac	macbook-pro	Engine not installed
           # Needs you
-          ✗	This Mac	has no engine installed	station engine start
+          ◐	This Mac	has no engine installed	station engine start

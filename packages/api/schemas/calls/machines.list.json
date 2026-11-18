@@ -311,6 +311,9 @@
         "Read": {
           "format": "date-time",
           "type": "string"
+        },
+        "Standing": {
+          "$ref": "#/$defs/machines.RollUp"
         }
       },
       "required": [
@@ -548,6 +551,9 @@
         "Laptop": {
           "type": "boolean"
         },
+        "Machines": {
+          "$ref": "#/$defs/machines.RollUp"
+        },
         "Name": {
           "type": "string"
         },
@@ -558,6 +564,16 @@
           "type": "boolean"
         },
         "Sentence": {
+          "type": "string"
+        },
+        "Standing": {
+          "enum": [
+            "asleep",
+            "not-seen",
+            "engine-stopped",
+            "engine-not-installed",
+            "online"
+          ],
           "type": "string"
         },
         "StationVersion": {
@@ -707,6 +723,27 @@
           "type": "integer"
         }
       },
+      "type": "object"
+    },
+    "machines.RollUp": {
+      "additionalProperties": false,
+      "properties": {
+        "N": {
+          "type": "integer"
+        },
+        "State": {
+          "enum": [
+            "down",
+            "not-seen",
+            "empty",
+            "fine"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "State"
+      ],
       "type": "object"
     },
     "machines.Room": {

@@ -10,4 +10,4 @@ runs:
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
           ◐	linux-1	Workspace	macbook-pro	Ended unexpectedly · ephemeral	4 CPU	8 GB
           # Needs you
-          ◐	linux-1	ended unexpectedly	station machines start linux-1
+          ✗	linux-1	ended unexpectedly	station machines start linux-1

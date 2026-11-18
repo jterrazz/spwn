@@ -1,11 +1,13 @@
 package machines
 
 import (
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
@@ -169,5 +171,184 @@ func TestMachinesListJudgesEachVMsStanding(t *testing.T) {
 	f := Judged(AllMachines{Macs: []MacView{{VMs: []VM{healthyServer(), {Name: "api", Lifetime: Persistent, State: Stopped}}}}})
 	if got := []VMStanding{f.Macs[0].VMs[0].Standing, f.Macs[0].VMs[1].Standing}; !slices.Equal(got, []VMStanding{StandingHealthy, StandingStopped}) {
 		t.Errorf("standings %v", got)
+	}
+}
+
+func TestEachRuleOfAMacsStandingNamesItsValue(t *testing.T) {
+	seen := time.Date(2026, 11, 18, 9, 0, 0, 0, time.UTC)
+	for name, c := range map[string]struct {
+		mac  MacView
+		want MacStanding
+	}{
+		"silent after it answered on battery, lid closed": {MacView{Answered: seen, Asleep: true}, MacAsleep},
+		"silent otherwise":                          {MacView{Answered: seen, Laptop: true}, MacNotSeen},
+		"never answered":                            {MacView{}, MacNotSeen},
+		"silent with its engine last stopped":       {MacView{Answered: seen, Engine: EngineView{State: EngineStopped}}, MacNotSeen},
+		"asleep with its engine last stopped":       {MacView{Answered: seen, Asleep: true, Engine: EngineView{State: EngineStopped}}, MacAsleep},
+		"its engine stopped":                        {MacView{ThisMac: true, Engine: EngineView{State: EngineStopped}}, MacEngineStopped},
+		"its engine not installed":                  {MacView{ThisMac: true, Engine: EngineView{State: EngineNotInstalled}}, MacEngineNotInstalled},
+		"another Mac whose engine is not installed": {MacView{Reachable: true, Engine: EngineView{State: EngineNotInstalled}}, MacEngineNotInstalled},
+		"its engine running":                        {MacView{ThisMac: true, Engine: EngineView{State: EngineRunning}}, MacOnline},
+		"answering, its engine not known":           {MacView{Reachable: true}, MacOnline},
+		"This Mac that last slept on battery":       {MacView{ThisMac: true, Asleep: true, Engine: EngineView{State: EngineRunning}}, MacOnline},
+	} {
+		if got := MacStandingOf(c.mac); got != c.want {
+			t.Errorf("%s: %q, want %q", name, got, c.want)
+		}
+	}
+}
+
+func TestEveryMacStandingHasItsLowercaseWordAndTone(t *testing.T) {
+	want := map[MacStanding]struct {
+		word string
+		tone verdict.Tone
+	}{
+		MacAsleep: {"asleep", verdict.Plain}, MacNotSeen: {"not seen", verdict.Warn}, MacEngineStopped: {"engine stopped", verdict.Bad},
+		MacEngineNotInstalled: {"engine not installed", verdict.Warn}, MacOnline: {"online", verdict.OK},
+	}
+	values := MacStanding("").Enum()
+	if len(values) != len(want) {
+		t.Fatalf("the Mac standings are %v", values)
+	}
+	for _, v := range values {
+		s := MacStanding(v)
+		if s.Word() != want[s].word || s.Tone() != want[s].tone {
+			t.Errorf("%s: %q %q, want %q %q", v, s.Word(), s.Tone(), want[s].word, want[s].tone)
+		}
+	}
+}
+
+func TestARollUpIsItsFirstRuleThatMatchesAndCountsWhatItNames(t *testing.T) {
+	seen := time.Date(2026, 11, 18, 9, 0, 0, 0, time.UTC)
+	online := func(vms ...VM) MacView {
+		return MacView{Reachable: true, Engine: EngineView{State: EngineRunning}, VMs: vms}
+	}
+	down := VM{Name: "linux-1", Lifetime: Persistent, State: Stale}
+	stopped := VM{Name: "api", Lifetime: Persistent, State: Stopped}
+	silent := MacView{Answered: seen, VMs: []VM{{Name: "infra", Lifetime: AlwaysOn, State: UnknownState, Restarts: Restarts{Looping: true}}}}
+	asleep := MacView{Answered: seen, Asleep: true, VMs: []VM{{Name: "linux-3", State: UnknownState}}}
+	for name, c := range map[string]struct {
+		macs []MacView
+		want RollUp
+	}{
+		"no Mac":                                   {nil, RollUp{State: RollUpEmpty}},
+		"a Mac with no VM":                         {[]MacView{online()}, RollUp{State: RollUpEmpty}},
+		"every VM up or stopped":                   {[]MacView{online(healthyServer(), stopped)}, RollUp{State: RollUpFine}},
+		"a VM down":                                {[]MacView{online(down, stopped)}, RollUp{State: RollUpDown, N: 1}},
+		"an engine stopped, no VM":                 {[]MacView{{ThisMac: true, Engine: EngineView{State: EngineStopped}}}, RollUp{State: RollUpDown, N: 1}},
+		"an engine not installed and a VM down":    {[]MacView{{ThisMac: true, Engine: EngineView{State: EngineNotInstalled}}, online(down)}, RollUp{State: RollUpDown, N: 2}},
+		"down before not seen":                     {[]MacView{online(down), silent, {}}, RollUp{State: RollUpDown, N: 1}},
+		"two Macs not seen":                        {[]MacView{online(), silent, {}}, RollUp{State: RollUpNotSeen, N: 2}},
+		"a silent Mac's VM counts through its Mac": {[]MacView{silent}, RollUp{State: RollUpNotSeen, N: 1}},
+		"not seen before empty":                    {[]MacView{online(), {}}, RollUp{State: RollUpNotSeen, N: 1}},
+		"an asleep Mac is no fault":                {[]MacView{online(stopped), asleep}, RollUp{State: RollUpFine}},
+		"an asleep Mac's VMs are VMs":              {[]MacView{online(), asleep}, RollUp{State: RollUpFine}},
+	} {
+		if got := RollUpOf(c.macs); got != c.want {
+			t.Errorf("%s: %+v, want %+v", name, got, c.want)
+		}
+	}
+}
+
+func TestEveryRollUpStateHasItsTone(t *testing.T) {
+	want := map[RollUpState]verdict.Tone{RollUpDown: verdict.Bad, RollUpNotSeen: verdict.Warn, RollUpEmpty: verdict.Plain, RollUpFine: verdict.OK}
+	values := RollUpState("").Enum()
+	if len(values) != len(want) {
+		t.Fatalf("the roll-up states are %v", values)
+	}
+	for _, v := range values {
+		if got := RollUpState(v).Tone(); got != want[RollUpState(v)] {
+			t.Errorf("%s: %q, want %q", v, got, want[RollUpState(v)])
+		}
+	}
+}
+
+func TestMachinesListJudgesEachMacsStandingItsRollUpAndAllOfThem(t *testing.T) {
+	seen := time.Date(2026, 11, 18, 9, 0, 0, 0, time.UTC)
+	f := Judged(AllMachines{Read: seen.Add(time.Hour), Macs: []MacView{
+		{Name: "macbook-pro", ThisMac: true, Engine: EngineView{State: EngineRunning}, VMs: []VM{{Name: "linux-1", Lifetime: Persistent, State: Stale}}},
+		{Name: "mac-mini", Reachable: true},
+		{Name: "macbook-air", Answered: seen},
+	}})
+	got := make([][]any, 0, len(f.Macs))
+	for _, h := range f.Macs {
+		got = append(got, []any{h.Name, h.Standing, *h.Machines})
+	}
+	want := [][]any{
+		{"macbook-pro", MacOnline, RollUp{State: RollUpDown, N: 1}},
+		{"mac-mini", MacOnline, RollUp{State: RollUpEmpty}},
+		{"macbook-air", MacNotSeen, RollUp{State: RollUpNotSeen, N: 1}},
+	}
+	if !reflect.DeepEqual(got, want) || f.Standing == nil || *f.Standing != (RollUp{State: RollUpDown, N: 1}) {
+		t.Errorf("macs %v, all %+v", got, f.Standing)
+	}
+}
+
+// invariant: a Mac's Unseen verdict, and every finding's severity, Mac or
+// VM, are functions of the standing over every combination of the facts the
+// rules read: Unseen only for a Mac that does not answer, in its standing's
+// tone and never bad; broken only where the standing's tone is bad.
+func TestUnseenAndFindingsAgreeWithTheStandingEverywhere(t *testing.T) {
+	now := time.Date(2026, 11, 18, 10, 0, 0, 0, time.UTC)
+	engines := []EngineState{"", EngineRunning, EngineStopped, EngineNotInstalled}
+	n := 0
+	for _, engine := range engines {
+		for facts := range 64 {
+			h := MacView{Name: "mac", ThisMac: facts&1 != 0, Reachable: facts&2 != 0, Asleep: facts&4 != 0, LAN: "192.168.1.9",
+				Engine: EngineView{State: engine}}
+			if facts&8 != 0 {
+				h.Answered = now.Add(-time.Hour)
+			}
+			if facts&16 != 0 {
+				h.VMs = []VM{healthyServer()}
+			}
+			if facts&32 != 0 {
+				h.Laptop = true
+			}
+			n++
+			s := MacStandingOf(h)
+			unseen := UnseenVerdict(h, now)
+			silent := s == MacAsleep || s == MacNotSeen
+			if (unseen != nil) != silent || unseen != nil && (unseen.Tone != s.Tone() || unseen.Tone == verdict.Bad) {
+				t.Errorf("%+v: unseen %+v, standing %q", h, unseen, s)
+			}
+			for _, f := range Findings(AllMachines{Macs: []MacView{h}}) {
+				if f.Machine.On == "" && (f.Severity == finding.Broken) != (s.Tone() == verdict.Bad) {
+					t.Errorf("%+v: %q is %q, standing %q", h, f.Text, f.Severity, s)
+				}
+			}
+		}
+	}
+	if n != len(engines)*64 {
+		t.Fatalf("%d Macs judged", n)
+	}
+	states := []VMState{Running, Stopped, Suspended, Stale, Broken, Creating, UnknownState}
+	for _, state := range states {
+		for _, lifetime := range []Lifetime{AlwaysOn, Persistent, Ephemeral} {
+			for _, check := range []CheckState{"", CheckWaiting, CheckPassing, CheckFailing} {
+				for facts := range 64 {
+					vm := VM{Name: "vm", Lifetime: lifetime, State: state, CheckStatus: CheckStatus{State: check}, Check: "vm:443",
+						Restarts: Restarts{Looping: facts&1 != 0}, IP: "192.168.64.9", SSH: facts&8 != 0, Want: "stopped"}
+					if facts&2 != 0 {
+						vm.Restart = &RestartWalk{Step: 1}
+					}
+					if facts&4 != 0 {
+						vm.Want = "running"
+					}
+					if facts&16 != 0 {
+						vm.Detail = PoweredOffInside
+					}
+					if facts&32 != 0 {
+						vm.Guest = "absent"
+					}
+					s := StandingOf(vm)
+					fs := Findings(AllMachines{Macs: []MacView{{Name: "mac", ThisMac: true, Engine: EngineView{State: EngineRunning}, VMs: []VM{vm}}}})
+					broken := slices.ContainsFunc(fs, func(f finding.Finding) bool { return f.Machine.On != "" && f.Severity == finding.Broken })
+					if broken != (s == StandingDown) {
+						t.Errorf("%+v: findings %+v, standing %q", vm, fs, s)
+					}
+				}
+			}
+		}
 	}
 }

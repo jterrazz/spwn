@@ -9,7 +9,7 @@ runs:
           ●	x	Mac	x	Online
           ✗	y	Mac	y	Unreachable
           # Needs you
-          ✗	y	does not answer
+          ◐	y	does not answer
       files:
           .ssh/config:
               equals: |

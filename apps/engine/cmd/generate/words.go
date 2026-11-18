@@ -57,6 +57,26 @@ func standingWords() map[string]word {
 	return out
 }
 
+func macStandingWords() map[string]word {
+	out := map[string]word{}
+	for _, v := range machines.MacStanding("").Enum() {
+		s := machines.MacStanding(v)
+		out[v] = toned(s.Tone(), s.Word())
+	}
+	return out
+}
+
+// invariant: a roll-up's word reads after its N with its own noun ("1
+// machine down", "2 Macs not seen"); empty and fine carry no N.
+func rollUpWords() map[string]word {
+	return map[string]word{
+		string(machines.RollUpDown):    {Word: "down", One: "machine down", Other: "machines down", Tone: machines.RollUpDown.Tone()},
+		string(machines.RollUpNotSeen): {Word: "not seen", One: "Mac not seen", Other: "Macs not seen", Tone: machines.RollUpNotSeen.Tone()},
+		string(machines.RollUpEmpty):   toned(machines.RollUpEmpty.Tone(), "no machine yet"),
+		string(machines.RollUpFine):    toned(machines.RollUpFine.Tone(), "all running"),
+	}
+}
+
 func plain(w string) word { return word{Word: w, Tone: verdict.Plain} }
 
 func toned(t verdict.Tone, w string) word { return word{Word: w, Tone: t} }
@@ -228,6 +248,8 @@ func wordedEnums() []worded {
 			string(machines.UnknownState): plain(machines.UnknownState.Word()),
 		}},
 		{machines.VMStanding(""), standingWords()},
+		{machines.MacStanding(""), macStandingWords()},
+		{machines.RollUpState(""), rollUpWords()},
 		{machines.HoldState(""), map[string]word{
 			string(machines.HoldAlwaysOn): plain("Always on"),
 			string(machines.HoldHeld):     toned(verdict.Warn, "Held"),

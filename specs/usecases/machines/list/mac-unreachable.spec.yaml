@@ -20,7 +20,7 @@ runs:
             └─ ? infra    Server     Not seen · always on             8 CPU  24 GB
 
           Needs you
-            ✗ mac-mini  does not answer  → station machines unlock mac-mini
+            ◐ mac-mini  does not answer  → station machines unlock mac-mini
     - command: 'machines'
       exit: 0
       stdout: |
@@ -30,4 +30,4 @@ runs:
           ✗	mac-mini	Mac	mac-mini	Unreachable · last answer 03:12
           ?	infra	Server	mac-mini	Not seen · always on	8 CPU	24 GB
           # Needs you
-          ✗	mac-mini	does not answer	station machines unlock mac-mini
+          ◐	mac-mini	does not answer	station machines unlock mac-mini

@@ -1,0 +1,11 @@
+description: 'a Mac with no engine installed reads engine-not-installed, and all of it rolls up down'
+env:
+    - bare-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [[.out.All.Macs[] | [.Name, .Standing, .Machines.State, .Machines.N]], [.out.All.Standing.State, .out.All.Standing.N]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [[["macbook-pro","engine-not-installed","down",1]],["down",1]]

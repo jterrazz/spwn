@@ -1643,6 +1643,7 @@ export type MachinesAdded = {
 export type MachinesAllMachines = {
     Macs: MachinesMacView[] | null;
     Read: string;
+    Standing?: MachinesRollUp;
 };
 
 export type MachinesBack = {
@@ -1923,10 +1924,12 @@ export type MachinesMacView = {
     Hardware: CoreMachineHardware;
     LAN: string;
     Laptop: boolean;
+    Machines?: MachinesRollUp;
     Name: string;
     Node: MachinesNode;
     Reachable: boolean;
     Sentence?: string;
+    Standing?: 'asleep' | 'not-seen' | 'engine-stopped' | 'engine-not-installed' | 'online';
     StationVersion: string;
     ThisMac: boolean;
     Unseen?: CoreVerdictVerdict;
@@ -1990,6 +1993,11 @@ export type MachinesRestarts = {
     recent?: string[];
     streak?: number;
     wait?: number;
+};
+
+export type MachinesRollUp = {
+    N?: number;
+    State: 'down' | 'not-seen' | 'empty' | 'fine';
 };
 
 export type MachinesRoom = {
@@ -3526,7 +3534,11 @@ export type MachinesHoldState = 'always-on' | 'held' | 'free' | 'yours' | 'not-s
 
 export type MachinesLifetime = 'ephemeral' | 'persistent' | 'always-on';
 
+export type MachinesMacStanding = 'asleep' | 'not-seen' | 'engine-stopped' | 'engine-not-installed' | 'online';
+
 export type MachinesPreset = 'small' | 'workspace' | 'gate';
+
+export type MachinesRollUpState = 'down' | 'not-seen' | 'empty' | 'fine';
 
 export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
@@ -3597,7 +3609,9 @@ export type StationWords = {
     MachinesFit: Record<MachinesFit, StationWord>;
     MachinesHoldState: Record<MachinesHoldState, StationWord>;
     MachinesLifetime: Record<MachinesLifetime, StationWord>;
+    MachinesMacStanding: Record<MachinesMacStanding, StationWord>;
     MachinesPreset: Record<MachinesPreset, StationWord>;
+    MachinesRollUpState: Record<MachinesRollUpState, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
     MachinesVMStanding: Record<MachinesVMStanding, StationWord>;
     MachinesVMState: Record<MachinesVMState, StationWord>;
