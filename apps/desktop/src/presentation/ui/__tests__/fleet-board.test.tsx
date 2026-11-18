@@ -1,4 +1,4 @@
-import { button, component, content } from '@jterrazz/test';
+import { button, component, content, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { FleetBoard } from '../fleet-board';
@@ -91,6 +91,20 @@ function board(onOpen: (name: string) => void = () => undefined) {
 }
 
 describe('FleetBoard', () => {
+    test('the panel is headed Machines and counts every machine, a Mac chosen or not', async () => {
+        // Given - a board of two Macs, three machines in all
+        const result = await component.render(board(), async (visitor) => {
+            await visitor.see(within(region('Machines'), heading('Machines 3')));
+
+            // When - the mini's card is pressed
+            await visitor.click(button(MINI_CARD));
+
+            // Then - the count is still the fleet's three
+            await visitor.see(within(region('Machines'), heading('Machines 3')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test('a Mac pressed keeps its rows alone, and pressed again shows every Mac', async () => {
         // Given - a board of two Macs, three machines in all
         const states: Seen[] = [];
