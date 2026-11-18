@@ -72,6 +72,19 @@ What lands in your project, and the four ideas behind it, is [Getting started](d
 
 <br/>
 
+## Two products, one repository
+
+This repository ships two binaries from one release:
+
+| Product | Binary    | Lives in                                                   | Built and checked with                                                        |
+| ------- | --------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| spwn    | `spwn`    | the root: `apps/`, `packages/`, `catalog/`, `specs/`       | `make build`, `make check`                                                    |
+| station | `station` | [`machines/`](machines/README.md), its own tree and manual | `make machines-build`, `make machines-check` (or `make -C machines <target>`) |
+
+Station moved in from `jterrazz/studio-station` with its history; the two still cohabit under their own names, and the renames come later ([ADR-017](docs/decisions/017-one-repository-station-moves-in-under-machines.md)). One `v*` tag releases both ([Release](docs/guides/release.md)).
+
+<br/>
+
 ## Learn more
 
 - [Getting started](docs/start/getting-started.md): the four ideas behind spwn, an agent's files, a world, and how one source reaches every runtime.

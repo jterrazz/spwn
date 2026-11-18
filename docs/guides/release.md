@@ -63,7 +63,10 @@ uses the default `GITHUB_TOKEN`.
 
 ### 1. Decide the version
 
-Follow semver: `vMAJOR.MINOR.PATCH`.
+Follow semver: `vMAJOR.MINOR.PATCH`. One tag versions both products, so a
+number never goes below the newest of either: spwn's `v1.0.0-rc1` and
+station's `v3.1.0` (tagged in its former repository, `jterrazz/studio-station`)
+put the first unified release at `v4.0.0-alpha.1`.
 
 - **Patch** (`v0.11.0 → v0.11.1`): bug fixes, no API changes.
 - **Minor** (`v0.11.0 → v0.12.0`): new features, backward compatible.
@@ -92,16 +95,26 @@ git push origin main
 git push origin v1.2.3
 ```
 
-That's it. The `Publish` workflow runs automatically and takes ~8 min:
+That's it. The `Publish` workflow runs automatically, and one tag releases
+both products of the repository, spwn and station (`machines/`):
 
 ```text
 .github/workflows/publish.yaml
-└─ publish (GoReleaser)           builds CLI archives + checksums.txt
+├─ machines-linux   (ubuntu, arm)   station-linux-arm64, station-linux-amd64, cgo off
+├─ machines-darwin  (macos-26)      station-darwin-arm64, station-darwin-amd64 (cgo, IOKit), Station.app.zip
+└─ publish (GoReleaser)             opens the release once both are built: spwn's archives,
+                                    station's files as extra_files, one checksums.txt for all
 ```
 
-The workflow ships the CLI alone. The desktop app and its `latest.json` have no
-job until the signing and notarization secrets are in place: the shared
+The release is opened once, by GoReleaser, and only after both station jobs
+succeeded, so a failed station leaves no release behind. Station's binaries
+carry its version through `-X .../apps/engine/wire.version=<tag>`, as its own
+release did. The desktop app and its `latest.json` have no job until the
+signing and notarization secrets are in place: the shared
 `release-tauri.yaml` they called is deleted.
+
+A manual run of the workflow (`workflow_dispatch`) is a dry run: every job
+builds, GoReleaser runs with `--snapshot`, and nothing is published.
 
 ### 4. Verify
 
@@ -142,9 +155,16 @@ automatically via the background check / Tauri updater.
 ### CLI build (no upload)
 
 ```bash
+make -C machines build-linux
+mkdir -p .artifacts/station
+cp machines/.artifacts/go/station-linux-arm64 .artifacts/station/
 goreleaser release --snapshot --clean
 # Artifacts land in ./.artifacts/goreleaser/
 ```
+
+GoReleaser reads station's files from `.artifacts/station/` as extra files,
+and a glob that matches nothing is an error, so a local snapshot needs at
+least one station binary there.
 
 ### Tauri build (no upload)
 

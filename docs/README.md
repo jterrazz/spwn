@@ -46,6 +46,10 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 | [Manual pass: agent behaviour](reference/manual-agent-behaviour.md) | Fifty scenarios that need a live, authenticated runtime                     |
 | [Manual pass: edge cases](reference/manual-edge-cases.md)           | Seventy-two cases of concurrency, partial failure and filesystem edges      |
 
+## Machines
+
+This repository holds a second product: station, under `machines/`, which keeps its own manual, mapped by `machines/docs/README.md`. This manual covers spwn and the repository as a whole; how station is built, tested and designed is that manual's. Why the two share one repository is [ADR-017](decisions/017-one-repository-station-moves-in-under-machines.md).
+
 ## Decisions
 
 The records of what this repository decided, and why (the stack, the layering, the container model), are [decisions/](decisions/), one `NNN-subject.md` each.
