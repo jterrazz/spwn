@@ -1,6 +1,7 @@
 package menubar
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -34,14 +35,10 @@ const (
 )
 
 // value: the terms the picker offers, then how many whole hours Until
-// offers from the next one, and the end it offers first: the end of a
-// working day (SPEC A9 2-11: `1 hr · 4 hr · Until 18:00`).
+// offers from the next one (SPEC A9 2-11: `1 hr · 4 hr · Until 18:00`).
 func terms() []time.Duration { return []time.Duration{time.Hour, 4 * time.Hour} }
 
-const (
-	untilHours = 8
-	untilHour  = 18
-)
+const untilHours = 8
 
 func isThisMac(f pageawake.AllMachines, r awake.Report) bool { return f.This != "" && r.Mac == f.This }
 
@@ -296,21 +293,20 @@ func asked(s awake.Session) time.Duration {
 
 func pageTerm(d time.Duration) string { return strconv.Itoa(int(d.Hours())) + " hr" }
 
-// value: Until's hours from the next one; it offers 18:00 first while
-// 18:00 is among them, else the middle one.
+// value: Until's hours from the next one, and the end awake.UntilOffered
+// gives, the one it opens on; that end closes the list when it comes
+// later.
 func untilField(now time.Time, zone *time.Location) page.Field {
 	next := now.In(zone).Truncate(time.Hour).Add(time.Hour)
-	opts := make([]page.Option, 0, untilHours)
-	def := ""
+	opts := make([]page.Option, 0, untilHours+1)
 	for i := range untilHours {
 		at := next.Add(time.Duration(i) * time.Hour)
 		opts = append(opts, page.Option{Value: moment(at), Label: at.Format("15:04")})
-		if at.Hour() == untilHour && def == "" {
-			def = moment(at)
-		}
 	}
-	if def == "" {
-		def = opts[len(opts)/2].Value
+	at := awake.UntilOffered(now, zone)
+	def := moment(at)
+	if !slices.ContainsFunc(opts, func(o page.Option) bool { return o.Value == def }) {
+		opts = append(opts, page.Option{Value: def, Label: at.In(zone).Format("15:04")})
 	}
 	return page.Field{Key: "Until", Label: "Until", Kind: page.FieldSelect, Options: opts, Default: def}
 }

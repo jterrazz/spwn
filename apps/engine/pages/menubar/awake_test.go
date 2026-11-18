@@ -182,3 +182,22 @@ func TestAwakeSaysEachMacsPolicyAndDependants(t *testing.T) {
 		t.Fatalf("the asleep Mac reads %q, %q (%s), verb %q", air.Label, words, air.Signal, air.Verb)
 	}
 }
+
+// invariant: Until opens on the end awake.UntilOffered gives, the next 18:00,
+// which closes its hours when it comes after them.
+func TestUntilOpensOnTheEndAwakeOffers(t *testing.T) {
+	for name, c := range map[string]struct {
+		now        time.Time
+		def, label string
+		n          int
+	}{
+		"morning": {time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC), `"2026-11-03T18:00:00Z"`, "18:00", untilHours},
+		"evening": {time.Date(2026, 11, 3, 19, 30, 0, 0, time.UTC), `"2026-11-04T18:00:00Z"`, "18:00", untilHours + 1},
+	} {
+		f := untilField(c.now, time.UTC)
+		last := f.Options[len(f.Options)-1]
+		if f.Default != c.def || len(f.Options) != c.n || !slices.ContainsFunc(f.Options, func(o page.Option) bool { return o.Value == c.def && o.Label == c.label }) {
+			t.Errorf("%s: opens on %s among %d hours, the last %s", name, f.Default, len(f.Options), last.Value)
+		}
+	}
+}

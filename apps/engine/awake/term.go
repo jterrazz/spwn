@@ -54,9 +54,9 @@ type Choice struct {
 	Until string `json:",omitempty"`
 }
 
-func Choices(now time.Time, zone *time.Location) []Choice {
-	// invariant: the terms a page offers are the ones awake.keep takes, each
-	// as keep would end it: a length, or the next 18:00 of the Mac's zone.
+func UntilOffered(now time.Time, zone *time.Location) time.Time {
+	// value: the end Until offers: the next 18:00 of the Mac's zone,
+	// tomorrow's once today's has passed.
 	if zone == nil {
 		zone = time.UTC
 	}
@@ -65,10 +65,17 @@ func Choices(now time.Time, zone *time.Location) []Choice {
 	if !end.After(local) {
 		end = end.AddDate(0, 0, 1)
 	}
+	return end
+}
+
+func Choices(now time.Time, zone *time.Location) []Choice {
+	// invariant: the terms a page offers are the ones awake.keep takes, each
+	// as keep would end it: a length, or the end UntilOffered gives.
+	end := UntilOffered(now, zone)
 	return []Choice{
 		{Label: "1 hr", For: time.Hour},
 		{Label: "4 hr", For: 4 * time.Hour},
-		{Label: "Until 18:00", Until: end.Format(time.RFC3339)},
+		{Label: "Until " + end.Format("15:04"), Until: end.Format(time.RFC3339)},
 	}
 }
 
