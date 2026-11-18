@@ -105,7 +105,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [051 A machine is a base and its Machinefiles, one base per distro](decisions/051-a-machine-is-a-base-and-its-machinefiles.md) (Accepted)
 - [052 Station keeps no agents; another binary owns them](decisions/052-station-keeps-no-agents.md) (Accepted)
 - [053 The panel is the untinted system glass over a hue-free grey, with no white card](decisions/053-the-panel-is-untinted-glass-over-a-grey-ground.md) (Accepted)
-- [054 A machine's standing is one rule at each level, and every verdict reads it](decisions/054-a-machines-standing-is-one-rule-at-each-level.md) (Proposed)
+- [054 A machine's standing is one rule at each level, and every verdict reads it](decisions/054-a-machines-standing-is-one-rule-at-each-level.md) (Accepted)
 - [055 Station reads only its current state, and retires no older one](decisions/055-station-reads-only-its-current-state.md) (Proposed)
 - [056 Station names the Local Network approval a Mac withholds](decisions/056-station-names-the-local-network-approval-a-mac-withholds.md) (Proposed)
 - [057 Init moves an app's whole old home, and says so and asks before it moves](decisions/057-init-moves-whole-homes-and-asks-first.md) (Proposed)
