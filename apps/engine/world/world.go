@@ -371,6 +371,8 @@ type VM struct {
 	Size machines.Size `json:"size"`
 	// value: the pid of its run; zero when it does not run.
 	PID int `json:"pid,omitempty"`
+	// value: the hypervisor holds it suspended while it does not run.
+	Suspended bool `json:"suspended,omitempty"`
 	// value: how its last run ended, kept until a run is read.
 	Ended *machines.RunEnd `json:"ended,omitempty"`
 	// value: when its last run began and when its last run ended, on the

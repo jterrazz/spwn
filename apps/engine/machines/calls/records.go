@@ -81,8 +81,9 @@ func (s *Machinist) HoldOf(ctx context.Context, name string) (model.Hold, bool) 
 func (s *Machinist) Records() ([]model.VMRecord, error) { return s.records() }
 
 func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineVM) ([]model.VM, error) {
-	// invariant: the daemon's view wins; without it, no engine or a listing that
-	// fails means nothing is running: every workspace reads stopped.
+	// invariant: the daemon's view wins, but a VM it runs no run of keeps
+	// the suspended its hypervisor tells; without it, no engine or a listing
+	// that fails means nothing is running: every workspace reads stopped.
 	stored, err := s.stored()
 	if err != nil || len(stored) == 0 {
 		return nil, err
@@ -125,7 +126,7 @@ func (s *Machinist) vmsOf(mac string, stored []model.Record, disks map[string]co
 			Purpose: r.Purpose, Creator: model.CreatorOf(r.Creator), Machinefile: r.Template,
 		}
 		if d, ok := live[r.Name]; ok && live != nil {
-			if d.State != "" {
+			if d.State != "" && (d.State != string(model.Stopped) || vm.State != model.Suspended) {
 				vm.State = model.VMState(d.State)
 			}
 			vm.Guest, vm.IP, vm.Detail = d.Guest, d.IP, d.Detail
