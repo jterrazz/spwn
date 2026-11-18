@@ -1,33 +1,133 @@
 name: Publish
-run-name: Publish ${{ github.ref_name }}
+run-name: ${{ github.event_name == 'workflow_dispatch' && 'Dry run' || 'Publish' }} ${{ github.ref_name }}
 
 on:
     push:
         tags:
             - 'v*'
+    workflow_dispatch:
 
 permissions:
-    contents: write
+    contents: read
+
+# invariant: one run per ref at a time, never cancelled half way through a release
+concurrency:
+    group: publish-${{ github.ref }}
+    cancel-in-progress: false
 
 jobs:
-    # value: a release ships the CLI, built by goreleaser into the release this job opens (its cross-compiled matrix, checksums and archives); it alone serves `curl | bash` and `spwn upgrade`
-    publish:
-        name: Publish
+    # value: station's linux binaries need no cgo, so they cross-build on Linux; its darwin ones need cgo for IOKit and build on a Mac below
+    machines-linux:
+        name: Machines (linux)
         runs-on: ubuntu-26.04-arm
+        defaults:
+            run:
+                working-directory: machines
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-go@v5
+              with:
+                  go-version-file: machines/go.work
+                  cache-dependency-path: machines/go.work.sum
+            - name: Build the binaries
+              env:
+                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
+              run: |
+                  set -euo pipefail
+                  dist="$RUNNER_TEMP/station"
+                  mkdir -p "$dist"
+                  for arch in arm64 amd64; do
+                      CGO_ENABLED=0 GOOS=linux GOARCH="$arch" go build -ldflags "$LDFLAGS" -o "$dist/station-linux-$arch" ./apps/engine/cmd/station
+                  done
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: station-linux
+                  path: ${{ runner.temp }}/station/*
+                  if-no-files-found: error
+
+    machines-darwin:
+        name: Machines (darwin)
+        runs-on: macos-26
+        defaults:
+            run:
+                working-directory: machines
         steps:
             - uses: actions/checkout@v4
               with:
                   fetch-depth: 0
+            - name: Select Xcode
+              run: |
+                  set -euo pipefail
+                  xcode=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+                  sudo xcode-select -s "$xcode"
+                  xcodebuild -version
+                  swift --version
+            - uses: actions/setup-go@v5
+              with:
+                  go-version-file: machines/go.work
+                  cache-dependency-path: machines/go.work.sum
+            - name: Build the binaries with cgo
+              env:
+                  # value: the oldest macOS the binaries run on, Sonoma
+                  MACOSX_DEPLOYMENT_TARGET: '14.0'
+                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
+              run: |
+                  set -euo pipefail
+                  dist="$RUNNER_TEMP/station"
+                  mkdir -p "$dist"
+                  sdk=$(xcrun --sdk macosx --show-sdk-path)
+                  for arch in arm64 amd64; do
+                      case "$arch" in arm64) target=arm64 ;; amd64) target=x86_64 ;; esac
+                      CGO_ENABLED=1 GOOS=darwin GOARCH="$arch" CC="clang -arch $target -isysroot $sdk -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET" \
+                          go build -ldflags "$LDFLAGS" -o "$dist/station-darwin-$arch" ./apps/engine/cmd/station
+                      # invariant: a darwin asset without cgo has no IOKit, so it is never released
+                      go version -m "$dist/station-darwin-$arch" | grep -q 'CGO_ENABLED=1'
+                      lipo -archs "$dist/station-darwin-$arch"
+                      minos=$(vtool -show-build "$dist/station-darwin-$arch" | awk '$1 == "minos" { print $2 }')
+                      echo "station-darwin-$arch minos $minos"
+                      [ "$minos" = "$MACOSX_DEPLOYMENT_TARGET" ]
+                  done
+                  "$dist/station-darwin-arm64" --version
+            - name: Build Station.app
+              run: |
+                  set -euo pipefail
+                  make menubar
+                  ditto -c -k --keepParent .artifacts/menubar/Station.app "$RUNNER_TEMP/station/Station.app.zip"
+                  codesign -dv .artifacts/menubar/Station.app
+                  vtool -show-build .artifacts/menubar/Station.app/Contents/MacOS/StationMenuBar | awk '$1 == "minos"'
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: station-darwin
+                  path: ${{ runner.temp }}/station/*
+                  if-no-files-found: error
 
+    # value: one release per tag, opened once by goreleaser: spwn's archives, plus station's binaries and Station.app.zip as extra files, every asset listed in the one checksums.txt
+    # invariant: the release opens only once both station jobs are built, so a failed station leaves no spwn-only release
+    publish:
+        name: Publish
+        needs: [machines-linux, machines-darwin]
+        runs-on: ubuntu-26.04-arm
+        permissions:
+            contents: write
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
             - uses: actions/setup-go@v5
               with:
                   go-version: '1.25'
                   cache-dependency-path: apps/cli/go.sum
-
+            - uses: actions/download-artifact@v4
+              with:
+                  pattern: station-*
+                  path: .artifacts/station
+                  merge-multiple: true
+            - run: ls -l .artifacts/station
             - name: Run GoReleaser
               uses: goreleaser/goreleaser-action@v6
               with:
                   version: '~> v2'
-                  args: release --clean
+                  args: release --clean ${{ github.event_name == 'workflow_dispatch' && '--snapshot' || '' }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - run: cat .artifacts/goreleaser/checksums.txt
