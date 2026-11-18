@@ -48,6 +48,15 @@ type worded struct {
 	words map[string]word
 }
 
+func standingWords() map[string]word {
+	out := map[string]word{}
+	for _, v := range machines.VMStanding("").Enum() {
+		s := machines.VMStanding(v)
+		out[v] = toned(s.Tone(), s.Word())
+	}
+	return out
+}
+
 func plain(w string) word { return word{Word: w, Tone: verdict.Plain} }
 
 func toned(t verdict.Tone, w string) word { return word{Word: w, Tone: t} }
@@ -218,6 +227,7 @@ func wordedEnums() []worded {
 			string(machines.Creating):     toned(verdict.New, machines.Creating.Word()),
 			string(machines.UnknownState): plain(machines.UnknownState.Word()),
 		}},
+		{machines.VMStanding(""), standingWords()},
 		{machines.HoldState(""), map[string]word{
 			string(machines.HoldAlwaysOn): plain("Always on"),
 			string(machines.HoldHeld):     toned(verdict.Warn, "Held"),

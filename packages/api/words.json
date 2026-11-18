@@ -1591,6 +1591,40 @@
       "Tone": "plain"
     }
   },
+  "MachinesVMStanding": {
+    "creating": {
+      "Word": "creating",
+      "Tone": "new"
+    },
+    "down": {
+      "Word": "down",
+      "Tone": "bad"
+    },
+    "healthy": {
+      "Word": "healthy",
+      "Tone": "ok"
+    },
+    "not-seen": {
+      "Word": "not seen",
+      "Tone": "plain"
+    },
+    "restarting": {
+      "Word": "restarting",
+      "Tone": "new"
+    },
+    "running": {
+      "Word": "running",
+      "Tone": "ok"
+    },
+    "stopped": {
+      "Word": "stopped",
+      "Tone": "plain"
+    },
+    "suspended": {
+      "Word": "suspended",
+      "Tone": "plain"
+    }
+  },
   "MachinesVMState": {
     "broken": {
       "Word": "In a loop",

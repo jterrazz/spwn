@@ -171,7 +171,6 @@ const (
 	SentenceDown       = "Down."
 	SentenceNoAddress  = "It has no address yet."
 	SentenceNoSSH      = "SSH does not answer."
-	SentenceCheckFails = "Its check fails."
 	SentenceCheckWaits = "Its check has not answered yet."
 	LineNoCheck        = "No check is set: its health stops at SSH."
 )
@@ -189,7 +188,7 @@ func HealthVerdict(vm VM) *verdict.Verdict {
 	case vm.Restart != nil:
 		v = verdict.Verdict{Tone: verdict.New, Sentence: SentenceRestarting}
 	case Down(vm):
-		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceDown, Line: vm.Cause}
+		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceDown, Line: downLine(vm)}
 	case !steps.Running:
 		v = verdict.Verdict{Tone: verdict.Plain, Sentence: vm.State.Word() + "."}
 	case !steps.Address:
@@ -198,12 +197,17 @@ func HealthVerdict(vm VM) *verdict.Verdict {
 		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceNoSSH}
 	case vm.Check == "":
 		v.Line = LineNoCheck
-	case vm.CheckStatus.State == CheckFailing:
-		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceCheckFails}
 	case vm.CheckStatus.State == CheckWaiting:
 		v = verdict.Verdict{Tone: verdict.New, Sentence: SentenceCheckWaits}
 	}
 	return &v
+}
+
+func passes(vm VM) bool {
+	// value: a running server passes every step past its state: it has an
+	// address, its SSH answers, and its check, when set, has answered.
+	steps := HealthOf(vm)
+	return steps.Address && steps.SSH && (vm.Check == "" || vm.CheckStatus.State != CheckWaiting)
 }
 
 func LatencyNote(vm VM) string {
@@ -223,7 +227,7 @@ func LatencyNote(vm VM) string {
 
 func Judged(f AllMachines) AllMachines {
 	// value: f with each server's health verdict and latency note, each
-	// VM's head, hold and sections, and each silent Mac's verdict, on copies of
+	// VM's standing, head, hold and sections, and each silent Mac's verdict, on copies of
 	// its Macs and VMs.
 	macs := slices.Clone(f.Macs)
 	for i := range macs {
@@ -233,7 +237,7 @@ func Judged(f AllMachines) AllMachines {
 		for j := range vms {
 			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j]), LatencyNote(vms[j])
 			head, pending := HeadOf(vms[j], f.Read)
-			vms[j].Head, vms[j].Pending = &head, pending
+			vms[j].Head, vms[j].Pending, vms[j].Standing = &head, pending, StandingOf(vms[j])
 			hold, sections := HoldOf(vms[j]), SectionsOf(vms[j])
 			vms[j].Hold, vms[j].Sections, vms[j].Gestures = &hold, &sections, GesturesOf(vms[j])
 		}

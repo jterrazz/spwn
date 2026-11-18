@@ -11,29 +11,29 @@ import (
 const LineStopped = "It holds no memory. Start it to use it again."
 
 func HeadOf(vm VM, now time.Time) (head verdict.Verdict, pending bool) {
-	// invariant: a VM's head is its state first (restarting or creating,
-	// down, stopped), then, running, how it stands with its file as its
-	// Mac's engine keeps it: its differences, that it matches, or that the
-	// file did not read. A server, which station sets up nothing inside, a
-	// workspace bound to no file, and one its engine has not read yet
-	// (pending) are only running.
-	switch {
-	case vm.Restart != nil:
-		return verdict.Verdict{Tone: verdict.New, Sentence: SentenceRestarting}, false
-	case vm.State == Creating:
-		return verdict.Verdict{Tone: verdict.New, Sentence: vm.State.Word() + "."}, false
-	case down(vm):
-		return verdict.Verdict{Tone: verdict.Bad, Sentence: vm.Name + " is down.", Line: downLine(vm)}, false
-	case vm.State == Stopped:
-		return verdict.Verdict{Tone: verdict.Plain, Sentence: vm.Name + " is stopped.", Line: LineStopped}, false
-	case vm.State != Running:
-		return verdict.Verdict{Tone: verdict.Plain, Sentence: vm.State.Word() + "."}, false
-	}
+	// invariant: a VM's head is its standing first, in that standing's tone;
+	// running, how it stands with its file as its Mac's engine keeps it: its
+	// differences, that it matches, or that the file did not read. A server,
+	// which station sets up nothing inside, a workspace bound to no file, and
+	// one its engine has not read yet (pending) are only running.
+	standing := StandingOf(vm)
 	word := "Running"
-	if vm.Lifetime == AlwaysOn && HealthVerdict(vm).Sentence == SentenceHealthy {
+	switch standing {
+	case StandingNotSeen, StandingSuspended:
+		return verdict.Verdict{Tone: standing.Tone(), Sentence: vm.State.Word() + "."}, false
+	case StandingRestarting:
+		return verdict.Verdict{Tone: standing.Tone(), Sentence: SentenceRestarting}, false
+	case StandingCreating:
+		return verdict.Verdict{Tone: standing.Tone(), Sentence: vm.State.Word() + "."}, false
+	case StandingDown:
+		return verdict.Verdict{Tone: standing.Tone(), Sentence: vm.Name + " is down.", Line: downLine(vm)}, false
+	case StandingStopped:
+		return verdict.Verdict{Tone: standing.Tone(), Sentence: vm.Name + " is stopped.", Line: LineStopped}, false
+	case StandingHealthy:
 		word = "Healthy"
+	case StandingRunning:
 	}
-	v := verdict.Verdict{Tone: verdict.OK, Sentence: word + ".", Line: runLine(vm, now)}
+	v := verdict.Verdict{Tone: standing.Tone(), Sentence: word + ".", Line: runLine(vm, now)}
 	kept := vm.Drift
 	switch {
 	case vm.Lifetime == AlwaysOn:
@@ -48,14 +48,6 @@ func HeadOf(vm VM, now time.Time) (head verdict.Verdict, pending bool) {
 		v.Sentence = word + ", and it matches its file."
 	}
 	return v, false
-}
-
-func down(vm VM) bool {
-	switch {
-	case Down(vm), vm.State == Broken, vm.State == Stale:
-		return true
-	}
-	return vm.Lifetime == AlwaysOn && vm.State == Running && vm.CheckStatus.State == CheckFailing
 }
 
 func downLine(vm VM) string {

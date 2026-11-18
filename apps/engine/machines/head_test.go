@@ -20,6 +20,8 @@ func TestAVMsHeadSaysItsStateThenHowItStandsWithItsFile(t *testing.T) {
 	downWhy.Cause = "Its check fails since 14:02, SSH still answers."
 	restarting := server
 	restarting.Restart = &RestartWalk{}
+	silent := restarting
+	silent.State = UnknownState
 	const line = "Fix the flaky test. Up 3 days."
 	for name, c := range map[string]struct {
 		vm      VM
@@ -38,6 +40,8 @@ func TestAVMsHeadSaysItsStateThenHowItStandsWithItsFile(t *testing.T) {
 		"stopped":         {VM{Name: "linux-1", Lifetime: Persistent, State: Stopped}, verdict.Verdict{Tone: verdict.Plain, Sentence: "linux-1 is stopped.", Line: LineStopped}, false},
 		"restarting":      {restarting, verdict.Verdict{Tone: verdict.New, Sentence: SentenceRestarting}, false},
 		"creating":        {VM{Name: "linux-2", State: Creating}, verdict.Verdict{Tone: verdict.New, Sentence: "Creating."}, false},
+		"not seen":        {silent, verdict.Verdict{Tone: verdict.Plain, Sentence: "Not seen."}, false},
+		"suspended":       {VM{Name: "linux-1", Lifetime: Persistent, State: Suspended}, verdict.Verdict{Tone: verdict.Plain, Sentence: "Suspended."}, false},
 	} {
 		got, pending := HeadOf(c.vm, now)
 		if got != c.want || pending != c.pending {

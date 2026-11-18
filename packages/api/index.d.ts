@@ -2078,6 +2078,7 @@ export type MachinesVM = {
     SSH: boolean;
     Sections?: MachinesSections;
     SizeGB: number;
+    Standing?: 'not-seen' | 'restarting' | 'creating' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
     State: 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
     Uptime: MachinesUptime;
     UsedBytes?: number;
@@ -3529,6 +3530,8 @@ export type MachinesPreset = 'small' | 'workspace' | 'gate';
 
 export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
+export type MachinesVMStanding = 'not-seen' | 'restarting' | 'creating' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
+
 export type MachinesVMState = 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
 
 export type OverviewMark = 'exposed' | 'down' | 'needs-you' | 'can-wait';
@@ -3596,6 +3599,7 @@ export type StationWords = {
     MachinesLifetime: Record<MachinesLifetime, StationWord>;
     MachinesPreset: Record<MachinesPreset, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
+    MachinesVMStanding: Record<MachinesVMStanding, StationWord>;
     MachinesVMState: Record<MachinesVMState, StationWord>;
     OverviewMark: Record<OverviewMark, StationWord>;
     OverviewUpkeep: Record<OverviewUpkeep, StationWord>;

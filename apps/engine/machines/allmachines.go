@@ -132,6 +132,9 @@ type VM struct {
 	// machines.list, nil in any other answer.
 	Head    *verdict.Verdict `json:",omitempty"`
 	Pending bool             `json:",omitempty"`
+	// value: the VM's one standing (StandingOf), which its head opens
+	// with; judged by machines.list, empty in any other answer.
+	Standing VMStanding `json:",omitempty"`
 	// value: what keeps it, and so whether it is safe to delete; the
 	// sections its page has, by its kind; the gestures its header offers, by
 	// its state; all judged by machines.list, nil in any other answer.
