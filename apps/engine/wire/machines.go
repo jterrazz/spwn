@@ -221,7 +221,11 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 		machinescreate.Command(machinescreate.Deps{
 			Resources: model.ParseResources, Check: createCheck(vms),
 			NotBuilt: func(image string) error {
-				return &model.NoImageError{Image: image, Mac: vms.ThisMacName(), Fetched: m.cat.FetchedOnly(image)}
+				mac := vms.ThisMacName()
+				if env.Far() {
+					mac = env.Target().Name
+				}
+				return &model.NoImageError{Image: image, Mac: mac, Fetched: m.cat.FetchedOnly(image)}
 			},
 			Admit: func() error {
 				return call.Gate(call.Meta{Name: machinescalls.CreateWorkspace.Name, Applies: machinescalls.CreateWorkspace.Applies, Needs: machinescalls.CreateWorkspace.Needs}, m.profile)

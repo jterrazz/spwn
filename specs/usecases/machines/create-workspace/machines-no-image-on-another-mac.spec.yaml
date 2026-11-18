@@ -1,0 +1,8 @@
+description: 'a create --on a Mac without the image is refused off a terminal in that Mac name'
+env: mini-no-image
+runs:
+    - command: 'machines create box --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: image base-ubuntu is not built on mac-mini
+          Hint: station images build base-ubuntu
