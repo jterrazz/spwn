@@ -71,7 +71,7 @@ describe('changes', () => {
                 await visitor.click(within(history, button('Retry mise')));
 
                 // Then - apps.update has answered and the line says Done
-                await visitor.see(within(history, content('Done')));
+                await visitor.see(within(history, content('done')));
             },
         );
         expect(result.errors.text).toBe('');

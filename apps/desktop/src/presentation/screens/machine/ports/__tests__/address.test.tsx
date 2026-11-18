@@ -66,7 +66,7 @@ describe('address', () => {
             await visitor.see(within(port5173, button('Stop sharing')));
         });
         expect(invoked).toStrictEqual([{ args: { url: SHARED }, command: 'open_url' }]);
-        expect(result.content.text).not.toContain('Done');
+        expect(result.content.text).not.toContain('done');
     });
 
     test('an address the shell refuses is drawn as a refusal under the share', async () => {

@@ -9,28 +9,28 @@
     - button "mac-mini"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
-    - 'button "Broken npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"'
+    - 'button "broken npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"'
     - button "Fix npm": Fix
-    - button "Broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Upkeep":
     - heading "Upkeep 7" [level=2]
-    - button "Needs a look 1 mise update waiting macbook-pro · Apps"
+    - button "needs a look 1 mise update waiting macbook-pro · Apps"
     - button "Update mise": Update
-    - button "Needs a look 1 brew update waiting macbook-pro · Apps"
+    - button "needs a look 1 brew update waiting macbook-pro · Apps"
     - button "Update brew": Update
-    - 'button "Needs a look Firewall: off macbook-pro · Settings"'
+    - 'button "needs a look Firewall: off macbook-pro · Settings"'
     - text: System Settings > Network > Firewall
     - button "Copy System Settings > Network > Firewall": Copy
-    - button "Needs a look ~/.tart is misplaced macbook-pro · Disk"
+    - button "needs a look ~/.tart is misplaced macbook-pro · Disk"
     - button "Move ~/.tart": Move
-    - button "Needs a look com.bjango.istatmenus.installer is left over macbook-pro · Background"
+    - button "needs a look com.bjango.istatmenus.installer is left over macbook-pro · Background"
     - text: sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
     - button "Copy sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist": Copy
-    - button "Needs a look com.docker.socket is left over macbook-pro · Background"
+    - button "needs a look com.docker.socket is left over macbook-pro · Background"
     - text: sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist
     - button "Copy sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist": Copy
-    - button "Needs a look com.docker.vmnetd is left over macbook-pro · Background"
+    - button "needs a look com.docker.vmnetd is left over macbook-pro · Background"
     - text: sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
     - button "Copy sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist": Copy
   - region "History":

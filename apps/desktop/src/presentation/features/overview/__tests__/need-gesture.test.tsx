@@ -80,7 +80,7 @@ describe('NeedLine', () => {
 
                 // Then - no dialog, the need read again is gone, and its outcome is held in Done here
                 await visitor.see(within(doneHere, content('1 mise update waiting')));
-                await visitor.see(within(doneHere, content('Done')));
+                await visitor.see(within(doneHere, content('done')));
                 await visitor.gone(within(waiting, button('Update mise')));
                 await visitor.gone(dialog());
             },

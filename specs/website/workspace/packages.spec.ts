@@ -52,7 +52,7 @@ describe('packages', () => {
             await visitor.click(within(dialog('Apply the plan of macbook-pro?'), button('Apply')));
 
             // Then - the plan reads Done
-            await visitor.see(content('Done'));
+            await visitor.see(content('done'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -124,7 +124,7 @@ describe('packages', () => {
             await visitor.click(within(region('Upgrades'), button('Upgrade now')));
 
             // Then - the gesture reads Done
-            await visitor.see(content('Done'));
+            await visitor.see(content('done'));
         });
         expect(result.errors.text).toBe('');
     });

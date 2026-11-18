@@ -23,7 +23,7 @@
     - group "Which side changes":
       - button "Change the machine" [pressed]
       - button "Change the file"
-    - text: The file says This machine has The machine will ripgrep macbook-pro Not installed Install it fd macbook-pro Not installed Install it Apply will install 2.
+    - text: The file says This machine has The machine will ripgrep macbook-pro not installed install it fd macbook-pro not installed install it Apply will install 2.
     - button "Plan"
   - region "Upgrades":
     - heading "Upgrades" [level=2]

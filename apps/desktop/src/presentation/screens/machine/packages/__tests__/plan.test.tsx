@@ -53,7 +53,7 @@ describe('Plan', () => {
 
                 // Then - the dialog closes and the engine's answer settles the gesture done
                 await visitor.gone(asked(MAC));
-                await visitor.see(content('Done'));
+                await visitor.see(content('done'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -88,7 +88,7 @@ describe('Plan', () => {
                 await visitor.click(within(asked(MAC), button('Apply')));
 
                 // Then - the engine answers done
-                await visitor.see(content('Done'));
+                await visitor.see(content('done'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -106,7 +106,7 @@ describe('Plan', () => {
                 // Then - the gesture fails on the engine's own hint, never one of the window's, and can be dismissed
                 await visitor.see(content('station machines start api'));
                 await visitor.see(button('Dismiss'));
-                await visitor.gone(content('Done'));
+                await visitor.gone(content('done'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -125,7 +125,7 @@ describe('Plan', () => {
 
                 // Then - no answer is shown
                 await visitor.gone(asked(MAC));
-                await visitor.gone(content('Done'));
+                await visitor.gone(content('done'));
             },
         );
         expect(result.errors.text).toBe('');

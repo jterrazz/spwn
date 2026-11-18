@@ -6,7 +6,7 @@
   - text: Memory free Not given yet CPU, this Mac 0% Awake, this Mac Off on power Disk free, this Mac Not given yet
   - region "Needs you":
     - heading "Needs you 1" [level=2]
-    - 'button "Broken loop-1 is in a loop: ↺ 5 in 10 min loop-1 · Overview"'
+    - 'button "broken loop-1 is in a loop: ↺ 5 in 10 min loop-1 · Overview"'
     - text: Fix
   - region "Machines":
     - heading "Machines 3" [level=2]

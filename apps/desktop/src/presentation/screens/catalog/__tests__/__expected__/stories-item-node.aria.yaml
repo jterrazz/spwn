@@ -10,7 +10,7 @@
   - region "Version":
     - heading "Version" [level=2]
     - term: On your machines
-    - definition: Not installed
+    - definition: not installed
     - term: Rule
     - definition: Not given yet
     - term: Newest

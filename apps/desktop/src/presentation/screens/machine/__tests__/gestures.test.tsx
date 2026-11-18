@@ -89,7 +89,7 @@ describe('gestures', () => {
                 await visitor.gone(dialog('Stop linux-1?'));
                 await visitor.see(heading('linux-1 stopped'));
                 await visitor.see(within(sidebar, button('linux-1 stopped')));
-                await visitor.see(content('Done'));
+                await visitor.see(content('done'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -107,7 +107,7 @@ describe('gestures', () => {
             await visitor.click(button('Stop'));
             await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
             await visitor.see(heading('linux-1 stopped'));
-            await visitor.see(content('Done'));
+            await visitor.see(content('done'));
             after = headerBoxes();
         });
 
@@ -124,14 +124,14 @@ describe('gestures', () => {
             async (visitor) => {
                 await visitor.click(button('Stop'));
                 await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
-                await visitor.see(content('Done'));
+                await visitor.see(content('done'));
 
                 // When - Start follows, which two-macs never recorded for linux-1
                 await visitor.click(button('Start'));
 
                 // Then - Start's failure replaces Stop's done
                 await visitor.see(content('No answer from the engine', { exact: false }));
-                await visitor.gone(content('Done'));
+                await visitor.gone(content('done'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -167,7 +167,7 @@ describe('gestures', () => {
                 await visitor.see(content('the engine may have done it', { exact: false }));
                 await visitor.see(content('the engine closed the connection', { exact: false }));
                 await visitor.see(heading('linux-1 running'));
-                await visitor.gone(content('Done'));
+                await visitor.gone(content('done'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -293,7 +293,7 @@ describe('gestures', () => {
 
             // Then - mac-mini restarts it, and the header, read again, says Done and the uptime its Mac gives
             await visitor.gone(dialog('Restart infra?'));
-            await visitor.see(content('Done'));
+            await visitor.see(content('done'));
             await visitor.see(restarted);
         });
         expect(result.errors.text).toBe('');

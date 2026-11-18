@@ -27,8 +27,8 @@ describe('server', () => {
                 await visitor.see(within(health, content('Healthy.', { exact: false })));
                 await visitor.see(within(health, content('healthy')));
                 await visitor.see(within(health, content('192.168.64.5')));
-                await visitor.see(within(health, content('Answers')));
-                await visitor.see(within(health, content('Passes')));
+                await visitor.see(within(health, content('answers')));
+                await visitor.see(within(health, content('passes')));
                 await visitor.see(
                     within(region('Check latency'), content('41 ms', { exact: false })),
                 );

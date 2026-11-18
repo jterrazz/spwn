@@ -30,7 +30,7 @@
       - button "fine-grained token"
   - text: Value
   - textbox "Value"
-  - text: Refused a typed password cannot be empty. type it, or add it from a sign-in Label
+  - text: refused a typed password cannot be empty. type it, or add it from a sign-in Label
   - textbox "Label": npm deploy
   - button "Cancel"
   - button "Add password"

@@ -13,11 +13,11 @@
   - heading "Signed in to 3 of 4 programs." [level=1]
   - region "Sign-ins":
     - heading "Sign-ins 4" [level=2]
-    - text: gh you · repo · signed in by itself Signed in
+    - text: gh you · repo · signed in by itself signed in
     - button "Sign out gh": Sign out
-    - text: npm you · signed in by itself · The token is refused by registry.npmjs.org Needs signing in again
+    - text: npm you · signed in by itself · The token is refused by registry.npmjs.org needs signing in again
     - button "Sign in again npm": Sign in again
-    - text: claude you@example.com · Max plan · signed in by itself Signed in
+    - text: claude you@example.com · Max plan · signed in by itself signed in
     - button "Sign out claude": Sign out
-    - text: wrangler you@example.com · signed in by itself Signed in
+    - text: wrangler you@example.com · signed in by itself signed in
     - button "Sign out wrangler": Sign out

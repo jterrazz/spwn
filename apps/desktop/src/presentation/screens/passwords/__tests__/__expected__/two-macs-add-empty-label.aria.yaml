@@ -32,6 +32,6 @@
   - textbox "Value"
   - text: Label
   - textbox "Label"
-  - text: Refused a password needs a label. name it so you can tell it apart
+  - text: refused a password needs a label. name it so you can tell it apart
   - button "Cancel"
   - button "Add password"

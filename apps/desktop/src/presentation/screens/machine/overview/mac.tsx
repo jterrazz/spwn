@@ -39,7 +39,7 @@ function stateUp(vm: MachinesVM, read: string | undefined) {
     if (vm.Birth !== null) {
         return { ...shown, word: vm.Birth.sentence };
     }
-    return { ...shown, asWritten: true, word: sentence([shown.word, upFor(vm, read)]) };
+    return { ...shown, word: sentence([shown.word, upFor(vm, read)]) };
 }
 
 export function Machines({ found, go }: { found: Found; go: Go }) {
