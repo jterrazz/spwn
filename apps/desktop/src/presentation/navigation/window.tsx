@@ -155,7 +155,7 @@ export function PageArea({ pages, panel = false, ...props }: AreaProps) {
 
 export function useStation() {
     const machines = useWatch('machines.list', {});
-    const overview = useWatch('overview.read', {});
+    const overview = useWatch('overview.read', { Elsewhere: true });
     const engine = useRead('engine.read', {});
     const carried = useCarried();
     const macs = macsOf(machines.kind === 'read' ? machines.out : undefined);

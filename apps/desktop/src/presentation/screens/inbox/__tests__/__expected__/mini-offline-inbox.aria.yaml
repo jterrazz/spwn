@@ -1,7 +1,7 @@
 - main:
-  - heading "Everything is fine." [level=1]
+  - heading "Elsewhere, 1 Mac not seen." [level=1]
   - paragraph:
-    - img "Everything is fine."
+    - img "Elsewhere, 1 Mac not seen."
     - text: 2 machines on macbook-pro
   - group "Which machines":
     - button "All machines" [pressed]
