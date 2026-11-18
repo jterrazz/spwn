@@ -59,6 +59,8 @@ func LiveValue(key string, readings []activity.Reading) page.Value {
 	switch measure {
 	case engine.LiveCPUMac:
 		return ofTheMac(subject, readings)
+	case engine.LiveMemMac:
+		return heldOnTheMac(subject, readings)
 	case engine.LiveCPU:
 		return led(m.cpu, m.cpus)
 	case engine.LiveMemory:
@@ -89,6 +91,21 @@ func ofTheMac(vm string, readings []activity.Reading) page.Value {
 		}
 	}
 	return led(now, series)
+}
+
+// value: the memory a VM's process holds on its Mac, as read, not capped at
+// the VM's size; the zero Value while the Mac's last reading does not carry
+// the VM. It has no series.
+func heldOnTheMac(vm string, readings []activity.Reading) page.Value {
+	if len(readings) == 0 {
+		return page.Value{}
+	}
+	for _, u := range readings[len(readings)-1].VMs {
+		if u.VM == vm {
+			return page.Size(u.Memory)
+		}
+	}
+	return page.Value{}
 }
 
 func led(now page.Value, series []int) page.Value {
