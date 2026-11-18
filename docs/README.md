@@ -33,7 +33,7 @@
 | [Commands](reference/commands.md)                    | Every command and flag, the hidden aliases, the plumbing, the exit codes                       |
 | [Machines](reference/machines.md)                    | Macs, servers and workspaces, lifetimes, `--on` and `station use`, Tailscale, ssh, the engine  |
 | [Ports](reference/ports.md)                          | Private and Public, rights and audiences, reserved ports, sharing, HTTPS                       |
-| [Accounts](reference/accounts.md)                    | Who is signed in, the vault, a grant to a VM or an agent, Claude in a VM                       |
+| [Accounts](reference/accounts.md)                    | Who is signed in, the vault, a grant to a VM, Claude in a VM                                   |
 | [Disk](reference/disk.md)                            | The Disk groups, the relocation rule, free, erase and move                                     |
 | [Activity](reference/activity.md)                    | What a machine is doing, where each value comes from, the history and its graphs               |
 | [Awake](reference/awake.md)                          | Every Mac's mode, keeping a Mac awake, the guards, Never sleeps                                |
@@ -75,12 +75,12 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [021 The menu bar keeps its system window, its own focus walk, and a still status item](decisions/021-the-menu-bar-keeps-its-system-window.md)
 - [022 HTTPS links are a Mac's choice, through Serve](decisions/022-https-links-are-a-macs-choice.md)
 - [023 A VM's CPU on its Mac is the process that holds its guest's disk](decisions/023-a-vms-cpu-is-its-guests-process.md)
-- [024 Agents run in Herdr, and tmux is no adapter](decisions/024-agents-run-in-herdr.md)
-- [025 Agents have their own lifecycle, apart from their VM](decisions/025-agents-have-their-own-lifecycle.md)
+- [024 Agents run in Herdr, and tmux is no adapter](decisions/024-agents-run-in-herdr.md) (Superseded by 052)
+- [025 Agents have their own lifecycle, apart from their VM](decisions/025-agents-have-their-own-lifecycle.md) (Superseded by 052)
 - [026 The stories are the menu bar's test suite](decisions/026-the-stories-are-the-menu-bars-test-suite.md)
-- [027 The agent hook keeps a scrubbed line, never code or commands](decisions/027-the-agent-hook-keeps-a-scrubbed-line.md)
+- [027 The agent hook keeps a scrubbed line, never code or commands](decisions/027-the-agent-hook-keeps-a-scrubbed-line.md) (Superseded by 052)
 - [028 A server's card shows its latency, not its traffic](decisions/028-a-servers-card-shows-latency-not-traffic.md)
-- [029 An agent is answered and merged from the panel](decisions/029-an-agent-is-answered-and-merged-from-the-panel.md)
+- [029 An agent is answered and merged from the panel](decisions/029-an-agent-is-answered-and-merged-from-the-panel.md) (Superseded by 052)
 - [030 init makes a machine known; apply carries its Machinefile](decisions/030-init-makes-a-machine-known-apply-carries-its-machinefile.md) (Accepted)
 - [031 The catalog defines, the Machinefile chooses](decisions/031-the-catalog-defines-the-machinefile-chooses.md) (Accepted)
 - [032 The words of a VM's lifetime and network](decisions/032-the-words-of-a-vms-lifetime-and-network.md) (Accepted)
@@ -96,7 +96,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [042 Versions are semver ranges, applied every night](decisions/042-versions-are-semver-ranges-applied-nightly.md) (Proposed)
 - [043 A shell block is judged against what station last wrote](decisions/043-a-shell-block-is-judged-against-what-station-last-wrote.md) (Proposed)
 - [044 An image is baked from its Machinefile; the recipe is plumbing alone](decisions/044-an-image-is-baked-from-its-machinefile.md) (Proposed)
-- [045 The agents family retires, and an agent is a package](decisions/045-the-agents-family-retires-an-agent-is-a-package.md)
+- [045 The agents family retires, and an agent is a package](decisions/045-the-agents-family-retires-an-agent-is-a-package.md) (Superseded by 052)
 - [046 The repository is a monorepo of members](decisions/046-the-repository-is-a-monorepo-of-members.md) (Proposed)
 - [047 A catalog entry is a package, and a machine file is `<name>.machine.yaml`](decisions/047-a-catalog-entry-is-a-package-a-machine-file-is-name-machine-yaml.md) (Accepted)
 - [048 The engine withholds a secret before any answer](decisions/048-the-engine-withholds-a-secret-before-any-answer.md) (Proposed)

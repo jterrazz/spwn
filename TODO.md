@@ -35,8 +35,8 @@ work in workspaces.
   truth, and it is designed with the owner (prototype, then stories) before any
   lot.
 - **Claude Code's settings are a blueprint setting** (the owner, 2026-11-10).
-  Today station never touches `~/.claude/settings.json` on a Mac (only
-  `agent-hooks`, in VMs), so the new MacBook's were set by hand: session
+  Today station never touches `~/.claude/settings.json`, so the new MacBook's
+  were set by hand: session
   retention (`cleanupPeriodDays: 365`, against a default that erased the old
   Mac's sessions past 30 days), the auto-compact window, notifications, the
   theme, the statusline and the `no-local-poll` hook (rtk's hook only where
@@ -140,8 +140,8 @@ one story's update stays in kilobytes. Starts at the next golden change.
 ## A password manager of station's own
 The owner's idea (2026-11-10): rather than adopt Bitwarden or 1Password, station
 carries its own password manager, a second adapter of `accounts/contract.Vault`,
-so sharing credentials between agents, VMs and Macs is one gesture of the app:
-a credential is shared with a VM or an agent for a term, scoped
+so sharing credentials between VMs and Macs is one gesture of the app:
+a credential is shared with a VM for a term, scoped
 (`operator:*` tokens per VM, beyond `session:*`), and taken back. A blueprint
 names a credential by its reference in this vault. Not designed: the
 encryption at rest, the unlock, the sync between Macs and the recovery are
@@ -172,28 +172,21 @@ the infrastructure moved from OrbStack to a server (`machines create infra
 owner before any test on it.
 
 ## The menu bar's stories left after v4
-Seven stories A2 designed are in STORIES.md but not built: the Agents
-fleet page (`agents.list`, `agents.empty`), the New agent sheet
-(`sheet.new-agent`, `sheet.new-agent.new`) and the agent's menus
-(`menu.context.agent`, `menu.page.agent`, `menu.new-agent.on`). Fourteen
-gap ids wait for a design before they are stories (STORIES.md, "Gaps").
-Each starts as a lot of its own once the owner asks for it.
+Fourteen gap ids wait for a design before they are stories (STORIES.md,
+"Gaps"). Each starts as a lot of its own once the owner asks for it.
 
-## Permanent agents, and what each machine holds of them
-The owner's question (2026-11-10): Herdr runs the agents, so every machine
-that carries Herdr (the app on the owner's MacBook, herdr-core on the Mac
-mini and in each VM) potentially runs its own permanent agents, with their
-own runtime, sessions and state. That opens what one machine knows of
-another's agents, and how the differences between machines are seen and
-reconciled: which agents run where, which sessions and memory they keep,
-which accounts each machine holds or was lent (accounts diverge the same
-way). The menu bar is where these differences are seen (All machines,
-Agents, Accounts), and a Machinefile may one day declare a machine's
-permanent agents. Not designed; decided with the owner before any lot.
-Hermes and OpenClaw, which the owner still starts by hand on an always-on
-Mac, are the first cases; their gateway rows were dropped from the Overview
-until this design, which may be a machine kind of its own.
+## The page kit's agent item types
+The page kit (`apps/engine/page/page.go`) still has the item types an agent
+drew: `Message`, `Steps`, `PR` and `Reply`. No page of the engine sends one;
+only `apps/engine/page/every_field_test.go` and the Swift decoder
+(`apps/menubar/sources/station-kit/engine/Client.swift`) hold them. They go in
+a later lot, with the fixture and the golden that carry them.
 
+## Permanent agents
+Another binary owns agents, and what each machine holds of them
+([ADR-052](docs/decisions/052-station-keeps-no-agents.md)); station designs none of it.
+
+## The Herdr iPhone app over SSH
 TEMPORARY, revert when the permanent machine session exists: the Herdr
 iPhone app reaches the owner's MacBook over SSH (2026-11-11). Herdr core
 listens on a local unix socket only, so remote access runs
