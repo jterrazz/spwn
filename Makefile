@@ -9,6 +9,7 @@ GO_PACKAGES      := 'go-workspace...'
 
 .PHONY: help install build fix lint test mutation check
 .PHONY: generate uninstall clean docs test-pkg test-image test-go-e2e test-compile-e2e test-smoke web-dev
+.PHONY: machines-check machines-build
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\n"} \
@@ -74,3 +75,9 @@ docs: generate ## Regenerate docs/reference/commands.md from the Cobra tree
 
 web-dev: ## Next.js dev server
 	@pnpm -C apps/web dev
+
+machines-check: ## Station's own `make check`, run inside machines/ with its toolchain
+	@$(MAKE) -C machines check
+
+machines-build: ## Station's own `make build`, into machines/.artifacts/go/station
+	@$(MAKE) -C machines build
