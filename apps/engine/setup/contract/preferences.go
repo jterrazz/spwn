@@ -11,12 +11,6 @@ const (
 	GroupUserName  = "user_name"
 )
 
-const (
-	// value: alias of the key station v2 kept this machine's name under,
-	// read under name and written there at the next write.
-	RetiredGroupName = "here"
-)
-
 type NamePrefs struct{ p core.Preferences }
 
 func Name(p core.Preferences) NamePrefs { return NamePrefs{p: p} }

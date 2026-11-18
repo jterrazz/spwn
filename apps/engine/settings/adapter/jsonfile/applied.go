@@ -31,7 +31,6 @@ type Applied struct {
 
 var (
 	_ contract.AppliedStore = (*Applied)(nil)
-	_ store.Migrator        = (*Applied)(nil)
 )
 
 func NewApplied(files Files, dir string) *Applied { return &Applied{files: files, dir: dir} }
@@ -52,7 +51,7 @@ func (a *Applied) read(at string) (settings.Applied, error) {
 	if err := json.Unmarshal(data, &f); err != nil {
 		return settings.Applied{}, &store.UnreadableError{Path: at, Cause: err}
 	}
-	if _, err := store.Current(f.V, Version); err != nil {
+	if err := store.Current(f.V, Version); err != nil {
 		return settings.Applied{}, &store.UnreadableError{Path: at, Cause: err}
 	}
 	return f.Applied, nil
@@ -106,23 +105,6 @@ func (a *Applied) List(context.Context) ([]settings.Applied, error) {
 func (a *Applied) Delete(_ context.Context, setting string) error {
 	if err := a.files.Remove(a.file(setting)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
-	}
-	return nil
-}
-
-func (a *Applied) Migrate(context.Context) error {
-	entries, err := a.files.ReadDir(a.dir)
-	if err != nil {
-		return store.OnlyNewer(err)
-	}
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
-			continue
-		}
-		_, err = a.read(path.Join(a.dir, e.Name()))
-		if store.OnlyNewer(err) != nil {
-			return err
-		}
 	}
 	return nil
 }

@@ -80,8 +80,8 @@ type Nights struct {
 	Unpulled    string
 	Error       string
 	// value: why no night runs at all: the ledger an older station wrote,
-	// refused until station init brings it to today.
-	Held string
+	// refused until the owner moves HeldFile away.
+	Held, HeldFile string
 }
 
 func NightOf(n machinefile.Night, ran bool, now time.Time) Nights {
@@ -112,7 +112,7 @@ func (n Nights) findings(m machine.Ref) []finding.Finding {
 		out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: severity, Subject: subject, Text: text, Fix: fix})
 	}
 	if n.Held != "" {
-		said(finding.Broken, "ledger", "no night's upgrade runs: "+n.Held, finding.Fix{Command: "station init"})
+		said(finding.Broken, "ledger", "no night's upgrade runs: "+n.Held, finding.Fix{Path: n.HeldFile})
 	}
 	if n.Error != "" {
 		said(finding.Broken, n.Machinefile, "the night's upgrade of "+n.Machinefile+" failed: "+n.Error, upgrade)

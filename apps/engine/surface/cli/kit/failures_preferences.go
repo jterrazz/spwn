@@ -27,7 +27,7 @@ func preferencesFailure(err error) (*fail.Error, bool) {
 		}
 		return failed(unreadable.Path+" cannot be read: "+where, "fix that line: station never rewrites a file it cannot read", err), true
 	case errors.As(err, &unreadable) && errors.As(err, &older):
-		return failed("cannot read \""+unreadable.Path+"\": "+older.Error(), "run station init: it brings \""+unreadable.Path+"\" to version "+strconv.Itoa(older.Current), err), true
+		return failed("cannot read \""+unreadable.Path+"\": "+older.Error(), "move \""+unreadable.Path+"\" away to start afresh", err), true
 	case errors.As(err, &unreadable):
 		return failed("cannot read \""+unreadable.Path+"\": "+unreadable.Cause.Error(), "repair the JSON of \""+unreadable.Path+"\", or move it away to start afresh", err), true
 	case errors.As(err, &unwritable):

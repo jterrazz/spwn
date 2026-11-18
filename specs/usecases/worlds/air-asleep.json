@@ -8,7 +8,7 @@
                 "started_at": "2026-11-01T10:00:00Z"
             },
             "preferences": {
-                "here": "macbook-pro",
+                "name": "macbook-pro",
                 "vm_user": "admin",
                 "macs": {
                     "macbook-air": {
@@ -29,7 +29,7 @@
                 "started_at": "2026-11-01T10:00:00Z"
             },
             "preferences": {
-                "here": "macbook-air",
+                "name": "macbook-air",
                 "macs": {
                     "macbook-pro": {
                         "user": "you"

@@ -339,6 +339,23 @@ func (s *Reserver) Release(ctx context.Context, t ports.Target, mac string, yes 
 	return l, s.st.Reservations.Delete(ctx, t.VM, t.Port)
 }
 
+func ForgetDeclarations(ctx context.Context, d contract.DeclarationStore, vm string) error {
+	// invariant: a VM deleted leaves no declared port behind it.
+	declared, err := d.List(ctx)
+	if err != nil {
+		return err
+	}
+	for _, p := range declared {
+		if p.Machine != vm {
+			continue
+		}
+		if err := d.Delete(ctx, p.Machine, p.Port); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func SaveReservations(ctx context.Context, r contract.ReservationStore, reservations []ports.Reservation) error {
 	// invariant: saving the whole set changes only what moved: a lease gone is
 	// deleted, a lease added or changed is put, each write whole.

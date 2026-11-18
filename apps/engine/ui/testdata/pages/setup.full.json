@@ -28,15 +28,15 @@
         {
           "row": {
             "id": "summary/init",
-            "mark": "attention",
-            "label": "Known to station, with a step left",
+            "mark": "ok",
+            "label": "Known to station",
             "cells": [
               {
                 "kind": "list",
                 "items": [
                   {
                     "kind": "text",
-                    "text": "1 step left"
+                    "text": "2 steps changed"
                   }
                 ]
               }
@@ -97,24 +97,6 @@
         },
         {
           "row": {
-            "id": "layout",
-            "mark": "attention",
-            "label": "layout",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "~/.tart not moved"
-              }
-            ],
-            "detail": {
-              "kind": "text",
-              "text": "73 GB: move it with station init --move"
-            },
-            "reason": "partial"
-          }
-        },
-        {
-          "row": {
             "id": "relocate",
             "mark": "ok",
             "label": "relocate",
@@ -134,10 +116,6 @@
         {
           "mark": "ok",
           "n": 3
-        },
-        {
-          "mark": "attention",
-          "n": 1
         }
       ]
     },

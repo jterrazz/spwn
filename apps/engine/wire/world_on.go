@@ -68,7 +68,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/remote/serve"
 	settingsfake "github.com/jterrazz/studio-station/apps/engine/settings/adapter/fake"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
-	setupcontract "github.com/jterrazz/studio-station/apps/engine/setup/contract"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
@@ -287,8 +286,7 @@ func (m *worldMac) stores(st *stores) {
 	if slice.Files == nil {
 		slice.Files = map[string]string{}
 	}
-	st.prefs = corefake.PreferencesOver(slice.Preferences, m.name, m.run.w).Over(slice.Files).Renaming(contract.RetiredGroupMacs, contract.GroupMacs).
-		Renaming(setupcontract.RetiredGroupName, setupcontract.GroupName).Renaming(portscontract.RetiredGroupPorts, portscontract.GroupPorts)
+	st.prefs = corefake.PreferencesOver(slice.Preferences, m.name, m.run.w).Over(slice.Files)
 	m.run.w.Unlock()
 	w := m.run.w
 	st.machines = machinesfake.StoreOf(w, m.name)

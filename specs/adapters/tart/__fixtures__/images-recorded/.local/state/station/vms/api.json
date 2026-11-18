@@ -1,1 +1,1 @@
-{"name": "api", "image": "base-ubuntu", "version": "2026.11.07", "lifetime": "persistent"}
+{"v": 2, "name": "api", "image": "base-ubuntu", "version": "2026.11.07", "lifetime": "persistent"}

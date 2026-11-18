@@ -26,12 +26,6 @@ type StepFailedError struct {
 func (e *StepFailedError) Error() string { return "init step " + e.Step + ": " + e.Cause.Error() }
 func (e *StepFailedError) Unwrap() error { return e.Cause }
 
-type DifferentContentError struct{ Path string }
-
-func (e *DifferentContentError) Error() string {
-	return e.Path + " already exists with different content"
-}
-
 type BusyError struct{ Process string }
 
 func (e *BusyError) Error() string { return e.Process + " is running: its files cannot move under it" }

@@ -37,7 +37,6 @@ type Ledger struct {
 
 var (
 	_ contract.Ledger = (*Ledger)(nil)
-	_ store.Migrator  = (*Ledger)(nil)
 )
 
 func NewLedger(files Files, at string) *Ledger { return &Ledger{files: files, at: at} }
@@ -64,12 +63,8 @@ func (l *Ledger) read() (file, error) {
 	if err = json.Unmarshal(data, &f); err != nil {
 		return file{}, &store.UnreadableError{Path: l.at, Cause: err}
 	}
-	v, err := store.Current(f.V, Version)
-	if err != nil {
+	if err = store.Current(f.V, Version); err != nil {
 		return file{}, &store.UnreadableError{Path: l.at, Cause: err}
-	}
-	if v < Version {
-		return file{}, &store.UnreadableError{Path: l.at, Cause: &store.OlderError{Version: v, Current: Version}}
 	}
 	return f, nil
 }
@@ -190,58 +185,4 @@ func (l *Ledger) DeleteBlock(_ context.Context, id string) error {
 		f.Blocks = slices.DeleteFunc(f.Blocks, of)
 		return held
 	})
-}
-
-// value: the ledger's version 1, whose records name their package by
-// `item`: read by Migrate alone, which writes version 2.
-type fileV1 struct {
-	Installed []struct {
-		machinefile.Installed
-		Item string `json:"item"`
-	} `json:"installed"`
-	Blocks []struct {
-		machinefile.Written
-		Item string `json:"item"`
-	} `json:"blocks,omitempty"`
-	Night *machinefile.Night `json:"night,omitempty"`
-}
-
-func (l *Ledger) Migrate(context.Context) error {
-	// invariant: a ledger at version 1 is rewritten at 2 under the lock, each
-	// record's package kept; one at 2, or none, is left as it is, and one a
-	// newer station wrote is refused rather than read.
-	if _, err := l.read(); !older(err) {
-		return store.OnlyNewer(err)
-	}
-	release, err := l.files.Lock(l.at + ".lock")
-	if err != nil {
-		return &store.UnwritableError{Path: l.at, Cause: err}
-	}
-	defer release()
-	if _, err = l.read(); !older(err) {
-		return store.OnlyNewer(err)
-	}
-	data, err := l.files.ReadFile(l.at)
-	if err != nil {
-		return &store.UnreadableError{Path: l.at, Cause: err}
-	}
-	var v1 fileV1
-	if err := json.Unmarshal(data, &v1); err != nil {
-		return &store.UnreadableError{Path: l.at, Cause: err}
-	}
-	f := file{Night: v1.Night}
-	for _, r := range v1.Installed {
-		r.Package = r.Item
-		f.Installed = append(f.Installed, r.Installed)
-	}
-	for _, w := range v1.Blocks {
-		w.Package = w.Item
-		f.Blocks = append(f.Blocks, w.Written)
-	}
-	return l.write(f)
-}
-
-func older(err error) bool {
-	var o *store.OlderError
-	return errors.As(err, &o)
 }

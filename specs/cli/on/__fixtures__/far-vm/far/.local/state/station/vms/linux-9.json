@@ -1,4 +1,5 @@
 {
+  "v": 2,
   "name": "linux-9",
   "image": "base-ubuntu",
   "version": "2026.11.07",

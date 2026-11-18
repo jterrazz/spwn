@@ -8,7 +8,6 @@ runs:
       stdout: |
           ●	name	m
           ●	zshrc
-          ●	layout	nothing to retire
           ✗	relocate	~/.local/share/station/vms already exists
           # Machinefile
           	none bound by init: init --machinefile binds one

@@ -1,4 +1,4 @@
-description: 'XDG_CONFIG_HOME moves settings.json and nothing is written to the default folder'
+description: 'XDG_CONFIG_HOME moves preferences.json and nothing is written to the default folder'
 env:
     - XDG_CONFIG_HOME=$WORKDIR/c
 runs:
@@ -7,7 +7,6 @@ runs:
       stdout: |
           ●	name	t
           ●	zshrc
-          ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
           	none bound by init: init --machinefile binds one

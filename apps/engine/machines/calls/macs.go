@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
-
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -206,13 +204,4 @@ var SSH = call.Call[Deps, SSHIn, machines.SSHTarget]{
 	Run: func(ctx context.Context, d Deps, in SSHIn, _ call.Progress) (machines.SSHTarget, error) {
 		return d.Machines.SSH(ctx, in.Name)
 	},
-}
-
-func AdoptV1(hosts contract.MacsPrefs, vmUser contract.VMUserPrefs, macs map[string]machines.MacRecord, user string) error {
-	// value: the Macs and the VM user a v1 config.json named, kept where
-	// machines keeps them; setup's layout step converts the file once.
-	if err := hosts.Set(macs); err != nil {
-		return err
-	}
-	return vmUser.Set(user)
 }

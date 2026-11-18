@@ -1,8 +1,0 @@
-{
-  "here": "t",
-  "hosts": {
-    "t": {}
-  },
-  "tailnet": "example.ts.net",
-  "vm_user": "tester"
-}

@@ -1,7 +1,0 @@
-{
-  "here": "elsewhere",
-  "hosts": {
-    "elsewhere": {}
-  },
-  "vm_user": "someone"
-}

@@ -7,7 +7,6 @@ runs:
           	On mac-mini:
           ●	name	mac-mini
           ●	zshrc
-          ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
           	none bound by init: init --machinefile binds one

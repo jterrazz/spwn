@@ -2,7 +2,6 @@ package wire
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -12,10 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
-	accountscontract "github.com/jterrazz/studio-station/apps/engine/accounts/contract"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
-	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
@@ -36,20 +32,15 @@ func initCommands(env kit.Env, m machine) []*cobra.Command {
 func setupOf(env kit.Env, m machine) *setupcalls.Provisioner {
 	allMachines := m.machines(env.Interactive)
 	registrar := allMachinesRegistrar{name: m.stores.name(), machines: allMachines}
-	return setupcalls.NewProvisioner(setupMachine{m.sys}, setupcalls.ProvisionerPrefs{Name: m.stores.name(), Identity: m.stores.identity(), Macs: m.stores.macs(), VMUser: m.stores.vmUser(), Ports: m.stores.ports(), Stores: m.stores.migrators()}, setupVault{m.vault()}, registrar, setupcalls.ProvisionerOptions{
+	return setupcalls.NewProvisioner(setupMachine{m.sys}, setupcalls.ProvisionerPrefs{Name: m.stores.name()}, registrar, setupcalls.ProvisionerOptions{
 		Kind:            m.kind,
 		Server:          m.profile.Kind == coremachine.Server,
 		PreferencesFile: m.stores.prefs.File(), State: m.paths.State,
-		// hazard: a spec points STATION_EXECUTABLE at a stub so the detached re-exec is
-		// observable; unset, the running binary is the one re-executed.
-		Executable:      m.or("STATION_EXECUTABLE", m.sys.Env.Executable()),
-		Detached:        m.vars["STATION_XDG_DETACHED"] == "1",
-		Apps:            m.cat.Apps,
-		Expand:          m.expander(),
-		Files:           m.appFiles(),
-		Configurer:      setupSettingsWriter{settings: settingsOf(m)},
-		MovePreferences: m.stores.prefs.MoveRetired,
-		Zshrc:           m.zshrc(),
+		Apps:       m.cat.Apps,
+		Expand:     m.expander(),
+		Files:      m.appFiles(),
+		Configurer: setupSettingsWriter{settings: settingsOf(m)},
+		Zshrc:      m.zshrc(),
 	})
 }
 
@@ -88,16 +79,4 @@ type setupAsk struct {
 func (a setupAsk) Name(ctx context.Context) (string, error) {
 	values, err := a.ask.Form(pagesetup.NameForm(a.setup.DefaultName(ctx)))
 	return strings.TrimSpace(values["name"]), err
-}
-
-// value: the keychain as setup's retirement forgets from it: a Mac without
-// its command keeps nothing.
-type setupVault struct{ v accountscontract.Vault }
-
-func (s setupVault) Forget(ctx context.Context, name string) error {
-	err := s.v.Forget(ctx, name)
-	if errors.Is(err, local.ErrNotFound) {
-		return accounts.ErrNotKept
-	}
-	return err
 }

@@ -382,7 +382,7 @@ type reservationReleaser struct{ m machine }
 func (r reservationReleaser) ReleaseVM(ctx context.Context, vm string) error {
 	// invariant: a VM leaves nothing of its ports on its Mac: its ports
 	// declared public, its reserved ports and their shares.
-	if err := r.forgetDeclarations(ctx, vm); err != nil {
+	if err := portscalls.ForgetDeclarations(ctx, r.m.stores.declarations, vm); err != nil {
 		return err
 	}
 	store := r.m.stores.reservations
@@ -403,22 +403,6 @@ func (r reservationReleaser) ReleaseVM(ctx context.Context, vm string) error {
 		}
 	}
 	return portscalls.SaveReservations(ctx, store, kept)
-}
-
-func (r reservationReleaser) forgetDeclarations(ctx context.Context, vm string) error {
-	declared, err := r.m.stores.declarations.List(ctx)
-	if err != nil {
-		return err
-	}
-	for _, d := range declared {
-		if d.Machine != vm {
-			continue
-		}
-		if err := r.m.stores.declarations.Delete(ctx, d.Machine, d.Port); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 type engineInstaller struct {

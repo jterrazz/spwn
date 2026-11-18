@@ -46,7 +46,7 @@ func (l listFile[T]) load() ([]T, error) {
 			return nil, &store.UnreadableError{Path: l.path, Cause: err}
 		}
 	}
-	if _, err := store.Current(versionOf(schema), l.version); err != nil {
+	if err := store.Current(versionOf(schema), l.version); err != nil {
 		return nil, &store.UnreadableError{Path: l.path, Cause: err}
 	}
 	var items []T

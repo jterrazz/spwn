@@ -39,29 +39,17 @@ func TestTheUptimeFileIsVersionedAndKeptPrivate(t *testing.T) {
 	}
 }
 
-func TestSetupMigratesTheUptimeFileAndRefusesANewerOne(t *testing.T) {
+func TestAnUptimeFileWithNoSchemaReadsAndANewerOneIsRefused(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "uptime.json")
 	s := jsonfile.NewUptime(uptimeDisk(), file)
-	if err := s.Migrate(context.Background()); err != nil {
-		t.Errorf("Migrate with no file = %v; want nothing to do", err)
-	}
 	unversioned := `{"servers":{"infra":{"since":"2026-10-20T09:00:00Z","days":[{"date":"2026-11-05","down_s":420,"restarts":1}]}}}`
 	_ = os.WriteFile(file, []byte(unversioned), 0o600)
-	if err := s.Migrate(context.Background()); err != nil {
-		t.Errorf("Migrate of a file with no schema = %v; want it read as v1", err)
-	}
-	if data, _ := os.ReadFile(file); string(data) != unversioned {
-		t.Errorf("Migrate rewrote a v1 file:\n%s", data)
-	}
 	if got, err := s.Get(context.Background(), "infra"); err != nil || len(got.Days) != 1 || got.Days[0].DownS != 420 {
 		t.Errorf("Get = %+v, %v; want the day it kept", got, err)
 	}
 	_ = os.WriteFile(file, []byte(`{"schema":"station.uptime/v2","servers":{}}`), 0o600)
 	var newer *store.NewerError
-	if err := s.Migrate(context.Background()); !errors.As(err, &newer) {
-		t.Errorf("Migrate of a file a newer station wrote = %v; want it refused", err)
-	}
 	if _, err := s.Get(context.Background(), "infra"); !errors.As(err, &newer) {
 		t.Errorf("Get of a file a newer station wrote = %v; want it refused", err)
 	}

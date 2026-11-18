@@ -21,7 +21,6 @@ type Store struct {
 
 var (
 	_ contract.MachineStore = (*Store)(nil)
-	_ store.Migrator        = (*Store)(nil)
 )
 
 func NewStore() *Store {
@@ -154,5 +153,3 @@ func (s *Store) Delete(_ context.Context, name string) error {
 	}
 	return nil
 }
-
-func (s *Store) Migrate(context.Context) error { return nil }

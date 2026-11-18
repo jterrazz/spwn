@@ -1,5 +1,5 @@
 {
-  "here": "x",
+  "name": "x",
   "macs": {
     "worker": {
       "user": "deploy"

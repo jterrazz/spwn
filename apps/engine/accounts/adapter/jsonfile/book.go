@@ -33,7 +33,6 @@ type Book struct {
 
 var (
 	_ contract.BookStore = (*Book)(nil)
-	_ store.Migrator     = (*Book)(nil)
 )
 
 func NewBook(files BookFiles, at string) *Book { return &Book{files: files, at: at} }
@@ -55,7 +54,7 @@ func (b *Book) Read(context.Context) (accounts.Book, error) {
 	if err := json.Unmarshal(data, &f); err != nil {
 		return accounts.Book{}, &store.UnreadableError{Path: b.at, Cause: err, Line: store.LineOf(data, err)}
 	}
-	if _, err := store.Current(f.V, BookVersion); err != nil {
+	if err := store.Current(f.V, BookVersion); err != nil {
 		return accounts.Book{}, &store.UnreadableError{Path: b.at, Cause: err}
 	}
 	if f.Entries == nil {
@@ -88,9 +87,4 @@ func (b *Book) Change(ctx context.Context, edit func(*accounts.Book) error) erro
 		return &store.UnwritableError{Path: b.at, Cause: err}
 	}
 	return nil
-}
-
-func (b *Book) Migrate(ctx context.Context) error {
-	_, err := b.Read(ctx)
-	return store.OnlyNewer(err)
 }

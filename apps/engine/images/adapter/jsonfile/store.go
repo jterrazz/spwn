@@ -32,7 +32,6 @@ type Store struct {
 
 var (
 	_ contract.ImageStore = (*Store)(nil)
-	_ store.Migrator      = (*Store)(nil)
 )
 
 func New(files Files, dir string) *Store { return &Store{files: files, dir: dir} }
@@ -57,7 +56,7 @@ func (s *Store) read(at string) (images.Record, error) {
 	if err := json.Unmarshal(data, &f); err != nil {
 		return images.Record{}, fmt.Errorf("image record %s: %w", at, err)
 	}
-	if _, err := store.Current(f.V, Version); err != nil {
+	if err := store.Current(f.V, Version); err != nil {
 		return images.Record{}, fmt.Errorf("image record %s: %w", at, err)
 	}
 	if !f.Distro.Known() {
@@ -111,32 +110,6 @@ func (s *Store) List(_ context.Context, image string) ([]images.Record, error) {
 func (s *Store) Delete(_ context.Context, image, version string) error {
 	if err := s.files.Remove(s.file(image, version)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
-	}
-	return nil
-}
-
-func (s *Store) Migrate(context.Context) error {
-	names, err := s.files.ReadDir(s.dir)
-	if err != nil {
-		return store.OnlyNewer(err)
-	}
-	for _, image := range names {
-		if !image.IsDir() {
-			continue
-		}
-		versions, err := s.files.ReadDir(s.imageDir(image.Name()))
-		if err != nil {
-			continue
-		}
-		for _, e := range versions {
-			if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
-				continue
-			}
-			_, err = s.read(path.Join(s.imageDir(image.Name()), e.Name()))
-			if store.OnlyNewer(err) != nil {
-				return err
-			}
-		}
 	}
 	return nil
 }

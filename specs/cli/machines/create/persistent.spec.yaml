@@ -5,7 +5,7 @@ fixture:
 env: engine
 serve: sshd
 runs:
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "41020-41039"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --memory 4G --persistent --name api; kill $d; wait $d'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "41020-41039"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --memory 4G --persistent --name api; kill $d; wait $d'
       exit: 0
       stdout: |
           ●	Running

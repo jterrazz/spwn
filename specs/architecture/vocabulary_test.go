@@ -601,8 +601,7 @@ func f() {
 
 // invariant: the legacy encodings, each a declaration marked "value: alias
 // of": station.status/v1 (the OS connector's, byte for byte one release),
-// its rows and its kind word; the v2 keys a store reads once and writes in
-// v3's words; v2's hidden commands that are no kit.Alias.
+// its rows and its kind word; v2's hidden commands that are no kit.Alias.
 func legacyEncodings() []string {
 	return []string{
 		"apps/engine/catalog StatusV1Kind",
@@ -618,8 +617,6 @@ func legacyEncodings() []string {
 		"apps/engine/ports VMLivesOn",
 		"apps/engine/ports/adapter/guest Hello",
 		"apps/engine/ports/adapter/jsonfile ReservationsSchema",
-		"apps/engine/ports/contract RetiredGroupPorts",
-		"apps/engine/setup/contract RetiredGroupName",
 		"apps/engine/surface/cli/settings containerShortcuts",
 	}
 }

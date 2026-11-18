@@ -13,7 +13,7 @@ A VM is never on the tailnet. It is reached through its host: its `~/.ssh/config
 
 ## Consequences
 
-- The VM-join client, the minted keys, the VM tag, the node removal, the userspace tailscaled and the `tailnet up`/`down` verbs are gone; `station setup` retires what an earlier round left ([Machines](../reference/machines.md#round-5-migration)).
+- The VM-join client, the minted keys, the VM tag, the node removal, the userspace tailscaled and the `tailnet up`/`down` verbs are gone; `station setup` retired what an earlier round left, until station dropped every path that upgrades an older install.
 - `ssh <vm>` works while the daemon restarts: `machines pipe` needs only the VM's current NAT ip.
 - What a VM serves reaches the tailnet only through its host's publication ([ADR-012](012-ports-are-reserved-and-shared.md)).
 - An iPhone on the Wi-Fi reaching a VM directly needs a bridged macOS VM, which stays unproven.

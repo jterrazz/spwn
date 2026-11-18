@@ -51,7 +51,7 @@ The shared kernel, which does no I/O:
     confirm/   the graded confirmations: confirm.For(action, kind) and confirm.Require
     call/      a use case as a Call or a Watch, Bind and Gate, the Registry, the Router; lanes/, the read pool
     contract/  the contracts every family shares: Self, Preferences
-    store/     what every store shares: its errors, its version, the Migrator init runs
+    store/     what every store shares: its errors, its version, refused when it is not this station's
     fail/      the error: its type, its code, its words
     secret/    what a secret looks like (the token shapes, Screen and Kept) and the Value that never prints in clear
     adapter/   macos and linux (Self), jsonfile (Preferences), fake

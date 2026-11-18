@@ -2,8 +2,7 @@
 # The keychain as the setup specs need it: every call is recorded in $HOME/.calls,
 # its stdin too (the secret travels there, never in argv). An entry is an empty file
 # $HOME/.keychain/<service>/<account>: its name is the state, its value is never kept.
-# A file $HOME/.security-fails-once makes the first add fail and every later one succeed;
-# a file $HOME/.security-delete makes delete-generic-password exit as it says.
+# A file $HOME/.security-fails-once makes the first add fail and every later one succeed.
 printf 'security %s\n' "$*" >> "$HOME/.calls"
 
 entry_of() {
@@ -34,7 +33,6 @@ apply() {
             [ -f "$entry" ] || exit 44
             ;;
         delete-generic-password*)
-            if [ -f "$HOME/.security-delete" ]; then exit "$(/bin/cat "$HOME/.security-delete")"; fi
             entry_of "$1"
             [ -f "$entry" ] || exit 44
             /bin/rm -f "$entry"

@@ -32,6 +32,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/apps/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
+	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	appscmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/apps"
@@ -97,7 +98,7 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 
 // value: the ledger as the apps family reads it: whether it holds an
 // install of an app by a method.
-type ledgerOf struct{ l ledgerStore }
+type ledgerOf struct{ l machinefilecontract.Ledger }
 
 func (l ledgerOf) Recorded(ctx context.Context, name string, m catalog.Method) (bool, error) {
 	if l.l == nil {

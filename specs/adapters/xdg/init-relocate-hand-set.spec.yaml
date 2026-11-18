@@ -8,7 +8,6 @@ runs:
       stdout: |
           ●	name	m
           ●	zshrc
-          ●	layout	nothing to retire
           ◐	relocate	GOPATH set by hand to /y; station leaves it; npm cache set by hand to /x; station leaves it
           # Machinefile
           	none bound by init: init --machinefile binds one
