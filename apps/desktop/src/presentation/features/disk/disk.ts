@@ -68,6 +68,10 @@ export function holdPartsOf(holds: null | readonly Holding[] | undefined): reado
     }));
 }
 
+export function listedOf(parts: readonly Part[]): readonly Part[] {
+    return parts.filter((part) => part.rest || part.bytes > 0);
+}
+
 export type AppRow = { key: string; app: string; rows: readonly DiskRow[] };
 
 function keyOf(row: DiskRow): string {

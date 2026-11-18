@@ -5,7 +5,7 @@ import { pageOver } from '../../../../../composition/__tests__/page-over';
 import { unansweredAt } from '../../../../../infrastructure/outbound/engine-replay/__tests__/unanswered';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
 
-const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'two-macs');
+const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'stories', 'two-macs');
 
 function windowOver(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Storage' });
@@ -64,6 +64,19 @@ describe('machine-storage', () => {
             },
         );
         expect(result.errors.text).toBe('');
+    });
+
+    test('a kind of 0 bytes draws no segment, the free space drawn last', async () => {
+        // Given - the window on linux-1's Storage over stories, whose system, apps and caches hold 0 bytes
+        const result = await component.render(windowOver('stories', 'linux-1'), async (visitor) => {
+            // When - its disk has been read
+            await visitor.see(within(region('Storage'), content('Your data')));
+        });
+
+        // Then - one segment for your data, one for free, none for what holds nothing
+        expect(result.html.text).toContain('title="Your data · 10 GB"');
+        expect(result.html.text).toContain('title="Free · 30 GB"');
+        expect(result.html.text).not.toMatch(/title="(?:System|Apps|Caches) · /u);
     });
 
     test('a disk the engine reads as empty says so, and offers nothing to free', async () => {

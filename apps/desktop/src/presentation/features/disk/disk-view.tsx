@@ -10,7 +10,7 @@ import type { SharePart } from '../../ui/index';
 import { detailOf, wordOf } from '../../words/engine-words';
 import { diskGestureOf, freesWhole } from '../../words/provisional';
 import { DISK_PENDING_WORD } from '../../words/words';
-import { byApp, groupsOf, holdPartsOf, kindPartsOf, sizeOf } from './disk';
+import { byApp, groupsOf, holdPartsOf, kindPartsOf, listedOf, sizeOf } from './disk';
 import type { AppRow, Group, Part } from './disk';
 import { DiskLine, EraseLink, FreeAllButton } from './disk-gestures';
 import type { DiskGesture } from './disk-gestures';
@@ -40,17 +40,19 @@ function DiskBar({
     total: number;
     label: string;
 }) {
-    if (total <= 0 || parts.length === 0) {
+    const drawn = parts.filter((part) => part.bytes > 0);
+    if (total <= 0 || drawn.length === 0) {
         return null;
     }
-    const held: SharePart[] = parts.map((part) => ({
+    const said = parts.map((part) => `${part.label} ${bytes(part.bytes)}`).join(SEPARATOR);
+    const held: SharePart[] = drawn.map((part) => ({
         identity: part.rest ? undefined : part.identity,
         key: part.key,
         label: `${part.label}${SEPARATOR}${bytes(part.bytes)}`,
         rest: part.rest,
         size: part.bytes,
     }));
-    return <ShareBar label={label} of={total} parts={held} />;
+    return <ShareBar label={`${label}: ${said}`} of={total} parts={held} />;
 }
 
 function Legend({ parts }: { parts: readonly Part[] }) {
@@ -122,7 +124,9 @@ export function DiskPanel({
     station,
     freeAllVariant = 'primary',
 }: DiskPanelProps) {
-    const parts = by === 'holds' ? holdPartsOf(reading.Station?.Holds) : kindPartsOf(reading.Kinds);
+    const parts = listedOf(
+        by === 'holds' ? holdPartsOf(reading.Station?.Holds) : kindPartsOf(reading.Kinds),
+    );
     const reread = useReread();
     return (
         <Panel note={reading.Pending ? DISK_PENDING_WORD : ''} padded title={title}>
