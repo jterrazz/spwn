@@ -1,9 +1,12 @@
 #!/bin/sh
 # Homebrew as the tools specs need it: every call is recorded in $HOME/.calls (a
-# bundle's Brewfile too, and its HOMEBREW_NO_AUTO_UPDATE in $HOME/.brew-env), the listings are answer files, and a bundle swaps in the
+# bundle's Brewfile too, and its HOMEBREW_NO_AUTO_UPDATE in $HOME/.brew-env; each read's in $HOME/.brew-read-env), the listings are answer files, and a bundle swaps in the
 # *.after.txt listings it was given, as a real install changes what brew lists.
 answers="${0%/*}/../answers/brew"
 printf 'brew %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "list "* | "outdated "*) printf '%s HOMEBREW_NO_AUTO_UPDATE=%s\n' "$*" "${HOMEBREW_NO_AUTO_UPDATE:-unset}" >> "$HOME/.brew-read-env" ;;
+esac
 case "$*" in
     "--version") echo "Homebrew 5.0.1" ;;
     "list --formula --versions") /bin/cat "$answers/formula.txt" ;;

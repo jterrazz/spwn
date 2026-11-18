@@ -17,12 +17,22 @@ import (
 const (
 	command = "brew"
 	bundle  = command + " bundle"
-	// value: brew refreshes its index before an install on its own, so a
-	// bundle would update every formula the index moved; station's
-	// installs take the index as it is, and only `station upgrade`
-	// refreshes it, through homebrew's own upgrade line (`brew update`).
+	// value: brew refreshes its index before an install or a listing of
+	// what is outdated on its own, so a bundle would update every formula
+	// the index moved and a read would relink them; station's calls take
+	// the index as it is, and only `station upgrade` refreshes it, through
+	// homebrew's own upgrade line (`brew update`).
 	noAutoUpdate = "HOMEBREW_NO_AUTO_UPDATE=1"
 )
+
+// invariant: a read leaves Homebrew as it found it: its index refresh, which
+// relinks formulae and moves what `outdated` says, is off for every call
+// that only reads.
+func read(args ...string) local.Cmd {
+	c := local.Command(command, args...)
+	c.Env = []string{noAutoUpdate}
+	return c
+}
 
 var manager = contract.Manager{Name: command, App: "homebrew"}
 
@@ -31,11 +41,11 @@ type Brew struct{ run local.Runner }
 func New(run local.Runner) *Brew { return &Brew{run: run} }
 
 func (b *Brew) Formulae() contract.Installer {
-	return &kind{brew: b, method: catalog.MethodBrew, flag: "--formula", list: local.Command(command, "list", "--formula", "--versions")}
+	return &kind{brew: b, method: catalog.MethodBrew, flag: "--formula", list: read("list", "--formula", "--versions")}
 }
 
 func (b *Brew) Casks() contract.Installer {
-	return &kind{brew: b, method: catalog.MethodCask, flag: "--cask", list: local.Command(command, "list", "--cask", "--versions")}
+	return &kind{brew: b, method: catalog.MethodCask, flag: "--cask", list: read("list", "--cask", "--versions")}
 }
 
 func (b *Brew) Name() string { return bundle }
@@ -201,7 +211,7 @@ type outdatedJSON struct {
 func (b *Brew) outdated(ctx context.Context, flags ...string) (map[string]string, error) {
 	// invariant: a pinned formula is never behind: station does not update
 	// what its owner pinned.
-	out, err := b.run.Output(ctx, local.Command(command, append([]string{"outdated", "--json=v2"}, flags...)...))
+	out, err := b.run.Output(ctx, read(append([]string{"outdated", "--json=v2"}, flags...)...))
 	switch {
 	case err != nil:
 		return nil, err
