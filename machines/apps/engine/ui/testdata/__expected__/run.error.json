@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "run dreset",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "docker ps failed: Docker is not running",
+    "hint": "start Docker, then run it again"
+  }
+}

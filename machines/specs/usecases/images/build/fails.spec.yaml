@@ -1,0 +1,20 @@
+description: 'a recipe the guest breaks off fails the build, names its step, and keeps no half image'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world fault Guest.Exec 1'
+      exit: 0
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 1
+      stderr: |
+          Error: image base-ubuntu: the recipe failed: the guest connection broke, as the world scripted it
+          Hint: station images build base-ubuntu
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | .version'''
+      exit: 0
+      stdout: |
+          2026.11.01
+          2026.10.20
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.04	built

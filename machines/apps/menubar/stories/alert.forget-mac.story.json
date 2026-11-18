@@ -1,0 +1,10 @@
+{
+    "group": "alert",
+    "id": "alert.forget-mac",
+    "note": "Forget macbook-air? Its VMs keep running; station stops showing it; it can be added again.",
+    "pages": ["pages/machines.macs.machine.macbook-air.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "forget-mac"
+    }
+}

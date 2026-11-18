@@ -1,0 +1,11 @@
+description: 'a stopped VM heads its row stopped, its line saying it holds no memory'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "api") | [.Head, .Pending]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{"ThisMac":true}}
+      exit: 0
+      stdout: |
+          [{"Tone":"plain","Sentence":"api is stopped.","Line":"It holds no memory. Start it to use it again."},null]

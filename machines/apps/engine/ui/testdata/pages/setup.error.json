@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "setup",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "a VM is named by its Mac",
+    "hint": "station init on its Mac"
+  }
+}

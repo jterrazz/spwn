@@ -1,0 +1,4 @@
+{"world": "creating", "station": "dev", "exchanges": [
+{"request":{"call":"machines.log","in":{"VM":"linux-4"}},"answers":[{"v":2,"out":{"Lines":null}}]},
+{"request":{"call":"machines.log","in":{"VM":"linux-5"}},"answers":[{"v":2,"out":{"Lines":null}}]}
+]}

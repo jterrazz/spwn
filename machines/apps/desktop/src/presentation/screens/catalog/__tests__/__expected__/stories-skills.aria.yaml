@@ -1,0 +1,28 @@
+- main:
+  - heading "17 skills are in the catalog." [level=1]
+  - searchbox "Search the catalog"
+  - group "Show":
+    - button "On your machines0"
+    - button "Everything17" [pressed]
+  - group "Category":
+    - button "All skills17" [pressed]
+    - button "Agent skills17"
+  - region "Skills":
+    - paragraph: Agent skills 17
+    - button "agent-browser-skill Drive agent-browser, the browser automation CLI not installed"
+    - button "better-accessibility Accessibility review and fixes not installed"
+    - button "better-colors Color craft not installed"
+    - button "better-interface Interface polish not installed"
+    - button "better-layout Layout and spacing craft not installed"
+    - button "better-typography Typography craft not installed"
+    - button "better-ui UI review across the better-* skills not installed"
+    - button "better-writing Interface copy not installed"
+    - button "chrome-extensions Chrome extension authoring not installed"
+    - button "frontend-design Distinctive, polished frontend interfaces not installed"
+    - button "last30days Research what happened in the last 30 days not installed"
+    - button "modern-web-guidance Chrome's current web platform guidance not installed"
+    - button "qmd-skill Drive qmd, the local markdown search not installed"
+    - button "shadcn shadcn/ui components and patterns not installed"
+    - button "upgrading-expo Upgrade an Expo app across SDK versions not installed"
+    - button "vercel-react-best-practices React and Next.js performance practices not installed"
+    - button "vercel-react-native-skills React Native practices not installed"

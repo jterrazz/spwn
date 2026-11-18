@@ -1,0 +1,14 @@
+description: 'a guard already past its threshold refuses the start, exit 1, and nothing is held'
+env: on-battery
+runs:
+    - command: 'world battery 20'
+      exit: 0
+    - command: 'awake 4h'
+      exit: 1
+      stderr: |
+          Error: Awake stays off: the battery is at 20 % on battery
+          Hint: station awake
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          null

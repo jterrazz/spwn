@@ -1,0 +1,12 @@
+description: 'disk move --on another Mac puts that Mac''s misplaced ~/go right, and the row leaves there'
+env: two-macs
+runs:
+    - command: 'disk move ~/go --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	~/go	nothing to move: its rebuildable files freed
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].disk.files | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["~/.claude/projects/x","~/Library/Caches/Homebrew/downloads/x"]

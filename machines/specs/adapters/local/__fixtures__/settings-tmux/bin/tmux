@@ -1,0 +1,9 @@
+#!/bin/sh
+printf 'tmux %s\n' "$1" >> "$HOME/.calls"
+case "$1" in
+    source-file) ;;
+    *)
+        echo "stub tmux: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

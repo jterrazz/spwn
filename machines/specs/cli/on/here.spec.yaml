@@ -1,0 +1,11 @@
+description: '--on naming this very machine runs here, with no ssh'
+fixture: ./__fixtures__/here-x/
+runs:
+    - command: 'apps --json --on x | /usr/bin/jq -r .schema'
+      exit: 0
+      stdout: |
+          station.apps.list/v1
+    - command: 'apps --json --on x > /dev/null'
+      exit: 0
+      files:
+          .calls: absent

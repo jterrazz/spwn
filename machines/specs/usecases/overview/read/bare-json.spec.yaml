@@ -1,0 +1,7 @@
+description: 'station --json prints the overview document, named after its call'
+env: two-macs
+runs:
+    - command: '--json | /usr/bin/jq -r ".schema"'
+      exit: 0
+      stdout: |
+          station.overview.read/v1

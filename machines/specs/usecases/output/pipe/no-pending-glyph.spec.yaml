@@ -1,0 +1,17 @@
+description: 'a slow read in a pipe or in JSON is waited for: the line is filled, never ◌'
+env: two-macs
+runs:
+    - command: 'disk > /dev/null'
+      exit: 0
+    - command: 'world slow macbook-pro 3s'
+      exit: 0
+    - command: 'overview | /usr/bin/grep -e "◌" -e "	Disk	"'
+      exit: 0
+      stdout: |
+          	Disk	◐ 388 GB free · 34.8 GB can rebuild · ◐ 1 misplaced
+    - command: 'world slow macbook-pro 3s'
+      exit: 0
+    - command: 'overview --json | /usr/bin/jq -c ''[(tostring | test("◌")), (.sections | map(select(.pending)) | length), (.sections[] | select(.id == "disk"))]'''
+      exit: 0
+      stdout: |
+          [false,0,{"id":"disk","counts":{"misplaced":1}}]

@@ -1,0 +1,50 @@
+description: 'brew cannot pin: the plan says the lock records a version, apply installs the newest'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [ripgrep]
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.lock'
+      stdin: |
+          lock: station.lock/v1
+          machinefile: macbook-pro
+          apps:
+              - { name: ripgrep, method: brew, version: 14.0.0 }
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To install
+          ○	ripgrep	brew	recorded 14.0.0
+    - command: 'explain apps.ripgrep'
+      exit: 0
+      stdout: |
+          # macbook-pro
+          	apps.ripgrep	listed	user	macbook-pro
+          	apps.ripgrep.method	brew	lock	macbook-pro
+          	apps.ripgrep.because	locked	lock	macbook-pro
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	ripgrep	brew	recorded 14.0.0
+          ●	homebrew	5.0.1	script	the manager of ripgrep
+          ●	ripgrep	1.0.0	brew
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].files["machinefiles/macbook-pro.lock"]'' world.json'
+      exit: 0
+      stdout: |+
+          lock: station.lock/v1
+          machinefile: macbook-pro
+          apps:
+              - name: homebrew
+                method: script
+                version: 5.0.1
+              - name: ripgrep
+                method: brew
+                version: 1.0.0
+

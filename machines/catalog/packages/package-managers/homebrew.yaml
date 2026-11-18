@@ -1,0 +1,31 @@
+package: station.package/v1
+kind: manager
+name: homebrew
+description: macOS package manager
+manages: [brew, cask]
+priority: { macos: 1 }
+provides: [brew]
+needs: [sudo]
+version-read:
+    args: [brew, --version]
+    pattern: ^Homebrew (\S+)
+methods:
+    - os: macos
+      path: [/opt/homebrew/bin, /usr/local/bin]
+      upgrade: brew update
+      script:
+          url: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+          on-terminal: [INTERACTIVE=1]
+          off-terminal: [NONINTERACTIVE=1]
+disk:
+    paths:
+        - path: ~/Library/Caches/Homebrew
+          level: cache
+        - path: ~/Library/Logs/Homebrew
+          level: cache
+    installed: [/opt/homebrew]
+    free:
+        - run: [brew, cleanup, --prune=all]
+          uses: brew
+        - delete: [~/Library/Caches/Homebrew/*]
+    no-erase: "Homebrew's data are its formulae: station apps remove <app>"

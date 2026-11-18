@@ -1,0 +1,36 @@
+description: 'settings on This Mac lists Set by station, the Always-on Mac group folded on one line'
+env: two-macs
+runs:
+    - command: 'settings'
+      exit: 0
+      stdout: |
+          # Set by station	17 ○
+          ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
+          ○	git-shortcuts	not applied	station settings apply git-shortcuts
+          ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
+          ○	hushlogin	not applied	station settings apply hushlogin
+          ○	starship-dotfiles	not applied · needs starship	station apps install starship
+          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
+          ○	dns	not applied	station settings apply dns
+          ○	git-signing	not applied · needs gpg	station apps install gpg
+          ○	github-login	not applied · needs gh	station apps install gh
+          ○	spotlight-exclude	not applied	station settings apply spotlight-exclude
+          ○	ssh-key	not applied	station settings apply ssh-key
+          ○	zed-dotfiles	not applied · needs zed	station apps install zed
+          ○	backup-exclusions	not applied	station settings apply backup-exclusions
+          ○	dock-reset	not applied	station settings apply dock-reset
+          ○	dock-spacer	not applied	station settings apply dock-spacer
+          ○	tart-launcher	not applied	station settings apply tart-launcher
+          ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
+          # Always-on Mac
+          ○	Always-on Mac	5 · for a Mac that hosts servers
+          # Checked	8 ●	1 ◐
+          ◐	firewall	off	System Settings > Network > Firewall
+          ●	filevault	as expected · on
+          ●	sip	as expected · on
+          ●	automatic-updates	as expected · on
+          ●	screen-lock	as expected · locks after 2 min
+          ●	gatekeeper	as expected · on
+          ●	remote-login	as expected · off
+          ●	time-machine	as expected · last backup 2 d ago
+          ●	macos-updates	as expected · up to date

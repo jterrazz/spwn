@@ -1,0 +1,17 @@
+description: 'a vm made by hand and renamed by hand onto a name a delete left in the ledger is not freed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].cloned = {"old-vm": 901} | .macs["macbook-pro"].vms["old-vm"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["old-vm"],"Confirm":"old-vm"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.not-freeable","subject":"old-vm"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''{disk: .macs["macbook-pro"].vms["old-vm"].disk, cloned: .macs["macbook-pro"].cloned}'' world.json'
+      exit: 0
+      stdout: |
+          {"disk":true,"cloned":null}

@@ -1,0 +1,17 @@
+description: 'ports reads the app and what it serves, and drives nothing'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/serving/
+runs:
+    - command: 'ports --json | /usr/bin/jq -S -c ''.tailscale'''
+      exit: 0
+      stdout: |
+          {"cli":"{{workdir}}/bin/tailscale","dns_name":"macbook.tail1234.ts.net","ip":"192.0.2.1","name":"x","serve":"on","state":"on","variant":""}
+      files:
+          .calls:
+              equals: |
+                  tailscale status --json
+                  sysctl -n net.inet.ip.portrange.first
+                  sysctl -n net.inet.ip.portrange.last
+                  tailscale status --json
+                  tailscale serve status --json

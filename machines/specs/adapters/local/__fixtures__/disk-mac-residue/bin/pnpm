@@ -1,0 +1,14 @@
+#!/bin/sh
+# pnpm as it prunes for real: the store is opened, so an absent one is created.
+case "$*" in
+    "--version") echo "10.20.0" ;;
+    "store prune")
+        printf 'pnpm %s\n' "$*" >> "$HOME/.calls"
+        /bin/mkdir -p "$HOME/Library/pnpm/store/v10"
+        printf 'x' > "$HOME/Library/pnpm/store/v10/index"
+        ;;
+    *)
+        echo "stub pnpm: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

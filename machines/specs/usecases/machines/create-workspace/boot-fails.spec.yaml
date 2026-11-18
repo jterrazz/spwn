@@ -1,0 +1,17 @@
+description: 'a create whose boot fails keeps the VM, says it did not boot, and offers start and delete'
+env: two-macs
+runs:
+    - command: 'world fault Hypervisor.Boot'
+      exit: 0
+    - command: 'machines create --memory 4G'
+      exit: 1
+      stderr: |
+          Error: linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it
+          Hint: station machines start linux-2, or station machines delete linux-2
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ○	linux-2	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	4 GB

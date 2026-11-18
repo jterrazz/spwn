@@ -1,0 +1,17 @@
+description: 'infra''s guest silent: its process on mac-mini, up since its run started; no disk, no network'
+env:
+    - server-without-guest
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].meter = {"sample": {}, "top": {"cpu": [], "memory": []}, "processes": {"2001": {"cpu": 18, "memory": 16106127360, "started": "2026-10-23T10:00:00Z"}}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; "$STATION" activity --on infra'
+      exit: 0
+      stdout: |
+          	On infra:
+          ●	infra	Server · up 12d 0h (since its run started) · from mac-mini (its guest does not answer)
+          # Now
+          	CPU	18 % of mac-mini
+          	Memory	15 GB resident
+    - command: 'activity --on infra --json | /usr/bin/jq -c ''{source, run, up_days: (.up_s / 86400 | floor), boot_at, disk, network}'''
+      exit: 0
+      stdout: |
+          {"source":"mac-process","run":{"cpu_percent":18,"resident_bytes":16106127360,"mac":"mac-mini"},"up_days":12,"boot_at":null,"disk":null,"network":null}

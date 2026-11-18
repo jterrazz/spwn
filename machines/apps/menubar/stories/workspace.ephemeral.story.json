@@ -1,0 +1,8 @@
+{
+    "group": "workspace",
+    "heightNote": "designed after the prototype: no prototype height, its golden is the reference",
+    "id": "workspace.ephemeral",
+    "note": "agent-7f, an ephemeral workspace still running: its facts, its gauges, no port shared and no account lent.",
+    "pages": ["pages/machines.machine.agent-7f.json"],
+    "schema": "station.story/v1"
+}

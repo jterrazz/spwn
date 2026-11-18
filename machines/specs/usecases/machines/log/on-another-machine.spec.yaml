@@ -1,0 +1,14 @@
+description: 'a server''s log is read on its own Mac with --on: every line its console kept, blank ones skipped'
+env: two-macs
+runs:
+    - command: 'world console infra ''[    2.114502] systemd[1]: Started k3s.service - Lightweight Kubernetes.'''
+      exit: 0
+    - command: 'world console infra '''''
+      exit: 0
+    - command: 'world console infra ''[ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB'''
+      exit: 0
+    - command: 'machines log infra --on mac-mini'
+      exit: 0
+      stdout: |
+          [    2.114502] systemd[1]: Started k3s.service - Lightweight Kubernetes.
+          [ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB

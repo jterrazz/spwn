@@ -1,0 +1,16 @@
+{
+    "group": "home",
+    "id": "home.keyboard",
+    "note": "The keyboard's one highlight: the arrows and Tab walk it through every row in reading order, here on the Accounts tile.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 34,
+        "cpuh:linux-3": 58
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "highlight": "control:menubar.accounts"
+    }
+}

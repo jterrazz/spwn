@@ -1,0 +1,33 @@
+description: 'NO_COLOR turns a terminal into the pipe form; without it the same command draws the header'
+fixture: ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" images'
+      stdin: |
+          see not built yet
+          screen
+      exit: 0
+      stdout: |
+          ●       base-ubuntu     2026.11.01      4.0 GB  macbook-pro     api · linux-1
+          ○       base-ubuntu     2026.10.20      3.0 GB  macbook-pro     older · station0
+          ●       base-ubuntu     2026.11.01      4.0 GB  mac-mini        infra
+          ○       base-macos                              not built yet
+    - command: '--version >/dev/null; /usr/bin/env -u NO_COLOR terminal "$STATION" images'
+      stdin: |
+          see not built yet
+          screen
+      exit: 0
+      stdout: |
+          3 images on 2 Macs · 1 older · base-macos not built yet
+
+          Images
+                           version       size  on
+            ● base-ubuntu  2026.11.01  4.0 GB  This Mac  api · linux-1
+            ○ base-ubuntu  2026.10.20  3.0 GB  This Mac  older
+              → station images delete base-ubuntu@2026.10.20
+            ● base-ubuntu  2026.11.01  4.0 GB  mac-mini  infra
+            ○ base-macos                                 not built yet
+
+          → station images update

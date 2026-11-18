@@ -1,0 +1,28 @@
+linux-1  ephemeral · on This Mac
+
+Gauges
+Ports  2
+  ● Vite       private  linux-1:5173
+  ● Port 7000  private  linux-1:7000
+Life
+  Ephemeral: deleted when it powers off from inside; pauses when This Mac
+  sleeps.
+Private  2
+  ● Vite       linux-1:5173
+  ● Port 7000  linux-1:7000
+Accounts  2
+  ● GitHub  granted  from the password GitHub token
+  ● Claude  granted  from the password Claude token
+  A grant is a password of This Mac's, and stays until you remove it.
+Last 6 minutes
+    CPU  34%  now                          Network  1.7 · 0.1 MB/s
+Last hour
+    CPU  34%  now                          Network  1.7 · 0.1 MB/s
+Last 24 hours
+    CPU  34%  now                          Network  1.7 · 0.1 MB/s
+Memory  now
+Top processes  CPU, of linux-1
+    station  34%
+Measured
+  Measured inside the guest. If linux-1 stops answering, this shows what This
+  Mac sees of it.

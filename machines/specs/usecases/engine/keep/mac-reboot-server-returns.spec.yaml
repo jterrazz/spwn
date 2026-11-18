@@ -1,0 +1,9 @@
+description: 'a reboot of its Mac brings a server wanted running back with the engine: a server is always on'
+env: two-macs
+runs:
+    - command: 'world reboot mac-mini'
+      exit: 0
+    - command: 'machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

@@ -1,0 +1,14 @@
+#!/bin/sh
+# tmutil latestbackup: a backup two days and an hour ago, so a slow run still reads 2 d; with $HOME/.off, none;
+# with $HOME/.no-destination, what macOS 26 answers with no destination configured.
+case "$*" in
+    latestbackup)
+        if [ -e "$HOME/.no-destination" ]; then echo 'Failed to mount backup destination, error: Error Domain=com.apple.backupd.ErrorDomain Code=17 "Failed to mount destination."'; exit 0; fi
+        if [ -e "$HOME/.off" ]; then echo "No machine directory found for host." >&2; exit 1; fi
+        at=$(/usr/bin/perl -MPOSIX -e 'print strftime("%Y-%m-%d-%H%M%S", localtime(time - 49 * 3600))')
+        echo "/Volumes/Backups of Mac/$at.backup/$at.backup" ;;
+    destinationinfo)
+        if [ -e "$HOME/.no-destination" ]; then echo "tmutil: No destinations configured."; exit 0; fi
+        echo "Name          : Backups of Mac" ;;
+    *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;
+esac

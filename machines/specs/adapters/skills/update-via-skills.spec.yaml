@@ -1,0 +1,16 @@
+description: '--manager skill re-adds the skills whose folder changed upstream, and nothing else'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ../__fixtures__/skills-cli/
+    - ./__fixtures__/skill-lock/
+serve:
+    - github
+runs:
+    - command: 'apps update --manager skill'
+      exit: 0
+      stdout: |
+          ●	shadcn		skill
+      files:
+          .calls:
+              equals: |
+                  skills add -g -y --skill shadcn --agent claude-code codex -- shadcn-ui/ui

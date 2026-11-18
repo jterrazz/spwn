@@ -1,0 +1,65 @@
+description: 'a server that crashes again and again waits 5 s, 10 s, 20 s, 40 s, then 60 s each time'
+env: two-macs
+runs:
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.restarts, .restarted_after_s]'''
+      exit: 0
+      stdout: |
+          [1,5]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 5, $down <= 6]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]
+    - command: 'world advance 3m'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.restarts, .restarted_after_s]'''
+      exit: 0
+      stdout: |
+          [2,10]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 10, $down <= 11]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]
+    - command: 'world advance 3m'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.restarts, .restarted_after_s]'''
+      exit: 0
+      stdout: |
+          [3,20]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 20, $down <= 21]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]
+    - command: 'world advance 3m'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.restarts, .restarted_after_s]'''
+      exit: 0
+      stdout: |
+          [4,40]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 40, $down <= 41]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]
+    - command: 'world advance 3m'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.state, .restarts, .restarted_after_s]'''
+      exit: 0
+      stdout: |
+          ["running",5,60]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 60, $down <= 61]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]
+    - command: 'machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

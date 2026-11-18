@@ -1,0 +1,9 @@
+#!/bin/sh
+# security answering find-generic-password from answers/security/<account>, exit 44 (not found) otherwise.
+answers="${0%/*}/../answers/security"
+printf 'security %s\n' "$*" >> "$HOME/.calls"
+if [ "$1" = "find-generic-password" ] && [ -f "$answers/$5" ]; then
+    /bin/cat "$answers/$5"
+    exit 0
+fi
+exit 44

@@ -1,0 +1,8 @@
+description: 'a word that names no setting is refused, its hint the settings list'
+env: two-macs
+runs:
+    - command: 'settings firewal'
+      exit: 2
+      stderr: |
+          Error: no setting named "firewal"
+          Hint: station settings

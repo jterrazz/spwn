@@ -1,0 +1,7 @@
+description: 'a Mac that has never answered is said silent with no last answer to name, exit 0'
+env: mini-never-answered
+runs:
+    - command: 'settings --all-machines --json | /usr/bin/jq -c ''.findings'''
+      exit: 0
+      stdout: |
+          [{"machine":"mac-mini","severity":"broken","section":"settings","subject":"mac-mini","text":"mac-mini: does not answer","fix":{"call":null,"command":null,"path":null}},{"machine":"api","severity":"needs-a-look","section":"settings","subject":"api","text":"api: stopped, not read since the engine started","fix":{"call":null,"command":null,"path":null}}]

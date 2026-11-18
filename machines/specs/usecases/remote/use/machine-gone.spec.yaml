@@ -1,0 +1,27 @@
+description: 'a deleted ephemeral workspace in use: the next command says so, runs on This Mac, clears the choice'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'use linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1 in this terminal. Other terminals stay on This Mac.
+    - command: 'world advance 10m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/env STATION_TERMINAL=other-terminal "$STATION" machines delete linux-1 --confirm=linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted
+    - command: 'overview --json | /usr/bin/jq -r .machine.name'
+      exit: 0
+      stdout: |
+          macbook-pro
+      stderr: |
+          linux-1 is gone (deleted at 10:10) · back on This Mac
+    - command: 'use'
+      exit: 0
+      stdout: |
+          	On This Mac in this terminal.
+    - command: 'shell prompt'
+      exit: 0

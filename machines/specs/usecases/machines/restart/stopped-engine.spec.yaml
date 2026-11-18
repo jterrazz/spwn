@@ -1,0 +1,8 @@
+description: 'with the engine stopped a restart is refused, and the hint starts it'
+env: engine-stopped
+runs:
+    - command: 'machines restart api'
+      exit: 1
+      stderr: |
+          Error: the engine is stopped on macbook-pro
+          Hint: station engine start

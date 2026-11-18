@@ -1,0 +1,12 @@
+description: 'awake off on a Mac that never sleeps ends nothing, exit 0: Never sleeps is a setting'
+env: two-macs
+runs:
+    - command: 'awake off --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ○	mac-mini	has no keep-awake to end · Never sleeps stays: station settings off never-sleeps --on mac-mini
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          ["station: never sleeps"]

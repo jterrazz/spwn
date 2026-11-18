@@ -1,0 +1,185 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "api",
+    "kind": "workspace",
+    "on": "This Mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "api",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "persistent",
+          "pri": 1
+        },
+        {
+          "kind": "text",
+          "text": "on This Mac",
+          "pri": 2,
+          "nav": "menubar.machine:macbook-pro"
+        },
+        {
+          "kind": "text",
+          "text": "stopped"
+        }
+      ]
+    },
+    {
+      "id": "stopped",
+      "title": "api is stopped",
+      "items": [
+        {
+          "empty": {
+            "text": "api is stopped",
+            "glyph": {
+              "kind": "workspace",
+              "signal": "quiet"
+            },
+            "sub": "Disk kept, starts with 8 GB",
+            "actions": [
+              "start-vm"
+            ]
+          }
+        }
+      ],
+      "card": "empty"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Start api",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "start-vm",
+      "run": {
+        "call": "machines.start",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api is starting"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "page",
+      "confirm": {
+        "question": "Delete api?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "This can't be undone. It goes with its disk (40 GB)."
+          }
+        ],
+        "danger": true,
+        "type": "api",
+        "yes": "Delete api",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "api"
+        }
+      }
+    },
+    {
+      "label": "More options for api",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "title:api",
+        "start-vm@menu",
+        "-",
+        "delete@menu"
+      ]
+    },
+    {
+      "label": "api on This Mac",
+      "on": "menu",
+      "id": "title:api"
+    },
+    {
+      "label": "Start",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "start-vm@menu",
+      "run": {
+        "call": "machines.start",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "icon": "play",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api is starting"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete api?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "This can't be undone. It goes with its disk (40 GB)."
+          }
+        ],
+        "danger": true,
+        "type": "api",
+        "yes": "Delete api",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@menu",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "workspace",
+      "signal": "quiet"
+    },
+    "buttons": [
+      "menu"
+    ]
+  }
+}

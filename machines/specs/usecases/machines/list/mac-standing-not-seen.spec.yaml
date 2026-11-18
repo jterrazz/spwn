@@ -1,0 +1,11 @@
+description: 'a Mac that does not answer reads not-seen, and all of them roll up not seen'
+env:
+    - mini-offline
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [[.out.All.Macs[] | [.Name, .Standing, .Machines.State, .Machines.N]], [.out.All.Standing.State, .out.All.Standing.N]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [[["macbook-pro","online","fine",null],["mac-mini","not-seen","not-seen",1]],["not-seen",1]]

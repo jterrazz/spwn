@@ -1,0 +1,3 @@
+{"world": "bare-mac", "station": "dev", "exchanges": [
+{"request":{"watch":"accounts.list","in":{}},"answers":[{"v":2,"out":{"Verdict":{"Tone":"plain","Sentence":"Signed in to no program"},"Programs":[{"Program":"gh","State":"signed-out","Action":"sign-in"},{"Program":"npm","State":"signed-out","Action":"sign-in"},{"Program":"claude","State":"signed-out","Action":"sign-in"},{"Program":"wrangler","State":"signed-out","Action":"sign-in"}]}},{"v":2,"done":true}]}
+]}

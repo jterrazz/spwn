@@ -1,0 +1,12 @@
+description: 'settings apply works from a directory holding no clone, and a second run finds the file there'
+runs:
+    - command: 'settings apply hushlogin'
+      exit: 0
+      stdout: |
+          ●	hushlogin	~/.hushlogin: created
+      files:
+          .hushlogin: exists
+    - command: 'settings apply hushlogin'
+      exit: 0
+      stdout: |
+          ●	hushlogin	~/.hushlogin: already there

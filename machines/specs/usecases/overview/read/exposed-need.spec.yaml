@@ -1,0 +1,13 @@
+description: 'an undeclared port reachable outside needs you, marked Exposed, its detail naming its process'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world listen macbook-pro "*:5000" ControlCenter'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Verdict.Sentence, [.Needs[] | select(.Section == "ports") | [.Text, .Upkeep, .Mark, .Detail, .Verb, .Noun, .Command, .Path]]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          ["2 things need you.",[["port 5000 is reachable outside Tailscale","needs-you","exposed","macbook-pro. ControlCenter. Not declared public.","review","Ports","",""]]]

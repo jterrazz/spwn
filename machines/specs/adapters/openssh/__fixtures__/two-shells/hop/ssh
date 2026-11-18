@@ -1,0 +1,6 @@
+#!/bin/sh
+# ssh as it carries a command to the far Mac: the words after -- joined by one
+# space, read again by the far user's shell.
+while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do shift; done
+shift
+exec /bin/sh -c "$*"

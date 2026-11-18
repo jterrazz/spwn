@@ -1,0 +1,28 @@
+package: station.package/v1
+kind: app
+name: opencode
+description: Open-source AI coding agent CLI
+provides: [opencode]
+methods:
+    - os: macos
+      brew: opencode
+    - family: linux
+      arch: arm64
+      github-release: { repo: anomalyco/opencode, asset: 'opencode-linux-arm64.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: anomalyco/opencode, asset: 'opencode-linux-x64.tar.gz' }
+disk:
+    paths:
+        - path: '{cache}/opencode'
+          level: cache
+        - path: '{data}/opencode'
+          level: data
+        - path: '{state}/opencode'
+          level: data
+        - path: '{config}/opencode'
+          level: settings
+    free:
+        - delete: ['{cache}/opencode/*']
+    erase:
+        - delete: ['{data}/opencode/*', '{state}/opencode/*']

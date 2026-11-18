@@ -1,0 +1,13 @@
+description: 'restart refuses This Mac and a name station does not know before any question, exit 2'
+env: two-macs
+runs:
+    - command: 'machines restart macbook-pro --yes'
+      exit: 2
+      stderr: |
+          Error: "macbook-pro" is this machine
+          Hint: pick another machine: station machines lists them all
+    - command: 'machines restart nope --yes'
+      exit: 2
+      stderr: |
+          Error: no machine named "nope"
+          Hint: station machines

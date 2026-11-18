@@ -1,0 +1,19 @@
+#!/bin/sh
+# launchctl as the VM specs need it: every call is recorded in $HOME/.calls; `print`
+# says the agent is loaded only when answers/launchctl/loaded exists; `print-disabled`
+# answers answers/launchctl/disabled; answers/launchctl/fails-<verb> makes that verb
+# print the file on stderr and exit 5, as launchd refusing it.
+printf 'launchctl %s\n' "$*" >> "$HOME/.calls"
+if [ -f "${0%/*}/../answers/launchctl/fails-$1" ]; then
+    /bin/cat "${0%/*}/../answers/launchctl/fails-$1" >&2
+    exit 5
+fi
+case "$1" in
+    print) [ -f "${0%/*}/../answers/launchctl/loaded" ] || exit 113 ;;
+    print-disabled) /bin/cat "${0%/*}/../answers/launchctl/disabled" 2> /dev/null ;;
+    bootstrap | bootout | kickstart | enable | disable) ;;
+    *)
+        echo "stub launchctl: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

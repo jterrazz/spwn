@@ -1,0 +1,7 @@
+description: 'on a Mac the network totals count Ethernet and Wi-Fi only, never a tunnel, bridge or loopback'
+fixture: ./__fixtures__/meter-kernel/
+runs:
+    - command: 'guest serve --stdio < ask.json | /usr/bin/jq -c ''.out.sample | [.net_in, .net_out]'''
+      exit: 0
+      stdout: |
+          [3119505408,3128866816]

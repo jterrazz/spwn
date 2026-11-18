@@ -1,0 +1,157 @@
+{
+  "schema": "station.page/v1",
+  "id": "images",
+  "command": "images",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "computer",
+    "registered": true
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/images",
+            "mark": "ok",
+            "label": "No image yet",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "base-ubuntu not built yet"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "base-macos not built yet"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "images",
+      "title": "Images",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "label": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "size",
+          "label": "size",
+          "kind": "size",
+          "keep": 60
+        },
+        {
+          "key": "mac",
+          "label": "on",
+          "kind": "text",
+          "keep": 40,
+          "show": "eye"
+        },
+        {
+          "key": "on",
+          "label": "on",
+          "kind": "text",
+          "keep": 40,
+          "show": "pipe"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "base-ubuntu",
+            "mark": "absent",
+            "label": "base-ubuntu",
+            "detail": {
+              "kind": "text",
+              "text": "not built yet"
+            },
+            "reason": "missing"
+          }
+        },
+        {
+          "row": {
+            "id": "base-macos",
+            "mark": "absent",
+            "label": "base-macos",
+            "detail": {
+              "kind": "text",
+              "text": "not built yet"
+            },
+            "reason": "missing"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "absent",
+          "n": 2
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station images update"
+    }
+  ],
+  "actions": [
+    {
+      "key": "b",
+      "label": "build",
+      "on": "row",
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "u",
+      "label": "update",
+      "on": "row",
+      "priority": 2,
+      "mutates": true
+    },
+    {
+      "key": "x",
+      "label": "delete",
+      "on": "row",
+      "confirm": {
+        "yes": "delete"
+      },
+      "priority": 3,
+      "mutates": true
+    }
+  ]
+}

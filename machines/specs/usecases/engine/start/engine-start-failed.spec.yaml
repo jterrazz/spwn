@@ -1,0 +1,14 @@
+description: 'a start the job manager refuses exits 1 with its last word, and the engine stays stopped'
+env: engine-stopped
+runs:
+    - command: 'world fault Jobs.Start'
+      exit: 0
+    - command: 'engine start'
+      exit: 1
+      stderr: |
+          Error: the engine did not start: jobs start: exited 5 the job manager could not start it
+          Hint: station engine
+    - command: 'engine --json | /usr/bin/jq -r .engine.state'
+      exit: 0
+      stdout: |
+          stopped

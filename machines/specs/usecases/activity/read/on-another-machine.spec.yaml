@@ -1,0 +1,20 @@
+description: 'station activity --on another Mac tells that Mac''s values, read there'
+env: two-macs
+runs:
+    - command: 'activity --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	mac-mini	up 12d 0h · rates over 1 s
+          # Now
+          	CPU	21 % of 10 CPU · load 1.9 2.0 2.1
+          	Memory	26 of 64 GB · pressure normal · swap 0 B
+          	Disk	1.6 TB free of 2 TB
+          	Disk read	1.8 MB/s · 900 GB since boot
+          	Disk write	6.2 MB/s · 1.4 TB since boot
+          	Network	in 900 KB/s · out 1.4 MB/s
+          	Network total	received 120 GB · sent 210 GB since boot
+          ●	Thermal	Nominal
+          # Top processes
+          	Top by CPU	tart (infra) 18 % · AirPlayXPCHelper 1 %
+          	Top by memory	tart (infra) 15 GB · AirPlayXPCHelper 50 MB

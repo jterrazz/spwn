@@ -1,0 +1,26 @@
+- main:
+  - heading "autologin setting" [level=1]
+  - paragraph: GUI auto-login for jterrazz.agent (FileVault-aware)
+  - button "Add to a machine" [disabled]
+  - region "How it is applied":
+    - heading "How it is applied" [level=2]
+    - text: Can be undone
+    - term: "On"
+    - definition: Mac
+    - term: Asks you for
+    - definition: Password of jterrazz.agent
+  - region "What it changes":
+    - heading "What it changes and nothing else" [level=2]
+    - text: /etc/kcpassword the agent user's login password, obfuscated kept /Library/Preferences/com.apple.loginwindow autoLoginUser in com.apple.loginwindow settings autoLoginUser set to jterrazz.agent value /etc/kcpassword set to present value
+  - region "autologin in the catalog":
+    - term: Kind
+    - definition: setting
+    - term: Category
+    - definition: Headless
+    - term: Declared in
+    - definition: Not given yet
+    - term: 1 machine
+    - definition:
+      - button "mac-mini"
+    - term: Comes from
+    - definition: Not given yet

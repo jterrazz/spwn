@@ -1,0 +1,17 @@
+description: 'the plan of another Mac is read on that Mac, against what it has'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit mac-mini machinefiles/mac-mini.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: mac-mini
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'plan --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # To install
+          ○	jq	brew

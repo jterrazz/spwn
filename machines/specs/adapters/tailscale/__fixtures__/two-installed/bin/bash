@@ -1,0 +1,10 @@
+#!/bin/sh
+# bash as a curl installer meets it: the installer's URL is recorded, the run succeeds.
+case "$1 $2" in
+    "-c script=\"\$(curl -fsSL \"\$0\")\" && exec bash -c \"\$script\" bash \"\$@\"") ;;
+    *)
+        echo "stub bash: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac
+printf 'bash %s\n' "$3" >> "$HOME/.calls"

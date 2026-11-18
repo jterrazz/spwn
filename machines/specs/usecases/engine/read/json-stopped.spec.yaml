@@ -1,0 +1,30 @@
+description: 'a stopped engine reads as stopped, with when and by what, and the read exits 0'
+env: engine-stopped
+runs:
+    - command: 'engine --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.engine.read/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "engine": {
+              "state": "stopped",
+              "version": null,
+              "up_s": null,
+              "vms": 0,
+              "stopped_at": "{{iso8601}}",
+              "stopped_by": "the menu bar"
+            }
+          }
+    - command: 'engine'
+      exit: 0
+      stdout: |
+          ◐	engine	stopped · since 13:40 by the menu bar	station engine start

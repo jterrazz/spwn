@@ -1,0 +1,14 @@
+description: 'station apps --all lists every row of every group, other machines'' apps too'
+env: two-macs
+runs:
+    - command: 'apps | /usr/bin/grep -A1 "^# Not for this machine"'
+      exit: 0
+      stdout: |
+          # Not for this machine
+          	10 apps live on other machines
+    - command: 'apps --all | /usr/bin/grep -A2 "^# Not for this machine"'
+      exit: 0
+      stdout: |
+          # Not for this machine	10 –
+          –	apt			Linux VMs only
+          –	build-essential			Linux VMs only

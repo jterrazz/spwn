@@ -1,0 +1,11 @@
+description: 'a Mac''s name is held: the next VM takes the next integer; no tailnet is asked'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/engine-vm/
+env: engine
+serve: sshd
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "41100-41119"}/'' .config/station/preferences.json; /usr/bin/sed -i.bak ''s/"x": {}/"x": {}, "linux-1": {}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create | /usr/bin/tail -1 | /usr/bin/cut -f2; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          linux-2

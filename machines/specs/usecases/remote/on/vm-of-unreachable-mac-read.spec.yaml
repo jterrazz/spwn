@@ -1,0 +1,26 @@
+description: 'a read of a VM whose Mac does not answer names where it is, and exits 0, with --json too'
+env: mini-offline
+runs:
+    - command: 'activity --on infra'
+      exit: 0
+      stdout: |
+          ✗ infra is on mac-mini, which does not answer
+    - command: 'apps --on infra'
+      exit: 0
+      stdout: |
+          ✗ infra is on mac-mini, which does not answer
+    - command: 'apps --on infra --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "unreachable",
+            "code": "remote.vm-mac-unreachable",
+            "subject": "infra",
+            "message": "infra is on mac-mini, which does not answer",
+            "hint": "station machines mac-mini",
+            "fix": null
+          }
+      stderr: |
+          Error: infra is on mac-mini, which does not answer
+          Hint: station machines mac-mini

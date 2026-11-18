@@ -1,0 +1,21 @@
+description: 'a server booting again lists its ports starting until its guest reports them'
+env: two-macs
+runs:
+    - command: 'world listen infra "*:443" traefik'
+      exit: 0
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "infra") | [.port, .answer]]'''
+      exit: 0
+      stdout: |
+          [[443,null]]
+    - command: 'world fault Guest.Dial'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "infra") | [.port, .answer]]'''
+      exit: 0
+      stdout: |
+          [[443,"starting"]]
+    - command: 'ports --all-machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ◐	infra	443	public	traefik	*:443 all interfaces	declared, but no tunnel seen on infra	starting: unreachable until infra is ready

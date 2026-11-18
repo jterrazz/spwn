@@ -1,0 +1,10 @@
+{
+    "group": "menu",
+    "id": "menu.page.server",
+    "note": "infra's … menu: Restart, Stop… and Delete…, typed, in red.",
+    "pages": ["pages/machines.server.machine.infra.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {}
+    }
+}

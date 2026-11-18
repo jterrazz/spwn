@@ -1,0 +1,17 @@
+description: 'awake off --on another Mac ends that Mac''s keep-awake, held by its engine'
+env: mini-sleeps
+runs:
+    - command: 'awake 30m --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	mac-mini	stays awake until 10:30
+    - command: 'awake off --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	mac-mini	sleeps normally again
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          null

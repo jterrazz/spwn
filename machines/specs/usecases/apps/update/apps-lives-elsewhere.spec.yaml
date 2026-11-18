@@ -1,0 +1,8 @@
+description: 'updating, inside a workspace, an app that lives on Macs only is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'apps update dia --on linux-1'
+      exit: 2
+      stderr: |
+          Error: dia lives on Macs only
+          Hint: station apps install dia --on <mac>

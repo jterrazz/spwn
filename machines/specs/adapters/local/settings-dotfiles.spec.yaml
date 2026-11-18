@@ -1,0 +1,15 @@
+description: 'the other dotfile packages land where their application reads them, the Ghostty themes with them'
+runs:
+    - command: 'settings apply ghostty-dotfiles starship-dotfiles'
+      exit: 0
+      stdout: |
+          ●	ghostty-dotfiles
+          ●	~/.config/ghostty/config	written
+          ●	~/.config/ghostty/themes/catppuccin-espresso-blur	written
+          ●	~/.config/ghostty/themes/catppuccin-latte-blur	written
+          ●	starship-dotfiles	~/.config/starship.toml: written
+      files:
+          .config/ghostty/config: exists
+          .config/ghostty/themes/catppuccin-espresso-blur: exists
+          .config/ghostty/themes/catppuccin-latte-blur: exists
+          .config/starship.toml: exists

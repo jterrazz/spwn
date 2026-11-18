@@ -1,0 +1,3 @@
+#!/bin/sh
+# The skills CLI where `bun install -g` put it, outside the caller's PATH.
+printf 'skills %s\n' "$*" >> "$HOME/.calls"

@@ -1,0 +1,20 @@
+description: 'a release with no asset for this machine arch installs nothing, saying which it looked for'
+fixture:
+    - ./__fixtures__/release/
+    - ./__fixtures__/other-arch/
+env:
+    - STATION_MACHINE_KIND=linux
+serve:
+    - github
+runs:
+    - command: 'apps install tool'
+      exit: 1
+      stdout: |
+          ✗	tool		github-release	~/.local/state/station/logs/tool.log
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: station apps install tool
+      files:
+          .local/state/station/logs/tool.log:
+              contains:
+                  - 'acme/tool v1.0.0 has no asset for'

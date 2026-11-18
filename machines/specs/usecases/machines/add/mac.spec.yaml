@@ -1,0 +1,15 @@
+description: 'adding a Mac whose ssh and station answer writes its ssh block, and it appears in All machines'
+env: one-mac
+runs:
+    - command: 'machines add mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	added · ssh answers · station {{string}}
+    - command: 'machines | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Mac	mac-mini	Engine running
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].ssh.blocks'' world.json'
+      exit: 0
+      stdout: |
+          {"mac-mini":{}}

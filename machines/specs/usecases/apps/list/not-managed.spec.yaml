@@ -1,0 +1,19 @@
+description: 'an app present outside its method, a dropped .app, is Not managed, its detail saying how'
+fixture: ./__fixtures__/dropped-app/
+env: two-macs
+runs:
+    - command: 'apps | /usr/bin/grep -A1 "^# Not managed"'
+      exit: 0
+      stdout: |
+          # Not managed	1 ?
+          ?	chatgpt		cask	ChatGPT.app in /Applications, not installed by cask
+    - command: 'apps chatgpt'
+      exit: 0
+      stdout: |
+          ?	chatgpt		cask	ChatGPT.app in /Applications, not installed by cask
+          # Detail
+          method	cask
+          version
+          lives on	Macs only
+          category	AI Apps
+          what	OpenAI ChatGPT desktop app

@@ -1,0 +1,10 @@
+{
+    "group": "mac",
+    "id": "mac.mini.ports",
+    "note": "mac-mini's Ports: Traefik public through Cloudflare Tunnel, Kubernetes API and linux-3's 8080 private, Postgres to share, HTTPS links off.",
+    "pages": ["pages/machines.ports.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "ports"
+    }
+}

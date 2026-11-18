@@ -1,0 +1,19 @@
+description: 'the memory pressure macOS reports, 1, 2 or 4, reads normal, warn or critical'
+fixture: ./__fixtures__/meter-kernel/
+runs:
+    - command: 'guest serve --stdio < ask.json | /usr/bin/jq -r .out.sample.pressure'
+      exit: 0
+      stdout: |
+          normal
+    - command: '--version >/dev/null; /usr/bin/jq ''.pressure = 2'' kernel/counters.json > next.json && /bin/mv next.json kernel/counters.json'
+      exit: 0
+    - command: 'guest serve --stdio < ask.json | /usr/bin/jq -r .out.sample.pressure'
+      exit: 0
+      stdout: |
+          warn
+    - command: '--version >/dev/null; /usr/bin/jq ''.pressure = 4'' kernel/counters.json > next.json && /bin/mv next.json kernel/counters.json'
+      exit: 0
+    - command: 'guest serve --stdio < ask.json | /usr/bin/jq -r .out.sample.pressure'
+      exit: 0
+      stdout: |
+          critical

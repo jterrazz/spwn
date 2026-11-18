@@ -1,0 +1,17 @@
+description: 'a machine file with an unknown key stops the files read at its line'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+          tint: blue
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error | {code, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"code":"machinefile.invalid","message":"~/.config/station/machinefiles/macbook-pro.machine.yaml: unmarshal errors: line 5: field tint not found in type catalog.Machinefile"}

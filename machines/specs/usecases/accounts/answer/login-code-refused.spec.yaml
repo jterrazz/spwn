@@ -1,0 +1,17 @@
+description: 'A wrong code is refused and the exchange stays open'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].accounts.exchanges = {"ex-9": {"program": "gh", "kind": "paste", "site": "claude.com", "expires": "2026-11-04T10:30:00Z", "asking": true}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"accounts.answer","in":{"Exchange":"ex-9","Code":"nope"}}
+      exit: 0
+      stdout: |
+          {"code":"login.code-refused","subject":"ex-9","message":"the code was refused"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].accounts.exchanges["ex-9"].given'' world.json'
+      exit: 0
+      stdout: |
+          null

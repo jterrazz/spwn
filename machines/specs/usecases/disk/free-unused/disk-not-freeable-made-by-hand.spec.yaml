@@ -1,0 +1,17 @@
+description: 'a stopped vm made by hand in station''s folder was never station''s: it is not freed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["by-hand"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["by-hand"],"Confirm":"by-hand"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.not-freeable","subject":"by-hand"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["by-hand"].disk'' world.json'
+      exit: 0
+      stdout: |
+          true

@@ -1,0 +1,17 @@
+description: 'a workspace whose three boots end in reboots within a minute stands down'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world reboot-inside linux-1'
+      exit: 0
+    - command: 'world reboot-inside linux-1'
+      exit: 0
+    - command: 'world reboot-inside linux-1'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "linux-1") | [.State, .Standing, .Head.Tone]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          ["broken","down","bad"]

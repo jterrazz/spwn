@@ -1,0 +1,11 @@
+description: 'the Overview of a Mac that does not answer is its finding with its last answer, and exits 0'
+env: mini-offline
+runs:
+    - command: 'machines mac-mini'
+      exit: 0
+      stdout: |
+          ✗ mac-mini does not answer · last answer 03:12
+    - command: 'overview --on mac-mini'
+      exit: 0
+      stdout: |
+          ✗ mac-mini does not answer · last answer 03:12

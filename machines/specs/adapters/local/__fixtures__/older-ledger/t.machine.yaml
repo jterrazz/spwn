@@ -1,0 +1,4 @@
+machinefile: station.machinefile/v1
+name: t
+machine: { kind: computer, system: { os: macos } }
+apps: []

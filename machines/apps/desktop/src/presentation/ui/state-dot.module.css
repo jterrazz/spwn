@@ -1,0 +1,29 @@
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+    display: inline-block;
+    background: var(--ok);
+}
+.warn {
+    background: var(--warn);
+    border-radius: var(--radius-hair);
+    transform: rotate(45deg);
+}
+.bad {
+    background: var(--bad);
+    border-radius: var(--radius-hair);
+}
+.new {
+    background: var(--new);
+    animation: pulse 1.4s ease-in-out infinite;
+}
+.plain {
+    background: var(--t4);
+}
+@keyframes pulse {
+    50% {
+        opacity: 0.3;
+    }
+}

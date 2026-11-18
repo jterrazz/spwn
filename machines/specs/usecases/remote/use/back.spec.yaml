@@ -1,0 +1,23 @@
+description: 'station use -: back on the machine this terminal used before, This Mac first'
+env: two-macs
+runs:
+    - command: 'use linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1 in this terminal. Other terminals stay on This Mac.
+    - command: 'use -'
+      exit: 0
+      stdout: |
+          	Back on This Mac (was linux-1).
+    - command: 'overview --json | /usr/bin/jq -r .machine.name'
+      exit: 0
+      stdout: |
+          macbook-pro
+    - command: 'use -'
+      exit: 0
+      stdout: |
+          	Back on linux-1 (was This Mac).
+    - command: 'overview --json | /usr/bin/jq -r .machine.name'
+      exit: 0
+      stdout: |
+          linux-1

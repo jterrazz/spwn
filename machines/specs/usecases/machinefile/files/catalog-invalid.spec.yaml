@@ -1,0 +1,11 @@
+description: 'a package of the shared source the strict decoder refuses stops the files read at its line'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"catalog/command-line/jq.yaml": "package: station.package/v1\nkind: app\nname: jq\ndescription: x\ntint: blue\nmethods:\n    - { os: any, mise: { name: jq, version: latest } }\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error | {code, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"code":"catalog.invalid","message":"studio@1a2b3c4/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package"}

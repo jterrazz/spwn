@@ -1,0 +1,94 @@
+{
+  "schema": "station.page/v1",
+  "id": "settings",
+  "command": "settings",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/settings",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "0 set by station here"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "nothing needs a look"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station settings apply"
+    },
+    {
+      "command": "station settings --all",
+      "text": "for every row"
+    }
+  ],
+  "actions": [
+    {
+      "key": "a",
+      "label": "apply",
+      "on": "row",
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "d",
+      "label": "diff",
+      "on": "row",
+      "priority": 2
+    },
+    {
+      "key": "o",
+      "label": "off here",
+      "on": "row",
+      "confirm": {
+        "yes": "off"
+      },
+      "priority": 3,
+      "mutates": true
+    },
+    {
+      "key": "f",
+      "label": "open the fix",
+      "on": "row",
+      "priority": 4
+    }
+  ]
+}

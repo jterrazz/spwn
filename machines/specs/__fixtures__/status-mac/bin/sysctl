@@ -1,0 +1,4 @@
+#!/bin/sh
+# sysctl answering no key: the counters status reads are the kernel tables of kernel/.
+echo "stub ${0##*/}: unexpected invocation: $*" >&2
+exit 97

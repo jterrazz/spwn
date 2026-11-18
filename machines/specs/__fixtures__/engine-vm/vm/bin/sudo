@@ -1,0 +1,20 @@
+#!/bin/sh
+# sudo inside the VM: a guest poweroff stops every running VM of the host's stub tart
+# and declares the intent, as the station-intent unit does; the first boot keeps its
+# stdin in .firstboot.stdin (answers/ssh/firstboot.exit fails it).
+case "$*" in
+    "bash -s")
+        /bin/cat > "$TEST_WORKDIR/.firstboot.stdin"
+        if [ -f "$TEST_WORKDIR/answers/ssh/firstboot.exit" ]; then exit "$(/bin/cat "$TEST_WORKDIR/answers/ssh/firstboot.exit")"; fi
+        ;;
+    "systemctl --no-block poweroff")
+        /bin/mkdir -p "$TEST_WORKDIR/.tart-intents"
+        for vm in "$TEST_WORKDIR"/.tart-vms/*; do
+            if [ "$(/bin/cat "$vm")" = running ]; then
+                : > "$TEST_WORKDIR/.tart-intents/${vm##*/}"
+                echo stopped > "$vm"
+            fi
+        done
+        ;;
+    *) exit 97 ;;
+esac

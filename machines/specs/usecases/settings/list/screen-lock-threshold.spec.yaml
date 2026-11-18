@@ -1,0 +1,13 @@
+description: 'a laptop whose screen locks after 10 min of idle needs a fix: expected 5 min'
+env: two-macs
+runs:
+    - command: 'world reads macbook-pro display-sleep 10'
+      exit: 0
+    - command: 'settings | /usr/bin/grep screen-lock'
+      exit: 0
+      stdout: |
+          ◐	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
+    - command: 'overview --all | /usr/bin/grep "Screen lock"'
+      exit: 0
+      stdout: |
+          ◐	Screen lock: locks after 10 min, expected 5 min	System Settings > Lock Screen

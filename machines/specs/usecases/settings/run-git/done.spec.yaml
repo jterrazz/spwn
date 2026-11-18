@@ -1,0 +1,16 @@
+description: 'a Git shortcut, once the Git shortcuts are applied here, is git''s own alias run with the same words'
+fixture: ../../__fixtures__/git/
+env: two-macs
+runs:
+    - command: 'settings apply git-shortcuts'
+      exit: 0
+      stdout: |
+          ●	git-shortcuts	~/.gitconfig [alias]: written
+    - command: 'run git wip'
+      exit: 0
+      stderr: |
+          → now: git wip
+      files:
+          .calls:
+              equals: |
+                  git <wip>

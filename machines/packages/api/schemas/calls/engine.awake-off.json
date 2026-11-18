@@ -1,0 +1,40 @@
+{
+  "$defs": {
+    "engine.AwakeOff": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "type": "integer"
+        },
+        "ended": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "after",
+        "ended"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.awake-off.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.awake-off of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.AwakeOff"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.awake-off",
+  "type": "object"
+}

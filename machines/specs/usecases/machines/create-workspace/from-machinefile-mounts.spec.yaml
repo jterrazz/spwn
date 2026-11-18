@@ -1,0 +1,34 @@
+description: 'create --from shares each vm.mounts folder at its run, and mounts it before the boot phase'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p Developer/notes data'
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm:
+            resources: { memory: 4G }
+            mounts:
+              - { computer: ~/Developer/notes, guest: ~/notes, read-only: true }
+              - { computer: ~/data, guest: /data }
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	vite	5173	https://macbook-pro.tail1234.ts.net:40003
+          ●	expo	8081	https://macbook-pro.tail1234.ts.net:40000
+          ●	Boot phase	studio-linux
+          ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["web"] | {folders: .booted.folders, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
+      exit: 0
+      stdout: |
+          {"folders":["{{workdir}}/Developer/notes:ro,tag=station-1","{{workdir}}/data:tag=station-2"],"ran":["sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '~/notes' ro 'station-2' '/data' rw","sudo bash -s","sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '~/notes' ro 'station-2' '/data' rw","bash -s","/usr/local/bin/station apply --machinefile 'studio-linux' --phase boot </dev/null"]}

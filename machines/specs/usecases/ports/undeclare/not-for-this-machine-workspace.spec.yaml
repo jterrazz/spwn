@@ -1,0 +1,8 @@
+description: 'inside a workspace, undeclare is refused: its Mac keeps the declaration'
+env: in-workspace
+runs:
+    - command: 'ports undeclare 3000 --yes'
+      exit: 2
+      stderr: |
+          Error: linux-1's ports are declared from its Mac
+          Hint: run it on its Mac, naming linux-1

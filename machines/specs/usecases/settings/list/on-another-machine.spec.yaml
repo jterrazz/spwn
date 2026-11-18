@@ -1,0 +1,16 @@
+description: 'settings --on another Mac reads that Mac''s settings: a setting applied there is not applied here'
+env: two-macs
+runs:
+    - command: 'settings apply dns --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	dns	dns: applied
+    - command: 'settings --on mac-mini --json | /usr/bin/jq -r ''.settings[] | select(.name == "dns") | .state'''
+      exit: 0
+      stdout: |
+          applied
+    - command: 'settings --json | /usr/bin/jq -r ''.settings[] | select(.name == "dns") | .state'''
+      exit: 0
+      stdout: |
+          not-applied

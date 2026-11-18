@@ -1,0 +1,19 @@
+[38;2;76;79;105mEvery Mac[m[38;2;76;79;105m · [m[38;2;76;79;105m5 ports[m[38;2;76;79;105m · [m[38;2;76;79;105m1 needs you[m
+
+[1;38;2;76;79;105mNeeds you: reachable outside Tailscale, not declared public[m
+[38;2;108;111;133m              port  class      what              listens on             declared[m
+  [38;2;156;160;176m[m[38;2;210;15;57m✗[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105m5000[m  [38;2;76;79;105mneeds you[m  [38;2;76;79;105mAirPlay Receiver[m  [38;2;76;79;105m*:5000 all interfaces[m  [38;2;76;79;105mdeclared no[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > General > AirDrop & Handoff > AirPlay Receiver[m
+[1;38;2;76;79;105mTailscale[m  [38;2;64;160;43m●[m [38;2;76;79;105msigned in[m[38;2;76;79;105m · macbook-pro.tail1234.ts.net[m[38;2;76;79;105m · ports are shared[m
+[1;38;2;76;79;105mPublic: reachable from anywhere else, internet or LAN, declared[m
+[38;2;108;111;133m              port  class   what  listens on           declared[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mmac-mini[m    [38;2;76;79;105m22[m  [38;2;76;79;105mpublic[m  [38;2;76;79;105mSSH[m   [38;2;76;79;105m*:22 all interfaces[m  [38;2;76;79;105myour LAN · Remote login · by Settings[m
+[1;38;2;76;79;105mPrivate: shared with you on Tailscale[m
+[38;2;108;111;133m                     port  class    url                              state[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mlinux-1[m  [38;2;76;79;105m5173 → 40001[m  [38;2;76;79;105mprivate[m  [38;2;76;79;105mhttps://macbook-pro…:40001[m       [38;2;76;79;105mshared[m  [38;2;108;111;133mprobably Vite[m
+  [38;2;156;160;176m[m[38;2;108;111;133m○[m [1;38;2;76;79;105mlinux-1[m  [38;2;76;79;105m5432 → 40002[m  [38;2;76;79;105mprivate[m                                   [38;2;76;79;105mnot listening · reserved 40002[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105minfra[m            [38;2;76;79;105m6443[m  [38;2;76;79;105mprivate[m                                   [38;2;76;79;105mown Tailscale device: infra[m
+[1;38;2;76;79;105mReserved ports[m
+  [38;2;76;79;105mReserved on This Mac: 2 of 1000 (40000-40999), 998 free[m
+  [38;2;76;79;105mReserved on mac-mini: 0 of 1000 (40000-40999), 1000 free[m
+  [38;2;76;79;105m1 more listens on its machine only[m

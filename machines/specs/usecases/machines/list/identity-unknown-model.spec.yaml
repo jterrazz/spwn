@@ -1,0 +1,7 @@
+description: 'a Mac of a model the catalogue does not hold is shown as a Mac, its identifier kept'
+env: unknown-model
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[] | select(.this_mac | not) | .hardware'''
+      exit: 0
+      stdout: |
+          {"name":"Mac","model":"Mac99,1","memory_bytes":68719476736,"cpus":12,"laptop":false}

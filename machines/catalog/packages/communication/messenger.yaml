@@ -1,0 +1,10 @@
+package: station.package/v1
+kind: app
+name: messenger
+description: Facebook Messenger
+bundle: Messenger
+methods:
+    - os: macos
+      machine: computer
+      script:
+          hint: no current source

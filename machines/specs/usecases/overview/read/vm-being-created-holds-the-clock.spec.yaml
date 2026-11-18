@@ -1,0 +1,24 @@
+description: 'a watch held open on a VM being created leaves the world clock where the story left it'
+env:
+    - creating
+    - engine
+runs:
+    - command: |
+          --version >/dev/null
+          before=$(/usr/bin/jq -r '.now | sub("\\.[0-9]+"; "") | fromdateiso8601' world.json)
+          /usr/bin/mkfifo requests
+          "$STATION" guest serve --stdio <requests >answers &
+          server=$!
+          exec 3>requests
+          /usr/bin/printf '%s\n' '{"v":2,"id":"1","watch":"overview.read","target":{"name":"linux-4"},"in":{}}' >&3
+          waited=0
+          until [ "$(/usr/bin/wc -l <answers)" -ge 1 ] || [ "$waited" -ge 300 ]; do /bin/sleep 0.1; waited=$((waited + 1)); done
+          /bin/sleep 3
+          /usr/bin/printf '%s\n' '{"v":2,"id":"1","cancel":true}' >&3
+          exec 3>&-
+          wait "$server"
+          after=$(/usr/bin/jq -r '.now | sub("\\.[0-9]+"; "") | fromdateiso8601' world.json)
+          if [ $((after - before)) -lt 60 ]; then echo 'the clock moved under a minute'; else echo "the clock moved $((after - before)) s"; fi
+      exit: 0
+      stdout: |
+          the clock moved under a minute

@@ -1,0 +1,11 @@
+description: 'A machine station does not know is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"grants.remove","in":{"Entry":"pw-1","To":"ghost","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"grant.unknown-machine","subject":"ghost","message":"no machine named \"ghost\""}

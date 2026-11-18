@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "settings",
+  "command": "settings",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "the preferences file is not valid JSON",
+    "hint": "repair the JSON of ~/.config/station/preferences.json"
+  }
+}

@@ -1,0 +1,17 @@
+description: 'while a machine record cannot be read, nothing is freed: its disk may be the one asked'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["old-vm"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}} | .macs["macbook-pro"].cloned = {"old-vm": 901} | .macs["macbook-pro"].vms["api"].unreadable = true | .macs["macbook-pro"].vms["old-vm"].born = 901'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["old-vm"],"Confirm":"old-vm"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.record-unreadable","subject":"~/.local/state/station/vms/api.json"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["old-vm"].disk'' world.json'
+      exit: 0
+      stdout: |
+          true

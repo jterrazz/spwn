@@ -1,0 +1,23 @@
+description: 'a server of another Mac restarts through that Mac, its name typed: a new run, still wanted running'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":2001,"want":"running"}
+    - command: 'machines restart infra --on mac-mini --confirm=infra'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	infra	restarted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":1002,"want":"running"}
+    - command: 'machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

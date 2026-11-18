@@ -1,0 +1,1 @@
+{"TCP":{"443":{"HTTPS":true},"40098":{"TCPForward":"127.0.0.1:40098"},"40099":{"HTTPS":true}},"Web":{"macbook.tail1234.ts.net:443":{"Handlers":{"/":{"Proxy":"http://127.0.0.1:3000"}}},"macbook.tail1234.ts.net:40099":{"Handlers":{"/":{"Proxy":"http://127.0.0.1:40099"}}}}}

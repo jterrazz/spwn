@@ -1,0 +1,10 @@
+#!/bin/sh
+# Spotlight finds the file: the folder is indexed.
+printf 'mdfind\n' >> "$HOME/.calls"
+case "$*" in
+    "-onlyin "*) echo "$HOME/Developer/a.txt" ;;
+    *)
+        echo "stub mdfind: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

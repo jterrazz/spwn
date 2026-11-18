@@ -1,0 +1,11 @@
+description: 'with the engine stopped the verdict says so in red, and the page says when it was read'
+env:
+    - engine-stopped
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Verdict, (.Read != null), [.Needs[] | select(.Subject == "engine") | [.Upkeep, .Verb]]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          [{"Tone":"bad","Sentence":"The engine is stopped.","Line":"Your VMs do not run and nothing is shared until it starts."},true,[["needs-you","start-engine"]]]

@@ -1,0 +1,21 @@
+description: 'remote login is judged by what each Mac should have: off on the laptop, on on the always-on mini'
+env: two-macs
+runs:
+    - command: 'settings | /usr/bin/grep remote-login'
+      exit: 0
+      stdout: |
+          ●	remote-login	as expected · off
+    - command: 'settings --on mac-mini | /usr/bin/grep remote-login'
+      exit: 0
+      stdout: |
+          ●	remote-login	as expected · on
+    - command: 'world reads macbook-pro remote-login on'
+      exit: 0
+    - command: 'settings | /usr/bin/grep remote-login'
+      exit: 0
+      stdout: |
+          ◐	remote-login	on · not expected on a laptop	System Settings > General > Sharing > Remote Login
+    - command: 'overview --all | /usr/bin/grep "Remote login"'
+      exit: 0
+      stdout: |
+          ◐	Remote login: on, not expected on a laptop	System Settings > General > Sharing > Remote Login

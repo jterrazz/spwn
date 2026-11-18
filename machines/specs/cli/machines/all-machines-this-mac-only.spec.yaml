@@ -1,0 +1,13 @@
+description: '--here lists This Mac alone and asks no other Mac'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ../../__fixtures__/fleet-y-answers/
+runs:
+    - command: 'machines --this-mac --json | /usr/bin/jq -r ''.macs | map(.name) | join(" ")'''
+      exit: 0
+      stdout: |
+          x
+      files:
+          .calls: absent
+          .ssh/config: absent

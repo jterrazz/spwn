@@ -1,0 +1,27 @@
+description: 'an undeclared port that still listens on every interface is red again, and told again'
+env: two-macs
+runs:
+    - command: 'world listen mac-mini "*:5000" ControlCenter'
+      exit: 0
+    - command: 'ports declare mac-mini 5000 --via lan'
+      exit: 0
+      stdout: |
+          ●	5000 on mac-mini	declared public (your LAN)
+    - command: 'ports undeclare mac-mini 5000 --yes'
+      exit: 0
+      stdout: |
+          ●	5000 on mac-mini	not declared
+    - command: 'ports --on mac-mini | /usr/bin/grep -e 5000 -e "^#"'
+      exit: 0
+      stdout: |
+          # Needs you: reachable outside Tailscale, not declared public	1 ✗
+          ✗	mac-mini	5000	needs you	AirPlay Receiver	*:5000 all interfaces	declared no	System Settings > General > AirDrop & Handoff > AirPlay Receiver
+          # Private: shared with you on Tailscale
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c .findings'
+      exit: 0
+      stdout: |
+          [{"machine":"mac-mini","severity":"broken","section":"ports","subject":"mac-mini:5000","text":"port 5000 is reachable outside Tailscale","fix":{"call":null,"command":null,"path":"System Settings > General > AirDrop & Handoff > AirPlay Receiver"}}]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.declarations | map(.port)'' world.json'
+      exit: 0
+      stdout: |
+          [443]

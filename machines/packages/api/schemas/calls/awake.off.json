@@ -1,0 +1,51 @@
+{
+  "$defs": {
+    "awake.Slept": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "type": "integer"
+        },
+        "ended": {
+          "type": "boolean"
+        },
+        "mac": {
+          "type": "string"
+        },
+        "never_sleeps": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "after",
+        "ended",
+        "mac",
+        "never_sleeps"
+      ],
+      "type": "object"
+    },
+    "awake.calls.OffIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/awake.off.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call awake.off of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/awake.calls.OffIn"
+    },
+    "out": {
+      "$ref": "#/$defs/awake.Slept"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "awake.off",
+  "type": "object"
+}

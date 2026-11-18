@@ -1,0 +1,11 @@
+description: 'an engine that crashes leaves its VMs running, and the next engine adopts them without a restart'
+env: two-macs
+runs:
+    - command: 'world engine-crash macbook-pro'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB

@@ -1,0 +1,29 @@
+description: 'heavy thermal pressure lid closed on battery ends a keep-awake after 5 minutes, not before'
+env: two-macs
+runs:
+    - command: 'awake 4h --lid --battery'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 14:00 · lid closed · on battery allowed
+    - command: 'world close-lid'
+      exit: 0
+    - command: 'world unplug'
+      exit: 0
+    - command: 'world thermal heavy'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 2p'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: 'world advance 4m'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 2p'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 2p'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)

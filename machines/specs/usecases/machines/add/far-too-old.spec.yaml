@@ -1,0 +1,18 @@
+description: 'a Mac that runs an older station is added, with the version it runs and how to update it there'
+env: mini-old
+runs:
+    - command: 'machines forget mac-mini --yes'
+      exit: 0
+      stdout: |
+          ●	mac-mini	forgotten · nothing changed on it
+    - command: 'machines add mac-mini --user jterrazz.agent'
+      exit: 0
+      stdout: |
+          ●	mac-mini	added · ssh answers · station v3.2.0
+          ◐	mac-mini	runs v3.2.0 · update station there (scripts/install.sh)
+    - command: 'machines | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ◐	mac-mini	Mac	mac-mini	Engine running · runs v3.2.0
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+          ◐	mac-mini	runs v3.2.0	update station there (scripts/install.sh)

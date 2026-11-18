@@ -1,0 +1,18 @@
+description: '--on a VM no answering Mac holds is the silent Mac''s error, never an unknown name'
+fixture:
+    - ../../__fixtures__/machines-stubs/
+    - ./__fixtures__/mini-offline/
+runs:
+    - command: 'apps --on infra'
+      exit: 0
+      stdout: |
+          ✗ z does not answer
+    - command: 'apps install jq --on infra'
+      exit: 1
+      stderr: |
+          Error: z does not answer
+          Hint: station machines z
+    - command: 'apps --on w 2>&1 | /usr/bin/head -n 1'
+      exit: 0
+      stdout: |
+          Error: y runs station v3.2.0, which has no apps.list

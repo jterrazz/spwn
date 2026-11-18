@@ -1,0 +1,24 @@
+description: 'a Mac that does not answer has no activity to read: it refuses as unreachable, no last values'
+env:
+    - mini-offline
+    - engine
+runs:
+    - command: 'activity --on mac-mini'
+      exit: 0
+      stdout: |
+          ✗ mac-mini does not answer · last answer 03:12
+    - command: 'activity --on mac-mini --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "unreachable",
+            "code": "remote.unreachable",
+            "subject": "mac-mini",
+            "message": "mac-mini does not answer",
+            "hint": "station machines mac-mini",
+            "fix": null
+          }
+      stderr: |
+          Error: mac-mini does not answer
+          Hint: station machines mac-mini

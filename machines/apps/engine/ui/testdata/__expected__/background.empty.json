@@ -1,0 +1,107 @@
+{
+  "schema": "station.page/v1",
+  "id": "background",
+  "command": "background",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/background",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "0 background tasks"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "tasks",
+      "title": "Background",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "background tasks"
+          }
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station background --all",
+      "text": "for every row"
+    }
+  ],
+  "actions": [
+    {
+      "key": "x",
+      "label": "remove",
+      "on": "row",
+      "confirm": {
+        "yes": "remove"
+      },
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "c",
+      "label": "copy the command",
+      "on": "row",
+      "priority": 2
+    }
+  ]
+}

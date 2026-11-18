@@ -1,0 +1,12 @@
+description: 'inside a server, the containers shortcut is refused and deletes nothing'
+fixture: ../../__fixtures__/docker/
+env: in-server
+runs:
+    - command: 'run docker rm --yes'
+      exit: 2
+      stderr: |
+          → now: dclean
+          Error: infra is a server: station does not manage its settings
+          Hint: manage it with your own tooling: ssh infra
+      files:
+          .calls: absent

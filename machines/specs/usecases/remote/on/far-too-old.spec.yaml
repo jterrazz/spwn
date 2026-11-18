@@ -1,0 +1,17 @@
+description: 'a call the far station is too old to serve is refused with its version and how to update it there'
+env: mini-old
+runs:
+    - command: 'ports declare 5000 --via lan --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini runs station v3.2.0, which has no ports.declare
+          Hint: update station on mac-mini (scripts/install.sh there)
+    - command: 'activity --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini runs station v3.2.0, which has no activity.read
+          Hint: update station on mac-mini (scripts/install.sh there)
+    - command: 'apps --on mac-mini | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          	On mac-mini:

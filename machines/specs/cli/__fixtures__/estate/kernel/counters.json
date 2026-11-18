@@ -1,0 +1,96 @@
+{
+    "cpus": [
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        },
+        {
+            "user": 3000,
+            "system": 1000,
+            "idle": 6000,
+            "nice": 0
+        }
+    ],
+    "load": [
+        2.8,
+        3.1,
+        2.9
+    ],
+    "pages": {
+        "size": 16384,
+        "internal": 500000,
+        "purgeable": 10000,
+        "wired": 150000,
+        "compressor": 120000
+    },
+    "swap_used": 0,
+    "pressure": 1,
+    "memsize": 34359738368,
+    "up": 273720000000000,
+    "disks": [
+        {
+            "media": "disk0",
+            "interconnect": "Apple Fabric",
+            "location": "Internal",
+            "read": 182000000000,
+            "written": 96000000000
+        }
+    ],
+    "links": [
+        {
+            "name": "en0",
+            "in": 38000000000,
+            "out": 4600000000
+        }
+    ]
+}

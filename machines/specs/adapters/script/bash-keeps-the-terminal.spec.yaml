@@ -1,0 +1,17 @@
+description: 'curl installers run under bash -c with the terminal kept, ohmyzsh leaving ~/.zshrc alone'
+fixture: ../__fixtures__/script-installers/
+runs:
+    - command: 'apps install homebrew ohmyzsh'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script
+          ●	ohmyzsh		script
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh] env RUNZSH= CHSH= KEEP_ZSHRC=
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh] env RUNZSH=no CHSH=no KEEP_ZSHRC=yes
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "homebrew") | .method'''
+      exit: 0
+      stdout: |
+          script

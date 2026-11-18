@@ -1,0 +1,13 @@
+#!/bin/sh
+# Homebrew for the one-reading documents: nothing installed, every call recorded in
+# $HOME/.calls.
+printf 'brew %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions" | "list --cask --versions") ;;
+    "outdated --json=v2"*) echo '{"formulae":[],"casks":[]}' ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

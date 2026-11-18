@@ -1,0 +1,17 @@
+description: 'a server that reboots from inside boots again at once: counted, no wait, nobody told'
+env: two-macs
+runs:
+    - command: 'world reboot-inside infra'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.state, .restarts, .restarted_after_s]'''
+      exit: 0
+      stdout: |
+          ["running",1,null]
+    - command: 'machines infra | /usr/bin/grep Restarts'
+      exit: 0
+      stdout: |
+          ●	Restarts	↺ 1 · last just now
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]?.Text]'' world.json'
+      exit: 0
+      stdout: |
+          []

@@ -1,0 +1,23 @@
+description: 'the block makes the terminal its id; the prompt segment says on linux-1, nothing on This Mac'
+env: two-macs
+runs:
+    - command: 'shell zsh | /usr/bin/grep -c ''^export STATION_TERMINAL='''
+      exit: 0
+      stdout: |
+          1
+    - command: 'shell prompt'
+      exit: 0
+    - command: 'use linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1 in this terminal. Other terminals stay on This Mac.
+    - command: 'shell prompt'
+      exit: 0
+      stdout: |
+          on linux-1
+    - command: 'use -'
+      exit: 0
+      stdout: |
+          	Back on This Mac (was linux-1).
+    - command: 'shell prompt'
+      exit: 0

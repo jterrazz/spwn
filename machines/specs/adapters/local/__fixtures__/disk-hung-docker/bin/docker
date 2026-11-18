@@ -1,0 +1,4 @@
+#!/bin/sh
+# docker installed but hung: even its version never answers, the sleep itself, so the
+# kill leaves nothing behind.
+exec /bin/sleep 30

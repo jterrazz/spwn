@@ -1,0 +1,9 @@
+#!/bin/sh
+# node installed: it answers its version.
+case "$*" in
+    --version) echo v22.0.0 ;;
+    *)
+        echo "stub node: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

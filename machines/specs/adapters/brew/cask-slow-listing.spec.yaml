@@ -1,0 +1,20 @@
+description: 'apps on a terminal draws the casks Reading at once and fills them as brew answers'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/slow-cask/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 120x200 /usr/bin/env -u NO_COLOR COLUMNS=120 "$STATION" apps | /usr/bin/grep -c "^This Mac · "'
+      stdin: |
+          within 1 see Reading
+          within 1 see ◌ ghostty
+          gone ◌
+          see OK
+          screen
+      exit: 0
+      stdout: |
+          1
+    - command: 'apps | /usr/bin/grep -c "◌"'
+      exit: 1
+      stdout: |
+          0

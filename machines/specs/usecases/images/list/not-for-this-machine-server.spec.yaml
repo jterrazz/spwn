@@ -1,0 +1,8 @@
+description: 'inside a server, images are refused: only a Mac makes VMs'
+env: in-server
+runs:
+    - command: 'images'
+      exit: 2
+      stderr: |
+          Error: infra keeps no images: only a Mac makes VMs
+          Hint: run station overview for what infra has

@@ -1,0 +1,10 @@
+description: 'station accounts login off a terminal is refused before anything runs'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'accounts login gh --on linux-1'
+      exit: 2
+      stderr: |
+          Error: station accounts login needs a terminal
+          Hint: run it in a terminal

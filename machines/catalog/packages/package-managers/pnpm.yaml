@@ -1,0 +1,41 @@
+package: station.package/v1
+kind: app
+name: pnpm
+description: Fast, disk space efficient Node package manager
+provides: [pnpm]
+methods:
+    - os: macos
+      brew: pnpm
+    - family: linux
+      arch: arm64
+      github-release: { repo: pnpm/pnpm, asset: 'pnpm-linux-arm64.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: pnpm/pnpm, asset: 'pnpm-linux-x64.tar.gz' }
+disk:
+    paths:
+        - path: ~/Library/pnpm/store
+          level: cache
+          os: macos
+        - path: '{data}/pnpm/store'
+          level: cache
+          family: linux
+        - path: '{state}/pnpm'
+          level: cache
+        - path: ~/Library/Preferences/pnpm
+          level: settings
+          os: macos
+    free:
+        - run: [pnpm, store, prune]
+          uses: pnpm
+          exists: ~/Library/pnpm/store
+          os: macos
+        - run: [pnpm, store, prune]
+          uses: pnpm
+          exists: '{data}/pnpm/store'
+          family: linux
+        - delete: [~/Library/pnpm/store/*]
+          os: macos
+        - delete: ['{data}/pnpm/store/*']
+          family: linux
+    no-erase: 'nothing to erase: keys and logins are kept'

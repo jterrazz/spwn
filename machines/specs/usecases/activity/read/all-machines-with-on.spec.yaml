@@ -1,0 +1,8 @@
+description: '--all-machines already reads every machine: with --on it is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'activity --all-machines --on linux-1'
+      exit: 2
+      stderr: |
+          Error: --all-machines reads every machine: it takes no --on
+          Hint: station activity --all-machines

@@ -1,0 +1,32 @@
+package: station.package/v1
+kind: app
+name: ghostty
+description: GPU-accelerated terminal emulator
+then: [ghostty-dotfiles]
+bundle: Ghostty
+updates: self
+methods:
+    - os: macos
+      cask: ghostty
+disk:
+    paths:
+        - path: '{cache}/ghostty'
+          level: cache
+        - path: ~/Library/HTTPStorages/com.mitchellh.ghostty
+          level: cache
+          os: macos
+        - path: ~/Library/WebKit/com.mitchellh.ghostty
+          level: cache
+          os: macos
+        - path: '{state}/ghostty'
+          level: data
+        - path: '{config}/ghostty'
+          level: settings
+    free:
+        - delete:
+              - '{cache}/ghostty/*'
+              - ~/Library/HTTPStorages/com.mitchellh.ghostty/*
+              - ~/Library/WebKit/com.mitchellh.ghostty/*
+    erase:
+        - delete: ['{state}/ghostty/*']
+    quit: ghostty

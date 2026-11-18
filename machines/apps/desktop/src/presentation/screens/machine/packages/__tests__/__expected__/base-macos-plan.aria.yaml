@@ -1,0 +1,6 @@
+- region "To install":
+  - heading "To install 2" [level=2]
+  - text: git from base-macos ohmyzsh from base-macos
+- region "To set":
+  - heading "To set 2" [level=2]
+  - text: git-shortcuts from base-macos hushlogin from base-macos

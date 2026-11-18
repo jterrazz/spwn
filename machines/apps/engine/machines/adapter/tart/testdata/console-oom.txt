@@ -1,0 +1,12 @@
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x610f0000]
+[    0.000000] Linux version 6.8.0-48-generic (buildd@bos02-arm64-061) (aarch64-linux-gnu-gcc-13 (Ubuntu 13.2.0-23ubuntu4) 13.2.0) #48-Ubuntu SMP PREEMPT_DYNAMIC
+[    0.000000] Kernel command line: BOOT_IMAGE=/vmlinuz-6.8.0-48-generic root=UUID=5b1e1c1e ro console=hvc0
+
+[    2.114502] systemd[1]: Started k3s.service - Lightweight Kubernetes.
+[ 4126.903117] k3s[812]: etcd: slow fdatasync, took 1.9 s
+[ 4127.550981]
+[ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB, anon-rss:1987312kB, file-rss:0kB, shmem-rss:0kB, UID:0 pgtables:4312kB oom_score_adj:0
+[ 4127.602331] systemd[1]: k3s.service: A process of this unit has been killed by the OOM killer.
+[ 4127.611008] systemd[1]: k3s.service: Main process exited, code=killed, status=9/KILL
+[ 4131.002116] systemd[1]: Reached target Power-Off.
+

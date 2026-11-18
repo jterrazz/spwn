@@ -1,0 +1,10 @@
+description: 'in a VM the shell block ends with the VM''s exports'
+fixture: ./__fixtures__/vm-exports/
+env: engine
+runs:
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" shell zsh | /usr/bin/tail -3'
+      exit: 0
+      stdout: |
+          export EXPO_PACKAGER_PROXY_URL='https://macbook.tail1234.ts.net:40000'
+          export STATION_PUBLIC_HOST='macbook.tail1234.ts.net'
+          export __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS='macbook.tail1234.ts.net'

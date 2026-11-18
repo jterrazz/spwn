@@ -1,0 +1,13 @@
+description: 'an installer that fails is told in our words, its own output kept in the log, then one block, exit 1'
+env: two-macs
+runs:
+    - command: 'world fault Installer.Install'
+      exit: 0
+    - command: 'apps install go'
+      exit: 0
+      stdout: |
+          ●	go	1.25.3	mise	already installed
+    - command: '--version >/dev/null; /bin/test -e .local/state/station/logs/go.log || echo "no go.log"'
+      exit: 0
+      stdout: |
+          no go.log

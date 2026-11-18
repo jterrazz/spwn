@@ -1,0 +1,25 @@
+description: 'a session named "you", or by no name, is refused before anything is made'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; STATION_SESSION=you "$STATION" machines create gate --memory 2G'
+      exit: 2
+      stderr: |
+          Error: STATION_SESSION "you" is not a session's name
+          Hint: name the session in lowercase letters, digits and "-", 1 to 40 characters, never "you"
+    - command: '--version >/dev/null; STATION_SESSION=Lot_Shell "$STATION" machines create gate --memory 2G'
+      exit: 2
+      stderr: |
+          Error: STATION_SESSION "Lot_Shell" is not a session's name
+          Hint: name the session in lowercase letters, digits and "-", 1 to 40 characters, never "you"
+    - command: 'machines --this-mac --json | /usr/bin/jq -c ''[.macs[0].vms[].name | select(. == "gate")]'''
+      exit: 0
+      stdout: |
+          []
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"gate","Creator":"you"}}}
+      exit: 0
+      stdout: |
+          {"code":"machines.bad-creator","subject":"you","message":"STATION_SESSION \"you\" is not a session's name"}

@@ -1,0 +1,31 @@
+description: 'after a power cut the mini says how to unlock it; unlocked, it answers and infra starts'
+env: two-macs
+runs:
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: 'world power-cut mac-mini'
+      exit: 0
+    - command: 'machines | /usr/bin/grep -A1 -E "mac-mini|Needs you"'
+      exit: 0
+      stdout: |
+          ✗	mac-mini	Mac	mac-mini	Unreachable · last answer 10:00
+          ?	infra	Server	mac-mini	Not seen · always on	8 CPU	24 GB
+          # Needs you
+          ◐	mac-mini	does not answer	station machines unlock mac-mini
+    - command: 'world unlock mac-mini'
+      exit: 0
+    - command: 'machines | /usr/bin/grep -E "mac-mini|infra"'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | [.pid > 0, .kept.want]'' world.json'
+      exit: 0
+      stdout: |
+          [true,"running"]

@@ -1,0 +1,12 @@
+description: 'inside a workspace or aimed at one, add is refused: Macs are added from a Mac'
+env: two-macs
+runs:
+    - command: 'machines add mac-studio --on linux-1'
+      exit: 2
+      stderr: |
+          Error: linux-1 is a workspace: Macs are added from a Mac
+          Hint: run station overview for what linux-1 has
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.macs | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["mac-mini"]

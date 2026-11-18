@@ -1,0 +1,142 @@
+package machinefile
+
+import "strings"
+
+// value: where a refused entry is written, `<file>:<line>` (or its file
+// alone when the line is not known); empty for a package another one
+// brings in.
+func within(at, by string) string {
+	if at != "" {
+		return at
+	}
+	return by
+}
+
+type NotFoundError struct {
+	Name string
+	// value: the Machinefile whose extends names it; empty when the owner
+	// named it.
+	By string
+}
+
+func (e *NotFoundError) Error() string {
+	if e.By != "" {
+		return e.By + " extends " + e.Name + ", which no source holds"
+	}
+	return "no Machinefile named " + e.Name
+}
+
+type MixinError struct{ Name string }
+
+func (e *MixinError) Error() string {
+	return e.Name + " is a mixin (it says no machine): it is extended, never applied"
+}
+
+type VMOnComputerError struct {
+	Name string
+	// value: the file that says vm.
+	File string
+}
+
+func (e *VMOnComputerError) Error() string {
+	return e.Name + " is a computer: vm is for a workspace or a server (" + e.File + ")"
+}
+
+type CycleError struct {
+	// value: the names around the cycle, its first again at its end.
+	Path []string
+	// value: what the cycle is of: extends, or the packages' requires and after.
+	Of string
+}
+
+func (e *CycleError) Error() string { return "a cycle in " + e.Of + ": " + e.Said() }
+
+func (e *CycleError) Said() string {
+	// value: the cycle in words, each name and the one it waits on: `a
+	// extends b extends a`, `left needs right needs left`.
+	verb := " needs "
+	if e.Of == "extends" {
+		verb = " extends "
+	}
+	return strings.Join(e.Path, verb)
+}
+
+type UnknownPackageError struct {
+	Name string
+	// value: the file that lists it, or the package that requires it.
+	By string
+	// value: what it is when it is a package of the other kind.
+	Is string
+	At string
+}
+
+func (e *UnknownPackageError) Error() string {
+	if e.Is != "" {
+		return e.Name + " is " + e.Is + " (" + within(e.At, e.By) + ")"
+	}
+	return "the catalog has no package " + e.Name + " (" + within(e.At, e.By) + ")"
+}
+
+type NoMethodError struct {
+	Package, System string
+	// value: the manager the Machinefile asked, when it asked one.
+	Manager string
+	// value: why the package is in the plan: listed, or required by another.
+	Why string
+	At  string
+}
+
+func (e *NoMethodError) Error() string {
+	by := ""
+	if e.Manager != "" {
+		by = " by " + e.Manager
+	}
+	return e.Package + " has no method" + by + " for " + e.System + " (" + e.Why + suffix(e.At) + ")"
+}
+
+func suffix(at string) string {
+	if at == "" {
+		return ""
+	}
+	return ", " + at
+}
+
+// value: a range the chosen method cannot hold: what it holds, and
+// another method of the package for this system that holds the range, or
+// empty.
+
+type UnpinnableError struct {
+	Package, Version, Method string
+	Holds                    string
+	Alternative              string
+	At                       string
+}
+
+func (e *UnpinnableError) Error() string {
+	return e.Package + " " + e.Version + ": " + e.Method + " holds " + e.Holds + ", never " + e.Version + " (" + e.At + ")"
+}
+
+type BadValueError struct {
+	Package, Key, Problem string
+	At                    string
+}
+
+func (e *BadValueError) Error() string {
+	if e.Key == "" {
+		return e.Package + ": " + e.Problem + " (" + e.At + ")"
+	}
+	return e.Package + "'s " + e.Key + ": " + e.Problem + " (" + e.At + ")"
+}
+
+type UnknownKeyError struct{ Key, Name string }
+
+func (e *UnknownKeyError) Error() string { return e.Name + " says nothing of " + e.Key }
+
+// value: a Machinefile no VM image is made from: a mixin, a computer's,
+// or one whose vm says no image.from.
+
+type NotTemplateError struct{ Name string }
+
+func (e *NotTemplateError) Error() string {
+	return e.Name + " makes no image: an image is made from a VM's Machinefile that says its vm.image.from"
+}

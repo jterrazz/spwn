@@ -1,0 +1,81 @@
+{
+  "$defs": {
+    "ports.Declaration": {
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "type": "string"
+        },
+        "machine": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        },
+        "via": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "machine",
+        "port",
+        "via"
+      ],
+      "type": "object"
+    },
+    "ports.calls.DeclareIn": {
+      "additionalProperties": false,
+      "properties": {
+        "By": {
+          "type": "string"
+        },
+        "Machine": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "string"
+        },
+        "URL": {
+          "type": "string"
+        },
+        "Via": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ports.calls.DeclareOut": {
+      "additionalProperties": false,
+      "properties": {
+        "Declaration": {
+          "$ref": "#/$defs/ports.Declaration"
+        }
+      },
+      "required": [
+        "Declaration"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/ports.declare.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call ports.declare of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/ports.calls.DeclareIn"
+    },
+    "out": {
+      "$ref": "#/$defs/ports.calls.DeclareOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "ports.declare",
+  "type": "object"
+}

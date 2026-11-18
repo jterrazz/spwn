@@ -1,0 +1,13 @@
+description: 'a Mac that hosts a server shows its readiness though it may sleep, each fix it lacks named'
+env: mini-sleeps
+runs:
+    - command: 'overview --on mac-mini | /usr/bin/sed -n ''/^# Mac readiness/,/^# /p'''
+      exit: 0
+      stdout: |
+          # Mac readiness
+          ○	restarts after a power cut	not applied, as root	station settings apply restart-after-power-cut
+          ○	never sleeps	not applied	station settings apply never-sleeps
+          ●	logs in by itself	applied
+          ◐	disk unlock after a power cut	needs you	station machines unlock mac-mini (from the same network)
+          ●	planned restarts unlock themselves	supported
+          ●	engine starts at login	installed

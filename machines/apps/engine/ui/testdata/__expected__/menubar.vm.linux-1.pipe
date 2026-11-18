@@ -1,0 +1,14 @@
+# Gauges
+# Ports
+●	Vite	private	linux-1:5173
+●	Port 7000	private	linux-1:7000
+	Ephemeral: deleted when it powers off from inside; pauses when This Mac sleeps.
+# Private
+●	Vite		linux-1:5173
+●	Port 7000		linux-1:7000
+# Accounts
+●	GitHub	granted	from the password GitHub token
+●	Claude	granted	from the password Claude token
+	A grant is a password of This Mac's, and stays until you remove it.
+# Measured
+	Measured inside the guest. If linux-1 stops answering, this shows what This Mac sees of it.

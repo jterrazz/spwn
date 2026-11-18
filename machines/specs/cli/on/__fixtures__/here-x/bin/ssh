@@ -1,0 +1,9 @@
+#!/bin/sh
+# ssh, which a run --on the machine it runs on never reaches.
+printf 'ssh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

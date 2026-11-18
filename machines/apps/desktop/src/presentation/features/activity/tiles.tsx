@@ -1,0 +1,240 @@
+import type { ActivityReport } from '@jterrazz/station-api';
+import type { ReactElement, ReactNode } from 'react';
+
+import { chartedOf, cpuOf, diskOf, marksOf, memoryOf } from '../../../domain/activity/measures';
+import type { Held } from '../../../domain/activity/measures';
+import { bytes, duration, memory, percent } from '../../../domain/format';
+import type { Found } from '../../../domain/machines/machines';
+import { SEPARATOR } from '../../../domain/separator';
+import type { Tone } from '../../../domain/tone';
+import { agoOf, firstUnitOf, shortDay } from '../../../domain/when';
+import { useIdentityOf } from '../../kit/identity';
+import { NotGivenTile, split, Unknown } from '../../kit/tile-states';
+import { Bar, Chart, Tile } from '../../ui/index';
+import type { Identity } from '../../ui/index';
+import { Tiles } from '../../ui/page';
+import type { OwnState } from '../../words/words';
+import { useActivity } from './reading';
+import type { Heard } from './reading';
+
+const LAST_BARS = 12;
+
+// invariant: `chart.peak` is the index of the bucket holding the busiest point, -1 when none holds one
+// (apps/engine/activity/chart.go); the figure drawn is that bucket's `max`.
+export function cpuFootOf(report: ActivityReport): string {
+    const { chart } = report;
+    const { cpus, at } = report.last.sample;
+    const peak = chart === undefined || chart.peak < 0 ? undefined : chart.buckets?.[chart.peak];
+    if (chart !== undefined && peak !== undefined) {
+        const ago = agoOf(chart.peak_at, at);
+        return `Peak ${percent(peak.max)} %${ago === undefined ? '' : `${SEPARATOR}${ago}`}`;
+    }
+    return cpus > 0 ? `${String(cpus)} CPUs` : '';
+}
+
+export function CpuTile({
+    report,
+    name,
+    label,
+}: {
+    report: ActivityReport;
+    name: string;
+    label: string;
+}) {
+    const cpu = cpuOf(report);
+    if (cpu === undefined) {
+        return <NotGivenTile label={label} />;
+    }
+    const buckets = report.chart?.buckets ?? [];
+    return (
+        <Tile
+            foot={cpuFootOf(report)}
+            label={label}
+            unit="%"
+            value={cpu}
+            viz={
+                chartedOf(buckets) ? (
+                    <Chart
+                        label={`CPU of ${name}, its last bars`}
+                        values={marksOf(buckets).values.slice(-LAST_BARS)}
+                    />
+                ) : undefined
+            }
+        />
+    );
+}
+
+function HeldTile({
+    label,
+    held,
+    shown,
+    identity,
+    tone = 'plain',
+}: {
+    label: string;
+    held: Held | undefined;
+    shown: (value: number) => string;
+    identity?: Identity | undefined;
+    tone?: Tone;
+}) {
+    if (held === undefined) {
+        return <NotGivenTile label={label} />;
+    }
+    const { value, unit } = split(shown(held.used));
+    if (held.total === undefined) {
+        return <Tile foot="its process" label={label} unit={unit} value={value} />;
+    }
+    return (
+        <Tile
+            foot={`of ${shown(held.total)}`}
+            label={label}
+            unit={unit}
+            value={value}
+            viz={
+                <Bar
+                    identity={identity}
+                    label={`${label} used of its total`}
+                    percent={(held.used / held.total) * 100}
+                    tone={identity === undefined ? tone : 'plain'}
+                    width="fixed"
+                />
+            }
+        />
+    );
+}
+
+function UptimeTile({
+    up,
+    report,
+    label,
+}: {
+    up: number;
+    report: ActivityReport | undefined;
+    label: string;
+}) {
+    if (up <= 0) {
+        return <NotGivenTile label={label} />;
+    }
+    const { value, unit } = firstUnitOf(duration(up));
+    const since = shortDay(report?.last.sample.boot);
+    return (
+        <Tile
+            foot={since === undefined ? '' : `since ${since}`}
+            label={label}
+            unit={unit}
+            value={value}
+        />
+    );
+}
+
+export function unknownOf(shown: Heard | undefined): OwnState | undefined {
+    if (shown === undefined) {
+        return 'reading';
+    }
+    if (shown.kind === 'failed') {
+        return 'no-answer';
+    }
+    return shown.out.silent === true ? 'not-measured' : undefined;
+}
+
+type Labels = { cpu: string; memory: string; disk: string; up: string };
+
+function labelsOf(of: string | undefined): Labels {
+    const named = (label: string) => (of === undefined ? label : `${label}, ${of}`);
+    return { cpu: named('CPU'), disk: named('Disk'), memory: named('Memory'), up: named('Uptime') };
+}
+
+// value: a disk the meter does not measure is drawn by the tile the page hands, its own read of the disk.
+function DiskHeld({
+    report,
+    label,
+    disk,
+}: {
+    report: ActivityReport;
+    label: string;
+    disk: ReactElement | undefined;
+}) {
+    const held = diskOf(report.last.sample);
+    if (held === undefined && disk !== undefined) {
+        return disk;
+    }
+    return <HeldTile held={held} label={label} shown={bytes} />;
+}
+
+function processHeldOf(vm: Found['vm']): Held | undefined {
+    if (vm?.UsedBytes === undefined) {
+        return undefined;
+    }
+    const total = vm.Resources.MemoryBytes;
+    return { total: total > 0 ? total : undefined, used: vm.UsedBytes };
+}
+
+type MemoryTileProps = {
+    label: string;
+    report: ActivityReport | undefined;
+    unknown: OwnState;
+    vm: Found['vm'];
+};
+
+function MemoryTile({ label, report, unknown, vm }: MemoryTileProps) {
+    const identityOf = useIdentityOf();
+    const process = processHeldOf(vm);
+    const held = report === undefined ? process : (memoryOf(report) ?? process);
+    if (held === undefined && report === undefined) {
+        return <Unknown label={label} state={unknown} />;
+    }
+    return (
+        <HeldTile
+            held={held}
+            identity={vm ? identityOf(vm.Name) : undefined}
+            label={label}
+            shown={memory}
+            tone="new"
+        />
+    );
+}
+
+type TilesProps = {
+    found: Found;
+    up: number;
+    of?: string;
+    fourth?: ReactNode;
+    disk?: ReactElement | undefined;
+};
+
+export function ActivityTiles({ found, up, of, fourth, disk }: TilesProps) {
+    const name = found.vm?.Name ?? found.mac.Name;
+    const labels = labelsOf(of);
+    const { readers, shown } = useActivity(found, '1h');
+    const unknown = unknownOf(shown);
+    const report = shown?.kind === 'read' ? shown.out : undefined;
+    const memoryTile = (
+        <MemoryTile
+            label={labels.memory}
+            report={unknown === undefined ? report : undefined}
+            unknown={unknown ?? 'reading'}
+            vm={found.vm}
+        />
+    );
+    return (
+        <>
+            {readers}
+            <Tiles>
+                {unknown !== undefined || report === undefined ? (
+                    <>
+                        <Unknown label={labels.cpu} state={unknown ?? 'reading'} />
+                        {memoryTile}
+                        <Unknown label={labels.disk} state={unknown ?? 'reading'} />
+                    </>
+                ) : (
+                    <>
+                        <CpuTile label={labels.cpu} name={name} report={report} />
+                        {memoryTile}
+                        <DiskHeld disk={disk} label={labels.disk} report={report} />
+                    </>
+                )}
+                {fourth ?? <UptimeTile label={labels.up} report={report} up={up} />}
+            </Tiles>
+        </>
+    );
+}

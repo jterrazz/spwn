@@ -1,0 +1,7 @@
+description: 'a create --on another Mac needs the image there, not on This Mac'
+env: this-mac-no-image
+runs:
+    - command: 'machines create box --on mac-mini | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	box	Created	Ephemeral · 4 CPU · 8 GB · 20 GB

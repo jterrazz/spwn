@@ -1,0 +1,32 @@
+description: 'init on a fresh Mac names it in three steps, installs nothing, and ends on the empty Machinefile'
+fixture: ../../../__fixtures__/terminal/
+env:
+    - fresh
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" init'
+      stdin: |
+          see Name this machine
+          send \r
+          see binds a Machinefile
+          screen
+      exit: 0
+      stdout: |
+          ┃ Name this machine
+          ┃ lowercase letters, digits and -, as in macbook or mac-mini
+          ✓ Known to station · 3 steps changed
+
+          Changes
+            ● name      macbook-pro
+            ● zshrc
+            ● relocate  bunfig, go env, mise settings, npmrc
+          Machinefile  none bound by init: init --machinefile binds one
+
+          → exec zsh                           so this shell reads the station block
+          → station init --machinefile <name>  binds a Machinefile, then applies it
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.preferences.name, (.jobs // {} | keys), .engine.stopped]'' world.json; /usr/bin/grep -c "^# >>> station >>>$" .zshrc; /bin/test -f .hushlogin || echo no setting applied'
+      exit: 0
+      stdout: |
+          ["macbook-pro",[],null]
+          1
+          no setting applied

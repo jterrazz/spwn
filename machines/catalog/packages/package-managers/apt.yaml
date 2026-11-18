@@ -1,0 +1,17 @@
+package: station.package/v1
+kind: manager
+name: apt
+description: Debian and Ubuntu's package manager
+manages: [apt]
+priority: { ubuntu: 1, debian: 1 }
+provides: [apt-get]
+methods:
+    - family: debian
+      needs: [sudo]
+      apt: { packages: [apt] }
+disk:
+    paths:
+        - path: '{data}/station/apt'
+          level: kept
+          note: one file per package station's install added, or was adding when cut short, naming the apps that hold it; a removal takes back a package with its last holder, and none that is not here
+    no-erase: 'what it installed is apps: station apps remove <app>'

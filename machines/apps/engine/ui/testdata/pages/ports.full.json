@@ -1,0 +1,529 @@
+{
+  "schema": "station.page/v1",
+  "id": "ports",
+  "command": "ports",
+  "context": {
+    "machine": "macbook",
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/ports",
+            "mark": "ok",
+            "label": "Every Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "5 ports"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "1 needs you"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you: reachable outside Tailscale, not declared public",
+      "columns": [
+        {
+          "key": "machine",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "port",
+          "keep": 90
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "what",
+          "label": "what",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "listens",
+          "label": "listens on",
+          "kind": "text",
+          "keep": 50
+        },
+        {
+          "key": "declared",
+          "label": "declared",
+          "kind": "text",
+          "keep": 70
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "mac-mini:5000",
+            "mark": "broken",
+            "label": "mac-mini",
+            "cells": [
+              {
+                "kind": "port",
+                "n": 5000
+              },
+              {
+                "kind": "text",
+                "text": "needs you"
+              },
+              {
+                "kind": "text",
+                "text": "AirPlay Receiver"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "*:5000 all interfaces"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "declared no"
+              }
+            ],
+            "reason": "exposed",
+            "hint": {
+              "command": "System Settings > General > AirDrop & Handoff > AirPlay Receiver",
+              "external": true
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "tailnet",
+      "title": "Tailscale",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "ok",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "signed in"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "macbook-pro.tail1234.ts.net"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "ports are shared"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "public",
+      "title": "Public: reachable from anywhere else, internet or LAN, declared",
+      "columns": [
+        {
+          "key": "machine",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "port",
+          "keep": 90
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "what",
+          "label": "what",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "listens",
+          "label": "listens on",
+          "kind": "text",
+          "keep": 50
+        },
+        {
+          "key": "declared",
+          "label": "declared",
+          "kind": "text",
+          "keep": 70
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "mac-mini:22",
+            "mark": "ok",
+            "label": "mac-mini",
+            "cells": [
+              {
+                "kind": "port",
+                "n": 22
+              },
+              {
+                "kind": "text",
+                "text": "public"
+              },
+              {
+                "kind": "text",
+                "text": "SSH"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "*:22 all interfaces"
+                  }
+                ]
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "your LAN"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Remote login"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "by Settings"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "private",
+      "title": "Private: shared with you on Tailscale",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:5173",
+            "mark": "ok",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "portmap",
+                "n": 5173,
+                "of": 40001
+              },
+              {
+                "kind": "text",
+                "text": "private"
+              },
+              {
+                "kind": "url",
+                "text": "https://macbook-pro.tail1234.ts.net:40001"
+              },
+              {
+                "kind": "text",
+                "text": "shared"
+              },
+              {
+                "kind": "text",
+                "text": "node"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "probably Vite"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:5432",
+            "mark": "absent",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "portmap",
+                "n": 5432,
+                "of": 40002
+              },
+              {
+                "kind": "text",
+                "text": "private"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "not listening"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "reserved 40002"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "postgres"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "reason": "waiting"
+          }
+        },
+        {
+          "row": {
+            "id": "infra:6443",
+            "mark": "ok",
+            "label": "infra",
+            "cells": [
+              {
+                "kind": "port",
+                "n": 6443
+              },
+              {
+                "kind": "text",
+                "text": "private"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "own Tailscale device: infra"
+              },
+              {
+                "kind": "text",
+                "text": "Kubernetes API"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        },
+        {
+          "mark": "absent",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "ranges",
+      "title": "Reserved ports",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "note": {
+            "text": "Reserved on This Mac: 2 of 1000 (40000-40999), 998 free"
+          }
+        },
+        {
+          "note": {
+            "text": "Reserved on mac-mini: 0 of 1000 (40000-40999), 1000 free"
+          }
+        },
+        {
+          "note": {
+            "text": "1 more listens on its machine only"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "x",
+      "label": "stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-1:5173",
+        "linux-1:5432"
+      ],
+      "confirm": {
+        "danger": true,
+        "yes": "stop sharing"
+      },
+      "priority": 1,
+      "mutates": true
+    }
+  ]
+}

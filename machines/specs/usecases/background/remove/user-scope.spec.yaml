@@ -1,0 +1,25 @@
+description: 'station background remove on a terminal asks, then removes the task and its plist'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 120x30 "$STATION" background remove com.example.brain.x-snapshot'
+      stdin: |
+          see Remove com.example.brain.x-snapshot?
+          send y
+          scrollback
+      exit: 0
+      stdout: |
+          ┃ Remove com.example.brain.x-snapshot?
+          ┃
+          ●       com.example.brain.x-snapshot    removed ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist deleted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs | [has("com.example.brain.x-snapshot"), has("com.example.brain.sync")]'' world.json'
+      exit: 0
+      stdout: |
+          [false,true]
+    - command: 'background | /usr/bin/grep -c -e "x-snapshot" -e "^# Failing"'
+      exit: 1
+      stdout: |
+          0

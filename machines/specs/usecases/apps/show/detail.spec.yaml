@@ -1,0 +1,45 @@
+description: 'station apps gh is its detail: method, version and the newest, where it lives, what it brings'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; NO_COLOR= terminal --size 100x30 "$STATION" apps gh'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          gh · 2.97.0 → 2.98.0 · brew · update available
+            → station apps update gh
+
+          Detail
+            method    brew
+            version   2.97.0 → 2.98.0
+            lives on  every machine
+            category  Git
+            what      GitHub CLI for repository management
+            brings    github-login
+            keeps     {cache}/gh
+            keeps     {state}/gh
+            keeps     {config}/gh/config.yml
+            keeps     {config}/gh/hosts.yml
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "gh") | "\(.state) \(.installed) \(.newest)"'''
+      exit: 0
+      stdout: |
+          update-available 2.97.0 2.98.0
+    - command: 'apps gh'
+      exit: 0
+      stdout: |
+          ◐	gh	2.97.0	brew	update available · station apps update gh
+          # Detail
+          method	brew
+          version	2.97.0
+          lives on	every machine
+          category	Git
+          what	GitHub CLI for repository management
+          brings	github-login
+          keeps	{cache}/gh
+          keeps	{state}/gh
+          keeps	{config}/gh/config.yml
+          keeps	{config}/gh/hosts.yml

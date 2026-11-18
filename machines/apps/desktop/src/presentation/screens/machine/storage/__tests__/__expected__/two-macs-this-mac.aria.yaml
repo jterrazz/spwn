@@ -1,0 +1,75 @@
+- main:
+  - heading "macbook-pro online" [level=2]
+  - paragraph: This Mac · Engine running. Sleeps normally.
+  - button "Keep macbook-pro awake": Awake…
+  - button "New machine on macbook-pro": New machine
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage" [selected]
+  - region "Storage":
+    - heading "Storage" [level=2]
+    - paragraph: 606 GB of 994 GB used
+    - button "Rescan"
+    - paragraph: This Mac itself holds 499 GB.
+    - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 443 GB · Caches 34.8 GB · Machines and images 107 GB · Free 388 GB"'
+    - list "The parts":
+      - listitem: System 21.4 GB
+      - listitem: Your data 443 GB
+      - listitem: Caches 34.8 GB
+      - listitem: Machines and images 107 GB
+      - listitem: Free 388 GB
+    - paragraph: Caches hold 34.8 GB. Each app rebuilds its own when it needs it.
+    - button "Free 34.8 GB"
+  - region "By app":
+    - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
+    - text: tart ~/.tart · to ~/.local/share/station/vms misplaced 73.3 GB
+    - button "Move tart": Move
+    - text: go ~/Library/Caches/go-build cache 19.4 GB
+    - button "Free go": Free
+    - text: xcode ~/Library/Developer/Xcode/DerivedData · ~/Library/Developer/CoreSimulator/Devices cache 5.8 GB data 19.1 GB
+    - button "Erase… xcode": Erase…
+    - button "Free xcode": Free
+    - text: homebrew ~/Library/Caches/Homebrew cache 2.1 GB
+    - button "Free homebrew": Free
+    - text: pnpm ~/Library/pnpm/store cache 1.8 GB
+    - button "Free pnpm": Free
+    - text: mise ~/Library/Caches/mise cache 1.2 GB
+    - button "Free mise": Free
+    - text: rust ~/.cargo/registry/cache cache 900 MB
+    - button "Free rust": Free
+    - text: node ~/.cache/npm cache 800 MB
+    - button "Free node": Free
+    - text: bun ~/Library/Caches/bun cache 600 MB
+    - button "Free bun": Free
+    - text: discord ~/Library/Application Support/discord/Cache cache 400 MB
+    - button "Free discord": Free
+    - text: ghostty ~/.cache/ghostty cache 400 MB
+    - button "Free ghostty": Free
+    - text: claude ~/.claude/cache · ~/.claude/projects cache 300 MB data 3.6 GB
+    - button "Erase… claude": Erase…
+    - button "Free claude": Free
+    - text: zed ~/Library/Logs/Zed · ~/Library/Application Support/Zed/db cache 300 MB data 1.2 GB
+    - button "Erase… zed": Erase…
+    - button "Free zed": Free
+    - text: cursor ~/Library/Application Support/Cursor/logs cache 200 MB
+    - button "Free cursor": Free
+    - text: notion ~/Library/Application Support/Notion/Partitions/notion/Cache cache 200 MB
+    - button "Free notion": Free
+    - text: codex ~/.codex/cache cache 100 MB
+    - button "Free codex": Free
+    - text: gh ~/.cache/gh cache 100 MB
+    - button "Free gh": Free
+    - text: helm ~/Library/Caches/helm cache 100 MB
+    - button "Free helm": Free
+    - text: starship ~/.cache/starship cache 100 MB
+    - button "Free starship": Free
+    - text: orbstack ~/Library/Group Containers/HUAQ24HBR6.dev.orbstack data 15.8 GB
+    - button "Erase… orbstack": Erase…
+    - text: ollama ~/.ollama/models data 1.9 GB
+    - button "Erase… ollama": Erase…
+    - text: gpg ~/.gnupg never touched 200 KB ssh ~/.ssh never touched 100 KB
+    - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.

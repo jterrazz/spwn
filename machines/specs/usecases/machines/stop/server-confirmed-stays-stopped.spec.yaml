@@ -1,0 +1,32 @@
+description: 'a server stopped with its name typed wants to stay stopped: its Mac''s reboot does not start it'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines stop infra --on mac-mini --confirm=infra'
+      stdin: |
+          within 20 exit 0
+          screen
+      exit: 0
+      stdout: |
+          On mac-mini:
+          ✓ infra · stopped · wanted state: Stopped
+
+          → station machines start infra --on mac-mini
+    - command: 'world reboot mac-mini'
+      exit: 0
+    - command: 'machines --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ○	infra	Server	mac-mini	Stopped · always on	8 CPU	24 GB
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {running: (.pid > 0), want: .kept.want}'' world.json'
+      exit: 0
+      stdout: |
+          {"running":false,"want":"stopped"}

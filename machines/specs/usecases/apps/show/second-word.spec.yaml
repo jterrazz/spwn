@@ -1,0 +1,8 @@
+description: 'a second word after an app is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'apps instal bat'
+      exit: 2
+      stderr: |
+          Error: unknown command "instal" for "station apps"
+          Hint: run station apps --help

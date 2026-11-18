@@ -1,0 +1,27 @@
+description: 'a choice no command used for 7 days is forgotten: commands and prompt are back on This Mac'
+env: two-macs
+runs:
+    - command: 'use linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1 in this terminal. Other terminals stay on This Mac.
+    - command: 'world advance 144h'
+      exit: 0
+    - command: 'overview --json | /usr/bin/jq -r .machine.name'
+      exit: 0
+      stdout: |
+          linux-1
+    - command: 'world advance 144h'
+      exit: 0
+    - command: 'shell prompt'
+      exit: 0
+      stdout: |
+          on linux-1
+    - command: 'world advance 192h'
+      exit: 0
+    - command: 'shell prompt'
+      exit: 0
+    - command: 'overview --json | /usr/bin/jq -r .machine.name'
+      exit: 0
+      stdout: |
+          macbook-pro

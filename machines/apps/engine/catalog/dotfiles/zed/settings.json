@@ -1,0 +1,391 @@
+// Zed settings: https://zed.dev/docs/reference/all-settings
+//
+// Formatting follows @jterrazz/typescript: 100 columns, 4 spaces, LF,
+// oxlint (type-aware, safe fixes only) THEN oxfmt on save; `.astro` is the one
+// shape oxfmt does not parse, so it goes through prettier with the same values.
+{
+    // ─── Appearance ──────────────────────────────────────────────────────────
+    "theme": {
+        "mode": "dark",
+        "light": "Sequoia Moonlight Light",
+        "dark": "Sequoia Moonlight"
+    },
+    "icon_theme": {
+        "mode": "dark",
+        "light": "Base Charmed Icons",
+        "dark": "Base Charmed Icons"
+    },
+    "ui_font_size": 16,
+    "buffer_font_size": 13.3,
+    "agent_ui_font_size": 15,
+
+    // Keyed by theme name: one palette cannot suit both a light and a dark
+    // theme, so each active theme (`theme.light`, `theme.dark`) carries its own.
+    "theme_overrides": {
+        "Sequoia Moonlight": {
+            "background": "#06070A",
+            "editor.background": "#06070A",
+            "terminal.background": "#06070A",
+            "surface.background": "#101319",
+            "elevated_surface.background": "#161922",
+            "element.background": "#161922",
+            "drop_target.background": "#161922",
+            "title_bar.background": "#0C0E13",
+            "status_bar.background": "#0C0E13",
+            "toolbar.background": "#06070A",
+            "tab_bar.background": "#0C0E13",
+            "tab.inactive_background": "#0C0E13",
+            "tab.active_background": "#817c9c24",
+            "panel.background": "#0C0E13",
+            "scrollbar.track.background": "#06070A",
+            "editor.gutter.background": "#06070A",
+            "editor.subheader.background": "#0C0E13",
+            "editor.active_line.background": "#817c9c1f",
+            "editor.highlighted_line.background": "#817c9c1f",
+            // Git, in Sequoia's own palette: it has no green, its terminal
+            // maps green to blue and red to pink.
+            "created": "#8EB6F5",
+            "modified": "#FFBB88",
+            "deleted": "#F58EE0",
+            "conflict": "#F58EE0",
+            "renamed": "#C58FFF",
+            "ignored": "#2A2B31",
+            "version_control.added": "#8EB6F5",
+            "version_control.modified": "#FFBB88",
+            "version_control.deleted": "#F58EE0",
+            "version_control.conflict": "#F58EE0",
+            "version_control.renamed": "#C58FFF",
+            "version_control.ignored": "#2A2B31"
+        },
+        "Sequoia Moonlight Light": {
+            // Git, in the same mapping as the dark variant, on its own palette.
+            "created": "#4A85D4",
+            "modified": "#D9884A",
+            "deleted": "#C94DA8",
+            "conflict": "#C94DA8",
+            "renamed": "#9A5FD9",
+            "ignored": "#D9DAE0",
+            "version_control.added": "#4A85D4",
+            "version_control.modified": "#D9884A",
+            "version_control.deleted": "#C94DA8",
+            "version_control.conflict": "#C94DA8",
+            "version_control.renamed": "#9A5FD9",
+            "version_control.ignored": "#D9DAE0"
+        }
+    },
+
+    // ─── Editor ──────────────────────────────────────────────────────────────
+    "base_keymap": "VSCode",
+    "autosave": "on_focus_change",
+    "format_on_save": "on",
+    "auto_indent_on_paste": true,
+    "tab_size": 4,
+    "preferred_line_length": 100,
+    "semantic_tokens": "combined",
+
+    // ─── AI ──────────────────────────────────────────────────────────────────
+    "edit_predictions": {
+        "provider": "ollama"
+    },
+    "agent": {
+        "tool_permissions": {
+            "default": "allow"
+        },
+        "model_parameters": []
+    },
+    "agent_servers": {
+        "claude-acp": {
+            "type": "registry",
+            "default_config_options": {
+                "effort": "medium",
+                "mode": "bypassPermissions",
+                "model": "opus[1m]"
+            },
+            "favorite_config_option_values": {
+                "effort": ["medium"],
+                "model": ["opus[1m]"],
+                "mode": ["bypassPermissions", "acceptEdits"]
+            }
+        },
+        "codex-acp": {
+            "type": "registry"
+        },
+        "opencode": {
+            "type": "registry"
+        },
+        "gemini-custom": {
+            "type": "custom",
+            "command": "gemini"
+        }
+    },
+
+    // ─── Extensions ──────────────────────────────────────────────────────────
+    // Install-only: `false` never uninstalls anything.
+    "auto_install_extensions": {
+        // Languages & tools
+        "ansible": true,
+        "astro": true,
+        "csharp": true,
+        "csv": true,
+        "dart": true,
+        "deno": true,
+        "dockerfile": true,
+        "env": true,
+        "erlang": true,
+        "git-firefly": true,
+        "github-actions": true,
+        "golangci-lint": true,
+        "graphql": true,
+        "helm": true,
+        "hoverfly": true,
+        "html": true,
+        "http": true,
+        "ini": true,
+        "java": true,
+        "json5": true,
+        "just": true,
+        "kotlin": true,
+        "latex": true,
+        "log": true,
+        "lua": true,
+        "make": true,
+        "markdown-oxide": true,
+        "nginx": true,
+        "nix": true,
+        "oxc": true,
+        "php": true,
+        "powershell": true,
+        "prisma": true,
+        "proto": true,
+        "r": true,
+        "ruby": true,
+        "scss": true,
+        "sql": true,
+        "swift": true,
+        "terraform": true,
+        "toml": true,
+        "tsgo": true,
+        "vue": true,
+        "xml": true,
+        "zig": true,
+
+        // Themes
+        "catppuccin": true,
+        "catppuccin-blur": true,
+        "everforest": true,
+        "github-dark-default": true,
+        "jetbrains-themes": true,
+        "nord": true,
+        "nvim-nightfox": true,
+        "polar-theme": true,
+        "sequoia": true,
+        "serendipity": true,
+        "tokyo-night": true,
+        "vesper": true,
+
+        // Icon themes
+        "bearded-icon-theme": true,
+        "charmed-icons": true
+    },
+
+    // ─── File types ──────────────────────────────────────────────────────────
+    // github-actions and ansible ship no file association: YAML stays YAML
+    // unless its path says otherwise.
+    "file_types": {
+        "GitHub Actions": [".github/workflows/*.yml", ".github/workflows/*.yaml"],
+        "Ansible": ["**/ansible/**/*.yml", "**/ansible/**/*.yaml"]
+    },
+
+    // ─── Language servers ────────────────────────────────────────────────────
+    "lsp": {
+        "oxlint": {
+            "initialization_options": {
+                "settings": {
+                    "configPath": null,
+                    "run": "onType",
+                    "disableNestedConfig": false,
+                    "typeAware": true,
+                    "fixKind": "safe_fix",
+                    "unusedDisableDirectives": "deny"
+                }
+            }
+        },
+        // golangci-lint v2 (the version the Go repositories pin): JSON on stdout.
+        "golangci-lint": {
+            "initialization_options": {
+                "command": [
+                    "golangci-lint",
+                    "run",
+                    "--output.json.path",
+                    "stdout",
+                    "--show-stats=false",
+                    "--output.text.path="
+                ]
+            }
+        },
+        "oxfmt": {
+            "initialization_options": {
+                "settings": {
+                    "fmt.configPath": null,
+                    "run": "onSave"
+                }
+            }
+        }
+    },
+
+    // ─── Languages ───────────────────────────────────────────────────────────
+    // Zed has no multi-language key, so each language names its formatter.
+    // `prettier.allowed: false` stops Zed's bundled prettier (on by default for
+    // these languages) from competing with oxfmt.
+    "languages": {
+        // Lint fixes first, then format: the order `typescript fix` runs them.
+        "JavaScript": {
+            // tsgo is the TypeScript 7 checker `typescript check` runs; deno would
+            // otherwise attach to every TypeScript file.
+            "language_servers": [
+                "typescript-ls",
+                "!vtsls",
+                "!typescript-language-server",
+                "!deno",
+                "..."
+            ],
+            "prettier": { "allowed": false },
+            "formatter": [
+                { "code_action": "source.fixAll.oxc" },
+                { "language_server": { "name": "oxfmt" } }
+            ]
+        },
+        "TypeScript": {
+            // tsgo is the TypeScript 7 checker `typescript check` runs; deno would
+            // otherwise attach to every TypeScript file.
+            "language_servers": [
+                "typescript-ls",
+                "!vtsls",
+                "!typescript-language-server",
+                "!deno",
+                "..."
+            ],
+            "prettier": { "allowed": false },
+            "formatter": [
+                { "code_action": "source.fixAll.oxc" },
+                { "language_server": { "name": "oxfmt" } }
+            ]
+        },
+        "TSX": {
+            // tsgo is the TypeScript 7 checker `typescript check` runs; deno would
+            // otherwise attach to every TypeScript file.
+            "language_servers": [
+                "typescript-ls",
+                "!vtsls",
+                "!typescript-language-server",
+                "!deno",
+                "..."
+            ],
+            "prettier": { "allowed": false },
+            "formatter": [
+                { "code_action": "source.fixAll.oxc" },
+                { "language_server": { "name": "oxfmt" } }
+            ]
+        },
+        "Vue.js": {
+            "prettier": { "allowed": false },
+            "formatter": [
+                { "code_action": "source.fixAll.oxc" },
+                { "language_server": { "name": "oxfmt" } }
+            ]
+        },
+
+        // Format only.
+        "CSS": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "SCSS": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "Less": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "HTML": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "GraphQL": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "JSON": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "JSONC": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "JSON5": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "Markdown": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "MDX": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+        "YAML": {
+            "prettier": { "allowed": false },
+            "formatter": { "language_server": { "name": "oxfmt" } }
+        },
+
+        // YAML dialects: oxfmt's server only attaches to YAML, so these run the
+        // project's own oxfmt binary (found upward from the file) on stdin; a
+        // repository without one passes the buffer through untouched.
+        "GitHub Actions": {
+            "formatter": {
+                "external": {
+                    "command": "sh",
+                    "arguments": [
+                        "-c",
+                        "d=$(dirname \"$1\"); while [ \"$d\" != / ] && [ ! -x \"$d/node_modules/.bin/oxfmt\" ]; do d=$(dirname \"$d\"); done; [ -x \"$d/node_modules/.bin/oxfmt\" ] && exec \"$d/node_modules/.bin/oxfmt\" --stdin-filepath \"$1\"; exec cat",
+                        "_",
+                        "{buffer_path}"
+                    ]
+                }
+            }
+        },
+        "Ansible": {
+            "formatter": {
+                "external": {
+                    "command": "sh",
+                    "arguments": [
+                        "-c",
+                        "d=$(dirname \"$1\"); while [ \"$d\" != / ] && [ ! -x \"$d/node_modules/.bin/oxfmt\" ]; do d=$(dirname \"$d\"); done; [ -x \"$d/node_modules/.bin/oxfmt\" ] && exec \"$d/node_modules/.bin/oxfmt\" --stdin-filepath \"$1\"; exec cat",
+                        "_",
+                        "{buffer_path}"
+                    ]
+                }
+            }
+        },
+
+        // golangci-lint is an extra server beside gopls, never started by default.
+        "Go": {
+            "language_servers": ["gopls", "golangci-lint", "..."]
+        },
+
+        // oxfmt does not parse `.astro`: prettier, with the oxfmt values.
+        "Astro": {
+            "formatter": "prettier",
+            "prettier": {
+                "allowed": true,
+                "printWidth": 100,
+                "singleQuote": true,
+                "tabWidth": 4,
+                "trailingComma": "all"
+            }
+        }
+    }
+}

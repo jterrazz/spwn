@@ -1,0 +1,51 @@
+{
+  "$defs": {
+    "machines.SSHTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Command": {
+          "type": "string"
+        },
+        "User": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Address",
+        "Command",
+        "User"
+      ],
+      "type": "object"
+    },
+    "machines.calls.SSHIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.ssh.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machines.ssh of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.SSHIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.SSHTarget"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.ssh",
+  "type": "object"
+}

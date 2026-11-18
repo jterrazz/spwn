@@ -1,0 +1,85 @@
+{
+  "$defs": {
+    "disk.Outcome": {
+      "additionalProperties": false,
+      "properties": {
+        "Detail": {
+          "type": "string"
+        },
+        "Erase": {
+          "type": "boolean"
+        },
+        "Freed": {
+          "type": "integer"
+        },
+        "Hint": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Reason": {
+          "type": "string"
+        },
+        "Result": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Detail",
+        "Erase",
+        "Freed",
+        "Hint",
+        "Name",
+        "Reason",
+        "Result"
+      ],
+      "type": "object"
+    },
+    "disk.calls.FreeIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Apps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/disk.free.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call disk.free of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/disk.calls.FreeIn"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/disk.Outcome"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "disk.free",
+  "type": "object"
+}

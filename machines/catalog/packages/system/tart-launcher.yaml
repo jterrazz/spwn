@@ -1,0 +1,12 @@
+package: station.package/v1
+kind: setting
+name: tart-launcher
+description: "The tart launcher: Tart's home is station's VMs folder"
+methods:
+    - os: macos
+      machine: computer
+      file:
+          copy:
+              - from: tart/tart
+                to: ~/.local/bin/tart
+                permissions: 0o755

@@ -1,0 +1,13 @@
+description: 'machines pipe resolves the VM''s address at each pipe, so ssh reaches it after a reboot moved it'
+env: two-macs
+runs:
+    - command: 'machines pipe linux-1 < /dev/null'
+      exit: 0
+      stdout: "SSH-2.0-world linux-1 192.168.64.5:22\r\n"
+    - command: 'world reboot-inside linux-1'
+      exit: 0
+    - command: 'world address linux-1 192.168.64.9'
+      exit: 0
+    - command: 'machines pipe linux-1 < /dev/null'
+      exit: 0
+      stdout: "SSH-2.0-world linux-1 192.168.64.9:22\r\n"

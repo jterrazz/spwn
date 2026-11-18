@@ -1,0 +1,52 @@
+#!/bin/sh
+# ssh as the VM specs need it: every call's argv is recorded in $HOME/.calls; a host's
+# engine API answers each call from answers/ssh/api-<host>/<call>.json, its Hello
+# naming those calls and the version in api-<host>/version (no folder: 255). `<name> true`
+# checks the host key in known_hosts/<name> against answers/ssh/hostkey, as
+# StrictHostKeyChecking=accept-new does. `station accounts` over --on answers as the
+# station of the document's vm/ folder does. Anything else exits 97.
+answers="${0%/*}/../answers/ssh"
+printf 'ssh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *" station engine attach")
+        prev=''
+        for arg; do
+            if [ "$arg" = -- ]; then target=$prev; break; fi
+            prev=$arg
+        done
+        far="$answers/api-$target"
+        [ -d "$far" ] || exit 255
+        version=$(/bin/cat "$far/version" 2>/dev/null)
+        calls=$(cd "$far" && for f in *.json; do printf '"%s",' "${f%.json}"; done)
+        while IFS= read -r line; do
+            id=$(printf '%s' "$line" | /usr/bin/jq -r .id)
+            call=$(printf '%s' "$line" | /usr/bin/jq -r '.call // empty')
+            if [ -z "$call" ]; then
+                printf '{"v":2,"id":"%s","hello":{"version":"%s","calls":[%s]}}\n' "$id" "$version" "${calls%,}"
+            else
+                printf '{"v":2,"id":"%s","out":%s}\n' "$id" "$(/bin/cat "$far/$call.json")"
+            fi
+        done
+        ;;
+    *" true")
+        eval "name=\${$(($# - 1))}"
+        known="$HOME/.local/state/station/known_hosts/$name"
+        key=$(/bin/cat "$answers/hostkey")
+        if [ -f "$known" ] && ! /usr/bin/grep -qF "$key" "$known"; then
+            echo "@@@@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! @@@@" >&2
+            exit 255
+        fi
+        /bin/mkdir -p "${known%/*}"
+        echo "$name $key" >> "$known"
+        ;;
+    *"exec station \"\$@\"' station accounts"*)
+        [ -x "$HOME/vm/bin/station" ] || { echo "stub ssh: no vm/ to answer: $*" >&2; exit 97; }
+        while [ "$1" != station ]; do shift; done
+        shift
+        cd "$HOME/vm" && exec /usr/bin/env -i HOME="$HOME/vm" PATH="$HOME/vm/bin" STATION="$STATION" TZ=UTC "$HOME/vm/bin/station" "$@"
+        ;;
+    *)
+        echo "stub ssh: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

@@ -1,0 +1,15 @@
+description: 'the DNS profile is written under the state folder and opened for approval'
+fixture: ./__fixtures__/settings-dns/
+runs:
+    - command: 'settings apply dns'
+      exit: 0
+      stdout: |
+          ●	dns
+          ●	profile	written to {{workdir}}/.local/state/station/dns/quad9-dns.mobileconfig
+          ○	next	approve the profile in System Settings > Privacy & Security > Profiles
+      files:
+          .local/state/station/dns/quad9-dns.mobileconfig:
+              contains: 'com.jterrazz.dns.quad9'
+          .calls:
+              contains:
+                  - 'open quad9-dns.mobileconfig'

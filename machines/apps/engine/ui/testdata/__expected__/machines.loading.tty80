@@ -1,0 +1,10 @@
+4 machines · 3 running · 1 stopped · 1 needs you
+
+  ◌ This Mac
+  ├─ ◌ api
+  └─ ◌ linux-1
+  ◌ mac-mini
+     No VMs yet  → station machines create --on mac-mini
+
+Needs you
+  ◌ mac-mini

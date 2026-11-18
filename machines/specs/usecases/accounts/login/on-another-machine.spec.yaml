@@ -1,0 +1,14 @@
+description: 'the mini signs in npm by its own engine'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | if .Step then {step: [.Step.Kind, .Step.Code, .Step.Site, .Step.Exchange, .Step.Line, (.Step.Expires > .Step.Now)]} else {signed: [.Programs[0].Program, .Programs[0].State, .Programs[0].How, .Programs[0].Action]} end'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"npm"}}
+      exit: 0
+      stdout: |
+          {"step":["link",null,"www.npmjs.com","ex-1","Waiting for you to approve npm at www.npmjs.com",true]}
+          {"signed":["npm","signed-in","own","sign-out"]}

@@ -1,0 +1,13 @@
+description: 'gh is not installed: the sign-in is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["macbook-pro"].accounts.programs.gh) | .macs["macbook-pro"].accounts.logins = {"gh": {"refuse": "login.not-installed"}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, field, subject, message, hint}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"gh"}}
+      exit: 0
+      stdout: |
+          {"code":"login.not-installed","field":null,"subject":"gh","message":"GitHub is not installed here","hint":"install it first: station apps"}

@@ -1,0 +1,15 @@
+#!/bin/sh
+# A gpg that answers after the seconds $HOME/.gpg-sleep holds (30 when absent); one that
+# never answers in time is the sleep itself, its pid in $HOME/.gpg-pid, so the probe's
+# kill leaves nothing behind.
+seconds=$(/bin/cat "$HOME/.gpg-sleep" 2>/dev/null || echo 30)
+case "$*" in
+    "--list-secret-keys --keyid-format long") ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac
+[ "$seconds" -ge 10 ] && echo $$ > "$HOME/.gpg-pid" && exec /bin/sleep "$seconds"
+/bin/sleep "$seconds"
+echo "sec   ed25519/ABCDEF 2026-01-01 [SC]"

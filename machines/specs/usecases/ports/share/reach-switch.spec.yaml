@@ -1,0 +1,25 @@
+description: 'the owner moves a share its rights made to local, then back to private: unshared, then shared'
+env: two-macs
+runs:
+    - command: 'ports share linux-1 5173 --to local'
+      exit: 0
+      stdout: |
+          http://127.0.0.1:{{port}}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {kept: [.stores.reservations[] | select(.guest_port == 5173) | [.by, .chosen, .to]], shared: [.tailnet.shares[].Reserved]}'' world.json'
+      exit: 0
+      stdout: |
+          {"kept":[["owner","local","local"]],"shared":[40002]}
+    - command: 'ports | /usr/bin/grep "^#\|	5173	"'
+      exit: 0
+      stdout: |
+          # Private: shared with you on Tailscale	1 ●
+          # This machine only: shared on its Mac, never on Tailscale	1 ●
+          ●	linux-1	5173	this machine only	http://127.0.0.1:{{port}}	shared	node	probably Vite
+    - command: 'ports share linux-1 5173 --to private'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:40001
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {kept: [.stores.reservations[] | select(.guest_port == 5173) | [.by, .chosen, .to]], shared: [.tailnet.shares[].Reserved]}'' world.json'
+      exit: 0
+      stdout: |
+          {"kept":[["owner","private",null]],"shared":[40001,40002]}

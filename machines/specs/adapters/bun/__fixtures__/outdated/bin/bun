@@ -1,0 +1,17 @@
+#!/bin/sh
+# bun: its global listing and what is outdated are answer files; an update swaps in the
+# listing it was given and leaves nothing outdated, as a real update does.
+answers="${0%/*}/../answers/bun"
+printf 'bun %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "pm ls -g") /bin/cat "$answers/ls.txt" ;;
+    "outdated -g") /bin/cat "$answers/outdated.txt" ;;
+    "update -g "*)
+        /bin/cp "$answers/ls.after.txt" "$answers/ls.txt"
+        printf 'bun outdated v1.4.4 (38afee6c8)\n' > "$answers/outdated.txt"
+        ;;
+    *)
+        echo "stub bun: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

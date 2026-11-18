@@ -1,0 +1,13 @@
+package: station.package/v1
+kind: app
+name: java
+description: Java Development Kit (Temurin)
+provides: [java]
+version-read:
+    args: [java, -version]
+    pattern: version "([^"]+)"
+methods:
+    - os: any
+      mise:
+          name: java
+          version: temurin-21

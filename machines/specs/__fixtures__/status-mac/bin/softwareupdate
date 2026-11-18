@@ -1,0 +1,10 @@
+#!/bin/sh
+# softwareupdate prints its whole report on stderr; every call recorded in $HOME/.calls.
+printf 'softwareupdate %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    -l) printf 'Software Update Tool\n\nFinding available software\nSoftware Update found the following new or updated software:\n* Label: macOS 27.1-27.1\n\tTitle: macOS 27.1, Version: 27.1, Size: 1000KiB, Recommended: YES,\n' >&2 ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

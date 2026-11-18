@@ -1,0 +1,29 @@
+# Set by station	4 ●	4 ◐	3 ○	3 ⊘
+◐	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts
+◐	dns	changed since 2 d ago	station settings diff dns
+◐	zed-dotfiles	changed since 2 d ago	station settings diff zed-dotfiles
+◐	tailscale-cli	changed since 2 d ago	station settings diff tailscale-cli
+○	ghostty-dotfiles	not applied	station settings apply ghostty-dotfiles
+○	git-signing	not applied	station settings apply git-signing
+○	backup-exclusions	not applied	station settings apply backup-exclusions
+●	docker-shortcuts	applied · ~/.docker-shortcuts
+●	tmux-dotfiles	applied · ~/.tmux-dotfiles
+●	ssh-key	applied · ~/.ssh-key
+●	tart-launcher	applied · ~/.tart-launcher
+⊘	hushlogin	off here
+⊘	github-login	off here
+⊘	dock-reset	off here
+# Always-on Mac
+○	Always-on Mac	5 · for a Mac that hosts servers
+# Checked	5 ●	2 ◐	1 ⊘	1 ?
+◐	firewall	off	System Settings > Network > Firewall
+◐	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
+?	time-machine	unknown · no answer in 2 s
+●	filevault	as expected · on
+●	sip	as expected · on
+●	automatic-updates	as expected · on
+●	remote-login	as expected · off
+●	macos-updates	as expected · up to date
+⊘	gatekeeper	off here · not checked on this machine
+# Not for this machine
+–	3 not for this machine	VMs only

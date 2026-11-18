@@ -1,0 +1,22 @@
+package: station.package/v1
+kind: app
+name: zoxide
+description: Smarter cd command
+replaces: cd (jumping around)
+provides: [zoxide]
+methods:
+    - os: macos
+      brew: zoxide
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [zoxide] }
+disk:
+    paths:
+        - path: ~/Library/Application Support/zoxide/db.zo
+          level: data
+          os: macos
+        - path: '{data}/zoxide/db.zo'
+          level: data
+          family: linux
+    erase:
+        - delete: [~/Library/Application Support/zoxide/db.zo, '{data}/zoxide/db.zo']

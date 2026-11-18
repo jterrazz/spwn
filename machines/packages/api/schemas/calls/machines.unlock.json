@@ -1,0 +1,54 @@
+{
+  "$defs": {
+    "machines.Unlocked": {
+      "additionalProperties": false,
+      "properties": {
+        "Already": {
+          "type": "boolean"
+        },
+        "Answers": {
+          "type": "boolean"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Already",
+        "Answers",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "machines.calls.UnlockIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Interactive": {
+          "type": "boolean"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.unlock.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machines.unlock of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.UnlockIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.Unlocked"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.unlock",
+  "type": "object"
+}

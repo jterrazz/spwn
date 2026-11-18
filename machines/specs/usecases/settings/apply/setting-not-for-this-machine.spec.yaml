@@ -1,0 +1,17 @@
+description: 'a Mac-only setting is refused in a workspace, its hint the apply on This Mac; nothing written'
+env: in-workspace
+runs:
+    - command: 'settings apply ssh-key'
+      exit: 2
+      stderr: |
+          Error: ssh-key is for Macs only
+          Hint: station settings apply ssh-key --on this-mac
+    - command: 'settings apply hushlogin ssh-key'
+      exit: 2
+      stderr: |
+          Error: ssh-key is for Macs only
+          Hint: station settings apply ssh-key --on this-mac
+    - command: '--version >/dev/null; test -e .hushlogin && echo written || echo nothing written'
+      exit: 0
+      stdout: |
+          nothing written

@@ -1,0 +1,12 @@
+description: '--yes never answers a server''s typed question: the stop is refused and infra keeps running'
+env: two-macs
+runs:
+    - command: 'machines stop infra --on mac-mini --yes'
+      exit: 2
+      stderr: |
+          Error: stopping a server needs its name
+          Hint: --confirm=infra
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {running: (.pid > 0), want: .kept.want}'' world.json'
+      exit: 0
+      stdout: |
+          {"running":true,"want":"running"}

@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "accounts.GrantOffer": {
+      "additionalProperties": false,
+      "properties": {
+        "Presence": {
+          "type": "string"
+        },
+        "Targets": {
+          "items": {
+            "$ref": "#/$defs/accounts.Target"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Presence",
+        "Targets"
+      ],
+      "type": "object"
+    },
+    "accounts.Target": {
+      "additionalProperties": false,
+      "properties": {
+        "Fit": {
+          "enum": [
+            "fits",
+            "no"
+          ],
+          "type": "string"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Fit",
+        "Line",
+        "To"
+      ],
+      "type": "object"
+    },
+    "grants.calls.GrantNewIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Entry": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/grants.new.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch grants.new of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/grants.calls.GrantNewIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.GrantOffer"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "grants.new",
+  "type": "object"
+}

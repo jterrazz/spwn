@@ -1,0 +1,9 @@
+#!/bin/sh
+printf 'killall %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    Dock) ;;
+    *)
+        echo "stub killall: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

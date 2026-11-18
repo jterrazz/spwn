@@ -1,0 +1,48 @@
+- main:
+  - heading "infra healthy" [level=2]
+  - paragraph:
+    - text: server · always on · on
+    - button "mac-mini"
+  - button "Stop"
+  - button "Restart"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Ports"
+  - heading "Healthy." [level=1]
+  - text: CPU 18% 8 CPUs Memory 15GB
+  - meter "Memory used of its total"
+  - text: of 24 GB Disk 36GB
+  - meter "Disk used of its total"
+  - text: of 80 GB Check 41ms passes · 3 s ago
+  - region "Health":
+    - heading "Health checked 3 s ago" [level=2]
+    - text: Healthy. Its state healthy Its address 192.168.64.5 SSH answers Its check passes
+  - region "Check latency":
+    - heading "Check latency" [level=2]
+    - text: 41 ms now
+    - paragraph: The engine kept one check so far.
+  - region "Days it went down":
+    - heading "Days it went down" [level=2]
+    - paragraph: The engine kept no such day.
+  - region "Why it exists":
+    - heading "Why it exists" [level=2]
+    - term: Purpose
+    - definition: No purpose given
+    - term: Created
+    - definition: 23 Oct, by you
+    - term: Hold
+    - definition: Always on. Stopping it needs its name typed.
+    - term: Check
+    - definition: https://infra:6443/readyz
+  - region "Busiest now":
+    - heading "Busiest now" [level=2]
+    - text: k3s-server
+    - meter "CPU of k3s-server"
+    - text: 9 % containerd
+    - meter "CPU of containerd"
+    - text: 3 % traefik
+    - meter "CPU of traefik"
+    - text: 1 %
+  - button "Delete infra…"

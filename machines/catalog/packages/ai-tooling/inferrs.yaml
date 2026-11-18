@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: inferrs
+description: TurboQuant LLM inference server
+provides: [inferrs]
+methods:
+    - os: macos
+      trusted: true
+      brew: ericcurtin/inferrs/inferrs

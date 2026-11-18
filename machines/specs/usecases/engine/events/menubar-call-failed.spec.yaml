@@ -1,0 +1,18 @@
+description: 'update all with one update failing: the others are done, and the one that failed stays to update'
+env: two-macs
+runs:
+    - command: 'world fault Installer.Update 1'
+      exit: 0
+    - command: 'apps update'
+      exit: 1
+      stdout: |
+          ●	gh	2.98.0	brew
+          ✗	node		mise	~/.local/state/station/logs/node.log
+      stderr: |
+          Error: 1 of 2 apps failed
+          Hint: re-run it: station apps update node
+    - command: 'apps | /usr/bin/grep -A1 "^# Updates"'
+      exit: 0
+      stdout: |
+          # Updates	1 ◐
+          ◐	node	22.11.0	mise	update available · station apps update node

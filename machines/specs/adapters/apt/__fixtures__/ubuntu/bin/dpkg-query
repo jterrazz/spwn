@@ -1,0 +1,5 @@
+#!/bin/sh
+# dpkg-query: the packages of dpkg.db installed (ii), one removed with its configuration kept (rc).
+printf 'dpkg-query %s\n' "$*" >> "$HOME/.calls"
+[ -f "$HOME/dpkg.db" ] && /usr/bin/awk -F'\t' '{ printf "%s\t%s\tii \n", $1, $2 }' "$HOME/dpkg.db"
+printf 'removed-kept\t1.0\trc \n'

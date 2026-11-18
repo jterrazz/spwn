@@ -1,0 +1,12 @@
+description: 'the newest version is refused Delete, saying why, and every version is kept'
+env: two-macs
+runs:
+    - command: 'images delete base-ubuntu@2026.11.01 --yes'
+      exit: 2
+      stderr: |
+          Error: image base-ubuntu 2026.11.01 is the newest: the next machines are made from it
+          Hint: station images lists the versions you can delete
+    - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "macbook-pro") | .version] | join(" ")'''
+      exit: 0
+      stdout: |
+          2026.11.01 2026.10.20

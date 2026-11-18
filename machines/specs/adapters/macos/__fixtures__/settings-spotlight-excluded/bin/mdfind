@@ -1,0 +1,10 @@
+#!/bin/sh
+# Spotlight finds nothing in the folder: it is in the Privacy list.
+printf 'mdfind\n' >> "$HOME/.calls"
+case "$*" in
+    "-onlyin "*) ;;
+    *)
+        echo "stub mdfind: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

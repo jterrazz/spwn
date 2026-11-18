@@ -1,0 +1,11 @@
+#!/bin/sh
+# docker installed, its disk use slower than its budget: the sleep itself, so the kill
+# leaves nothing behind.
+case "$*" in
+    --version) echo "Docker version 28.5.1, build e180ab8" ;;
+    "system df --format {{.Size}}") exec /bin/sleep 30 ;;
+    *)
+        echo "stub docker: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

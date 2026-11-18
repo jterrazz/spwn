@@ -1,0 +1,11 @@
+#!/bin/sh
+# lsof on a Mac, recorded: -iTCP -sTCP:LISTEN -P -n -Fpcn.
+case "$*" in
+    "-iTCP -sTCP:LISTEN -P -n -Fpcn")
+        printf 'p501\ncpostgres\nn127.0.0.1:5432\nn[::1]:5432\n'
+        printf 'p502\ncnode\nn*:3000\nn[::]:3000\n'
+        printf 'p503\nccaddy\nn100.101.102.103:8443\n'
+        printf 'p504\ncpython3\nn192.168.1.20:8000\n'
+        ;;
+    *) exit 97 ;;
+esac

@@ -1,0 +1,8 @@
+description: 'off on no setting is refused before any question'
+env: two-macs
+runs:
+    - command: 'settings off firewal --yes'
+      exit: 2
+      stderr: |
+          Error: no setting named "firewal"
+          Hint: station settings

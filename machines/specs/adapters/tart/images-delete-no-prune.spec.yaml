@@ -1,0 +1,13 @@
+description: 'deleting an image version never prunes tart''s cache: that is tart''s own to free'
+fixture:
+    - ./__fixtures__/images-stubs/
+    - ./__fixtures__/images-recorded/
+runs:
+    - command: 'images delete base-ubuntu@2026.11.01 --yes'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.01	deleted
+    - command: '--version > /dev/null; /usr/bin/grep -c "prune" .calls'
+      exit: 1
+      stdout: |
+          0

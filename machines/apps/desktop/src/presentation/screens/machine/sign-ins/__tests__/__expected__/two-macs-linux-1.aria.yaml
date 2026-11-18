@@ -1,0 +1,29 @@
+- main:
+  - heading "linux-1 running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "macbook-pro"
+  - button "Stop"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins" [selected]
+    - tab "Storage"
+  - heading "Signed in to 2 of 4 programs." [level=1]
+  - region "Sign-ins":
+    - heading "Sign-ins 4" [level=2]
+    - text: gh signed out
+    - button "Sign in gh": Sign in
+    - text: npm from the password npm publish signed in
+    - button "Open the password npm publish": npm publish
+    - button "Remove npm": Remove
+    - text: claude you@example.com · Max plan · signed in by itself signed in
+    - button "Sign out claude": Sign out
+    - text: wrangler Refused at the provider needs signing in again
+    - button "Sign in again wrangler": Sign in again
+    - paragraph:
+      - text: 1 password from this Mac is granted to linux-1 ·
+      - button "Passwords"

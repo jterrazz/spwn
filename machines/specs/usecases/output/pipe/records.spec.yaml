@@ -1,0 +1,24 @@
+description: 'a read piped is records: `# <title>`, then glyph and cells by tabs, unpadded; cut -f2 is the name'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'apps | /usr/bin/head -4'
+      exit: 0
+      stdout: |
+          # Updates	2 ◐
+          ◐	node	22.11.0	mise	update available · station apps update node
+          ◐	gh	2.97.0	brew	update available · station apps update gh
+          # Not installed	105 ○
+    - command: 'machines | /usr/bin/cut -f2'
+      exit: 0
+      stdout: |
+          macbook-pro
+          api
+          linux-1
+          mac-mini
+          infra
+    - command: '--version >/dev/null; for read in overview apps settings disk ports accounts background awake machines images engine activity; do /usr/bin/env -u NO_COLOR "$STATION" $read > $read.txt; done; /bin/cat *.txt | /usr/bin/grep -c -e "$(printf "\033")" -e " 	" -e "	 " -e " $"'
+      exit: 1
+      stdout: |
+          0

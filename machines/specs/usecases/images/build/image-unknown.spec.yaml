@@ -1,0 +1,8 @@
+description: 'an image the catalogue does not hold is refused, the images named'
+env: two-macs
+runs:
+    - command: 'images build debian'
+      exit: 2
+      stderr: |
+          Error: no image "debian"
+          Hint: station images

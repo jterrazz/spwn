@@ -1,0 +1,10 @@
+description: 'an engine launchd loads but cannot start is a failed start, never a running row'
+fixture:
+    - ../../__fixtures__/vms/
+    - ./__fixtures__/launchctl-fails-kickstart/
+runs:
+    - command: 'engine start </dev/null'
+      exit: 1
+      stderr: |
+          Error: the engine did not start: launchctl kickstart exited 5: Could not kickstart service: 5: Input/output error
+          Hint: station engine

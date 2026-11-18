@@ -1,0 +1,13 @@
+description: 'a Mac that answers is already awake: nothing is armed, so no mac_back is told'
+env: air-asleep
+runs:
+    - command: 'machines remind macbook-air'
+      exit: 0
+      stdout: |
+          ●	macbook-air	already awake: it answers
+    - command: 'world advance 1m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]? | select(.Kind == "mac_back")]'' world.json'
+      exit: 0
+      stdout: |
+          []

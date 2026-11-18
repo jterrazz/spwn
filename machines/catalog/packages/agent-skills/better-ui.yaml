@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: better-ui
+description: UI review across the better-* skills
+methods:
+    - os: any
+      skill:
+          repo: jakubkrehel/skills
+          name: better-ui

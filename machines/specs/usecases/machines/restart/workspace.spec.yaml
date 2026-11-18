@@ -1,0 +1,24 @@
+description: 'a workspace restarts with no question: a new run, its health steps passed, then restarted'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"] | {pid, booted}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":1001,"booted":null}
+    - command: 'machines restart linux-1'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	linux-1	restarted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"] | {pid, booted}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":2002,"booted":{"bridged":false,"folders":[]}}
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB

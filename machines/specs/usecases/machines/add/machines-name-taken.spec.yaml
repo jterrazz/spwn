@@ -1,0 +1,13 @@
+description: 'add refuses a Mac already added, exit 2, before it reaches any Mac'
+env: two-macs
+runs:
+    - command: 'machines add mac-mini'
+      exit: 2
+      stderr: |
+          Error: machine "mac-mini" already exists
+          Hint: station machines forget mac-mini first, to change it
+    - command: 'machines add --name mac-mini'
+      exit: 2
+      stderr: |
+          Error: machine "mac-mini" already exists
+          Hint: station machines forget mac-mini first, to change it

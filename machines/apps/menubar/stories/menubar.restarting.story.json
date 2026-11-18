@@ -1,0 +1,10 @@
+{
+    "group": "shell",
+    "id": "menubar.restarting",
+    "note": "The status item while infra restarts: the busy mark turns in place of the red.",
+    "pages": ["pages/machines.restarting.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "statusItem": true
+    }
+}

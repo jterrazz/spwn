@@ -1,0 +1,14 @@
+#!/bin/sh
+# Homebrew whose cask listing takes 3 s, as a cold Homebrew index does.
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions") echo "tmux 3.5a" ;;
+    "list --cask --versions")
+        /bin/sleep 3
+        echo "ghostty 1.2.0"
+        ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

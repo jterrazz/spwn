@@ -1,0 +1,33 @@
+To do
+  ✗ brain.x-snapshot         failing · last exit 2
+    → launchctl bootout gui/501/com.example.brain.x-snapshot &&
+      rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist
+  ◐ engine                   not installed  → station engine start
+  ◐ brew                     120 outdated  → station apps update --manager brew
+  ◐ misplaced                2 misplaced folders · 80.5 GB
+    → station disk move ~/.tart
+  ◐ pnpm                     update available  → station apps update pnpm
+  ◐ better-ui                update available  → station apps update better-ui
+  ◐ restart-after-power-cut  partly applied
+    → station settings apply restart-after-power-cut
+  ◐ macos                    2 pending · checked 22m ago
+  ◐ com.docker.socket        orphan: Docker.app is gone
+    → sudo launchctl bootout system/com.docker.socket &&
+      sudo rm /Library/LaunchDaemons/com.docker.socket.plist
+Summary
+  ◐ Machine     Mac · Darwin 27.0.0 …    ◐ Apps          6 ●  7 ◐  4 ○
+  ◐ Network     192.168.1.152 · 4/4 on   ◐ Settings      1 ●  1 ◐
+  ● Tailscale   macbook-pro · Serve on   ● Disk          27.9 GB reclaimable …
+  ● Identity    you@example.com …        ◐ All machines  engine not installed
+  ✗ Background  3 jobs · 1 failing …     ● Gateways      1 ●
+Machine      ● 3  ◐ 1 · name, uptime, setup, engine
+Environment  ● 6  ◐ 2 · local ip, filevault, firewall, sip, gatekeeper, …
+Workspace    ● 1  ◐ 2 · disk, tart, bun
+Identity     ● 2 · git email, git signing
+Background   ● 1  ◐ 1  ✗ 1
+Gateways     ● 1 · Tailscale Serve
+Apps         ● 6  ◐ 7  ○ 4 · mise, mas, pnpm, bun, go, java, python, chatgpt, …
+Settings     ● 1  ◐ 1 · restart-after-power-cut
+
+→ station overview --all  for every row
+→ station overview | cat  for records

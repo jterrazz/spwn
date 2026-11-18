@@ -1,0 +1,24 @@
+description: 'a misplaced folder is freed with its old location''s own command, then its emptied folders go'
+fixture:
+    - ./__fixtures__/disk-go/
+    - ./__fixtures__/disk-node/
+    - ./__fixtures__/disk-relocated/
+    - ./__fixtures__/disk-strays/
+runs:
+    - command: 'disk free go node'
+      exit: 0
+      stdout: |
+          ●	go	2 B freed
+          ●	node	4 B freed
+          ●	Freed	6 B	nothing is lost
+      files:
+          go: absent
+          .npm: absent
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          go clean -cache -modcache
+          go clean -modcache
+          env GOMODCACHE={{workdir}}/go/pkg/mod GOFLAGS=-modcacherw
+          npm cache clean --force
+          npm cache clean --force --cache {{workdir}}/.npm

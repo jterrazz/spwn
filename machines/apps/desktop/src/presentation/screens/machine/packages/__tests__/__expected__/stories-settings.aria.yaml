@@ -1,0 +1,39 @@
+- main:
+  - heading "macbook-pro online" [level=2]
+  - paragraph: This Mac · Engine running. Awake until 18:00, lid closed.
+  - button "Keep macbook-pro awake": Awake…
+  - button "New machine on macbook-pro": New machine
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages" [selected]
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "2 differences from macbook-pro." [level=1]:
+    - text: 2 differences from
+    - button "macbook-pro"
+    - text: .
+  - paragraph:
+    - img "2 differences"
+    - text: 3 of 5 apps match · 0 of 1 setting match · Its machine file is
+    - button "macbook-pro"
+  - region "Differs from its file":
+    - heading "Differs from its file 3" [level=2]
+    - group "Which side changes":
+      - button "Change the machine" [pressed]
+      - button "Change the file"
+    - text: The file says This machine has The machine will gh macbook-pro outdated 2.97.0 keep it bat macbook-pro not installed install it git-shortcuts macbook-pro not installed set it Apply will install 2.
+    - button "Plan"
+  - region "Upgrades":
+    - heading "Upgrades" [level=2]
+    - button "Upgrade now"
+    - text: Every night at 03:00, as macbook-pro allows. macbook-pro File 1 app moved. 7 Nov · 03:00 1 app waits for you. Last run
+  - group "Which packages":
+    - button "Apps5"
+    - button "Settings1" [pressed]
+  - region "Settings":
+    - heading "Settings by file, a later one wins" [level=2]
+    - region "macbook-pro":
+      - paragraph: macbook-pro 1 setting
+      - text: git-shortcuts not installed

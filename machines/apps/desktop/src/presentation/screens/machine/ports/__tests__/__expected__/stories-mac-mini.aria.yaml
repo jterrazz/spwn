@@ -1,0 +1,19 @@
+- main:
+  - heading "mac-mini online" [level=2]
+  - paragraph: Engine running. Never sleeps.
+  - button "Keep mac-mini awake": Awake…
+  - button "New machine on mac-mini": New machine
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports" [selected]
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "7 ports listen." [level=1]
+  - paragraph:
+    - img "7 ports listen."
+    - text: One is shared.
+  - region "What listens on this Mac":
+    - heading "What listens on this Mac" [level=2]
+    - text: :5900 screensharingd 100.98.133.20 · pid 500 Private

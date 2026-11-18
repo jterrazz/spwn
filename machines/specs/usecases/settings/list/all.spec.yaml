@@ -1,0 +1,27 @@
+description: '--all unfolds every group: the OK rows, Off here, and what is not for this machine with its reason'
+env: two-macs
+runs:
+    - command: 'settings apply dock-spacer'
+      exit: 0
+      stdout: |
+          ●	dock-spacer	dock-spacer: applied
+    - command: 'settings off hushlogin --yes'
+      exit: 0
+      stdout: |
+          ●	hushlogin
+    - command: 'settings --all | /usr/bin/grep -e "^#" -e "	dock-spacer	" -e "	hushlogin	"'
+      exit: 0
+      stdout: |
+          # Set by station	1 ●	15 ○	1 ⊘
+          ●	dock-spacer	applied
+          ⊘	hushlogin	off here
+          # Always-on Mac	5 ○
+          # Checked	8 ●	1 ◐
+    - command: 'settings --on linux-1 --all | /usr/bin/grep -e "^#" -e "	dns	" -e "	tart-launcher	"'
+      exit: 0
+      stdout: |
+          # Set by station	6 ○
+          # Checked
+          # Not for this machine
+          –	dns	not for this machine · Mac only
+          –	tart-launcher	not for this machine · Mac only

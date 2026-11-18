@@ -1,0 +1,12 @@
+description: 'forget piped without --yes is refused, exit 2, and the Mac stays added'
+env: two-macs
+runs:
+    - command: 'machines forget mac-mini'
+      exit: 2
+      stderr: |
+          Error: refusing to forget without --yes
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [(.preferences.macs | keys), (.ssh.blocks | keys)]'' world.json'
+      exit: 0
+      stdout: |
+          [["mac-mini"],["api","infra","linux-1","mac-mini"]]

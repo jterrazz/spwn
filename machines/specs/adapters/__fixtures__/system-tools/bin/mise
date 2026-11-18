@@ -1,0 +1,12 @@
+#!/bin/sh
+# mise as brew installed it: its global listing is empty, so a runtime on PATH reads as
+# one nobody manages; cache clear and prune are recorded.
+case "$*" in
+    "--version") echo "2026.10.25 macos-arm64" ;;
+    "ls --global --json") echo "{}" ;;
+    "cache clear" | "prune --tools --yes") printf 'mise %s\n' "$*" >> "$HOME/.calls" ;;
+    *)
+        echo "stub mise: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

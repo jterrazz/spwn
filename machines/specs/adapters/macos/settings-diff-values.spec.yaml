@@ -1,0 +1,9 @@
+description: 'settings diff of a setting that writes no file reads its values on this Mac, then what station sets'
+fixture: ./__fixtures__/settings-pmset/
+runs:
+    - command: 'settings diff restart-after-power-cut'
+      exit: 0
+      stdout: |
+          # restart-after-power-cut
+          ○	autorestart	0	1
+          ●	womp	1	1

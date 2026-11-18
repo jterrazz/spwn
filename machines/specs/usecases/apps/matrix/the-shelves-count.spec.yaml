@@ -1,0 +1,11 @@
+description: 'apps.matrix: the Apps shelf is ok, the Skills shelf counts what machines carry and the catalog holds'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''{apps: .out.Verdict, skills: .out.Skills}'''
+      stdin: |
+          {"v":2,"id":"1","call":"apps.matrix","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"apps":{"Mine":{"Tone":"ok","Sentence":"Every app follows its rule"},"Catalog":{"Tone":"ok","Sentence":"Every app follows its rule"}},"skills":{"Mine":{"Tone":"plain","Sentence":"0 skills are on your machines"},"Catalog":{"Tone":"plain","Sentence":"17 skills are in the catalog"}}}

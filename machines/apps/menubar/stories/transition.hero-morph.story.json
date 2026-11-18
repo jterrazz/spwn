@@ -1,0 +1,18 @@
+{
+    "freeze": 0.2,
+    "group": "transition",
+    "id": "transition.hero-morph",
+    "note": "The hero morphs in place to infra down: its top cross-fades from 3 pt above, its rows follow 60 ms later, the red glyph arrives from .6.",
+    "pages": ["pages/machines.home.down.menubar.json"],
+    "play": {
+        "from": "home.needs",
+        "gesture": "infra goes down"
+    },
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1"
+}

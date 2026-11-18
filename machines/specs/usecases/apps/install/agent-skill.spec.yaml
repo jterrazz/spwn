@@ -1,0 +1,22 @@
+description: 'an agent skill installs by the skills method, only where it lives'
+env: two-macs
+runs:
+    - command: 'apps install frontend-design'
+      exit: 0
+      stdout: |
+          ●	frontend-design	1.0.0	skill
+    - command: 'apps frontend-design | /usr/bin/head -4'
+      exit: 0
+      stdout: |
+          ●	frontend-design	1.0.0	skill
+          # Detail
+          method	skill
+          version	1.0.0
+    - command: 'apps frontend-design | /usr/bin/grep "^category"'
+      exit: 0
+      stdout: |
+          category	Agent skills
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "frontend-design") | "\(.category) \(.method) \(.lives_on)"'''
+      exit: 0
+      stdout: |
+          Agent skills skill every-machine

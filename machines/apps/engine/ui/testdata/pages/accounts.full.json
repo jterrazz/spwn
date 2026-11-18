@@ -1,0 +1,254 @@
+{
+  "schema": "station.page/v1",
+  "id": "accounts",
+  "command": "accounts",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/accounts",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "4 programs"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "2 signed in"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "1 needs you"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "columns": [
+        {
+          "key": "program",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        },
+        {
+          "key": "who",
+          "kind": "identity",
+          "keep": 60
+        },
+        {
+          "key": "how",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "scope",
+          "kind": "list",
+          "keep": 50,
+          "whole": true
+        },
+        {
+          "key": "line",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro/gh",
+            "mark": "ok",
+            "label": "gh",
+            "short": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "signed in"
+              },
+              {
+                "kind": "identity",
+                "text": "you"
+              },
+              {
+                "kind": "text",
+                "text": "own"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "gist"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "read:org"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "repo"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "workflow"
+                  }
+                ]
+              },
+              {
+                "kind": "none"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/npm",
+            "mark": "broken",
+            "label": "npm",
+            "short": "npm",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "broken"
+              },
+              {
+                "kind": "identity",
+                "text": "you"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "The token is refused by registry.npmjs.org"
+              }
+            ],
+            "reason": "failing"
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/claude",
+            "mark": "ok",
+            "label": "claude",
+            "short": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "signed in"
+              },
+              {
+                "kind": "identity",
+                "text": "you@example.com"
+              },
+              {
+                "kind": "text",
+                "text": "own"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "max"
+                  }
+                ]
+              },
+              {
+                "kind": "none"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/wrangler",
+            "mark": "absent",
+            "label": "wrangler",
+            "short": "Cloudflare",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "signed out"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        },
+        {
+          "mark": "absent",
+          "n": 1
+        },
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "R",
+      "label": "reload",
+      "on": "page",
+      "priority": 1
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+    "freeze": 0.35,
+    "group": "transition",
+    "id": "transition.push",
+    "note": "A push to mac-mini: its page slides in from the trailing edge, opaque and shaded; home moves a third left and dims; the height rides the same spring.",
+    "pages": ["pages/machines.macs.machine.mac-mini.json"],
+    "play": {
+        "from": "home.needs",
+        "gesture": "click mac-mini"
+    },
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
+}

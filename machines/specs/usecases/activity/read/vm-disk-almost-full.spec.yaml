@@ -1,0 +1,12 @@
+description: 'linux-1''s own disk at 4 % free is linux-1''s finding, fixed by station disk --on linux-1'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].disk.free = 800000000'' world.json > w.json && /bin/mv w.json world.json; "$STATION" activity --on linux-1 | /usr/bin/head -4'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	Workspace · up 2h 0m · rates over 1 s
+          # Needs you
+          ✗	linux-1: disk almost full: 4 % free	station disk --on linux-1

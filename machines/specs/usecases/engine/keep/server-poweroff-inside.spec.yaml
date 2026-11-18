@@ -1,0 +1,29 @@
+description: 'a server powered off from inside stays stopped, wanted stopped, red, and the owner is told'
+env: two-macs
+runs:
+    - command: 'world poweroff-inside infra'
+      exit: 0
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ✗	infra	Server	mac-mini	Stopped · always on	8 CPU	24 GB	powered off from inside
+          # Needs you
+          ✗	infra	powered off from inside	station machines start infra --on mac-mini
+    - command: 'world advance 5m'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.state, .wanted, .restarts, .detail]'''
+      exit: 0
+      stdout: |
+          ["stopped","stopped",0,"powered off from inside"]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | [.pid, .kept.want]'' world.json'
+      exit: 0
+      stdout: |
+          [null,"stopped"]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]?.Text]'' world.json'
+      exit: 0
+      stdout: |
+          ["infra powered off from inside · it stays stopped"]

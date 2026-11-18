@@ -1,0 +1,42 @@
+description: 'init --machinefile with a file copies it among yours, binds it, plans and applies it'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro downloads/laptop.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: laptop
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd]
+      exit: 0
+    - command: 'init --name macbook-pro --machinefile downloads/laptop.machine.yaml'
+      exit: 0
+      stdout: |
+          ●	name	macbook-pro
+          ●	zshrc
+          ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart
+          # Machinefile
+          	downloads/laptop.machine.yaml: applied below, which binds it
+          # To install
+          ○	fd	brew
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ●	fd	10.3.0	brew
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [(.preferences.machinefile | .bound_at |= type), (.files | keys)]'' world.json'
+      exit: 0
+      stdout: |
+          [{"name":"laptop","bound_at":"string"},["downloads/laptop.machine.yaml","machinefiles/laptop.lock","machinefiles/laptop.machine.yaml"]]
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Packages
+          ●	homebrew	script	present
+          ●	jq	brew	present
+          ●	fd	brew	present
+    - command: 'explain apps.fd'
+      exit: 0
+      stdout: |
+          # laptop
+          	apps.fd	listed	user	laptop
+          	apps.fd.method	brew	lock	laptop
+          	apps.fd.because	locked	lock	laptop

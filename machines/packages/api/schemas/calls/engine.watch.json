@@ -1,0 +1,52 @@
+{
+  "$defs": {
+    "engine.WatchIn": {
+      "additionalProperties": false,
+      "properties": {
+        "machines": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "engine.Watching": {
+      "additionalProperties": false,
+      "properties": {
+        "machines": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "machines"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.watch.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch engine.watch of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.WatchIn"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.Watching"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.watch",
+  "type": "object"
+}

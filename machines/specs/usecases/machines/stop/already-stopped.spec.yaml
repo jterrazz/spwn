@@ -1,0 +1,7 @@
+description: 'stopping a VM that is already stopped changes nothing and says it is stopped'
+env: two-macs
+runs:
+    - command: 'machines stop api'
+      exit: 0
+      stdout: |
+          ○	api	is already stopped

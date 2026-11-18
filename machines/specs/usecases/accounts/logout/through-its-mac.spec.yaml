@@ -1,0 +1,11 @@
+description: 'a VM is signed out by the engine of its own Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Program, .Action] else .error | {code, subject} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"accounts.logout","in":{"Machine":"linux-1","Program":"claude","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          ["claude","sign-in"]

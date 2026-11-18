@@ -1,0 +1,28 @@
+description: 'station background reads running, failing, idle, not loaded and program-missing tasks'
+fixture:
+    - ./__fixtures__/jobs-states/
+runs:
+    - command: 'background'
+      exit: 0
+      stdout: |
+          # Failing	2 ✗
+          ✗	com.docker.vmnetd	root	failing · last exit 1	Docker.app	/Library/LaunchDaemons/com.docker.vmnetd.plist · sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
+          ✗	com.example.backup-failing	user	failing · last exit 78		~/Library/LaunchAgents/com.example.backup-failing.plist · station background remove com.example.backup-failing
+          # Orphans	1 ◐
+          ◐	com.example.ghost-missing	user	idle		~/Library/LaunchAgents/com.example.ghost-missing.plist · station background remove com.example.ghost-missing
+          # Known apps	1 ●
+          ●	com.docker.socket	root	running · pid 529	Docker.app	/Library/LaunchDaemons/com.docker.socket.plist
+          # Unknown	3 ●	2 ○
+          ○	com.example.cleanup-unloaded	user	not loaded		~/Library/LaunchAgents/com.example.cleanup-unloaded.plist
+          ●	com.example.report-idle	user	idle		~/Library/LaunchAgents/com.example.report-idle.plist
+          ●	com.example.sync-running	user	running · pid 1187		~/Library/LaunchAgents/com.example.sync-running.plist
+          ●	org.example.agent-idle	root	idle		/Library/LaunchDaemons/org.example.agent-idle.plist
+          ○	org.example.relay-unloaded	root	not loaded		/Library/LaunchDaemons/org.example.relay-unloaded.plist
+      files:
+          .calls:
+              equals: |
+                  launchctl list
+                  launchctl print system/com.docker.socket
+                  launchctl print system/com.docker.vmnetd
+                  launchctl print system/org.example.agent-idle
+                  launchctl print system/org.example.relay-unloaded

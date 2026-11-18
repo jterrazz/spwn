@@ -1,0 +1,12 @@
+# Needs you: reachable outside Tailscale, not declared public	1 ✗
+✗	mac-mini	5000	needs you	AirPlay Receiver	*:5000 all interfaces	declared no	System Settings > General > AirDrop & Handoff > AirPlay Receiver
+●	Tailscale	signed in · macbook-pro.tail1234.ts.net · ports are shared
+# Public: reachable from anywhere else, internet or LAN, declared	1 ●
+●	mac-mini	22	public	SSH	*:22 all interfaces	your LAN · Remote login · by Settings
+# Private: shared with you on Tailscale	2 ●	1 ○
+●	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
+○	linux-1	5432	private		not listening · reserved 40002	postgres
+●	infra	6443	private		own Tailscale device: infra	Kubernetes API
+	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
+	Reserved on mac-mini: 0 of 1000 (40000-40999), 1000 free
+	1 more listens on its machine only

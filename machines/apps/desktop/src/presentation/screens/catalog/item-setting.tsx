@@ -1,0 +1,154 @@
+import type { SettingsMatrix, SettingsRow } from '@jterrazz/station-api';
+
+import { Facts, Panel, Row, StatePill, Value } from '../../ui/index';
+import { countOf, wordOf } from '../../words/engine-words';
+import { kindChipWord, reversibleState } from '../../words/shown';
+import { needsOf } from './item-model';
+import {
+    factOf,
+    FileLinks,
+    ItemChips,
+    ItemHead,
+    MachineChips,
+    Rail,
+    systemsWord,
+    Two,
+} from './item-parts';
+import type { ItemProps } from './item-parts';
+import { Marked } from './marked';
+import { categoryWord } from './shelves';
+
+import styles from './item.module.css';
+
+function HowApplied({ row, go, routeOf }: ItemProps & { row: SettingsRow }) {
+    const setting = row.Package;
+    const undone = reversibleState(setting.Reversible);
+    const needs = needsOf(setting);
+    const asks = (setting.Inputs ?? []).map((input) =>
+        input.Label === '' ? input.Name : input.Label,
+    );
+    const systems = systemsWord(setting.Kinds ?? []);
+    const facts = [
+        { label: 'On', value: systems === '' ? null : systems },
+        { label: 'Asks you for', value: asks.length === 0 ? null : asks.join(', ') },
+    ].filter((fact) => fact.value !== null);
+    const needed = {
+        label: needs.oneOf ? 'Needs one of' : 'Needs',
+        value: <ItemChips go={go} names={needs.names} routeOf={routeOf} />,
+    };
+    return (
+        <Panel
+            action={undone ? <StatePill tone={undone.tone} word={undone.word} /> : undefined}
+            padded
+            title="How it is applied"
+        >
+            {facts.length === 0 ? null : <Facts facts={facts} layout="line" />}
+            {needs.names.length === 0 ? null : <Facts facts={[needed]} layout="line" />}
+        </Panel>
+    );
+}
+
+function Changes({ row }: { row: SettingsRow }) {
+    const writes = row.Package.Writes ?? [];
+    const sets = row.Package.Sets ?? [];
+    if (writes.length === 0 && sets.length === 0) {
+        return null;
+    }
+    return (
+        <Panel note="and nothing else" title="What it changes">
+            <div className={styles.rows}>
+                {writes.map((stored) => (
+                    <Row
+                        key={stored.Path}
+                        kind={wordOf('CatalogLevel', stored.Level).Word}
+                        sentence={<Marked>{stored.Note}</Marked>}
+                        size="slim"
+                        title={stored.Path}
+                        titleLook="mono"
+                    />
+                ))}
+                {sets.map((value) => (
+                    <Row
+                        key={value.Key}
+                        kind="value"
+                        sentence={
+                            <>
+                                set to <Value>{value.Value}</Value>
+                            </>
+                        }
+                        size="slim"
+                        title={value.Key}
+                        titleLook="mono"
+                    />
+                ))}
+            </div>
+        </Panel>
+    );
+}
+
+function countedOn(name: string, matrix: SettingsMatrix | undefined): string[] | undefined {
+    const held = (matrix?.Rows ?? []).find((one) => one.Name === name);
+    if (!held || !matrix) {
+        return undefined;
+    }
+    const columns = matrix.Columns ?? [];
+    return (held.Counts ?? []).flatMap((counted, index) => {
+        const column = columns[index];
+        return counted && column ? [column.Name] : [];
+    });
+}
+
+export function SettingItem({
+    row,
+    matrix,
+    declared,
+    ...props
+}: ItemProps & {
+    row: SettingsRow;
+    matrix: SettingsMatrix | undefined;
+    declared: readonly string[];
+}) {
+    const setting = row.Package;
+    const on = countedOn(row.Name, matrix);
+    return (
+        <>
+            <ItemHead
+                about={setting.Description}
+                kind="setting"
+                kindWord={kindChipWord('setting')}
+                name={row.Name}
+                version=""
+            />
+            <Two
+                main={
+                    <>
+                        <HowApplied {...props} row={row} />
+                        <Changes row={row} />
+                    </>
+                }
+                rail={
+                    <Rail
+                        facts={[
+                            factOf('Kind', wordOf('CatalogKind', 'setting').Word),
+                            factOf('Category', categoryWord(setting.Category)),
+                            factOf(
+                                'Declared in',
+                                declared.length === 0 ? null : (
+                                    <FileLinks go={props.go} names={declared} />
+                                ),
+                            ),
+                            factOf(
+                                on === undefined ? 'Machines' : countOf('machine', on.length),
+                                on === undefined ? null : (
+                                    <MachineChips go={props.go} macs={props.macs} names={on} />
+                                ),
+                            ),
+                            factOf('Comes from', null),
+                        ]}
+                        name={row.Name}
+                    />
+                }
+            />
+        </>
+    );
+}

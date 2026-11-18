@@ -1,0 +1,8 @@
+description: 'awake --on another Mac reads that Mac alone, through its engine'
+env: two-macs
+runs:
+    - command: 'awake --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)

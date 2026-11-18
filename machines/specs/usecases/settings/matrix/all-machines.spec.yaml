@@ -1,0 +1,34 @@
+description: 'the matrix: a column per Mac and workspace, a server apart, counts without –, Needs a look first'
+env: two-macs
+runs:
+    - command: 'settings apply dns --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	dns	dns: applied
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: '--version >/dev/null; printf ''# mine\n'' >> .local/bin/tart'
+      exit: 0
+    - command: 'settings --all-machines'
+      exit: 0
+      stdout: |
+          # Needs a look
+          ◐	macbook-pro	tart-launcher	changed since just now	station settings diff tart-launcher
+          ◐	macbook-pro	firewall	off	System Settings > Network > Firewall
+          # Machines
+          ●	macbook-pro	Mac	read
+          ●	mac-mini	Mac	read
+          ●	linux-1	Workspace	read
+          ?	api	Workspace	stopped · not read since the engine started
+          –	infra	Server	not checked: station does not manage its settings
+          # Set by station
+          ◐	tart-launcher	◐	○	–	?	0/2
+          ○	16 more	○ 0/16	○ 1/16	○ 0/6	?	1/38
+          # Always-on Mac
+          ○	5 settings	○	○ 3/5	–	?	3/5
+          # Checked
+          ◐	firewall	◐	●	–	?	1/2
+          ●	8 more	● 8/8	● 8/8	–	?	16/16

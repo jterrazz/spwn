@@ -1,0 +1,15 @@
+description: 'the Overview clipped to a short terminal below earlier output leaves one copy in the scrollback'
+fixture:
+    - ../../../__fixtures__/terminal/
+    - ./__fixtures__/recording/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 120x24 /bin/sh -c ''for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do echo earlier; done; exec /usr/bin/env -u NO_COLOR COLUMNS=120 "$STATION" overview'' > scroll.txt; /usr/bin/grep -c "^ station overview" scroll.txt; /usr/bin/grep -c "◌" scroll.txt; /usr/bin/grep -c "^earlier$" scroll.txt'
+      stdin: |
+          within 5 see Background
+          scrollback
+      exit: 0
+      stdout: |
+          0
+          0
+          30

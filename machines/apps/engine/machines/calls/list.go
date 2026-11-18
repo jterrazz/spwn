@@ -1,0 +1,161 @@
+package calls
+
+import (
+	"context"
+	"errors"
+
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
+)
+
+type ListIn struct {
+	// value: this host only, without asking the others.
+	ThisMac bool
+	// value: the fleet read only, the owner's client blocks left as they are.
+	Unwritten bool
+}
+
+type ListOut struct {
+	All machines.AllMachines
+	// value: the room of each Mac of All that said its memory.
+	Rooms []machines.Room
+	// value: the Mac a new VM goes on when none is named; empty when no
+	// awake Mac says its memory.
+	Roomiest string
+	// value: why the owner's client blocks for the fleet were not rewritten.
+	Unrefreshed error
+}
+
+var List = call.Watch[Deps, ListIn, ListOut]{
+	// invariant: each update is the fleet so far, a row more as each Mac
+	// answers; the last holds every Mac, and the ssh blocks are rewritten
+	// for it alone.
+	Name: "machines.list", Where: call.InProcess, Applies: machine.Anywhere,
+	Run: func(ctx context.Context, d Deps, in ListIn, _ call.Progress) (<-chan call.Update[ListOut], error) {
+		updates := make(chan call.Update[ListOut])
+		send := func(u call.Update[ListOut]) {
+			select {
+			case updates <- u:
+			case <-ctx.Done():
+			}
+		}
+		go func() {
+			defer close(updates)
+			allMachines, err := d.Machines.AllMachinesAsItFills(ctx, in.ThisMac, func(f machines.AllMachines) { send(call.Update[ListOut]{Value: listOut(f)}) })
+			if err != nil {
+				send(call.Update[ListOut]{Err: err})
+				return
+			}
+			out := listOut(allMachines)
+			if !in.ThisMac && !in.Unwritten {
+				out.Unrefreshed = errors.Join(d.Machines.SSHBlocks(ctx, allMachines), d.Machines.Remember(ctx, allMachines))
+			}
+			send(call.Update[ListOut]{Value: out})
+		}()
+		return updates, nil
+	},
+}
+
+func listOut(f machines.AllMachines) ListOut {
+	return ListOut{All: machines.Judged(f), Rooms: machines.Rooms(f), Roomiest: machines.Roomiest(f)}
+}
+
+type CreateIn struct {
+	Request machines.CreateRequest
+	// value: the answer to "build the missing image first?", asked only when
+	// the image is not built on this Mac.
+	Confirm string
+}
+
+var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
+	// invariant: a workspace, ephemeral or persistent; always on is a server's.
+	Name: "machines.create-workspace", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
+	Errors: workspaceRefusals(),
+	Run: func(ctx context.Context, d Deps, in CreateIn, p call.Progress) (machines.Created, error) {
+		r := in.Request
+		r.Server = false
+		var b ImageBuild
+		if image := missingImage(ctx, d, r); image != "" {
+			if err := confirm.Ask(confirm.BuildImage, d.Kind, d.OS, image, in.Confirm); err != nil {
+				return machines.Created{}, err
+			}
+			b = builds(d, image)
+		}
+		return create(ctx, d, r, b, p)
+	},
+}
+
+type CreateServerIn struct {
+	Name, Image string
+	Network     catalog.Network
+	Size        machines.Resources
+	// value: its health check, a URL or host:port; empty for none.
+	Check string
+	// value: what it is for, free text; the session that asks for it, by
+	// its name, empty for the owner.
+	Purpose, Creator string
+	// value: the answer to "build the missing image first?", asked only when
+	// the image is not built on this Mac.
+	Confirm string
+}
+
+var CreateServer = call.Call[Deps, CreateServerIn, machines.Created]{
+	// invariant: a server is always on, behind its Mac, and named; station
+	// sets up nothing inside it (SPEC §7.1).
+	Name: "machines.create-server", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
+	Errors: serverRefusals(),
+	Run: func(ctx context.Context, d Deps, in CreateServerIn, p call.Progress) (machines.Created, error) {
+		r := machines.CreateRequest{Image: in.Image, Name: in.Name, Server: true, Network: in.Network, Size: in.Size, Check: in.Check, Purpose: in.Purpose, Creator: in.Creator}
+		var b ImageBuild
+		if image := missingImage(ctx, d, r); image != "" {
+			if err := confirm.Ask(confirm.BuildImage, d.Kind, d.OS, image, in.Confirm); err != nil {
+				return machines.Created{}, err
+			}
+			b = builds(d, image)
+		}
+		created, err := create(ctx, d, r, b, p)
+		created.OnALaptop = err == nil && d.Laptop
+		return created, err
+	},
+}
+
+// value: the image a create would be refused for alone, not built on this
+// Mac; empty when it is built, when station only fetches it, or when another
+// refusal comes first.
+func missingImage(ctx context.Context, d Deps, r machines.CreateRequest) string {
+	_, err := d.Machines.CheckCreate(ctx, r)
+	if unbuilt := new(machines.NoImageError); errors.As(err, &unbuilt) && d.Images != nil {
+		if unbuilt.Fetched {
+			return ""
+		}
+		return unbuilt.Image
+	}
+	return ""
+}
+
+// value: the build of image on this Mac, which the create runs once its
+// record holds the VM.
+func builds(d Deps, image string) ImageBuild {
+	return func(ctx context.Context, step func(label string)) error {
+		return imagescalls.Worded(d.Images.Build(ctx, image, step))
+	}
+}
+
+func create(ctx context.Context, d Deps, r machines.CreateRequest, b ImageBuild, p call.Progress) (machines.Created, error) {
+	last := ""
+	created, err := d.Machines.Create(ctx, r, b, func(s machines.Step) {
+		if last != "" {
+			p.Done(last, nil)
+		}
+		last = s.Label
+		p.Step(s.Label, "")
+	})
+	if last != "" {
+		p.Done(last, err)
+	}
+	return created, err
+}

@@ -1,0 +1,13 @@
+#!/bin/sh
+# tart behind its launcher: it answers its version, a prune is recorded.
+case "$1" in
+    --version) echo "2.30.0" ;;
+    prune)
+        printf 'tart %s\n' "$*" >> "$HOME/.calls"
+        if [ -f "$HOME/tart-prune.exit" ]; then echo boom >&2; exit "$(/bin/cat "$HOME/tart-prune.exit")"; fi
+        ;;
+    *)
+        echo "stub tart: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

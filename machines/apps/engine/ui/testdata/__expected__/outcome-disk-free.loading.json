@@ -1,0 +1,112 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "disk free",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "outcome",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "homebrew",
+            "mark": "pending",
+            "label": "homebrew",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424,
+                "unit": "freed",
+                "stale": true
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "bun",
+            "mark": "pending",
+            "label": "bun",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "freed",
+      "title": "Freed",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "outcome",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "freed",
+            "mark": "pending",
+            "label": "Freed",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424,
+                "stale": true
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ],
+      "uncounted": true
+    }
+  ]
+}

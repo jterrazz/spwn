@@ -1,0 +1,12 @@
+description: 'station apps remove piped without --yes is refused and removes nothing, exit 2'
+env: two-macs
+runs:
+    - command: 'apps remove lazygit'
+      exit: 2
+      stderr: |
+          Error: refusing to remove without --yes
+          Hint: re-run with --yes
+    - command: 'apps lazygit | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	lazygit	0.55.1	brew

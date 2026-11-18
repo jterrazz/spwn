@@ -1,0 +1,19 @@
+description: 'a Meter silent past 2 s: every value says so, the Overview''s line too, the rest fills, exit 0'
+env: two-macs
+runs:
+    - command: 'world fault Meter.Sample'
+      exit: 0
+    - command: 'activity'
+      exit: 0
+      stdout: |
+          ✗	This Mac	the meter does not answer	no answer in 2 s
+          # Now
+          	CPU	? · no answer in 2 s
+          	Memory	? · no answer in 2 s
+          	Disk	? · no answer in 2 s
+          	Network	? · no answer in 2 s
+    - command: 'overview | /usr/bin/grep -E "	(Activity|Apps)	"'
+      exit: 0
+      stdout: |
+          	Activity	? no answer in 2 s
+          	Apps	● 7 ok · ◐ 2 updates · ○ 105 not installed

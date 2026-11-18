@@ -1,0 +1,22 @@
+description: 'on a terminal a name typed wrong erases nothing: one block, exit 1'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" disk erase xcode'
+      stdin: |
+          see Type xcode
+          send xcod\r
+          see Hint:
+          screen
+      exit: 1
+      stdout: |
+          ┃ Type xcode to erase its data:
+          Error: not erased: you typed "xcod", not "xcode"
+          Hint: station disk erase xcode
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {derived: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], devices: .["~/Library/Developer/CoreSimulator/Devices/A/data"]}'' world.json'
+      exit: 0
+      stdout: |
+          {"derived":5800000000,"devices":19100000000}

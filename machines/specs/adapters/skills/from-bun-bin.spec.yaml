@@ -1,0 +1,13 @@
+description: 'a skill installs through the skills CLI in bun''s relocated bin, off the caller''s PATH'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/skills-in-bun-bin/
+runs:
+    - command: 'apps install frontend-design'
+      exit: 0
+      stdout: |
+          ●	frontend-design		skill
+      files:
+          .calls:
+              contains:
+                  - 'skills add -g -y --skill frontend-design'

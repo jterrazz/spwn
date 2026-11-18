@@ -1,0 +1,4 @@
+#!/bin/sh
+# xcrun: every simctl call is recorded and succeeds. Anything else exits 97.
+printf 'xcrun %s\n' "$*" >> "$HOME/.calls"
+[ "$1" = simctl ] || exit 97

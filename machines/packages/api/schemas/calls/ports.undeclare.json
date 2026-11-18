@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "ports.Declaration": {
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "type": "string"
+        },
+        "machine": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        },
+        "via": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "machine",
+        "port",
+        "via"
+      ],
+      "type": "object"
+    },
+    "ports.calls.UndeclareIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "Machine": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ports.calls.UndeclareOut": {
+      "additionalProperties": false,
+      "properties": {
+        "Declaration": {
+          "$ref": "#/$defs/ports.Declaration"
+        }
+      },
+      "required": [
+        "Declaration"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/ports.undeclare.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call ports.undeclare of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/ports.calls.UndeclareIn"
+    },
+    "out": {
+      "$ref": "#/$defs/ports.calls.UndeclareOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "ports.undeclare",
+  "type": "object"
+}

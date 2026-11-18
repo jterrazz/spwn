@@ -1,0 +1,22 @@
+package: station.package/v1
+kind: app
+name: postgres
+description: Relational database server
+provides: [postgres, psql]
+ports:
+    - port: 5432
+      label: Postgres
+methods:
+    - os: ubuntu
+      provides: [psql]
+      needs: [sudo]
+      apt: { packages: [postgresql] }
+    # outside: Homebrew links no versioned formula, so postgres and psql are
+    # found in the keg's bin alone.
+    - os: macos
+      path: [/opt/homebrew/opt/postgresql@18/bin, /usr/local/opt/postgresql@18/bin]
+      brew: postgresql@18
+      shell:
+          - id: station:postgres/path
+            zsh: |
+                [[ -d {{ brew.prefix }}/opt/postgresql@18/bin ]] && path=({{ brew.prefix }}/opt/postgresql@18/bin $path)

@@ -1,0 +1,12 @@
+description: 'a free of an app with no Disk row is refused before anything is freed'
+env: two-macs
+runs:
+    - command: 'disk free gooo'
+      exit: 2
+      stderr: |
+          Error: no disk row for "gooo"
+          Hint: station disk
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.free'' world.json'
+      exit: 0
+      stdout: |
+          388000000000

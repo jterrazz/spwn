@@ -1,0 +1,11 @@
+description: 'a share sent with --on reserves on that Mac, at its tailnet name; This Mac reserves nothing'
+env: two-macs
+runs:
+    - command: 'ports share infra 8080 --on mac-mini'
+      exit: 0
+      stdout: |
+          https://mac-mini.tail1234.ts.net:40000
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {mini: [.["mac-mini"].stores.reservations[] | [.vm, .guest_port, .host_port]], here: [.["macbook-pro"].stores.reservations[].guest_port]}'' world.json'
+      exit: 0
+      stdout: |
+          {"mini":[["infra",8080,40000]],"here":[5173,7000]}

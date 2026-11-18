@@ -1,0 +1,13 @@
+description: 'an update on another Mac fetches the image there, This Mac''s untouched'
+env: two-macs
+runs:
+    - command: 'images update base-ubuntu --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	base-ubuntu	2026.11.03	fetched
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.newest) | "\(.mac) \(.version)"'''
+      exit: 0
+      stdout: |
+          macbook-pro 2026.11.01
+          mac-mini 2026.11.03

@@ -1,0 +1,13 @@
+description: 'machines.new offers base-ubuntu on the roomiest Mac, a silent one disabled with why'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world offline mac-mini'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {From, Name, Size, Lifetime, Lifetimes, MinMemory, Mac, Server, On: [.On[] | {Mac, Ready, Verdict: .Verdict.Sentence, MaxMemory, RoomFor: .Room.RoomFor, Server: .Server.Fit}]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.new","in":{}}
+      exit: 0
+      stdout: |
+          {"From":"base-ubuntu","Name":"linux-2","Size":{"CPUs":4,"MemoryBytes":8589934592,"DiskBytes":20000000000},"Lifetime":"ephemeral","Lifetimes":["ephemeral","persistent"],"MinMemory":2147483648,"Mac":"macbook-pro","Server":{"Image":"base-ubuntu","Size":{"CPUs":4,"MemoryBytes":8589934592,"DiskBytes":50000000000}},"On":[{"Mac":"macbook-pro","Ready":true,"Verdict":"","MaxMemory":4294967296,"RoomFor":"small","Server":"no-room"},{"Mac":"mac-mini","Ready":false,"Verdict":"mac-mini does not answer","MaxMemory":0,"RoomFor":null,"Server":null}]}

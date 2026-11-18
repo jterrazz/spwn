@@ -1,0 +1,24 @@
+description: 'tailscale status is read running, with Serve off, signed out and stopped'
+fixture:
+    - ../../__fixtures__/vms/
+env: engine
+runs:
+    - command: 'ports --json | /usr/bin/jq -c ''.tailscale | [.state, .serve]'''
+      exit: 0
+      stdout: |
+          ["on","on"]
+    - command: '--version >/dev/null; : > answers/tailscale/status.serve-off; "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.state, .serve]''; "$STATION" ports | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ["serve-off","off"]
+          ◐	Tailscale	signed in · macbook.tail1234.ts.net · ports are local only	Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console
+    - command: '--version >/dev/null; /bin/rm answers/tailscale/status.serve-off; /usr/bin/sed -i.bak ''s/"BackendState": *"Running"/"BackendState":"NeedsLogin"/'' answers/tailscale/status.json; "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.state, .serve]''; "$STATION" ports | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ["signed-out","off"]
+          ✗	Tailscale	is signed out on This Mac: ports are local only	open Tailscale and sign in
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"BackendState":"NeedsLogin"/"BackendState":"Stopped"/'' answers/tailscale/status.json; "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.state, .serve]''; "$STATION" ports | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ["signed-out","off"]
+          ✗	Tailscale	is signed out on This Mac: ports are local only	open Tailscale and sign in

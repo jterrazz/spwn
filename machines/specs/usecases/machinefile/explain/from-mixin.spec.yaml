@@ -1,0 +1,43 @@
+description: 'a Machinefile that extends a mixin takes its values, its own win, and its overlay adds and removes'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/base.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: base
+          apps: [git, jq]
+          accounts: { signins: [gh] }
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          extends: [base]
+          apps: [gh]
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.local.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          overrides: macbook-pro
+          apps: { add: [lazygit], remove: [jq] }
+      exit: 0
+    - command: 'explain'
+      exit: 0
+      stdout: |
+          # macbook-pro
+          	machine.kind	computer	user	macbook-pro
+          	machine.system.os	macos	user	macbook-pro
+          	apps.git	listed	user	base
+          	apps.git.method	shell	built-in	git
+          	apps.git.because	its one method for macos	built-in	git
+          	apps.homebrew	the manager of gh	built-in	gh
+          	apps.homebrew.method	script	built-in	homebrew
+          	apps.homebrew.because	its one method for macos	built-in	homebrew
+          	apps.gh	listed	user	macbook-pro
+          	apps.gh.method	brew	built-in	gh
+          	apps.gh.because	its one method for macos	built-in	gh
+          	apps.lazygit	listed	overlay	macbook-pro
+          	apps.lazygit.method	brew	built-in	lazygit
+          	apps.lazygit.because	its one method for macos	built-in	lazygit
+          	accounts.signins.gh	signs in	user	base

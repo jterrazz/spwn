@@ -1,0 +1,699 @@
+{
+  "schema": "station.page/v1",
+  "id": "home",
+  "command": "status",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "todo",
+      "title": "To do",
+      "role": "actions",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "workspace/misplaced",
+            "mark": "attention",
+            "label": "misplaced",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "count",
+                  "n": 2,
+                  "unit": "misplaced folders"
+                },
+                {
+                  "kind": "size",
+                  "n": 80530636800
+                }
+              ]
+            },
+            "reason": "misplaced",
+            "hint": {
+              "command": "station disk move ~/.tart"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/machine",
+            "mark": "pending",
+            "label": "Machine",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Mac"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Darwin 27.0.0"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/network",
+            "mark": "pending",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "192.168.1.152"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "4/4 on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/tailnet",
+            "mark": "pending",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "off"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/identity",
+            "mark": "pending",
+            "label": "Identity",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not set"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/apps",
+            "mark": "pending",
+            "label": "Apps",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "label": "pending"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/settings",
+            "mark": "pending",
+            "label": "Settings",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "label": "pending"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/disk",
+            "mark": "ok",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "size",
+                    "n": 27917287424,
+                    "unit": "reclaimable"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 2,
+                    "unit": "misplaced"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/all-machines",
+            "mark": "pending",
+            "label": "All machines",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "macbook"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/gateways",
+            "mark": "pending",
+            "label": "Gateways",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "label": "pending"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "break": 4
+    },
+    {
+      "id": "machine",
+      "title": "Machine",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "name",
+            "mark": "ok",
+            "label": "name",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "macbook"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "Darwin 27.0.0 arm64"
+                },
+                {
+                  "kind": "text",
+                  "text": "you"
+                },
+                {
+                  "kind": "text",
+                  "text": "zsh"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "uptime",
+            "mark": "pending",
+            "label": "uptime"
+          }
+        },
+        {
+          "row": {
+            "id": "setup",
+            "mark": "pending",
+            "label": "setup"
+          }
+        },
+        {
+          "row": {
+            "id": "engine",
+            "mark": "pending",
+            "label": "engine"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "pending",
+          "n": 3
+        }
+      ]
+    },
+    {
+      "id": "environment",
+      "title": "Environment",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "local ip",
+            "mark": "ok",
+            "label": "local ip",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "192.168.1.152"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "filevault",
+            "mark": "ok",
+            "label": "filevault",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "firewall",
+            "mark": "ok",
+            "label": "firewall",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "sip",
+            "mark": "ok",
+            "label": "sip",
+            "cells": [
+              {
+                "kind": "off"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "gatekeeper",
+            "mark": "ok",
+            "label": "gatekeeper",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macos",
+            "mark": "pending",
+            "label": "macos"
+          }
+        },
+        {
+          "row": {
+            "id": "brew",
+            "mark": "pending",
+            "label": "brew"
+          }
+        },
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "pending",
+            "label": "Tailscale"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 5
+        },
+        {
+          "mark": "pending",
+          "n": 3
+        }
+      ]
+    },
+    {
+      "id": "workspace",
+      "title": "Workspace",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "disk",
+            "mark": "pending",
+            "label": "disk",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424,
+                "stale": true
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "tart/0",
+            "mark": "attention",
+            "label": "tart",
+            "cells": [
+              {
+                "kind": "path",
+                "text": "~/.tart"
+              }
+            ],
+            "detail": {
+              "kind": "size",
+              "n": 78383153152
+            },
+            "reason": "misplaced",
+            "hint": {
+              "command": "station disk move ~/.tart"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "bun/1",
+            "mark": "attention",
+            "label": "bun",
+            "cells": [
+              {
+                "kind": "path",
+                "text": "~/.bun"
+              }
+            ],
+            "detail": {
+              "kind": "size",
+              "n": 2147483648
+            },
+            "reason": "misplaced",
+            "hint": {
+              "command": "station disk move ~/.bun"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 2
+        },
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "identity",
+      "title": "Identity",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "git-email",
+            "mark": "pending",
+            "label": "git email"
+          }
+        },
+        {
+          "row": {
+            "id": "git-signing",
+            "mark": "pending",
+            "label": "git signing"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "gateways",
+      "title": "Gateways",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "Tailscale Serve",
+            "mark": "pending",
+            "label": "Tailscale Serve"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "apps",
+      "title": "Apps",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "catalogue",
+            "mark": "pending",
+            "label": "catalogue"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "title": "Settings",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "packages",
+            "mark": "pending",
+            "label": "packages"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station overview | cat",
+      "external": true,
+      "text": "for records"
+    }
+  ],
+  "actions": [
+    {
+      "key": "enter",
+      "label": "fix",
+      "on": "row",
+      "rows": [
+        "workspace/misplaced"
+      ],
+      "mutates": true
+    }
+  ]
+}

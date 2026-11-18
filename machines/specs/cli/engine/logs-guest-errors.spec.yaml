@@ -1,0 +1,11 @@
+description: 'the engine logs why a guest does not connect, once per new reason, on its stderr'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/vm-api/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo stopped > .tart-vms/api; STATION_GUEST_SSH_PORT=9 "$STATION" engine run 2> daemon.err & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; ("$STATION" machines start api >/dev/null 2>&1 &); n=0; until "$STATION" machines --json 2>/dev/null | /usr/bin/jq -e ''[.macs[].vms[] | select(.state == "running")] | length > 0'' >/dev/null || [ $n -ge 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /bin/sleep 4; kill $d; wait $d; echo stopped > .tart-vms/api; /usr/bin/grep -v "tailnet: certificate for" daemon.err | /usr/bin/cut -d" " -f2-'
+      exit: 0
+      stdout: |
+          api guest: dial tcp 127.0.0.1:9: connect: connection refused

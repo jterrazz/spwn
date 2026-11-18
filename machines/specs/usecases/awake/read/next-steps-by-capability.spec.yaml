@@ -1,0 +1,21 @@
+description: 'awake offers --lid as its next step only on a Mac that reports a lid'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" awake | /usr/bin/grep "station awake 4h"'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          → station awake 4h --lid          this Mac
+          → station awake 4h --on mac-mini  another Mac
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].power.Lid = ""'' world.json > lidless.json && /bin/mv lidless.json world.json; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" awake | /usr/bin/grep "station awake 4h"'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          → station awake 4h                this Mac
+          → station awake 4h --on mac-mini  another Mac

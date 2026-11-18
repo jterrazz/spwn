@@ -1,0 +1,17 @@
+description: 'an apply naming no setting is refused before any effect'
+env: two-macs
+runs:
+    - command: 'settings apply hushlogin firewal'
+      exit: 2
+      stderr: |
+          Error: no setting named "firewal"
+          Hint: station settings
+    - command: 'settings hushlogin'
+      exit: 0
+      stdout: |
+          ○	hushlogin	not applied	station settings apply hushlogin
+          # Detail
+          group	Set by station
+          does	Silence the terminal login message
+          lives on	Macs, Linux VMs, macOS VMs
+          where	~/.hushlogin

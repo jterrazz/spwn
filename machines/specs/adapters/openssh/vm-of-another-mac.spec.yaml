@@ -1,0 +1,35 @@
+description: 'bare machines writes a block for a VM of another Mac, with the VM login'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ../../__fixtures__/fleet-y-answers/
+runs:
+    - command: 'machines --json | /usr/bin/jq -r ''.macs | length | tostring'''
+      exit: 0
+      stdout: |
+          2
+      files:
+          .ssh/config:
+              equals: |
+                  # >>> jterrazz machine y >>>
+                  Host y
+                    HostName y
+                    User u
+                    IdentityFile ~/.ssh/id_ed25519
+                    ServerAliveInterval 30
+                    ServerAliveCountMax 3
+                    UserKnownHostsFile ~/.local/state/station/known_hosts/y
+                    StrictHostKeyChecking accept-new
+                  # <<< jterrazz machine y <<<
+
+                  # >>> jterrazz machine w >>>
+                  Host w
+                    HostName w
+                    User vmu
+                    IdentityFile ~/.ssh/id_ed25519
+                    ServerAliveInterval 30
+                    ServerAliveCountMax 3
+                    UserKnownHostsFile ~/.local/state/station/known_hosts/w
+                    StrictHostKeyChecking accept-new
+                    ProxyCommand ssh y -- "sh -c 'PATH=\"\$HOME/.local/bin:/usr/local/bin:\$PATH\" exec station \"\$@\"' station machines pipe w"
+                  # <<< jterrazz machine w <<<

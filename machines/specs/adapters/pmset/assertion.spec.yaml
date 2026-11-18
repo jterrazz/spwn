@@ -1,0 +1,28 @@
+description: 'a keep-awake holds one idle assertion through the engine, and only --lid touches the clamshell'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/power/
+env: engine
+runs:
+    - command: '--version > /dev/null; "$STATION" engine run 2> engine.log & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; : > .calls; "$STATION" awake 4h > /dev/null; /bin/cat .calls; "$STATION" awake --json | /usr/bin/jq ''(.macs[0].until_at|fromdate) - now | . > 14300 and . <= 14400''; "$STATION" awake 1h --lid > /dev/null; /bin/cat .calls; "$STATION" awake --json | /usr/bin/jq -c ''.macs[0] | [.mode, .lid]''; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          power assert idle station: station awake 4h
+          true
+          power assert idle station: station awake 4h
+          power clamshell disabled
+          ["awake-until",true]
+    - command: 'awake 30h'
+      exit: 2
+      stderr: |
+          Error: "30h" is not between 1 min and 24 h
+          Hint: station awake 4h
+    - command: 'awake 30s'
+      exit: 2
+      stderr: |
+          Error: "30s" is not between 1 min and 24 h
+          Hint: station awake 4h
+    - command: '--version > /dev/null; : > .calls; "$STATION" awake 30h 2> /dev/null; "$STATION" awake 30s 2> /dev/null; /usr/bin/wc -l < .calls | /usr/bin/tr -d " "'
+      exit: 0
+      stdout: |
+          0

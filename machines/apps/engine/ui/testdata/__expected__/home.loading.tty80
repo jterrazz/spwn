@@ -1,0 +1,19 @@
+To do
+  ◐ misplaced  2 misplaced folders · 80.5 GB  → station disk move ~/.tart
+Summary
+  ◌ Machine    Mac · Darwin 27.0.0       ◌ Apps          1 ◌
+  ◌ Network    192.168.1.152 · 4/4 on    ◌ Settings      1 ◌
+  ◌ Tailscale  off                       ● Disk
+  ◌ Identity   not set                     27.9 GB reclaimable · 2 misplaced
+  ◌ All machines  macbook
+  ◌ Gateways      1 ◌
+Machine      ● 1  ◌ 3 · name, uptime, setup, engine
+Environment  ● 5  ◌ 3 · local ip, filevault, firewall, sip, gatekeeper, …
+Workspace    ◐ 2  ◌ 1 · disk, tart, bun
+Identity     ◌ 2 · git email, git signing
+Gateways     ◌ 1 · Tailscale Serve
+Apps         ◌ 1 · catalogue
+Settings     ◌ 1 · packages
+
+→ station overview --all  for every row
+→ station overview | cat  for records

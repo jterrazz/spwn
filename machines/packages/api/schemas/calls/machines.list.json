@@ -1,0 +1,1190 @@
+{
+  "$defs": {
+    "core.call.WireError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "apps.lives-elsewhere",
+            "apps.no-method",
+            "apps.not-installed",
+            "apps.unknown",
+            "apps.unpinnable",
+            "awake.no-battery",
+            "awake.no-lid",
+            "awake.out-of-bounds",
+            "awake_guard",
+            "awake_range",
+            "awake_unsupported",
+            "background.is-the-engine",
+            "background.root-scope",
+            "background.unknown",
+            "call.bad-frame",
+            "call.bad-input",
+            "call.bad-output",
+            "call.needs",
+            "call.unknown",
+            "catalog.invalid",
+            "catalog.newer-schema",
+            "confirm.declined",
+            "confirm.mismatch",
+            "confirm.needed",
+            "confirm.yes-needed",
+            "disk.app-running",
+            "disk.lives-elsewhere",
+            "disk.names-needed",
+            "disk.never-touched",
+            "disk.not-freeable",
+            "disk.not-misplaced",
+            "disk.nothing-to-erase",
+            "disk.nothing-to-free",
+            "disk.record-unreadable",
+            "disk.unknown",
+            "engine.start-failed",
+            "grant.cannot-deliver",
+            "grant.machine-stopped",
+            "grant.many-passwords",
+            "grant.no-password",
+            "grant.no-presence",
+            "grant.not-granted",
+            "grant.other-mac",
+            "grant.presence-refused",
+            "grant.signed-in-here",
+            "grant.to-server",
+            "grant.unknown-entry",
+            "grant.unknown-machine",
+            "guest_absent",
+            "guest_timeout",
+            "ignored_port",
+            "image.binary-not-found",
+            "image.in-use",
+            "image.no-hypervisor",
+            "image.no-linux-binary",
+            "image.no-recipe",
+            "image.old-record",
+            "image.unknown",
+            "internal",
+            "login.already-signed-in",
+            "login.busy",
+            "login.code-refused",
+            "login.expired",
+            "login.failed",
+            "login.granted",
+            "login.machine-stopped",
+            "login.no-exchange",
+            "login.not-asking",
+            "login.not-installed",
+            "login.not-signed-in",
+            "login.other-mac",
+            "login.site-refused",
+            "login.unknown-program",
+            "machinefile.bad-phase",
+            "machinefile.bad-value",
+            "machinefile.busy",
+            "machinefile.cycle",
+            "machinefile.invalid",
+            "machinefile.mixin",
+            "machinefile.name-taken",
+            "machinefile.needs-terminal",
+            "machinefile.newer-schema",
+            "machinefile.no-method",
+            "machinefile.not-a-template",
+            "machinefile.not-found",
+            "machinefile.source-unavailable",
+            "machinefile.unknown-key",
+            "machinefile.unknown-package",
+            "machinefile.unpinnable",
+            "machinefile.vm-on-a-computer",
+            "machines.bad-check",
+            "machines.bad-creator",
+            "machines.bad-lifetime",
+            "machines.bad-name",
+            "machines.bad-network",
+            "machines.bad-purpose",
+            "machines.being-created",
+            "machines.check-for-servers",
+            "machines.engine-down",
+            "machines.name-taken",
+            "machines.no-hypervisor",
+            "machines.no-image",
+            "machines.not-enough-memory",
+            "machines.not-finished",
+            "machines.server-bridged",
+            "machines.server-needs-name",
+            "machines.server-template",
+            "machines.too-little-memory",
+            "machines.unknown-image",
+            "not_allowed",
+            "port.audience-inside-vm",
+            "port.audience-not-kept",
+            "port.engine-too-old",
+            "port.needs-route",
+            "port.needs-vm",
+            "port.not-declared",
+            "port.not-found",
+            "port.on-another-mac",
+            "port.range-full",
+            "port.signed-out",
+            "port.unknown-audience",
+            "port.unknown-route",
+            "range_full",
+            "remote.caller-too-old",
+            "remote.far-too-old",
+            "remote.no-station",
+            "remote.unreachable",
+            "remote.vm-mac-unreachable",
+            "section.not-for-this-machine",
+            "setting.checked",
+            "setting.needs-admin",
+            "setting.needs-terminal",
+            "setting.not-applied",
+            "setting.not-for-this-machine",
+            "setting.unknown",
+            "unknown_op",
+            "unknown_page",
+            "unknown_vm",
+            "usage.entry-without-verb",
+            "usage.missing-argument",
+            "usage.needs-terminal",
+            "usage.unknown-command",
+            "vault.cannot-capture",
+            "vault.empty-label",
+            "vault.empty-value",
+            "vault.label-taken",
+            "vault.not-signed-in",
+            "vault.unknown",
+            "vm_stopped"
+          ],
+          "type": "string"
+        },
+        "detail": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "exit": {
+          "type": "integer"
+        },
+        "field": {
+          "enum": [
+            "label",
+            "value"
+          ],
+          "type": "string"
+        },
+        "fix": {
+          "$ref": "#/$defs/core.finding.Fix"
+        },
+        "hint": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "refused",
+            "not-found",
+            "not-for-this-machine",
+            "needs-confirmation",
+            "needs-terminal",
+            "declined",
+            "unreachable",
+            "engine-stopped",
+            "far-too-old",
+            "failed",
+            "interrupted"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    },
+    "core.finding.Fix": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Command": {
+          "type": "string"
+        },
+        "Confirm": {
+          "type": "string"
+        },
+        "On": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Call",
+        "Command",
+        "Confirm",
+        "On",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "core.machine.Hardware": {
+      "additionalProperties": false,
+      "properties": {
+        "CPUs": {
+          "type": "integer"
+        },
+        "Chip": {
+          "type": "string"
+        },
+        "Ether": {
+          "type": "string"
+        },
+        "Memory": {
+          "type": "integer"
+        },
+        "Model": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "CPUs",
+        "Memory"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
+    "machines.AllMachines": {
+      "additionalProperties": false,
+      "properties": {
+        "Macs": {
+          "items": {
+            "$ref": "#/$defs/machines.MacView"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Read": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Standing": {
+          "$ref": "#/$defs/machines.RollUp"
+        }
+      },
+      "required": [
+        "Macs",
+        "Read"
+      ],
+      "type": "object"
+    },
+    "machines.Birth": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer"
+        },
+        "progress": {
+          "type": "integer"
+        },
+        "sentence": {
+          "type": "string"
+        },
+        "step": {
+          "enum": [
+            "building",
+            "cloning",
+            "booting",
+            "address",
+            "ssh"
+          ],
+          "type": "string"
+        },
+        "steps": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "position",
+        "progress",
+        "sentence",
+        "step",
+        "steps"
+      ],
+      "type": "object"
+    },
+    "machines.Capacity": {
+      "additionalProperties": false,
+      "properties": {
+        "Free": {
+          "type": "integer"
+        },
+        "MacOS": {
+          "type": "integer"
+        },
+        "Total": {
+          "type": "integer"
+        },
+        "VMs": {
+          "items": {
+            "$ref": "#/$defs/machines.Share"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Free",
+        "MacOS",
+        "Total",
+        "VMs"
+      ],
+      "type": "object"
+    },
+    "machines.CheckStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "since": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "waiting",
+            "passing",
+            "failing"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "machines.EngineView": {
+      "additionalProperties": false,
+      "properties": {
+        "State": {
+          "enum": [
+            "running",
+            "stopped",
+            "not-installed"
+          ],
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Version"
+      ],
+      "type": "object"
+    },
+    "machines.Hold": {
+      "additionalProperties": false,
+      "properties": {
+        "By": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "always-on",
+            "held",
+            "free",
+            "yours",
+            "not-seen"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "State"
+      ],
+      "type": "object"
+    },
+    "machines.Incident": {
+      "additionalProperties": false,
+      "properties": {
+        "cause": {
+          "type": "string"
+        },
+        "from": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "to": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from"
+      ],
+      "type": "object"
+    },
+    "machines.KeptDrift": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Differences": {
+          "type": "integer"
+        },
+        "Failed": {
+          "type": "string"
+        },
+        "Unbound": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "At",
+        "Differences"
+      ],
+      "type": "object"
+    },
+    "machines.LatencyPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "took": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "took"
+      ],
+      "type": "object"
+    },
+    "machines.MacView": {
+      "additionalProperties": false,
+      "properties": {
+        "Answered": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Asleep": {
+          "type": "boolean"
+        },
+        "Awake": {
+          "type": "string"
+        },
+        "Engine": {
+          "$ref": "#/$defs/machines.EngineView"
+        },
+        "Hardware": {
+          "$ref": "#/$defs/core.machine.Hardware"
+        },
+        "LAN": {
+          "type": "string"
+        },
+        "Laptop": {
+          "type": "boolean"
+        },
+        "Machines": {
+          "$ref": "#/$defs/machines.RollUp"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Node": {
+          "$ref": "#/$defs/machines.Node"
+        },
+        "Reachable": {
+          "type": "boolean"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Standing": {
+          "enum": [
+            "asleep",
+            "not-seen",
+            "engine-stopped",
+            "engine-not-installed",
+            "online"
+          ],
+          "type": "string"
+        },
+        "StationVersion": {
+          "type": "string"
+        },
+        "ThisMac": {
+          "type": "boolean"
+        },
+        "Unseen": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
+        "User": {
+          "type": "string"
+        },
+        "VMs": {
+          "items": {
+            "$ref": "#/$defs/machines.VM"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Asleep",
+        "Engine",
+        "Hardware",
+        "LAN",
+        "Laptop",
+        "Name",
+        "Node",
+        "Reachable",
+        "StationVersion",
+        "ThisMac",
+        "User",
+        "VMs"
+      ],
+      "type": "object"
+    },
+    "machines.Node": {
+      "additionalProperties": false,
+      "properties": {
+        "IP": {
+          "type": "string"
+        },
+        "Online": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "IP",
+        "Online"
+      ],
+      "type": "object"
+    },
+    "machines.PresetOn": {
+      "additionalProperties": false,
+      "properties": {
+        "Fit": {
+          "enum": [
+            "fits",
+            "no-room"
+          ],
+          "type": "string"
+        },
+        "MemoryBytes": {
+          "type": "integer"
+        },
+        "Preset": {
+          "enum": [
+            "small",
+            "workspace",
+            "gate"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Fit",
+        "MemoryBytes",
+        "Preset"
+      ],
+      "type": "object"
+    },
+    "machines.Resources": {
+      "additionalProperties": false,
+      "properties": {
+        "CPUs": {
+          "type": "integer"
+        },
+        "DiskBytes": {
+          "type": "integer"
+        },
+        "MemoryBytes": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "CPUs",
+        "DiskBytes",
+        "MemoryBytes"
+      ],
+      "type": "object"
+    },
+    "machines.RestartWalk": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "step": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "step"
+      ],
+      "type": "object"
+    },
+    "machines.Restarts": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "last": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "looping": {
+          "type": "boolean"
+        },
+        "recent": {
+          "items": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "streak": {
+          "type": "integer"
+        },
+        "wait": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "machines.RollUp": {
+      "additionalProperties": false,
+      "properties": {
+        "N": {
+          "type": "integer"
+        },
+        "State": {
+          "enum": [
+            "down",
+            "engine-stopped",
+            "not-seen",
+            "engine-not-installed",
+            "empty",
+            "fine"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "State"
+      ],
+      "type": "object"
+    },
+    "machines.Room": {
+      "additionalProperties": false,
+      "properties": {
+        "Capacity": {
+          "$ref": "#/$defs/machines.Capacity"
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "Presets": {
+          "items": {
+            "$ref": "#/$defs/machines.PresetOn"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "RoomFor": {
+          "enum": [
+            "small",
+            "workspace",
+            "gate",
+            "none"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Capacity",
+        "Mac",
+        "Presets",
+        "RoomFor"
+      ],
+      "type": "object"
+    },
+    "machines.Sections": {
+      "additionalProperties": false,
+      "properties": {
+        "Accounts": {
+          "type": "boolean"
+        },
+        "Activity": {
+          "type": "boolean"
+        },
+        "Apps": {
+          "type": "boolean"
+        },
+        "Awake": {
+          "type": "boolean"
+        },
+        "Background": {
+          "type": "boolean"
+        },
+        "Disk": {
+          "type": "boolean"
+        },
+        "Overview": {
+          "type": "boolean"
+        },
+        "Ports": {
+          "type": "boolean"
+        },
+        "SSH": {
+          "type": "boolean"
+        },
+        "Settings": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Accounts",
+        "Activity",
+        "Apps",
+        "Awake",
+        "Background",
+        "Disk",
+        "Overview",
+        "Ports",
+        "SSH",
+        "Settings"
+      ],
+      "type": "object"
+    },
+    "machines.Share": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "UsedBytes": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "machines.Uptime": {
+      "additionalProperties": false,
+      "properties": {
+        "days": {
+          "items": {
+            "$ref": "#/$defs/machines.UptimeDay"
+          },
+          "type": "array"
+        },
+        "incidents": {
+          "items": {
+            "$ref": "#/$defs/machines.Incident"
+          },
+          "type": "array"
+        },
+        "since": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "machines.UptimeDay": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "down_s": {
+          "type": "integer"
+        },
+        "restarts": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date"
+      ],
+      "type": "object"
+    },
+    "machines.VM": {
+      "additionalProperties": false,
+      "properties": {
+        "Birth": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.Birth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "BootAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Cause": {
+          "type": "string"
+        },
+        "Check": {
+          "type": "string"
+        },
+        "CheckStatus": {
+          "$ref": "#/$defs/machines.CheckStatus"
+        },
+        "CreatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Creator": {
+          "type": "string"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "Device": {
+          "type": "string"
+        },
+        "Drift": {
+          "$ref": "#/$defs/machines.KeptDrift"
+        },
+        "Gestures": {
+          "items": {
+            "enum": [
+              "start",
+              "stop",
+              "restart"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Guest": {
+          "type": "string"
+        },
+        "Head": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
+        "Health": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
+        "Hold": {
+          "$ref": "#/$defs/machines.Hold"
+        },
+        "IP": {
+          "type": "string"
+        },
+        "Image": {
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "mac",
+            "linux",
+            "macos"
+          ],
+          "type": "string"
+        },
+        "LastLines": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Latency": {
+          "items": {
+            "$ref": "#/$defs/machines.LatencyPoint"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "LatencyNote": {
+          "type": "string"
+        },
+        "Lifetime": {
+          "enum": [
+            "ephemeral",
+            "persistent",
+            "always-on"
+          ],
+          "type": "string"
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "Machinefile": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Network": {
+          "type": "string"
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "Purpose": {
+          "type": "string"
+        },
+        "ReadyAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Resources": {
+          "$ref": "#/$defs/machines.Resources"
+        },
+        "Restart": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.RestartWalk"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Restarts": {
+          "$ref": "#/$defs/machines.Restarts"
+        },
+        "SSH": {
+          "type": "boolean"
+        },
+        "Sections": {
+          "$ref": "#/$defs/machines.Sections"
+        },
+        "SizeGB": {
+          "type": "integer"
+        },
+        "Standing": {
+          "enum": [
+            "not-seen",
+            "restarting",
+            "creating",
+            "down",
+            "stopped",
+            "suspended",
+            "healthy",
+            "running"
+          ],
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "running",
+            "stopped",
+            "suspended",
+            "stale",
+            "broken",
+            "creating",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Uptime": {
+          "$ref": "#/$defs/machines.Uptime"
+        },
+        "UsedBytes": {
+          "type": "integer"
+        },
+        "Version": {
+          "type": "string"
+        },
+        "Want": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Birth",
+        "BootAt",
+        "Cause",
+        "Check",
+        "CheckStatus",
+        "CreatedAt",
+        "Creator",
+        "Detail",
+        "Device",
+        "Guest",
+        "IP",
+        "Image",
+        "Kind",
+        "LastLines",
+        "Latency",
+        "Lifetime",
+        "Mac",
+        "Machinefile",
+        "Name",
+        "Network",
+        "Purpose",
+        "ReadyAt",
+        "Resources",
+        "Restart",
+        "Restarts",
+        "SSH",
+        "SizeGB",
+        "State",
+        "Uptime",
+        "Version",
+        "Want"
+      ],
+      "type": "object"
+    },
+    "machines.calls.ListIn": {
+      "additionalProperties": false,
+      "properties": {
+        "ThisMac": {
+          "type": "boolean"
+        },
+        "Unwritten": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "machines.calls.ListOut": {
+      "additionalProperties": false,
+      "properties": {
+        "All": {
+          "$ref": "#/$defs/machines.AllMachines"
+        },
+        "Roomiest": {
+          "type": "string"
+        },
+        "Rooms": {
+          "items": {
+            "$ref": "#/$defs/machines.Room"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Unrefreshed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.call.WireError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "All",
+        "Roomiest",
+        "Rooms",
+        "Unrefreshed"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch machines.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.ListIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.calls.ListOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.list",
+  "type": "object"
+}

@@ -1,0 +1,8 @@
+description: 'in a VM without its exports file the shell block exports no public URL'
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'shell zsh | /usr/bin/awk ''/services\.env|STATION_PUBLIC_HOST|EXPO_PACKAGER_PROXY_URL|__VITE_ADDITIONAL/{n++} END{print n+0}'''
+      exit: 0
+      stdout: |
+          0

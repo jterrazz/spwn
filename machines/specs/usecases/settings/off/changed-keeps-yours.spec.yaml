@@ -1,0 +1,25 @@
+description: 'off on a setting changed since keeps your version as it is, and it reads Off here'
+env: two-macs
+runs:
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: '--version >/dev/null; printf ''# mine\n'' >> .local/bin/tart'
+      exit: 0
+    - command: 'settings off tart-launcher --yes'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: yours, kept as it is
+    - command: '--version >/dev/null; /usr/bin/tail -1 .local/bin/tart'
+      exit: 0
+      stdout: |
+          # mine
+    - command: 'settings tart-launcher'
+      exit: 0
+      stdout: |
+          ⊘	tart-launcher	off here
+          # Detail
+          group	Set by station
+          does	The tart launcher: Tart's home is station's VMs folder
+          lives on	Macs

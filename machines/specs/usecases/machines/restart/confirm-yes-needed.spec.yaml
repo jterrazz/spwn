@@ -1,0 +1,12 @@
+description: 'a Mac restart off a terminal without --yes is refused before anything restarts'
+env: two-macs
+runs:
+    - command: 'machines restart mac-mini'
+      exit: 2
+      stderr: |
+          Error: refusing to restart without --yes
+          Hint: re-run with --yes
+    - command: 'machines | /usr/bin/grep -c "Engine running"'
+      exit: 0
+      stdout: |
+          2

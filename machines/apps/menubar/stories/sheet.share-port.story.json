@@ -1,0 +1,13 @@
+{
+    "group": "sheet",
+    "heightNote": "5 pt under the prototype's 556, as ports.all under it: the page header's top inset is the panel frame's",
+    "id": "sheet.share-port",
+    "note": "Share a port from the Ports footer: Of linux-1, what listens there with Share each, nothing typed.",
+    "pages": ["pages/machines.ports.ports.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "share-port"
+        }
+    }
+}

@@ -1,0 +1,9 @@
+description: 'station background --on another Mac lists that Mac''s tasks, not This Mac''s'
+env: two-macs
+runs:
+    - command: 'background --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # Station	1 ●
+          ●	com.jterrazz.station.engine	user	running · pid 812		~/Library/LaunchAgents/com.jterrazz.station.engine.plist

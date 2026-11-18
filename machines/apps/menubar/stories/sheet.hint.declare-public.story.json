@@ -1,0 +1,12 @@
+{
+    "group": "sheet",
+    "id": "sheet.hint.declare-public",
+    "note": "Declare a port public from the exposed card: what declaring means, and the declare line for port 5000, its route the owner's to name.",
+    "pages": ["pages/machines.ports.exposed.ports.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "declare-public:macbook-pro:5000"
+        }
+    }
+}

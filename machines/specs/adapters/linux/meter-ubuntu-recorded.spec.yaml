@@ -1,0 +1,8 @@
+description: 'a real Ubuntu 24.04 VM''s recorded /proc reads as its own numbers'
+fixture: ./__fixtures__/meter-ubuntu/
+env: engine
+runs:
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" guest serve --stdio < ask.json | /usr/bin/jq -c ''.out.sample | [.cpus, .cpu_busy, .cpu_total, .mem_total, .mem_used, .net_in, .net_out, .disk_read, .disk_written, .pressure, .load]'''
+      exit: 0
+      stdout: |
+          [4,9195,98166,4086210560,446332928,487173567,1465339,493279744,4851686400,"normal",[0.62,0.34,0.13]]

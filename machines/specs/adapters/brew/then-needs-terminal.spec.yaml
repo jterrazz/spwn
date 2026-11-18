@@ -1,0 +1,10 @@
+description: 'an interactive Then package is skipped off a terminal, as a row naming its command'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/then-gpg/
+runs:
+    - command: 'apps install gpg </dev/null'
+      exit: 0
+      stdout: |
+          ●	gpg	2.4.8	brew
+          ○	git-signing			needs a terminal: station settings apply git-signing

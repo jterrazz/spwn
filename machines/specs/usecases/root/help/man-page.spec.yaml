@@ -1,0 +1,8 @@
+description: 'the hidden man page still answers, the roff of station(1), exit 0'
+env: one-mac
+runs:
+    - command: 'man > station.1'
+      exit: 0
+      files:
+          station.1:
+              contains: '.TH STATION 1'

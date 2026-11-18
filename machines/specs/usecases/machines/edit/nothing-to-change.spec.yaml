@@ -1,0 +1,8 @@
+description: 'an edit with no size says what to change, with an example'
+env: two-macs
+runs:
+    - command: 'machines edit linux-1'
+      exit: 2
+      stderr: |
+          Error: say what to change on linux-1
+          Hint: station machines edit linux-1 --memory 8G

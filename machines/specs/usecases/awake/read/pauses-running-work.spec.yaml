@@ -1,0 +1,15 @@
+description: 'a running workspace is work that pauses while its Mac sleeps; once stopped it is not'
+env: two-macs
+runs:
+    - command: 'awake --json | /usr/bin/jq -c ''.macs[0] | {name, pauses}'''
+      exit: 0
+      stdout: |
+          {"name":"macbook-pro","pauses":["linux-1"]}
+    - command: 'machines stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept
+    - command: 'awake --json | /usr/bin/jq -c ''.macs[0] | {name, pauses}'''
+      exit: 0
+      stdout: |
+          {"name":"macbook-pro","pauses":[]}

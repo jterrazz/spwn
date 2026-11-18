@@ -1,0 +1,14 @@
+description: 'the inventory is one call per method: no per-app version read, no skills call'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/bun-cli/
+    - ../__fixtures__/skills-cli/
+runs:
+    - command: 'apps --json > /dev/null; /usr/bin/sort .calls'
+      exit: 0
+      stdout: |
+          brew --version
+          brew list --cask --versions
+          brew list --formula --versions
+          bun pm ls -g
+          mise ls --global --json

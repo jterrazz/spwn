@@ -1,0 +1,12 @@
+package: station.package/v1
+kind: app
+name: ripgrep
+description: Fast grep, the rg agents and editors shell out to
+replaces: grep (what agents and editors call)
+provides: [rg]
+methods:
+    - os: macos
+      brew: ripgrep
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [ripgrep] }

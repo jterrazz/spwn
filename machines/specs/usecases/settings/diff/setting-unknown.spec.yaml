@@ -1,0 +1,8 @@
+description: 'a diff of no setting is refused'
+env: two-macs
+runs:
+    - command: 'settings diff firewal'
+      exit: 2
+      stderr: |
+          Error: no setting named "firewal"
+          Hint: station settings

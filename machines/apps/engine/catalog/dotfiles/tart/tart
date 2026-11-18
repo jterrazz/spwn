@@ -1,0 +1,4 @@
+#!/bin/sh
+d="$HOME/.local/share"
+case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac
+TART_HOME="$d/station/vms" exec "$d/station/tart/tart.app/Contents/MacOS/tart" "$@"

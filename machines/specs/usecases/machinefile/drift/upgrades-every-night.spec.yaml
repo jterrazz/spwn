@@ -1,0 +1,38 @@
+description: 'a mac bound to its file upgrades every night, and its drift says the last run'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, { name: node, version: '22' }]
+      exit: 0
+    - command: 'apply --machinefile macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+          ●	mise	2026.10.1	brew	the manager of node
+          ◐	node	22.11.0	mise	outdated
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Upgrades | del(.Last.At)'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows."}
+    - command: 'world advance 24h'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Upgrades | del(.Last.At)'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows.","Last":{"Verdict":{"Tone":"warn","Sentence":"2 apps moved.","Line":"1 app waits for you."}}}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Plan.Lines[] | select(.Waiting != "") | {package: .Step.Package, waiting: .Waiting}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"package":"node","waiting":"25.1.0 is out"}

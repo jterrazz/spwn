@@ -1,0 +1,17 @@
+description: 'granting again replaces the grant, never adding a second'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-2","To":"linux-1"}}
+      exit: 0
+      stdout: |
+          {}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac: .Mac, entries: [.Entries[] | [.ID, .Label, .Program, .Kind, [.Grants[] | .To]]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"macbook-pro","entries":[["pw-1","GitHub deploy","gh","fine-grained",[]],["pw-2","npm publish","npm","token",["linux-1"]],["pw-3","Claude Max","claude","oauth-token",[]]]}

@@ -1,0 +1,8 @@
+description: 'with the engine stopped nothing is created, and the hint starts it'
+env: engine-stopped
+runs:
+    - command: 'machines create'
+      exit: 1
+      stderr: |
+          Error: the engine is stopped on macbook-pro
+          Hint: station engine start

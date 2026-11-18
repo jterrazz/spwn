@@ -1,0 +1,5 @@
+#!/bin/sh
+# Stops the engine engine-up started, and waits until it is gone.
+pid=$(/bin/cat "$HOME/.engine.pid")
+kill "$pid"
+while kill -0 "$pid" 2> /dev/null; do /bin/sleep 0.1; done

@@ -1,0 +1,210 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "computer"
+  },
+  "state": "loading",
+  "strip": {
+    "cpu": {
+      "kind": "pending",
+      "live": "cpu:macbook-pro"
+    },
+    "memory": {
+      "kind": "pending",
+      "live": "memory:macbook-pro"
+    }
+  },
+  "sections": [
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "role": "actions",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "reading",
+            "mark": "pending",
+            "label": "reading"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "machines",
+      "title": "Machines",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 80
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "reading",
+            "mark": "pending",
+            "label": "reading"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "Stop everything on This Mac",
+      "on": "page",
+      "confirm": {
+        "question": "Stop everything on This Mac?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Awake ends; the engine stays off until you log in again or run"
+          },
+          {
+            "kind": "command",
+            "text": "station engine start"
+          }
+        ],
+        "danger": true,
+        "yes": "Stop"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-all",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        }
+      }
+    },
+    {
+      "label": "Add a Mac",
+      "on": "menu",
+      "id": "add-mac",
+      "form": {
+        "title": "Add a Mac",
+        "fields": [
+          {
+            "key": "command-1",
+            "kind": "command",
+            "note": "On the new Mac",
+            "hint": {
+              "command": "curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh",
+              "external": true
+            }
+          },
+          {
+            "key": "command-2",
+            "kind": "command",
+            "note": "Then on This Mac",
+            "hint": {
+              "command": "station machines add <mac>"
+            }
+          }
+        ],
+        "subtitle": "Install station on the new Mac, then add it from This Mac by its Tailscale name. It appears here once its ssh and its station answer.",
+        "primary": [
+          {
+            "label": "Done"
+          }
+        ]
+      },
+      "sheet": "hint:add-mac"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open station in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "Open at login",
+      "on": "menu",
+      "id": "app:login"
+    },
+    {
+      "label": "CPU in the menu bar",
+      "on": "menu",
+      "id": "app:sparkline"
+    },
+    {
+      "key": "cmd+q",
+      "label": "Quit station",
+      "on": "menu",
+      "id": "app:quit"
+    },
+    {
+      "label": "More options for station",
+      "on": "menu",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "add-mac",
+        "open-station@menu",
+        "-",
+        "app:login",
+        "app:sparkline",
+        "-",
+        "app:quit"
+      ]
+    }
+  ],
+  "live": [
+    "cpu:macbook-pro",
+    "memory:macbook-pro"
+  ]
+}

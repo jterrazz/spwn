@@ -1,0 +1,144 @@
+{
+  "schema": "station.page/v1",
+  "id": "ssh",
+  "command": "machines ssh infra",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "door",
+      "title": "SSH",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "infra"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "command",
+            "mark": "pending",
+            "label": "ssh admin@infra",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "editor",
+            "mark": "pending",
+            "label": "In an editor",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "note": {
+            "text": "No password: your key. Files travel through the same name; no folder of a Mac is shared."
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "reached",
+      "title": "How it is reached",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "to-mac",
+            "mark": "pending",
+            "label": "This Mac to mac-mini",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "to-vm",
+            "mark": "pending",
+            "label": "mac-mini to infra",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "inside",
+      "title": "Inside",
+      "items": [
+        {
+          "note": {
+            "text": "Station opens it for debugging only; your tooling owns what runs inside."
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ]
+}

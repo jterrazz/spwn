@@ -1,0 +1,132 @@
+description: 'a 60-column read cuts details by their kind, never a name, a state word or a command'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 60x40 /usr/bin/env -u NO_COLOR COLUMNS=60 "$STATION" overview'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · macbook-pro · 8 things need you · Engine running
+
+          Needs you
+            ✗ com.example.brain.x-snapshot is failing, last exit 2
+              station background remove com.example.brain.x-snapshot
+            ◐ 1 mise update waiting
+              station apps update --manager mise
+            ◐ 1 brew update waiting
+              station apps update --manager brew
+            ◐ Firewall: off
+              System Settings > Network > Firewall
+            ◐ ~/.tart is misplaced  station disk move ~/.tart
+            3 more: station overview --all
+          Activity    memory 12.4 of 16 GB · 388 GB free
+          Apps        ● 7 ok · ◐ 2 updates · ○ 105 not installed
+          Settings    set by station · ○ 0 of 17 · checked · ● 8 of 9
+          Disk        ◐ 388 GB free · 34.8 GB can rebuild
+                      ◐ 1 misplaced
+          Ports       Public 0 · Private 2
+          Accounts    ● 3
+          Background  ● 10 · ✗ 1 failing · ◐ 3 orphans
+          Awake       ○ sleeps normally
+          VMs         ○ api stopped · ● linux-1 running
+
+          → station background remove com.example.brain.x-snapshot
+          → station overview --all  for every line
+    - command: '--version >/dev/null; terminal --size 60x60 /usr/bin/env -u NO_COLOR COLUMNS=60 "$STATION" apps'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · 114 apps for this Mac · 2 updates
+            105 not installed
+
+          Updates
+            ◐ node  22.11.0 → 24.11.0  mise  update available
+              → station apps update node
+            ◐ gh    2.97.0 → 2.98.0    brew  update available
+              → station apps update gh
+          Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, …
+          OK             ● 7 · github-release, mise, go, ghostty, …
+          Not for this machine  10 apps live on other machines
+
+          → station apps update            the 2 updates
+          → station apps install <app...>  install some
+    - command: '--version >/dev/null; terminal --size 60x60 /usr/bin/env -u NO_COLOR COLUMNS=60 "$STATION" background'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · 14 background tasks · 1 failing · 3 orphans
+
+          Failing
+            ✗ com.example.brain.x-snapshot  user    ~/Librar…ot.plist
+              failing · last exit 2
+              → station background remove com.example.brain.x-snapshot
+          Orphans
+            ◐ com.bjango.istatmenus.installer
+              root  not loaded  iStat Menus (gone)
+              /Library/…/com.bjango.istatmenus.installer.plist
+              → sudo launchctl bootout system/com.bjango.istatmenus.installer &&
+                sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
+            ◐ com.docker.socket  root  idle  Docker.app (gone)
+              /Library/LaunchDaemons/com.docker.socket.plist
+              → sudo launchctl bootout system/com.docker.socket &&
+                sudo rm /Library/LaunchDaemons/com.docker.socket.plist
+            ◐ com.docker.vmnetd  root  idle  Docker.app (gone)
+              /Library/LaunchDaemons/com.docker.vmnetd.plist
+              → sudo launchctl bootout system/com.docker.vmnetd &&
+                sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
+          Station     ● 1 · com.jterrazz.station.engine
+          Known apps  ● 7 · com.adguard.mac.adguard.loginhelper, …
+          Unknown     ● 2 · com.example.brain.sync, …
+
+          → station background --all  for every row
+    - command: '--version >/dev/null; terminal --size 60x40 /usr/bin/env -u NO_COLOR COLUMNS=60 "$STATION" overview --on mac-mini'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          On mac-mini:
+          mac-mini · Mac · 1 thing needs you · Engine running
+
+          Needs you
+            ◐ ~/go is misplaced  station disk move ~/go --on mac-mini
+          Activity    memory 26 of 64 GB · 1.6 TB free
+          Apps        ● 1 ok · ○ 113 not installed
+          Settings    set by station · ○ 0 of 17 · checked · ● 9 of 9
+          Disk        ◐ 1.6 TB free · 1.1 GB can rebuild
+                      ◐ 1 misplaced
+          Ports       Public 0 · Private 0
+          Accounts    ● 0
+          Background  ● 1
+          Awake       ● never sleeps
+          VMs         ● infra running
+          Mac readiness
+            ● restarts after a power cut  applied
+            ● never sleeps                applied
+            ● logs in by itself           applied
+            ◐ disk unlock after a power cut
+              needs you
+              → station machines unlock mac-mini (from the same network)
+            ● planned restarts unlock themselves
+              supported
+            ● engine starts at login      installed
+
+          → station disk move ~/go --on mac-mini
+    - command: '--version >/dev/null; terminal --size 60x40 /usr/bin/env -u NO_COLOR COLUMNS=60 "$STATION" machines'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          5 machines · 4 running · 1 stopped · nothing needs you
+
+              MACHINE     STATE                 CPU    MEMORY
+            ● This Mac    Engine running
+            ├─ ○ api      Stopped · persistent  4 CPU  8 GB
+            └─ ● linux-1  Running · ephemeral   4 CPU  8 GB
+            ● mac-mini    Engine running
+            └─ ● infra    Running · always on   8 CPU  24 GB

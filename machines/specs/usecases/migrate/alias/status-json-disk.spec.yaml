@@ -1,0 +1,18 @@
+description: 'the disk view sizes placed rows by level, and caches no placed row claims as other'
+fixture: ../../../__fixtures__/terminal/
+env: terminal
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p Library/Caches/go-build .local/share/station/vms/cache/OCIs .cache/uv Library/Caches/ms-playwright/chromium-1 .cache/unknown-tool && echo aaaa > Library/Caches/go-build/a && echo bbbb > .local/share/station/vms/cache/OCIs/b && echo cccc > .cache/uv/c && echo dddd > Library/Caches/ms-playwright/chromium-1/d && echo eeeeeeee > .cache/unknown-tool/e'
+      exit: 0
+    - command: 'status --json | /usr/bin/jq -c ''.workspace.disk'''
+      exit: 0
+      stdout: |
+          [{"name":"uv","level":"cache","bytes":5},{"name":"go","level":"cache","bytes":5},{"name":"tart","level":"cache","bytes":5},{"name":"other","level":"cache","bytes":14}]
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=macos "$STATION" status --json | /usr/bin/jq -c ''.workspace.disk[] | select(.name == "playwright-browsers")'''
+      exit: 0
+      stdout: |
+          {"name":"playwright-browsers","level":"installed","bytes":5}
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=macos "$STATION" status --json | /usr/bin/jq -c ''.workspace.disk[] | select(.name == "other")'''
+      exit: 0
+      stdout: |
+          {"name":"other","level":"cache","bytes":9}

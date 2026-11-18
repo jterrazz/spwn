@@ -1,0 +1,13 @@
+description: 'a port This Mac binds to loopback only is no row: it is counted as on its machine only'
+env: two-macs
+runs:
+    - command: 'world listen macbook-pro 127.0.0.1:5432 postgres'
+      exit: 0
+    - command: 'ports | /usr/bin/grep -e 5432 -e "machine only"'
+      exit: 0
+      stdout: |
+          	1 more listens on its machine only
+    - command: 'ports --json | /usr/bin/jq -c ''[.local_only, [.ports[] | select(.port == 5432)], .findings]'''
+      exit: 0
+      stdout: |
+          [1,[],[]]

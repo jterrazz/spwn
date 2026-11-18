@@ -1,0 +1,16 @@
+description: 'a bare image name deletes every version of it on This Mac; its VMs keep their own disks'
+env: two-macs
+runs:
+    - command: 'images delete base-ubuntu --yes'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.01	deleted
+          ●	base-ubuntu	2026.10.20	deleted
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version)"'''
+      exit: 0
+      stdout: |
+          mac-mini 2026.11.01
+    - command: 'machines --this-mac --json | /usr/bin/jq -r ''[.. | objects | select(has("name") and has("lifetime")) | .name] | sort | join(" ")'''
+      exit: 0
+      stdout: |
+          api linux-1

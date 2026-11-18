@@ -1,0 +1,15 @@
+description: 'the run-once dock packages change the dock, then restart it'
+fixture: ./__fixtures__/settings-dock/
+runs:
+    - command: 'settings apply dock-reset dock-spacer'
+      exit: 0
+      stdout: |
+          ●	dock-reset	dock: back to the system defaults
+          ●	dock-spacer	dock: spacer tile added
+      files:
+          .calls:
+              equals: |
+                  defaults delete com.apple.dock
+                  killall Dock
+                  defaults write com.apple.dock persistent-apps -array-add {"tile-type"="small-spacer-tile";}
+                  killall Dock

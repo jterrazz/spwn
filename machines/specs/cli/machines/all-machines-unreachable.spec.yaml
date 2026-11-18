@@ -1,0 +1,16 @@
+description: 'a Mac that does not answer is a degraded row, never a failure'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+runs:
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	x	Mac	x	Online
+          ✗	y	Mac	y	Unreachable
+          # Needs you
+          ◐	y	does not answer
+    - command: 'machines --json | /usr/bin/jq -r ''.macs[1] | [.name, (.reachable | tostring), (.vms | length | tostring)] | join(" ")'''
+      exit: 0
+      stdout: |
+          y false 0

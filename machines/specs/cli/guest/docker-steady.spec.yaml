@@ -1,0 +1,10 @@
+description: 'a docker port stays listed, named by its container, between two docker scans: no flap'
+fixture:
+    - ./__fixtures__/vm/
+    - ./__fixtures__/docker/
+env: engine
+runs:
+    - command: '--version >/dev/null; (echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}''; /bin/sleep 2.5) | HOME=$PWD/vm PATH=$PWD/bin STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''select(.type == "snapshot" or .type == "listen" or .type == "unlisten") | [.type, .port, ([.ports[]? | select(.port == 3000) | .process] | first)]'''
+      exit: 0
+      stdout: |
+          ["snapshot",null,"web-1"]

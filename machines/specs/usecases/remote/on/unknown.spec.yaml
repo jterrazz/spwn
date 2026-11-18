@@ -1,0 +1,8 @@
+description: '--on a name no machine has is refused before anything runs'
+env: two-macs
+runs:
+    - command: 'apps --on nope'
+      exit: 2
+      stderr: |
+          Error: no machine named "nope"
+          Hint: station machines

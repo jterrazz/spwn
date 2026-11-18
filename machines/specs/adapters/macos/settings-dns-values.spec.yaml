@@ -1,0 +1,8 @@
+description: 'settings diff dns on a Mac without the profile reads the network''s DNS against Quad9'
+fixture: ./__fixtures__/settings-dns/
+runs:
+    - command: 'settings diff dns'
+      exit: 0
+      stdout: |
+          # dns
+          ○	encrypted DNS	the network's	Quad9 DoH

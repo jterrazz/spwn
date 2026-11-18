@@ -1,0 +1,26 @@
+- navigation "Sidebar":
+  - button "Find"
+  - button "Home"
+  - button "Inbox"
+  - button "Machine files"
+  - button "Passwords"
+  - group "Machines":
+    - heading "Machines" [level=2]
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps"
+    - button "Skills"
+    - button "Settings"
+  - button "Storage"
+  - img "No answer"
+  - text: No engine answers at /run/engine.sock
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Home
+  - button "New machine"
+  - heading "No engine answers at /run/engine.sock." [level=1]
+  - paragraph:
+    - img "No answer"
+    - text: connection refused · trying again in 4 s

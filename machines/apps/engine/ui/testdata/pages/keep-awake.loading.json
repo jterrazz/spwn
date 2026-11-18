@@ -1,0 +1,263 @@
+{
+  "schema": "station.page/v1",
+  "id": "keep-awake",
+  "command": "awake",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "keep-awake",
+      "title": "Awake",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "more",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "awake",
+            "mark": "pending",
+            "label": "awake",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "guards",
+      "title": "Guards",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "more",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "battery",
+            "mark": "ok",
+            "label": "battery",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "80%"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "AC attached"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "ends a session at 20% on battery"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "low_power",
+            "mark": "ok",
+            "label": "low power mode",
+            "cells": [
+              {
+                "kind": "off"
+              },
+              {
+                "kind": "text",
+                "text": "ends a session when it turns on"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "thermal",
+            "mark": "ok",
+            "label": "thermal",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "nominal"
+              },
+              {
+                "kind": "text",
+                "text": "ends a session at serious, or heavy for 5m lid closed on battery"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "lid",
+            "mark": "ok",
+            "label": "lid",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "open"
+              },
+              {
+                "kind": "text",
+                "text": "closing it on battery ends a --lid session without --battery"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 4
+        }
+      ]
+    },
+    {
+      "id": "reading",
+      "title": "Reading",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "more",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "fact": {
+            "key": "lid",
+            "value": {
+              "kind": "text",
+              "text": "open"
+            }
+          }
+        },
+        {
+          "fact": {
+            "key": "source",
+            "value": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "AC"
+                },
+                {
+                  "kind": "text",
+                  "text": "80%"
+                },
+                {
+                  "kind": "text",
+                  "text": "not charging"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "fact": {
+            "key": "low power mode",
+            "value": {
+              "kind": "off"
+            }
+          }
+        },
+        {
+          "fact": {
+            "key": "thermal",
+            "value": {
+              "kind": "text",
+              "text": "nominal (0)"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "a",
+      "label": "awake",
+      "on": "page",
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "s",
+      "label": "sleep",
+      "on": "page",
+      "priority": 2,
+      "mutates": true
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+description: 'awake until 09:00 past nine runs until tomorrow, said with the date'
+env: on-battery
+runs:
+    - command: 'awake until 09:00'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 09:00 tomorrow (Thu 5 Nov)
+    - command: 'awake --json | /usr/bin/jq -r ''.macs[0].until_at[0:16]'''
+      exit: 0
+      stdout: |
+          2026-11-05T09:00

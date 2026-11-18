@@ -1,0 +1,58 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook-pro",
+    "user": "you",
+    "macs": {
+        "macbook-pro": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z"
+            },
+            "preferences": {
+                "name": "macbook-pro",
+                "vm_user": "admin",
+                "macs": {
+                    "macbook-air": {
+                        "user": "you"
+                    }
+                }
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            }
+        },
+        "macbook-air": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z"
+            },
+            "preferences": {
+                "name": "macbook-air",
+                "macs": {
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
+                "vm_user": "admin"
+            },
+            "power": {
+                "Lid": "closed",
+                "Source": "battery",
+                "HasBattery": true,
+                "Percent": 64
+            },
+            "self": {
+                "system": {},
+                "hardware": {
+                    "Model": "Mac16,12",
+                    "Chip": "Apple M4",
+                    "Memory": 17179869184,
+                    "CPUs": 10,
+                    "Ether": "a4:83:e7:1c:20:9f"
+                }
+            }
+        }
+    }
+}

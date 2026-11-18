@@ -1,0 +1,359 @@
+package machines
+
+import (
+	"slices"
+	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
+)
+
+type Node struct {
+	Online bool
+	IP     string
+}
+
+type Reserved struct {
+	GuestPort, MacPort int
+	Profile, URL       string
+	PublicName         string
+	Off                string
+}
+
+type Resources struct {
+	CPUs int
+	// value: bytes, both: memory sized in binary units (GiB, as macOS and
+	// the hypervisor count RAM), disk in decimal ones (GB, base 1000).
+	MemoryBytes int64
+	DiskBytes   int64
+}
+
+func (r Resources) Size() Size {
+	return Size{CPUs: r.CPUs, Memory: r.MemoryBytes, Disk: r.DiskBytes}
+}
+
+type VMState string
+
+const (
+	Running   VMState = "running"
+	Stopped   VMState = "stopped"
+	Suspended VMState = "suspended"
+	Stale     VMState = "stale"
+	Broken    VMState = "broken"
+	// value: on a Mac that does not answer: as it was at its last answer,
+	// its state unknown.
+	UnknownState VMState = "unknown"
+)
+
+func (VMState) Enum() []string {
+	return []string{string(Running), string(Stopped), string(Suspended), string(Stale), string(Broken), string(Creating), string(UnknownState)}
+}
+
+func (s VMState) Word() string {
+	// value: a VM's state as a page says it.
+	switch s {
+	case Running:
+		return "Running"
+	case Stopped:
+		return "Stopped"
+	case Suspended:
+		return "Suspended"
+	case Stale:
+		return "Ended unexpectedly"
+	case Broken:
+		return "In a loop"
+	case Creating:
+		return "Creating"
+	case UnknownState:
+	}
+	return "Not seen"
+}
+
+type VM struct {
+	Name, Image, Version, Mac  string
+	Kind                       catalog.MachineKind
+	Lifetime                   Lifetime
+	State                      VMState
+	Resources                  Resources
+	SizeGB                     int
+	IP, Network, Guest, Detail string
+	// value: the state its record asks for, running or stopped.
+	Want string
+	// value: a server's health check as an answer shows it, its token
+	// withheld; empty for none. The record keeps it as given, for the
+	// check to run.
+	Check string
+	// value: a server's own tailnet device, by its name on the tailnet,
+	// which the owner's tooling installed; empty for none.
+	Device    string
+	CreatedAt time.Time
+	// value: its ssh connection opened, whether station's guest answers on
+	// it or not (a server's tooling may replace it).
+	SSH bool
+	// value: a server's restarts since its Mac's engine started, and its
+	// health check as last run.
+	Restarts    Restarts
+	CheckStatus CheckStatus
+	// value: when its engine last booted it, while it runs; zero when not
+	// known.
+	BootAt time.Time
+	// value: a server's record of the last 30 days, its check's last runs,
+	// and the step its restart runs now (nil when none runs).
+	Uptime  Uptime
+	Latency []LatencyPoint
+	Restart *RestartWalk
+	// value: SPEC B5.5: why a server is down, and the last lines its
+	// console kept then; empty while it is up.
+	Cause     string
+	LastLines []string
+	// value: SPEC B5.10: how far its create is while it runs, and when its
+	// create made it ready.
+	Birth   *Birth
+	ReadyAt time.Time
+	// value: what it is for, as its create was told, empty when it was told
+	// nothing; who made it, the session its create named, else you; and
+	// the Machinefile it was made from, empty when none was named.
+	Purpose     string
+	Creator     string
+	Machinefile string
+	// value: a server's health in one verdict over its state, address, SSH
+	// and check, nil for a workspace; and what the engine kept of its check
+	// when there is too little of it to draw, empty otherwise.
+	Health      *verdict.Verdict `json:",omitempty"`
+	LatencyNote string           `json:",omitempty"`
+	// value: how a running workspace stands with its file, as its Mac's
+	// engine keeps it; nil until that engine read it since its boot.
+	Drift *KeptDrift `json:",omitempty"`
+	// value: the VM in one verdict, its state then how it stands with its
+	// file, and Pending while it runs unread by its engine; judged by
+	// machines.list, nil in any other answer.
+	Head    *verdict.Verdict `json:",omitempty"`
+	Pending bool             `json:",omitempty"`
+	// value: the VM's one standing (StandingOf), which its head opens
+	// with; judged by machines.list, empty in any other answer.
+	Standing VMStanding `json:",omitempty"`
+	// value: what keeps it, and so whether it is safe to delete; the
+	// sections its page has, by its kind; the gestures its header offers, by
+	// its state; all judged by machines.list, nil in any other answer.
+	Hold     *Hold     `json:",omitempty"`
+	Sections *Sections `json:",omitempty"`
+	Gestures []Gesture `json:",omitempty"`
+	// value: the memory its process holds on its Mac now, in bytes, as that
+	// Mac's kernel measures it; zero when it does not run or is not measured.
+	UsedBytes int64 `json:",omitempty"`
+}
+
+type KeptDrift struct {
+	// value: how a running workspace stands with its Machinefile, as its
+	// Mac's engine last read it: when, how many differences every chapter
+	// counts, that it is bound to no file (none is named after it and
+	// none bound to it), or why its file did not read.
+	At          time.Time
+	Differences int
+	Unbound     bool   `json:",omitempty"`
+	Failed      string `json:",omitempty"`
+}
+
+func Pausing(vms []VM) []string {
+	// value: what pauses while its Mac sleeps: every running VM that is not
+	// always on, by name.
+	var out []string
+	for _, vm := range vms {
+		if vm.Lifetime != AlwaysOn && vm.State == Running {
+			out = append(out, vm.Name)
+		}
+	}
+	slices.Sort(out)
+	return out
+}
+
+type EngineState string
+
+const (
+	EngineRunning      EngineState = "running"
+	EngineStopped      EngineState = "stopped"
+	EngineNotInstalled EngineState = "not-installed"
+)
+
+func (EngineState) Enum() []string {
+	return []string{string(EngineRunning), string(EngineStopped), string(EngineNotInstalled)}
+}
+
+func (EngineState) TSName() string {
+	// value: the words' name of the engine's state, which engine.read and
+	// a Mac's view share.
+	return "EngineReadState"
+}
+
+type EngineView struct {
+	// value: the engine's state as this Mac reads it, stopped when its
+	// launchd job is on disk and it does not answer (R9.D3); empty where it
+	// is not known (another Mac, a Mac with no hypervisor).
+	State   EngineState `json:",omitempty"`
+	Version string
+}
+
+func (e EngineView) Known() bool   { return e.State != "" }
+func (e EngineView) Running() bool { return e.State == EngineRunning }
+
+type MacView struct {
+	Name, User, StationVersion string
+	ThisMac, Reachable         bool
+	// value: when this Mac last had its answer; absent for one never heard.
+	Answered time.Time `json:",omitzero"`
+	// value: its address on your LAN, as it reads it; empty when it cannot say.
+	LAN    string
+	Node   Node
+	Engine EngineView
+	VMs    []VM
+	// value: SPEC B5.12: what it is, as it read itself at its last answer,
+	// and whether it has a lid (a laptop) or not (a desktop).
+	Hardware machine.Hardware
+	Laptop   bool
+	// value: SPEC B5.15: at its last answer it was on battery with its lid
+	// closed, so its silence since is sleep.
+	Asleep bool
+	// value: a Mac that does not answer, said in one verdict: since when
+	// it is not seen, and that nothing proves it is down; nil while it
+	// answers.
+	Unseen *verdict.Verdict `json:",omitempty"`
+	// value: how it sleeps, in words ("awake until 18:00, lid closed",
+	// "never sleeps", "sleeps normally"), as it read itself; empty when
+	// its engine does not say.
+	Awake string `json:",omitempty"`
+	// value: the Mac in one sentence, judged by machines.list: its engine
+	// and how it sleeps, or since when it is not seen.
+	Sentence string `json:",omitempty"`
+	// value: the Mac's one standing (MacStandingOf), and the roll-up of
+	// this Mac and its VMs alone (RollUpOf); judged by machines.list, absent
+	// in any other answer.
+	Standing MacStanding `json:",omitempty"`
+	Machines *RollUp     `json:",omitempty"`
+}
+
+type AllMachines struct {
+	Macs []MacView
+	// value: when it was read.
+	Read time.Time
+	// value: the roll-up of every Mac and its VMs (RollUpOf); judged by
+	// machines.list, absent in any other answer.
+	Standing *RollUp `json:",omitempty"`
+}
+
+type Unasked struct {
+	// value: a create asked for its machine file alone: that file, its
+	// image, size and lifetime, no name; the kind its name is given by;
+	// the built-in Linux image whose own file it is, empty for any other
+	// file.
+	Request CreateRequest
+	Kind    catalog.MachineKind
+	Builtin string
+}
+
+type CreateRequest struct {
+	Image, Name string
+	// value: a workspace's, ephemeral or persistent; a server's is always on.
+	Lifetime Lifetime
+	Network  catalog.Network
+	Size     Resources
+	// value: the create makes a server, which is always on.
+	Server bool
+	// value: a server's health check, a URL or host:port; empty for none.
+	Check string
+	// value: the Machinefile the workspace is made from, by its name: its
+	// image, and what its vm says where the request says nothing.
+	From string
+	// value: what it is for, free text; the session that asks for it, by
+	// its name, empty for the owner.
+	Purpose string
+	Creator string
+}
+
+type ServerLifetimeError struct {
+	// value: a server create that also asks a workspace's lifetime, by its
+	// flag.
+	Name, Flag string
+}
+
+func (e *ServerLifetimeError) Error() string {
+	return "a server is always on: --" + e.Flag + " is for workspaces"
+}
+
+func ServerSize() Resources {
+	// value: a server's size when the create names none (SPEC §7.1); a
+	// workspace's is its image's.
+	return Resources{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 50e9}
+}
+
+type Created struct {
+	VM    VM
+	Ports []Reserved
+	Env   map[string]string
+	// value: the Mac it was made on reports a battery: a server there stops
+	// whenever the Mac sleeps.
+	OnALaptop bool
+	// value: its first start's boot phase; nil when made from no
+	// Machinefile.
+	Boot *FirstStart
+}
+
+type Step struct{ Label string }
+
+// value: SPEC §7.2's health steps, in order, a workspace's three.
+const (
+	StepRunning = "Running"
+	StepAddress = "Has an address"
+	StepSSH     = "SSH answers"
+	// value: a workspace made from a Machinefile runs its boot phase once
+	// it answers.
+	StepBoot = "Boot phase"
+)
+
+type DeleteReport struct {
+	Name     string
+	Warnings []string
+}
+
+type RestartEvent struct{ Phase, Detail string }
+
+type RestartReport struct {
+	Name string
+	// value: a VM was restarted, its health steps passed; IP is its address.
+	VM     bool
+	IP     string
+	Waited time.Duration
+}
+
+type Change struct {
+	// value: the sizes an edit changes; a zero one is kept.
+	Resources Resources
+	// value: a server's health check to set, or NoCheck to remove it.
+	Check   string
+	NoCheck bool
+}
+
+func (c Change) None() bool { return c == Change{} }
+
+type Edited struct {
+	Name string
+	// value: the sizes the edit asked, the others zero.
+	Changed Resources
+	// value: the health check it set, its token withheld, or that it
+	// removed one.
+	Check   string
+	NoCheck bool
+	// value: the VM runs, so the change waits for its next start.
+	Running bool
+}
+
+func FindVM(f AllMachines, name string) (MacView, VM, bool) {
+	for _, h := range f.Macs {
+		for _, vm := range h.VMs {
+			if vm.Name == name {
+				return h, vm, true
+			}
+		}
+	}
+	return MacView{}, VM{}, false
+}

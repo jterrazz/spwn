@@ -1,0 +1,27 @@
+description: 'a read with a Mac that does not answer, or a stopped engine, still exits 0 with its findings'
+env: two-macs
+runs:
+    - command: 'world power-cut mac-mini'
+      exit: 0
+    - command: 'machines | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ✗	mac-mini	Mac	mac-mini	Unreachable
+          ◐	mac-mini	does not answer
+    - command: 'world engine-crash macbook-pro'
+      exit: 0
+    - command: 'machines | /usr/bin/grep macbook-pro'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+    - command: 'ports --all-machines'
+      exit: 0
+      stdout: |
+          ●	Tailscale	signed in · macbook-pro.tail1234.ts.net · ports are shared
+          # Private: shared with you on Tailscale	2 ●	1 ◐
+          ●	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
+          ●	linux-1	7000	private	macbook-pro.tail1234.ts.net:40002	shared	server
+          ◐	mac-mini				does not answer		station machines
+          	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free

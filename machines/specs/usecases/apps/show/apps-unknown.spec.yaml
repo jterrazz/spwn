@@ -1,0 +1,8 @@
+description: 'station apps names no app of the catalogue: refused, exit 2'
+env: two-macs
+runs:
+    - command: 'apps jqq'
+      exit: 2
+      stderr: |
+          Error: no app named "jqq"
+          Hint: station apps for every app here

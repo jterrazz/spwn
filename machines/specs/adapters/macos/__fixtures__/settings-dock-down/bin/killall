@@ -1,0 +1,5 @@
+#!/bin/sh
+# killall as it answers while the Dock is down, between a restart and launchd's relaunch.
+printf 'killall %s\n' "$*" >> "$HOME/.calls"
+echo "No matching processes belonging to you were found" >&2
+exit 1

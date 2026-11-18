@@ -1,0 +1,8 @@
+description: '--battery on a Mac that reports no battery is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'awake 4h --battery --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: mac-mini has no battery: --battery is for laptops
+          Hint: station awake 4h --on mac-mini

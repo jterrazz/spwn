@@ -1,0 +1,19 @@
+description: 'the play world''s Mac answers a day of its past at once, charted, with the VMs it runs'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {source, day: (.history | length >= 300), peak: (.chart.peak >= 0), peak_at: (.chart.peak_at != null), vms: [.last.vms[] | select(.cpu > 0 and .memory > 0) | .vm], findings: (.findings | length)}'''
+      stdin: |
+          {"v":2,"id":"1","call":"activity.read","target":{"name":"macbook-pro"},"in":{"history":true,"graph":86400000000000}}
+      exit: 0
+      stdout: |
+          {"source":"engine","day":true,"peak":true,"peak_at":true,"vms":["linux-1","agent-7f"],"findings":0}
+    - command: 'world advance 2m'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.history | {live: (.[-1].at > "2026-11-07T10:30:00Z"), ticks_per_s: ([range(1; length) as $i | (.[$i].cpu_total - .[$i - 1].cpu_total) / ((.[$i].at | fromdate) - (.[$i - 1].at | fromdate))] | max)}'''
+      stdin: |
+          {"v":2,"id":"1","call":"activity.read","target":{"name":"macbook-pro"},"in":{"history":true}}
+      exit: 0
+      stdout: |
+          {"live":true,"ticks_per_s":1000}

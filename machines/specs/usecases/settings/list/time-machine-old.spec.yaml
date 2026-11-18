@@ -1,0 +1,13 @@
+description: 'a last Time Machine backup older than 7 days needs a fix; one 2 days old is as expected'
+env: two-macs
+runs:
+    - command: 'settings | /usr/bin/grep time-machine'
+      exit: 0
+      stdout: |
+          ●	time-machine	as expected · last backup 2 d ago
+    - command: 'world advance 168h'
+      exit: 0
+    - command: 'settings | /usr/bin/grep time-machine'
+      exit: 0
+      stdout: |
+          ◐	time-machine	last backup 9 d ago	System Settings > General > Time Machine

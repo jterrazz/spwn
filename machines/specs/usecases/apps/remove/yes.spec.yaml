@@ -1,0 +1,11 @@
+description: 'station apps remove --yes removes without a question'
+env: two-macs
+runs:
+    - command: 'apps remove lazygit --yes'
+      exit: 0
+      stdout: |
+          ●	lazygit		brew
+    - command: 'apps lazygit | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ○	lazygit		brew	station apps install lazygit

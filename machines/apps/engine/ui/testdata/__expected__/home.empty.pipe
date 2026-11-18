@@ -1,0 +1,23 @@
+# Machine
+●	name	macbook	Mac · Darwin 27.0.0 arm64 · you · zsh
+●	uptime	22d 14h	battery 100% charged
+●	setup	done
+●	engine	running v2.0.0-250
+# Environment
+●	local ip	192.168.1.152
+●	filevault	on
+●	firewall	on
+●	sip	off
+●	gatekeeper	on
+●	macos	up to date	checked 22m ago
+●	brew	up to date
+●	Tailscale	Running · macbook-pro.tail1234.ts.net · 100.98.133.14
+# Workspace
+●	disk	27.9 GB	reclaimable: station disk free
+# Identity
+●	git email	you@example.com
+●	git signing	on
+# Background	1 ●
+●	com.github.facebook.watchman	known	running · pid 3464	user	watchman	~/Library/LaunchAgents/com.github.facebook.watchman.plist
+# Apps	1 ●
+# Settings	1 ●

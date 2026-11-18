@@ -1,0 +1,26 @@
+description: 'station asks the terminal for its colours only when it draws on it: piped or redirected, never'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR "$STATION" apps'
+      stdin: |
+          asked
+      exit: 0
+      stdout: |
+          asked for its colours 1 times
+    - command: '--version >/dev/null; terminal --size 80x40 /bin/sh -c "/usr/bin/env -u NO_COLOR \"\$STATION\" apps > apps.txt"; /usr/bin/grep -c "$(printf "\033")" apps.txt'
+      stdin: |
+          asked
+      exit: 1
+      stdout: |
+          asked for its colours 0 times
+          0
+    - command: '--version >/dev/null; terminal --size 80x40 /bin/sh -c "/usr/bin/env -u NO_COLOR \"\$STATION\" apps | /usr/bin/head -1"'
+      stdin: |
+          asked
+      exit: 0
+      stdout: |
+          asked for its colours 0 times

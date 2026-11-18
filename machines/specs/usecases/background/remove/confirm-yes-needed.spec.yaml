@@ -1,0 +1,12 @@
+description: 'station background remove piped without --yes is refused and the task is kept, exit 2'
+env: two-macs
+runs:
+    - command: 'background remove com.example.brain.x-snapshot'
+      exit: 2
+      stderr: |
+          Error: refusing to remove without --yes
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs["com.example.brain.x-snapshot"] | [.Loaded, .LastExit]'' world.json'
+      exit: 0
+      stdout: |
+          [true,2]

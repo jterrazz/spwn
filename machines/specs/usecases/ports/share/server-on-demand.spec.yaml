@@ -1,0 +1,17 @@
+description: 'ports share infra 8080 shares the server''s port on demand, reserved and served on its Mac'
+env: two-macs
+runs:
+    - command: 'world listen infra "*:8080" nginx'
+      exit: 0
+    - command: 'ports share infra 8080 --on mac-mini'
+      exit: 0
+      stdout: |
+          https://mac-mini.tail1234.ts.net:40000
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 8080) | [.machine, .state, .reserved]]'''
+      exit: 0
+      stdout: |
+          [["infra","shared",40000]]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | {reserved: [.stores.reservations[] | [.vm, .guest_port, .host_port]], shared: [.tailnet.shares[] | .Reserved]}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[["infra",8080,40000]],"shared":[40000]}

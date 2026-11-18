@@ -1,0 +1,62 @@
+description: 'add writes one block and keeps the owner''s own blocks; forget gives the file back, dialing nothing'
+fixture:
+    - ../../__fixtures__/far-mac/
+    - ./__fixtures__/owner-ssh-config/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/cp .ssh/config config-before; "$STATION" machines add mac-mini --user jterrazz.agent --key "~/.ssh/agent_key" | /usr/bin/sed "s/station .*/station VERSION/"'
+      exit: 0
+      stdout: |
+          ●	mac-mini	added · ssh answers · station VERSION
+      files:
+          .ssh/config:
+              equals: |
+                  Host github.com
+                    User git
+
+                  # >>> jterrazz machine worker >>>
+                  Host worker
+                    HostName worker
+                    User deploy
+                    IdentityFile ~/.ssh/id_ed25519
+                    ServerAliveInterval 30
+                    ServerAliveCountMax 3
+                    UserKnownHostsFile ~/.local/state/station/known_hosts/worker
+                    StrictHostKeyChecking accept-new
+                  # <<< jterrazz machine worker <<<
+
+                  Host legacy
+                    HostName 10.0.0.9
+                    User old
+
+                  # >>> jterrazz machine mac-mini >>>
+                  Host mac-mini
+                    HostName mac-mini
+                    User jterrazz.agent
+                    IdentityFile ~/.ssh/agent_key
+                    IdentitiesOnly yes
+                    ServerAliveInterval 30
+                    ServerAliveCountMax 3
+                    UserKnownHostsFile ~/.local/state/station/known_hosts/mac-mini
+                    StrictHostKeyChecking accept-new
+                  # <<< jterrazz machine mac-mini <<<
+          .calls:
+              equals: |
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 mac-mini -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+    - command: 'machines add mac-mini'
+      exit: 2
+      stderr: |
+          Error: machine "mac-mini" already exists
+          Hint: station machines forget mac-mini first, to change it
+    - command: 'machines forget mac-mini --yes'
+      exit: 0
+      stdout: |
+          ●	mac-mini	forgotten · nothing changed on it
+      files:
+          .calls:
+              equals: |
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 mac-mini -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+    - command: '--version >/dev/null; /usr/bin/cmp .ssh/config config-before && echo "byte for byte"'
+      exit: 0
+      stdout: |
+          byte for byte

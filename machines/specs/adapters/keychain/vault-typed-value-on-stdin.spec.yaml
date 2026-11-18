@@ -1,0 +1,16 @@
+description: 'a typed password reaches security on its stdin alone, and the book never holds it'
+fixture:
+    - ../__fixtures__/setup-stubs/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error.code''; /bin/cat .calls; /usr/bin/grep -c FAKE000 .local/state/station/vault.json'
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"docs deploy","Program":"gh","Kind":"fine-grained","From":"typed","Value":"FAKE000"}}
+      exit: 1
+      stdout: |
+          {"ID":"pw-1"}
+          security -i
+          add-generic-password -U -s station -a "vault:pw-1" -w "FAKE000"
+          0
+      files:
+          .keychain/station/vault:pw-1: exists

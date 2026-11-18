@@ -1,0 +1,8 @@
+description: 'off on a setting that does not live on this machine is refused'
+env: in-workspace
+runs:
+    - command: 'settings off ssh-key --yes'
+      exit: 2
+      stderr: |
+          Error: ssh-key is for Macs only
+          Hint: station settings apply ssh-key --on this-mac

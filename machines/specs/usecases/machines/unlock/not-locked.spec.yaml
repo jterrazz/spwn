@@ -1,0 +1,7 @@
+description: 'a Mac that answers has its disk unlocked already: unlock says so, exit 0, and opens no session'
+env: two-macs
+runs:
+    - command: 'machines unlock mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	already answers: its disk is unlocked

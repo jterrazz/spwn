@@ -1,0 +1,39 @@
+# Needs a look
+◐	macbook-pro	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts
+◐	macbook-pro	dns	changed since 2 d ago	station settings diff dns
+◐	macbook-pro	zed-dotfiles	changed since 2 d ago	station settings diff zed-dotfiles
+◐	macbook-pro	tailscale-cli	changed since 2 d ago	station settings diff tailscale-cli
+◐	macbook-pro	firewall	off	System Settings > Network > Firewall
+◐	macbook-pro	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
+◐	mac-mini	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts --on mac-mini
+◐	mac-mini	dns	changed since 2 d ago	station settings diff dns --on mac-mini
+◐	mac-mini	zed-dotfiles	changed since 2 d ago	station settings diff zed-dotfiles --on mac-mini
+◐	mac-mini	tailscale-cli	changed since 2 d ago	station settings diff tailscale-cli --on mac-mini
+◐	mac-mini	firewall	off	System Settings > Network > Firewall
+◐	mac-mini	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
+◐	linux-1	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts --on linux-1
+◐	linux-1	dns	changed since 2 d ago	station settings diff dns --on linux-1
+◐	linux-1	zed-dotfiles	changed since 2 d ago	station settings diff zed-dotfiles --on linux-1
+◐	linux-1	tailscale-cli	changed since 2 d ago	station settings diff tailscale-cli --on linux-1
+◐	api	git-shortcuts	changed since 2 d ago	station machines start api
+◐	api	dns	changed since 2 d ago	station machines start api
+◐	api	zed-dotfiles	changed since 2 d ago	station machines start api
+◐	api	tailscale-cli	changed since 2 d ago	station machines start api
+# Machines
+●	macbook-pro	Mac	read
+●	mac-mini	Mac	read
+●	linux-1	Workspace	read
+○	api	Workspace	stopped · last read 2 h ago
+–	infra	Server	not checked: station does not manage its settings
+# Set by station
+◐	git-shortcuts	◐	◐	◐	◐	0/4
+◐	dns	◐	◐	◐	◐	0/4
+◐	zed-dotfiles	◐	◐	◐	◐	0/4
+◐	tailscale-cli	◐	◐	◐	◐	0/4
+○	13 more	○ 4/10	○ 4/10	○ 4/10	○ 4/10	16/40
+# Always-on Mac
+○	5 settings	○	○	–	–	–
+# Checked
+◐	firewall	◐	◐	–	–	0/2
+◐	screen-lock	◐	◐	–	–	0/2
+⊘	7 more	⊘ 5/7	⊘ 5/7	–	–	10/14

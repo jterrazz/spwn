@@ -1,0 +1,8 @@
+description: '--history is for scripts: without --json it is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'activity --history'
+      exit: 2
+      stderr: |
+          Error: --history is for scripts: it needs --json
+          Hint: station activity --json --history

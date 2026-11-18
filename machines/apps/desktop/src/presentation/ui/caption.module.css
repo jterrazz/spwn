@@ -1,0 +1,10 @@
+.caption {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-10);
+    padding: var(--space-2) 0 var(--space-10);
+    color: var(--t3);
+    font-size: var(--text-label);
+}

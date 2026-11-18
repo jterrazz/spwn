@@ -1,0 +1,15 @@
+description: 'a registry that does not answer fails the update, and the image stays as it was'
+env: two-macs
+runs:
+    - command: 'world fault ImageSource.Latest 1'
+      exit: 0
+    - command: 'images update base-ubuntu'
+      exit: 1
+      stderr: |
+          Error: the registry did not answer for base-ubuntu: the registry does not answer, as the world scripted it
+          Hint: station images update base-ubuntu
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | "\(.version) \(.newest)"'''
+      exit: 0
+      stdout: |
+          2026.11.01 true
+          2026.10.20 false

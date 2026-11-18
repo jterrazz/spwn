@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: better-interface
+description: Interface polish
+methods:
+    - os: any
+      skill:
+          repo: jakubkrehel/skills
+          name: better-interface

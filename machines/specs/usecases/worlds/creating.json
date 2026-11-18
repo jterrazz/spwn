@@ -1,0 +1,121 @@
+{
+    "now": "2026-11-04T10:00:05Z",
+    "this_mac": "macbook-pro",
+    "user": "you",
+    "macs": {
+        "macbook-pro": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z"
+            },
+            "building": [
+                {
+                    "image": "base-ubuntu",
+                    "version": "2026.11.04",
+                    "step": "packages",
+                    "owner": {
+                        "pid": 4242,
+                        "start": "1762250400.120000"
+                    }
+                }
+            ],
+            "disk": {
+                "total": 994000000000,
+                "free": 412000000000,
+                "system": 21400000000,
+                "files": {
+                    "~/Library/Caches/go-build/00/a": 8200000000,
+                    "~/Library/Caches/Homebrew/downloads/x": 1400000000,
+                    "~/.cache/npm/_cacache/x": 600000000,
+                    "~/Library/Developer/CoreSimulator/Devices/A/data": 6300000000,
+                    "~/.claude/projects/x": 2100000000,
+                    "~/.local/state/station/logs/engine.log": 120000000
+                }
+            },
+            "preferences": {
+                "name": "macbook-pro",
+                "vm_user": "admin"
+            },
+            "processes": [
+                {
+                    "pid": 4242,
+                    "start": "1762250400.120000"
+                },
+                {
+                    "pid": 4243,
+                    "start": "1762250401.330000"
+                }
+            ],
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            },
+            "self": {
+                "system": {},
+                "hardware": {
+                    "Model": "Mac16,8",
+                    "Chip": "Apple M4 Pro",
+                    "Memory": 25769803776,
+                    "CPUs": 12
+                }
+            },
+            "vms": {
+                "linux-4": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "2026.11.01",
+                        "lifetime": "ephemeral",
+                        "created_at": "2026-11-04T10:00:00Z",
+                        "owner": {
+                            "pid": 4242,
+                            "start": "1762250400.120000"
+                        },
+                        "birth": {
+                            "progress": 400,
+                            "step": "booting",
+                            "position": 2,
+                            "steps": 4,
+                            "at": "2026-11-04T10:00:03Z",
+                            "sentence": "Creating: boot 2 of 4"
+                        }
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 20000000000
+                    }
+                },
+                "linux-5": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "lifetime": "persistent",
+                        "created_at": "2026-11-04T10:00:01Z",
+                        "purpose": "Lot shell, one block per package",
+                        "creator": "studio-os-fe",
+                        "owner": {
+                            "pid": 4243,
+                            "start": "1762250401.330000"
+                        },
+                        "birth": {
+                            "progress": 20,
+                            "step": "building",
+                            "position": 1,
+                            "steps": 5,
+                            "detail": "image 2 of 3",
+                            "at": "2026-11-04T10:00:04Z",
+                            "sentence": "Creating: image 1 of 5"
+                        }
+                    },
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 4294967296,
+                        "Disk": 20000000000
+                    }
+                }
+            }
+        }
+    }
+}

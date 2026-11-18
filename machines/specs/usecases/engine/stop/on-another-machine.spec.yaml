@@ -1,0 +1,14 @@
+description: 'stop everything on another Mac stops its workspaces and skips its server, its engine kept'
+env: mini-workspace
+runs:
+    - command: 'engine stop --yes --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	engine	stopped 1 VM (ci-1) · infra skipped (server) · the engine keeps running for infra
+    - command: 'machines | /usr/bin/grep -A2 mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+          ○	ci-1	Workspace	mac-mini	Stopped · ephemeral	4 CPU	8 GB

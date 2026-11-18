@@ -1,0 +1,10 @@
+{
+    "group": "alert",
+    "id": "alert.restart-mac",
+    "note": "Restart mac-mini, typed because it hosts a server: infra is down while it restarts, about 2 min.",
+    "pages": ["pages/machines.macs.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "restart-mac"
+    }
+}

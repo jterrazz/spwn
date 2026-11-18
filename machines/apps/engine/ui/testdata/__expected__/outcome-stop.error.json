@@ -1,0 +1,56 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "engine stop",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "engine",
+            "mark": "broken",
+            "label": "engine",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "stopped 1 VM (linux-1)"
+                },
+                {
+                  "kind": "text",
+                  "text": "api did not stop"
+                },
+                {
+                  "kind": "text",
+                  "text": "the engine keeps running"
+                }
+              ]
+            },
+            "reason": "failing"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}

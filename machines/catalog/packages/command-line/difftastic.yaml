@@ -1,0 +1,16 @@
+package: station.package/v1
+kind: app
+name: difftastic
+description: Structural diff
+replaces: diff
+provides: [difft]
+methods:
+    - os: macos
+      brew: difftastic
+    - family: linux
+      arch: arm64
+      github-release:
+          { repo: Wilfred/difftastic, asset: 'difft-*-aarch64-unknown-linux-gnu.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: Wilfred/difftastic, asset: 'difft-*-x86_64-unknown-linux-gnu.tar.gz' }

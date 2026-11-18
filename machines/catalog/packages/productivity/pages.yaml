@@ -1,0 +1,11 @@
+package: station.package/v1
+kind: app
+name: pages
+description: Apple word processor
+bundle: Pages
+methods:
+    - os: macos
+      machine: computer
+      mas:
+          id: 361309726
+          name: Pages

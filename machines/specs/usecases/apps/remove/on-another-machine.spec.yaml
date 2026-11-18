@@ -1,0 +1,15 @@
+description: 'station apps remove node --on linux-1 removes it inside the workspace; This Mac keeps its own'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'apps remove node --yes --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	node		mise
+    - command: '--version >/dev/null; "$STATION" apps node --on linux-1 | /usr/bin/sed -n 2p; "$STATION" apps node | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ○	node		mise	station apps install node
+          ◐	node	22.11.0	mise	update available · station apps update node

@@ -1,0 +1,55 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "run dreset",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "containers",
+            "mark": "ok",
+            "label": "containers",
+            "detail": {
+              "kind": "count",
+              "n": 3,
+              "unit": "removed"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "images",
+            "mark": "ok",
+            "label": "images",
+            "detail": {
+              "kind": "count",
+              "n": 12,
+              "unit": "removed"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

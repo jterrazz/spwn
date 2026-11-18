@@ -1,0 +1,8 @@
+description: '--yes never answers a typed question: a delete with it is refused, nothing deleted'
+env: two-macs
+runs:
+    - command: 'machines delete linux-1 --yes'
+      exit: 2
+      stderr: |
+          Error: unknown flag: --yes
+          Hint: run station machines delete --help

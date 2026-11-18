@@ -1,0 +1,14 @@
+description: 'a package file of the owner''s in a newer schema is refused with update station'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          package: station.package/v2
+          kind: app
+          name: jq
+      exit: 0
+    - command: 'apps'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/catalog/command-line/jq.yaml is station.package/v2, newer than this station reads (station.package/v1)
+          Hint: update station

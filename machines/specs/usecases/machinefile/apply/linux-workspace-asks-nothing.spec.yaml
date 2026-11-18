@@ -1,0 +1,36 @@
+description: 'inside a Linux workspace, a runtime, a bun app and an apt app are planned and applied off a terminal'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq, playwright-mcp]
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To install
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
+          ○	mise	script	the manager of node
+          ○	node	mise	required by playwright-mcp
+          ○	bun	mise	the manager of playwright-mcp
+          ○	playwright-mcp	bun
+    - command: 'apply --yes'
+      exit: 0
+      stdout: |
+          # To install
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
+          ○	mise	script	the manager of node
+          ○	node	mise	required by playwright-mcp
+          ○	bun	mise	the manager of playwright-mcp
+          ○	playwright-mcp	bun
+          ●	apt	1.0.0	apt	the manager of jq
+          ●	jq	1.0.0	apt
+          ●	mise		script	the manager of node
+          ●	node	1.0.0	mise	required by playwright-mcp
+          ●	bun	1.0.0	mise	the manager of playwright-mcp
+          ●	playwright-mcp	1.0.0	bun

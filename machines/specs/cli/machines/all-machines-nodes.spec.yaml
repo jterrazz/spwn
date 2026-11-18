@@ -1,0 +1,11 @@
+description: 'tailnet nodes give All machines its ips, This Mac''s included'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ../../__fixtures__/fleet-y-answers/
+    - ./__fixtures__/tailnet-nodes/
+runs:
+    - command: 'machines --json | /usr/bin/jq -r ''.macs | map(.name + "=" + .ip) | join(" ")'''
+      exit: 0
+      stdout: |
+          x=100.64.0.1 y=100.64.0.2

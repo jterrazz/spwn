@@ -1,0 +1,11 @@
+description: 'apps.list says each entry''s kind, a skill an agent skill'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out[] | .App | select(.Name == "better-layout" or .Name == "homebrew" or .Name == "jq") | [.Name, .AppKind]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"apps.list","in":{}}
+      exit: 0
+      stdout: |
+          [["homebrew","manager"],["jq","app"],["better-layout","skill"]]

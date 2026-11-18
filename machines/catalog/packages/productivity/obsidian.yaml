@@ -1,0 +1,16 @@
+package: station.package/v1
+kind: app
+name: obsidian
+description: Knowledge base and note-taking
+bundle: Obsidian
+updates: self
+methods:
+    - os: macos
+      machine: computer
+      cask: obsidian
+disk:
+    paths:
+        - path: ~/Library/Application Support/obsidian
+          level: data
+    no-erase: "an app's data is its account's: erase it in the app"
+    quit: Obsidian

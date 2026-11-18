@@ -1,0 +1,26 @@
+description: 'a read of a silent Mac is its finding with its last answer, and exits 0, with --json too'
+env: mini-offline
+runs:
+    - command: 'apps --on mac-mini'
+      exit: 0
+      stdout: |
+          ✗ mac-mini does not answer · last answer 03:12
+    - command: 'disk --on mac-mini'
+      exit: 0
+      stdout: |
+          ✗ mac-mini does not answer · last answer 03:12
+    - command: 'apps --on mac-mini --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "unreachable",
+            "code": "remote.unreachable",
+            "subject": "mac-mini",
+            "message": "mac-mini does not answer",
+            "hint": "station machines mac-mini",
+            "fix": null
+          }
+      stderr: |
+          Error: mac-mini does not answer
+          Hint: station machines mac-mini

@@ -1,0 +1,13 @@
+description: 'an update fetches the newest released linux beside the version held; its VMs keep the older'
+env: two-macs
+runs:
+    - command: 'images update base-ubuntu'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.03	fetched
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | "\(.version) \(.newest) \(.vms | join(","))"'''
+      exit: 0
+      stdout: |
+          2026.11.03 true 
+          2026.11.01 false api,linux-1
+          2026.10.20 false 

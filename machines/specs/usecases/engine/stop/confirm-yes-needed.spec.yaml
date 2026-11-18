@@ -1,0 +1,12 @@
+description: 'off a terminal, a stop that would stop a running VM is refused without --yes, and nothing stops'
+env: two-macs
+runs:
+    - command: 'engine stop'
+      exit: 2
+      stderr: |
+          Error: station engine stop stops linux-1
+          Hint: station engine stop --yes
+    - command: 'engine'
+      exit: 0
+      stdout: |
+          ●	engine	running · {{string}} · up 3 d · 1 VM

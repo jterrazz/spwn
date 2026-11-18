@@ -1,0 +1,30 @@
+description: 'a LAN declaration is seen on the mini''s *:5000 and not on its loopback 5432'
+env: two-macs
+runs:
+    - command: 'world listen mac-mini "*:5000" ControlCenter'
+      exit: 0
+    - command: 'world listen mac-mini 127.0.0.1:5432 postgres'
+      exit: 0
+    - command: 'ports declare mac-mini 5432 --via lan'
+      exit: 0
+      stdout: |
+          ●	5432 on mac-mini	declared public (your LAN)
+    - command: 'ports declare mac-mini 5000 --via lan'
+      exit: 0
+      stdout: |
+          ●	5000 on mac-mini	declared public (your LAN)
+    - command: 'ports --on mac-mini | /usr/bin/grep -e 5000 -e 5432 -e "^#"'
+      exit: 0
+      stdout: |
+          # Public: reachable from anywhere else, internet or LAN, declared	1 ●	1 ◐
+          ●	mac-mini	5000	public	AirPlay Receiver	*:5000 all interfaces	your LAN · listens on the LAN
+          ◐	mac-mini	5432	public	postgres	127.0.0.1:5432 this machine	declared, but 5432 does not listen on the LAN of mac-mini
+          # Private: shared with you on Tailscale
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.findings, [.ports[] | select(.port == 5000 or .port == 5432) | [.class, .declared]]]'''
+      exit: 0
+      stdout: |
+          [[],[["public",{"via":"lan","seen":true}],["public",{"via":"lan","seen":false,"missing":"5432 does not listen on the LAN of mac-mini"}]]]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | map_values(.stores.declarations // [] | map(.machine + ":" + (.port|tostring) + " " + .via))'' world.json'
+      exit: 0
+      stdout: |
+          {"infra":[],"linux-1":[],"mac-mini":["infra:443 cloudflare-tunnel","mac-mini:5432 lan","mac-mini:5000 lan"],"macbook-pro":[]}

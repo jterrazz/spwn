@@ -1,0 +1,19 @@
+description: 'station activity --on linux-1 tells linux-1''s own values, read by its guest; no Thermal, no Battery'
+env: two-macs
+runs:
+    - command: 'activity --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	Workspace · up 2h 0m · rates over 1 s
+          # Now
+          	CPU	8 % of 4 CPU · load 0.3 0.4 0.4
+          	Memory	1.1 of 4 GB · pressure normal · swap 0 B
+          	Disk	12.4 GB free of 20 GB
+          	Disk read	200 KB/s · 3 GB since boot
+          	Disk write	400 KB/s · 5 GB since boot
+          	Network	in 300 KB/s · out 100 KB/s
+          	Network total	received 902 MB · sent 401 MB since boot
+          # Top processes
+          	Top by CPU	node 6 % · vite 2 %
+          	Top by memory	node 0.5 GB · vite 0.2 GB

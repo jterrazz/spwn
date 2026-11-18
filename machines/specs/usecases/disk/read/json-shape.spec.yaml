@@ -1,0 +1,7 @@
+description: 'station disk --json is station.disk.read/v1: the volume, the findings, every row by group'
+env: two-macs
+runs:
+    - command: 'disk --json | /usr/bin/jq -c ''{schema, findings, free_bytes, total_bytes, groups: ([.rows[].group] | unique), tart: (.rows[] | select(.group == "misplaced")), go: (.rows[] | select(.app == "go"))}'''
+      exit: 0
+      stdout: |
+          {"schema":"station.disk.read/v1","findings":[{"severity":"needs-a-look","section":"disk","subject":"~/.tart","text":"~/.tart is misplaced","fix":{"call":"disk.move","args":{"Folder":"~/.tart"},"command":null,"path":null}}],"free_bytes":388000000000,"total_bytes":994000000000,"groups":["can-rebuild","misplaced","never-touched","your-data"],"tart":{"app":"tart","group":"misplaced","bytes":73300000000,"paths":["~/.tart"],"move_to":"~/.local/share/station/vms"},"go":{"app":"go","group":"can-rebuild","bytes":19400000000,"paths":["~/Library/Caches/go-build"]}}

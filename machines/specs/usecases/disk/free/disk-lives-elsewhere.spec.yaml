@@ -1,0 +1,8 @@
+description: 'a free of an app whose Disk row lives on another kind of machine is refused before anything runs'
+env: two-macs
+runs:
+    - command: 'disk free docker'
+      exit: 2
+      stderr: |
+          Error: docker is for Linux VMs only
+          Hint: station disk

@@ -1,0 +1,10 @@
+#!/bin/sh
+# docker installed: it answers its version and its disk use.
+case "$*" in
+    --version) echo "Docker version 28.5.1, build e180ab8" ;;
+    "system df --format {{.Size}}") printf '1.5GB\n300MB\n' ;;
+    *)
+        echo "stub docker: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

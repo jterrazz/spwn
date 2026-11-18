@@ -1,0 +1,14 @@
+description: 'a follower that cannot be read leaves the page verdict plain'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["macbook-pro"].preferences.machinefile) | del(.macs["macbook-pro"].vms[]?.kept.template) | .macs["macbook-pro"].vms.api.kept.template = "linux-dev"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''[.out.Files[] | .Followers[]], .out.Verdict'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          [{"Machine":"api","Mac":"macbook-pro","ThisMac":true,"State":"unread","Differences":0}]
+          {"Tone":"plain","Sentence":"Whether the machines match their files does not read now."}

@@ -1,0 +1,30 @@
+- main:
+  - heading "2 things need you." [level=1]
+  - paragraph:
+    - img "2 things need you."
+    - text: The rest is fine. 4 machines on macbook-pro
+  - group "Which machines":
+    - button "All machines"
+    - button "macbook-pro"
+    - button "mac-mini" [pressed]
+    - button "macbook-air"
+  - region "Needs you":
+    - heading "Needs you a gesture is due" [level=2]
+    - paragraph: None of the needs listed concerns mac-mini or its machines.
+  - region "Upkeep":
+    - heading "Upkeep 0" [level=2]
+    - paragraph: Nothing can wait.
+  - region "History":
+    - heading "History what happened, newest first" [level=2]
+    - region "Today":
+      - heading "Today" [level=3]
+      - text: 14:07 gate-2 deleted 8 GB freed by you
+      - button "14:06 infra restarted by you"
+    - region "Last night":
+      - heading "Last night" [level=3]
+      - button "03:12 node 24.11.0 → 24.11.1 2 machines"
+      - button "03:13 uv 0.9.7 → 0.9.9 2 machines"
+    - region "Yesterday":
+      - heading "Yesterday" [level=3]
+      - button "18:02 linux-3 created by agent-7f · review the docs lot"
+      - button "09:15 infra restarted after an update by its Mac"

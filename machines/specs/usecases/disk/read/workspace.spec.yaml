@@ -1,0 +1,11 @@
+description: 'station disk --on linux-1 tells the workspace''s own volume and rows, read inside it'
+env: two-macs
+runs:
+    - command: 'disk --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	12.4 GB free of 20.0 GB · 0 misplaced folders
+          # Can rebuild
+          ●	go	1.2 GB
+          ●	node	300 MB

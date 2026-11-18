@@ -1,0 +1,8 @@
+description: 'an action on a Mac that does not answer exits 1, its hint the Mac''s own page'
+env: mini-offline
+runs:
+    - command: 'apps install jq --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini does not answer
+          Hint: station machines mac-mini

@@ -1,0 +1,14 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook-pro",
+    "macs": {
+        "macbook-pro": {
+            "engine": {},
+            "preferences": {
+                "name": "macbook-pro",
+                "vm_user": "admin"
+            },
+            "hypervisor": "none"
+        }
+    }
+}

@@ -1,0 +1,12 @@
+description: 'on a Mac, a share names its VM: a port alone is refused, and nothing is reserved'
+env: two-macs
+runs:
+    - command: 'ports share 3000'
+      exit: 2
+      stderr: |
+          Error: say which VM's port 3000 it is
+          Hint: station ports share <vm> 3000
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[].guest_port]'' world.json'
+      exit: 0
+      stdout: |
+          [5173,7000]

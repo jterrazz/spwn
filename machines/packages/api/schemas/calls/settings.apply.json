@@ -1,0 +1,159 @@
+{
+  "$defs": {
+    "settings.Change": {
+      "additionalProperties": false,
+      "properties": {
+        "After": {
+          "items": {
+            "$ref": "#/$defs/settings.KeyValue"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Before": {
+          "items": {
+            "$ref": "#/$defs/settings.KeyValue"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Package": {
+          "type": "string"
+        },
+        "Result": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Steps": {
+          "items": {
+            "$ref": "#/$defs/settings.ChangeStep"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Verb": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "After",
+        "Before",
+        "Package",
+        "Result",
+        "Steps",
+        "Verb"
+      ],
+      "type": "object"
+    },
+    "settings.ChangeStep": {
+      "additionalProperties": false,
+      "properties": {
+        "Detail": {
+          "type": "string"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Detail",
+        "Label",
+        "State"
+      ],
+      "type": "object"
+    },
+    "settings.KeyValue": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "type": "object"
+    },
+    "settings.calls.ApplyIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "Interactive": {
+          "type": "boolean"
+        },
+        "Names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Values": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/settings.apply.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call settings.apply of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/settings.calls.ApplyIn"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/settings.Change"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "settings.apply",
+  "type": "object"
+}

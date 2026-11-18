@@ -1,0 +1,4 @@
+●	jq	1.8.1	brew
+●	mise	2026.10.1	brew
+◐	activate			restart the shell
+✗	typewhisper		cask	brew bundle exited 1

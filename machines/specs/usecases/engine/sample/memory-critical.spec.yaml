@@ -1,0 +1,10 @@
+description: 'memory pressure critical for a minute is broken, told once, fixed by station activity'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].meter.sample.pressure = "critical"'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3; do "$STATION" world advance 1m; done; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind == "activity") | .Text]'' world.json; "$STATION" activity | /usr/bin/grep "Memory pressure critical"'
+      exit: 0
+      stdout: |
+          ["This Mac: Memory pressure critical"]
+          ✗	Memory pressure critical	station activity

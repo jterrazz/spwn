@@ -1,0 +1,37 @@
+description: 'a misplaced folder of an app not installed is put right by path, as the overview''s fix says'
+fixture:
+    - ./__fixtures__/disk-relocated/
+    - ./__fixtures__/disk-strays/
+runs:
+    - command: 'overview </dev/null | /usr/bin/grep "~/go"'
+      exit: 0
+      stdout: |
+          ◐	~/go is misplaced	station disk move ~/go
+    - command: 'disk move ~/go'
+      exit: 0
+      stdout: |
+          ●	~/go	nothing to move: its rebuildable files freed
+      files:
+          go: absent
+          .npm/_cacache/x: exists
+          .calls: absent
+    - command: 'status --json | /usr/bin/jq -c ''.workspace.strays | map(.name)'''
+      exit: 0
+      stdout: |
+          ["node"]
+    - command: 'disk move ~/.npm'
+      exit: 0
+      stdout: |
+          ●	~/.npm	nothing to move: its rebuildable files freed
+      files:
+          .npm: absent
+          .calls: absent
+    - command: 'status --json | /usr/bin/jq -c ''.workspace.strays'''
+      exit: 0
+      stdout: |
+          []
+    - command: 'disk free go'
+      exit: 0
+      stdout: |
+          ○	go	not installed
+          ●	Freed	0 B	nothing is lost

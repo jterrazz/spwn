@@ -1,0 +1,110 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# =============================================================================
+# Starship prompt: ANSI named colors only, so the terminal theme drives the
+# palette and the prompt stays readable in both light and dark modes.
+# Managed by station. No Nerd Font required: only widely-supported Unicode glyphs.
+# Two lines: context on top (path + git left, language versions right via the
+# fill module), a clean ➜ to type on below. Only a slow command's duration
+# ever appears on the input line.
+# =============================================================================
+
+add_newline = true
+
+format = """
+${custom.station}\
+$directory\
+$git_branch\
+$git_status\
+$git_state\
+$fill\
+$nodejs\
+$golang\
+$rust\
+$python\
+$java\
+$line_break\
+$character"""
+
+right_format = """$cmd_duration"""
+
+[fill]
+symbol = ' '
+
+[custom.station]
+when = 'test -n "$STATION_TERMINAL" && test -f "${XDG_STATE_HOME:-$HOME/.local/state}/station/use/$STATION_TERMINAL"'
+command = 'station shell prompt'
+shell = ['sh']
+style = 'yellow bold'
+format = '[$output]($style) '
+
+[directory]
+style = 'blue bold'
+truncation_length = 3
+truncate_to_repo = true
+truncation_symbol = '…/'
+read_only = ' ro'
+read_only_style = 'red'
+
+[character]
+success_symbol = '[➜](bold green)'
+error_symbol = '[➜](bold red)'
+vimcmd_symbol = '[➜](bold yellow)'
+
+[git_branch]
+symbol = ''
+style = 'purple'
+format = '[$branch]($style) '
+
+[git_status]
+style = 'yellow'
+format = '([$all_status$ahead_behind]($style) )'
+conflicted = '='
+ahead = '⇡${count}'
+behind = '⇣${count}'
+diverged = '⇕⇡${ahead_count}⇣${behind_count}'
+untracked = '?${count}'
+stashed = ''
+modified = '!${count}'
+staged = '+${count}'
+renamed = '»${count}'
+deleted = '✘${count}'
+
+[git_state]
+style = 'red'
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+
+[cmd_duration]
+min_time = 2_000
+style = 'bright-black'
+format = 'took [$duration]($style)'
+
+[nodejs]
+symbol = 'node '
+style = 'green'
+version_format = '${major}.${minor}'
+format = ' [$symbol($version)]($style)'
+
+[golang]
+symbol = 'go '
+style = 'cyan'
+version_format = '${major}.${minor}'
+format = ' [$symbol($version)]($style)'
+
+[rust]
+symbol = 'rust '
+style = 'bright-red'
+version_format = '${major}.${minor}'
+format = ' [$symbol($version)]($style)'
+
+[python]
+symbol = 'py '
+style = 'yellow'
+version_format = '${major}.${minor}'
+format = ' [$symbol($version)]($style)'
+
+[java]
+symbol = 'java '
+style = 'red'
+version_format = '${major}.${minor}'
+format = ' [$symbol($version)]($style)'

@@ -1,0 +1,8 @@
+description: 'inside a server, a server create is refused: VMs are made on a Mac'
+env: in-server
+runs:
+    - command: 'machines create box --server'
+      exit: 2
+      stderr: |
+          Error: infra runs no engine: VMs are made on a Mac
+          Hint: run station overview for what infra has

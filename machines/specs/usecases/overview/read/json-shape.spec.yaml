@@ -1,0 +1,26 @@
+description: 'station overview --json: its schema, each finding with one fix, each section its counts'
+env: two-macs
+runs:
+    - command: 'overview --json | /usr/bin/jq -c ''[.schema, .machine, .engine]'''
+      exit: 0
+      stdout: |
+          ["station.overview.read/v1",{"name":"macbook-pro","label":"This Mac","kind":"computer","on":null,"this_mac":true},"running"]
+    - command: 'overview --json | /usr/bin/jq -c ''[.findings[].fix | [.call, .command, .path] | map(select(. != null)) | length] | unique'''
+      exit: 0
+      stdout: |
+          [1]
+    - command: 'overview --json | /usr/bin/jq -c ''.findings[] | select(.subject == "brew") | .fix'''
+      exit: 0
+      stdout: |
+          {"call":"apps.update","args":{"Managers":"brew"},"command":null,"path":null}
+    - command: 'overview --json | /usr/bin/jq -c ''.sections[] | [.id, .counts]'''
+      exit: 0
+      stdout: |
+          ["activity",{}]
+          ["apps",{"not-installed":105,"ok":7,"update-available":2}]
+          ["settings",{"applied":0,"as-expected":8}]
+          ["disk",{"misplaced":1}]
+          ["ports",{"private":2,"public":0}]
+          ["accounts",{"signed-in":3}]
+          ["background",{"failing":1,"ok":10,"orphan":3}]
+          ["awake",{}]

@@ -1,0 +1,14 @@
+description: 'a Machinefile of a newer schema is refused with update station before anything else is judged'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v2
+          name: macbook-pro
+          horizon: far
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml is station.machinefile/v2, newer than this station reads (station.machinefile/v1)
+          Hint: update station

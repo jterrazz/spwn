@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "overview",
+  "command": "overview",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "the engine is stopped on macbook-pro",
+    "hint": "station engine start"
+  }
+}

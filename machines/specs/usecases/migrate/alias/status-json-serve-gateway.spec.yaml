@@ -1,0 +1,21 @@
+description: 'a connected host shows the Tailscale Serve gateway on, a VM none, and status runs no serve'
+fixture: ../../../__fixtures__/vms/
+env: engine
+runs:
+    - command: 'status --json | /usr/bin/jq -c ''.gateways[] | select(.name == "Tailscale Serve")'''
+      exit: 0
+      stdout: |
+          {"name":"Tailscale Serve","state":"ok","value":"on","detail":""}
+    - command: 'ports --json | /usr/bin/jq -r ''.tailscale.serve, .tailscale.dns_name'''
+      exit: 0
+      stdout: |
+          on
+          macbook.tail1234.ts.net
+    - command: '--version >/dev/null; "$STATION" overview >/dev/null; /usr/bin/grep -c ''tailscale serve --bg'' .calls'
+      exit: 1
+      stdout: |
+          0
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" status --json | /usr/bin/jq ''[.gateways[] | select(.name == "Tailscale Serve")] | length'''
+      exit: 0
+      stdout: |
+          0

@@ -1,0 +1,28 @@
+# Paths macOS's own daemons write under $HOME while the suite runs, never a tool's.
+# One shell glob per line, relative to $HOME; a tool's path never goes here. A line
+# names a shape (a daemon's folder, a temp file's form), never one transient name.
+Library/Preferences/com.apple.*
+Library/Preferences/ByHost
+Library/Caches/com.apple.*
+Library/Application Support/com.apple.*
+Library/Containers/com.apple.*
+Library/Group Containers/group.com.apple.*
+Library/Group Containers/com.apple.*
+Library/Application Scripts/group.com.apple.*
+Library/Application Scripts/com.apple.*
+Library/PersonalizationPortrait
+Library/Shortcuts
+Library/Daemon Containers
+Library/Biome
+Library/Trial
+Library/Metadata
+Library/Logs/DiagnosticReports
+Library/HTTPStorages/com.apple.*
+Library/HomeKit
+Library/DataDeliveryServices
+Library/Sharing/**
+Library/Application Support/DiskImages
+Library/Application Support/DiskImages/**
+Library/**/*.sb-*-*
+# sshd keeps one agent socket per session of the suite under ~/.ssh/agent.
+.ssh/agent

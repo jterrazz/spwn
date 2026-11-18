@@ -1,0 +1,11 @@
+description: 'a VM''s Overview in JSON carries its health: running, address, ssh, and the check a server has'
+env: two-macs
+runs:
+    - command: 'machines infra --json | /usr/bin/jq -c .health'
+      exit: 0
+      stdout: |
+          {"running":true,"address":true,"ssh":true,"check":{"url":"https://infra:6443/readyz","ok":true}}
+    - command: 'machines api --json | /usr/bin/jq -c ''[.state, .wanted, .health]'''
+      exit: 0
+      stdout: |
+          ["stopped","stopped",{"running":false,"address":false,"ssh":false,"check":null}]

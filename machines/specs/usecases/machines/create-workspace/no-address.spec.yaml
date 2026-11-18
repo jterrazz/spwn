@@ -1,0 +1,19 @@
+description: 'a created VM that gets no address in 60 s fails Has an address, and is kept'
+env: two-macs
+runs:
+    - command: 'world fault Hypervisor.Address'
+      exit: 0
+    - command: 'machines create --memory 4G'
+      exit: 1
+      stderr: |
+          Error: linux-2 is kept, failing Has an address: none after 60 s
+          Hint: station machines start linux-2, or station machines delete linux-2
+    - command: 'machines linux-2'
+      exit: 0
+      stdout: |
+          	On linux-2:
+          # Health
+          ●	Running
+          ✗	Has an address	failing
+          ✗	SSH answers	failing
+          ●	Size	4 CPU · 4 GB · 20 GB

@@ -1,0 +1,10 @@
+description: 'a Mac that refuses the planned restart is a failure naming why, and it keeps running'
+env: two-macs
+runs:
+    - command: 'world fault Unlocker.PlannedRestart'
+      exit: 0
+    - command: 'machines restart mac-mini --yes'
+      exit: 1
+      stderr: |
+          Error: "mac-mini" refused to restart: refused, as the world scripted it
+          Hint: check that sudo needs no password for fdesetup on mac-mini

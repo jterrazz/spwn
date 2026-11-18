@@ -1,0 +1,5 @@
+{
+  "machinefile": {
+    "source": { "name": "../escape", "url": "--upload-pack=touch" }
+  }
+}

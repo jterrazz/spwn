@@ -1,0 +1,7 @@
+description: 'an Overview sent with --on is that Mac''s own, read through its engine'
+env: two-macs
+runs:
+    - command: 'overview --on mac-mini --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
+      exit: 0
+      stdout: |
+          {"schema":"station.overview.read/v1","machine":"mac-mini"}

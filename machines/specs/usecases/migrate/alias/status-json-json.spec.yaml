@@ -1,0 +1,57 @@
+description: 'status --json is station.status/v1: every section, closed states, within the latency budget'
+runs:
+    - command: 'status --json | /usr/bin/jq -r .schema'
+      timeout: 6000
+      exit: 0
+      stdout: |
+          station.status/v1
+    - command: 'status --json | /usr/bin/jq -r ''keys | join(" ")'''
+      exit: 0
+      stdout: |
+          background config environment gateways generated_at identity machine schema setup station system tailnet tools workspace
+    - command: 'status --json | /usr/bin/jq -e ''has("generated_at") and has("station") and has("machine") and has("system") and has("environment") and has("workspace") and has("tools") and has("config") and has("setup") and has("identity") and has("background") and has("gateways") and has("tailnet") and (has("services") | not)'''
+      exit: 0
+      stdout: |
+          true
+    - command: 'status --json | /usr/bin/jq -e ''.tools and .config and .setup and .gateways and .tailnet and .workspace and .environment and .identity and .background'' > /dev/null'
+      exit: 0
+    - command: 'status --json | /usr/bin/jq -r ''(.gateways | type), (.station.daemon | keys | join(" "))'''
+      exit: 0
+      stdout: |
+          array
+          running state version
+    - command: 'status --json | /usr/bin/jq -r ''[.. | objects | select(has("state")) | .state] | map(select(. as $s | ["ok","degraded","absent","broken","unknown"] | index($s) | not)) | length'''
+      exit: 0
+      stdout: |
+          0
+    - command: 'status --json | /usr/bin/jq -r ''.machine.kind'''
+      exit: 0
+      stdout: |
+          host
+    - command: 'status --json | /usr/bin/jq -r ''.generated_at | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:]{8}Z$") | tostring'''
+      exit: 0
+      stdout: |
+          true
+    - command: 'status --json | /usr/bin/jq -r ''.machine, .system, .workspace, .tailnet | keys | join(" ")'''
+      exit: 0
+      stdout: |
+          arch hostname kind name os shell user
+          battery cpu memory uptime
+          dependencies disk docker repositories strays
+          backend_state cli connected dns_name ip name state variant
+    - command: 'status --json | /usr/bin/jq -r ''.environment | keys | join(" ")'''
+      exit: 0
+      stdout: |
+          network ports security updates
+    - command: 'status --json | /usr/bin/jq -r ''.workspace.docker | keys | join(" ")'''
+      exit: 0
+      stdout: |
+          containers dangling_bytes images state total_bytes volumes
+    - command: 'status --json | /usr/bin/jq -r ''.tools[0] | keys | join(" ")'''
+      exit: 0
+      stdout: |
+          category detail managed method name places provides state use version
+    - command: 'status --json | /usr/bin/jq -r ''.setup.steps | map(.name) | join(" ")'''
+      exit: 0
+      stdout: |
+          name zshrc

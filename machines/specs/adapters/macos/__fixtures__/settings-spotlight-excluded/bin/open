@@ -1,0 +1,9 @@
+#!/bin/sh
+# open, which the Spotlight package never needs once the folder is excluded.
+printf 'open %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *)
+        echo "stub open: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

@@ -1,0 +1,15 @@
+description: 'a keep-awake until 17:00 picks Until, which says 17:00, and no length'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'awake until 17:00'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 17:00
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Verdict.Sentence, [.Choices[] | [.Label, (.Picked // false)]]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"awake.read","in":{}}
+      exit: 0
+      stdout: |
+          ["Awake until 17:00.",[["1 hr",false],["4 hr",false],["Until 17:00",true]]]

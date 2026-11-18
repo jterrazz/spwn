@@ -1,0 +1,13 @@
+description: 'a tapped formula is written fully qualified and trusted'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/trusted-tap/
+runs:
+    - command: 'apps install terraform'
+      exit: 0
+      stdout: |
+          ●	terraform	1.9.0	brew
+      files:
+          .calls:
+              contains:
+                  - 'brew "hashicorp/tap/terraform", trusted: true'

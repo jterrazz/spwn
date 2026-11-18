@@ -1,0 +1,15 @@
+[1;38;2;76;79;105mAwake[m  [38;2;108;111;133mawake · lid · 3h 12m left[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mawake[m      [38;2;76;79;105mon[m      [38;2;76;79;105mlid · until 14:42 (4h)[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mdisplay[m    [38;2;76;79;105msleeps[m  [38;2;76;79;105mon lid close: pmset displaysleepnow (no display assertion)[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mclamshell[m  [38;2;76;79;105mheld[m    [38;2;76;79;105mback to normal at the end, at every engine start and quit[m
+
+[1;38;2;76;79;105mGuards[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mbattery[m         [38;2;76;79;105m28% · on battery[m  [38;2;76;79;105mthe session ends at 20%[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mlow power mode[m  [38;2;76;79;105moff[m               [38;2;76;79;105mends a session when it turns on[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mthermal[m         [38;2;76;79;105mnominal[m           [38;2;76;79;105mends a session at serious, or heavy for 5m lid closed on bat…[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mlid[m             [38;2;76;79;105mopen[m              [38;2;76;79;105mclosing it on battery ends a --lid session without --battery[m
+[1;38;2;76;79;105mReading[m
+  [1;38;2;76;79;105mlid           [m  [38;2;76;79;105mopen[m
+  [1;38;2;76;79;105msource        [m  [38;2;76;79;105mbattery · 28% · not charging[m
+  [1;38;2;76;79;105mlow power mode[m  [38;2;76;79;105moff[m
+  [1;38;2;76;79;105mthermal       [m  [38;2;76;79;105mnominal (0)[m

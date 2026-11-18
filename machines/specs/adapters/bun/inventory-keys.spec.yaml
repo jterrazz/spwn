@@ -1,0 +1,14 @@
+description: 'an inventory line is read by the name the manager prints, not the source it installed from'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/bun-cli/
+    - ./__fixtures__/inventory-keys/
+env:
+    - STATION_MACHINE_KIND=macos
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name | IN("codex", "qmd", "markitdown")) | "\(.name) \(.state) \(.installed)"'''
+      exit: 0
+      stdout: |
+          codex ok 0.154.0
+          markitdown ok 0.1.7
+          qmd ok github:tobi/qmd#e428df7

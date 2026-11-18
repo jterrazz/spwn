@@ -1,0 +1,31 @@
+description: 'a workspace stopped and started again shares its port on the same reserved port and URL'
+env: two-macs
+runs:
+    - command: 'machines start api'
+      exit: 0
+      stdout: |
+          ●	api	started
+    - command: 'world listen api "*:3000" node'
+      exit: 0
+    - command: 'ports | /usr/bin/grep "api	3000"'
+      exit: 0
+      stdout: |
+          ●	api	3000	private	https://macbook-pro.tail1234.ts.net:40004	shared	node	probably Node or Next
+    - command: 'machines stop api --yes'
+      exit: 0
+      stdout: |
+          ●	api	stopped, kept
+    - command: 'ports | /usr/bin/grep "api	3000"'
+      exit: 0
+      stdout: |
+          ○	api	3000	private	https://macbook-pro.tail1234.ts.net:40004	not shared while api is stopped · reserved 40004		probably Node or Next
+    - command: 'machines start api'
+      exit: 0
+      stdout: |
+          ●	api	started
+    - command: 'world listen api "*:3000" node'
+      exit: 0
+    - command: 'ports | /usr/bin/grep "api	3000"'
+      exit: 0
+      stdout: |
+          ●	api	3000	private	https://macbook-pro.tail1234.ts.net:40004	shared	node	probably Node or Next

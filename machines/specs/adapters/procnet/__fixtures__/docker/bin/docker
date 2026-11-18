@@ -1,0 +1,6 @@
+#!/bin/sh
+# docker inside the VM, recorded: nginx published on 8080 (docker run -p 8080:80 nginx).
+case "$*" in
+    "ps --format {{json .}}") echo '{"Names":"nginx-1","Ports":"0.0.0.0:8080->80/tcp, :::8080->80/tcp"}' ;;
+    *) exit 97 ;;
+esac

@@ -1,0 +1,451 @@
+#!/bin/bash
+# value: tier 2: the engine of this build runs real Linux VMs on this Mac, from a Mac home
+# of its own, and a second home plays another Mac that reaches them over a real ssh
+# hop. Sourced by run.sh.
+# invariant: the two homes are folders of this run, never the owner's: their PATH
+# holds their own bin and the system's, their Power is the stub, their system root
+# a folder of the run, so the owner's Tailscale, keychain and pmset are never
+# reached; their tart keeps its VMs in the run's own store.
+# outside: the tailnet, the credential store and Claude's sign-in of the Mac are
+# stubs (tailscale, claude in the Mac's bin): what a VM receives is real.
+
+vm_user=e2e.user
+mac="$work/mac"
+far="$work/far"
+real_tart=""
+for d in "$HOME/.local/share/station/tart/tart.app" "$HOME/.local/opt/tart.app"; do
+  [ -x "$d/Contents/MacOS/tart" ] && { real_tart=$d; break; }
+done
+[ -n "$real_tart" ] || fail "tart is not installed: station apps install tart"
+real_cache=""
+for d in "$HOME/.local/share/station/vms/cache" "$HOME/.tart/cache"; do
+  [ -d "$d" ] && { real_cache=$d; break; }
+done
+
+home_of() {
+  local h=$1 name=$2
+  mkdir -p "$h/.local/bin" "$h/.local/share/station/tart" "$h/.local/share/station/vms" \
+    "$h/.config/station" "$h/power" "$h/root"
+  ln -s "$real_tart" "$h/.local/share/station/tart/tart.app"
+  # value: the OCI cache is the owner's, read when the base image is already
+  # pulled; the VMs and images this run makes stay in its own store, and tart's
+  # automatic pruning is off (TART_NO_AUTO_PRUNE in as), or a clone of this run
+  # deletes the owner's other base images to make room.
+  [ -z "$real_cache" ] || ln -s "$real_cache" "$h/.local/share/station/vms/cache"
+  cp "$repo/apps/engine/catalog/dotfiles/tart/tart" "$h/.local/bin/tart"
+  cp "$repo/.artifacts/go/station" "$h/.local/bin/station"
+  cp "$suite/linux/stubs/"* "$h/.local/bin/"
+  chmod +x "$h/.local/bin/"*
+  printf '{"name":"%s","vm_user":"%s"}\n' "$name" "$vm_user" > "$h/.config/station/preferences.json"
+}
+as() {
+  local h=$1
+  shift
+  env -i HOME="$h" PATH="$h/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin" TERM=dumb TZ=UTC NO_COLOR=1 \
+    TART_NO_AUTO_PRUNE=1 STATION_MACHINE_KIND=mac STATION_POWER_STUB="$h/power" STATION_SYSTEM_ROOT="$h/root" "$@"
+}
+# value: as, in place of the caller: a process started in the background is then
+# the one its pid names, and the cleanup's kill reaches it.
+as_exec() {
+  local h=$1
+  shift
+  exec env -i HOME="$h" PATH="$h/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin" TERM=dumb TZ=UTC NO_COLOR=1 \
+    TART_NO_AUTO_PRUNE=1 STATION_MACHINE_KIND=mac STATION_POWER_STUB="$h/power" STATION_SYSTEM_ROOT="$h/root" "$@"
+}
+on_mac() { as "$mac" "$@"; }
+on_far() { as "$far" "$@"; }
+st() { on_mac station "$@"; }
+
+engine_pid=""
+sshd_pid=""
+cleanup_tier() {
+  [ -d "$mac/.local/share/station/vms" ] || return 0
+  local vm
+  for vm in $(on_mac tart list --quiet --source local 2>/dev/null); do
+    on_mac tart stop "$vm" >/dev/null 2>&1 || true
+    on_mac tart delete "$vm" >/dev/null 2>&1 || true
+  done
+  [ -z "$engine_pid" ] || kill "$engine_pid" 2>/dev/null || true
+  [ -z "$sshd_pid" ] || kill "$sshd_pid" 2>/dev/null || true
+  wait 2>/dev/null
+  rm -rf "$mac/.local/share/station/vms" "$mac/.local/share/station/images" "$mac/.cache"
+}
+
+# value: ssh into a VM of the Mac as the image's login, through the product's own
+# pipe: the engine's address, never a guess.
+# invariant: every ssh into a guest ends at its bound, 10 minutes unless in_vm_for
+# names a shorter one, so a guest command that never returns fails its case rather
+# than hold the run.
+key="$mac/.local/state/station/images/key"
+vm_ssh() {
+  local vm=$1
+  shift
+  on_mac /usr/bin/timeout -k 10 600 /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$@"
+}
+in_vm() { vm_ssh "$1" "$2" < /dev/null; }
+# value: in_vm_for <seconds> <vm> <command>: in_vm with a bound of its own.
+in_vm_for() {
+  local secs=$1 vm=$2
+  on_mac /usr/bin/timeout -k 10 "$secs" /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$3" < /dev/null
+}
+
+# invariant: a GITHUB_TOKEN the runner holds reaches the station of a workspace, so its
+# releases ask GitHub with it rather than share the address's 60 calls an hour: it is
+# written to the guest's /etc/environment over stdin, never on a command line nor in the
+# log, and the VM restarts, since its sshd reads that file as the engine's connection
+# opens. With none, the guest asks without one, as a fresh owner machine does.
+token_into() {
+  local vm=$1
+  [ -n "${GITHUB_TOKEN:-}" ] || return 0
+  printf 'GITHUB_TOKEN=%s\n' "$GITHUB_TOKEN" | vm_ssh "$vm" 'sudo -n tee -a /etc/environment > /dev/null' || fail "give $vm the runner's GITHUB_TOKEN"
+  st machines restart "$vm" >> "$log" 2>&1 || fail "machines restart $vm exited $?"
+  in_vm "$vm" 'test -n "${GITHUB_TOKEN:-}"' || fail "$vm's sessions do not hold the GITHUB_TOKEN written to /etc/environment"
+  say "   $vm asks GitHub with the runner's GITHUB_TOKEN"
+}
+
+# value: a guest's /proc files as a tar, the recorded inputs of the D specs; each is
+# copied first, because /proc reports a size of 0 and tar would archive it empty.
+capture() { echo "rm -rf /tmp/e2e-cap && for f in $*; do mkdir -p /tmp/e2e-cap/\${f%/*} && cat /\$f > /tmp/e2e-cap/\$f; done; tar cf - -C /tmp/e2e-cap proc"; }
+
+until_true() {
+  local tries=$1
+  shift
+  local i
+  for i in $(seq 1 "$tries"); do
+    "$@" && return 0
+    sleep 5
+  done
+  return 1
+}
+
+home_of "$mac" macbook-e2e
+on_mac tart --version > /dev/null || fail "tart does not answer from the run's Mac home"
+(as_exec "$mac" station engine run) >> "$work/engine.log" 2>&1 &
+engine_pid=$!
+until_true 6 st engine --json > /dev/null 2>&1 || fail "the engine of this build does not answer"
+say "-- the engine of this build runs for $mac (pid $engine_pid)"
+
+
+case_begin image-build IM-09 ADR-044
+# value: the owner's template, read through the run's own user source: it extends
+# base-ubuntu and bakes what it bakes, shares a folder of the Mac read-only, and
+# its own lines run at the image's build (run.image) and at a first start (run.boot,
+# a clone of a repository the shared folder holds); the build's own minutes, against
+# its bound (images/calls/build.go: 30 min the recipe, 30 the image phase).
+mkdir -p "$mac/.config/station/machinefiles" "$mac/shared"
+on_mac git init -q "$work/seed" && on_mac git -C "$work/seed" -c user.name=e2e -c user.email=e2e@station.test commit -q --allow-empty -m seed \
+  && on_mac git -C "$work/seed" bundle create -q "$mac/shared/seed.bundle" HEAD || fail "make the seed repository's bundle"
+cat > "$mac/.config/station/machinefiles/studio-linux.machine.yaml" << 'YAML'
+machinefile: station.machinefile/v1
+name: studio-linux
+machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+extends: [base-ubuntu]
+vm:
+  lifetime: persistent
+  resources: { cpus: 4, memory: 4G, disk: 30G }
+  mounts: [{ computer: ~/shared, guest: ~/shared, read-only: true }]
+run:
+  image: |
+    mkdir -p ~/.local/state/e2e && echo image > ~/.local/state/e2e/run-image
+  boot: |
+    git clone -q ~/shared/seed.bundle ~/Developer/seed
+YAML
+started=$(date +%s)
+st images build studio-linux --binary "$repo/.artifacts/go/station-linux-arm64" >> "$log" 2>&1 || fail "images build studio-linux exited $?"
+say "   images build studio-linux took $(( ($(date +%s) - started) / 60 )) min $(( ($(date +%s) - started) % 60 )) s"
+built=$(st images --json | jq -r '[.images[] | select(.name == "studio-linux") | .version] | join(" ")')
+[ -n "$built" ] || fail "images lists no studio-linux version"
+on_mac tart list --quiet --source local | grep -q '^station-image-studio-linux-' || fail "no station-image-studio-linux-* in the store"
+record=$(cat "$mac"/.local/state/station/images/studio-linux/*.json)
+[ "$(jq -r .machinefile <<< "$record")" = studio-linux ] || fail "the image record names no Machinefile: $record"
+jq -r .lock <<< "$record" | grep -q '^lock: station.lock/v1' || fail "the image record holds no lock: $record"
+case_pass
+
+
+case_begin create-workspace-from ADR-044
+st machines create ws1 --from studio-linux --json > "$work/ws1-created.json" 2>> "$log" || fail "machines create ws1 --from studio-linux exited $?"
+created=$(cat "$work/ws1-created.json")
+[ "$(jq -r '.template' <<< "$created")" = studio-linux ] || fail "ws1 is not made from studio-linux: $created"
+[ "$(jq -r '.lifetime, .cpus, .disk_bytes' <<< "$created" | tr '\n' ' ')" = "persistent 4 30000000000 " ] || fail "ws1 is not sized and kept as studio-linux's vm says: $created"
+[ "$(jq -r '.boot.failed // ""' <<< "$created")" = "" ] || fail "ws1's boot phase failed: $(jq -r .boot.failed <<< "$created")"
+[ "$(jq -c '.boot.drift' <<< "$created")" = "[]" ] || fail "ws1, made from the newest studio-linux, shows drift: $(jq -c .boot.drift <<< "$created")"
+in_vm ws1 'test -s ~/.config/station/machinefiles/studio-linux.machine.yaml' || fail "the boot phase left no studio-linux.machine.yaml in ws1"
+[ "$(in_vm ws1 'cat ~/.local/state/e2e/run-image')" = image ] || fail "run.image left nothing in ws1's image"
+in_vm ws1 'git -C ~/Developer/seed log --format=%s -1' 2>> "$log" | grep -qx seed || fail "run.boot did not clone the seed into ws1"
+echo live > "$mac/shared/live.txt"
+[ "$(in_vm ws1 'cat ~/shared/live.txt')" = live ] || fail "a file written on the Mac does not read in ws1's mount"
+refused=$(in_vm ws1 'touch ~/shared/from-guest' 2>&1) && fail "ws1 wrote into a read-only mount"
+grep -q 'Read-only file system' <<< "$refused" || fail "a write into ws1's read-only mount failed for another reason: $refused"
+st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1 exited $?"
+[ "$(in_vm ws1 'cat ~/shared/live.txt')" = live ] || fail "ws1's mount is gone after a restart"
+sed -i.bak '/^  mounts:/d' "$mac/.config/station/machinefiles/studio-linux.machine.yaml" && rm -f "$mac/.config/station/machinefiles/studio-linux.machine.yaml.bak"
+st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1, its mount taken out, exited $?"
+in_vm ws1 'mountpoint -q ~/shared' && fail "ws1 still mounts ~/shared once vm.mounts no longer names it"
+in_vm ws1 'grep -q "^station-" /etc/fstab' && fail "ws1's /etc/fstab keeps a mount vm.mounts no longer names"
+token_into ws1
+rm -f "$mac/shared/live.txt"
+say "   ws1 made from studio-linux $built: persistent, 4 CPU, 30 GB, its boot phase ran, no drift from its image, run.image and run.boot ran, ~/shared mounted read-only and live, then gone from the guest once vm.mounts no longer names it"
+case_pass
+
+
+case_begin drift-clean ADR-044
+kind_inside=$(st overview --on ws1 --json | jq -r '.machine.kind')
+[ "$kind_inside" = workspace ] || fail "station inside ws1 reports $kind_inside, not workspace"
+for baked in mise git docker build-essential playwright-deps; do
+  state=$(st drift --on ws1 --json | jq -r --arg a "$baked" '[.. | objects | select(.package? == $a) | .condition] | first // "none"')
+  [ "$state" = present ] || fail "$baked, baked into the image, reads $state in ws1's drift"
+done
+in_vm ws1 'docker run --rm hello-world && docker image rm hello-world' >> "$log" 2>&1 || fail "docker run hello-world in ws1 failed"
+say "   station inside ws1 reports workspace, what studio-linux bakes reads present, docker runs hello-world"
+case_pass
+
+
+case_begin create-workspace CR-23
+health=$(st machines ws1 --json | jq -c '.health')
+[ "$(jq -r '.running and .address and .ssh' <<< "$health")" = true ] || fail "ws1's health: $health"
+[ "$(in_vm ws1 hostname)" = ws1 ] || fail "ssh through the pipe does not reach ws1"
+listing() { in_vm ws1 'cd ~ && find . -mindepth 1 -maxdepth 4 2>/dev/null | sed "s|^\./||" | LC_ALL=C sort'; }
+fp="$work/ws1"
+mkdir -p "$fp"
+listing > "$fp/0-before.txt" || fail "list ws1's home"
+steps=()
+n=0
+step() {
+  local name=$1 code
+  shift
+  n=$((n + 1))
+  say "-- step $n: $name"
+  "$@" >> "$log" 2>&1
+  code=$?
+  listing > "$fp/$n.txt"
+  steps+=("$n:$name")
+  [ $code -eq 0 ] || fail "step $n ($name) exited $code"
+}
+mise_path='PATH=$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH'
+while read -r app; do
+  case "$app" in '' | '#'*) continue ;; esac
+  step "apps install $app" st apps install "$app" --on ws1
+done < "$suite/linux/one-per-method.txt"
+step "go build" in_vm ws1 "$mise_path; mkdir -p /tmp/e2e/hello && cd /tmp/e2e/hello && printf 'module hello\n\ngo 1.21\n' > go.mod && printf 'package main\n\nfunc main() { println(\"hello\") }\n' > main.go && go build -o hello . && ./hello"
+step "npm i" in_vm ws1 "$mise_path; mkdir -p /tmp/e2e/npm && cd /tmp/e2e/npm && printf '{\"name\":\"e2e\",\"private\":true}\n' > package.json && npm i is-number@7.0.0"
+step "bun add -g" in_vm ws1 "$mise_path; bun add -g is-number@7.0.0"
+step "uv tool install" in_vm ws1 "$mise_path; uv tool install pyflakes==3.2.0"
+step "zsh -ic" in_vm ws1 "zsh -ic 'command -v station && command -v mise && go env GOPATH'"
+in_vm ws1 'test -e ~/.bun' && fail "~/.bun present after bun add -g: bun ignored the bunfig"
+in_vm ws1 "$mise_path; station disk --json" > "$fp/disk.json" || fail "disk --json"
+footprint "$fp" "$fp/disk.json" "$suite/linux/os-noise.txt" || fail "the footprint test"
+st disk free --on ws1 >> "$log" 2>&1 || fail "disk free exited $?"
+left=$(st disk --on ws1 --json | jq -r '.rows[] | select(.group == "can-rebuild" and .bytes > 0) | "\(.app) \(.bytes)"')
+[ -z "$left" ] || fail "disk free left: $left"
+say "   ws1 answers ssh, its apps install through the engine, its home holds only the footprint"
+case_pass
+
+
+case_begin chromium-headless ADR-044
+# value: headless Chromium launches on the libraries base-ubuntu bakes alone: no
+# `playwright install-deps`, which would install them as root.
+# hazard: playwright 1.55.0's browser install never ends on Node 26 (the archive is
+# downloaded, its extraction waits forever); a release that knows the Node the catalog
+# installs is pinned, and every guest command has its bound.
+st apps install node --on ws1 >> "$log" 2>&1 || fail "apps install node exited $?"
+launched=$(in_vm_for 420 ws1 "$mise_path; set -e; mkdir -p /tmp/e2e/pw && cd /tmp/e2e/pw && printf '{\"name\":\"pw\",\"private\":true}\n' > package.json && timeout 120 npm i --silent playwright@1.65.0 >/dev/null && timeout 240 npx playwright install chromium >/dev/null && timeout 60 node -e \"const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage();await p.setContent('<h1>headless ok</h1>');console.log(await p.textContent('h1'));await b.close()})()\"" 2> "$work/chromium.err")
+code=$?
+cat "$work/chromium.err" >> "$log"
+[ "$launched" = "headless ok" ] || fail "headless Chromium did not launch in ws1 (exit $code): $launched $(tail -n 3 "$work/chromium.err")"
+say "   headless Chromium launches in ws1 and reads its page"
+case_pass
+
+
+case_begin apps-every-linux-app AP-25 ADR-038 ADR-040
+# value: a workspace of its own, deleted after, so every app installs on a fresh home
+# and none leans on what ws1 already holds.
+st machines create apps1 --image studio-linux >> "$log" 2>&1 || fail "machines create apps1 exited $?"
+token_into apps1
+while read -r app commands; do
+  case "$app" in '' | '#'*) continue ;; esac
+  # value: a failed install's logs, its own and a requirement's, the two newest, are
+  # kept in the tier's, since apps1 is deleted at the case's end.
+  st apps install "$app" --on apps1 >> "$log" 2>&1 || {
+    miss "apps install $app exited $?"
+    in_vm apps1 'cd ~/.local/state/station/logs && tail -n 5 $(ls -t *.log | head -n 2)' >> "$log" 2>&1
+    continue
+  }
+  state=$(st apps --all --on apps1 --json | jq -r --arg a "$app" '.apps[] | select(.name == $a) | .state')
+  say "   $app: $state"
+  case "$state" in not-installed | failed | not-known | "") miss "$app reads \"$state\" after its install" ;; esac
+  # value: a command is looked for on the PATH station's own shell block gives a new
+  # terminal of the guest, never on a list of folders kept here.
+  for command in $commands; do
+    in_vm apps1 "zsh -ic 'command -v $command'" > /dev/null 2>&1 || miss "$app: $command is not on the PATH of the guest's shell"
+  done
+done < "$suite/linux/every-app.txt"
+st machines delete apps1 --confirm=apps1 >> "$log" 2>&1 || on_mac tart delete apps1 >> "$log" 2>&1
+case_pass
+
+
+case_begin docker-shortcuts SE-28
+st settings apply docker-shortcuts --on ws1 >> "$log" 2>&1 || fail "settings apply exited $?"
+[ "$(in_vm ws1 "zsh -ic 'whence -w dclean'" 2>/dev/null)" = "dclean: function" ] || fail "dclean is not a function of the zsh block"
+asked=$(echo n | vm_ssh ws1 "zsh -ic dclean" 2>&1)
+code=$?
+grep -q '\[y/N\]' <<< "$asked" || fail "dclean asked nothing: $asked"
+[ $code -ne 0 ] || fail "dclean answered no and still exited 0"
+say "   dclean asks before removing: $(tr '\n' ' ' <<< "$asked")"
+case_pass
+
+
+case_begin server-check-self-signed KP-21
+st machines create srv1 --image studio-linux --server --check https://srv1:8443/readyz --cpus 2 --memory 2G --disk 20G >> "$log" 2>&1 || fail "create srv1 exited $?"
+vm_ssh srv1 'mkdir -p /tmp/e2e-tls && cd /tmp/e2e-tls && openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1 -subj /CN=cluster-ca 2>/dev/null && cat > https.py && (nohup python3 https.py > /dev/null 2>&1 &)' < "$suite/linux/https.py" || fail "serve readyz in srv1"
+check_ok() { [ "$(st machines srv1 --json | jq -r '.health.check.ok')" = "$1" ]; }
+until_true 24 check_ok true || fail "the check on srv1's own name never passed with its self-signed certificate"
+mkdir -p "$work/proc-capture" && in_vm srv1 "$(capture proc/net/tcp proc/net/tcp6)" > "$work/proc-capture/tcp.tar"
+addr=$(on_mac tart ip srv1) || fail "srv1 has no address"
+st machines edit srv1 --check "https://$addr:8443/readyz" >> "$log" 2>&1 || fail "edit srv1's check exited $?"
+until_true 24 check_ok false || fail "a check on another name ($addr) passed with a certificate not made for it"
+st machines delete srv1 --confirm=srv1 >> "$log" 2>&1 || on_mac tart delete srv1 >> "$log" 2>&1
+say "   own name: passes with the cluster's certificate; https://$addr: fails"
+case_pass
+
+
+case_begin on-through-hop MA-15 RM-20
+home_of "$far" laptop-e2e
+hop="$far/hop"
+mkdir -p "$hop"
+ssh-keygen -q -t ed25519 -N '' -C station-e2e -f "$hop/host_key" || fail "ssh-keygen"
+ssh-keygen -q -t ed25519 -N '' -C station-e2e -f "$hop/client_key" || fail "ssh-keygen"
+cp "$hop/client_key.pub" "$hop/authorized_keys"
+chmod 600 "$hop/authorized_keys"
+port=$((22000 + RANDOM % 1000))
+# invariant: the far Mac's sshd is this user's, on loopback, and every session it
+# opens runs in the Mac home of this run, never the owner's.
+cat > "$hop/session" <<EOF
+#!/bin/sh
+exec env -i HOME="$mac" PATH="$mac/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin" TERM=dumb TZ=UTC NO_COLOR=1 \
+  STATION_MACHINE_KIND=mac STATION_POWER_STUB="$mac/power" STATION_SYSTEM_ROOT="$mac/root" /bin/sh -c "\$SSH_ORIGINAL_COMMAND"
+EOF
+chmod +x "$hop/session"
+cat > "$hop/sshd_config" <<EOF
+Port $port
+ListenAddress 127.0.0.1
+HostKey $hop/host_key
+AuthorizedKeysFile $hop/authorized_keys
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+UsePAM no
+StrictModes no
+PidFile $hop/sshd.pid
+ForceCommand $hop/session
+EOF
+/usr/sbin/sshd -D -f "$hop/sshd_config" -E "$hop/sshd.log" &
+sshd_pid=$!
+cat > "$hop/ssh_config" <<EOF
+Host macbook-e2e
+  HostName 127.0.0.1
+  Port $port
+  IdentityFile $hop/client_key
+  IdentitiesOnly yes
+  IdentityAgent none
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  LogLevel ERROR
+EOF
+# value: ssh reads the config of the user's real home, never $HOME's: the far
+# Mac's ssh is this one config.
+printf '#!/bin/sh\nexec /usr/bin/ssh -F %s "$@"\n' "$hop/ssh_config" > "$far/.local/bin/ssh"
+chmod +x "$far/.local/bin/ssh"
+until_true 6 on_far ssh macbook-e2e true < /dev/null || fail "the far Mac's sshd does not answer"
+on_far station machines add macbook-e2e < /dev/null >> "$log" 2>&1 || fail "machines add exited $?"
+remote=$(on_far station overview --on ws1 --json < /dev/null | jq -r '"\(.machine.kind) on \(.machine.on)"')
+[ "$remote" = "workspace on macbook-e2e" ] || fail "--on ws1 from the other Mac answered: $remote"
+st machines ws1 --json > /dev/null
+on_far station machines --json < /dev/null > /dev/null
+own_config="$hop/owner_config"
+sed "s|~/.ssh/id_ed25519|$key|; s|UserKnownHostsFile .*|UserKnownHostsFile /dev/null|" "$far/.ssh/config" > "$own_config"
+grep -q 'ProxyCommand ssh macbook-e2e' "$own_config" || fail "the other Mac's ssh block for ws1 has no hop"
+owner_ssh() { on_far /usr/bin/ssh -F "$own_config" -o IdentitiesOnly=yes -o IdentityAgent=none -o BatchMode=yes -o LogLevel=ERROR -o ConnectTimeout=5 ws1 "$@" < /dev/null; }
+before=$(owner_ssh 'cat /proc/sys/kernel/random/boot_id; hostname -I | cut -d" " -f1') || fail "ssh ws1 through the hop"
+st machines stop ws1 --yes >> "$log" 2>&1 || fail "stop ws1 exited $?"
+on_mac tart set ws1 --random-mac >> "$log" 2>&1 || fail "give ws1 a new MAC address"
+st machines start ws1 >> "$log" 2>&1 || fail "start ws1 exited $?"
+moved() { after=$(owner_ssh 'cat /proc/sys/kernel/random/boot_id; hostname -I | cut -d" " -f1' 2>/dev/null) && [ -n "$after" ] && [ "$(tail -1 <<< "$after")" != "$(tail -1 <<< "$before")" ]; }
+until_true 36 moved || fail "after a new address, ssh ws1 through the hop did not reach it: before $(tail -1 <<< "$before"), after ${after:-nothing}"
+say "   --on ws1 from the other Mac in BatchMode; ssh ws1 hops at $(tail -1 <<< "$before"), then at $(tail -1 <<< "$after")"
+case_pass
+
+case_begin activity-under-load AC-29
+proc() { in_vm ws1 'cat /proc/meminfo /proc/net/dev /proc/diskstats; nproc'; }
+# value: a sample the guest measured, never the Mac's view of the VM process a
+# guest that is reconnecting falls back to.
+sample() {
+  local i
+  for i in $(seq 1 12); do
+    st activity --on ws1 --json > "$work/sample.json" && [ "$(jq -r .source "$work/sample.json")" = direct ] && { cat "$work/sample.json"; return 0; }
+    sleep 2
+  done
+  cat "$work/sample.json"
+  return 1
+}
+check_proc() {
+  local a=$1 p=$2 total avail rx wr
+  total=$(awk '/^MemTotal:/ { print $2 * 1024 }' "$p")
+  avail=$(awk '/^MemAvailable:/ { print $2 * 1024 }' "$p")
+  rx=$(awk '$1 ~ /^(en|eth)/ { s += $2 } END { print s }' "$p")
+  wr=$(awk '$3 ~ /^vd[a-z]$/ { s += $10 * 512 } END { print s }' "$p")
+  [ "$(jq -r '.cpu.cpus' "$a")" = "$(tail -1 "$p")" ] || { say "   cpus $(jq -r '.cpu.cpus' "$a") vs nproc $(tail -1 "$p")"; return 1; }
+  [ "$(jq -r '.memory.total_bytes' "$a")" = "$total" ] || { say "   memory total differs from /proc"; return 1; }
+  near "$(jq -r '.memory.used_bytes' "$a")" $((total - avail)) 5 67108864 || { say "   memory used $(jq -r '.memory.used_bytes' "$a") vs /proc $((total - avail))"; return 1; }
+  near "$(jq -r '.network.received_since_boot_bytes' "$a")" "$rx" 2 1048576 || { say "   received $(jq -r '.network.received_since_boot_bytes' "$a") vs /proc $rx"; return 1; }
+  near "$(jq -r '.disk.written_since_boot_bytes' "$a")" "$wr" 2 1048576 || { say "   written $(jq -r '.disk.written_since_boot_bytes' "$a") vs /proc $wr"; return 1; }
+}
+sample > "$work/act-0.json" && proc > "$work/proc-0.txt" || fail "read ws1's activity"
+check_proc "$work/act-0.json" "$work/proc-0.txt" || fail "idle: station's numbers do not match /proc"
+# value: the load lasts 40 s, the CPU's overlapping the disk's and the network's: the
+# dd of 1.5 GB is done in 2 s, and the 400 MB received are sent by this Mac over
+# ssh, 10 MB a quarter second, since speed.cloudflare.com refuses calls of a burst.
+vm_ssh ws1 'setsid -f sh -c "yes > /dev/null & yes > /dev/null & end=\$((\$(date +%s) + 40)); dd if=/dev/zero of=/tmp/e2e-dd bs=1M count=1536 oflag=direct status=none; rm -f /tmp/e2e-dd; while [ \$(date +%s) -lt \$end ]; do sleep 1; done; pkill yes" > /dev/null 2>&1 &' < /dev/null
+(for i in $(seq 1 40); do head -c 10000000 /dev/zero; sleep 0.25; done | vm_ssh ws1 'cat > /dev/null') &
+feed=$!
+busy=0
+for i in $(seq 1 12); do
+  sleep 2
+  sample > "$work/act-load.json" || continue
+  jq -e '.cpu.busy_percent >= 40 and ((.disk.write_bytes_per_s > 20000000) or (.network.in_bytes_per_s > 10000000))' "$work/act-load.json" > /dev/null && { busy=1; break; }
+done
+[ $busy -eq 1 ] || fail "under load: no sample shows CPU over 40 % with disk or network over its idle rate"
+jq -r '.top.by_cpu[0].name' "$work/act-load.json" | grep -qx yes || say "   note: the busiest process read was $(jq -r '.top.by_cpu[0].name' "$work/act-load.json")"
+until_true 24 in_vm ws1 '! pgrep -x yes > /dev/null' || fail "the load did not end"
+wait "$feed" || fail "the 400 MB sent to ws1 over ssh did not all arrive"
+mkdir -p "$work/proc-capture"
+in_vm ws1 "$(capture proc/stat proc/meminfo proc/net/dev proc/diskstats proc/loadavg proc/uptime proc/pressure/memory)" > "$work/proc-capture/proc.tar"
+sample > "$work/act-1.json" && proc > "$work/proc-1.txt" || fail "read ws1's activity after the load"
+check_proc "$work/act-1.json" "$work/proc-1.txt" || fail "after the load: station's numbers do not match /proc"
+grew() { jq -n --slurpfile a "$work/act-0.json" --slurpfile b "$work/act-1.json" "\$b[0].$1 - \$a[0].$1"; }
+[ "$(grew disk.written_since_boot_bytes)" -ge 1500000000 ] || fail "written grew $(grew disk.written_since_boot_bytes) under a 1.5 GB dd"
+[ "$(grew network.received_since_boot_bytes)" -ge 400000000 ] || fail "received grew $(grew network.received_since_boot_bytes) under 400 MB sent"
+say "   matches /proc idle and after; written +$(grew disk.written_since_boot_bytes) B, received +$(grew network.received_since_boot_bytes) B"
+case_pass
+
+
+
+case_begin rights-private ADR-035
+# value: ws1's Machinefile opens 3000-3999 to private, read at its next run:
+# 3000 is shared on a port of the Mac and served on the stub tailnet, 8443
+# is flagged and never reaches it.
+mkdir -p "$mac/.config/station/machinefiles"
+printf 'machinefile: station.machinefile/v1\nname: ws1\nmachine: { kind: workspace }\nports: { open: 3000-3999, to: private }\n' > "$mac/.config/station/machinefiles/ws1.machine.yaml"
+st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1 exited $?"
+in_vm ws1 '(nohup python3 -m http.server 3000 > /dev/null 2>&1 &); (nohup python3 -m http.server 8443 > /dev/null 2>&1 &)' || fail "start ws1's two servers"
+state_of() { st ports --json | jq -r --argjson p "$1" '[.ports[] | select(.machine == "ws1" and .port == $p) | .state] | first // "none"'; }
+is_state() { [ "$(state_of "$1")" = "$2" ]; }
+until_true 24 is_state 3000 shared || fail "3000, inside the rights, is $(state_of 3000), not shared"
+until_true 6 is_state 8443 not-allowed || fail "8443, outside the rights, is $(state_of 8443), not flagged"
+on=$(st ports --json | jq -r '[.ports[] | select(.machine == "ws1" and .port == 3000) | .reserved] | first')
+grep -q -- "serve --bg --https=$on http://127.0.0.1:$on" "$mac/.calls" || miss "3000 was never served on the tailnet at $on"
+grep -q -- "8443" "$mac/.calls" && miss "8443 reached the tailnet"
+curl -fsS -o /dev/null "http://127.0.0.1:$on/" || miss "3000 does not answer on the Mac's loopback port $on"
+rm -f "$mac/.config/station/machinefiles/ws1.machine.yaml"
+say "   3000 shared on $on and served; 8443 flagged, never served"
+case_pass
+
+st machines delete ws1 --confirm=ws1 >> "$log" 2>&1 || true

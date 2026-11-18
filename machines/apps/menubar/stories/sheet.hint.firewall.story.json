@@ -1,0 +1,13 @@
+{
+    "group": "sheet",
+    "heightNote": "the page header is a Mac page's, 4 pt shorter than the prototype's, as needs.updating under it",
+    "id": "sheet.hint.firewall",
+    "note": "Turn the firewall on: station never changes a security setting; the line to run in Terminal, with Copy.",
+    "pages": ["pages/machines.needs.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "upkeep:macbook-pro/settings/3"
+        }
+    }
+}

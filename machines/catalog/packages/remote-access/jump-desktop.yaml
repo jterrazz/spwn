@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: jump-desktop
+description: Jump Desktop viewer/client app
+bundle: Jump Desktop
+methods:
+    - os: macos
+      machine: computer
+      cask: jump-desktop

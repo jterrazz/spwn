@@ -1,0 +1,234 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.needs",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Needs you",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "All machines"
+        },
+        {
+          "kind": "text",
+          "text": "nothing blocks a server"
+        }
+      ]
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "Nothing needs you"
+          }
+        }
+      ],
+      "card": "flush"
+    },
+    {
+      "id": "upkeep",
+      "title": "Upkeep",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "4"
+        },
+        {
+          "kind": "text",
+          "text": "when you have a minute"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "upkeep:macbook-pro/settings/3",
+            "mark": "attention",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "firewall off"
+            },
+            "reason": "degraded",
+            "glyph": {
+              "kind": "symbol:shield",
+              "signal": "waits"
+            },
+            "verb": "upkeep:macbook-pro/settings/3",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "upkeep:macbook-pro/background/1",
+            "mark": "attention",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "1 login item failed"
+            },
+            "reason": "degraded",
+            "glyph": {
+              "kind": "symbol:exclamationmark.triangle",
+              "signal": "waits"
+            },
+            "verb": "upkeep:macbook-pro/background/1",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "upkeep:macbook-pro/accounts/0",
+            "mark": "attention",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "npm needs sign-in"
+            },
+            "reason": "degraded",
+            "glyph": {
+              "kind": "symbol:key",
+              "signal": "waits"
+            },
+            "verb": "upkeep:macbook-pro/accounts/0",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "upkeep:macbook-pro/apps/2",
+            "mark": "attention",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "2 updates"
+            },
+            "reason": "degraded",
+            "glyph": {
+              "kind": "symbol:arrow.down.circle",
+              "signal": "waits"
+            },
+            "verb": "upkeep:macbook-pro/apps/2",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "How to",
+      "on": "row",
+      "rows": [
+        "upkeep:macbook-pro/settings/3"
+      ],
+      "id": "upkeep:macbook-pro/settings/3",
+      "form": {
+        "title": "Turn the firewall on",
+        "fields": [
+          {
+            "key": "command-1",
+            "kind": "command",
+            "hint": {
+              "command": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on",
+              "external": true
+            }
+          }
+        ],
+        "subtitle": "station never changes a security setting for you. Run this in Terminal, or open System Settings > Network > Firewall.",
+        "primary": [
+          {
+            "label": "Done"
+          }
+        ]
+      },
+      "sheet": "hint:firewall"
+    },
+    {
+      "label": "Show",
+      "on": "row",
+      "rows": [
+        "upkeep:macbook-pro/background/1"
+      ],
+      "id": "upkeep:macbook-pro/background/1"
+    },
+    {
+      "label": "Sign in",
+      "on": "row",
+      "rows": [
+        "upkeep:macbook-pro/accounts/0"
+      ],
+      "id": "upkeep:macbook-pro/accounts/0",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "accounts"
+        ]
+      }
+    },
+    {
+      "label": "Update",
+      "on": "row",
+      "rows": [
+        "upkeep:macbook-pro/apps/2"
+      ],
+      "mutates": true,
+      "id": "upkeep:macbook-pro/apps/2",
+      "run": {
+        "call": "apps.update"
+      },
+      "busy": "Updating",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Everything is up to date"
+          }
+        ]
+      }
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "symbol:exclamationmark.circle.fill",
+      "signal": "waits"
+    }
+  }
+}

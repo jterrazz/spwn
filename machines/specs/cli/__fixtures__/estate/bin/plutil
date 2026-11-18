@@ -1,0 +1,13 @@
+#!/bin/sh
+# plutil reading the SoftwareUpdate plist: the background check ran an hour ago and
+# recommended two updates.
+case "$*" in
+    "-extract LastSuccessfulDate raw -o - "*)
+        /bin/date -u -v-1H +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || /bin/date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%SZ
+        ;;
+    "-extract RecommendedUpdates raw -o - "*) echo 2 ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

@@ -1,0 +1,14 @@
+- main:
+  - heading "This Mac is ready." [level=1]
+  - group "Which machines":
+    - button "All machines" [pressed]
+    - button "macbook-pro"
+  - region "Needs you":
+    - heading "Needs you a gesture is due" [level=2]
+    - paragraph: No need is listed.
+  - region "Upkeep":
+    - heading "Upkeep 0" [level=2]
+    - paragraph: Nothing can wait.
+  - region "History":
+    - heading "History what happened, newest first" [level=2]
+    - paragraph: No change is kept yet.

@@ -1,0 +1,16 @@
+description: 'a delete sent with --on takes the workspace of that Mac, its name typed there'
+env: two-macs
+runs:
+    - command: 'machines delete infra --confirm=infra --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	infra	deleted
+    - command: 'machines --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB

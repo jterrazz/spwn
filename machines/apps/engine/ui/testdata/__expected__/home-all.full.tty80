@@ -1,0 +1,88 @@
+To do
+  ✗ brain.x-snapshot         failing · last exit 2
+    → launchctl bootout gui/501/com.example.brain.x-snapshot &&
+      rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist
+  ◐ setup                    name not set  → station init
+  ◐ engine                   runs v2.0.0-242-gd653060, station is v2.0.0-250
+    → station engine start
+  ◐ brew                     120 outdated  → station apps update --manager brew
+  ◐ misplaced                2 misplaced folders · 80.5 GB
+    → station disk move ~/.tart
+  ◐ pnpm                     update available  → station apps update pnpm
+  ◐ better-ui                update available  → station apps update better-ui
+  ◐ restart-after-power-cut  partly applied
+    → station settings apply restart-after-power-cut
+  ◐ macos                    2 pending · checked 22m ago
+  ◐ com.docker.socket        orphan: Docker.app is gone
+    → sudo launchctl bootout system/com.docker.socket &&
+      sudo rm /Library/LaunchDaemons/com.docker.socket.plist
+Summary
+  ◐ Machine     Mac · Darwin 27.0.0 …    ◐ Apps          6 ●  7 ◐  4 ○
+  ◐ Network     192.168.1.152 · 4/4 on   ◐ Settings      1 ●  1 ◐
+  ● Tailscale   macbook-pro · Serve on   ● Disk          27.9 GB reclaimable …
+  ● Identity    you@example.com …        ◐ All machines  engine runs v2.0.0-24…
+  ✗ Background  3 jobs · 1 failing …     ● Gateways      1 ●
+Machine
+  ◐ name    unregistered  Mac · Darwin 27.0.0 arm64 · you · zsh
+  ● uptime  22d 14h       battery 100% charged
+  ◐ setup   name          not set  → station init
+  ◐ engine  runs v2.0.0-242-gd653060, station is v2.0.0-250
+    → station engine start
+Environment
+  ● local ip    192.168.1.152
+  ● filevault   on
+  ● firewall    on
+  ● sip         off
+  ● gatekeeper  on
+  ◐ macos       2 pending      checked 22m ago
+  ◐ brew        120 outdated   → station apps update --manager brew
+  ● Tailscale   Running · macbook-pro.tail1234.ts.net · 100.98.133.14
+Workspace
+  ● disk  27.9 GB  reclaimable: station disk free
+  ◐ tart  ~/.tart  78.4 GB  → station disk move ~/.tart
+  ◐ bun   ~/.bun   2.1 GB  → station disk move ~/.bun
+Identity
+  ● git email    you@example.com
+  ● git signing  on
+Background
+    station
+     no background jobs
+    known
+  └─ ● watchman  running · pid 3464  user  watchman    ~/Library/L…tchman.plist
+    unknown
+  └─ ✗ com.example.brain.x-snapshot
+       failing · last exit 2  user
+       ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist
+       → launchctl bootout gui/501/com.example.brain.x-snapshot &&
+         rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist
+    orphan
+  └─ ◐ socket    not loaded          root  Docker.app  /Library/La…socket.plist
+       → sudo launchctl bootout system/com.docker.socket &&
+         sudo rm /Library/LaunchDaemons/com.docker.socket.plist
+Gateways  ● Tailscale Serve · on
+Apps
+  ○ mise                                brew   → station apps install mise
+  ○ mas                                 brew   → station apps install mas
+  ◐ pnpm             11.21.0 → 11.22.1  brew   update available
+    → station apps update pnpm
+  ? bun                                 mise   installed, mise not installed
+    → station apps install mise
+  ? go                                  mise   installed, mise not installed
+    → station apps install mise
+  ? java             17.0.20            mise   installed, mise not installed
+    → station apps install mise
+  ? python           3.14.6             mise   installed, mise not installed
+    → station apps install mise
+  ? chatgpt                             cask   on PATH, not managed by cask
+  ○ typewhisper                         cask
+    → station apps install typewhisper
+  ○ frontend-design                     skill  skills not installed
+    → station apps install skills
+  ◐ better-ui                           skill  update available
+    → station apps update better-ui
+Settings
+  ◐ restart-after-power-cut    partly applied
+    Restarts after a power cut, and wakes for the network
+    → station settings apply restart-after-power-cut
+
+→ station overview | cat  for records

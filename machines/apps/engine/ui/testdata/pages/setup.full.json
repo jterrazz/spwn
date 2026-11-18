@@ -1,0 +1,147 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "init",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/init",
+            "mark": "ok",
+            "label": "Known to station",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "2 steps changed"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "step",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "name",
+            "mark": "ok",
+            "label": "name",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "macbook"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "zshrc",
+            "mark": "ok",
+            "label": "zshrc",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "the station block"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "relocate",
+            "mark": "ok",
+            "label": "relocate",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "bunfig, go env, mise settings, npmrc"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        }
+      ]
+    },
+    {
+      "id": "machinefile",
+      "title": "Machinefile",
+      "fold": "open",
+      "items": [
+        {
+          "note": {
+            "text": "none bound by init: init --machinefile binds one"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "exec zsh",
+      "external": true,
+      "text": "so this shell reads the station block"
+    },
+    {
+      "command": "station init --machinefile <name>",
+      "text": "binds a Machinefile, then applies it"
+    }
+  ]
+}

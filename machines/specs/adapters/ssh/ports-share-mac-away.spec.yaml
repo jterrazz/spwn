@@ -1,0 +1,9 @@
+description: 'in a VM whose Mac is not connected, ports share names the Mac'
+fixture: ./__fixtures__/ports-placed/
+env: engine
+runs:
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" ports share 3000'
+      exit: 1
+      stderr: |
+          Error: macbook is not connected to this VM
+          Hint: on macbook: station engine start

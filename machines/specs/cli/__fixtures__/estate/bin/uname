@@ -1,0 +1,8 @@
+#!/bin/sh
+case "$*" in
+    -sr) echo "Darwin 27.0.0" ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

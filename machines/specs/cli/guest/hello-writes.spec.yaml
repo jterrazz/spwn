@@ -1,0 +1,15 @@
+description: 'hello writes the Mac''s keys into a managed block, keeping the owner''s line, and the VM''s exports'
+fixture: ./__fixtures__/vm/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","public_host":"macbook.tail1234.ts.net","keys":["ssh-ed25519 AAAA1 a@macbook","ssh-ed25519 AAAA2 b@mini"],"env":{"EXPO_PACKAGER_PROXY_URL":"https://macbook.tail1234.ts.net:40000","STATION_PUBLIC_HOST":"macbook.tail1234.ts.net"},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest > /dev/null; /bin/cat vm/.ssh/authorized_keys vm/.config/station/services.env; /usr/bin/jq -r .host vm/.local/state/station/guest.json'
+      exit: 0
+      stdout: |
+          ssh-ed25519 AAAAOWNER owner@laptop
+          # >>> station hosts >>>
+          ssh-ed25519 AAAA1 a@macbook
+          ssh-ed25519 AAAA2 b@mini
+          # <<< station hosts <<<
+          export EXPO_PACKAGER_PROXY_URL='https://macbook.tail1234.ts.net:40000'
+          export STATION_PUBLIC_HOST='macbook.tail1234.ts.net'
+          macbook

@@ -1,0 +1,222 @@
+package menubar
+
+import (
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/page"
+	"github.com/jterrazz/studio-station/apps/engine/ports"
+)
+
+const (
+	heroPro  = "macbook-pro"
+	heroMini = "mac-mini"
+)
+
+var heroNow = time.Date(2026, 11, 7, 14, 30, 0, 0, time.UTC)
+
+type heroWorld struct {
+	r Reading
+}
+
+func newHeroWorld() *heroWorld {
+	infra := model.VM{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running, BootAt: heroNow.Add(-12 * 24 * time.Hour)}
+	linux1 := model.VM{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running}
+	return &heroWorld{r: Reading{Now: heroNow, Zone: time.UTC, Ports: &ports.AllMachines{},
+		All: &model.AllMachines{Read: heroNow, Macs: []model.MacView{
+			{Name: heroPro, ThisMac: true, Reachable: true, Answered: heroNow, Hardware: hardware(48), VMs: []model.VM{linux1}},
+			{Name: heroMini, Reachable: true, Answered: heroNow, Hardware: hardware(64), VMs: []model.VM{infra}},
+		}}}}
+}
+
+func (w *heroWorld) mini() *model.MacView { return &w.r.All.Macs[1] }
+
+// value: the world with one of mac-mini's ports reachable from outside.
+func (w *heroWorld) exposedOnMini(port int) *heroWorld {
+	w.r.Ports.Macs = append(w.r.Ports.Macs, ports.MacPorts{Name: heroMini, Ports: []ports.Port{
+		{Machine: machine.Ref{Name: heroMini}, Port: port, Process: "node", Reach: ports.Outside, Answer: ports.Answers},
+	}})
+	return w
+}
+
+func (w *heroWorld) granted(t *testing.T, vm string) *heroWorld {
+	t.Helper()
+	w.r.SignIns = &SignIns{Machines: []MachineSignIns{{Name: vm, Mac: heroPro, ThisMac: true, VM: true, Rows: []accounts.ProgramRow{grantedRow(t, catalog.ProviderClaude, "pw-1")}}}}
+	return w
+}
+
+func (w *heroWorld) down() *heroWorld {
+	infra := &w.mini().VMs[0]
+	infra.State, infra.Cause, infra.BootAt = model.Stopped, "out of memory", time.Time{}
+	infra.Restarts = model.Restarts{Looping: true}
+	infra.CheckStatus = model.CheckStatus{State: model.CheckFailing, Since: heroNow.Add(-2 * time.Minute)}
+	return w
+}
+
+func (w *heroWorld) exposed() *heroWorld {
+	w.r.Ports.Macs = append(w.r.Ports.Macs, ports.MacPorts{Name: heroPro, ThisMac: true, Ports: []ports.Port{
+		{Machine: machine.Ref{Name: heroPro}, Port: 5000, Process: "ControlCenter", Reach: ports.Outside, Answer: ports.Answers},
+	}})
+	return w
+}
+
+func hardware(gigabytes int64) machine.Hardware {
+	return machine.Hardware{Memory: gigabytes << 30, CPUs: 12}
+}
+
+type heroSaid struct {
+	title string
+	facts string
+	verb  string
+	rows  []string
+	link  string
+}
+
+func said(t *testing.T, w *heroWorld) (heroSaid, page.Page) {
+	t.Helper()
+	p := Page(w.r, page.Context{Machine: heroPro, Kind: "computer"})
+	if len(p.Sections) == 0 || p.Sections[0].ID != SectionHero {
+		t.Fatalf("the page leads with %q, not the hero", p.Sections[0].ID)
+	}
+	var out heroSaid
+	for i, it := range p.Sections[0].Items {
+		switch {
+		case i == 0 && it.Row != nil:
+			out.title, out.facts = it.Row.Label, heroWords(it.Row.Detail)
+			if it.Row.Verb != "" {
+				out.verb = verbLabel(p, it.Row.Verb)
+			}
+		case it.Row != nil:
+			out.rows = append(out.rows, it.Row.Label+" | "+heroWords(it.Row.Detail)+" ["+verbLabel(p, it.Row.Verb)+"]")
+		case it.Link != nil:
+			out.link = strings.TrimSuffix(it.Link.Label+" | "+heroWords(it.Link.Detail), " | ")
+		}
+	}
+	return out, p
+}
+
+func heroWords(v page.Value) string {
+	if v.Kind == page.KindList {
+		parts := make([]string, 0, len(v.Items))
+		for _, it := range v.Items {
+			w := it.Text
+			if it.Pri > 0 {
+				w += "^" + strconv.Itoa(it.Pri)
+			}
+			parts = append(parts, w)
+		}
+		return strings.Join(parts, " | ")
+	}
+	return v.Text
+}
+
+func verbLabel(p page.Page, id string) string {
+	for _, a := range p.Actions {
+		if a.ID == id {
+			return a.Label
+		}
+	}
+	return "missing " + id
+}
+
+func equal(t *testing.T, got, want heroSaid) {
+	t.Helper()
+	if got.title != want.title || got.facts != want.facts || got.verb != want.verb || got.link != want.link || strings.Join(got.rows, "\n") != strings.Join(want.rows, "\n") {
+		t.Fatalf("hero\n%+v\nwant\n%+v", got, want)
+	}
+}
+
+// invariant: SPEC A4 Home 1: every need is red: one need is the hero
+// itself, its words as the title, its facts (the last dropped first), its
+// fix.
+func TestOneNeedIsTheHeroWithItsFactsAndItsVerb(t *testing.T) {
+	got, p := said(t, newHeroWorld().exposed())
+	equal(t, got, heroSaid{title: "Port 5000 is exposed", facts: "This Mac | AirPlay Receiver^1", verb: "Review"})
+	if p.Badge.Needs != 1 {
+		t.Fatalf("the badge says %d, the hero 1", p.Badge.Needs)
+	}
+}
+
+// invariant: the first ranked need carries the hero with its fix; the
+// others keep their row when there is one, or fold into one line naming
+// each subject once; two reds are never merged.
+func TestARedNeedCarriesTheHeroAndTheOthersFoldUnderIt(t *testing.T) {
+	got, _ := said(t, newHeroWorld().down().exposed())
+	equal(t, got, heroSaid{title: "infra is down", facts: "out of memory | since 14:28 | on mac-mini^1", verb: "Restart", rows: []string{"This Mac | port 5000 exposed [Review]"}})
+	got, _ = said(t, newHeroWorld().down().exposed().exposedOnMini(8080))
+	equal(t, got, heroSaid{title: "infra is down", facts: "out of memory | since 14:28 | on mac-mini^1", verb: "Restart", link: "2 more need you | mac-mini, This Mac"})
+}
+
+// invariant: a server restarting carries the hero while it boots, its step
+// counted as it runs, and the needs fold under it as under a red.
+func TestAServerRestartingCarriesTheHeroWithItsStep(t *testing.T) {
+	w := newHeroWorld().exposed().exposedOnMini(8080)
+	w.mini().VMs[0].Restart = &model.RestartWalk{Step: 2, At: heroNow}
+	got, _ := said(t, w)
+	equal(t, got, heroSaid{title: "Restarting infra", facts: "on mac-mini^2 | has an address | 2 of 4", link: "2 more need you | This Mac, mac-mini"})
+}
+
+// invariant: a restart begins while the server is still down: from its
+// first step it is the restart, never a need folded under it nor counted.
+func TestAServerRestartingFromDownIsNeitherANeedNorCounted(t *testing.T) {
+	w := newHeroWorld().down()
+	w.mini().VMs[0].Restart = &model.RestartWalk{Step: 1, At: heroNow}
+	got, p := said(t, w)
+	if got.title != "Restarting infra" || len(got.rows) != 0 || got.link != "" {
+		t.Fatalf("hero %+v", got)
+	}
+	if b := p.Badge; b == nil || b.Needs != 0 || !b.Restarting || b.Down {
+		t.Fatalf("badge %+v", p.Badge)
+	}
+}
+
+// invariant: nothing needs you: the fleet's facts, the server's uptime
+// dropped first, then whether every Mac is awake.
+func TestAFineFleetSaysItsFactsInOrderOfWhatGoesFirst(t *testing.T) {
+	got, _ := said(t, newHeroWorld())
+	equal(t, got, heroSaid{title: "All machines are fine", facts: "infra healthy | up 12 days^3 | all 2 Macs answer^1"})
+}
+
+// invariant: an empty fleet has no hero but the empty state, with the free
+// memory of This Mac and New VM, and no + in the header.
+func TestAnEmptyFleetIsTheEmptyStateWithNewVM(t *testing.T) {
+	w := newHeroWorld()
+	w.r.All.Macs = w.r.All.Macs[:1]
+	w.r.All.Macs[0].VMs = nil
+	p := Page(w.r, page.Context{Machine: heroPro, Kind: "computer"})
+	e := p.Sections[0].Items[0].Empty
+	if e == nil || e.Text != "No VMs yet" || e.Sub != "44 GB free on This Mac" || len(e.Actions) != 1 || e.Actions[0] != ActionNewVM {
+		t.Fatalf("empty state %+v", e)
+	}
+	if len(p.Header.Buttons) != 0 {
+		t.Fatalf("the empty fleet's header shows %v", p.Header.Buttons)
+	}
+}
+
+// invariant: SPEC B5.15: a Mac silent for more than 30 s is checked: the
+// header says so, its needs are drawn stale, an asleep Mac is not checked.
+func TestAMacStillAnsweringIsCheckedAndItsNeedsDrawnStale(t *testing.T) {
+	w := newHeroWorld().exposed().exposedOnMini(8080)
+	w.mini().Reachable, w.mini().Answered = false, heroNow.Add(-40*time.Second)
+	_, p := said(t, w)
+	if p.Header.Stale == nil || p.Header.Stale.Text != "checking mac-mini" {
+		t.Fatalf("header %+v", p.Header)
+	}
+	signals := map[string]page.Signal{}
+	for _, it := range p.Sections[0].Items[1:] {
+		signals[it.Row.Label] = it.Row.Signal
+	}
+	if signals["mac-mini"] != page.SignalStale || signals["This Mac"] != "" {
+		t.Fatalf("signals %v", signals)
+	}
+	w.mini().Asleep = true
+	if _, p = said(t, w); p.Header.Stale != nil {
+		t.Fatalf("an asleep Mac is checked: %v", p.Header.Stale)
+	}
+}

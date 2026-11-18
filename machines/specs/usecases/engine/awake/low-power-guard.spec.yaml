@@ -1,0 +1,18 @@
+description: 'low Power Mode ends a keep-awake, and says so'
+env: two-macs
+runs:
+    - command: 'awake 4h'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 14:00
+    - command: 'world low-power on'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 1,2p'
+      exit: 0
+      stdout: |
+          ◐	macbook-pro	Awake stopped · Low Power Mode on
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].power.holds, [.told[] | .Text]]'' world.json'
+      exit: 0
+      stdout: |
+          [null,["Awake stopped on This Mac: Low Power Mode on"]]

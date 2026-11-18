@@ -1,0 +1,37 @@
+- heading "Passwords on macbook-pro" [level=1]
+- paragraph:
+  - img "3 kept, 1 granted"
+  - text: 3 kept, 1 granted · a value never leaves this Mac's Keychain to be shown.
+- region "Passwords":
+  - heading "Passwords 3" [level=2]
+  - text: Password Kind Account Added Granted to
+  - button "GitHub deploy gh fine-grained token you 30 Oct not granted"
+  - button "npm publish npm token 12 Oct 1 machine"
+  - button "Claude Max claude OAuth token you@example.com 2 Oct not granted"
+- dialog "Add a password":
+  - heading "Add a password" [level=3]
+  - paragraph: It is kept in macbook-pro's Keychain; you can then grant it to a machine.
+  - region "From":
+    - text: From
+    - group "From":
+      - button "From a sign-in": From a sign-in Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.
+      - button "Typed" [pressed]: Typed A token you made yourself
+  - region "Program":
+    - text: Program
+    - group "Program":
+      - button "GitHub"
+      - button "npm" [pressed]
+      - button "Claude"
+      - button "Cloudflare"
+  - region "Kind":
+    - text: Kind
+    - group "Kind":
+      - button "token" [pressed]
+      - button "fine-grained token"
+  - text: Value
+  - textbox "Value"
+  - text: Label
+  - textbox "Label"
+  - text: refused a password needs a label. name it so you can tell it apart
+  - button "Cancel"
+  - button "Add password"

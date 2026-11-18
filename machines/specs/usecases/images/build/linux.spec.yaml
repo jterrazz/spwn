@@ -1,0 +1,14 @@
+description: 'a build makes base-ubuntu''s next version on This Mac; the VMs made from the older one keep it'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.04	built
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "macbook-pro") | "\(.version) \(.newest) \(.size_bytes) \(.vms | join(","))"'''
+      exit: 0
+      stdout: |
+          2026.11.04 true 4000000000 
+          2026.11.01 false 4000000000 api,linux-1
+          2026.10.20 false 3000000000 

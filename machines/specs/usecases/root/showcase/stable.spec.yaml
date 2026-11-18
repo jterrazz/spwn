@@ -1,0 +1,23 @@
+description: 'every showcase read answers the same bytes over two fresh copies of the play world'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; while read -r frame; do for w in a b; do /bin/cp world.json $w.json; printf ''%s\n'' "$frame" | STATION_WORLD=$PWD/$w.json "$STATION" guest serve --stdio > $w.out; done; call=$(printf ''%s'' "$frame" | /usr/bin/jq -r ".call + \" \" + .target.name"); if /usr/bin/grep -q "\"out\":" a.out && /usr/bin/cmp -s a.out b.out; then echo "$call same"; else echo "$call differs"; fi; done'
+      stdin: |
+          {"v":2,"id":"1","call":"activity.read","target":{"name":"macbook-pro"},"in":{"history":true,"graph":86400000000000}}
+          {"v":2,"id":"1","call":"machinefile.drift","target":{"name":"linux-1"},"in":{}}
+          {"v":2,"id":"1","call":"machinefile.drift","target":{"name":"agent-7f"},"in":{}}
+          {"v":2,"id":"1","call":"ports.list","target":{"name":"macbook-pro"},"in":{"AllMachines":true}}
+          {"v":2,"id":"1","call":"machines.list","target":{"name":"macbook-pro"},"in":{}}
+          {"v":2,"id":"1","call":"machines.log","target":{"name":"macbook-pro"},"in":{"VM":"linux-1"}}
+          {"v":2,"id":"1","call":"images.list","target":{"name":"macbook-pro"},"in":{}}
+      exit: 0
+      stdout: |
+          activity.read macbook-pro same
+          machinefile.drift linux-1 same
+          machinefile.drift agent-7f same
+          ports.list macbook-pro same
+          machines.list macbook-pro same
+          machines.log macbook-pro same
+          images.list macbook-pro same

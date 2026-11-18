@@ -1,0 +1,22 @@
+package: station.package/v1
+kind: app
+name: lazygit
+description: Terminal UI for git
+replaces: raw git porcelain (interactive)
+provides: [lazygit]
+methods:
+    - os: macos
+      brew: lazygit
+    - family: linux
+      arch: arm64
+      github-release: { repo: jesseduffield/lazygit, asset: 'lazygit_*_linux_arm64.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: jesseduffield/lazygit, asset: 'lazygit_*_linux_x86_64.tar.gz' }
+disk:
+    paths:
+        - path: ~/Library/Application Support/lazygit/state.yml
+          level: data
+          os: macos
+    erase:
+        - delete: [~/Library/Application Support/lazygit/state.yml]

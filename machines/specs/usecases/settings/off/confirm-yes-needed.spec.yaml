@@ -1,0 +1,16 @@
+description: 'off a terminal, off without --yes is refused and the setting stays as it is'
+env: two-macs
+runs:
+    - command: 'settings apply hushlogin'
+      exit: 0
+      stdout: |
+          ●	hushlogin	~/.hushlogin: created
+    - command: 'settings off hushlogin </dev/null'
+      exit: 2
+      stderr: |
+          Error: refusing to off without --yes
+          Hint: re-run with --yes
+    - command: 'settings hushlogin --json | /usr/bin/jq -r .setting.state'
+      exit: 0
+      stdout: |
+          applied

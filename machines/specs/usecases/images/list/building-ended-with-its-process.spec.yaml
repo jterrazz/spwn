@@ -1,0 +1,13 @@
+description: 'a build whose process is gone, its Mac restarted, is no row of the list'
+env: creating
+runs:
+    - command: 'images --json | /usr/bin/jq -c ''[.images[] | .building]'''
+      exit: 0
+      stdout: |
+          ["Step 2 of 4"]
+    - command: 'world reboot macbook-pro'
+      exit: 0
+    - command: 'images --json | /usr/bin/jq -c ''[.images[] | .building]'''
+      exit: 0
+      stdout: |
+          []

@@ -1,0 +1,8 @@
+description: 'inside a server, settings are refused: station does not manage a server''s settings'
+env: in-server
+runs:
+    - command: 'settings'
+      exit: 2
+      stderr: |
+          Error: infra is a server: station does not manage its settings
+          Hint: manage it with your own tooling: ssh infra

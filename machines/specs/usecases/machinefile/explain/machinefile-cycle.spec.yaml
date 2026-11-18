@@ -1,0 +1,21 @@
+description: 'a cycle of extends is printed around its loop'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/base.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: base
+          extends: [macbook-pro]
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          extends: [base]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: a cycle in extends: macbook-pro extends base extends macbook-pro
+          Hint: break it: one of them must not need the other

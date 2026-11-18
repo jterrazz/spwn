@@ -1,0 +1,13 @@
+description: 'a port that does not answer HTTP is shared as host:port, with no scheme'
+env: two-macs
+runs:
+    - command: 'world listen linux-1 "*:6379" redis-server'
+      exit: 0
+    - command: 'ports | /usr/bin/grep 6379'
+      exit: 0
+      stdout: |
+          ●	linux-1	6379	private	macbook-pro.tail1234.ts.net:40000	shared	redis-server
+    - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | select(.port == 6379) | [.proto, .url]]'''
+      exit: 0
+      stdout: |
+          [["tcp","macbook-pro.tail1234.ts.net:40000"]]

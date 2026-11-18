@@ -1,0 +1,14 @@
+description: 'a fact not read in its budget is Unknown, never off: no Needs you line claims a protection is down'
+env: two-macs
+runs:
+    - command: 'world fault Inspector.Read'
+      exit: 0
+    - command: 'settings | /usr/bin/grep -E "time-machine|firewall"'
+      exit: 0
+      stdout: |
+          ?	firewall	unknown · no answer in 2 s
+          ?	time-machine	unknown · no answer in 2 s
+    - command: 'overview --all | /usr/bin/grep -c Firewall'
+      exit: 1
+      stdout: |
+          0

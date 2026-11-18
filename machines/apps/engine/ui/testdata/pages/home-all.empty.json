@@ -1,0 +1,768 @@
+{
+  "schema": "station.page/v1",
+  "id": "home",
+  "command": "status",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "todo",
+      "title": "To do",
+      "role": "actions",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "actions"
+          }
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/machine",
+            "mark": "ok",
+            "label": "Machine",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Mac"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Darwin 27.0.0"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "up 22d 14h"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/network",
+            "mark": "ok",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "192.168.1.152"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "4/4 on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/tailnet",
+            "mark": "ok",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "macbook-pro"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Serve on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/identity",
+            "mark": "ok",
+            "label": "Identity",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "you@example.com"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "signing on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/background",
+            "mark": "ok",
+            "label": "Background",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "unit": "job"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/apps",
+            "mark": "ok",
+            "label": "Apps",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "label": "ok"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/settings",
+            "mark": "ok",
+            "label": "Settings",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "label": "ok"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/disk",
+            "mark": "ok",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424,
+                "unit": "reclaimable"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/all-machines",
+            "mark": "ok",
+            "label": "All machines",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "engine running v2.0.0-250"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "break": 5
+    },
+    {
+      "id": "machine",
+      "title": "Machine",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "name",
+            "mark": "ok",
+            "label": "name",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "macbook"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "Darwin 27.0.0 arm64"
+                },
+                {
+                  "kind": "text",
+                  "text": "you"
+                },
+                {
+                  "kind": "text",
+                  "text": "zsh"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "uptime",
+            "mark": "ok",
+            "label": "uptime",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "22d 14h"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "battery 100% charged"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "setup",
+            "mark": "ok",
+            "label": "setup",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "done"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "engine",
+            "mark": "ok",
+            "label": "engine",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "running v2.0.0-250"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 4
+        }
+      ]
+    },
+    {
+      "id": "environment",
+      "title": "Environment",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "local ip",
+            "mark": "ok",
+            "label": "local ip",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "192.168.1.152"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "filevault",
+            "mark": "ok",
+            "label": "filevault",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "firewall",
+            "mark": "ok",
+            "label": "firewall",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "sip",
+            "mark": "ok",
+            "label": "sip",
+            "cells": [
+              {
+                "kind": "off"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "gatekeeper",
+            "mark": "ok",
+            "label": "gatekeeper",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macos",
+            "mark": "ok",
+            "label": "macos",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "up to date"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "checked 22m ago"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "brew",
+            "mark": "ok",
+            "label": "brew",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "up to date"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "ok",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Running"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "macbook-pro.tail1234.ts.net"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "100.98.133.14"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 8
+        }
+      ]
+    },
+    {
+      "id": "workspace",
+      "title": "Workspace",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "disk",
+            "mark": "ok",
+            "label": "disk",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "reclaimable: station disk free"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "identity",
+      "title": "Identity",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "git-email",
+            "mark": "ok",
+            "label": "git email",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "you@example.com"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "git-signing",
+            "mark": "ok",
+            "label": "git signing",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "background",
+      "title": "Background",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "group",
+          "kind": "text",
+          "show": "pipe"
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "group/station",
+              "label": "station"
+            },
+            "items": [
+              {
+                "empty": {
+                  "noun": "background jobs"
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "group/known",
+              "label": "known"
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "com.github.facebook.watchman",
+                  "mark": "ok",
+                  "label": "com.github.facebook.watchman",
+                  "short": "watchman",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "known"
+                    },
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "running"
+                        },
+                        {
+                          "kind": "text",
+                          "text": "pid 3464"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "text": "user"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "watchman"
+                    }
+                  ],
+                  "detail": {
+                    "kind": "path",
+                    "text": "~/Library/LaunchAgents/com.github.facebook.watchman.plist"
+                  }
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "apps",
+      "title": "Apps",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "method",
+          "kind": "list",
+          "keep": 30
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "uncounted": true,
+      "pipe_counts": true
+    },
+    {
+      "id": "settings",
+      "title": "Settings",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "description",
+          "kind": "text",
+          "keep": 20
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "uncounted": true,
+      "pipe_counts": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station overview | cat",
+      "external": true,
+      "text": "for records"
+    }
+  ]
+}

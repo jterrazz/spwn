@@ -1,0 +1,136 @@
+{
+  "accounts.logout": {
+    "confirm": "sign-out",
+    "consequence": "%s is signed out on this machine; its token stays valid at its provider.",
+    "form": "yes-no"
+  },
+  "apps.remove": {
+    "confirm": "remove",
+    "consequence": "%s leaves this machine; its data stays.",
+    "form": "yes-no"
+  },
+  "background.remove": {
+    "confirm": "remove",
+    "consequence": "%s leaves this machine; its data stays.",
+    "form": "yes-no"
+  },
+  "disk.erase": {
+    "confirm": "erase",
+    "consequence": "The data of %s is deleted for good.",
+    "form": "type-name"
+  },
+  "disk.free-unused": {
+    "confirm": "free-unused",
+    "consequence": "Deleted for good: %s. No machine and no file of yours is touched.",
+    "form": "type-name"
+  },
+  "engine.stop": {
+    "confirm": "stop-engine",
+    "consequence": "Every VM of this Mac stops, and nothing is shared until the engine starts again.",
+    "form": "yes-no"
+  },
+  "grants.remove": {
+    "confirm": "remove-grant",
+    "consequence": "The grant of %s ends now; the password stays in this Mac's vault.",
+    "form": "yes-no"
+  },
+  "images.delete": {
+    "confirm": "delete-image",
+    "consequence": "%s is deleted; the next create that needs it builds it again.",
+    "form": "yes-no"
+  },
+  "machinefile.apply": {
+    "confirm": "remove",
+    "consequence": "%s leaves this machine; its data stays.",
+    "form": "yes-no"
+  },
+  "machines.cleanup": {
+    "confirm": "cleanup",
+    "consequence": "Every stopped ephemeral workspace is deleted.",
+    "form": "yes-no"
+  },
+  "machines.create-server": {
+    "confirm": "build-image",
+    "consequence": "%s is built first, which takes several minutes.",
+    "form": "yes-no"
+  },
+  "machines.create-workspace": {
+    "confirm": "build-image",
+    "consequence": "%s is built first, which takes several minutes.",
+    "form": "yes-no"
+  },
+  "machines.delete": {
+    "confirm": "delete",
+    "consequence": "%s and everything on its disk are deleted for good.",
+    "form": "type-name"
+  },
+  "machines.forget": {
+    "confirm": "forget",
+    "consequence": "%s leaves your machines; nothing on it changes.",
+    "form": "yes-no"
+  },
+  "machines.restart": {
+    "confirm": "restart-mac",
+    "consequence": "%s restarts: its VMs stop, and its servers start again once it is back.",
+    "form": "yes-no",
+    "kinds": {
+      "server": {
+        "confirm": "restart-server",
+        "consequence": "It is a server: what it serves stops while it restarts.",
+        "form": "type-name"
+      },
+      "workspace": {
+        "confirm": "restart",
+        "consequence": "%s stops, then starts again: what it serves stops while it restarts.",
+        "form": "none"
+      }
+    }
+  },
+  "machines.restart-mac": {
+    "confirm": "restart-mac",
+    "consequence": "%s restarts: its VMs stop, and its servers start again once it is back.",
+    "form": "yes-no"
+  },
+  "machines.stop": {
+    "confirm": "stop",
+    "consequence": "%s stops: what it serves stops until you start it again.",
+    "form": "yes-no",
+    "kinds": {
+      "server": {
+        "confirm": "stop",
+        "consequence": "%s stops: what it serves stops until you start it again.",
+        "form": "type-name"
+      }
+    }
+  },
+  "ports.stop-sharing": {
+    "confirm": "stop-sharing",
+    "consequence": "%s is no longer shared, and its reserved port is released.",
+    "form": "yes-no"
+  },
+  "ports.undeclare": {
+    "confirm": "undeclare",
+    "consequence": "%s is no longer declared, so a listener on it is flagged again.",
+    "form": "yes-no"
+  },
+  "settings.apply": {
+    "confirm": "overwrite",
+    "consequence": "Your value of %s is replaced by the one the file asks.",
+    "form": "yes-no"
+  },
+  "settings.off": {
+    "confirm": "off-here",
+    "consequence": "station stops applying %s on this machine; its value now stays.",
+    "form": "yes-no"
+  },
+  "settings.run-containers": {
+    "confirm": "remove",
+    "consequence": "%s leaves this machine; its data stays.",
+    "form": "yes-no"
+  },
+  "vault.remove": {
+    "confirm": "remove-password",
+    "consequence": "%s leaves this Mac's vault, and every grant made from it ends.",
+    "form": "yes-no"
+  }
+}

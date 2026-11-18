@@ -1,0 +1,83 @@
+#!/bin/bash
+# The Tailscale app's CLI as the specs need it, one body for its three places
+# (on PATH, the Standalone app's /usr/local/bin/tailscale, the App Store
+# bundle's executable): every call is recorded in $HOME/.calls under the name
+# of its place; `status --json` answers answers/tailscale/status.json (Serve on: it
+# lists a certificate domain), with `CertDomains` null while
+# answers/tailscale/status.serve-off exists (Serve off on the tailnet); `serve status
+# --json` answers answers/tailscale/serve.json (else {}), and every other `serve` is
+# recorded and succeeds unless answers/tailscale/serve.exit says otherwise, or
+# answers/tailscale/serve.hang makes it print the app's line and wait for the admin
+# (its pid in $HOME/serve.pid);
+# answers/tailscale/serve.warn makes every `serve` first warn, as a CLI older than its
+# daemon does, and answers/tailscale/warn makes every call warn on both streams;
+# `cert` succeeds, held while answers/tailscale/cert.hold exists until
+# $HOME/cert.release does (20 s at most), and fails as the real one does when
+# an output it is given already exists and is not a regular file ("-" is
+# stdout). The App Store bundle's executable
+# fails as the real one does when its caller set none of TERM, SHLVL and
+# TERM_PROGRAM (bash, on every host, sets SHLVL to 1 when it found none, and an
+# unset TERM reads dumb).
+answers="$HOME/answers/tailscale"
+case "$0" in
+    */usr/local/bin/tailscale) name=tailscale-standalone ;;
+    */Contents/MacOS/Tailscale) name=tailscale-app-store ;;
+    *) name=tailscale ;;
+esac
+printf '%s %s\n' "$name" "$*" >> "$HOME/.calls"
+if [ "$name" = tailscale-app-store ] && [ "${TERM:-dumb}" = dumb ] && [ -z "$TERM_PROGRAM" ] && [ "${SHLVL:-1}" -le 1 ]; then
+    echo "The Tailscale GUI failed to start: The operation couldn't be completed. (Tailscale.CLIError error 3.)" >&2
+    exit 1
+fi
+if [ -f "$answers/warn" ]; then
+    echo 'Warning: client version "1.102.2" != tailscaled server version "1.104.4"'
+    echo 'Warning: client version "1.102.2" != tailscaled server version "1.104.4"' >&2
+fi
+case "$*" in
+    "status --json")
+        if [ -f "$answers/status.serve-off" ]; then
+            /usr/bin/sed 's/"CertDomains":\[[^]]*\]/"CertDomains":null/' "$answers/status.json"
+        else
+            /bin/cat "$answers/status.json"
+        fi
+        ;;
+    "serve status --json")
+        if [ -f "$answers/serve.json" ]; then /bin/cat "$answers/serve.json"; else echo '{}'; fi
+        ;;
+    serve*)
+        if [ -f "$answers/serve.warn" ]; then
+            echo 'Warning: client version "1.102.2" != tailscaled server version "1.104.4"' >&2
+        fi
+        if [ -f "$answers/serve.hang" ]; then
+            echo "Serve is not enabled on your tailnet."
+            echo $$ > "$HOME/serve.pid"
+            exec /bin/sleep 20
+        fi
+        if [ -f "$answers/serve.exit" ]; then
+            echo "serve: HTTPS is not enabled for this tailnet" >&2
+            exit "$(/bin/cat "$answers/serve.exit")"
+        fi
+        ;;
+    cert*)
+        for a in "$@"; do
+            case "$a" in
+                --cert-file=-|--key-file=-) ;;
+                --cert-file=*|--key-file=*)
+                    f=${a#*=}
+                    if [ -e "$f" ] && [ ! -f "$f" ]; then
+                        echo "$(/bin/date '+%Y/%m/%d %H:%M:%S') $f already exists and is not a regular file" >&2
+                        exit 1
+                    fi
+                    ;;
+            esac
+        done
+        if [ -f "$answers/cert.hold" ]; then
+            n=0
+            while [ ! -f "$HOME/cert.release" ] && [ $n -lt 200 ]; do /bin/sleep 0.1; n=$((n+1)); done
+        fi
+        ;;
+    *)
+        echo "stub tailscale: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

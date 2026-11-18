@@ -1,0 +1,8 @@
+description: 'start on another Mac whose engine runs says so through that Mac'
+env: two-macs
+runs:
+    - command: 'engine start --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	engine	already running · {{string}}

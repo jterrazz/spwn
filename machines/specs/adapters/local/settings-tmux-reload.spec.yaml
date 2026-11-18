@@ -1,0 +1,14 @@
+description: 'the tmux settings are written, then a running tmux is told to read it'
+fixture: ./__fixtures__/settings-tmux/
+runs:
+    - command: 'settings apply tmux-dotfiles'
+      exit: 0
+      stdout: |
+          ●	tmux-dotfiles
+          ●	~/.tmux.conf	written
+          ●	tmux	reloaded
+      files:
+          .tmux.conf: exists
+          .calls:
+              equals: |
+                  tmux source-file

@@ -1,0 +1,23 @@
+- main:
+  - heading "macbook-pro online" [level=2]
+  - paragraph: This Mac · Engine running. Sleeps normally.
+  - button "Keep macbook-pro awake": Awake…
+  - button "New machine on macbook-pro": New machine
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages" [selected]
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "Not given yet"
+    - text: What the engine answered is below
+  - region "Upgrades":
+    - heading "Upgrades" [level=2]
+    - button "Upgrade now"
+    - paragraph: What the engine answered is below
+  - region "Apps":
+    - heading "Apps by file, a later one wins" [level=2]
+    - text: "not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"

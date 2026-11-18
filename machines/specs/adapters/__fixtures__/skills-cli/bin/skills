@@ -1,0 +1,11 @@
+#!/bin/sh
+# The skills CLI: add and remove exit with the answer file's code.
+answers="${0%/*}/../answers/skills"
+printf 'skills %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "add "* | "remove "*) exit "$(/bin/cat "$answers/exit")" ;;
+    *)
+        echo "stub skills: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac
