@@ -501,7 +501,7 @@ type Run struct {
 	// name an answer, as a Form's notes do.
 	Then *Run `json:"then,omitempty"`
 	// value: the calls a sheet makes after this one, in turn (Clean up's
-	// delete on each Mac, then each agent forgotten): each is sent only the
+	// delete on each Mac): each is sent only the
 	// answers its In names, its fixed value narrowed to what the owner
 	// left checked, and a call left with nothing is not made.
 	And []Run `json:"and,omitempty"`
@@ -586,8 +586,7 @@ type Field struct {
 	Taken    []string `json:"taken,omitempty"`
 	TakenHud string   `json:"taken_hud,omitempty"`
 	// value: the field whose answers carry some of this one's: an option
-	// whose Of is checked there is checked too, and dimmed (a finished
-	// agent goes with the ephemeral workspace it ran in).
+	// whose Of is checked there is checked too, and dimmed.
 	Follows string `json:"follows,omitempty"`
 	// value: a command field's command, the owner's to run, copied.
 	Hint *Hint `json:"hint,omitempty"`

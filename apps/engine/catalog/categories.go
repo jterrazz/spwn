@@ -52,7 +52,7 @@ func (c Category) Folder() string { return folderOf(string(c)) }
 
 var SettingCategories = []SettingCategory{
 	CategoryShell, CategoryTerminal, CategorySecurity, CategoryEditor,
-	CategorySystem, CategoryHeadless, CategoryNetwork, CategoryAgents,
+	CategorySystem, CategoryHeadless, CategoryNetwork,
 }
 
 func (c SettingCategory) Folder() string { return folderOf(string(c)) }

@@ -33,9 +33,6 @@ import (
 	activityfake "github.com/jterrazz/studio-station/apps/engine/activity/adapter/fake"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
-	agentsfake "github.com/jterrazz/studio-station/apps/engine/agents/adapter/fake"
-	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	appsfake "github.com/jterrazz/studio-station/apps/engine/apps/adapter/fake"
 	appscontract "github.com/jterrazz/studio-station/apps/engine/apps/contract"
 	awakefake "github.com/jterrazz/studio-station/apps/engine/awake/adapter/fake"
@@ -375,17 +372,6 @@ func (m *worldMac) forgetGrants(ctx context.Context, vm string) error {
 
 func (m *worldMac) grants(now func() time.Time, sleep func(context.Context, time.Duration) error) accountscontract.Grants {
 	return accountsfake.NewGrants(m.run.w, m.name, accountsfake.Clock{Now: now, Sleep: sleep})
-}
-func (m *worldMac) journal() agentscontract.Journal { return agentsfake.JournalOf(m.run.w, m.name) }
-func (m *worldMac) agentSession() agentscontract.Session {
-	return agentsfake.SessionOf(m.run.w, m.name)
-}
-func (m *worldMac) forge() agentscontract.Forge { return agentsfake.ForgeOf(m.run.w, m.name) }
-func (m *worldMac) multiplexer() agentscontract.Multiplexer {
-	return agentsfake.MultiplexerOf(m.run.w, m.name)
-}
-func (m *worldMac) hooks(app agents.App) agentscontract.Hooks {
-	return agentsfake.HooksOf(m.run.w, m.name, app)
 }
 func (m *worldMac) listeners() portscontract.Listeners {
 	return portsfake.ListenersOf(m.run.w, m.name)

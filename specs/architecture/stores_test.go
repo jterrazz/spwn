@@ -32,7 +32,6 @@ func storeOwners() map[string]string {
 		src + "ports/contract.ReservationStore":     "ports/calls",
 		src + "ports/contract.DeclarationStore":     "ports/calls",
 		src + "settings/contract.AppliedStore":      "settings/calls",
-		src + "agents/contract.Journal":             "agents/calls",
 		src + "machinefile/contract.Ledger":         "machinefile/calls",
 		src + "engine.Reservations":                 "ports/calls",
 		src + "machines/adapter/jsonfile.Store":     "machines/calls",
@@ -42,7 +41,6 @@ func storeOwners() map[string]string {
 		src + "ports/adapter/jsonfile.Reservations": "ports/calls",
 		src + "ports/adapter/jsonfile.Declarations": "ports/calls",
 		src + "settings/adapter/jsonfile.Applied":   "settings/calls",
-		src + "agents/adapter/jsonfile.Journal":     "agents/calls",
 		src + "machinefile/adapter/jsonfile.Ledger": "machinefile/calls",
 		src + "core/adapter/jsonfile.Preferences":   "core/contract",
 	}

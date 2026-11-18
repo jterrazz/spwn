@@ -338,61 +338,6 @@
     }
   },
   "CoreFailCode": {
-    "agents.ambiguous": {
-      "Word": "ambiguous",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.bad-name": {
-      "Word": "bad name",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.ended": {
-      "Word": "ended",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.live": {
-      "Word": "live",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.name-taken": {
-      "Word": "name taken",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.no-pr": {
-      "Word": "no pr",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.no-terminal": {
-      "Word": "no terminal",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.no-text": {
-      "Word": "no text",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.no-where": {
-      "Word": "no where",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.unknown-agent": {
-      "Word": "unknown agent",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
-    "agents.unknown-app": {
-      "Word": "unknown app",
-      "Detail": "agents",
-      "Tone": "plain"
-    },
     "apps.lives-elsewhere": {
       "Word": "lives elsewhere",
       "Detail": "apps",

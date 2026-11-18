@@ -32,7 +32,7 @@ func Tree(f *model.AllMachines, svc *ports.AllMachines, line func(model.MacView)
 	}
 	for _, h := range f.Macs {
 		g := page.Group{Head: macRow(*f, h, line(h))}
-		var srv, ws, idle []page.Item
+		var srv, ws, stopped []page.Item
 		for _, vm := range h.VMs {
 			row := vmRow(vm, shared(svc, vm.Name), f.Read)
 			if !h.Reachable && !h.ThisMac {
@@ -45,10 +45,10 @@ func Tree(f *model.AllMachines, svc *ports.AllMachines, line func(model.MacView)
 			case vm.State == model.Running:
 				ws = append(ws, page.Item{Row: &row})
 			default:
-				idle = append(idle, page.Item{Row: &row})
+				stopped = append(stopped, page.Item{Row: &row})
 			}
 		}
-		ws = append(ws, idle...)
+		ws = append(ws, stopped...)
 		if len(srv) > 0 {
 			g.Items = append(g.Items, page.Item{Group: &page.Group{Head: page.Row{ID: h.Name + servers, Label: GroupServers}, Items: srv}})
 		}

@@ -3,15 +3,10 @@ package wire
 import (
 	"context"
 	"io"
-	"path"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/gh"
-	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/herdr"
-	agentsjsonfile "github.com/jterrazz/studio-station/apps/engine/agents/adapter/jsonfile"
-	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/docker"
@@ -59,39 +54,6 @@ func (g guestServer) Run(ctx context.Context, in io.Reader, out io.Writer) error
 		return err
 	}
 	return g.Agent.Run(ctx, in, out)
-}
-
-// value: the journal of this VM's agents, inside the VM.
-func (m machine) journal() agentscontract.Journal {
-	if m.world != nil {
-		return m.world.journal()
-	}
-	return agentsjsonfile.New(m.sys.FS, path.Join(m.paths.State, "agents"), m.sys.Clock, catalog.AgentWatchEvery)
-}
-
-// value: the multiplexer this VM's agents run in.
-func (m machine) agentSession() agentscontract.Session {
-	if m.world != nil {
-		return m.world.agentSession()
-	}
-	return herdr.NewSession(m.sys.Run)
-}
-
-// value: where the owner's terminal attaches to an agent's.
-func (m machine) multiplexer() agentscontract.Multiplexer {
-	if m.world != nil {
-		return m.world.multiplexer()
-	}
-	return herdr.NewMultiplexer(m.sys.Run)
-}
-
-// value: the forge this VM's agents open their PRs on, signed in with the
-// account lent to the VM.
-func (m machine) forge() agentscontract.Forge {
-	if m.world != nil {
-		return m.world.forge()
-	}
-	return gh.New(m.sys.Run)
 }
 
 // value: what listens here, read the way this system can: a Linux kernel's

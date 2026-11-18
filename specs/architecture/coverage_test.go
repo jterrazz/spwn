@@ -198,18 +198,18 @@ func TestEveryCallHasItsUseCaseSpecs(t *testing.T) {
 // invariant: AR-07: a machine kind added to the references is demanded its
 // not-for-this-machine story by every call whose Applies refuses it.
 func TestCoverageDemandsANewKindEverywhere(t *testing.T) {
-	agent := reference{"agent", machine.Profile{Kind: machine.Kind("agent"), System: machine.System{OS: machine.Linux}}}
+	appliance := reference{"appliance", machine.Profile{Kind: machine.Kind("appliance"), System: machine.System{OS: machine.Linux}}}
 	metas := registeredMetas(t)
-	got := ruleCoverage(metas, append(references(), agent), useCaseDocs(t))
+	got := ruleCoverage(metas, append(references(), appliance), useCaseDocs(t))
 	refused := 0
 	for _, m := range metas {
-		if m.Applies == nil || m.Applies(agent.profile).OK {
+		if m.Applies == nil || m.Applies(appliance.profile).OK {
 			continue
 		}
 		refused++
 		folder := "specs/usecases/" + strings.Replace(m.Name, ".", "/", 1) + "/"
 		if !slices.ContainsFunc(got, func(f finding) bool {
-			return f.where == folder && strings.Contains(f.what, outcomeNotFor+"-agent")
+			return f.where == folder && strings.Contains(f.what, outcomeNotFor+"-appliance")
 		}) {
 			t.Errorf("%s refuses the new kind and the coverage rule demanded no story of it", m.Name)
 		}

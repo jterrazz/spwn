@@ -7,10 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents"
-	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/claudecode"
-	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/codex"
-	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/gitaliases"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/zshblock"
 
@@ -137,18 +133,6 @@ func (m machine) has(app string) bool {
 		return err == nil
 	}
 	return false
-}
-
-// value: the hook of one app's agents in this VM's own settings file; a
-// world's is the fake over its VM.
-func (m machine) agentHooks(app agents.App) agentscontract.Hooks {
-	if m.world != nil {
-		return m.world.hooks(app)
-	}
-	if app == codex.ID {
-		return codex.New(m.sys.FS, m.sys.Env.Home(), m.sys.Clock.Now)
-	}
-	return claudecode.New(m.sys.FS, m.sys.Env.Home(), m.sys.Clock.Now)
 }
 
 // value: a read run once per run of the shared pool, whoever asks it.

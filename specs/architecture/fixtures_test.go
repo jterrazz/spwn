@@ -86,7 +86,7 @@ func worldSecrets(t *testing.T, root string) []string {
 
 // invariant: rule fixtures-carry-no-secret (13.3 rule 16, SC-10): no JSON
 // fixture carries a secret of a world, nor anything shaped like an issued
-// token, so a page, a stream, a golden file or an agent's journal that
+// token, so a page, a stream, a golden file or a recorded log that
 // kept one, pasted by the owner into a prompt or printed by a tool, would
 // be caught here, not in a review.
 func ruleFixturesCarryNoSecret(fixtures map[string]string, secrets []string) []finding {
@@ -121,9 +121,9 @@ func TestFixturesCarryNoSecret(t *testing.T) {
 		if len(ruleFixturesCarryNoSecret(mutant, secrets)) == 0 {
 			t.Error("a page fixture that prints a world's secret passed the rule")
 		}
-		journal := map[string]string{"specs/usecases/agents/__fixtures__/journal.json": `{"task":"deploy with sk-ant-api03-` + strings.Repeat("k", 40) + `"}`}
+		journal := map[string]string{"specs/usecases/vault/__fixtures__/log.json": `{"task":"deploy with sk-ant-api03-` + strings.Repeat("k", 40) + `"}`}
 		if len(ruleFixturesCarryNoSecret(journal, nil)) == 0 {
-			t.Error("a journal fixture that kept a token passed the rule")
+			t.Error("a log fixture that kept a token passed the rule")
 		}
 	})
 }

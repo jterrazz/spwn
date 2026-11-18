@@ -3,7 +3,6 @@ package main
 import (
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
-	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
@@ -27,7 +26,7 @@ const callsPath = "apps/engine/remote/api/calls.json"
 func registry() *call.Registry {
 	r, err := call.NewRegistry(
 		accountscalls.All(accountscalls.Deps{}), activitycalls.All(activitycalls.Deps{}), appscalls.All(appscalls.Deps{}),
-		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}), agentscalls.All(agentscalls.Deps{}),
+		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}),
 		imagescalls.All(imagescalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),
 	)

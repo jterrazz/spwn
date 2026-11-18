@@ -247,111 +247,6 @@ export type ActivityVMUsage = {
     vm: string;
 };
 
-export type AgentsAgent = {
-    app: string;
-    ask?: AgentsAsk;
-    change?: AgentsChange;
-    ended?: string;
-    folder?: string;
-    mac?: string;
-    name?: string;
-    pr?: AgentsPR;
-    reason?: string;
-    session: string;
-    since?: string;
-    state: '' | 'finished' | 'running' | 'starting' | 'waiting' | 'working';
-    steps?: AgentsStep[];
-    task?: string;
-    terminal?: string;
-    updated?: string;
-    vm?: string;
-};
-
-export type AgentsAsk = {
-    at: string;
-    detail?: string;
-    title: string;
-};
-
-export type AgentsCallsAgentIn = {
-    Agent?: string;
-};
-
-export type AgentsCallsListIn = {
-    AsGiven?: boolean;
-    On?: string;
-};
-
-export type AgentsCallsNew = {
-    CPUs?: number;
-    Confirm?: string;
-    Disk?: string;
-    Image?: string;
-    Mac?: string;
-    Memory?: string;
-};
-
-export type AgentsCallsRecordIn = {
-    App?: string;
-    Payload?: string;
-    Terminal?: string;
-};
-
-export type AgentsCallsRecorded = {
-    Kept: boolean;
-    Session?: string;
-    State?: 'finished' | 'running' | 'starting' | 'waiting' | 'working';
-};
-
-export type AgentsCallsReplyIn = {
-    Agent?: string;
-    Text?: string;
-};
-
-export type AgentsCallsStartIn = {
-    App?: string;
-    Folder?: string;
-    Name?: string;
-    New?: AgentsCallsNew;
-    On?: string;
-    Task?: string;
-};
-
-export type AgentsCallsStopIn = {
-    Agent?: string;
-    Confirm?: string;
-    Reason?: string;
-};
-
-export type AgentsChange = {
-    files: number;
-    minus: number;
-    plus: number;
-};
-
-export type AgentsDiff = {
-    minus: number;
-    plus: number;
-};
-
-export type AgentsPR = {
-    number: number;
-    url: string;
-};
-
-export type AgentsStep = {
-    at: string;
-    diff?: AgentsDiff;
-    object?: string;
-    tests?: AgentsTests;
-    verb: '' | 'build' | 'command' | 'commit' | 'delegate' | 'edit' | 'install' | 'open-pr' | 'read' | 'test' | 'web';
-};
-
-export type AgentsTests = {
-    pass: number;
-    total: number;
-};
-
 export type Answer = HelloFrame | ProgressFrame | OutFrame | ErrorFrame | DoneFrame;
 
 export type AppsCallsInstallIn = {
@@ -814,7 +709,7 @@ export type CatalogScriptMethod = {
 };
 
 export type CatalogSetting = {
-    Category: '' | 'Agents' | 'Editor' | 'Headless' | 'Network' | 'Security' | 'Shell' | 'System' | 'Terminal';
+    Category: '' | 'Editor' | 'Headless' | 'Network' | 'Security' | 'Shell' | 'System' | 'Terminal';
     Description: string;
     Guided: boolean;
     Help: string;
@@ -832,7 +727,7 @@ export type CatalogSetting = {
 };
 
 export type CatalogSettingInput = {
-    Category?: 'Agents' | 'Editor' | 'Headless' | 'Network' | 'Security' | 'Shell' | 'System' | 'Terminal';
+    Category?: 'Editor' | 'Headless' | 'Network' | 'Security' | 'Shell' | 'System' | 'Terminal';
     Description?: string;
     Guided?: boolean;
     Help?: string;
@@ -892,7 +787,7 @@ export type CatalogVersionRead = {
 };
 
 export type CoreCallWireError = {
-    code?: 'agents.ambiguous' | 'agents.bad-name' | 'agents.ended' | 'agents.live' | 'agents.name-taken' | 'agents.no-pr' | 'agents.no-terminal' | 'agents.no-text' | 'agents.no-where' | 'agents.unknown-agent' | 'agents.unknown-app' | 'apps.lives-elsewhere' | 'apps.no-method' | 'apps.not-installed' | 'apps.unknown' | 'apps.unpinnable' | 'awake.no-battery' | 'awake.no-lid' | 'awake.out-of-bounds' | 'awake_guard' | 'awake_range' | 'awake_unsupported' | 'background.is-the-engine' | 'background.root-scope' | 'background.unknown' | 'call.bad-frame' | 'call.bad-input' | 'call.bad-output' | 'call.needs' | 'call.unknown' | 'catalog.invalid' | 'catalog.newer-schema' | 'confirm.declined' | 'confirm.mismatch' | 'confirm.needed' | 'confirm.yes-needed' | 'disk.app-running' | 'disk.lives-elsewhere' | 'disk.names-needed' | 'disk.never-touched' | 'disk.not-freeable' | 'disk.not-misplaced' | 'disk.nothing-to-erase' | 'disk.nothing-to-free' | 'disk.record-unreadable' | 'disk.unknown' | 'engine.start-failed' | 'grant.cannot-deliver' | 'grant.machine-stopped' | 'grant.many-passwords' | 'grant.no-password' | 'grant.no-presence' | 'grant.not-granted' | 'grant.other-mac' | 'grant.presence-refused' | 'grant.signed-in-here' | 'grant.to-server' | 'grant.unknown-entry' | 'grant.unknown-machine' | 'guest_absent' | 'guest_timeout' | 'ignored_port' | 'image.binary-not-found' | 'image.in-use' | 'image.no-hypervisor' | 'image.no-linux-binary' | 'image.no-recipe' | 'image.old-record' | 'image.unknown' | 'internal' | 'login.already-signed-in' | 'login.busy' | 'login.code-refused' | 'login.expired' | 'login.failed' | 'login.granted' | 'login.machine-stopped' | 'login.no-exchange' | 'login.not-asking' | 'login.not-installed' | 'login.not-signed-in' | 'login.other-mac' | 'login.site-refused' | 'login.unknown-program' | 'machinefile.bad-phase' | 'machinefile.bad-value' | 'machinefile.busy' | 'machinefile.cycle' | 'machinefile.invalid' | 'machinefile.mixin' | 'machinefile.name-taken' | 'machinefile.needs-terminal' | 'machinefile.newer-schema' | 'machinefile.no-method' | 'machinefile.not-a-template' | 'machinefile.not-found' | 'machinefile.source-unavailable' | 'machinefile.unknown-key' | 'machinefile.unknown-package' | 'machinefile.unpinnable' | 'machinefile.vm-on-a-computer' | 'machines.bad-check' | 'machines.bad-creator' | 'machines.bad-lifetime' | 'machines.bad-name' | 'machines.bad-network' | 'machines.bad-purpose' | 'machines.being-created' | 'machines.check-for-servers' | 'machines.engine-down' | 'machines.name-taken' | 'machines.no-hypervisor' | 'machines.no-image' | 'machines.not-enough-memory' | 'machines.not-finished' | 'machines.server-bridged' | 'machines.server-needs-name' | 'machines.server-template' | 'machines.too-little-memory' | 'machines.unknown-image' | 'not_allowed' | 'port.audience-inside-vm' | 'port.audience-not-kept' | 'port.engine-too-old' | 'port.needs-route' | 'port.needs-vm' | 'port.not-declared' | 'port.not-found' | 'port.on-another-mac' | 'port.range-full' | 'port.signed-out' | 'port.unknown-audience' | 'port.unknown-route' | 'range_full' | 'remote.caller-too-old' | 'remote.far-too-old' | 'remote.no-station' | 'remote.unreachable' | 'remote.vm-mac-unreachable' | 'section.not-for-this-machine' | 'setting.checked' | 'setting.needs-admin' | 'setting.needs-terminal' | 'setting.not-applied' | 'setting.not-for-this-machine' | 'setting.unknown' | 'unknown_op' | 'unknown_page' | 'unknown_vm' | 'usage.entry-without-verb' | 'usage.missing-argument' | 'usage.needs-terminal' | 'usage.unknown-command' | 'vault.cannot-capture' | 'vault.empty-label' | 'vault.empty-value' | 'vault.label-taken' | 'vault.not-signed-in' | 'vault.unknown' | 'vm_stopped';
+    code?: 'apps.lives-elsewhere' | 'apps.no-method' | 'apps.not-installed' | 'apps.unknown' | 'apps.unpinnable' | 'awake.no-battery' | 'awake.no-lid' | 'awake.out-of-bounds' | 'awake_guard' | 'awake_range' | 'awake_unsupported' | 'background.is-the-engine' | 'background.root-scope' | 'background.unknown' | 'call.bad-frame' | 'call.bad-input' | 'call.bad-output' | 'call.needs' | 'call.unknown' | 'catalog.invalid' | 'catalog.newer-schema' | 'confirm.declined' | 'confirm.mismatch' | 'confirm.needed' | 'confirm.yes-needed' | 'disk.app-running' | 'disk.lives-elsewhere' | 'disk.names-needed' | 'disk.never-touched' | 'disk.not-freeable' | 'disk.not-misplaced' | 'disk.nothing-to-erase' | 'disk.nothing-to-free' | 'disk.record-unreadable' | 'disk.unknown' | 'engine.start-failed' | 'grant.cannot-deliver' | 'grant.machine-stopped' | 'grant.many-passwords' | 'grant.no-password' | 'grant.no-presence' | 'grant.not-granted' | 'grant.other-mac' | 'grant.presence-refused' | 'grant.signed-in-here' | 'grant.to-server' | 'grant.unknown-entry' | 'grant.unknown-machine' | 'guest_absent' | 'guest_timeout' | 'ignored_port' | 'image.binary-not-found' | 'image.in-use' | 'image.no-hypervisor' | 'image.no-linux-binary' | 'image.no-recipe' | 'image.old-record' | 'image.unknown' | 'internal' | 'login.already-signed-in' | 'login.busy' | 'login.code-refused' | 'login.expired' | 'login.failed' | 'login.granted' | 'login.machine-stopped' | 'login.no-exchange' | 'login.not-asking' | 'login.not-installed' | 'login.not-signed-in' | 'login.other-mac' | 'login.site-refused' | 'login.unknown-program' | 'machinefile.bad-phase' | 'machinefile.bad-value' | 'machinefile.busy' | 'machinefile.cycle' | 'machinefile.invalid' | 'machinefile.mixin' | 'machinefile.name-taken' | 'machinefile.needs-terminal' | 'machinefile.newer-schema' | 'machinefile.no-method' | 'machinefile.not-a-template' | 'machinefile.not-found' | 'machinefile.source-unavailable' | 'machinefile.unknown-key' | 'machinefile.unknown-package' | 'machinefile.unpinnable' | 'machinefile.vm-on-a-computer' | 'machines.bad-check' | 'machines.bad-creator' | 'machines.bad-lifetime' | 'machines.bad-name' | 'machines.bad-network' | 'machines.bad-purpose' | 'machines.being-created' | 'machines.check-for-servers' | 'machines.engine-down' | 'machines.name-taken' | 'machines.no-hypervisor' | 'machines.no-image' | 'machines.not-enough-memory' | 'machines.not-finished' | 'machines.server-bridged' | 'machines.server-needs-name' | 'machines.server-template' | 'machines.too-little-memory' | 'machines.unknown-image' | 'not_allowed' | 'port.audience-inside-vm' | 'port.audience-not-kept' | 'port.engine-too-old' | 'port.needs-route' | 'port.needs-vm' | 'port.not-declared' | 'port.not-found' | 'port.on-another-mac' | 'port.range-full' | 'port.signed-out' | 'port.unknown-audience' | 'port.unknown-route' | 'range_full' | 'remote.caller-too-old' | 'remote.far-too-old' | 'remote.no-station' | 'remote.unreachable' | 'remote.vm-mac-unreachable' | 'section.not-for-this-machine' | 'setting.checked' | 'setting.needs-admin' | 'setting.needs-terminal' | 'setting.not-applied' | 'setting.not-for-this-machine' | 'setting.unknown' | 'unknown_op' | 'unknown_page' | 'unknown_vm' | 'usage.entry-without-verb' | 'usage.missing-argument' | 'usage.needs-terminal' | 'usage.unknown-command' | 'vault.cannot-capture' | 'vault.empty-label' | 'vault.empty-value' | 'vault.label-taken' | 'vault.not-signed-in' | 'vault.unknown' | 'vm_stopped';
     detail?: Record<string, string>;
     exit?: number;
     field?: 'label' | 'value';
@@ -1986,7 +1881,7 @@ export type MachinesFirstStart = {
 };
 
 export type MachinesFirstStartGrant = {
-    Code?: 'agents.ambiguous' | 'agents.bad-name' | 'agents.ended' | 'agents.live' | 'agents.name-taken' | 'agents.no-pr' | 'agents.no-terminal' | 'agents.no-text' | 'agents.no-where' | 'agents.unknown-agent' | 'agents.unknown-app' | 'apps.lives-elsewhere' | 'apps.no-method' | 'apps.not-installed' | 'apps.unknown' | 'apps.unpinnable' | 'awake.no-battery' | 'awake.no-lid' | 'awake.out-of-bounds' | 'awake_guard' | 'awake_range' | 'awake_unsupported' | 'background.is-the-engine' | 'background.root-scope' | 'background.unknown' | 'call.bad-frame' | 'call.bad-input' | 'call.bad-output' | 'call.needs' | 'call.unknown' | 'catalog.invalid' | 'catalog.newer-schema' | 'confirm.declined' | 'confirm.mismatch' | 'confirm.needed' | 'confirm.yes-needed' | 'disk.app-running' | 'disk.lives-elsewhere' | 'disk.names-needed' | 'disk.never-touched' | 'disk.not-freeable' | 'disk.not-misplaced' | 'disk.nothing-to-erase' | 'disk.nothing-to-free' | 'disk.record-unreadable' | 'disk.unknown' | 'engine.start-failed' | 'grant.cannot-deliver' | 'grant.machine-stopped' | 'grant.many-passwords' | 'grant.no-password' | 'grant.no-presence' | 'grant.not-granted' | 'grant.other-mac' | 'grant.presence-refused' | 'grant.signed-in-here' | 'grant.to-server' | 'grant.unknown-entry' | 'grant.unknown-machine' | 'guest_absent' | 'guest_timeout' | 'ignored_port' | 'image.binary-not-found' | 'image.in-use' | 'image.no-hypervisor' | 'image.no-linux-binary' | 'image.no-recipe' | 'image.old-record' | 'image.unknown' | 'internal' | 'login.already-signed-in' | 'login.busy' | 'login.code-refused' | 'login.expired' | 'login.failed' | 'login.granted' | 'login.machine-stopped' | 'login.no-exchange' | 'login.not-asking' | 'login.not-installed' | 'login.not-signed-in' | 'login.other-mac' | 'login.site-refused' | 'login.unknown-program' | 'machinefile.bad-phase' | 'machinefile.bad-value' | 'machinefile.busy' | 'machinefile.cycle' | 'machinefile.invalid' | 'machinefile.mixin' | 'machinefile.name-taken' | 'machinefile.needs-terminal' | 'machinefile.newer-schema' | 'machinefile.no-method' | 'machinefile.not-a-template' | 'machinefile.not-found' | 'machinefile.source-unavailable' | 'machinefile.unknown-key' | 'machinefile.unknown-package' | 'machinefile.unpinnable' | 'machinefile.vm-on-a-computer' | 'machines.bad-check' | 'machines.bad-creator' | 'machines.bad-lifetime' | 'machines.bad-name' | 'machines.bad-network' | 'machines.bad-purpose' | 'machines.being-created' | 'machines.check-for-servers' | 'machines.engine-down' | 'machines.name-taken' | 'machines.no-hypervisor' | 'machines.no-image' | 'machines.not-enough-memory' | 'machines.not-finished' | 'machines.server-bridged' | 'machines.server-needs-name' | 'machines.server-template' | 'machines.too-little-memory' | 'machines.unknown-image' | 'not_allowed' | 'port.audience-inside-vm' | 'port.audience-not-kept' | 'port.engine-too-old' | 'port.needs-route' | 'port.needs-vm' | 'port.not-declared' | 'port.not-found' | 'port.on-another-mac' | 'port.range-full' | 'port.signed-out' | 'port.unknown-audience' | 'port.unknown-route' | 'range_full' | 'remote.caller-too-old' | 'remote.far-too-old' | 'remote.no-station' | 'remote.unreachable' | 'remote.vm-mac-unreachable' | 'section.not-for-this-machine' | 'setting.checked' | 'setting.needs-admin' | 'setting.needs-terminal' | 'setting.not-applied' | 'setting.not-for-this-machine' | 'setting.unknown' | 'unknown_op' | 'unknown_page' | 'unknown_vm' | 'usage.entry-without-verb' | 'usage.missing-argument' | 'usage.needs-terminal' | 'usage.unknown-command' | 'vault.cannot-capture' | 'vault.empty-label' | 'vault.empty-value' | 'vault.label-taken' | 'vault.not-signed-in' | 'vault.unknown' | 'vm_stopped';
+    Code?: 'apps.lives-elsewhere' | 'apps.no-method' | 'apps.not-installed' | 'apps.unknown' | 'apps.unpinnable' | 'awake.no-battery' | 'awake.no-lid' | 'awake.out-of-bounds' | 'awake_guard' | 'awake_range' | 'awake_unsupported' | 'background.is-the-engine' | 'background.root-scope' | 'background.unknown' | 'call.bad-frame' | 'call.bad-input' | 'call.bad-output' | 'call.needs' | 'call.unknown' | 'catalog.invalid' | 'catalog.newer-schema' | 'confirm.declined' | 'confirm.mismatch' | 'confirm.needed' | 'confirm.yes-needed' | 'disk.app-running' | 'disk.lives-elsewhere' | 'disk.names-needed' | 'disk.never-touched' | 'disk.not-freeable' | 'disk.not-misplaced' | 'disk.nothing-to-erase' | 'disk.nothing-to-free' | 'disk.record-unreadable' | 'disk.unknown' | 'engine.start-failed' | 'grant.cannot-deliver' | 'grant.machine-stopped' | 'grant.many-passwords' | 'grant.no-password' | 'grant.no-presence' | 'grant.not-granted' | 'grant.other-mac' | 'grant.presence-refused' | 'grant.signed-in-here' | 'grant.to-server' | 'grant.unknown-entry' | 'grant.unknown-machine' | 'guest_absent' | 'guest_timeout' | 'ignored_port' | 'image.binary-not-found' | 'image.in-use' | 'image.no-hypervisor' | 'image.no-linux-binary' | 'image.no-recipe' | 'image.old-record' | 'image.unknown' | 'internal' | 'login.already-signed-in' | 'login.busy' | 'login.code-refused' | 'login.expired' | 'login.failed' | 'login.granted' | 'login.machine-stopped' | 'login.no-exchange' | 'login.not-asking' | 'login.not-installed' | 'login.not-signed-in' | 'login.other-mac' | 'login.site-refused' | 'login.unknown-program' | 'machinefile.bad-phase' | 'machinefile.bad-value' | 'machinefile.busy' | 'machinefile.cycle' | 'machinefile.invalid' | 'machinefile.mixin' | 'machinefile.name-taken' | 'machinefile.needs-terminal' | 'machinefile.newer-schema' | 'machinefile.no-method' | 'machinefile.not-a-template' | 'machinefile.not-found' | 'machinefile.source-unavailable' | 'machinefile.unknown-key' | 'machinefile.unknown-package' | 'machinefile.unpinnable' | 'machinefile.vm-on-a-computer' | 'machines.bad-check' | 'machines.bad-creator' | 'machines.bad-lifetime' | 'machines.bad-name' | 'machines.bad-network' | 'machines.bad-purpose' | 'machines.being-created' | 'machines.check-for-servers' | 'machines.engine-down' | 'machines.name-taken' | 'machines.no-hypervisor' | 'machines.no-image' | 'machines.not-enough-memory' | 'machines.not-finished' | 'machines.server-bridged' | 'machines.server-needs-name' | 'machines.server-template' | 'machines.too-little-memory' | 'machines.unknown-image' | 'not_allowed' | 'port.audience-inside-vm' | 'port.audience-not-kept' | 'port.engine-too-old' | 'port.needs-route' | 'port.needs-vm' | 'port.not-declared' | 'port.not-found' | 'port.on-another-mac' | 'port.range-full' | 'port.signed-out' | 'port.unknown-audience' | 'port.unknown-route' | 'range_full' | 'remote.caller-too-old' | 'remote.far-too-old' | 'remote.no-station' | 'remote.unreachable' | 'remote.vm-mac-unreachable' | 'section.not-for-this-machine' | 'setting.checked' | 'setting.needs-admin' | 'setting.needs-terminal' | 'setting.not-applied' | 'setting.not-for-this-machine' | 'setting.unknown' | 'unknown_op' | 'unknown_page' | 'unknown_vm' | 'usage.entry-without-verb' | 'usage.missing-argument' | 'usage.needs-terminal' | 'usage.unknown-command' | 'vault.cannot-capture' | 'vault.empty-label' | 'vault.empty-value' | 'vault.label-taken' | 'vault.not-signed-in' | 'vault.unknown' | 'vm_stopped';
     Program: string;
     Subject?: string;
 };
@@ -3260,20 +3155,6 @@ export type ActivityReadInput = ActivityCallsReadIn;
 export type ActivityReadOutput = ActivityReport;
 export type ActivitySampleInput = ActivityCallsSampleIn;
 export type ActivitySampleOutput = ActivityReading;
-export type AgentsForgetInput = AgentsCallsAgentIn;
-export type AgentsForgetOutput = AgentsAgent;
-export type AgentsListInput = AgentsCallsListIn;
-export type AgentsListOutput = AgentsAgent[] | null;
-export type AgentsMergeInput = AgentsCallsAgentIn;
-export type AgentsMergeOutput = AgentsAgent;
-export type AgentsRecordInput = AgentsCallsRecordIn;
-export type AgentsRecordOutput = AgentsCallsRecorded;
-export type AgentsReplyInput = AgentsCallsReplyIn;
-export type AgentsReplyOutput = AgentsAgent;
-export type AgentsStartInput = AgentsCallsStartIn;
-export type AgentsStartOutput = AgentsAgent;
-export type AgentsStopInput = AgentsCallsStopIn;
-export type AgentsStopOutput = AgentsAgent;
 export type AppsInstallInput = AppsCallsInstallIn;
 export type AppsInstallOutput = AppsOutcome[] | null;
 export type AppsListInput = AppsCallsListIn;
@@ -3477,13 +3358,6 @@ export interface Calls {
     'accounts.open': { in: AccountsOpenInput; out: AccountsOpenOutput; watch: false };
     'activity.read': { in: ActivityReadInput; out: ActivityReadOutput; watch: true };
     'activity.sample': { in: ActivitySampleInput; out: ActivitySampleOutput; watch: false };
-    'agents.forget': { in: AgentsForgetInput; out: AgentsForgetOutput; watch: false };
-    'agents.list': { in: AgentsListInput; out: AgentsListOutput; watch: false };
-    'agents.merge': { in: AgentsMergeInput; out: AgentsMergeOutput; watch: false };
-    'agents.record': { in: AgentsRecordInput; out: AgentsRecordOutput; watch: false };
-    'agents.reply': { in: AgentsReplyInput; out: AgentsReplyOutput; watch: false };
-    'agents.start': { in: AgentsStartInput; out: AgentsStartOutput; watch: false };
-    'agents.stop': { in: AgentsStopInput; out: AgentsStopOutput; watch: false; confirm: 'stop-agent'; consequence: 'The agent in %s stops where it is; its work so far stays.' };
     'apps.install': { in: AppsInstallInput; out: AppsInstallOutput; watch: false };
     'apps.list': { in: AppsListInput; out: AppsListOutput; watch: true };
     'apps.matrix': { in: AppsMatrixInput; out: AppsMatrixOutput; watch: false };
@@ -3627,7 +3501,7 @@ export type CatalogNeed = 'sudo' | 'terminal' | 'license' | 'app-store-login';
 
 export type CatalogOS = 'macos' | 'ubuntu' | 'debian' | 'any';
 
-export type CoreFailCode = 'agents.ambiguous' | 'agents.bad-name' | 'agents.ended' | 'agents.live' | 'agents.name-taken' | 'agents.no-pr' | 'agents.no-terminal' | 'agents.no-text' | 'agents.no-where' | 'agents.unknown-agent' | 'agents.unknown-app' | 'apps.lives-elsewhere' | 'apps.no-method' | 'apps.not-installed' | 'apps.unknown' | 'apps.unpinnable' | 'awake.no-battery' | 'awake.no-lid' | 'awake.out-of-bounds' | 'awake_guard' | 'awake_range' | 'awake_unsupported' | 'background.is-the-engine' | 'background.root-scope' | 'background.unknown' | 'call.bad-frame' | 'call.bad-input' | 'call.bad-output' | 'call.needs' | 'call.unknown' | 'catalog.invalid' | 'catalog.newer-schema' | 'confirm.declined' | 'confirm.mismatch' | 'confirm.needed' | 'confirm.yes-needed' | 'disk.app-running' | 'disk.lives-elsewhere' | 'disk.names-needed' | 'disk.never-touched' | 'disk.not-freeable' | 'disk.not-misplaced' | 'disk.nothing-to-erase' | 'disk.nothing-to-free' | 'disk.record-unreadable' | 'disk.unknown' | 'engine.start-failed' | 'grant.cannot-deliver' | 'grant.machine-stopped' | 'grant.many-passwords' | 'grant.no-password' | 'grant.no-presence' | 'grant.not-granted' | 'grant.other-mac' | 'grant.presence-refused' | 'grant.signed-in-here' | 'grant.to-server' | 'grant.unknown-entry' | 'grant.unknown-machine' | 'guest_absent' | 'guest_timeout' | 'ignored_port' | 'image.binary-not-found' | 'image.in-use' | 'image.no-hypervisor' | 'image.no-linux-binary' | 'image.no-recipe' | 'image.old-record' | 'image.unknown' | 'internal' | 'login.already-signed-in' | 'login.busy' | 'login.code-refused' | 'login.expired' | 'login.failed' | 'login.granted' | 'login.machine-stopped' | 'login.no-exchange' | 'login.not-asking' | 'login.not-installed' | 'login.not-signed-in' | 'login.other-mac' | 'login.site-refused' | 'login.unknown-program' | 'machinefile.bad-phase' | 'machinefile.bad-value' | 'machinefile.busy' | 'machinefile.cycle' | 'machinefile.invalid' | 'machinefile.mixin' | 'machinefile.name-taken' | 'machinefile.needs-terminal' | 'machinefile.newer-schema' | 'machinefile.no-method' | 'machinefile.not-a-template' | 'machinefile.not-found' | 'machinefile.source-unavailable' | 'machinefile.unknown-key' | 'machinefile.unknown-package' | 'machinefile.unpinnable' | 'machinefile.vm-on-a-computer' | 'machines.bad-check' | 'machines.bad-creator' | 'machines.bad-lifetime' | 'machines.bad-name' | 'machines.bad-network' | 'machines.bad-purpose' | 'machines.being-created' | 'machines.check-for-servers' | 'machines.engine-down' | 'machines.name-taken' | 'machines.no-hypervisor' | 'machines.no-image' | 'machines.not-enough-memory' | 'machines.not-finished' | 'machines.server-bridged' | 'machines.server-needs-name' | 'machines.server-template' | 'machines.too-little-memory' | 'machines.unknown-image' | 'not_allowed' | 'port.audience-inside-vm' | 'port.audience-not-kept' | 'port.engine-too-old' | 'port.needs-route' | 'port.needs-vm' | 'port.not-declared' | 'port.not-found' | 'port.on-another-mac' | 'port.range-full' | 'port.signed-out' | 'port.unknown-audience' | 'port.unknown-route' | 'range_full' | 'remote.caller-too-old' | 'remote.far-too-old' | 'remote.no-station' | 'remote.unreachable' | 'remote.vm-mac-unreachable' | 'section.not-for-this-machine' | 'setting.checked' | 'setting.needs-admin' | 'setting.needs-terminal' | 'setting.not-applied' | 'setting.not-for-this-machine' | 'setting.unknown' | 'unknown_op' | 'unknown_page' | 'unknown_vm' | 'usage.entry-without-verb' | 'usage.missing-argument' | 'usage.needs-terminal' | 'usage.unknown-command' | 'vault.cannot-capture' | 'vault.empty-label' | 'vault.empty-value' | 'vault.label-taken' | 'vault.not-signed-in' | 'vault.unknown' | 'vm_stopped';
+export type CoreFailCode = 'apps.lives-elsewhere' | 'apps.no-method' | 'apps.not-installed' | 'apps.unknown' | 'apps.unpinnable' | 'awake.no-battery' | 'awake.no-lid' | 'awake.out-of-bounds' | 'awake_guard' | 'awake_range' | 'awake_unsupported' | 'background.is-the-engine' | 'background.root-scope' | 'background.unknown' | 'call.bad-frame' | 'call.bad-input' | 'call.bad-output' | 'call.needs' | 'call.unknown' | 'catalog.invalid' | 'catalog.newer-schema' | 'confirm.declined' | 'confirm.mismatch' | 'confirm.needed' | 'confirm.yes-needed' | 'disk.app-running' | 'disk.lives-elsewhere' | 'disk.names-needed' | 'disk.never-touched' | 'disk.not-freeable' | 'disk.not-misplaced' | 'disk.nothing-to-erase' | 'disk.nothing-to-free' | 'disk.record-unreadable' | 'disk.unknown' | 'engine.start-failed' | 'grant.cannot-deliver' | 'grant.machine-stopped' | 'grant.many-passwords' | 'grant.no-password' | 'grant.no-presence' | 'grant.not-granted' | 'grant.other-mac' | 'grant.presence-refused' | 'grant.signed-in-here' | 'grant.to-server' | 'grant.unknown-entry' | 'grant.unknown-machine' | 'guest_absent' | 'guest_timeout' | 'ignored_port' | 'image.binary-not-found' | 'image.in-use' | 'image.no-hypervisor' | 'image.no-linux-binary' | 'image.no-recipe' | 'image.old-record' | 'image.unknown' | 'internal' | 'login.already-signed-in' | 'login.busy' | 'login.code-refused' | 'login.expired' | 'login.failed' | 'login.granted' | 'login.machine-stopped' | 'login.no-exchange' | 'login.not-asking' | 'login.not-installed' | 'login.not-signed-in' | 'login.other-mac' | 'login.site-refused' | 'login.unknown-program' | 'machinefile.bad-phase' | 'machinefile.bad-value' | 'machinefile.busy' | 'machinefile.cycle' | 'machinefile.invalid' | 'machinefile.mixin' | 'machinefile.name-taken' | 'machinefile.needs-terminal' | 'machinefile.newer-schema' | 'machinefile.no-method' | 'machinefile.not-a-template' | 'machinefile.not-found' | 'machinefile.source-unavailable' | 'machinefile.unknown-key' | 'machinefile.unknown-package' | 'machinefile.unpinnable' | 'machinefile.vm-on-a-computer' | 'machines.bad-check' | 'machines.bad-creator' | 'machines.bad-lifetime' | 'machines.bad-name' | 'machines.bad-network' | 'machines.bad-purpose' | 'machines.being-created' | 'machines.check-for-servers' | 'machines.engine-down' | 'machines.name-taken' | 'machines.no-hypervisor' | 'machines.no-image' | 'machines.not-enough-memory' | 'machines.not-finished' | 'machines.server-bridged' | 'machines.server-needs-name' | 'machines.server-template' | 'machines.too-little-memory' | 'machines.unknown-image' | 'not_allowed' | 'port.audience-inside-vm' | 'port.audience-not-kept' | 'port.engine-too-old' | 'port.needs-route' | 'port.needs-vm' | 'port.not-declared' | 'port.not-found' | 'port.on-another-mac' | 'port.range-full' | 'port.signed-out' | 'port.unknown-audience' | 'port.unknown-route' | 'range_full' | 'remote.caller-too-old' | 'remote.far-too-old' | 'remote.no-station' | 'remote.unreachable' | 'remote.vm-mac-unreachable' | 'section.not-for-this-machine' | 'setting.checked' | 'setting.needs-admin' | 'setting.needs-terminal' | 'setting.not-applied' | 'setting.not-for-this-machine' | 'setting.unknown' | 'unknown_op' | 'unknown_page' | 'unknown_vm' | 'usage.entry-without-verb' | 'usage.missing-argument' | 'usage.needs-terminal' | 'usage.unknown-command' | 'vault.cannot-capture' | 'vault.empty-label' | 'vault.empty-value' | 'vault.label-taken' | 'vault.not-signed-in' | 'vault.unknown' | 'vm_stopped';
 
 export type CoreFailField = 'label' | 'value';
 

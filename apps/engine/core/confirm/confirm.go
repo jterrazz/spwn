@@ -33,7 +33,6 @@ const (
 	RestartServer Action = "restart-server"
 	StopEngine    Action = "stop-engine"
 	Stop          Action = "stop"
-	StopAgent     Action = "stop-agent"
 	Delete        Action = "delete"
 	Erase         Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.
@@ -200,8 +199,6 @@ func (a Action) Consequence() string {
 		return "Every VM of this Mac stops, and nothing is shared until the engine starts again."
 	case Stop:
 		return "%s stops: what it serves stops until you start it again."
-	case StopAgent:
-		return "The agent in %s stops where it is; its work so far stays."
 	case Delete:
 		return "%s and everything on its disk are deleted for good."
 	case Erase:

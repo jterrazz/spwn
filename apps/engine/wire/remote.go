@@ -269,6 +269,24 @@ func orNone(err error) error {
 	return fail.New(fail.Unreachable, call.Unreachable, "", nil)
 }
 
+// value: the Router a call reaches another machine through: this run's,
+// once it is built.
+type farRouter struct{ m machine }
+
+func (f farRouter) Invoke(ctx context.Context, target coremachine.Ref, name string, in, out any, p call.Progress) error {
+	if f.m.far == nil || f.m.far.router == nil {
+		return orNone(nil)
+	}
+	return f.m.far.router.Invoke(ctx, target, name, in, out, p)
+}
+
+func (f farRouter) Watch(ctx context.Context, target coremachine.Ref, name string, in any, p call.Progress) (<-chan call.Update[any], error) {
+	if f.m.far == nil || f.m.far.router == nil {
+		return nil, orNone(nil)
+	}
+	return f.m.far.router.Watch(ctx, target, name, in, p)
+}
+
 // invariant: a server runs each frame through this run's Router: a call
 // for this machine here, one for its VM over its engine's connection. A
 // door onto the engine socket also sends a frame for another Mac, or for
