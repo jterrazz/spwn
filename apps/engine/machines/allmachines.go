@@ -142,6 +142,9 @@ type VM struct {
 	// value: the memory its process holds on its Mac now, in bytes, as that
 	// Mac's kernel measures it; zero when it does not run or is not measured.
 	UsedBytes int64 `json:",omitempty"`
+	// value: what refuses its guest its connection, as its Mac's engine
+	// met it; empty when nothing does.
+	Blocked GuestBlock `json:",omitempty"`
 }
 
 type KeptDrift struct {

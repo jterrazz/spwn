@@ -1,0 +1,10 @@
+description: 'a create sent with --on to a Mac that has not approved Local Network names that Mac'
+env: two-macs
+runs:
+    - command: 'world local-network mac-mini not-approved'
+      exit: 0
+    - command: 'machines create box --memory 4G --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: box is kept, failing SSH answers: mac-mini has not approved station for Local Network
+          Hint: approve station on mac-mini's screen, or in System Settings > Privacy & Security > Local Network; box connects by itself once approved

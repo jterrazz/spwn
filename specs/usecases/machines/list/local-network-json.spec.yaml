@@ -1,0 +1,9 @@
+description: 'machines --json carries the finding of a VM its Mac has not approved for Local Network'
+env: two-macs
+runs:
+    - command: 'world local-network macbook-pro not-approved'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c .findings'
+      exit: 0
+      stdout: |
+          [{"machine":"linux-1","severity":"needs-a-look","section":"overview","subject":"linux-1","text":"linux-1 is unreachable: macbook-pro has not approved station for Local Network","fix":{"call":null,"command":null,"path":"approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network"}}]

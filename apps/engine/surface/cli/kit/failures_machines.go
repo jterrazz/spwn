@@ -109,6 +109,8 @@ func vmFailure(err error) (*fail.Error, bool) {
 		return usage(shrinks.Error(), shrinks.Name+" has "+strconv.FormatFloat(float64(shrinks.Has)/1e9, 'f', 1, 64)+" GB: ask for more"), true
 	case errors.As(err, &noBoot):
 		return failed(noBoot.Error(), keptFix(noBoot.Name), err), true
+	case errors.As(err, &unhealthy) && unhealthy.BlockedOn != "":
+		return failed(unhealthy.Error(), model.LocalNetworkFix(unhealthy.BlockedOn)+"; "+unhealthy.Name+" connects by itself once approved", err), true
 	case errors.As(err, &unhealthy):
 		return failed(unhealthy.Error(), keptFix(unhealthy.Name), err), true
 	case errors.As(err, &created):
