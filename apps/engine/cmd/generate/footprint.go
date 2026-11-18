@@ -29,7 +29,7 @@ func footprint() string {
 	})
 	parts := []string{
 		strings.Replace(footprintPreamble, "%LEVELS%", levels, 1),
-		"## Station", table([]string{"Path", "Group", "Note"}, storedRows(catalog.StationDisk)), catalog.StationRetiredNote,
+		"## Station", table([]string{"Path", "Group", "Note"}, storedRows(catalog.StationDisk)),
 		"## Apps",
 	}
 	for _, t := range builtin().Apps {

@@ -6,9 +6,6 @@
         "From": {
           "type": "string"
         },
-        "Moved": {
-          "type": "boolean"
-        },
         "Restarted": {
           "type": "boolean"
         },
@@ -18,7 +15,6 @@
       },
       "required": [
         "From",
-        "Moved",
         "Restarted",
         "Written"
       ],

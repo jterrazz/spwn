@@ -45,7 +45,6 @@ import (
 	machinesrestart "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/restart"
 	machinesstart "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/start"
 	machinesstop "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/stop"
-	machinessupervise "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/supervise"
 	machinesunlock "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/unlock"
 	machineswake "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/wake"
 	overviewcmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/overview"
@@ -117,7 +116,7 @@ func (m machine) vmUses(ctx context.Context) map[string]int64 {
 // value: engine start's own use case, run for a call that needs the engine
 // on a Mac that never installed it.
 func (m machine) startEngine(ctx context.Context) error {
-	d := enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m, machines: m.machines(false)}, Kind: m.profile.Kind}
+	d := enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m}, Kind: m.profile.Kind}
 	_, err := enginecalls.Start.Run(ctx, d, enginecalls.StartIn{}, nil)
 	return err
 }
@@ -251,7 +250,6 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 		machinesunlock.Command(machinesunlock.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machineswake.Command(machineswake.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinesremind.Command(machinesremind.Deps{Names: vms.Names, ThisMachine: m.where}, env),
-		machinessupervise.Command(env),
 		machinespipe.Command(machinespipe.Deps{Machines: vmPipe{vms, m.sys.Sockets}}, env),
 	)
 }

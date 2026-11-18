@@ -1033,7 +1033,6 @@ export type EngineHello = {
 
 export type EngineInstalled = {
     From: string;
-    Moved: boolean;
     Restarted: boolean;
     Written: boolean;
 };

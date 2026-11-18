@@ -140,7 +140,6 @@ func pipeFailure(err error) (*fail.Error, bool) {
 	var notThisMac *model.NotThisMacError
 	var stopped *model.StoppedError
 	var closed *model.SSHDClosedError
-	var running *model.RunningUnderAgentError
 	switch {
 	case errors.As(err, &notThisMac):
 		return usage(notThisMac.Error(), words.ReachedThrough(notThisMac.Name, notThisMac.Mac)), true
@@ -148,8 +147,6 @@ func pipeFailure(err error) (*fail.Error, bool) {
 		return failed(stopped.Error(), "station machines start "+stopped.Name, err), true
 	case errors.As(err, &closed):
 		return failed(closed.Error(), "station machines "+closed.Name, err), true
-	case errors.As(err, &running):
-		return failed(running.Error(), "stop the persistent VMs and delete the ephemeral ones (station machines), then station engine start", err), true
 	}
 	return nil, false
 }

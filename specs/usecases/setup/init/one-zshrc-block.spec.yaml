@@ -1,8 +1,8 @@
-description: 'init replaces a v2 station block by the one block, never a second, keeping the owner''s lines'
-fixture: ./__fixtures__/v2-zshrc/
-env: fresh-v2
+description: 'init rewrites an edited station block into the one block, keeping the owner''s lines'
+fixture: ./__fixtures__/edited-zshrc/
+env: fresh
 runs:
-    - command: 'init > /dev/null'
+    - command: 'init --name macbook-pro > /dev/null'
       exit: 0
     - command: 'init > /dev/null; /usr/bin/grep -c "^# >>> station >>>$" .zshrc; /bin/cat .zshrc'
       exit: 0

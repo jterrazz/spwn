@@ -1,4 +1,4 @@
-description: 'init moves a v2 settings.json and engine job once; a second run says nothing of it'
+description: 'init moves a v2 settings.json once; a second run says nothing of it'
 env: fresh-v2
 runs:
     - command: 'init'

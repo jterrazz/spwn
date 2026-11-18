@@ -60,7 +60,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		awakecalls.All(m.awakeDeps()),
 		backgroundcalls.All(m.backgroundDeps()),
 		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind, Name: m.profile.Ref.Name}),
-		enginecalls.All(enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m, machines: m.machines(false)}, Kind: kind}),
+		enginecalls.All(enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m}, Kind: kind}),
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
 		machinefilecalls.All(m.machinefileDeps(thisMac)),
 		machinescalls.All(machinescalls.Deps{Machines: machineCalls{Machinist: m.machines(env.Interactive), m: m}, Images: createImages{imageBuilder{m.images()}}, Kind: kind, OS: m.profile.System.OS, Laptop: m.profile.Caps.Battery, Holdings: holdings{m}, Now: m.sys.Clock.Now}),

@@ -620,7 +620,6 @@ func legacyEncodings() []string {
 		"apps/engine/ports/adapter/jsonfile ReservationsSchema",
 		"apps/engine/ports/contract RetiredGroupPorts",
 		"apps/engine/setup/contract RetiredGroupName",
-		"apps/engine/surface/cli/kit RetiredEngineCommand",
 		"apps/engine/surface/cli/settings containerShortcuts",
 	}
 }

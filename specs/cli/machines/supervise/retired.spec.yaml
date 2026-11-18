@@ -1,9 +1,0 @@
-description: 'the retired supervisor ends at once, exit 0, and touches nothing'
-fixture: ../../../__fixtures__/vms/
-runs:
-    - command: 'machines supervise linux-1'
-      exit: 0
-      stderr: |
-          supervise is retired: the engine supervises VMs (station engine start)
-      files:
-          .calls: absent
