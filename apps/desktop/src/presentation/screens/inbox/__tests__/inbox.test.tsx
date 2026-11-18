@@ -45,7 +45,7 @@ describe('Inbox', () => {
         // Given - the Inbox over mini-offline
         const result = await component.render(inboxOver('mini-offline'), async (visitor) => {
             // When - its overview has been read
-            await visitor.see(heading('Everything is fine.'));
+            await visitor.see(heading('Elsewhere, 1 Mac not seen.'));
             await visitor.see(within(waiting, content('1 mise update waiting')));
         });
 

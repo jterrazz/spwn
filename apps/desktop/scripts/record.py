@@ -187,6 +187,7 @@ def asks(listed):
     targets = [onMac(mac) for mac in macs] + [at(vm["Name"]) for _, vm in vms]
     return list({keyOf(request): request for request in [
         {"watch": "overview.read", "in": {}},
+        {"watch": "overview.read", "in": {"Elsewhere": True}},
         {"call": "engine.read", "in": {}},
         {"call": "ports.list", "in": {"AllMachines": True}},
         *[{"call": "ports.list", "in": {"Of": name}} for name in [*macsOf(listed), *vmsOf(listed)]],
