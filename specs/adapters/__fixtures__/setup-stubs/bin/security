@@ -1,22 +1,57 @@
 #!/bin/sh
 # The keychain as the setup specs need it: every call is recorded in $HOME/.calls,
-# its stdin too (the secret travels there, never in argv); a file $HOME/.security-fails-once
-# makes the first call fail and every later one succeed; delete-generic-password exits
-# as $HOME/.security-delete says (default 44: the account is absent).
+# its stdin too (the secret travels there, never in argv). An entry is an empty file
+# $HOME/.keychain/<service>/<account>: its name is the state, its value is never kept.
+# A file $HOME/.security-fails-once makes the first add fail and every later one succeed;
+# a file $HOME/.security-delete makes delete-generic-password exit as it says.
 printf 'security %s\n' "$*" >> "$HOME/.calls"
-case "$*" in
-    -i) /bin/cat >> "$HOME/.calls" ;;
-    delete-generic-password*)
-        if [ -f "$HOME/.security-delete" ]; then exit "$(/bin/cat "$HOME/.security-delete")"; fi
-        exit 44
-        ;;
-    *)
-        echo "stub security: unexpected invocation: $*" >&2
-        exit 97
-        ;;
-esac
-if [ -f "$HOME/.security-fails-once" ] && [ ! -f "$HOME/.security-failed" ]; then
-    : > "$HOME/.security-failed"
-    echo "security: keychain locked" >&2
-    exit 36
+
+entry_of() {
+    rest="${1#* -s }"
+    service="${rest%% *}"
+    rest="${1#* -a }"
+    case "$rest" in
+        \"*) rest="${rest#\"}"; account="${rest%%\"*}" ;;
+        *) account="${rest%% *}" ;;
+    esac
+    entry="$HOME/.keychain/$service/$account"
+}
+
+apply() {
+    case "$1" in
+        add-generic-password*)
+            if [ -f "$HOME/.security-fails-once" ] && [ ! -f "$HOME/.security-failed" ]; then
+                : > "$HOME/.security-failed"
+                echo "security: keychain locked" >&2
+                exit 36
+            fi
+            entry_of "$1"
+            /bin/mkdir -p "$HOME/.keychain/$service"
+            : > "$entry"
+            ;;
+        find-generic-password*)
+            entry_of "$1"
+            [ -f "$entry" ] || exit 44
+            ;;
+        delete-generic-password*)
+            if [ -f "$HOME/.security-delete" ]; then exit "$(/bin/cat "$HOME/.security-delete")"; fi
+            entry_of "$1"
+            [ -f "$entry" ] || exit 44
+            /bin/rm -f "$entry"
+            ;;
+        *)
+            echo "stub security: unexpected invocation: $1" >&2
+            exit 97
+            ;;
+    esac
+}
+
+if [ "$*" = "-i" ]; then
+    input="$(/bin/cat)"
+    printf '%s\n' "$input" >> "$HOME/.calls"
+    printf '%s\n' "$input" | while IFS= read -r line; do
+        if [ -n "$line" ]; then apply "$line"; fi
+    done
+    exit $?
 fi
+apply "$*"
