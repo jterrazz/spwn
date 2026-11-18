@@ -24,7 +24,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	// Start and has no segment and no footer.
 	p, _ := vmHead(m, h, vm)
 	label := model.Label(*m.All, h)
-	p.Header = &page.Header{Back: "All machines", Glyph: page.Glyph{Kind: "workspace", Signal: page.SignalQuiet}, Buttons: []string{ActionMenu}}
+	p.Header = &page.Header{Back: Back, Title: vm.Name, Glyph: page.Glyph{Kind: "workspace", Signal: page.SignalQuiet}, Buttons: []string{ActionMenu}}
 	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: workspaceFacts(m, h, vm, label)}}
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage}
 	shared, grants := len(workspacePorts(m, vm).Shares), grantedOn(m, vm.Name)
@@ -80,9 +80,9 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 // a narrow line its uptime goes first, then its Mac, then its life: what
 // it runs stays.
 func workspaceFacts(m Machine, h model.MacView, vm model.VM, label string) []page.Value {
-	out := []page.Value{dropFirst(page.Text(lifeWord(vm)), 1), dropFirst(page.Linked(page.Text("on "+label), machinePage(h.Name)), 2)}
+	out := append(vmStanding(vm), dropFirst(page.Text(lifeWord(vm)), 1), dropFirst(page.Linked(page.Text("on "+label), machinePage(h.Name)), 2))
 	if vm.State != model.Running {
-		return append(out, page.Text("stopped"))
+		return out
 	}
 	if !vm.BootAt.IsZero() && m.Now.After(vm.BootAt) {
 		out = append(out, dropFirst(page.Text("up "+days(m.Now.Sub(vm.BootAt))), 3))

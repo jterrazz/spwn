@@ -2481,6 +2481,7 @@ export type PageHeader = {
     buttons?: string[];
     glyph?: PageGlyph;
     stale?: PageValue;
+    title?: string;
 };
 
 export type PageHint = {

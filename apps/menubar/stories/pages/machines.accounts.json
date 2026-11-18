@@ -839,7 +839,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "Accounts",
     "glyph": {
       "kind": "symbol:key"
     }

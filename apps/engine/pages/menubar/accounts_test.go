@@ -66,8 +66,8 @@ func TestEachMachineTheGrantSheetOffersHasItsSheetOnTheAccountsPage(t *testing.T
 func TestAWorkspacesGrantsAreItsAccountsSegment(t *testing.T) {
 	s := SignIns{Machines: []MachineSignIns{{Name: "linux-3", Mac: miniMac, VM: true, Rows: []accounts.ProgramRow{grantedRow(t, catalog.ProviderGitHub, "pw-1")}}}}
 	p := macPageOf(t, "linux-3", func(m *Machine) { m.SignIns, m.Summary = &s, nil })
-	if p.Header == nil || p.Header.Back != "All machines" || len(p.Segments) != 4 {
-		t.Fatalf("header %+v, segments %+v: want the way back to All machines and the four segments", p.Header, p.Segments)
+	if p.Header == nil || p.Header.Back != "Back" || len(p.Segments) != 4 {
+		t.Fatalf("header %+v, segments %+v: want the way Back and the four segments", p.Header, p.Segments)
 	}
 	for _, sec := range p.Sections {
 		switch {

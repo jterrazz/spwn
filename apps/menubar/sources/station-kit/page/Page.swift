@@ -1,7 +1,7 @@
 import Foundation
 
 public let pageSchema = "station.page/v1"
-public let pageRevision = 4
+public let pageRevision = 5
 
 public struct Page: Codable, Equatable, Sendable {
     public var schema: String?
@@ -52,6 +52,7 @@ public struct Badge: Codable, Equatable, Sendable {
 
 public struct Header: Codable, Equatable, Sendable {
     public var back: String?
+    public var title: String?
     public var glyph: Glyph?
     public var buttons: [String]?
     public var stale: Value?

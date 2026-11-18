@@ -15,6 +15,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "online",
+          "signal": "well"
+        },
+        {
+          "kind": "text",
           "text": "MacBook Pro",
           "pri": 1
         },
@@ -5614,7 +5619,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "This Mac",
     "glyph": {
       "kind": "laptop"
     },

@@ -16,6 +16,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "down",
+          "signal": "failing"
+        },
+        {
+          "kind": "text",
           "text": "server"
         },
         {
@@ -26,8 +31,7 @@
         },
         {
           "kind": "text",
-          "text": "down since 10:26",
-          "signal": "failing"
+          "text": "since 10:26"
         },
         {
           "kind": "text",
@@ -673,7 +677,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "infra",
     "glyph": {
       "kind": "server"
     },

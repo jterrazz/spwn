@@ -390,7 +390,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "Awake",
     "glyph": {
       "kind": "symbol:sun.max",
       "signal": "quiet"

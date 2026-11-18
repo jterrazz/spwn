@@ -214,8 +214,8 @@ final class ClientTests: XCTestCase {
 
     func testAnEngineOlderThanThePageLanguageOfTheAppIsTold() async throws {
         let answers = [
-            "mb-hello-now": (#"{"version":"v4.1.0","page":\#(pageRevision),"executable":"/u/bin/station"}"#, false),
-            "mb-hello-old": (#"{"version":"v3.9.0","page":\#(pageRevision - 1)}"#, true),
+            "mb-hello-now": (#"{"version":"v4.1.0","page":5,"executable":"/u/bin/station"}"#, false),
+            "mb-hello-old": (#"{"version":"v3.9.0","page":4}"#, true),
             "mb-hello-v3": (#"{"version":"v3.0.0"}"#, true),
         ]
         for (name, (out, older)) in answers {

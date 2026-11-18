@@ -15,6 +15,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "online",
+          "signal": "well"
+        },
+        {
+          "kind": "text",
           "text": "up 21 days",
           "pri": 4
         }
@@ -5717,7 +5722,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "mac-mini",
     "glyph": {
       "kind": "desktop"
     },

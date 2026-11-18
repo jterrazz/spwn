@@ -1354,7 +1354,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "Ports",
     "glyph": {
       "kind": "symbol:network"
     },

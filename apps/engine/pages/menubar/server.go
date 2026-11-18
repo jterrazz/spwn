@@ -68,7 +68,7 @@ func serverPage(m Machine, h model.MacView, vm model.VM) page.Page {
 	// answer.
 	s := serverView{m: m, h: h, vm: vm, on: model.Label(*m.All, h), state: stateOf(vm)}
 	p := page.Page{ID: MachineID, Command: "menubar", Context: page.Context{Machine: vm.Name, Kind: string(machine.Server), On: s.on}}
-	p.Header = &page.Header{Back: "All machines", Glyph: page.Glyph{Kind: string(machine.Server)}, Buttons: []string{ActionMenu}}
+	p.Header = &page.Header{Back: Back, Title: vm.Name, Glyph: page.Glyph{Kind: string(machine.Server)}, Buttons: []string{ActionMenu}}
 	p.Segments = []page.Segment{{ID: SegmentOverview, Label: "Overview", Picked: true}, {ID: SegmentActivity, Label: "Activity", Key: "cmd+i"}}
 	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: s.facts()}, s.health()}
 	if card, ok := s.latency(); ok {
@@ -99,19 +99,13 @@ func (s serverView) facts() []page.Value {
 	}
 	on := part("on "+s.on, 1)
 	on.Nav = machinePage(s.h.Name)
-	out := []page.Value{page.Text(string(machine.Server)), on}
+	out := append(vmStanding(s.vm), page.Text(string(machine.Server)), on)
 	switch s.state {
 	case serverDown:
-		down := page.Text("down")
 		if since := s.vm.CheckStatus.Since; !since.IsZero() {
-			down = page.Text("down since " + s.clock(since))
+			out = append(out, page.Text("since "+s.clock(since)))
 		}
-		down.Signal = page.SignalFailing
-		out = append(out, down)
-	case serverRestarting:
-		out = append(out, page.Text("restarting"))
-	case serverStopped:
-		out = append(out, page.Text("stopped"))
+	case serverRestarting, serverStopped:
 	default:
 		if up := s.up(); up > 0 {
 			out = append(out, page.Text("up "+days(up)))

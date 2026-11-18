@@ -16,6 +16,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "healthy",
+          "signal": "well"
+        },
+        {
+          "kind": "text",
           "text": "server"
         },
         {
@@ -2008,7 +2013,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "infra",
     "glyph": {
       "kind": "server"
     },

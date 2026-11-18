@@ -312,6 +312,7 @@ func (f Scene) mac(name string) (model.MacView, bool) {
 }
 
 func (f Scene) draw() []Fixture {
+	f.All = model.Judged(f.All)
 	thisMac := page.Context{Machine: proName, Kind: "computer"}
 	r := f.reading()
 	out := []Fixture{

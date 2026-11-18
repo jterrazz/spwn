@@ -4,7 +4,7 @@ import "strings"
 
 const Schema = "station.page/v1"
 
-const Revision = 4
+const Revision = 5
 
 type Page struct {
 	ID       ID        `json:"id,omitempty"`
@@ -25,6 +25,7 @@ type Page struct {
 
 type Header struct {
 	Back    string   `json:"back,omitempty"`
+	Title   string   `json:"title,omitempty"`
 	Glyph   Glyph    `json:"glyph,omitzero"`
 	Buttons []string `json:"buttons,omitempty"`
 	Stale   *Value   `json:"stale,omitempty"`

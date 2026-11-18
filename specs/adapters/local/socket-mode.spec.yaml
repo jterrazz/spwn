@@ -1,4 +1,4 @@
-description: 'the engine answers v2 frames, its hello naming page revision 4, on one 0600 unix socket, never TCP'
+description: 'the engine answers v2 frames, its hello naming page revision 5, on one 0600 unix socket, never TCP'
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/socket-client/
@@ -9,6 +9,6 @@ runs:
       exit: 0
       stdout: |
           srw-------
-          ["1",true,true,4,true,null,false]
+          ["1",true,true,5,true,null,false]
           ["2",false,false,null,false,"call.unknown",true]
           ["3",false,false,null,false,"call.bad-frame",true]

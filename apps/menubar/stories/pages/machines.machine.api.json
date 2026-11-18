@@ -16,6 +16,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "stopped",
+          "signal": "quiet"
+        },
+        {
+          "kind": "text",
           "text": "persistent",
           "pri": 1
         },
@@ -24,10 +29,6 @@
           "text": "on This Mac",
           "pri": 2,
           "nav": "menubar.machine:macbook-pro"
-        },
-        {
-          "kind": "text",
-          "text": "stopped"
         }
       ]
     },
@@ -173,7 +174,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "api",
     "glyph": {
       "kind": "workspace",
       "signal": "quiet"

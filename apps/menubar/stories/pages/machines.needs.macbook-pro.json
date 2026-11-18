@@ -257,7 +257,8 @@
     }
   ],
   "header": {
-    "back": "This Mac",
+    "back": "Back",
+    "title": "Needs you",
     "glyph": {
       "kind": "symbol:exclamationmark.circle.fill",
       "signal": "waits"

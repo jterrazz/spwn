@@ -16,6 +16,11 @@
       "caption": [
         {
           "kind": "text",
+          "text": "restarting",
+          "signal": "active"
+        },
+        {
+          "kind": "text",
           "text": "server"
         },
         {
@@ -23,10 +28,6 @@
           "text": "on mac-mini",
           "pri": 1,
           "nav": "menubar.machine:mac-mini"
-        },
-        {
-          "kind": "text",
-          "text": "restarting"
         },
         {
           "kind": "text",
@@ -2054,7 +2055,8 @@
     }
   ],
   "header": {
-    "back": "All machines",
+    "back": "Back",
+    "title": "infra",
     "glyph": {
       "kind": "server"
     },
