@@ -66,13 +66,19 @@ uses the default `GITHUB_TOKEN`.
 Follow semver: `vMAJOR.MINOR.PATCH`. One tag versions both products, so a
 number never goes below the newest of either: spwn's `v1.0.0-rc1` and
 station's `v3.1.0` (tagged in its former repository, `jterrazz/studio-station`)
-put the first unified release at `v4.0.0-alpha.1`.
+would put it above `v3.1.0`, but there are no real users and no backward
+compatibility to keep: the one version line restarts at `v0.1.0-alpha.1`
+for everything, and the two installed station hosts are reinstalled by hand.
+A host still on `v1.0.0-rc1` is never offered it: `spwn upgrade` compares
+`1.0.0-rc1` with `0.1.0-alpha.1` by major first
+(`packages/upgrade/version.go:84`) and reports no update.
 
 - **Patch** (`v0.11.0 → v0.11.1`): bug fixes, no API changes.
 - **Minor** (`v0.11.0 → v0.12.0`): new features, backward compatible.
 - **Major** (`v0.x.x → v1.0.0`): breaking changes.
 - **Prerelease**: suffix with `-beta.N` or `-rc.N`. Marked automatically
-  by GoReleaser (`prerelease: auto`), not picked up by `--channel stable`.
+  by the tag only: GoReleaser publishes it as a normal release marked latest
+  (`prerelease: false`, `make_latest: true`), so `releases/latest` returns it.
 
 ### 2. Bump version files (optional but recommended)
 
@@ -145,7 +151,18 @@ spwn upgrade                   # should download, verify, swap
 spwn --version                 # should print v1.2.3
 ```
 
-### 5. Announce
+### 5. Retitle the legacy releases (first unified release only)
+
+The old spwn releases stay, with their tags: only their titles change, so
+the release list reads as before and after the single repository.
+
+```bash
+gh release edit v1.0.0-rc1 --title "Legacy · spwn 1.0.0-rc1, before the single repository"
+```
+
+Repeat for each `v1.0.0-beta*` release.
+
+### 6. Announce
 
 Nothing to do here - users running the CLI or web UI will be notified
 automatically via the background check / Tauri updater.
