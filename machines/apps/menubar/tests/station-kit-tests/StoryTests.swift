@@ -152,7 +152,7 @@ final class StoryTests: XCTestCase {
         XCTAssertEqual(failures, [])
     }
 
-    // invariant: what a status item's golden cannot show, its count, is
+    // invariant: what a status item's golden cannot show, its words, is
     // what VoiceOver says of it.
     func testEveryStatusItemStorySaysItsStateInItsLabel() throws {
         let labels = try stories().filter { $0.ui.statusItem == true }.reduce(into: [String: String]()) {
@@ -163,6 +163,8 @@ final class StoryTests: XCTestCase {
             "menubar.restarting": "infra restarting, 2 of 4 checks",
             "menubar.fine": "all machines are fine",
             "menubar.open": "all machines are fine",
+            "menubar.stopped": "station: engine stopped",
+            "menubar.connecting": "station: connecting",
         ])
     }
 

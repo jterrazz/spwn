@@ -1,0 +1,11 @@
+{
+    "group": "shell",
+    "id": "menubar.connecting",
+    "note": "The status item while a connection is made: the first dot solid, the two others at 32 %.",
+    "pages": ["pages/machines.fine.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "connection": "connecting",
+        "statusItem": true
+    }
+}

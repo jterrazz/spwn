@@ -32,12 +32,8 @@ extension Token {
     }
 
     public enum Busy {
-        public static let size: CGFloat = 9
-        public static let stroke: CGFloat = 1.4
-        public static let open = 0.12
-        public static let start = Angle.degrees(-90 - 360 * open / 2)
         public static let fps = 10.0
-        public static let period = 0.8
+        public static let period = 1.2
         public static let frames = Int((fps * period).rounded())
 
         public static func turn(frame: Int) -> Double { Double(frame % frames) / Double(frames) }

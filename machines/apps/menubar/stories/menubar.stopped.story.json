@@ -1,0 +1,11 @@
+{
+    "group": "shell",
+    "id": "menubar.stopped",
+    "note": "The status item with the engine stopped: the dots and the slash at 45 %.",
+    "pages": ["pages/machines.fine.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "connection": "stopped",
+        "statusItem": true
+    }
+}

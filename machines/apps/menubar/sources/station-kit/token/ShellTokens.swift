@@ -2,7 +2,6 @@ import SwiftUI
 
 extension Token {
     public enum Item {
-        public static let countGap: CGFloat = 5
         public static let pressedRadius: CGFloat = 5
         public static let pressedPad = CGSize(width: 7, height: 3)
         public static let strip: [String] = ["wifi", "battery.75percent", "switch.2"]

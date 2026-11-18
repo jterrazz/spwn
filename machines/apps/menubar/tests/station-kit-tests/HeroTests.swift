@@ -61,7 +61,6 @@ final class HeroTests: XCTestCase {
 
         var ticked = try XCTUnwrap(try stories().first { $0.id == "home.needs" }?.pages.first)
         ticked.strip?.cpu?.n = 999
-        ticked.badge?.needs = 2
         let heard = [needs, ticked.section("hero"), needs, down, down, restarting, fine].map(Hero.announcement)
         var said: [String] = []
         var last: String?

@@ -109,16 +109,16 @@ enum Snapshot {
     // the CPU until Metal is ready, or when it is busy, so its dark goldens
     // would match only on a quiet machine.
     @MainActor
-    static func render(_ view: AnyView, scheme: ColorScheme, desk: Bool = true) -> (png: Data, bitmap: Bitmap)? {
-        render(view, scheme: scheme, over: desk ? AnyView(Desk(scheme: scheme)) : nil)
+    static func render(_ view: AnyView, scheme: ColorScheme, desk: Bool = true, scale: CGFloat = 2) -> (png: Data, bitmap: Bitmap)? {
+        render(view, scheme: scheme, over: desk ? AnyView(Desk(scheme: scheme)) : nil, scale: scale)
     }
 
     @MainActor
-    static func render(_ view: AnyView, scheme: ColorScheme, over desk: AnyView?) -> (png: Data, bitmap: Bitmap)? {
+    static func render(_ view: AnyView, scheme: ColorScheme, over desk: AnyView?, scale: CGFloat = 2) -> (png: Data, bitmap: Bitmap)? {
         let themed = view.stationTheme(scheme).environment(\.stationNow, now).environment(\.stationStill, true)
         let content = desk.map { AnyView(themed.fixedSize().padding(24).background($0)) } ?? AnyView(themed)
         let renderer = ImageRenderer(content: content)
-        renderer.scale = 2
+        renderer.scale = scale
         guard let image = renderer.cgImage, let bitmap = Bitmap(image), let flat = bitmap.image else { return nil }
         let rep = NSBitmapImageRep(cgImage: flat)
         guard let png = rep.representation(using: .png, properties: [:]) else { return nil }
@@ -149,9 +149,9 @@ enum Golden {
     // invariant: a view is proved by its golden PNG, drawn offscreen: nil
     // when it matches within 0.1 % of its pixels, else what differs.
     @MainActor
-    static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true, tolerance: Int = 16) throws -> String? {
+    static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true, tolerance: Int = 16, scale: CGFloat = 2) throws -> String? {
         let file = "\(name).\(scheme == .dark ? "dark" : "light")"
-        return try match(Snapshot.render(view, scheme: scheme, desk: desk), file: file, in: Tree.goldens, tolerance: tolerance)
+        return try match(Snapshot.render(view, scheme: scheme, desk: desk, scale: scale), file: file, in: Tree.goldens, tolerance: tolerance)
     }
 
     static func match(_ rendered: (png: Data, bitmap: Bitmap)?, file: String, in folder: URL, tolerance: Int = 16) throws -> String? {

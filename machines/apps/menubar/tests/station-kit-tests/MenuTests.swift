@@ -34,7 +34,7 @@ final class MenuTests: XCTestCase {
             return (form.fields ?? []).first { SheetAnchor.field($0.key ?? "") == open.id }.map { MenuModel.popup($0, answers) }
         }
         guard let key = open.row else {
-            return page.id == PageID.home ? MenuModel.station(page, loginItemOn: story.ui.loginItem ?? false, sparklineOn: false) : MenuModel.page(page)
+            return page.id == PageID.home ? MenuModel.station(page, loginItemOn: story.ui.loginItem ?? false) : MenuModel.page(page)
         }
         let actions = page.actions ?? []
         let rows = (page.sections ?? []).flatMap { s in (s.items ?? []).flatMap { [$0.row].compactMap { $0 } + ($0.group?.items ?? []).compactMap(\.row) } }
@@ -59,7 +59,7 @@ final class MenuTests: XCTestCase {
     // offers, in groups, red what destroys, each key as the system says it.
     func testEachMenuSaysWhatSpecA5Lists() throws {
         let read = Dictionary(uniqueKeysWithValues: try menuStories().compactMap { s in s.menu.map { (s.id, Self.read($0)) } })
-        XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "✓ Open at login", "CPU in the menu bar", "-", "Quit station ⌘Q"])
+        XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "✓ Open at login", "-", "Quit station ⌘Q"])
         XCTAssertEqual(read["menu.context.workspace"], ["linux-1 on This Mac", "Open ↩", "Open in Terminal ⌘↩", "Open Vite", "-",
                                                         "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…]", "Grant a password…", "-",
                                                         "Stop…", "-", "Delete… (red)"])
@@ -107,7 +107,7 @@ final class MenuTests: XCTestCase {
             pick(try XCTUnwrap(entries.first { $0.title == title }, title), nav: "menubar.machine:linux-1")
         }
         let home = try XCTUnwrap(try Stories.load(root: Tree.stories).first { $0.id == "menu.station" }?.state.shown)
-        for item in MenuModel.station(home, loginItemOn: true, sparklineOn: false).items where item.id == MenuModel.login || item.id == MenuModel.quit {
+        for item in MenuModel.station(home, loginItemOn: true).items where item.id == MenuModel.login || item.id == MenuModel.quit {
             pick(item, nav: nil)
         }
         XCTAssertEqual(did, ["goes to menubar.machine:linux-1", "opens https://macbook-pro.tail77a797.ts.net:40001", "copies ssh linux-1", "asks stop@linux-1", "login false", "quits"])

@@ -82,8 +82,6 @@ struct ModelPanel: View {
             toggleMenu: { model.state.menu.toggle() },
             loginItem: { on in model.setLoginItem(on) },
             loginItemOn: model.loginItemOn,
-            sparkline: { on in model.setSparkline(on) },
-            sparklineOn: model.sparkline,
             quit: { NSApplication.shared.terminate(nil) },
             openMachine: { name in model.openMachine(name) },
             copy: { text in

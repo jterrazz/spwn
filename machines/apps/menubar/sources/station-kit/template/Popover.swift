@@ -110,8 +110,6 @@ public struct PopoverHandlers {
     public var toggleMenu: () -> Void
     public var loginItem: (Bool) -> Void
     public var loginItemOn: Bool
-    public var sparkline: (Bool) -> Void
-    public var sparklineOn: Bool
     public var quit: () -> Void
     public var copy: (String) -> Void
     // value: navigation: open a machine's page, a page by its
@@ -135,7 +133,7 @@ public struct PopoverHandlers {
     public init(run: @escaping (Action, [String: String]) -> Void = { _, _ in }, confirm: @escaping (Action?) -> Void = { _ in },
                 answer: @escaping (String, String, String) -> Void = { _, _, _ in }, open: @escaping (URL) -> Void = { _ in },
                 toggleQR: @escaping (String) -> Void = { _ in }, toggleMenu: @escaping () -> Void = {}, loginItem: @escaping (Bool) -> Void = { _ in }, loginItemOn: Bool = false,
-                sparkline: @escaping (Bool) -> Void = { _ in }, sparklineOn: Bool = false, quit: @escaping () -> Void = {},
+                quit: @escaping () -> Void = {},
                 openMachine: @escaping (String) -> Void = { _ in },
                 copy: @escaping (String) -> Void = { _ in }, window: @escaping (String) -> Void = { _ in },
                 push: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, close: @escaping () -> Void = {}) {
@@ -147,8 +145,6 @@ public struct PopoverHandlers {
         self.toggleMenu = toggleMenu
         self.loginItem = loginItem
         self.loginItemOn = loginItemOn
-        self.sparkline = sparkline
-        self.sparklineOn = sparklineOn
         self.quit = quit
         self.openMachine = openMachine
         self.copy = copy
@@ -340,13 +336,10 @@ public struct Popover: View {
     }
 
     // invariant: the footer menu is drawn inline, never an AppKit menu: the
-    // switches for launch at login and the icon's CPU line, and quit.
+    // switch for launch at login, and quit.
     var menu: some View {
         HStack(spacing: Token.Space.gap) {
             Toggle("Open at login", isOn: Binding(get: { handlers.loginItemOn }, set: { handlers.loginItem($0) }))
-                .toggleStyle(.checkbox)
-                .font(.system(size: Token.Space.small))
-            Toggle("CPU in the menu bar", isOn: Binding(get: { handlers.sparklineOn }, set: { handlers.sparkline($0) }))
                 .toggleStyle(.checkbox)
                 .font(.system(size: Token.Space.small))
             Spacer()

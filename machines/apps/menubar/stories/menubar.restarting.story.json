@@ -1,7 +1,8 @@
 {
+    "freeze": 0.4,
     "group": "shell",
     "id": "menubar.restarting",
-    "note": "The status item while infra restarts: the busy mark turns in place of the red.",
+    "note": "The status item while infra restarts: the dots lighting in a wave, caught at 0.4 of its turn.",
     "pages": ["pages/machines.restarting.menubar.json"],
     "schema": "station.story/v1",
     "ui": {

@@ -21,5 +21,5 @@ The menu bar's views were proved by per-page snapshot files, one golden each, wr
 
 - A change to a view is judged by the stories that draw it; a new state of the design is a section of STORIES.md first, then its story file, its world's pages and its goldens ([Test](../guides/test.md#the-menu-bars-stories)).
 - The per-page snapshot files, the vision rounds' tests and the generic page renderer's goldens retired with the states the stories took over (C1).
-- What no golden can show is proved apart: a status item's count by its accessibility label, a movement by its frozen frame and the Catalog's replay at that frame, the real menu bar's behaviour in the macOS VM ([ADR-021](021-the-menu-bar-keeps-its-system-window.md)).
+- What no golden can show is proved apart: a status item's words by its accessibility label, a movement by its frozen frame and the Catalog's replay at that frame, the real menu bar's behaviour in the macOS VM ([ADR-021](021-the-menu-bar-keeps-its-system-window.md)).
 - No check and no agent opens the Catalog's window: `make catalog-open` is the owner's gesture; checks use `--export`.

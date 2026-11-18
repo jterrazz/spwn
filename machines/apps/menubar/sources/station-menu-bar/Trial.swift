@@ -52,17 +52,14 @@ final class Trial: ObservableObject {
     func draw() {
         frame += 1
         let t = Double(frame) / max(Self.fps, 1)
-        let leg = t.truncatingRemainder(dividingBy: 2 * Trial.leg) / Trial.leg
-        let progress = Token.Motion.smoothCurve.value(at: leg <= 1 ? leg : 2 - leg)
         let turn = t.truncatingRemainder(dividingBy: Trial.turn) / Trial.turn
         let dark = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        label = TrialItemView.image(progress: progress, turn: turn, scheme: dark ? .dark : .light)
+        label = TrialItemView.image(turn: turn, scheme: dark ? .dark : .light)
     }
 
-    // value: the badge grows and shrinks on the smooth curve's 340 ms, and
-    // the busy mark turns once per 800 ms, without a pause (SPEC M16, M29).
-    static let leg = 0.34
-    static let turn = 0.8
+    // value: the mark's wave crosses its dots once per 1.2 s, without a
+    // pause (SPEC M16, M29).
+    static let turn = Token.Busy.period
 
     func measure() {
         let cpu = Self.cpuSeconds(), now = Date()

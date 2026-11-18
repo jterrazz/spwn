@@ -446,7 +446,7 @@ struct HomeHeaderBar: View {
     @ViewBuilder
     var station: some View {
         let h = Token.HomeHeader.self
-        let model = MenuModel.station(page, loginItemOn: handlers.loginItemOn, sparklineOn: handlers.sparklineOn)
+        let model = MenuModel.station(page, loginItemOn: handlers.loginItemOn)
         if still || model.isEmpty {
             RoundButton(h.menu, size: .topBar, action: handlers.toggleMenu)
         } else {

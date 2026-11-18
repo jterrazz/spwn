@@ -10,11 +10,7 @@ final class Model: ObservableObject {
     }
     @Published private(set) var turn = 0.0
     @Published var loginItemOn = LoginItem.on
-    @Published var sparkline = UserDefaults.standard.bool(forKey: Model.sparklineKey)
 
-    // value: the menu bar's own display option, in its macOS user defaults,
-    // never in station's preferences.
-    static let sparklineKey = "cpuSparkline"
     // value: the machines last opened, Find's Recent (SPEC B5.21): the menu
     // bar's own, in its macOS user defaults.
     static let recentKey = "recentMachines"
@@ -73,7 +69,7 @@ final class Model: ObservableObject {
     }
 
     var icon: MenuBarIcon {
-        var icon = MenuBarIcon.of(connection: state.connection, page: state.page, sparkline: sparkline, live: live)
+        var icon = MenuBarIcon.of(connection: state.connection, page: state.page)
         icon.busy = state.running != nil
         return icon
     }
@@ -144,11 +140,6 @@ final class Model: ObservableObject {
         finding = Task.detached { await sub.run() }
     }
 
-    func setSparkline(_ on: Bool) {
-        UserDefaults.standard.set(on, forKey: Self.sparklineKey)
-        sparkline = on
-    }
-
     func receive(_ event: StreamEvent) {
         switch event {
         case .connected:
@@ -164,7 +155,6 @@ final class Model: ObservableObject {
             break
         case .sample(let sample):
             live.take(sample)
-            if sparkline { objectWillChange.send() }
         case .notice(_, let icon, let text):
             state.say(Status(text, failed: false), on: navigation.watched)
             clearLater()

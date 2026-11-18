@@ -12,7 +12,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 
 ## Index
 
-- **Menu bar and panel shell** (4): `menubar.down`, `menubar.restarting`, `menubar.fine`, `menubar.open`
+- **Menu bar and panel shell** (6): `menubar.down`, `menubar.restarting`, `menubar.fine`, `menubar.open`, `menubar.stopped`, `menubar.connecting`
 - **All machines (home)** (13): `home.needs`, `home.hover`, `home.keyboard`, `home.down`, `home.restarting`, `home.recovered`, `home.exposed`, `home.down-and-exposed`, `home.loading`, `home.loaded`, `home.fine`, `home.empty`, `home.awake-off`
 - **Needs you (fleet list)** (5): `needs.all`, `needs.empty`, `needs.updating`, `needs.updated`, `needs.catalog-refused`
 - **A Mac** (21): `mac.this.overview`, `mac.this.upkeep`, `mac.this.activity`, `mac.this.ports`, `mac.this.accounts`, `mac.this.exposed`, `mac.mini.overview`, `mac.mini.activity`, `mac.mini.activity.6m`, `mac.mini.activity.24h`, `mac.mini.activity.scrub`, `mac.mini.ports`, `mac.mini.ports.https`, `mac.mini.accounts`, `mac.mini.down`, `mac.mini.loading`, `mac.mini.stale`, `mac.mini.creating`, `mac.mini.created`, `mac.air.asleep`, `mac.this.empty`
@@ -36,7 +36,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![menubar.down](stories/menubar.down.png) ![menubar.down light](stories/menubar.down.light.png)
 
 - **Capture**: [dark](stories/menubar.down.png), [light](stories/menubar.down.light.png)
-- **Shows**: A server down: the status item glyph is slashed beside its count, in the bar's one ink, never red; aria-label "station, infra down".
+- **Shows**: A server down or a port exposed: the status item's three dots with one diagonal slash across them, cut out of the dots and stroked on top, in the bar's one ink, never red; aria-label "station, infra down".
 - **Data**: a server in state down
 - **Enters**: #hud: CSS hud 2600 ms linear
 
@@ -45,7 +45,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![menubar.restarting](stories/menubar.restarting.png)
 
 - **Capture**: [dark](stories/menubar.restarting.png)
-- **Shows**: A server boots: a turning busy mark replaces the red glyph; aria-label "infra restarting, n of 4 checks".
+- **Shows**: A server boots: the three dots light in a wave, first to last, each 0.2 s after the one before, a 1.2 s loop that runs under Reduce Motion too, in place of the slash; aria-label "infra restarting, n of 4 checks".
 - **Data**: a server in state restarting with its step index
 - **Enters**: .busy: CSS spin 800 ms linear; #hud: CSS hud 2600 ms linear
 
@@ -54,7 +54,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![menubar.fine](stories/menubar.fine.png) ![menubar.fine light](stories/menubar.fine.light.png)
 
 - **Capture**: [dark](stories/menubar.fine.png), [light](stories/menubar.fine.light.png)
-- **Shows**: Nothing needs you: the bare glyph, no badge; aria-label "all machines are fine".
+- **Shows**: Nothing is down: the three dots on their arc, plain; aria-label "all machines are fine".
 - **Data**: needs() empty
 - **Enters**: #hud: CSS hud 2600 ms linear
 
@@ -63,10 +63,20 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![menubar.open](stories/menubar.open.png)
 
 - **Capture**: [dark](stories/menubar.open.png)
-- **Shows**: The status item while its panel is open: the item is highlighted (pressed capsule), the coach is gone.
-- **Data**: none beyond the count
+- **Shows**: The status item while its panel is open: the plain mark on the system's highlight (pressed capsule), the coach is gone.
+- **Data**: none
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 33%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 69%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
 - **Enters**: #panel: opacity+transform 0 scale(.96) → 1 none 340 ms smooth; #sItem: CSS background-color 120 ms
+
+### `menubar.stopped`
+
+- **Shows**: The engine stopped or station not installed: the three dots and the slash at 45 % opacity, so silence is never mistaken for all good; aria-label "station: engine stopped".
+- **Data**: the engine's socket absent
+
+### `menubar.connecting`
+
+- **Shows**: A connection being made: the first dot solid, the two others at 32 % opacity; aria-label "station: connecting".
+- **Data**: the socket present, no page yet
 
 ## All machines (home)
 
@@ -1134,9 +1144,9 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 ![menu.station](stories/menu.station.png) ![menu.station light](stories/menu.station.light.png)
 
 - **Capture**: [dark](stories/menu.station.png), [light](stories/menu.station.light.png)
-- **Shows**: The station menu (the … button): New VM… ⌘N, Add a Mac…, Open station in Terminal ⌘T, ✓ Open at login, CPU in the menu bar, Quit station ⌘Q.
+- **Shows**: The station menu (the … button): New VM… ⌘N, Add a Mac…, Open station in Terminal ⌘T, ✓ Open at login, Quit station ⌘Q.
 - **Data**: roomiest Mac; settings
-- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 40%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 74%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "New VM… ⌘N"; menu item "Add a Mac…"; menu item "Open station in Terminal ⌘T"; menu item "Open at login"; menu item "CPU in the menu bar"; … 1 more
+- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 40%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 74%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "New VM… ⌘N"; menu item "Add a Mac…"; menu item "Open station in Terminal ⌘T"; menu item "Open at login"; … 1 more
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy; .round: CSS background-color 120 ms
 - **Leaves**: no recorded animation (esc)
 
@@ -1619,7 +1629,7 @@ Keys: type to filter, ↑ ↓ move, ↩ run, ⌘↩ attach a workspace, esc clos
 - **Capture**: [dark](stories/transition.menu.png)
 - **Shows**: A menu appears: scale .97 → 1 with opacity, snappy 200 ms.
 - **Data**: none
-- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 41%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 73%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "New VM… ⌘N"; menu item "Add a Mac…"; menu item "Open station in Terminal ⌘T"; menu item "Open at login"; menu item "CPU in the menu bar"; … 1 more
+- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 41%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 73%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "New VM… ⌘N"; menu item "Add a Mac…"; menu item "Open station in Terminal ⌘T"; menu item "Open at login"; … 1 more
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy; .round: CSS background-color 120 ms
 
 ### `transition.hero-morph`
@@ -1698,7 +1708,6 @@ Every transient confirmation the prototype fires, read from its code: the gestur
 | Wake (asleep Mac) | wake → (custom, or power) | Wake-on-LAN sent to macbook-air |
 | Tell me when it wakes | bell → bell | You will be told when macbook-air wakes |
 | Open at login (station menu) | check → checkmark | station opens at login |
-| CPU in the menu bar (station menu) | cpu → cpu | Shown in the menu bar (prototype) |
 | Fix everything (scenario dock only) | checkf → checkmark.circle.fill | All machines are fine (prototype) |
 
 ## Gaps: IA states the prototype does not draw

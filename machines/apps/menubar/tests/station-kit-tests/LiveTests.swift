@@ -43,13 +43,4 @@ final class LiveTests: XCTestCase {
         XCTAssertTrue(same(live, try drawn(Metrics(measures: [("CPU", Self.tickCPU, [15, 45])]))), "the tile does not draw the tick's CPU and line")
         XCTAssertFalse(same(live, try drawn(Metrics(measures: [("CPU", Self.pageCPU, nil)]))), "the tile draws the page's CPU over the tick's")
     }
-
-    // invariant: the menu bar's CPU line, when the owner shows it, is the
-    // tick's series.
-    func testTheMenuBarsCPULineIsTheTicks() throws {
-        var page = try Tree.page("menubar.home.one-mac")
-        page.strip = Self.strip(Self.pageCPU, spark: [1, 2])
-        XCTAssertEqual(MenuBarIcon.of(connection: .live, page: page, sparkline: true, live: Self.store()).spark, [15, 45])
-        XCTAssertEqual(MenuBarIcon.of(connection: .live, page: page, sparkline: true, live: LiveStore()).spark, [1, 2])
-    }
 }

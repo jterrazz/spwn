@@ -6,40 +6,39 @@ public struct MenuBarIcon: Equatable, Sendable {
         case plain, down, restarting, stopped, connecting
     }
 
+    // value: how the mark is drawn, the six states of the item: the dots
+    // plain, slashed, lighting in a wave, dimmed and slashed, the first
+    // alone solid. The sixth, the menu open, is the plain mark on the
+    // system's highlight, which the system paints.
+    public enum Face: Equatable, Sendable {
+        case plain, slashed, waving, away, connecting
+    }
+
     public var mark: Mark
-    public var count: Int
-    public var spark: [Int]?
     public var busy: Bool
     public var said: String?
 
-    public init(_ mark: Mark, count: Int = 0, spark: [Int]? = nil, busy: Bool = false, said: String? = nil) {
+    public init(_ mark: Mark, busy: Bool = false, said: String? = nil) {
         self.mark = mark
-        self.count = count
-        self.spark = spark
         self.busy = busy
         self.said = said
     }
 
     // invariant: SPEC A3: the item draws the page's badge and never judges
-    // it: the count of what needs you beside the Orbit with its badge cut
-    // out, the Orbit slashed while a server is down or a port exposed, a
-    // turning mark in place of the slash while a server restarts, and the
-    // words VoiceOver reads are the badge's own; while it turns, the
-    // machines stand a third of a turn along the ring. The engine stopped
-    // dims the slashed Orbit, so its silence is never mistaken for all good.
-    // The CPU line is the owner's option, drawn only while the engine
-    // streams.
-    public static func of(connection: Connection, page: Page?, sparkline: Bool = false, live: LiveStore? = nil) -> MenuBarIcon {
+    // it: the mark slashed while a server is down or a port exposed, its
+    // dots lighting in a wave while a server restarts or a call runs, and
+    // the words VoiceOver reads are the badge's own. The engine stopped or
+    // not installed dims the slashed mark, so its silence is never mistaken
+    // for all good; a connection being made keeps the first dot solid.
+    public static func of(connection: Connection, page: Page?) -> MenuBarIcon {
         switch connection {
         case .connecting: return MenuBarIcon(.connecting)
         case .stopped, .notInstalled: return MenuBarIcon(.stopped)
         case .live: break
         }
-        let cpu = page?.strip.flatMap { live?.points($0.cpu, else: $0.spark) ?? $0.spark }
-        let spark = sparkline ? cpu.flatMap { $0.isEmpty ? nil : $0 } : nil
-        guard let badge = page?.badge else { return MenuBarIcon(.plain, spark: spark) }
+        guard let badge = page?.badge else { return MenuBarIcon(.plain) }
         let mark: Mark = badge.down == true ? .down : badge.restarting == true ? .restarting : .plain
-        return MenuBarIcon(mark, count: max(badge.needs ?? 0, 0), spark: spark, said: badge.label)
+        return MenuBarIcon(mark, said: badge.label)
     }
 
     public var label: String {
@@ -51,35 +50,47 @@ public struct MenuBarIcon: Equatable, Sendable {
         }
     }
 
-    public var turning: Bool { busy || mark == .restarting }
-
-    public var symbol: String {
-        if mark == .stopped || mark == .down { return Token.Icon.slashed }
-        if turning { return Token.Icon.working }
-        return count > 0 ? Token.Icon.badged : Token.Icon.orbit
-    }
-}
-
-struct IconSpark: Shape {
-    let points: [Int]
-
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        guard points.count > 1 else { return p }
-        let step = rect.width / CGFloat(points.count - 1)
-        for (i, v) in points.enumerated() {
-            let share = CGFloat(min(max(v, 0), 100)) / 100
-            let pt = CGPoint(x: CGFloat(i) * step, y: rect.height - rect.height * share)
-            if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+    public var face: Face {
+        switch mark {
+        case .stopped: return .away
+        case .down: return .slashed
+        case .connecting: return .connecting
+        case .restarting: return .waving
+        case .plain: return busy ? .waving : .plain
         }
-        return p
+    }
+
+    public var turning: Bool { face == .waving }
+}
+
+// value: the spwn mark, three dots on an arc (`Token.Icon`'s box and dots).
+public enum SpwnMark {
+    // value: a dot's opacity at a turn of the loop (0 to 1): it runs from
+    // `Token.Icon.low` up to 1 and back, peaking `Token.Icon.peak` of the
+    // way through its own run, eased in and out both ways; each dot's run
+    // starts `Token.Icon.stagger` seconds after the one before.
+    public static func light(dot: Int, turn: Double) -> Double {
+        var phase = turn - Double(dot) * Token.Icon.stagger / Token.Busy.period
+        phase -= phase.rounded(.down)
+        let peak = Token.Icon.peak
+        let rise = phase < peak ? phase / peak : 1 - (phase - peak) / (1 - peak)
+        let eased = rise * rise * (3 - 2 * rise)
+        return Token.Icon.low + (1 - Token.Icon.low) * eased
+    }
+
+    public static func opacity(dot: Int, face: MenuBarIcon.Face, turn: Double) -> Double {
+        switch face {
+        case .plain, .slashed: return 1
+        case .away: return Token.Icon.dimmed
+        case .waving: return light(dot: dot, turn: turn)
+        case .connecting: return dot == 0 ? 1 : Token.Icon.resting
+        }
     }
 }
 
-// invariant: the item has no colour of its own, in any state: drawn at the
-// status bar's symbol size and weight, macOS paints it white on a dark bar,
-// black on a light one, and its states are told by shape alone. A
-// connection being made dims the Mac and its ring, the machines stay lit.
+// invariant: the item has no colour of its own, in any state: macOS paints
+// it white on a dark bar, black on a light one, and its states are told by
+// the dots' opacity and a slash drawn across them alone.
 public struct StatusItem: View {
     let icon: MenuBarIcon
     let scheme: ColorScheme
@@ -94,43 +105,30 @@ public struct StatusItem: View {
     var ink: Color { Token.Icon.ink(scheme) }
 
     public var body: some View {
-        HStack(spacing: Token.Icon.gap) {
-            HStack(spacing: Token.Item.countGap) {
-                Image(icon.symbol, bundle: .module)
-                    .font(.system(size: Token.Icon.glyph, weight: Token.Icon.weight))
-                    .imageScale(.medium)
-                    .symbolRenderingMode(icon.mark == .connecting ? .hierarchical : .monochrome)
-                    .foregroundStyle(ink)
-                    .opacity(icon.mark == .stopped ? Token.Icon.dimmed : 1)
-                if icon.turning {
-                    BusyMark(turn: turn, ink: ink)
+        let scale = Token.Icon.height / Token.Icon.box.height
+        let face = icon.face
+        Canvas { context, _ in
+            context.scaleBy(x: scale, y: scale)
+            let slashed = face == .slashed || face == .away
+            var line = Path()
+            line.move(to: Token.Icon.slashFrom)
+            line.addLine(to: Token.Icon.slashTo)
+            context.drawLayer { layer in
+                for (i, dot) in Token.Icon.dots.enumerated() {
+                    let rect = CGRect(x: dot.x - dot.r, y: dot.y - dot.r, width: dot.r * 2, height: dot.r * 2)
+                    layer.fill(Path(ellipseIn: rect), with: .color(ink.opacity(SpwnMark.opacity(dot: i, face: face, turn: turn))))
                 }
-                if icon.count > 0 {
-                    Text(String(icon.count))
-                        .font(.system(size: Token.Icon.size, weight: Token.Icon.weight))
-                        .monospacedDigit()
-                        .foregroundStyle(ink)
+                if slashed {
+                    layer.blendMode = .destinationOut
+                    layer.stroke(line, with: .color(ink), style: StrokeStyle(lineWidth: Token.Icon.cut, lineCap: .round))
                 }
             }
-            if let spark = icon.spark {
-                IconSpark(points: spark)
-                    .stroke(ink, style: StrokeStyle(lineWidth: Token.Icon.line, lineCap: .round, lineJoin: .round))
-                    .frame(width: Token.Icon.sparkWidth, height: Token.Icon.sparkHeight)
+            if slashed {
+                let opacity = face == .away ? Token.Icon.dimmed : 1
+                context.stroke(line, with: .color(ink.opacity(opacity)), style: StrokeStyle(lineWidth: Token.Icon.stroke, lineCap: .round))
             }
         }
-    }
-}
-
-struct BusyMark: View {
-    let turn: Double
-    let ink: Color
-
-    var body: some View {
-        Circle()
-            .trim(from: Token.Busy.open, to: 1)
-            .stroke(ink, style: StrokeStyle(lineWidth: Token.Busy.stroke, lineCap: .round))
-            .rotationEffect(Token.Busy.start + .radians(turn * .pi * 2))
-            .frame(width: Token.Busy.size, height: Token.Busy.size)
+        .frame(width: Token.Icon.box.width * scale, height: Token.Icon.box.height * scale)
     }
 }
 

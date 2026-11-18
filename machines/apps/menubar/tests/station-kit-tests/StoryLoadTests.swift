@@ -58,7 +58,7 @@ final class StoryLoadTests: XCTestCase {
         let cases: [(StoryFile, String?, StoryError)] = [
             (wrongSchema, nil, .schema(file: "home.needs.story.json", schema: "station.story/v0")),
             (StoryFile(id: "home.fine", group: .home, note: "n", pages: page), "home.needs", .id(file: "home.needs.story.json", id: "home.fine")),
-            (StoryFile(id: "menubar.count", group: .home, note: "n", pages: page), nil, .group(id: "menubar.count", group: .home)),
+            (StoryFile(id: "menubar.plain", group: .home, note: "n", pages: page), nil, .group(id: "menubar.plain", group: .home)),
             (StoryFile(id: "home.needs", group: .home, note: "n", pages: []), nil, .noPages(id: "home.needs")),
             (StoryFile(id: "home.needs", group: .home, note: "n", pages: ["pages/fleet.menubar.json"]), nil,
              .missingPage(id: "home.needs", page: "pages/fleet.menubar.json")),
@@ -78,7 +78,7 @@ final class StoryLoadTests: XCTestCase {
     }
 
     func testEveryStoryIdBelongsToItsGroup() {
-        XCTAssertEqual(StoryGroup.of("menubar.count"), .shell)
+        XCTAssertEqual(StoryGroup.of("menubar.plain"), .shell)
         XCTAssertEqual(StoryGroup.of("mac.mini.activity.6m"), .mac)
         XCTAssertEqual(StoryGroup.of("pop.hud.copy"), .pop)
         XCTAssertNil(StoryGroup.of("phone.explainer"))
@@ -92,7 +92,7 @@ final class StoryLoadTests: XCTestCase {
         try write(StoryFile(id: "home.needs", group: .home, note: "n", pages: ["pages/menubar.home.two-macs.json"], ui: find))
         var item = StoryUI()
         item.statusItem = true
-        try write(StoryFile(id: "menubar.count", group: .shell, note: "n", pages: ["pages/menubar.home.two-macs.json"], ui: item))
+        try write(StoryFile(id: "menubar.plain", group: .shell, note: "n", pages: ["pages/menubar.home.two-macs.json"], ui: item))
         let stories = Dictionary(uniqueKeysWithValues: try Stories.load(root: root).map { ($0.id, $0) })
 
         let mac = try XCTUnwrap(stories["mac.mini.overview"]).state
@@ -108,7 +108,7 @@ final class StoryLoadTests: XCTestCase {
         XCTAssertEqual(drawn.height, today.height)
         XCTAssertEqual(drawn.differing(today), 0, "a story draws the panel the app draws from the same state")
 
-        let icon = try XCTUnwrap(Snapshot.render(AnyView(StoryView(try XCTUnwrap(stories["menubar.count"]))), scheme: .dark)).bitmap
+        let icon = try XCTUnwrap(Snapshot.render(AnyView(StoryView(try XCTUnwrap(stories["menubar.plain"]))), scheme: .dark)).bitmap
         XCTAssertLessThan(icon.height, 200, "a shell story is the status item, not the panel")
         XCTAssertGreaterThan(drawn.height, 400)
     }

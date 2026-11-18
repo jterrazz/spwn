@@ -38,7 +38,6 @@ public struct MenuModel: Equatable, Sendable {
     static let links = ["open-port:", "copy-port:", "copy:"]
 
     public static let login = "app:login"
-    public static let sparkline = "app:sparkline"
     public static let quit = "app:quit"
 
     public var isEmpty: Bool { items.allSatisfy(\.separator) }
@@ -121,11 +120,11 @@ public struct MenuModel: Equatable, Sendable {
         return list(action(menu, in: actions)?.submenu ?? [], actions: actions)
     }
 
-    // value: the station menu: Home's More menu, the app's own switches
-    // checked as they stand.
-    public static func station(_ page: Page, loginItemOn: Bool, sparklineOn: Bool) -> MenuModel {
+    // value: the station menu: Home's More menu, the app's own switch
+    // checked as it stands.
+    public static func station(_ page: Page, loginItemOn: Bool) -> MenuModel {
         let actions = page.actions ?? []
-        let on = Set([loginItemOn ? login : nil, sparklineOn ? sparkline : nil].compactMap { $0 })
+        let on = Set([loginItemOn ? login : nil].compactMap { $0 })
         return list(action(menu, in: actions)?.submenu ?? [], actions: actions, checked: on)
     }
 
@@ -177,7 +176,6 @@ public struct MenuPick {
     public func callAsFunction(_ item: MenuItem, nav: String?) {
         switch item.id {
         case MenuModel.login: return handlers.loginItem(!handlers.loginItemOn)
-        case MenuModel.sparkline: return handlers.sparkline(!handlers.sparklineOn)
         case MenuModel.quit: return handlers.quit()
         default: break
         }

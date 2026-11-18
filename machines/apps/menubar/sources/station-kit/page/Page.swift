@@ -40,11 +40,11 @@ public struct Page: Codable, Equatable, Sendable {
 }
 
 public struct Badge: Codable, Equatable, Sendable {
-    public init(needs: Int?, down: Bool? = nil) {
-        self.needs = needs
+    public init(down: Bool? = nil, restarting: Bool? = nil, label: String? = nil) {
         self.down = down
+        self.restarting = restarting
+        self.label = label
     }
-    public var needs: Int?
     public var down: Bool?
     public var restarting: Bool?
     public var label: String?

@@ -1,7 +1,8 @@
 import Foundation
 
-// invariant: the mark turns at Token.Busy.fps while the icon says it turns,
-// a call running or a server restarting, and its timer is gone otherwise.
+// invariant: the wave runs at Token.Busy.fps while the icon says it waves,
+// a call running or a server restarting, Reduce Motion or not, and its
+// timer is gone otherwise.
 @MainActor
 public final class Turner {
     public private(set) var turn = 0.0

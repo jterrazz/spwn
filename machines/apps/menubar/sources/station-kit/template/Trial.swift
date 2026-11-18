@@ -134,38 +134,27 @@ public struct TrialPanel: View {
     }
 }
 
-// invariant: the status item's motion as the app would draw it: the
-// badge's width at a progress and the Orbit turned by a share of a turn,
-// one bitmap per screen scale, every frame rendered offscreen.
+// invariant: the status item's motion as the app would draw it: the mark
+// waving at a share of a turn, one bitmap per screen scale, every frame
+// rendered offscreen.
 public struct TrialItemView: View {
-    let progress: Double
     let turn: Double
     let scheme: ColorScheme
 
-    public init(progress: Double, turn: Double, scheme: ColorScheme) {
-        self.progress = progress
+    public init(turn: Double, scheme: ColorScheme) {
         self.turn = turn
         self.scheme = scheme
     }
 
     public var body: some View {
-        HStack(spacing: Token.Icon.gap) {
-            Image(Token.Icon.orbit, bundle: .module)
-                .font(.system(size: Token.Icon.glyph, weight: Token.Icon.weight))
-                .imageScale(.medium)
-                .foregroundStyle(Token.Icon.ink(scheme))
-                .rotationEffect(.radians(turn * .pi * 2))
-            Capsule()
-                .fill(Token.Icon.needs(scheme))
-                .frame(width: Token.Icon.sparkHeight + (Token.Icon.sparkWidth - Token.Icon.sparkHeight) * progress, height: Token.Icon.sparkHeight)
-        }
+        StatusItem(MenuBarIcon(.restarting), scheme: scheme, turn: turn)
     }
 
     @MainActor
-    public static func image(progress: Double, turn: Double, scheme: ColorScheme) -> NSImage {
+    public static func image(turn: Double, scheme: ColorScheme) -> NSImage {
         let image = NSImage()
         for scale in [1, 2, 3] as [CGFloat] {
-            let renderer = ImageRenderer(content: TrialItemView(progress: progress, turn: turn, scheme: scheme))
+            let renderer = ImageRenderer(content: TrialItemView(turn: turn, scheme: scheme))
             renderer.scale = scale
             guard let cg = renderer.cgImage else { continue }
             let rep = NSBitmapImageRep(cgImage: cg)

@@ -138,23 +138,34 @@ public enum Token {
         }
     }
 
-    // value: the menu bar icon: the Orbit filled, a custom SF Symbol drawn
-    // as the status bar draws its own symbols, 13 pt medium (measured
-    // against Spotlight's and a bare status item's on macOS 26), one symbol
-    // per state, and the CPU line beside it.
+    // value: the menu bar icon: the spwn mark, three dots on an arc, in the
+    // one ink the system paints. `height` is its 44-unit box in points, the
+    // optical height of the bar's own round symbols; `glyph` and `weight`
+    // draw those neighbours in the stories and the tests.
     public enum Icon {
-        public static let orbit = "station.orbit"
-        public static let badged = "station.orbit.badge"
-        public static let slashed = "station.orbit.slash"
-        public static let working = "station.orbit.working"
-        public static let size: CGFloat = 13
+        public static let height: CGFloat = 16
+        public static let box = CGSize(width: 48, height: 44)
+        // value: the three dots on the box, each its centre and radius.
+        public static let dots: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [(10, 35, 8), (31.86, 23.37, 5.6), (42.81, 5.85, 3.9)]
+        // value: the slash, one line across the box from `slashFrom` to
+        // `slashTo`, round caps: the dots are cut out of by a band `cut`
+        // wide, and the stroke `stroke` wide is drawn on top of the cut.
+        public static let slashFrom = CGPoint(x: 6, y: 4)
+        public static let slashTo = CGPoint(x: 44, y: 42)
+        public static let cut: CGFloat = 9
+        public static let stroke: CGFloat = 3.6
         public static let glyph: CGFloat = 15
         public static let weight = Font.Weight.medium
-        public static let line: CGFloat = 1.25
-        public static let sparkWidth: CGFloat = 22
-        public static let sparkHeight: CGFloat = 12
-        public static let gap: CGFloat = 4
-        public static let dimmed = 0.4
+        // value: the stopped mark: the whole glyph, dots and stroke, at this opacity.
+        public static let dimmed = 0.45
+        // value: the connecting mark: the dots after the first, at this opacity.
+        public static let resting = 0.32
+        // value: the restart wave: each dot's opacity runs `low` to 1 to
+        // `low` once per `Token.Busy.period`, at its peak `peak` of the way
+        // through, eased in and out, each dot `stagger` seconds after the last.
+        public static let low = 0.3
+        public static let peak = 0.35
+        public static let stagger = 0.2
 
         public static func needs(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0xFFAD1F : 0xF29D0B) }
         public static func down(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0xFF4F45 : 0xEC3B30) }
