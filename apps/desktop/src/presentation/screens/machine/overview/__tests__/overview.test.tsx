@@ -24,7 +24,7 @@ describe('overview', () => {
     test("a delete's dialog says its consequence alone while the machine's hold is calm", async () => {
         // Given - api's page over two-macs, api yours and stopped
         const result = await component.render(machineOver('two-macs', 'api'), async (visitor) => {
-            await visitor.see(heading('api Stopped'));
+            await visitor.see(heading('api stopped'));
 
             // When - Delete api is clicked
             await visitor.click(button('Delete api…'));

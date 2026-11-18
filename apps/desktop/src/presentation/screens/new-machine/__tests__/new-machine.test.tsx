@@ -69,7 +69,7 @@ describe('New machine', () => {
 
             // Then - the sheet is gone and gate5's page is open
             await visitor.gone(onThisMac);
-            await visitor.see(heading('gate5 Running'));
+            await visitor.see(heading('gate5 running'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -88,7 +88,7 @@ describe('New machine', () => {
 
                 // Then - the mini's engine made it, the sheet is gone and gate5's page is open
                 await visitor.gone(onMini);
-                await visitor.see(heading('gate5 Running'));
+                await visitor.see(heading('gate5 running'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -147,7 +147,7 @@ describe('New machine', () => {
 
             // Then - the sheet hands over to web's page
             await visitor.gone(onThisMac);
-            await visitor.see(heading('web Healthy'));
+            await visitor.see(heading('web healthy'));
         });
         expect(result.errors.text).toBe('');
     });

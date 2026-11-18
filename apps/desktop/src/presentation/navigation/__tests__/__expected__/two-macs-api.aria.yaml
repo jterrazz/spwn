@@ -35,7 +35,7 @@
   - button "Forward" [disabled]
   - button "macbook-pro"
   - text: api
-  - heading "api Stopped" [level=2]
+  - heading "api stopped" [level=2]
   - paragraph:
     - text: workspace · persistent · on
     - button "macbook-pro"

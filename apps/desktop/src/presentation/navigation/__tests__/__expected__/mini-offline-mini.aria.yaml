@@ -34,7 +34,7 @@
   - button "Back"
   - button "Forward" [disabled]
   - text: mac-mini
-  - heading "mac-mini Not seen" [level=2]
+  - heading "mac-mini not seen" [level=2]
   - paragraph: Not seen for 6 h. Asleep or off the network.
   - button "Keep mac-mini awake": Awake…
   - button "New machine on mac-mini": New machine
@@ -53,7 +53,7 @@
     - text: CPU no answer Memory no answer Disk no answer Its machines 1machine
     - region "Its machines":
       - heading "Its machines" [level=2]
-      - button "infra Not seen"
+      - button "infra not seen"
     - region "Packages":
       - heading "Packages" [level=2]
       - text: Unreachable mac-mini does not answer. station machines mac-mini

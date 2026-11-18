@@ -6,14 +6,14 @@ import { website } from '../website.specification.js';
 const sidebar = navigation('Sidebar');
 
 describe('mac', () => {
-    test('M1 a Mac reads its name, Online, its CPU, memory and disk', async () => {
+    test('M1 a Mac reads its name, online, its CPU, memory and disk', async () => {
         // Given - the window on This Mac's page over two-macs
         const result = await website.visit(
             '/?world=two-macs&machine=macbook-pro&tab=Overview',
             async (visitor) => {
                 // When - the page is read
                 // Then - its name and state head it, and its three measures follow
-                await visitor.see(heading('macbook-pro Online'));
+                await visitor.see(heading('macbook-pro online'));
                 await visitor.see(content('This Mac · Engine running', { exact: false }));
                 await visitor.see(content('34%'));
                 await visitor.see(content('12.4GB'));
@@ -99,8 +99,8 @@ describe('mac', () => {
                 await visitor.see(machines);
 
                 // Then - each machine names its creator and its state
-                await visitor.see(within(machines, button('api by you Stopped')));
-                await visitor.see(within(machines, button('linux-1 by you Running')));
+                await visitor.see(within(machines, button('api by you stopped')));
+                await visitor.see(within(machines, button('linux-1 by you running')));
             },
         );
         expect(result.errors.text).toBe('');
@@ -149,7 +149,7 @@ describe('mac', () => {
             async (visitor) => {
                 // When - the page and the sidebar are read
                 // Then - the Mac reads Not seen in both, and its head says what the engine says of it
-                await visitor.see(heading('mac-mini Not seen'));
+                await visitor.see(heading('mac-mini not seen'));
                 await visitor.see(within(sidebar, button('mac-mini not seen')));
                 await visitor.see(heading('mac-mini has not been seen for 6 h.'));
                 await visitor.see(
@@ -167,7 +167,7 @@ describe('mac', () => {
             async (visitor) => {
                 // When - the page and the sidebar are read
                 // Then - infra reads Not seen in both, and its hold says nothing is known of it
-                await visitor.see(heading('infra Not seen'));
+                await visitor.see(heading('infra not seen'));
                 await visitor.see(within(sidebar, button('infra not seen')));
                 await visitor.see(
                     content('Not seen: its Mac does not answer, so nothing says what holds it.'),
@@ -354,7 +354,7 @@ describe('mac', () => {
                 );
 
                 // Then - that machine opens
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
             },
         );
         expect(result.errors.text).toBe('');

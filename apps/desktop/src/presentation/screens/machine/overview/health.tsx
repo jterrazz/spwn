@@ -51,7 +51,7 @@ export function Health({ vm }: { vm: MachinesVM }) {
             )}
             <div className={styles.steps}>
                 <Step label="Its state">
-                    <StatePill {...vmState(vm)} />
+                    <StatePill asWritten {...vmState(vm)} />
                 </Step>
                 <Step label="Its address">
                     {vm.IP === '' ? (

@@ -145,7 +145,7 @@ describe('machine', () => {
             },
         );
 
-        // Then - Running and its uptime share the state's place, as the mockup's "Running · up 6 d"
-        expect(result.html.text).toMatch(/>Running · up \d+ (?:min|h|d)</u);
+        // Then - running and its uptime share the state's place, as the engine's word and "up 6 d"
+        expect(result.html.text).toMatch(/>running · up \d+ (?:min|h|d)</u);
     });
 });

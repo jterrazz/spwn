@@ -1,5 +1,5 @@
 - main:
-  - heading "infra Not seen" [level=2]
+  - heading "infra not seen" [level=2]
   - paragraph:
     - text: server · always on · on
     - button "mac-mini"

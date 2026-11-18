@@ -96,19 +96,19 @@ describe('workspace', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('W4 Stop reads Stopped everywhere, and the memory it held is free on Home', async () => {
+    test('W4 Stop reads stopped everywhere, and the memory it held is free on Home', async () => {
         // Given - the window on Home over two-macs, where linux-1 runs and holds 8 GB of its Mac's 16
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
             await visitor.see(within(region('Machines'), content('4 free')));
             await visitor.click(within(sidebar, button('linux-1 running')));
-            await visitor.see(heading('linux-1 Running'));
+            await visitor.see(heading('linux-1 running'));
 
             // When - Stop is pressed and confirmed
             await visitor.click(button('Stop'));
             await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
 
-            // Then - it reads Stopped, and Home counts its memory free
-            await visitor.see(heading('linux-1 Stopped'));
+            // Then - it reads stopped, and Home counts its memory free
+            await visitor.see(heading('linux-1 stopped'));
             await visitor.see(within(sidebar, button('linux-1 stopped')));
             await visitor.click(within(sidebar, button('Home')));
             await visitor.see(within(region('Machines'), content('12 free')));
@@ -119,13 +119,13 @@ describe('workspace', () => {
     test('W4 Start brings a stopped workspace back', async () => {
         // Given - the window on api over two-macs, a workspace that is stopped
         const result = await website.visit('/?world=two-macs&machine=api', async (visitor) => {
-            await visitor.see(heading('api Stopped'));
+            await visitor.see(heading('api stopped'));
 
             // When - Start is pressed
             await visitor.click(button('Start'));
 
-            // Then - it reads Running
-            await visitor.see(heading('api Running'));
+            // Then - it reads running
+            await visitor.see(heading('api running'));
             await visitor.see(within(sidebar, button('api running')));
         });
         expect(result.errors.text).toBe('');
@@ -142,7 +142,7 @@ describe('workspace', () => {
             async (visitor) => {
                 // When - the page is read
                 // Then - it reads Creating and names the step it is at
-                await visitor.see(heading('linux-4 Creating'));
+                await visitor.see(heading('linux-4 creating'));
                 await visitor.see(content('Creating: boot 2 of 4'));
                 await visitor.see(disabled(button('Open in Terminal')));
             },
