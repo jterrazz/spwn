@@ -55,7 +55,8 @@ release:
         owner: jterrazz
         name: spwn
     draft: false
-    prerelease: auto
+    prerelease: false
+    make_latest: true
     extra_files:
         - glob: ./.artifacts/station/*
     name_template: 'v{{.Version}}'
