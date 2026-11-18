@@ -30,6 +30,8 @@ make test            # every member's tests, the cli and website specifications 
 make check           # lint, test and mutation: what CI runs
 ```
 
+None of these gestures reads `machines/`, station's tree: it keeps its own toolchain (Go 1.27 from `machines/go.work`, npm, Swift for its menu bar on a Mac) and its own loop, which `make machines-check` and `make machines-build` run from the root, and its [Develop](../../machines/docs/guides/develop.md) describes. The root's TypeScript toolchain declares the folder a verbatim root in `studio.config.ts`, so no root pass formats, lints or names a file in it.
+
 Adding a module to `go.work` is the only thing needed to bring it under lint and test coverage: Turborepo reads `go.work` itself and turns every module into a package of the same graph the pnpm workspace feeds, so the Makefile never lists a package.
 
 Every gate above delegates to `turbo run`, which hashes each package's inputs and replays a cached result when nothing changed: a second `make lint` over an untouched tree finishes in about a second. The cache is a directory, `.artifacts/turbo`, so `make clean` is also how it is thrown away. What the wiring relies on, and what it cost, are [ADR-016](../decisions/016-turborepo-over-both-toolchains.md)'s.

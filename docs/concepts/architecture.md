@@ -33,6 +33,8 @@ packages/
 
 Beside them, `catalog/` holds the shipped worlds and the `spwn:*` blocks, `specs/` the CLI and website specifications ([Test architecture](../reference/test-architecture.md)), `docker/` the test image, and `docs/` this manual. `go.work`, `pnpm-workspace.yaml` and the `Makefile` tie them together.
 
+`machines/` is the other product of the repository, station, the `station` binary that sets up and runs a Mac and its VMs. It is a repository of its own nested here with its history ([ADR-017](../decisions/017-one-repository-station-moves-in-under-machines.md)): its own `go.work`, npm workspace, Turborepo graph and `Makefile`, which none of the root's lists name, and its own manual at [`machines/docs/`](../../machines/docs/README.md).
+
 Each `packages/` module exposes its public API in the root `.go` file; implementation details live under `internal/`, which the Go compiler itself keeps private.
 
 ## Layered dependency graph
