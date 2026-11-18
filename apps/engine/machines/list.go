@@ -181,16 +181,20 @@ func severityOf(t verdict.Tone) finding.Severity {
 }
 
 // invariant: what a VM's finding says is read from its facts, its severity
-// from its standing (severityOf). A server in a loop, powered off from
-// inside, or whose check fails since it passed, a VM ended unexpectedly or
-// broken, a running one whose SSH fails, and any other VM down each have
-// one; a check that has not answered yet is none. The engine never restarts
-// a server by itself: the restart is the owner's gesture.
+// from its standing (severityOf). A running VM its Mac's Local Network
+// blocks says so first, the cause of whatever else fails; a server in a
+// loop, powered off from inside, or whose check fails since it passed, a VM
+// ended unexpectedly or broken, a running one whose SSH fails, and any other
+// VM down each have one; a check that has not answered yet is none. The
+// engine never restarts a server by itself: the restart is the owner's
+// gesture.
 func vmFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 	s := StandingOf(vm)
 	f := finding.Finding{Machine: ref, Section: section.Overview, Severity: severityOf(s.Tone()), Subject: vm.Name}
 	server := vm.Lifetime == AlwaysOn
 	switch {
+	case vm.State == Running && vm.Blocked == LocalNetworkBlock:
+		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On), finding.Fix{Path: LocalNetworkFix(ref.On)}
 	case server && vm.Restarts.Looping:
 		f.Text = vm.Name + " is in a loop: " + vm.Restarts.InALoop()
 	case server && vm.State == Stopped && vm.Detail == PoweredOffInside:

@@ -581,7 +581,18 @@ func (s *Machinist) unhealthy(ctx context.Context, name string, cause error) err
 	if _, err := s.engine.Address(ctx, name, 0); err != nil {
 		return &model.UnhealthyError{Name: name, Step: model.StepAddress, Detail: "none after 60 s"}
 	}
-	return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: "none after 30 s"}
+	return s.sshFails(ctx, name, "none after 30 s")
+}
+
+// invariant: a VM whose SSH fails because its Mac has not approved station
+// for Local Network says so, as the engine that dialed it met it, naming
+// the Mac this call runs on; any other cause keeps its detail.
+func (s *Machinist) sshFails(ctx context.Context, name, detail string) error {
+	if live, err := s.engineAPI.VMs(ctx); err == nil && live[name].Blocked == model.LocalNetworkBlock {
+		mac := s.ThisMacName()
+		return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: model.NotApproved(mac), BlockedOn: mac}
+	}
+	return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: detail}
 }
 
 type made struct{ vm, record, undone bool }

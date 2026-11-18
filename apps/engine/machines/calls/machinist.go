@@ -100,6 +100,8 @@ type EngineVM struct {
 	// value: how a running workspace stands with its file, as the engine
 	// keeps it; nil before its first reading since its boot.
 	Drift *model.KeptDrift
+	// value: what refused its guest's last connection; empty when nothing did.
+	Blocked model.GuestBlock
 }
 
 type Engine interface {

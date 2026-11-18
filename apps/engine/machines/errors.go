@@ -141,7 +141,12 @@ func (e *DidNotBootError) Error() string {
 	return text
 }
 
-type UnhealthyError struct{ Name, Step, Detail string }
+type UnhealthyError struct {
+	Name, Step, Detail string
+	// value: the Mac that has not approved station for Local Network, when
+	// that is why its SSH fails; empty otherwise.
+	BlockedOn string
+}
 
 func (e *UnhealthyError) Error() string {
 	return e.Name + " is kept, failing " + e.Step + ": " + e.Detail

@@ -1,0 +1,44 @@
+description: 'a create on a Mac not approved for Local Network says so; once approved, its VM connects'
+env: two-macs
+runs:
+    - command: 'world local-network macbook-pro not-approved'
+      exit: 0
+    - command: 'machines create --memory 4G'
+      exit: 1
+      stderr: |
+          Error: linux-2 is kept, failing SSH answers: macbook-pro has not approved station for Local Network
+          Hint: approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network; linux-2 connects by itself once approved
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB
+          # Needs you
+          ◐	linux-1	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+          ◐	linux-2	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+    - command: 'world local-network macbook-pro approved'
+      exit: 0
+    - command: 'machines linux-2'
+      exit: 0
+      stdout: |
+          	On linux-2:
+          	Activity	? not measured
+          	Apps	● 1 ok · ○ 72 not installed
+          	Settings	set by station · ○ 0 of 6
+          	Disk	● 0 B free · 0 B can rebuild
+          	Ports	Public 0 · Private 2
+          	Accounts	● 0
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Size	4 CPU · 4 GB · 20 GB
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB

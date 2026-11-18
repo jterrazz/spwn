@@ -718,6 +718,12 @@
             }
           ]
         },
+        "Blocked": {
+          "enum": [
+            "local-network"
+          ],
+          "type": "string"
+        },
         "BootAt": {
           "format": "date-time",
           "type": "string"

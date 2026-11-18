@@ -2054,6 +2054,7 @@ export type MachinesUptimeDay = {
 
 export type MachinesVM = {
     Birth: MachinesBirth | null;
+    Blocked?: 'local-network';
     BootAt: string;
     Cause: string;
     Check: string;

@@ -195,6 +195,9 @@ func HealthVerdict(vm VM) *verdict.Verdict {
 		v = verdict.Verdict{Tone: verdict.Warn, Sentence: SentenceNoAddress}
 	case !steps.SSH:
 		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceNoSSH}
+		if vm.Blocked == LocalNetworkBlock {
+			v.Line = NotApproved(vm.Mac) + "."
+		}
 	case vm.Check == "":
 		v.Line = LineNoCheck
 	case vm.CheckStatus.State == CheckWaiting:
