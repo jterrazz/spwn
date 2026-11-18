@@ -23,6 +23,10 @@ export default defineConfig({
                 'catalog/x/tools/x/index.js':
                     'the X tool the gate runs by the path its tool.yaml names',
             },
+            ignore: {
+                'machines/**':
+                    "station's tree, whose npm workspace knip cannot see from the root (pnpm's globs do not reach it): its configs, declarations and imports of its own packages read as unused or unlisted here, and its own `make check` runs knip over it with the right workspace",
+            },
             ignoreBinaries: {
                 pgrep: 'a system binary of macOS and Linux, never a package',
                 playwright:
