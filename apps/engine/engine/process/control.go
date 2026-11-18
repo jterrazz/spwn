@@ -202,7 +202,7 @@ func (c *Control) stopDirect(ctx context.Context, w engine.Work) []engine.Stoppe
 
 func (c *Control) Start(ctx context.Context) (engine.StartReport, error) {
 	if p, err := c.c.Hello(ctx); err == nil {
-		return engine.StartReport{Already: true, Version: p.Version, PID: p.PID}, nil
+		return engine.StartReport{Already: true, Version: p.Version, PID: p.PID, LocalNetwork: p.LocalNetwork}, nil
 	}
 	if !c.job.Loaded(ctx) {
 		if err := c.job.Load(ctx); err != nil {
@@ -214,7 +214,7 @@ func (c *Control) Start(ctx context.Context) (engine.StartReport, error) {
 	}
 	for waited := time.Duration(0); waited < startWait; waited += controlPoll {
 		if p, err := c.c.Hello(ctx); err == nil {
-			return engine.StartReport{Version: p.Version, PID: p.PID}, nil
+			return engine.StartReport{Version: p.Version, PID: p.PID, LocalNetwork: p.LocalNetwork}, nil
 		}
 		if err := c.h.Sleep(ctx, controlPoll); err != nil {
 			return engine.StartReport{}, err

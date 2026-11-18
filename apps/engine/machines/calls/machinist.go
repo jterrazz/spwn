@@ -105,7 +105,9 @@ type EngineVM struct {
 }
 
 type Engine interface {
-	Ping(ctx context.Context) (version string, err error)
+	// value: the engine as its hello says it: running, its version and its
+	// Mac's Local Network approval.
+	Hello(ctx context.Context) (model.EngineView, error)
 	VMs(ctx context.Context) (map[string]EngineVM, error)
 	Do(ctx context.Context, op, vm string) error
 	// value: the ports a VM's engine reserved for the env its run set, each

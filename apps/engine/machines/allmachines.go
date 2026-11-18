@@ -221,6 +221,9 @@ type EngineView struct {
 	// is not known (another Mac, a Mac with no hypervisor).
 	State   EngineState `json:",omitempty"`
 	Version string
+	// value: how the Mac stands with macOS's Local Network approval of
+	// station, as its engine last read it; empty where it cannot tell.
+	LocalNetwork LocalNetwork `json:",omitempty"`
 }
 
 func (e EngineView) Known() bool   { return e.State != "" }

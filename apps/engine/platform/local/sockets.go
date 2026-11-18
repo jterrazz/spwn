@@ -113,6 +113,21 @@ func (sockets) ListenTCP(ip string, port int) (Listener, error) {
 	return listener{l: l}, nil
 }
 
+func (sockets) SendUDP(ctx context.Context, address string, payload []byte) error {
+	to, err := net.ResolveUDPAddr("udp4", address)
+	if err != nil {
+		return err
+	}
+	var lc net.ListenConfig
+	conn, err := lc.ListenPacket(ctx, "udp4", ":0")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = conn.Close() }()
+	_, err = conn.WriteTo(payload, to)
+	return err
+}
+
 func (sockets) Pipe(ctx context.Context, ip string, port int, in io.Reader, out io.Writer) error {
 	d := net.Dialer{Timeout: 5 * time.Second}
 	conn, err := d.DialContext(ctx, "tcp", net.JoinHostPort(ip, strconv.Itoa(port)))

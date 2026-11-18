@@ -1,5 +1,7 @@
 package engine
 
+import model "github.com/jterrazz/studio-station/apps/engine/machines"
+
 type Work struct {
 	Answering bool
 	VMs       []Stopped
@@ -44,6 +46,9 @@ type StartReport struct {
 	PID     int
 	// value: what the start did to the engine's job before it ran.
 	Installed Installed
+	// value: how its Mac stands with Local Network, as the engine read it
+	// at its start; empty where it cannot tell.
+	LocalNetwork model.LocalNetwork
 }
 
 type Installed struct {

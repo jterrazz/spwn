@@ -107,5 +107,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [053 The panel is the untinted system glass over a hue-free grey, with no white card](decisions/053-the-panel-is-untinted-glass-over-a-grey-ground.md) (Accepted)
 - [054 A machine's standing is one rule at each level, and every verdict reads it](decisions/054-a-machines-standing-is-one-rule-at-each-level.md) (Proposed)
 - [055 Station reads only its current state, and retires no older one](decisions/055-station-reads-only-its-current-state.md) (Proposed)
+- [056 Station names the Local Network approval a Mac withholds](decisions/056-station-names-the-local-network-approval-a-mac-withholds.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

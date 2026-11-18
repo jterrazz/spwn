@@ -18,6 +18,9 @@
         "executable": {
           "type": "string"
         },
+        "local_network": {
+          "type": "string"
+        },
         "page": {
           "type": "integer"
         },

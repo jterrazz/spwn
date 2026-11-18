@@ -255,7 +255,7 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 	if s.engineAPI == nil {
 		return &model.EngineDownError{Mac: s.ThisMacName(), Installed: s.h.Exists(catalog.EnginePlist(s.h.Home()))}
 	}
-	_, err := s.engineAPI.Ping(ctx)
+	_, err := s.engineAPI.Hello(ctx)
 	if !errors.Is(err, model.ErrEngineDown) {
 		return err
 	}
@@ -269,7 +269,7 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 	if err := s.o.StartEngine(ctx); err != nil {
 		return err
 	}
-	if _, err := s.engineAPI.Ping(ctx); err != nil {
+	if _, err := s.engineAPI.Hello(ctx); err != nil {
 		if errors.Is(err, model.ErrEngineDown) {
 			return &model.EngineDownError{Mac: s.ThisMacName(), Installed: true}
 		}

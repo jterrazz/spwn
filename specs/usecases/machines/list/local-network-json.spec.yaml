@@ -6,4 +6,4 @@ runs:
     - command: 'machines --json | /usr/bin/jq -c .findings'
       exit: 0
       stdout: |
-          [{"machine":"linux-1","severity":"needs-a-look","section":"overview","subject":"linux-1","text":"linux-1 is unreachable: macbook-pro has not approved station for Local Network","fix":{"call":null,"command":null,"path":"approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network"}}]
+          [{"machine":"macbook-pro","severity":"needs-a-look","section":"overview","subject":"This Mac","text":"macbook-pro has not approved station for Local Network","fix":{"call":null,"command":null,"path":"approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network"}},{"machine":"linux-1","severity":"needs-a-look","section":"overview","subject":"linux-1","text":"linux-1 is unreachable: macbook-pro has not approved station for Local Network","fix":{"call":null,"command":null,"path":"approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network"}}]

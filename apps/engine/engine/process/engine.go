@@ -135,6 +135,9 @@ type Options struct {
 	Drift   func(ctx context.Context, vm string) model.KeptDrift
 	Changes []string
 	Beside  func(func())
+	// value: how this Mac stands with macOS's Local Network approval of
+	// the engine, read now; nil, or an empty answer, where it cannot tell.
+	LocalNetwork func(ctx context.Context) model.LocalNetwork
 }
 
 type Engine struct {
@@ -210,6 +213,9 @@ type Engine struct {
 	// value: whether Begin is still running: no share is made until the
 	// start's reconciliation has run.
 	starting bool
+	// value: this Mac's Local Network approval as last read, and when.
+	localNetwork   model.LocalNetwork
+	localNetworkAt time.Time
 }
 
 type Stores struct {
@@ -358,6 +364,7 @@ func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 	// adoption, so a switch made before Serve is ever on is judged from it.
 	d.servedMode = d.policy().HTTPS
 	d.refreshSelf(ctx)
+	d.readLocalNetwork(ctx)
 	d.adopt(ctx)
 	d.sweepOwed(ctx)
 	d.reconcileServe(ctx)
@@ -432,6 +439,7 @@ func (d *Engine) step(ctx context.Context, tick int) {
 	d.keepDrift(ctx)
 	d.awakeJob.Tick()
 	d.tellBack(ctx)
+	d.rereadLocalNetwork(ctx)
 	d.watchState()
 	for _, job := range d.o.Jobs {
 		job(ctx)

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"io"
 	"io/fs"
 	"maps"
@@ -315,6 +316,10 @@ func (m *worldMac) withAwake(kept map[string]activity.Kept) map[string]activity.
 }
 
 func (m *worldMac) power() awakecontract.Power { return awakefake.PowerOf(m.run.w, m.name) }
+func (m *worldMac) localNetwork() func(context.Context) model.LocalNetwork {
+	return func(context.Context) model.LocalNetwork { return m.slice().LocalNetwork }
+}
+
 func (m *worldMac) guests() contract.GuestDialer {
 	return worldGuests{GuestDialer: machinesfake.GuestsOf(m.run.w).Serving(engine.GuestSession), r: m.run}
 }

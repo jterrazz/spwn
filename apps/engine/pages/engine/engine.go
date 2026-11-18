@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	ID  = "engine"
-	Row = "engine"
+	ID              = "engine"
+	Row             = "engine"
+	LocalNetworkRow = "local-network"
 )
 
 func columns() []page.Column {
@@ -159,5 +160,12 @@ func Start(r engine.StartReport, thisMac page.Context) page.Page {
 	}
 	row := pages.Done(Row, catalog.StateOK, "running")
 	row.Detail = page.Texts(words...)
-	return pages.Outcome("engine start", thisMac, nil, []page.Row{row}, "engine to start")
+	rows := []page.Row{row}
+	if r.LocalNetwork == machines.LocalNetworkNotApproved {
+		ln := pages.Done(LocalNetworkRow, catalog.StateDegraded, "")
+		ln.Label = "local network"
+		ln.Detail = page.Texts("needs you", machines.LocalNetworkFix(thisMac.Machine))
+		rows = append(rows, ln)
+	}
+	return pages.Outcome("engine start", thisMac, nil, rows, "engine to start")
 }

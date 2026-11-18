@@ -150,6 +150,9 @@ type Sockets interface {
 	// library speaks over it.
 	DialTCP(ctx context.Context, address string, timeout time.Duration) (net.Conn, error)
 	ListenTCP(ip string, port int) (Listener, error)
+	// value: one UDP datagram sent to address (ip:port) from a port of
+	// its own, no answer read: the error is the system's refusal to send it.
+	SendUDP(ctx context.Context, address string, payload []byte) error
 	Pipe(ctx context.Context, ip string, port int, in io.Reader, out io.Writer) error
 	Join(a, b Conn)
 }

@@ -4,6 +4,7 @@ package wire
 
 import (
 	"context"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -54,6 +55,7 @@ func (*worldMac) self() corecontract.Self                                { retur
 func (*worldMac) power() awakecontract.Power                             { return nil }
 func (*worldMac) hypervisor(string, catalog.Install) contract.Hypervisor { return nil }
 func (*worldMac) guests() contract.GuestDialer                           { return nil }
+func (*worldMac) localNetwork() func(context.Context) model.LocalNetwork { return nil }
 func (*worldMac) imageSource(string) imagescontract.ImageSource          { return nil }
 func (*worldMac) sshConfig() contract.SSHConfig                          { return nil }
 func (*worldMac) unlocker() contract.Unlocker                            { return nil }

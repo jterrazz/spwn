@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"path/filepath"
 	"time"
 
@@ -45,6 +46,14 @@ func (t macSystem) Names(dir string) ([]string, error) {
 }
 
 type machinesEngine struct{ macEngine }
+
+func (d machinesEngine) Hello(ctx context.Context) (model.EngineView, error) {
+	p, err := d.c.Hello(ctx)
+	if err != nil {
+		return model.EngineView{}, downAs(err, model.ErrEngineDown)
+	}
+	return model.EngineView{State: model.EngineRunning, Version: p.Version, LocalNetwork: p.LocalNetwork}, nil
+}
 
 func (d machinesEngine) GuestExec(ctx context.Context, vm, line, stdin string) (machinescalls.GuestRan, error) {
 	out, err := d.macEngine.GuestExec(ctx, vm, line, stdin)
