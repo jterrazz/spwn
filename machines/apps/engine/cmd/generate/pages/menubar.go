@@ -21,8 +21,26 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ui/token"
 )
 
-func samples() []activity.Reading {
-	return readings(16*gb, 0, 0)
+func samples() map[string][]activity.Reading {
+	return map[string][]activity.Reading{thisMacName: readings(16*gb, 0, 0)}
+}
+
+// value: a Mac's readings, each carrying the share of CPU and the memory
+// every running VM of it takes: a curve of its own per VM, by its place.
+func withVMs(readings []activity.Reading, vms []model.VM) []activity.Reading {
+	out := make([]activity.Reading, 0, len(readings))
+	for i, r := range readings {
+		r.VMs = nil
+		for n, vm := range vms {
+			if vm.State != model.Running {
+				continue
+			}
+			cpu := float64((i*7+n*13)%9+n*11) + 1
+			r.VMs = append(r.VMs, activity.VMUsage{VM: vm.Name, Usage: activity.Usage{CPU: cpu, Memory: int64(n%3+2) * 1_350_000_000}})
+		}
+		out = append(out, r)
+	}
+	return out
 }
 
 // value: 16 readings 2 s apart of a machine with this memory and disk,

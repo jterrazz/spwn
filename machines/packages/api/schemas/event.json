@@ -648,7 +648,6 @@
         "kind": {
           "enum": [
             "",
-            "find",
             "none",
             "ssh",
             "terminal-list"
@@ -806,6 +805,9 @@
         "glyph": {
           "$ref": "#/$defs/page.Glyph"
         },
+        "search": {
+          "type": "string"
+        },
         "stale": {
           "$ref": "#/$defs/page.Value"
         },
@@ -862,9 +864,6 @@
         },
         "row": {
           "$ref": "#/$defs/page.Row"
-        },
-        "tile": {
-          "$ref": "#/$defs/page.Tile"
         },
         "uptime": {
           "$ref": "#/$defs/page.Uptime"
@@ -1153,11 +1152,9 @@
             "flush",
             "gauges",
             "health",
-            "hero",
             "log",
             "now",
             "plain",
-            "tiles",
             "uptime",
             "wait"
           ],
@@ -1346,53 +1343,6 @@
           "type": "string"
         },
         "on": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "page.Tile": {
-      "additionalProperties": false,
-      "properties": {
-        "caption": {
-          "type": "string"
-        },
-        "glyph": {
-          "$ref": "#/$defs/page.Glyph"
-        },
-        "key": {
-          "type": "string"
-        },
-        "nav": {
-          "type": "string"
-        },
-        "number": {
-          "$ref": "#/$defs/page.Value"
-        },
-        "plus": {
-          "type": "string"
-        },
-        "signal": {
-          "enum": [
-            "active",
-            "asleep",
-            "done",
-            "failing",
-            "faint",
-            "quiet",
-            "stale",
-            "waits",
-            "well"
-          ],
-          "type": "string"
-        },
-        "tip": {
-          "$ref": "#/$defs/page.Value"
-        },
-        "toggle": {
-          "type": "string"
-        },
-        "word": {
           "type": "string"
         }
       },

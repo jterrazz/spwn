@@ -17,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
+	pagemenubar "github.com/jterrazz/studio-station/apps/engine/pages/menubar"
 )
 
 type moving struct {
@@ -188,6 +189,48 @@ func TestAVMsShareOfItsMacIsReadOnThatMacAndItsOwnCoresInsideIt(t *testing.T) {
 	defer f.mu.Unlock()
 	if f.asked["linux-1"] != 2 || f.asked[thisMac] != 2 || f.asked[mini] != 2 {
 		t.Errorf("the ticks asked %v; want each machine once a tick: linux-1 for its own cores, each Mac for its VMs", f.asked)
+	}
+}
+
+// invariant: Home draws a far Mac's CPU and its VMs' from the readings
+// the ticks kept of that Mac, each a spark, the Mac asked once a tick.
+func TestHomeDrawsAFarMacAndItsVMsFromThatMacsReadings(t *testing.T) {
+	w := &world{judged: true, infra: []machines.VM{infraAt(machines.Running, 0)}, asked: map[string][]string{}, activity: map[string]uint64{}}
+	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
+	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond, MacOf: func(_ context.Context, vm string) (string, bool) {
+		return mini, vm == "infra"
+	}}
+	keys := []string{"cpu:" + mini, "cpuh:infra"}
+	live.Sample(t.Context(), keys)
+	live.Sample(t.Context(), keys)
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	o := feeds.Menubar{Calls: w, Clock: newSteps(), Live: live, ThisMachine: page.Context{Machine: thisMac}, Report: func(awake.View) *awake.Report { return nil }}
+	cell := func(p page.Page, section, row string) page.Value {
+		for _, s := range p.Sections {
+			for _, it := range s.Items {
+				if s.ID == section && it.Row != nil && it.Row.ID == row && len(it.Row.Cells) == 1 {
+					return it.Row.Cells[0]
+				}
+			}
+		}
+		return page.Value{}
+	}
+	home := until(t, o.Feed()(ctx, engine.FeedInput{Changed: make(chan struct{}), Refresh: make(chan struct{}), Awake: func() awake.View { return awake.View{} }}), "home with mac-mini", func(p page.Page) bool {
+		return cell(p, pagemenubar.SectionMacs, mini).Kind != ""
+	})
+	for _, c := range []struct{ section, row, key string }{{pagemenubar.SectionMacs, mini, "cpu:" + mini}, {pagemenubar.SectionServers, "infra", "cpuh:infra"}} {
+		if got := cell(home, c.section, c.row); got.Kind != page.KindSpark || got.Live != c.key || len(got.Items) < 2 {
+			t.Errorf("%s: its cell %+v, want a spark of %s with a point at least", c.row, got, c.key)
+		}
+		if !slices.Contains(home.Live, c.key) {
+			t.Errorf("home follows %q, want %s among them", home.Live, c.key)
+		}
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.asked[mini] != 2 {
+		t.Errorf("the mini was asked %d times over two ticks, want once a tick for its CPU and its VMs", f.asked[mini])
 	}
 }
 

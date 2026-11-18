@@ -77,6 +77,11 @@ func TestSealCountsTheMarksAndSetsTheState(t *testing.T) {
 	if p := page.Seal(page.Page{Error: &page.Error{Message: "x", Hint: "y"}}); p.State != page.Failed {
 		t.Errorf("a page with an error is %s", p.State)
 	}
+	waiting := page.Pending()
+	waiting.Live = "cpu:x"
+	if p := page.Seal(page.Page{Sections: []page.Section{section(row(page.Row{ID: "a", Mark: page.OK, Cells: []page.Value{waiting}}))}}); p.State != page.Ready {
+		t.Errorf("a page whose only pending cell follows a live key is %s", p.State)
+	}
 	if p := page.Seal(page.Page{}); p.State != page.Ready {
 		t.Errorf("an empty page is %s", p.State)
 	}

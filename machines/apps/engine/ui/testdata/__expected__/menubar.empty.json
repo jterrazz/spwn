@@ -6,7 +6,7 @@
     "machine": "macbook-pro",
     "kind": "computer"
   },
-  "state": "ready",
+  "state": "loading",
   "strip": {
     "cpu": {
       "kind": "percent",
@@ -84,21 +84,12 @@
   },
   "sections": [
     {
-      "id": "hero",
-      "title": "Needs you",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
+      "id": "this-mac",
+      "title": "This Mac"
+    },
+    {
+      "id": "empty",
+      "title": "No VMs yet",
       "items": [
         {
           "empty": {
@@ -136,13 +127,105 @@
             "id": "macbook-pro",
             "mark": "ok",
             "label": "This Mac",
+            "cells": [
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "percent",
+                    "n": 340
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 22
+                  },
+                  {
+                    "kind": "count",
+                    "n": 41
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 36
+                  },
+                  {
+                    "kind": "count",
+                    "n": 28
+                  },
+                  {
+                    "kind": "count",
+                    "n": 31
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  }
+                ],
+                "live": "cpu:macbook-pro"
+              }
+            ],
             "detail": {
-              "kind": "text",
-              "text": "0 VMs"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "online"
+                },
+                {
+                  "kind": "text",
+                  "text": "0 VMs",
+                  "pri": 2
+                },
+                {
+                  "kind": "pending",
+                  "label": "Disk",
+                  "live": "disk:macbook-pro",
+                  "pri": 1
+                }
+              ]
             },
             "glyph": {
               "kind": "desktop",
-              "ring": "cpu:macbook-pro"
+              "signal": "well"
             },
             "trail": "value",
             "quick": "new-vm:macbook-pro",
@@ -168,8 +251,88 @@
           }
         }
       ],
-      "uncounted": true,
-      "card": "flush"
+      "uncounted": true
+    },
+    {
+      "id": "shortcuts",
+      "title": "Shortcuts",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "awake",
+            "mark": "ok",
+            "label": "Keep awake",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "off"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:sun.max",
+              "signal": "quiet"
+            },
+            "trail": "value",
+            "verb": "awake-keep",
+            "nav": "menubar.awake"
+          }
+        },
+        {
+          "row": {
+            "id": "ports",
+            "mark": "ok",
+            "label": "Ports",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:network",
+              "signal": "quiet"
+            },
+            "trail": "value",
+            "nav": "menubar.ports"
+          }
+        },
+        {
+          "row": {
+            "id": "accounts",
+            "mark": "ok",
+            "label": "Accounts",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:key",
+              "signal": "quiet"
+            },
+            "trail": "value",
+            "nav": "menubar.accounts"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        }
+      ],
+      "uncounted": true
     },
     {
       "id": "needs-you",
@@ -1245,6 +1408,22 @@
       "sheet": "hint:add-mac"
     },
     {
+      "label": "Keep This Mac awake",
+      "on": "row",
+      "rows": [
+        "awake"
+      ],
+      "priority": 4,
+      "mutates": true,
+      "id": "awake-keep",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "For": "14400000000000"
+        }
+      }
+    },
+    {
       "key": "cmd+t",
       "label": "Open station in Terminal",
       "on": "menu",
@@ -1459,15 +1638,92 @@
         "terminal": true
       },
       "icon": "terminal"
+    },
+    {
+      "label": "Keep This Mac awake",
+      "on": "menu",
+      "id": "title:awake"
+    },
+    {
+      "label": "For 1 hr",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep:1h@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "For": "3600000000000",
+          "Lid": "false"
+        }
+      }
+    },
+    {
+      "label": "For 4 hr",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep:4h@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "For": "14400000000000",
+          "Lid": "false"
+        }
+      }
+    },
+    {
+      "label": "Until 18:00",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep-until@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "Lid": "false",
+          "Until": "\"0001-01-01T18:00:00Z\""
+        }
+      }
+    },
+    {
+      "key": "cmd+e",
+      "label": "Awake of all Macs",
+      "on": "menu",
+      "id": "open:awake",
+      "icon": "sun.max"
+    },
+    {
+      "label": "More options for Awake",
+      "on": "menu",
+      "id": "menu:awake",
+      "submenu": [
+        "title:awake",
+        "keep:1h@awake",
+        "keep:4h@awake",
+        "keep-until@awake",
+        "-",
+        "open:awake"
+      ]
     }
   ],
   "badge": {
     "label": "all machines are fine"
   },
-  "header": {},
+  "header": {
+    "title": "Station",
+    "search": "Find a machine, a port, an action"
+  },
   "live": [
     "cpu:macbook-pro",
     "memory:macbook-pro",
-    "net:macbook-pro"
+    "net:macbook-pro",
+    "disk:macbook-pro"
   ]
 }

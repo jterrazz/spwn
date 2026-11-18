@@ -42,7 +42,7 @@ func TestCheckRefusesWhatThePanelCannotDraw(t *testing.T) {
 		"live key \"cpu:infra\" is no live key":        panel(page.Page{Sections: []page.Section{panelSection(marked(page.Row{Cells: []page.Value{{Kind: page.KindPercent, Live: "cpu:infra"}}}))}}),
 		"ring \"cpu:mac-mini\" is no live key":         panel(page.Page{Header: &page.Header{Glyph: page.Glyph{Kind: "desktop", Ring: "cpu:mac-mini"}}}),
 		"a short wording carries its priority":         panel(page.Page{Sections: []page.Section{{ID: "s", Title: "S", Role: page.Summary, Caption: []page.Value{{Kind: page.KindText, Text: "on mac-mini", Short: "mini"}}}}}),
-		"a tile carries its number":                    panel(page.Page{Sections: []page.Section{{ID: "s", Title: "S", Card: page.CardTiles, Items: []page.Item{{Tile: &page.Tile{Caption: "VMs"}}}}}}),
+		"its card \"tiles\" is no card":                panel(page.Page{Sections: []page.Section{{ID: "s", Title: "S", Card: "tiles"}}}),
 		"a sheet action carries its form":              panel(page.Page{Actions: []page.Action{{ID: "new-vm", Sheet: page.SheetNewVM}}}),
 		"a destructive action carries a confirm":       panel(page.Page{Actions: []page.Action{{ID: "delete", Destructive: true}}}),
 		"button \"attach\" is no action":               panel(page.Page{Footer: &page.Footer{Kind: page.FooterSSH, Buttons: []string{"attach"}}}),

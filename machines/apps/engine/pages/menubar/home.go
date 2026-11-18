@@ -1,61 +1,77 @@
 package menubar
 
 import (
+	"cmp"
+	"slices"
 	"strconv"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/awake"
+	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
+	pagemachines "github.com/jterrazz/studio-station/apps/engine/pages/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 )
 
 const (
-	SectionTiles   = "tiles"
-	SectionServers = "servers"
-	SectionMacs    = "macs"
+	SectionNeedsRows = "needs"
+	SectionServers   = "servers"
+	SectionMacs      = "macs"
+	SectionEmpty     = "empty"
+	SectionShortcuts = "shortcuts"
 
-	TilePorts    = "ports"
-	TileAccounts = "accounts"
-	TileAwake    = "awake"
+	RowPorts    = "ports"
+	RowAccounts = "accounts"
 
 	RowAddMac = "add-mac"
 
 	ActionNewVMOn = "new-vm:"
+
+	searchPrompt = "Find a machine, a port, an action"
 )
 
-// value: what Home's sections below the hero read: the fleet, This Mac's
-// name, the upkeep ranked, the clock.
+// value: what Home's sections read: the fleet, This Mac's name, the needs
+// and the upkeep ranked, the clock.
 type homeReading struct {
 	r      Reading
 	self   string
+	needs  []Need
 	upkeep []Need
 	now    time.Time
+	stale  string
 }
 
-// invariant: SPEC A4 Home 2-5: under the hero, the three tiles, then the
-// servers and the Macs, each one flush card; the empty fleet
-// keeps only its Macs.
-func homeSections(r Reading, self string, upkeep []Need) ([]page.Section, []page.Action) {
-	if r.All == nil {
-		return nil, nil
-	}
-	h := homeReading{r: r, self: self, upkeep: upkeep, now: r.now()}
+// invariant: Home is the V3 panel, one kind per section, in one order:
+// what needs you (only when something does), This Mac's measures under its
+// head, the servers, the VMs counted, the Macs, then the Keep awake, Ports
+// and Accounts rows; an empty fleet keeps its empty state and its Macs.
+func homeSections(r Reading, self string) ([]page.Section, []page.Action) {
+	ranked, upkeep := needsOf(r.needsReading(), self)
+	h := homeReading{r: r, self: self, needs: ranked, upkeep: upkeep, now: r.now(), stale: staleMac(r, self)}
 	var sections []page.Section
-	var actions []page.Action
-	if !empty(*r.All) {
-		tiles, toggle := h.tiles()
-		sections = append(sections, tiles)
-		actions = append(actions, toggle)
-	}
-	if s, ok := h.servers(); ok {
+	actions := verbs(ranked)
+	if s, ok := h.needsRows(); ok {
 		sections = append(sections, s)
+	}
+	sections = append(sections, h.thisMac())
+	if empty(*r.All) {
+		sections = append(sections, page.Section{ID: SectionEmpty, Title: "No VMs yet", Card: page.CardEmpty, Items: []page.Item{{Empty: h.empty()}}})
+	} else {
+		if s, ok := h.servers(); ok {
+			sections = append(sections, s)
+		}
+		if s, ok := h.vms(); ok {
+			sections = append(sections, s)
+		}
 	}
 	macs, more := h.macs()
 	sections = append(sections, macs)
 	actions = append(actions, more...)
+	shortcuts, toggle := h.shortcuts()
+	sections = append(sections, shortcuts)
+	actions = append(actions, toggle)
 	for _, m := range r.All.Macs {
 		for _, vm := range m.VMs {
 			if alive(vm) {
@@ -78,24 +94,240 @@ func homeSections(r Reading, self string, upkeep []Need) ([]page.Section, []page
 
 func alive(vm model.VM) bool { return vm.State == model.Running || vm.State == model.Creating }
 
-// value: the three tiles, Ports, Accounts and Awake: each its caption and
-// glyph, one number and its word, the page it opens; Awake's glyph its
-// switch.
-func (h homeReading) tiles() (page.Section, page.Action) {
-	toggle := h.awakeToggle()
-	items := []page.Item{{Tile: h.portsTile()}, {Tile: h.accountsTile()}, {Tile: h.awakeTile(toggle)}}
-	return page.Section{ID: SectionTiles, Title: "Tiles", Role: page.Summary, Card: page.CardTiles, Items: items}, toggle
+// value: Needs you, one row per thing that needs you, ranked, each its
+// subject, the Mac it is on, what it is and its verb; a Mac still
+// answering dims the ones of it. No row, no section.
+func (h homeReading) needsRows() (page.Section, bool) {
+	s := page.Section{ID: SectionNeedsRows, Title: "Needs you", Columns: columns(), Uncounted: true}
+	for _, n := range h.needs {
+		row := page.Row{ID: n.Key, Label: n.Subject, Detail: page.Text(n.What), Glyph: n.Glyph, Verb: n.Verb.ID, Nav: n.Nav, Mark: page.Broken, Reason: reasonOf(n.Finding), Signal: h.signal(n)}
+		if len(n.Scope) > 0 && n.Subject != page.MacName(n.Scope[0], h.self) {
+			row.Mac = page.MacName(n.Scope[0], h.self)
+		}
+		s.Items = append(s.Items, page.Item{Row: &row})
+	}
+	return s, len(s.Items) > 0
 }
 
-// value: the Ports tile: how many ports are shared (each shared port,
-// each declared public, each a server's own device carries); red what is
+// value: a need of the Mac still answering is drawn stale.
+func (h homeReading) signal(n Need) page.Signal {
+	if h.stale == "" {
+		return ""
+	}
+	for _, m := range h.r.All.Macs {
+		if page.MacName(m.Name, h.self) == h.stale && n.of(m.Name) {
+			return page.SignalStale
+		}
+	}
+	return ""
+}
+
+// value: This Mac's head over the page's strip, its caption the memory a
+// new VM finds there.
+func (h homeReading) thisMac() page.Section {
+	s := page.Section{ID: SectionThisMac, Title: page.ThisMac}
+	for _, m := range h.r.All.Macs {
+		if c, ok := model.CapacityOf(m); ok && m.ThisMac {
+			s.Caption = []page.Value{page.Text(strconv.FormatInt(c.Free>>30, 10) + " GB free")}
+		}
+	}
+	return s
+}
+
+func (h homeReading) empty() *page.Empty {
+	e := &page.Empty{Text: "No VMs yet", Glyph: symbol("shippingbox", page.SignalQuiet), Actions: []string{ActionNewVM}}
+	for _, m := range h.r.All.Macs {
+		if c, ok := model.CapacityOf(m); ok && m.ThisMac {
+			e.Sub = strconv.FormatInt(c.Free>>30, 10) + " GB free on " + page.ThisMac
+		}
+	}
+	return e
+}
+
+// invariant: every server of the fleet, always first of the machines: a
+// server is the kind that pages you, so a fleet of one server keeps its
+// section of one row.
+func (h homeReading) servers() (page.Section, bool) {
+	s := page.Section{ID: SectionServers, Title: "Servers", Columns: columns(), Uncounted: true}
+	for _, m := range h.r.All.Macs {
+		for _, vm := range m.VMs {
+			if vm.Lifetime == model.AlwaysOn {
+				row := h.vmRow(m, vm)
+				s.Items = append(s.Items, page.Item{Row: &row})
+			}
+		}
+	}
+	return s, len(s.Items) > 0
+}
+
+// value: every VM that is no server, the running first, its head counting
+// them.
+func (h homeReading) vms() (page.Section, bool) {
+	s := page.Section{ID: SectionVMs, Title: "VMs", Columns: columns(), Uncounted: true}
+	var running, others []page.Item
+	for _, m := range h.r.All.Macs {
+		for _, vm := range m.VMs {
+			if vm.Lifetime == model.AlwaysOn {
+				continue
+			}
+			row := h.vmRow(m, vm)
+			if runs(vm.Standing) {
+				running = append(running, page.Item{Row: &row})
+			} else {
+				others = append(others, page.Item{Row: &row})
+			}
+		}
+	}
+	s.Items = slices.Concat(running, others)
+	s.Caption = []page.Value{page.Text(strconv.Itoa(len(s.Items)))}
+	return s, len(s.Items) > 0
+}
+
+// value: a VM's standing counts as running, the one that lists live keys.
+func runs(s model.VMStanding) bool { return s == model.StandingRunning || s == model.StandingHealthy }
+
+// invariant: a VM's row is its standing: the dot its tone draws and its
+// word first. A running or healthy VM adds the memory its process holds
+// and ends in its CPU, a spark from its Mac's readings; every other
+// standing says its lifetime, or what it waits on, and lists no key.
+func (h homeReading) vmRow(m model.MacView, vm model.VM) page.Row {
+	row := page.Row{ID: vm.Name, Label: vm.Name, Mac: page.MacName(m.Name, h.self), Mark: page.OK, Nav: machinePage(vm.Name),
+		Glyph: page.Glyph{Dot: page.DotFill, Signal: toneSignal(string(vm.Standing.Tone()))}}
+	word := page.Text(vm.Standing.Word())
+	readings := h.r.Samples[m.Name]
+	switch vm.Standing {
+	case model.StandingRunning, model.StandingHealthy:
+		row.Trail = "value"
+		row.Cells = []page.Value{liveOf(engine.LiveKey(engine.LiveCPUMac, vm.Name), readings)}
+		row.Detail = page.List(word, liveOf(engine.LiveKey(engine.LiveMemMac, vm.Name), readings))
+	case model.StandingRestarting:
+		if vm.Restart == nil {
+			row.Detail = page.List(word)
+			break
+		}
+		row.Glyph = page.Glyph{Dot: page.DotRing, Progress: (vm.Restart.Step - 1) * 1000 / model.RestartSteps, Signal: page.SignalActive}
+		row.Detail = page.List(word, page.Text(vm.Restart.Counted()))
+	case model.StandingDown:
+		row.Mark, row.Reason = page.Broken, page.Down
+		if since := vm.CheckStatus.Since; !since.IsZero() {
+			word = page.Text(vm.Standing.Word() + " since " + (needSaid{r: NeedsReading{Zone: h.r.Zone}}).at(since))
+		}
+		word.Signal = page.SignalFailing
+		row.Detail = page.List(word)
+	case model.StandingCreating:
+		row.Glyph.Dot = page.DotRing
+		row.Detail = page.List(word, pagemachines.Lifetime(vm.Lifetime))
+	case model.StandingStopped, model.StandingSuspended, model.StandingNotSeen:
+		row.Mark, row.Reason = page.Absent, page.Stopped
+		row.Glyph.Dot = page.DotRing
+		row.Detail = page.List(word, pagemachines.Lifetime(vm.Lifetime))
+	}
+	if h.stale != "" && page.MacName(m.Name, h.self) == h.stale {
+		row.Signal = page.SignalStale
+	}
+	return row
+}
+
+// value: a live key's value as a row draws it, pending until its machine
+// is read.
+func liveOf(key string, readings []activity.Reading) page.Value {
+	return live(pendingOr(LiveValue(key, readings)), key)
+}
+
+// invariant: one row per Mac: its standing's dot and word, then, while it
+// is online, how many VMs it holds and its disk used, the shortest part
+// dropped first, and its CPU as a spark; an asleep or unseen Mac lists no
+// key. A fleet of one Mac adds the row that adds another.
+func (h homeReading) macs() (page.Section, []page.Action) {
+	s := page.Section{ID: SectionMacs, Title: "Macs", Columns: columns(), Uncounted: true}
+	var actions []page.Action
+	for _, m := range h.r.All.Macs {
+		row := h.macRow(m)
+		s.Items = append(s.Items, page.Item{Row: &row})
+	}
+	if len(h.r.All.Macs) == 1 {
+		s.Items = append(s.Items, page.Item{Row: &page.Row{ID: RowAddMac, Label: "Add a Mac to run VMs on it", Mark: page.OK, Glyph: symbol("plus", page.SignalActive), Verb: ActionAddMac}})
+		actions = append(actions, addMacHint(page.Action{ID: ActionAddMac, Label: "Add a Mac", On: page.OnRow, Rows: []string{RowAddMac}, Priority: 4}))
+	}
+	return s, actions
+}
+
+func (h homeReading) macRow(m model.MacView) page.Row {
+	glyph := "desktop"
+	if m.Laptop {
+		glyph = "laptop"
+	}
+	row := page.Row{ID: m.Name, Label: model.Label(*h.r.All, m), Mark: page.OK, Nav: machinePage(m.Name),
+		Glyph: page.Glyph{Kind: glyph, Signal: toneSignal(string(m.Standing.Tone()))}}
+	word := page.Text(m.Standing.Word())
+	if m.Standing != model.MacOnline {
+		row.Detail = page.List(word)
+		if m.Standing == model.MacAsleep {
+			row.Signal = page.SignalAsleep
+			row.Detail = page.List(word, page.Text("seen "+minutes(h.now.Sub(m.Answered))+" ago"))
+		}
+		return row
+	}
+	readings := h.r.Samples[m.Name]
+	row.Quick = ActionNewVMOn + m.Name
+	row.Trail = "value"
+	row.Cells = []page.Value{liveOf(engine.LiveKey(engine.LiveCPU, m.Name), readings)}
+	disk := liveOf(engine.LiveKey(engine.LiveDisk, m.Name), readings)
+	disk.Label = "Disk"
+	row.Detail = page.List(append([]page.Value{word}, shortestFirst(page.Text(counted(len(m.VMs), "VM", "VMs")), disk)...)...)
+	if h.stale != "" && page.MacName(m.Name, h.self) == h.stale {
+		row.Signal = page.SignalStale
+	}
+	return row
+}
+
+// value: the parts after a standing's word, each dropped by its length,
+// the shortest first: the highest priority goes to the shortest.
+func shortestFirst(parts ...page.Value) []page.Value {
+	order := slices.Clone(parts)
+	slices.SortStableFunc(order, func(a, b page.Value) int { return cmp.Compare(len(partWords(b)), len(partWords(a))) })
+	out := slices.Clone(parts)
+	for pri, v := range order {
+		for i := range out {
+			if partWords(out[i]) == partWords(v) {
+				out[i].Pri = pri + 1
+			}
+		}
+	}
+	return out
+}
+
+// value: a part's words as the line counts them: its label and its text,
+// or its unit's room for a number ("Disk 83 %").
+func partWords(v page.Value) string {
+	if v.Kind == page.KindText {
+		return v.Text
+	}
+	return v.Label + " 000 %"
+}
+
+// value: the rows under the machines, each its glyph, its word and the
+// page it opens: Keep awake with its switch, then Ports and Accounts.
+func (h homeReading) shortcuts() (page.Section, page.Action) {
+	toggle := h.awakeToggle()
+	awakeRow := page.Row{ID: RowAwake, Label: "Keep awake", Mark: page.OK, Glyph: symbol("sun.max", page.SignalQuiet), Nav: AwakeID, Verb: toggle.ID, Trail: "value"}
+	awakeRow.Cells = []page.Value{page.Pending()}
+	if r := h.r.Awake; r != nil {
+		awakeRow.Cells = []page.Value{page.Text(cmpWord(awakeWords(*r), "off"))}
+	}
+	items := []page.Item{{Row: &awakeRow}, {Row: h.portsRow()}, {Row: h.accountsRow()}}
+	return page.Section{ID: SectionShortcuts, Title: "Shortcuts", Columns: columns(), Uncounted: true, Items: items}, toggle
+}
+
+// value: the Ports row: how many ports are shared (each shared port, each
+// declared public, each a server's own device carries); red what is
 // exposed, or what a server down leaves unreachable; what a server
 // restarting is starting.
-func (h homeReading) portsTile() *page.Tile {
-	t := &page.Tile{Caption: "Ports", Glyph: symbol("network", page.SignalQuiet), Nav: PortsID, Tip: page.Texts("Ports"), Key: keyPorts}
+func (h homeReading) portsRow() *page.Row {
+	row := &page.Row{ID: RowPorts, Label: "Ports", Mark: page.OK, Glyph: symbol("network", page.SignalQuiet), Nav: PortsID, Trail: "value"}
 	if h.r.Ports == nil {
-		t.Number = page.Pending()
-		return t
+		row.Cells = []page.Value{page.Pending()}
+		return row
 	}
 	shared, exposed, unreachable, starting := 0, 0, 0, 0
 	for _, m := range h.r.Ports.Macs {
@@ -115,17 +347,19 @@ func (h homeReading) portsTile() *page.Tile {
 			}
 		}
 	}
-	t.Number, t.Word = page.Count(int64(shared), ""), "shared"
+	cell := page.Text(strconv.Itoa(shared) + " shared")
 	switch {
 	case exposed > 0:
-		t.Number, t.Word, t.Signal = page.Count(int64(exposed), ""), "exposed", page.SignalFailing
+		cell = page.Text(strconv.Itoa(exposed) + " exposed")
+		cell.Signal = page.SignalFailing
 	case unreachable > 0:
-		t.Number, t.Word, t.Signal = page.Count(int64(unreachable), ""), "unreachable", page.SignalFailing
+		cell = page.Text(strconv.Itoa(unreachable) + " unreachable")
+		cell.Signal = page.SignalFailing
 	case starting > 0:
-		t.Number, t.Word = page.Count(int64(starting), ""), "starting"
+		cell = page.Text(strconv.Itoa(starting) + " starting")
 	}
-	t.Tip = page.Texts(strconv.FormatInt(t.Number.N, 10) + " " + t.Word)
-	return t
+	row.Cells = []page.Value{cell}
+	return row
 }
 
 func (h homeReading) vm(name string) (model.VM, bool) {
@@ -139,65 +373,35 @@ func (h homeReading) vm(name string) (model.VM, bool) {
 	return model.VM{}, false
 }
 
-// value: the Accounts tile: what is signed out on any Mac, as its upkeep
+// value: the Accounts row: what is signed out on any Mac, as its upkeep
 // says it, else how many passwords are granted to machines.
-func (h homeReading) accountsTile() *page.Tile {
-	t := &page.Tile{Caption: "Accounts", Glyph: symbol("key", page.SignalQuiet), Nav: AccountsID, Tip: page.Texts("Accounts", "All machines"), Key: keyAccounts}
+func (h homeReading) accountsRow() *page.Row {
+	row := &page.Row{ID: RowAccounts, Label: "Accounts", Mark: page.OK, Glyph: symbol("key", page.SignalQuiet), Nav: AccountsID, Trail: "value"}
 	out := 0
 	for _, n := range h.upkeep {
 		if n.Finding.Section == section.Accounts {
 			out++
 		}
 	}
-	if out > 0 {
-		t.Number, t.Word, t.Signal = page.Count(int64(out), ""), "signed out", page.SignalWaits
-		return t
+	switch {
+	case out > 0:
+		cell := page.Text(strconv.Itoa(out) + " signed out")
+		cell.Signal = page.SignalWaits
+		row.Cells = []page.Value{cell}
+	case h.r.SignIns == nil:
+		row.Cells = []page.Value{page.Pending()}
+	default:
+		row.Cells = []page.Value{page.Text(strconv.Itoa(h.r.SignIns.grants()) + " granted")}
 	}
-	if h.r.SignIns == nil {
-		t.Number = page.Pending()
-		return t
-	}
-	t.Number, t.Word = page.Count(int64(h.r.SignIns.grants()), ""), "granted"
-	return t
+	return row
 }
 
-// value: the Awake tile: the time This Mac stays awake, or Off; its glyph
-// the switch, the sun while it holds, the moon while it may sleep.
-func (h homeReading) awakeTile(toggle page.Action) *page.Tile {
-	t := &page.Tile{Caption: "Awake", Toggle: toggle.ID, Nav: AwakeID, Glyph: symbol("moon", page.SignalQuiet), Number: page.Text("Off"), Tip: page.Texts("Awake", durations), Key: keyAwake}
-	r := h.r.Awake
-	if r == nil {
-		t.Number = page.Pending()
-		return t
-	}
-	switch r.Mode() {
-	case awake.NeverSleeps:
-		t.Glyph = symbol("sun.max", page.SignalWaits)
-		t.Number = page.Text("Always")
-	case awake.AwakeUntil:
-		t.Tip = page.Texts("Awake "+awakeWords(*r), durations)
-		t.Glyph = symbol("sun.max", page.SignalWaits)
-		t.Number, t.Word = page.Text(hoursLeft(r.Session.Until.Sub(h.now))), "left"
-	case awake.StoppedByGuard, awake.SleepsNormally:
-	}
-	return t
-}
-
-// value: a time left as the tile says it, in whole hours from one hour
-// on: "4 hr", "35 min".
-func hoursLeft(d time.Duration) string {
-	if d >= time.Hour {
-		return strconv.Itoa(int(d/time.Hour)) + " hr"
-	}
-	return minutes(d)
-}
-
-// invariant: the Awake tile's switch is one click: it lets This Mac sleep
+// invariant: the Keep awake switch is one click: it lets This Mac sleep
 // while a keep-awake holds, else keeps it awake for the default term; the
 // other terms are its menu's.
 func (h homeReading) awakeToggle() page.Action {
 	a := awakeAction(h.r.Awake)
-	a.Label, a.Rows = "Keep "+page.ThisMac+" awake", []string{TileAwake}
+	a.Label, a.Rows = "Keep "+page.ThisMac+" awake", []string{RowAwake}
 	if a.ID == ActionAwakeOff {
 		a.Picked = true
 		return a
@@ -205,145 +409,4 @@ func (h homeReading) awakeToggle() page.Action {
 	a.Form = nil
 	a.Run.In = map[string]string{"For": strconv.FormatInt(int64(4*time.Hour), 10)}
 	return a
-}
-
-func (h homeReading) stale(m model.MacView) bool {
-	return !m.Asleep && model.Unheard(m, h.now)
-}
-
-// invariant: SPEC A4 Home 4: one row per server: healthy with its time up
-// and its ports, red while down, its ring while it restarts, hollow while
-// its Mac is checked; no uptime strip.
-func (h homeReading) servers() (page.Section, bool) {
-	s := page.Section{ID: SectionServers, Title: "Servers", Card: page.CardFlush, Columns: columns(), Uncounted: true}
-	for _, m := range h.r.All.Macs {
-		for _, vm := range m.VMs {
-			if vm.Lifetime != model.AlwaysOn {
-				continue
-			}
-			row := h.serverRow(m, vm)
-			s.Items = append(s.Items, page.Item{Row: &row})
-		}
-	}
-	return s, len(s.Items) > 0
-}
-
-func (h homeReading) serverRow(m model.MacView, vm model.VM) page.Row {
-	row := page.Row{ID: vm.Name, Label: vm.Name, Mark: page.OK, Nav: machinePage(vm.Name)}
-	switch {
-	case h.stale(m):
-		row.Glyph, row.Signal = page.Glyph{Dot: page.DotRing, Signal: page.SignalStale}, page.SignalStale
-		row.Detail = page.Texts("seen "+ago(h.now.Sub(m.Answered))+" ago", "checking")
-	case vm.Restart != nil:
-		row.Glyph = page.Glyph{Dot: page.DotRing, Progress: (vm.Restart.Step - 1) * 1000 / model.RestartSteps, Signal: page.SignalActive}
-		row.Detail = page.Texts("restarting", vm.Restart.Counted())
-	case model.Down(vm):
-		row.Mark, row.Reason = page.Broken, page.Down
-		row.Glyph = page.Glyph{Dot: page.DotFill, Signal: page.SignalFailing}
-		down := page.Text("down")
-		if since := vm.CheckStatus.Since; !since.IsZero() {
-			down = page.Text("down since " + (needSaid{r: NeedsReading{Zone: h.r.Zone}}).at(since))
-		}
-		down.Signal = page.SignalFailing
-		row.Detail = page.List(down)
-	case vm.State != model.Running:
-		row.Mark, row.Reason = page.Absent, page.Stopped
-		row.Glyph = page.Glyph{Dot: page.DotSquare, Signal: page.SignalQuiet}
-		row.Detail = page.Texts("stopped")
-	default:
-		row.Glyph = page.Glyph{Dot: page.DotFill, Signal: page.SignalWell}
-		parts := []string{health(vm)}
-		if !vm.BootAt.IsZero() && h.now.After(vm.BootAt) {
-			parts = append(parts, "up "+days(h.now.Sub(vm.BootAt)))
-		}
-		if n := h.ports(vm.Name); n > 0 {
-			parts = append(parts, counted(n, "port", "ports"))
-		}
-		row.Detail = page.Texts(parts...)
-	}
-	return row
-}
-
-func (h homeReading) ports(vm string) int {
-	if h.r.Ports == nil {
-		return 0
-	}
-	n := 0
-	for _, m := range h.r.Ports.Macs {
-		for _, p := range m.Ports {
-			if p.Machine.Name == vm && p.Reach != ports.ThisMachine {
-				n++
-			}
-		}
-	}
-	return n
-}
-
-// invariant: SPEC A4 Home 5: one row per Mac: its CPU ring, what runs and
-// waits there and its upkeep (the upkeep dropped first), its memory free
-// for a new VM, New VM in its quick slot; an asleep Mac dimmed; a fleet
-// of one Mac adds the row that adds another.
-func (h homeReading) macs() (page.Section, []page.Action) {
-	s := page.Section{ID: SectionMacs, Title: "Macs", Card: page.CardFlush, Columns: columns(), Uncounted: true}
-	var actions []page.Action
-	for _, m := range h.r.All.Macs {
-		row := h.macRow(m)
-		s.Items = append(s.Items, page.Item{Row: &row})
-	}
-	if len(h.r.All.Macs) == 1 {
-		s.Items = append(s.Items, page.Item{Row: &page.Row{ID: RowAddMac, Label: "Add a Mac to run VMs on it", Mark: page.OK, Glyph: symbol("plus", page.SignalActive), Verb: ActionAddMac}})
-		actions = append(actions, addMacHint(page.Action{ID: ActionAddMac, Label: "Add a Mac", On: page.OnRow, Rows: []string{RowAddMac}, Priority: 4}))
-	}
-	return s, actions
-}
-
-func (h homeReading) macRow(m model.MacView) page.Row {
-	label := model.Label(*h.r.All, m)
-	glyph := "desktop"
-	if m.Laptop {
-		glyph = "laptop"
-	}
-	row := page.Row{ID: m.Name, Label: label, Mark: page.OK, Nav: machinePage(m.Name), Trail: "value",
-		Glyph: page.Glyph{Kind: glyph, Ring: engine.LiveKey(engine.LiveCPU, m.Name)}}
-	switch {
-	case m.Asleep:
-		row.Glyph.Signal, row.Signal = page.SignalAsleep, page.SignalAsleep
-		row.Detail = page.Texts("asleep", "seen "+minutes(h.now.Sub(m.Answered))+" ago")
-		row.Trail = ""
-		return row
-	case h.stale(m):
-		row.Signal = page.SignalStale
-		row.Detail = page.Texts("seen "+ago(h.now.Sub(m.Answered))+" ago", "checking")
-	default:
-		row.Detail = h.macFacts(m)
-	}
-	row.Quick = ActionNewVMOn + m.Name
-	if c, ok := model.CapacityOf(m); ok {
-		row.Cells = []page.Value{page.Text(strconv.FormatInt(c.Free>>30, 10) + " GB free")}
-	}
-	return row
-}
-
-// value: a Mac's sub line, by priority: what is down there, its upkeep
-// (dropped first); with none of them, how many VMs it holds.
-func (h homeReading) macFacts(m model.MacView) page.Value {
-	down := 0
-	for _, vm := range m.VMs {
-		if vm.Lifetime == model.AlwaysOn && model.Down(vm) {
-			down++
-		}
-	}
-	var parts []page.Value
-	if down > 0 {
-		v := page.Text(strconv.Itoa(down) + " down")
-		v.Signal = page.SignalFailing
-		parts = append(parts, v)
-	}
-	if n := len(scoped(h.upkeep, m.Name)); n > 0 {
-		parts = append(parts, dropFirst(page.Text(strconv.Itoa(n)+" upkeep"), 1))
-	}
-	if len(parts) == 0 {
-		return page.Text(counted(len(m.VMs), "VM", "VMs"))
-	}
-	return page.List(parts...)
 }

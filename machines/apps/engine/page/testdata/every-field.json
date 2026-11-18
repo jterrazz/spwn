@@ -287,37 +287,6 @@
           }
         },
         {
-          "tile": {
-            "caption": "VMs",
-            "glyph": {
-              "kind": "server"
-            },
-            "number": {
-              "kind": "count",
-              "n": 3
-            },
-            "word": "running",
-            "signal": "well",
-            "toggle": "awake",
-            "nav": "menubar.awake",
-            "plus": "+1",
-            "tip": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "3 running"
-                },
-                {
-                  "kind": "text",
-                  "text": "right-click for a term"
-                }
-              ]
-            },
-            "key": "cmd+e"
-          }
-        },
-        {
           "gauge": {
             "title": "CPU",
             "note": "4 cores",
@@ -694,6 +663,7 @@
   "header": {
     "back": "Back",
     "title": "linux-1",
+    "search": "Find a machine",
     "glyph": {
       "kind": "workspace"
     },

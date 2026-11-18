@@ -97,7 +97,7 @@ So `cut -f2` is a row's name. `--json` prints the call's document, `station.<cal
 
 ## Graphs
 
-Activity is the one section with graphs, and the menu bar draws them; the CLI prints values, a pipe and `--json` the numbers. A graph is a cell of the kind `page.KindSpark`: one point per sample of the engine's history, each 0 to 100 of its measure's own scale (CPU, memory, swap, disk read and write, network in and out). A terminal's renderer draws it as a sparkline of the eight levels `▁▂▃▄▅▆▇█` (`token.Spark`); the menu bar's machine page draws charts from the same points ([Activity](../reference/activity.md#graphs)). A measure with no points has no graph, never a flat line of zeros. Each graph sits after its line's value, so a screen reader and `NO_COLOR` keep the number.
+Activity is the one section with graphs, and the menu bar draws them; the CLI prints values, a pipe and `--json` the numbers. The menu bar's Home draws one more, the same mark at row size: the CPU of every running VM and every online Mac, a spark at the end of its row, its memory and disk staying words; a row of any other standing draws none. A graph is a cell of the kind `page.KindSpark`: one point per sample of the engine's history, each 0 to 100 of its measure's own scale (CPU, memory, swap, disk read and write, network in and out). A terminal's renderer draws it as a sparkline of the eight levels `▁▂▃▄▅▆▇█` (`token.Spark`); the menu bar's machine page draws charts from the same points ([Activity](../reference/activity.md#graphs)). A measure with no points has no graph, never a flat line of zeros. Each graph sits after its line's value, so a screen reader and `NO_COLOR` keep the number.
 
 ## Related
 

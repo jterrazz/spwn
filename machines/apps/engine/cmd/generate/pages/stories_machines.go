@@ -239,7 +239,7 @@ func proActivity() pageactivity.View {
 }
 
 func (f Scene) reading() pagemenubar.Reading {
-	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, SignIns: f.signIns(f.SignedIn), Asks: Levels}
+	return pagemenubar.Reading{Home: &f.Home, Samples: f.homeSamples(), All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, SignIns: f.signIns(f.SignedIn), Asks: Levels}
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {
@@ -393,4 +393,14 @@ func miniStillAnswering(f *Scene) {
 	f.Away = nil
 	f.Macs = f.Macs[1:]
 	f.All.Macs[1].Answered = storyNow.Add(-40 * time.Second)
+}
+
+// value: the readings Home draws: every Mac's own, each carrying what its
+// running VMs take, on a fixed curve per VM.
+func (f Scene) homeSamples() map[string][]activity.Reading {
+	out := map[string][]activity.Reading{}
+	for _, m := range f.All.Macs {
+		out[m.Name] = withVMs(f.Samples[m.Name], m.VMs)
+	}
+	return out
 }

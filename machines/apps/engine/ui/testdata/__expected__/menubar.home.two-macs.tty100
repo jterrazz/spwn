@@ -1,10 +1,15 @@
-All machines are fine · infra healthy · up 12 days · all 2 Macs answer
-
-Tiles
-Servers  ● infra · healthy · up 12 days
+This Mac
+Servers  ● infra · healthy
+VMs  2
+  ● linux-1  running
+  ○ api      stopped · Persistent
 Macs
-  ● This Mac  5 upkeep
-  ● mac-mini  1 VM
+  ● This Mac  ▁▂▂▃▃▂▃▄▄▃▂▃▄▃▃▃ 34%  online · 2 VMs
+  ● mac-mini                        online · 1 VM
+Shortcuts
+  ● Keep awake  until 18:00
+  ● Ports       2 shared
+  ● Accounts    1 signed out
 Needs you  5 things need you
   ◐ 2 app updates         station apps update
   ✗ npm sign-in expired   npm login

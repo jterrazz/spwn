@@ -374,10 +374,10 @@ func homeMenus(r Reading, p page.Page) page.Page {
 		}
 		withRowMenu(&p, h.Name, macRowMenu(p, h, label))
 	}
-	if r.Awake != nil && slices.ContainsFunc(p.Sections, func(s page.Section) bool { return s.ID == SectionTiles }) {
+	if r.Awake != nil && slices.ContainsFunc(p.Sections, func(s page.Section) bool { return s.ID == SectionShortcuts }) {
 		am := awakeMenu(*r.Awake, r.now(), r.Zone)
 		p.Actions = append(p.Actions, am.added...)
-		p.Actions = append(p.Actions, page.Action{ID: ActionMenu + ":" + TileAwake, Label: "More options for Awake", On: OnMenu, Submenu: am.ids})
+		p.Actions = append(p.Actions, page.Action{ID: ActionMenu + ":" + RowAwake, Label: "More options for Awake", On: OnMenu, Submenu: am.ids})
 	}
 	return p
 }
@@ -408,13 +408,13 @@ func macRowMenu(p page.Page, h model.MacView, label string) menu {
 // the hour, let sleep; then Awake of all Macs.
 func awakeMenu(r awake.Report, now time.Time, zone *time.Location) menu {
 	var m menu
-	m.title(TileAwake, "Keep "+page.ThisMac+" awake")
+	m.title(RowAwake, "Keep "+page.ThisMac+" awake")
 	for _, a := range keeps(r, now, zone) {
 		switch {
 		case strings.HasPrefix(a.ID, ActionKeep):
-			m.add(menuCopy(a, menuID(a.ID, TileAwake), "For "+a.Label, ""))
+			m.add(menuCopy(a, menuID(a.ID, RowAwake), "For "+a.Label, ""))
 		case a.ID == ActionUntil:
-			a = menuCopy(a, menuID(a.ID, TileAwake), "", "")
+			a = menuCopy(a, menuID(a.ID, RowAwake), "", "")
 			until := a.Form.Fields[0].Default
 			if a.Picked {
 				until = moment(r.Session.Until)
@@ -427,10 +427,10 @@ func awakeMenu(r awake.Report, now time.Time, zone *time.Location) menu {
 	m.next()
 	for _, a := range keeps(r, now, zone) {
 		if a.ID == ActionLetGo {
-			m.add(menuCopy(a, menuID(a.ID, TileAwake), "", "moon"))
+			m.add(menuCopy(a, menuID(a.ID, RowAwake), "", "moon"))
 		}
 	}
-	m.add(page.Action{ID: ActionOpenRow + TileAwake, Label: "Awake of all Macs", Icon: "sun.max", Key: "cmd+e", On: OnMenu})
+	m.add(page.Action{ID: ActionOpenRow + RowAwake, Label: "Awake of all Macs", Icon: "sun.max", Key: "cmd+e", On: OnMenu})
 	return m
 }
 

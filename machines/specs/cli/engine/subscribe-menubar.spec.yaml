@@ -14,7 +14,7 @@ runs:
           ["1",["menubar"]]
           loading
           ready
-          ["menubar",["hero","macs","needs-you","machines"]]
+          ["menubar",["this-mac","empty","macs","shortcuts","needs-you","machines"]]
           [["new-vm","machines.create-workspace"],["open-station","terminal"],["stop-all","engine.stop"]]
-          [["new-vm:x","machines.create-workspace",["x"]],["add-mac",null,["add-mac"]]]
+          [["new-vm:x","machines.create-workspace",["x"]],["add-mac",null,["add-mac"]],["awake-keep","awake.keep",["awake"]]]
           1

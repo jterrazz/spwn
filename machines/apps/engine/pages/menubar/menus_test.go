@@ -154,11 +154,11 @@ func TestTheAwakeTilesMenuOffersItsTerms(t *testing.T) {
 	w.r.Awake = &awake.Report{Now: heroNow, Engine: awake.EngineRunning, Mac: heroPro, Caps: coremachine.Capabilities{Engine: true},
 		Session: &awake.Session{StartedAt: heroNow.Add(-time.Hour), For: 4 * time.Hour, Until: heroNow.Add(3 * time.Hour)}}
 	p := homeOf(t, w)
-	got := menuWords(p, actionOf(p, ActionMenu+":"+TileAwake).Submenu)
+	got := menuWords(p, actionOf(p, ActionMenu+":"+RowAwake).Submenu)
 	if !slices.Equal(got[:3], []string{"Keep This Mac awake", "For 1 hr", "For 4 hr"}) || got[len(got)-1] != "Awake of all Macs" || !slices.Contains(got, "Let it sleep") {
 		t.Fatalf("the Awake tile's menu %q", got)
 	}
-	if !actionOf(p, menuID(ActionKeep+"4h", TileAwake)).Picked {
+	if !actionOf(p, menuID(ActionKeep+"4h", RowAwake)).Picked {
 		t.Fatalf("the 4 hr term in force is not picked")
 	}
 }

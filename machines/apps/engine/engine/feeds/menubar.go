@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -140,7 +141,7 @@ func (f *menubar) update(ctx context.Context, change func(*pagemenubar.Reading))
 	f.mu.Lock()
 	change(&f.r)
 	f.r.Now, f.r.Zone = f.o.Clock.Now(), f.o.zone()
-	f.r.Samples = f.o.Live.Readings(f.o.ThisMachine.Machine)
+	f.r.Samples = readingsOf(f.o.Live, f.o.ThisMachine.Machine, f.r.All)
 	p := page.Document{Schema: page.Schema, Page: f.draw(f.r)}
 	f.mu.Unlock()
 	select {
@@ -284,4 +285,16 @@ func thisMacPorts(was *ports.AllMachines, thisMac ports.AllMachines) *ports.AllM
 		}
 	}
 	return &out
+}
+
+// value: the readings the ticks kept of This Mac and of every other Mac
+// of the fleet, by name: each Mac's ring serves its VMs' keys too.
+func readingsOf(l *Live, thisMac string, all *machines.AllMachines) map[string][]activity.Reading {
+	out := map[string][]activity.Reading{thisMac: l.Readings(thisMac)}
+	if all != nil {
+		for _, m := range all.Macs {
+			out[m.Name] = l.Readings(m.Name)
+		}
+	}
+	return out
 }

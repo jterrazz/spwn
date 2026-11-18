@@ -2438,7 +2438,7 @@ export type PageField = {
 export type PageFooter = {
     buttons?: string[];
     copy?: PageValue;
-    kind: '' | 'find' | 'none' | 'ssh' | 'terminal-list';
+    kind: '' | 'none' | 'ssh' | 'terminal-list';
     note?: string;
 };
 
@@ -2479,6 +2479,7 @@ export type PageHeader = {
     back?: string;
     buttons?: string[];
     glyph?: PageGlyph;
+    search?: string;
     stale?: PageValue;
     title?: string;
 };
@@ -2500,7 +2501,6 @@ export type PageItem = {
     log?: PageLog;
     note?: PageNote;
     row?: PageRow;
-    tile?: PageTile;
     uptime?: PageUptime;
 };
 
@@ -2583,7 +2583,7 @@ export type PageSection = {
     about?: PageAbout;
     break?: number;
     caption?: PageValue[];
-    card?: 'care' | 'chart' | 'check' | 'empty' | 'exposed' | 'flush' | 'gauges' | 'health' | 'hero' | 'log' | 'now' | 'plain' | 'tiles' | 'uptime' | 'wait';
+    card?: 'care' | 'chart' | 'check' | 'empty' | 'exposed' | 'flush' | 'gauges' | 'health' | 'log' | 'now' | 'plain' | 'uptime' | 'wait';
     columns?: PageColumn[];
     counts?: PageTally[];
     fold?: 'auto' | 'brief' | 'calm' | 'folded' | 'open';
@@ -2636,19 +2636,6 @@ export type PageTally = {
 export type PageTarget = {
     name?: string;
     on?: string;
-};
-
-export type PageTile = {
-    caption?: string;
-    glyph?: PageGlyph;
-    key?: string;
-    nav?: string;
-    number?: PageValue;
-    plus?: string;
-    signal?: 'active' | 'asleep' | 'done' | 'failing' | 'faint' | 'quiet' | 'stale' | 'waits' | 'well';
-    tip?: PageValue;
-    toggle?: string;
-    word?: string;
 };
 
 export type PageUptime = {

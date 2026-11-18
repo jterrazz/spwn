@@ -24,8 +24,11 @@ type Page struct {
 }
 
 type Header struct {
-	Back    string   `json:"back,omitempty"`
-	Title   string   `json:"title,omitempty"`
+	Back  string `json:"back,omitempty"`
+	Title string `json:"title,omitempty"`
+	// value: the prompt of the field that finds anything, on the page that
+	// carries one (Home); none, no field.
+	Search  string   `json:"search,omitempty"`
 	Glyph   Glyph    `json:"glyph,omitzero"`
 	Buttons []string `json:"buttons,omitempty"`
 	Stale   *Value   `json:"stale,omitempty"`
@@ -48,7 +51,6 @@ type Footer struct {
 type FooterKind string
 
 const (
-	FooterFind      FooterKind = "find"
 	FooterSSH       FooterKind = "ssh"
 	FooterTerminals FooterKind = "terminal-list"
 	FooterNone      FooterKind = "none"
@@ -90,8 +92,6 @@ const (
 type CardKind string
 
 const (
-	CardHero    CardKind = "hero"
-	CardTiles   CardKind = "tiles"
 	CardGauges  CardKind = "gauges"
 	CardFlush   CardKind = "flush"
 	CardPlain   CardKind = "plain"
@@ -106,6 +106,14 @@ const (
 	CardExposed CardKind = "exposed"
 	CardCare    CardKind = "care"
 )
+
+func knownCard(c CardKind) bool {
+	switch c {
+	case "", CardGauges, CardFlush, CardPlain, CardWait, CardNow, CardHealth, CardCheck, CardUptime, CardLog, CardChart, CardEmpty, CardExposed, CardCare:
+		return true
+	}
+	return false
+}
 
 type Badge struct {
 	// value: what the menu bar's icon says of the page's machines: whether a
@@ -242,24 +250,10 @@ type Item struct {
 	Error  *Error  `json:"error,omitempty"`
 	Note   *Note   `json:"note,omitempty"`
 	Link   *Link   `json:"link,omitempty"`
-	Tile   *Tile   `json:"tile,omitempty"`
 	Gauge  *Gauge  `json:"gauge,omitempty"`
 	Chart  *Chart  `json:"chart,omitempty"`
 	Log    *Log    `json:"log,omitempty"`
 	Uptime *Uptime `json:"uptime,omitempty"`
-}
-
-type Tile struct {
-	Caption string `json:"caption,omitempty"`
-	Glyph   Glyph  `json:"glyph,omitzero"`
-	Number  Value  `json:"number,omitzero"`
-	Word    string `json:"word,omitempty"`
-	Signal  Signal `json:"signal,omitempty"`
-	Toggle  string `json:"toggle,omitempty"`
-	Nav     ID     `json:"nav,omitempty"`
-	Plus    string `json:"plus,omitempty"`
-	Tip     Value  `json:"tip,omitzero"`
-	Key     string `json:"key,omitempty"`
 }
 
 type Gauge struct {

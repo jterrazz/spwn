@@ -55,7 +55,6 @@ func everyField() page.Page {
 			{Empty: &page.Empty{Noun: "VMs", Text: "No VMs yet", Hint: page.Cmd("station machines create"), Glyph: page.Glyph{Kind: "symbol:shippingbox"}, Sub: "Create one to start", Actions: []string{"new-vm"}}},
 			{Error: &page.Error{Message: "linux-1 does not answer", Hint: "station machines linux-1"}},
 			{Link: &page.Link{Label: "web", Lead: page.PortMap(5173, 40001), Value: page.URL("http://localhost:40001"), Detail: page.Text("vite"), Page: "menubar.ports", Row: "web"}},
-			{Tile: &page.Tile{Caption: "VMs", Glyph: page.Glyph{Kind: "server"}, Number: page.Count(3, ""), Word: "running", Signal: page.SignalWell, Toggle: "awake", Nav: "menubar.awake", Plus: "+1", Tip: page.Texts("3 running", "right-click for a term"), Key: "cmd+e"}},
 			{Gauge: &page.Gauge{Title: "CPU", Note: "4 cores", Value: cpu, Spark: []int{10, 20, 34}, Bar: &disk, Stale: true}},
 			{Chart: &page.Chart{
 				Kind: page.ChartBars, Window: "6m",
@@ -96,7 +95,7 @@ func everyField() page.Page {
 			{ID: "attach", Label: "Attach", Disabled: "Needs infra running"},
 		},
 		Badge:    &page.Badge{Down: true, Restarting: true, Label: "Station, infra down"},
-		Header:   &page.Header{Back: "Back", Title: "linux-1", Glyph: page.Glyph{Kind: "workspace"}, Buttons: []string{"new-vm", "menu"}, Stale: &page.Value{Kind: page.KindAge, N: 40, Text: "seen 40 s ago, checking"}},
+		Header:   &page.Header{Back: "Back", Title: "linux-1", Search: "Find a machine", Glyph: page.Glyph{Kind: "workspace"}, Buttons: []string{"new-vm", "menu"}, Stale: &page.Value{Kind: page.KindAge, N: 40, Text: "seen 40 s ago, checking"}},
 		Segments: []page.Segment{{ID: "overview", Label: "Overview", Picked: true}, {ID: "activity", Label: "Activity", Key: "cmd+i"}},
 		Footer:   &page.Footer{Kind: page.FooterSSH, Copy: &page.Value{Kind: page.KindCommand, Text: "linux-1.local"}, Note: "Needs infra running", Buttons: []string{"attach"}},
 		Live:     []string{"cpu:linux-1"},

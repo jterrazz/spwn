@@ -112,8 +112,11 @@ func rowPending(r Row) bool {
 	if r.Mark == Awaiting || r.Detail.Kind == KindPending {
 		return true
 	}
+	// invariant: a cell that follows a live key waits on the next sample,
+	// not on a read, so it holds no page loading (a page rebuilt on reads
+	// alone would stay loading until the next one).
 	for _, c := range r.Cells {
-		if c.Kind == KindPending {
+		if c.Kind == KindPending && c.Live == "" {
 			return true
 		}
 	}
@@ -156,7 +159,7 @@ func Check(p Page) error {
 func checkItem(s Section, it Item, judged bool, rows map[string]bool, depth int) error {
 	set := 0
 	for _, ok := range []bool{it.Row != nil, it.Fact != nil, it.Group != nil, it.Empty != nil, it.Error != nil, it.Note != nil, it.Link != nil,
-		it.Tile != nil, it.Gauge != nil, it.Chart != nil, it.Log != nil, it.Uptime != nil} {
+		it.Gauge != nil, it.Chart != nil, it.Log != nil, it.Uptime != nil} {
 		if ok {
 			set++
 		}
@@ -291,6 +294,9 @@ func checkPanel(p Page) error {
 		}
 	}
 	for _, s := range p.Sections {
+		if !knownCard(s.Card) {
+			return errors.New("section " + s.ID + ": its card " + strconv.Quote(string(s.Card)) + " is no card the panel draws")
+		}
 		if s.Segment != "" && !n.segments[s.Segment] {
 			return errors.New("section " + s.ID + ": its segment " + strconv.Quote(s.Segment) + " is no segment of the page")
 		}
@@ -323,13 +329,6 @@ func checkPanelItem(s Section, it Item, n names) error {
 		}
 	case it.Empty != nil:
 		return n.named("the empty card's action", it.Empty.Actions...)
-	case it.Tile != nil:
-		if it.Tile.Number.IsNone() {
-			return errors.New("a tile carries its number")
-		}
-		if it.Tile.Toggle != "" {
-			return n.named("the tile's toggle", it.Tile.Toggle)
-		}
 	case it.Log != nil:
 		if it.Log.Cause < 0 || it.Log.Cause > len(it.Log.Lines) {
 			return errors.New("a log's cause is one of its lines")

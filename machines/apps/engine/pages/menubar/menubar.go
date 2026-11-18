@@ -39,8 +39,10 @@ const (
 
 type Reading struct {
 	// value: a nil part is still being read and draws pending.
-	Home    *overview.Summary
-	Samples []activity.Reading
+	Home *overview.Summary
+	// value: the readings the engine kept of each machine it reads, This
+	// Mac's and every other Mac's, by name.
+	Samples map[string][]activity.Reading
 	All     *model.AllMachines
 	Ports   *ports.AllMachines
 	Awake   *awake.Report
@@ -60,21 +62,24 @@ type Reading struct {
 }
 
 func Page(r Reading, thisMac page.Context) page.Page {
-	p := page.Page{ID: ID, Command: "menubar", Context: thisMac, Strip: strip(r.Samples, thisMac.Machine)}
+	p := page.Page{ID: ID, Command: "menubar", Context: thisMac, Strip: strip(r.Samples[thisMac.Machine], thisMac.Machine)}
 	needs := needsYou(r)
 	tree := Tree(r.All, r.Ports, homeLine(r))
 	markMacs(&tree, r)
 	p.Sections = []page.Section{needs, tree}
 	p.Actions = append(append(newVMSheets(r.All, thisMac.Machine, roomiest(r.All, thisMac.Machine), true), openStation(), stopAll(r)), updateAll(needs, r.Home)...)
-	ranked, upkeep := needsOf(r.needsReading(), thisMac.Machine)
-	if top, stale, ok := hero(r, thisMac.Machine, ranked); ok {
-		sections, actions := homeSections(r, thisMac.Machine, upkeep)
-		p.Sections = append(append([]page.Section{top}, sections...), p.Sections...)
-		p.Header = &page.Header{Stale: stale}
-		if top.Card != page.CardEmpty {
+	if r.All != nil {
+		sections, actions := homeSections(r, thisMac.Machine)
+		p.Sections = append(sections, p.Sections...)
+		p.Header = &page.Header{Title: "Station", Search: searchPrompt}
+		if s := staleMac(r, thisMac.Machine); s != "" {
+			v := page.Text("checking " + s)
+			v.Signal = page.SignalStale
+			p.Header.Stale = &v
+		}
+		if !empty(*r.All) {
 			p.Header.Buttons = []string{ActionNewVM}
 		}
-		p.Actions = append(p.Actions, verbs(ranked)...)
 		p.Actions = append(p.Actions, actions...)
 	}
 	p.Badge = badge(r)
@@ -154,6 +159,9 @@ func liveKeys(p page.Page) []string {
 		for _, it := range sec.Items {
 			if it.Row != nil {
 				for _, v := range it.Row.Cells {
+					add(v)
+				}
+				for _, v := range it.Row.Detail.Items {
 					add(v)
 				}
 				if ring := it.Row.Glyph.Ring; ring != "" && !slices.Contains(keys, ring) {

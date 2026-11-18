@@ -87,7 +87,9 @@ func (s *steps) pass(t *testing.T, d time.Duration) {
 }
 
 type world struct {
-	mu     sync.Mutex
+	mu sync.Mutex
+	// value: machines.list answers judged, as the call does.
+	judged bool
 	infra  []machines.VM
 	beside []machines.VM
 	here   []machines.VM
@@ -135,7 +137,11 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 	switch name {
 	case machinescalls.List.Name:
 		listed, _ := in.(machinescalls.ListIn)
-		return machinescalls.ListOut{All: w.machines(listed.ThisMac)}
+		all := w.machines(listed.ThisMac)
+		if w.judged {
+			all = machines.Judged(all)
+		}
+		return machinescalls.ListOut{All: all}
 	case portscalls.List.Name:
 		return ports.Listing{}
 	case accountscalls.Programs.Name:

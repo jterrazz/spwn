@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
+	pagemenubar "github.com/jterrazz/studio-station/apps/engine/pages/menubar"
 )
 
 const air = "macbook-air"
@@ -173,10 +174,10 @@ func TestTheAccountsTileCountsTheGrantsOfEveryMachine(t *testing.T) {
 	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "computer"}, Report: func(awake.View) *awake.Report { return nil }}
 	in := engine.FeedInput{}
 	in.Awake = nothing(in.Awake)
-	until(t, o.Feed()(ctx, in), "the Accounts tile", func(p page.Page) bool {
+	until(t, o.Feed()(ctx, in), "the Accounts row", func(p page.Page) bool {
 		for _, s := range p.Sections {
 			for _, it := range s.Items {
-				if it.Tile != nil && it.Tile.Caption == "Accounts" && it.Tile.Number.N == 2 && it.Tile.Word == "granted" {
+				if r := it.Row; r != nil && s.ID == pagemenubar.SectionShortcuts && r.ID == pagemenubar.RowAccounts && len(r.Cells) == 1 && r.Cells[0].Text == "2 granted" {
 					return true
 				}
 			}
