@@ -78,18 +78,18 @@ func TestAVMIsAskedForItsOwnCallsOnlyThroughTheGuestServer(t *testing.T) {
 	}
 }
 
-func TestAReplyToAnAgentTravelsOnTheGuestsStdinNeverOnItsCommandLine(t *testing.T) {
+func TestACallsInputTravelsOnTheGuestsStdinNeverOnItsCommandLine(t *testing.T) {
 	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.2.0")}
 	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }, nil, nil).Dial(t.Context(), "macbook-pro")
 	text := "yes, merge it; then `rm -rf build` && say $HOME"
-	in, _ := json.Marshal(map[string]string{"Session": "s-1", "Text": text})
-	_, _ = ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "agents.reply", in, nil)
+	in, _ := json.Marshal(contracttest.InstallIn{App: text})
+	_, _ = ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "apps.install", in, nil)
 	if len(e.lines) != 2 || e.lines[0] != unix.Guest || e.lines[1] != unix.Guest {
 		t.Fatalf("the engine ran %q inside the VM, want only %q", e.lines, unix.Guest)
 	}
 	sent, _ := json.Marshal(text)
 	if !strings.Contains(e.stdin[1], strings.Trim(string(sent), `"`)) {
-		t.Errorf("the reply is not in the guest's stdin %q", e.stdin[1])
+		t.Errorf("the input is not in the guest's stdin %q", e.stdin[1])
 	}
 }
 

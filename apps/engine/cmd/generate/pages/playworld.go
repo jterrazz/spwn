@@ -9,7 +9,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/background"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -118,7 +117,6 @@ type playVM struct {
 	UpAt      time.Time        `json:"up_at,omitzero"`
 	Guest     *struct{}        `json:"guest,omitempty"`
 	Listening []ports.Listener `json:"listening,omitempty"`
-	Agents    *playAgents      `json:"agents,omitempty"`
 	Console   []string         `json:"console,omitempty"`
 }
 
@@ -134,13 +132,6 @@ type playKept struct {
 	Creator   string         `json:"creator,omitempty"`
 	Owner     *model.Process `json:"owner,omitempty"`
 	Birth     *model.Birth   `json:"birth,omitempty"`
-}
-
-type playAgents struct {
-	Journal   map[string]agents.Agent `json:"journal,omitempty"`
-	Hooks     map[agents.App]bool     `json:"hooks,omitempty"`
-	Terminals []agents.Terminal       `json:"terminals,omitempty"`
-	PRs       map[int]string          `json:"prs,omitempty"`
 }
 
 func PlayWorld(base []byte) []byte {
@@ -445,21 +436,6 @@ func playMachine(f Scene, mac string, vm model.VM, pid int) *playVM {
 			if s.VM == vm.Name {
 				v.Listening = append(v.Listening, ports.Listener{Port: s.GuestPort, Bind: "0.0.0.0", Process: s.Process, PID: pid*10 + len(v.Listening)})
 			}
-		}
-	}
-	for _, a := range f.Agents {
-		if a.VM != vm.Name {
-			continue
-		}
-		if v.Agents == nil {
-			v.Agents = &playAgents{Journal: map[string]agents.Agent{}, Hooks: map[agents.App]bool{a.App: true}}
-		}
-		v.Agents.Journal[a.Session] = a
-		if a.Terminal != "" {
-			v.Agents.Terminals = append(v.Agents.Terminals, agents.Terminal{Address: a.Terminal, App: a.App, Folder: "/home/admin/app"})
-		}
-		if a.PR != nil {
-			v.Agents.PRs = map[int]string{a.PR.Number: "open"}
 		}
 	}
 	return v

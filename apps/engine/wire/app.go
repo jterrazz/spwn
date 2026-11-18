@@ -12,7 +12,6 @@ import (
 	"charm.land/fang/v2"
 	"github.com/spf13/cobra"
 
-	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/herdr"
 	awakemacos "github.com/jterrazz/studio-station/apps/engine/awake/adapter/macos"
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -138,7 +137,6 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		appsAlias(kenv, thisMac),
 		retiredEngineCommand(kenv, thisMac),
 		guestCommand(kenv, thisMac),
-		agentsCommand(kenv, thisMac.where, agentsDeps{Terminal: thisMac.vars[herdr.TerminalVar], Attach: thisMac.multiplexer().Attach}),
 		runCommand(kenv, thisMac),
 		shellcmd.Command(kenv),
 	)

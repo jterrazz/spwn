@@ -1,8 +1,0 @@
-description: 'agents --on a Mac is refused: a Mac reads every machine''s agents, --on names a workspace'
-env: two-macs
-runs:
-    - command: 'agents --on mac-mini'
-      exit: 2
-      stderr: |
-          Error: mac-mini is a Mac: agents are recorded inside the workspace they work in
-          Hint: run station overview for what mac-mini has

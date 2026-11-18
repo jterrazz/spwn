@@ -85,7 +85,6 @@ func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
 		{"alert.stop-server", confirm.Stop, machine.Server, nil, confirm.TypeName},
 		{"alert.delete-server", confirm.Delete, machine.Server, nil, confirm.TypeName},
 		{"alert.stop-vm", confirm.Stop, machine.Workspace, []confirm.Fact{confirm.Ephemeral}, confirm.YesNo},
-		{"alert.stop-agent", confirm.StopAgent, machine.Workspace, nil, confirm.YesNo},
 		{"alert.delete-vm.ephemeral", confirm.Delete, machine.Workspace, []confirm.Fact{confirm.Ephemeral}, confirm.YesNo},
 		{"alert.delete-vm.persistent", confirm.Delete, machine.Workspace, nil, confirm.TypeName},
 		{"alert.stop-all", confirm.StopEngine, machine.Computer, nil, confirm.YesNo},
@@ -104,7 +103,7 @@ func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
 func TestEveryConfirmationSaysWhatItsGestureDoes(t *testing.T) {
 	for _, a := range []confirm.Action{confirm.Install, confirm.Share, confirm.Start, confirm.Restart, confirm.Edit, confirm.Remove,
 		confirm.StopSharing, confirm.SignOut, confirm.RemovePassword, confirm.RemoveGrant, confirm.Undeclare, confirm.OffHere, confirm.Overwrite,
-		confirm.Forget, confirm.DeleteImage, confirm.RestartMac, confirm.RestartServer, confirm.StopEngine, confirm.Stop, confirm.StopAgent, confirm.Delete, confirm.Erase,
+		confirm.Forget, confirm.DeleteImage, confirm.RestartMac, confirm.RestartServer, confirm.StopEngine, confirm.Stop, confirm.Delete, confirm.Erase,
 		confirm.BuildImage, confirm.Cleanup, confirm.FreeUnused} {
 		if c := a.Consequence(); c == "" || !strings.HasSuffix(c, ".") {
 			t.Errorf("%s says %q: every confirmation says what it does, in one sentence", a, c)

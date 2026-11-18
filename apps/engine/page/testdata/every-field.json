@@ -490,7 +490,7 @@
       "label": "Reply",
       "id": "reply",
       "run": {
-        "call": "agents.reply",
+        "call": "machines.restart",
         "target": {
           "name": "linux-1",
           "on": "mac-mini"
@@ -688,9 +688,9 @@
         },
         "and": [
           {
-            "call": "agents.forget",
+            "call": "machines.forget",
             "in": {
-              "Agent": "agent-7f"
+              "VM": "agent-7f"
             }
           }
         ]

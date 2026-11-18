@@ -35,7 +35,6 @@
       "properties": {
         "Category": {
           "enum": [
-            "Agents",
             "Editor",
             "Headless",
             "Network",

@@ -1,4 +1,4 @@
-description: 'the play world draws the stories'' machines and agents, the air asleep'
+description: 'the play world draws the stories'' machines, the air asleep'
 env: stories
 runs:
     - command: 'machines'
@@ -16,10 +16,3 @@ runs:
           ○	macbook-air	Mac	macbook-air	Asleep · last answer 08:30
           # Needs you
           ✗	infra	check failing since 10:18
-    - command: 'agents | /usr/bin/cut -f1,2,4 | /usr/bin/tail -n +2'
-      exit: 0
-      stdout: |
-          ◐	review-bot	waiting · PR #42 is ready, tests pass
-          ●	linux-1	working · running tests · 41/58 pass
-          ●	linux-3	working · editing src/auth/refresh.ts
-          ○	agent-7f	finished · tests pass

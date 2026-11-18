@@ -192,17 +192,6 @@
       "properties": {
         "Code": {
           "enum": [
-            "agents.ambiguous",
-            "agents.bad-name",
-            "agents.ended",
-            "agents.live",
-            "agents.name-taken",
-            "agents.no-pr",
-            "agents.no-terminal",
-            "agents.no-text",
-            "agents.no-where",
-            "agents.unknown-agent",
-            "agents.unknown-app",
             "apps.lives-elsewhere",
             "apps.no-method",
             "apps.not-installed",

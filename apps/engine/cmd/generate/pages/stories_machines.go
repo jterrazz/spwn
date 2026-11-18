@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
-	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -37,7 +36,6 @@ type Scene struct {
 	Awake    awake.Report
 	Macs     []awake.Report
 	Activity pageactivity.View
-	Agents   []agents.Agent
 	// value: home reads every Mac's own sign-ins beside the grants of its
 	// VMs, as the engine does: what a sheet offers to grant.
 	SignedIn bool
@@ -56,7 +54,6 @@ func everyMachine() Scene {
 		Awake:    proAwake(),
 		Macs:     []awake.Report{miniAwakeReport(), airAwake()},
 		Activity: proActivity(),
-		Agents:   sceneAgents(),
 	}
 }
 

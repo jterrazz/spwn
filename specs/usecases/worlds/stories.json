@@ -1032,46 +1032,7 @@
                             "Process": "python3",
                             "PID": 10051
                         }
-                    ],
-                    "agents": {
-                        "journal": {
-                            "s-linux-3": {
-                                "name": "linux-3",
-                                "vm": "linux-3",
-                                "mac": "mac-mini",
-                                "app": "claudecode",
-                                "session": "s-linux-3",
-                                "state": "working",
-                                "terminal": "t1",
-                                "task": "refresh the auth token",
-                                "steps": [
-                                    {
-                                        "at": "2026-11-07T10:25:00Z",
-                                        "verb": "test",
-                                        "tests": {
-                                            "pass": 55,
-                                            "total": 58
-                                        }
-                                    },
-                                    {
-                                        "at": "2026-11-07T10:29:40Z",
-                                        "verb": "edit",
-                                        "object": "src/auth/refresh.ts"
-                                    }
-                                ]
-                            }
-                        },
-                        "hooks": {
-                            "claudecode": true
-                        },
-                        "terminals": [
-                            {
-                                "address": "t1",
-                                "app": "claudecode",
-                                "folder": "/home/admin/app"
-                            }
-                        ]
-                    }
+                    ]
                 },
                 "review-bot": {
                     "kept": {
@@ -1099,55 +1060,7 @@
                             "Process": "uvicorn",
                             "PID": 10060
                         }
-                    ],
-                    "agents": {
-                        "journal": {
-                            "s-review-bot": {
-                                "name": "review-bot",
-                                "vm": "review-bot",
-                                "mac": "mac-mini",
-                                "app": "claudecode",
-                                "session": "s-review-bot",
-                                "state": "waiting",
-                                "terminal": "t1",
-                                "task": "fixes the token refresh",
-                                "steps": [
-                                    {
-                                        "at": "2026-11-07T10:23:00Z",
-                                        "verb": "open-pr"
-                                    }
-                                ],
-                                "ask": {
-                                    "title": "PR #42 is ready, tests pass",
-                                    "detail": "I moved the refresh into its own commit. The retry path changes how a 401 is handled: check it before I merge.",
-                                    "at": "2026-11-07T10:24:00Z"
-                                },
-                                "pr": {
-                                    "number": 42,
-                                    "url": "https://github.com/jterrazz/app/pull/42"
-                                },
-                                "change": {
-                                    "files": 6,
-                                    "plus": 214,
-                                    "minus": 88
-                                },
-                                "since": "2026-11-07T08:30:00Z"
-                            }
-                        },
-                        "hooks": {
-                            "claudecode": true
-                        },
-                        "terminals": [
-                            {
-                                "address": "t1",
-                                "app": "claudecode",
-                                "folder": "/home/admin/app"
-                            }
-                        ],
-                        "prs": {
-                            "42": "open"
-                        }
-                    }
+                    ]
                 },
                 "station-image-base-ubuntu-3": {
                     "disk": true,
@@ -1697,48 +1610,7 @@
                             "Process": "storybook",
                             "PID": 10020
                         }
-                    ],
-                    "agents": {
-                        "journal": {
-                            "s-agent-7f": {
-                                "name": "agent-7f",
-                                "vm": "agent-7f",
-                                "mac": "macbook-pro",
-                                "app": "claudecode",
-                                "session": "s-agent-7f",
-                                "state": "finished",
-                                "task": "write the changelog",
-                                "steps": [
-                                    {
-                                        "at": "2026-11-07T09:59:00Z",
-                                        "verb": "edit",
-                                        "object": "CHANGELOG.md",
-                                        "diff": {
-                                            "plus": 42,
-                                            "minus": 3
-                                        }
-                                    },
-                                    {
-                                        "at": "2026-11-07T10:12:00Z",
-                                        "verb": "test",
-                                        "tests": {
-                                            "pass": 58,
-                                            "total": 58
-                                        }
-                                    },
-                                    {
-                                        "at": "2026-11-07T10:17:00Z",
-                                        "verb": "commit"
-                                    }
-                                ],
-                                "ended": "2026-11-07T10:18:00Z",
-                                "reason": "tests pass"
-                            }
-                        },
-                        "hooks": {
-                            "claudecode": true
-                        }
-                    }
+                    ]
                 },
                 "api": {
                     "kept": {
@@ -1802,55 +1674,6 @@
                             "PID": 10013
                         }
                     ],
-                    "agents": {
-                        "journal": {
-                            "s-linux-1": {
-                                "name": "linux-1",
-                                "vm": "linux-1",
-                                "mac": "macbook-pro",
-                                "app": "claudecode",
-                                "session": "s-linux-1",
-                                "state": "working",
-                                "terminal": "t1",
-                                "task": "builds the landing page",
-                                "steps": [
-                                    {
-                                        "at": "2026-11-07T10:23:00Z",
-                                        "verb": "edit",
-                                        "object": "the pricing section"
-                                    },
-                                    {
-                                        "at": "2026-11-07T10:27:00Z",
-                                        "verb": "edit",
-                                        "object": "src/pages/index.astro",
-                                        "diff": {
-                                            "plus": 86,
-                                            "minus": 12
-                                        }
-                                    },
-                                    {
-                                        "at": "2026-11-07T10:29:50Z",
-                                        "verb": "test",
-                                        "tests": {
-                                            "pass": 41,
-                                            "total": 58
-                                        }
-                                    }
-                                ],
-                                "since": "2026-11-07T09:50:00Z"
-                            }
-                        },
-                        "hooks": {
-                            "claudecode": true
-                        },
-                        "terminals": [
-                            {
-                                "address": "t1",
-                                "app": "claudecode",
-                                "folder": "/home/admin/app"
-                            }
-                        ]
-                    },
                     "console": [
                         "[    0.000000] Linux version 6.8.0-52-generic (buildd@lcy02) #53-Ubuntu SMP PREEMPT_DYNAMIC",
                         "[    1.388210] virtio_net virtio1 enp0s1: renamed from eth0",

@@ -4,11 +4,6 @@
     "consequence": "%s is signed out on this machine; its token stays valid at its provider.",
     "form": "yes-no"
   },
-  "agents.stop": {
-    "confirm": "stop-agent",
-    "consequence": "The agent in %s stops where it is; its work so far stays.",
-    "form": "yes-no"
-  },
   "apps.remove": {
     "confirm": "remove",
     "consequence": "%s leaves this machine; its data stays.",

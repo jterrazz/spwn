@@ -13,10 +13,6 @@ import (
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
-	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/claudecode"
-	"github.com/jterrazz/studio-station/apps/engine/agents/adapter/codex"
-	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
-	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
@@ -57,7 +53,6 @@ func (m machine) registry(env kit.Env) *call.Registry {
 	registry, err := call.NewRegistry(
 		activitycalls.All(m.activityDeps(sections.Meter)),
 		overviewcalls.All(sections),
-		agentscalls.All(agentscalls.Deps{Hooks: []agentscontract.Hooks{m.agentHooks(claudecode.ID), m.agentHooks(codex.ID)}, Journal: m.journal(), Session: m.agentSession(), Forge: m.forge(), Now: m.sys.Clock.Now, Machine: m.profile.Ref.Name, Kind: kind, Calls: farRouter{m}}),
 		accountscalls.All(accountscalls.Deps{SignIns: m.signIns(), Kind: kind}),
 		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),

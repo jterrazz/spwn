@@ -15,7 +15,6 @@ const (
 	CategorySystem   SettingCategory = "System"
 	CategoryHeadless SettingCategory = "Headless"
 	CategoryNetwork  SettingCategory = "Network"
-	CategoryAgents   SettingCategory = "Agents"
 )
 
 type InputKind int

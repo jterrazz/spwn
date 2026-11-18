@@ -92,7 +92,7 @@ func TestAMacsMenuOffersWhatThatMacTakes(t *testing.T) {
 		t.Fatalf("This Mac's menu %q", got)
 	}
 	if got := pageMenu(macPageOf(t, proMac, nil)); !slices.Equal(got, []string{"This Mac", "Open in Terminal"}) {
-		t.Fatalf("an idle This Mac's menu %q", got)
+		t.Fatalf("This Mac's menu with no running VM %q", got)
 	}
 	if got := pageMenu(macPageOf(t, airMac, nil)); !slices.Equal(got, []string{"macbook-air", "Wake macbook-air", "-", "Forget... (red)"}) {
 		t.Fatalf("an asleep Mac's menu %q", got)

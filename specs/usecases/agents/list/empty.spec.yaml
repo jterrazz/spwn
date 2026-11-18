@@ -1,8 +1,0 @@
-description: 'a workspace whose agents never ran a hook lists none'
-env: in-workspace
-runs:
-    - command: 'agents'
-      exit: 0
-      stdout: |
-          # Agents
-          	none
