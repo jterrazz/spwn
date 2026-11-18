@@ -158,7 +158,7 @@ describe('Activity', () => {
                 await visitor.click(content('a machine of this Mac'));
 
                 // Then - linux-1's own Activity is shown
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
             },
         );
         expect(result.errors.text).toBe('');

@@ -37,7 +37,7 @@ describe('find', () => {
 
             // Then - linux-1 is open
             await visitor.gone(find);
-            await visitor.see(heading('linux-1 Running'));
+            await visitor.see(heading('linux-1 running'));
         });
         expect(result.errors.text).toBe('');
     });

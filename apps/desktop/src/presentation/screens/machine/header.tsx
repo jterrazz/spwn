@@ -92,7 +92,7 @@ export function MachineHeader({ found, tab, go, onNewMachine }: Props) {
                         <div>
                             <h2 className={styles.name}>
                                 {name}
-                                <StatePill {...(vm ? vmState(vm) : macState(mac))} />
+                                <StatePill asWritten {...(vm ? vmState(vm) : macState(mac))} />
                             </h2>
                             {vm ? <VmLine found={found} go={go} /> : <MacLine mac={mac} />}
                         </div>

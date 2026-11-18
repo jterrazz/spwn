@@ -1,5 +1,5 @@
 - main:
-  - heading "macbook-pro Online" [level=2]
+  - heading "macbook-pro online" [level=2]
   - paragraph: This Mac · Engine running. Sleeps normally.
   - button "Keep macbook-pro awake": Awake…
   - button "New machine on macbook-pro": New machine
@@ -32,8 +32,8 @@
     - text: 4 macOS 8 linux-1 4 free
   - region "Its machines":
     - heading "Its machines" [level=2]
-    - button "api by you Stopped"
-    - button "linux-1 by you Running"
+    - button "api by you stopped"
+    - button "linux-1 by you running"
   - region "Packages":
     - heading "Packages" [level=2]
     - button "Follows macbook-pro its apps, settings and the values you set are read in Machine files 2 differences from macbook-pro."

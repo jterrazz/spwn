@@ -61,7 +61,7 @@ describe('Window', () => {
             await visitor.click(within(sidebar, button('api stopped')));
 
             // Then - its header is the engine's, and its Overview asks nothing a stopped machine refuses
-            await visitor.see(heading('api Stopped'));
+            await visitor.see(heading('api stopped'));
             await visitor.see(content('Its file'));
         });
         await expect(result.tree).toMatch(file('./__expected__/two-macs-api.aria.yaml'));
@@ -91,7 +91,7 @@ describe('Window', () => {
         const result = await component.render(windowOver('mini-offline', HOME), async (visitor) => {
             // When - the Mac that does not answer is opened
             await visitor.click(within(sidebar, button('mac-mini not seen')));
-            await visitor.see(heading('mac-mini Not seen'));
+            await visitor.see(heading('mac-mini not seen'));
         });
 
         // Then - its header says it is not seen, and its Overview carries the refusal its reads came back with
@@ -211,7 +211,7 @@ describe('Window', () => {
         // Given - the window on Home over two-macs, This Mac opened
         const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
             await visitor.click(within(sidebar, button('macbook-pro online')));
-            await visitor.see(heading('macbook-pro Online'));
+            await visitor.see(heading('macbook-pro online'));
 
             // When - the mouse's back button is released, then its forward button
             globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 3 }));
@@ -219,7 +219,7 @@ describe('Window', () => {
             globalThis.dispatchEvent(new MouseEvent('mouseup', { button: 4 }));
 
             // Then - the window is on This Mac again
-            await visitor.see(heading('macbook-pro Online'));
+            await visitor.see(heading('macbook-pro online'));
             await visitor.see(disabled(forward));
         });
         expect(result.errors.text).toBe('');

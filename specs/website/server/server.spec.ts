@@ -25,7 +25,7 @@ describe('server', () => {
 
                 // Then - its state, its address, SSH and its check each read their answer
                 await visitor.see(within(health, content('Healthy.', { exact: false })));
-                await visitor.see(within(health, content('Healthy')));
+                await visitor.see(within(health, content('healthy')));
                 await visitor.see(within(health, content('192.168.64.5')));
                 await visitor.see(within(health, content('Answers')));
                 await visitor.see(within(health, content('Passes')));

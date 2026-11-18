@@ -36,7 +36,7 @@ describe('terminal', () => {
         // Given - linux-1's Overview over two-macs, running, its SSH answering
         const { invoked, page } = overviewOf('linux-1');
         const result = await component.render(page, async (visitor) => {
-            await visitor.see(heading('linux-1 Running'));
+            await visitor.see(heading('linux-1 running'));
 
             // When - Open in Terminal is clicked once machines.ssh has answered
             await visitor.see(enabled(button('Open in Terminal')));
@@ -58,7 +58,7 @@ describe('terminal', () => {
         let why: null | string | undefined;
         await component.render(page, async (visitor) => {
             // When - its header is drawn
-            await visitor.see(heading('api Stopped'));
+            await visitor.see(heading('api stopped'));
             await visitor.see(disabled(button('Open in Terminal')));
             why = titleOf('Open in Terminal');
         });

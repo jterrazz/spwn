@@ -72,7 +72,7 @@ describe('gestures', () => {
         const result = await component.render(
             machineOver('two-macs', 'linux-1'),
             async (visitor) => {
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
 
                 // When - Stop is clicked, then confirmed in its dialog
                 await visitor.click(button('Stop'));
@@ -87,7 +87,7 @@ describe('gestures', () => {
 
                 // Then - the engine's machines.list, read again, says it is stopped
                 await visitor.gone(dialog('Stop linux-1?'));
-                await visitor.see(heading('linux-1 Stopped'));
+                await visitor.see(heading('linux-1 stopped'));
                 await visitor.see(within(sidebar, button('linux-1 stopped')));
                 await visitor.see(content('Done'));
             },
@@ -100,13 +100,13 @@ describe('gestures', () => {
         let before: Boxes | undefined;
         let after: Boxes | undefined;
         await component.render(machineOver('two-macs', 'linux-1'), async (visitor) => {
-            await visitor.see(heading('linux-1 Running'));
+            await visitor.see(heading('linux-1 running'));
             before = headerBoxes();
 
             // When - Stop is confirmed and the engine says it is done
             await visitor.click(button('Stop'));
             await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
-            await visitor.see(heading('linux-1 Stopped'));
+            await visitor.see(heading('linux-1 stopped'));
             await visitor.see(content('Done'));
             after = headerBoxes();
         });
@@ -154,7 +154,7 @@ describe('gestures', () => {
                 />
             </EngineProvider>,
             async (visitor) => {
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
 
                 // When - Stop is confirmed, and the connection drops before its answer
                 await visitor.click(button('Stop'));
@@ -166,7 +166,7 @@ describe('gestures', () => {
                 // Then - the stop is unknown, never failed, and the header is the engine's machines.list read again
                 await visitor.see(content('the engine may have done it', { exact: false }));
                 await visitor.see(content('the engine closed the connection', { exact: false }));
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
                 await visitor.gone(content('Done'));
             },
         );
@@ -178,7 +178,7 @@ describe('gestures', () => {
         const result = await component.render(
             machineOver('two-macs', 'linux-1'),
             async (visitor) => {
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
 
                 // When - Stop is clicked, then cancelled
                 await visitor.click(button('Stop'));
@@ -186,7 +186,7 @@ describe('gestures', () => {
 
                 // Then - no dialog, and the machine still runs
                 await visitor.gone(dialog('Stop linux-1?'));
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
             },
         );
         expect(result.errors.text).toBe('');
@@ -195,13 +195,13 @@ describe('gestures', () => {
     test('start asks nothing, and the machine reads running', async () => {
         // Given - api's page over two-macs, api stopped
         const result = await component.render(machineOver('two-macs', 'api'), async (visitor) => {
-            await visitor.see(heading('api Stopped'));
+            await visitor.see(heading('api stopped'));
 
             // When - Start is clicked
             await visitor.click(button('Start'));
 
             // Then - it runs, with no dialog asked
-            await visitor.see(heading('api Running'));
+            await visitor.see(heading('api running'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -209,7 +209,7 @@ describe('gestures', () => {
     test('delete asks for the name typed, then the machine leaves the sidebar', async () => {
         // Given - api's page over two-macs
         const result = await component.render(machineOver('two-macs', 'api'), async (visitor) => {
-            await visitor.see(heading('api Stopped'));
+            await visitor.see(heading('api stopped'));
 
             // When - Delete api is clicked, a wrong name typed, then the right one
             await visitor.click(button('Delete api…'));
@@ -260,7 +260,7 @@ describe('gestures', () => {
         const result = await component.render(
             machineOver('engine-stopped', 'linux-1'),
             async (visitor) => {
-                await visitor.see(heading('linux-1 Stopped'));
+                await visitor.see(heading('linux-1 stopped'));
 
                 // When - Start is clicked
                 await visitor.click(button('Start'));
@@ -331,7 +331,7 @@ describe('gestures', () => {
             machineOver('two-macs', 'linux-1'),
             async (visitor) => {
                 // When - its header is drawn and machines.ssh has answered
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
                 await visitor.see(enabled(button('Open in Terminal')));
                 shows = [...document.querySelectorAll('button')]
                     .find((one) => one.textContent === 'Open in Terminal')
@@ -350,7 +350,7 @@ describe('gestures', () => {
         // Given - api stopped and linux-1 running over two-macs
         const stopped = await component.render(machineOver('two-macs', 'api'), async (visitor) => {
             // When - a stopped workspace's header is drawn
-            await visitor.see(heading('api Stopped'));
+            await visitor.see(heading('api stopped'));
 
             // Then - its Start only
             await visitor.see(button('Start'));
@@ -360,7 +360,7 @@ describe('gestures', () => {
             machineOver('two-macs', 'linux-1'),
             async (visitor) => {
                 // When - a running workspace's header is drawn
-                await visitor.see(heading('linux-1 Running'));
+                await visitor.see(heading('linux-1 running'));
 
                 // Then - its Stop only
                 await visitor.see(button('Stop'));

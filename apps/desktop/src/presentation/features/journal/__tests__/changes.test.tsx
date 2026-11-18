@@ -112,7 +112,7 @@ describe('changes', () => {
                 );
 
                 // Then - linux-3's page is open, its head saying its state
-                await visitor.see(heading('linux-3 Running'));
+                await visitor.see(heading('linux-3 running'));
             },
         );
         expect(result.errors.text).toBe('');

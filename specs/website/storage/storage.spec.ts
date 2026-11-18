@@ -69,7 +69,7 @@ describe('storage', () => {
             await visitor.click(button('linux-1 1.5 GB of caches inside 50 GB'));
 
             // Then - its Storage tab opens, on the disk inside it
-            await visitor.see(heading('linux-1 Running'));
+            await visitor.see(heading('linux-1 running'));
             await visitor.see(button('Free 1.5 GB'));
         });
         expect(result.errors.text).toBe('');

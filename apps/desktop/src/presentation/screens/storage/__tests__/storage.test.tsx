@@ -211,7 +211,7 @@ describe('Storage', () => {
             );
 
             // Then - its own Storage tab is shown, with its disk
-            await visitor.see(heading('linux-1 Running'));
+            await visitor.see(heading('linux-1 running'));
             await visitor.see(region('By app'));
         });
         expect(result.errors.text).toBe('');

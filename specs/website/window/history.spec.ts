@@ -48,13 +48,13 @@ describe('history', () => {
 
             // When - This Mac is opened, back taken, then forward
             await visitor.click(thisMac);
-            await visitor.see(heading('macbook-pro Online'));
+            await visitor.see(heading('macbook-pro online'));
             await visitor.see(disabled(forward));
             await visitor.click(back);
             await visitor.see(disabled(back));
             await visitor.see(enabled(forward));
             await visitor.click(forward);
-            await visitor.see(heading('macbook-pro Online'));
+            await visitor.see(heading('macbook-pro online'));
             await visitor.see(enabled(back));
             await visitor.see(disabled(forward));
         });
@@ -68,12 +68,12 @@ describe('history', () => {
         const result = await website.visit(HOME, async (visitor) => {
             // When - This Mac is opened, then ⌘[ and ⌘] pressed
             await visitor.click(thisMac);
-            await visitor.see(heading('macbook-pro Online'));
+            await visitor.see(heading('macbook-pro online'));
             await visitor.press('Control+BracketLeft');
             await visitor.see(heading('2 things need you.'));
             await visitor.see(enabled(forward));
             await visitor.press('Control+BracketRight');
-            await visitor.see(heading('macbook-pro Online'));
+            await visitor.see(heading('macbook-pro online'));
             await visitor.see(enabled(back));
         });
 
