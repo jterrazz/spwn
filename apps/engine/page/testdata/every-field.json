@@ -66,13 +66,13 @@
       ]
     },
     {
-      "id": "agents",
-      "title": "Agents",
+      "id": "machines",
+      "title": "Machines",
       "fold": "auto",
       "caption": [
         {
           "kind": "text",
-          "text": "2 working"
+          "text": "2 running"
         }
       ],
       "joined": true,
@@ -132,7 +132,7 @@
               "text": "open it"
             },
             "glyph": {
-              "kind": "agent",
+              "kind": "workspace",
               "signal": "waits",
               "dot": "ping",
               "ring": "cpu:linux-1",
@@ -227,8 +227,8 @@
         }
       ],
       "about": {
-        "label": "About agents",
-        "text": "An agent is Claude at work in its own VM."
+        "label": "About machines",
+        "text": "A machine is a Mac or a VM station keeps."
       }
     },
     {
@@ -381,44 +381,6 @@
               "5 s ago"
             ]
           }
-        },
-        {
-          "message": {
-            "title": "Claude waits",
-            "body": "Should I merge?",
-            "since": {
-              "kind": "age",
-              "n": 600,
-              "at": "2026-11-03T10:20:00Z"
-            },
-            "pr": {
-              "number": 42,
-              "url": "https://github.com/jterrazz/x/pull/42",
-              "files": 3,
-              "plus": 120,
-              "minus": 8,
-              "opened": {
-                "kind": "age",
-                "n": 600,
-                "at": "2026-11-03T10:20:00Z"
-              }
-            },
-            "reply": true
-          }
-        },
-        {
-          "steps": [
-            {
-              "at": {
-                "kind": "age",
-                "n": 600,
-                "at": "2026-11-03T10:20:00Z"
-              },
-              "text": "ran the tests",
-              "diff": "+12 -3",
-              "current": true
-            }
-          ]
         },
         {
           "log": {

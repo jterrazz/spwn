@@ -26,27 +26,27 @@ func everyField() page.Page {
 		Split:   []string{"create-only"},
 		Warn:    "This Mac may sleep: a server pauses with it.",
 	}
-	agentRow := page.Row{
+	fullRow := page.Row{
 		ID: "agent-7f", Mark: page.Attention, Label: "agent-7f", Short: "a7", Sentence: true,
 		Cells:  []page.Value{cpu},
 		Detail: page.List(on, since), Reason: page.Waiting, Hint: hint,
-		Glyph: page.Glyph{Kind: "agent", Signal: page.SignalWaits, Dot: page.DotPing, Ring: "cpu:linux-1", Spin: true, Progress: 400},
+		Glyph: page.Glyph{Kind: "workspace", Signal: page.SignalWaits, Dot: page.DotPing, Ring: "cpu:linux-1", Spin: true, Progress: 400},
 		Mac:   "mac-mini", Trail: "value", Verb: "reply", Quick: "copy", Nav: "menubar.machine:linux-1",
 		Menu: []string{"copy", "-", "delete"}, Signal: page.SignalAsleep, Fresh: true,
 		Left:  &page.Value{Kind: page.KindUntil, N: 1350, Of: 3600},
 		Birth: &page.Value{Kind: page.KindCount, N: 400, Of: 1000},
 	}
 	machine := page.Section{
-		ID: "agents", Title: "Agents", Role: page.Plain, Fold: page.Auto,
-		Caption: []page.Value{page.Text("2 working")}, Joined: true,
+		ID: "machines", Title: "Machines", Role: page.Plain, Fold: page.Auto,
+		Caption: []page.Value{page.Text("2 running")}, Joined: true,
 		Columns:    []page.Column{{Key: "name", Label: "Name", Kind: page.KindText, Keep: 100, Show: page.EyeOnly, Whole: true}, {Key: "value", Kind: page.KindLevels, Levels: []string{"data"}}},
-		Items:      []page.Item{{Row: &agentRow}, {Group: &page.Group{Head: page.Row{ID: "group", Mark: page.OK}, Items: []page.Item{row(page.Row{ID: "child", Mark: page.Awaiting})}, Fold: page.Folded}}},
+		Items:      []page.Item{{Row: &fullRow}, {Group: &page.Group{Head: page.Row{ID: "group", Mark: page.OK}, Items: []page.Item{row(page.Row{ID: "child", Mark: page.Awaiting})}, Fold: page.Folded}}},
 		PipeCounts: true, PipeGroups: true, Break: 1, SaysDropped: true,
 		Top: 1, Rest: &page.Item{Note: &page.Note{Text: "+ 3 more"}},
 		Glance:  []page.Value{page.Text("1 waits")},
 		Segment: "overview", Card: page.CardNow,
 		Picker: []page.Action{{ID: "window-6m", Label: "6 min", Picked: true, Run: &page.Run{Call: "activity.window", In: map[string]string{"Window": "6m"}}}},
-		About:  &page.About{Label: "About agents", Text: "An agent is Claude at work in its own VM."},
+		About:  &page.About{Label: "About machines", Text: "A machine is a Mac or a VM station keeps."},
 	}
 	cards := page.Section{
 		ID: "cards", Title: "Cards", Uncounted: true, Counts: []page.Tally{{Mark: page.OK, N: 3}}, Segment: "activity", Card: page.CardHealth,
@@ -65,9 +65,6 @@ func everyField() page.Page {
 				Anomaly: &page.Anomaly{From: 1, To: 2, Sentence: "CPU stayed high for 2 min"},
 				At:      []string{"15 s ago", "10 s ago", "5 s ago"},
 			}},
-			{Message: &page.Message{Title: "Claude waits", Body: "Should I merge?", Since: since, Reply: true,
-				PR: &page.PR{Number: 42, URL: "https://github.com/jterrazz/x/pull/42", Files: 3, Plus: 120, Minus: 8, Opened: since}}},
-			{Steps: []page.Step{{At: since, Text: "ran the tests", Diff: "+12 -3", Current: true}}},
 			{Log: &page.Log{Lines: []string{"listening", "panic: nil map"}, Cause: 2, More: "logs"}},
 			{Uptime: &page.Uptime{Days: []page.Day{{Date: "2026-11-02", Mark: page.DayRestart, Tip: "restarted at 04:10"}}, Availability: page.Percent(998)}},
 		},

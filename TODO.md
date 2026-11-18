@@ -175,13 +175,6 @@ owner before any test on it.
 Fourteen gap ids wait for a design before they are stories (STORIES.md,
 "Gaps"). Each starts as a lot of its own once the owner asks for it.
 
-## The page kit's agent item types
-The page kit (`apps/engine/page/page.go`) still has the item types an agent
-drew: `Message`, `Steps`, `PR` and `Reply`. No page of the engine sends one;
-only `apps/engine/page/every_field_test.go` and the Swift decoder
-(`apps/menubar/sources/station-kit/engine/Client.swift`) hold them. They go in
-a later lot, with the fixture and the golden that carry them.
-
 ## Permanent agents
 Another binary owns agents, and what each machine holds of them
 ([ADR-052](docs/decisions/052-station-keeps-no-agents.md)); station designs none of it.

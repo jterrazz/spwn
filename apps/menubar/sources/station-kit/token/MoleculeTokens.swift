@@ -27,11 +27,6 @@ extension Token.Metric {
         public static let gap: CGFloat = 8
     }
 
-    public enum Steps {
-        public static let rowGap: CGFloat = 3
-        public static let columnGap: CGFloat = 10
-    }
-
     public enum Log {
         public static let lineGap: CGFloat = 2
         public static let moreTop: CGFloat = 4
@@ -88,9 +83,6 @@ extension Token.Role {
     public static let needSubject = Token.Role(12, .semibold, .t1)
     public static let check = Token.Role(13, .regular, .t1)
     public static let checkResult = Token.Role(11, .regular, .t3)
-    public static let stepAt = Token.Role(12, .regular, .t3)
-    public static let step = Token.Role(12, .regular, .t2)
-    public static let stepCurrent = Token.Role(12, .medium, .t1)
     public static let logLine = Token.Role(10.5, .regular, .t2, design: .monospaced, tracking: -0.105)
     public static let logSource = Token.Role(10.5, .medium, .t1, design: .monospaced, tracking: -0.105)
     public static let link = Token.Role(12, .regular, .t2)

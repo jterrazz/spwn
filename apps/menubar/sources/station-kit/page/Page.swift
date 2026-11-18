@@ -150,8 +150,6 @@ public struct Item: Codable, Equatable, Sendable {
     public var tile: Tile?
     public var gauge: PageGauge?
     public var chart: PageChart?
-    public var message: Message?
-    public var steps: [Step]?
     public var log: Log?
     public var uptime: Uptime?
 }
@@ -212,30 +210,6 @@ public struct Anomaly: Codable, Equatable, Sendable {
     public var from: Int?
     public var to: Int?
     public var sentence: String?
-}
-
-public struct Message: Codable, Equatable, Sendable {
-    public var title: String?
-    public var body: String?
-    public var since: Value?
-    public var pr: PR?
-    public var reply: Bool?
-}
-
-public struct PR: Codable, Equatable, Sendable {
-    public var number: Int?
-    public var url: String?
-    public var files: Int?
-    public var plus: Int?
-    public var minus: Int?
-    public var opened: Value?
-}
-
-public struct Step: Codable, Equatable, Sendable {
-    public var at: Value?
-    public var text: String?
-    public var diff: String?
-    public var current: Bool?
 }
 
 public struct Log: Codable, Equatable, Sendable {

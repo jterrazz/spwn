@@ -1,40 +1,5 @@
 import SwiftUI
 
-// invariant: a run's last steps: when, in one column, what it did, in
-// one text x; the step running in t1, its diff after it.
-public struct StepSlots: View {
-    let steps: [Step]
-    @Environment(\.stationTokens) private var tokens
-    @Environment(\.stationNow) private var now
-
-    public init(_ steps: [Step]) { self.steps = steps }
-
-    func words(_ step: Step) -> String {
-        [step.text, step.diff].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
-    }
-
-    public var body: some View {
-        let m = Token.Metric.Steps.self
-        Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: m.columnGap, verticalSpacing: m.rowGap) {
-            ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
-                let role: Token.Role = step.current == true ? .stepCurrent : .step
-                GridRow {
-                    Text(step.at.map { Format.show($0, now: now) } ?? "")
-                        .font(Token.Role.stepAt.font)
-                        .foregroundStyle(tokens.tone(Token.Role.stepAt.tone))
-                        .lineLimit(1)
-                        .fixedSize()
-                    Text(words(step))
-                        .font(role.font)
-                        .foregroundStyle(tokens.tone(role.tone))
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-        }
-    }
-}
-
 // invariant: the last lines of a run, in mono: each line's time, its
 // source in t1, what it said; the cause line (Log.Cause, counted from 1)
 // wholly in t1; the full log behind its action.
