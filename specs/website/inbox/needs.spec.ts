@@ -161,10 +161,10 @@ describe('needs', () => {
             await visitor.see(within(sidebar, button('Machine files')));
             await visitor.see(within(sidebar, button('Passwords')));
             await visitor.see(within(sidebar, button('macbook-pro online')));
-            await visitor.see(within(sidebar, button('api Stopped')));
-            await visitor.see(within(sidebar, button('linux-1 Running')));
+            await visitor.see(within(sidebar, button('api stopped')));
+            await visitor.see(within(sidebar, button('linux-1 running')));
             await visitor.see(within(sidebar, button('mac-mini online')));
-            await visitor.see(within(sidebar, button('infra Running')));
+            await visitor.see(within(sidebar, button('infra healthy')));
             await visitor.see(within(sidebar, button('Apps 10')));
             await visitor.see(within(sidebar, button('Skills 0')));
             await visitor.see(within(sidebar, button('Settings 3')));

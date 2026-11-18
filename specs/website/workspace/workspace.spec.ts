@@ -100,7 +100,7 @@ describe('workspace', () => {
         // Given - the window on Home over two-macs, where linux-1 runs and holds 8 GB of its Mac's 16
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
             await visitor.see(within(region('Machines'), content('4 free')));
-            await visitor.click(within(sidebar, button('linux-1 Running')));
+            await visitor.click(within(sidebar, button('linux-1 running')));
             await visitor.see(heading('linux-1 Running'));
 
             // When - Stop is pressed and confirmed
@@ -109,7 +109,7 @@ describe('workspace', () => {
 
             // Then - it reads Stopped, and Home counts its memory free
             await visitor.see(heading('linux-1 Stopped'));
-            await visitor.see(within(sidebar, button('linux-1 Stopped')));
+            await visitor.see(within(sidebar, button('linux-1 stopped')));
             await visitor.click(within(sidebar, button('Home')));
             await visitor.see(within(region('Machines'), content('12 free')));
         });
@@ -126,7 +126,7 @@ describe('workspace', () => {
 
             // Then - it reads Running
             await visitor.see(heading('api Running'));
-            await visitor.see(within(sidebar, button('api Running')));
+            await visitor.see(within(sidebar, button('api running')));
         });
         expect(result.errors.text).toBe('');
     });

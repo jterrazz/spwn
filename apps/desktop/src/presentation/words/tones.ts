@@ -8,7 +8,6 @@ import type {
 } from '@jterrazz/station-api';
 
 import type { Tone } from '../../domain/tone';
-import type { MacState } from './provisional';
 import type { OwnState } from './words';
 
 type Tones<T extends PropertyKey> = Readonly<Record<T, Tone>>;
@@ -88,12 +87,6 @@ export const APP_WHY_TONES: Tones<AppsReport['Why']> = {
     outdated: 'warn',
     partial: 'warn',
     unmanaged: 'warn',
-};
-
-export const MAC_STATE_TONES: Tones<MacState> = {
-    asleep: 'plain',
-    reachable: 'ok',
-    unreachable: 'plain',
 };
 
 export const APP_STATE_TONES: Tones<AppsReport['State']> = {

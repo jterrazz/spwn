@@ -1,4 +1,9 @@
-import type { ActivityReport, MachinesMacView, MachinesRoom } from '@jterrazz/station-api';
+import type {
+    ActivityReport,
+    MachinesMacView,
+    MachinesRollUp,
+    MachinesRoom,
+} from '@jterrazz/station-api';
 
 import { useWatch } from '../../dependencies/dependencies';
 import { useActivities } from '../../features/activity/reading';
@@ -11,9 +16,13 @@ import { fleetOf } from './fleet-of';
 
 type Go = (to: Route) => void;
 
-function useRooms(): readonly MachinesRoom[] {
+type Listed = { rooms: readonly MachinesRoom[]; standing: MachinesRollUp | undefined };
+
+function useListed(): Listed {
     const listing = useWatch('machines.list', {});
-    return listing.kind === 'read' ? (listing.out.Rooms ?? []) : [];
+    return listing.kind === 'read'
+        ? { rooms: listing.out.Rooms ?? [], standing: listing.out.All.Standing }
+        : { rooms: [], standing: undefined };
 }
 
 function reportsOf(heard: ReadonlyMap<string, Heard>): ReadonlyMap<string, ActivityReport> {
@@ -31,10 +40,10 @@ type HomeFleetProps = {
 };
 
 export function HomeFleet({ macs, go, onAddMac }: HomeFleetProps) {
-    const rooms = useRooms();
+    const { rooms, standing } = useListed();
     const identityOf = useIdentityOf();
     const { readers, shown } = useActivities(macs, '1h');
-    const fleet = fleetOf({ identityOf, macs, reports: reportsOf(shown), rooms });
+    const fleet = fleetOf({ identityOf, macs, reports: reportsOf(shown), rooms, standing });
     const open = (name: string) => {
         go(machineRoute(name));
     };

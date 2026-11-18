@@ -1,6 +1,7 @@
 import type {
     ActivityReport,
     MachinesMacView,
+    MachinesRollUp,
     MachinesRoom,
     MachinesShare,
     MachinesVM,
@@ -11,16 +12,17 @@ import { gigabytes, percent } from '../../../domain/format';
 import type { IdentityOf } from '../../kit/identity';
 import type { FleetBoardProps, FleetMac, FleetMachine, FleetShare } from '../../ui/index';
 import { countOf } from '../../words/engine-words';
-import { macState, vmState } from '../../words/shown';
+import { macCardState, rollUpState, vmState } from '../../words/shown';
 import { THIS_MAC_WORD } from '../../words/words';
 
-export type Fleet = Pick<FleetBoardProps, 'macs' | 'summary' | 'thisMac'>;
+export type Fleet = Pick<FleetBoardProps, 'macs' | 'standing' | 'thisMac'>;
 
 export type FleetReads = {
     macs: readonly MachinesMacView[];
     rooms: readonly MachinesRoom[];
     reports: ReadonlyMap<string, ActivityReport>;
     identityOf: IdentityOf;
+    standing?: MachinesRollUp | undefined;
 };
 
 type Placed = { share: MachinesShare; at: number };
@@ -91,10 +93,10 @@ function macOf(mac: MachinesMacView, reads: MacReads): FleetMac {
     return {
         cpu: cpuOfMac(reads.report),
         free: room === undefined ? '' : `${gigabytes(room.Capacity.Free)} free`,
-        kind: countOf('machine', vms.length),
+        kind: vms.length === 0 ? undefined : countOf('machine', vms.length),
         machines: vms.map((vm) => machineOf(vm, reads)),
         name: mac.Name,
-        state: macState(mac),
+        state: macCardState(mac),
         system:
             room === undefined
                 ? undefined
@@ -103,8 +105,7 @@ function macOf(mac: MachinesMacView, reads: MacReads): FleetMac {
     };
 }
 
-export function fleetOf({ macs, rooms, reports, identityOf }: FleetReads): Fleet {
-    const machines = macs.reduce((sum, mac) => sum + (mac.VMs ?? []).length, 0);
+export function fleetOf({ macs, rooms, reports, identityOf, standing }: FleetReads): Fleet {
     return {
         macs: macs.map((mac) =>
             macOf(mac, {
@@ -113,7 +114,7 @@ export function fleetOf({ macs, rooms, reports, identityOf }: FleetReads): Fleet
                 room: rooms.find((one) => one.Mac === mac.Name),
             }),
         ),
-        summary: countOf('machine', machines),
+        standing: standing === undefined ? undefined : rollUpState(standing),
         thisMac: THIS_MAC_WORD,
     };
 }

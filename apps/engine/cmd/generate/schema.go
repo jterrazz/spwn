@@ -11,6 +11,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 const (
@@ -257,15 +258,17 @@ func (r *reflector) zeroable(t reflect.Type, s map[string]any) map[string]any {
 // source it was read in; a machine's kind, system and architecture come
 // from the catalog's own; a drift's chapter is named by the drift that
 // counts it. A verdict always carries its tone, the one closed enum that
-// is not worded, since it is how a word is drawn. The worlds' answers are
+// is not worded, since it is how a word is drawn. A VM's state is always
+// set: the list reads every VM as one of its values, unknown when unread.
+// The worlds' answers are
 // held to these schemas by specs/architecture.
 func neverZero() []reflect.Type {
 	enums := wordedEnums()
-	out := make([]reflect.Type, 0, len(enums)+1)
+	out := make([]reflect.Type, 0, len(enums)+2)
 	for _, w := range enums {
 		out = append(out, reflect.TypeOf(w.of))
 	}
-	return append(out, reflect.TypeFor[verdict.Tone]())
+	return append(out, reflect.TypeFor[verdict.Tone](), reflect.TypeFor[machines.VMState]())
 }
 
 // invariant: what call.Encode writes for a value of t that is not

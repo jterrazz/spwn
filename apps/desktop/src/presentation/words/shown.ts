@@ -12,6 +12,7 @@ import type {
     MachinesEngineView,
     MachinesHold,
     MachinesMacView,
+    MachinesRollUp,
     MachinesVM,
     OverviewNeed,
     PortsPort,
@@ -21,10 +22,9 @@ import type {
 import type { Tone } from '../../domain/tone';
 import { wordOf } from './engine-words';
 import type { CodeOf, Worded } from './engine-words';
-import { machineKindOf, macStateOf } from './provisional';
+import { machineKindOf } from './provisional';
 import {
     APP_WHY_TONES,
-    MAC_STATE_TONES,
     NEWEST_TONE,
     OWN_STATE_TONES,
     PORT_REACH_TONES,
@@ -32,7 +32,6 @@ import {
 } from './tones';
 import {
     APP_WHY_WORDS,
-    MAC_STATE_WORDS,
     MACHINE_KIND_WORDS,
     NEWEST_WORD,
     newestOutWord,
@@ -61,10 +60,19 @@ export function engineShown<E extends Worded>(of: E, code: CodeOf<E>): Shown {
     return { tone: toneOf(said), word: said.Word };
 }
 
-export function vmState(vm: MachinesVM): Shown {
-    return vm.Birth === null
-        ? engineShown('MachinesVMState', vm.State)
-        : engineShown('MachinesBirthStep', vm.Birth.step);
+const NOT_GIVEN: Shown = { tone: 'plain', word: NO_STATE_WORD };
+
+export function vmState(vm: Pick<MachinesVM, 'Standing'>): Shown {
+    return vm.Standing === undefined ? NOT_GIVEN : engineShown('MachinesVMStanding', vm.Standing);
+}
+
+export function rollUpState({ N, State }: MachinesRollUp): Shown {
+    const said = wordOf('MachinesRollUpState', State);
+    const noun = N === 1 ? said.One : said.Other;
+    return {
+        tone: toneOf(said),
+        word: N === undefined || noun === undefined ? said.Word : `${String(N)} ${noun}`,
+    };
 }
 
 export function vmCheck(vm: MachinesVM): Shown {
@@ -78,9 +86,16 @@ export function vmSsh(vm: MachinesVM): Shown {
     return { tone: 'plain', word: vm.SSH ? SSH_WORDS.answers : SSH_WORDS.silent };
 }
 
-export function macState(mac: MachinesMacView): Shown {
-    const state = macStateOf(mac);
-    return { tone: MAC_STATE_TONES[state], word: MAC_STATE_WORDS[state] };
+export function macState(mac: Pick<MachinesMacView, 'Standing'>): Shown {
+    return mac.Standing === undefined
+        ? NOT_GIVEN
+        : engineShown('MachinesMacStanding', mac.Standing);
+}
+
+export function macCardState(mac: MachinesMacView): Shown {
+    return mac.Standing === 'online' && mac.Machines !== undefined
+        ? rollUpState(mac.Machines)
+        : macState(mac);
 }
 
 export function needState(need: OverviewNeed): Shown {

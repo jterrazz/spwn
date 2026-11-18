@@ -19,43 +19,43 @@
   - region "Machines":
     - heading "Machines 7" [level=2]
     - group "Macs":
-      - button "macbook-pro · 4 machines · online": macbook-pro 4 machines online
-      - button "mac-mini · 3 machines · online": mac-mini 3 machines online
-      - button "macbook-air · 0 machines · asleep": macbook-air 0 machines asleep
-      - text: 7 machines This Mac
+      - button "macbook-pro · 4 machines · all running": macbook-pro 4 machines all running
+      - button "mac-mini · 3 machines · 1 machine down": mac-mini 3 machines 1 machine down
+      - button "macbook-air · asleep": macbook-air asleep
+      - text: 1 machine down This Mac
     - button "macbook-pro"
     - text: 22 %
     - img "Memory of macbook-pro"
     - text: 20 free
     - button "agent-7f"
-    - text: Write the changelog of v4 Running 1 %
+    - text: Write the changelog of v4 running 1 %
     - img "Memory of agent-7f"
     - text: 5.3 / 8
     - button "api"
-    - text: The API's staging copy Stopped
+    - text: The API's staging copy stopped
     - img "Memory of api"
     - button "linux-1"
-    - text: Lot L2.5, settings from a machine file Running 9 %
+    - text: Lot L2.5, settings from a machine file running 9 %
     - img "Memory of linux-1"
     - text: 5.3 / 8
     - button "linux-2"
-    - text: Lot L3, the Machines page Creating
+    - text: Lot L3, the Machines page creating
     - img "Memory of linux-2"
     - text: of 8
     - button "mac-mini"
-    - text: 36 %
+    - text: 1 machine down 36 %
     - img "Memory of mac-mini"
     - text: 24 free
     - button "infra"
-    - text: The cluster's control plane Running 10 %
+    - text: The cluster's control plane down 10 %
     - img "Memory of infra"
     - text: 16 / 24
     - button "linux-3"
-    - text: Refresh the auth token Running 17 %
+    - text: Refresh the auth token running 17 %
     - img "Memory of linux-3"
     - text: 5.3 / 8
     - button "review-bot"
-    - text: Review every pull request of studio-station Running 0.9 %
+    - text: Review every pull request of studio-station running 0.9 %
     - img "Memory of review-bot"
     - text: 2.7 / 4
     - button "macbook-air"

@@ -225,7 +225,8 @@ STATION_VM = "~/.local/share/station/vms/vms/linux-1/disk.img"
 
 WORLDS = {
     **{name: plain(name) for name in (
-        "bare-mac", "creating", "disk-low", "engine-stopped", "mini-offline", "mini-workspace", "one-mac", "stories",
+        "bare-mac", "creating", "disk-low", "engine-stopped", "mini-offline", "mini-workspace", "one-mac", "standings",
+        "stories",
     )},
     "two-macs":("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
                  [exchange("linux-1", "ex-1", "gh", "device-code", "github.com"),

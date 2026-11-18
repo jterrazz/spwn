@@ -11,7 +11,6 @@ import {
     isPortShared,
     machineKindOf,
 } from '../provisional';
-import { macState, vmState } from '../shown';
 
 const recordingFor = await recordingsOf('bare-mac', 'disk-low', 'stories', 'two-macs');
 
@@ -44,21 +43,6 @@ function portsOf(world: string) {
 }
 
 describe('provisional', () => {
-    test("a Mac's reach and a VM's state are shown by the one word their code has", () => {
-        // Given - This Mac of two-macs, reachable, with a stopped and a running VM
-        const [mac] = macsOf('two-macs');
-
-        // When - their states are read
-        const shown = mac ? [macState(mac), ...(mac.VMs ?? []).map((vm) => vmState(vm))] : [];
-
-        // Then - each reads the words and tones tables, never its raw field
-        expect(shown).toStrictEqual([
-            { tone: 'ok', word: 'online' },
-            { tone: 'plain', word: 'Stopped' },
-            { tone: 'ok', word: 'Running' },
-        ]);
-    });
-
     test("a VM's port is shared when one of the VM's shares names its guest port", () => {
         // Given - the first Mac of stories, whose linux-1 shares 3000 and 5173 of the four ports it listens on
         const [mac] = portsOf('stories');

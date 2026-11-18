@@ -204,7 +204,7 @@ describe('words', () => {
             "const C: Words<MachinesBirth['step']> = {};",
             "const P: Tones<MachinefileChapterDrift['Chapter']> = {};",
             "const K: Readonly<Record<NonNullable<CatalogMethodSpec['OS']>, string>> = {};",
-            "const S: Words<MachinesVM['State']> = {};",
+            "const S: Words<NonNullable<MachinesVM['Standing']>> = {};",
             "const K: Words<NonNullable<CatalogApp['Kind']>> = {};",
             "const G: Readonly<Record<DiskRow['Group'], Tone>> = {};",
         ];

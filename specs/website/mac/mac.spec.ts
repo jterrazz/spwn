@@ -168,7 +168,7 @@ describe('mac', () => {
                 // When - the page and the sidebar are read
                 // Then - infra reads Not seen in both, and its hold says nothing is known of it
                 await visitor.see(heading('infra Not seen'));
-                await visitor.see(within(sidebar, button('infra Not seen')));
+                await visitor.see(within(sidebar, button('infra not seen')));
                 await visitor.see(
                     content('Not seen: its Mac does not answer, so nothing says what holds it.'),
                 );

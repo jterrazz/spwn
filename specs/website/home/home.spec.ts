@@ -10,7 +10,7 @@ const canWait = region('Upkeep');
 const STORIES = '/?world=stories&page=home';
 const machines = region('Machines');
 const startHere = region('Start here');
-const MINI_CARD = 'mac-mini · 3 machines · online';
+const MINI_CARD = 'mac-mini · 3 machines · 1 machine down';
 
 describe('home', () => {
     test('H1 the verdict reads Everything is fine. and nothing on Home needs me', async () => {
@@ -86,12 +86,10 @@ describe('home', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'H6 waits for a recording of a VM above 85 % CPU, its usage read by activity.read, and for MachinesVM.Standing',
-    );
+    test.todo('H6 waits for a recording of a VM above 85 % CPU, its usage read by activity.read');
 
     test.todo(
-        'H7 waits for a recording of a create with a purpose, whose reads say Creating, then Running',
+        'H7 waits for a recording of a create with a purpose, whose reads say creating, then running',
     );
 
     test('H8 a preset sets the memory, the figure and what it leaves follow, and no size above what is free is offered', async () => {
@@ -225,6 +223,22 @@ describe('home', () => {
             await visitor.see(within(machines, content('Its check fails since 10:18.')));
             await visitor.click(within(machines, button('Open infra')));
             await visitor.see(heading('infra is down.'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('H14 a machine down reads down on its line, and its Mac card counts it', async () => {
+        // Given - the window on Home over standings, where loop-1 on macbook-pro is down in a restart loop, restart-1 restarting and suspended-1 suspended
+        const result = await website.visit('/?world=standings&page=home', async (visitor) => {
+            // When - I look at the Machines board
+            await visitor.see(within(machines, button('loop-1')));
+
+            // Then - each line reads its own standing, and its Mac's card says one machine down, beside the mini that holds none
+            await visitor.see(within(machines, content('down')));
+            await visitor.see(within(machines, content('restarting')));
+            await visitor.see(within(machines, content('suspended')));
+            await visitor.see(button('macbook-pro · 3 machines · 1 machine down'));
+            await visitor.see(button('mac-mini · no machine yet'));
         });
         expect(result.errors.text).toBe('');
     });

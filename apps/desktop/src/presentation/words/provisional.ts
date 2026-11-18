@@ -8,7 +8,6 @@ import type {
     MachinefileExtraLine,
     MachinefileLine,
     MachinesFit,
-    MachinesMacView,
     MachinesRestartInput,
     MachinesVM,
     OverviewNeed,
@@ -18,11 +17,6 @@ import type {
 
 import type { EngineError } from '../../domain/engine-error';
 import { codesOf } from './engine-words';
-
-// outside: machines.list sends a Mac's reach as two booleans and no state code; this file alone makes it a code, until
-// outside: the wire carries one.
-
-export type MacState = 'asleep' | 'reachable' | 'unreachable';
 
 // outside: a preset's Fit is the engine's verdict on whether it can be asked, and machines.new names no gesture.
 export function fitAllows(fit: MachinesFit): boolean {
@@ -51,13 +45,6 @@ export type MachineKind = 'server' | 'workspace';
 // outside: machines.list sends no kind; Go reads it off the Lifetime (apps/engine/machines/run.go, Lifetime.Kind).
 export function machineKindOf(vm: Pick<MachinesVM, 'Lifetime'>): MachineKind {
     return vm.Lifetime === 'always-on' ? 'server' : 'workspace';
-}
-
-export function macStateOf(mac: MachinesMacView): MacState {
-    if (mac.Asleep) {
-        return 'asleep';
-    }
-    return mac.Reachable ? 'reachable' : 'unreachable';
 }
 
 // outside: a need's `Args` are its call's input fields, a list field holding the one value given; the call's input
