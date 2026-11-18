@@ -19,6 +19,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -79,6 +80,9 @@ type vmState struct {
 	drift    *model.KeptDrift
 	driftDue bool
 	drifting bool
+	// value: what refused its guest's last dial, until one connects or its
+	// run ends.
+	blocked model.GuestBlock
 }
 
 // invariant: a VM's record changes under d.mu, as a tick reads the store
@@ -348,7 +352,7 @@ func (d *Engine) vmViews() []engine.VMView {
 		view := engine.VMView{
 			Name: name, State: v.state, RunPID: v.runPID(), Holder: v.holder(), Guest: v.guest, IP: v.ip, Detail: v.detail, SSH: v.ssh, Restarts: v.restarts, Check: v.check,
 			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines, ReadyAt: v.readyAt,
-			Drift: v.keptDriftLocked(),
+			Drift: v.keptDriftLocked(), Blocked: v.blocked,
 		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt
@@ -390,6 +394,13 @@ func (d *Engine) awaitGuest(ctx context.Context, vm string) error {
 		if err := d.h.Sleep(ctx, pollEvery); err != nil {
 			return err
 		}
+	}
+	d.mu.Lock()
+	blocked := v.blocked
+	d.mu.Unlock()
+	if blocked == model.LocalNetworkBlock {
+		mac := d.m.ThisMacName()
+		return fault(enginecalls.LocalNetwork, model.NotApproved(mac), model.LocalNetworkFix(mac))
 	}
 	return fault(enginecalls.GuestTimeout, vm+"'s guest did not connect in "+strconv.Itoa(int(guestReady.Seconds()))+" s", "station machines "+vm)
 }
@@ -518,7 +529,7 @@ func (d *Engine) disconnect(v *vmState) {
 		v.cancel()
 	}
 	v.gen++
-	v.cancel, v.guest, v.client, v.in, v.ssh = nil, engine.GuestAbsent, nil, nil, false
+	v.cancel, v.guest, v.client, v.in, v.ssh, v.blocked = nil, engine.GuestAbsent, nil, nil, false, ""
 	v.release()
 	d.greetedLocked(v)
 }
@@ -546,7 +557,7 @@ func (d *Engine) session(ctx context.Context, v *vmState, gen int) {
 	defer func() {
 		d.mu.Lock()
 		if v.gen == gen {
-			v.cancel, v.guest, v.client, v.in = nil, engine.GuestAbsent, nil, nil
+			v.cancel, v.guest, v.client, v.in, v.blocked = nil, engine.GuestAbsent, nil, nil, ""
 			v.release()
 			d.greetedLocked(v)
 		}
@@ -595,9 +606,11 @@ func (d *Engine) guestOnce(ctx context.Context, v *vmState, gen int) {
 	client, err := d.guests.Dial(ctx, name, at)
 	if err != nil {
 		d.guestFailed(ctx, v, err.Error())
+		d.blockedBy(v, gen, err)
 		return
 	}
 	defer func() { _ = client.Close() }()
+	d.blockedBy(v, gen, nil)
 	d.mountFolders(ctx, v, client)
 	d.mu.Lock()
 	if v.gen != gen {
@@ -664,6 +677,20 @@ func (d *Engine) guestFailed(ctx context.Context, v *vmState, reason string) {
 	d.mu.Unlock()
 	if !repeated {
 		d.logf(v.name+" guest", reason)
+	}
+}
+
+// invariant: a VM is blocked by its Mac's Local Network from the dial that
+// was refused so until one that is not, read in this run's session only.
+func (d *Engine) blockedBy(v *vmState, gen int, err error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if v.gen != gen {
+		return
+	}
+	v.blocked = ""
+	if errors.Is(err, contract.ErrLocalNetwork) {
+		v.blocked = model.LocalNetworkBlock
 	}
 }
 

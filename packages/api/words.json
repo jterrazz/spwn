@@ -625,6 +625,10 @@
       "Word": "Engine failure",
       "Tone": "plain"
     },
+    "local_network": {
+      "Word": "Local Network not approved",
+      "Tone": "plain"
+    },
     "login.already-signed-in": {
       "Word": "already signed in",
       "Detail": "login",

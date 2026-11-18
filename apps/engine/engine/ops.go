@@ -52,6 +52,9 @@ type VMView struct {
 	// value: how a running workspace stands with its file, as the drift
 	// job last read it since its boot; nil before that reading.
 	Drift *model.KeptDrift `json:"drift,omitempty"`
+	// value: what refused its guest's last connection, while nothing has
+	// connected since; empty when nothing did.
+	Blocked model.GuestBlock `json:"blocked,omitempty"`
 }
 
 func SocketPath(state string) string { return path.Join(state, "engine.sock") }

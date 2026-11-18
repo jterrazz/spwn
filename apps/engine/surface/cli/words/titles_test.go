@@ -16,6 +16,7 @@ func TestACodeIsCalledByItsNameReadAsWordsAndItsFamily(t *testing.T) {
 		"port.on-another-mac":        {"on another Mac", "port"},
 		"account.unknown-vm":         {"unknown VM", "account"},
 		"guest_timeout":              {"Guest did not answer", ""},
+		"local_network":              {"Local Network not approved", ""},
 		"unknown_vm":                 {"Unknown machine", ""},
 		"vm_stopped":                 {"Machine stopped", ""},
 	} {
@@ -40,7 +41,7 @@ func TestEveryCodeIsListedOnceInOneOrder(t *testing.T) {
 func TestAnEngineRefusalIsTitledByHandNeverReadFromItsName(t *testing.T) {
 	for _, code := range []fail.Code{
 		enginecalls.StartFailed, enginecalls.VMStopped, enginecalls.UnknownVM, enginecalls.UnknownOp,
-		enginecalls.UnknownPage, enginecalls.GuestAbsent, enginecalls.GuestTimeout, enginecalls.IgnoredPort,
+		enginecalls.UnknownPage, enginecalls.GuestAbsent, enginecalls.GuestTimeout, enginecalls.LocalNetwork, enginecalls.IgnoredPort,
 		enginecalls.NotAllowed, enginecalls.RangeFull, enginecalls.AwakeRange,
 		enginecalls.AwakeGuard, enginecalls.AwakeUnsupported, enginecalls.Internal,
 	} {

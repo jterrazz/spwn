@@ -144,6 +144,9 @@ func Codes() map[fail.Code]Wording {
 		enginecalls.GuestTimeout: func(e *fail.Error) (string, string) {
 			return carried(e, "the VM's guest did not answer in time", "station machines")
 		},
+		enginecalls.LocalNetwork: func(e *fail.Error) (string, string) {
+			return carried(e, "the Mac has not approved station for Local Network", "station machines")
+		},
 		enginecalls.IgnoredPort: func(e *fail.Error) (string, string) {
 			return carried(e, "station never shares port 22 nor a port below 1024", "station ports")
 		},

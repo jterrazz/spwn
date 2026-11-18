@@ -3,6 +3,12 @@
     "engine.VMView": {
       "additionalProperties": false,
       "properties": {
+        "blocked": {
+          "enum": [
+            "local-network"
+          ],
+          "type": "string"
+        },
         "boot_at": {
           "format": "date-time",
           "type": "string"
