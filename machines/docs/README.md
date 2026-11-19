@@ -36,6 +36,7 @@
 | [Accounts](reference/accounts.md)                    | Who is signed in, the vault, a grant to a VM, Claude in a VM                                   |
 | [Disk](reference/disk.md)                            | The Disk groups, the relocation rule, free, erase and move                                     |
 | [Activity](reference/activity.md)                    | What a machine is doing, where each value comes from, the history and its graphs               |
+| [Journal](reference/journal.md)                      | What was done on each Mac and its VMs, kept thirty days, read by day, paged, narrowed          |
 | [Awake](reference/awake.md)                          | Every Mac's mode, keeping a Mac awake, the guards, Never sleeps                                |
 | [The catalog's package format](reference/catalog.md) | Every key of a package file, the selector, the methods, options, an example per method         |
 | [Machinefiles](reference/machinefiles.md)            | What a machine carries: every key, the overlay, sources and origins, the resolution, `explain` |

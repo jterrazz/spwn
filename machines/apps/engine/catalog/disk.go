@@ -173,6 +173,8 @@ var StationDisk = Disk{
 		noted(data("{state}/station/children/*"), "the engine's `tailscale` calls in flight, `<pid>` holding its start: the next engine start kills what a killed one left"),
 		noted(data("{state}/station/runs/*"), "each running VM's `<vm>.pid` and `<vm>.exit`"),
 		noted(data("{state}/station/uptime.json"), "each server's last 30 days, written by its Mac's engine: deleting it starts every record again"),
+		noted(data("{state}/station/journal.jsonl", Mac), "what was done on this Mac and its VMs, the last 30 days: deleting it forgets that history"),
+		noted(data("{state}/station/journal.jsonl.lock", Mac), "empty: the lock every write of the journal takes"),
 		noted(data("{state}/station/vault.json", Mac), "the vault's book: each password's label, program, kind and grants, never a value (the values are station's Keychain items)"),
 		noted(data("{state}/station/vault.json.lock", Mac), "empty: the lock every change of the vault's book takes"),
 		noted(data("{state}/station/vms/.records.lock"), "empty: the lock a create and the engine take in turn to write a VM record"),

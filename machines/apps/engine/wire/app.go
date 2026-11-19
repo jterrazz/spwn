@@ -126,6 +126,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		backgroundCommand(kenv, thisMac),
 		awakeCommand(kenv, thisMac),
 		machinesCommand(kenv, thisMac),
+		journalCommand(kenv, thisMac),
 		imagesCommand(kenv, thisMac),
 		engineCommand(kenv, thisMac),
 		useCommand(kenv, thisMac),

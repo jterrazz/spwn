@@ -34,6 +34,7 @@ func storeOwners() map[string]string {
 		src + "settings/contract.AppliedStore":       "settings/calls",
 		src + "machinefile/contract.Ledger":          "machinefile/calls",
 		src + "engine/contract.ReleaseCache":         "engine/calls",
+		src + "journal/contract.Journal":             "journal/calls",
 		src + "engine.Reservations":                  "ports/calls",
 		src + "machines/adapter/jsonfile.Store":      "machines/calls",
 		src + "machines/adapter/jsonfile.Uptime":     "machines/calls",
@@ -44,6 +45,7 @@ func storeOwners() map[string]string {
 		src + "settings/adapter/jsonfile.Applied":    "settings/calls",
 		src + "machinefile/adapter/jsonfile.Ledger":  "machinefile/calls",
 		src + "engine/adapter/jsonfile.ReleaseCache": "engine/calls",
+		src + "journal/adapter/jsonfile.Journal":     "journal/calls",
 		src + "core/adapter/jsonfile.Preferences":    "core/contract",
 	}
 }

@@ -15,6 +15,8 @@ import (
 	enginecontract "github.com/jterrazz/studio-station/apps/engine/engine/contract"
 	imagesjsonfile "github.com/jterrazz/studio-station/apps/engine/images/adapter/jsonfile"
 	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
+	journaljsonfile "github.com/jterrazz/studio-station/apps/engine/journal/adapter/jsonfile"
+	journalcontract "github.com/jterrazz/studio-station/apps/engine/journal/contract"
 	machinefilejsonfile "github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/jsonfile"
 	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	machinesjsonfile "github.com/jterrazz/studio-station/apps/engine/machines/adapter/jsonfile"
@@ -57,6 +59,7 @@ type stores struct {
 	uptime       machinescontract.UptimeStore
 	ledger       machinefilecontract.Ledger
 	release      enginecontract.ReleaseCache
+	journal      journalcontract.Journal
 	// value: held while the engine asks GitHub for the latest release.
 	asking sync.Mutex
 }
@@ -74,6 +77,7 @@ func newStores(files local.FS, p setup.Paths) *stores {
 		uptime:       machinesjsonfile.NewUptime(files, filepath.Join(p.State, "uptime.json")),
 		ledger:       machinefilejsonfile.NewLedger(lockable{files}, filepath.Join(p.State, "ledger.json")),
 		release:      enginejsonfile.NewReleaseCache(files, filepath.Join(p.Cache, "release.json")),
+		journal:      journaljsonfile.New(lockable{files}, filepath.Join(p.State, "journal.jsonl")),
 	}
 }
 

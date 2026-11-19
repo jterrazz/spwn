@@ -32,6 +32,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | Accounts, sign-ins, the vault, grants                | `docs/reference/accounts.md`        |
 | The Disk groups, free, erase, move                   | `docs/reference/disk.md`            |
 | Activity, its history and graphs                     | `docs/reference/activity.md`        |
+| The journal: what was done, by day, on each Mac      | `docs/reference/journal.md`         |
 | Awake, the guards, Never sleeps                      | `docs/reference/awake.md`           |
 | The settings and the Checked group                   | `docs/reference/settings.md`        |
 | `preferences.json`, the environment variables        | `docs/reference/preferences.md`     |

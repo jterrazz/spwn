@@ -24,6 +24,7 @@ import (
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
+	journalcalls "github.com/jterrazz/studio-station/apps/engine/journal/calls"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
@@ -64,6 +65,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind, Name: m.profile.Ref.Name}),
 		enginecalls.All(m.engineDeps()),
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
+		journalcalls.All(m.journalDeps()),
 		machinefilecalls.All(m.machinefileDeps(thisMac)),
 		machinescalls.All(machinescalls.Deps{Machines: machineCalls{Machinist: m.machines(env.Interactive), m: m}, Images: createImages{imageBuilder{m.images()}}, Kind: kind, OS: m.profile.System.OS, Laptop: m.profile.Caps.Battery, Holdings: holdings{m}, Now: m.sys.Clock.Now}),
 		portscalls.All(portscalls.Deps{Ports: m.portsOf(env), Tailnet: m.tailnetStatus(), Kind: kind,

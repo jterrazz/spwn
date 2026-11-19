@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "journal",
+  "command": "journal",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "the journal on mac-mini cannot be read",
+    "hint": "station journal --on mac-mini"
+  }
+}

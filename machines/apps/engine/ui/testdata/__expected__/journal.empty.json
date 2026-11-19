@@ -1,0 +1,22 @@
+{
+  "schema": "station.page/v1",
+  "id": "journal",
+  "command": "journal",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "journal",
+      "title": "Journal",
+      "items": [
+        {
+          "empty": {
+            "text": "Nothing was done in the last 7 days."
+          }
+        }
+      ]
+    }
+  ]
+}

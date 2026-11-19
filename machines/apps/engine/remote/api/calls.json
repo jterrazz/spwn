@@ -590,6 +590,29 @@
       "in": "UpdateIn"
     },
     {
+      "name": "journal.kept",
+      "schema": "station.journal.kept/v1",
+      "where": "at-target",
+      "errors": [
+        "journal.unreadable"
+      ],
+      "in": "KeptIn",
+      "out": "KeptOut"
+    },
+    {
+      "name": "journal.read",
+      "schema": "station.journal.read/v1",
+      "where": "in-process",
+      "errors": [
+        "journal.bad-day",
+        "journal.unknown-mac",
+        "journal.unknown-machine",
+        "journal.unreadable"
+      ],
+      "in": "ReadIn",
+      "out": "Reading"
+    },
+    {
       "name": "machinefile.apply",
       "schema": "station.machinefile.apply/v2",
       "where": "at-target",

@@ -1,0 +1,16 @@
+description: 'journal.read: every Mac''s lines by day, the night merged and summed, newest first'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.journal = [{"At":"2026-11-04T09:00:00Z","Machine":"gate-2","Text":"gate-2 deleted","Detail":"8 GB freed","By":"you","Outcome":"done","Subject":{"Kind":"machine","Name":"gate-2"}},{"At":"2026-11-04T08:00:00Z","Machine":"linux-1","Text":"linux-1 restarted","Detail":"","By":"you","Outcome":"done","Subject":{"Kind":"machine","Name":"linux-1"}},{"At":"2026-11-04T03:00:00Z","Machine":"macbook-pro","Text":"node","Detail":"","By":"the night","Outcome":"done","Subject":{"Kind":"app","Name":"node"},"Upgrade":{"From":"24.11.0","To":"24.11.1"},"Night":"2026-11-04T03:00:00Z"},{"At":"2026-11-04T03:00:00Z","Machine":"linux-1","Text":"node","Detail":"","By":"the night","Outcome":"done","Subject":{"Kind":"app","Name":"node"},"Upgrade":{"From":"24.11.0","To":"24.11.1"},"Night":"2026-11-04T03:00:00Z"},{"At":"2026-11-03T09:00:00Z","Machine":"api","Text":"api created","Detail":"","By":"review-bot","Outcome":"done","Subject":{"Kind":"machine","Name":"api"},"Purpose":"the API"},{"At":"2026-10-28T09:00:00Z","Machine":"macbook-pro","Text":"lazygit installed","Detail":"","By":"you","Outcome":"done","Subject":{"Kind":"app","Name":"lazygit"}}] | .macs["mac-mini"].stores.journal = [{"At":"2026-11-04T03:00:00Z","Machine":"mac-mini","Text":"node","Detail":"","By":"the night","Outcome":"done","Subject":{"Kind":"app","Name":"node"},"Upgrade":{"From":"24.11.0","To":"24.11.1"},"Night":"2026-11-04T03:00:00Z"},{"At":"2026-11-04T03:01:00Z","Machine":"mac-mini","Text":"ripgrep","Detail":"download timed out","By":"the night","Outcome":"failed","Subject":{"Kind":"app","Name":"ripgrep"},"Night":"2026-11-04T03:00:00Z","Retry":{"Call":"apps.update","Args":{"Names":"ripgrep"},"On":"mac-mini"}},{"At":"2026-11-04T03:02:00Z","Machine":"mac-mini","Text":"postgres","Detail":"18 waits past its range","By":"the night","Outcome":"held","Subject":{"Kind":"app","Name":"postgres"},"Night":"2026-11-04T03:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''[.out.Groups[] | {d: .Day, t: .Title, s: .Sum, l: [.Lines[] | {t: .Text, on: .On, o: .Outcome, by: .By, g: .Subject.Gone, r: .Retry.Verb}]}], .out.Unheard, .out.Next, .out.Empty'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.read","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          [{"d":"2026-11-04","t":"Today","s":"","l":[{"t":"gate-2 deleted","on":["gate-2"],"o":"done","by":"you","g":true,"r":null},{"t":"linux-1 restarted","on":["linux-1"],"o":"done","by":"you","g":false,"r":null}]},{"d":"2026-11-04","t":"Last night","s":"1 moved, 1 held, 1 failed","l":[{"t":"ripgrep","on":["mac-mini"],"o":"failed","by":"","g":false,"r":"Retry"},{"t":"node","on":["linux-1","mac-mini","macbook-pro"],"o":"done","by":"","g":false,"r":null},{"t":"postgres","on":["mac-mini"],"o":"held","by":"","g":false,"r":null}]},{"d":"2026-11-03","t":"Yesterday","s":"","l":[{"t":"api created","on":["api"],"o":"done","by":"review-bot","g":false,"r":null}]}]
+          null
+          "2026-10-29"
+          ""

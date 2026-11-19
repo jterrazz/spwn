@@ -630,6 +630,26 @@
       "Word": "Engine failure",
       "Tone": "plain"
     },
+    "journal.bad-day": {
+      "Word": "bad day",
+      "Detail": "journal",
+      "Tone": "plain"
+    },
+    "journal.unknown-mac": {
+      "Word": "unknown Mac",
+      "Detail": "journal",
+      "Tone": "plain"
+    },
+    "journal.unknown-machine": {
+      "Word": "unknown machine",
+      "Detail": "journal",
+      "Tone": "plain"
+    },
+    "journal.unreadable": {
+      "Word": "unreadable",
+      "Detail": "journal",
+      "Tone": "plain"
+    },
     "local_network": {
       "Word": "Local Network not approved",
       "Tone": "plain"
@@ -1142,6 +1162,42 @@
     },
     "needs-a-look": {
       "Word": "needs a look",
+      "Tone": "warn"
+    }
+  },
+  "CoreJournalKind": {
+    "app": {
+      "Word": "app",
+      "Tone": "plain"
+    },
+    "image": {
+      "Word": "image",
+      "Tone": "plain"
+    },
+    "machine": {
+      "Word": "machine",
+      "Tone": "plain"
+    },
+    "setting": {
+      "Word": "setting",
+      "Tone": "plain"
+    },
+    "skill": {
+      "Word": "skill",
+      "Tone": "plain"
+    }
+  },
+  "CoreJournalOutcome": {
+    "done": {
+      "Word": "done",
+      "Tone": "plain"
+    },
+    "failed": {
+      "Word": "failed",
+      "Tone": "bad"
+    },
+    "held": {
+      "Word": "held",
       "Tone": "warn"
     }
   },

@@ -1,0 +1,11 @@
+description: 'journal.read refuses a machine no Mac lists'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error.code'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.read","target":{},"in":{"Machine":"linux-9"}}
+      exit: 0
+      stdout: |
+          "journal.unknown-machine"

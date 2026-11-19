@@ -19,6 +19,7 @@ import (
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
+	journalcalls "github.com/jterrazz/studio-station/apps/engine/journal/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -573,6 +574,18 @@ func Codes() map[fail.Code]Wording {
 		},
 		diskcalls.NamesNeeded: func(*fail.Error) (string, string) {
 			return "nothing named: free-unused frees only what it names", "station disk"
+		},
+		journalcalls.UnknownMac: func(e *fail.Error) (string, string) {
+			return "no Mac named \"" + e.Subject + "\"", "station machines"
+		},
+		journalcalls.UnknownMachine: func(e *fail.Error) (string, string) {
+			return "no machine named \"" + e.Subject + "\"", "station machines"
+		},
+		journalcalls.BadDay: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is not a day: write it YYYY-MM-DD", "station journal"
+		},
+		journalcalls.Unreadable: func(e *fail.Error) (string, string) {
+			return e.Subject + " cannot be read: what was done is not shown until it can", "repair " + e.Subject + " by hand, or remove it: rm " + e.Subject
 		},
 		diskcalls.RecordUnreadable: func(e *fail.Error) (string, string) {
 			return e.Subject + " cannot be read: nothing is freed until it can", "repair " + e.Subject + " by hand, or remove it: rm " + e.Subject

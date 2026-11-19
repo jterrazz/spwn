@@ -1,0 +1,218 @@
+{
+  "$defs": {
+    "core.finding.Fix": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Command": {
+          "type": "string"
+        },
+        "Confirm": {
+          "type": "string"
+        },
+        "On": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Call",
+        "Command",
+        "Confirm",
+        "On",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "core.journal.Line": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "By": {
+          "type": "string"
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "Machine": {
+          "type": "string"
+        },
+        "Night": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Outcome": {
+          "enum": [
+            "done",
+            "failed",
+            "held"
+          ],
+          "type": "string"
+        },
+        "Purpose": {
+          "type": "string"
+        },
+        "Retry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.finding.Fix"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Subject": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.journal.Subject"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Text": {
+          "type": "string"
+        },
+        "Upgrade": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.journal.Upgrade"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "At",
+        "By",
+        "Call",
+        "Detail",
+        "Machine",
+        "Outcome",
+        "Purpose",
+        "Retry",
+        "Subject",
+        "Text",
+        "Upgrade"
+      ],
+      "type": "object"
+    },
+    "core.journal.Subject": {
+      "additionalProperties": false,
+      "properties": {
+        "Gone": {
+          "type": "boolean"
+        },
+        "Kind": {
+          "enum": [
+            "app",
+            "machine",
+            "setting",
+            "skill",
+            "image"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Gone",
+        "Kind",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "core.journal.Upgrade": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "From",
+        "To"
+      ],
+      "type": "object"
+    },
+    "journal.calls.KeptIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Before": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Since": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "journal.calls.KeptOut": {
+      "additionalProperties": false,
+      "properties": {
+        "Lines": {
+          "items": {
+            "$ref": "#/$defs/core.journal.Line"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Lines"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/journal.kept.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call journal.kept of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/journal.calls.KeptIn"
+    },
+    "out": {
+      "$ref": "#/$defs/journal.calls.KeptOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "journal.kept",
+  "type": "object"
+}

@@ -1,0 +1,14 @@
+description: 'a journal with no line reads the engine''s sentence for the days asked'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''[.out.Groups[] | {d: .Day, t: .Title, s: .Sum, l: [.Lines[] | {t: .Text, on: .On, o: .Outcome, by: .By, g: .Subject.Gone, r: .Retry.Verb}]}], .out.Unheard, .out.Next, .out.Empty'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.read","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          []
+          null
+          ""
+          "Nothing was done in the last 7 days."

@@ -1,0 +1,11 @@
+description: 'journal.read refuses a Before that is not a day'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error.code'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.read","target":{},"in":{"Before":"yesterday"}}
+      exit: 0
+      stdout: |
+          "journal.bad-day"

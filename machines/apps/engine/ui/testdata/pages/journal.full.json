@@ -1,0 +1,169 @@
+{
+  "schema": "station.page/v1",
+  "id": "journal",
+  "command": "journal",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "2026-11-03",
+      "title": "Today",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "time",
+          "label": "time",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "machines",
+          "label": "on",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "by",
+          "label": "by",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "2026-11-03T10:00:00Z/gate-2 deleted/gate-2",
+            "mark": "ok",
+            "label": "gate-2 deleted",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "10:00"
+              },
+              {
+                "kind": "text",
+                "text": "gate-2"
+              },
+              {
+                "kind": "text",
+                "text": "review-bot"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "8 GB freed"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "2026-11-03-night",
+      "title": "Last night",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1 moved, 1 failed"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "time",
+          "label": "time",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "machines",
+          "label": "on",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "by",
+          "label": "by",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "2026-11-03T03:31:00Z/ripgrep/mac-mini",
+            "mark": "broken",
+            "label": "ripgrep",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "03:31"
+              },
+              {
+                "kind": "text",
+                "text": "mac-mini"
+              },
+              {
+                "kind": "none"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "download timed out"
+            },
+            "reason": "failing"
+          }
+        },
+        {
+          "row": {
+            "id": "2026-11-03T03:30:00Z/node/mac-mini,macbook-pro",
+            "mark": "ok",
+            "label": "node",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "03:30"
+              },
+              {
+                "kind": "text",
+                "text": "mac-mini, macbook-pro"
+              },
+              {
+                "kind": "none"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "22.11.0 to 22.12.0"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}

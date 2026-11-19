@@ -55,6 +55,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	imagesfake "github.com/jterrazz/studio-station/apps/engine/images/adapter/fake"
 	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
+	journalfake "github.com/jterrazz/studio-station/apps/engine/journal/adapter/fake"
 	machinefilefake "github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/fake"
 	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	machinesfake "github.com/jterrazz/studio-station/apps/engine/machines/adapter/fake"
@@ -300,6 +301,7 @@ func (m *worldMac) stores(st *stores) {
 	st.uptime = machinesfake.UptimeOf(w, m.name)
 	st.ledger = machinefilefake.LedgerOf(w, m.name)
 	st.release = enginefake.ReleaseCacheOf(w, m.name)
+	st.journal = journalfake.Of(w, m.name)
 }
 
 func (m *worldMac) releases() enginecontract.Releases { return enginefake.ReleasesOf(m.run.w) }

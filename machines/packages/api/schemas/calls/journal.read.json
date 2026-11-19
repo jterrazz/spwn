@@ -1,0 +1,308 @@
+{
+  "$defs": {
+    "core.journal.Group": {
+      "additionalProperties": false,
+      "properties": {
+        "Day": {
+          "type": "string"
+        },
+        "Lines": {
+          "items": {
+            "$ref": "#/$defs/core.journal.ReadLine"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Night": {
+          "type": "boolean"
+        },
+        "Sum": {
+          "type": "string"
+        },
+        "Title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Day",
+        "Lines",
+        "Night",
+        "Sum",
+        "Title"
+      ],
+      "type": "object"
+    },
+    "core.journal.ReadLine": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "By": {
+          "type": "string"
+        },
+        "Detail": {
+          "type": "string"
+        },
+        "On": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Outcome": {
+          "enum": [
+            "done",
+            "failed",
+            "held"
+          ],
+          "type": "string"
+        },
+        "Purpose": {
+          "type": "string"
+        },
+        "Retry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.journal.Retry"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Subject": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.journal.Subject"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Text": {
+          "type": "string"
+        },
+        "Upgrade": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/core.journal.Upgrade"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "At",
+        "By",
+        "Detail",
+        "On",
+        "Outcome",
+        "Purpose",
+        "Retry",
+        "Subject",
+        "Text",
+        "Upgrade"
+      ],
+      "type": "object"
+    },
+    "core.journal.Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "Empty": {
+          "type": "string"
+        },
+        "Groups": {
+          "items": {
+            "$ref": "#/$defs/core.journal.Group"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Next": {
+          "type": "string"
+        },
+        "Unheard": {
+          "items": {
+            "$ref": "#/$defs/core.journal.Unheard"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Empty",
+        "Groups",
+        "Next",
+        "Unheard"
+      ],
+      "type": "object"
+    },
+    "core.journal.Retry": {
+      "additionalProperties": false,
+      "properties": {
+        "Args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Call": {
+          "type": "string"
+        },
+        "On": {
+          "type": "string"
+        },
+        "Verb": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Args",
+        "Call",
+        "On",
+        "Verb"
+      ],
+      "type": "object"
+    },
+    "core.journal.Subject": {
+      "additionalProperties": false,
+      "properties": {
+        "Gone": {
+          "type": "boolean"
+        },
+        "Kind": {
+          "enum": [
+            "app",
+            "machine",
+            "setting",
+            "skill",
+            "image"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Gone",
+        "Kind",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "core.journal.Subject.input": {
+      "additionalProperties": false,
+      "properties": {
+        "Gone": {
+          "type": "boolean"
+        },
+        "Kind": {
+          "enum": [
+            "app",
+            "machine",
+            "setting",
+            "skill",
+            "image"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "core.journal.Unheard": {
+      "additionalProperties": false,
+      "properties": {
+        "Mac": {
+          "type": "string"
+        },
+        "Why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Mac",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "core.journal.Upgrade": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "From",
+        "To"
+      ],
+      "type": "object"
+    },
+    "journal.calls.ReadIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Before": {
+          "type": "string"
+        },
+        "Days": {
+          "type": "integer"
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "Machine": {
+          "type": "string"
+        },
+        "Night": {
+          "type": "boolean"
+        },
+        "Subject": {
+          "$ref": "#/$defs/core.journal.Subject.input"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/journal.read.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call journal.read of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/journal.calls.ReadIn"
+    },
+    "out": {
+      "$ref": "#/$defs/core.journal.Reading"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "journal.read",
+  "type": "object"
+}

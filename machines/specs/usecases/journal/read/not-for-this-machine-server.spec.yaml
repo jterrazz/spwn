@@ -1,0 +1,11 @@
+description: 'inside a server, the journal is refused: its Mac keeps it'
+env:
+    - in-server
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error.code'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.read","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          "section.not-for-this-machine"

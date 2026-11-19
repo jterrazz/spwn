@@ -1,0 +1,13 @@
+description: 'journal.kept refuses while the journal does not read, naming its file'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].files["journal.jsonl"] = "not json\n"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.kept","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"code":"journal.unreadable","subject":"~/.local/state/station/journal.jsonl"}

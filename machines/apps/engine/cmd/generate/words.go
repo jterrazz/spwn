@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 	"github.com/jterrazz/studio-station/apps/engine/disk"
@@ -307,6 +308,18 @@ func wordedEnums() []worded {
 		{finding.Severity(""), map[string]word{
 			string(finding.Broken):     toned(verdict.Bad, "broken"),
 			string(finding.NeedsALook): toned(verdict.Warn, "needs a look"),
+		}},
+		{journal.Outcome(""), map[string]word{
+			string(journal.Done):   plain("done"),
+			string(journal.Failed): toned(verdict.Bad, "failed"),
+			string(journal.Held):   toned(verdict.Warn, "held"),
+		}},
+		{journal.Kind(""), map[string]word{
+			string(journal.App):     plain("app"),
+			string(journal.Machine): plain("machine"),
+			string(journal.Setting): plain("setting"),
+			string(journal.Skill):   plain("skill"),
+			string(journal.Image):   plain("image"),
 		}},
 		{section.ID(""), sectionWords()},
 		{refusalCode{}, refusalWords()},

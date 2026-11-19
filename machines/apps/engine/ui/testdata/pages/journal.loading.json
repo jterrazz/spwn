@@ -1,0 +1,154 @@
+{
+  "schema": "station.page/v1",
+  "id": "journal",
+  "command": "journal",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "2026-11-03",
+      "title": "Today",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "time",
+          "label": "time",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "machines",
+          "label": "on",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "by",
+          "label": "by",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "2026-11-03T10:00:00Z/gate-2 deleted/gate-2",
+            "mark": "pending",
+            "label": "gate-2 deleted",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "2026-11-03-night",
+      "title": "Last night",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1 moved, 1 failed"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "time",
+          "label": "time",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "machines",
+          "label": "on",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "by",
+          "label": "by",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "2026-11-03T03:31:00Z/ripgrep/mac-mini",
+            "mark": "pending",
+            "label": "ripgrep",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "2026-11-03T03:30:00Z/node/mac-mini,macbook-pro",
+            "mark": "pending",
+            "label": "node",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

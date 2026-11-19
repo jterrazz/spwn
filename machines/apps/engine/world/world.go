@@ -11,6 +11,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/background"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/images"
@@ -314,6 +315,8 @@ type Stores struct {
 	Blocks []machinefile.Written `json:"blocks,omitempty"`
 	// value: what the engine keeps of its last asks of the latest release.
 	Release *engine.ReleaseKept `json:"release,omitempty"`
+	// value: what was done on this Mac and its VMs, oldest first.
+	Journal []journal.Line `json:"journal,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

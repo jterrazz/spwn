@@ -48,6 +48,8 @@ Every verdict an answer carries is one shape, the word and tone of the verdict a
 
 The release reading is two calls of the Registry, so a window finds it in a hello's `calls`: `engine.read-release` answers what the engine kept of GitHub's latest release, with no network, and `engine.refresh-release` asks GitHub again first; both answer `Installed`, `Latest`, `Behind`, `Head` (a verdict), `Notes`, `Checked` and `Refused` ([Machines](machines.md#the-engine)).
 
+The journal is two calls of the Registry: `journal.kept`, at the target, answers one Mac's `Lines`, newest first, from `Since` to `Before`; `journal.read`, in this process, asks each Mac and answers `Groups` (each `Day`, `Title`, `Sum`, `Night` and its `Lines`), `Unheard`, `Next` and `Empty`, narrowed by `Mac`, `Machine` or `Subject`, paged by `Before` and `Days`, or `Night` alone. A line's `At` is an RFC 3339 instant, and its `Outcome` and a subject's `Kind` are closed enums with their words ([Journal](journal.md)).
+
 ## The engine's own calls
 
 Beside the Registry, the engine serves calls of its own, which the CLI's reads and the VMs' guests ask of its live state; `calls.json` lists them with `own`, and a hello's `calls` never names them:
