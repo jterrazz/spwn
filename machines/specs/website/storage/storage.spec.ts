@@ -4,7 +4,9 @@ import { describe, expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
 describe('storage', () => {
-    test.todo('D6 waits for the input of images.build');
+    test.todo(
+        'D6 waits for images.build to answer in the world build, which as a dev build refuses it with image.no-linux-binary (apps/engine/images/calls/binary.go:26)',
+    );
 
     test('D8 the disk of a Mac is told by what Station holds and the engine verdict heads the page', async () => {
         // Given - Storage over two-macs
