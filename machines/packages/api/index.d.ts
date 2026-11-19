@@ -588,20 +588,26 @@ export type CatalogGitHubReleaseMethod = {
 };
 
 export type CatalogInput = {
+    Default: string;
     DefaultEnv: string;
     Help: string;
     Kind: number;
     Label: string;
+    Max: number | null;
+    Min: number | null;
     Name: string;
     Options: string[] | null;
     Required: boolean;
 };
 
 export type CatalogInputInput = {
+    Default?: string;
     DefaultEnv?: string;
     Help?: string;
     Kind?: number;
     Label?: string;
+    Max?: number;
+    Min?: number;
     Name?: string;
     Options?: string[];
     Required?: boolean;
@@ -1738,6 +1744,8 @@ export type MachinefileUpgrades = {
 };
 
 export type MachinefileValue = {
+    Default: string;
+    Defined: MachinefileOrigin | null;
     Key: string;
     Origin: MachinefileOrigin;
     Text: string;

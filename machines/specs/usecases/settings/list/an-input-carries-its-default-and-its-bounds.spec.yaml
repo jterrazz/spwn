@@ -1,0 +1,27 @@
+description: 'a setting''s input carries the package''s default and its bounds'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit macbook-pro catalog/system/battery.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: battery
+          description: 'The battery charges up to a limit'
+          options:
+              - { name: limit, label: Charge limit, type: integer, min: 50, max: 100, default: 80 }
+              - { name: mode, label: Mode, type: enum, values: [steady, quick] }
+          methods:
+              - os: macos
+                macos-defaults:
+                    domain: com.example.battery
+                    keys:
+                        - { key: limit, type: integer, value: '${option.limit}' }
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out[] | select(.Name == "battery") | .Package.Inputs | map({Name, Default, Min, Max, Options})'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.list","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          [{"Name":"limit","Default":"80","Min":50,"Max":100,"Options":null},{"Name":"mode","Default":"","Min":null,"Max":null,"Options":["steady","quick"]}]

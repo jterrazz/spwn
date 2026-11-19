@@ -32,6 +32,10 @@ type Input struct {
 	Options           []string
 	DefaultEnv        string
 	Required          bool
+	// value: the package's default for the option ("" when it gives none,
+	// and never a secret's) and an integer's bounds.
+	Default  string
+	Min, Max *int
 }
 
 type Effect interface{ Kind() EffectKind }

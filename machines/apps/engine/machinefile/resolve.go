@@ -20,6 +20,11 @@ type Value struct {
 	// value: the text held a secret: an option's value is withheld whole,
 	// any other text word by word.
 	Withheld bool
+	// value: an option's value beside the package's own default for it ("" when
+	// the package gives none, and never a secret's), and the file of the
+	// package that defines it; empty and nil on every other value.
+	Default string
+	Defined *Origin
 }
 
 // value: one package of the plan: what it is, the method that installs or
@@ -879,7 +884,8 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		}
 		for _, k := range sortedNames(s.Values) {
 			text, withheld := withhold(string(s.Values[k]))
-			out = append(out, Value{Key: key + "." + k, Text: text, Origin: s.Origin, Withheld: withheld})
+			def, defined := optionDefault(c, s, k)
+			out = append(out, Value{Key: key + "." + k, Text: text, Origin: s.Origin, Withheld: withheld, Default: def, Defined: defined})
 		}
 		if s.From != "" {
 			out = append(out, Value{Key: key + ".from", Text: s.From, Origin: s.Origin})
@@ -893,6 +899,21 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		out = append(out, Value{Key: group + s.Package, Text: s.Why, Origin: s.Origin})
 	}
 	return append(out, m.family("accounts", "ports", "run")...)
+}
+
+func optionDefault(c catalog.Catalog, s Step, name string) (string, *Origin) {
+	// invariant: the package's default of an option, read from its definition
+	// and never a secret's, and the file that defines it.
+	p, ok := c.Package(s.Package)
+	if !ok {
+		return "", nil
+	}
+	i := slices.IndexFunc(p.Package.Options, func(o catalog.Option) bool { return o.Name == name })
+	if i < 0 {
+		return "", nil
+	}
+	defined := s.Defined
+	return p.Package.Options[i].Shown(), &defined
 }
 
 func (m merged) family(families ...string) []Value {

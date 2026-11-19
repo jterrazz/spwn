@@ -178,11 +178,21 @@ func (it Package) setting(category SettingCategory) Setting {
 		s.Inputs = append(s.Inputs, Input{
 			Name: o.Name, Label: o.Label, Help: o.Help, Kind: o.input(),
 			Options: o.Values, DefaultEnv: o.DefaultEnv, Required: o.Required,
+			Default: o.Shown(), Min: o.Min, Max: o.Max,
 		})
 	}
 	s.Kinds = it.Methods[0].kinds()
 	s.Effect = it.Methods[0].effect()
 	return s
+}
+
+func (o Option) Shown() string {
+	// invariant: the default a catalog shows is the package's own, never a
+	// secret's.
+	if o.Secret || o.Default == nil {
+		return ""
+	}
+	return string(*o.Default)
 }
 
 // invariant: a form asks an option by its type: a secret string hidden as

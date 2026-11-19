@@ -32,6 +32,19 @@
     "machinefile.Value": {
       "additionalProperties": false,
       "properties": {
+        "Default": {
+          "type": "string"
+        },
+        "Defined": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machinefile.Origin"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "Key": {
           "type": "string"
         },
@@ -46,6 +59,8 @@
         }
       },
       "required": [
+        "Default",
+        "Defined",
         "Key",
         "Origin",
         "Text",

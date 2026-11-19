@@ -3,6 +3,9 @@
     "catalog.Input": {
       "additionalProperties": false,
       "properties": {
+        "Default": {
+          "type": "string"
+        },
         "DefaultEnv": {
           "type": "string"
         },
@@ -14,6 +17,18 @@
         },
         "Label": {
           "type": "string"
+        },
+        "Max": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "Min": {
+          "type": [
+            "integer",
+            "null"
+          ]
         },
         "Name": {
           "type": "string"
@@ -32,10 +47,13 @@
         }
       },
       "required": [
+        "Default",
         "DefaultEnv",
         "Help",
         "Kind",
         "Label",
+        "Max",
+        "Min",
         "Name",
         "Options",
         "Required"

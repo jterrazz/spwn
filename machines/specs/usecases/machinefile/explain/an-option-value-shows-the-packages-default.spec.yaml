@@ -1,0 +1,36 @@
+description: 'an option''s value is explained beside the package''s own default and the file that defines it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit macbook-pro catalog/system/battery.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: battery
+          description: 'The battery charges up to a limit'
+          options:
+              - { name: limit, label: Charge limit, type: integer, min: 50, max: 100, default: 80 }
+              - { name: mode, label: Mode, type: enum, values: [steady, quick] }
+          methods:
+              - os: macos
+                macos-defaults:
+                    domain: com.example.battery
+                    keys:
+                        - { key: limit, type: integer, value: '${option.limit}' }
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          settings:
+              battery: { limit: 70, mode: quick }
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Values[] | select(.Key | startswith("settings.battery.")) | select(.Key == "settings.battery.limit" or .Key == "settings.battery.mode") | {Key, Text, Default, Defined}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.explain","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"Key":"settings.battery.limit","Text":"70","Default":"80","Defined":{"Name":"battery","Kind":"user","File":"~/.config/station/catalog/system/battery.yaml"}}
+          {"Key":"settings.battery.mode","Text":"quick","Default":"","Defined":{"Name":"battery","Kind":"user","File":"~/.config/station/catalog/system/battery.yaml"}}
