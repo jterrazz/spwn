@@ -19,6 +19,12 @@ const (
 	machinefileSchemaPath = "packages/api/schemas/station.machinefile.v1.json"
 )
 
+// value: the one place a schema's $id is built: its file in the repository
+// that releases station, under the folder machines/ holds it in.
+func schemaID(path string) string {
+	return "https://github.com/" + catalog.StationRepo + "/blob/main/machines/" + path
+}
+
 type enumerated interface{ Enum() []string }
 
 // value: a type the decoder reads by its own UnmarshalYAML, which says its
@@ -59,7 +65,7 @@ func projected(t reflect.Type, key, schema, at, description string) []byte {
 	}
 	doc := map[string]any{
 		"$schema":     "https://json-schema.org/draft/2020-12/schema",
-		"$id":         "https://github.com/jterrazz/studio-station/blob/main/" + at,
+		"$id":         schemaID(at),
 		"title":       schema,
 		"description": description,
 		"$defs":       r.defs,

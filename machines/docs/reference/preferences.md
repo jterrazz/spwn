@@ -27,7 +27,7 @@ station keeps its own choices in one file, `~/.config/station/preferences.json`,
         "bound_at": "2026-11-10T09:12:00Z",
         "source": {
             "name": "studio",
-            "url": "https://github.com/jterrazz/studio-station.git"
+            "url": "https://github.com/jterrazz/spwn.git"
         }
     }
 }

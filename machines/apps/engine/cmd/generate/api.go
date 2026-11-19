@@ -289,7 +289,7 @@ func callSchema(w *wireRules, c wireCall) map[string]any {
 	}
 	return map[string]any{
 		"$schema":     draft,
-		"$id":         "https://github.com/jterrazz/studio-station/blob/main/" + apiCallsDir + "/" + c.meta.Name + ".json",
+		"$id":         schemaID(apiCallsDir + "/" + c.meta.Name + ".json"),
 		"title":       c.meta.Name,
 		"description": "The " + kind + " " + c.meta.Name + " of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
 		"type":        "object", "additionalProperties": false, "required": []string{"in", "out"},
@@ -323,7 +323,7 @@ func frameSchema(w *wireRules) map[string]any {
 	r.defs["Answer"] = map[string]any{"anyOf": []any{ref("HelloFrame"), ref("ProgressFrame"), ref("OutFrame"), ref("ErrorFrame"), ref("DoneFrame")}}
 	return map[string]any{
 		"$schema":     draft,
-		"$id":         "https://github.com/jterrazz/studio-station/blob/main/" + framePath,
+		"$id":         schemaID(framePath),
 		"title":       "station.api/v2",
 		"description": "One frame of station.api/v2, one JSON object per line: a Request, or an Answer carrying the request's id. A call's `in` and `out` are its own schema's, under calls/. Written by make generate; remote/api's test holds it to remote/api.Frame.",
 		"anyOf":       []any{ref("Request"), ref("Answer")},
@@ -341,7 +341,7 @@ func eventSchema(w *wireRules) map[string]any {
 	opened := r.wireOf(reflect.TypeFor[engine.Opened]())
 	return map[string]any{
 		"$schema":     draft,
-		"$id":         "https://github.com/jterrazz/studio-station/blob/main/" + eventPath,
+		"$id":         schemaID(eventPath),
 		"title":       "station.api/v2 events",
 		"description": "An `out` of the watches page and engine.events: their opening, then an event, told apart by `event`. Written by make generate from engine.Event and engine.Opened.",
 		"anyOf":       []any{opened, map[string]any{"$ref": "#/$defs/Event"}},

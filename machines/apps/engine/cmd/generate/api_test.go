@@ -33,6 +33,36 @@ func TestThePackagesAPISchemasAndTypesHaveNotDriftedFromTheirGoTypes(t *testing.
 	}
 }
 
+func TestEverySchemaIsIdentifiedByItsFileInTheRepositoryThatReleasesStation(t *testing.T) {
+	files := apiFiles(root(t))
+	for _, path := range []string{schemaPath, machinefileSchemaPath} {
+		body, err := os.ReadFile(filepath.Join(root(t), path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		files[path] = body
+	}
+	seen := 0
+	for path, body := range files {
+		if !strings.HasPrefix(path, "packages/api/schemas/") {
+			continue
+		}
+		var doc struct {
+			ID string `json:"$id"`
+		}
+		if err := json.Unmarshal(body, &doc); err != nil {
+			t.Fatalf("%s: %v", path, err)
+		}
+		if want := "https://github.com/jterrazz/spwn/blob/main/machines/" + path; doc.ID != want {
+			t.Errorf("%s has $id %q; want %q", path, doc.ID, want)
+		}
+		seen++
+	}
+	if seen < 3 {
+		t.Fatalf("read %d schemas", seen)
+	}
+}
+
 func TestEveryCallOfTheWireHasItsSchema(t *testing.T) {
 	var c struct {
 		Calls []struct {

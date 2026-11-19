@@ -517,7 +517,7 @@
       "type": "object"
     }
   },
-  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/frame.json",
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/frame.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "anyOf": [
     {

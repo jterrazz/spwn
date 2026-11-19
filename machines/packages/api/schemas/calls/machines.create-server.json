@@ -1012,7 +1012,7 @@
       "type": "object"
     }
   },
-  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.create-server.json",
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/machines.create-server.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "description": "The call machines.create-server of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",

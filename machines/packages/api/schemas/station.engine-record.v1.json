@@ -1,6 +1,6 @@
 {
   "$defs": {},
-  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/station.engine-record.v1.json",
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/station.engine-record.v1.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "description": "The binary the engine last started from, written to station/engine.json under the state root at each engine start, so a client finds station while the engine does not answer. The state root is $XDG_STATE_HOME when it is an absolute path, else $HOME/.local/state. Written by make generate from engine.Record; install.json says where.",

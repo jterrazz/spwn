@@ -75,7 +75,7 @@ func recordShape(w *wireRules, id, schemaPath, description string) map[string]an
 	}
 	out := map[string]any{
 		"$schema":     draft,
-		"$id":         "https://github.com/jterrazz/studio-station/blob/main/" + schemaPath,
+		"$id":         schemaID(schemaPath),
 		"title":       id,
 		"description": description,
 		"$defs":       r.defs,

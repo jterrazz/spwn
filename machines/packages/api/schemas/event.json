@@ -1474,7 +1474,7 @@
       "type": "object"
     }
   },
-  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/event.json",
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/event.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "anyOf": [
     {

@@ -12,8 +12,8 @@ How to work on `station` itself: build it, run it from the checkout, and know wh
 ## Working from source
 
 ```sh
-git clone https://github.com/jterrazz/studio-station.git
-cd studio-station
+git clone https://github.com/jterrazz/spwn.git
+cd spwn/machines
 make install              # Go modules and the npm half
 make build                # .artifacts/go/station
 ./.artifacts/go/station overview  # run the build without installing it
