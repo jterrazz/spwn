@@ -112,5 +112,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [058 The window installs and starts the core itself](decisions/058-the-window-installs-and-starts-the-core-itself.md) (Accepted)
 - [059 The latest release is read by two calls: one reads what the engine kept, one asks GitHub](decisions/059-the-latest-release-is-read-by-two-calls.md) (Accepted)
 - [060 The window offers the engine's release and updates on a press](decisions/060-the-window-offers-the-engines-release-and-updates-on-a-press.md) (Accepted)
+- [061 The history is kept by the Mac that holds the machine](decisions/061-the-history-is-kept-by-the-mac-that-holds-the-machine.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
