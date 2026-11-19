@@ -54,9 +54,32 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'S3 waits for a recording of a Restart of a server that is down, and of the line it leaves',
-    );
+    test('S3 a server down restarted from its line in Needs you leaves it, and no longer reads down', async () => {
+        // Given - mac-mini's page over stories, whose server infra fails its check
+        const result = await website.visit(
+            '/?world=stories&machine=mac-mini&tab=Overview',
+            async (visitor) => {
+                const needs = region('Needs you, on this Mac');
+                const line = content('infra check failing since 10:18', { exact: false });
+                await visitor.see(within(needs, line));
+                await visitor.see(content('down · up 12 d'));
+
+                // When - its Restart is pressed, and confirmed with the name typed
+                await visitor.click(within(needs, button('Restart infra', { exact: false })));
+                const confirm = dialog('Restart infra?');
+                await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
+                await visitor.click(within(confirm, button('Restart')));
+
+                // Then - the line has left Needs you for Done here, and infra no longer reads down among the mini's machines
+                await visitor.gone(within(needs, line));
+                await visitor.see(within(region('Done here'), line));
+                await visitor.gone(content('down · up 12 d'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo("S3 waits for the engine's kept journal, where Changes records a restart");
 
     test('S4 Delete asks for the name typed, and stays off until it matches', async () => {
         // Given - the window on infra's page over two-macs
