@@ -329,7 +329,7 @@ GESTURES = {
         {"call": "awake.off", "in": {}},
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "4321"}},
         {"call": "ports.share", "in": {"VM": "linux-3", "Port": "5432"}, **at("mac-mini")},
-        {"call": "ports.declare", "in": {"Machine": "", "Port": "5000", "Via": "lan"}},
+        {"call": "ports.declare", "in": {"Machine": "macbook-pro", "Port": "5000", "Via": "lan"}},
     ],
     "sign-ins": [
         {"watch": "accounts.login", "in": {"Program": "claude", "Machine": "linux-1"}},
