@@ -44,45 +44,6 @@ public struct FoldChevron: Movement {
     }
 }
 
-// value: M8, the hero morphing in place: its top cross-fades from 3 pt
-// above, its rows follow 60 ms later, a red glyph arrives at .6 scale on
-// the success spring.
-public struct HeroMorph: Movement {
-    public enum Part: Sendable { case top, rows, glyph }
-
-    public var progress: Double
-    public var part: Part
-    @Environment(\.stationTokens) private var tokens
-
-    public init(progress: Double, part: Part) {
-        self.progress = progress
-        self.part = part
-    }
-
-    public static func look(_ progress: Double, part: Part, reduce: Bool) -> Look {
-        var look = Look()
-        switch part {
-        case .top:
-            look.opacity = progress
-            if !reduce { look.y = -Token.Motion.Move.heroDrop * CGFloat(1 - progress) }
-        case .rows:
-            look.opacity = reduce ? progress : Look.delayed(progress, by: Token.Motion.Move.heroRowsDelay)
-        case .glyph:
-            if reduce { look.opacity = min(progress, 1) } else { look.scale = Look.scaled(Look.lerp(Token.Motion.Move.heroGlyphFrom, 1, progress)) }
-        }
-        return look
-    }
-
-    public static func frozen(_ time: Double, part: Part, reduce: Bool) -> Double {
-        if reduce { return Token.Motion.freeze(time, Token.Motion.reducedCurve) }
-        return part == .glyph ? Token.Motion.freeze(time, .bouncy) : Token.Motion.freeze(time, Token.Motion.smoothCurve)
-    }
-
-    public func body(content: Content) -> some View {
-        content.moved(Self.look(progress, part: part, reduce: tokens.reduceMotion))
-    }
-}
-
 // value: M9, a row leaving: it collapses to no height, slides 10 pt and
 // fades; at a removal's moment t it is at 1 - pace(t).
 public struct RowLeave: Movement {

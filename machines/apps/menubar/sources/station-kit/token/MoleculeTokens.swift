@@ -89,7 +89,6 @@ extension Token.Role {
     public static let fold = Token.Role(12, .regular, .t2)
     public static let emptyBold = Token.Role(13, .semibold, .t1)
     public static let emptyGrey = Token.Role(12, .regular, .t2)
-    public static let tilePlus = Token.Role(11, .semibold, .t1)
 }
 
 extension Token.Symbol {

@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.restarting",
-    "note": "infra restarting: the hero spins, its step counted, the needs folded.",
+    "note": "infra restarting: its row's ring counts the steps.",
     "pages": ["pages/machines.home.restarting-2.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

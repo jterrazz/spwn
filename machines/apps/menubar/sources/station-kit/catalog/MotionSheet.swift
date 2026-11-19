@@ -20,6 +20,7 @@ public struct MotionSheet: View {
 
     public static let exempt: [String: String] = [
         "M1": "the panel opens whole on its first frame, as the system's extras do: nothing moves",
+        "M8": "the hero morph is retired with Home's hero: no page draws a hero",
         "M13": "a number rolls by contentTransition, which draws its end state",
         "M14": "a symbol flips by contentTransition, which draws its end state",
         "M16": "Spinner turns on a TimelineView, still at a fixed angle",
@@ -122,13 +123,6 @@ public struct MotionSheet: View {
             AnyView(VStack(spacing: Token.Motion.Sheet.gap) {
                 symbol(Token.Symbol.down, tint: .t2).modifier(FoldChevron(progress: Fold.frozen(t, reduce: r)))
                 VStack(spacing: Token.Motion.Sheet.gap) { Line(); Line() }.modifier(Fold(progress: Fold.frozen(t, reduce: r)))
-            }.frame(maxHeight: .infinity, alignment: .top))
-        },
-        Cell(id: "M8", title: "hero morph") { t, r in
-            AnyView(VStack(spacing: Token.Motion.Sheet.gap) {
-                symbol(Token.Symbol.check, tint: .red).modifier(HeroMorph(progress: HeroMorph.frozen(t, part: .glyph, reduce: r), part: .glyph))
-                Line().modifier(HeroMorph(progress: HeroMorph.frozen(t, part: .top, reduce: r), part: .top))
-                Line().modifier(HeroMorph(progress: HeroMorph.frozen(t, part: .rows, reduce: r), part: .rows))
             }.frame(maxHeight: .infinity, alignment: .top))
         },
         Cell(id: "M9", title: "row leaves") { t, r in

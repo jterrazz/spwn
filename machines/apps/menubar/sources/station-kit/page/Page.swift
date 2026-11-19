@@ -53,6 +53,7 @@ public struct Badge: Codable, Equatable, Sendable {
 public struct Header: Codable, Equatable, Sendable {
     public var back: String?
     public var title: String?
+    public var search: String?
     public var glyph: Glyph?
     public var buttons: [String]?
     public var stale: Value?
@@ -148,24 +149,10 @@ public struct Item: Codable, Equatable, Sendable {
     public var error: PageError?
     public var note: Note?
     public var link: Link?
-    public var tile: Tile?
     public var gauge: PageGauge?
     public var chart: PageChart?
     public var log: Log?
     public var uptime: Uptime?
-}
-
-public struct Tile: Codable, Equatable, Sendable {
-    public var caption: String?
-    public var glyph: Glyph?
-    public var number: Value?
-    public var word: String?
-    public var signal: String?
-    public var toggle: String?
-    public var nav: String?
-    public var plus: String?
-    public var tip: Value?
-    public var key: String?
 }
 
 public struct PageGauge: Codable, Equatable, Sendable {

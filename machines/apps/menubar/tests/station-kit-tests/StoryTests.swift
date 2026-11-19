@@ -247,8 +247,8 @@ final class StoryTests: XCTestCase {
         XCTAssertEqual(try JSONDecoder().decode(Heights.self, from: Data(text.utf8)).heights, ["home.needs": 642, "menubar.down": 0])
     }
 
-    func testTheSizeCheckHoldsATargetStoryToItsHeightUnlessItSaysWhy() throws {
-        let heights = try Heights.load()
+    func testTheSizeCheckHoldsATargetStoryToItsHeightUnlessItSaysWhy() {
+        let heights = Heights(heights: ["home.needs": 455, "home.fine": 455, "home.empty": 360])
         let page = ["pages/fleet.menubar.json"]
         let stories = [
             StoryFile(id: "home.needs", group: .home, note: "n", pages: page),

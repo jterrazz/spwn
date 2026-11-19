@@ -255,17 +255,8 @@ public struct Popover: View {
                 .blur(radius: layer == nil ? 0 : S.blur)
                 .disabled(layer != nil)
             } footer: {
-                SwiftUI.Group {
-                    if home.section(HomeCards.macs) != nil {
-                        VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
-                            statusBar
-                            FindCapsule { handlers.find(FindQuery()) }
-                        }
-                    } else {
-                        statusBar
-                    }
-                }
-                .blur(radius: layer == nil ? 0 : S.blur)
+                statusBar
+                    .blur(radius: layer == nil ? 0 : S.blur)
             }
             .background { BackKey(state: state, handlers: handlers) }
             .environment(\.stationHints, false)

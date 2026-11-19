@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.awake-off",
-    "note": "Awake switched off from its tile: the moon, Off.",
+    "note": "Awake switched off from its row: the switch off, Off.",
     "pages": ["pages/machines.home.awake-off.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

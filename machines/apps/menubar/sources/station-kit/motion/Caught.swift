@@ -7,7 +7,6 @@ public struct Caught: Equatable, Sendable {
     public var time: Double
     // value: the row leaving its list, by its id.
     public var row: String?
-    public var hero = false
     // value: the panel's top layer arriving: its sheet, alert, Find field
     // or menu.
     public var layer = false
@@ -17,10 +16,9 @@ public struct Caught: Equatable, Sendable {
     // draws once around two pages.
     public var bare = false
 
-    public init(time: Double, row: String? = nil, hero: Bool = false, layer: Bool = false, segment: String? = nil, bare: Bool = false) {
+    public init(time: Double, row: String? = nil, layer: Bool = false, segment: String? = nil, bare: Bool = false) {
         self.time = time
         self.row = row
-        self.hero = hero
         self.layer = layer
         self.segment = segment
         self.bare = bare
@@ -41,21 +39,6 @@ struct CaughtRow: ViewModifier {
     func body(content: Content) -> some View {
         if let caught, let id, caught.row == id {
             content.modifier(RowLeave(progress: RowLeave.frozen(caught.time, reduce: tokens.reduceMotion)))
-        } else {
-            content
-        }
-    }
-}
-
-// invariant: the hero's parts morph only while a moment names the hero.
-struct CaughtHero: ViewModifier {
-    let part: HeroMorph.Part
-    @Environment(\.stationCaught) private var caught
-    @Environment(\.stationTokens) private var tokens
-
-    func body(content: Content) -> some View {
-        if let caught, caught.hero {
-            content.modifier(HeroMorph(progress: HeroMorph.frozen(caught.time, part: part, reduce: tokens.reduceMotion), part: part))
         } else {
             content
         }
@@ -95,8 +78,6 @@ struct CaughtMenu: ViewModifier {
 
 extension View {
     func caughtRow(_ id: String?) -> some View { modifier(CaughtRow(id: id)) }
-
-    func caughtHero(_ part: HeroMorph.Part) -> some View { modifier(CaughtHero(part: part)) }
 }
 
 // value: M6 between two contents: as tall as its share of the way from

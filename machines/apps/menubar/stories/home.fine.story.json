@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.fine",
-    "note": "All machines are fine: the green check and the facts line.",
+    "note": "Nothing needs you: no Needs you section, This Mac, then each kind as it runs.",
     "pages": ["pages/machines.home.fine.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

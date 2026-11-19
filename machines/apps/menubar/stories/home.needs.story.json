@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.needs",
-    "note": "The daily home: nothing red needs you, so the hero says all machines are fine; four upkeep items wait apart.",
+    "note": "The daily home: nothing red needs you, so This Mac, Servers, VMs and Macs, each running row ending in its CPU spark; the upkeep waits apart.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

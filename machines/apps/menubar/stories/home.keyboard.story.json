@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.keyboard",
-    "note": "The keyboard's one highlight: the arrows and Tab walk it through every row in reading order, here on the Accounts tile.",
+    "note": "The keyboard's one highlight: the arrows and Tab walk it through every row in reading order, here on the Accounts row.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,
@@ -11,6 +11,6 @@
     },
     "schema": "station.story/v1",
     "ui": {
-        "highlight": "control:menubar.accounts"
+        "highlight": "accounts"
     }
 }

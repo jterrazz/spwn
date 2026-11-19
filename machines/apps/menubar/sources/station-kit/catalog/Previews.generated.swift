@@ -204,7 +204,6 @@ import SwiftUI
 
 #Preview("pop.qr") { StoryStage(Stories["pop.qr"]) }
 
-#Preview("pop.tooltip") { StoryStage(Stories["pop.tooltip"]) }
 
 #Preview("ports.all.down") { StoryStage(Stories["ports.all.down"]) }
 
@@ -264,7 +263,6 @@ import SwiftUI
 
 #Preview("transition.find") { StoryStage(Stories["transition.find"]) }
 
-#Preview("transition.hero-morph") { StoryStage(Stories["transition.hero-morph"]) }
 
 #Preview("transition.jump") { StoryStage(Stories["transition.jump"]) }
 

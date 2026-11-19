@@ -67,14 +67,6 @@ final class PopoverTests: XCTestCase {
         XCTAssertNil(tip.arrow)
     }
 
-    func testATooltipSaysThePagesWordsForTheControlItExplains() throws {
-        let home = page("pop.tooltip")
-        let ports = try XCTUnwrap((home.sections ?? []).flatMap { $0.items ?? [] }.compactMap(\.tile).first { $0.nav == Stories["pop.tooltip"].ui.tooltip })
-        XCTAssertEqual(TileView.tooltip(ports), "5 shared · ⌘P")
-        let awake = try XCTUnwrap((home.sections ?? []).flatMap { $0.items ?? [] }.compactMap(\.tile).first { $0.caption == "Awake" })
-        XCTAssertEqual(TileView.tooltip(awake), "Awake until 18:00 · ⌘E · right-click for a duration")
-    }
-
     func testEveryHUDStoryDrawsTheWordsItsPageGivesTheGesture() throws {
         let want = ["pop.hud.copy": ("Copied ssh linux-1", Token.Symbol.hudCopy), "pop.hud.terminal": ("linux-1 opened in Terminal", Token.Symbol.hudTerminal)]
         for (id, (words, symbol)) in want {

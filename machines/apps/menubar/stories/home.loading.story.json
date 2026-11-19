@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.loading",
-    "note": "mac-mini still answering: a spinner beside the count, its need dimmed.",
+    "note": "mac-mini still answering: a spinner beside the title, its rows as last read.",
     "pages": ["pages/machines.home.loading.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

@@ -564,7 +564,7 @@ extension Token {
 
         public static let heroTitle = Role(17, .bold, .t1, tracking: -0.17)
         public static let pageTitle = Role(22, .bold, .t1, tracking: -0.40)
-        public static let homeTitle = Role(13, .bold, .t1)
+        public static let homeTitle = Role(15, .bold, .t1)
         public static let sectionLabel = Role(12, .semibold, .section)
         public static let sectionValue = Role(12, .medium, .t3)
         public static let rowName = Role(13, .medium, .t1)
@@ -611,7 +611,7 @@ extension Token {
             public static let blocks: CGFloat = 8
             public static let label: CGFloat = 4
             public static let footer = EdgeInsets(top: 6, leading: 12, bottom: 12, trailing: 12)
-            public static let cap: CGFloat = 700
+            public static let cap: CGFloat = 720
             public static let screenRoom: CGFloat = 48
             public static let fade: CGFloat = 14
             public static let rim: CGFloat = 1
@@ -638,17 +638,6 @@ extension Token {
             public static let insetGlyph: CGFloat = 40
             public static let insetRing: CGFloat = 44
             public static let insetEnd: CGFloat = 8
-        }
-
-        public enum Hero {
-            public static let radius: CGFloat = 12
-            public static let padding = EdgeInsets(top: 9, leading: 12, bottom: 8, trailing: 12)
-            public static let top: CGFloat = 44
-            public static let topTitleOnly: CGFloat = 28
-            public static let glyph: CGFloat = 26
-            public static let slot = CGSize(width: 24, height: 28)
-            public static let row: CGFloat = 32
-            public static let more: CGFloat = 28
         }
 
         public enum Tiles {
@@ -717,6 +706,9 @@ extension Token {
             public static let chips: CGFloat = 18
             public static let network: CGFloat = 64
             public static let spark = CGSize(width: 60, height: 14)
+            public static let rowSpark = CGSize(width: 40, height: 14)
+            public static let rowSparkPoints = 16
+            public static let rowSparkGap: CGFloat = 6
             public static let uptimeCells = 30
             public static let uptimeHeight: CGFloat = 16
             public static let uptimeGap: CGFloat = 2

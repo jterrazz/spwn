@@ -25,7 +25,7 @@ final class MenuTests: XCTestCase {
 
     // value: the menu the panel attaches natively where a story opens
     // one: the page's More menu (Home's the station menu), or the menu of
-    // the row or the tile right-clicked, found on the page as drawn.
+    // the row right-clicked, found on the page as drawn.
     static func attached(_ story: Story) -> MenuModel? {
         guard let open = story.ui.menu, let page = story.state.shown else { return nil }
         if let sheet = story.ui.sheet, let action = page.action(sheet.id), let form = action.form {
@@ -38,9 +38,7 @@ final class MenuTests: XCTestCase {
         }
         let actions = page.actions ?? []
         let rows = (page.sections ?? []).flatMap { s in (s.items ?? []).flatMap { [$0.row].compactMap { $0 } + ($0.group?.items ?? []).compactMap(\.row) } }
-        if let row = rows.first(where: { $0.id == key }) { return MenuModel.context(row, actions: actions) }
-        let tiles = (page.sections ?? []).flatMap { ($0.items ?? []).compactMap(\.tile) }
-        return tiles.first { t in actions.first { $0.id == t.toggle }?.rows?.first == key }.map { MenuModel.tile($0, actions: actions) }
+        return rows.first { $0.id == key }.map { MenuModel.context($0, actions: actions) }
     }
 
     // invariant: SPEC C4: a menu story draws the very model the panel

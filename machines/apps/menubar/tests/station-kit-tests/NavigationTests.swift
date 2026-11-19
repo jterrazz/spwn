@@ -147,9 +147,9 @@ final class NavigationPathTests: XCTestCase {
         XCTAssertNil(state.status)
     }
 
-    // invariant: Home's tiles open their fleet page.
-    func testTheTilesOpenTheirFleetPage() throws {
+    // invariant: Home's shortcut rows open their fleet page.
+    func testTheShortcutsOpenTheirFleetPage() throws {
         let home = try Tree.page("menubar.full")
-        XCTAssertEqual(home.section("tiles")?.items?.compactMap(\.tile?.nav), ["menubar.ports", "menubar.accounts", "menubar.awake"])
+        XCTAssertEqual(home.section("shortcuts")?.rows.compactMap(\.nav), ["menubar.awake", "menubar.ports", "menubar.accounts"])
     }
 }

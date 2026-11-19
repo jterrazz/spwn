@@ -7,6 +7,7 @@ extension Token {
     // bar, the no-match lines; and the words Find says of itself.
     public enum Find {
         public static let recent = "Recent"
+        public static let prompt = "Find a machine, a port, an action\u{2026}"
         public static let close = "Close"
         public static let show = "Show"
         public static let open = "Open"

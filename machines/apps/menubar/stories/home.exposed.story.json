@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.exposed",
-    "note": "Port 5000 is exposed: the red hero with Review, the other needs folded.",
+    "note": "Port 5000 is exposed: its row under Needs you with Review; Ports says 1 exposed.",
     "pages": ["pages/machines.home.exposed.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

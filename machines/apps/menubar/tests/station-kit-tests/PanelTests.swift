@@ -106,10 +106,10 @@ final class PanelTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(Self.height(unbounded)), Token.Metric.Row.height * 40 + Token.Metric.Panel.body.top + Token.Metric.Panel.body.bottom)
     }
 
-    func testTheCapIsSevenHundredOrTheScreenLessFortyEight() {
-        XCTAssertEqual(PanelHeight.cap(visible: nil), 700)
-        XCTAssertEqual(PanelHeight.cap(visible: 1000), 700)
-        XCTAssertEqual(PanelHeight.cap(visible: 748), 700)
+    func testTheCapIsSevenHundredTwentyOrTheScreenLessFortyEight() {
+        XCTAssertEqual(PanelHeight.cap(visible: nil), 720)
+        XCTAssertEqual(PanelHeight.cap(visible: 1000), 720)
+        XCTAssertEqual(PanelHeight.cap(visible: 768), 720)
         XCTAssertEqual(PanelHeight.cap(visible: 600), 552)
     }
 

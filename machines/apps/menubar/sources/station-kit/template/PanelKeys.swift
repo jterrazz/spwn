@@ -68,7 +68,7 @@ public enum PanelOrder {
         case .page:
             guard let home = PanelKeys.home(state) else { return arrows(state) }
             let header = (home.header?.buttons ?? []).map(PanelFocus.control)
-            return header + [.menu] + arrows(state) + [.find]
+            return header + [.menu, .find] + arrows(state)
         }
     }
 
@@ -80,10 +80,9 @@ public enum PanelOrder {
         }
         guard let shown = state.shown else { return [] }
         guard let home = PanelKeys.home(state) else { return rows(of: shown, segment: state.segment).map { .row($0.id ?? "") } }
-        let hero = (home.section(HomePage.hero)?.rows ?? []).dropFirst().filter { $0.nav != nil || $0.verb != nil }.map { PanelFocus.row($0.id ?? "") }
-        let tiles = (home.section(HomeCards.tiles)?.items ?? []).compactMap { $0.tile?.nav }.map(PanelFocus.control)
-        let cards = HomeCards.navigable(home).map { PanelFocus.row($0.id ?? "") }
-        return hero + tiles + cards
+        return HomePage.walked.compactMap { home.section($0) }
+            .flatMap { s in s.rows.filter { $0.id != HomePage.addMac && ($0.nav != nil || $0.verb != nil) } }
+            .map { PanelFocus.row($0.id ?? "") }
     }
 
     static func rows(of page: Page, segment: String?) -> [Row] {
@@ -226,11 +225,10 @@ public enum PanelKeys {
             return state.pushed != nil ? .home : .none
         case "cmd+i", "cmd+p", "cmd+u", "cmd+e":
             if let segment = shown?.segments?.first(where: { $0.key == key }) { return .segment(segment.id ?? "") }
-            if let tile = (home?.section(HomeCards.tiles)?.items ?? []).compactMap(\.tile).first(where: { $0.key == key }), let nav = tile.nav { return .open(nav) }
             return pages[key].map { .open($0) } ?? .none
         default:
             if key.hasPrefix("cmd+"), let n = Int(key.dropFirst(4)), n > 0 {
-                let macs = (state.page?.section(HomeCards.macs)?.rows ?? []).filter { $0.nav != nil }
+                let macs = (state.page?.section(HomePage.macs)?.rows ?? []).filter { $0.nav != nil }
                 return n <= macs.count ? .open(macs[n - 1].nav ?? "") : .none
             }
             if home != nil, key.count == 1, key.first?.isLetter == true { return .find(key) }
@@ -243,7 +241,7 @@ public enum PanelKeys {
         switch focus {
         case let .row(id)?:
             guard let (row, section) = row(id, in: shown) else { return .none }
-            if section == HomePage.hero || section == TodoBadge.section, let verb = row.verb { return .run(verb) }
+            if section == HomePage.needs || section == TodoBadge.section, let verb = row.verb { return .run(verb) }
             return row.nav.map { .open($0) } ?? .none
         case let .control(id)?:
             if focus == .find { return .find("") }

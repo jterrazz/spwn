@@ -78,15 +78,12 @@ public struct MenuModel: Equatable, Sendable {
     }
 
     // value: a row's right-click menu: the ids its row lists.
+    // A row that lists none opens the menu its id heads (Keep awake's).
     public static func context(_ row: Row, actions: [Action]) -> MenuModel {
-        list(row.menu ?? [], actions: actions)
-    }
-
-    // value: a tile's right-click menu: the menu its switch's row names.
-    public static func tile(_ tile: Tile, actions: [Action]) -> MenuModel {
-        guard let key = action(tile.toggle ?? "", in: actions)?.rows?.first,
-              let head = action(menu + ":" + key, in: actions) else { return MenuModel(header: nil, items: []) }
-        return list(head.submenu ?? [], actions: actions)
+        if row.menu == nil, let id = row.id, let head = action(menu + ":" + id, in: actions) {
+            return list(head.submenu ?? [], actions: actions)
+        }
+        return list(row.menu ?? [], actions: actions)
     }
 
     // value: a sheet's popup: each option, the one answered checked, one

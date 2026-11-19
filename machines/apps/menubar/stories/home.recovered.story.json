@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.recovered",
-    "note": "infra is healthy again: the hero says what needs you, as before.",
+    "note": "infra is healthy again: Needs you is gone and infra's row says healthy with its CPU.",
     "pages": ["pages/machines.home.recovered.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

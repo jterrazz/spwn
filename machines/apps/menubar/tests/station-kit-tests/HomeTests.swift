@@ -57,12 +57,15 @@ final class HomeTests: XCTestCase {
         XCTAssertEqual(Snapshot.state("menubar.home.engine-stopped", page).connection, .stopped)
     }
 
-    // invariant: MB-05, SPEC A4: Home is its hero first, then its tiles,
-    // its servers and its Macs; Open in Terminal and Stop everything on
-    // This Mac are the station menu's; New VM is the header's.
+    // invariant: MB-05, Home V3: This Mac, its servers, its VMs, its Macs
+    // and the shortcut rows, under the header's title and find prompt;
+    // Open in Terminal and Stop everything on This Mac are the station
+    // menu's; New VM is the header's.
     func testHomeLayout() throws {
         let page = try Tree.page("menubar.home.two-macs")
-        XCTAssertEqual(page.sections?.compactMap(\.id), ["hero", "tiles", "servers", "macs", "needs-you", "machines"])
+        XCTAssertEqual(page.sections?.compactMap(\.id), ["this-mac", "servers", "vms", "macs", "shortcuts", "needs-you", "machines"])
+        XCTAssertEqual(page.header?.title, "Station")
+        XCTAssertEqual(page.header?.search, "Find a machine, a port, an action")
         XCTAssertEqual(page.header?.buttons, ["new-vm"])
         let strip = try XCTUnwrap(page.strip)
         XCTAssertNotNil(strip.cpu)
@@ -72,7 +75,8 @@ final class HomeTests: XCTestCase {
         XCTAssertEqual(page.section("needs-you")?.caption?.first?.text, "5 things need you")
         XCTAssertEqual(page.pageActions.map(\.label), ["New VM", "Open in Terminal", "Stop everything on This Mac"])
         XCTAssertEqual(page.pageActions.map(\.key), ["cmd+n", "cmd+t", nil])
-        XCTAssertEqual(page.section("tiles")?.items?.compactMap(\.tile).map(TileStrip.said), ["Ports, 2 shared", "Accounts, 1 signed out", "Awake, 6 hr left"])
+        XCTAssertEqual(page.section("shortcuts")?.rows.map { "\($0.label ?? ""), \(Format.show($0.cells?.first ?? Value()))" },
+                       ["Keep awake, until 18:00", "Ports, 2 shared", "Accounts, 1 signed out"])
     }
 
     // invariant: MA-14: under each Mac its Servers, then its Workspaces,

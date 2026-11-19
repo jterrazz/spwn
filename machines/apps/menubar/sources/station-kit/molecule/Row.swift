@@ -30,6 +30,7 @@ public struct RowView: View {
     let columns: [Column]
     let actions: [Action]
     let highlighted: Bool
+    let switches: Bool
     let run: (Action) -> Void
     let hovered: (Bool) -> Void
     @Environment(\.stationTokens) private var tokens
@@ -37,11 +38,13 @@ public struct RowView: View {
     @Environment(\.stationPointerHeld) private var held
     @State private var hovering = false
 
-    public init(_ row: Row, columns: [Column] = [], actions: [Action] = [], highlighted: Bool = false, run: @escaping (Action) -> Void = { _ in }, hovered: @escaping (Bool) -> Void = { _ in }) {
+    public init(_ row: Row, columns: [Column] = [], actions: [Action] = [], highlighted: Bool = false, switches: Bool = false,
+                run: @escaping (Action) -> Void = { _ in }, hovered: @escaping (Bool) -> Void = { _ in }) {
         self.row = row
         self.columns = columns
         self.actions = actions
         self.highlighted = highlighted
+        self.switches = switches
         self.run = run
         self.hovered = hovered
     }
@@ -72,6 +75,20 @@ public struct RowView: View {
         return i - 1 < cells.count ? cells[i - 1] : nil
     }
 
+    // value: the trailing value when it is a series, the CPU a running
+    // row ends in.
+    public static func spark(_ row: Row, columns: [Column]) -> Value? {
+        guard let value = trail(row, columns: columns), value.kind == "spark" else { return nil }
+        return value
+    }
+
+    // value: a series' value now, under the series' live key.
+    static func lead(_ spark: Value) -> Value {
+        var lead = spark.items?.first ?? Value()
+        lead.live = spark.live
+        return lead
+    }
+
     static func action(_ id: String?, in actions: [Action]) -> Action? {
         guard let id else { return nil }
         return actions.first { $0.id == id || $0.key == id }
@@ -94,7 +111,7 @@ public struct RowView: View {
             VStack(alignment: .leading, spacing: m.subGap) {
                 nameLine.rowPart(.name)
                 if let sub {
-                    FactsLine(sub, role: .rowSub).opacity(stale ? m.staleShare : 1).rowPart(.sub)
+                    LiveRead { store in FactsLine(store.current(sub), role: .rowSub) }.opacity(stale ? m.staleShare : 1).rowPart(.sub)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -165,13 +182,22 @@ public struct RowView: View {
     @ViewBuilder var trailing: some View {
         if let left = row.left {
             TimeLeft(left).rowPart(.trail)
+        } else if let spark = Self.spark(row, columns: columns) {
+            HStack(spacing: Token.Metric.Chart.rowSparkGap) {
+                LiveRead { store in RowSpark(store.points(spark, else: spark.points) ?? []) }
+                LiveText(Self.lead(spark), role: .rowValue).fixedSize()
+            }
+            .rowPart(.trail)
         } else if let value = Self.trail(row, columns: columns) {
             LiveText(value, role: .rowValue).fixedSize().rowPart(.trail)
         }
     }
 
     @ViewBuilder var control: some View {
-        if let verb = Self.action(row.verb, in: actions) {
+        if switches, let verb = Self.action(row.verb, in: actions) {
+            StationSwitch(on: verb.picked == true) { run(verb) }
+                .rowPart(.control)
+        } else if let verb = Self.action(row.verb, in: actions) {
             VerbButton(verb.label ?? "") { run(verb) }
                 .padding(.trailing, m.verbTrail)
                 .rowPart(.control)
@@ -215,6 +241,7 @@ public struct RowStack: View {
     let columns: [Column]
     let actions: [Action]
     let highlighted: String?
+    let switches: Bool
     let open: ((Row) -> Void)?
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
@@ -226,12 +253,13 @@ public struct RowStack: View {
         return highlighted
     }
 
-    public init(_ rows: [Row], columns: [Column] = [], actions: [Action] = [], highlighted: String? = nil, open: ((Row) -> Void)? = nil,
-                run: @escaping (Action) -> Void = { _ in }) {
+    public init(_ rows: [Row], columns: [Column] = [], actions: [Action] = [], highlighted: String? = nil, switches: Bool = false,
+                open: ((Row) -> Void)? = nil, run: @escaping (Action) -> Void = { _ in }) {
         self.rows = rows
         self.columns = columns
         self.actions = actions
         self.highlighted = highlighted
+        self.switches = switches
         self.open = open
         self.run = run
     }
@@ -250,7 +278,7 @@ public struct RowStack: View {
         let m = Token.Metric.Row.self
         VStack(spacing: 0) {
             ForEach(Array(rows.enumerated()), id: \.offset) { i, row in
-                RowView(row, columns: columns, actions: actions, highlighted: highlighted != nil && row.id == highlighted, run: run) { on in
+                RowView(row, columns: columns, actions: actions, highlighted: highlighted != nil && row.id == highlighted, switches: switches, run: run) { on in
                     if on { hovered = i } else if hovered == i { hovered = nil }
                 }
                 .onTapGesture { if row.nav != nil { open?(row) } }

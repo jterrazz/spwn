@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.down",
-    "note": "infra is down: the red hero with Restart, the other needs folded into one line.",
+    "note": "infra is down: its row under Needs you with Restart, and infra down since HH:MM under Servers.",
     "pages": ["pages/machines.home.down.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

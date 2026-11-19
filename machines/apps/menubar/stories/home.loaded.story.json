@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.loaded",
-    "note": "mac-mini answered: its need drawn at full strength again.",
+    "note": "mac-mini answered: its rows drawn at full strength again.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

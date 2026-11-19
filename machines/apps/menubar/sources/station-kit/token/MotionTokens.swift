@@ -85,10 +85,6 @@ extension Token.Motion {
         public static let foldFade = 0.12 / 0.34
         public static let chevronTurn = 180.0
 
-        public static let heroDrop: CGFloat = 3
-        public static let heroRowsDelay = 0.06 / 0.34
-        public static let heroGlyphFrom = 0.6
-
         public static let leaveShift: CGFloat = 10
         public static let landFrom = 0.97
         public static let landDrop: CGFloat = 3

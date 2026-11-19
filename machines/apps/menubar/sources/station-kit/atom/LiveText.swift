@@ -28,6 +28,24 @@ public final class LiveStore: ObservableObject, @unchecked Sendable {
         return lead
     }
 
+    // value: a page's value with each live part its key's last value: a
+    // series' points and value now, a measure's number, its words kept.
+    public func current(_ value: Value) -> Value {
+        var out = value
+        out.items = value.items?.map { item in current(item) }
+        guard let key = value.live, let got = values[key] else { return out }
+        if got.kind == "spark", value.kind == "spark" {
+            out.items = got.items
+        } else {
+            out.kind = got.kind
+            out.n = got.n
+            out.of = got.of
+            out.unit = got.unit
+        }
+        if got.stale == true { out.stale = true }
+        return out
+    }
+
     // value: the series a value's live key carries, else the page's own.
     public func points(_ value: Value?, else spark: [Int]?) -> [Int]? {
         guard let key = value?.live, let got = values[key], got.kind == "spark" else { return spark }

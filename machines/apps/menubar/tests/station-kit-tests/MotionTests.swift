@@ -17,7 +17,7 @@ final class MotionTests: XCTestCase {
         XCTAssertEqual(Set(drawn).count, drawn.count)
         XCTAssertTrue(exempt.isDisjoint(with: drawn))
         XCTAssertEqual(exempt.union(drawn), Set((1...31).map { "M\($0)" }))
-        XCTAssertEqual(exempt, ["M1", "M13", "M14", "M16", "M29"])
+        XCTAssertEqual(exempt, ["M1", "M8", "M13", "M14", "M16", "M29"])
     }
 
     @MainActor
@@ -167,18 +167,6 @@ final class MotionTests: XCTestCase {
         XCTAssertEqual(leaving.bitmap.height, 20)
     }
 
-    func testTheHeroMorphsItsTopFirstItsRowsLaterAndItsGlyphOnTheSpring() {
-        for t in Self.moments {
-            let top = HeroMorph.look(HeroMorph.frozen(t, part: .top, reduce: false), part: .top, reduce: false)
-            let rows = HeroMorph.look(HeroMorph.frozen(t, part: .rows, reduce: false), part: .rows, reduce: false)
-            let glyph = HeroMorph.look(HeroMorph.frozen(t, part: .glyph, reduce: false), part: .glyph, reduce: false)
-            near(top.opacity, Self.smooth(t), "top at \(t)")
-            near(Double(top.y), -3 * (1 - Self.smooth(t)), "top's drop at \(t)")
-            XCTAssertLessThanOrEqual(rows.opacity, top.opacity, "rows follow at \(t)")
-            near(glyph.scale.width, 0.6 + 0.4 * Token.Motion.bouncy(at: t), "glyph at \(t)")
-        }
-    }
-
     func testARowLeavesCollapsingSlidingAndFadingAndARowLandsFromAbove() {
         for t in Self.moments {
             let shown = 1 - Self.smooth(t)
@@ -321,8 +309,6 @@ final class MotionTests: XCTestCase {
             ("push", PushTransition.look(t, role: .top, way: .push, reduce: true)),
             ("segment", SegmentSlide.look(t, forward: true, reduce: true)),
             ("fold", Fold.look(t, reduce: true)),
-            ("hero", HeroMorph.look(t, part: .top, reduce: true)),
-            ("glyph", HeroMorph.look(t, part: .glyph, reduce: true)),
             ("leave", RowLeave.look(t, reduce: true)),
             ("land", RowLand.look(t, reduce: true)),
             ("born", Born.look(t, reduce: true)),

@@ -1,4 +1,4 @@
-import StationKit
+@testable import StationKit
 import SwiftUI
 import XCTest
 
@@ -9,12 +9,13 @@ final class KeyboardTests: XCTestCase {
 
     func testHomeWalksItsRowsAndControlsInReadingOrder() {
         let rows: [PanelFocus] = [
-            .control("menubar.ports"), .control("menubar.accounts"), .control("menubar.awake"),
             .row("infra"),
+            .row("linux-1"), .row("agent-7f"), .row("linux-3"), .row("review-bot"), .row("api"),
             .row("macbook-pro"), .row("mac-mini"), .row("macbook-air"),
+            .row("awake"), .row("ports"), .row("accounts"),
         ]
         XCTAssertEqual(PanelOrder.arrows(home), rows)
-        XCTAssertEqual(PanelOrder.walk(home), [.control("new-vm"), .menu] + rows + [.find])
+        XCTAssertEqual(PanelOrder.walk(home), [.control("new-vm"), .menu, .find] + rows)
     }
 
     func testAMachinePageWalksTheRowsThatAct() {
@@ -52,14 +53,15 @@ final class KeyboardTests: XCTestCase {
     func testTabWrapsInsideItsRegionAndTheArrowsStopAtTheEnds() {
         let walk = PanelOrder.walk(home)
         XCTAssertEqual(PanelOrder.walked(nil, by: 1, in: walk), .control("new-vm"))
-        XCTAssertEqual(PanelOrder.walked(nil, by: -1, in: walk), .find)
-        XCTAssertEqual(PanelOrder.walked(.find, by: 1, in: walk), .control("new-vm"))
-        XCTAssertEqual(PanelOrder.walked(.control("new-vm"), by: -1, in: walk), .find)
+        XCTAssertEqual(PanelOrder.walked(nil, by: -1, in: walk), .row("accounts"))
+        XCTAssertEqual(PanelOrder.walked(.find, by: 1, in: walk), .row("infra"))
+        XCTAssertEqual(PanelOrder.walked(.row("accounts"), by: 1, in: walk), .control("new-vm"))
+        XCTAssertEqual(PanelOrder.walked(.control("new-vm"), by: -1, in: walk), .row("accounts"))
         let arrows = PanelOrder.arrows(home)
-        XCTAssertEqual(PanelOrder.moved(nil, by: 1, in: arrows), .control("menubar.ports"))
-        XCTAssertEqual(PanelOrder.moved(.control("menubar.ports"), by: 1, in: arrows), .control("menubar.accounts"))
-        XCTAssertEqual(PanelOrder.moved(.row("macbook-air"), by: 1, in: arrows), .row("macbook-air"))
-        XCTAssertEqual(PanelOrder.moved(.control("menubar.ports"), by: -1, in: arrows), .control("menubar.ports"))
+        XCTAssertEqual(PanelOrder.moved(nil, by: 1, in: arrows), .row("infra"))
+        XCTAssertEqual(PanelOrder.moved(.row("infra"), by: 1, in: arrows), .row("linux-1"))
+        XCTAssertEqual(PanelOrder.moved(.row("accounts"), by: 1, in: arrows), .row("accounts"))
+        XCTAssertEqual(PanelOrder.moved(.row("infra"), by: -1, in: arrows), .row("infra"))
     }
 
     func testTheHighlightFollowsItsRowByIdentityAndGoesWithIt() {
@@ -68,7 +70,7 @@ final class KeyboardTests: XCTestCase {
         var reordered = home
         reordered.page?.sections = home.page?.sections?.map { s in
             var s = s
-            if s.id == HomeCards.macs { s.items = s.items?.reversed() }
+            if s.id == HomePage.macs { s.items = s.items?.reversed() }
             return s
         }
         XCTAssertEqual(PanelOrder.follow(mini, in: PanelOrder.walk(reordered)), mini)
@@ -76,8 +78,8 @@ final class KeyboardTests: XCTestCase {
         XCTAssertNil(PanelOrder.follow(.panel, in: PanelOrder.walk(home)))
     }
 
-    func testTheStoryDrawsTheAccountsTileLitByTheKeyboard() {
-        XCTAssertEqual(Stories["home.keyboard"].ui.highlight.map(PanelFocus.init), .control("menubar.accounts"))
+    func testTheStoryDrawsTheAccountsRowLitByTheKeyboard() {
+        XCTAssertEqual(Stories["home.keyboard"].ui.highlight.map(PanelFocus.init), .row("accounts"))
         XCTAssertEqual(PanelFocus("linux-1"), .row("linux-1"))
     }
 
@@ -119,10 +121,10 @@ final class KeyboardTests: XCTestCase {
             ("enter", "a server row", home, .row("infra"), .open("menubar.machine:infra")),
             ("enter", "a need row", Stories["home.down-and-exposed"].state, .row("exposed:macbook-pro:5000"), .run("exposed:macbook-pro:5000")),
             ("enter", "a workspace row", mac, .row("linux-1"), .open("menubar.machine:linux-1")),
-            ("enter", "a tile", home, .control("menubar.accounts"), .open("menubar.accounts")),
+            ("enter", "a shortcut row", home, .row("accounts"), .open("menubar.accounts")),
             ("enter", "the + button", home, .control("new-vm"), .run("new-vm")),
             ("enter", "nothing lit", home, nil, .none),
-            ("space", "a tile", home, .control("menubar.accounts"), .open("menubar.accounts")),
+            ("space", "a shortcut row", home, .row("accounts"), .open("menubar.accounts")),
             ("cmd+enter", "a workspace row", mac, .row("linux-1"), .run("attach:linux-1")),
             ("cmd+enter", "a workspace's page", workspace, nil, .run("open-station")),
             ("cmd+enter", "a Mac's page", mac, nil, .none),

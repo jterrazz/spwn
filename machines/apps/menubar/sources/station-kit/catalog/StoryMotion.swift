@@ -5,7 +5,6 @@ import SwiftUI
 // <movement>` for its Reduce Motion form.
 public enum StoryMotion: String, CaseIterable, Sendable {
     case push, pop, jump, segment, sheet, alert, find, menu
-    case heroMorph = "hero-morph"
     case rowLeave = "row-leave"
 
     public static let reduced = "reduce-motion."
@@ -74,8 +73,6 @@ struct TransitionView: View {
             rest(story, Caught(time: time, segment: from.ui.segment ?? from.pages.first.map(MacPage.picked)))
         case .sheet, .alert, .menu:
             rest(story, Caught(time: time, layer: true))
-        case .heroMorph:
-            rest(story, Caught(time: time, hero: true))
         case .rowLeave:
             rest(story, Caught(time: time, row: story.ui.leaving))
         }

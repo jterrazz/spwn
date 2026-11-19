@@ -2,7 +2,7 @@ import SwiftUI
 
 extension Story {
     // value: the menu a story opens, built as the app builds it: the
-    // station menu, the shown page's More menu, or a row's or a tile's.
+    // station menu, the shown page's More menu, or a row's.
     public var menu: MenuModel? {
         guard let open = ui.menu, let page = state.shown else { return nil }
         if let sheet = ui.sheet, let action = page.action(sheet.id), let form = action.form, let id = open.id {
@@ -19,9 +19,6 @@ extension Story {
             for item in section.items ?? [] {
                 for row in [item.row].compactMap({ $0 }) + (item.group?.items ?? []).compactMap(\.row) where row.id == key {
                     return MenuModel.context(row, actions: actions)
-                }
-                if let tile = item.tile, actions.first(where: { $0.id == tile.toggle })?.rows?.first == key {
-                    return MenuModel.tile(tile, actions: actions)
                 }
             }
         }

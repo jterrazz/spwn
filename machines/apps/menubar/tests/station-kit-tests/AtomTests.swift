@@ -30,9 +30,11 @@ final class AtomTests: XCTestCase {
         (text as NSString).size(withAttributes: [.font: NSFont.monospacedDigitSystemFont(ofSize: Token.Role.facts.size, weight: .regular)]).width
     }
 
+    // value: a facts line's room in a card of the panel, its glyph slot
+    // and gap before it.
     static func heroLine(panel: CGFloat) -> CGFloat {
         let m = Token.Metric.self
-        return panel - m.Panel.body.leading - m.Panel.body.trailing - m.Hero.padding.leading - m.Hero.padding.trailing - m.Hero.slot.width - m.Row.gap
+        return panel - m.Panel.body.leading - m.Panel.body.trailing - m.Card.padding.leading - m.Card.padding.trailing - m.Marks.glyphSlot - m.Row.gap
     }
 
     func fitted(_ panel: CGFloat) -> String {

@@ -150,6 +150,9 @@ public enum Format {
             return (v.items ?? []).map { "\($0.label ?? "") \(show($0, now: now))" }.joined(separator: Token.Glyph.sep)
         case "list":
             return (v.items ?? []).map { show($0, now: now) }.filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
+        case "spark":
+            let lead = (v.items?.first).map { show($0, now: now) } ?? ""
+            return [v.label ?? "", lead].filter { !$0.isEmpty }.joined(separator: " ")
         default: return said(v.text ?? "")
         }
     }

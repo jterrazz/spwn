@@ -1,7 +1,7 @@
 {
     "group": "home",
     "id": "home.down-and-exposed",
-    "note": "Two reds: infra down carries the hero, the exposed port folds with the rest.",
+    "note": "Two reds under Needs you: infra down with Restart, then the exposed port with Review; red rows are never merged.",
     "pages": ["pages/machines.home.down-exposed.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

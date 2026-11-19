@@ -4,9 +4,12 @@ import SwiftUI
 // the search glyph, its placeholder; it takes the keys as Find opens, its
 // arrows move the light, its Return runs the line lit, ⌘↩ its alternate,
 // esc closes Find. Drawn still, the text and a caret stand in for the
-// AppKit field.
+// AppKit field. On Home it rests: its prompt the page's, a click opens
+// Find, and a letter typed opens it with that letter (PanelKeys).
 public struct FindField: View {
     @Binding var text: String
+    let prompt: String
+    let open: (() -> Void)?
     let move: (Int) -> Void
     let submit: (Bool) -> Void
     let close: () -> Void
@@ -14,14 +17,36 @@ public struct FindField: View {
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationStill) private var still
 
-    public init(text: Binding<String>, move: @escaping (Int) -> Void = { _ in }, submit: @escaping (Bool) -> Void = { _ in }, close: @escaping () -> Void = {}) {
+    public init(text: Binding<String>, prompt: String = Token.Find.prompt, move: @escaping (Int) -> Void = { _ in }, submit: @escaping (Bool) -> Void = { _ in }, close: @escaping () -> Void = {}) {
         _text = text
+        self.prompt = prompt
+        open = nil
         self.move = move
         self.submit = submit
         self.close = close
     }
 
+    public init(resting prompt: String, open: @escaping () -> Void) {
+        _text = .constant("")
+        self.prompt = prompt
+        self.open = open
+        move = { _ in }
+        submit = { _ in }
+        close = {}
+    }
+
     public var body: some View {
+        if let open {
+            Button(action: open) { look.contentShape(Rectangle()) }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(prompt))
+        } else {
+            look
+        }
+    }
+
+    @ViewBuilder
+    var look: some View {
         let m = Token.Metric.Find.self
         let f = Token.Find.self
         let shape = RoundedRectangle(cornerRadius: m.fieldRadius, style: .continuous)
@@ -41,15 +66,15 @@ public struct FindField: View {
 
     @ViewBuilder
     var field: some View {
-        if still {
+        if still || open != nil {
             HStack(spacing: 0) {
-                Text(text.isEmpty ? Token.FindCapsule.words : text)
+                Text(text.isEmpty ? prompt : text)
                     .foregroundStyle(text.isEmpty ? tokens.color.t3 : tokens.color.t1)
                     .lineLimit(1)
                 Spacer(minLength: 0)
             }
         } else {
-            TextField(Token.FindCapsule.words, text: $text)
+            TextField(prompt, text: $text)
                 .textFieldStyle(.plain)
                 .foregroundStyle(tokens.color.t1)
                 .focused($focused)

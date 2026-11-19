@@ -1,10 +1,12 @@
 import SwiftUI
 
-// invariant: SPEC A4's Home: the hero the engine decides first; below it,
-// the tiles and the servers' and Macs' cards, the menu's lines
-// only while the station menu is open. A page from an engine that sends
-// no cards keeps the machines' list, the Awake and Accounts tiles and the
-// menu; one that sends no hero, the three measures and what needs you.
+// invariant: Home V3: under the header's title and find field, one
+// section per kind in the page's order: what needs you (only when it
+// does), This Mac over its three measures, the servers, the VMs, the Macs,
+// then the Keep awake, Ports and Accounts rows; the menu's lines only
+// while the station menu is open. A page from an engine that sends no
+// such sections keeps the machines' list, the Awake and Accounts tiles,
+// the measures and what needs you, and the menu.
 struct HomePage: View {
     let page: Page
     let state: PanelState
@@ -12,7 +14,6 @@ struct HomePage: View {
     @State private var unfolded = false
     @Environment(\.stationFocus) private var focus
     @Environment(\.stationPalette) private var palette
-    @Environment(\.stationStill) private var still
 
     init(page: Page, state: PanelState, handlers: PopoverHandlers) {
         self.page = page
@@ -20,71 +21,89 @@ struct HomePage: View {
         self.handlers = handlers
     }
 
-    // value: SPEC A4's Home below the hero: its tiles and its cards, once
-    // the engine sends them.
-    var cards: Bool { page.section(HomeCards.macs) != nil }
+    static let needs = "needs"
+    static let thisMac = "this-mac"
+    static let empty = "empty"
+    static let servers = "servers"
+    static let vms = "vms"
+    static let macs = "macs"
+    static let shortcuts = "shortcuts"
+    static let addMac = "add-mac"
+
+    // value: the sections Home draws, in the page's order, and those of
+    // them whose rows the arrows walk.
+    static let drawn = [needs, thisMac, empty, servers, vms, macs, shortcuts]
+    static let walked = [needs, servers, vms, macs, shortcuts]
+
+    var listed: Bool { page.section(Self.macs) != nil }
 
     var litID: String? {
         if case let .row(id)? = focus { return id }
         return state.lit
     }
 
-    var hero: Section? { page.section(Self.hero) }
-    static let hero = "hero"
-
-    // value: the actions the header and the hero already offer, which the
-    // menu does not repeat.
-    var carried: [String] { (page.header?.buttons ?? []) + (hero?.items?.first?.empty?.actions ?? []) }
+    // value: the actions the header and the empty card already offer,
+    // which the menu does not repeat.
+    var carried: [String] {
+        (page.header?.buttons ?? []) + (page.section(Self.empty)?.items ?? []).flatMap { $0.empty?.actions ?? [] }
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: cards ? Token.Metric.Panel.blocks : Token.Tile.section) {
-            if let hero {
-                Hero(hero, actions: page.actions ?? [], stale: page.header?.stale, run: { verb(page, $0, handlers) }, open: { go($0, handlers) })
-                    .onChange(of: Hero.announcement(hero)) { _, said in
-                        if let said, !still { AccessibilityNotification.Announcement(said).post() }
-                    }
-            }
-            if cards {
-                sections
-            }
-            if hero == nil, let strip = page.strip {
-                Button { handlers.push(Navigation.activity) } label: {
-                    Metrics(measures: [("CPU", strip.cpu, strip.spark), ("Memory", strip.memory, strip.memory_spark), ("Network", strip.net?.first, strip.net_spark)])
-                        .contentShape(Rectangle())
+        VStack(alignment: .leading, spacing: listed ? Token.Metric.Panel.blocks : Token.Tile.section) {
+            if listed {
+                ForEach(Array((page.sections ?? []).filter { Self.drawn.contains($0.id ?? "") }.enumerated()), id: \.offset) { _, s in
+                    section(s)
                 }
-                .buttonStyle(.plain)
+            } else if let strip = page.strip {
+                measures(strip)
             }
             if let needs = page.section(TodoBadge.section), stopped {
                 engineStopped(needs)
-            } else if hero == nil, let needs = page.section(TodoBadge.section), needs.items?.contains(where: { $0.row != nil }) == true {
+            } else if !listed, let needs = page.section(TodoBadge.section), needs.items?.contains(where: { $0.row != nil }) == true {
                 needsYou(needs)
             }
-            if !cards, let machines = page.section("machines") {
+            if !listed, let machines = page.section("machines") {
                 SectionHeader(machines.title ?? "")
                 MachineTree(section: machines, kinds: false, only: nil, lit: litID, stopping: StopAll.stopping(state, page), open: handlers.openMachine)
             }
-            if !cards { tiles }
+            if !listed { tiles }
             SheetFor(page: page, state: state, handlers: handlers)
-            if (!cards || state.menu), state.confirming == nil || page.action(state.confirming ?? "")?.on == "row" {
+            if (!listed || state.menu), state.confirming == nil || page.action(state.confirming ?? "")?.on == "row" {
                 menu
             }
         }
     }
 
-    // value: SPEC A4 Home 2-5: the tiles, then the servers and the Macs,
-    // each its card.
+    // value: one section of Home: its head (its title, its caption), then
+    // its card; the shortcuts' rows go unheaded, their verb a switch.
     @ViewBuilder
-    var sections: some View {
+    func section(_ s: Section) -> some View {
         let actions = page.actions ?? []
-        if let tiles = page.section(HomeCards.tiles) {
-            TileStrip(tiles, actions: actions, run: { perform($0, handlers) }, open: { go($0, handlers) })
+        switch s.id {
+        case Self.thisMac:
+            VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
+                CardLabel(s.title ?? "", value: s.caption ?? [])
+                if let strip = page.strip { measures(strip) }
+            }
+        case Self.empty:
+            VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
+                CardLabel(s.title ?? "", value: s.caption ?? [])
+                ForEach(Array((s.items ?? []).compactMap(\.empty).enumerated()), id: \.offset) { _, empty in
+                    Card(flush: false) { EmptyState(empty, actions: actions) { perform($0, handlers) } }
+                }
+            }
+        default:
+            HomeSection(s, actions: actions, lit: litID, headed: s.id != Self.shortcuts, switches: s.id == Self.shortcuts,
+                        run: { verb(page, $0, handlers) }, go: { go($0, handlers) })
         }
-        if let servers = page.section(HomeCards.servers) {
-            ServersCard(servers, actions: actions, lit: litID, go: { go($0, handlers) })
+    }
+
+    func measures(_ strip: Strip) -> some View {
+        Button { handlers.push(Navigation.activity) } label: {
+            Metrics(measures: [("CPU", strip.cpu, strip.spark), ("Memory", strip.memory, strip.memory_spark), ("Network", strip.net?.first, strip.net_spark)])
+                .contentShape(Rectangle())
         }
-        if let macs = page.section(HomeCards.macs) {
-            MacsCard(macs, actions: actions, lit: litID, run: { a, _ in perform(a, handlers) }, go: { go($0, handlers) })
-        }
+        .buttonStyle(.plain)
     }
 
     // value: the engine does not answer: what is wrong in a sentence and
@@ -408,9 +427,10 @@ func go(_ nav: String, _ handlers: PopoverHandlers) {
     }
 }
 
-// invariant: SPEC A4: Home's header: "All machines", then the round +
-// (New VM, when the page offers it there) and the round more button of the station
-// menu.
+// invariant: Home's header: the page's title (a small spinner beside it
+// while a Mac is still answering), then the round + (New VM,
+// when the page offers it there) and the round more button of the station
+// menu; under them, the find field with the page's prompt.
 struct HomeHeaderBar: View {
     let page: Page
     let state: PanelState
@@ -421,24 +441,33 @@ struct HomeHeaderBar: View {
 
     var body: some View {
         let h = Token.HomeHeader.self
-        HStack(spacing: h.gap) {
-            Text(h.title)
-                .font(Token.Role.homeTitle.font)
-                .foregroundStyle(tokens.tone(Token.Role.homeTitle.tone))
-                .accessibilityAddTraits(.isHeader)
-            Spacer(minLength: 0)
-            ForEach(Array((page.header?.buttons ?? []).compactMap { page.action($0) }.enumerated()), id: \.offset) { _, a in
-                RoundButton(h.plus, size: .topBar) { perform(a, handlers) }
-                    .accessibilityLabel(Text(a.label ?? ""))
-                    .help(a.label ?? "")
-                    .keyboardShortcut("n", modifiers: .command)
-                    .disabled(state.running != nil)
-                    .panelFocus(.control(a.id ?? ""), look: .control, radius: Token.Metric.Control.roundTopBar / 2)
+        VStack(alignment: .leading, spacing: h.field) {
+            HStack(spacing: h.gap) {
+                Text(page.header?.title ?? "")
+                    .font(Token.Role.homeTitle.font)
+                    .foregroundStyle(tokens.tone(Token.Role.homeTitle.tone))
+                    .accessibilityAddTraits(.isHeader)
+                if let stale = page.header?.stale {
+                    Spinner(small: true).accessibilityLabel(Text(Format.show(stale) + Token.Glyph.ellipsis))
+                }
+                Spacer(minLength: 0)
+                ForEach(Array((page.header?.buttons ?? []).compactMap { page.action($0) }.enumerated()), id: \.offset) { _, a in
+                    RoundButton(h.plus, size: .topBar) { perform(a, handlers) }
+                        .accessibilityLabel(Text(a.label ?? ""))
+                        .help(a.label ?? "")
+                        .keyboardShortcut("n", modifiers: .command)
+                        .disabled(state.running != nil)
+                        .panelFocus(.control(a.id ?? ""), look: .control, radius: Token.Metric.Control.roundTopBar / 2)
+                }
+                station
+                    .accessibilityLabel(Text(h.menuLabel))
+                    .menuAnchor(MenuAnchors.page)
+                    .panelFocus(.menu, look: .control, radius: Token.Metric.Control.roundTopBar / 2)
             }
-            station
-                .accessibilityLabel(Text(h.menuLabel))
-                .menuAnchor(MenuAnchors.page)
-                .panelFocus(.menu, look: .control, radius: Token.Metric.Control.roundTopBar / 2)
+            if let prompt = page.header?.search {
+                FindField(resting: prompt) { handlers.find(FindQuery()) }
+                    .panelFocus(.find, look: .control, radius: Token.Metric.Find.fieldRadius)
+            }
         }
     }
 
@@ -459,6 +488,74 @@ struct HomeHeaderBar: View {
                 .systemMenu(model) { pick?($0, nav: nil) }
                 .accessibilityElement()
                 .accessibilityAddTraits(.isButton)
+        }
+    }
+}
+
+// invariant: a section of Home: its label and its caption (unless it goes
+// unheaded), then its rows in the page's order in one flush card, each
+// navigable row opening its page; Add a Mac is the accent line under the
+// Macs.
+struct HomeSection: View {
+    let section: Section
+    let actions: [Action]
+    let lit: String?
+    let headed: Bool
+    let switches: Bool
+    let run: (Action) -> Void
+    let go: (String) -> Void
+    @Environment(\.stationTokens) private var tokens
+
+    init(_ section: Section, actions: [Action], lit: String?, headed: Bool, switches: Bool,
+         run: @escaping (Action) -> Void, go: @escaping (String) -> Void) {
+        self.section = section
+        self.actions = actions
+        self.lit = lit
+        self.headed = headed
+        self.switches = switches
+        self.run = run
+        self.go = go
+    }
+
+    var rows: [Row] { section.rows.filter { $0.id != HomePage.addMac } }
+    var add: Row? { section.rows.first { $0.id == HomePage.addMac } }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
+            if headed {
+                CardLabel(section.title ?? "", value: section.caption ?? [])
+            }
+            Card {
+                RowStack(rows, columns: section.columns ?? [], actions: actions, highlighted: lit, switches: switches, open: { row in
+                    if let nav = row.nav { go(nav) }
+                }, run: run)
+                if let add, let action = RowView.action(add.verb, in: actions) {
+                    addLine(add, action)
+                }
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(Text(section.title ?? ""))
+        }
+    }
+
+    func addLine(_ add: Row, _ action: Action) -> some View {
+        Button { run(action) } label: {
+            HStack(spacing: Token.Metric.Row.gap) {
+                Image(systemName: Token.Symbol.plus)
+                    .font(.system(size: Token.Metric.Row.chevron, weight: .semibold))
+                    .frame(width: Token.Metric.Row.accessory)
+                Text(add.label ?? "").font(Token.Role.rowName.font).lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(tokens.color.accentText)
+            .padding(.horizontal, Token.Metric.Row.padding)
+            .frame(minHeight: Token.HomeCard.line)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .overlay(alignment: .top) {
+            Rectangle().fill(tokens.color.hair).frame(height: Token.Metric.Row.hairline)
+                .padding(.leading, RowView.inset(.glyph)).padding(.trailing, Token.Metric.Row.insetEnd)
         }
     }
 }

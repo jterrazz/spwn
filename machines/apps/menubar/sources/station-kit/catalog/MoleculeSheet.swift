@@ -174,19 +174,6 @@ public struct MoleculeSheet: View {
         return l
     }()
 
-    static func tile(_ caption: String, glyph: String, number: Value, word: String? = nil, signal: String? = nil, toggle: String? = nil, plus: String? = nil) -> Tile {
-        var t = Tile()
-        t.caption = caption
-        t.glyph = MoleculeSheet.glyph("symbol:\(glyph)")
-        t.number = number
-        t.word = word
-        t.signal = signal
-        t.toggle = toggle
-        t.plus = plus
-        t.nav = caption
-        return t
-    }
-
     static func count(_ n: Int64) -> Value {
         var v = Value(kind: "count")
         v.n = n
@@ -222,13 +209,7 @@ public struct MoleculeSheet: View {
     static let hud: Value = Value(kind: "text", text: "Copied ssh linux-1")
 
     var blocks: some View {
-        let tiles = Token.Metric.Tiles.self
         return VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
-            HStack(spacing: tiles.gap) {
-                TileView(Self.tile("Ports", glyph: Token.Symbol.ports, number: Self.count(5), word: "shared", plus: "+1"))
-                TileView(Self.tile("Accounts", glyph: Token.Symbol.key, number: Self.count(1), word: "signed out", signal: "waits"), highlighted: true)
-                TileView(Self.tile("Awake", glyph: Token.Symbol.awake, number: Self.left(14400, of: 14400), word: "left", toggle: "awake"), actions: Self.actions)
-            }
             HStack(spacing: Token.Metric.Gauges.gap) {
                 GaugeTile(Self.gauge("CPU\(Token.Glyph.sep)4 cores", Self.percent(310), spark: [12, 18, 15, 22, 30, 41, 35, 28, 31, 30, 33, 31]))
                 GaugeTile(Self.gauge("Memory", Self.free(3), bar: Self.share(60, of: 100)))
