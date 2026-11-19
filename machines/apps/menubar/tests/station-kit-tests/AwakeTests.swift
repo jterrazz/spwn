@@ -9,6 +9,15 @@ final class AwakeTests: XCTestCase {
 
     // invariant: the work that pauses is a note under This Mac's card, not
     // a block of its own; another Mac's card stands alone after it.
+    // invariant: the H1 draws a page's symbol (the sun) at 18, a machine's
+    // own glyph at 20, as the board does.
+    func testTheTitleGlyphOfAPageSymbolIsDrawnAtTheBoardsSize() throws {
+        let page = try Tree.page("menubar.awake.two-macs")
+        let sun = try XCTUnwrap(page.header?.glyph)
+        XCTAssertEqual(MachineHeader.glyphSize(sun), 18)
+        XCTAssertEqual(MachineHeader.glyphSize(Glyph(kind: "server")), 20)
+    }
+
     func testThePauseNoteIsDrawnUnderThisMacsCard() throws {
         let json = #"{"sections":[{"id":"summary"},{"id":"this-mac","card":"flush"},{"id":"pauses","items":[{"note":{"text":"linux-1 pauses while This Mac sleeps"}}]},{"id":"mac-mini","card":"flush"}]}"#
         let page = try JSONDecoder().decode(Page.self, from: Data(json.utf8))

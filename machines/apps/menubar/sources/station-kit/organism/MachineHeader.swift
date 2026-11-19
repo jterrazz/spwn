@@ -42,6 +42,13 @@ public struct MachineHeader: View {
         return Image(systemName: name)
     }
 
+    // value: the H1 glyph's size: a machine's own glyph at 20, a page's
+    // symbol (Keep awake's sun, Accounts' key) at 18, the board's, so its
+    // optical weight matches the title beside it.
+    public static func glyphSize(_ glyph: Glyph) -> CGFloat {
+        glyph.kind?.hasPrefix("symbol:") == true ? Token.Metric.PageHeader.symbolGlyph : Token.Metric.PageHeader.glyph
+    }
+
     public var body: some View { drawing.recorded(viewMark) }
 
     var viewMark: ViewMark? { ViewMark(.group, kit: "MachineHeader") }
@@ -63,7 +70,7 @@ public struct MachineHeader: View {
             }
             HStack(spacing: m.titleGap) {
                 if let glyph = page.header?.glyph, let image = Self.image(glyph) {
-                    image.font(.system(size: m.glyph, weight: .regular))
+                    image.font(.system(size: Self.glyphSize(glyph), weight: .regular))
                         .foregroundStyle(glyph.signal.map { $0 == "active" ? tokens.color.t2 : tokens.signal($0) } ?? tokens.color.t2)
                         .frame(width: m.glyphSlot)
                 }

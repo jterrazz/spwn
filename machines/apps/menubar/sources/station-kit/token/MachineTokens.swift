@@ -7,6 +7,7 @@ extension Token.Metric {
         public static let backGap: CGFloat = 3
         public static let backBottom: CGFloat = 8
         public static let glyph: CGFloat = 20
+        public static let symbolGlyph: CGFloat = 18
         public static let glyphSlot: CGFloat = 28
         public static let titleGap: CGFloat = 8
         public static let title: CGFloat = 28
