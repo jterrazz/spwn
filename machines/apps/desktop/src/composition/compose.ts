@@ -92,7 +92,10 @@ async function composedOf({ inTauri, query }: Place): Promise<Composed> {
         return { transport: absent('no engine bridge outside the Tauri window') };
     }
     const { recordingFor } = await import('../infrastructure/outbound/engine-replay/recordings');
-    const pace = { gestureFrame: Number(query.get('pace') ?? '0') };
+    const pace = {
+        gestureFrame: Number(query.get('pace') ?? '0'),
+        held: query.get('held') ?? undefined,
+    };
     const recorded = await recordingFor(world);
     const release = await import('../infrastructure/outbound/core-scripted/release');
     const recording =

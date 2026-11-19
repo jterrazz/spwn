@@ -4,11 +4,17 @@ import type { Link } from '../../../application/ports/engine.port';
 import { isRecord, keyOf } from '../../../domain/request-key';
 import type { Exchange as Opened, Receiver, Transport } from '../engine-link/transport';
 import { helloOf } from './hello';
+import { inFlight, play } from './played';
+import type { Played } from './played';
 import { throwIf, unrecordedOf } from './unrecorded';
 
 export type Exchange = { request: Record<string, unknown>; answers: readonly unknown[] };
 
-export type GestureExchange = Exchange & { after: readonly Exchange[] };
+// value: `during`, the reads as the world answered them while the gesture ran; `after`, those it changed once done.
+export type GestureExchange = Exchange & {
+    during?: readonly Exchange[];
+    after: readonly Exchange[];
+};
 
 export type Recording = {
     world: string;
@@ -31,7 +37,12 @@ function gestureOf(world: string, value: unknown): GestureExchange {
         throw new Error(`A gesture of ${world} lists the reads made after it.`);
     }
     const after: readonly unknown[] = value.after;
-    return { ...exchange, after: after.map((read) => exchangeOf(world, read)) };
+    const during: readonly unknown[] = Array.isArray(value.during) ? value.during : [];
+    return {
+        ...exchange,
+        after: after.map((read) => exchangeOf(world, read)),
+        during: during.map((read) => exchangeOf(world, read)),
+    };
 }
 
 export function recordingOf(value: unknown): Recording {
@@ -54,42 +65,6 @@ export function recordingOf(value: unknown): Recording {
     };
 }
 
-function withId(frame: unknown, id: string): unknown {
-    return isRecord(frame) ? { ...frame, id } : frame;
-}
-
-type Played = { frames: readonly unknown[]; gap: number; first: number; onLast?: () => void };
-
-function play(receiver: Receiver, id: string, { frames, gap, first, onLast }: Played) {
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const last = frames.length - 1;
-    for (const [index, frame] of frames.entries()) {
-        timers.push(
-            setTimeout(
-                () => {
-                    if (index === last) {
-                        onLast?.();
-                    }
-                    receiver.frame(withId(frame, id));
-                },
-                first + index * gap,
-            ),
-        );
-    }
-    timers.push(
-        setTimeout(
-            () => {
-                if (last < 0) {
-                    onLast?.();
-                }
-                receiver.end('answered', true);
-            },
-            first + frames.length * gap,
-        ),
-    );
-    return timers;
-}
-
 // invariant: a request the world holds no answer for ends with no reason, as an engine that never answers does: the
 // invariant: window draws its own no-answer state, and the world's name never reaches the page; a gesture sent with an
 // invariant: input no recording of its call holds is a spec's mistake: it ends on what was sent and what is recorded, and throws.
@@ -104,6 +79,8 @@ export type Pace = {
     gestureFrame: number;
     // value: how long the first answer to a request waits, by the request and how often its key was asked before.
     latency?: (request: Request, asked: number) => number;
+    // value: the call whose gestures stop after their first frame and never end, their reads answering as while they ran.
+    held?: string | undefined;
 };
 
 // value: a replay the spec drives: the link flips as shown, a drop ends every open exchange after its request was
@@ -256,16 +233,15 @@ class Staging {
         const { gestures, reads } = this.answers;
         const gesture = gestures.get(key);
         if (gesture) {
-            const changed = () => {
-                for (const read of gesture.after) {
-                    reads.set(keyOf(read.request), read.answers);
-                }
-            };
+            const flight = inFlight(reads, gesture.during ?? [], gesture.after);
+            const held = 'call' in request && request.call === this.pace?.held;
             return {
                 first,
-                frames: gesture.answers,
+                frames: held ? gesture.answers.slice(0, 1) : gesture.answers,
                 gap: this.pace?.gestureFrame ?? 0,
-                onLast: changed,
+                held,
+                onFirst: flight.begun,
+                onLast: held ? undefined : flight.ended,
             };
         }
         const recorded = reads.get(key);
