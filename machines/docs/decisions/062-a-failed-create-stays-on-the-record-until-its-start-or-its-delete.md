@@ -31,6 +31,8 @@ it had been made.
    reading of the file tells what is missing. The call stays `machines.start`; the word is the
    engine's: the `Gesture` `try-again` (words.json `Try again`) in the header's `Gestures`, and the
    need's `Verb` `try-again`, never `Start`, which says a VM its owner stopped is resumed.
+   A start that fails again keeps the new failure (its step, cause and last lines replace the old) and
+   answers it as its error, so the window shows it at once.
    `delete` stays out of the gestures, because the page offers it for every VM.
 4. **A delete takes the birth off with the record.** The birth lives in the record store, so it
    outlives the engine's restart.

@@ -87,6 +87,27 @@ func TestAStartThatFailsAgainKeepsTheBirthFailed(t *testing.T) {
 	}
 }
 
+func TestAStartThatFailsAgainKeepsTheNewFailureAndAnswersIt(t *testing.T) {
+	b := failedAtBoot(t)
+	b.w.Lock()
+	b.w.Mac("mac").VMs["web"].Console = []string{"retry: one", "retry: two"}
+	b.w.Unlock()
+	err := b.m.Start(context.Background(), "web")
+	if !errors.As(err, new(*model.DidNotBootError)) {
+		t.Fatalf("start of web: %v; want it not booted", err)
+	}
+	rec, getErr := b.store.Get(context.Background(), "web")
+	if getErr != nil || rec.Birth == nil || !rec.Birth.Failed {
+		t.Fatalf("web keeps birth %+v, %v; want it failed", rec.Birth, getErr)
+	}
+	if first, _, _ := strings.Cut(err.Error(), "\n"); rec.Birth.Cause != first {
+		t.Errorf("web's failed birth says %q, its start answered %q; want the same", rec.Birth.Cause, first)
+	}
+	if want := []string{"retry: one", "retry: two"}; !slices.Equal(rec.Birth.LastLines, want) {
+		t.Errorf("web's failed birth keeps lines %q; want its console's now, %q", rec.Birth.LastLines, want)
+	}
+}
+
 func TestAnInterruptedCreateKeepsNoFailedBirth(t *testing.T) {
 	b := creating(t, true)
 	ctx, cancel := context.WithCancel(context.Background())

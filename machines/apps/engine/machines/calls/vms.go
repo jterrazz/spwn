@@ -71,8 +71,9 @@ func (s *Machinist) CheckStop(name string) error {
 func (s *Machinist) Start(ctx context.Context, name string) error {
 	// invariant: a start of a VM whose create failed is that create's
 	// retry: it runs the VM, then its set-up from its first boot on, as the
-	// create would have; its birth goes once the set-up answers, and stays,
-	// failed at the step that failed again, otherwise.
+	// create would have; its birth goes once the set-up answers, and
+	// otherwise holds the new failure (its step, cause and console lines
+	// replacing the old), which the start answers as its error.
 	rec, err := s.VM(name, engine.VMStart)
 	if err != nil {
 		return err
@@ -82,10 +83,14 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	}
 	retry := rec.Birth != nil && rec.Birth.Failed
 	if err := s.engineAPI.Do(ctx, engine.VMStart, name); err != nil {
-		if retry && ctx.Err() == nil {
-			s.failBirth(name, *model.BirthAt(model.BornBooting, rec.Birth.Steps == len(rec.Birth.Step.Enum()), s.h.Now()), err)
+		if !retry {
+			return err
 		}
-		return err
+		again := s.unhealthy(ctx, name, err)
+		if ctx.Err() == nil {
+			s.failBirth(name, *model.BirthAt(model.BornBooting, rec.Birth.Steps == len(rec.Birth.Step.Enum()), s.h.Now()), again)
+		}
+		return again
 	}
 	if !retry {
 		return nil
