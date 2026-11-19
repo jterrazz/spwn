@@ -105,7 +105,7 @@ public struct NeedRow: View {
 // on (or, while its VM does not answer, why, in its signal's colour), its
 // address in mono. A row whose verb opens or copies its link is that verb,
 // its pointer (↗, or the copy glyph) at its end; any other verb is the
-// row's text button (Share); the QR slot is reserved beside it.
+// row's small button (Share); the QR slot is reserved beside it.
 public struct PortRow: View {
     let row: Row
     let actions: [Action]
@@ -203,10 +203,7 @@ public struct PortRow: View {
                     .foregroundStyle(lit ? tokens.color.t1 : tokens.color.t3)
                     .frame(width: Token.Metric.Port.pointer)
             } else if let verb = RowView.action(row.verb, in: actions) {
-                Button { run(verb) } label: {
-                    Text(verb.label ?? "").font(Token.Role.button.font).foregroundStyle(tokens.color.accentText)
-                }
-                .buttonStyle(.plain)
+                VerbButton(verb.label ?? "") { run(verb) }
             } else if row.nav != nil {
                 Image(systemName: Token.Symbol.outward)
                     .font(.system(size: Token.Metric.Port.pointerGlyph, weight: .medium))

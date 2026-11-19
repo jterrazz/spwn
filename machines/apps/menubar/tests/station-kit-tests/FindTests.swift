@@ -20,7 +20,7 @@ final class FindTests: XCTestCase {
     func testNothingTypedListsTheNeedsTheRecentMachinesAndTheActionsAtHand() throws {
         XCTAssertEqual(said(try index().results(query: "", recent: Self.recent)), [
             "Recent:", "linux-1", "mac-mini", "infra",
-            "Actions:", "Keep This Mac awake 4 hr", "New VM on This Mac", "New VM on mac-mini",
+            "Actions:", "Keep This Mac awake 4 h", "New VM on This Mac", "New VM on mac-mini",
         ])
     }
 
@@ -44,12 +44,12 @@ final class FindTests: XCTestCase {
     func testAQueryRanksPrefixThenWordThenSubstringThenTag() throws {
         let e = { (title: String, tags: [String]) in FindEntry(row: Row(), group: FindIndex.actions, title: title, address: nil, scope: nil, tags: tags, prefix: nil) }
         XCTAssertEqual(FindIndex.score(e("Awake · All Macs", []), query: "awake"), 0)
-        XCTAssertEqual(FindIndex.score(e("Keep This Mac awake 4 hr", []), query: "awake"), 1)
+        XCTAssertEqual(FindIndex.score(e("Keep This Mac awake 4 h", []), query: "awake"), 1)
         XCTAssertEqual(FindIndex.score(e("mac-mini", []), query: "ini"), 2)
         XCTAssertEqual(FindIndex.score(e("New VM on This Mac", ["create"]), query: "cre"), 3)
         XCTAssertNil(FindIndex.score(e("New VM on This Mac", ["create"]), query: "zzzq"))
         XCTAssertEqual(said(try index().results(query: "awake", recent: [])), [
-            "Actions:", "Keep This Mac awake 4 hr", "Sections:", "Awake · All Macs",
+            "Actions:", "Keep This Mac awake 4 h", "Sections:", "Awake · All Macs",
         ])
     }
 

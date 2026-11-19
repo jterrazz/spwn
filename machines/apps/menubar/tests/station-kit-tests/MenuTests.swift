@@ -71,7 +71,7 @@ final class MenuTests: XCTestCase {
         XCTAssertEqual(read["menu.context.mac"], ["mac-mini", "Open ↩", "New VM on mac-mini… ⌘N", "Open in Terminal ⌘T"])
         XCTAssertEqual(read["menu.context.mac.asleep"], ["macbook-air", "Open ↩", "Wake macbook-air"])
         XCTAssertEqual(read["menu.context.grant"], ["GitHub granted to linux-1", "Remove… (red)"])
-        XCTAssertEqual(read["menu.awake"], ["Keep This Mac awake", "For 1 hr", "For 4 hr", "✓ Until 18:00", "-", "Let it sleep", "Awake of all Macs ⌘E"])
+        XCTAssertEqual(read["menu.awake"], ["Keep This Mac awake", "For 1 h", "For 4 h", "✓ Until 18:00", "-", "Let it sleep", "Awake of all Macs ⌘E"])
         XCTAssertEqual(read["menu.page.mac"], ["mac-mini", "Open in Terminal ⌘T", "-", "Restart…", "Stop everything… (red)", "-", "Forget… (red)"])
         XCTAssertEqual(read["menu.page.this-mac"], ["This Mac", "Open in Terminal ⌘T", "-", "Stop everything… (red)"])
         XCTAssertEqual(read["menu.page.mac.asleep"], ["macbook-air", "Wake macbook-air", "-", "Forget… (red)"])

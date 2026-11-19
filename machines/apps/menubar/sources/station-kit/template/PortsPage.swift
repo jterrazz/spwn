@@ -197,7 +197,7 @@ public struct PortsPage: View {
         let profile = Format.show(r.detail ?? Value())
         let what = !profile.isEmpty ? profile.capitalized : "TCP"
         let title = "\(what)\(Token.Glyph.sep)\(port?.n ?? 0)"
-        let detail = ["Private", reserved ?? state].compactMap { $0 }.joined(separator: Token.Glyph.sep)
+        let detail = ["On your tailnet", reserved ?? state].compactMap { $0 }.joined(separator: Token.Glyph.sep)
         let open = url.map { state_qr($0) } ?? false
         return VStack(alignment: .leading, spacing: 0) {
             line(title: title, detail: detail, mark: r.mark, symbol: nil,
