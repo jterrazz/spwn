@@ -93,6 +93,6 @@ describe('new machine', () => {
     });
 
     test.todo(
-        "H8 waits for a drag verb of @jterrazz/test's visitor (its verbs are check, click, fill, gone, hover, press, see, select), and for the memory grid to take a drag: MemoryPick draws its squares as one image, with no pointer handler",
+        "H8 the drag across the free squares waits only for a drag verb of @jterrazz/test's visitor (its verbs are check, click, fill, gone, hover, press, see, select): the window takes the drag, proved by MemoryPick's component test, memory-pick.test.tsx",
     );
 });
