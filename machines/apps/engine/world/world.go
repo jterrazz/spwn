@@ -271,9 +271,24 @@ type Meter struct {
 	// value: how much each counter of Sample grows a second from Sample's
 	// time, so two reads apart in the world's time give a rate.
 	PerSecond *activity.Sample `json:"per_second,omitempty"`
-	Top       activity.Busiest `json:"top"`
+	// value: a busy share that varies with the world's clock: CPUBusy grows
+	// by CPUTotal's rate at a level that changes every slot, so two reads
+	// apart differ and two runs of one world agree.
+	Load *Load            `json:"load,omitempty"`
+	Top  activity.Busiest `json:"top"`
 	// value: the processes that run, by pid.
 	Processes map[int]activity.Usage `json:"processes,omitempty"`
+}
+
+// value: a machine's busy share as a seeded curve of the world's clock: one
+// level a slot, in thousandths of CPUTotal's rate, between Floor and Ceil,
+// drawn from Seed and the slot's number alone; a zero slot is a minute.
+
+type Load struct {
+	Seed        uint64 `json:"seed"`
+	Floor       int    `json:"floor"`
+	Ceil        int    `json:"ceil"`
+	SlotSeconds int    `json:"slot_seconds,omitempty"`
 }
 
 type Disk struct {

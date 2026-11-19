@@ -1,0 +1,13 @@
+description: 'a meter with a load curve reads different CPU at two world times'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].engine.menubar = "open" | .macs["macbook-pro"].meter.load = {"seed": 7, "floor": 100, "ceil": 900, "slot_seconds": 2}'' world.json > w.json && /bin/mv w.json world.json; for i in 1 2 3; do "$STATION" world advance 2s; done; "$STATION" activity --json | /usr/bin/jq -c ''{source, cpu: .cpu.busy_percent}'''
+      exit: 0
+      stdout: |
+          {"source":"engine","cpu":39.86}
+    - command: '--version >/dev/null; for i in 1 2 3; do "$STATION" world advance 2s; done; "$STATION" activity --json | /usr/bin/jq -c ''{source, cpu: .cpu.busy_percent}'''
+      exit: 0
+      stdout: |
+          {"source":"engine","cpu":63.24}

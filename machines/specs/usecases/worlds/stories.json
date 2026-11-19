@@ -59,6 +59,12 @@
                     "net_out": 19846,
                     "thermal": 0,
                     "boot": "0001-01-01T00:00:00Z"
+                },
+                "load": {
+                    "seed": 2954043707289400572,
+                    "floor": 28,
+                    "ceil": 52,
+                    "slot_seconds": 60
                 }
             },
             "preferences": {
@@ -143,6 +149,12 @@
                     "net_out": 246126,
                     "thermal": 0,
                     "boot": "0001-01-01T00:00:00Z"
+                },
+                "load": {
+                    "seed": 8453326386287340765,
+                    "floor": 126,
+                    "ceil": 234,
+                    "slot_seconds": 60
                 }
             },
             "self": {
@@ -245,6 +257,12 @@
                     "net_out": 263918,
                     "thermal": 0,
                     "boot": "0001-01-01T00:00:00Z"
+                },
+                "load": {
+                    "seed": 14882431706505268947,
+                    "floor": 259,
+                    "ceil": 481,
+                    "slot_seconds": 60
                 }
             },
             "preferences": {
@@ -326,6 +344,12 @@
                     "net_out": 73078,
                     "thermal": 0,
                     "boot": "0001-01-01T00:00:00Z"
+                },
+                "load": {
+                    "seed": 14882433905528525369,
+                    "floor": 420,
+                    "ceil": 780,
+                    "slot_seconds": 60
                 }
             },
             "self": {
@@ -1803,6 +1827,12 @@
                     "net_out": 12720,
                     "thermal": 0,
                     "boot": "0001-01-01T00:00:00Z"
+                },
+                "load": {
+                    "seed": 11773686958812364521,
+                    "floor": 42,
+                    "ceil": 78,
+                    "slot_seconds": 60
                 }
             },
             "self": {

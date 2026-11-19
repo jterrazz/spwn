@@ -3,6 +3,7 @@ package pages
 import (
 	"bytes"
 	"encoding/json"
+	"hash/fnv"
 	"maps"
 	"strconv"
 	"time"
@@ -90,7 +91,16 @@ type playApps struct {
 type playMeter struct {
 	Sample    activity.Sample        `json:"sample"`
 	PerSecond *activity.Sample       `json:"per_second,omitempty"`
+	Load      *playLoad              `json:"load,omitempty"`
 	Processes map[int]activity.Usage `json:"processes,omitempty"`
+}
+
+// value: the seeded load curve of a VM's meter (world.Load), its seed its name's.
+type playLoad struct {
+	Seed        uint64 `json:"seed"`
+	Floor       int    `json:"floor"`
+	Ceil        int    `json:"ceil"`
+	SlotSeconds int    `json:"slot_seconds,omitempty"`
 }
 
 type playDisk struct {
@@ -452,6 +462,11 @@ func inside(f Scene, vm model.VM, share float64, p activity.Profile) *playMac {
 	m := &playMac{Self: &playSelf{Kind: kind, System: coremachine.System{OS: "linux"}}, Disk: &playDisk{Total: int64(vm.SizeGB) * 1e9, Free: int64(vm.SizeGB) * 1e9 * 3 / 4}}
 	if vm.State == model.Running {
 		m.Meter = playMeterOf(p, meterSample(share, vm.Resources.CPUs, vm.Resources.MemoryBytes, vm.BootAt))
+		if m.Meter.PerSecond != nil {
+			seed := fnv.New64a()
+			_, _ = seed.Write([]byte(vm.Name))
+			m.Meter.Load = &playLoad{Seed: seed.Sum64(), Floor: int(share * 700), Ceil: min(int(share*1300), 1000), SlotSeconds: 60}
+		}
 	}
 	if apt, ok := devApps(vm.Name); ok {
 		m.Files = devFiles()

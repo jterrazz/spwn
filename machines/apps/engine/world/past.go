@@ -16,7 +16,11 @@ func (m Meter) Answers(now time.Time) activity.Sample {
 		seconds := max(now.Sub(s.At).Seconds(), 0)
 		by := func(n, per uint64) uint64 { return n + uint64(float64(per)*seconds) }
 		rate := *m.PerSecond
-		s.CPUBusy, s.CPUTotal = by(s.CPUBusy, rate.CPUBusy), by(s.CPUTotal, rate.CPUTotal)
+		busy := by(s.CPUBusy, rate.CPUBusy)
+		if m.Load != nil {
+			busy = s.CPUBusy + m.Load.busy(s.At, now, rate.CPUTotal)
+		}
+		s.CPUBusy, s.CPUTotal = busy, by(s.CPUTotal, rate.CPUTotal)
 		s.DiskRead, s.DiskWritten = by(s.DiskRead, rate.DiskRead), by(s.DiskWritten, rate.DiskWritten)
 		s.NetIn, s.NetOut = by(s.NetIn, rate.NetIn), by(s.NetOut, rate.NetOut)
 		s.SwapUsed += int64(float64(rate.SwapUsed) * seconds)
@@ -24,6 +28,35 @@ func (m Meter) Answers(now time.Time) activity.Sample {
 	s.At = now
 	s.Thermal, s.Battery, s.DiskFree, s.DiskTotal = activity.ThermalUnknown, nil, 0, 0
 	return s
+}
+
+func (l Load) level(slot int64) uint64 {
+	// invariant: a slot's level is a pure function of the seed and the slot,
+	// whole-number arithmetic alone, so every host draws the same curve.
+	z := l.Seed + uint64(slot)*0x9e3779b97f4a7c15 //nolint:gosec // value: a slot is after 1970.
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb
+	z ^= z >> 31
+	floor := max(l.Floor, 0)
+	span := max(l.Ceil-floor, 0) + 1
+	return uint64(floor) + z%uint64(span) //nolint:gosec // value: span is at least one.
+}
+
+func (l Load) busy(from, to time.Time, perSecond uint64) uint64 {
+	// value: the busy counts between two times: the rate of CPUTotal at each
+	// slot's level, over the part of the slot that lies between them.
+	slot := int64(60_000)
+	if l.SlotSeconds > 0 {
+		slot = int64(l.SlotSeconds) * 1000
+	}
+	end := to.UnixMilli()
+	var weighted uint64
+	for t := from.UnixMilli(); t < end; {
+		next := min((t/slot+1)*slot, end)
+		weighted += l.level(t/slot) * uint64(next-t) //nolint:gosec // value: next is after t.
+		t = next
+	}
+	return perSecond * weighted / 1_000_000
 }
 
 func (w *World) unfold() {
