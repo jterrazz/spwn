@@ -1,0 +1,31 @@
+description: 'a server stopped by a reboot loop is offered stop and restart, and its restart runs it again'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world reboot-inside infra'
+      exit: 0
+    - command: 'world reboot-inside infra'
+      exit: 0
+    - command: 'world reboot-inside infra'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "infra") | [.State, .Standing, .Gestures]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          ["broken","down",["stop","restart"]]
+    - command: 'machines restart infra --on mac-mini --confirm=infra'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	infra	restarted
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "infra") | [.State, .Standing, .Gestures]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          ["running","healthy",["stop","restart"]]

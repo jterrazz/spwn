@@ -205,6 +205,7 @@ func vmFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 		f.Fix = finding.Fix{Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: ref.On, Command: "station machines start " + vm.Name + on}
 	case server && vm.Restarts.Looping:
 		f.Text = vm.Name + " is in a loop: " + vm.Restarts.InALoop()
+		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name}
 	case server && vm.State == Stopped && vm.Detail == PoweredOffInside:
 		f.Text, f.Fix = vm.Name+" "+PoweredOffInside, finding.Fix{Command: "station machines start " + vm.Name + on}
 	case server && vm.State == Running && vm.CheckStatus.State == CheckFailing:

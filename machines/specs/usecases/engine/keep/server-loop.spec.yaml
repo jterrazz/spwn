@@ -37,6 +37,11 @@ runs:
           ✗	infra	Server	mac-mini	In a loop · always on	8 CPU	24 GB	↺ 5 in 10 min · waiting 60 s
           # Needs you
           ✗	infra	is in a loop: ↺ 5 in 10 min
+    - command: 'overview --on mac-mini | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ✗	infra is in a loop: ↺ 5 in 10 min	station machines restart infra --confirm=infra --on mac-mini
+          	VMs	● infra running
     - command: 'machines infra | /usr/bin/grep Restarts'
       exit: 0
       stdout: |

@@ -1,0 +1,11 @@
+description: 'a server in a loop needs you with its restart by name, the one gesture its header offers beside stop'
+env:
+    - standings
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary.Needs[] | select(.Subject == "loop-1") | [.Call, .Args, .On, .Confirm, .Verb]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          ["machines.restart",{"Name":"loop-1"},"macbook-pro","loop-1","restart"]
