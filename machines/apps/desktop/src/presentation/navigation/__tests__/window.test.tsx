@@ -140,7 +140,7 @@ describe('Window', () => {
             </EngineProvider>,
             async (visitor) => {
                 // When - the window has heard from its transport, and found no core on the disk
-                await visitor.see(heading('spwn is not installed on this Mac.'));
+                await visitor.see(heading('Spwn is not installed on this Mac.'));
             },
         );
 

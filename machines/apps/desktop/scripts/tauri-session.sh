@@ -58,7 +58,7 @@ tauri_launch() {
     app=$!
     win=
     for _ in $(seq 1 120); do
-        win=$(xdotool search --onlyvisible --pid "$app" --name '^spwn$' 2>/dev/null | head -1 || true)
+        win=$(xdotool search --onlyvisible --pid "$app" --name '^Spwn$' 2>/dev/null | head -1 || true)
         [ -n "$win" ] && break
         sleep 0.5
     done

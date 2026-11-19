@@ -20,9 +20,9 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Home
-  - region "spwn on this Mac":
-    - heading "spwn is not installed on this Mac." [level=1]
-    - paragraph: This window shows the machines the spwn engine runs. Install it here, then start the engine.
+  - region "Spwn on this Mac":
+    - heading "Spwn is not installed on this Mac." [level=1]
+    - paragraph: This window shows the machines the Spwn engine runs. Install it here, then start the engine.
     - paragraph: What it puts on this Mac
     - list "What it puts on this Mac":
       - listitem: "station The engine and its CLI: the machines ~/.local/bin"

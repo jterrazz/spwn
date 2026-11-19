@@ -28,8 +28,8 @@ function Offer({ flow }: { flow: CoreFlow }) {
     return (
         <>
             <Mark />
-            <Head title="spwn is not installed on this Mac.">
-                This window shows the machines the spwn engine runs. Install it here, then start the
+            <Head title="Spwn is not installed on this Mac.">
+                This window shows the machines the Spwn engine runs. Install it here, then start the
                 engine.
             </Head>
             <Rows label="What it puts on this Mac" rows={PUTS} />
@@ -67,13 +67,13 @@ function Installing({
     return (
         <>
             <Mark />
-            <Head title="Installing spwn.">
+            <Head title="Installing Spwn.">
                 The installer runs the command below. Nothing lands in <Mono>{INSTALL_FOLDER}</Mono>{' '}
                 until every checksum matches.
             </Head>
             <Command />
             <Status aside="· its own output below" said="Running the installer" />
-            <Progress label="Installing spwn" />
+            <Progress label="Installing Spwn" />
             <Output label={OUTPUT} lines={state.lines} />
             <Acts>
                 <Button
@@ -91,7 +91,7 @@ function Installing({
 function Waiting({ flow }: { flow: CoreFlow }) {
     return (
         <>
-            <Head title="Waiting for spwn on this Mac.">
+            <Head title="Waiting for Spwn on this Mac.">
                 Run the command in a terminal. This page moves on by itself when{' '}
                 <Mono>station</Mono> appears.
             </Head>
@@ -117,7 +117,7 @@ function Installed({ flow, state }: { flow: CoreFlow; state: Starts }) {
     return (
         <>
             <Pill kind="installed" />
-            <Head title="spwn is installed. Start the engine next.">
+            <Head title="Spwn is installed. Start the engine next.">
                 The engine runs your machines. The installer does not start it, so nothing runs yet.
             </Head>
             <Rows label="On this Mac" rows={ON_DISK} />
@@ -158,7 +158,7 @@ function Later({ flow }: { flow: CoreFlow }) {
         <>
             <Pill kind="installed" />
             <Head title="The engine is not started.">
-                spwn is on this Mac. Start the engine when you want to see your machines.
+                Spwn is on this Mac. Start the engine when you want to see your machines.
             </Head>
             <Acts>
                 <Button
@@ -263,7 +263,7 @@ export function CorePage() {
     return (
         <div className={styles.center}>
             {state.kind === 'looking' ? null : (
-                <section aria-label="spwn on this Mac" className={styles.panel}>
+                <section aria-label="Spwn on this Mac" className={styles.panel}>
                     <Shown flow={flow} state={state} />
                 </section>
             )}

@@ -20,9 +20,9 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Home
-  - region "spwn on this Mac":
+  - region "Spwn on this Mac":
     - text: installed
-    - heading "spwn is installed. Start the engine next." [level=1]
+    - heading "Spwn is installed. Start the engine next." [level=1]
     - paragraph: The engine runs your machines. The installer does not start it, so nothing runs yet.
     - paragraph: On this Mac
     - list "On this Mac":

@@ -20,8 +20,8 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Home
-  - region "spwn on this Mac":
-    - heading "Waiting for spwn on this Mac." [level=1]
+  - region "Spwn on this Mac":
+    - heading "Waiting for Spwn on this Mac." [level=1]
     - paragraph: Run the command in a terminal. This page moves on by itself when station appears.
     - code: curl -fsSL https://spwn.sh/install.sh | bash
     - button "Copy the install command": Copy

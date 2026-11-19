@@ -64,7 +64,7 @@ export const CORE_MACHINES_WORDS: Words<CoreKind> = {
 export const CORE_FOOT_WORDS: Words<CoreKind> = {
     failed: 'No engine on this Mac',
     installed: 'Engine not started',
-    installing: 'Installing spwn',
+    installing: 'Installing Spwn',
     looking: 'No engine on this Mac',
     missing: 'No engine on this Mac',
     started: 'Engine starting',

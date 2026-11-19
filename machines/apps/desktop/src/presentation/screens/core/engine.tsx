@@ -52,7 +52,7 @@ function Offer({ release }: { release: MachinesRelease }) {
                     />
                 )
             }
-            note="station and spwn, by the public installer"
+            note="station and Spwn, by the public installer"
             title={RELEASE_WORDS.update}
         >
             <div className={styles.acts}>

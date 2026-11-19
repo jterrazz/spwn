@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
-const OFFER = heading('spwn is not installed on this Mac.');
-const INSTALLED = heading('spwn is installed. Start the engine next.');
+const OFFER = heading('Spwn is not installed on this Mac.');
+const INSTALLED = heading('Spwn is installed. Start the engine next.');
 
 describe('no core', () => {
     test('E1 a Mac with no core says so, and its sidebar waits for an engine', async () => {
@@ -70,7 +70,7 @@ describe('no core', () => {
             async (visitor) => {
                 // When - the terminal path is chosen
                 await visitor.click(button("I'll install it from the terminal"));
-                await visitor.see(heading('Waiting for spwn on this Mac.'));
+                await visitor.see(heading('Waiting for Spwn on this Mac.'));
 
                 // Then - the start is offered once station appears
                 await visitor.see(INSTALLED);
@@ -85,7 +85,7 @@ describe('no core', () => {
             '/?world=two-macs&page=home&core=holding',
             async (visitor) => {
                 await visitor.click(button('Install'));
-                await visitor.see(heading('Installing spwn.'));
+                await visitor.see(heading('Installing Spwn.'));
 
                 // When - Cancel is pressed
                 await visitor.click(button('Cancel'));

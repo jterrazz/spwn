@@ -1,6 +1,7 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
-    "productName": "spwn",
+    "productName": "Spwn",
+    "mainBinaryName": "spwn-window",
     "version": "0.1.0",
     "identifier": "com.jterrazz.spwn",
     "build": {
@@ -13,7 +14,7 @@
         "windows": [
             {
                 "label": "main",
-                "title": "spwn",
+                "title": "Spwn",
                 "width": 1440,
                 "height": 1000,
                 "minWidth": 1100,

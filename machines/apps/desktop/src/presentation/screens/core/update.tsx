@@ -57,7 +57,7 @@ function Running({ flow, state }: { flow: UpdateFlow; state: Shown }) {
         return (
             <>
                 <Status aside="· its own output below" said="Running the installer" />
-                <Progress label="Updating spwn" />
+                <Progress label="Updating Spwn" />
                 <Acts>
                     <Button
                         onClick={() => {

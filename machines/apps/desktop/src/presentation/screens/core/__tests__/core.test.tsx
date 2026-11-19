@@ -16,7 +16,7 @@ import { PAGES } from '../../registry';
 const recordingFor = await recordingsOf('two-macs');
 
 const sidebar = navigation('Sidebar');
-const INSTALLED = heading('spwn is installed. Start the engine next.');
+const INSTALLED = heading('Spwn is installed. Start the engine next.');
 
 function noEngineWith(script: CoreScriptName) {
     const stage = stagedReplay(recordingFor('two-macs'), {
@@ -50,7 +50,7 @@ describe('CorePage', () => {
         // Given - no engine answers and no station lies in the core's folder
         const result = await component.render(noEngineWith('missing'), async (visitor) => {
             // When - the window has looked at the disk
-            await visitor.see(heading('spwn is not installed on this Mac.'));
+            await visitor.see(heading('Spwn is not installed on this Mac.'));
         });
 
         // Then - one panel on Home, and a sidebar whose items wait for an engine
@@ -79,7 +79,7 @@ describe('CorePage', () => {
             await visitor.click(button('Cancel'));
 
             // Then - the offer again, nothing installed
-            await visitor.see(heading('spwn is not installed on this Mac.'));
+            await visitor.see(heading('Spwn is not installed on this Mac.'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -107,7 +107,7 @@ describe('CorePage', () => {
             await visitor.click(button("I'll install it from the terminal"));
 
             // Then - the page looks for station every few seconds
-            await visitor.see(heading('Waiting for spwn on this Mac.'));
+            await visitor.see(heading('Waiting for Spwn on this Mac.'));
         });
         await expect(result.tree).toMatch(file('./__expected__/waiting.aria.yaml'));
     });

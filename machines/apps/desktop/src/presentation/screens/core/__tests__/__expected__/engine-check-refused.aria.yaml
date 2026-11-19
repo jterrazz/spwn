@@ -40,7 +40,7 @@
     - img "spwn v0.22.0 is out."
     - text: This Mac runs v0.21.0.
   - region "Update":
-    - heading "Update station and spwn, by the public installer" [level=2]
+    - heading "Update station and Spwn, by the public installer" [level=2]
     - button "What changed"
     - button "Update"
     - text: curl -fsSL https://spwn.sh/install.sh | bash

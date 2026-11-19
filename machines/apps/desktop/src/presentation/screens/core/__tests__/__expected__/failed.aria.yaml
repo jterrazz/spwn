@@ -20,7 +20,7 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Home
-  - region "spwn on this Mac":
+  - region "Spwn on this Mac":
     - text: failed
     - 'heading "Error: station-darwin-arm64 does not match its checksum, nothing installed" [level=1]'
     - paragraph: The installer ended with exit code 1. Its output is kept below.

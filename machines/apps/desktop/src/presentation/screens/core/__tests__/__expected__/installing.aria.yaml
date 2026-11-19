@@ -14,18 +14,18 @@
     - button "Settings" [disabled]
   - button "Storage" [disabled]
   - img "installing"
-  - text: Installing spwn
+  - text: Installing Spwn
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Home
-  - region "spwn on this Mac":
-    - heading "Installing spwn." [level=1]
+  - region "Spwn on this Mac":
+    - heading "Installing Spwn." [level=1]
     - paragraph: The installer runs the command below. Nothing lands in ~/.local/bin until every checksum matches.
     - code: curl -fsSL https://spwn.sh/install.sh | bash
     - button "Copy the install command": Copy
     - status: Running the installer · its own output below
-    - progressbar "Installing spwn"
+    - progressbar "Installing Spwn"
     - log "The installer's output": "Detecting the newest release... Version: v0.21.0 Downloading spwn_darwin_arm64.tar.gz... Downloading station-darwin-arm64..."
     - button "Cancel"

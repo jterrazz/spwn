@@ -26,7 +26,7 @@ function refusedRun(message: string): CoreRun {
 }
 
 export const NO_CORE: CorePort = {
-    install: () => refusedRun('The window installs spwn from its Tauri shell alone'),
+    install: () => refusedRun('The window installs Spwn from its Tauri shell alone'),
     present: async () => await Promise.resolve(false),
     start: () => refusedRun('The window starts the engine from its Tauri shell alone'),
 };
