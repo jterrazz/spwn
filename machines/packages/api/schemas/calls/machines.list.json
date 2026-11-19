@@ -331,8 +331,20 @@
           "format": "date-time",
           "type": "string"
         },
+        "cause": {
+          "type": "string"
+        },
         "detail": {
           "type": "string"
+        },
+        "failed": {
+          "type": "boolean"
+        },
+        "last_lines": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "position": {
           "type": "integer"
@@ -1062,6 +1074,7 @@
             "not-seen",
             "restarting",
             "creating",
+            "not-created",
             "down",
             "stopped",
             "suspended",

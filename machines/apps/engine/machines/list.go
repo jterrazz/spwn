@@ -186,7 +186,8 @@ func severityOf(t verdict.Tone) finding.Severity {
 
 // invariant: what a VM's finding says is read from its facts, its severity
 // from its standing (severityOf). A running VM its Mac's Local Network
-// blocks says so first, the cause of whatever else fails; a server in a
+// blocks says so first, the cause of whatever else fails; a VM whose
+// create failed, its start the cure; a server in a
 // loop, powered off from inside, or whose check fails since it passed, a VM
 // ended unexpectedly or broken, a running one whose SSH fails, and any other
 // VM down each have one; a check that has not answered yet is none. The
@@ -199,6 +200,8 @@ func vmFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 	switch {
 	case vm.State == Running && vm.Blocked == LocalNetworkBlock:
 		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On), finding.Fix{Path: LocalNetworkFix(ref.On)}
+	case s == StandingNotCreated:
+		f.Text, f.Fix = vm.Name+" was not created: it failed at "+vm.Birth.Step.Noun(), finding.Fix{Command: "station machines start " + vm.Name + on}
 	case server && vm.Restarts.Looping:
 		f.Text = vm.Name + " is in a loop: " + vm.Restarts.InALoop()
 	case server && vm.State == Stopped && vm.Detail == PoweredOffInside:

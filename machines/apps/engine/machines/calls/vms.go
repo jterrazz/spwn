@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -68,13 +69,41 @@ func (s *Machinist) CheckStop(name string) error {
 }
 
 func (s *Machinist) Start(ctx context.Context, name string) error {
-	if err := s.CheckStart(name); err != nil {
+	// invariant: a start of a VM whose create failed is that create's
+	// retry: it runs the VM, then its set-up from its first boot on, as the
+	// create would have; its birth goes once the set-up answers, and stays,
+	// failed at the step that failed again, otherwise.
+	rec, err := s.VM(name, engine.VMStart)
+	if err != nil {
 		return err
 	}
 	if err := s.EngineUp(ctx); err != nil {
 		return err
 	}
-	return s.engineAPI.Do(ctx, engine.VMStart, name)
+	retry := rec.Birth != nil && rec.Birth.Failed
+	if err := s.engineAPI.Do(ctx, engine.VMStart, name); err != nil {
+		if retry && ctx.Err() == nil {
+			s.failBirth(name, *model.BirthAt(model.BornBooting, rec.Birth.Steps == len(rec.Birth.Step.Enum()), s.h.Now()), err)
+		}
+		return err
+	}
+	if !retry {
+		return nil
+	}
+	img, _ := s.imageOf(ctx, rec.Image)
+	if err := s.setUp(ctx, img, model.CreateRequest{Name: name, Lifetime: rec.Lifetime}); err != nil {
+		failed := &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())}
+		if ctx.Err() == nil {
+			s.failBirth(name, *rec.Birth, failed)
+		}
+		return failed
+	}
+	_ = s.engineAPI.Do(ctx, engine.VMReady, name)
+	return s.writeBirth(name, func(stored *model.Record) {
+		if stored.Birth != nil && stored.Birth.Failed {
+			stored.Birth = nil
+		}
+	})
 }
 
 func (s *Machinist) Stop(ctx context.Context, name string) error {
@@ -176,7 +205,7 @@ func (s *Machinist) Births(ctx context.Context, name string) (<-chan model.Birth
 		defer close(out)
 		var sent *model.Birth
 		for ; ok; birth, ok = s.Creating(name) {
-			if sent == nil || *sent != birth {
+			if sent == nil || !sent.Same(birth) {
 				select {
 				case out <- birth:
 				case <-ctx.Done():

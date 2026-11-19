@@ -15,7 +15,11 @@ func (Gesture) Enum() []string {
 func GesturesOf(vm VM) []Gesture {
 	// invariant: what a machine's header offers is what its state allows: a
 	// running one stops, a running server also restarts, a stopped one
-	// starts; a VM in any other state offers none.
+	// starts; a VM in any other state offers none. A VM whose create
+	// failed offers start whatever its state: a start finishes its create.
+	if vm.Birth != nil && vm.Birth.Failed {
+		return []Gesture{GestureStart}
+	}
 	switch vm.State {
 	case Running:
 		if vm.Lifetime == AlwaysOn {

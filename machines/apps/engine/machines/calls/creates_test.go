@@ -37,10 +37,12 @@ func (i *images) Latest(_ context.Context, image string) (disk, version string, 
 func (*images) KeyPath() string { return "/home/.ssh/station" }
 
 // value: an engine that holds no VM and runs none; down, it does not
-// answer, as while it restarts; run, when set, is called at each VM's run.
+// answer, as while it restarts; run, when set, is called at each VM's run;
+// starts, a start runs the VM and its guest answers.
 type idleEngine struct {
-	down bool
-	run  func()
+	down   bool
+	starts bool
+	run    func()
 }
 
 func (e *idleEngine) Ping(context.Context) (string, error) {
@@ -59,12 +61,18 @@ func (e *idleEngine) Do(_ context.Context, action, _ string) error {
 	if action == engine.VMRun && e.run != nil {
 		e.run()
 	}
+	if e.starts && (action == engine.VMStart || action == engine.VMReady) {
+		return nil
+	}
 	return errNoRun
 }
 func (*idleEngine) EnvPorts(context.Context, string) ([]model.Reserved, error) {
 	return nil, nil
 }
-func (*idleEngine) GuestExec(context.Context, string, string, string) (machines.GuestRan, error) {
+func (e *idleEngine) GuestExec(context.Context, string, string, string) (machines.GuestRan, error) {
+	if e.starts {
+		return machines.GuestRan{}, nil
+	}
 	return machines.GuestRan{}, errNoRun
 }
 
@@ -91,6 +99,7 @@ type bench struct {
 	procs  *processes
 	prefs  machines.Prefs
 	mac    *stillMac
+	w      *world.World
 }
 
 // value: a Mac of 16 GB whose clock reads 10:00 and whose engine answers,
@@ -114,7 +123,7 @@ func creating(t *testing.T, built bool, hardware ...func(context.Context) corema
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux}, KnownHosts: "/state/known_hosts", Logs: "/state/logs",
 		Hardware: hardware[0], Processes: procs,
 	})
-	return bench{m: m, store: store, img: img, engine: e, procs: procs, prefs: p, mac: mac}
+	return bench{m: m, store: store, img: img, engine: e, procs: procs, prefs: p, mac: mac, w: w}
 }
 
 func TestAVMKeepsWhatItIsForAndWhoMadeIt(t *testing.T) {
@@ -211,8 +220,8 @@ func TestACreateHoldsItsRecordWhileItsImageIsBuilt(t *testing.T) {
 	if during.Birth == nil || during.Birth.Detail != "image 2 of 3" || during.Birth.Doing() != "image 1 of 5" {
 		t.Errorf("during the build web's birth is %+v; want image 1 of 5, the build's own step its detail", during.Birth)
 	}
-	if kept, err := b.store.Get(ctx, "web"); err != nil || kept.Birth != nil || kept.Version != "v1" {
-		t.Errorf("web's record once made = %+v, %v; want it kept, its version the image's, its birth off", kept, err)
+	if kept, err := b.store.Get(ctx, "web"); err != nil || kept.Birth == nil || !kept.Birth.Failed || kept.Birth.Steps != 5 || kept.Version != "v1" {
+		t.Errorf("web's record once kept = %+v, %v; want it kept, its version the image's, its birth failed at its boot, of 5 steps", kept, err)
 	}
 }
 
@@ -421,8 +430,8 @@ func TestWhatIsWrittenWhileACreateBootsStaysOrIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rec.MemoryBytes != 4<<30 || rec.Want != model.WantStopped || rec.Birth != nil {
-		t.Errorf("web after its create: %d bytes, want %q, birth %+v; want its 4 GB, stopped, no birth", rec.MemoryBytes, rec.Want, rec.Birth)
+	if rec.MemoryBytes != 4<<30 || rec.Want != model.WantStopped || rec.Birth == nil || !rec.Birth.Failed {
+		t.Errorf("web after its create: %d bytes, want %q, birth %+v; want its 4 GB, stopped, its birth failed at its boot", rec.MemoryBytes, rec.Want, rec.Birth)
 	}
 }
 
@@ -614,7 +623,7 @@ func TestTheBirthsOfACreateAreEveryStepItReachesAsMachinesListReadsThem(t *testi
 	}
 	first, _ := next()
 	<-moved
-	if want := listed(); first != want {
+	if want := listed(); !first.Same(want) {
 		t.Errorf("the first birth is %+v; machines.list gives %+v", first, want)
 	}
 	moved <- struct{}{}
@@ -623,7 +632,7 @@ func TestTheBirthsOfACreateAreEveryStepItReachesAsMachinesListReadsThem(t *testi
 	moved <- struct{}{}
 	second, _ := next()
 	<-moved
-	if want := listed(); second != want || second.Step != model.BornBooting {
+	if want := listed(); !second.Same(want) || second.Step != model.BornBooting {
 		t.Errorf("the next birth is %+v; machines.list gives %+v, booting", second, want)
 	}
 	rec, err := b.store.Get(ctx, "web")

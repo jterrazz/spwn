@@ -1,0 +1,20 @@
+description: 'a delete of a VM whose create failed takes it off the list'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Boot 1'
+      exit: 0
+    - command: 'machines create --memory 4G'
+      exit: 1
+      stderr: |
+          Error: linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it
+          Hint: station machines start linux-2, or station machines delete linux-2
+    - command: 'machines delete linux-2 --confirm=linux-2'
+      exit: 0
+      stdout: |
+          ●	linux-2	deleted
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name]'''
+      exit: 0
+      stdout: |
+          ["api","linux-1","infra"]

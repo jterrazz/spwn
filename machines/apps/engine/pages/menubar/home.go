@@ -217,6 +217,10 @@ func (h homeReading) vmRow(m model.MacView, vm model.VM) page.Row {
 		}
 		word.Signal = page.SignalFailing
 		row.Detail = page.List(word)
+	case model.StandingNotCreated:
+		row.Mark, row.Reason = page.Broken, page.Failing
+		word.Signal = page.SignalFailing
+		row.Detail = page.List(word, page.Text("failed at "+vm.Birth.Step.Noun()))
 	case model.StandingCreating:
 		row.Glyph.Dot = page.DotRing
 		row.Detail = page.List(word, pagemachines.Lifetime(vm.Lifetime))

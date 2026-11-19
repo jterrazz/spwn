@@ -13,6 +13,7 @@ const (
 	StandingNotSeen    VMStanding = "not-seen"
 	StandingRestarting VMStanding = "restarting"
 	StandingCreating   VMStanding = "creating"
+	StandingNotCreated VMStanding = "not-created"
 	StandingDown       VMStanding = "down"
 	StandingStopped    VMStanding = "stopped"
 	StandingSuspended  VMStanding = "suspended"
@@ -21,7 +22,7 @@ const (
 )
 
 func (VMStanding) Enum() []string {
-	return []string{string(StandingNotSeen), string(StandingRestarting), string(StandingCreating), string(StandingDown),
+	return []string{string(StandingNotSeen), string(StandingRestarting), string(StandingCreating), string(StandingNotCreated), string(StandingDown),
 		string(StandingStopped), string(StandingSuspended), string(StandingHealthy), string(StandingRunning)}
 }
 
@@ -30,6 +31,8 @@ func (s VMStanding) Word() string {
 	switch s {
 	case StandingNotSeen:
 		return "not seen"
+	case StandingNotCreated:
+		return "not created"
 	case StandingRestarting, StandingCreating, StandingDown, StandingStopped, StandingSuspended, StandingHealthy, StandingRunning:
 	}
 	return string(s)
@@ -41,7 +44,7 @@ func (s VMStanding) Tone() verdict.Tone {
 		return verdict.OK
 	case StandingRestarting, StandingCreating:
 		return verdict.New
-	case StandingDown:
+	case StandingDown, StandingNotCreated:
 		return verdict.Bad
 	case StandingNotSeen, StandingStopped, StandingSuspended:
 	}
@@ -50,9 +53,9 @@ func (s VMStanding) Tone() verdict.Tone {
 
 func StandingOf(vm VM) VMStanding {
 	// invariant: a VM has one standing, its first rule that matches: its
-	// Mac silent, a restart walking, a create running, down, stopped,
-	// suspended, a server healthy, running. Head, Health's down and Down
-	// read it; no other rule says a VM is down.
+	// Mac silent, a restart walking, a create running, a create that
+	// failed, down, stopped, suspended, a server healthy, running. Head,
+	// Health's down and Down read it; no other rule says a VM is down.
 	switch {
 	case vm.State == UnknownState:
 		return StandingNotSeen
@@ -60,6 +63,8 @@ func StandingOf(vm VM) VMStanding {
 		return StandingRestarting
 	case vm.State == Creating:
 		return StandingCreating
+	case vm.Birth != nil && vm.Birth.Failed:
+		return StandingNotCreated
 	case isDown(vm):
 		return StandingDown
 	case vm.State == Stopped:

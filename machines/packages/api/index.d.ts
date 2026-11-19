@@ -1660,7 +1660,10 @@ export type MachinesBack = {
 
 export type MachinesBirth = {
     at: string;
+    cause?: string;
     detail?: string;
+    failed?: boolean;
+    last_lines?: string[];
     position: number;
     progress: number;
     sentence: string;
@@ -2109,7 +2112,7 @@ export type MachinesVM = {
     SSH: boolean;
     Sections?: MachinesSections;
     SizeGB: number;
-    Standing?: 'not-seen' | 'restarting' | 'creating' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
+    Standing?: 'not-seen' | 'restarting' | 'creating' | 'not-created' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
     State: 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
     Uptime: MachinesUptime;
     UsedBytes?: number;
@@ -3569,7 +3572,7 @@ export type MachinesRollUpState = 'down' | 'engine-stopped' | 'not-seen' | 'engi
 
 export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
-export type MachinesVMStanding = 'not-seen' | 'restarting' | 'creating' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
+export type MachinesVMStanding = 'not-seen' | 'restarting' | 'creating' | 'not-created' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
 
 export type OverviewMark = 'exposed' | 'down' | 'needs-you' | 'can-wait';
 

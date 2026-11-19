@@ -25,6 +25,8 @@ func HeadOf(vm VM, now time.Time) (head verdict.Verdict, pending bool) {
 		return verdict.Verdict{Tone: standing.Tone(), Sentence: SentenceRestarting}, false
 	case StandingCreating:
 		return verdict.Verdict{Tone: standing.Tone(), Sentence: vm.State.Word() + "."}, false
+	case StandingNotCreated:
+		return verdict.Verdict{Tone: standing.Tone(), Sentence: vm.Name + " was not created: it failed at " + vm.Birth.Step.Noun() + ".", Line: vm.Birth.Cause}, false
 	case StandingDown:
 		return verdict.Verdict{Tone: standing.Tone(), Sentence: vm.Name + " is down.", Line: downLine(vm)}, false
 	case StandingStopped:

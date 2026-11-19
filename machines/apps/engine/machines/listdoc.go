@@ -118,8 +118,9 @@ type ListVM struct {
 	// (SPEC B5.5); absent while it is up.
 	Cause     string   `json:"cause,omitempty"`
 	LastLines []string `json:"last_lines,omitempty"`
-	// value: SPEC B5.10: how far its create is, while it is being made;
-	// fresh for 8 s once its create made it ready.
+	// value: SPEC B5.10: how far its create is, while it is being made, or
+	// where it failed, until a start or a delete; fresh for 8 s once its
+	// create made it ready.
 	Birth *ListBirth `json:"birth,omitempty"`
 	Fresh bool       `json:"fresh,omitempty"`
 }
@@ -130,13 +131,19 @@ type ListBirth struct {
 	// value: what its step does now, the build's own step while its image
 	// is built; absent for none.
 	Detail string `json:"detail,omitempty"`
+	// value: its create failed at its step, the VM kept: why, and what its
+	// console last wrote then; absent while it runs.
+	Failed    bool     `json:"failed,omitempty"`
+	Cause     string   `json:"cause,omitempty"`
+	LastLines []string `json:"last_lines,omitempty"`
 }
 
 func birthOf(vm VM) *ListBirth {
 	if vm.Birth == nil {
 		return nil
 	}
-	return &ListBirth{Progress: vm.Birth.Progress, Step: vm.Birth.Step, Detail: vm.Birth.Detail}
+	b := vm.Birth
+	return &ListBirth{Progress: b.Progress, Step: b.Step, Detail: b.Detail, Failed: b.Failed, Cause: b.Cause, LastLines: b.LastLines}
 }
 
 type ListUptime struct {

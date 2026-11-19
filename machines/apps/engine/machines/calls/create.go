@@ -441,15 +441,23 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	// frame, its image's build included, its memory reserved, wanting
 	// nothing until its disk is made; each step moves its birth on, and a
 	// record gone meanwhile (deleted) stops the create, never made again;
-	// a failure before the clone takes it off, and the create's end, made
-	// or kept failing, takes its birth off.
+	// a failure before the clone takes it off; a failure from the first run
+	// on keeps its birth, failed at its step, and any other end of the
+	// create, made or interrupted, takes it off.
 	born := func(step model.BirthStep, detail string) error {
 		rec.Birth = model.BirthAt(step, build != nil, s.h.Now())
 		rec.Birth.Detail = detail
 		return s.writeBirth(r.Name, func(stored *model.Record) { stored.Birth = rec.Birth })
 	}
+	keep := func(err error) (model.Created, error) {
+		if ctx.Err() == nil {
+			made.failed = true
+			s.failBirth(r.Name, *rec.Birth, err)
+		}
+		return failed(err)
+	}
 	defer func() {
-		if made.record && !made.undone {
+		if made.record && !made.undone && !made.failed {
 			_ = s.writeBirth(r.Name, func(stored *model.Record) { stored.Birth, stored.Owner = nil, nil })
 		}
 	}()
@@ -506,7 +514,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 		return fail("the record", err)
 	}
 	if err = s.engineAPI.Do(ctx, engine.VMRun, r.Name); err != nil {
-		return failed(s.unhealthy(ctx, r.Name, err))
+		return keep(s.unhealthy(ctx, r.Name, err))
 	}
 	say(model.StepAddress)
 	if err = born(model.BornAddress, ""); err != nil {
@@ -514,7 +522,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	}
 	addr, err := s.engine.Address(ctx, r.Name, ipWait)
 	if err != nil {
-		return failed(&model.UnhealthyError{Name: r.Name, Step: model.StepAddress, Detail: "none after 60 s"})
+		return keep(&model.UnhealthyError{Name: r.Name, Step: model.StepAddress, Detail: "none after 60 s"})
 	}
 	ip := addr.String()
 	say(model.StepSSH)
@@ -522,7 +530,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 		return failed(&model.UnknownMachineError{Name: r.Name})
 	}
 	if err := s.setUp(ctx, img, r); err != nil {
-		return failed(&model.UnhealthyError{Name: r.Name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())})
+		return keep(&model.UnhealthyError{Name: r.Name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())})
 	}
 	var boot *model.FirstStart
 	if t != nil {
@@ -595,7 +603,22 @@ func (s *Machinist) sshFails(ctx context.Context, name, detail string) error {
 	return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: detail}
 }
 
-type made struct{ vm, record, undone bool }
+type made struct{ vm, record, undone, failed bool }
+
+// invariant: a create that failed from its first run on leaves its birth on
+// the record, failed at its step, with its cause and its console's last
+// lines, and no process making it, so it is deleted or started at once.
+func (s *Machinist) failBirth(name string, b model.Birth, cause error) {
+	var unhealthy *model.UnhealthyError
+	if errors.As(cause, &unhealthy) {
+		if step, ok := map[string]model.BirthStep{model.StepAddress: model.BornAddress, model.StepSSH: model.BornSSH}[unhealthy.Step]; ok && step != b.Step {
+			b = *model.BirthAt(step, b.Steps == len(b.Step.Enum()), b.At)
+		}
+	}
+	lines, _ := s.engine.Console(context.Background(), name, model.ConsoleWindow)
+	failed := model.FailedAt(b, cause.Error(), lines)
+	_ = s.writeBirth(name, func(stored *model.Record) { stored.Birth, stored.Owner = failed, nil })
+}
 
 // invariant: the rollback is best effort and runs every step whatever fails, so a
 // half-made VM leaves as little as it can; what it reports is the create's failure.

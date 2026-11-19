@@ -3,6 +3,7 @@ package machines
 import (
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,8 +21,16 @@ type Birth struct {
 	Detail   string    `json:"detail,omitempty"`
 	At       time.Time `json:"at"`
 	// value: the create's sentence a client shows as it stands: `Creating:
-	// image 1 of 5`, its step's noun and position after the VM's state.
+	// image 1 of 5`, its step's noun and position after the VM's state, or
+	// `Failed at boot 2 of 4` once it failed there.
 	Sentence string `json:"sentence"`
+	// value: a create that failed from its first run on, its VM kept: its
+	// Step the one it failed at, its Cause the create's own words of why,
+	// its LastLines what the VM's console last wrote then; false while it
+	// runs.
+	Failed    bool     `json:"failed,omitempty"`
+	Cause     string   `json:"cause,omitempty"`
+	LastLines []string `json:"last_lines,omitempty"`
 }
 
 type BirthStep string
@@ -93,6 +102,22 @@ func BirthAt(step BirthStep, builds bool, at time.Time) *Birth {
 	return b
 }
 
+func FailedAt(b Birth, cause string, lines []string) *Birth {
+	// value: b once its create failed at its step: its cause's first line,
+	// its console's last lines as LastLines keeps them.
+	cause, _, _ = strings.Cut(strings.TrimSpace(cause), "\n")
+	b.Failed, b.Cause, b.LastLines, b.Detail = true, cause, LastLines(lines), ""
+	b.Sentence = "Failed at " + b.Doing()
+	return &b
+}
+
+func (b Birth) Same(o Birth) bool {
+	// value: two births that say the same, their lines included.
+	return b.Progress == o.Progress && b.Step == o.Step && b.Position == o.Position && b.Steps == o.Steps &&
+		b.Detail == o.Detail && b.At.Equal(o.At) && b.Sentence == o.Sentence &&
+		b.Failed == o.Failed && b.Cause == o.Cause && slices.Equal(b.LastLines, o.LastLines)
+}
+
 const HalfMade = "was left half made"
 
 const FreshFor = 8 * time.Second
@@ -116,9 +141,12 @@ func Born(vm VM, b *Birth, runs bool) VM {
 	// left, nor has one whose step and position this station does not know;
 	// it reads stopped, half made, to start or delete, its memory given back.
 	// A create that runs reads creating however long a step takes, an engine
-	// restart included.
+	// restart included. A birth that failed stays on the VM as its disk and
+	// engine say it, until a start that answers or a delete takes it off.
 	switch {
 	case b == nil:
+	case b.Failed:
+		vm.Birth = b
 	case b.Known() && runs:
 		vm.State, vm.Birth = Creating, b
 	case vm.State == Running:

@@ -1669,6 +1669,10 @@
       "Word": "healthy",
       "Tone": "ok"
     },
+    "not-created": {
+      "Word": "not created",
+      "Tone": "bad"
+    },
     "not-seen": {
       "Word": "not seen",
       "Tone": "plain"

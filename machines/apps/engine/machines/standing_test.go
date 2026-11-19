@@ -84,7 +84,7 @@ func TestEveryStandingHasItsLowercaseWordAndTone(t *testing.T) {
 		tone verdict.Tone
 	}{
 		StandingNotSeen: {"not seen", verdict.Plain}, StandingRestarting: {"restarting", verdict.New}, StandingCreating: {"creating", verdict.New},
-		StandingDown: {"down", verdict.Bad}, StandingStopped: {"stopped", verdict.Plain}, StandingSuspended: {"suspended", verdict.Plain},
+		StandingNotCreated: {"not created", verdict.Bad}, StandingDown: {"down", verdict.Bad}, StandingStopped: {"stopped", verdict.Plain}, StandingSuspended: {"suspended", verdict.Plain},
 		StandingHealthy: {"healthy", verdict.OK}, StandingRunning: {"running", verdict.OK},
 	}
 	values := VMStanding("").Enum()
@@ -152,7 +152,7 @@ func agree(t *testing.T, vm VM, now time.Time) {
 		if !strings.HasPrefix(head.Sentence, word) || (head.Tone != verdict.OK && head.Tone != verdict.Warn) {
 			t.Errorf("%+v: head %+v, standing %q", vm, head, s)
 		}
-	case StandingNotSeen, StandingRestarting, StandingCreating, StandingDown, StandingStopped, StandingSuspended:
+	case StandingNotSeen, StandingRestarting, StandingCreating, StandingNotCreated, StandingDown, StandingStopped, StandingSuspended:
 		if head.Tone != s.Tone() {
 			t.Errorf("%+v: head tone %q, standing %q's %q", vm, head.Tone, s, s.Tone())
 		}

@@ -14,11 +14,11 @@ runs:
           ●	macbook-pro	Mac	macbook-pro	Engine running
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
           ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
-          ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB
+          ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB	Failed at SSH 4 of 4
           # Needs you
+          ✗	linux-2	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
           ◐	This Mac	macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
           ◐	linux-1	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
-          ◐	linux-2	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
     - command: 'world local-network macbook-pro approved'
       exit: 0
     - command: 'machines linux-2'
@@ -42,4 +42,6 @@ runs:
           ●	macbook-pro	Mac	macbook-pro	Engine running
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
           ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
-          ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB
+          ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB	Failed at SSH 4 of 4
+          # Needs you
+          ✗	linux-2	was not created: it failed at SSH	station machines start linux-2

@@ -58,6 +58,19 @@ func MachineStore(t *testing.T, open func(t *testing.T) contract.MachineStore) {
 		}
 	})
 
+	t.Run("a VM whose create failed keeps its birth failed, with its cause and its last lines", func(t *testing.T) {
+		s := open(t)
+		failed := vmRecord("linux-4")
+		booting := machines.BirthAt(machines.BornBooting, false, time.Date(2026, 11, 1, 9, 0, 5, 0, time.UTC))
+		failed.Birth = machines.FailedAt(*booting, "linux-4 did not boot: the hypervisor refused it", []string{"boot: one", "boot: two"})
+		if err := s.Put(ctx, failed); err != nil {
+			t.Fatalf("Put: %v", err)
+		}
+		if got, err := s.Get(ctx, "linux-4"); err != nil || !reflect.DeepEqual(got, failed) {
+			t.Fatalf("Get = %+v, %v; want %+v", got, err, failed)
+		}
+	})
+
 	t.Run("the VMs are listed by name, and putting one again replaces it", func(t *testing.T) {
 		s := open(t)
 		for _, name := range []string{"linux-2", "api", "linux-1"} {

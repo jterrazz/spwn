@@ -26,7 +26,7 @@ func TestASaveKeepsTheStoredBirthAndWritesItsEnv(t *testing.T) {
 		t.Fatal(err)
 	}
 	got, err := store.Get(ctx, "linux-4")
-	if err != nil || got.Birth == nil || *got.Birth != *booting || got.Owner == nil || *got.Owner != *owner || got.Env["PORT"] != "40001" {
+	if err != nil || got.Birth == nil || !got.Birth.Same(*booting) || got.Owner == nil || *got.Owner != *owner || got.Env["PORT"] != "40001" {
 		t.Errorf("record after the save = %+v, %v; want the stored birth and its process, and PORT 40001", got, err)
 	}
 }
