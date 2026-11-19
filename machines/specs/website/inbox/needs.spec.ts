@@ -42,7 +42,32 @@ describe('needs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('N3 waits for a recording of an exposed port and the Review verb of its line');
+    test("N3 a port reached outside Tailscale opens its Mac's Ports, where declaring it public settles its line", async () => {
+        // Given - the Inbox over stories, where ControlCenter listens on macbook-pro's port 5000, reached outside Tailscale and declared by no one
+        const line = button('broken port 5000 is reachable outside Tailscale macbook-pro · Ports');
+        const result = await website.visit('/?world=stories&page=inbox', async (visitor) => {
+            await visitor.see(within(needs, line));
+            await visitor.see(within(needs, content('Review')));
+
+            // When - its line is pressed
+            await visitor.click(within(needs, line));
+
+            // Then - the Mac's Ports tab opens on the line, above the port it names and its declaration
+            const declare = within(
+                region('What listens on this Mac'),
+                button('Declare :5000 public'),
+            );
+            await visitor.see(within(region('Needs you, on its ports'), line));
+            await visitor.see(declare);
+
+            // When - it is declared public
+            await visitor.click(declare);
+
+            // Then - the line has left
+            await visitor.gone(line);
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test('N4 a program held by a grant says which password holds it, gives no end, and opens that password', async () => {
         // Given - linux-1's Sign-ins over two-macs, npm held by a grant of npm publish

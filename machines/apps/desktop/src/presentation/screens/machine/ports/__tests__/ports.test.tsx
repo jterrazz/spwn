@@ -21,7 +21,7 @@ const EXPOSED: PortsPort = {
     Binds: ['0.0.0.0'],
     Declared: null,
     Device: false,
-    Machine: { Name: '', On: '' },
+    Machine: { Name: 'macbook-pro', On: '' },
     PID: 4100,
     Port: 5000,
     Process: 'python3',
