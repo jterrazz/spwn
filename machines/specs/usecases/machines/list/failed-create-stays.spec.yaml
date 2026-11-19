@@ -10,9 +10,9 @@ runs:
       stderr: |
           Error: linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it
           Hint: station machines start linux-2, or station machines delete linux-2
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "linux-2") | [.State, .Standing, .Head.Sentence, .Head.Line, .Gestures, .Birth.failed, .Birth.step, .Birth.sentence]][0]'' | /usr/bin/tail -1'
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "linux-2") | [.State, .Standing, .Head.Sentence, .Head.Line, .Gestures, .Birth.failed, .Birth.step, .Birth.sentence, .Birth.last_lines]][0]'' | /usr/bin/tail -1'
       stdin: |
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          ["stopped","not-created","linux-2 was not created: it failed at boot.","linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it",["try-again"],true,"booting","Failed at boot 2 of 4"]
+          ["stopped","not-created","linux-2 was not created: it failed at boot.","linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it",["try-again"],true,"booting","Failed at boot 2 of 4",["vz: starting the virtual machine","vz: configuration validated","vz: the hypervisor refused to start the virtual machine"]]

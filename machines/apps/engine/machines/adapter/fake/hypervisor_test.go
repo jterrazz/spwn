@@ -1,6 +1,7 @@
 package fake
 
 import (
+	"errors"
 	"slices"
 	"testing"
 
@@ -52,5 +53,19 @@ func TestAStoppedVMsLogReadsItsConsoleThenItsHypervisorsLines(t *testing.T) {
 	}
 	if got, _ = h.Console(t.Context(), "api", 1); !slices.Equal(got, []string{"[ 4.2] power off", "Error: again"}) {
 		t.Errorf("last 1 of each = %q; want the last console line then the last hypervisor line", got)
+	}
+}
+
+func TestABootTheWorldScriptsToFailWritesItsConsoleLines(t *testing.T) {
+	w := &world.World{}
+	w.Script = append(w.Script, world.Fault{Call: "Hypervisor.Boot"})
+	w.Mac("mac-mini").VMs = map[string]*world.VM{"web": {Disk: true}}
+	h := HypervisorOf(w, "mac-mini", "vz", nil)
+	if _, err := h.Boot(t.Context(), "web", contract.BootOptions{}); !errors.Is(err, ErrScripted) {
+		t.Fatalf("boot: %v; want the scripted refusal", err)
+	}
+	lines, err := h.Console(t.Context(), "web", 40)
+	if err != nil || !slices.Equal(lines, bootRefused()) {
+		t.Errorf("console of web: %q, %v; want the lines the refused boot wrote, %q", lines, err, bootRefused())
 	}
 }

@@ -239,11 +239,22 @@ func (h *Hypervisor) Boot(ctx context.Context, vm string, opts contract.BootOpti
 		return nil, ErrTwoRuns
 	}
 	if h.w.Fails("Hypervisor.Boot") {
+		v.Console = append(v.Console, bootRefused()...)
 		return nil, ErrScripted
 	}
 	v.PID, v.Ended, v.UpAt = h.nextPID(), nil, h.w.Now
 	v.Booted = &world.Boot{Bridged: opts.Network.Bridged, Folders: folders(opts.Mounts)}
 	return &run{h: h, vm: vm, pid: v.PID}, nil
+}
+
+// value: the lines the console writes when the world scripts a boot to fail,
+// the same each time, so a create that fails there has last lines to keep.
+func bootRefused() []string {
+	return []string{
+		"vz: starting the virtual machine",
+		"vz: configuration validated",
+		"vz: the hypervisor refused to start the virtual machine",
+	}
 }
 
 // value: the folders a run shares, each as tart's --dir says it:
