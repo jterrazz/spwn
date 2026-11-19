@@ -1,6 +1,9 @@
 package images
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 func TestBuildingAtCountsTheStepsFromOne(t *testing.T) {
 	for step, want := range map[BuildStep]string{
@@ -11,6 +14,29 @@ func TestBuildingAtCountsTheStepsFromOne(t *testing.T) {
 	} {
 		if got := BuildingAt(step).Sentence; got != want {
 			t.Errorf("%s: %q, want %q", step, got, want)
+		}
+	}
+}
+
+func TestBuildingAtSaysEachStepDoneNowOrNext(t *testing.T) {
+	steps := BuildSteps()
+	for at, want := range map[BuildStep][]BuildState{
+		BuildBaseSystem: {BuildNow, BuildNext, BuildNext, BuildNext},
+		BuildPackages:   {BuildDone, BuildNow, BuildNext, BuildNext},
+		BuildSettings:   {BuildDone, BuildDone, BuildNow, BuildNext},
+		BuildSeal:       {BuildDone, BuildDone, BuildDone, BuildNow},
+	} {
+		walk := BuildingAt(at).Walk
+		if len(walk) != len(steps) {
+			t.Fatalf("%s: %d steps, want %d", at, len(walk), len(steps))
+		}
+		for i, w := range walk {
+			if w.Step != steps[i] || w.State != want[i] || w.Word != steps[i].Word() {
+				t.Errorf("%s: step %d is %+v, want %s %s %q", at, i+1, w, steps[i], want[i], steps[i].Word())
+			}
+		}
+		if !slices.Contains(BuildState("").Enum(), string(walk[0].State)) {
+			t.Errorf("%s: state %q is outside the closed list", at, walk[0].State)
 		}
 	}
 }

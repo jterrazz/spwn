@@ -9,6 +9,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 
@@ -46,6 +47,7 @@ func events() []event {
 		{"unlisten", []string{"<machine>", "<port>"}, unlisten},
 		{"container-run", []string{"<vm>", "<port>:<port>", "<container>", "[no-proxy]"}, containerRun},
 		{"edit", []string{"<machine>", "<file>", "[<text>]"}, edit},
+		{"building", []string{"<image>", "<step>"}, building},
 		{"unplug", nil, power(battery, func(p *Power) error { p.Source = "battery"; p.Charging = false; return nil })},
 		{"plug", nil, power(battery, func(p *Power) error { p.Source = "ac"; return nil })},
 		{"close-lid", nil, power(lid, func(p *Power) error { p.Lid = "closed"; return nil })},
@@ -392,6 +394,22 @@ func (w *World) Containers(vm string) []Container {
 		return nil
 	}
 	return v.Containers
+}
+
+func building(w *World, args []string) error {
+	// invariant: a build of the image, at the step, runs on This Mac in a
+	// process of its own, and marks it as the real build marks its step; a
+	// build of that image already marked is replaced.
+	step := images.BuildStep(args[1])
+	if !slices.Contains(images.BuildSteps(), step) {
+		return fmt.Errorf("world building: %q is not a step of a build: one of %s", args[1], strings.Join(step.Enum(), ", "))
+	}
+	m := w.Mac(w.ThisMac)
+	owner := machines.Process{PID: 4000 + len(m.Processes), Start: strconv.FormatInt(w.Now.Unix(), 10) + ".000000"}
+	m.Processes = append(m.Processes, owner)
+	m.Building = append(slices.DeleteFunc(m.Building, func(o images.Making) bool { return o.Image == args[0] }),
+		images.Making{Image: args[0], Version: w.Now.Format("2006.01.02"), Step: step, Owner: &owner})
+	return nil
 }
 
 func listen(w *World, args []string) error {

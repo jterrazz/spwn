@@ -1278,11 +1278,18 @@ export type HelloFrame = {
     v: 2;
 };
 
+export type ImagesBuildWalk = {
+    State: 'done' | 'now' | 'next';
+    Step: 'base-system' | 'packages' | 'settings' | 'seal';
+    Word: string;
+};
+
 export type ImagesBuilding = {
     Position: number;
     Sentence: string;
     Step: 'base-system' | 'packages' | 'settings' | 'seal';
     Steps: number;
+    Walk: ImagesBuildWalk[] | null;
 };
 
 export type ImagesCallsBuildIn = {
@@ -3671,6 +3678,8 @@ export type DiskKind = 'system' | 'apps' | 'your-data' | 'caches' | 'machines' |
 
 export type EngineReadState = 'running' | 'stopped' | 'not-installed';
 
+export type ImagesBuildState = 'done' | 'now' | 'next';
+
 export type ImagesBuildStep = 'base-system' | 'packages' | 'settings' | 'seal';
 
 export type MachinefileAction = 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
@@ -3762,6 +3771,7 @@ export type StationWords = {
     DiskHolder: Record<DiskHolder, StationWord>;
     DiskKind: Record<DiskKind, StationWord>;
     EngineReadState: Record<EngineReadState, StationWord>;
+    ImagesBuildState: Record<ImagesBuildState, StationWord>;
     ImagesBuildStep: Record<ImagesBuildStep, StationWord>;
     MachinefileAction: Record<MachinefileAction, StationWord>;
     MachinefileChapter: Record<MachinefileChapter, StationWord>;

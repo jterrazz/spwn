@@ -57,14 +57,49 @@ type Making struct {
 	Owner *machines.Process `json:"owner,omitempty"`
 }
 
+type BuildState string
+
+// value: where one step of a build stands: finished, the one running, or
+// still to come.
+const (
+	BuildDone BuildState = "done"
+	BuildNow  BuildState = "now"
+	BuildNext BuildState = "next"
+)
+
+func (BuildState) Enum() []string {
+	return []string{string(BuildDone), string(BuildNow), string(BuildNext)}
+}
+
+func (s BuildState) Word() string {
+	switch s {
+	case BuildDone:
+		return "Done"
+	case BuildNow:
+		return "Now"
+	case BuildNext:
+		return "Next"
+	}
+	return string(s)
+}
+
+type BuildWalk struct {
+	// value: one step of a build as images.list tells it: the step, where it
+	// stands, and the word the engine says it by.
+	Step  BuildStep
+	State BuildState
+	Word  string
+}
+
 type Building struct {
 	// value: where a build is, as images.list tells it: its step, its position
-	// among the build's steps and how many there are, and the sentence a client
-	// shows, "Step 2 of 4".
+	// among the build's steps and how many there are, the sentence a client
+	// shows, "Step 2 of 4", and every step in order with where it stands.
 	Step     BuildStep
 	Position int
 	Steps    int
 	Sentence string
+	Walk     []BuildWalk
 }
 
 func BuildingAt(step BuildStep) *Building {
@@ -74,6 +109,16 @@ func BuildingAt(step BuildStep) *Building {
 		if s == step {
 			b.Position = i + 1
 		}
+	}
+	for i, s := range all {
+		state := BuildNext
+		switch {
+		case i+1 < b.Position:
+			state = BuildDone
+		case i+1 == b.Position:
+			state = BuildNow
+		}
+		b.Walk = append(b.Walk, BuildWalk{Step: s, State: state, Word: s.Word()})
 	}
 	b.Sentence = "Step " + strconv.Itoa(b.Position) + " of " + strconv.Itoa(b.Steps)
 	return b

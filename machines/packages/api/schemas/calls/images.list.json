@@ -1,5 +1,36 @@
 {
   "$defs": {
+    "images.BuildWalk": {
+      "additionalProperties": false,
+      "properties": {
+        "State": {
+          "enum": [
+            "done",
+            "now",
+            "next"
+          ],
+          "type": "string"
+        },
+        "Step": {
+          "enum": [
+            "base-system",
+            "packages",
+            "settings",
+            "seal"
+          ],
+          "type": "string"
+        },
+        "Word": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "State",
+        "Step",
+        "Word"
+      ],
+      "type": "object"
+    },
     "images.Building": {
       "additionalProperties": false,
       "properties": {
@@ -20,13 +51,23 @@
         },
         "Steps": {
           "type": "integer"
+        },
+        "Walk": {
+          "items": {
+            "$ref": "#/$defs/images.BuildWalk"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         }
       },
       "required": [
         "Position",
         "Sentence",
         "Step",
-        "Steps"
+        "Steps",
+        "Walk"
       ],
       "type": "object"
     },

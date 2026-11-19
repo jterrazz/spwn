@@ -1349,6 +1349,20 @@
       "Tone": "plain"
     }
   },
+  "ImagesBuildState": {
+    "done": {
+      "Word": "Done",
+      "Tone": "ok"
+    },
+    "next": {
+      "Word": "Next",
+      "Tone": "plain"
+    },
+    "now": {
+      "Word": "Now",
+      "Tone": "new"
+    }
+  },
   "ImagesBuildStep": {
     "base-system": {
       "Word": "Base system",

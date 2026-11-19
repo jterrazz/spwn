@@ -129,6 +129,11 @@ func wordedEnums() []worded {
 			string(images.BuildSettings):   plain(images.BuildSettings.Word()),
 			string(images.BuildSeal):       plain(images.BuildSeal.Word()),
 		}},
+		{images.BuildState(""), map[string]word{
+			string(images.BuildDone): toned(verdict.OK, images.BuildDone.Word()),
+			string(images.BuildNow):  toned(verdict.New, images.BuildNow.Word()),
+			string(images.BuildNext): plain(images.BuildNext.Word()),
+		}},
 		{machinefile.Chapter(""), map[string]word{
 			string(machinefile.ChapterApps):     {Word: "Apps", One: "app", Other: "apps", Tone: verdict.Plain},
 			string(machinefile.ChapterSettings): {Word: "Settings", One: "setting", Other: "settings", Tone: verdict.Plain},

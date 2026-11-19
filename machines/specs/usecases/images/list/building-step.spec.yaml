@@ -8,7 +8,7 @@ runs:
           {"v":2,"id":"1","call":"images.list","in":{}}
       exit: 0
       stdout: |
-          [["base-ubuntu","2026.11.04",false,false,{"Step":"packages","Position":2,"Steps":4,"Sentence":"Step 2 of 4"}]]
+          [["base-ubuntu","2026.11.04",false,false,{"Step":"packages","Position":2,"Steps":4,"Sentence":"Step 2 of 4","Walk":[{"Step":"base-system","State":"done","Word":"Base system"},{"Step":"packages","State":"now","Word":"Packages"},{"Step":"settings","State":"next","Word":"Settings"},{"Step":"seal","State":"next","Word":"Seal"}]}]]
     - command: 'images'
       exit: 0
       stdout: |

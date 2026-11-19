@@ -1,0 +1,13 @@
+description: 'a build at seal lists its four steps with where each stands, step 4 of 4'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world building base-ubuntu seal'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | map(select(.Building) | .Building | [.Step, .Position, .Sentence, [.Walk[] | [.Step, .State, .Word]]])'''
+      stdin: |
+          {"v":2,"id":"1","call":"images.list","in":{}}
+      exit: 0
+      stdout: |
+          [["seal",4,"Step 4 of 4",[["base-system","done","Base system"],["packages","done","Packages"],["settings","done","Settings"],["seal","now","Seal"]]]]

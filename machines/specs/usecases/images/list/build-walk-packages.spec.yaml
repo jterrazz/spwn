@@ -1,0 +1,13 @@
+description: 'a build at packages lists its four steps with where each stands, step 2 of 4'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world building base-ubuntu packages'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | map(select(.Building) | .Building | [.Step, .Position, .Sentence, [.Walk[] | [.Step, .State, .Word]]])'''
+      stdin: |
+          {"v":2,"id":"1","call":"images.list","in":{}}
+      exit: 0
+      stdout: |
+          [["packages",2,"Step 2 of 4",[["base-system","done","Base system"],["packages","now","Packages"],["settings","next","Settings"],["seal","next","Seal"]]]]
