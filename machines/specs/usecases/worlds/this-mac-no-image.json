@@ -149,6 +149,9 @@
                 }
             },
             "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                },
                 "reservations": [
                     {
                         "vm": "linux-1",
@@ -701,6 +704,9 @@
                 }
             },
             "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                },
                 "declarations": [
                     {
                         "machine": "infra",

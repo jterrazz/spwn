@@ -900,6 +900,11 @@
                             }
                         ]
                     }
+                },
+                "release": {
+                    "Read": "2026-11-07T10:30:00Z",
+                    "Latest": null,
+                    "Refused": null
                 }
             },
             "tailnet": {
@@ -1101,6 +1106,13 @@
                     "Chip": "Apple M3",
                     "Memory": 25769803776,
                     "CPUs": 8
+                }
+            },
+            "stores": {
+                "release": {
+                    "Read": "2026-11-07T10:30:00Z",
+                    "Latest": null,
+                    "Refused": null
                 }
             }
         },
@@ -1538,6 +1550,11 @@
                 },
                 "applies": {
                     "macbook-pro": "2026-11-06T09:12:00Z"
+                },
+                "release": {
+                    "Read": "2026-11-07T10:30:00Z",
+                    "Latest": null,
+                    "Refused": null
                 }
             },
             "tailnet": {

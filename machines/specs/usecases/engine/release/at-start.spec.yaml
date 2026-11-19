@@ -1,0 +1,13 @@
+description: 'an engine that never asked reads the latest release at its start, in silence'
+env:
+    - release-unasked
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.release | {read: .Read, latest: .Latest.Tag, refused: .Refused}'' world.json'
+      exit: 0
+      stdout: |
+          {"read":"{{iso8601}}","latest":"v0.22.0","refused":null}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.told // []'' world.json'
+      exit: 0
+      stdout: |
+          []

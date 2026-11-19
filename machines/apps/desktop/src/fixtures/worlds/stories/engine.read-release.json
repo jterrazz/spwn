@@ -1,0 +1,3 @@
+{"world": "stories", "station": "dev", "exchanges": [
+{"request":{"call":"engine.read-release","in":{}},"answers":[{"v":2,"out":{"Installed":"v4.0.0","Behind":false,"Head":{"Tone":"plain","Sentence":"The latest release is not known yet."},"Checked":"2026-11-07T10:30:00Z"}}]}
+]}

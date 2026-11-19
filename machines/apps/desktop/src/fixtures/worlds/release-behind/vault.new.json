@@ -1,0 +1,3 @@
+{"world": "release-behind", "station": "dev", "exchanges": [
+{"request":{"watch":"vault.new","in":{}},"answers":[{"v":2,"out":{"Intro":"It is kept in macbook-pro's Keychain; you can then grant it to a machine.","Captures":[{"Program":"gh","Who":"you","Scopes":["repo"],"Kind":"oauth-token","KindSentence":"Kept as an OAuth token, the kind gh holds","Label":"GitHub \u00b7 you"}],"CaptureLine":"","Programs":[{"Program":"gh","Label":"GitHub","Kinds":["fine-grained","token"],"Kind":"fine-grained"},{"Program":"npm","Label":"npm","Kinds":["token","fine-grained"],"Kind":"token"},{"Program":"claude","Label":"Claude","Kinds":["oauth-token"],"Kind":"oauth-token"},{"Program":"wrangler","Label":"Cloudflare","Kinds":["token","fine-grained"],"Kind":"token"}]}},{"v":2,"done":true}]}
+]}

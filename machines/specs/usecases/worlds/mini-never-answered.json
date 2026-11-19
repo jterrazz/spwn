@@ -108,6 +108,9 @@
                 }
             },
             "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                },
                 "images": [
                     {
                         "name": "base-ubuntu",
@@ -186,6 +189,9 @@
             "offline": true,
             "locked": true,
             "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                },
                 "images": [
                     {
                         "name": "base-ubuntu",

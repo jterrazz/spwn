@@ -3,6 +3,11 @@
     "this_mac": "macbook-pro",
     "macs": {
         "macbook-pro": {
+            "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                }
+            },
             "engine": {},
             "preferences": {
                 "name": "macbook-pro",

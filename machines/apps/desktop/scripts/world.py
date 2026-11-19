@@ -224,6 +224,21 @@ def kept_awake(name, **kept):
     return edit
 
 
+def released(name, installed, tag, kept):
+    """station's release `tag` on GitHub with every binary attached, a Mac's engine at version `installed`, and what
+    that engine kept of its last asks (when GitHub last answered, the refusal since), so its job asks nothing at the
+    first turn."""
+    url = f"https://github.com/jterrazz/spwn/releases/tag/{tag}"
+    assets = ["station-linux-amd64", "station-linux-arm64", "station-darwin-amd64", "station-darwin-arm64"]
+
+    def edit(content):
+        content["releases"] = [{"tag": tag, "url": url, "assets": assets}]
+        content["macs"][name]["engine"]["version"] = installed
+        content["macs"][name].setdefault("stores", {})["release"] = {
+            "Read": kept["read"], "Latest": {"Tag": tag, "URL": url}, "Refused": kept.get("refused")}
+    return edit
+
+
 def plain(name):
     return (name, None, {}, [])
 
@@ -269,6 +284,11 @@ WORLDS = {
         "by": "station awake 4h", "for": 4 * 3600 * 10**9})]),
     "awake-stopped": ("two-macs", None, {}, [kept_awake("macbook-pro", last_end={
         "at": "2026-11-04T09:58:00Z", "reason": "battery", "detail": "battery 18 %"})]),
+    "release-behind": ("two-macs", None, {}, [released("macbook-pro", "v0.21.0", "v0.22.0",
+                                                       {"read": "2026-11-04T09:00:00Z"})]),
+    "release-unreachable": ("two-macs", None, {}, [released("macbook-pro", "v0.21.0", "v0.22.0", {
+        "read": "2026-11-04T02:00:00Z",
+        "refused": {"At": "2026-11-04T09:50:00Z", "Message": "GitHub: dial tcp: connection refused"}})]),
 }
 
 

@@ -98,7 +98,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	}
 	jobs := []process.Tick{sample.Run}
 	if m.kind == catalog.Mac {
-		jobs = append(jobs, m.nightly(calls).Run)
+		jobs = append(jobs, m.nightly(calls).Run, m.releaseJob(calls).Run)
 	}
 	d = process.New(engineMac{m.sys}, engineHypervisor{m.hypervisor()}, guests, m.machines(false), tailnet, process.Stores{Ports: m.stores.ports(), Reservations: m.stores.reservations}, process.Options{
 		Remember: func(vm string, port int, stopped bool) error {
@@ -191,6 +191,20 @@ func (m machine) nightly(calls call.Router) *enginejobs.Nightly {
 		},
 		Upgrade: func(ctx context.Context, name string) error {
 			_, err := call.Invoke(ctx, calls, coremachine.Ref{}, machinefilecalls.Upgrade, machinefilecalls.UpgradeIn{Machinefile: name, Unattended: true}, nil)
+			return err
+		},
+	}
+}
+
+func (m machine) releaseJob(calls call.Router) *enginejobs.Release {
+	run := func(f func()) { go f() }
+	if m.world != nil {
+		run = func(f func()) { f() }
+	}
+	return &enginejobs.Release{
+		Clock: m.sys.Clock, Go: run, Kept: m.stores.release.Read,
+		Refresh: func(ctx context.Context) error {
+			_, err := call.Invoke(ctx, calls, coremachine.Ref{}, enginecalls.RefreshRelease, enginecalls.ReleaseIn{}, nil)
 			return err
 		},
 	}

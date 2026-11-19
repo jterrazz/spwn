@@ -4,6 +4,11 @@
     "user": "you",
     "macs": {
         "macbook": {
+            "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                }
+            },
             "engine": {},
             "preferences": {
                 "name": "studio-laptop",

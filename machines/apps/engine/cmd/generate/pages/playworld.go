@@ -107,6 +107,9 @@ type playStores struct {
 	// Machinefile was last applied.
 	Night   *machinefile.Night   `json:"night,omitempty"`
 	Applies map[string]time.Time `json:"applies,omitempty"`
+	// value: what the engine kept of its last ask of GitHub, answered at the
+	// story's now, so its release job asks nothing at its start.
+	Release *engine.ReleaseKept `json:"release,omitempty"`
 }
 
 type playVM struct {
@@ -153,7 +156,7 @@ func PlayWorld(base []byte) []byte {
 		if !h.Reachable && !h.ThisMac {
 			known[h.Name] = map[string]any{"user": h.User, "answered": h.Answered, "hardware": hw, "laptop": true, "asleep": true}
 			w.Macs[h.Name] = &playMac{Offline: true, Engine: &playEngine{Version: stationVer, StartedAt: storyNow.Add(-5 * 24 * time.Hour)},
-				Preferences: map[string]any{"vm_user": "admin"}, Self: &playSelf{Hardware: hw}}
+				Preferences: map[string]any{"vm_user": "admin"}, Self: &playSelf{Hardware: hw}, Stores: &playStores{Release: &engine.ReleaseKept{Read: storyNow}}}
 			continue
 		}
 		known[h.Name] = map[string]any{"user": h.User, "lan": h.LAN}
@@ -169,7 +172,7 @@ func PlayWorld(base []byte) []byte {
 			Tailnet:     &playNode{Self: ports.Self{Node: ports.Node{ID: h.Name, Name: h.Name, DNSName: h.Name + tailnet, IP: h.Node.IP, Online: true}, Sharing: ports.SharingState{Backend: "Running", On: true, DNSName: h.Name + tailnet}}},
 			Meter:       playMeterOf(past[h.Name], meterSample(cpu[h.Name], hw.CPUs, hw.Memory, storyNow.Add(-macUp(f, h.Name)))),
 			Facts:       macFacts(h.ThisMac),
-			Stores:      &playStores{Images: []images.Record{{Name: "base-ubuntu", Version: "3", Distro: catalog.DistroUbuntu, DistroVersion: "24.04", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: stationVer, BuiltAt: storyNow.Add(-6 * 24 * time.Hour), SizeGB: 4}}},
+			Stores:      &playStores{Images: []images.Record{{Name: "base-ubuntu", Version: "3", Distro: catalog.DistroUbuntu, DistroVersion: "24.04", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: stationVer, BuiltAt: storyNow.Add(-6 * 24 * time.Hour), SizeGB: 4}}, Release: &engine.ReleaseKept{Read: storyNow}},
 		}
 		m.VMs["station-image-base-ubuntu-3"] = &playVM{Disk: true, Size: model.Size{Disk: 4e9}}
 		if h.ThisMac {

@@ -37,7 +37,7 @@ func spanning() []string {
 }
 
 func engineJobs() []string {
-	return []string{"keep", "share", "expire", "awake", "sample", "exposure", "events"}
+	return []string{"keep", "share", "expire", "awake", "sample", "exposure", "events", "release"}
 }
 
 const (
