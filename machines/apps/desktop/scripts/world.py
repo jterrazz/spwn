@@ -239,6 +239,25 @@ def released(name, installed, tag, kept):
     return edit
 
 
+def never_asked(name, installed, tag):
+    """station's release `tag` on GitHub and a Mac's engine at version `installed`, stopped before its first ask: it
+    kept nothing."""
+    def edit(content):
+        released(name, installed, tag, {"read": ""})(content)
+        del content["macs"][name]["stores"]["release"]
+        content["macs"][name]["engine"].update({"stopped": True, "stopped_at": "2026-11-04T09:40:00Z", "stopped_by": "the menu bar"})
+    return edit
+
+
+def first_refused(name, installed, tag):
+    """station's release `tag` on GitHub, a Mac's engine at version `installed` whose first ask GitHub refuses."""
+    def edit(content):
+        released(name, installed, tag, {"read": ""})(content)
+        del content["macs"][name]["stores"]["release"]
+        content["script"] = [{"call": "Releases.Latest", "times": 1}]
+    return edit
+
+
 def plain(name):
     return (name, None, {}, [])
 
@@ -289,6 +308,8 @@ WORLDS = {
     "release-unreachable": ("two-macs", None, {}, [released("macbook-pro", "v0.21.0", "v0.22.0", {
         "read": "2026-11-04T02:00:00Z",
         "refused": {"At": "2026-11-04T09:50:00Z", "Message": "GitHub: dial tcp: connection refused"}})]),
+    "release-never-asked": ("two-macs", None, {}, [never_asked("macbook-pro", "v0.21.0", "v0.22.0")]),
+    "release-first-refused": ("two-macs", None, {}, [first_refused("macbook-pro", "v0.21.0", "v0.22.0")]),
 }
 
 
