@@ -172,9 +172,30 @@ describe('workspace', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        "W5 waits for the engine to keep a failed creation: a create whose boot fails leaves its VM stopped, with no birth and no LastLines, the create's end taking its birth off (apps/engine/machines/calls/create.go:445)",
-    );
+    test('W5 a create that failed says it was not created, its step and its console, here and in Inbox', async () => {
+        // Given - the window on linux-2 over create-failed, whose create failed at its boot
+        const result = await website.visit(
+            '/?world=create-failed&machine=linux-2&tab=Overview',
+            async (visitor) => {
+                // When - the page is read
+                // Then - it reads not created, the step it failed at, and what its console last wrote
+                await visitor.see(heading('linux-2 not created'));
+                await visitor.see(content('linux-2 was not created: it failed at boot.'));
+                const failed = region('Failed at boot 2 of 4');
+                const panic = 'Kernel panic - not syncing: VFS: unable to mount root fs';
+                await visitor.see(within(failed, content(panic, { exact: false })));
+                await visitor.see(within(sidebar, button('linux-2 not created')));
+
+                // When - the Inbox is opened
+                await visitor.click(within(sidebar, button('Inbox 2')));
+
+                // Then - it is a need, with the engine's command
+                await visitor.see(content('linux-2 was not created: it failed at boot'));
+                await visitor.see(content('station machines start linux-2'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('W6 a password granted to a VM is listed among its grants', async () => {
         // Given - GitHub deploy's page over two-macs, granted nowhere, linux-1 signed out of gh
