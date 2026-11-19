@@ -64,6 +64,8 @@ import SwiftUI
 
 #Preview("home.awake-off") { StoryStage(Stories["home.awake-off"]) }
 
+#Preview("home.capped") { StoryStage(Stories["home.capped"]) }
+
 #Preview("home.down-and-exposed") { StoryStage(Stories["home.down-and-exposed"]) }
 
 #Preview("home.down") { StoryStage(Stories["home.down"]) }
