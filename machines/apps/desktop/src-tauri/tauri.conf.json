@@ -31,5 +31,5 @@
         ],
         "security": { "csp": "default-src 'self'; font-src 'self' data:; img-src 'self' data:" }
     },
-    "bundle": { "active": false, "icon": ["icons/icon.png"] }
+    "bundle": { "active": false, "icon": ["icons/icon.png", "icons/icon.icns"] }
 }
