@@ -362,6 +362,7 @@ func (m *worldMac) imageSource(hypervisor string) imagescontract.ImageSource {
 	return imagesfake.SourceOf(m.run.w, hypervisor)
 }
 func (m *worldMac) sshConfig() contract.SSHConfig { return machinesfake.SSHConfigOf(m.run.w, m.name) }
+func (*worldMac) deviceKey() contract.DeviceKey   { return &machinesfake.DeviceKey{} }
 func (m *worldMac) unlocker() contract.Unlocker   { return machinesfake.MacsOf(m.run.w) }
 func (m *worldMac) waker() contract.Waker         { return machinesfake.WakerOf(m.run.w, m.name) }
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {

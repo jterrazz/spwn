@@ -33,6 +33,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	machinescmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines"
 	machinesadd "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/add"
+	machinesagent "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/agent"
 	machinescleanup "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/cleanup"
 	machinescreate "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/create"
 	machinesdelete "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/delete"
@@ -251,6 +252,7 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 		machineswake.Command(machineswake.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinesremind.Command(machinesremind.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinespipe.Command(machinespipe.Deps{Machines: vmPipe{vms, m.sys.Sockets}}, env),
+		machinesagent.Command(machinesagent.Deps{Serve: m.serveAgent}, env),
 	)
 }
 

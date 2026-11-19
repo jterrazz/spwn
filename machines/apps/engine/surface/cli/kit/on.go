@@ -71,7 +71,7 @@ func refusesOn(path string) bool {
 	case "shell", "completion", "help", "guest", "use":
 		return true
 	}
-	return len(fields) > 1 && (fields[0] == "machines" && fields[1] == "pipe" ||
+	return len(fields) > 1 && (fields[0] == "machines" && (fields[1] == "pipe" || fields[1] == "agent") ||
 		fields[0] == "engine" && (fields[1] == "run" || fields[1] == "attach"))
 }
 

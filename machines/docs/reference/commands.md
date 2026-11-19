@@ -269,8 +269,9 @@ These commands exist for the machine's own use. They are hidden from help and th
 | `station guest serve --stdio` | the Mac's engine runs it inside each VM over its one guest connection: the VM's calls, and what listens there ([The API](api.md#the-transport))                                                                                     |
 | `station engine attach`       | another Mac runs it over ssh: bridges ssh's stdio to this Mac's engine socket ([The API](api.md#the-transport))                                                                                                                     |
 | `station machines pipe <vm>`  | a VM's `~/.ssh/config` ProxyCommand runs it: ssh's bytes to the VM's ip behind its Mac ([Machines](machines.md#ssh))                                                                                                                |
+| `station machines agent`      | serves this Mac's device key to ssh on `~/.local/state/station/agent.sock`, and relays any other key to the session's own agent ([Machines](machines.md#ssh))                                                                       |
 
-`--on` is refused on `shell`, `completion`, `help`, `use`, `engine run`, `engine attach`, `guest` and `machines pipe`: none of them sends a call.
+`--on` is refused on `shell`, `completion`, `help`, `use`, `engine run`, `engine attach`, `guest`, `machines pipe` and `machines agent`: none of them sends a call.
 
 ## Exit codes
 

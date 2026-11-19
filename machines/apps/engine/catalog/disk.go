@@ -169,6 +169,8 @@ var StationDisk = Disk{
 		noted(data("{state}/station/known_hosts/*"), "pins: deleting them downgrades to trust-on-first-use, never cleaned"),
 		noted(data("{state}/station/consoles/*"), "live while a VM or a build runs: `consoles/<vm>`, `consoles/station-build-<image>`"),
 		noted(data("{state}/station/engine.sock"), "the engine's socket, live while it runs"),
+		noted(data("{state}/station/agent.sock", Mac), "the agent's socket, live while it runs"),
+		noted(data("{state}/station/device-key.pub", Mac), "this Mac's device key, its public half, written at each agent start: the private half never leaves the Secure Enclave"),
 		noted(data("{state}/station/engine.json"), "the binary the engine last started from and its version, rewritten at each engine start: the window finds station by it"),
 		noted(data("{state}/station/installed.json"), "the binary the public installer last installed and its version, written by the installer at the end of an install that installed a station binary, never deleted: the window finds station by it before any engine has started"),
 		noted(data("{state}/station/children/*"), "the engine's `tailscale` calls in flight, `<pid>` holding its start: the next engine start kills what a killed one left"),

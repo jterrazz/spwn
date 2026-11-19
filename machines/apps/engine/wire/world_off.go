@@ -57,6 +57,7 @@ func (*worldMac) self() corecontract.Self                                { retur
 func (*worldMac) power() awakecontract.Power                             { return nil }
 func (*worldMac) hypervisor(string, catalog.Install) contract.Hypervisor { return nil }
 func (*worldMac) guests() contract.GuestDialer                           { return nil }
+func (*worldMac) deviceKey() contract.DeviceKey                          { return nil }
 func (*worldMac) localNetwork() func(context.Context) model.LocalNetwork { return nil }
 func (*worldMac) imageSource(string) imagescontract.ImageSource          { return nil }
 func (*worldMac) sshConfig() contract.SSHConfig                          { return nil }

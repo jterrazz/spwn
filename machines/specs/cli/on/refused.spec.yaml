@@ -18,6 +18,13 @@ runs:
           Hint: run it on x itself: ssh x
       files:
           .calls: absent
+    - command: 'machines agent --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "machines agent"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
     - command: 'guest --on x'
       exit: 2
       stderr: |
