@@ -35,8 +35,8 @@ describe('awake', () => {
                 // Then - the sheet names the Mac, says its state, and offers each choice the engine labelled
                 const sheet = dialog('Keep macbook-pro awake');
                 await visitor.see(within(sheet, content('Sleeps normally.')));
-                await visitor.see(within(sheet, button('1 hr')));
-                await visitor.see(within(sheet, button('4 hr')));
+                await visitor.see(within(sheet, button('1 h')));
+                await visitor.see(within(sheet, button('4 h')));
                 await visitor.see(within(sheet, button('Until 18:00')));
                 await visitor.gone(within(sheet, button('Stop keeping awake')));
                 pressed = pressedTerms();
@@ -67,8 +67,8 @@ describe('awake', () => {
         await expect(result.tree).toMatch(file('./__expected__/stories-awake-sheet.aria.yaml'));
     });
 
-    test('a keep asked for four hours presses 4 hr, the one the engine picked', async () => {
-        // Given - This Mac's Overview over kept-four-hours, whose Session was asked for 4h, so its 4 hr choice is picked
+    test('a keep asked for four hours presses 4 h, the one the engine picked', async () => {
+        // Given - This Mac's Overview over kept-four-hours, whose Session was asked for 4h, so its 4 h choice is picked
         let pressed: (null | string)[] = [];
         const result = await component.render(
             overviewOver('kept-four-hours', 'macbook-pro'),
@@ -83,7 +83,7 @@ describe('awake', () => {
                 pressed = pressedTerms();
             },
         );
-        expect(pressed).toStrictEqual(['4 hr']);
+        expect(pressed).toStrictEqual(['4 h']);
         expect(result.errors.text).toBe('');
     });
 
@@ -123,7 +123,7 @@ describe('awake', () => {
                 const sheet = dialog('Keep mac-mini awake');
                 await visitor.see(within(sheet, content('Never sleeps.')));
                 await visitor.see(within(sheet, content('the always-on Mac policy')));
-                await visitor.see(within(sheet, button('1 hr')));
+                await visitor.see(within(sheet, button('1 h')));
                 pressed = pressedTerms();
             },
         );
@@ -151,13 +151,13 @@ describe('awake', () => {
     });
 
     test('a term pressed keeps the Mac awake with the choice the engine sent, and the sheet closes', async () => {
-        // Given - This Mac's Overview over two-macs, whose awake.keep is recorded for the 4 hr choice's For
+        // Given - This Mac's Overview over two-macs, whose awake.keep is recorded for the 4 h choice's For
         const result = await component.render(
             overviewOver('two-macs', 'macbook-pro'),
             async (visitor) => {
-                // When - Awake…, then 4 hr, are pressed
+                // When - Awake…, then 4 h, are pressed
                 await visitor.click(button('Keep macbook-pro awake'));
-                await visitor.click(within(dialog('Keep macbook-pro awake'), button('4 hr')));
+                await visitor.click(within(dialog('Keep macbook-pro awake'), button('4 h')));
 
                 // Then - the keep is answered and the sheet is gone
                 await visitor.gone(dialog('Keep macbook-pro awake'));
@@ -173,7 +173,7 @@ describe('awake', () => {
             await visitor.click(button('Keep mac-mini awake'));
 
             // Then - its sheet offers the choices the mini's engine answered
-            await visitor.see(within(dialog('Keep mac-mini awake'), content('1 hr')));
+            await visitor.see(within(dialog('Keep mac-mini awake'), content('1 h')));
         });
         expect(far.errors.text).toBe('');
     });

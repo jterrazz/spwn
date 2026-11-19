@@ -168,7 +168,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 			{"Awake", "All Macs", "Open", "cmd+e", ""},
 		}},
 		{FindActions, []findSaid{
-			{"Keep This Mac awake 4 hr", "", "Keep awake", "", ""},
+			{"Keep This Mac awake 4 h", "", "Keep awake", "", ""},
 			{"New VM on This Mac", "36 GB free", "New VM", "cmd+n", ""},
 			{"New VM on mac-mini", "24 GB free", "New VM", "", ""},
 			{"Restart infra", "asks first", "Restart", "", ""},
@@ -248,7 +248,7 @@ func TestFindIsLoadingUntilTheMachinesAreRead(t *testing.T) {
 }
 
 // invariant: a keep-awake from Find never shortens the term held: past
-// 4 hr left it extends the end by 4 hr.
+// 4 h left it extends the end by 4 h.
 func TestFindExtendsAwakeWhenMoreThanFourHoursAreLeft(t *testing.T) {
 	r := findFleet()
 	r.Awake.Session.Until = time.Date(2026, 11, 7, 21, 0, 0, 0, time.UTC)
@@ -337,7 +337,7 @@ func TestFindKeepsThisMacAwakeByATimeOnly(t *testing.T) {
 			}
 		}
 		if keeps != 1 {
-			t.Errorf("%s: Find offers %d keep-awakes, want the one 4 hr or its extension", name, keeps)
+			t.Errorf("%s: Find offers %d keep-awakes, want the one 4 h or its extension", name, keeps)
 		}
 	}
 }

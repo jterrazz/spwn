@@ -437,7 +437,7 @@ func (f finder) awake() []entry {
 		return nil
 	}
 	in := map[string]string{"For": nanos(awakeFor)}
-	label, until := "Keep This Mac awake 4 hr", f.r.Now.Add(awakeFor)
+	label, until := "Keep This Mac awake 4 h", f.r.Now.Add(awakeFor)
 	if s := r.Session; s != nil {
 		in = flags(s.Lid, s.Battery)
 		in["For"] = nanos(awakeFor)

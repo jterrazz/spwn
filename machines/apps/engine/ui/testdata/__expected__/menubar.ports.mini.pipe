@@ -3,6 +3,6 @@
 ✗	10250	kubelet	infra · on your network, not declared
 # Public
 ●	Traefik		example.com · Cloudflare Tunnel
-# Private
+# On your tailnet
 ●	Kubernetes API		infra:6443
 ●	Screen Sharing		mac-mini:5900

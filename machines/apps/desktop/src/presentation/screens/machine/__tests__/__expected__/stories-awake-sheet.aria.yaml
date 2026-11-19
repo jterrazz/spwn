@@ -6,8 +6,8 @@
     - heading "Keep macbook-pro awake" [level=3]
     - paragraph: Awake until 18:00, lid closed.
     - group "How long":
-      - button "1 hr"
-      - button "4 hr"
+      - button "1 h"
+      - button "4 h"
       - button "Until 18:00" [pressed]
     - button "Stop keeping awake"
     - button "Close"

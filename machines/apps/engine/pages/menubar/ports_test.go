@@ -552,3 +552,14 @@ func rowsFrom(items []page.Item) []page.Row {
 	}
 	return out
 }
+
+// invariant: the Ports page names its audiences "Public" and "On your
+// tailnet", by the section that holds them.
+func TestPortsTitleItsAudiences(t *testing.T) {
+	p := fleetPorts(t, portFleet(), PortsOf{})
+	for id, want := range map[string]string{SectionPublic: "Public", SectionPrivate: "On your tailnet"} {
+		if got := sectionOf(p, id).Title; got != want {
+			t.Errorf("section %s is titled %q, want %q", id, got, want)
+		}
+	}
+}

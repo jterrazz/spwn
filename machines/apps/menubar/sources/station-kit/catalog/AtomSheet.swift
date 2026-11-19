@@ -154,7 +154,7 @@ public struct AtomSheet: View {
                 Switch(on: true).disabled(true)
             }
             Segmented(options: [("Overview", true, {}), ("Activity", false, {}), ("Ports", false, {})])
-            Segmented(options: [("1 hr", false, {}), ("4 hr", true, {}), ("Until 18:00", false, {})])
+            Segmented(options: [("1 h", false, {}), ("4 h", true, {}), ("Until 18:00", false, {})])
             line {
                 PanelButton("Restart", look: .tint)
                 PanelButton("Copy", symbol: Token.Symbol.copy)

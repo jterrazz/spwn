@@ -4,6 +4,6 @@ Exposed  reachable outside Tailscale
   ✗ 5000   AirPlay Receiver  mac-mini · on your network, not declared
   ✗ 10250  kubelet           infra · on your network, not declared
 Public  ● Traefik · example.com · Cloudflare Tunnel
-Private  2
+On your tailnet  2
   ● Kubernetes API  infra:6443
   ● Screen Sharing  mac-mini:5900

@@ -8,7 +8,7 @@ import (
 )
 
 // value: the Awake stories: This Mac kept awake until 18:00 on battery,
-// let sleep, or kept 4 hr; mac-mini never sleeps, the air asleep.
+// let sleep, or kept 4 h; mac-mini never sleeps, the air asleep.
 func awakeWorlds() []World {
 	awakePage := []string{"awake"}
 	return []World{

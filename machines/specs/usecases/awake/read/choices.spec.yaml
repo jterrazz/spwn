@@ -1,4 +1,4 @@
-description: 'awake.read offers the terms awake.keep takes: 1 hr, 4 hr, and Until 18:00 as the moment it ends'
+description: 'awake.read offers the terms awake.keep takes: 1 h, 4 h, and Until 18:00 as the moment it ends'
 env:
     - two-macs
     - engine
@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"awake.read","in":{}}
       exit: 0
       stdout: |
-          [{"Label":"1 hr","For":3600000000000},{"Label":"4 hr","For":14400000000000},{"Label":"Until 18:00","at":"18:00","today":true}]
+          [{"Label":"1 h","For":3600000000000},{"Label":"4 h","For":14400000000000},{"Label":"Until 18:00","at":"18:00","today":true}]

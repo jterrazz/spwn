@@ -12,4 +12,4 @@ runs:
           {"v":2,"id":"1","watch":"awake.read","in":{}}
       exit: 0
       stdout: |
-          ["Awake until 17:00.",[["1 hr",false],["4 hr",false],["Until 17:00",true]]]
+          ["Awake until 17:00.",[["1 h",false],["4 h",false],["Until 17:00",true]]]

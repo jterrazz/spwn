@@ -32,7 +32,7 @@ const (
 	CallSetHTTPS = "ports.set-https"
 
 	TitlePublic    = "Public"
-	TitlePrivate   = "Private"
+	TitlePrivate   = "On your tailnet"
 	TitleListening = "Listening, not shared"
 	TitleLocal     = "This Mac only"
 	TitlePorts     = "Ports"
@@ -182,10 +182,10 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 		if len(public) == 0 {
 			public = []page.Item{{Empty: &page.Empty{Text: "Nothing public."}}}
 		}
-		b.Sections = append(b.Sections, page.Section{ID: SectionPublic, Title: TitlePublic, Glance: page.Texts(TitlePublic, "from outside").Items, Caption: []page.Value{count(b.Public)}, Columns: columns(), Items: public,
+		b.Sections = append(b.Sections, page.Section{ID: SectionPublic, Title: TitlePublic, Caption: []page.Value{count(b.Public)}, Columns: columns(), Items: public,
 			Uncounted: publicCapped, Counts: whole(publicCapped, wholePublic)})
 	}
-	priv := page.Section{ID: SectionPrivate, Title: TitlePrivate, Glance: page.Texts(TitlePrivate, "on your tailnet").Items, Caption: []page.Value{count(b.Private)}, Columns: columns(), Items: private,
+	priv := page.Section{ID: SectionPrivate, Title: TitlePrivate, Caption: []page.Value{count(b.Private)}, Columns: columns(), Items: private,
 		About: &page.About{Label: catalog.AboutPrivateLinks, Text: catalog.PrivateLinksAre}, Uncounted: tallied, Counts: whole(tallied, wholePrivate)}
 	switch {
 	case sc.VM != "" && len(private) > 0 && len(listening) > 0:

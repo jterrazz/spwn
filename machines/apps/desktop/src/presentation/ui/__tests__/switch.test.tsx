@@ -60,7 +60,7 @@ describe('Switch', () => {
     });
 
     test('an even switch may press none, and its busy option takes no press', async () => {
-        // Given - three even terms, none chosen, 4 hr busy
+        // Given - three even terms, none chosen, 4 h busy
         const chosen: string[] = [];
         const result = await component.render(
             <Switch
@@ -70,8 +70,8 @@ describe('Switch', () => {
                     chosen.push(value);
                 }}
                 options={[
-                    { id: '1h', label: '1 hr' },
-                    { busy: true, id: '4h', label: '4 hr' },
+                    { id: '1h', label: '1 h' },
+                    { busy: true, id: '4h', label: '4 h' },
                     { id: 'until', label: 'Until 18:00' },
                 ]}
                 value={null}
@@ -84,7 +84,7 @@ describe('Switch', () => {
 
         // Then - no option is pressed, the busy one is disabled and busy, and the press reached onChange
         expect(result.tree.text).toBe(
-            '- group "How long":\n  - button "1 hr"\n  - button "4 hr" [disabled]\n  - button "Until 18:00"',
+            '- group "How long":\n  - button "1 h"\n  - button "4 h" [disabled]\n  - button "Until 18:00"',
         );
         expect(result.html.text.match(/aria-busy="true"/gu)).toHaveLength(1);
         expect(chosen).toStrictEqual(['until']);

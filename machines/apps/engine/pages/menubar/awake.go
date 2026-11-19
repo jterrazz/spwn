@@ -168,27 +168,25 @@ func dependants(servers, pauses []string) string {
 	return "nothing depends on it"
 }
 
-// value: another Mac's card row: its policy, what depends on it, its
-// switch on while it stays awake; its mark the tone of its verdict.
+// value: another Mac's card row: its label the Awake verdict's sentence,
+// what depends on it as its detail, its switch on while it stays awake; its
+// mark the tone of the verdict.
 func otherMac(r awake.Report, zone *time.Location) page.Row {
-	row := page.Row{ID: r.Mac, Label: "May sleep", Glyph: sun(false), Cells: switched(false), Detail: page.Text(dependants(r.Servers, r.Pauses))}
-	row.Mark, row.Reason = markOf(r)
 	r.Zone = zone
-	said := r.Clauses()
+	row := page.Row{ID: r.Mac, Glyph: sun(false), Cells: switched(false), Detail: page.Text(dependants(r.Servers, r.Pauses))}
+	row.Mark, row.Reason = markOf(r)
+	v := awake.VerdictOf(r)
+	if v == nil {
+		row.Label, row.Detail, row.Cells = "Checking", page.Pending(), nil
+		return row
+	}
+	row.Label = strings.TrimSuffix(v.Sentence, ".")
 	switch {
-	case r.Engine == awake.EngineReading:
-		row.Label, row.Detail = "Checking", page.Pending()
-		row.Cells = nil
 	case r.EngineDown():
-		row.Detail = page.Texts("the engine is stopped", dependants(r.Servers, r.Pauses))
+		row.Detail = page.Texts(v.Line, dependants(r.Servers, r.Pauses))
 		row.Hint = page.Cmd("station engine start")
 	case r.Mode() == awake.NeverSleeps, r.Mode() == awake.AwakeUntil:
-		row.Label, row.Glyph, row.Cells = capital(said[0]), sun(true), switched(true)
-		if r.Mode() == awake.NeverSleeps && len(said) > 1 {
-			row.Detail = page.Texts(append(said[1:], dependants(r.Servers, r.Pauses))...)
-		}
-	case r.Mode() == awake.StoppedByGuard:
-		row.Detail = page.Texts(append([]string{capital(said[0])}, said[1:]...)...)
+		row.Glyph, row.Cells = sun(true), switched(true)
 	}
 	return row
 }
@@ -208,8 +206,6 @@ func markOf(r awake.Report) (page.Mark, page.Reason) {
 	}
 	return page.Absent, ""
 }
-
-func capital(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
 
 // value: a Mac that did not answer: asleep, when it was last seen and
 // what depended on it then, dimmed; else not answering, and why.

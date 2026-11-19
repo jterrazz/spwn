@@ -209,7 +209,7 @@
     },
     {
       "id": "private",
-      "title": "Private",
+      "title": "On your tailnet",
       "caption": [
         {
           "kind": "text",
@@ -282,16 +282,6 @@
         {
           "mark": "ok",
           "n": 2
-        }
-      ],
-      "glance": [
-        {
-          "kind": "text",
-          "text": "Private"
-        },
-        {
-          "kind": "text",
-          "text": "on your tailnet"
         }
       ],
       "segment": "ports",

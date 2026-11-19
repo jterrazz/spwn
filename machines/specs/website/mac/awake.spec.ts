@@ -6,17 +6,17 @@ import { website } from '../website.specification.js';
 const sidebar = navigation('Sidebar');
 
 describe('awake', () => {
-    test('M2 Awake keeps the Mac awake for 4 hr, and Home says until when', async () => {
+    test('M2 Awake keeps the Mac awake for 4 h, and Home says until when', async () => {
         // Given - This Mac's page over two-macs, whose awake.read answers three choices and no session
         const result = await website.visit(
             '/?world=two-macs&machine=macbook-pro&pace=600',
             async (visitor) => {
-                // When - Awake… is pressed, then 4 hr in its sheet
+                // When - Awake… is pressed, then 4 h in its sheet
                 await visitor.click(button('Keep macbook-pro awake'));
                 const sheet = dialog('Keep macbook-pro awake');
-                await visitor.see(within(sheet, button('4 hr')));
+                await visitor.see(within(sheet, button('4 h')));
                 await visitor.gone(within(sheet, button('Stop keeping awake')));
-                await visitor.click(within(sheet, button('4 hr')));
+                await visitor.click(within(sheet, button('4 h')));
 
                 // Then - the sheet closes, and Home's Awake tile says On, until when
                 await visitor.gone(sheet);
@@ -59,7 +59,7 @@ describe('awake', () => {
                 // Then - the sheet says until when, then offers the terms, and Stop keeping awake
                 const sheet = dialog('Keep macbook-pro awake');
                 await visitor.see(within(sheet, content('Awake until 14:00.')));
-                await visitor.see(within(sheet, button('4 hr')));
+                await visitor.see(within(sheet, button('4 h')));
                 await visitor.see(within(sheet, button('Stop keeping awake')));
             },
         );

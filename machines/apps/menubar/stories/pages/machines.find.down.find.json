@@ -1012,7 +1012,7 @@
         {
           "row": {
             "id": "awake",
-            "label": "Keep This Mac awake 4 hr",
+            "label": "Keep This Mac awake 4 h",
             "cells": [
               {
                 "kind": "list",

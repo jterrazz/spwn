@@ -4337,7 +4337,7 @@
       "id": "title:awake"
     },
     {
-      "label": "For 1 hr",
+      "label": "For 1 h",
       "on": "menu",
       "priority": 1,
       "mutates": true,
@@ -4353,7 +4353,7 @@
       }
     },
     {
-      "label": "For 4 hr",
+      "label": "For 4 h",
       "on": "menu",
       "priority": 1,
       "mutates": true,

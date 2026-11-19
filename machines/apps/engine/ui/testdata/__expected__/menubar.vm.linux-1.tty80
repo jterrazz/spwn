@@ -7,7 +7,7 @@ Ports  2
 Life
   Ephemeral: deleted when it powers off from inside; pauses when This Mac
   sleeps.
-Private  2
+On your tailnet  2
   ● Vite       linux-1:5173
   ● Port 7000  linux-1:7000
 Accounts  2

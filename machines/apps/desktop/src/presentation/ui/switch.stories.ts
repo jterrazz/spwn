@@ -26,8 +26,8 @@ const FILES = [
 ];
 
 const TERMS = [
-    { id: '1h', label: '1 hr' },
-    { id: '4h', label: '4 hr' },
+    { id: '1h', label: '1 h' },
+    { id: '4h', label: '4 h' },
     { id: 'until', label: 'Until 18:00' },
 ];
 

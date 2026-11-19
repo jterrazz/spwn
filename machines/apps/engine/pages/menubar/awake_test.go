@@ -118,8 +118,8 @@ func pickerOf(p page.Page) (labels, picked []string) {
 	return labels, picked
 }
 
-// invariant: SPEC A9 2-11: while a 4 hr term holds, the picker still
-// reads 1 hr, 4 hr and Until 18:00, with 4 hr picked: Until offers the
+// invariant: SPEC A9 2-11: while a 4 h term holds, the picker still
+// reads 1 h, 4 h and Until 18:00, with 4 h picked: Until offers the
 // hour its form opens on, not the end of the term in force. Only an
 // Until in force says the hour it holds until.
 func TestAwakeUntilKeepsItsHourWhileATermHolds(t *testing.T) {
@@ -128,11 +128,11 @@ func TestAwakeUntilKeepsItsHourWhileATermHolds(t *testing.T) {
 		return awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", Caps: machine.Capabilities{Engine: true}, Session: s}})
 	}
 	labels, picked := pickerOf(held(&awake.Session{StartedAt: now, Until: now.Add(4 * time.Hour), For: 4 * time.Hour}))
-	if want := []string{"1 hr", "4 hr", "Until 18:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"4 hr"}) {
-		t.Fatalf("a held 4 hr term offers %q with %q picked, want %q with 4 hr", labels, picked, want)
+	if want := []string{"1 h", "4 h", "Until 18:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"4 h"}) {
+		t.Fatalf("a held 4 h term offers %q with %q picked, want %q with 4 h", labels, picked, want)
 	}
 	labels, picked = pickerOf(held(&awake.Session{StartedAt: now, Until: now.Add(150 * time.Minute)}))
-	if want := []string{"1 hr", "4 hr", "Until 13:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"Until 13:00"}) {
+	if want := []string{"1 h", "4 h", "Until 13:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"Until 13:00"}) {
 		t.Fatalf("an Until 13:00 in force offers %q with %q picked, want %q", labels, picked, want)
 	}
 }
@@ -183,10 +183,11 @@ func TestAwakeSaysEachMacsPolicyAndDependants(t *testing.T) {
 	}
 }
 
-// invariant: another Mac's card row is marked by the tone of its Awake
+// invariant: another Mac's card row is worded and marked by its Awake
 // verdict, over every mode, engine state, policy hold, battery and guard:
-// awaiting while there is none, ok OK, warn Attention, plain Absent.
-func TestAMacsCardRowIsMarkedByTheToneOfItsVerdict(t *testing.T) {
+// its label the verdict's sentence without the period, its mark awaiting
+// while there is none, ok OK, warn Attention, plain Absent.
+func TestAMacsCardRowIsWordedAndMarkedByItsVerdict(t *testing.T) {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
 	marks := map[string]page.Mark{"ok": page.OK, "warn": page.Attention, "plain": page.Absent}
 	for _, engine := range []string{awake.EngineReading, awake.EngineStopped, awake.EngineAbsent, awake.EngineRunning} {
@@ -203,12 +204,16 @@ func TestAMacsCardRowIsMarkedByTheToneOfItsVerdict(t *testing.T) {
 			if on(4) {
 				r.Reading.Source, r.Reading.Percent = "battery", 25
 			}
-			want := page.Awaiting
+			want, label := page.Awaiting, "Checking"
 			if v := awake.VerdictOf(r); v != nil {
-				want = marks[string(v.Tone)]
+				want, label = marks[string(v.Tone)], strings.TrimSuffix(v.Sentence, ".")
 			}
-			if got := otherMac(r, time.UTC); got.Mark != want {
+			got := otherMac(r, time.UTC)
+			if got.Mark != want {
 				t.Errorf("%s %06b: %s; its verdict says %s", engine, bits, got.Mark, want)
+			}
+			if got.Label != label {
+				t.Errorf("%s %06b: labeled %q; its verdict says %q", engine, bits, got.Label, label)
 			}
 		}
 	}

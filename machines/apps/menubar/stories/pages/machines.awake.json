@@ -178,7 +178,7 @@
   ],
   "actions": [
     {
-      "label": "1 hr",
+      "label": "1 h",
       "on": "row",
       "rows": [
         "macbook-pro"
@@ -197,7 +197,7 @@
       }
     },
     {
-      "label": "4 hr",
+      "label": "4 h",
       "on": "row",
       "rows": [
         "macbook-pro"

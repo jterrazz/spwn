@@ -15,7 +15,7 @@ func TestEveryChoiceIsATermKeepTakesAndEndsWhereKeepEndsIt(t *testing.T) {
 		"at 18:00":     time.Date(2026, 11, 4, 18, 0, 0, 0, paris),
 	} {
 		got := awake.Choices(now, paris, nil)
-		if len(got) != 3 || got[0].Label != "1 hr" || got[1].Label != "4 hr" || got[2].Label != "Until 18:00" {
+		if len(got) != 3 || got[0].Label != "1 h" || got[1].Label != "4 h" || got[2].Label != "Until 18:00" {
 			t.Fatalf("%s offers %+v", name, got)
 		}
 		for i, words := range []string{"1h", "4h"} {
@@ -41,10 +41,10 @@ func TestTheTermOfTheKeepAwakeHeldIsTheOneChoicePicked(t *testing.T) {
 		label, at string
 	}{
 		"nothing held":           {nil, "", ""},
-		"asked for 1 h":          {&awake.Session{StartedAt: now, Until: now.Add(time.Hour), For: time.Hour}, "1 hr", ""},
-		"asked for 4 h":          {&awake.Session{StartedAt: now.Add(-time.Hour), Until: now.Add(3 * time.Hour), For: 4 * time.Hour}, "4 hr", ""},
-		"4 h, to the minute":     {&awake.Session{StartedAt: now, Until: now.Add(4*time.Hour - 20*time.Second), For: 4*time.Hour - 20*time.Second}, "4 hr", ""},
-		"its span, no word":      {&awake.Session{StartedAt: now.Add(-3 * time.Minute), Until: now.Add(57 * time.Minute)}, "1 hr", ""},
+		"asked for 1 h":          {&awake.Session{StartedAt: now, Until: now.Add(time.Hour), For: time.Hour}, "1 h", ""},
+		"asked for 4 h":          {&awake.Session{StartedAt: now.Add(-time.Hour), Until: now.Add(3 * time.Hour), For: 4 * time.Hour}, "4 h", ""},
+		"4 h, to the minute":     {&awake.Session{StartedAt: now, Until: now.Add(4*time.Hour - 20*time.Second), For: 4*time.Hour - 20*time.Second}, "4 h", ""},
+		"its span, no word":      {&awake.Session{StartedAt: now.Add(-3 * time.Minute), Until: now.Add(57 * time.Minute)}, "1 h", ""},
 		"until an hour none has": {&awake.Session{StartedAt: now, Until: now.Add(8 * time.Hour), For: 8 * time.Hour}, "Until 17:00", "2026-11-04T17:00:00+01:00"},
 	} {
 		var picked []awake.Choice

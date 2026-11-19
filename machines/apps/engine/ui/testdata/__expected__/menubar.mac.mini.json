@@ -471,21 +471,11 @@
           }
         }
       ],
-      "glance": [
-        {
-          "kind": "text",
-          "text": "Public"
-        },
-        {
-          "kind": "text",
-          "text": "from outside"
-        }
-      ],
       "segment": "ports"
     },
     {
       "id": "private",
-      "title": "Private",
+      "title": "On your tailnet",
       "caption": [
         {
           "kind": "text",
@@ -509,16 +499,6 @@
           "empty": {
             "text": "Nothing shared yet"
           }
-        }
-      ],
-      "glance": [
-        {
-          "kind": "text",
-          "text": "Private"
-        },
-        {
-          "kind": "text",
-          "text": "on your tailnet"
         }
       ],
       "segment": "ports",

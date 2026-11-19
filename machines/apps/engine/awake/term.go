@@ -80,8 +80,8 @@ func Choices(now time.Time, zone *time.Location, held *Session) []Choice {
 	}
 	end := UntilOffered(now, zone)
 	out := []Choice{
-		{Label: "1 hr", For: time.Hour},
-		{Label: "4 hr", For: 4 * time.Hour},
+		{Label: "1 h", For: time.Hour},
+		{Label: "4 h", For: 4 * time.Hour},
 		{Label: "Until " + end.Format("15:04"), Until: end.Format(time.RFC3339)},
 	}
 	if held == nil {

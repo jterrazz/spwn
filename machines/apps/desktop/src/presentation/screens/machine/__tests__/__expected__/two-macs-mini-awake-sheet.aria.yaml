@@ -7,8 +7,8 @@
     - paragraph: Never sleeps.
     - paragraph: the always-on Mac policy
     - group "How long":
-      - button "1 hr"
-      - button "4 hr"
+      - button "1 h"
+      - button "4 h"
       - button "Until 18:00"
     - button "Close"
   - button "New machine on mac-mini": New machine
