@@ -1,0 +1,158 @@
+{
+  "$defs": {
+    "accounts.VaultEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "Added": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Grants": {
+          "items": {
+            "$ref": "#/$defs/accounts.VaultGrant"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "ID": {
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "token",
+            "fine-grained",
+            "api-key",
+            "oauth-token",
+            "password"
+          ],
+          "type": "string"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        },
+        "Reach": {
+          "enum": [
+            "granted",
+            "not-granted"
+          ],
+          "type": "string"
+        },
+        "RemoveSentence": {
+          "type": "string"
+        },
+        "Who": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Added",
+        "Grants",
+        "ID",
+        "Kind",
+        "Label",
+        "Program",
+        "Reach",
+        "RemoveSentence"
+      ],
+      "type": "object"
+    },
+    "accounts.VaultGrant": {
+      "additionalProperties": false,
+      "properties": {
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "To"
+      ],
+      "type": "object"
+    },
+    "accounts.VaultRead": {
+      "additionalProperties": false,
+      "properties": {
+        "Entries": {
+          "items": {
+            "$ref": "#/$defs/accounts.VaultEntry"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Entries",
+        "Mac",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
+    "vault.calls.VaultListIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/vault.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch vault.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/vault.calls.VaultListIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.VaultRead"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "vault.list",
+  "type": "object"
+}

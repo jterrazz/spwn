@@ -1,0 +1,16 @@
+description: 'removing the engine''s own job is refused with station engine stop, and the engine keeps running'
+env: two-macs
+runs:
+    - command: 'background remove com.jterrazz.station.engine --yes'
+      exit: 2
+      stderr: |
+          Error: that is station's engine
+          Hint: station engine stop
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].engine | has("stopped")'' world.json'
+      exit: 0
+      stdout: |
+          false
+    - command: 'background | /usr/bin/grep station.engine'
+      exit: 0
+      stdout: |
+          ●	com.jterrazz.station.engine	user	running · pid 812		~/Library/LaunchAgents/com.jterrazz.station.engine.plist

@@ -1,0 +1,11 @@
+description: 'with no cache and nothing unused, neither can-free names a call: the window has nothing to offer'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {caches: .CanFree, station: .Station.CanFree, verdict: .Station.Verdict.Sentence}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"caches":{"Bytes":0,"Sentence":"No cache to free. What is left is yours or the system's."},"station":{"Bytes":0,"Sentence":"Every image and every disk station holds is a machine's or the newest."},"verdict":"Nothing to free."}

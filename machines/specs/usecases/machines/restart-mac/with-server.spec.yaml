@@ -1,0 +1,26 @@
+description: 'yes, naming what pauses, restarts the Mac, waits for its station and says how its VMs are'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines restart mac-mini'
+      stdin: |
+          within 10 see infra pauses
+          send y
+          within 20 exit 0
+          screen
+      exit: 0
+      stdout: |
+          ┃ Restart mac-mini? infra pauses until it is back
+          ┃
+          ✓ mac-mini · back · infra running
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].engine.started_at > "2026-11-04"'' world.json'
+      exit: 0
+      stdout: |
+          true
+    - command: 'machines --on mac-mini | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

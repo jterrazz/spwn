@@ -1,0 +1,17 @@
+description: 'no image on This Mac: a server''s create asks to build it, refused off a terminal, --yes builds'
+env: one-mac
+runs:
+    - command: 'machines create infra --server'
+      exit: 2
+      stderr: |
+          Error: image base-ubuntu is not built on macbook-pro
+          Hint: station images build base-ubuntu
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name]'''
+      exit: 0
+      stdout: |
+          []
+    - command: 'machines create infra --server --yes'
+      exit: 2
+      stderr: |
+          Error: this station is a dev build: there is no release binary to put in the image
+          Hint: make build-linux, then station images build base-ubuntu --binary .artifacts/go/station-linux-arm64

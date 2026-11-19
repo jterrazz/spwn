@@ -1,0 +1,16 @@
+{
+    "extends": ["//"],
+    "tasks": {
+        "test": {
+            "inputs": [
+                "$TURBO_DEFAULT$",
+                "$TURBO_ROOT$/catalog/**",
+                "$TURBO_ROOT$/skills/studio-toolbelt/SKILL.md",
+                "$TURBO_ROOT$/docs/reference/footprint.md",
+                "$TURBO_ROOT$/packages/api/schemas/**",
+                "$TURBO_ROOT$/apps/menubar/stories/pages/**",
+                "$TURBO_ROOT$/specs/usecases/worlds/*.json"
+            ]
+        }
+    }
+}

@@ -1,0 +1,12 @@
+#!/bin/sh
+# Homebrew with the fleet's system tools installed: the listings answer, cleanup is recorded.
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions") printf 'mise 2026.10.25\n' ;;
+    "list --cask --versions") printf 'tailscale-app 1.90.6\n' ;;
+    "cleanup --prune=all") printf 'brew %s\n' "$*" >> "$HOME/.calls" ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

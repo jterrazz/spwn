@@ -1,0 +1,28 @@
+description: 'a record an older station wrote stops every delete of its image but its own, which deletes it'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro images/base-ubuntu/2026.09.01.json'
+      stdin: |
+          {
+              "name": "base-ubuntu",
+              "version": "2026.09.01",
+              "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+              "station": "v3.0.0",
+              "recipe_sha": "",
+              "built_at": "2026-09-01T08:00:00Z",
+              "size_gb": 4
+          }
+      exit: 0
+    - command: 'images delete base-ubuntu@2026.10.20 --yes </dev/null'
+      exit: 2
+      stderr: |
+          Error: ~/.local/state/station/images/base-ubuntu/2026.09.01.json is a record an older station wrote: it names no distro
+          Hint: station images delete base-ubuntu@2026.09.01
+    - command: 'images delete base-ubuntu@2026.09.01 --yes </dev/null'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.09.01	deleted
+    - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "macbook-pro") | .version] | join(" ")'''
+      exit: 0
+      stdout: |
+          2026.11.01 2026.10.20

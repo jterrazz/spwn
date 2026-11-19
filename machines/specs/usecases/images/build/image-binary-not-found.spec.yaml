@@ -1,0 +1,20 @@
+description: 'a --binary that does not exist is refused before anything is fetched'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'images build base-ubuntu --binary $HOME/nowhere'
+      exit: 2
+      stderr: |
+          Error: {{workdir}}/nowhere: no such file
+          Hint: make build-linux, then station images build base-ubuntu --binary .artifacts/go/station-linux-arm64
+    - command: 'images --json | /usr/bin/jq -r ''.images | length'''
+      exit: 0
+      stdout: |
+          3
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"images.build","in":{"Names":["base-ubuntu"],"Binary":"/nowhere"}}
+      exit: 0
+      stdout: |
+          {"code":"image.binary-not-found","subject":"/nowhere","message":"/nowhere: no such file"}

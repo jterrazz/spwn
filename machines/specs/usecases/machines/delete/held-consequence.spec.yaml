@@ -1,0 +1,16 @@
+description: 'a workspace a session works in asks its name typed, and the refusal says who holds it'
+env: stories
+runs:
+    - command: 'machines delete linux-1'
+      exit: 2
+      stderr: |
+          Error: refusing without the name typed: linux-1. It is held by its lot, by studio-os-fe: work may be in progress.
+          Hint: in a script: --confirm=linux-1
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ●	agent-7f	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          	linux-2	Workspace	macbook-pro	Creating · persistent	4 CPU	8 GB	image 1 of 5

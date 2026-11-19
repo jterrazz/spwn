@@ -1,0 +1,21 @@
+description: 'uv --outdated marks a package behind its latest, and a bare update updates it'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/outdated/
+env:
+    - STATION_MACHINE_KIND=macos
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name | IN("markitdown", "browser-use")) | "\(.name) \(.state) \(.installed) \(.newest // "-") \(.detail)"'''
+      exit: 0
+      stdout: |
+          browser-use ok 0.5.0 - 
+          markitdown update-available 0.1.2 0.1.7 outdated
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	markitdown	0.1.7	uv
+      files:
+          .calls:
+              contains:
+                  - 'uv tool list --outdated'
+                  - 'uv "markitdown[all]"'

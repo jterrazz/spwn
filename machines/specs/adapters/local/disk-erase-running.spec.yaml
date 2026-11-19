@@ -1,0 +1,12 @@
+description: 'an erase refuses an app that is running, names how to go on, and leaves its data'
+fixture: ../__fixtures__/process-running/
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p "Library/Application Support/Zed/db" && echo x > "Library/Application Support/Zed/db/x"'
+      exit: 0
+    - command: 'disk erase zed --confirm=zed'
+      exit: 1
+      stderr: |
+          Error: zed is running: its data cannot be erased now
+          Hint: quit zed, then station disk erase zed
+      files:
+          Library/Application Support/Zed/db/x: exists

@@ -1,0 +1,11 @@
+description: 'a Mac added with its login and key keeps both in its ssh block and its preferences'
+env: one-mac
+runs:
+    - command: 'machines add mac-mini --user jterrazz.agent --key "~/.ssh/id_ed25519"'
+      exit: 0
+      stdout: |
+          ●	mac-mini	added · ssh answers · station {{string}}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.ssh.blocks, (.preferences.macs | map_values(del(.answered)))]'' world.json'
+      exit: 0
+      stdout: |
+          [{"mac-mini":{"user":"jterrazz.agent","key":"~/.ssh/id_ed25519"}},{"mac-mini":{"user":"jterrazz.agent","key":"~/.ssh/id_ed25519"}}]

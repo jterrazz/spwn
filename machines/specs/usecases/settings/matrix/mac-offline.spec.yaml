@@ -1,0 +1,22 @@
+description: 'with the mini offline, its column says when it last answered and the others are filled, exit 0'
+env: mini-offline
+runs:
+    - command: 'settings --all-machines'
+      exit: 0
+      stdout: |
+          # Machines
+          ●	macbook-pro	Mac	read
+          ✗	mac-mini	Mac	does not answer · last answer 03:12
+          ●	linux-1	Workspace	read
+          ?	api	Workspace	stopped · not read since the engine started
+          –	infra	Server	not checked: station does not manage its settings
+          # Set by station
+          ○	17 settings	○ 0/17	?	○ 0/6	?	0/23
+          # Always-on Mac
+          ○	5 settings	○	?	–	?	–
+          # Checked
+          ?	9 settings	? 0/9	?	–	?	0/9
+    - command: 'settings --all-machines --json | /usr/bin/jq -c ''.findings'''
+      exit: 0
+      stdout: |
+          [{"machine":"mac-mini","severity":"broken","section":"settings","subject":"mac-mini","text":"mac-mini: does not answer, last answer 03:12","fix":{"call":null,"command":null,"path":null}},{"machine":"api","severity":"needs-a-look","section":"settings","subject":"api","text":"api: stopped, not read since the engine started","fix":{"call":null,"command":null,"path":null}}]

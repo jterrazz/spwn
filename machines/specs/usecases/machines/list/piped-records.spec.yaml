@@ -1,0 +1,16 @@
+description: 'piped, each machine is one record: glyph, name, kind, Mac, state, CPU, memory'
+env: two-macs
+runs:
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: 'machines | /usr/bin/awk -F''\t'' ''$4 == "mac-mini"'' | /usr/bin/cut -f2'
+      exit: 0
+      stdout: |
+          mac-mini
+          infra

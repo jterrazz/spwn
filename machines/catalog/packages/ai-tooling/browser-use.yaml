@@ -1,0 +1,17 @@
+package: station.package/v1
+kind: app
+name: browser-use
+description: AI agent library for browser automation
+provides: [browser-use]
+requires: [uv]
+version-read:
+    pattern: browser-use (\d+\.\d+\.\d+)
+methods:
+    - os: macos
+      machine: [workspace, server]
+      uv: browser-use
+    - family: linux
+      script:
+          check: ANONYMIZED_TELEMETRY=false browser-use --version
+          run: uv tool install browser-use
+          undo: uv tool uninstall browser-use

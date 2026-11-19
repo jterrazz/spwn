@@ -1,0 +1,112 @@
+{
+  "schema": "station.page/v1",
+  "id": "settings",
+  "command": "settings --all-machines",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/settings",
+            "mark": "ok",
+            "label": "0 settings on 0 machines",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "nothing needs a look"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "machines",
+      "title": "Machines",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "machines"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station settings --all-machines --all",
+      "text": "every row"
+    }
+  ],
+  "actions": [
+    {
+      "key": "a",
+      "label": "apply across",
+      "on": "row",
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "enter",
+      "label": "open on that machine",
+      "on": "row",
+      "priority": 2
+    },
+    {
+      "key": "F",
+      "label": "only what needs a look",
+      "on": "page",
+      "priority": 3
+    },
+    {
+      "key": "f",
+      "label": "open the fix",
+      "on": "row",
+      "priority": 4
+    }
+  ]
+}

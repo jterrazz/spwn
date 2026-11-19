@@ -1,0 +1,13 @@
+description: 'a password granted to two machines counts both in its removal'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].accounts.passwords[0].Grants = [{"To": "linux-1"}, {"To": "linux-2"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Entries[0] | [.ID, .Reach, .RemoveSentence]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          ["pw-1","granted","Its grants end: 2 machines"]

@@ -1,0 +1,11 @@
+description: 'the add sheet offers the gh sign-in this Mac holds, kept as the kind gh holds'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {intro: .Intro, line: .CaptureLine, captures: [.Captures[] | [.Program, .Who, .Scopes, .Kind, .KindSentence, .Label]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.new","in":{}}
+      exit: 0
+      stdout: |
+          {"intro":"It is kept in macbook-pro's Keychain; you can then grant it to a machine.","line":"","captures":[["gh","you",["repo"],"oauth-token","Kept as an OAuth token, the kind gh holds","GitHub · you"]]}

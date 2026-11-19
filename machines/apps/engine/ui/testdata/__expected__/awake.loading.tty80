@@ -1,0 +1,5 @@
+◌ This Mac
+◌ mac-mini
+
+→ station awake 4h --lid          this Mac
+→ station awake 4h --on mac-mini  another Mac

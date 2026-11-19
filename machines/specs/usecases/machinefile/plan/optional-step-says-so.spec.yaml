@@ -1,0 +1,16 @@
+description: 'a plan step says its package is optional where the file marks it'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, { name: ripgrep, optional: true }]
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | [.Lines[] | [.Step.Package, .Step.Optional]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.plan","in":{}}
+      exit: 0
+      stdout: |
+          [["homebrew",false],["jq",false],["ripgrep",true]]

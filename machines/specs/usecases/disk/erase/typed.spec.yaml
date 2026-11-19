@@ -1,0 +1,28 @@
+description: 'on a terminal an erase asks the app''s name typed; typed right, xcode''s simulators are erased'
+fixture:
+    - ../../../__fixtures__/terminal/
+    - ../../../__fixtures__/disk-xcode/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" disk erase xcode'
+      stdin: |
+          see Type xcode
+          send xcode\r
+          see erased
+          screen
+      exit: 0
+      stdout: |
+          ┃ Type xcode to erase its data:
+          ●       xcode   5.8 GB erased
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {derived: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], devices: .["~/Library/Developer/CoreSimulator/Devices/A/data"]}'' world.json'
+      exit: 0
+      stdout: |
+          {"derived":null,"devices":19100000000}
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          xcrun simctl delete unavailable
+          xcrun simctl shutdown all
+          xcrun simctl erase all

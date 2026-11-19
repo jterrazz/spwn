@@ -1,0 +1,20 @@
+description: 'station machines lists each Mac, its VMs under it, as MACHINE, KIND, STATE, CPU, MEMORY'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x30 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          5 machines · 4 running · 1 stopped · nothing needs you
+
+              MACHINE     KIND       STATE                 CPU    MEMORY
+            ● This Mac    Mac        Engine running
+            ├─ ○ api      Workspace  Stopped · persistent  4 CPU  8 GB
+            └─ ● linux-1  Workspace  Running · ephemeral   4 CPU  8 GB
+            ● mac-mini    Mac        Engine running
+            └─ ● infra    Server     Running · always on   8 CPU  24 GB

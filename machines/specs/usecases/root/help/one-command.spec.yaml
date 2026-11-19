@@ -1,0 +1,22 @@
+description: 'station help <command> prints that command, its commands, flags and examples'
+env: one-mac
+runs:
+    - command: 'help ports | /usr/bin/grep -E "^  [A-Z]|^    [a-z]+ " | /usr/bin/sed -E "s/ +$//"'
+      exit: 0
+      stdout: |4
+            What listens on your machines, who reaches it, and what your VMs share on Tailscale
+            USAGE
+              station ports [command] [--flags]
+            EXAMPLES
+              station ports
+              station ports --all-machines
+              station ports --all
+              station ports --json
+              station ports share linux-1 3000
+              station ports stop-sharing linux-1 3000
+            COMMANDS
+              share <vm> <port> [--flags]           Reserve a VM's port now and share it on Tailscale, its URL printed before anything listens; inside a VM, the port alone
+              declare <machine> <port> [--flags]    Declare a port public: it is meant to be reached from outside Tailscale, by the route --via names (cloudflare-tunnel, tailscale-funnel, lan)
+              undeclare <machine> <port> [--flags]  Take back a port's declaration: it is red again while it listens where something outside Tailscale reaches it
+              https <on|off> [--flags]              Turn HTTPS links on or off on a Mac: on, an HTTP server's share gets an https:// link with a valid certificate; off, an http:// one
+            FLAGS

@@ -1,0 +1,20 @@
+description: 'a ~/go that appears at the home root is misplaced at the next read, on the page and in the JSON'
+env: two-macs
+runs:
+    - command: 'disk | /usr/bin/grep -c "~/go"'
+      exit: 1
+      stdout: |
+          0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/go/pkg/mod/cache/x"] = 2300000000'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'disk | /usr/bin/grep -e "^◐" -e "^# Misplaced"'
+      exit: 0
+      stdout: |
+          ◐	This Mac	388 GB free of 994 GB · 2 misplaced folders	station disk move ~/.tart
+          # Misplaced
+          ◐	~/.tart	73.3 GB	misplaced · tart · station disk move ~/.tart
+          ◐	~/go	2.3 GB	misplaced · go · station disk move ~/go
+    - command: 'disk --json | /usr/bin/jq -c .findings'
+      exit: 0
+      stdout: |
+          [{"severity":"needs-a-look","section":"disk","subject":"~/.tart","text":"~/.tart is misplaced","fix":{"call":"disk.move","args":{"Folder":"~/.tart"},"command":null,"path":null}},{"severity":"needs-a-look","section":"disk","subject":"~/go","text":"~/go is misplaced","fix":{"call":"disk.move","args":{"Folder":"~/go"},"command":null,"path":null}}]

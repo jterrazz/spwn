@@ -1,0 +1,11 @@
+description: 'the window reads another Mac from that Mac: its server''s failing check needs you'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Head.Name, .Verdict.Sentence, [.Needs[] | [.Subject, .Mark, .Upkeep, .Verb, .On]]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","target":{"name":"mac-mini"},"in":{}}
+      exit: 0
+      stdout: |
+          ["mac-mini","infra is down.",[["infra","down","needs-you","restart","mac-mini"]]]

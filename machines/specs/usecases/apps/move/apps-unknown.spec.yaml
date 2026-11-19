@@ -1,0 +1,8 @@
+description: 'moving an app the catalog does not hold is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'apps move nope --to brew'
+      exit: 2
+      stderr: |
+          Error: no app named "nope"
+          Hint: station apps for every app here

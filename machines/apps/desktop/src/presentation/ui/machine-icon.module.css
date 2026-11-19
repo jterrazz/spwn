@@ -1,0 +1,24 @@
+.icon {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-icon);
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--c, var(--t3)) 22%, transparent);
+    color: var(--c, var(--t3));
+}
+.icon svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 1.6;
+}
+.large {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-well);
+}
+.large svg {
+    width: 18px;
+    height: 18px;
+}

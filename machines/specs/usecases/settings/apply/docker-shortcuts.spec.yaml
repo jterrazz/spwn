@@ -1,0 +1,43 @@
+description: docker-shortcuts is one block of ~/.zshrc, each function asks first, off takes it
+fixture: ../../__fixtures__/docker/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; printf ''export EDITOR=vim\n'' > .zshrc'
+      exit: 0
+    - command: 'settings apply docker-shortcuts'
+      exit: 0
+      stdout: |
+          ●	docker-shortcuts	~/.zshrc [station:docker-shortcuts]: written
+    - command: '--version >/dev/null; /usr/bin/grep -E ''^(dclean|dclean-images|dreset)\(\)'' .zshrc'
+      exit: 0
+      stdout: |
+          dclean() {
+          dclean-images() {
+          dreset() {
+    - command: '--version >/dev/null; /usr/bin/sed -n ''/^_station_docker_ask()/,/^# <<< station:docker-shortcuts/p'' .zshrc | /usr/bin/sed ''$d'' > block.zsh; echo n | /bin/bash -c ''. ./block.zsh; dclean'''
+      exit: 1
+      stdout: |
+          Remove every container? [y/N] kept: you said no
+      files:
+          .calls: absent
+    - command: '--version >/dev/null; echo y | /bin/bash -c ''. ./block.zsh; dclean'''
+      exit: 0
+      stdout: |
+          Remove every container? [y/N] 2 containers removed
+      files:
+          .calls:
+              equals: |
+                  docker ps -aq
+                  docker rm -vf c1 c2
+    - command: 'settings docker-shortcuts | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	docker-shortcuts	applied · ~/.zshrc [station:docker-shortcuts]
+    - command: 'settings off docker-shortcuts --yes'
+      exit: 0
+      stdout: |
+          ●	docker-shortcuts	~/.zshrc [station:docker-shortcuts]: removed
+    - command: '--version >/dev/null; /bin/cat .zshrc'
+      exit: 0
+      stdout: |
+          export EDITOR=vim

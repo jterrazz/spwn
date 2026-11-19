@@ -1,0 +1,11 @@
+description: 'the containers shortcut on a workspace deletes the containers there'
+fixture: ../../__fixtures__/docker/
+env: two-macs
+runs:
+    - command: 'run docker rm --yes --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	containers	2 removed
+      stderr: |
+          → now: dclean

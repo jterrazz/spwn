@@ -1,0 +1,9 @@
+description: 'a console line that holds a token is withheld in the log, the words around it kept'
+env: two-macs
+runs:
+    - command: 'world console linux-1 ''[    4.118220] cloud-init: login with sk-station-story-not-a-real-key failed'''
+      exit: 0
+    - command: 'machines log linux-1'
+      exit: 0
+      stdout: |
+          [    4.118220] cloud-init: login with withheld failed

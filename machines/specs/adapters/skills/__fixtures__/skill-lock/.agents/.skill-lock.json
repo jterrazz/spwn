@@ -1,0 +1,17 @@
+{
+    "version": 3,
+    "skills": {
+        "frontend-design": {
+            "source": "anthropics/skills",
+            "sourceType": "github",
+            "skillPath": "skills/frontend-design/SKILL.md",
+            "skillFolderHash": "1111111111111111111111111111111111111111"
+        },
+        "shadcn": {
+            "source": "shadcn-ui/ui",
+            "sourceType": "github",
+            "skillPath": "skills/shadcn/SKILL.md",
+            "skillFolderHash": "2222222222222222222222222222222222222222"
+        }
+    }
+}

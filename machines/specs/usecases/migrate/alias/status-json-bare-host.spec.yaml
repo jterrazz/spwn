@@ -1,0 +1,6 @@
+description: 'with no agent, daemon or repository the document has no Services or Background section'
+runs:
+    - command: 'status --json | /usr/bin/jq -c ''[(.services | length), (.background | length), (.workspace.repositories | length)]'''
+      exit: 0
+      stdout: |
+          [0,0,0]

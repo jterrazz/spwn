@@ -1,0 +1,11 @@
+# One tool per method placed on a host, the smallest of each, then what the native
+# commands need; Homebrew comes with the prebaked image. Casks, App Store apps and
+# apps open windows, so the headless suite leaves them out.
+mise
+go
+node
+bun
+uv
+jq
+skills
+frontend-design

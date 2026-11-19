@@ -1,0 +1,9 @@
+description: 'an install of an app already there but behind is done: it reads installed, exit 0'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/outdated/
+runs:
+    - command: 'apps install bat'
+      exit: 0
+      stdout: |
+          ●	bat	0.24.0	brew

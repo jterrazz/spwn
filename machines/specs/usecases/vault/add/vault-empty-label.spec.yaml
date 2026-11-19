@@ -1,0 +1,11 @@
+description: 'A blank label is refused and names its field'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"   ","Program":"gh","Kind":"token","From":"typed","Value":"FAKE000"}}
+      exit: 0
+      stdout: |
+          {"code":"vault.empty-label","field":"label","subject":"   ","message":"a password needs a label","hint":"name it so you can tell it apart"}

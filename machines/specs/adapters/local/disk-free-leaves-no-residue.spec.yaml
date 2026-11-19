@@ -1,0 +1,11 @@
+description: 'free empties every Linux cache, what apps write back and bun''s files in npm''s folder included'
+fixture: ./__fixtures__/disk-residue/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .cache && cd .cache && /bin/mkdir -p go-build/ab mise npm/_cacache npm/.bunx-1002/cowsay@1.6.0 sigstore-rust/tuf gopls/9aa7cf61 goimports && for f in go-build/ab/x mise/old npm/_cacache/x npm/11a2e1aa83860bd7.npm npm/.bunx-1002/cowsay@1.6.0/f sigstore-rust/tuf/root.json gopls/9aa7cf61/f goimports/f; do echo x > $f; done'
+      exit: 0
+    - command: 'disk free </dev/null >/dev/null'
+      exit: 0
+    - command: 'disk --json | /usr/bin/jq -r ''.rows[] | select(.group == "can-rebuild" and .bytes > 0) | .paths[]'''
+      exit: 0

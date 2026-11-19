@@ -1,0 +1,17 @@
+description: 'after the mini''s engine crashes its successor holds Never sleeps again at its start'
+env: two-macs
+runs:
+    - command: 'world engine-crash mac-mini'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          ["station: never sleeps"]
+    - command: 'awake | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          ["station: never sleeps"]

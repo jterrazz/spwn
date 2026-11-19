@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: vercel-react-native-skills
+description: React Native practices
+methods:
+    - os: any
+      skill:
+          repo: vercel-labs/agent-skills
+          name: vercel-react-native-skills

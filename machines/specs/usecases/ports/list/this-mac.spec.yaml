@@ -1,0 +1,11 @@
+description: 'station ports begins with the Tailscale line, then each port This Mac shares, at its URL'
+env: two-macs
+runs:
+    - command: 'ports'
+      exit: 0
+      stdout: |
+          ●	Tailscale	signed in · macbook-pro.tail1234.ts.net · ports are shared
+          # Private: shared with you on Tailscale	2 ●
+          ●	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
+          ●	linux-1	7000	private	macbook-pro.tail1234.ts.net:40002	shared	server
+          	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free

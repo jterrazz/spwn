@@ -1,0 +1,27 @@
+description: 'a disk deleted by hand, then its machine, then made again by hand under its name, is not freed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].cloned = {"linux-1": 901} | .macs["macbook-pro"].vms["linux-1"].disk = false | .macs["macbook-pro"].vms["linux-1"].pid = 0'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines delete linux-1 --confirm=linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].cloned'' world.json'
+      exit: 0
+      stdout: |
+          null
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["linux-1"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["linux-1"],"Confirm":"linux-1"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.not-freeable","subject":"linux-1"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"].disk'' world.json'
+      exit: 0
+      stdout: |
+          true

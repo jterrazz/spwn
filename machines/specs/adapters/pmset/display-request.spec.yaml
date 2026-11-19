@@ -1,0 +1,11 @@
+description: 'the display sleeps on lid close by pmset displaysleepnow alone, and only under --lid'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/power/
+env: engine
+runs:
+    - command: '--version > /dev/null; "$STATION" engine run 2> engine.log & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" awake 4h > /dev/null; echo closed > power/lid; /bin/sleep 1.5; /usr/bin/grep -c pmset .calls; echo open > power/lid; /bin/sleep 1; "$STATION" awake 4h --lid --battery > /dev/null; echo closed > power/lid; /bin/sleep 1.5; /usr/bin/grep pmset .calls; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          0
+          pmset displaysleepnow

@@ -1,0 +1,14 @@
+description: 'a linux VM lists browser-use, never dia nor a cask'
+fixture: ../../../__fixtures__/stubs/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name | IN("dia", "node", "ollama", "browser-use", "xcode")) | "\(.name) \(.lives_on)"'''
+      exit: 0
+      stdout: |
+          node every-machine
+          browser-use vms-only
+    - command: 'apps --json | /usr/bin/jq -r ''[.apps[] | select(.method == "cask")] | length'''
+      exit: 0
+      stdout: |
+          0

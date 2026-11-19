@@ -1,0 +1,21 @@
+description: 'two apps opening with one package each hold it: removing one keeps it for the other'
+fixture:
+    - ./__fixtures__/ubuntu/
+    - ./__fixtures__/shared-first/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps install aaa bbb'
+      exit: 0
+      stdout: |
+          ●	aaa	1.0	apt
+          ●	bbb	1.0	apt
+    - command: 'apps remove aaa --yes'
+      exit: 0
+      stdout: |
+          ●	aaa		apt
+    - command: '--version >/dev/null; /bin/cat dpkg.db'
+      exit: 0
+      stdout: |
+          foo	1.0
+          foo-doc	1.0

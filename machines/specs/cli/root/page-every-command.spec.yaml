@@ -1,0 +1,40 @@
+description: 'every read answers --page with station.page/v1, its page id, ready and titled sections'
+fixture:
+    - ../__fixtures__/estate/
+runs:
+    - command: 'overview --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	overview	ready	true
+    - command: 'overview --all --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	overview	ready	true
+    - command: 'apps --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	apps	ready	true
+    - command: 'settings --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	settings	ready	true
+    - command: 'disk --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	disk	ready	true
+    - command: 'machines --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	machines	ready	true
+    - command: 'images --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	images	ready	true
+    - command: 'ports --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	ports	ready	true
+    - command: 'accounts --page | /usr/bin/jq -r ''[.schema, .id, .state, all(.sections[]; .title != "")] | @tsv'''
+      exit: 0
+      stdout: |
+          station.page/v1	accounts	ready	true

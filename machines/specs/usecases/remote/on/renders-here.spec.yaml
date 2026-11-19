@@ -1,0 +1,15 @@
+description: 'apps --on linux-1 is apps run inside linux-1, byte for byte, but its On line'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'apps --on linux-1 > on.txt; STATION_WORLD=$PWD/linux-1.world.json STATION_WORLD_SEED=${STATION_WORLD_SEED%/*}/in-linux-1.json "$STATION" apps > inside.txt; /usr/bin/head -1 on.txt; /usr/bin/tail -n +2 on.txt | /usr/bin/cmp - inside.txt && echo same'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          same
+    - command: 'apps --on linux-1 --json > on.json; STATION_WORLD=$PWD/linux-1.world.json STATION_WORLD_SEED=${STATION_WORLD_SEED%/*}/in-linux-1.json "$STATION" apps --json > inside.json; for doc in on inside; do /usr/bin/jq ''del(.generated_at, .machine)'' $doc.json > $doc.body; done; /usr/bin/cmp on.body inside.body && echo same; /usr/bin/jq -c ''.machine | [.name, .kind]'' on.json'
+      exit: 0
+      stdout: |
+          same
+          ["linux-1","workspace"]

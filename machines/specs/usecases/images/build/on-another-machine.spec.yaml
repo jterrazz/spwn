@@ -1,0 +1,16 @@
+description: 'a build on another Mac makes the image there, This Mac''s untouched'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'images build base-ubuntu --binary $HOME/station-linux --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	base-ubuntu	2026.11.04	built
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version)"'''
+      exit: 0
+      stdout: |
+          macbook-pro 2026.11.01
+          macbook-pro 2026.10.20
+          mac-mini 2026.11.04
+          mac-mini 2026.11.01

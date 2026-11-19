@@ -1,0 +1,11 @@
+description: 'machines.new from a file that is nowhere is refused, its code on the wire'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.new","in":{"From":"nowhere"}}
+      exit: 0
+      stdout: |
+          {"code":"machinefile.not-found","subject":"nowhere"}

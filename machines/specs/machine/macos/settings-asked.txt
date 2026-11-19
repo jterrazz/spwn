@@ -1,0 +1,8 @@
+# Set by station settings whose apply asks values or a sign-in on a terminal, or a
+# click in System Settings (a guided item, a profile to approve), so a headless run
+# leaves them to the owner; every other one is applied, turned off and applied again.
+github-login
+git-signing
+ssh-key
+spotlight-exclude
+dns

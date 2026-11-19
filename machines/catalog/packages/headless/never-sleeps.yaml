@@ -1,0 +1,15 @@
+package: station.package/v1
+kind: setting
+name: never-sleeps
+description: 'Never sleeps: the engine keeps this Mac awake, its servers with it'
+reversible: true
+sets:
+    - { key: never sleeps, value: held by the engine }
+methods:
+    - os: macos
+      machine: computer
+      builtin: never-sleeps
+writes:
+    - path: '{config}/station/preferences.json'
+      level: settings
+      note: '`never_sleeps`, the engine holds an idle-sleep assertion while it is set'

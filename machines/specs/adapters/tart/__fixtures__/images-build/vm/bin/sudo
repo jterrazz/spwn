@@ -1,0 +1,20 @@
+#!/bin/sh
+# sudo inside the build VM: the recipe (run with its env) keeps its stdin in .recipe.stdin
+# and the env it was given in .recipe.env, the cleanup keeps its stdin in .cleanup.stdin;
+# each answers with answers/sudo/<recipe|cleanup>.stderr and .exit when present.
+answers="$TEST_WORKDIR/answers/sudo"
+case "$*" in
+    "env VM_USER="*" bash -s")
+        who=recipe
+        shift
+        while [ "$1" != bash ]; do printf '%s\n' "$1" >> "$TEST_WORKDIR/.recipe.env"; shift; done
+        ;;
+    "bash -s") who=cleanup ;;
+    *)
+        echo "stub sudo: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac
+/bin/cat > "$TEST_WORKDIR/.$who.stdin"
+if [ -f "$answers/$who.stderr" ]; then /bin/cat "$answers/$who.stderr" >&2; fi
+if [ -f "$answers/$who.exit" ]; then exit "$(/bin/cat "$answers/$who.exit")"; fi

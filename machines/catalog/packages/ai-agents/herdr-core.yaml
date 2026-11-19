@@ -1,0 +1,18 @@
+package: station.package/v1
+kind: app
+name: herdr-core
+description: "Herdr's engine and its hc command"
+provides: [hc]
+version-read:
+    pattern: (\d+\.\d+\.\d+\S*)
+# outside: herdr-core ships no GitHub release, so a machine with no
+# herdr-app installs hc by the project's own installer, which checks the
+# archive against its manifest.
+methods:
+    - os: macos
+      machine: computer
+      provided-by: herdr-app
+    - os: any
+      script:
+          check: hc --version
+          url: https://releases.herdr.dev/core/install.sh

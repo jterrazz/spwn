@@ -1,0 +1,47 @@
+description: 'apply --remove removes only what station installed and the Machinefile lists no longer'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd, eza]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	fd	brew
+          ○	eza	brew
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ●	fd	10.3.0	brew
+          ●	eza	0.23.4	brew
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [eza]
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	fd	brew	installed by station for macbook-pro, listed no longer
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	fd	brew	installed by station for macbook-pro, listed no longer
+          ●	homebrew	5.0.1	script	the manager of eza
+          ●	eza	0.23.4	brew
+          ●	fd		brew	removed
+    - command: 'apps | /usr/bin/grep -e "	fd	" -e "	eza	" -e "	jq	"'
+      exit: 0
+      stdout: |
+          ○	fd		brew	station apps install fd
+          ●	eza	0.23.4	brew
+          ●	jq	1.8.1	brew

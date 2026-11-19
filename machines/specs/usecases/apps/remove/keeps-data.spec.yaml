@@ -1,0 +1,8 @@
+description: 'a removed app''s data stays: its Disk rows still name what it keeps'
+fixture: ./__fixtures__/gh-data/
+env: two-macs
+runs:
+    - command: 'apps remove gh --yes >/dev/null; /usr/bin/find .config/gh -type f'
+      exit: 0
+      stdout: |
+          .config/gh/hosts.yml

@@ -1,0 +1,11 @@
+description: 'awake.read of a Mac that never sleeps says so, ok, under the always-on Mac policy, no term picked'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Mac, .Verdict, [.Choices[] | select(.Picked) | .Label]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"awake.read","target":{"name":"mac-mini"},"in":{}}
+      exit: 0
+      stdout: |
+          ["mac-mini",{"Tone":"ok","Sentence":"Never sleeps.","Line":"the always-on Mac policy"},[]]

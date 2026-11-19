@@ -1,0 +1,16 @@
+.chip {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-6);
+    align-items: center;
+    padding: 3px 9px 3px var(--space-4);
+    border-radius: var(--radius-control);
+    background: var(--raise);
+    color: var(--t1);
+    font-size: var(--text-label);
+    transition: background var(--motion-hover);
+}
+.chip:hover {
+    background: var(--raise-2);
+}

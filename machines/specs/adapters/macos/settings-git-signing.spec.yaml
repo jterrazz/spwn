@@ -1,0 +1,16 @@
+description: 'on a terminal, git-signing finds the gpg key for the address and has git sign every commit with it'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/settings-git-signing/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" settings apply git-signing'
+      stdin: |
+          see signs every commit with 3AA5C34371567BD2
+      exit: 0
+      files:
+          .calls:
+              contains:
+                  - 'git config --global user.signingkey 3AA5C34371567BD2'
+                  - 'git config --global commit.gpgsign true'
+                  - 'git config --global gpg.program gpg'

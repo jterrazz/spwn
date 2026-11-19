@@ -1,0 +1,27 @@
+description: 'a word the machines family does not know is a machine name, or refused with its verb, exit 2'
+runs:
+    - command: 'machines status'
+      exit: 2
+      stderr: |
+          Error: no machine named "status"
+          Hint: station machines
+    - command: 'machines remove x'
+      exit: 2
+      stderr: |
+          Error: unknown command "remove" for "station machines"
+          Hint: run station machines --help
+    - command: 'machines shell x'
+      exit: 2
+      stderr: |
+          Error: unknown command "shell" for "station machines"
+          Hint: run station machines --help
+    - command: 'machines exec x'
+      exit: 2
+      stderr: |
+          Error: unknown command "exec" for "station machines"
+          Hint: run station machines --help
+    - command: 'machines init --name x'
+      exit: 2
+      stderr: |
+          Error: unknown flag: --name
+          Hint: run station machines --help

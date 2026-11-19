@@ -1,0 +1,29 @@
+description: 'inside linux-1 the Overview is the workspace''s own: its kind and uptime, its sections, no On line'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - in-linux-1
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x30 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" overview'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          linux-1 · Workspace · up 2 h
+
+          Activity  ? not measured
+          Apps      ● 2 ok · ○ 71 not installed
+          Settings  set by station · ○ 0 of 6
+          Disk      ● 0 B free · 0 B can rebuild
+          Ports     Public 0 · Private 2
+          Accounts  ● 0
+    - command: ''
+      exit: 0
+      stdout: |
+          	Activity	? not measured
+          	Apps	● 2 ok · ○ 71 not installed
+          	Settings	set by station · ○ 0 of 6
+          	Disk	● 0 B free · 0 B can rebuild
+          	Ports	Public 0 · Private 2
+          	Accounts	● 0

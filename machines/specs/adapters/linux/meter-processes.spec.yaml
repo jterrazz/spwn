@@ -1,0 +1,8 @@
+description: 'inside a VM the busiest processes come from /proc, a name with spaces and parentheses read whole'
+fixture: ./__fixtures__/meter-proc/
+env: engine
+runs:
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" guest serve --stdio < ask.json | /usr/bin/jq -c ''.out.top | [(.cpu[] | [.name, (.value * 10 | round / 10)]), (.memory[] | [.name, .value])]'''
+      exit: 0
+      stdout: |
+          [["k3s-server",6],["containerd",1],["tmux: server (main)",0.3],["systemd",0],["k3s-server",1174405120],["containerd",209715200],["systemd",13520896],["tmux: server (main)",4194304]]

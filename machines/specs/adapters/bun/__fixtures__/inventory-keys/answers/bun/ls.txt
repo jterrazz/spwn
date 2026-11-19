@@ -1,0 +1,3 @@
+/home/u/.bun/install/global node_modules (2)
+├── @openai/codex@0.154.0
+└── qmd@github:tobi/qmd#e428df7

@@ -1,0 +1,246 @@
+{
+  "$defs": {
+    "apps.Cell": {
+      "additionalProperties": false,
+      "properties": {
+        "Holds": {
+          "type": "boolean"
+        },
+        "Newest": {
+          "type": "string"
+        },
+        "NotHere": {
+          "type": "boolean"
+        },
+        "State": {
+          "enum": [
+            "",
+            "failed",
+            "not-installed",
+            "not-known",
+            "not-managed",
+            "ok",
+            "pending",
+            "update-available"
+          ],
+          "type": "string"
+        },
+        "Version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Holds",
+        "Newest",
+        "NotHere",
+        "State",
+        "Version"
+      ],
+      "type": "object"
+    },
+    "apps.Column": {
+      "additionalProperties": false,
+      "properties": {
+        "Answered": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Away": {
+          "enum": [
+            "",
+            "silent",
+            "stopped"
+          ],
+          "type": "string"
+        },
+        "Mac": {
+          "type": "boolean"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Read": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Ref": {
+          "$ref": "#/$defs/core.machine.Ref"
+        },
+        "ThisMachine": {
+          "type": "boolean"
+        },
+        "Why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Answered",
+        "Away",
+        "Mac",
+        "Name",
+        "Read",
+        "Ref",
+        "ThisMachine",
+        "Why"
+      ],
+      "type": "object"
+    },
+    "apps.Matrix": {
+      "additionalProperties": false,
+      "properties": {
+        "Columns": {
+          "items": {
+            "$ref": "#/$defs/apps.Column"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Rows": {
+          "items": {
+            "$ref": "#/$defs/apps.MatrixRow"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Servers": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Skills": {
+          "$ref": "#/$defs/core.verdict.Shelf"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Shelf"
+        }
+      },
+      "required": [
+        "Columns",
+        "Rows",
+        "Servers",
+        "Skills",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "apps.MatrixRow": {
+      "additionalProperties": false,
+      "properties": {
+        "Carry": {
+          "type": "integer"
+        },
+        "Cells": {
+          "items": {
+            "$ref": "#/$defs/apps.Cell"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Of": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Carry",
+        "Cells",
+        "Name",
+        "Of"
+      ],
+      "type": "object"
+    },
+    "apps.calls.MatrixIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "core.machine.Ref": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "On": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name",
+        "On"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Shelf": {
+      "additionalProperties": false,
+      "properties": {
+        "Catalog": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
+        "Mine": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Catalog",
+        "Mine"
+      ],
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/apps.matrix.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call apps.matrix of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/apps.calls.MatrixIn"
+    },
+    "out": {
+      "$ref": "#/$defs/apps.Matrix"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "apps.matrix",
+  "type": "object"
+}

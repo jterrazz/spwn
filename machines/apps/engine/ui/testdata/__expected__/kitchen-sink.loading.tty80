@@ -1,0 +1,71 @@
+To do
+  ◌ brew
+Summary
+  ◌ Marks
+Values  40000-40999
+              value   number
+  ◌ text
+  ◌ size      275 B  22.6 KB
+  ◌ ratio
+  ◌ percent
+  ◌ version
+  ◌ age
+  ◌ old
+  ◌ until
+  ◌ soon
+  ◌ expired
+  ◌ url
+  ◌ identity
+  ◌ file
+  ◌ command
+  ◌ list
+  ◌ switch
+  ◌ sip
+  ◌ unknown
+Marks
+  ◌ outdated
+  ◌ misplaced
+  ◌ unreachable
+  ◌ mismatch
+  ◌ unmanaged
+  ◌ missing
+  ◌ partial
+  ◌ differs
+  ◌ unset
+  ◌ stopped
+  ◌ late
+  ◌ degraded
+  ◌ orphan
+  ◌ waiting
+  ◌ failing
+  ◌ refused
+  ◌ down
+  ◌ stale
+  ◌ expiring
+  ◌ guard
+  ◌ absent
+  ◌ off-here
+  ◌ not-for-this-machine
+  ◌ not-known
+All machines
+  ◌ mac-mini
+  ├─ ◌ linux-1
+  │  ├─ 8081 → 40002  https://mac-mini.ts.net:40002  vite
+  │  └─ ◌ web
+  └─ ◌ linux-2
+Disk
+  ◌ station
+  ◌ tart
+Prose
+  machine  macbook-pro
+  uptime   22d 14h
+  Serve is off on Tailscale, so no shared port is reachable from another
+  machine until it is turned on in the admin console.
+  Error: defaults is not installed
+  Hint: run station init
+  no sign-ins  → station accounts login <program> --on <vm>
+Peers
+  ◌ iphone
+
+→ station overview --all
+→ station apps  for the catalogue

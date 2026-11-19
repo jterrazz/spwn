@@ -1,0 +1,21 @@
+description: 'once the mini''s Never sleeps is off, a keep-awake there is held by the mini''s own engine'
+env: two-macs
+runs:
+    - command: 'settings off never-sleeps --on mac-mini --yes'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	never-sleeps	never-sleeps: the Mac sleeps normally
+    - command: 'awake 2h --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	mac-mini	stays awake until 12:00
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["mac-mini"].power.holds, .macs["macbook-pro"].power.holds]'' world.json'
+      exit: 0
+      stdout: |
+          [["station: station awake 2h"],null]
+    - command: 'awake | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Awake until 12:00 · 1h 59m left

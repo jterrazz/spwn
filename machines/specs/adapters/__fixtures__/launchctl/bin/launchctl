@@ -1,0 +1,26 @@
+#!/bin/sh
+# launchctl as the stop and start specs need it: every call is recorded in
+# $HOME/.calls; the agent is loaded while $HOME/launchctl.loaded exists;
+# bootout sends SIGTERM to the engine whose pid is in $HOME/engine.pid;
+# bootstrap and kickstart -k start "$STATION" engine run, unless
+# $HOME/launchctl.silent says the started engine never answers.
+printf 'launchctl %s\n' "$*" >> "$HOME/.calls"
+run() {
+    [ -f "$HOME/launchctl.silent" ] && return
+    "$STATION" engine run > /dev/null 2>&1 &
+    echo $! > "$HOME/engine.pid"
+}
+case "$1" in
+    print) [ -f "$HOME/launchctl.loaded" ] || exit 113 ;;
+    bootout)
+        [ -f "$HOME/launchctl.loaded" ] || exit 5
+        /bin/rm -f "$HOME/launchctl.loaded"
+        [ -f "$HOME/engine.pid" ] && /bin/kill -TERM "$(/bin/cat "$HOME/engine.pid")" 2> /dev/null
+        exit 0
+        ;;
+    bootstrap) : > "$HOME/launchctl.loaded"; run ;;
+    kickstart)
+        [ -f "$HOME/engine.pid" ] && /bin/kill -TERM "$(/bin/cat "$HOME/engine.pid")" 2> /dev/null
+        run ;;
+    *) echo "stub launchctl: unexpected invocation: $*" >&2; exit 97 ;;
+esac

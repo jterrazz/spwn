@@ -1,0 +1,13 @@
+{
+    "group": "home",
+    "id": "home.awake-off",
+    "note": "Awake switched off from its tile: the moon, Off.",
+    "pages": ["pages/machines.home.awake-off.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1"
+}

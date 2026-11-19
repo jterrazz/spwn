@@ -1,0 +1,13 @@
+description: 'infra''s disk at 4 % free is fixed by growing it on its Mac, never by station disk'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["infra"].disk.free = 3200000000'' world.json > w.json && /bin/mv w.json world.json; "$STATION" activity --on infra | /usr/bin/grep "disk almost full"'
+      exit: 0
+      stdout: |
+          ✗	infra: disk almost full: 4 % free	station machines edit infra --disk <size> --on mac-mini
+    - command: 'machines infra --on mac-mini | /usr/bin/grep "almost full"'
+      exit: 0
+      stdout: |
+          ✗	Disk almost full: 4 % free	station machines edit infra --disk <size>

@@ -1,0 +1,139 @@
+{
+  "schema": "station.page/v1",
+  "id": "accounts",
+  "command": "accounts",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/accounts",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1 program"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "0 signed in"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "1 needs you"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "columns": [
+        {
+          "key": "program",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        },
+        {
+          "key": "who",
+          "kind": "identity",
+          "keep": 60
+        },
+        {
+          "key": "how",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "scope",
+          "kind": "list",
+          "keep": 50,
+          "whole": true
+        },
+        {
+          "key": "line",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro/gh",
+            "mark": "broken",
+            "label": "gh",
+            "short": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "broken"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "The sign-in no longer works"
+              }
+            ],
+            "reason": "failing"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "R",
+      "label": "reload",
+      "on": "page",
+      "priority": 1
+    }
+  ]
+}

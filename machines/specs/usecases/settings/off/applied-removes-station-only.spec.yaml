@@ -1,0 +1,23 @@
+description: 'off on an Applied setting removes what station wrote, and it reads Off here'
+env: two-macs
+runs:
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: 'settings off tart-launcher --yes'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: removed
+    - command: '--version >/dev/null; test -e .local/bin/tart && echo kept || echo removed'
+      exit: 0
+      stdout: |
+          removed
+    - command: 'settings tart-launcher'
+      exit: 0
+      stdout: |
+          ⊘	tart-launcher	off here
+          # Detail
+          group	Set by station
+          does	The tart launcher: Tart's home is station's VMs folder
+          lives on	Macs

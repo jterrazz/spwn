@@ -1,0 +1,8 @@
+description: 'removing a name the catalogue does not hold is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'apps remove jqq --yes'
+      exit: 2
+      stderr: |
+          Error: no app named "jqq"
+          Hint: station apps for every app here

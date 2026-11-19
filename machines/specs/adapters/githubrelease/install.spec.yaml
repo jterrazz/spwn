@@ -1,0 +1,28 @@
+description: 'a release asset its checksums vouch for lands in ~/.local/bin, and is read held at its tag'
+fixture:
+    - ./__fixtures__/release/
+env:
+    - STATION_MACHINE_KIND=linux
+serve:
+    - github
+runs:
+    - command: 'apps install tool'
+      exit: 0
+      stdout: |
+          ●	tool	v1.0.0	github-release
+    - command: '--version > /dev/null; .local/bin/tool'
+      exit: 0
+      stdout: |
+          tool 1.0.0
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "tool") | "\(.state) \(.method) \(.installed)"'''
+      exit: 0
+      stdout: |
+          ok github-release v1.0.0
+    - command: 'apps remove tool --yes'
+      exit: 0
+      stdout: |
+          ●	tool		github-release
+    - command: '--version > /dev/null; test -e .local/bin/tool || echo absent'
+      exit: 0
+      stdout: |
+          absent

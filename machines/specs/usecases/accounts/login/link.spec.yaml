@@ -1,0 +1,12 @@
+description: 'npm gives a link at www.npmjs.com, then the row is signed in'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | if .Step then {step: [.Step.Kind, .Step.Code, .Step.Site, .Step.Exchange, .Step.Line, (.Step.Expires > .Step.Now)]} else {signed: [.Programs[0].Program, .Programs[0].State, .Programs[0].How, .Programs[0].Action]} end'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"npm"}}
+      exit: 0
+      stdout: |
+          {"step":["link",null,"www.npmjs.com","ex-4","Waiting for you to approve npm at www.npmjs.com",true]}
+          {"signed":["npm","signed-in","own","sign-out"]}

@@ -1,0 +1,9 @@
+description: 'a Mac read from the history its engine keeps still carries its battery and heat'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'activity --json | /usr/bin/jq -c ''{source, thermal, battery}'''
+      exit: 0
+      stdout: |
+          {"source":"engine","thermal":{"level":"nominal","cpu_celsius":null},"battery":{"percent":96,"state":"charging","health_percent":98,"cycles":112}}

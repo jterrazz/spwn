@@ -1,0 +1,11 @@
+description: 'the play world''s head, asked for the other Macs, says the one down elsewhere'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary.Verdict'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{"Elsewhere":true}}
+      exit: 0
+      stdout: |
+          {"Tone":"bad","Sentence":"2 things need you.","Line":"Elsewhere, 1 machine down. 4 machines on macbook-pro"}

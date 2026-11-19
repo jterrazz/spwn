@@ -1,0 +1,13 @@
+description: 'awake lists every Mac, This Mac first, never a VM; the mini never sleeps for its server'
+env: two-macs
+runs:
+    - command: 'awake'
+      exit: 0
+      stdout: |
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          # This Mac
+          lid	open
+          power source	AC · 96 % · charging
+          thermal	nominal
+          screen	always turns off

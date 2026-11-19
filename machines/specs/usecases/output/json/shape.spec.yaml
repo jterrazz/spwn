@@ -1,0 +1,36 @@
+description: 'every --json read opens with schema, generated_at, machine, findings; indented, no ANSI, no ◌'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; for read in overview activity apps settings disk ports accounts background awake machines images engine; do "$STATION" $read --json | /usr/bin/jq -r --arg read "$read" ''[$read, .schema, (keys_unsorted[0:4] | join(" ")), (.findings | type)] | join("  ")''; done'
+      exit: 0
+      stdout: |
+          overview  station.overview.read/v1  schema generated_at machine findings  array
+          activity  station.activity.read/v1  schema generated_at machine findings  array
+          apps  station.apps.list/v1  schema generated_at machine findings  array
+          settings  station.settings.list/v1  schema generated_at machine findings  array
+          disk  station.disk.read/v1  schema generated_at machine findings  array
+          ports  station.ports.list/v1  schema generated_at machine findings  array
+          accounts  station.accounts.list/v1  schema generated_at machine findings  array
+          background  station.background.list/v1  schema generated_at machine findings  array
+          awake  station.awake.read/v1  schema generated_at machine findings  array
+          machines  station.machines.list/v1  schema generated_at machine findings  array
+          images  station.images.list/v1  schema generated_at machine findings  array
+          engine  station.engine.read/v1  schema generated_at machine findings  array
+    - command: 'apps --json > apps.json; /usr/bin/head -3 apps.json; /usr/bin/tail -c 2 apps.json | /usr/bin/od -An -tx1 | /usr/bin/tr -d " \n"; echo; /usr/bin/grep -c "$(printf "\033")" apps.json; /usr/bin/grep -c "◌" apps.json; /usr/bin/jq -c .machine apps.json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.apps.list/v1",
+            "generated_at": "{{iso8601}}",
+          7d0a
+          0
+          0
+          {"name":"macbook-pro","label":"This Mac","kind":"computer","on":null,"this_mac":true}
+    - command: '--version >/dev/null; for on in linux-1 mac-mini infra; do "$STATION" ports --on $on --json | /usr/bin/jq -c .machine; done'
+      exit: 0
+      stdout: |
+          {"name":"linux-1","label":"linux-1","kind":"workspace","on":"macbook-pro","this_mac":false}
+          {"name":"mac-mini","label":"mac-mini","kind":"computer","on":null,"this_mac":false}
+          {"name":"infra","label":"infra","kind":"server","on":"mac-mini","this_mac":false}

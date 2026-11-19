@@ -1,0 +1,731 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook-pro",
+    "macs": {
+        "macbook-pro": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z"
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            },
+            "preferences": {
+                "name": "macbook-pro",
+                "macs": {
+                    "mac-mini": {
+                        "user": "jterrazz.agent"
+                    }
+                },
+                "vm_user": "admin"
+            },
+            "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
+            "fresh": {
+                "size": {
+                    "CPUs": 4,
+                    "Memory": 8589934592,
+                    "Disk": 4000000000
+                },
+                "guest": {
+                    "answers": {
+                        "sudo env *": {},
+                        "env MACHINEFILE=*": {},
+                        "sudo bash -s": {
+                            "poweroff": true
+                        }
+                    }
+                }
+            },
+            "vms": {
+                "linux-1": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "2026.11.01",
+                        "lifetime": "ephemeral",
+                        "want": "running",
+                        "created_at": "2026-11-04T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 50000000000
+                    },
+                    "pid": 1001,
+                    "guest": {},
+                    "listening": [
+                        {
+                            "Port": 5173,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3001
+                        },
+                        {
+                            "Port": 7000,
+                            "Bind": "0.0.0.0",
+                            "Process": "server",
+                            "PID": 3002
+                        },
+                        {
+                            "Port": 8001,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3003
+                        },
+                        {
+                            "Port": 8002,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3004
+                        },
+                        {
+                            "Port": 8003,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3005
+                        },
+                        {
+                            "Port": 8004,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3006
+                        },
+                        {
+                            "Port": 8005,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3007
+                        },
+                        {
+                            "Port": 8006,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3008
+                        },
+                        {
+                            "Port": 8007,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3009
+                        },
+                        {
+                            "Port": 8008,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3010
+                        },
+                        {
+                            "Port": 8009,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3011
+                        },
+                        {
+                            "Port": 8010,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3012
+                        },
+                        {
+                            "Port": 8011,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3013
+                        },
+                        {
+                            "Port": 8012,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3014
+                        },
+                        {
+                            "Port": 8013,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3015
+                        },
+                        {
+                            "Port": 8014,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3016
+                        },
+                        {
+                            "Port": 8015,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3017
+                        },
+                        {
+                            "Port": 8016,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3018
+                        },
+                        {
+                            "Port": 8017,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3019
+                        },
+                        {
+                            "Port": 8018,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3020
+                        }
+                    ]
+                },
+                "api": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "2026.11.01",
+                        "lifetime": "persistent",
+                        "want": "stopped",
+                        "created_at": "2026-10-20T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 50000000000
+                    },
+                    "guest": {}
+                },
+                "station-image-base-ubuntu-2026.11.01": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 4000000000
+                    }
+                },
+                "station-image-base-ubuntu-2026.10.20": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 3000000000
+                    }
+                }
+            },
+            "stores": {
+                "images": [
+                    {
+                        "name": "base-ubuntu",
+                        "version": "2026.10.20",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
+                        "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v3.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-10-20T08:00:00Z",
+                        "size_gb": 3
+                    },
+                    {
+                        "name": "base-ubuntu",
+                        "version": "2026.11.01",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
+                        "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v3.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-11-01T08:00:00Z",
+                        "size_gb": 4
+                    }
+                ],
+                "reservations": [
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 5173,
+                        "host_port": 40001,
+                        "http": true,
+                        "reserved_at": "2026-11-04T09:00:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 7000,
+                        "host_port": 40002,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:05:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8001,
+                        "host_port": 40003,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8002,
+                        "host_port": 40004,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8003,
+                        "host_port": 40005,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8004,
+                        "host_port": 40006,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8005,
+                        "host_port": 40007,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8006,
+                        "host_port": 40008,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8007,
+                        "host_port": 40009,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8008,
+                        "host_port": 40010,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8009,
+                        "host_port": 40011,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8010,
+                        "host_port": 40012,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8011,
+                        "host_port": 40013,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8012,
+                        "host_port": 40014,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8013,
+                        "host_port": 40015,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8014,
+                        "host_port": 40016,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8015,
+                        "host_port": 40017,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8016,
+                        "host_port": 40018,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8017,
+                        "host_port": 40019,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 8018,
+                        "host_port": 40020,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:10:00Z"
+                    }
+                ]
+            },
+            "apps": {
+                "brew": {
+                    "installed": {
+                        "jq": "1.8.1",
+                        "gh": "2.97.0",
+                        "lazygit": "0.55.1",
+                        "bat": "0.25.0",
+                        "mise": "2026.10.1"
+                    },
+                    "behind": {
+                        "gh": "2.98.0"
+                    },
+                    "offers": {
+                        "fd": "10.3.0",
+                        "eza": "0.23.4",
+                        "yazi": "25.5.31"
+                    }
+                },
+                "cask": {
+                    "installed": {
+                        "ghostty": "1.2.0"
+                    },
+                    "behind": {
+                        "ghostty": "1.2.1"
+                    }
+                },
+                "mise": {
+                    "installed": {
+                        "node": "22.11.0",
+                        "go": "1.25.3"
+                    },
+                    "behind": {
+                        "node": "24.11.0"
+                    }
+                },
+                "mas": {
+                    "absent": true
+                }
+            },
+            "self": {
+                "system": {},
+                "hardware": {
+                    "Memory": 17179869184,
+                    "CPUs": 12
+                }
+            },
+            "tailnet": {
+                "self": {
+                    "ID": "n1",
+                    "Name": "macbook-pro",
+                    "DNSName": "macbook-pro.tail1234.ts.net",
+                    "IP": "100.64.0.1",
+                    "Online": true,
+                    "Sharing": {
+                        "Backend": "Running",
+                        "On": true,
+                        "DNSName": "macbook-pro.tail1234.ts.net"
+                    },
+                    "Client": {
+                        "Path": "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
+                        "Variant": "app-store"
+                    }
+                },
+                "shares": [
+                    {
+                        "Port": 40001,
+                        "Reserved": 40001,
+                        "Scheme": "https",
+                        "Target": "http://127.0.0.1:40001"
+                    },
+                    {
+                        "Port": 40002,
+                        "Reserved": 40002,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40002"
+                    },
+                    {
+                        "Port": 40003,
+                        "Reserved": 40003,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40003"
+                    },
+                    {
+                        "Port": 40004,
+                        "Reserved": 40004,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40004"
+                    },
+                    {
+                        "Port": 40005,
+                        "Reserved": 40005,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40005"
+                    },
+                    {
+                        "Port": 40006,
+                        "Reserved": 40006,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40006"
+                    },
+                    {
+                        "Port": 40007,
+                        "Reserved": 40007,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40007"
+                    },
+                    {
+                        "Port": 40008,
+                        "Reserved": 40008,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40008"
+                    },
+                    {
+                        "Port": 40009,
+                        "Reserved": 40009,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40009"
+                    },
+                    {
+                        "Port": 40010,
+                        "Reserved": 40010,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40010"
+                    },
+                    {
+                        "Port": 40011,
+                        "Reserved": 40011,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40011"
+                    },
+                    {
+                        "Port": 40012,
+                        "Reserved": 40012,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40012"
+                    },
+                    {
+                        "Port": 40013,
+                        "Reserved": 40013,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40013"
+                    },
+                    {
+                        "Port": 40014,
+                        "Reserved": 40014,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40014"
+                    },
+                    {
+                        "Port": 40015,
+                        "Reserved": 40015,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40015"
+                    },
+                    {
+                        "Port": 40016,
+                        "Reserved": 40016,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40016"
+                    },
+                    {
+                        "Port": 40017,
+                        "Reserved": 40017,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40017"
+                    },
+                    {
+                        "Port": 40018,
+                        "Reserved": 40018,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40018"
+                    },
+                    {
+                        "Port": 40019,
+                        "Reserved": 40019,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40019"
+                    },
+                    {
+                        "Port": 40020,
+                        "Reserved": 40020,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40020"
+                    }
+                ]
+            },
+            "ssh": {
+                "blocks": {
+                    "api": {
+                        "user": "admin",
+                        "behind": "macbook-pro",
+                        "this_mac": true
+                    },
+                    "infra": {
+                        "user": "admin",
+                        "behind": "mac-mini"
+                    },
+                    "mac-mini": {
+                        "user": "jterrazz.agent"
+                    },
+                    "linux-1": {
+                        "user": "admin",
+                        "behind": "macbook-pro",
+                        "this_mac": true
+                    }
+                }
+            }
+        },
+        "mac-mini": {
+            "engine": {
+                "started_at": "2026-10-23T09:00:00Z"
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "preferences": {
+                "name": "mac-mini",
+                "macs": {
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
+                "never_sleeps": true,
+                "vm_user": "admin"
+            },
+            "facts": {
+                "filevault": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "authrestart": {
+                    "State": "ok",
+                    "Value": "on"
+                }
+            },
+            "settings": {
+                "restart-after-power-cut": "autorestart=1\nwomp=1",
+                "autologin": "autoLoginUser=jterrazz.agent\n/etc/kcpassword=present"
+            },
+            "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
+            "fresh": {
+                "size": {
+                    "CPUs": 4,
+                    "Memory": 8589934592,
+                    "Disk": 4000000000
+                },
+                "guest": {
+                    "answers": {
+                        "sudo env *": {},
+                        "env MACHINEFILE=*": {},
+                        "sudo bash -s": {
+                            "poweroff": true
+                        }
+                    }
+                }
+            },
+            "vms": {
+                "infra": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "2026.11.01",
+                        "lifetime": "always-on",
+                        "want": "running",
+                        "check": "https://infra:6443/readyz",
+                        "created_at": "2026-10-23T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 8,
+                        "Memory": 25769803776,
+                        "Disk": 80000000000
+                    },
+                    "pid": 2001,
+                    "guest": {}
+                },
+                "station-image-base-ubuntu-2026.11.01": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 4000000000
+                    }
+                }
+            },
+            "stores": {
+                "images": [
+                    {
+                        "name": "base-ubuntu",
+                        "version": "2026.11.01",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
+                        "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v3.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-11-01T08:00:00Z",
+                        "size_gb": 4
+                    }
+                ]
+            },
+            "tailnet": {
+                "self": {
+                    "ID": "n2",
+                    "Name": "mac-mini",
+                    "DNSName": "mac-mini.tail1234.ts.net",
+                    "IP": "100.64.0.2",
+                    "Online": true,
+                    "Sharing": {
+                        "Backend": "Running",
+                        "On": true,
+                        "DNSName": "mac-mini.tail1234.ts.net"
+                    },
+                    "Client": {
+                        "Path": "/usr/local/bin/tailscale",
+                        "Variant": "standalone"
+                    }
+                }
+            }
+        },
+        "linux-1": {
+            "passwordless": true,
+            "self": {
+                "kind": "workspace",
+                "system": {
+                    "OS": "linux"
+                }
+            },
+            "apps": {
+                "mise": {
+                    "installed": {
+                        "node": "22.11.0"
+                    }
+                }
+            }
+        },
+        "infra": {
+            "passwordless": true,
+            "self": {
+                "kind": "server",
+                "system": {
+                    "OS": "linux"
+                }
+            }
+        }
+    },
+    "user": "you",
+    "registry": {
+        "base-ubuntu": "2026.11.03"
+    }
+}

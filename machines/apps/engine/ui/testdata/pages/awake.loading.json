@@ -1,0 +1,89 @@
+{
+  "schema": "station.page/v1",
+  "id": "awake",
+  "command": "awake",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "awake",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "mode",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro",
+            "mark": "pending",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini",
+            "mark": "pending",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station awake 4h --lid",
+      "text": "this Mac"
+    },
+    {
+      "command": "station awake 4h --on mac-mini",
+      "text": "another Mac"
+    }
+  ],
+  "actions": [
+    {
+      "key": "l",
+      "label": "lid",
+      "on": "row",
+      "rows": [
+        "macbook-pro"
+      ]
+    },
+    {
+      "key": "b",
+      "label": "battery",
+      "on": "row",
+      "rows": [
+        "macbook-pro"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+description: 'explain says withheld for a token in a run line'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          run:
+            boot: |
+              export API_KEY=sk-station-story-not-a-real-key
+              make install
+      exit: 0
+    - command: 'explain run'
+      exit: 0
+      stdout: |
+          # linux-1
+          	run.boot	export API_KEY=withheld; make install	user	linux-1

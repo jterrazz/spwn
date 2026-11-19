@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0"><dict><key>Label</key><string>com.docker.vmnetd</string><key>Program</key><string>/Library/PrivilegedHelperTools/com.docker.vmnetd</string></dict></plist>

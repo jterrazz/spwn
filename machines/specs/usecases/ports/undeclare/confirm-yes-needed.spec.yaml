@@ -1,0 +1,12 @@
+description: 'off a terminal, undeclare without --yes is refused, and the port stays declared'
+env: two-macs
+runs:
+    - command: 'ports undeclare infra 443'
+      exit: 2
+      stderr: |
+          Error: refusing to undeclare 443 on infra without --yes
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.declarations'' world.json'
+      exit: 0
+      stdout: |
+          [{"machine":"infra","port":443,"via":"cloudflare-tunnel"}]

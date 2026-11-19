@@ -1,0 +1,9 @@
+{"world": "stories", "station": "dev", "exchanges": [
+{"request":{"call":"machines.ssh","in":{"Name":"agent-7f"}},"answers":[{"v":2,"out":{"User":"admin","Address":"agent-7f","Command":"ssh admin@agent-7f"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"api"}},"answers":[{"v":2,"out":{"User":"admin","Address":"api","Command":"ssh admin@api"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"linux-1"}},"answers":[{"v":2,"out":{"User":"admin","Address":"linux-1","Command":"ssh admin@linux-1"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"linux-2"}},"answers":[{"v":2,"out":{"User":"admin","Address":"linux-2","Command":"ssh admin@linux-2"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"infra"}},"answers":[{"v":2,"out":{"User":"you","Address":"infra","Command":"ssh you@infra"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"linux-3"}},"answers":[{"v":2,"out":{"User":"you","Address":"linux-3","Command":"ssh you@linux-3"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"review-bot"}},"answers":[{"v":2,"out":{"User":"you","Address":"review-bot","Command":"ssh you@review-bot"}}]}
+]}

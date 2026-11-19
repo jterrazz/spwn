@@ -1,0 +1,29 @@
+description: 'a bare free empties every Can rebuild row with its app''s own commands, asking nothing'
+fixture:
+    - ../__fixtures__/system-tools/
+    - ./__fixtures__/disk-go/
+    - ./__fixtures__/disk-node/
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p Library/Caches/go-build Library/Caches/Homebrew Library/Caches/com.github.cirruslabs.tart .cache/npm/_npx/x && echo x > Library/Caches/go-build/a && echo x > Library/Caches/Homebrew/x && echo db > Library/Caches/com.github.cirruslabs.tart/Cache.db && echo x > .cache/npm/_npx/x/f'
+      exit: 0
+    - command: 'disk free </dev/null'
+      exit: 0
+      stdout: |
+          ●	homebrew	2 B freed
+          ●	go	2 B freed
+          ●	node	2 B freed
+          ●	tart	3 B freed
+          ●	Freed	9 B	nothing is lost
+      files:
+          .calls:
+              contains:
+                  - 'go clean -cache -modcache'
+                  - 'brew cleanup --prune=all'
+                  - 'tart prune --entries=caches --older-than=0'
+                  - 'npm cache clean --force'
+          Library/Caches/com.github.cirruslabs.tart/Cache.db: absent
+          .cache/npm/_npx/x: absent
+    - command: '--version >/dev/null; /usr/bin/grep "^tart prune" .calls'
+      exit: 0
+      stdout: |
+          tart prune --entries=caches --older-than=0

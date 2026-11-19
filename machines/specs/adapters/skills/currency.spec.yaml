@@ -1,0 +1,13 @@
+description: 'a locked skill is ok, an update available when its folder changed upstream, absent unlocked'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/skill-lock/
+serve:
+    - github
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name | IN("frontend-design", "shadcn", "last30days")) | "\(.name) \(.state) \(.detail) \(.method) \(.category)"'''
+      exit: 0
+      stdout: |
+          frontend-design ok  skill Agent skills
+          last30days not-installed skills not installed skill Agent skills
+          shadcn update-available outdated skill Agent skills

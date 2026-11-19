@@ -1,0 +1,12 @@
+description: 'in a VM without studio the script is complete and exports no token, exit 0'
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'shell zsh | /usr/bin/grep -c ''CLAUDE_CODE_OAUTH_TOKEN'''
+      exit: 1
+      stdout: |
+          0
+    - command: 'shell zsh | /usr/bin/grep -c ''mise activate zsh'''
+      exit: 0
+      stdout: |
+          1

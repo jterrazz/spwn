@@ -1,0 +1,15 @@
+description: 'a stale ephemeral VM is deleted by its verb: the VM goes from tart, with no tailnet call'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../__fixtures__/vm-t/
+    - ../__fixtures__/stale-t/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines delete t --confirm=t; c=$?; kill $d; wait $d; exit $c'
+      exit: 0
+      stdout: |
+          ●	t	deleted
+      files:
+          .calls: { contains: 'tart delete t' }
+          .local/state/station/vms/t.json: absent
+          .tart-vms/t: absent

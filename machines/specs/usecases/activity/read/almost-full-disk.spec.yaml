@@ -1,0 +1,17 @@
+description: 'this Mac at 4 % free is broken, at 8 % it needs a look; each fixed by station disk'
+env:
+    - disk-low
+    - engine
+runs:
+    - command: 'activity | /usr/bin/head -3'
+      exit: 0
+      stdout: |
+          ●	This Mac	up 3d 4h · rates over 1 s
+          # Needs you
+          ✗	Disk almost full: 4 % free	station disk
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.free = 79520000000'' world.json > w.json && /bin/mv w.json world.json; "$STATION" activity | /usr/bin/head -3'
+      exit: 0
+      stdout: |
+          ●	This Mac	up 3d 4h · rates over 1 s
+          # Needs you
+          ◐	Disk almost full: 8 % free	station disk

@@ -1,0 +1,18 @@
+description: 'off a terminal, an apply over a change of yours needs --yes, and your file is untouched'
+env: two-macs
+runs:
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: '--version >/dev/null; printf ''# mine\n'' >> .local/bin/tart'
+      exit: 0
+    - command: 'settings apply tart-launcher </dev/null'
+      exit: 2
+      stderr: |
+          Error: refusing to apply without --yes
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; /usr/bin/tail -1 .local/bin/tart'
+      exit: 0
+      stdout: |
+          # mine

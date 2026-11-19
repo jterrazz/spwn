@@ -1,0 +1,23 @@
+package: station.package/v1
+kind: app
+name: android-studio
+description: Android development IDE
+bundle: Android Studio
+updates: self
+methods:
+    - os: macos
+      cask: android-studio
+disk:
+    paths:
+        - path: ~/.gradle/caches
+          level: cache
+        - path: ~/.gradle/wrapper/dists
+          level: cache
+        - path: ~/.android/avd
+          level: data
+    installed: [/Applications/Android Studio.app]
+    free:
+        - delete: [~/.gradle/caches/*, ~/.gradle/wrapper/dists/*]
+    erase:
+        - delete: [~/.android/avd/*]
+    quit: studio

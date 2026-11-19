@@ -1,0 +1,11 @@
+description: 'a server that goes down keeps its share of its Mac, so the free memory does not jump'
+env: two-macs
+runs:
+    - command: 'world fault Hypervisor.Boot'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | [(.vms[0] | .state, .wanted), .capacity.free_bytes]'''
+      exit: 0
+      stdout: |
+          ["stopped","running",38654705664]

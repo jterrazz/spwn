@@ -1,0 +1,10 @@
+description: 'a process using 2 of 10 cores is 20 % of the whole machine, never 200 %'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].meter |= (.per_second.cpu_busy = 200 | .top.cpu = [{"pid": 77, "name": "cc1", "value": 20}])'' world.json > w.json && /bin/mv w.json world.json; "$STATION" activity | /usr/bin/grep -E "	(CPU|Top by CPU)	"'
+      exit: 0
+      stdout: |
+          	CPU	20 % of 10 CPU · load 2.8 3.1 2.9
+          	Top by CPU	cc1 20 %

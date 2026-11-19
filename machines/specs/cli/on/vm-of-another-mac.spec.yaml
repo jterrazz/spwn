@@ -1,0 +1,22 @@
+description: '--on a VM of another Mac rides that Mac''s engine, never ssh to the VM; an unheld name is refused'
+fixture:
+    - ../../__fixtures__/far-mac/
+    - ./__fixtures__/far-vm/
+env: engine
+runs:
+    - command: 'apps --on linux-9 2> err.txt; echo "exit $?"; /usr/bin/grep -c "engine is not running" err.txt; /usr/bin/grep -c linux-9 .calls; /usr/bin/sort .calls'
+      exit: 0
+      stdout: |
+          exit 1
+          1
+          0
+          ssh -o BatchMode=yes -o ConnectTimeout=5 x -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+    - command: 'apps --on nope; echo "exit $?"; /usr/bin/grep -c nope .calls'
+      exit: 1
+      stdout: |
+          exit 2
+          0
+      stderr: |
+          Error: no machine named "nope"
+          Hint: station machines

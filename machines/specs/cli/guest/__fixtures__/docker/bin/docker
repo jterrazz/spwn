@@ -1,0 +1,6 @@
+#!/bin/sh
+# docker inside the VM: one container publishing 3000.
+case "$*" in
+    "ps --format {{json .}}") echo '{"Names":"web-1","Ports":"0.0.0.0:3000->80/tcp"}' ;;
+    *) exit 97 ;;
+esac

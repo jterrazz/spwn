@@ -1,0 +1,21 @@
+- main:
+  - heading "Nothing to free." [level=1]
+  - paragraph:
+    - img "Nothing to free."
+    - text: "on macbook-pro: no machine and no file of yours is touched"
+  - group "Which Mac":
+    - button "macbook-pro" [pressed]
+  - region "Disk":
+    - heading "Disk" [level=2]
+    - button "Rescan"
+    - paragraph: "Outside any machine, station holds 0 B: machine disks, images, leftovers and its logs"
+    - list "The parts":
+      - listitem: Free 0 B
+    - paragraph: Every image and every disk station holds is a machine's or the newest.
+    - paragraph: No cache to free. What is left is yours or the system's.
+  - region "Images":
+    - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+    - paragraph: No image on macbook-pro.
+  - region "Machines":
+    - heading "Machines what is inside one is on its own Storage tab" [level=2]
+    - button "macbook-pro the Mac itself · No cache to free. What is left is yours or the system's. 0 B"

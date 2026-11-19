@@ -1,0 +1,11 @@
+description: 'A password that is not in the vault is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-404","To":"linux-1"}}
+      exit: 0
+      stdout: |
+          {"code":"grant.unknown-entry","field":null,"subject":"pw-404","message":"no password pw-404 in this Mac's vault","hint":"read the vault for what it keeps"}

@@ -1,0 +1,281 @@
+# Commands
+
+Every command of `station`, grouped as `station help` groups them. The words are the [Glossary](../concepts/glossary.md)'s.
+
+| Section                   | Answers                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------- |
+| Rules                     | What holds for every command                                                                   |
+| Machines                  | `machines`                                                                                     |
+| On a machine              | `overview`, `activity`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake` |
+| A Mac's images and engine | `images`, `engine`                                                                             |
+| This terminal             | `use`                                                                                          |
+| Station itself            | `init`, `plan`, `apply`, `drift`, `upgrade`, `explain`, `--version`, `help`                    |
+| Hidden aliases            | The v2 words that still run, for one release                                                   |
+| Plumbing                  | The hidden commands the machine runs for itself                                                |
+| Exit codes                | What 0, 1, 2 and 130 mean                                                                      |
+
+## Rules
+
+- Bare `station` prints `station overview`, with its `--all` and `--json`, exit 0: this machine at a glance, then the next steps as commands.
+- A bare noun lists (`apps`, `settings`, `disk`, `machines`, `ports`, `images`, `accounts`). A verb whose argument is missing is refused, its hint the command with it: `station apps install` hints `station apps install <app>`.
+- An existing thing is a positional (`machines stop api`); a new thing is described by options (`machines create api --persistent`).
+- One verb per meaning, the [Glossary](../concepts/glossary.md#the-verbs)'s: `apps` install, update, remove; `settings` apply, diff, off; `disk` free, erase, move; a VM create, start, stop, restart, edit, delete. The only other words are the [hidden aliases](#hidden-aliases).
+- Every read takes `--json`. Every destructive action asks on a terminal or takes `--yes`.
+- Every refusal exits 2 before any question; every failure is one `Error:` and one `Hint:`. With `--json`, the same refusal or failure is also the `station.error/v1` document on stdout (`schema`, `type`, `code`, `subject`, `message`, `hint`, `fix`), the exit code unchanged. A question answered no is `Error: <what> kept: you said no`, exit 1.
+- A command that needs an app this Mac lacks is refused before anything runs, exit 2, naming the app and what needs it: `Error: tart is required by machines`, `Hint: station apps install tart`. The needs are the [Glossary](../concepts/glossary.md)'s: the VM verbs that make or run a VM and the image verbs need tart, `ports share` needs Tailscale. On a terminal the refusal is one line, `○ tart is required by machines · station apps install tart`, then `Install tart now?`: yes installs it as `apps install` does and runs the command again; no ends there, exit 2. A need station installs none of (the studio CLI) is the refusal on a terminal too.
+- A word station does not know is `Error: unknown command "<word>"` / `Hint: station help`, exit 2; so is `station help <word>`.
+- A word under `disk` that names one of its entries, the verb forgotten, is still refused, but its hint is the command meant: `station disk go` is `"go" is a disk row: say what to do with it`, hint `station disk free go`. Under `apps` the entry is a read: `station apps jq` is jq's detail; under `settings`, a setting's name is its read: `station settings dns`.
+- `--on <machine>` runs any command below on another machine, through its engine, and renders the answer on this one; see [Machines](machines.md#on-another-machine).
+- `station use <machine>` makes every later command of this terminal run there, as `--on` would; `--on` still wins for one command. See [Machines](machines.md#this-terminals-machine).
+- A value a command needs from you is never an argv flag when it could be a secret: a setting asks in a form on a terminal ([Settings](settings.md)).
+
+## Machines
+
+### `station machines`
+
+```sh
+station machines [--json] # All machines: every Mac, its VMs under it, then Needs you
+station machines <machine> [--json] # that machine's Overview, as station overview --on <machine>
+station machines add <mac> [--user <login>] [--key <file>]
+station machines forget <mac> [--yes]
+
+station machines create [<name>] [--persistent] [--image base-ubuntu | --from <machinefile>] [--for <purpose>] [--cpus <n>] [--memory <size>] [--disk <size>] [--network nat|bridged]
+station machines create <name> --server [--for <purpose>] [--cpus <n>] [--memory <size>] [--disk <size>] [--check <url|host:port>]
+station machines start <vm>
+station machines stop <vm> [--yes | --confirm=<name>]
+station machines restart <machine> [--yes | --confirm=<name>]
+station machines edit <vm> [--cpus <n>] [--memory <size>] [--disk <size>] [--check <url|host:port> | --no-check]
+station machines ssh <machine>
+station machines log <vm>
+station machines cleanup [<vm>...] [--yes]
+station machines delete <vm> [--confirm=<name>]
+station machines unlock <mac>
+station machines wake <mac> [--tell]
+station machines remind <mac>
+```
+
+`--this-mac` lists This Mac only, without asking the other Macs. `unlock` is for a Mac waiting at FileVault after a power cut: a Mac that answers already says so (exit 0); otherwise it needs a terminal and dials the Mac on your LAN, at the address it last answered with (Tailscale starts only once its disk is unlocked), where you type the password into macOS's own pre-boot prompt, then waits for the Mac on Tailscale again. `wake` sends a Wake-on-LAN packet from this Mac to the hardware address the Mac's last answer said (a Mac that answers already says so, exit 0; one never heard has none, exit 1); `--tell` also tells you once, `mac_back`, the moment it answers again. `remind` is that ask alone (the menu bar's Tell me when it wakes): it sends nothing, so a Mac never heard can be asked too; one that answers already says so and nothing is armed. `restart <mac>` asks yes or no naming the VMs that pause, sends a planned restart that unlocks itself, waits for its station to answer again (`did not come back`, exit 1, past 3 minutes), starts those VMs again and says how they are. `create` makes an ephemeral workspace unless `--persistent` is given, or a server with `--server` (always on, named, behind its Mac, 4 CPU · 8 GB · 50 GB by default; `--check` is its health check, refused on a workspace; `--always-on` is its hidden v2 alias); and asks the Mac on a terminal when two answer; piped it needs no question. A new VM's name is one no Mac and no VM of any machine holds; a create with no name takes the first `<image>-<n>` free so. `stop` asks a workspace yes or no and a server its name typed (`--confirm=<name>`; `--yes` never answers it), and the VM's own Mac judges the answer. `add` writes the Mac's ssh block, then reaches it as every later call will: a Mac that does not answer, or answers with no station, is not added and nothing stays written; one that runs another station version is added, with how to bring the two to one. `delete` is the only verb that destroys a machine; `forget` only unregisters a Mac, here, whatever `--on` says: it never reaches that Mac, and refuses This Mac and a VM. VMs are made and run on Macs, so these commands are refused on a VM. `create`, `start`, `stop`, `restart`, `edit` and `delete` need the Mac's engine (`Hint: station engine start`). `log` prints the lines a VM's runs wrote, its console's then its hypervisor's own, on the VM's own Mac. `cleanup` deletes, after one yes or no, every ephemeral workspace of the Mac that is stopped (or only those named), each with its disk, its ports and its grants, and names the VMs still running, which stay; naming one that may not go is refused before any goes. `station machines <machine>` is that machine's Overview (`probe` is its hidden v2 alias). `--network bridged` is for macOS VMs only. See [Machines](machines.md).
+
+## On a machine
+
+These commands act on the target machine: the one `--on` names, else the one `station use` chose for this terminal, else This Mac. Each lists only what the machine's kind allows; a section its kind does not have is refused, exit 2, with the reason in words.
+
+### `station overview`
+
+```sh
+station overview [--all] [--json]
+```
+
+This machine at a glance (SPEC §5.1): a first line that sums it up (`This Mac · macbook-pro · 5 things need you · Engine running`; a VM's names its kind and how long it has run), then Needs you, every section's findings ranked broken first and then by the one section order, five of them unless `--all`; then one line per section the machine has, in that order (a Mac: Activity, Apps, Settings, Disk, Ports, Accounts, Background, Awake, then its VMs; a workspace: the sections it has; a server: Activity, Ports and SSH, and `Apps, settings, accounts: not managed by station`); Activity's line is CPU, memory, free space and network in, from the engine's history when it spans a rate, else one sample now, and its findings join Needs you; then one or two `→` next steps. Each line is that section's own read, so its counts equal what the section's own command prints. A fix that is a call prints as the command that runs it: the input it acts on is its word, each other input a flag, `--confirm=<name>` answers a question it asks typed, and `--on <machine>` names where it runs when that is not the machine reading (`station machines restart infra --confirm=infra --on mac-mini`). `station overview --on <vm>` and `station machines <vm>` print the same bytes: `On <vm>:`, the VM's first line from its Mac (`linux-1 · Workspace on This Mac · Ephemeral · up 2 h`), the sections it reads inside it, then its Health; a VM that does not run, or whose guest does not answer, shows its first line and Health alone. `--json` prints `station.overview.read/v1`: `machine`, `findings[]` (each `fix` one of `call`, `command`, `path`) and `sections[]` with their counts; the hidden alias `station status --json` keeps printing the [`station.status/v1`](status-json.md) document `studio doctor` reads. On a terminal, `overview`, `apps` and `disk` draw every row at once and fill each as its read answers ([instant reads](../concepts/design-system.md#instant-reads)); piped or with `--json` they print one complete document.
+
+### `station activity`
+
+```sh
+station activity [--all-machines] [--json [--history]]
+```
+
+What a machine is doing now: CPU and load, memory and its pressure, swap, free space, disk and network rates and totals, thermal and battery on a Mac, uptime, and the busiest processes; `--all-machines` is one row per machine and gathers every machine's findings (refused with `--on`, exit 2). `--json` prints `station.activity.read/v1`; `--history` adds the engine's 24 h series and needs `--json` (exit 2 without). Where each value comes from, and the history, are [Activity](activity.md)'s.
+
+### `station apps`
+
+```sh
+station apps [<app>] [--all] [--json] # the apps for this machine, by attention; one app's detail
+station apps install <app...>
+station apps update [<app...> | --manager <manager>... | --all-machines]
+station apps remove <app...> [--yes]
+station apps move <app> --to <manager>
+```
+
+The list sums This Mac first (`108 apps for this Mac · 3 updates · 100 not installed`), then groups the apps by attention: Updates, Failed, Not installed, Not managed (`?`: present, but installed by none of its catalogue methods, the detail saying how it got there), and OK folded; the apps that live on other machines are a count, every row of every group unfolded with `--all`. `station apps <app>` is one app's detail: its method, its version and the newest that waits (`2.97.0 → 2.98.0`), where it lives, its category and what it brings. `--json` is `station.apps.list/v1`, each app with `name`, `category`, `method`, `state`, `installed` (`null` when it is not), `newest` (with an update only), `lives_on` (`every-machine`, `mac-only`, `vms-only`), `provides` and `detail`.
+
+`install` installs in dependency order, each app with what it requires: a requirement missing here (an app it requires, its method's provider, its method's manager, as the catalog's packages link them, the links a Machinefile's resolution follows) joins the run, so `apps install gh` on a Mac without Homebrew installs homebrew first. Then come the settings each app brings. On a terminal its spinner names what runs and why (`Installing homebrew · required by gh`); a step whose installer may ask on the terminal (one that asks your password, every curl installer) is a line of its own, `▸ Installing homebrew · required by gh · asks your password once`, so the prompt under it is never drawn over. Ctrl-c stops it with nothing printed after, exit 130, what finished staying installed. An installer's own words go to its app's log, `~/.local/state/station/logs/<app>.log`, never to the terminal; a failure names that file (`✗ claude  script  the install failed: its output is in ~/.local/state/station/logs/claude.log`). Its outcome opens with the count, the machine and the time (`✓ Installed 2 apps on This Mac · 9s`; `✗ 1 app failed to install on This Mac` when none did), then each app with the version and the method that hold it and who required it, then `→ exec zsh` once a manager's commands landed off this shell's PATH; the pipe keeps the app rows alone. An app already installed says so with its version and the method that holds it, `● jq 1.8.1 brew already installed`, exit 0. A bare `update` updates only the apps with an update and says so the same way (`● Updated 3 apps on This Mac`; `● every app is up to date on This Mac` when none); `--manager` takes a key a manager package of the catalog installs by (`brew`, `cask`, `mas`, `npm`, `bun`, `uv`, `mise`, `skill`), each reaching every key its manager installs by (`brew` and `cask` are both Homebrew's), never with names; `--all-machines` updates each Mac and running workspace in turn, says each server and stopped VM it skips, and exits 1 when a Mac does not answer. `remove` asks on a terminal and needs `--yes` off one; an app not installed is refused before anything runs. `move` switches an installed app to another of its methods here, `--to` naming it as a Machinefile's `manager:` does (`brew`, `mise`...): it installs by that one first, then uninstalls the copy the old method held, so the command never goes missing in between (`● jq  1.0.0  mise  moved from brew`, `● brew copy  uninstalled`); a copy no method holds (on PATH by hand) is yours and kept, one its method cannot uninstall is kept and said, a failed install leaves the old copy as it was, and an app already held by that method says so. A manager the app has no method by here is refused, exit 2, naming the ones it has (`jq has no method mise here, only brew`), its hint a move to one that does not hold it already, else the app's detail (`station apps jq`), as are an unknown manager, a missing `--to` and an app not installed.
+
+The refusals exit 2: `no app named "jqq"`, `dia lives on Macs only` (hint `--on <mac>`), `lazygit is not installed`, `infra is a server: station does not manage its apps`; a requirement this machine cannot carry refuses the install the same way, by its own name. An agent skill is an app: `station apps install frontend-design`. The model is [Apps and skills](apps-and-skills.md).
+
+### `station settings`
+
+```sh
+station settings [--all] [--json] # Set by station: applied, changed since, not applied, off here
+station settings --all-machines [--all] [--json] # the matrix: one row per setting, one column per Mac and workspace
+station settings <setting> [--json] # one setting's detail
+station settings diff <setting> # what station would write against what is here
+station settings apply [<setting...>] [--yes] [--all-machines] # bare = every setting not applied or changed since that asks nothing
+station settings off <setting...> [--yes] # off here: station neither applies nor watches it on this machine
+```
+
+A setting that needs values asks them in a form on a terminal and is refused elsewhere (exit 2); a value is never an argument. An apply over a setting changed since asks first, as yours is lost; off removes only what is still exactly station's, a change of yours stays. The Always-on Mac group is applied by name only. `--all-machines` reads every Mac and workspace at once: first the machines (a stopped workspace shows its last read with its age, kept by This Mac's engine in its memory alone, so `?` once it restarted; a Mac that does not answer says when it last did; a server is named and has no column), then what needs a look with its gesture, then each group's rows with one mark per machine and their OK count, which leaves out what is not for its machine; the rows that need no look fold on one line unless `--all`. `--json` is `station.settings.matrix/v1`. `settings apply --all-machines` applies on each Mac and running workspace in turn, says each server and stopped workspace it skips, each setting named that does not live on a machine (skipped there alone, the rest applied), and each admin setting with the command that applies it on that Mac's own terminal, and exits 1 when a Mac does not answer. `station config`, `config install` and `config uninstall` are hidden aliases of `settings`, `settings apply` and `settings off` for one release. See [Settings](settings.md).
+
+### `station disk`
+
+```bash
+station disk [--json] # the volume, then Misplaced, Can rebuild, Your data, Never touched, with sizes; nothing runs
+station disk free [<app...>] # empty what an app can rebuild with its own command; bare = every Can rebuild row
+station disk erase <app> [--confirm=<app>] # erase an app's data, back to factory; its name typed
+station disk move <folder> # move a misplaced folder where its app expects it
+```
+
+`free` and `move` ask nothing: nothing is lost. `erase` is always one app, its name typed, and refuses while the app runs or on a Never touched row. A stale VM goes with `station machines delete`, an old image version with `station images delete`. The v2 `station storage`, `storage clean` and `storage reset` are hidden aliases for one release. `station disk free docker` prunes Docker's unused data. See [Disk](disk.md).
+
+### `station ports`
+
+```sh
+station ports [--all-machines] [--all] [--json] # every listening port in its class: Needs you, Public, Private, This machine only
+station ports share <vm> <port> [--to <audience>] [--json] # reserve the port now and share it, with local, private or public; inside a VM: station ports share <port>
+station ports stop-sharing <vm> <port> [--yes] # release it, and do not share it again until a share; inside a VM: <port>
+station ports declare [<machine>] <port> --via <route> [--url <link>] # declare it public: cloudflare-tunnel, tailscale-funnel or lan
+station ports undeclare [<machine>] <port> [--yes]     # take the declaration back
+station ports https on|off [--on <mac>]               # HTTPS links on a Mac: https:// with a certificate, or http://
+```
+
+`--all-machines` asks every Mac through its engine; `--all` lists the ports that listen on their machine only, otherwise counted on one line. `share` prints the URL before anything listens, piped the URL alone; a port is refused on a VM that shares 20 already (exit 1, `Hint: station ports stop-sharing <vm> <port>`) and while This Mac is signed out of Tailscale (exit 1, the reservation kept). `stop-sharing` asks yes or no and is remembered in `preferences.json` (`ports.not_shared`). `declare` and `undeclare` are kept by the machine's Mac and refused inside a VM; the route is verified on every list (see [Ports](ports.md)). `--json` is `station.ports.list/v1`. The v2 nouns of this family and `tailnet` are hidden aliases for one release. See [Ports](ports.md).
+
+#### The Tailscale line
+
+The first line of `station ports` is This Mac's node: signed in with its name and whether Serve shares, signed out, or not installed. Read only: the owner logs in through the Tailscale app, and station never drives it but for [shared ports](ports.md#serve-and-https).
+
+### `station accounts`
+
+```sh
+station accounts [--all-machines] [--json] # who is signed in on this machine, and how
+station accounts login <program> [--on <machine>] # sign a program in: its code or link is printed, you finish at its site
+```
+
+One row per program station signs in for (GitHub, npm, Claude, Cloudflare): signed in, signed out or broken, who, its scopes, and how, `own` or `granted` with the password's label. It is `accounts.list` of the machine; `--on <vm>` reads a workspace through the engine of its Mac, which knows what it granted. `--all-machines` prints one block per Mac and workspace, a server named and not listed, a stopped workspace and a Mac that does not answer each its own line. Identities and scopes only: no token, cookie or key body is ever read into a value. `--json` is `station.accounts.list/v1`: `{schema, machine, findings, accounts}`. `login` is `accounts.login` at that machine, a VM of a Mac through its Mac's engine: it prints each step as the engine words it (the heading, the code when there is one, the site, and the line that says what it waits for), then the program's row, exit 0; a refusal prints its words and exits non-zero (`login.unknown-program`, `login.already-signed-in`, `login.not-installed`, `login.expired`, `login.failed`; a server, `section.not-for-this-machine`), and Ctrl-C cancels the login. It waits on you, so off a terminal it is refused, exit 2, `Hint: run it in a terminal`; it opens no browser, and the site is the one you open. A sign-out and a grant are the window's and the menu bar's; see [Accounts](accounts.md).
+
+### `station background`
+
+```sh
+station background [--all] [--json] # every non-Apple launchd job: Failing, Orphans, then Station, Known apps, Unknown folded
+station background remove <label> [--yes] # a task of your own: boot it out and delete its plist
+```
+
+An orphan is a task whose program is missing or whose app is gone. `remove` asks on a terminal and needs `--yes` off one; it takes only a user-scope task: a root one is refused, exit 2, with the command to run yourself (station never runs sudo), and the engine's own job is refused with `station engine stop`. A Linux workspace has no job manager station reads, so `--on` one is refused; a macOS workspace lists its own launchd tasks. `--json` is `station.background.list/v1`.
+
+### `station awake`
+
+```sh
+station awake [--json] # every Mac, this one first: its mode, its guards, its reading
+station awake <for> [--lid] [--battery] # keep this Mac awake: 30m, 1h, 4h, until 18:00 (1 min to 24 h); held by the engine
+station awake off # end the keep-awake now; Never sleeps stays
+```
+
+A Mac only; a guard already past its threshold refuses the start (exit 1). Piped, one record per row: the session (`on`, its flags, until in RFC 3339, who asked), the guards, then the reading as `key<TAB>value`. The modes, the guards and Never sleeps are [Awake](awake.md)'s.
+
+## A Mac's images and engine
+
+### `station images`
+
+```sh
+station images [--json] # every Mac's, one row per version per Mac
+station images build [<machinefile...>] [--binary <linux station binary>]
+station images update [<image...>] # the newest released version
+station images delete <image>[@<version>] [--yes]
+```
+
+An image is named after the Machinefile it is built from (`base-ubuntu`, `studio-linux`); `linux`, `station-linux` and `macos` name no image. A bare `build` builds every image that is missing or whose recipe, Machinefile or lock changed; a bare `update` updates every image this Mac holds. A name no source holds a Machinefile of is `no image "debian"`, and a Machinefile that makes no image is refused naming why (both exit 2). See [Images](images.md).
+
+### `station engine`
+
+```sh
+station engine [--json] # running, its version, up, the VMs it runs, Awake; or stopped, since when and by what
+station engine stop [--yes] # Stop everything on this Mac: every running workspace stopped, its disk kept; Awake and the sharing end; then the engine, unless a server runs: it is skipped, and the engine keeps running for it
+station engine start # the engine installed when it is not, restarted when it runs another version, bootstrapped again; the VMs it stopped stay stopped
+```
+
+`--json` is `station.engine.read/v1`: `{schema, engine: {state, version, up_s, vms, stopped_at, stopped_by}}`, `state` `running`, `stopped` or `not-installed`. An engine running another version than station names both and `station engine start`. A Mac only; `--on <mac>` runs it on another Mac. `station stop` and `station start` are hidden aliases of `engine stop` and `engine start` for one release, saying `→ now: station engine stop` on stderr (see [Hidden aliases](#hidden-aliases)). A start the job manager refuses ends in `the engine did not start: <its last word>` (exit 1). See [Machines](machines.md#the-engine).
+
+## This terminal
+
+### `station use`
+
+```sh
+station use <machine> # every later command of this terminal runs there, as --on would
+station use - # back to the machine used before
+station use # the machine this terminal uses, and since when
+```
+
+`--on` still wins for its one command; other terminals stay where they are. See [Machines](machines.md#this-terminals-machine).
+
+## Station itself
+
+```sh
+station init [--name <name>] [--machinefile <name|path>] [--yes]
+station plan [--machinefile <name|path>] [--phase image|boot|apply] [--diff] [--json]
+station apply [--machinefile <name|path>] [--phase image|boot|apply] [--remove] [--yes]
+station drift [--machinefile <name|path>] [--json]
+station upgrade [--machinefile <name>] [--json]
+station explain [<key>] [--machinefile <name>]
+station --version
+station help [command]
+```
+
+`init` makes this machine known to station, safe to run again: it names this Mac (asking the name on a terminal, taking `--name` otherwise; off a terminal, a Mac with no name yet is refused, exit 2, `Hint: station init --name <name>`), writes the one managed block of `~/.zshrc`, writes the apps' own files (`relocate`), then moves what the apps left at the home root where those files point ([Disk](disk.md#relocation)). Before it moves anything it prints `# To move`, one row per move (`~/.bun/bin  to ~/.local/share/bun/bin  52 MB`, or a file it deletes, `deleted: its app writes it again`), then asks `Move them?` on a terminal; a no ends it there, exit 1, every file and every step as it was (`init kept: you said no`). Off a terminal it is refused, exit 2, before any step (`Error: refusing to move the apps' files without --yes`), and `--yes` answers it; with nothing to move it prints and asks nothing. It installs no app, runs no package manager and asks no password; the engine comes with the first VM command on a Mac with tart, or `station engine start`. On a terminal it opens on a line that sums it up and ends on the empty state of what the machine carries (`Machinefile  none bound by init: init --machinefile binds one`), then at most two next steps: `exec zsh` when it wrote the block, `station init --machinefile <name>`, `station apps install <app>`. `--machinefile` then binds this machine to that Machinefile and runs `apply` on it: init's page names it (`Machinefile  downloads/laptop.machine.yaml: applied below, which binds it`) and drops the step that says how to bind one, then come its plan and the run. Inside a workspace it writes the block and the layout only; inside a server it sets nothing up, the server's own tooling keeps it. `--version` prints `station <version> (<commit>)`. See [Getting started](../start/getting-started.md) and [Dotfiles](dotfiles.md).
+
+`plan` resolves the machine's Machinefile (the one named, else the one it is bound to, else the one named after it) and reads each package through its family: it opens with what the run asks of you, once per need (`◐ homebrew  asks your password once`, where this machine's sudo asks one), then what it installs, sets, adopts (present by another way, or by another of its methods, which it names: never installed again) and leaves as it is (a setting you changed by hand, a read that did not answer), what is extra (installed by station for it, listed no longer) and what has to happen once applied, each once (`the Dock restarts`). It changes nothing. A package that declares `shell` adds a row of its own under what it sets, `~/.zshrc [station:postgres/path]: 1 line` (`station's earlier text, written anew` when the block is still what station last wrote and station writes it otherwise now), and one `Left as it is` when you edited the block by hand; a block station wrote for an extra is extra too, with what `apply --remove` does with it: `written by station, goes with postgres` when the app goes, `kept with postgres` while it stays, `edited by hand since station wrote it: kept, and yours` ([Dotfiles](dotfiles.md#package-blocks)). `--diff` replaces the table by the diff of each file apply would write, from what the file holds (`-`) to what apply writes (`+`): each shell block of `~/.zshrc`, and each setting's file (`station settings diff` drawn the other way); it says the table when there is none. `--json` prints `station.machinefile.plan/v2`, its `blocks` the shell blocks (`package`, `id`, `condition`, `action`); `apply --json`'s `station.machinefile.apply/v2` lists the blocks the run judged, each with its `result` and `detail`, so an extra's block is there with `--remove` alone.
+
+`apply` prints the plan, then carries it out one package at a time, by `apps install` and `settings apply`, and prints the run: each package with its mark, version and method. A failure fails that package, exit 1, and each package that waits on it is `not run · requires <package>, which did not install`; every other package goes on. An interruption marks the package it stopped at `interrupted (Ctrl-C) · station apply resumes` and each one after it `not run`, exit 130 (a package that finished just before is kept as its install answered; one whose install handed nothing back is in the ledger when a fresh read of the apps gives its row within 15 seconds, unrecorded otherwise, so never removed), and the next `station apply` finishes from there. Off a terminal, a plan that asks you anything (a password, a license, a question; with `--remove`, what uninstalling an extra asks) is refused before any effect, exit 2, `Hint: run station apply on a terminal`. A password is asked only where this machine's sudo asks one: a plan that holds a sudo need reads it once, by `sudo -k -n true`, which never prompts, runs nothing but `true` and is given 5 seconds, a read that cannot tell counting as asking; a VM station made asks none, so `apply` inside one installs Homebrew off a terminal. `--machinefile <name|path>` binds the machine to it first; a file named by its path is copied into `~/.config/station/machinefiles/` under its name, the same words copying nothing, and one whose name that folder already holds in other words is refused before any effect, exit 2: station never replaces your Machinefile. `--remove` also removes what the ledger says station installed for this Machinefile that it lists no longer, and only while it reads there by the method that installed it, dependents first, asking on a terminal (`--yes` off one, else exit 2); an extra another app there still needs (it requires it, provides it, or manages it, by that app's method as `station apps` shows it; a setting's requirement keeps no app), whoever installed that app, is `required by <app>: kept`, with its record, and so is one that an extra station cannot uninstall, or whose uninstall failed in this run, still needs; an extra station cannot uninstall (a script's install that names no `undo`, an apt app station recorded adding nothing of) is never taken back and asks nothing, `station cannot uninstall it: kept, and yours: remove it by hand if you want` (`required by <app>: kept`, with its record, when an app there needs it); an extra already gone, or held by another method since, or that station cannot uninstall and nothing needs, is said and kept, and the ledger lets it go; one whose manager is missing here, even one that reads absent, is `its manager <manager> is missing: kept`, with its record; a manager that holds packages of yours (what its methods list that no app of the catalog installs, `npm i -g typescript` for node), or whose list does not read, is `holds <n> packages of yours: kept`, with its record, and taken back once it holds none. A `vault:` value is shown as itself and never printed.
+
+`drift` is the plan read as conditions, one row per package: `present`, `absent`, `outdated`, `changed`, `not managed`, `extra`, `unknown`. It never acts. `--on <vm>` judges the packages on the VM and reads its ports and accounts on its Mac: each one held otherwise than its file gives it is a row of `Ports and accounts` (`port 3000  changed · shared public, its file opens it to private`). `--json` prints `station.machinefile.drift/v3`.
+
+`--phase` plans or carries out one phase of the Machinefile: `image`, what a VM image bakes (`vm.image.bake` and what each baked package requires), the one `station images build` runs inside its build VM; `boot`, a VM's first start; `apply`, the default, every package but a boot or image package's, the baked ones included. A phase none of these is refused before any effect, exit 2, and so is `--remove` with another phase than `apply`, since another phase carries only a part of the Machinefile ([Machinefiles](machinefiles.md#phases)).
+
+`apply` and `upgrade` write the Machinefile's lock, `~/.config/station/machinefiles/<name>.lock`, once their run ends, interrupted or not ([Machinefiles](machinefiles.md#the-lock)). `apply` installs an app the lock holds by the lock's method, at its version where that method pins one, and the plan says it (`○ python  mise  locked 3.12.7`). `apply` reads the shared source where its clone stands, and `upgrade` moves it forward to its default branch's newest commit; a lock that does not decode is refused at its file, `Hint: remove it: the next station apply writes it anew from what is there`.
+
+`upgrade` reads its plan where the shared source's clone stands, refuses before any effect what it cannot run here, then moves the source forward to its default branch's newest commit and reads the plan there, going on from the clone as it stood when the source does not move (offline, a rewritten branch, a commit that does not resolve: a `Source` section says why); a clone whose own commit no longer resolves is moved first and read at the newest commit alone, so a fix pushed upstream is taken; then it moves every app the Machinefile lists that reads there by one of its methods as far as its `version` lets it ([Versions](machinefiles.md#versions)), by that method, the managers first (homebrew's index by `brew update`, mise, node) and then the rest, each in the plan's order, then writes the lock anew and prints what moved in it (`gh  2.98.0 by brew, was 2.97.0 by brew`, the shared source's commit). An app of mise's or bun's is installed again at its range (`within 22`, `held at 22.11.0`), one exact version of apt's or a release's is kept, `pinned 2.43.0 by <machinefile>: kept`, and a newer version past a range is said waiting, with the line that takes it (`node  25.1.0 available: change '22' to '25' in <file>`); a copy no method holds is yours and left as it is, and an app not there is apply's, except one the lock holds: a locked version that can no longer install is no dead end, so upgrade installs that app by the lock's method at the newest the Machinefile allows and the lock follows (`ripgrep  1.0.0 by brew, was 14.0.0 by brew`). Off a terminal, an upgrade whose updates ask you anything is refused before any effect, exit 2, `Hint: run station upgrade on a terminal`; an interruption marks the app it stopped at and each one after it, exit 130, `station upgrade resumes`. It updates neither station itself (re-run the install, [Release](../guides/release.md)) nor what the Machinefile does not list (`station apps update`). `--json` prints `station.machinefile.upgrade/v2`: each `line` as it ended, the `lock`'s moves (`app`, `was`, `now`), the `source` when it moved, each version `waiting` (`app`, `newest`, `range`, `moved`, `file`), `interrupted`, and `unpulled`, why the shared source did not move, when it did not. One apply, upgrade or night runs on a machine at a time: a run that finds another holding it waits a few seconds, then is refused, exit 2, `Hint: run it again once that one ends`; one interrupted while it waits exits 130.
+
+`explain` resolves the Machinefile this machine is bound to (else the one named after it), or `--machinefile <name>`, against the catalog, and prints each value with its origin (`user`, `shared`, `built-in`, `overlay`, `this machine`, `lock`) and the Machinefile or package that says it; a key (`vm`, `apps.jq`) explains itself and every key under it. Every refusal of the resolution exits 2 with its own words: no Machinefile of that name, a file refused at its line, a newer schema (`update station`), `vm` on a computer, a cycle, a package with no method for the system or a range its method cannot hold, a package the catalog does not hold, a value that is none of the package's options, a key it says nothing of; a mixin (a Machinefile that says no `machine:`) answers the values its own chain says, with no step judged against a machine; a shared source that cannot be read exits 1. `--json` prints `station.machinefile.explain/v1`. The format is [Machinefiles](machinefiles.md).
+
+## Hidden aliases
+
+A v2 word, or a v3.0 one (`setup`), runs its new command with the same arguments, for one release, and prints one muted line on stderr naming it (nothing there with `--json` or `--page`); help and completion never list it.
+
+| Old                                   | Runs                                                                                                                                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `station status`                      | `station overview`; `status --json` keeps `station.status/v1`                                                                                                                                                |
+| `station stop`                        | `station engine stop`                                                                                                                                                                                        |
+| `station start`                       | `station engine start`                                                                                                                                                                                       |
+| `station tools`                       | `station apps`; `install`, `uninstall` and `upgrade --via` run `apps install`, `apps remove` and `apps update --manager`                                                                                     |
+| `station config`                      | `station settings`; `install` and `uninstall` run `settings apply` and `settings off`                                                                                                                        |
+| `station power`                       | `station awake`; `awake --for <d>` runs `awake <d>`, `sleep` runs `awake off`                                                                                                                                |
+| `station services`, `station tailnet` | `station ports`; `url` and `release` run `ports share` and `ports stop-sharing`                                                                                                                              |
+| `station machines probe <machine>`    | `station machines <machine>`                                                                                                                                                                                 |
+| `station setup`                       | `station init`, v3.0's word, and one more muted line on stderr: apps and settings no longer come with it (`station apps install <app>`, `station settings apply <setting>`)                                  |
+| `machines create --always-on`         | `machines create --server`                                                                                                                                                                                   |
+| `machines create --permanent`         | `machines create --persistent`; a VM record stored as `throwaway` or `permanent` is rewritten as `ephemeral` or `persistent` by the next `station init`                                                      |
+| `station run git <shortcut>`          | `git <alias>`, the [Git shortcuts](settings.md#the-packages) setting's alias (`log`, `push`, `status` are `lg`, `pushup`, `st`); refused with `station settings apply git-shortcuts` while it is not applied |
+| `station run docker rm\|rmi\|reset`   | the steps of `dclean`, `dclean-images`, `dreset`, the [Docker shortcuts](settings.md#the-packages), asking as before (`--yes` off a terminal)                                                                |
+
+The words of a kind and a lifetime are not aliased in `--json`: `station.machines.list/v1`, `station.accounts.list/v1` and `station.overview.read/v1` say `computer`, `ephemeral` and `persistent`, and `station.status/v1` keeps its words ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)).
+
+## Plumbing
+
+These commands exist for the machine's own use. They are hidden from help and the owner never types them.
+
+| Command                       | What runs it and what it does                                                                                                                                                                                                       |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `station shell zsh`           | the `~/.zshrc` block evaluates it at every shell start: PATH, the mise activation, station's completion, and in a VM the [profiles'](ports.md#what-a-package-sets) exports. Output on stdout only; another shell or none is refused |
+| `station shell prompt`        | the prompt's `custom.station` segment runs it: `on linux-1` while this terminal [uses](machines.md#this-terminals-machine) another machine, nothing otherwise; it never counts as a use                                             |
+| `station completion <shell>`  | cobra's completion script, for a shell the block does not serve                                                                                                                                                                     |
+| `station engine run`          | the launchd agent `com.jterrazz.station.engine` runs it on a Mac: the VMs and their ports ([Machines](machines.md#the-engine))                                                                                                      |
+| `station guest serve --stdio` | the Mac's engine runs it inside each VM over its one guest connection: the VM's calls, and what listens there ([The API](api.md#the-transport))                                                                                     |
+| `station engine attach`       | another Mac runs it over ssh: bridges ssh's stdio to this Mac's engine socket ([The API](api.md#the-transport))                                                                                                                     |
+| `station machines pipe <vm>`  | a VM's `~/.ssh/config` ProxyCommand runs it: ssh's bytes to the VM's ip behind its Mac ([Machines](machines.md#ssh))                                                                                                                |
+
+`--on` is refused on `shell`, `completion`, `help`, `use`, `engine run`, `engine attach`, `guest` and `machines pipe`: none of them sends a call.
+
+## Exit codes
+
+| Code | Means                                                                                                                 |
+| ---- | --------------------------------------------------------------------------------------------------------------------- |
+| 0    | Done, or a read that found findings                                                                                   |
+| 1    | `failed`, `unreachable`, `engine-stopped`, `far-too-old`, `declined`: an operation failed, or you said no             |
+| 2    | `refused`, `not-found`, `not-for-this-machine`, `needs-confirmation`, `needs-terminal`: before any question or effect |
+| 130  | `interrupted`; nothing is printed                                                                                     |
+
+The exit code is computed once, from the error's type ([Architecture](../concepts/architecture.md#the-error-model)). A command over several packages prints every outcome, then exits 1 with `<n> of <m> <noun> failed` if any failed.
+
+## Related
+
+- [Design system](../concepts/design-system.md): the forms a document takes.
+- [Status contract](status-json.md): the v2 JSON the hidden `status --json` keeps for one release.
+- [The API](api.md): the calls behind every command.

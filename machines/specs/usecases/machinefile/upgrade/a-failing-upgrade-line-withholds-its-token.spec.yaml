@@ -1,0 +1,21 @@
+description: 'a failing run.upgrade line that holds a token says withheld in its step and its last words'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          run:
+            upgrade: |
+              export API_KEY=sk-station-story-not-a-real-key
+      exit: 0
+    - command: 'world fault Shell.Run'
+      exit: 0
+    - command: 'upgrade'
+      exit: 1
+      stdout: |
+          ✗	run.upgrade		linux-1	1 line · exited 1: bash: line 1: the line failed; station: exit 1 at: export API_KEY=withheld
+      stderr: |
+          Error: 1 of 1 steps failed
+          Hint: station upgrade

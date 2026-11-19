@@ -1,0 +1,3 @@
+#!/bin/sh
+# tailscale as installed by brew: it answers its version.
+echo "tailscale 1.0.0"

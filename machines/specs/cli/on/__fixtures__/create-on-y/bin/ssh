@@ -1,0 +1,32 @@
+#!/bin/sh
+# ssh to host y: every call is recorded in $HOME/.calls; y's engine API answers each
+# call from answers/ssh/api-y/<call>.json, its Hello naming those calls: its create
+# makes the VM linux-1, which its fleet answer holds.
+answers="${0%/*}/../answers/ssh"
+printf 'ssh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *" station engine attach")
+        prev=''
+        for arg; do
+            if [ "$arg" = -- ]; then target=$prev; break; fi
+            prev=$arg
+        done
+        far="$answers/api-$target"
+        [ -d "$far" ] || exit 255
+        version=$(/bin/cat "$far/version" 2>/dev/null)
+        calls=$(cd "$far" && for f in *.json; do printf '"%s",' "${f%.json}"; done)
+        while IFS= read -r line; do
+            id=$(printf '%s' "$line" | /usr/bin/jq -r .id)
+            call=$(printf '%s' "$line" | /usr/bin/jq -r '.call // empty')
+            if [ -z "$call" ]; then
+                printf '{"v":2,"id":"%s","hello":{"version":"%s","calls":[%s]}}\n' "$id" "$version" "${calls%,}"
+            else
+                printf '{"v":2,"id":"%s","out":%s}\n' "$id" "$(/bin/cat "$far/$call.json")"
+            fi
+        done
+        ;;
+    *)
+        echo "stub ssh: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

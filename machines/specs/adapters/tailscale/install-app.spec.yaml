@@ -1,0 +1,25 @@
+description: 'tailscale installs as the app, the cask tailscale-app, on a Mac only'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/tailscale-app/
+env: engine
+runs:
+    - command: 'apps --json | /usr/bin/jq -c ''.apps[] | select(.name == "tailscale") | [.method, .lives_on]'''
+      exit: 0
+      stdout: |
+          ["cask","mac-only"]
+    - command: 'apps install tailscale'
+      exit: 0
+      stdout: |
+          ●	tailscale	1.90.0	cask
+          ●	tailscale-cli			~/.local/bin/tailscale
+      files:
+          .calls:
+              contains:
+                  - |-
+                    brew bundle install --no-upgrade --file=-
+                    cask "tailscale-app"
+    - command: '--version > /dev/null; STATION_MACHINE_KIND=linux "$STATION" apps --json | /usr/bin/jq -r ''[.apps[] | select(.name == "tailscale")] | length'''
+      exit: 0
+      stdout: |
+          0

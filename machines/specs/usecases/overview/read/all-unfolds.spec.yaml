@@ -1,0 +1,14 @@
+description: 'station overview --all unfolds every Needs-you line; without it five and how many more'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'overview | /usr/bin/grep -c -e "^✗" -e "^◐" -e "more: station overview --all"'
+      exit: 0
+      stdout: |
+          6
+    - command: 'overview --all | /usr/bin/grep -c -e "^✗" -e "^◐"; "$STATION" overview --all | /usr/bin/grep -c "more:"'
+      exit: 1
+      stdout: |
+          8
+          0

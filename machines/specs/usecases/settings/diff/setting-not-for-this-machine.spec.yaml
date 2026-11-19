@@ -1,0 +1,8 @@
+description: 'a diff of a setting that does not live on this machine is refused, with where it lives'
+env: in-workspace
+runs:
+    - command: 'settings diff ssh-key'
+      exit: 2
+      stderr: |
+          Error: ssh-key is for Macs only
+          Hint: station settings apply ssh-key --on this-mac

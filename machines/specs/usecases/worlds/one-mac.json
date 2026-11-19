@@ -1,0 +1,33 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook-pro",
+    "user": "you",
+    "macs": {
+        "macbook-pro": {
+            "engine": {},
+            "preferences": {
+                "name": "macbook-pro",
+                "vm_user": "admin"
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            }
+        },
+        "mac-mini": {
+            "engine": {
+                "started_at": "2026-10-23T09:00:00Z"
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "preferences": {
+                "name": "mac-mini",
+                "vm_user": "admin"
+            }
+        }
+    }
+}

@@ -1,0 +1,11 @@
+description: 'with no VM running, stop asks nothing and the engine stops'
+env: one-mac
+runs:
+    - command: 'engine stop'
+      exit: 0
+      stdout: |
+          ●	engine	the engine stopped
+    - command: 'engine --json | /usr/bin/jq -r .engine.state'
+      exit: 0
+      stdout: |
+          stopped

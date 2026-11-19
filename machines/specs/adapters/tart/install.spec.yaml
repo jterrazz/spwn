@@ -1,0 +1,14 @@
+description: 'tart installs into station''s data folder, then its launcher is written'
+fixture: ./__fixtures__/shell-recorder/
+runs:
+    - command: 'apps install tart'
+      exit: 0
+      stdout: |
+          ●	tart		shell
+          ●	tart-launcher			~/.local/bin/tart
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          bash [-c] [d="$HOME/.local/share"; case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac; mkdir -p "$d/station/tart" "$d/station/vms" "$HOME/.local/bin" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C "$d/station/tart"]
+      files:
+          .local/bin/tart: exists

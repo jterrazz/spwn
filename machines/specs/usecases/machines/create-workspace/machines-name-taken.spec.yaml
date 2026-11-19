@@ -1,0 +1,8 @@
+description: 'a name a workspace of This Mac holds is refused before anything is made'
+env: two-macs
+runs:
+    - command: 'machines create linux-1'
+      exit: 2
+      stderr: |
+          Error: "linux-1" is taken (on macbook-pro)
+          Hint: pick another name

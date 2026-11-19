@@ -1,0 +1,474 @@
+package pages
+
+import (
+	"bytes"
+	"encoding/json"
+	"maps"
+	"strconv"
+	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/activity"
+	"github.com/jterrazz/studio-station/apps/engine/awake"
+	"github.com/jterrazz/studio-station/apps/engine/background"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/images"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/overview"
+	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/settings"
+)
+
+const (
+	PlayWorldPath = "specs/usecases/worlds/stories.json"
+	PlayWorldBase = "specs/usecases/worlds/two-macs.json"
+)
+
+type playWorld struct {
+	Now      time.Time           `json:"now"`
+	ThisMac  string              `json:"this_mac"`
+	User     string              `json:"user"`
+	Macs     map[string]*playMac `json:"macs"`
+	Registry map[string]string   `json:"registry,omitempty"`
+	// value: the site each failing URL check asks, which the world holds down.
+	SitesDown []string `json:"sites_down,omitempty"`
+}
+
+type playMac struct {
+	Engine      *playEngine                    `json:"engine,omitempty"`
+	Offline     bool                           `json:"offline,omitempty"`
+	Preferences map[string]any                 `json:"preferences,omitempty"`
+	Images      []string                       `json:"images,omitempty"`
+	Building    []images.Making                `json:"building,omitempty"`
+	VMs         map[string]*playVM             `json:"vms,omitempty"`
+	Jobs        map[string]background.Job      `json:"jobs,omitempty"`
+	Accounts    *playSignIns                   `json:"accounts,omitempty"`
+	Facts       map[catalog.Fact]settings.Fact `json:"facts,omitempty"`
+	Self        *playSelf                      `json:"self,omitempty"`
+	Listening   []ports.Listener               `json:"listening,omitempty"`
+	Tailnet     *playNode                      `json:"tailnet,omitempty"`
+	Apps        map[catalog.Method]*playApps   `json:"apps,omitempty"`
+	Meter       *playMeter                     `json:"meter,omitempty"`
+	Disk        *playDisk                      `json:"disk,omitempty"`
+	Stores      *playStores                    `json:"stores,omitempty"`
+	Files       map[string]string              `json:"files,omitempty"`
+	Processes   []model.Process                `json:"processes,omitempty"`
+}
+
+type playEngine struct {
+	Version   string        `json:"version,omitempty"`
+	StartedAt time.Time     `json:"started_at,omitzero"`
+	Memory    engine.Memory `json:"memory,omitempty"`
+	Awake     *awake.Kept   `json:"awake,omitempty"`
+	// value: the activity the engine kept before the story, by machine.
+	Past map[string]activity.Profile `json:"past,omitempty"`
+}
+
+type playSelf struct {
+	Kind     coremachine.Kind     `json:"kind,omitempty"`
+	System   coremachine.System   `json:"system"`
+	Hardware coremachine.Hardware `json:"hardware"`
+}
+
+type playSignIns struct {
+	Programs map[accounts.Program]accounts.Facts `json:"programs,omitempty"`
+}
+
+type playNode struct {
+	Self   ports.Self    `json:"self"`
+	Shares []ports.Share `json:"shares,omitempty"`
+}
+
+type playApps struct {
+	Installed map[string]string `json:"installed,omitempty"`
+	Behind    map[string]string `json:"behind,omitempty"`
+}
+
+type playMeter struct {
+	Sample    activity.Sample        `json:"sample"`
+	PerSecond *activity.Sample       `json:"per_second,omitempty"`
+	Processes map[int]activity.Usage `json:"processes,omitempty"`
+}
+
+type playDisk struct {
+	Total int64 `json:"total,omitempty"`
+	Free  int64 `json:"free,omitempty"`
+}
+
+type playStores struct {
+	Images       []images.Record         `json:"images,omitempty"`
+	Reservations []ports.Reservation     `json:"reservations,omitempty"`
+	Declarations []ports.Declaration     `json:"declarations,omitempty"`
+	Uptime       map[string]model.Uptime `json:"uptime,omitempty"`
+	// value: the last night the engine's upgrade recorded, and when each
+	// Machinefile was last applied.
+	Night   *machinefile.Night   `json:"night,omitempty"`
+	Applies map[string]time.Time `json:"applies,omitempty"`
+}
+
+type playVM struct {
+	Kept      *playKept        `json:"kept,omitempty"`
+	Disk      bool             `json:"disk,omitempty"`
+	Size      model.Size       `json:"size"`
+	PID       int              `json:"pid,omitempty"`
+	UpAt      time.Time        `json:"up_at,omitzero"`
+	Guest     *struct{}        `json:"guest,omitempty"`
+	Listening []ports.Listener `json:"listening,omitempty"`
+	Console   []string         `json:"console,omitempty"`
+}
+
+type playKept struct {
+	Image     string         `json:"image,omitempty"`
+	Version   string         `json:"version,omitempty"`
+	Lifetime  model.Lifetime `json:"lifetime"`
+	Want      string         `json:"want,omitempty"`
+	Check     string         `json:"check,omitempty"`
+	CreatedAt time.Time      `json:"created_at,omitzero"`
+	Template  string         `json:"template,omitempty"`
+	Purpose   string         `json:"purpose,omitempty"`
+	Creator   string         `json:"creator,omitempty"`
+	Owner     *model.Process `json:"owner,omitempty"`
+	Birth     *model.Birth   `json:"birth,omitempty"`
+}
+
+func PlayWorld(base []byte) []byte {
+	f := everyMachine()
+	infraServes(&f)
+	infraFailing(&f)
+	cpu := map[string]float64{proName: .30, miniMac: .55, "linux-1": .37, "agent-7f": .04, "infra": .18, "linux-3": .60, "review-bot": .06}
+	hardware := map[string]coremachine.Hardware{
+		proName: {Model: "Mac16,5", Chip: "Apple M4 Max", Memory: 48 * gb, CPUs: 16},
+		miniMac: {Model: "Mac16,11", Chip: "Apple M4 Pro", Memory: 64 * gb, CPUs: 14},
+		airName: {Model: "Mac15,12", Chip: "Apple M3", Memory: 24 * gb, CPUs: 8},
+	}
+	w := playWorld{Now: storyNow, ThisMac: proName, User: "you", Macs: map[string]*playMac{}, Registry: map[string]string{"base-ubuntu": "3"}}
+	known := map[string]any{}
+	past := profiles()
+	pid := 1000
+	for _, h := range f.All.Macs {
+		hw := hardware[h.Name]
+		if !h.Reachable && !h.ThisMac {
+			known[h.Name] = map[string]any{"user": h.User, "answered": h.Answered, "hardware": hw, "laptop": true, "asleep": true}
+			w.Macs[h.Name] = &playMac{Offline: true, Engine: &playEngine{Version: stationVer, StartedAt: storyNow.Add(-5 * 24 * time.Hour)},
+				Preferences: map[string]any{"vm_user": "admin"}, Self: &playSelf{Hardware: hw}}
+			continue
+		}
+		known[h.Name] = map[string]any{"user": h.User, "lan": h.LAN}
+		if h.ThisMac {
+			known[h.Name] = map[string]any{"user": h.User}
+		}
+		m := &playMac{
+			Engine:      &playEngine{Version: stationVer, StartedAt: storyNow.Add(-macUp(f, h.Name))},
+			Preferences: map[string]any{"vm_user": "admin"},
+			Images:      []string{"ghcr.io/jterrazz/station-base-ubuntu:3"},
+			VMs:         map[string]*playVM{},
+			Self:        &playSelf{Hardware: hw},
+			Tailnet:     &playNode{Self: ports.Self{Node: ports.Node{ID: h.Name, Name: h.Name, DNSName: h.Name + tailnet, IP: h.Node.IP, Online: true}, Sharing: ports.SharingState{Backend: "Running", On: true, DNSName: h.Name + tailnet}}},
+			Meter:       playMeterOf(past[h.Name], meterSample(cpu[h.Name], hw.CPUs, hw.Memory, storyNow.Add(-macUp(f, h.Name)))),
+			Facts:       macFacts(h.ThisMac),
+			Stores:      &playStores{Images: []images.Record{{Name: "base-ubuntu", Version: "3", Distro: catalog.DistroUbuntu, DistroVersion: "24.04", Upstream: "ghcr.io/cirruslabs/ubuntu:24.04", Station: stationVer, BuiltAt: storyNow.Add(-6 * 24 * time.Hour), SizeGB: 4}}},
+		}
+		m.VMs["station-image-base-ubuntu-3"] = &playVM{Disk: true, Size: model.Size{Disk: 4e9}}
+		if h.ThisMac {
+			m.Engine.Awake = &awake.Kept{Session: f.Awake.Session}
+			m.Disk = &playDisk{Total: 994e9, Free: 388e9}
+			m.Files = ownerFiles()
+			// invariant: the Mac has run its night since 03:00 of the story's
+			// day, so the clock moving an hour runs none: an app moved, and
+			// node, which its file holds on 24, waiting for 25.
+			m.Stores.Night = &machinefile.Night{
+				At: storyNow.Add(-7*time.Hour - 30*time.Minute + 9*time.Second), Machinefile: proName,
+				Moved:   []machinefile.Moved{{App: "gh", Was: "2.96.1", Now: "2.97.0", Range: "latest"}},
+				Waiting: []machinefile.Waiting{{App: "node", Newest: "25.1.0", Range: "24", Moved: "25", File: "~/.config/station/machinefiles/" + proName + ".machine.yaml"}},
+			}
+			m.Stores.Applies = map[string]time.Time{proName: storyNow.Add(-24*time.Hour - 78*time.Minute)}
+			m.Preferences["machinefile"] = map[string]any{"name": proName, "bound_at": storyNow.Add(-9 * 24 * time.Hour)}
+			m.Jobs = map[string]background.Job{"com.example.brain.x-snapshot": {Label: "com.example.brain.x-snapshot", Program: "~/.local/bin/x-snapshot", File: "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist", Scope: "user", Loaded: true, LastExit: 2, ProgramExists: true, OwnerExists: true}}
+			// invariant: lazygit, which this Mac's overlay takes out of its
+			// file, is behind and stays so through the engine's night, which
+			// moves only what the file lists: the world keeps one app whose
+			// newest version is out.
+			m.Apps = map[catalog.Method]*playApps{
+				catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0", "lazygit": "0.55.1"}, Behind: map[string]string{"gh": "2.98.0", "lazygit": "0.56.0"}},
+				catalog.MethodCask: {Installed: map[string]string{"ghostty": "1.2.0"}, Behind: map[string]string{"ghostty": "1.2.1"}},
+			}
+		} else {
+			m.Preferences["never_sleeps"] = true
+			m.Disk = &playDisk{Total: 994e9, Free: 610e9}
+		}
+		m.Engine.Past = map[string]activity.Profile{h.Name: past[h.Name]}
+		m.Meter.Processes = map[int]activity.Usage{}
+		for _, vm := range h.VMs {
+			pid++
+			m.VMs[vm.Name] = playMachine(f, h.Name, vm, pid)
+			if vm.State == model.Running {
+				if p, ok := past[vm.Name]; ok {
+					m.Engine.Past[vm.Name] = p
+				}
+				m.Meter.Processes[pid] = activity.Usage{CPU: 100 * cpu[vm.Name] * float64(vm.Resources.CPUs) / float64(hw.CPUs), Memory: vm.Resources.MemoryBytes * 2 / 3, Started: vm.BootAt}
+			}
+			if vm.State == model.Running && !vm.BootAt.IsZero() {
+				if m.Engine.Memory == nil {
+					m.Engine.Memory = engine.Memory{}
+				}
+				m.Engine.Memory[vm.Name] = engine.Remembered{State: engine.StateRunning, BootAt: vm.BootAt, Check: vm.CheckStatus, Latency: vm.Latency}
+			}
+			if len(vm.Uptime.Days) > 0 {
+				if m.Stores.Uptime == nil {
+					m.Stores.Uptime = map[string]model.Uptime{}
+				}
+				m.Stores.Uptime[vm.Name] = vm.Uptime
+			}
+			w.Macs[vm.Name] = inside(f, vm, cpu[vm.Name], past[vm.Name])
+			if check, ok := model.ParseCheck(vm.Check); ok && check.URL != nil && vm.CheckStatus.State == model.CheckFailing {
+				w.SitesDown = append(w.SitesDown, check.URL.Hostname())
+			}
+		}
+		var notShared []string
+		for _, p := range f.portsOf(h.Name).AllMachines.Macs {
+			for _, port := range p.Ports {
+				if port.Machine.On != h.Name {
+					continue
+				}
+				switch {
+				case port.Device:
+					m.Tailnet.Self.Peers = append(m.Tailnet.Self.Peers, ports.Node{ID: port.Machine.Name, Name: port.Machine.Name, DNSName: port.Machine.Name + tailnet, Online: true})
+				case port.Reach == ports.Tailnet && port.Declared == nil:
+					notShared = append(notShared, port.Machine.Name+":"+strconv.Itoa(port.Port))
+				}
+			}
+		}
+		if notShared != nil {
+			m.Preferences["ports"] = ports.PortsGroup{NotShared: notShared}
+		}
+		for _, p := range f.portsOf(h.Name).AllMachines.Macs {
+			for _, s := range p.Shared {
+				m.Stores.Reservations = append(m.Stores.Reservations, ports.Reservation{VM: s.VM, GuestPort: s.GuestPort, MacPort: s.Reserved, By: ports.ByOwner, HTTP: &s.HTTP, ReservedAt: storyNow.Add(-2 * time.Hour)})
+				m.Tailnet.Shares = append(m.Tailnet.Shares, ports.Share{Port: s.Reserved, Reserved: s.Reserved, Scheme: "https", Target: "http://127.0.0.1:" + strconv.Itoa(s.Reserved)})
+			}
+			for _, port := range p.Ports {
+				if port.Machine.Name == h.Name {
+					m.Listening = append(m.Listening, ports.Listener{Port: port.Port, Bind: h.Node.IP, Process: port.Process, PID: 500 + port.Port%100})
+				}
+				if port.Declared != nil {
+					m.Stores.Declarations = append(m.Stores.Declarations, *port.Declared)
+				}
+			}
+		}
+		if h.ThisMac {
+			creating(m)
+		}
+		w.Macs[h.Name] = m
+	}
+	// invariant: every Mac of the world knows every other one, so a name
+	// any of them holds is held at each.
+	for name := range known {
+		peers := maps.Clone(known)
+		delete(peers, name)
+		w.Macs[name].Preferences["macs"] = peers
+	}
+	// value: one port this Mac opens to its LAN, a need beside the failing
+	// server's, so one world shows what needs you beside what can wait.
+	w.Macs[proName].Listening = append(w.Macs[proName].Listening, ports.Listener{Port: 5000, Bind: "*", Process: "ControlCenter", PID: 588})
+	out, err := json.Marshal(w)
+	if err != nil {
+		panic(err)
+	}
+	out, err = inherit(out, base, map[string]string{proName: "", miniMac: "mac-mini"})
+	if err != nil {
+		panic(err)
+	}
+	return append(out, '\n')
+}
+
+func inherit(world, base []byte, from map[string]string) ([]byte, error) {
+	var w, b struct {
+		ThisMac string                                `json:"this_mac"`
+		Macs    map[string]map[string]json.RawMessage `json:"macs"`
+	}
+	var whole map[string]json.RawMessage
+	if err := json.Unmarshal(world, &w); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(world, &whole); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(base, &b); err != nil {
+		return nil, err
+	}
+	for name, source := range from {
+		if source == "" {
+			source = b.ThisMac
+		}
+		for key, value := range b.Macs[source] {
+			if _, ours := w.Macs[name][key]; !ours && key != "ssh" {
+				w.Macs[name][key] = value
+			}
+		}
+	}
+	macs, err := json.Marshal(w.Macs)
+	if err != nil {
+		return nil, err
+	}
+	whole["macs"] = macs
+	merged, err := json.Marshal(whole)
+	if err != nil {
+		return nil, err
+	}
+	var out bytes.Buffer
+	err = json.Indent(&out, merged, "", "    ")
+	return out.Bytes(), err
+}
+
+func macUp(f Scene, name string) time.Duration {
+	for _, s := range append([]overview.Summary{f.Home}, f.Away...) {
+		if s.Head.Name == name {
+			return s.Head.Up
+		}
+	}
+	return 24 * time.Hour
+}
+
+func playMeterOf(p activity.Profile, s activity.Sample) *playMeter {
+	// value: a meter whose counters are what the machine's profile counted
+	// since it booted, growing a second as the profile does now.
+	if s.Boot.IsZero() {
+		return &playMeter{Sample: s}
+	}
+	counted := p.Points(storyNow, storyNow.Sub(s.Boot).Truncate(activity.CoarseEvery), activity.CoarseEvery)
+	end := counted[len(counted)-1]
+	s.CPUBusy, s.CPUTotal, s.NetIn, s.NetOut = end.CPUBusy, end.CPUTotal, end.NetIn, end.NetOut
+	step := p.Points(storyNow, activity.FineEvery, activity.FineEvery)
+	every := uint64(activity.FineEvery / time.Second)
+	per := func(a, b uint64) uint64 { return (b - a) / every }
+	return &playMeter{Sample: s, PerSecond: &activity.Sample{
+		CPUBusy: per(step[0].CPUBusy, step[1].CPUBusy), CPUTotal: per(step[0].CPUTotal, step[1].CPUTotal),
+		NetIn: per(step[0].NetIn, step[1].NetIn), NetOut: per(step[0].NetOut, step[1].NetOut),
+	}}
+}
+
+func meterSample(share float64, cpus int, memory int64, boot time.Time) activity.Sample {
+	return activity.Sample{At: storyNow, CPUBusy: uint64(share * 1e7), CPUTotal: 1e7, CPUs: cpus, Load: [3]float64{share * float64(cpus), share * float64(cpus), share * float64(cpus)},
+		MemUsed: memory * 2 / 3, MemTotal: memory, Pressure: "normal", Boot: boot}
+}
+
+func macFacts(thisMac bool) map[catalog.Fact]settings.Fact {
+	ok := func(v string) settings.Fact { return settings.Fact{State: catalog.StateOK, Value: v} }
+	facts := map[catalog.Fact]settings.Fact{
+		"filevault": ok("on"), "firewall": ok("on"), "sip": ok("on"), "gatekeeper": ok("on"), "automatic-updates": ok("on"),
+		"screen-lock": ok("0"), "display-sleep": ok("2"), "time-machine": ok(storyNow.Add(-24 * time.Hour).Format(time.RFC3339)), "system-updates": ok("up to date"),
+	}
+	if thisMac {
+		facts["firewall"] = settings.Fact{State: catalog.StateAbsent, Value: "off"}
+	}
+	return facts
+}
+
+// value: what each VM of the play world is for and the session that made
+// it, empty for the owner.
+func purposeOf(name string) (purpose, creator string) {
+	switch name {
+	case "linux-1":
+		return "Lot L2.5, settings from a machine file", "studio-os-fe"
+	case "agent-7f":
+		return "Write the changelog of v4", "studio-os-43"
+	case "api":
+		return "The API's staging copy", ""
+	case "infra":
+		return "The cluster's control plane", ""
+	case "linux-3":
+		return "Refresh the auth token", "studio-os-fe"
+	case "review-bot":
+		return "Review every pull request of studio-station", "studio-os-43"
+	case creatingVM:
+		return "Lot L3, the Machines page", "studio-os-fe"
+	}
+	return "", ""
+}
+
+const creatingVM = "linux-2"
+
+// value: a workspace This Mac is creating, its image being built, its
+// create's process alive: it reads Creating.
+func creating(m *playMac) {
+	owner := model.Process{PID: 4242, Start: strconv.FormatInt(storyNow.Add(-20*time.Second).Unix(), 10) + ".000000"}
+	m.Processes = append(m.Processes, owner)
+	m.Building = []images.Making{{Image: "base-ubuntu", Version: "4", Step: images.BuildPackages, Owner: &owner}}
+	purpose, creator := purposeOf(creatingVM)
+	m.VMs[creatingVM] = &playVM{
+		Kept: &playKept{Image: "base-ubuntu", Lifetime: model.Persistent, CreatedAt: storyNow.Add(-20 * time.Second), Purpose: purpose, Creator: creator,
+			Owner: &owner, Birth: model.BirthAt(model.BornBuilding, true, storyNow.Add(-5*time.Second))},
+		Size: model.Size{CPUs: 4, Memory: 8 * gb, Disk: 20e9},
+	}
+}
+
+func playMachine(f Scene, mac string, vm model.VM, pid int) *playVM {
+	want := "stopped"
+	if vm.State == model.Running {
+		want = "running"
+	}
+	purpose, creator := purposeOf(vm.Name)
+	v := &playVM{
+		Kept: &playKept{Image: vm.Image, Version: vm.Version, Lifetime: vm.Lifetime, Want: want, Check: vm.Check, CreatedAt: vm.CreatedAt, Purpose: purpose, Creator: creator},
+		Disk: true, Size: model.Size{CPUs: vm.Resources.CPUs, Memory: vm.Resources.MemoryBytes, Disk: int64(vm.SizeGB) * 1e9},
+	}
+	if _, ok := devApps(vm.Name); ok {
+		v.Kept.Template = devFile
+	}
+	if vm.State != model.Running {
+		return v
+	}
+	v.PID, v.UpAt, v.Guest, v.Console = pid, vm.BootAt, &struct{}{}, consoleOf(vm.Name)
+	for _, p := range f.portsOf(mac).AllMachines.Macs {
+		for _, port := range p.Ports {
+			if port.Machine.Name != vm.Name {
+				continue
+			}
+			v.Listening = append(v.Listening, ports.Listener{Port: port.Port, Bind: port.Binds[0], Process: port.Process, PID: pid*10 + len(v.Listening)})
+			if port.Declared != nil && port.Declared.Via == catalog.RouteCloudflareTunnel && port.Verified != nil && port.Verified.Seen {
+				v.Listening = append(v.Listening, ports.Listener{Port: 20241, Bind: "127.0.0.1", Process: "cloudflared", PID: pid*10 + len(v.Listening)})
+			}
+		}
+		for _, s := range p.Shared {
+			if s.VM == vm.Name {
+				v.Listening = append(v.Listening, ports.Listener{Port: s.GuestPort, Bind: "0.0.0.0", Process: s.Process, PID: pid*10 + len(v.Listening)})
+			}
+		}
+	}
+	return v
+}
+
+func inside(f Scene, vm model.VM, share float64, p activity.Profile) *playMac {
+	kind := coremachine.Workspace
+	if vm.Lifetime == model.AlwaysOn {
+		kind = coremachine.Server
+	}
+	m := &playMac{Self: &playSelf{Kind: kind, System: coremachine.System{OS: "linux"}}, Disk: &playDisk{Total: int64(vm.SizeGB) * 1e9, Free: int64(vm.SizeGB) * 1e9 * 3 / 4}}
+	if vm.State == model.Running {
+		m.Meter = playMeterOf(p, meterSample(share, vm.Resources.CPUs, vm.Resources.MemoryBytes, vm.BootAt))
+	}
+	if apt, ok := devApps(vm.Name); ok {
+		m.Files = devFiles()
+		m.Preferences = map[string]any{"machinefile": map[string]string{"name": devFile}}
+		m.Apps = map[catalog.Method]*playApps{catalog.MethodApt: apt}
+	} else if s, ok := f.Insides[vm.Name]; ok && len(s.Needs) > 0 {
+		m.Apps = map[catalog.Method]*playApps{catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0"}, Behind: map[string]string{"gh": "2.98.0", "jq": "1.8.2"}}}
+	}
+	programs := map[accounts.Program]accounts.Facts{}
+	for _, read := range f.Accounts.Machines {
+		if read.Name == vm.Name {
+			for _, a := range read.Accounts {
+				if program, ok := programOf(a.Provider); ok {
+					programs[program] = factsOf(program, a)
+				}
+			}
+		}
+	}
+	if len(programs) > 0 {
+		m.Accounts = &playSignIns{Programs: programs}
+	}
+	return m
+}

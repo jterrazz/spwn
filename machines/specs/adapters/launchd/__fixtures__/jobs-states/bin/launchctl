@@ -1,0 +1,12 @@
+#!/bin/sh
+# launchctl as macOS 26 printed it on the owner's Mac (2026-11-03), labels
+# renamed: `list` for the user domain, `print system/<label>` per daemon.
+printf 'launchctl %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "list") printf 'PID\tStatus\tLabel\n1187\t0\tcom.example.sync-running\n-\t78\tcom.example.backup-failing\n-\t0\tcom.example.report-idle\n-\t0\tcom.example.ghost-missing\n-\t0\tcom.apple.Finder\n' ;;
+    "print system/com.docker.socket") printf 'system/com.docker.socket = {\n\tactive count = 1\n\tpath = /Library/LaunchDaemons/com.docker.socket.plist\n\ttype = LaunchDaemon\n\tstate = running\n\n\tprogram = /usr/local/bin/docker-socket\n\tpid = 529\n\timmediate reason = speculative\n\tlast exit code = (never exited)\n\n\tendpoints = {\n\t\tstate = active\n\t}\n}\n' ;;
+    "print system/com.docker.vmnetd") printf 'system/com.docker.vmnetd = {\n\tactive count = 0\n\tpath = /Library/LaunchDaemons/com.docker.vmnetd.plist\n\ttype = LaunchDaemon\n\tstate = not running\n\n\tprogram = /usr/local/bin/vmnetd\n\truns = 3\n\tlast exit code = 1\n\n\tendpoints = {\n\t\tpid = 77\n\t\tstate = running\n\t}\n}\n' ;;
+    "print system/org.example.agent-idle") printf 'system/org.example.agent-idle = {\n\tactive count = 0\n\tpath = /Library/LaunchDaemons/org.example.agent-idle.plist\n\ttype = LaunchDaemon\n\tstate = not running\n\n\tprogram = /usr/local/bin/agent\n\tlast exit code = (never exited)\n}\n' ;;
+    "print system/org.example.relay-unloaded") echo 'Bad request.' >&2; echo 'Could not find service "org.example.relay-unloaded" in domain for system' >&2; exit 113 ;;
+    *) echo "stub launchctl: unexpected invocation: $*" >&2; exit 97 ;;
+esac

@@ -1,0 +1,7 @@
+description: 'a dock package applied while the Dock is down, just restarted, is done'
+fixture: ./__fixtures__/settings-dock-down/
+runs:
+    - command: 'settings apply dock-spacer'
+      exit: 0
+      stdout: |
+          ●	dock-spacer	dock: spacer tile added

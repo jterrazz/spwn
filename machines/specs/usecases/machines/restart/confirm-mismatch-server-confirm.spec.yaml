@@ -1,0 +1,12 @@
+description: 'a --confirm that is not the server''s name is refused, nothing restarted'
+env: two-macs
+runs:
+    - command: 'machines restart infra --on mac-mini --confirm=inf'
+      exit: 2
+      stderr: |
+          Error: not restarted: you typed "inf", not "infra"
+          Hint: in a script: --confirm=infra
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":2001,"want":"running"}

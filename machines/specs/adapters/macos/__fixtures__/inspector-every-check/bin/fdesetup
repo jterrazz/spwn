@@ -1,0 +1,6 @@
+#!/bin/sh
+# fdesetup status: FileVault on, or off once $HOME/.off exists.
+case "$*" in
+    status) if [ -e "$HOME/.off" ]; then echo "FileVault is Off."; else echo "FileVault is On."; fi ;;
+    *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;
+esac

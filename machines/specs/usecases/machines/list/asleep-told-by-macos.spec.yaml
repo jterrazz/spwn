@@ -1,0 +1,22 @@
+description: 'a desktop Mac whose engine heard macOS say it goes to sleep is asleep once silent, not unreachable'
+env: two-macs
+runs:
+    - command: 'world will-sleep mac-mini'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[] | select(.name == "mac-mini") | {reach, laptop: .hardware.laptop}'''
+      exit: 0
+      stdout: |
+          {"reach":"answers","laptop":false}
+    - command: 'world offline mac-mini'
+      exit: 0
+    - command: 'world advance 2m'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[] | select(.name == "mac-mini") | {reachable, reach}'''
+      exit: 0
+      stdout: |
+          {"reachable":false,"reach":"asleep"}
+    - command: 'machines | /usr/bin/grep -w Mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	mac-mini	Mac	mac-mini	Asleep · last answer 10:00

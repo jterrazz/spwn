@@ -1,0 +1,57 @@
+description: 'five crashes within 10 min are a loop: red, told once, and it keeps trying every 60 s'
+env: two-macs
+runs:
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra | /usr/bin/grep Restarts'
+      exit: 0
+      stdout: |
+          ●	Restarts	↺ 1 · last just now
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra | /usr/bin/grep Restarts'
+      exit: 0
+      stdout: |
+          ●	Restarts	↺ 2 · last just now
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra | /usr/bin/grep Restarts'
+      exit: 0
+      stdout: |
+          ●	Restarts	↺ 3 · last just now
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra | /usr/bin/grep Restarts'
+      exit: 0
+      stdout: |
+          ●	Restarts	↺ 4 · last just now
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ✗	infra	Server	mac-mini	In a loop · always on	8 CPU	24 GB	↺ 5 in 10 min · waiting 60 s
+          # Needs you
+          ✗	infra	is in a loop: ↺ 5 in 10 min
+    - command: 'machines infra | /usr/bin/grep Restarts'
+      exit: 0
+      stdout: |
+          ✗	Restarts	↺ 5 in 10 min · waiting 60 s
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.state, .restarts, .restarted_after_s]'''
+      exit: 0
+      stdout: |
+          ["running",6,60]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 60, $down <= 61]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]?.Text]'' world.json'
+      exit: 0
+      stdout: |
+          ["infra stopped and is restarting (↺ 1)","infra stopped and is restarting (↺ 2)","infra stopped and is restarting (↺ 3)","infra stopped and is restarting (↺ 4)","infra is in a loop: 5 restarts in 10 min · waiting 60 s"]

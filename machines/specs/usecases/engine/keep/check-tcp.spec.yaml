@@ -1,0 +1,22 @@
+description: 'a host:port check passes while the port accepts a connection, and fails once it refuses'
+env: two-macs
+runs:
+    - command: 'machines edit infra --check infra:6443 --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	infra	health check infra:6443, from its next health run
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines infra | /usr/bin/grep Check'
+      exit: 0
+      stdout: |
+          ●	Check passes	infra:6443
+    - command: 'world fault CheckRunner.Run'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines infra | /usr/bin/grep Check'
+      exit: 0
+      stdout: |
+          ◐	Check failing	since 10:02 · infra:6443

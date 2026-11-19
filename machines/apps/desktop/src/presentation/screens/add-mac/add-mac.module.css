@@ -1,0 +1,20 @@
+.login {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+}
+.toggle {
+    all: unset;
+    cursor: pointer;
+    color: var(--new);
+    font-size: var(--text-label);
+    align-self: flex-start;
+}
+.fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+}
+.outcome:empty {
+    display: none;
+}

@@ -1,0 +1,50 @@
+description: 'disk --all unfolds every group: every Can rebuild row, Your data and Never touched row by row'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x60 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" disk --all'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · 388 GB free of 994 GB · 1 misplaced folder
+
+          Misplaced
+                          size
+            ◐ ~/.tart  73.3 GB  misplaced · tart  → station disk move ~/.tart
+          Can rebuild
+                           size
+            ● go        19.4 GB
+            ● xcode      5.8 GB
+            ● homebrew   2.1 GB
+            ● pnpm       1.8 GB
+            ● mise       1.2 GB
+            ● rust       900 MB
+            ● node       800 MB
+            ● bun        600 MB
+            ● discord    400 MB
+            ● ghostty    400 MB
+            ● claude     300 MB
+            ● zed        300 MB
+            ● cursor     200 MB
+            ● notion     200 MB
+            ● codex      100 MB
+            ● gh         100 MB
+            ● helm       100 MB
+            ● starship   100 MB
+          Your data
+                           size
+            ● xcode     19.1 GB
+            ● orbstack  15.8 GB
+            ● claude     3.6 GB
+            ● ollama     1.9 GB
+            ● zed        1.2 GB
+          Never touched
+                     size
+            ● gpg  200 KB
+            ● ssh  100 KB
+
+          → station disk free  frees every Can rebuild row, nothing is lost

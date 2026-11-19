@@ -1,0 +1,46 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "engine stop",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "engine",
+            "mark": "pending",
+            "label": "engine",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station engine start"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+description: 'a server made on mac-mini passes its health steps, its check waits, and nothing is set up inside'
+env: two-macs
+runs:
+    - command: 'machines create infra-2 --server --cpus 8 --memory 24G --disk 80G --check https://infra-2:6443/readyz --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ◐	Check waiting	normal: what answers comes with your tooling
+          ●	infra-2	is a server	always on · 8 CPU · 24 GB · 80 GB
+          ●	Station sets up nothing inside	no apps, settings or accounts: set it up with your tooling
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms["infra-2"] | {lifetime: .kept.lifetime, want: .kept.want, check: .kept.check, size, running: (.pid > 0), ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
+      exit: 0
+      stdout: |
+          {"lifetime":"always-on","want":"running","check":"https://infra-2:6443/readyz","size":{"CPUs":8,"Memory":25769803776,"Disk":80000000000},"running":true,"ran":[]}

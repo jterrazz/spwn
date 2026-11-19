@@ -1,0 +1,5 @@
+#!/bin/sh
+# ssh to a machine that does not answer: the argv is recorded in $HOME/.calls, and
+# ssh ends with its own 255.
+printf 'ssh %s\n' "$*" >> "$HOME/.calls"
+exit 255

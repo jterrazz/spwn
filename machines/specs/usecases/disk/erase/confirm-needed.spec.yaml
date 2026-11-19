@@ -1,0 +1,17 @@
+description: 'an erase off a terminal without --confirm, or with --yes, is refused before anything is erased'
+env: two-macs
+runs:
+    - command: 'disk erase xcode'
+      exit: 2
+      stderr: |
+          Error: refusing without the name typed: xcode
+          Hint: in a script: --confirm=xcode
+    - command: 'disk erase xcode --yes'
+      exit: 2
+      stderr: |
+          Error: unknown flag: --yes
+          Hint: run station disk erase --help
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {derived: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], devices: .["~/Library/Developer/CoreSimulator/Devices/A/data"]}'' world.json'
+      exit: 0
+      stdout: |
+          {"derived":5800000000,"devices":19100000000}

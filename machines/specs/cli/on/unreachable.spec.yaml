@@ -1,0 +1,7 @@
+description: 'ssh''s own 255 is a machine that cannot be reached: a read says so and exits 0'
+fixture: ./__fixtures__/ssh-down/
+runs:
+    - command: 'apps --on x'
+      exit: 0
+      stdout: |
+          ✗ x does not answer

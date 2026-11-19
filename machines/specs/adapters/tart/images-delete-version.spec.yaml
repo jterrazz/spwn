@@ -1,0 +1,21 @@
+description: 'delete image@version removes that version only; the VMs made from it stay'
+fixture:
+    - ./__fixtures__/images-stubs/
+    - ./__fixtures__/images-recorded/
+runs:
+    - command: 'images delete base-ubuntu@2026.11.01 --yes'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.01	deleted
+      files:
+          .calls:
+              contains: 'tart delete station-image-base-ubuntu-2026.11.01'
+    - command: '--version > /dev/null; /bin/ls .local/state/station/images/base-ubuntu .local/state/station/vms; /usr/bin/grep -c ''tart delete'' .calls'
+      exit: 0
+      stdout: |
+          .local/state/station/images/base-ubuntu:
+          2026.11.07.json
+
+          .local/state/station/vms:
+          api.json
+          1

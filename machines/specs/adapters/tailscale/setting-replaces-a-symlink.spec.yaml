@@ -1,0 +1,19 @@
+description: 'a symlink to the App Store bundle''s CLI crashes, so tailscale-cli replaces it with its script'
+fixture:
+    - ../__fixtures__/system-tools/
+    - ../../__fixtures__/tailscale-app-store/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/rm bin/tailscale; /bin/mkdir -p .local/bin; /bin/ln -s "$PWD/root/Applications/Tailscale.app/Contents/MacOS/Tailscale" .local/bin/tailscale; "$STATION" settings apply tailscale-cli </dev/null; /bin/ls -l .local/bin/tailscale | /usr/bin/cut -c1'
+      exit: 0
+      stdout: |
+          ●	tailscale-cli	~/.local/bin/tailscale: written
+          -
+      files:
+          .local/bin/tailscale:
+              equals: |
+                  #!/bin/sh
+                  exec {{workdir}}/root/Applications/Tailscale.app/Contents/MacOS/Tailscale "$@"
+          root/Applications/Tailscale.app/Contents/MacOS/Tailscale:
+              contains:
+                  - 'The Tailscale app''s CLI as the specs need it'

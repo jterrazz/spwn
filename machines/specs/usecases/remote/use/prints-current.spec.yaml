@@ -1,0 +1,17 @@
+description: 'station use prints the machine this terminal uses and since when, This Mac when none'
+env: two-macs
+runs:
+    - command: 'use'
+      exit: 0
+      stdout: |
+          	On This Mac in this terminal.
+    - command: 'use linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1 in this terminal. Other terminals stay on This Mac.
+    - command: 'world advance 2m'
+      exit: 0
+    - command: 'use'
+      exit: 0
+      stdout: |
+          	On linux-1 in this terminal since 10:00

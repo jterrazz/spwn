@@ -1,0 +1,5 @@
+#!/bin/sh
+# bash as station's script installer meets it: each argument recorded in brackets.
+line='bash'
+for arg in "$@"; do line="$line [$arg]"; done
+printf '%s\n' "$line" >> "$HOME/.calls"

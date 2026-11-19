@@ -1,0 +1,443 @@
+{
+  "schema": "station.page/v1",
+  "id": "background",
+  "command": "background",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/background",
+            "mark": "broken",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "6 background tasks"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "1 failing"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "1 orphan"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "failing",
+      "title": "Failing",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.example.brain.x-snapshot",
+            "mark": "broken",
+            "label": "com.example.brain.x-snapshot",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "user"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "failing"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "last exit 2"
+                  }
+                ]
+              },
+              {
+                "kind": "none"
+              }
+            ],
+            "detail": {
+              "kind": "path",
+              "text": "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist"
+            },
+            "reason": "failing",
+            "hint": {
+              "command": "station background remove com.example.brain.x-snapshot"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "orphans",
+      "title": "Orphans",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.bjango.istatmenus.installer",
+            "mark": "attention",
+            "label": "com.bjango.istatmenus.installer",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "root"
+              },
+              {
+                "kind": "text",
+                "text": "idle"
+              },
+              {
+                "kind": "text",
+                "text": "iStat Menus (gone)"
+              }
+            ],
+            "detail": {
+              "kind": "path",
+              "text": "/Library/LaunchDaemons/com.bjango.istatmenus.installer.plist"
+            },
+            "reason": "orphan",
+            "hint": {
+              "command": "sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist",
+              "external": true
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "station",
+      "title": "Station",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.jterrazz.station.engine",
+            "mark": "ok",
+            "label": "com.jterrazz.station.engine",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "user"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "running"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "pid 812"
+                  }
+                ]
+              },
+              {
+                "kind": "none"
+              }
+            ],
+            "detail": {
+              "kind": "path",
+              "text": "~/Library/LaunchAgents/com.jterrazz.station.engine.plist"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "known",
+      "title": "Known apps",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.github.facebook.watchman",
+            "mark": "ok",
+            "label": "com.github.facebook.watchman",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "user"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "running"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "pid 3464"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "watchman"
+              }
+            ],
+            "detail": {
+              "kind": "path",
+              "text": "~/Library/LaunchAgents/com.github.facebook.watchman.plist"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "unknown",
+      "title": "Unknown",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.example.brain.sync",
+            "mark": "ok",
+            "label": "com.example.brain.sync",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "user"
+              },
+              {
+                "kind": "text",
+                "text": "idle"
+              },
+              {
+                "kind": "none"
+              }
+            ],
+            "detail": {
+              "kind": "path",
+              "text": "~/Library/LaunchAgents/com.example.brain.sync.plist"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "com.example.brain.late",
+            "mark": "attention",
+            "label": "com.example.brain.late",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "user"
+              },
+              {
+                "kind": "text",
+                "text": "?"
+              },
+              {
+                "kind": "none"
+              }
+            ],
+            "detail": {
+              "kind": "path",
+              "text": "~/Library/LaunchAgents/com.example.brain.late.plist"
+            },
+            "reason": "late"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "x",
+      "label": "remove",
+      "on": "row",
+      "confirm": {
+        "yes": "remove"
+      },
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "c",
+      "label": "copy the command",
+      "on": "row",
+      "priority": 2
+    }
+  ]
+}

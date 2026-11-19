@@ -1,0 +1,84 @@
+#!/bin/sh
+# Tart as the VM specs need it: every call is recorded in $HOME/.calls, and the VMs are
+# the files of $HOME/.tart-vms (each holding its state). `run` marks the VM running
+# and lasts until something marks it stopped (a poweroff, `tart stop`), its home is
+# removed, or 300 s pass (a home kept by hand never holds a run forever), or, when its
+# script answers/tart/run.<n> says `after <seconds>`, that long; then a poweroff the
+# guest declared ($HOME/.tart-intents/<vm>) or a script line `intent` writes the
+# intent into the --serial-path file, a line `say <word>` writes the word there, and a
+# line `exit <code>` is its exit (default 0).
+# `ip` answers answers/tart/ip (default 192.168.64.5); `ip` and `stop` exit with
+# answers/tart/ip.exit and answers/tart/stop.exit when present (a VM that will not stop).
+vms="$HOME/.tart-vms"
+answers="${0%/*}/../answers/tart"
+printf 'tart %s\n' "$*" >> "$HOME/.calls"
+case "$1" in
+    --version) echo "2.41.1" ;;
+    list)
+        printf '['
+        sep=''
+        for vm in "$vms"/*; do
+            [ -f "$vm" ] || continue
+            state=$(/bin/cat "$vm")
+            printf '%s{"Source":"local","Name":"%s","Disk":20,"Size":20,"State":"%s","Running":%s}' "$sep" "${vm##*/}" "$state" "$([ "$state" = running ] && echo true || echo false)"
+            sep=','
+        done
+        printf ']\n'
+        ;;
+    clone) echo stopped > "$vms/$3" ;;
+    set) ;;
+    ip)
+        [ -f "$answers/ip.exit" ] && exit "$(/bin/cat "$answers/ip.exit")"
+        if [ -f "$answers/ip" ]; then /bin/cat "$answers/ip"; else echo "192.168.64.5"; fi
+        ;;
+    stop)
+        if [ -f "$answers/stop.exit" ]; then echo "stub tart: the VM did not stop" >&2; exit "$(/bin/cat "$answers/stop.exit")"; fi
+        eval "vm=\${$#}"
+        echo stopped > "$vms/$vm"
+        ;;
+    delete) /bin/rm -f "$vms/$2" ;;
+    run)
+        n=$(/bin/cat "$HOME/.tart-runs" 2> /dev/null || echo 0)
+        n=$((n + 1))
+        echo "$n" > "$HOME/.tart-runs"
+        prev=''
+        for arg in "$@"; do
+            [ "$prev" = --serial-path ] && console=$arg
+            prev=$arg
+            vm=$arg
+        done
+        printf 'console before run %s: %s\n' "$n" "$(/usr/bin/wc -c < "$console" | /usr/bin/tr -d ' ')" >> "$HOME/.consoles"
+        echo running > "$vms/$vm"
+        script="$answers/run.$n"
+        after=$([ -f "$script" ] && /usr/bin/sed -n 's/^after //p' "$script")
+        if [ -n "$after" ]; then
+            /bin/sleep "$after"
+        else
+            t=0
+            while [ "$(/bin/cat "$vms/$vm" 2> /dev/null)" = running ] && [ $t -lt 3000 ]; do
+                /bin/sleep 0.1
+                t=$((t + 1))
+            done
+        fi
+        if [ -f "$HOME/.tart-intents/$vm" ]; then
+            echo "station-intent=poweroff" >> "$console"
+            /bin/rm -f "$HOME/.tart-intents/$vm"
+        fi
+        code=0
+        if [ -f "$script" ]; then
+            while read -r word value; do
+                case "$word" in
+                    intent) echo "station-intent=poweroff" >> "$console" ;;
+                    say) echo "$value" >> "$console" ;;
+                    exit) code=$value ;;
+                esac
+            done < "$script"
+        fi
+        [ -f "$vms/$vm" ] && echo stopped > "$vms/$vm"
+        exit "$code"
+        ;;
+    *)
+        echo "stub tart: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

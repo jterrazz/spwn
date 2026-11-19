@@ -1,0 +1,47 @@
+description: 'background --all unfolds every group: Station, Known apps and Unknown row by row'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x60 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" background --all'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · 14 background tasks · 1 failing · 3 orphans
+
+          Failing
+            ✗ com.example.brain.x-snapshot  user  failing · last exit 2  ~/Library/LaunchA…n.x-snapshot.plist
+              → station background remove com.example.brain.x-snapshot
+          Orphans
+            ◐ com.bjango.istatmenus.installer
+              root  not loaded  iStat Menus (gone)
+              /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
+              → sudo launchctl bootout system/com.bjango.istatmenus.installer &&
+                sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
+            ◐ com.docker.socket  root  idle  Docker.app (gone)  /Library/…/com.docker.socket.plist
+              → sudo launchctl bootout system/com.docker.socket &&
+                sudo rm /Library/LaunchDaemons/com.docker.socket.plist
+            ◐ com.docker.vmnetd  root  idle  Docker.app (gone)  /Library/…/com.docker.vmnetd.plist
+              → sudo launchctl bootout system/com.docker.vmnetd &&
+                sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
+          ● com.jterrazz.station.engine · user · running · pid 812
+            ~/Library/LaunchAgents/com.jterrazz.station.engine.plist
+          Known apps
+            ● com.adguard.mac.adguard.loginhelper
+              user  running · pid 702  AdGuard
+              ~/Library/LaunchAgents/com.adguard.mac.adguard.loginhelper.plist
+            ● com.discord.helper            user  idle                Discord         ~/Library/L…elper.plist
+            ● com.github.facebook.watchman  user  running · pid 3464  watchman        ~/Library/L…chman.plist
+            ● com.google.keystone.agent     user  idle                Google Updater  ~/Library/L…agent.plist
+            ● com.microsoft.update.agent    user  idle                Microsoft       ~/Library/L…agent.plist
+            ● dev.orbstack.OrbStack.privhelper
+              root  idle  OrbStack  /Library/LaunchDaemons/dev.orbstack.OrbStack.privhelper.plist
+            ● io.tailscale.ipn.macsys.login-item-helper
+              user  running · pid 611  Tailscale
+              ~/Library/LaunchAgents/io.tailscale.ipn.macsys.login-item-helper.plist
+          Unknown
+            ● com.example.brain.sync       user  running · pid 4120  ~/…/com.example.brain.sync.plist
+            ● homebrew.mxcl.postgresql@16  user  running · pid 901   ~/…/homebrew.mxcl.postgresql@16.plist

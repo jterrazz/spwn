@@ -1,0 +1,17 @@
+description: 'with Serve off the packages'' env exports the local URL; once it is on, the public one'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/engine-vm/
+env: engine
+serve: sshd
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "42280-42299"}/'' .config/station/preferences.json; : > answers/tailscale/status.serve-off; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api | /usr/bin/grep "Serve is off"; /usr/bin/grep -E "EXPO|VITE|STATION" vm/.config/station/services.env; /bin/rm answers/tailscale/status.serve-off; "$STATION" machines stop api --yes > /dev/null; "$STATION" machines start api > /dev/null; /usr/bin/grep -E "EXPO|VITE|STATION" vm/.config/station/services.env; "$STATION" machines stop api --yes > /dev/null; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          ◐	ports	Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console
+          export EXPO_PACKAGER_PROXY_URL='http://127.0.0.1:{{port}}'
+          export STATION_PUBLIC_HOST='127.0.0.1'
+          export __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS='127.0.0.1'
+          export EXPO_PACKAGER_PROXY_URL='https://macbook.tail1234.ts.net:42280'
+          export STATION_PUBLIC_HOST='macbook.tail1234.ts.net'
+          export __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS='macbook.tail1234.ts.net'

@@ -1,0 +1,10 @@
+{
+    "group": "menu",
+    "id": "menu.page.mac",
+    "note": "mac-mini's … menu: Open in Terminal; Restart…, Stop everything…; Forget….",
+    "pages": ["pages/machines.macs.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {}
+    }
+}

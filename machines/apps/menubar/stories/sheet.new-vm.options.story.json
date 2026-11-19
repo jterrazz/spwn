@@ -1,0 +1,15 @@
+{
+    "group": "sheet",
+    "id": "sheet.new-vm.options",
+    "note": "Options open on mac-mini: Kind, Lifetime, System, the memory slider hatched past its free memory, Share folded, Name.",
+    "pages": ["pages/machines.sheet.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "answers": {
+                "Options": "open"
+            },
+            "id": "new-vm:mac-mini"
+        }
+    }
+}

@@ -1,0 +1,13 @@
+#!/bin/sh
+# env inside the build VM: the image phase (MACHINEFILE=<name> bash -s) keeps its stdin in
+# .bake.stdin and its env in .bake.env, then prints the lock line and answers/bake/lock when
+# present; any other env is the system's.
+case "$1 $2 $3" in
+    "MACHINEFILE="*" bash -s")
+        printf '%s\n' "$1" > "$TEST_WORKDIR/.bake.env"
+        /bin/cat > "$TEST_WORKDIR/.bake.stdin"
+        echo '--- station lock'
+        if [ -f "$TEST_WORKDIR/answers/bake/lock" ]; then /bin/cat "$TEST_WORKDIR/answers/bake/lock"; fi
+        ;;
+    *) exec /usr/bin/env "$@" ;;
+esac

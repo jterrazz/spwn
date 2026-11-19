@@ -1,0 +1,8 @@
+description: 'a keep-awake needs the engine: with it stopped, exit 1 and the way to start it'
+env: engine-stopped
+runs:
+    - command: 'awake 4h'
+      exit: 1
+      stderr: |
+          Error: the engine is stopped on macbook-pro
+          Hint: station engine start

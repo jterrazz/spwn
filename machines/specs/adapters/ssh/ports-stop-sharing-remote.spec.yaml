@@ -1,0 +1,17 @@
+description: 'a VM of another Mac stops sharing through that Mac''s engine, over ssh, after the yes asked here'
+fixture:
+    - ../../__fixtures__/vms/
+    - ./__fixtures__/ports-remote/
+runs:
+    - command: 'ports stop-sharing w:3000; /usr/bin/grep -c ''station engine attach'' .calls'
+      exit: 0
+      stdout: |
+          1
+      stderr: |
+          Error: refusing to stop sharing w:3000 without --yes
+          Hint: re-run with --yes
+    - command: 'ports stop-sharing w 3000 --yes; /usr/bin/grep -c ''station engine attach'' .calls'
+      exit: 0
+      stdout: |
+          ●	w:3000	not shared
+          2

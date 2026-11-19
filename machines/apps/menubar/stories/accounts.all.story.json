@@ -1,0 +1,9 @@
+{
+    "group": "accounts",
+    "heightNote": "4.5 pt shorter than the prototype: MachineHeader's back line is 24 pt where the prototype's is 28 (its 24 pt button and 4 pt margin), which a page without segments does not make up; every card below matches it row for row",
+    "id": "accounts.all",
+    "note": "Accounts · All machines: what needs you (npm signed out on This Mac), then each machine with the accounts it is signed in to or granted (a grant to a VM of This Mac with its Remove menu), the Macs not read, then Full list in Terminal and Grant a password….",
+    "pages": ["pages/machines.accounts.accounts.json"],
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
+}

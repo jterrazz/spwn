@@ -1,0 +1,13 @@
+description: 'a device code is read from the errors of its program, then its row reads signed in'
+fixture:
+    - ./__fixtures__/signins/
+env: engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/touch gh.out; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .error then .error.code elif .out.Step then [.out.Step.Kind, .out.Step.Code, .out.Step.Site] else [.out.Programs[0].State, .out.Programs[0].Who] end''; /usr/bin/grep -c "^gh auth login --web --hostname github.com --git-protocol https --skip-ssh-key$" .calls'
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"gh"}}
+      exit: 0
+      stdout: |
+          ["device-code","0A1B-2C3D","github.com"]
+          ["signed-in","you"]
+          1

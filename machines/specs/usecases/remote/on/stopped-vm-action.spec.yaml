@@ -1,0 +1,8 @@
+description: 'an action that runs inside a stopped VM is refused with how to start it'
+env: two-macs
+runs:
+    - command: 'settings apply starship --on api'
+      exit: 2
+      stderr: |
+          Error: api is stopped
+          Hint: station machines start api

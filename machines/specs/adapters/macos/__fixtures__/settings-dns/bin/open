@@ -1,0 +1,9 @@
+#!/bin/sh
+printf 'open %s\n' "${1##*/}" >> "$HOME/.calls"
+case "$*" in
+    */quad9-dns.mobileconfig) ;;
+    *)
+        echo "stub open: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

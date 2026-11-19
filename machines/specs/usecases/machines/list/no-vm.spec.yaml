@@ -1,0 +1,17 @@
+description: 'a Mac with no VM says No VMs yet under its row, and the next step creates one'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - one-mac
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x30 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          1 machine · 1 running · 0 stopped · nothing needs you
+
+              MACHINE   KIND  STATE
+            ● This Mac  Mac   Engine running
+               No VMs yet  → station machines create

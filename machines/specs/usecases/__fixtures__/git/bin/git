@@ -1,0 +1,6 @@
+#!/bin/sh
+# git as the run git alias needs it: every argv is recorded one word per <..>, so a
+# message that reached git as separate words is told from one joined.
+printf 'git' >> "$HOME/.calls"
+for word in "$@"; do printf ' <%s>' "$word" >> "$HOME/.calls"; done
+printf '\n' >> "$HOME/.calls"

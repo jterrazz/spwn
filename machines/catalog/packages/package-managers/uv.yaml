@@ -1,0 +1,24 @@
+package: station.package/v1
+kind: manager
+name: uv
+description: Fast Python package and project manager
+manages: [uv]
+provides: [uv]
+methods:
+    - os: macos
+      brew: uv
+    - family: linux
+      arch: arm64
+      github-release: { repo: astral-sh/uv, asset: 'uv-aarch64-unknown-linux-gnu.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: astral-sh/uv, asset: 'uv-x86_64-unknown-linux-gnu.tar.gz' }
+disk:
+    paths:
+        - path: '{cache}/uv'
+          level: cache
+    installed: ['{data}/uv/tools', '{data}/uv/python', ~/.local/bin/uv]
+    free:
+        - run: [uv, cache, clean]
+          uses: uv
+    no-erase: 'what uv installs is apps: station apps remove <app>'

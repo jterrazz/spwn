@@ -1,0 +1,4 @@
+# Paths the suite's own native commands put where their user asked, never station's
+# nor a tool's own: one shell glob per line, relative to $HOME.
+# `uv tool install pyflakes`: uv links a tool's executable into ~/.local/bin.
+.local/bin/pyflakes

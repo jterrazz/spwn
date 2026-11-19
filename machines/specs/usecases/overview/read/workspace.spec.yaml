@@ -1,0 +1,52 @@
+description: 'overview --on linux-1: the On line, its first line, the sections it reads inside, its health'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" overview --on linux-1'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          On linux-1:
+          linux-1 · Workspace on This Mac · Ephemeral · up 2 h
+
+          Needs you
+            ✗ wrangler sign-in fails: Refused at the provider
+              station accounts login wrangler --on linux-1
+          Activity  memory 1.1 of 4 GB · 12.4 GB free
+          Apps      ● 2 ok · ○ 71 not installed
+          Settings  set by station · ○ 0 of 6
+          Disk      ● 12.4 GB free · 1.5 GB can rebuild
+          Ports     Public 0 · Private 2
+          Accounts  ● 2 · ✗ wrangler
+          Health
+            ● Running
+            ● Has an address  192.168.64.5
+            ● SSH answers
+            ● Size            4 CPU · 8 GB · 50 GB
+
+          → station accounts login wrangler --on linux-1
+    - command: 'overview --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Needs you
+          ✗	wrangler sign-in fails: Refused at the provider	station accounts login wrangler --on linux-1
+          	Activity	memory 1.1 of 4 GB · 12.4 GB free
+          	Apps	● 2 ok · ○ 71 not installed
+          	Settings	set by station · ○ 0 of 6
+          	Disk	● 12.4 GB free · 1.5 GB can rebuild
+          	Ports	Public 0 · Private 2
+          	Accounts	● 2 · ✗ wrangler
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Size	4 CPU · 8 GB · 50 GB
+    - command: 'overview --on linux-1 --json | /usr/bin/jq -c ''[.machine.kind, [.sections[].id], .health]'''
+      exit: 0
+      stdout: |
+          ["workspace",["activity","apps","settings","disk","ports","accounts"],{"running":true,"address":true,"ssh":true,"check":null}]

@@ -1,0 +1,14 @@
+description: 'a serve a killed engine left running is killed at the next engine start, whatever the locale'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/serving/
+env: engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "40090-40109"}/'' .config/station/preferences.json; : > answers/tailscale/serve.hang; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -s serve.pid ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; kill -9 $d; wait $d 2>/dev/null; p=$(/bin/cat serve.pid); kill -0 $p && echo "left running"; /bin/rm answers/tailscale/serve.hang; LANG=fr_FR.UTF-8 LC_ALL=fr_FR.UTF-8 "$STATION" engine run 2> second.err & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; kill -0 $p 2>/dev/null || echo "reaped"; /bin/ls .local/state/station/children | /usr/bin/wc -l | /usr/bin/tr -d " "; kill $d; wait $d; /usr/bin/grep -v "tailnet: certificate for" second.err | /usr/bin/cut -d" " -f2-'
+      exit: 0
+      stdout: |
+          left running
+          reaped
+          0
+          children: killed 1 process(es) a killed engine left running

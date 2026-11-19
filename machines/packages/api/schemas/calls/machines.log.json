@@ -1,0 +1,49 @@
+{
+  "$defs": {
+    "machines.calls.LogOut": {
+      "additionalProperties": false,
+      "properties": {
+        "Lines": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Lines"
+      ],
+      "type": "object"
+    },
+    "machines.calls.VMIn": {
+      "additionalProperties": false,
+      "properties": {
+        "VM": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.log.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machines.log of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.VMIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.calls.LogOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.log",
+  "type": "object"
+}

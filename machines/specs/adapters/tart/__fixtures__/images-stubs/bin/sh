@@ -1,0 +1,4 @@
+#!/bin/sh
+# sh as the images specs need it: the detached run wrapper of a build runs under
+# the real /bin/sh, recorded nowhere, so the calls keep their order.
+exec /bin/sh "$@"

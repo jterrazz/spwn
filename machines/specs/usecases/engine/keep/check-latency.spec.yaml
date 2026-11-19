@@ -1,0 +1,15 @@
+description: 'a healthy server''s check runs every minute and its engine keeps how long each took'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0].latency | [.now_ms, .p50_ms, .peak_ms, .peak_at[11:16], .points_ms]'''
+      exit: 0
+      stdout: |
+          [41,41,41,"10:00",[41,41,41]]

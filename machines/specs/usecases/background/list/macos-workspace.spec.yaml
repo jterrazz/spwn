@@ -1,0 +1,11 @@
+description: 'station background --on a macOS workspace lists its own launchd tasks, grouped like a Mac''s'
+env: bridged-macos
+runs:
+    - command: 'background --on macos-1'
+      exit: 0
+      stdout: |
+          	On macos-1:
+          # Failing	1 ✗
+          ✗	dev.expo.metro	user	failing · last exit 1		~/Library/LaunchAgents/dev.expo.metro.plist · station background remove dev.expo.metro
+          # Known apps	1 ●
+          ●	com.github.facebook.watchman	user	running · pid 812	watchman	~/Library/LaunchAgents/com.github.facebook.watchman.plist

@@ -1,0 +1,11 @@
+description: 'a server in a restart loop needs you with the five restarts that made it a loop'
+env:
+    - standings
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary.Needs[] | select(.Subject == "loop-1") | .Text'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          "loop-1 is in a loop: ↺ 5 in 10 min"

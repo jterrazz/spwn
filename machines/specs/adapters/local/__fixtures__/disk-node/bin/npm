@@ -1,0 +1,12 @@
+#!/bin/sh
+# npm: a cache clean is recorded and empties the cache it names.
+case "$1 $2" in
+    "cache clean")
+        printf 'npm %s\n' "$*" >> "$HOME/.calls"
+        if [ "$4" = "--cache" ]; then /bin/rm -rf "$5/_cacache"; fi
+        ;;
+    *)
+        echo "stub npm: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

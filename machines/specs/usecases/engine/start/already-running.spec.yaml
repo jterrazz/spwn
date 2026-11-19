@@ -1,0 +1,7 @@
+description: 'start while the engine runs says so, and exits 0'
+env: two-macs
+runs:
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	already running · {{string}}

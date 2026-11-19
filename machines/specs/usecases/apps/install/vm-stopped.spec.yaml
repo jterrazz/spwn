@@ -1,0 +1,8 @@
+description: 'installing into a stopped workspace is refused with the verb that starts it, exit 2'
+env: two-macs
+runs:
+    - command: 'apps install jq --on api'
+      exit: 2
+      stderr: |
+          Error: api is stopped
+          Hint: station machines start api

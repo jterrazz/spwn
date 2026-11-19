@@ -1,0 +1,13 @@
+description: 'spotlight-exclude changes nothing once Spotlight finds nothing in ~/Developer'
+fixture: ./__fixtures__/settings-spotlight-excluded/
+runs:
+    - command: 'settings apply spotlight-exclude'
+      exit: 0
+      stdout: |
+          ●	spotlight-exclude	~/Developer: already excluded
+      files:
+          .calls:
+              equals: |
+                  mdfind
+                  mdfind
+                  mdfind

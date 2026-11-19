@@ -1,0 +1,5 @@
+{
+  "machinefile": {
+    "source": { "name": "studio", "url": "ext::sh -c id" }
+  }
+}

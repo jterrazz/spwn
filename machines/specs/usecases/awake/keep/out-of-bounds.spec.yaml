@@ -1,0 +1,22 @@
+description: 'a keep-awake lasts from 1 min to 24 h: 25h and 0m are refused, exit 2, and nothing is held'
+env: two-macs
+runs:
+    - command: 'awake 25h'
+      exit: 2
+      stderr: |
+          Error: "25h" is not between 1 min and 24 h
+          Hint: station awake 4h
+    - command: 'awake 0m'
+      exit: 2
+      stderr: |
+          Error: "0m" is not between 1 min and 24 h
+          Hint: station awake 4h
+    - command: 'awake soon'
+      exit: 2
+      stderr: |
+          Error: "soon" is not between 1 min and 24 h
+          Hint: station awake 4h
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          null

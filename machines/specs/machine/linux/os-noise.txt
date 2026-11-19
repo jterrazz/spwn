@@ -1,0 +1,2 @@
+# Paths the guest OS itself writes under $HOME while the suite runs, never a tool's.
+# One shell glob per line, relative to $HOME. Empty on Linux.

@@ -1,0 +1,23 @@
+description: 'a port declared via Tailscale Funnel is seen when the Mac''s Funnel lists it, and only then'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].tailnet.funnel = [8443]'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'world listen mac-mini 127.0.0.1:8443 caddy'
+      exit: 0
+    - command: 'world listen mac-mini 127.0.0.1:9443 caddy'
+      exit: 0
+    - command: 'ports declare mac-mini 8443 --via tailscale-funnel'
+      exit: 0
+      stdout: |
+          ●	8443 on mac-mini	declared public (Tailscale Funnel)
+    - command: 'ports declare mac-mini 9443 --via tailscale-funnel'
+      exit: 0
+      stdout: |
+          ●	9443 on mac-mini	declared public (Tailscale Funnel)
+    - command: 'ports --on mac-mini | /usr/bin/grep -e 443 -e "^# Public"'
+      exit: 0
+      stdout: |
+          # Public: reachable from anywhere else, internet or LAN, declared	1 ●	1 ◐
+          ●	mac-mini	8443	public	caddy	127.0.0.1:8443 this machine	Tailscale Funnel · Funnel lists it
+          ◐	mac-mini	9443	public	caddy	127.0.0.1:9443 this machine	declared, but Funnel does not list 9443 on mac-mini

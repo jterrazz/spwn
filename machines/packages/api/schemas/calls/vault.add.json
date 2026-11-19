@@ -1,0 +1,73 @@
+{
+  "$defs": {
+    "accounts.Added": {
+      "additionalProperties": false,
+      "properties": {
+        "ID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ID"
+      ],
+      "type": "object"
+    },
+    "vault.calls.VaultAddIn": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "enum": [
+            "sign-in",
+            "typed"
+          ],
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "token",
+            "fine-grained",
+            "api-key",
+            "oauth-token",
+            "password"
+          ],
+          "type": "string"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        },
+        "Value": {
+          "type": "string",
+          "writeOnly": true
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/vault.add.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call vault.add of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/vault.calls.VaultAddIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.Added"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "vault.add",
+  "type": "object"
+}

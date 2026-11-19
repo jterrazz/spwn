@@ -1,0 +1,20 @@
+package: station.package/v1
+kind: app
+name: claude-desktop
+description: Anthropic Claude desktop app
+bundle: Claude
+updates: self
+methods:
+    - os: macos
+      machine: computer
+      cask: claude
+disk:
+    paths:
+        - path: ~/Library/Application Support/Claude/vm_bundles
+          level: data
+        - path: ~/Library/Application Support/Claude/claude-code-vm
+          level: data
+        - path: ~/Library/Application Support/Claude/claude-code
+          level: data
+    no-erase: "an app's data is its account's: erase it in the app"
+    quit: Claude

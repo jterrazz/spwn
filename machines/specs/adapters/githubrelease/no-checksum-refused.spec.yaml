@@ -1,0 +1,20 @@
+description: 'a release that gives no checksum for its asset installs nothing'
+fixture:
+    - ./__fixtures__/release/
+    - ./__fixtures__/no-checksum/
+env:
+    - STATION_MACHINE_KIND=linux
+serve:
+    - github
+runs:
+    - command: 'apps install tool'
+      exit: 1
+      stdout: |
+          ✗	tool		github-release	~/.local/state/station/logs/tool.log
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: station apps install tool
+      files:
+          .local/state/station/logs/tool.log:
+              contains:
+                  - 'acme/tool v1.0.0 gives no checksum for tool-'

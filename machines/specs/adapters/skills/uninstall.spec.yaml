@@ -1,0 +1,14 @@
+description: 'a skill uninstalls through the skills CLI'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ../__fixtures__/skills-cli/
+    - ./__fixtures__/skill-lock/
+runs:
+    - command: 'apps remove frontend-design --yes'
+      exit: 0
+      stdout: |
+          ●	frontend-design		skill
+      files:
+          .calls:
+              contains:
+                  - 'skills remove -g -y -- frontend-design'

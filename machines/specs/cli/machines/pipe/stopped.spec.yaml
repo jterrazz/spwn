@@ -1,0 +1,11 @@
+description: 'a stopped persistent VM is named, with the verb that starts it'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/vm-api/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo stopped > .tart-vms/api; "$STATION" machines pipe api'
+      exit: 1
+      stderr: |
+          Error: api is stopped
+          Hint: station machines start api

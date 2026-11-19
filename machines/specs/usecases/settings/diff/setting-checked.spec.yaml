@@ -1,0 +1,8 @@
+description: 'a checked setting has no diff: station never writes it, and says where the owner fixes it'
+env: two-macs
+runs:
+    - command: 'settings diff firewall'
+      exit: 2
+      stderr: |
+          Error: firewall is checked, not set: station never runs sudo
+          Hint: System Settings > Network > Firewall

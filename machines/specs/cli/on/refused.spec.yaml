@@ -1,0 +1,42 @@
+description: '--on is refused where no call is sent, and a bare station --on reads that machine'
+fixture: ../../__fixtures__/far-mac/
+runs:
+    - command: 'shell zsh --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "shell"
+          Hint: run it on x itself: ssh x
+    - command: 'completion zsh --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "completion zsh"
+          Hint: run it on x itself: ssh x
+    - command: 'machines pipe v --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "machines pipe"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
+    - command: 'guest --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "guest"
+          Hint: run it on x itself: ssh x
+    - command: 'man --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "man"
+          Hint: run it on x itself: ssh x
+    - command: 'help --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "help"
+          Hint: run it on x itself: ssh x
+    - command: '--on x 2> err.txt </dev/null || echo "station exited $?"'
+      exit: 0
+      stdout: |
+          station exited 1
+      files:
+          err.txt:
+              contains: 'station is not installed on x'

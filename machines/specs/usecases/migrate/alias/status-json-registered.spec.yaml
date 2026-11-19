@@ -1,0 +1,7 @@
+description: 'a registered machine names itself, has a finished setup and no null anywhere'
+fixture: ../../../__fixtures__/status-registered/
+runs:
+    - command: 'status --json | /usr/bin/jq -c ''[.machine.name, .setup.state, ([paths(. == null)] | length)]'''
+      exit: 0
+      stdout: |
+          ["macbook","ok",0]

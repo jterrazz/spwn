@@ -1,0 +1,8 @@
+[1;38;2;76;79;105mSSH[m  [38;2;108;111;133minfra[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mssh admin@infra[m  [38;2;76;79;105mfrom any Mac: station's SSH block hops through mac-mini[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mIn an editor[m     [38;2;76;79;105mRemote SSH to infra[m
+  [38;2;76;79;105mNo password: your key. Files travel through the same name; no folder of a Mac is shared.[m
+[1;38;2;76;79;105mHow it is reached[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mThis Mac to mac-mini[m  [38;2;76;79;105mover Tailscale · as jterrazz.agent[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mmac-mini to infra[m     [38;2;76;79;105m192.168.64.7 · its Mac's private network[m
+[1;38;2;76;79;105mInside[m  [38;2;108;111;133mStation opens it for debugging only; your tooling owns what runs inside.[m

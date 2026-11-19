@@ -1,0 +1,8 @@
+description: 'with the engine stopped an edit is refused like every action'
+env: engine-stopped
+runs:
+    - command: 'machines edit api --memory 8G'
+      exit: 1
+      stderr: |
+          Error: the engine is stopped on macbook-pro
+          Hint: station engine start

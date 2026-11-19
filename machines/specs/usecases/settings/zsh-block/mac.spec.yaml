@@ -1,0 +1,30 @@
+description: 'shell zsh prints the loader, mise and guarded completion, and no nvm nor token on a Mac'
+runs:
+    - command: 'shell zsh | /usr/bin/grep -c ''eval "$(mise activate zsh)"'''
+      exit: 0
+      stdout: |
+          1
+    - command: 'shell zsh | /usr/bin/grep -c ''compdef _station station'''
+      exit: 0
+      stdout: |
+          1
+    - command: 'shell zsh | /usr/bin/grep -c ''functions\[compdef\]'''
+      exit: 0
+      stdout: |
+          2
+    - command: 'shell zsh | /usr/bin/grep -c ''starship init zsh'''
+      exit: 0
+      stdout: |
+          1
+    - command: 'shell zsh | /usr/bin/grep -ci ''nvm\|workstation\|CLAUDE_CODE_OAUTH_TOKEN'''
+      exit: 1
+      stdout: |
+          0
+    - command: 'shell zsh > first.zsh'
+      exit: 0
+    - command: 'shell zsh | /usr/bin/cmp first.zsh -'
+      exit: 0
+    - command: 'shell zsh > /dev/null'
+      exit: 0
+      files:
+          .calls: absent

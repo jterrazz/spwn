@@ -1,0 +1,14 @@
+description: 'linux-1 holds no gh sign-in, so gh gives its code to enter there'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "linux-1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | if .Step then {step: [.Step.Kind, .Step.Code, .Step.Site]} else {signed: [.Programs[0].Program, .Programs[0].State]} end'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"gh"}}
+      exit: 0
+      stdout: |
+          {"step":["device-code","WDJB-MJHT","github.com"]}
+          {"signed":["gh","signed-in"]}

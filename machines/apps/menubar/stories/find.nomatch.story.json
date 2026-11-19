@@ -1,0 +1,12 @@
+{
+    "group": "find",
+    "id": "find.nomatch",
+    "note": "Find \"zzzq\": no match, and the hint.",
+    "pages": ["pages/machines.find.find.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "find": {
+            "query": "zzzq"
+        }
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "group": "find",
+    "id": "find.more-open",
+    "note": "Find \"linux\" with Show 3 more picked: Ports opened in place to every match, Actions keeping its own Show N more.",
+    "pages": ["pages/machines.find.find.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "find": {
+            "highlight": 5,
+            "open": ["ports"],
+            "query": "linux"
+        }
+    }
+}

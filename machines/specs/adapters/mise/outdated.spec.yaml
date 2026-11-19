@@ -1,0 +1,19 @@
+description: 'mise outdated marks a runtime behind, an exact pin stays current, a bare update upgrades it'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/outdated/
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name | IN("node", "go")) | "\(.name) \(.state) \(.installed) \(.newest // "-") \(.detail)"'''
+      exit: 0
+      stdout: |
+          go ok 1.25.4 - 
+          node update-available 22.11.0 22.23.5 outdated
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	node	22.11.0	mise
+      files:
+          .calls:
+              contains:
+                  - 'mise outdated --json -- '
+                  - 'mise upgrade node'

@@ -1,0 +1,9 @@
+#!/bin/sh
+printf 'open %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    x-apple.systempreferences:com.apple.Spotlight-Settings.extension) ;;
+    *)
+        echo "stub open: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

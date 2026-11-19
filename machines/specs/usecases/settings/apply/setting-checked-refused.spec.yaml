@@ -1,0 +1,21 @@
+description: 'a checked setting named to apply is refused with its fix; nothing is run or written'
+env: two-macs
+runs:
+    - command: 'settings apply firewall'
+      exit: 2
+      stderr: |
+          Error: firewall is checked, not set: station never runs sudo
+          Hint: System Settings > Network > Firewall
+    - command: 'settings apply hushlogin firewall'
+      exit: 2
+      stderr: |
+          Error: firewall is checked, not set: station never runs sudo
+          Hint: System Settings > Network > Firewall
+    - command: '--version >/dev/null; test -e .hushlogin && echo written || echo nothing written'
+      exit: 0
+      stdout: |
+          nothing written
+    - command: 'settings firewall | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ◐	firewall	off	System Settings > Network > Firewall

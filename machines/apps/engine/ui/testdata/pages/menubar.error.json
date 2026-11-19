@@ -1,0 +1,82 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar",
+  "command": "menubar",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "role": "actions",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "The engine is stopped"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "engine",
+            "mark": "attention",
+            "label": "engine",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "stopped"
+              }
+            ],
+            "reason": "stopped"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "label": "Start the engine",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "start",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "engine",
+          "start"
+        ]
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true
+      }
+    }
+  ]
+}

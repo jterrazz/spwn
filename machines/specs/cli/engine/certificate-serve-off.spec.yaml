@@ -1,0 +1,10 @@
+description: 'with Serve off the engine asks for no certificate'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/engine-vm/
+env: engine
+runs:
+    - command: '--version >/dev/null; : > answers/tailscale/status.serve-off; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /bin/sleep 1; /usr/bin/grep -c "tailscale cert" .calls; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          0

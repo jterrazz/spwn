@@ -1,0 +1,14 @@
+description: 'a move of ~/.tart while tart runs is refused, and nothing moves'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.running = ["tart"]'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'disk move ~/.tart'
+      exit: 1
+      stderr: |
+          Error: tart is running: ~/.tart cannot move now
+          Hint: quit tart, then station disk move ~/.tart
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | with_entries(select(.key | test("tart"))) | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["~/.tart/vms/linux-dev/disk.img"]

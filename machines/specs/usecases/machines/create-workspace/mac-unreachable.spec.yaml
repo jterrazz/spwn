@@ -1,0 +1,8 @@
+description: 'a create sent to a Mac that does not answer fails, naming it by its short name, and makes nothing'
+env: mini-offline
+runs:
+    - command: 'machines create --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini does not answer
+          Hint: station machines mac-mini

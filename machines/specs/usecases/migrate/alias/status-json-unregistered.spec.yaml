@@ -1,0 +1,14 @@
+description: 'an unregistered machine has a null name, nothing else is null, and its setup says what to run, once'
+fixture: ../../../__fixtures__/status-mac/
+env:
+    - USER=tester
+    - SHELL=/bin/zsh
+runs:
+    - command: 'status --json | /usr/bin/jq -c ''[paths(. == null) | map(tostring) | join(".")]'''
+      exit: 0
+      stdout: |
+          ["machine.name"]
+    - command: 'status --json | /usr/bin/jq -c ''[.setup.state, (.setup.steps[0] | [.name, .state, .detail])]'''
+      exit: 0
+      stdout: |
+          ["absent",["name","absent","station init --name <name>"]]

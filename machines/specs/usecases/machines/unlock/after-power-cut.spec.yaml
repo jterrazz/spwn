@@ -1,0 +1,23 @@
+description: 'on a terminal, unlock opens the pre-boot prompt; once unlocked the Mac is on Tailscale again'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - mini-offline
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines unlock mac-mini'
+      stdin: |
+          within 20 exit 0
+          screen
+      exit: 0
+      stdout: |
+          ✓ mac-mini · unlocked · on Tailscale again
+    - command: 'machines | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | [.locked, .offline]'' world.json'
+      exit: 0
+      stdout: |
+          [null,null]

@@ -1,0 +1,19 @@
+description: 'a down server keeps its last console lines with a token withheld, the cause still told'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world console infra ''[ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB'''
+      exit: 0
+    - command: 'world console infra ''[ 4127.611008] k3s: join https://agent:sk-station-story-not-a-real-key@10.0.0.2:6443'''
+      exit: 0
+    - command: 'world fault CheckRunner.Run 2 times'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -r ''.macs[1].vms[0] | .cause, .last_lines[]'''
+      exit: 0
+      stdout: |
+          out of memory
+          [ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB
+          [ 4127.611008] k3s: join https://withheld@10.0.0.2:6443

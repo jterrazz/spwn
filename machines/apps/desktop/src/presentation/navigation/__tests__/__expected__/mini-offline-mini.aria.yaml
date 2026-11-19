@@ -1,0 +1,59 @@
+- navigation "Sidebar":
+  - button "Find"
+  - button "Home"
+  - button "Inbox"
+  - button "Machine files"
+  - button "Passwords"
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - button "macbook-pro online":
+      - text: macbook-pro
+      - img "online"
+    - button "api stopped":
+      - text: api
+      - img "stopped"
+    - button "linux-1 running":
+      - text: linux-1
+      - img "running"
+    - button "mac-mini not seen":
+      - text: mac-mini
+      - img "not seen"
+    - button "infra not seen":
+      - text: infra
+      - img "not seen"
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps 9"
+    - button "Skills 0"
+    - button "Settings 0"
+  - button "Storage"
+  - img "running"
+  - text: Engine running · dev
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back"
+  - button "Forward" [disabled]
+  - text: mac-mini
+  - heading "mac-mini not seen" [level=2]
+  - paragraph: Not seen for 6 h. Asleep or off the network.
+  - button "Keep mac-mini awake": Awake…
+  - button "New machine on mac-mini": New machine
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - tabpanel "Overview":
+    - heading "mac-mini has not been seen for 6 h." [level=1]
+    - paragraph:
+      - img "mac-mini has not been seen for 6 h."
+      - text: "Nothing proves it is down: it may be asleep, or off your network."
+    - text: CPU no answer Memory no answer Disk no answer Its machines 1machine
+    - region "Its machines":
+      - heading "Its machines" [level=2]
+      - button "infra not seen"
+    - region "Packages":
+      - heading "Packages" [level=2]
+      - text: unreachable mac-mini does not answer. station machines mac-mini

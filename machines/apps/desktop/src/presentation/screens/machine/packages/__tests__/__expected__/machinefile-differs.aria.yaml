@@ -1,0 +1,42 @@
+- main:
+  - heading "macbook-pro online" [level=2]
+  - paragraph: This Mac · Engine running. Sleeps normally.
+  - button "Keep macbook-pro awake": Awake…
+  - button "New machine on macbook-pro": New machine
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages" [selected]
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "2 differences from macbook-pro." [level=1]:
+    - text: 2 differences from
+    - button "macbook-pro"
+    - text: .
+  - paragraph:
+    - img "2 differences"
+    - text: 4 of 6 apps match · Its machine file is
+    - button "macbook-pro"
+  - region "Differs from its file":
+    - heading "Differs from its file 2" [level=2]
+    - group "Which side changes":
+      - button "Change the machine" [pressed]
+      - button "Change the file"
+    - text: The file says This machine has The machine will ripgrep macbook-pro not installed install it fd macbook-pro not installed install it Apply will install 2.
+    - button "Plan"
+  - region "Upgrades":
+    - heading "Upgrades" [level=2]
+    - button "Upgrade now"
+    - text: "Never by itself: macbook-pro is bound to no Machinefile."
+  - group "Which packages":
+    - button "Apps6" [pressed]
+    - button "Settings0"
+  - region "Apps":
+    - heading "Apps by file, a later one wins" [level=2]
+    - region "base":
+      - paragraph: base 2 apps
+      - text: homebrew 5.0.1 takes every version jq 1.8.1 takes every version
+    - region "macbook-pro":
+      - paragraph: macbook-pro 4 apps
+      - text: lazygit 0.55.1 takes every version bat 0.25.0 takes every version ripgrep not installed takes every version fd not installed takes every version

@@ -1,0 +1,43 @@
+description: 'git-shortcuts writes a station block of ~/.gitconfig beside the owner''s, and git reads it'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; printf ''[user]\n\tname = Owner\n[alias]\n\tco = checkout\n'' > .gitconfig'
+      exit: 0
+    - command: 'settings apply git-shortcuts'
+      exit: 0
+      stdout: |
+          ●	git-shortcuts	~/.gitconfig [alias]: written
+    - command: '--version >/dev/null; /usr/bin/git config --global --get-regexp ''^(alias|user)\.'''
+      exit: 0
+      stdout: |
+          user.name Owner
+          alias.co checkout
+          alias.wip !git add --all && git commit -m WIP
+          alias.unwip !git reset --soft HEAD~1 && git reset HEAD
+          alias.sync !git fetch -p; git pull
+          alias.feat !f() { git add . && git commit -m "feat: $*"; }; f
+          alias.fix !f() { git add . && git commit -m "fix: $*"; }; f
+          alias.chore !f() { git add . && git commit -m "chore: $*"; }; f
+          alias.branches branch
+          alias.lg log --oneline -10
+          alias.st status
+          alias.pushup push -u origin HEAD
+    - command: '--version >/dev/null; /usr/bin/git -c init.defaultBranch=main init -q repo && cd repo && echo a > a && /usr/bin/git -c user.email=o@o feat add the login page >/dev/null && /usr/bin/git log --format=%s'
+      exit: 0
+      stdout: |
+          feat: add the login page
+    - command: 'settings git-shortcuts | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	git-shortcuts	applied · ~/.gitconfig [alias]
+    - command: 'settings off git-shortcuts --yes'
+      exit: 0
+      stdout: |
+          ●	git-shortcuts	~/.gitconfig [alias]: removed
+    - command: '--version >/dev/null; /bin/cat .gitconfig'
+      exit: 0
+      stdout: |
+          [user]
+          	name = Owner
+          [alias]
+          	co = checkout

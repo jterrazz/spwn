@@ -1,0 +1,14 @@
+description: 'an erase while Xcode runs is refused before its name is asked, and nothing is erased'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.running = ["Xcode"]'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'disk erase xcode --confirm=xcode'
+      exit: 1
+      stderr: |
+          Error: Xcode is running: its data cannot be erased now
+          Hint: quit Xcode, then station disk erase xcode
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {derived: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], devices: .["~/Library/Developer/CoreSimulator/Devices/A/data"]}'' world.json'
+      exit: 0
+      stdout: |
+          {"derived":5800000000,"devices":19100000000}

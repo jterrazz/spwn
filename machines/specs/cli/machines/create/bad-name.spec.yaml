@@ -1,0 +1,35 @@
+description: 'a malformed name, a Mac''s name and a name a VM record holds are refused before the engine'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ./__fixtures__/other-host/
+env: engine
+runs:
+    - command: 'machines create --name Bad_Name'
+      exit: 2
+      stderr: |
+          Error: "Bad_Name" is not a valid name
+          Hint: use lowercase letters, digits and "-", 1 to 40 characters
+      files:
+          .calls: absent
+    - command: 'machines create --name x'
+      exit: 2
+      stderr: |
+          Error: "x" already names a Mac
+          Hint: pick another name
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"x": {}/"x": {}, "y": {}/'' .config/station/preferences.json; "$STATION" machines create --name y'
+      exit: 2
+      stderr: |
+          Error: "y" already names a Mac
+          Hint: pick another name
+    - command: 'machines create --name linux-1'
+      exit: 2
+      stderr: |
+          Error: "linux-1" is taken (on y)
+          Hint: pick another name
+      files:
+          .calls:
+              contains: 'station engine attach'
+    - command: '--version >/dev/null; /usr/bin/grep -c ''tart clone'' .calls'
+      exit: 1
+      stdout: |
+          0

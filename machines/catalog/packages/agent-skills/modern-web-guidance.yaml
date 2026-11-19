@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: modern-web-guidance
+description: Chrome's current web platform guidance
+methods:
+    - os: any
+      skill:
+          repo: GoogleChrome/modern-web-guidance
+          name: modern-web-guidance

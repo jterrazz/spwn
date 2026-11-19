@@ -1,0 +1,114 @@
+{
+  "$defs": {
+    "accounts.ProgramRow": {
+      "additionalProperties": false,
+      "properties": {
+        "Action": {
+          "enum": [
+            "sign-in",
+            "sign-in-again",
+            "sign-out",
+            "remove",
+            "none"
+          ],
+          "type": "string"
+        },
+        "Ask": {
+          "type": "string"
+        },
+        "Entry": {
+          "type": "string"
+        },
+        "EntryLabel": {
+          "type": "string"
+        },
+        "How": {
+          "enum": [
+            "own",
+            "granted"
+          ],
+          "type": "string"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "Plan": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        },
+        "Scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "State": {
+          "enum": [
+            "signed-in",
+            "signed-out",
+            "broken",
+            "reading",
+            "waiting"
+          ],
+          "type": "string"
+        },
+        "Who": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Action",
+        "Program",
+        "State"
+      ],
+      "type": "object"
+    },
+    "accounts.calls.LogoutIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "Machine": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/accounts.logout.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call accounts.logout of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/accounts.calls.LogoutIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.ProgramRow"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "accounts.logout",
+  "type": "object"
+}

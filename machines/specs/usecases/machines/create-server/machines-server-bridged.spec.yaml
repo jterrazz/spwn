@@ -1,0 +1,20 @@
+description: 'a server stays behind its Mac: --network bridged is refused before anything is made'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create infra-2 --server --network bridged --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: a server stays behind its Mac: --network bridged is for macOS workspaces
+          Hint: share its ports instead: station ports share
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms["infra-2"]'' world.json'
+      exit: 0
+      stdout: |
+          null
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-server","in":{"Name":"infra-2","Network":"bridged"}}
+      exit: 0
+      stdout: |
+          {"code":"machines.server-bridged","subject":null,"message":"a server stays behind its Mac: --network bridged is for macOS workspaces"}

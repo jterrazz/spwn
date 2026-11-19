@@ -1,0 +1,16 @@
+description: 'backup-exclusions creates the two trees and excludes both from Time Machine in one call'
+fixture: ./__fixtures__/settings-tmutil/
+runs:
+    - command: 'settings apply backup-exclusions'
+      exit: 0
+      stdout: |
+          ●	backup-exclusions	Time Machine: excludes {{workdir}}/.cache, {{workdir}}/.local/share/station/vms
+      files:
+          .cache: exists
+          .local/share/station/vms: exists
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          tmutil isexcluded {{workdir}}/.cache {{workdir}}/.local/share/station/vms
+          tmutil addexclusion {{workdir}}/.cache {{workdir}}/.local/share/station/vms
+          tmutil isexcluded {{workdir}}/.cache {{workdir}}/.local/share/station/vms

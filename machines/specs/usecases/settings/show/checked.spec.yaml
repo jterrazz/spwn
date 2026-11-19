@@ -1,0 +1,28 @@
+description: 'the detail of a checked setting: group, state, what it does, its fix, what each Mac should have'
+env: two-macs
+runs:
+    - command: 'settings firewall'
+      exit: 0
+      stdout: |
+          ◐	firewall	off	System Settings > Network > Firewall
+          # Detail
+          group	Checked
+          does	The macOS firewall refuses unasked connections
+          lives on	Macs
+          fix	System Settings > Network > Firewall
+    - command: 'world reads macbook-pro remote-login on'
+      exit: 0
+    - command: 'settings remote-login'
+      exit: 0
+      stdout: |
+          ◐	remote-login	on · not expected on a laptop	System Settings > General > Sharing > Remote Login
+          # Detail
+          group	Checked
+          does	Remote login is off on a laptop, on on an always-on Mac
+          lives on	Macs
+          fix	System Settings > General > Sharing > Remote Login
+          expected	not expected on a laptop
+    - command: 'settings remote-login --on mac-mini | /usr/bin/sed -n 2p'
+      exit: 0
+      stdout: |
+          ●	remote-login	as expected · on

@@ -1,0 +1,24 @@
+description: 'a fourth port the owner opens to public is refused: the three Funnel ports carry the others'
+env: two-macs
+runs:
+    - command: 'ports share linux-1 3000 --to public'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:443
+    - command: 'ports share linux-1 3001 --to public'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:8443
+    - command: 'ports share linux-1 3002 --to public'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:10000
+    - command: 'ports share linux-1 5173 --to public'
+      exit: 1
+      stderr: |
+          Error: no Funnel port is left for 5173: 443, 8443, 10000 each carry another share
+          Hint: station ports
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[] | [.guest_port, .to, .public_port]]'' world.json'
+      exit: 0
+      stdout: |
+          [[5173,null,null],[7000,null,null],[3000,"public",443],[3001,"public",8443],[3002,"public",10000]]

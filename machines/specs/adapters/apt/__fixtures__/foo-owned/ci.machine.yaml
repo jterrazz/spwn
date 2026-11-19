@@ -1,0 +1,4 @@
+machinefile: station.machinefile/v1
+name: ci
+machine: { kind: computer, system: { os: ubuntu } }
+apps: [foo]

@@ -1,0 +1,12 @@
+description: 'an undeclare sent with --on forgets the declaration that Mac keeps'
+env: two-macs
+runs:
+    - command: 'ports undeclare infra 443 --yes --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	443 on infra	not declared
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.declarations'' world.json'
+      exit: 0
+      stdout: |
+          null

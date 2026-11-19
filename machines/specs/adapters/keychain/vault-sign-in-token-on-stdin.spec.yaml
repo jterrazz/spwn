@@ -1,0 +1,16 @@
+description: 'a password from a sign-in is the token gh prints, passed to security on its stdin'
+fixture:
+    - ../__fixtures__/setup-stubs/
+    - ./__fixtures__/vault/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error.code''; /bin/cat .calls; /usr/bin/grep -c FAKE000 .local/state/station/vault.json'
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"GitHub","Program":"gh","Kind":"oauth-token","From":"sign-in"}}
+      exit: 1
+      stdout: |
+          {"ID":"pw-1"}
+          gh auth token -h github.com
+          security -i
+          add-generic-password -U -s station -a "vault:pw-1" -w "FAKE000"
+          0

@@ -1,0 +1,15 @@
+description: 'a persistent workspace whose guest powers off is stopped and kept, never deleted'
+env: two-macs
+runs:
+    - command: 'machines start api'
+      exit: 0
+      stdout: |
+          ●	api	started
+    - command: 'world poweroff-inside api'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB

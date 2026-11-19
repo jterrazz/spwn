@@ -1,0 +1,11 @@
+description: '--all-machines updates every Mac and running workspace, saying each server and stopped VM skipped'
+env: two-macs
+runs:
+    - command: 'apps update --all-machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	updated 2 apps
+          –	api	skipped (stopped)
+          ●	linux-1	every app is up to date
+          ●	mac-mini	every app is up to date
+          –	infra	skipped (server)

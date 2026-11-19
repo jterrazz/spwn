@@ -1,0 +1,26 @@
+description: 'a server whose run crashes boots again after 5 s, counted, and the owner is told'
+env: two-macs
+runs:
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.state, .restarts, .restarted_after_s]'''
+      exit: 0
+      stdout: |
+          ["running",1,5]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | ((.up_at | fromdate) - (.down_at | fromdate)) as $down | [$down >= 5, $down <= 6]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]
+    - command: 'machines infra | /usr/bin/grep -E "Running|Restarts"'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Restarts	↺ 1 · last just now
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]?.Text]'' world.json'
+      exit: 0
+      stdout: |
+          ["infra stopped and is restarting (↺ 1)"]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | [.pid > 0, .kept.want]'' world.json'
+      exit: 0
+      stdout: |
+          [true,"running"]

@@ -1,0 +1,10 @@
+description: 'a real Ubuntu 24.04 VM''s recorded tcp tables read as its three listeners'
+fixture: ./__fixtures__/ubuntu/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo ''{"v":1,"type":"hello","host":"macbook","vm":"ws1","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''.ports[]? | [.port, .ip]'''
+      exit: 0
+      stdout: |
+          [3000,"::"]
+          [5432,"127.0.0.1"]
+          [8081,"0.0.0.0"]

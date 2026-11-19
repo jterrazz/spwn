@@ -1,0 +1,43 @@
+- main:
+  - heading "linux-1 running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "macbook-pro"
+  - button "Stop"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports" [selected]
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "2 ports listen." [level=1]
+  - paragraph:
+    - img "2 ports listen."
+    - text: 2 are shared.
+  - region "Shared":
+    - heading "Shared" [level=2]
+    - region "Port 5173":
+      - text: :5173 Vite node https://macbook-pro.tail1234.ts.net:40001
+      - group "Who reaches linux-1:5173":
+        - button "Local"
+        - button "Private" [pressed]
+        - button "Public"
+      - button "Stop sharing"
+      - button "Copy https://macbook-pro.tail1234.ts.net:40001": Copy
+      - text: ·
+      - button "Open"
+      - text: ·
+      - button "Hide QR code"
+      - img "QR code of https://macbook-pro.tail1234.ts.net:40001"
+    - region "Port 7000":
+      - text: :7000 server macbook-pro.tail1234.ts.net:40002
+      - group "Who reaches linux-1:7000":
+        - button "Local"
+        - button "Private" [pressed]
+        - button "Public"
+      - button "Stop sharing"
+      - button "Copy macbook-pro.tail1234.ts.net:40002": Copy
+      - text: ·
+      - button "QR code"

@@ -1,0 +1,13 @@
+description: 'a formula uninstalls with brew uninstall'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/bat-installed/
+runs:
+    - command: 'apps remove bat --yes'
+      exit: 0
+      stdout: |
+          ●	bat		brew
+      files:
+          .calls:
+              contains:
+                  - 'brew uninstall bat'

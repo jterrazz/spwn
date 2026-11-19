@@ -1,0 +1,17 @@
+description: 'the tailscale cask fails while the formula answers: the install is broken, the formula stays'
+fixture:
+    - ../__fixtures__/system-tools/
+    - ./__fixtures__/tailscale-app-fails/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" apps install tailscale </dev/null'
+      exit: 1
+      stdout: |
+          ✗	tailscale		cask	~/.local/state/station/logs/tailscale.log
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: station apps install tailscale
+      files:
+          .calls:
+              equals: |
+                  brew bundle install --no-upgrade --file=-

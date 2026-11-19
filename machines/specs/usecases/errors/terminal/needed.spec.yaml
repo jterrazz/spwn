@@ -1,0 +1,13 @@
+description: 'what needs a terminal, off one, says so: exit 2'
+env: mini-offline
+runs:
+    - command: 'machines unlock mac-mini </dev/null'
+      exit: 2
+      stderr: |
+          Error: machines unlock needs a terminal
+          Hint: run it in a terminal
+    - command: 'settings apply autologin </dev/null'
+      exit: 2
+      stderr: |
+          Error: autologin asks a value: run it on a terminal
+          Hint: station settings apply autologin

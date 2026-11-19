@@ -1,0 +1,8 @@
+description: 'a server name outside the name rule is refused, the rule in the hint'
+env: two-macs
+runs:
+    - command: 'machines create Web_1 --server'
+      exit: 2
+      stderr: |
+          Error: "Web_1" is not a valid name
+          Hint: use lowercase letters, digits and "-", 1 to 40 characters

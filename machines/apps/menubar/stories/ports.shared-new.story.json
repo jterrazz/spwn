@@ -1,0 +1,11 @@
+{
+    "group": "ports",
+    "heightNote": "the ssh footer is the workspace page's own lot (P9); the QR popover over it is S5's pop.qr",
+    "id": "ports.shared-new",
+    "note": "linux-1's Astro shared a moment ago: its link lands fresh among the shares.",
+    "pages": ["pages/machines.ports.shared.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "ports"
+    }
+}

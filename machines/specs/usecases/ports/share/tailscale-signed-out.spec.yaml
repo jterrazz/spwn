@@ -1,0 +1,12 @@
+description: 'a share while This Mac is signed out of Tailscale is refused, the port reserved all the same'
+env: tailscale-out
+runs:
+    - command: 'ports share linux-1 9000'
+      exit: 1
+      stderr: |
+          Error: Tailscale is signed out on This Mac: ports are local only
+          Hint: open Tailscale and sign in
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[] | select(.vm == "linux-1" and .guest_port == 9000) | .host_port]'' world.json'
+      exit: 0
+      stdout: |
+          [40000]

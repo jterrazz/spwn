@@ -1,0 +1,1214 @@
+{
+  "schema": "station.page/v1",
+  "id": "settings",
+  "command": "settings --all-machines",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/settings",
+            "mark": "ok",
+            "label": "31 settings on 4 machines",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "20 need a look"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "infra is a server: not checked"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "needs-a-look",
+      "title": "Needs a look",
+      "columns": [
+        {
+          "key": "machine",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "setting",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro/git-shortcuts",
+            "mark": "attention",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "git-shortcuts"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff git-shortcuts"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/dns",
+            "mark": "attention",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "dns"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff dns"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/zed-dotfiles",
+            "mark": "attention",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "zed-dotfiles"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff zed-dotfiles"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/tailscale-cli",
+            "mark": "attention",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "tailscale-cli"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tailscale-cli"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/firewall",
+            "mark": "attention",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "firewall"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "off"
+                  }
+                ]
+              }
+            ],
+            "reason": "mismatch",
+            "hint": {
+              "command": "System Settings > Network > Firewall",
+              "external": true
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/screen-lock",
+            "mark": "attention",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "screen-lock"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "locks after 10 min"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "expected 5 min"
+                  }
+                ]
+              }
+            ],
+            "reason": "mismatch",
+            "hint": {
+              "command": "System Settings > Lock Screen",
+              "external": true
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini/git-shortcuts",
+            "mark": "attention",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "git-shortcuts"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff git-shortcuts --on mac-mini"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini/dns",
+            "mark": "attention",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "dns"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff dns --on mac-mini"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini/zed-dotfiles",
+            "mark": "attention",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "zed-dotfiles"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff zed-dotfiles --on mac-mini"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini/tailscale-cli",
+            "mark": "attention",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "tailscale-cli"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tailscale-cli --on mac-mini"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini/firewall",
+            "mark": "attention",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "firewall"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "off"
+                  }
+                ]
+              }
+            ],
+            "reason": "mismatch",
+            "hint": {
+              "command": "System Settings > Network > Firewall",
+              "external": true
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini/screen-lock",
+            "mark": "attention",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "screen-lock"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "locks after 10 min"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "expected 5 min"
+                  }
+                ]
+              }
+            ],
+            "reason": "mismatch",
+            "hint": {
+              "command": "System Settings > Lock Screen",
+              "external": true
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1/git-shortcuts",
+            "mark": "attention",
+            "label": "linux-1",
+            "short": "linux-1",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "git-shortcuts"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff git-shortcuts --on linux-1"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1/dns",
+            "mark": "attention",
+            "label": "linux-1",
+            "short": "linux-1",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "dns"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff dns --on linux-1"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1/zed-dotfiles",
+            "mark": "attention",
+            "label": "linux-1",
+            "short": "linux-1",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "zed-dotfiles"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff zed-dotfiles --on linux-1"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1/tailscale-cli",
+            "mark": "attention",
+            "label": "linux-1",
+            "short": "linux-1",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "tailscale-cli"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tailscale-cli --on linux-1"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/git-shortcuts",
+            "mark": "attention",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "git-shortcuts"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station machines start api"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/dns",
+            "mark": "attention",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "dns"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station machines start api"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/zed-dotfiles",
+            "mark": "attention",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "zed-dotfiles"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station machines start api"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/tailscale-cli",
+            "mark": "attention",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "tailscale-cli"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station machines start api"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 20
+        }
+      ]
+    },
+    {
+      "id": "machines",
+      "title": "Machines",
+      "fold": "brief",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro",
+            "mark": "ok",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Mac"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "read"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini",
+            "mark": "ok",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Mac"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "read"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1",
+            "mark": "ok",
+            "label": "linux-1",
+            "short": "linux-1",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Workspace"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "read"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "api",
+            "mark": "absent",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Workspace"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "stopped"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "last read 2 h ago"
+                  }
+                ]
+              }
+            ],
+            "reason": "stopped"
+          }
+        },
+        {
+          "row": {
+            "id": "infra",
+            "mark": "not-for-this-machine",
+            "label": "infra",
+            "short": "infra",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Server"
+              },
+              {
+                "kind": "text",
+                "text": "not checked: station does not manage its settings"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        },
+        {
+          "mark": "absent",
+          "n": 1
+        },
+        {
+          "mark": "not-for-this-machine",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "set",
+      "title": "Set by station",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "macbook-pro",
+          "label": "This Mac",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "mac-mini",
+          "label": "mac-mini",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "linux-1",
+          "label": "linux-1",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "api",
+          "label": "api",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "ok",
+          "label": "OK",
+          "kind": "text",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "git-shortcuts",
+            "mark": "attention",
+            "label": "git-shortcuts",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "text": "0/4"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "dns",
+            "mark": "attention",
+            "label": "dns",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "text": "0/4"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "zed-dotfiles",
+            "mark": "attention",
+            "label": "zed-dotfiles",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "text": "0/4"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "tailscale-cli",
+            "mark": "attention",
+            "label": "tailscale-cli",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "text": "0/4"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "folded",
+            "mark": "absent",
+            "label": "13 more",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "4/10",
+                "label": "absent"
+              },
+              {
+                "kind": "text",
+                "text": "4/10",
+                "label": "absent"
+              },
+              {
+                "kind": "text",
+                "text": "4/10",
+                "label": "absent"
+              },
+              {
+                "kind": "text",
+                "text": "4/10",
+                "label": "absent"
+              },
+              {
+                "kind": "text",
+                "text": "16/40"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "always-on-mac",
+      "title": "Always-on Mac",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "macbook-pro",
+          "label": "This Mac",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "mac-mini",
+          "label": "mac-mini",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "linux-1",
+          "label": "linux-1",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "api",
+          "label": "api",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "ok",
+          "label": "OK",
+          "kind": "text",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "folded",
+            "mark": "absent",
+            "label": "5 settings",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "absent"
+              },
+              {
+                "kind": "text",
+                "label": "absent"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "checked",
+      "title": "Checked",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "macbook-pro",
+          "label": "This Mac",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "mac-mini",
+          "label": "mac-mini",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "linux-1",
+          "label": "linux-1",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "api",
+          "label": "api",
+          "kind": "text",
+          "keep": 20
+        },
+        {
+          "key": "ok",
+          "label": "OK",
+          "kind": "text",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "firewall",
+            "mark": "attention",
+            "label": "firewall",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              },
+              {
+                "kind": "text",
+                "text": "0/2"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "screen-lock",
+            "mark": "attention",
+            "label": "screen-lock",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              },
+              {
+                "kind": "text",
+                "text": "0/2"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "folded",
+            "mark": "off-here",
+            "label": "7 more",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "5/7",
+                "label": "off-here"
+              },
+              {
+                "kind": "text",
+                "text": "5/7",
+                "label": "off-here"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              },
+              {
+                "kind": "text",
+                "label": "not-for-this-machine"
+              },
+              {
+                "kind": "text",
+                "text": "10/14"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station settings --all-machines --all",
+      "text": "every row"
+    }
+  ],
+  "actions": [
+    {
+      "key": "a",
+      "label": "apply across",
+      "on": "row",
+      "rows": [
+        "docker-shortcuts",
+        "git-shortcuts",
+        "ghostty-dotfiles",
+        "hushlogin",
+        "starship-dotfiles",
+        "tmux-dotfiles",
+        "dns",
+        "git-signing",
+        "github-login",
+        "spotlight-exclude",
+        "ssh-key",
+        "zed-dotfiles",
+        "backup-exclusions",
+        "dock-reset",
+        "dock-spacer",
+        "tart-launcher",
+        "autologin",
+        "lock-after-login",
+        "never-sleeps",
+        "restart-after-power-cut",
+        "sshd",
+        "tailscale-cli"
+      ],
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "enter",
+      "label": "open on that machine",
+      "on": "row",
+      "rows": [
+        "docker-shortcuts",
+        "git-shortcuts",
+        "ghostty-dotfiles",
+        "hushlogin",
+        "starship-dotfiles",
+        "tmux-dotfiles",
+        "dns",
+        "git-signing",
+        "github-login",
+        "spotlight-exclude",
+        "ssh-key",
+        "zed-dotfiles",
+        "backup-exclusions",
+        "dock-reset",
+        "dock-spacer",
+        "tart-launcher",
+        "autologin",
+        "lock-after-login",
+        "never-sleeps",
+        "restart-after-power-cut",
+        "sshd",
+        "tailscale-cli",
+        "filevault",
+        "firewall",
+        "sip",
+        "automatic-updates",
+        "screen-lock",
+        "gatekeeper",
+        "remote-login",
+        "time-machine",
+        "macos-updates"
+      ],
+      "priority": 2
+    },
+    {
+      "key": "F",
+      "label": "only what needs a look",
+      "on": "page",
+      "priority": 3
+    },
+    {
+      "key": "f",
+      "label": "open the fix",
+      "on": "row",
+      "rows": [
+        "filevault",
+        "firewall",
+        "sip",
+        "automatic-updates",
+        "screen-lock",
+        "gatekeeper",
+        "remote-login",
+        "time-machine",
+        "macos-updates"
+      ],
+      "priority": 4
+    }
+  ]
+}

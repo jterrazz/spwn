@@ -1,0 +1,10 @@
+description: 'an image the catalogue does not hold is refused before the registry is asked'
+env: two-macs
+runs:
+    - command: 'world fault ImageSource.Latest'
+      exit: 0
+    - command: 'images update debian'
+      exit: 2
+      stderr: |
+          Error: no image "debian"
+          Hint: station images

@@ -1,0 +1,7 @@
+description: 'station apps --json is station.apps.list/v1: each app''s state, method, version and where it lives'
+env: two-macs
+runs:
+    - command: 'apps --json | /usr/bin/jq -c "{schema, elsewhere: .not_for_this_machine, gh: (.apps[] | select(.name == \"gh\"))}"'
+      exit: 0
+      stdout: |
+          {"schema":"station.apps.list/v1","elsewhere":10,"gh":{"name":"gh","category":"Git","method":"brew","state":"update-available","installed":"2.97.0","newest":"2.98.0","lives_on":"every-machine","provides":["gh"],"detail":"outdated"}}

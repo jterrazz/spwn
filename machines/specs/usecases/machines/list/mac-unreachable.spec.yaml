@@ -1,0 +1,33 @@
+description: 'a Mac that does not answer keeps its row and its VMs, unknown; a finding, and exit 0'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - mini-offline
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x30 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          5 machines · 2 running · 1 stopped · 1 needs you
+
+              MACHINE     KIND       STATE                            CPU    MEMORY
+            ● This Mac    Mac        Engine running
+            ├─ ○ api      Workspace  Stopped · persistent             4 CPU  8 GB
+            └─ ● linux-1  Workspace  Running · ephemeral              4 CPU  8 GB
+            ✗ mac-mini    Mac        Unreachable · last answer 03:12
+            └─ ? infra    Server     Not seen · always on             8 CPU  24 GB
+
+          Needs you
+            ◐ mac-mini  does not answer  → station machines unlock mac-mini
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ✗	mac-mini	Mac	mac-mini	Unreachable · last answer 03:12
+          ?	infra	Server	mac-mini	Not seen · always on	8 CPU	24 GB
+          # Needs you
+          ◐	mac-mini	does not answer	station machines unlock mac-mini

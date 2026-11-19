@@ -1,0 +1,47 @@
+- main:
+  - heading "3.0 GB can be freed." [level=1]
+  - paragraph:
+    - img "3.0 GB can be freed."
+    - text: "on macbook-pro: no machine and no file of yours is touched"
+  - group "Which Mac":
+    - button "macbook-pro" [pressed]
+    - button "mac-mini"
+  - region "Disk":
+    - heading "Disk" [level=2]
+    - paragraph: 606 GB of 994 GB used
+    - button "Rescan"
+    - paragraph: "Outside any machine, station holds 107 GB: machine disks, images, leftovers and its logs"
+    - 'img "What holds the disk of macbook-pro: Machine disks 100 GB · Images 7 GB · The Mac itself 499 GB · Free 388 GB"'
+    - list "The parts":
+      - listitem: Machine disks 100 GB
+      - listitem: Images 7 GB
+      - listitem: The Mac itself 499 GB
+      - listitem: Free 388 GB
+    - paragraph: "3.0 GB can be freed: 1 unused image."
+    - button "Free 3 GB"
+    - paragraph: Caches hold 34.8 GB. Each app rebuilds its own when it needs it.
+    - button "Free 34.8 GB"
+  - region "Can be freed":
+    - heading "Can be freed" [level=2]
+    - text: base-ubuntu@2026.10.20 Unused image 3 GB
+  - region "Your data":
+    - heading "Your data 5" [level=2]
+    - text: xcode ~/Library/Developer/CoreSimulator/Devices 19.1 GB
+    - button "Erase… xcode": Erase…
+    - text: orbstack ~/Library/Group Containers/HUAQ24HBR6.dev.orbstack 15.8 GB
+    - button "Erase… orbstack": Erase…
+    - text: claude ~/.claude/projects 3.6 GB
+    - button "Erase… claude": Erase…
+    - text: ollama ~/.ollama/models 1.9 GB
+    - button "Erase… ollama": Erase…
+    - text: zed ~/Library/Application Support/Zed/db 1.2 GB
+    - button "Erase… zed": Erase…
+  - region "Images":
+    - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+    - text: base-ubuntu 2026.11.01 built 1 Nov · 4 GB · 2 machines made from it newest base-ubuntu 2026.10.20 built 20 Oct · 3 GB · no machine made from it
+    - button "Delete base-ubuntu 2026.10.20": Delete · frees 3 GB
+  - region "Machines":
+    - heading "Machines what is inside one is on its own Storage tab" [level=2]
+    - button "macbook-pro the Mac itself 34.8 GB of caches inside 499 GB"
+    - button "api 50 GB"
+    - button "linux-1 1.5 GB of caches inside 50 GB"

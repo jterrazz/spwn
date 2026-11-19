@@ -1,0 +1,17 @@
+description: 'macos-1, bridged, on every interface is reachable outside Tailscale and needs you'
+env: bridged-macos
+runs:
+    - command: 'ports | /usr/bin/grep -e "^#" -e "✗"'
+      exit: 0
+      stdout: |
+          # Needs you: reachable outside Tailscale, not declared public	1 ✗
+          ✗	macos-1	8081	needs you	node	*:8081 all interfaces	declared no
+          # Private: shared with you on Tailscale	3 ●
+    - command: 'ports --json | /usr/bin/jq -c ''.findings'''
+      exit: 0
+      stdout: |
+          [{"machine":"macos-1","severity":"broken","section":"ports","subject":"macos-1:8081","text":"macos-1: port 8081 is reachable outside Tailscale","fix":{"call":null,"command":null,"path":null}}]
+    - command: 'overview | /usr/bin/grep 8081'
+      exit: 0
+      stdout: |
+          ✗	macos-1: port 8081 is reachable outside Tailscale

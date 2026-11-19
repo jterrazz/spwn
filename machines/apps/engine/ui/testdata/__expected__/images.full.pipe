@@ -1,0 +1,4 @@
+●	base-ubuntu	2026.11.01	4.0 GB	macbook-pro	linux-1 · api
+○	base-ubuntu	2026.10.20	4.0 GB	macbook-pro	older · station images delete base-ubuntu@2026.10.20
+●	base-ubuntu	2026.11.01	4.0 GB	mac-mini	infra
+○	base-macos				not built yet

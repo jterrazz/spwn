@@ -1,0 +1,7 @@
+{
+    "group": "mac",
+    "id": "mac.mini.creating",
+    "note": "linux-4 being created on mac-mini: its ring, its step and its birth bar.",
+    "pages": ["pages/machines.macs.creating.machine.mac-mini.json"],
+    "schema": "station.story/v1"
+}

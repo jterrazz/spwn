@@ -1,0 +1,8 @@
+description: 'a Mac is no VM: an edit refuses it'
+env: two-macs
+runs:
+    - command: 'machines edit mac-mini --memory 8G'
+      exit: 2
+      stderr: |
+          Error: mac-mini is a Mac
+          Hint: run station machines for the VMs

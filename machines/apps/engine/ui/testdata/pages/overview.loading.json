@@ -1,0 +1,176 @@
+{
+  "schema": "station.page/v1",
+  "id": "overview",
+  "command": "overview",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "overview",
+      "title": "This Mac",
+      "role": "banner",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "macbook-pro"
+        },
+        {
+          "kind": "text",
+          "text": "nothing needs you"
+        },
+        {
+          "kind": "text",
+          "text": "Engine running"
+        }
+      ],
+      "joined": true,
+      "uncounted": true
+    },
+    {
+      "id": "sections",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "section",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "line",
+          "kind": "list",
+          "keep": 90
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "activity",
+            "mark": "pending",
+            "label": "Activity",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "apps",
+            "mark": "pending",
+            "label": "Apps",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "settings",
+            "mark": "pending",
+            "label": "Settings",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "mark": "pending",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "ports",
+            "mark": "pending",
+            "label": "Ports",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "accounts",
+            "mark": "pending",
+            "label": "Accounts",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "background",
+            "mark": "pending",
+            "label": "Background",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "awake",
+            "mark": "pending",
+            "label": "Awake",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "vms",
+            "label": "VMs",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "linux-1 running",
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "api stopped",
+                    "label": "absent"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 8
+        }
+      ],
+      "uncounted": true
+    }
+  ]
+}

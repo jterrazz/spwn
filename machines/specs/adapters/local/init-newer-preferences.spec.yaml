@@ -1,0 +1,29 @@
+description: 'init refuses a preferences.json a newer station wrote, and leaves it as it is'
+fixture:
+    - ../__fixtures__/setup-stubs/
+    - ./__fixtures__/newer-preferences/
+env:
+    - USER=tester
+runs:
+    - command: 'init'
+      exit: 1
+      stdout: |
+          ✗	name	cannot read {{workdir}}/.config/station/preferences.json: written at version 2 by a newer station, this one knows 1
+          ●	zshrc
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+      stderr: |
+          Error: init step name: cannot read {{workdir}}/.config/station/preferences.json: written at version 2 by a newer station, this one knows 1
+          Hint: fix it, then run station init again: it resumes
+      files:
+          .config/station/preferences.json:
+              equals: |
+                  {
+                    "name": "t",
+                    "macs": {
+                      "t": {}
+                    },
+                    "v": 2,
+                    "vm_user": "tester"
+                  }

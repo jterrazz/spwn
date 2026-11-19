@@ -1,0 +1,7 @@
+#!/bin/sh
+# sysctl answering a 16 GiB host.
+printf 'sysctl %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "-n hw.memsize") echo 17179869184 ;;
+    *) exit 97 ;;
+esac

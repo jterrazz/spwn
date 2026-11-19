@@ -1,0 +1,13 @@
+description: 'the first line counts the machines, how many run, how many are stopped and what needs the owner'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; "$STATION" world crash linux-1; terminal --size 100x30 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines | /usr/bin/grep "machines ·"'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          5 machines · 3 running · 1 stopped · 1 needs you

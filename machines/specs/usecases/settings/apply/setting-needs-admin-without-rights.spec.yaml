@@ -1,0 +1,17 @@
+description: 'an admin setting without admin rights is refused with the sudo line, and nothing runs'
+env: two-macs
+runs:
+    - command: 'settings apply restart-after-power-cut'
+      exit: 2
+      stderr: |
+          Error: restart-after-power-cut needs admin rights
+          Hint: sudo station settings apply restart-after-power-cut
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].settings["restart-after-power-cut"], .as_root]'' world.json'
+      exit: 0
+      stdout: |
+          [null,null]
+    - command: 'settings | /usr/bin/grep -A1 ''# Always-on'''
+      exit: 0
+      stdout: |
+          # Always-on Mac
+          ○	Always-on Mac	5 · for a Mac that hosts servers

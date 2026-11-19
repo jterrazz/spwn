@@ -1,0 +1,8 @@
+#!/bin/sh
+case "$*" in
+    "outdated --json --prefix "*) echo "{}" ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

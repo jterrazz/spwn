@@ -1,0 +1,12 @@
+description: 'station apps --on mac-mini reads mac-mini''s own apps, on its engine, and renders them here'
+env: two-macs
+runs:
+    - command: 'apps --on mac-mini | /usr/bin/head -2'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # Not installed	113 ○
+    - command: 'apps | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          # Updates	2 ◐

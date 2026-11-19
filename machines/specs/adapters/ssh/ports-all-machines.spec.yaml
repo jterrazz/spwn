@@ -1,0 +1,30 @@
+description: 'ports --all-machines asks every Mac over ssh, its range with it, and shows one that does not answer'
+fixture:
+    - ../../__fixtures__/vms/
+    - ./__fixtures__/ports-all-machines/
+runs:
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''.schema, [.range[] | .mac], ([.ports[] | keys] | unique)'''
+      exit: 0
+      stdout: |
+          "station.ports.list/v1"
+          ["x","y"]
+          [["bind","class","declared","logo","machine","name","port","process","proto","reserved","shared_at","state","to","url"],["bind","class","declared","machine","name","port","process","proto","reserved","shared_at","state","to","url"],["bind","class","declared","machine","name","port","process","proto","reserved","state","url"]]
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''.range'''
+      exit: 0
+      stdout: |
+          [{"mac":"x","from":40000,"to":40999,"reserved":2,"free":998},{"mac":"y","from":40000,"to":40099,"reserved":1,"free":99}]
+    - command: 'ports --all-machines'
+      exit: 0
+      stdout: |
+          ●	Tailscale	signed in · macbook.tail1234.ts.net · ports are shared
+          # Private: shared with you on Tailscale	1 ●	4 ◐
+          ◐	engine				the engine is not installed		station engine start
+          ◐	api	3000	private		not shared while the engine is stopped · reserved 40002		probably Node or Next
+          ◐	api	8081	private		not shared while the engine is stopped · reserved 40000		probably Expo
+          ●	w	3000	private	https://y.tail1234.ts.net:40000	shared	node
+          ◐	z				does not answer		station machines
+          	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
+          	Reserved on y: 1 of 100 (40000-40099), 99 free
+      files:
+          .calls:
+              contains: 'ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c'

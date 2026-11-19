@@ -1,0 +1,7 @@
+{
+    "group": "mac",
+    "id": "mac.mini.created",
+    "note": "linux-4 just ready on mac-mini: it lands with its check.",
+    "pages": ["pages/machines.macs.created.machine.mac-mini.json"],
+    "schema": "station.story/v1"
+}

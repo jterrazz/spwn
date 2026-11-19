@@ -1,0 +1,15 @@
+description: 'deleting an ephemeral workspace releases its reserved ports and removes its shares from Tailscale'
+env: two-macs
+runs:
+    - command: 'machines delete linux-1 --confirm=linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted
+    - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "linux-1")]'''
+      exit: 0
+      stdout: |
+          []
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [(.stores.reservations // [])[] | [.vm, .guest_port, .host_port]], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[],"shared":[]}

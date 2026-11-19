@@ -1,0 +1,11 @@
+description: 'A workspace read through its Mac shows its grant, its time and its question'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {verdict: .Verdict.Sentence, tone: .Verdict.Tone, rows: [.Programs[] | [.Program, .State, .How, .Action, .Line, .Ask]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{"Machine":"linux-1"}}
+      exit: 0
+      stdout: |
+          {"verdict":"Signed in to 2 of 4 programs","tone":"plain","rows":[["gh","signed-out",null,"sign-in",null,null],["npm","signed-in","granted","remove",null,"Remove npm? The grant ends here; the token stays yours."],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","broken",null,"sign-in-again","Refused at the provider",null]]}

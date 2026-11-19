@@ -1,0 +1,10 @@
+description: 'station apps --on linux-1 lists the workspace''s own apps, read inside it'
+env: two-macs
+runs:
+    - command: 'apps --on linux-1 | /usr/bin/grep -e "^# " -e "node"'
+      exit: 0
+      stdout: |
+          # Not installed	71 ○
+          # OK	2 ●
+          ●	node	22.11.0	mise
+          # Not for this machine

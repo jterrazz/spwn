@@ -1,0 +1,11 @@
+description: 'inside a server, a Git shortcut is refused: station does not manage its settings'
+env: in-server
+runs:
+    - command: 'run git wip'
+      exit: 2
+      stderr: |
+          → now: git wip
+          Error: infra is a server: station does not manage its settings
+          Hint: manage it with your own tooling: ssh infra
+      files:
+          .calls: absent

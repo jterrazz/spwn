@@ -1,0 +1,8 @@
+description: 'a name station does not know is refused before the yes-or-no, with the name as the error'
+env: two-macs
+runs:
+    - command: 'machines forget nope'
+      exit: 2
+      stderr: |
+          Error: no machine named "nope"
+          Hint: station machines

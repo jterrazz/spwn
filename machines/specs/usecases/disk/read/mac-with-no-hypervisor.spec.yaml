@@ -1,0 +1,11 @@
+description: 'a mac with no hypervisor has no station part and no machines kind, and your data is still told'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].hypervisor = "none"'' world.json > w.json && /bin/mv w.json world.json; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {kinds: [.Kinds[] | [.Kind, .Bytes]], station: .Station}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"kinds":[["system",21400000000],["apps",0],["your-data",549800000000],["caches",34800000000],["free",388000000000]],"station":null}

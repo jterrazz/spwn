@@ -1,0 +1,13 @@
+description: 'a name that is no machine is refused before anything is read, and the hint lists All machines'
+env: two-macs
+runs:
+    - command: 'machines infr'
+      exit: 2
+      stderr: |
+          Error: no machine named "infr"
+          Hint: station machines
+    - command: 'overview --on infr'
+      exit: 2
+      stderr: |
+          Error: no machine named "infr"
+          Hint: station machines

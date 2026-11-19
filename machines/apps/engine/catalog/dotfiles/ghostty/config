@@ -1,0 +1,17 @@
+theme = light:catppuccin-latte-blur,dark:catppuccin-espresso-blur
+
+# Slightly less transparent than Zed's "Blur [Heavy]" variants (88%) for readability
+background-opacity = 0.92
+background-blur = 60
+
+window-padding-x = 16
+window-padding-y = 6
+window-width = 104
+window-height = 24
+confirm-close-surface = false
+
+macos-option-as-alt = left
+
+# Unbind Alt+arrows so they pass through to tmux for window switching
+keybind = alt+arrow_left=unbind
+keybind = alt+arrow_right=unbind

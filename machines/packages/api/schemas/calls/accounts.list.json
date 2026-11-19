@@ -1,0 +1,150 @@
+{
+  "$defs": {
+    "accounts.ProgramRow": {
+      "additionalProperties": false,
+      "properties": {
+        "Action": {
+          "enum": [
+            "sign-in",
+            "sign-in-again",
+            "sign-out",
+            "remove",
+            "none"
+          ],
+          "type": "string"
+        },
+        "Ask": {
+          "type": "string"
+        },
+        "Entry": {
+          "type": "string"
+        },
+        "EntryLabel": {
+          "type": "string"
+        },
+        "How": {
+          "enum": [
+            "own",
+            "granted"
+          ],
+          "type": "string"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "Plan": {
+          "type": "string"
+        },
+        "Program": {
+          "enum": [
+            "gh",
+            "npm",
+            "claude",
+            "wrangler"
+          ],
+          "type": "string"
+        },
+        "Scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "State": {
+          "enum": [
+            "signed-in",
+            "signed-out",
+            "broken",
+            "reading",
+            "waiting"
+          ],
+          "type": "string"
+        },
+        "Who": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Action",
+        "Program",
+        "State"
+      ],
+      "type": "object"
+    },
+    "accounts.ProgramsRead": {
+      "additionalProperties": false,
+      "properties": {
+        "Programs": {
+          "items": {
+            "$ref": "#/$defs/accounts.ProgramRow"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Programs",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "accounts.calls.ProgramsIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Machine": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/accounts.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch accounts.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/accounts.calls.ProgramsIn"
+    },
+    "out": {
+      "$ref": "#/$defs/accounts.ProgramsRead"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "accounts.list",
+  "type": "object"
+}

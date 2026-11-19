@@ -1,0 +1,6 @@
+[
+  {"Source": "local", "Name": "station-image-ubuntu-1", "Disk": 20, "Size": 7, "Accessed": 1761900000, "Running": false, "State": "stopped"},
+  {"Source": "local", "Name": "dev", "Disk": 50, "Size": 12, "Accessed": 1761900100, "Running": true, "State": "running"},
+  {"Source": "local", "Name": "paused", "Disk": null, "Size": 9, "Accessed": 1761900200, "Running": false, "State": "suspended"},
+  {"Source": "OCI", "Name": "ghcr.io/cirruslabs/ubuntu:latest", "Disk": 20, "Size": 3, "Accessed": 1761900300, "Running": false, "State": "stopped"}
+]

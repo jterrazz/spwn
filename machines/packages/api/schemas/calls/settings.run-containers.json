@@ -1,0 +1,72 @@
+{
+  "$defs": {
+    "settings.ContainersOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "Removals": {
+          "items": {
+            "$ref": "#/$defs/settings.ContainersRemoval"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Shortcut": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Removals",
+        "Shortcut"
+      ],
+      "type": "object"
+    },
+    "settings.ContainersRemoval": {
+      "additionalProperties": false,
+      "properties": {
+        "Count": {
+          "type": "integer"
+        },
+        "What": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Count",
+        "What"
+      ],
+      "type": "object"
+    },
+    "settings.calls.ContainersIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/settings.run-containers.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call settings.run-containers of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/settings.calls.ContainersIn"
+    },
+    "out": {
+      "$ref": "#/$defs/settings.ContainersOutcome"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "settings.run-containers",
+  "type": "object"
+}

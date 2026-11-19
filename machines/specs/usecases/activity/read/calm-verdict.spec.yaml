@@ -1,0 +1,11 @@
+description: 'a Mac with nothing to raise heads its activity Nothing to look at'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.verdict'''
+      stdin: |
+          {"v":2,"id":"1","call":"activity.read","target":{"name":"macbook-pro"},"in":{"history":true}}
+      exit: 0
+      stdout: |
+          {"Tone":"ok","Sentence":"Nothing to look at.","Line":"history kept 24 h, since the engine started"}

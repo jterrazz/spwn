@@ -1,0 +1,17 @@
+description: 'a server can be used: its own sections run on it, and what station does not manage there is refused'
+env: two-macs
+runs:
+    - command: 'use infra'
+      exit: 0
+      stdout: |
+          	On infra in this terminal. Other terminals stay on This Mac.
+    - command: 'apps'
+      exit: 2
+      stderr: |
+          Error: infra is a server: station does not manage its apps
+          Hint: manage it with your own tooling: ssh infra
+    - command: 'activity | /usr/bin/head -2'
+      exit: 0
+      stdout: |
+          	On infra:
+          ●	infra	Server · up 12d 0h · rates over 1 s

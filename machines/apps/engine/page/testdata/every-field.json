@@ -1,0 +1,737 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine:linux-1",
+  "command": "machines linux-1",
+  "context": {
+    "machine": "linux-1",
+    "kind": "workspace",
+    "registered": true,
+    "on": "mac-mini"
+  },
+  "state": "failed",
+  "strip": {
+    "cpu": {
+      "kind": "percent",
+      "n": 340,
+      "live": "cpu:linux-1",
+      "signal": "active"
+    },
+    "spark": [
+      1,
+      2
+    ],
+    "memory": {
+      "kind": "percent",
+      "n": 500
+    },
+    "memory_spark": [
+      3
+    ],
+    "net_spark": [
+      4
+    ],
+    "battery": {
+      "kind": "percent",
+      "n": 800
+    },
+    "net": [
+      {
+        "kind": "size",
+        "n": 1
+      }
+    ],
+    "awake": {
+      "kind": "until",
+      "n": 27000,
+      "at": "2026-11-03T18:00:00Z"
+    },
+    "top": {
+      "id": "top",
+      "title": "Top"
+    }
+  },
+  "sections": [
+    {
+      "id": "summary",
+      "title": "linux-1",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "on mac-mini",
+          "pri": 2,
+          "short": "mini",
+          "nav": "menubar.machine:mac-mini"
+        }
+      ]
+    },
+    {
+      "id": "machines",
+      "title": "Machines",
+      "fold": "auto",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2 running"
+        }
+      ],
+      "joined": true,
+      "columns": [
+        {
+          "key": "name",
+          "label": "Name",
+          "kind": "text",
+          "keep": 100,
+          "show": "eye",
+          "whole": true
+        },
+        {
+          "key": "value",
+          "kind": "levels",
+          "levels": [
+            "data"
+          ]
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "agent-7f",
+            "mark": "attention",
+            "label": "agent-7f",
+            "short": "a7",
+            "sentence": true,
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:linux-1",
+                "signal": "active"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "on mac-mini",
+                  "pri": 2,
+                  "short": "mini",
+                  "nav": "menubar.machine:mac-mini"
+                },
+                {
+                  "kind": "age",
+                  "n": 600,
+                  "at": "2026-11-03T10:20:00Z"
+                }
+              ]
+            },
+            "reason": "waiting",
+            "hint": {
+              "command": "station machines linux-1",
+              "text": "open it"
+            },
+            "glyph": {
+              "kind": "workspace",
+              "signal": "waits",
+              "dot": "ping",
+              "ring": "cpu:linux-1",
+              "spin": true,
+              "progress": 400
+            },
+            "mac": "mac-mini",
+            "trail": "value",
+            "verb": "reply",
+            "quick": "copy",
+            "nav": "menubar.machine:linux-1",
+            "menu": [
+              "copy",
+              "-",
+              "delete"
+            ],
+            "signal": "asleep",
+            "fresh": true,
+            "left": {
+              "kind": "until",
+              "n": 1350,
+              "of": 3600
+            },
+            "birth": {
+              "kind": "count",
+              "n": 400,
+              "of": 1000
+            }
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "group",
+              "mark": "ok"
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "child",
+                  "mark": "pending"
+                }
+              }
+            ],
+            "fold": "folded"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        },
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true,
+      "pipe_groups": true,
+      "break": 1,
+      "says_dropped": true,
+      "top": 1,
+      "rest": {
+        "note": {
+          "text": "+ 3 more"
+        }
+      },
+      "glance": [
+        {
+          "kind": "text",
+          "text": "1 waits"
+        }
+      ],
+      "segment": "overview",
+      "card": "now",
+      "picker": [
+        {
+          "label": "6 min",
+          "id": "window-6m",
+          "run": {
+            "call": "activity.window",
+            "in": {
+              "Window": "6m"
+            }
+          },
+          "picked": true
+        }
+      ],
+      "about": {
+        "label": "About machines",
+        "text": "A machine is a Mac or a VM station keeps."
+      }
+    },
+    {
+      "id": "cards",
+      "title": "Cards",
+      "items": [
+        {
+          "fact": {
+            "key": "uptime",
+            "value": {
+              "kind": "duration",
+              "n": 7200
+            }
+          }
+        },
+        {
+          "empty": {
+            "noun": "VMs",
+            "text": "No VMs yet",
+            "hint": {
+              "command": "station machines create"
+            },
+            "glyph": {
+              "kind": "symbol:shippingbox"
+            },
+            "sub": "Create one to start",
+            "actions": [
+              "new-vm"
+            ]
+          }
+        },
+        {
+          "error": {
+            "message": "linux-1 does not answer",
+            "hint": "station machines linux-1"
+          }
+        },
+        {
+          "link": {
+            "label": "web",
+            "lead": {
+              "kind": "portmap",
+              "n": 5173,
+              "of": 40001
+            },
+            "value": {
+              "kind": "url",
+              "text": "http://localhost:40001"
+            },
+            "detail": {
+              "kind": "text",
+              "text": "vite"
+            },
+            "page": "menubar.ports",
+            "row": "web"
+          }
+        },
+        {
+          "tile": {
+            "caption": "VMs",
+            "glyph": {
+              "kind": "server"
+            },
+            "number": {
+              "kind": "count",
+              "n": 3
+            },
+            "word": "running",
+            "signal": "well",
+            "toggle": "awake",
+            "nav": "menubar.awake",
+            "plus": "+1",
+            "tip": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "3 running"
+                },
+                {
+                  "kind": "text",
+                  "text": "right-click for a term"
+                }
+              ]
+            },
+            "key": "cmd+e"
+          }
+        },
+        {
+          "gauge": {
+            "title": "CPU",
+            "note": "4 cores",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:linux-1",
+              "signal": "active"
+            },
+            "spark": [
+              10,
+              20,
+              34
+            ],
+            "bar": {
+              "kind": "size",
+              "n": 2400000000,
+              "of": 20000000000,
+              "unit": "GB",
+              "label": "disk",
+              "stale": true
+            },
+            "stale": true
+          }
+        },
+        {
+          "chart": {
+            "kind": "bars",
+            "window": "6m",
+            "series": [
+              {
+                "key": "cpu",
+                "points": [
+                  1.5,
+                  34,
+                  12
+                ],
+                "unit": "%"
+              }
+            ],
+            "peak": {
+              "index": 1,
+              "value": {
+                "kind": "percent",
+                "n": 340
+              },
+              "at": "10:28"
+            },
+            "ends": [
+              "6 min ago",
+              "now"
+            ],
+            "anomaly": {
+              "from": 1,
+              "to": 2,
+              "sentence": "CPU stayed high for 2 min"
+            },
+            "at": [
+              "15 s ago",
+              "10 s ago",
+              "5 s ago"
+            ]
+          }
+        },
+        {
+          "log": {
+            "lines": [
+              "listening",
+              "panic: nil map"
+            ],
+            "cause": 2,
+            "more": "logs"
+          }
+        },
+        {
+          "uptime": {
+            "days": [
+              {
+                "date": "2026-11-02",
+                "mark": "restart",
+                "tip": "restarted at 04:10"
+              }
+            ],
+            "availability": {
+              "kind": "percent",
+              "n": 998
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "health"
+    }
+  ],
+  "hints": [
+    {
+      "command": "open -a Terminal",
+      "external": true
+    }
+  ],
+  "error": {
+    "message": "partly read",
+    "hint": "station machines linux-1"
+  },
+  "actions": [
+    {
+      "key": "cmd+c",
+      "label": "Copy the address",
+      "on": "row",
+      "rows": [
+        "agent-7f"
+      ],
+      "priority": 1,
+      "id": "copy",
+      "run": {
+        "copy": "linux-1.local"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "text",
+        "text": "Copied linux-1.local"
+      }
+    },
+    {
+      "label": "Reply",
+      "id": "reply",
+      "run": {
+        "call": "machines.restart",
+        "target": {
+          "name": "linux-1",
+          "on": "mac-mini"
+        }
+      },
+      "default": true,
+      "busy": "Sending"
+    },
+    {
+      "label": "Delete",
+      "confirm": {
+        "question": "Delete linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "its disk is removed"
+          }
+        ],
+        "danger": true,
+        "type": "linux-1",
+        "yes": "Delete",
+        "no": "Cancel",
+        "icon": "warn"
+      },
+      "mutates": true,
+      "id": "delete",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "machines",
+          "delete",
+          "linux-1"
+        ]
+      },
+      "destructive": true
+    },
+    {
+      "key": "cmd+n",
+      "label": "New VM",
+      "id": "new-vm",
+      "run": {
+        "call": "machines.create-workspace"
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "kind",
+            "label": "Kind",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "workspace",
+                "label": "Workspace"
+              },
+              {
+                "value": "server",
+                "label": "Server",
+                "note": "always on",
+                "disabled": "Needs infra running"
+              }
+            ],
+            "default": "workspace",
+            "required": true
+          },
+          {
+            "key": "task",
+            "label": "Task",
+            "kind": "text",
+            "note": "what Claude starts on",
+            "when": {
+              "key": "kind",
+              "value": "workspace"
+            }
+          },
+          {
+            "key": "memory",
+            "label": "Memory",
+            "kind": "slider",
+            "stops": [
+              4,
+              8,
+              16
+            ],
+            "limit": 16,
+            "limit_note": "the most this Mac can lend"
+          },
+          {
+            "key": "on",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm",
+                "label": "This Mac"
+              }
+            ],
+            "swaps": true
+          },
+          {
+            "key": "name",
+            "label": "Name",
+            "kind": "text",
+            "taken": [
+              "linux-1"
+            ],
+            "taken_hud": "{name} already exists"
+          },
+          {
+            "key": "lend-for",
+            "label": "Lend for",
+            "kind": "segmented",
+            "when": {
+              "key": "lend",
+              "set": true
+            }
+          },
+          {
+            "key": "more",
+            "label": "More",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "network",
+                "kind": "select"
+              }
+            ],
+            "summary": {
+              "kind": "text",
+              "text": "NAT, ephemeral"
+            }
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "github",
+                "label": "GitHub",
+                "note": "you",
+                "glyph": {
+                  "kind": "account:github"
+                },
+                "of": "linux-1"
+              }
+            ],
+            "follows": "VMs"
+          },
+          {
+            "key": "copy",
+            "kind": "command",
+            "note": "On the new Mac, run this once.",
+            "hint": {
+              "command": "station machines add mac-mini"
+            }
+          }
+        ],
+        "subtitle": "on This Mac",
+        "primary": [
+          {
+            "label": "Create"
+          },
+          {
+            "when": {
+              "key": "task",
+              "value": "*",
+              "count": 1
+            },
+            "label": "Create and Start Claude",
+            "danger": true
+          }
+        ],
+        "split": [
+          "create-only"
+        ],
+        "warn": "This Mac may sleep: a server pauses with it."
+      },
+      "sheet": "new-vm",
+      "prefill": {
+        "kind": "server"
+      }
+    },
+    {
+      "label": "Create only",
+      "id": "create-only",
+      "run": {
+        "call": "machines.create-workspace",
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{name}"
+          ]
+        },
+        "and": [
+          {
+            "call": "machines.forget",
+            "in": {
+              "VM": "agent-7f"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "Keep awake",
+      "id": "awake",
+      "run": {
+        "call": "awake.keep"
+      }
+    },
+    {
+      "label": "Show the log",
+      "id": "logs",
+      "run": {
+        "open": "https://grafana.example/linux-1"
+      }
+    },
+    {
+      "label": "More",
+      "id": "menu",
+      "submenu": [
+        "copy",
+        "logs"
+      ]
+    },
+    {
+      "label": "Attach",
+      "id": "attach",
+      "disabled": "Needs infra running"
+    }
+  ],
+  "badge": {
+    "needs": 1,
+    "down": true,
+    "restarting": true,
+    "label": "Station, 1 needs you"
+  },
+  "header": {
+    "back": "Back",
+    "title": "linux-1",
+    "glyph": {
+      "kind": "workspace"
+    },
+    "buttons": [
+      "new-vm",
+      "menu"
+    ],
+    "stale": {
+      "kind": "age",
+      "text": "seen 40 s ago, checking",
+      "n": 40
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    }
+  ],
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "linux-1.local"
+    },
+    "note": "Needs infra running",
+    "buttons": [
+      "attach"
+    ]
+  },
+  "live": [
+    "cpu:linux-1"
+  ]
+}

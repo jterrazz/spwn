@@ -1,0 +1,104 @@
+{
+  "schema": "station.page/v1",
+  "id": "all-machines",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "all-machines",
+      "title": "All machines",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "all-machines",
+            "mark": "pending",
+            "label": "reading"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "images",
+      "title": "Images",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "images",
+            "mark": "pending",
+            "label": "reading"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "tailnet",
+      "title": "Tailscale",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "pending",
+            "label": "reading"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "n",
+      "label": "create",
+      "on": "page",
+      "priority": 4,
+      "mutates": true
+    },
+    {
+      "key": "b",
+      "label": "build images",
+      "on": "page",
+      "priority": 7,
+      "mutates": true
+    }
+  ]
+}

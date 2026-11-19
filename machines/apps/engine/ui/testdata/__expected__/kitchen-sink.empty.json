@@ -1,0 +1,325 @@
+{
+  "schema": "station.page/v1",
+  "id": "home",
+  "command": "status",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "computer",
+    "registered": true
+  },
+  "state": "ready",
+  "strip": {
+    "cpu": {
+      "kind": "percent",
+      "n": 340
+    },
+    "spark": [
+      3,
+      10,
+      25,
+      40,
+      60,
+      80,
+      100,
+      50,
+      34,
+      20,
+      10,
+      5,
+      0,
+      15,
+      30,
+      34
+    ],
+    "memory": {
+      "kind": "ratio",
+      "n": 12400000000,
+      "of": 17200000000
+    },
+    "battery": {
+      "kind": "percent",
+      "n": 1000
+    },
+    "net": [
+      {
+        "kind": "text",
+        "text": "28.2 KB/s"
+      },
+      {
+        "kind": "text",
+        "text": "14.5 KB/s"
+      }
+    ],
+    "awake": {
+      "kind": "list",
+      "items": [
+        {
+          "kind": "text",
+          "text": "awake"
+        },
+        {
+          "kind": "text",
+          "text": "3h 12m"
+        }
+      ]
+    }
+  },
+  "sections": [
+    {
+      "id": "actions",
+      "title": "To do",
+      "role": "actions",
+      "items": [
+        {
+          "empty": {
+            "noun": "VMs",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "items": [
+        {
+          "empty": {
+            "noun": "VMs",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "values",
+      "title": "Values",
+      "caption": [
+        {
+          "kind": "range",
+          "n": 40000,
+          "of": 40999
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "a",
+          "label": "value",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "b",
+          "label": "number",
+          "kind": "count",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "VMs",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "marks",
+      "title": "Marks",
+      "fold": "auto",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "VMs",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-machines",
+      "title": "All machines",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "mac",
+          "kind": "text",
+          "keep": 10,
+          "show": "pipe"
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "VMs",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "disk",
+      "title": "Disk",
+      "columns": [
+        {
+          "key": "name",
+          "label": "app",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "levels",
+          "kind": "levels",
+          "keep": 80,
+          "levels": [
+            "data",
+            "kept"
+          ]
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "VMs",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "prose",
+      "title": "Prose",
+      "items": [
+        {
+          "empty": {
+            "noun": "VMs",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "peers",
+      "title": "Peers",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "VMs",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station overview --all"
+    },
+    {
+      "command": "station apps",
+      "text": "for the catalogue"
+    }
+  ],
+  "actions": [
+    {
+      "key": "enter",
+      "label": "fix",
+      "on": "row",
+      "confirm": {
+        "question": "Delete linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "its disk is removed"
+          },
+          {
+            "kind": "command",
+            "text": "station machines delete linux-1"
+          }
+        ],
+        "danger": true,
+        "yes": "delete"
+      },
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "ctrl+r",
+      "label": "restart",
+      "on": "row",
+      "rows": [
+        "linux-1"
+      ],
+      "confirm": {
+        "question": "Restart api?",
+        "type": "api",
+        "yes": "restart"
+      },
+      "priority": 2,
+      "mutates": true
+    },
+    {
+      "key": "n",
+      "label": "create",
+      "on": "page",
+      "priority": 3,
+      "mutates": true
+    }
+  ]
+}

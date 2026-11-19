@@ -1,0 +1,561 @@
+//go:build world
+
+package wire
+
+import (
+	"context"
+	"io"
+	"net/netip"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/engine/process"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/world"
+)
+
+type quietMac struct{}
+
+func (quietMac) Now() time.Time                               { return time.Unix(1, 0) }
+func (quietMac) Sleep(context.Context, time.Duration) error   { return nil }
+func (quietMac) Home() string                                 { return "/home" }
+func (quietMac) ReadFile(string) ([]byte, error)              { return nil, context.Canceled }
+func (quietMac) Exists(string) bool                           { return false }
+func (quietMac) MkdirAll(string) error                        { return nil }
+func (quietMac) Remove(string) error                          { return nil }
+func (quietMac) ListenUnix(string) (process.Listener, error)  { return nil, context.Canceled }
+func (quietMac) ListenLoopback(int) (process.Listener, error) { return nil, context.Canceled }
+func (quietMac) Join(process.Stream, process.Stream)          {}
+func (quietMac) Reap(string) int                              { return 0 }
+
+type quietMachines struct{}
+
+func (quietMachines) Records() ([]model.VMRecord, error) { return nil, nil }
+func (quietMachines) Save(model.VMRecord) error          { return nil }
+func (quietMachines) Remove(context.Context, string) (model.DeleteReport, error) {
+	return model.DeleteReport{}, nil
+}
+func (quietMachines) PowerOff(context.Context, string) error             { return nil }
+func (quietMachines) EngineRunning(context.Context, string) bool         { return false }
+func (quietMachines) ThisMacName() string                                { return "here" }
+func (quietMachines) ThisMacLabel() string                               { return "here" }
+func (quietMachines) MarkUptime(context.Context, model.UptimeMark) error { return nil }
+
+type quietTailnet struct{}
+
+func (quietTailnet) Ready(context.Context) (ports.SharingState, error) {
+	return ports.SharingState{}, nil
+}
+func (quietTailnet) Share(context.Context, ports.Share) (string, error) { return "", nil }
+func (quietTailnet) Unshare(context.Context, ports.Share) error         { return nil }
+func (quietTailnet) Shared(context.Context) ([]ports.Share, error)      { return nil, nil }
+func (quietTailnet) Funneled(context.Context) ([]int, error)            { return nil, nil }
+func (quietTailnet) Warm(context.Context) error                         { return nil }
+
+type quietPolicy struct{}
+
+func (quietPolicy) Get() (*ports.PortsGroup, error) { return &ports.PortsGroup{}, nil }
+
+type quietReservations struct{ process.Reservations }
+
+func (quietReservations) List(context.Context) ([]ports.Reservation, error) { return nil, nil }
+
+func quietEngine(kind catalog.MachineKind, r process.Reservations) *process.Engine {
+	return process.New(quietMac{}, nil, nil, quietMachines{}, quietTailnet{}, process.Stores{Ports: quietPolicy{}, Reservations: r}, process.Options{ThisMachine: kind, State: "/state"})
+}
+
+func begunEngine(t *testing.T) *process.Engine {
+	t.Helper()
+	d := quietEngine(catalog.Mac, quietReservations{})
+	if err := d.Begin(context.Background(), func(string) {}); err != nil {
+		t.Fatal(err)
+	}
+	return d
+}
+
+func coldMac(start func(m *worldMac) *process.Engine) *worldMac {
+	w := &world.World{ThisMac: "here", Macs: map[string]*world.Mac{"here": {Engine: &world.Engine{StartedAt: time.Unix(1, 0)}}}}
+	m := (&worldRun{w: w, macs: map[string]*worldMac{}}).mac("here")
+	m.start = func() *process.Engine { return start(m) }
+	return m
+}
+
+type dialingReservations struct {
+	quietReservations
+	dial func(ctx context.Context)
+}
+
+func (r dialingReservations) List(ctx context.Context) ([]ports.Reservation, error) {
+	r.dial(ctx)
+	return nil, nil
+}
+
+// value: a caller's context that says when the caller waits on it.
+type askedContext struct {
+	context.Context
+	asked chan<- struct{}
+}
+
+func (c askedContext) Done() <-chan struct{} {
+	select {
+	case c.asked <- struct{}{}:
+	default:
+	}
+	return c.Context.Done()
+}
+
+func dialMac(ctx context.Context, m *worldMac) error {
+	conn, err := worldSockets{m: m}.DialUnix(ctx, "", 0)
+	if err == nil {
+		_ = conn.Close()
+	}
+	return err
+}
+
+func TestWorldMacUpNeverAnswersAnEngineThatEnded(t *testing.T) {
+	for range 200 {
+		w := &world.World{ThisMac: "here", Macs: map[string]*world.Mac{"here": {Engine: &world.Engine{StartedAt: time.Unix(1, 0)}}}}
+		run := &worldRun{w: w, macs: map[string]*worldMac{}}
+		m := run.mac("here")
+		m.hold(begunEngine(t), m.engineStarted())
+
+		var (
+			wg  sync.WaitGroup
+			got *process.Engine
+			ok  bool
+		)
+		wg.Add(2)
+		go func() { defer wg.Done(); got, ok = m.up(context.Background()) }()
+		go func() { defer wg.Done(); m.down(false) }()
+		wg.Wait()
+		if ok && got == nil {
+			t.Fatal("up answered ok with a nil engine: it read the engine twice while down ended it")
+		}
+	}
+}
+
+func TestWorldMacCallersThatMeetAStartWaitForItsEngine(t *testing.T) {
+	const callers = 4
+	for range 200 {
+		m := coldMac(func(*worldMac) *process.Engine { return quietEngine(catalog.Mac, quietReservations{}) })
+		barrier := make(chan struct{})
+		errs := make([]error, callers)
+		var wg sync.WaitGroup
+		for i := range callers {
+			wg.Go(func() {
+				<-barrier
+				errs[i] = dialMac(context.Background(), m)
+			})
+		}
+		close(barrier)
+		wg.Wait()
+		for i, err := range errs {
+			if err != nil {
+				t.Fatalf("caller %d of %d dialed a cold Mac and was refused: %v", i+1, callers, err)
+			}
+		}
+	}
+}
+
+func TestWorldMacStartThatDialsItsOwnMacIsRefusedNotWaited(t *testing.T) {
+	var (
+		once  sync.Once
+		inner error
+	)
+	m := coldMac(func(m *worldMac) *process.Engine {
+		return quietEngine(catalog.Mac, dialingReservations{dial: func(ctx context.Context) {
+			once.Do(func() { inner = dialMac(ctx, m) })
+		}})
+	})
+	done := make(chan error, 1)
+	go func() { done <- dialMac(context.Background(), m) }()
+	bound, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("the start that dialed its own Mac failed: %v", err)
+		}
+	case <-bound.Done():
+		t.Fatal("the start dialed its own Mac and waited for itself")
+	}
+	if inner == nil {
+		t.Fatal("the engine's own dial during its start was answered, not refused")
+	}
+}
+
+func TestWorldMacThatHoldsAnEngineBeginsNoStart(t *testing.T) {
+	m := coldMac(func(*worldMac) *process.Engine { return quietEngine(catalog.Mac, quietReservations{}) })
+	held := begunEngine(t)
+	m.hold(held, m.engineStarted())
+	if s, mine := m.beginStarting(); s != nil || mine {
+		t.Fatalf("a Mac that holds an engine gave a caller a start (mine %v): a start that ended as it looked leaves two engines", mine)
+	}
+	if d, ok := m.up(context.Background()); !ok || d != held {
+		t.Fatal("a caller of a Mac that holds an engine did not read that engine")
+	}
+}
+
+func TestWorldMacStartBegunInAnEnginesLifetimeLeapsTheClockItself(t *testing.T) {
+	started, release := make(chan struct{}), make(chan struct{})
+	m := coldMac(func(*worldMac) *process.Engine {
+		close(started)
+		<-release
+		return quietEngine(catalog.Mac, quietReservations{})
+	})
+	inside := context.WithValue(context.Background(), waits{}, true)
+	go func() { _ = dialMac(inside, m) }()
+	<-started
+	bound, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- dialMac(context.Background(), m) }()
+	close(release)
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("the command that met an engine's start was refused: %v", err)
+		}
+	case <-bound.Done():
+		t.Fatal("the start begun in an engine's lifetime waited on a clock only the command it blocks moves")
+	}
+}
+
+func TestWorldMacWaiterLeavesWhenItsContextEnds(t *testing.T) {
+	started, release := make(chan struct{}), make(chan struct{})
+	m := coldMac(func(*worldMac) *process.Engine {
+		close(started)
+		<-release
+		return quietEngine(catalog.Mac, quietReservations{})
+	})
+	defer close(release)
+	go func() { _ = dialMac(context.Background(), m) }()
+	<-started
+	bound, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	asked := make(chan struct{}, 1)
+	ctx, leave := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() { done <- dialMac(askedContext{Context: ctx, asked: asked}, m) }()
+	select {
+	case <-asked:
+	case err := <-done:
+		t.Fatalf("a caller that met a start did not wait for it: %v", err)
+	case <-bound.Done():
+		t.Fatal("a caller waited for the start without its context")
+	}
+	leave()
+	select {
+	case err := <-done:
+		if err == nil {
+			t.Fatal("a waiter whose context ended was answered an engine")
+		}
+	case <-bound.Done():
+		t.Fatal("a waiter whose context ended still waited for the start")
+	}
+}
+
+func TestWorldMacStartThatFailsFailsEveryWaiter(t *testing.T) {
+	const waiters = 3
+	started, asked := make(chan struct{}), make(chan struct{}, 4*waiters)
+	bound, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	var starts atomic.Int32
+	m := coldMac(func(*worldMac) *process.Engine {
+		if starts.Add(1) > 1 {
+			return quietEngine(catalog.Mac, quietReservations{})
+		}
+		close(started)
+		for range waiters {
+			select {
+			case <-asked:
+			case <-bound.Done():
+				t.Error("a waiter never asked for the start it waited on")
+			}
+		}
+		return quietEngine(catalog.Linux, quietReservations{})
+	})
+	errs := make([]error, waiters+1)
+	var wg sync.WaitGroup
+	wg.Go(func() { errs[waiters] = dialMac(context.Background(), m) })
+	<-started
+	for i := range waiters {
+		wg.Go(func() { errs[i] = dialMac(askedContext{Context: context.Background(), asked: asked}, m) })
+	}
+	wg.Wait()
+	if n := starts.Load(); n != 1 {
+		t.Fatalf("a start that failed was begun %d times: a waiter began its own", n)
+	}
+	for i, err := range errs {
+		if err == nil {
+			t.Fatalf("caller %d was answered an engine by a start that failed", i)
+		}
+	}
+	if err := dialMac(context.Background(), m); err != nil {
+		t.Fatalf("a caller after the failed start was refused instead of beginning its own: %v", err)
+	}
+	if n := starts.Load(); n != 2 {
+		t.Fatalf("the caller after a failed start left %d starts, want 2", n)
+	}
+}
+
+func TestWorldMacFirstCallersServeAFarMacOnce(t *testing.T) {
+	const callers = 16
+	w := &world.World{ThisMac: "here", Macs: map[string]*world.Mac{
+		"here":  {Engine: &world.Engine{StartedAt: time.Unix(1, 0)}},
+		"there": {Engine: &world.Engine{StartedAt: time.Unix(1, 0)}},
+	}}
+	var built atomic.Int32
+	run := &worldRun{w: w, macs: map[string]*worldMac{}}
+	run.farFrom(func(*worldMac) farMac {
+		built.Add(1)
+		return farMac{start: func() *process.Engine { return quietEngine(catalog.Mac, quietReservations{}) }}
+	})
+	m := run.mac("there")
+	barrier := make(chan struct{})
+	var wg sync.WaitGroup
+	for range callers {
+		wg.Go(func() {
+			<-barrier
+			if _, ok := m.up(context.Background()); !ok {
+				t.Error("a first caller of a far Mac was refused")
+			}
+		})
+	}
+	close(barrier)
+	wg.Wait()
+	if n := built.Load(); n != 1 {
+		t.Fatalf("a far Mac was built %d times by concurrent first callers, want 1", n)
+	}
+}
+
+func TestWorldMacStartThatJoinsAPoolJobWaitingOnItEnds(t *testing.T) {
+	bound, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	type frame struct{ dialed error }
+	var pool *lanes.Pool
+	read := func(ctx context.Context, m *worldMac) <-chan frame {
+		return lanes.Run(ctx, pool, frame{}, []lanes.Job[frame]{{Key: "overview/machine/daemon",
+			Do: func(ctx context.Context) func(*frame) {
+				err := dialMac(ctx, m)
+				return func(f *frame) { f.dialed = err }
+			},
+			Late: func(*frame) {},
+		}}, func(f frame) frame { return f })
+	}
+	drained := func(answers <-chan frame) bool {
+		for {
+			select {
+			case _, open := <-answers:
+				if !open {
+					return true
+				}
+			case <-bound.Done():
+				return false
+			}
+		}
+	}
+	started, release := make(chan struct{}), make(chan struct{})
+	var (
+		once   sync.Once
+		joined atomic.Bool
+	)
+	m := coldMac(func(m *worldMac) *process.Engine {
+		close(started)
+		select {
+		case <-release:
+		case <-bound.Done():
+		}
+		return quietEngine(catalog.Mac, dialingReservations{dial: func(ctx context.Context) {
+			once.Do(func() { joined.Store(drained(read(ctx, m))) })
+		}})
+	})
+	pool = lanes.NewPool(m.poolContext(context.Background()), m.budgets(), 1, 1)
+	direct := make(chan error, 1)
+	go func() { direct <- dialMac(context.Background(), m) }()
+	select {
+	case <-started:
+	case <-bound.Done():
+		t.Fatal("the direct caller never began the start")
+	}
+	outside := read(context.Background(), m)
+	close(release)
+	select {
+	case err := <-direct:
+		if err != nil {
+			t.Fatalf("the direct caller was refused the engine it began: %v", err)
+		}
+	case <-bound.Done():
+		t.Fatal("the start joined the pool job that waited on it, and neither ended")
+	}
+	if !joined.Load() {
+		t.Fatal("the start's read through the pool joined a job that waited on the start")
+	}
+	if !drained(outside) {
+		t.Fatal("the pool job that met the start never ended")
+	}
+}
+
+type liveRun struct{ ended chan model.RunEnd }
+
+func (liveRun) VM() string                   { return "api" }
+func (liveRun) PID() int                     { return 1001 }
+func (liveRun) Holder() int                  { return 1001 }
+func (r liveRun) Ended() <-chan model.RunEnd { return r.ended }
+
+// value: a hypervisor whose one VM, api, runs from before the engine.
+type liveHypervisor struct{ run liveRun }
+
+func (h liveHypervisor) Boot(context.Context, string, model.Network, []model.Mount) (process.Run, error) {
+	return h.run, nil
+}
+func (h liveHypervisor) Adopt(context.Context, string) (process.Run, bool) { return h.run, true }
+func (liveHypervisor) Shutdown(context.Context, string, time.Duration) error {
+	return nil
+}
+func (liveHypervisor) Address(context.Context, string, time.Duration) (netip.Addr, error) {
+	return netip.MustParseAddr("192.168.64.5"), nil
+}
+func (liveHypervisor) Console(context.Context, string, int) ([]string, error) { return nil, nil }
+
+type apiMachines struct{ quietMachines }
+
+func (apiMachines) Records() ([]model.VMRecord, error) {
+	return []model.VMRecord{{Name: "api", Lifetime: model.Persistent}}, nil
+}
+
+// value: a guest whose connection opens once open is closed, then says
+// ready and its first scan when says, or nothing at all.
+type greetingGuests struct {
+	open <-chan struct{}
+	says bool
+}
+
+func (g greetingGuests) Dial(ctx context.Context, _ string, _ netip.AddrPort) (process.Guest, error) {
+	select {
+	case <-g.open:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	return greetingGuest{says: g.says, done: make(chan struct{})}, nil
+}
+
+type greetingGuest struct {
+	says bool
+	done chan struct{}
+}
+
+func (greetingGuest) Exec(context.Context, string, string) (engine.GuestRan, error) {
+	return engine.GuestRan{}, nil
+}
+
+func (g greetingGuest) Attach(ctx context.Context, _ string) (process.Session, error) {
+	out, said := io.Pipe()
+	go func() {
+		if g.says {
+			_, _ = said.Write([]byte(`{"v":1,"type":"ready"}` + "\n" + `{"v":1,"type":"snapshot","ports":[]}` + "\n"))
+		}
+		<-ctx.Done()
+		_ = said.Close()
+	}()
+	return guestSession{out}, nil
+}
+
+func (greetingGuest) Forward(context.Context, string, int) (process.Stream, error) {
+	return nil, context.Canceled
+}
+func (greetingGuest) Close() error            { return nil }
+func (g greetingGuest) Done() <-chan struct{} { return g.done }
+
+type guestSession struct{ *io.PipeReader }
+
+func (guestSession) Write(p []byte) (int, error) { return len(p), nil }
+func (guestSession) Wait() (int, error)          { return 0, nil }
+
+// value: the real time a settling may wait on its guests' greetings, in all.
+const greetWait = 2 * time.Second
+
+func adoptingMac(guests process.Guests) (m *worldMac, started func() *process.Engine) {
+	var held atomic.Pointer[process.Engine]
+	m = coldMac(func(*worldMac) *process.Engine {
+		d := process.New(quietMac{}, liveHypervisor{run: liveRun{ended: make(chan model.RunEnd)}}, guests, apiMachines{}, quietTailnet{}, process.Stores{Ports: quietPolicy{}, Reservations: quietReservations{}}, process.Options{ThisMachine: catalog.Mac, State: "/state"})
+		held.Store(d)
+		return d
+	})
+	return m, held.Load
+}
+
+func TestWorldMacStartSettlesOnceItsGuestsHaveGreeted(t *testing.T) {
+	open := make(chan struct{})
+	opening := time.AfterFunc(500*time.Millisecond, func() { close(open) })
+	defer opening.Stop()
+	m, started := adoptingMac(greetingGuests{open: open, says: true})
+	from, began := m.run.clock().Now(), time.Now()
+	if err := dialMac(context.Background(), m); err != nil {
+		t.Fatalf("the caller was refused the engine it began: %v", err)
+	}
+	if waited := time.Since(began); waited >= greetWait {
+		t.Fatalf("the settling waited %v, its whole bound, on a guest that had greeted", waited)
+	}
+	views := started().VMs()
+	if len(views) != 1 || views[0].Guest != engine.GuestConnected {
+		t.Fatalf("the start settled while api's guest still greeted: %+v", views)
+	}
+	if took := m.run.clock().Now().Sub(from); took != quietTicks*time.Second {
+		t.Fatalf("the start's settling leapt the clock %v, want the %d quiet ticks alone", took, quietTicks)
+	}
+}
+
+func TestWorldMacStartSettlesPastAGreetingThatNeverEnds(t *testing.T) {
+	bound, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	open := make(chan struct{})
+	close(open)
+	m, _ := adoptingMac(greetingGuests{open: open, says: false})
+	began := time.Now()
+	done := make(chan error, 1)
+	go func() { done <- dialMac(context.Background(), m) }()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("the caller was refused the engine it began: %v", err)
+		}
+	case <-bound.Done():
+		t.Fatal("a guest that never greets held the start's settling past its bound")
+	}
+	if waited := time.Since(began); waited < greetWait || waited > greetWait+time.Second {
+		t.Fatalf("a guest that never greets held the settling %v, want its bound %v once", waited, greetWait)
+	}
+}
+
+func TestWorldMacReadingsBesideRunInOrderOnAClockRealTimeNeverMoves(t *testing.T) {
+	began := time.Unix(1000, 0)
+	w := &world.World{ThisMac: "here", Now: began, Macs: map[string]*world.Mac{"here": {}}}
+	m := (&worldRun{w: w, macs: map[string]*worldMac{}}).mac("here")
+	var ran []string
+	var seen time.Time
+	m.beside(func() {
+		taking, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+		defer cancel()
+		<-taking.Done()
+		seen = m.run.clock().Now()
+		ran = append(ran, "first")
+	})
+	m.beside(func() { ran = append(ran, "second") })
+	m.aside()
+	if !seen.Equal(began) {
+		t.Fatalf("a reading that took real time read the clock at %v, want %v: real time moved it", seen, began)
+	}
+	if len(ran) != 2 || ran[0] != "first" || ran[1] != "second" {
+		t.Fatalf("the readings ran as %v, want first then second", ran)
+	}
+	if !w.Now.Equal(began) || len(m.besides) != 0 {
+		t.Fatalf("after the readings the clock reads %v with %d left, want %v and none", w.Now, len(m.besides), began)
+	}
+}

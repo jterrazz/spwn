@@ -1,0 +1,13 @@
+{
+    "group": "home",
+    "id": "home.restarting",
+    "note": "infra restarting: the hero spins, its step counted, the needs folded.",
+    "pages": ["pages/machines.home.restarting-2.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1"
+}

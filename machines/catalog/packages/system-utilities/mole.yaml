@@ -1,0 +1,21 @@
+package: station.package/v1
+kind: app
+name: mole
+description: Tidy, uninstall, analyze, and optimize macOS from the terminal
+provides: [mo]
+methods:
+    - os: macos
+      machine: computer
+      brew: mole
+disk:
+    paths:
+        - path: '{cache}/mole'
+          level: cache
+        - path: ~/Library/Logs/mole
+          level: cache
+          os: macos
+        - path: '{config}/mole'
+          level: settings
+    free:
+        - delete: ['{cache}/mole/*', ~/Library/Logs/mole/*]
+    no-erase: 'nothing to erase: keys and logins are kept'

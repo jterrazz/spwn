@@ -1,0 +1,32 @@
+description: "memory counts binary, disk decimal, an unknown unit is refused"
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/engine-vm/
+env: engine
+serve: sshd
+runs:
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --memory 8G --disk 80G --cpus 2; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	127.0.0.1
+          ●	SSH answers
+          ●	vite	5173	https://macbook.tail1234.ts.net:40001
+          ●	expo	8081	https://macbook.tail1234.ts.net:40000
+          ●	linux-1	Created	Ephemeral · 2 CPU · 8 GB · 80 GB
+      files:
+          .calls: { contains: 'tart set linux-1 --cpu 2 --memory 8192 --disk-size 80' }
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --memory 2560M --name mid; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	127.0.0.1
+          ●	SSH answers
+          ●	vite	5173	https://macbook.tail1234.ts.net:40003
+          ●	expo	8081	https://macbook.tail1234.ts.net:40002
+          ●	mid	Created	Ephemeral · 4 CPU · 2.5 GB · 20 GB
+    - command: 'machines create --memory 12X'
+      exit: 2
+      stderr: |
+          Error: --memory "12X" is not a size
+          Hint: write a size with its unit: 512M, 8G, 1T

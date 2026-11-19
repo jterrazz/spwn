@@ -1,0 +1,11 @@
+description: 'A VM of the mini has no action here: its row says where to sign in'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {verdict: .Verdict.Sentence, tone: .Verdict.Tone, rows: [.Programs[] | [.Program, .State, .How, .Action, .Line, .Ask]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{"Machine":"infra"}}
+      exit: 0
+      stdout: |
+          {"verdict":"infra is a server: it takes no grant and keeps its own sign-ins","tone":"plain","rows":[["gh","signed-out",null,"none","A server keeps its own sign-ins",null],["npm","signed-out",null,"none","A server keeps its own sign-ins",null],["claude","signed-out",null,"none","A server keeps its own sign-ins",null],["wrangler","signed-out",null,"none","A server keeps its own sign-ins",null]]}

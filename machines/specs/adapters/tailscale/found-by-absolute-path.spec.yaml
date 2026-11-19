@@ -1,0 +1,51 @@
+description: 'the Tailscale CLI is found by absolute path: Standalone first, App Store bundle next, PATH last'
+fixture:
+    - ../../__fixtures__/vms/
+    - ./__fixtures__/tailscale-standalone/
+    - ../../__fixtures__/tailscale-app-store/
+env: engine
+runs:
+    - command: 'ports --json | /usr/bin/jq -c ''.tailscale | [.variant, .cli]'''
+      exit: 0
+      stdout: |
+          ["app-store","{{workdir}}/root/usr/local/bin/tailscale"]
+      files:
+          .calls:
+              equals: |
+                  tailscale-standalone status --json
+                  sysctl -n net.inet.ip.portrange.first
+                  sysctl -n net.inet.ip.portrange.last
+                  tailscale-standalone status --json
+                  tailscale-standalone serve status --json
+    - command: '--version >/dev/null; : > .calls; /bin/mv root/usr/local/bin/tailscale standalone; "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.variant, .cli]'''
+      exit: 0
+      stdout: |
+          ["app-store","{{workdir}}/root/Applications/Tailscale.app/Contents/MacOS/Tailscale"]
+      files:
+          .calls:
+              equals: |
+                  tailscale-app-store status --json
+                  sysctl -n net.inet.ip.portrange.first
+                  sysctl -n net.inet.ip.portrange.last
+                  tailscale-app-store status --json
+                  tailscale-app-store serve status --json
+    - command: '--version >/dev/null; /usr/bin/env -u TERM -u TERM_PROGRAM -u SHLVL "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.state, .variant]'''
+      exit: 0
+      stdout: |
+          ["on","app-store"]
+    - command: '--version >/dev/null; /bin/mv standalone root/usr/local/bin/tailscale; /bin/rm -r root/Applications/Tailscale.app/Contents/_MASReceipt; "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.variant, .cli]'''
+      exit: 0
+      stdout: |
+          ["standalone","{{workdir}}/root/usr/local/bin/tailscale"]
+    - command: '--version >/dev/null; : > .calls; /bin/rm -r root/Applications root/usr; "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.variant, .cli]'''
+      exit: 0
+      stdout: |
+          ["","{{workdir}}/bin/tailscale"]
+      files:
+          .calls:
+              equals: |
+                  tailscale status --json
+                  sysctl -n net.inet.ip.portrange.first
+                  sysctl -n net.inet.ip.portrange.last
+                  tailscale status --json
+                  tailscale serve status --json

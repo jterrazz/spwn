@@ -1,0 +1,13 @@
+description: 'a Mac of a model station never saw has the same readiness: measured, not looked up'
+env: unknown-model
+runs:
+    - command: 'overview --on mac-mini | /usr/bin/sed -n ''/^# Mac readiness/,/^# /p'''
+      exit: 0
+      stdout: |
+          # Mac readiness
+          ●	restarts after a power cut	applied
+          ●	never sleeps	applied
+          ●	logs in by itself	applied
+          ◐	disk unlock after a power cut	needs you	station machines unlock mac-mini (from the same network)
+          ●	planned restarts unlock themselves	supported
+          ●	engine starts at login	installed

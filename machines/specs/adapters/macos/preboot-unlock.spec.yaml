@@ -1,0 +1,17 @@
+description: 'a Mac refusing the key before boot is dialed on its LAN and gets a password session'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ./__fixtures__/pre-boot/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" machines unlock y'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/sed "s|=/.*/known_hosts/|=~/known_hosts/|" .calls'
+      exit: 0
+      stdout: |
+          ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o ConnectTimeout=2 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=~/known_hosts/y.preboot -o HostName=192.168.1.20 y true
+          ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=~/known_hosts/y.preboot -o HostName=192.168.1.20 y
+          ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach

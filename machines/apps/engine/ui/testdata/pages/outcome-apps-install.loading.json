@@ -1,0 +1,141 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "apps install",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/install",
+            "mark": "pending",
+            "label": "Installed 2 apps on This Mac",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "method",
+          "kind": "list",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "jq",
+            "mark": "pending",
+            "label": "jq",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mise",
+            "mark": "pending",
+            "label": "mise",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mise/activate",
+            "mark": "pending",
+            "label": "activate",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "typewhisper",
+            "mark": "pending",
+            "label": "typewhisper",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 4
+        }
+      ]
+    }
+  ]
+}

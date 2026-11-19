@@ -1,0 +1,13 @@
+description: 'a skill installs as an app, through the skills CLI'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ../__fixtures__/skills-cli/
+runs:
+    - command: 'apps install frontend-design'
+      exit: 0
+      stdout: |
+          ●	frontend-design		skill
+      files:
+          .calls:
+              contains:
+                  - 'skills add -g -y --skill frontend-design --agent claude-code codex -- anthropics/skills'

@@ -1,0 +1,8 @@
+description: 'a daemon whose hello names another version than station is degraded, named'
+fixture: ../../../__fixtures__/vms/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .local/state/station; for i in 1; do (cd .local/state/station && printf ''{"v":2,"id":"1","out":{"version":"v0.9.0","pid":1}}\n'' | /usr/bin/nc -lU engine.sock > /dev/null) & n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; if [ $i = 1 ]; then "$STATION" status --json | /usr/bin/jq -c ''.station.daemon''; else "$STATION" overview | /usr/bin/awk -F "\t" ''$2 == "engine"'' | /usr/bin/sed "s/station is v[^[:space:]]*/station is THIS/"; fi; wait; /bin/rm -f .local/state/station/engine.sock; done'
+      exit: 0
+      stdout: |
+          {"state":"degraded","running":true,"version":"v0.9.0"}

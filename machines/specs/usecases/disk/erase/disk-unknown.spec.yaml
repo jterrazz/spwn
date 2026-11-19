@@ -1,0 +1,8 @@
+description: 'an erase of an app with no Disk row is refused before its name is asked'
+env: two-macs
+runs:
+    - command: 'disk erase gooo'
+      exit: 2
+      stderr: |
+          Error: no disk row for "gooo"
+          Hint: station disk

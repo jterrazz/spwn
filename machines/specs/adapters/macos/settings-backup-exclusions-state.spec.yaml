@@ -1,0 +1,19 @@
+description: 'backup-exclusions reads applied with both excluded, and not applied with one, or without tmutil'
+fixture: ./__fixtures__/settings-tmutil/
+runs:
+    - command: 'settings --json | /usr/bin/jq -r ''.settings[] | select(.name == "backup-exclusions") | .state'''
+      exit: 0
+      stdout: |
+          applied
+    - command: '--version >/dev/null; /bin/mkdir -p answers/tmutil && echo 1 > answers/tmutil/excluded'
+      exit: 0
+    - command: 'settings --json | /usr/bin/jq -r ''.settings[] | select(.name == "backup-exclusions") | .state'''
+      exit: 0
+      stdout: |
+          not-applied
+    - command: '--version >/dev/null; /bin/rm bin/tmutil'
+      exit: 0
+    - command: 'settings --json | /usr/bin/jq -r ''.settings[] | select(.name == "backup-exclusions") | .state'''
+      exit: 0
+      stdout: |
+          not-applied

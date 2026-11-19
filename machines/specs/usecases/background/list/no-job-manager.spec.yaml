@@ -1,0 +1,8 @@
+description: 'station background --on a Linux workspace is refused: it has no job manager station reads'
+env: two-macs
+runs:
+    - command: 'background --on linux-1'
+      exit: 2
+      stderr: |
+          Error: linux-1 has no job manager station reads
+          Hint: run station overview for what linux-1 has

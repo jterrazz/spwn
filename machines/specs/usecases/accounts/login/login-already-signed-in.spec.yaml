@@ -1,0 +1,11 @@
+description: 'gh is signed in on this Mac: a second sign-in is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, field, subject, message, hint}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"gh"}}
+      exit: 0
+      stdout: |
+          {"code":"login.already-signed-in","field":null,"subject":"gh","message":"GitHub is already signed in here","hint":"sign out first to sign in again"}

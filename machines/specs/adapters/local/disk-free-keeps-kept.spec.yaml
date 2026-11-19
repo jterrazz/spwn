@@ -1,0 +1,18 @@
+description: 'free never touches a file it never touches, nor a settings file'
+fixture:
+    - ../__fixtures__/system-tools/
+    - ./__fixtures__/disk-go/
+    - ./__fixtures__/disk-kept/
+runs:
+    - command: 'disk free'
+      exit: 0
+      stdout: |
+          	none
+      files:
+          .local/state/station/vms/a.json: { equals: "{\"v\": 2, \"lifetime\":\"persistent\"}\n" }
+          .local/state/station/images/key: { equals: "a private key\n" }
+          .local/state/station/leases.json: { equals: "{\"schema\":\"station.leases/v1\",\"leases\":[]}\n" }
+          .local/state/station/known_hosts/x: { equals: "x ssh-ed25519 AAAA\n" }
+          .config/gh/hosts.yml: { equals: "github.com:\n    user: you\n" }
+          .npmrc: { equals: "registry=https://r.example/\n" }
+          .ssh/config: { equals: "Host x\n    User u\n" }

@@ -1,0 +1,5 @@
+#!/bin/sh
+# pgrep -x: nothing of that name runs. Anything else exits 97.
+printf 'pgrep %s\n' "$*" >> "$HOME/.calls"
+[ "$1" = -x ] || exit 97
+exit 1

@@ -1,0 +1,40 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "apps install",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "method",
+          "kind": "list",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "apps to install"
+          }
+        }
+      ]
+    }
+  ]
+}

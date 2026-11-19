@@ -1,0 +1,10 @@
+#!/bin/sh
+# ssh-add keeping the key's passphrase in the Keychain.
+printf 'ssh-add %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "--apple-use-keychain "*/.ssh/id_ed25519) ;;
+    *)
+        echo "stub ssh-add: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

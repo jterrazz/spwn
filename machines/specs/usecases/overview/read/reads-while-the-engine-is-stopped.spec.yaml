@@ -1,0 +1,17 @@
+description: 'with the engine stopped the Overview reads: a finding to start it, Awake waits, exit 0'
+env: engine-stopped
+runs:
+    - command: 'overview'
+      exit: 0
+      stdout: |
+          # Needs you
+          ◐	Engine stopped	station engine start
+          	Activity	? not measured
+          	Apps	● 1 ok · ○ 113 not installed
+          	Settings	set by station · ○ 0 of 17 · checked · ● 0 of 9
+          	Disk	● 0 B free · 0 B can rebuild
+          	Ports	Public 0 · Private 2
+          	Accounts	● 0
+          	Background	● 1
+          	Awake	needs the engine
+          	VMs	○ api stopped · ○ linux-1 stopped

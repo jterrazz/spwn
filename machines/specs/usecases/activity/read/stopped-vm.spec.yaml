@@ -1,0 +1,13 @@
+description: 'a stopped workspace has no activity: station activity --on api says it is stopped and exits 0'
+env: two-macs
+runs:
+    - command: 'activity --on api'
+      exit: 0
+      stdout: |
+          	On api:
+          # Activity
+          ○	api is stopped
+    - command: 'activity --on api --json | /usr/bin/jq -c ''{machine: .machine.name, state, cpu}'''
+      exit: 0
+      stdout: |
+          {"machine":"api","state":"stopped","cpu":null}

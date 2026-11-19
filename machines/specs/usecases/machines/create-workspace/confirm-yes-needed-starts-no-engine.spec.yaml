@@ -1,0 +1,14 @@
+description: 'a create refused for its build question installs no engine: the engine starts only with the create'
+env: no-engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["macbook-pro"].stores.images, .macs["macbook-pro"].vms)'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create </dev/null'
+      exit: 2
+      stderr: |
+          Error: image base-ubuntu is not built on macbook-pro
+          Hint: station images build base-ubuntu
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs // {} | keys'' world.json'
+      exit: 0
+      stdout: |
+          []

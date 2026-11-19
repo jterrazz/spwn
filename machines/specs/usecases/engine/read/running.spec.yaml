@@ -1,0 +1,7 @@
+description: 'the engine reads as running, its version, how long it has run and the VMs it runs'
+env: two-macs
+runs:
+    - command: 'engine'
+      exit: 0
+      stdout: |
+          ●	engine	running · {{string}} · up 3 d · 1 VM

@@ -1,0 +1,180 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "apps install",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/install",
+            "mark": "broken",
+            "label": "Installed 2 apps on This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1 failed"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "9s"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "method",
+          "kind": "list",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "jq",
+            "mark": "ok",
+            "label": "jq",
+            "cells": [
+              {
+                "kind": "version",
+                "text": "1.8.1"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mise",
+            "mark": "ok",
+            "label": "mise",
+            "cells": [
+              {
+                "kind": "version",
+                "text": "2026.10.1"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mise/activate",
+            "mark": "attention",
+            "label": "activate",
+            "detail": {
+              "kind": "text",
+              "text": "restart the shell"
+            },
+            "reason": "partial"
+          }
+        },
+        {
+          "row": {
+            "id": "typewhisper",
+            "mark": "broken",
+            "label": "typewhisper",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "cask"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "brew bundle exited 1"
+            },
+            "reason": "failing"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        },
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}

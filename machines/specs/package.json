@@ -1,0 +1,9 @@
+{
+    "name": "studio-station-specs",
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "@types/node": "^25.9.9",
+        "playwright": "1.63.0"
+    }
+}

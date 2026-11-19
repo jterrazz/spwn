@@ -1,0 +1,18 @@
+{
+    "freeze": 0.3,
+    "group": "transition",
+    "id": "transition.find",
+    "note": "Find opens over home: its card fades in on snappy and its field drops 6 pt into place on smooth; home behind dims.",
+    "pages": ["pages/machines.find.find.json"],
+    "play": {
+        "from": "home.needs",
+        "gesture": "press ⌘K"
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "find": {
+            "query": ""
+        },
+        "recent": ["linux-1", "mac-mini", "infra"]
+    }
+}

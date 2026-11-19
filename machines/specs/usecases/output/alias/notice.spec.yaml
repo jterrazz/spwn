@@ -1,0 +1,13 @@
+description: 'a hidden alias names the command it ran on stderr, muted, and says nothing there with --json'
+env: two-macs
+runs:
+    - command: 'status >/dev/null'
+      exit: 0
+      stderr: |
+          → now: station overview
+    - command: 'status --all >/dev/null'
+      exit: 0
+      stderr: |
+          → now: station overview --all
+    - command: 'status --json >/dev/null'
+      exit: 0

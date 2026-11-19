@@ -1,0 +1,18 @@
+description: 'every other Mac''s engine is asked for its own view, in BatchMode, and the answers merged'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ../../__fixtures__/fleet-y-answers/
+runs:
+    - command: 'machines --json | /usr/bin/jq -r ''.macs | map(.name + ":" + (.this_mac | tostring) + ":" + (.reachable | tostring)) | join(" ")'''
+      exit: 0
+      stdout: |
+          x:true:true y:false:true
+      files:
+          .calls:
+              equals: |
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+    - command: 'machines --json | /usr/bin/jq -r ''.macs[1].vms[0] | [.name, .state, .lifetime, .ip] | join(" ")'''
+      exit: 0
+      stdout: |
+          w running persistent 

@@ -1,0 +1,219 @@
+{
+  "schema": "station.page/v1",
+  "id": "accounts",
+  "command": "accounts",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/accounts",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "4 programs"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "0 signed in"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "reading"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "columns": [
+        {
+          "key": "program",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        },
+        {
+          "key": "who",
+          "kind": "identity",
+          "keep": 60
+        },
+        {
+          "key": "how",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "scope",
+          "kind": "list",
+          "keep": 50,
+          "whole": true
+        },
+        {
+          "key": "line",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro/gh",
+            "mark": "pending",
+            "label": "gh",
+            "short": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "reading"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "Reading"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/npm",
+            "mark": "pending",
+            "label": "npm",
+            "short": "npm",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "reading"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "Reading"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/claude",
+            "mark": "pending",
+            "label": "claude",
+            "short": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "reading"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "Reading"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/wrangler",
+            "mark": "pending",
+            "label": "wrangler",
+            "short": "Cloudflare",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "reading"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "Reading"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 4
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "R",
+      "label": "reload",
+      "on": "page",
+      "priority": 1
+    }
+  ]
+}

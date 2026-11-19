@@ -1,0 +1,26 @@
+description: 'a preferences.json edited by hand into bad JSON stops a command at its line, and is never rewritten'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro preferences.json'
+      stdin: |
+          {
+              "name": "macbook-pro",
+              "vm_user": "admin",
+          }
+      exit: 0
+    - command: 'machines'
+      exit: 1
+      stderr: |
+          Error: ~/.config/station/preferences.json cannot be read: line 4: invalid character '}' looking for beginning of object key string
+          Hint: fix that line: station never rewrites a file it cannot read
+    - command: 'machines; /usr/bin/jq -r ''.macs["macbook-pro"].files["preferences.json"]'' world.json'
+      exit: 0
+      stdout: |+
+          {
+              "name": "macbook-pro",
+              "vm_user": "admin",
+          }
+
+      stderr: |
+          Error: ~/.config/station/preferences.json cannot be read: line 4: invalid character '}' looking for beginning of object key string
+          Hint: fix that line: station never rewrites a file it cannot read

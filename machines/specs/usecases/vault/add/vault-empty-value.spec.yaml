@@ -1,0 +1,11 @@
+description: 'A typed password with no text is refused and names its field'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"docs","Program":"gh","Kind":"token","From":"typed","Value":""}}
+      exit: 0
+      stdout: |
+          {"code":"vault.empty-value","field":"value","subject":"docs","message":"a typed password cannot be empty"}

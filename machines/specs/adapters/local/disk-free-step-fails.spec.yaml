@@ -1,0 +1,20 @@
+description: 'a failing action is its row''s ✗ with its last stderr line; the other rows are still freed, exit 1'
+fixture:
+    - ../__fixtures__/system-tools/
+    - ./__fixtures__/disk-go/
+runs:
+    - command: '--version >/dev/null; echo 1 > tart-prune.exit'
+      exit: 0
+    - command: 'disk free tart go'
+      exit: 1
+      stdout: |
+          ✗	tart	tart prune exited 1	boom
+          ●	go	0 B freed
+          ●	Freed	0 B	nothing is lost
+      stderr: |
+          boom
+          Error: 1 of 2 could not be freed
+          Hint: re-run it: station disk free tart
+      files:
+          .calls:
+              contains: 'go clean -cache -modcache'

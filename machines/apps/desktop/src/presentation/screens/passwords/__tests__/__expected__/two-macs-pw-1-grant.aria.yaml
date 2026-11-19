@@ -1,0 +1,29 @@
+- main:
+  - heading "GitHub deploy" [level=1]
+  - paragraph: gh · fine-grained token · you · added 30 Oct
+  - button "Remove password"
+  - region "This password":
+    - heading "This password" [level=2]
+    - term: Value
+    - definition: Withheld
+    - term: Kind
+    - definition: fine-grained token
+    - term: Program
+    - definition: gh
+    - term: Account
+    - definition: you
+  - region "Granted to":
+    - heading "Granted to" [level=2]
+    - button "Grant…"
+  - dialog "Grant GitHub deploy":
+    - heading "Grant GitHub deploy" [level=3]
+    - radiogroup "Machines":
+      - radio "linux-1"
+      - text: linux-1 Signed out here
+      - radio "api" [disabled]
+      - text: api Start the machine first
+      - radio "infra" [disabled]
+      - text: infra A server keeps its own sign-ins
+    - paragraph: Touch ID will ask you to confirm before the password leaves this Mac
+    - button "Cancel"
+    - button "Grant" [disabled]

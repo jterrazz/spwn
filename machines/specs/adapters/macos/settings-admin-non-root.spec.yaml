@@ -1,0 +1,9 @@
+description: 'an admin setting needs admin rights on a Mac, and says the sudo line that applies it'
+runs:
+    - command: 'settings apply restart-after-power-cut'
+      exit: 2
+      stderr: |
+          Error: restart-after-power-cut needs admin rights
+          Hint: sudo station settings apply restart-after-power-cut
+      files:
+          .calls: absent

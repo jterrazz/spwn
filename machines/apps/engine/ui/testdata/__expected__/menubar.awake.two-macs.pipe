@@ -1,0 +1,6 @@
+# This Mac
+●	Keep This Mac awake	on	Stays on for a while
+●	Stay awake with the lid closed	on
+●	Stay awake on battery	off
+# mac-mini
+●	Never sleeps	on	hosts infra, which pauses if it sleeps

@@ -1,0 +1,13 @@
+package: station.package/v1
+kind: app
+name: fd
+description: Fast find alternative
+replaces: find
+provides: [fd]
+methods:
+    - os: macos
+      brew: fd
+    - os: ubuntu
+      provides: [fdfind]
+      needs: [sudo]
+      apt: { packages: [fd-find] }

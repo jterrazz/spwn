@@ -1,0 +1,8 @@
+description: 'a free of an app that keeps nothing station can rebuild is refused before anything runs'
+env: two-macs
+runs:
+    - command: 'disk free gpg'
+      exit: 2
+      stderr: |
+          Error: gpg keeps nothing station can rebuild
+          Hint: station disk

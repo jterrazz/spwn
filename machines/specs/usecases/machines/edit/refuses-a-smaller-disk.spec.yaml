@@ -1,0 +1,12 @@
+description: 'a disk only grows: asking linux-1 for less than it has is refused, and its size is kept'
+env: two-macs
+runs:
+    - command: 'machines edit linux-1 --disk 10G'
+      exit: 2
+      stderr: |
+          Error: a VM's disk only grows
+          Hint: linux-1 has 50.0 GB: ask for more
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[0].vms[] | select(.name == "linux-1") | .size.disk_bytes'''
+      exit: 0
+      stdout: |
+          50000000000

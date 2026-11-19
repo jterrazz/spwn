@@ -1,0 +1,21 @@
+description: 'the choice is this terminal''s: another terminal (another STATION_TERMINAL) stays on This Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'use linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1 in this terminal. Other terminals stay on This Mac.
+    - command: '--version >/dev/null; /usr/bin/env STATION_TERMINAL=other-terminal "$STATION" use'
+      exit: 0
+      stdout: |
+          	On This Mac in this terminal.
+    - command: '--version >/dev/null; /usr/bin/env STATION_TERMINAL=other-terminal "$STATION" overview --json | /usr/bin/jq -r .machine.name'
+      exit: 0
+      stdout: |
+          macbook-pro
+    - command: 'overview --json | /usr/bin/jq -r .machine.name'
+      exit: 0
+      stdout: |
+          linux-1

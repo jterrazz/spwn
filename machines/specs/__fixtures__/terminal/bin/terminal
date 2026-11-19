@@ -1,0 +1,517 @@
+#!/usr/bin/python3
+# A terminal for the documents that need one: runs COMMAND on a pseudo-terminal of the given size,
+# replays what it draws on a screen of cells, and plays the steps read on stdin, one per
+# line:
+#   see TEXT    wait until the screen shows TEXT
+#   within SECONDS see TEXT
+#               the same, failing when TEXT is not shown within SECONDS
+#   within SECONDS exit CODE
+#               wait for COMMAND to exit, failing when it has not within SECONDS or
+#               exited with another CODE, so a quit that hangs fails fast
+#   gone TEXT   wait until the screen no longer shows TEXT
+#   send KEYS   type KEYS; \r, \x1b and \xNN escapes are keys
+#   file PATH   wait until PATH exists and is not empty, so a step can follow a stub's start
+#   settle      wait until COMMAND has drawn nothing for 0.2 s (1 s at most), so
+#               the next key reaches the frame the last one drew
+#   clipboard TEXT
+#               wait until COMMAND has set the clipboard to TEXT (OSC 52)
+#   run COMMAND run COMMAND with sh beside the binary, the screen still read, and fail
+#               when it exits other than 0: a world event while a screen is shown, or
+#               a look at what a key changed
+#   screen      once COMMAND has drawn nothing for 0.2 s (1 s at most), print the
+#               screen's text, each line's trailing blanks and the blank bottom
+#               lines trimmed
+#   asked       wait for COMMAND to exit, then print how many times it asked the
+#               terminal for its background colour
+#   scrollback  wait for COMMAND to exit, then print the history above the screen and
+#               the screen, as tmux keeps them: a line scrolled off the top joins the
+#               history, and so does the whole screen when it is cleared from its
+#               first cell (tmux's scroll-on-clear, on by default)
+#   paint NAME=SGR...
+#               the scrollback with its colours: a run drawn with a named SGR reads
+#               {NAME text}, one with an SGR left unnamed {SGR text}, and the name
+#               plain leaves its runs bare, so a document names its palette and
+#               shows exactly what is coloured
+# A copy the binary asks of the terminal (OSC 52) is written to ./clipboard, the
+# terminal's clipboard, so a document can read what a key copied.
+# Then it waits for COMMAND to exit and exits with its code. A wait that times out,
+# or a screen wait COMMAND exits before, prints the screen on stderr and exits 124.
+# usage: terminal [--size COLSxROWS] COMMAND [ARG...]
+import base64
+import codecs
+import fcntl
+import os
+import pty
+import re
+import select
+import signal
+import subprocess
+import struct
+import sys
+import termios
+import time
+import unicodedata
+
+WAIT = 10.0
+
+
+class Cell(str):
+    sgr = ""
+
+
+def cell(ch, sgr):
+    c = Cell(ch)
+    c.sgr = sgr
+    return c
+
+
+class Screen:
+    def __init__(self, cols, rows):
+        self.cols, self.rows = max(cols, 80), max(rows, 24)
+        self.main = self.blank()
+        self.history = []
+        self.rows_kept = []
+        self.sgr = ""
+        self.alt = None
+        self.cells = self.main
+        self.x = self.y = 0
+        self.saved = (0, 0)
+        self.top, self.bottom = 0, self.rows - 1
+        self.last = " "
+        self.state = "ground"
+        self.seq = ""
+        self.replies = b""
+        self.clipboard = None
+        self.asked = 0
+        self.frame = None
+
+    def blank(self):
+        return [[" "] * self.cols for _ in range(self.rows)]
+
+    def text(self):
+        if self.frame is not None:
+            return self.frame
+        lines = [self.line(row) for row in self.cells]
+        while lines and not lines[-1]:
+            lines.pop()
+        return "\n".join(lines)
+
+    def line(self, row):
+        return "".join(c for c in row if c is not None).rstrip()
+
+    def scrollback(self):
+        return "\n".join(self.history + [self.text()])
+
+    def keep(self):
+        if self.cells is self.main:
+            lines = [self.line(row) for row in self.cells]
+            while lines and not lines[-1]:
+                lines.pop()
+            self.history += lines
+            self.rows_kept += [list(row) for row in self.cells[: len(lines)]]
+
+    def feed(self, data):
+        for ch in data:
+            self.step(ch)
+
+    def step(self, ch):
+        if self.state == "esc":
+            self.escape(ch)
+        elif self.state == "csi":
+            self.seq += ch
+            if "\x40" <= ch <= "\x7e":
+                self.state = "ground"
+                self.csi(self.seq)
+        elif self.state == "string":
+            if ch == "\x07":
+                self.state = "ground"
+                self.string(self.seq)
+            elif ch == "\x1b":
+                self.state = "string-esc"
+            else:
+                self.seq += ch
+        elif self.state == "string-esc":
+            self.state = "ground" if ch == "\\" else "string"
+            if self.state == "ground":
+                self.string(self.seq)
+        elif self.state == "charset":
+            self.state = "ground"
+        elif ch == "\x1b":
+            self.state = "esc"
+        elif ch == "\r":
+            self.x = 0
+        elif ch == "\n":
+            self.down()
+        elif ch == "\b":
+            self.x = max(self.x - 1, 0)
+        elif ch == "\t":
+            self.x = min((self.x // 8 + 1) * 8, self.cols - 1)
+        elif ch >= " ":
+            self.put(ch)
+
+    def escape(self, ch):
+        self.state = "ground"
+        if ch == "[":
+            self.state, self.seq = "csi", ""
+        elif ch in "]PX^_":
+            self.state, self.seq = "string", ""
+        elif ch in "()*+":
+            self.state = "charset"
+        elif ch == "7":
+            self.saved = (self.x, self.y)
+        elif ch == "8":
+            self.x, self.y = self.saved
+        elif ch == "D":
+            self.down()
+        elif ch == "E":
+            self.x = 0
+            self.down()
+        elif ch == "M":
+            if self.y == self.top:
+                self.scroll(-1)
+            else:
+                self.y = max(self.y - 1, 0)
+
+    def put(self, ch):
+        wide = unicodedata.east_asian_width(ch) in "WF"
+        if unicodedata.combining(ch):
+            return
+        if self.x + (2 if wide else 1) > self.cols:
+            self.x = 0
+            self.down()
+        self.cells[self.y][self.x] = cell(ch, self.sgr)
+        if wide:
+            self.cells[self.y][self.x + 1] = None
+        self.x += 2 if wide else 1
+        self.last = ch
+        if self.x >= self.cols:
+            self.x = self.cols - 1
+
+    def down(self):
+        if self.y == self.bottom:
+            self.scroll(1)
+        else:
+            self.y = min(self.y + 1, self.rows - 1)
+
+    def scroll(self, n):
+        region = self.cells[self.top : self.bottom + 1]
+        if n > 0 and self.top == 0 and self.cells is self.main:
+            self.history += [self.line(row) for row in region[:n]]
+            self.rows_kept += [list(row) for row in region[:n]]
+        if n > 0:
+            region = region[n:] + [[" "] * self.cols for _ in range(min(n, len(region)))]
+        else:
+            region = [[" "] * self.cols for _ in range(min(-n, len(region)))] + region[:n]
+        self.cells[self.top : self.bottom + 1] = region[: self.bottom - self.top + 1]
+
+    def erase(self, y, x0, x1):
+        for x in range(max(x0, 0), min(x1, self.cols)):
+            self.cells[y][x] = " "
+
+    def csi(self, seq):
+        final, body = seq[-1], seq[:-1]
+        private = body[:1] in ("?", ">", "=", "<")
+        params = [int(p) if p.isdigit() else 0 for p in re.split("[;:]", body.lstrip("?>=<"))] if body.lstrip("?>=<") else []
+        n = params[0] if params and params[0] else 1
+
+        def arg(i, default):
+            return params[i] if len(params) > i and params[i] else default
+
+        if final == "m" and not private:
+            kept = self.sgr.split(";") if self.sgr and body else []
+            for p in body.split(";"):
+                kept = [] if p in ("", "0") else kept + [p]
+            self.sgr = ";".join(kept)
+            return
+        if private:
+            if final in "hl" and 1049 in params:
+                self.screen(final == "h")
+            # invariant: the screen is a terminal with synchronized output, as
+            # the ones a live page runs in are: a frame drawn between ?2026h and
+            # ?2026l is read whole, so a step never reads a frame half drawn,
+            # even of a command that never stops drawing.
+            if final in "hl" and 2026 in params:
+                self.frame = self.text() if final == "h" else None
+            if final == "p" and body == "?2026$":
+                self.replies += b"\x1b[?2026;2$y"
+            return
+        if final == "A":
+            self.y = max(self.y - n, 0)
+        elif final in "Be":
+            self.y = min(self.y + n, self.rows - 1)
+        elif final in "Ca":
+            self.x = min(self.x + n, self.cols - 1)
+        elif final == "D":
+            self.x = max(self.x - n, 0)
+        elif final == "E":
+            self.x, self.y = 0, min(self.y + n, self.rows - 1)
+        elif final == "F":
+            self.x, self.y = 0, max(self.y - n, 0)
+        elif final in "G`":
+            self.x = min(n - 1, self.cols - 1)
+        elif final == "d":
+            self.y = min(n - 1, self.rows - 1)
+        elif final in "Hf":
+            self.y, self.x = min(arg(0, 1) - 1, self.rows - 1), min(arg(1, 1) - 1, self.cols - 1)
+        elif final == "J":
+            mode = arg(0, 0)
+            if mode == 2 or (mode == 0 and self.x == 0 and self.y == 0):
+                self.keep()
+            if mode == 0:
+                self.erase(self.y, self.x, self.cols)
+                for y in range(self.y + 1, self.rows):
+                    self.erase(y, 0, self.cols)
+            elif mode == 1:
+                for y in range(self.y):
+                    self.erase(y, 0, self.cols)
+                self.erase(self.y, 0, self.x + 1)
+            else:
+                for y in range(self.rows):
+                    self.erase(y, 0, self.cols)
+        elif final == "K":
+            mode = arg(0, 0)
+            start, end = {0: (self.x, self.cols), 1: (0, self.x + 1)}.get(mode, (0, self.cols))
+            self.erase(self.y, start, end)
+        elif final == "X":
+            self.erase(self.y, self.x, self.x + n)
+        elif final == "b":
+            for _ in range(n):
+                self.put(self.last)
+        elif final == "@":
+            row = self.cells[self.y]
+            row[self.x :] = ([" "] * n + row[self.x :])[: self.cols - self.x]
+        elif final == "P":
+            row = self.cells[self.y]
+            row[self.x :] = (row[self.x + n :] + [" "] * n)[: self.cols - self.x]
+        elif final in "LM" and self.top <= self.y <= self.bottom:
+            top = self.top
+            self.top = self.y
+            self.scroll(-n if final == "L" else n)
+            self.top = top
+        elif final == "S":
+            self.scroll(n)
+        elif final == "T":
+            self.scroll(-n)
+        elif final == "r":
+            self.top, self.bottom = arg(0, 1) - 1, min(arg(1, self.rows), self.rows) - 1
+            self.x = self.y = 0
+        elif final == "s":
+            self.saved = (self.x, self.y)
+        elif final == "u":
+            self.x, self.y = self.saved
+        elif final == "c" and not body:
+            self.replies += b"\x1b[?62;22c"
+        elif final == "n" and arg(0, 0) == 6:
+            self.replies += b"\x1b[%d;%dR" % (self.y + 1, self.x + 1)
+
+    def string(self, body):
+        # invariant: the screen answers the background query as a dark terminal
+        # does, so a binary never waits on a reply a real terminal gives at once.
+        if body == "11;?":
+            self.asked += 1
+            self.replies += b"\x1b]11;rgb:0000/0000/0000\x1b\\"
+        # value: what the command copied, as a terminal keeps it for OSC 52,
+        # and in ./clipboard, so a run step can read it back.
+        elif body.startswith("52;"):
+            data = base64.b64decode(body.split(";", 2)[-1])
+            with open("clipboard", "wb") as f:
+                f.write(data)
+            try:
+                self.clipboard = data.decode()
+            except ValueError:
+                self.clipboard = None
+
+    def painted(self, names):
+        rows = self.rows_kept + list(self.cells)
+        lines = []
+        for row in rows:
+            runs = []
+            for c in row:
+                if c is None:
+                    continue
+                sgr = getattr(c, "sgr", "") if c != " " else ""
+                if runs and runs[-1][0] == sgr:
+                    runs[-1][1] += c
+                else:
+                    runs.append([sgr, str(c)])
+            # invariant: a run's words keep together across the blanks a
+            # renderer leaves unstyled between them.
+            joined = []
+            for run in runs:
+                if len(joined) >= 2 and run[0] and joined[-2][0] == run[0] and not joined[-1][0] and not joined[-1][1].strip():
+                    blank = joined.pop()
+                    joined[-1][1] += blank[1] + run[1]
+                else:
+                    joined.append(run)
+            out = ""
+            for sgr, text in joined:
+                name = names.get(sgr, sgr)
+                out += text if not sgr or name == "plain" else "{" + name + " " + text + "}"
+            lines.append(out.rstrip())
+        while lines and not lines[-1]:
+            lines.pop()
+        return "\n".join(lines)
+
+    def screen(self, alternate):
+        if alternate and self.cells is self.main:
+            self.alt = self.blank()
+            self.cells = self.alt
+        elif not alternate and self.cells is not self.main:
+            self.cells = self.main
+
+
+def hold(args, cols, rows):
+    # invariant: the pseudo-terminal's session leader is a shell's stand-in, never
+    # COMMAND: it runs COMMAND as a foreground job and takes the terminal back when
+    # it exits, as a shell does, so the hangup of the leader's exit reaches only
+    # the leader and what COMMAND leaves running stays alive to be seen.
+    try:
+        # invariant: the size is set before COMMAND starts, so its first read of
+        # the size never races the driver's and finds 0x0.
+        fcntl.ioctl(0, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
+        signal.signal(signal.SIGTTOU, signal.SIG_IGN)
+        # invariant: the job alone makes its process group and takes the
+        # terminal, before it runs COMMAND. A shell also calls setpgid from the
+        # parent; on macOS the two calls race, and under load the job's lost
+        # with EPERM, so COMMAND never ran and the run read exit 127.
+        job = os.fork()
+        if job == 0:
+            os.setpgid(0, 0)
+            os.tcsetpgrp(0, os.getpgrp())
+            signal.signal(signal.SIGTTOU, signal.SIG_DFL)
+            os.execvp(args[0], args)
+        _, code = os.waitpid(job, 0)
+        os.tcsetpgrp(0, os.getpgrp())
+        os._exit(os.waitstatus_to_exitcode(code) & 0xFF)
+    except BaseException as e:
+        # value: why COMMAND never ran, on the screen the failure prints, so
+        # a 127 names its cause (the call that failed and its errno).
+        import traceback
+        call = [f for f in traceback.extract_tb(e.__traceback__) if f.filename == __file__][-1].line
+        os.write(2, ("terminal: %s\r\n%s\r\n" % (call, getattr(e, "strerror", None) or repr(e))).encode())
+    finally:
+        os._exit(127)
+
+
+def main():
+    args = sys.argv[1:]
+    cols, rows = 80, 24
+    if args[:1] == ["--size"]:
+        cols, rows = (int(v) for v in args[1].split("x"))
+        args = args[2:]
+    steps = sys.stdin.read().splitlines()
+    pid, fd = pty.fork()
+    if pid == 0:
+        hold(args, cols, rows)
+    screen = Screen(cols, rows)
+    decoder = codecs.getincrementaldecoder("utf-8")("replace")
+    status = None
+    drawn = 0
+    started = time.monotonic()
+
+    def pump(seconds):
+        nonlocal status, drawn
+        ready, _, _ = select.select([fd], [], [], seconds)
+        if ready:
+            try:
+                data = os.read(fd, 65536)
+            except OSError:
+                data = b""
+            if data:
+                drawn += len(data)
+                screen.feed(decoder.decode(data))
+                if screen.replies:
+                    os.write(fd, screen.replies)
+                    screen.replies = b""
+                return
+        if status is None:
+            done, code = os.waitpid(pid, os.WNOHANG)
+            if done:
+                status = os.waitstatus_to_exitcode(code)
+
+    def settle():
+        # invariant: the screen is read once the command has drawn nothing for
+        # 0.2 s, so a frame larger than one read is never printed half drawn;
+        # one that never stops drawing (a spinner) is read after 1 s.
+        deadline = time.monotonic() + 1.0
+        while True:
+            before = drawn
+            pump(0.2)
+            if drawn == before or time.monotonic() > deadline:
+                return
+
+    def fail(why):
+        # value: what the command drew and how long it ran, so a binary that never
+        # started (drew 0 bytes) is told apart from a slow first frame.
+        ran = "%d bytes drawn in %.1f s" % (drawn, time.monotonic() - started)
+        sys.stderr.write(why + " (" + ran + "); the screen held:\n" + screen.text() + "\n")
+        if status is None:
+            os.kill(pid, signal.SIGKILL)
+        sys.exit(124)
+
+    def wait(ok, why, seconds=WAIT, ended=True):
+        # invariant: a screen wait fails as soon as the command has exited, with its
+        # code, since an exited command never draws the text it waits for.
+        deadline = time.monotonic() + seconds
+        while not ok():
+            if ended and status is not None:
+                fail(why + ": the command exited " + str(status))
+            if time.monotonic() > deadline:
+                fail(why)
+            pump(0.05)
+
+    for line in steps:
+        verb, _, arg = line.partition(" ")
+        if verb == "within":
+            seconds, _, rest = arg.partition(" ")
+            then, _, text = rest.partition(" ")
+            if then == "exit":
+                wait(lambda: status is not None, "the command had not exited within " + seconds + " s", float(seconds), ended=False)
+                if status != int(text):
+                    fail("the command exited " + str(status) + ", not " + text)
+                continue
+            if then != "see":
+                sys.stderr.write("terminal: unknown step " + repr(line) + "\n")
+                sys.exit(97)
+            wait(lambda: text in screen.text(), "never saw " + repr(text) + " within " + seconds + " s", float(seconds))
+        elif verb == "see":
+            wait(lambda: arg in screen.text(), "never saw " + repr(arg))
+        elif verb == "gone":
+            wait(lambda: arg not in screen.text(), "still saw " + repr(arg))
+        elif verb == "file":
+            wait(lambda: os.path.isfile(arg) and os.path.getsize(arg) > 0, "never saw the file " + repr(arg), ended=False)
+        elif verb == "run":
+            child = subprocess.Popen(["/bin/sh", "-c", arg])
+            wait(lambda: child.poll() is not None, "the step never ended: " + repr(arg), ended=False)
+            if child.returncode != 0:
+                fail("the step " + repr(arg) + " exited " + str(child.returncode))
+        elif verb == "send":
+            os.write(fd, arg.encode().decode("unicode_escape").encode("latin-1"))
+        elif verb == "settle":
+            settle()
+        elif verb == "clipboard":
+            wait(lambda: screen.clipboard == arg, "the clipboard never held " + repr(arg) + ", it held " + repr(screen.clipboard))
+        elif verb == "screen":
+            settle()
+            print(screen.text())
+        elif verb == "paint":
+            wait(lambda: status is not None, "the command never exited", ended=False)
+            pump(0.2)
+            print(screen.painted(dict(reversed(pair.split("=", 1)) for pair in arg.split())))
+        elif verb == "asked":
+            wait(lambda: status is not None, "the command never exited", ended=False)
+            pump(0.2)
+            print("asked for its colours %d times" % screen.asked)
+        elif verb == "scrollback":
+            wait(lambda: status is not None, "the command never exited", ended=False)
+            pump(0.2)
+            print(screen.scrollback())
+        elif verb:
+            # invariant: an unscripted step is refused with exit 97, as every stub refuses one.
+            sys.stderr.write("terminal: unknown step " + repr(line) + "\n")
+            sys.exit(97)
+    wait(lambda: status is not None, "the command never exited", ended=False)
+    sys.exit(status)
+
+
+main()

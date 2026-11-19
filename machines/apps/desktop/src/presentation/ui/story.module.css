@@ -1,0 +1,7 @@
+.modal {
+    margin: 0;
+    padding: var(--space-24);
+    background: var(--panel);
+    border-radius: var(--radius-panel);
+    color: var(--t2);
+}

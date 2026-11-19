@@ -1,0 +1,14 @@
+{
+    "group": "sheet",
+    "heightNote": "the prototype measured no panel for it: review-bot's Ports page, under the sheet",
+    "id": "sheet.share-port.empty",
+    "note": "Share a port of review-bot, where nothing listens: the line that says so and no Share.",
+    "pages": ["pages/machines.ports.machine.review-bot.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "ports",
+        "sheet": {
+            "id": "share-port"
+        }
+    }
+}

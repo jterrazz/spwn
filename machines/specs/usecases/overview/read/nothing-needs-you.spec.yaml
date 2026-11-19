@@ -1,0 +1,22 @@
+description: 'a Mac with nothing to do says so first, has no Needs you, keeps one line per section'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - one-mac
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" overview'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · macbook-pro · nothing needs you · Engine running
+
+          Activity    ? not measured
+          Apps        ● 1 ok · ○ 113 not installed
+          Settings    set by station · ○ 0 of 17 · checked · ● 0 of 9
+          Disk        ● 0 B free · 0 B can rebuild
+          Ports       Public 0 · Private 0
+          Accounts    ● 0
+          Background  ● 1
+          Awake       ○ sleeps normally

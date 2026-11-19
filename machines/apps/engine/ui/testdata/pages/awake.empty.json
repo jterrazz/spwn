@@ -1,0 +1,159 @@
+{
+  "schema": "station.page/v1",
+  "id": "awake",
+  "command": "awake",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "awake",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "mode",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro",
+            "mark": "absent",
+            "label": "macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Sleeps normally"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini",
+            "mark": "absent",
+            "label": "mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Sleeps normally"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "absent",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "reading",
+      "title": "This Mac",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "mode",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "fact": {
+            "key": "lid",
+            "value": {
+              "kind": "text",
+              "text": "open"
+            }
+          }
+        },
+        {
+          "fact": {
+            "key": "power source",
+            "value": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "AC"
+                },
+                {
+                  "kind": "text",
+                  "text": "80 %"
+                },
+                {
+                  "kind": "text",
+                  "text": "not charging"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "fact": {
+            "key": "thermal",
+            "value": {
+              "kind": "text",
+              "text": "nominal"
+            }
+          }
+        },
+        {
+          "fact": {
+            "key": "screen",
+            "value": {
+              "kind": "text",
+              "text": "always turns off"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station awake 4h --lid",
+      "text": "this Mac"
+    },
+    {
+      "command": "station awake 4h --on mac-mini",
+      "text": "another Mac"
+    }
+  ],
+  "actions": [
+    {
+      "key": "l",
+      "label": "lid",
+      "on": "row",
+      "rows": [
+        "macbook-pro"
+      ]
+    },
+    {
+      "key": "b",
+      "label": "battery",
+      "on": "row",
+      "rows": [
+        "macbook-pro"
+      ]
+    }
+  ]
+}

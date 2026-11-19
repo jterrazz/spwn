@@ -1,0 +1,26 @@
+package: station.package/v1
+kind: app
+name: starship
+description: Cross-shell prompt (path, git branch/status, versions)
+provides: [starship]
+then: [starship-dotfiles]
+methods:
+    - os: macos
+      brew: starship
+    - family: linux
+      arch: arm64
+      github-release:
+          { repo: starship/starship, asset: 'starship-aarch64-unknown-linux-musl.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release:
+          { repo: starship/starship, asset: 'starship-x86_64-unknown-linux-musl.tar.gz' }
+disk:
+    paths:
+        - path: '{cache}/starship'
+          level: cache
+        - path: '{config}/starship.toml'
+          level: settings
+    free:
+        - delete: ['{cache}/starship/*']
+    no-erase: 'nothing to erase: keys and logins are kept'

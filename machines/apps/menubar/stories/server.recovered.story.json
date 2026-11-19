@@ -1,0 +1,8 @@
+{
+    "group": "server",
+    "heightNote": "healthy again, its Health folds back as server.healthy's does; the prototype's capture keeps it unfolded from the restart, at the cap",
+    "id": "server.recovered",
+    "note": "infra healthy again: up 1 min, today's cell a restart.",
+    "pages": ["pages/machines.server.recovered.machine.infra.json"],
+    "schema": "station.story/v1"
+}

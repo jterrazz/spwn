@@ -1,0 +1,21 @@
+{
+    "group": "menu",
+    "id": "menu.new-vm.create",
+    "note": "The split button's menu of New VM: Create, and Create and Open in Terminal.",
+    "pages": ["pages/machines.sheet.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {
+            "id": "split"
+        },
+        "sheet": {
+            "id": "new-vm:mac-mini"
+        }
+    }
+}

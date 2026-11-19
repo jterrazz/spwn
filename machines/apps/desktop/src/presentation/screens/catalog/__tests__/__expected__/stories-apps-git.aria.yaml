@@ -1,0 +1,32 @@
+- main:
+  - heading "Every app follows its rule." [level=1]
+  - searchbox "Search the catalog"
+  - group "Show":
+    - button "On your machines6"
+    - button "Everything97" [pressed]
+  - group "Category":
+    - button "All apps97"
+    - button "Package Managers8"
+    - button "Runtimes7"
+    - button "Shell & Terminal5"
+    - button "Command line12"
+    - button "Git4" [pressed]
+    - button "Editors & IDEs5"
+    - button "Containers & VMs6"
+    - button "Deploy4"
+    - button "AI Agents8"
+    - button "AI Tooling5"
+    - button "AI Apps3"
+    - button "Browsers2"
+    - button "Communication4"
+    - button "Productivity7"
+    - button "Media5"
+    - button "Remote Access3"
+    - button "Security3"
+    - button "System Utilities6"
+  - region "Apps":
+    - paragraph: Git 4
+    - button "gh 3 of 6 machines GitHub CLI for repository management 2.98.0 is out 2.97.0"
+    - button "git Distributed version control system not installed"
+    - button "gpg GNU Privacy Guard for encryption and signing not installed"
+    - button "lazygit 1 of 6 machines Terminal UI for git 0.56.0 is out 0.55.1"

@@ -1,0 +1,16 @@
+package: station.package/v1
+kind: manager
+name: skills
+description: Agent skills package manager
+manages: [skill]
+provides: [skills]
+requires: [bun]
+methods:
+    - os: any
+      bun: skills
+disk:
+    paths:
+        - path: ~/.agents/.skill-lock.json
+          level: settings
+    installed: [~/.agents/skills, ~/.claude/skills]
+    no-erase: 'skills are apps: station apps remove <skill>'

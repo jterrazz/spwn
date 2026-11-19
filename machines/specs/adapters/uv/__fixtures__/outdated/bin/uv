@@ -1,0 +1,13 @@
+#!/bin/sh
+# uv: its tools and what is outdated are answer files: `tool list --outdated` lists every tool,
+# the behind ones marked `[latest: <version>]`.
+answers="${0%/*}/../answers/uv"
+printf 'uv %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "tool list") /bin/cat "$answers/list.txt" ;;
+    "tool list --outdated") /bin/cat "$answers/outdated.txt" ;;
+    *)
+        echo "stub uv: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

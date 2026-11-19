@@ -1,0 +1,12 @@
+{
+  "v": 2,
+  "name": "api",
+  "image": "base-ubuntu",
+  "version": "2026.11.07",
+  "lifetime": "persistent",
+  "want": "stopped",
+  "cpus": 4,
+  "memory_bytes": 8589934592,
+  "disk_bytes": 50000000000,
+  "created_at": "2026-11-07T10:00:00Z"
+}

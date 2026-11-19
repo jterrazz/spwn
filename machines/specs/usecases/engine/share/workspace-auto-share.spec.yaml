@@ -1,0 +1,15 @@
+description: 'a new port a workspace starts listening on is reserved and shared by itself, at its https URL'
+env: two-macs
+runs:
+    - command: 'world listen linux-1 "*:8000" python'
+      exit: 0
+    - command: 'world advance 5s'
+      exit: 0
+    - command: 'ports | /usr/bin/grep 8000'
+      exit: 0
+      stdout: |
+          ●	linux-1	8000	private	https://macbook-pro.tail1234.ts.net:40000	shared	python
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [(.stores.reservations // [])[] | [.vm, .guest_port, .host_port]], shared: ([(.tailnet.shares // [])[] | .Reserved] | sort)}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[["linux-1",5173,40001],["linux-1",7000,40002],["linux-1",8000,40000]],"shared":[40000,40001,40002]}

@@ -1,0 +1,14 @@
+description: 'infra''s 443 declared via a Cloudflare Tunnel with no cloudflared inside says no tunnel is seen'
+env: two-macs
+runs:
+    - command: 'world listen infra "*:443" traefik'
+      exit: 0
+    - command: 'ports --on mac-mini | /usr/bin/grep -e 443 -e "^# Public"'
+      exit: 0
+      stdout: |
+          # Public: reachable from anywhere else, internet or LAN, declared	1 ◐
+          ◐	infra	443	public	traefik	*:443 all interfaces	declared, but no tunnel seen on infra
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.findings, [.ports[] | select(.port == 443) | .declared]]'''
+      exit: 0
+      stdout: |
+          [[],[{"via":"cloudflare-tunnel","seen":false,"missing":"no tunnel seen on infra"}]]

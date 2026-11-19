@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+# socket PATH: a client of the unix socket at PATH, one body on every host: stdin is
+# sent, and its end closes the sending half so the far side sees it; what comes back
+# is printed until the far side closes. nc -U is not one: Ubuntu's never closes its
+# sending half without -N, which macOS's does not take.
+use strict;
+use warnings;
+use IO::Socket::UNIX;
+use Socket qw(SOCK_STREAM);
+
+my $peer = IO::Socket::UNIX->new(Type => SOCK_STREAM, Peer => $ARGV[0]) or die "socket: $ARGV[0]: $!\n";
+my $sender = fork() // die "socket: fork: $!\n";
+if ($sender == 0) {
+    while (sysread(STDIN, my $chunk, 65536)) {
+        defined syswrite($peer, $chunk) or last;
+    }
+    shutdown($peer, 1);
+    exit 0;
+}
+while (sysread($peer, my $chunk, 65536)) {
+    syswrite(STDOUT, $chunk);
+}
+kill 'TERM', $sender;
+waitpid($sender, 0);

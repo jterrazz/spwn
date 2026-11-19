@@ -1,0 +1,36 @@
+description: 'add never shadows a block the owner wrote: nothing is written, the preferences rolled back'
+fixture:
+    - ../../__fixtures__/far-mac/
+    - ./__fixtures__/hand-written-ssh-config/
+env: engine
+runs:
+    - command: 'machines add mac-mini --user agent'
+      exit: 1
+      stderr: |
+          Error: updating the ssh config failed (registry rolled back): refusing to modify {{workdir}}/.ssh/config: a block of yours already names mac-mini at line 1 (outside any managed block)
+          Hint: check "{{workdir}}/.ssh/config" and run it again
+      files:
+          .ssh/config:
+              equals: |
+                  Host mac-mini
+                    HostName legacy
+                    User legacy
+
+                  # >>> jterrazz machine worker >>>
+                  Host worker
+                    HostName 10.0.0.1
+                    User old
+                    IdentityFile ~/.ssh/id_ed25519
+                    ServerAliveInterval 30
+                    ServerAliveCountMax 3
+                  # <<< jterrazz machine worker <<<
+          .config/station/preferences.json:
+              equals: |
+                  {
+                    "name": "x",
+                    "macs": {
+                      "x": {}
+                    },
+                    "vm_user": "vmu"
+                  }
+          .calls: absent

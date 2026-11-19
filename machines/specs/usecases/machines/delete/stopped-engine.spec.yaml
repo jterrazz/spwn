@@ -1,0 +1,18 @@
+description: 'with the engine stopped a delete is refused like every action, and the VM is kept'
+env: engine-stopped
+runs:
+    - command: 'machines delete api --confirm=api'
+      exit: 1
+      stderr: |
+          Error: the engine is stopped on macbook-pro
+          Hint: station engine start
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ✗	macbook-pro	Mac	macbook-pro	Engine stopped
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ○	linux-1	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+          # Needs you
+          ✗	This Mac	has its engine stopped	station engine start

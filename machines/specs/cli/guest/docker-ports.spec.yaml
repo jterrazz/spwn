@@ -1,0 +1,12 @@
+description: 'a port docker maps counts, named by its container'
+fixture:
+    - ./__fixtures__/vm/
+    - ./__fixtures__/docker/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm PATH=$PWD/bin STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''.ports[]? | [.port, .process, .source]'''
+      exit: 0
+      stdout: |
+          [3000,"web-1","docker"]
+          [5432,"","socket"]
+          [8081,"","socket"]

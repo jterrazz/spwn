@@ -1,0 +1,15 @@
+description: 'a running VM that matches its file heads its row so'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["agent-7f"].apps.apt.installed.apt = "1.0.0" | (.. | objects | select(has("not_shared")) | .not_shared) |= map(select(. != "agent-7f:6006"))'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world advance 11m'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "agent-7f") | [.Head, .Pending]][0]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{"ThisMac":true}}
+      exit: 0
+      stdout: |
+          [{"Tone":"ok","Sentence":"Running, and it matches its file.","Line":"Write the changelog of v4. Up 2 h."},null]

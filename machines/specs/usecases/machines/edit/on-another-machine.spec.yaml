@@ -1,0 +1,12 @@
+description: 'a VM of another Mac is edited through that Mac, and its new size is that Mac''s record'
+env: two-macs
+runs:
+    - command: 'machines edit infra --cpus 10 --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	infra	10 cpus, applies when infra next starts · station machines restart infra
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[] | select(.name == "infra") | .size.cpus'''
+      exit: 0
+      stdout: |
+          10

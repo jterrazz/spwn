@@ -1,0 +1,16 @@
+description: 'a Mac that does not answer is not added: no preference, no ssh block, a hint that runs'
+env: one-mac
+runs:
+    - command: 'world offline mac-mini'
+      exit: 0
+    - command: 'machines add mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini does not answer
+          Hint: station machines
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.preferences.macs, (.ssh.blocks // {})]'' world.json'
+      exit: 0
+      stdout: |
+          [null,{}]

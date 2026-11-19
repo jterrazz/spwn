@@ -1,0 +1,39 @@
+description: 'on a terminal, apply --remove asks before it removes what the Machinefile lists no longer'
+fixture:
+    - ../../__fixtures__/homebrew/
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger = [{package: "lazygit", method: "brew", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" apply --remove; "$STATION" apps lazygit | /usr/bin/head -1'
+      stdin: |
+          see Remove what the Machinefile lists no longer?
+          send y
+          scrollback
+      exit: 0
+      stdout: |
+          macbook-pro · 2 present · 1 extra
+
+          Extra  ? lazygit · brew
+                   installed by station for macbook-pro, listed no longer
+
+          → station apply --remove  also removes what is extra
+          ┃ Remove what the Machinefile lists no longer?
+          ┃
+          ✓ Applied macbook-pro · 1 changed
+
+          Changes
+            ● homebrew  5.0.1  script  the manager of jq
+            ● jq        1.8.1  brew
+            ● lazygit          brew    removed
+          ○	lazygit		brew	station apps install lazygit

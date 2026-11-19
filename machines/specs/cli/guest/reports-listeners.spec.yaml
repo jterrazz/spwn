@@ -1,0 +1,10 @@
+description: 'the guest reports what listens, minus the ignored ports, and ends with its stdin'
+fixture: ./__fixtures__/vm/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","public_host":"macbook.tail1234.ts.net","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''[.type, ([.ports[]? | [.port, .ip]])]''; /bin/ls vm/.local/state/station'
+      exit: 0
+      stdout: |
+          ["ready",[]]
+          ["snapshot",[[3000,"::"],[5432,"127.0.0.1"],[8081,"0.0.0.0"]]]
+          guest.json

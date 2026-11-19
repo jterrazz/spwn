@@ -1,0 +1,33 @@
+description: 'with --json a refusal is station.error/v1 on stdout and the same block on stderr, exit 2'
+env: two-macs
+runs:
+    - command: 'machines probe nope --json'
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": null,
+            "subject": null,
+            "message": "no machine named \"nope\"",
+            "hint": "station machines",
+            "fix": null
+          }
+      stderr: |
+          Error: no machine named "nope"
+          Hint: station machines
+    - command: 'frobnicate --json'
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": "usage.unknown-command",
+            "subject": "frobnicate",
+            "message": "unknown command \"frobnicate\"",
+            "hint": "station help",
+            "fix": null
+          }
+      stderr: |
+          Error: unknown command "frobnicate"
+          Hint: station help

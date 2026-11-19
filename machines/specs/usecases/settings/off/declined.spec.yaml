@@ -1,0 +1,28 @@
+description: 'on a terminal, off asks first; no keeps the setting as it is'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'settings apply hushlogin'
+      exit: 0
+      stdout: |
+          ●	hushlogin	~/.hushlogin: created
+    - command: '--version >/dev/null; terminal "$STATION" settings off hushlogin'
+      stdin: |
+          see off here?
+          send n
+          see Error:
+          screen
+      exit: 1
+      stdout: |
+          ┃ Turn hushlogin off here? station stops applying and watching it on this
+          ┃ machine
+          ┃
+          Error: hushlogin kept: you said no
+          Hint: --yes skips the question
+    - command: 'settings hushlogin --json | /usr/bin/jq -r .setting.state'
+      exit: 0
+      stdout: |
+          applied

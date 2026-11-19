@@ -1,0 +1,15 @@
+- main:
+  - heading "3 settings are on your machines." [level=1]
+  - searchbox "Search the catalog"
+  - group "Show":
+    - button "On your machines3" [pressed]
+    - button "Everything22"
+  - group "Category":
+    - button "All settings3" [pressed]
+    - button "Headless3"
+  - region "Settings":
+    - paragraph: Headless 3
+    - button "autologin setting GUI auto-login for jterrazz.agent (FileVault-aware) 1 of 1 machine OK"
+    - 'button "never-sleeps setting Never sleeps: the engine keeps this Mac awake, its servers with it 1 of 1 machine OK"'
+    - button "restart-after-power-cut setting Restarts after a power cut, and wakes for the network 1 of 1 machine OK"
+    - paragraph: Only what your machines carry is shown. The catalog holds 136 packages.

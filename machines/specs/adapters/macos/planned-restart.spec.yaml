@@ -1,0 +1,18 @@
+description: 'a planned restart sends FileVault''s authrestart, then waits for the station to drop and answer'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ./__fixtures__/down-then-up/
+runs:
+    - command: 'machines restart y --yes'
+      exit: 0
+      stdout: |
+          ●	y	back
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o ConnectTimeout=2 -o BatchMode=yes y sudo fdesetup authrestart -delayminutes 0
+          ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach

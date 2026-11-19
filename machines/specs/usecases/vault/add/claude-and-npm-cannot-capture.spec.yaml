@@ -1,0 +1,17 @@
+description: 'claude and npm sign-ins cannot be taken either, as the real adapter answers'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"cl","Program":"claude","Kind":"oauth-token","From":"sign-in"}}
+      exit: 0
+      stdout: |
+          {"code":"vault.cannot-capture","field":null,"subject":"claude","message":"station cannot take Claude's sign-in into the vault"}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"vault.add","in":{"Label":"np","Program":"npm","Kind":"token","From":"sign-in"}}
+      exit: 0
+      stdout: |
+          {"code":"vault.cannot-capture","field":null,"subject":"npm","message":"station cannot take npm's sign-in into the vault"}

@@ -1,0 +1,24 @@
+{
+    "freeze": 0.15,
+    "group": "transition",
+    "id": "transition.menu",
+    "note": "The station menu appears from home's …: scale .97 to 1 with opacity on snappy.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "play": {
+        "from": "home.needs",
+        "gesture": "click More options for station"
+    },
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "loginItem": true,
+        "menu": {
+            "id": "station"
+        }
+    }
+}

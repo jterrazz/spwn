@@ -1,0 +1,5 @@
+#!/bin/sh
+# route as the bridged specs need it: the call is recorded in $HOME/.calls and the
+# default route goes out through en7.
+printf 'route %s\n' "$*" >> "$HOME/.calls"
+printf '   route to: default\ndestination: default\n       mask: default\n    gateway: 192.168.1.1\n  interface: en7\n'

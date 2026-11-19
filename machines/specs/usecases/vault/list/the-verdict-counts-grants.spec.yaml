@@ -1,0 +1,11 @@
+description: 'the passwords verdict counts the passwords kept and those granted somewhere'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Verdict | [.Sentence, .Tone]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          ["3 kept, 1 granted","plain"]

@@ -1,0 +1,8 @@
+All machines
+  ● macbook  Mac  This Mac  online  -  0 VMs
+     no VMs  → station machines create
+Images
+  ○ base-ubuntu  not built yet
+  ○ base-macos   not built yet
+Tailscale
+  ○ Tailscale  not installed  → station apps install tailscale

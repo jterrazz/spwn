@@ -1,0 +1,7 @@
+description: 'station status --json keeps station.status/v1: station, tools and tailnet, as studio doctor reads'
+env: two-macs
+runs:
+    - command: 'status --json | /usr/bin/jq -c "[.schema, (.station | keys), (.tools | length > 0), (.tools[0] | keys | map(select(. == \"name\" or . == \"provides\" or . == \"state\" or . == \"version\"))), (.tailnet | has(\"state\") and has(\"connected\") and has(\"backend_state\"))]"'
+      exit: 0
+      stdout: |
+          ["station.status/v1",["commit","daemon","version"],true,["name","provides","state","version"],true]

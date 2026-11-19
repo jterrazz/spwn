@@ -1,0 +1,20 @@
+- main:
+  - heading "infra not seen" [level=2]
+  - paragraph:
+    - text: server · always on · on
+    - button "mac-mini"
+  - button "Open in Terminal" [disabled]
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity" [selected]
+    - tab "Ports"
+  - heading "mac-mini does not answer." [level=1]
+  - paragraph:
+    - img "unreachable"
+    - text: Unreachable · station machines mac-mini
+  - region "What infra prints":
+    - heading "What infra prints its console, then its hypervisor" [level=2]
+    - group "Which log":
+      - button "Console" [pressed]
+      - button "Setup run"
+    - text: unreachable mac-mini does not answer. station machines mac-mini

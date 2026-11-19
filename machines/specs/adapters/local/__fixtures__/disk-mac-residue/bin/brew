@@ -1,0 +1,15 @@
+#!/bin/sh
+# Homebrew as it cleans for real: --prune=all keeps the formula API cache and Ruby's bootsnap cache.
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions") printf 'pnpm 10.20.0\n' ;;
+    "list --cask --versions") ;;
+    "cleanup --prune=all")
+        printf 'brew %s\n' "$*" >> "$HOME/.calls"
+        /bin/rm -rf "$HOME/Library/Caches/Homebrew/downloads"
+        ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

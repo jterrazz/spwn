@@ -1,0 +1,14 @@
+description: 'an exploration dev app installs on a Mac by mas itself, outside the brew bundle'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ../__fixtures__/bundle-batch/
+    - ./__fixtures__/mas-xcode/
+runs:
+    - command: 'apps install xcode'
+      exit: 0
+      stdout: |
+          ●	xcode	26.1	mas
+      files:
+          .calls:
+              contains:
+                  - 'mas install 497799835'

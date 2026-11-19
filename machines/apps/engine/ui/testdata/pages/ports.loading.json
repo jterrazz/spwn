@@ -1,0 +1,285 @@
+{
+  "schema": "station.page/v1",
+  "id": "ports",
+  "command": "ports",
+  "context": {
+    "machine": "macbook",
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/ports",
+            "mark": "pending",
+            "label": "Every Mac",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "tailnet",
+      "title": "Tailscale",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "pending",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "private",
+      "title": "Private: shared with you on Tailscale",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:5173",
+            "mark": "pending",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:5432",
+            "mark": "pending",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini",
+            "mark": "pending",
+            "label": "mac-mini",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 3
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "ranges",
+      "title": "Reserved ports",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "note": {
+            "text": "Reserved on This Mac: 2 of 1000 (40000-40999), 998 free"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "x",
+      "label": "stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-1:5173",
+        "linux-1:5432"
+      ],
+      "confirm": {
+        "danger": true,
+        "yes": "stop sharing"
+      },
+      "priority": 1,
+      "mutates": true
+    }
+  ]
+}

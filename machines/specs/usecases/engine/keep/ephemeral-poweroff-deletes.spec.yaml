@@ -1,0 +1,18 @@
+description: 'an ephemeral workspace that powers off is deleted, nothing of it left in the world'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {disk: .vms["linux-1"].disk, record: .vms["linux-1"].kept.lifetime, ports: [.stores.reservations[]? | select(.vm == "linux-1") | .host_port], tailscale: [.tailnet.shares[]?.Reserved], accounts: [.accounts.passwords[]? | select(any(.Grants[]?; .To == "linux-1")) | .Program], ssh: .ssh.blocks["linux-1"].behind}'' world.json'
+      exit: 0
+      stdout: |
+          {"disk":true,"record":"ephemeral","ports":[40001,40002],"tailscale":[40001,40002],"accounts":["npm"],"ssh":"macbook-pro"}
+    - command: 'world poweroff-inside linux-1'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {disk: .vms["linux-1"].disk, record: .vms["linux-1"].kept.lifetime, ports: [.stores.reservations[]? | select(.vm == "linux-1") | .host_port], tailscale: [.tailnet.shares[]?.Reserved], accounts: [.accounts.passwords[]? | select(any(.Grants[]?; .To == "linux-1")) | .Program], ssh: .ssh.blocks["linux-1"].behind}'' world.json'
+      exit: 0
+      stdout: |
+          {"disk":null,"record":null,"ports":[],"tailscale":[],"accounts":[],"ssh":null}

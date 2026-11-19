@@ -1,0 +1,95 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "settings apply",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "restart-after-power-cut",
+            "mark": "ok",
+            "label": "restart-after-power-cut",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tart-launcher",
+            "mark": "ok",
+            "label": "tart-launcher",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "restart-after-power-cut-before",
+      "title": "restart-after-power-cut before",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "fact": {
+            "key": "autorestart",
+            "value": {
+              "kind": "text",
+              "text": "0"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "restart-after-power-cut-after",
+      "title": "restart-after-power-cut after",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "fact": {
+            "key": "autorestart",
+            "value": {
+              "kind": "text",
+              "text": "1"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

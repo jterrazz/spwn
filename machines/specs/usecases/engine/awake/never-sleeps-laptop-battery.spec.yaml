@@ -1,0 +1,36 @@
+description: 'never sleeps on a laptop lets go at 20 % on battery, the one guard that acts on it, told once'
+env: on-battery
+runs:
+    - command: 'settings apply never-sleeps'
+      exit: 0
+      stdout: |
+          ●	never-sleeps	never-sleeps: held by the engine
+          # never-sleeps before
+          never sleeps	off
+          # never-sleeps after
+          never sleeps	held by the engine
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          ["station: never sleeps"]
+    - command: 'world battery 20'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 1,2p'
+      exit: 0
+      stdout: |
+          ◐	macbook-pro	Never sleeps · always-on Mac policy · let go while the battery is low
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: 'awake'
+      exit: 0
+      stdout: |
+          ◐	macbook-pro	Never sleeps · always-on Mac policy · let go while the battery is low
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          # This Mac
+          lid	open
+          power source	battery · 20 % · not charging
+          thermal	nominal
+          screen	always turns off
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].power.holds, [.told[] | .Text]]'' world.json'
+      exit: 0
+      stdout: |
+          [null,["Never sleeps let go: battery 20 %"]]

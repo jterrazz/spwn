@@ -1,0 +1,9 @@
+description: 'a Mac whose running VMs are workspaces, and that sleeps, has no readiness block'
+env: two-macs
+runs:
+    - command: 'overview >/dev/null'
+      exit: 0
+    - command: 'overview | /usr/bin/grep -c "Mac readiness"'
+      exit: 1
+      stdout: |
+          0

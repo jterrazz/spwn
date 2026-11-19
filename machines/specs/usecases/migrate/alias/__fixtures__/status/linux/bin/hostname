@@ -1,0 +1,8 @@
+#!/bin/sh
+case "$*" in
+    -I) echo "192.168.64.5 fd00::5" ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

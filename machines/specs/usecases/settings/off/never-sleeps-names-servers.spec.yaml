@@ -1,0 +1,32 @@
+description: 'never-sleeps off asks first and names the servers that pause; yes lets the mini sleep normally'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'settings off never-sleeps --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: refusing to off without --yes
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; terminal "$STATION" settings off never-sleeps --on mac-mini'
+      stdin: |
+          see off here?
+          screen
+          send y
+          see never-sleeps:
+      exit: 0
+      stdout: |
+          ┃ Turn never-sleeps off here? station stops applying and watching it on this
+          ┃ machine; infra pauses while mac-mini sleeps
+          ┃
+          ┃                                  Yes  No
+    - command: 'awake | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ○	mac-mini	Sleeps normally
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          null

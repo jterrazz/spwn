@@ -1,0 +1,26 @@
+description: 'station background counts the tasks, then Failing and Orphans open, the other groups folded'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x60 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" background | /usr/bin/grep -e "background tasks" -e "^ [A-Z][a-z ]*  [0-9]" -e "brain.x-snap" -e "→ station"'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · 14 background tasks · 1 failing · 3 orphans
+            ✗ com.example.brain.x-snapshot  user  failing · last exit 2  ~/Library/LaunchA…n.x-snapshot.plist
+              → station background remove com.example.brain.x-snapshot
+          → station background --all  for every row
+    - command: 'background | /usr/bin/grep -e "^#" -e "docker.vmnetd" -e "station.engine"'
+      exit: 0
+      stdout: |
+          # Failing	1 ✗
+          # Orphans	3 ◐
+          ◐	com.docker.vmnetd	root	idle	Docker.app (gone)	/Library/LaunchDaemons/com.docker.vmnetd.plist · sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
+          # Station	1 ●
+          ●	com.jterrazz.station.engine	user	running · pid 812		~/Library/LaunchAgents/com.jterrazz.station.engine.plist
+          # Known apps	7 ●
+          # Unknown	2 ●

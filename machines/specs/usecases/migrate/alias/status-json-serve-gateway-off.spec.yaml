@@ -1,0 +1,21 @@
+description: 'a tailnet with Serve off is a degraded gateway with the admin step; logged out, no row'
+fixture: ../../../__fixtures__/vms/
+env: engine
+runs:
+    - command: '--version >/dev/null; : > answers/tailscale/status.serve-off; "$STATION" status --json | /usr/bin/jq -c ''.gateways[] | select(.name == "Tailscale Serve")'''
+      exit: 0
+      stdout: |
+          {"name":"Tailscale Serve","state":"degraded","value":"off","detail":"Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console"}
+    - command: '--version >/dev/null; : > answers/tailscale/status.serve-off; "$STATION" ports --json | /usr/bin/jq -r ''.tailscale.serve, .tailscale.dns_name'''
+      exit: 0
+      stdout: |
+          off
+          macbook.tail1234.ts.net
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"Running"/"NeedsLogin"/'' answers/tailscale/status.json; "$STATION" status --json | /usr/bin/jq ''[.gateways[] | select(.name == "Tailscale Serve")] | length'''
+      exit: 0
+      stdout: |
+          0
+    - command: '--version >/dev/null; /bin/rm bin/tailscale; "$STATION" status --json | /usr/bin/jq ''[.gateways[] | select(.name == "Tailscale Serve")] | length'''
+      exit: 0
+      stdout: |
+          0

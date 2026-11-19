@@ -1,0 +1,377 @@
+{
+  "schema": "station.page/v1",
+  "id": "background",
+  "command": "background",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/background",
+            "mark": "pending",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "failing",
+      "title": "Failing",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.example.brain.x-snapshot",
+            "mark": "pending",
+            "label": "com.example.brain.x-snapshot",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "orphans",
+      "title": "Orphans",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.bjango.istatmenus.installer",
+            "mark": "pending",
+            "label": "com.bjango.istatmenus.installer",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "station",
+      "title": "Station",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.jterrazz.station.engine",
+            "mark": "pending",
+            "label": "com.jterrazz.station.engine",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "known",
+      "title": "Known apps",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.github.facebook.watchman",
+            "mark": "pending",
+            "label": "com.github.facebook.watchman",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "unknown",
+      "title": "Unknown",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "com.example.brain.sync",
+            "mark": "pending",
+            "label": "com.example.brain.sync",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "com.example.brain.late",
+            "mark": "pending",
+            "label": "com.example.brain.late",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ],
+      "pipe_counts": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station background --all",
+      "text": "for every row"
+    }
+  ],
+  "actions": [
+    {
+      "key": "x",
+      "label": "remove",
+      "on": "row",
+      "confirm": {
+        "yes": "remove"
+      },
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "c",
+      "label": "copy the command",
+      "on": "row",
+      "priority": 2
+    }
+  ]
+}

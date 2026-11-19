@@ -1,0 +1,37 @@
+description: 'a bare apply on a terminal asks before it overwrites a setting changed since'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: '--version >/dev/null; printf ''# mine\n'' >> .local/bin/tart'
+      exit: 0
+    - command: '--version >/dev/null; terminal "$STATION" settings apply'
+      stdin: |
+          see yours is lost
+          send y
+          see hushlogin
+          screen
+      exit: 0
+      stdout: |
+          ┃ Apply every setting not applied or changed since? A setting changed since is
+          ┃ overwritten: yours is lost
+          ┃
+          ●       docker-shortcuts        ~/.zshrc [station:docker-shortcuts]: written
+          ●       git-shortcuts   ~/.gitconfig [alias]: written
+          ●       hushlogin       ~/.hushlogin: created
+          ●       dns     dns: applied
+          ●       spotlight-exclude       spotlight-exclude: applied
+          ●       backup-exclusions       backup-exclusions: applied
+          ●       dock-reset      dock-reset: applied
+          ●       dock-spacer     dock-spacer: applied
+          ●       tart-launcher   ~/.local/bin/tart: written
+    - command: 'settings tart-launcher --json | /usr/bin/jq -r .setting.state'
+      exit: 0
+      stdout: |
+          applied

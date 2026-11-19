@@ -1,0 +1,39 @@
+description: 'another machine''s output starts with On <machine>:, its short name however typed'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" overview --on mac-mini | /usr/bin/head -6'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          On mac-mini:
+          mac-mini · Mac · 1 thing needs you · Engine running
+
+          Needs you
+            ◐ ~/go is misplaced  station disk move ~/go --on mac-mini
+          Activity    memory 26 of 64 GB · 1.6 TB free
+    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" machines --on mac-mini'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          On mac-mini:
+          5 machines · 4 running · 1 stopped · nothing needs you
+
+              MACHINE      KIND       STATE                 CPU    MEMORY
+            ● mac-mini     Mac        Engine running
+            └─ ● infra     Server     Running · always on   8 CPU  24 GB
+            ● macbook-pro  Mac        Engine running
+            ├─ ○ api       Workspace  Stopped · persistent  4 CPU  8 GB
+            └─ ● linux-1   Workspace  Running · ephemeral   4 CPU  8 GB
+    - command: '--version >/dev/null; "$STATION" apps --on mac-mini | /usr/bin/head -1; "$STATION" disk --on linux-1 | /usr/bin/head -1; "$STATION" apps | /usr/bin/head -1; "$STATION" apps --on this-mac | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          	On linux-1:
+          # Updates	2 ◐
+          # Updates	2 ◐

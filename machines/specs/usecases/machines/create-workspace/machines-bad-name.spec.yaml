@@ -1,0 +1,8 @@
+description: 'a name outside the name rule is refused, the rule in the hint'
+env: two-macs
+runs:
+    - command: 'machines create Dev_1'
+      exit: 2
+      stderr: |
+          Error: "Dev_1" is not a valid name
+          Hint: use lowercase letters, digits and "-", 1 to 40 characters

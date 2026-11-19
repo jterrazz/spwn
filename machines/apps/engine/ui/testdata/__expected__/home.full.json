@@ -1,0 +1,1571 @@
+{
+  "schema": "station.page/v1",
+  "id": "home",
+  "command": "status",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "todo",
+      "title": "To do",
+      "role": "actions",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "background/com.example.brain.x-snapshot",
+            "mark": "broken",
+            "label": "brain.x-snapshot",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "failing"
+                },
+                {
+                  "kind": "text",
+                  "text": "last exit 2"
+                }
+              ]
+            },
+            "reason": "failing",
+            "hint": {
+              "command": "launchctl bootout gui/501/com.example.brain.x-snapshot && rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist",
+              "external": true
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "machine/engine",
+            "mark": "attention",
+            "label": "engine",
+            "detail": {
+              "kind": "text",
+              "text": "not installed"
+            },
+            "reason": "degraded",
+            "hint": {
+              "command": "station engine start"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "environment/brew",
+            "mark": "attention",
+            "label": "brew",
+            "detail": {
+              "kind": "text",
+              "text": "120 outdated"
+            },
+            "reason": "degraded",
+            "hint": {
+              "command": "station apps update --manager brew"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "workspace/misplaced",
+            "mark": "attention",
+            "label": "misplaced",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "count",
+                  "n": 2,
+                  "unit": "misplaced folders"
+                },
+                {
+                  "kind": "size",
+                  "n": 80530636800
+                }
+              ]
+            },
+            "reason": "misplaced",
+            "hint": {
+              "command": "station disk move ~/.tart"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "apps/pnpm",
+            "mark": "attention",
+            "label": "pnpm",
+            "detail": {
+              "kind": "text",
+              "text": "update available"
+            },
+            "reason": "outdated",
+            "hint": {
+              "command": "station apps update pnpm"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "apps/better-ui",
+            "mark": "attention",
+            "label": "better-ui",
+            "detail": {
+              "kind": "text",
+              "text": "update available"
+            },
+            "reason": "outdated",
+            "hint": {
+              "command": "station apps update better-ui"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "settings/restart-after-power-cut",
+            "mark": "attention",
+            "label": "restart-after-power-cut",
+            "detail": {
+              "kind": "text",
+              "text": "partly applied"
+            },
+            "reason": "partial",
+            "hint": {
+              "command": "station settings apply restart-after-power-cut"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "environment/macos",
+            "mark": "attention",
+            "label": "macos",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "2 pending"
+                },
+                {
+                  "kind": "text",
+                  "text": "checked 22m ago"
+                }
+              ]
+            },
+            "reason": "degraded"
+          }
+        },
+        {
+          "row": {
+            "id": "background/com.docker.socket",
+            "mark": "attention",
+            "label": "com.docker.socket",
+            "detail": {
+              "kind": "text",
+              "text": "orphan: Docker.app is gone"
+            },
+            "reason": "orphan",
+            "hint": {
+              "command": "sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist",
+              "external": true
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 8
+        },
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/machine",
+            "mark": "attention",
+            "label": "Machine",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Mac"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Darwin 27.0.0"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "up 22d 14h"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/network",
+            "mark": "attention",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "192.168.1.152"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "4/4 on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/tailnet",
+            "mark": "ok",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "macbook-pro"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Serve on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/identity",
+            "mark": "ok",
+            "label": "Identity",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "you@example.com"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "signing on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/background",
+            "mark": "broken",
+            "label": "Background",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 3,
+                    "unit": "jobs"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "unit": "failing"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "unit": "orphan"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/apps",
+            "mark": "attention",
+            "label": "Apps",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 6,
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7,
+                    "label": "attention"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 4,
+                    "label": "absent"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/settings",
+            "mark": "attention",
+            "label": "Settings",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "label": "attention"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/disk",
+            "mark": "ok",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "size",
+                    "n": 27917287424,
+                    "unit": "reclaimable"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 2,
+                    "unit": "misplaced"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/all-machines",
+            "mark": "attention",
+            "label": "All machines",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "engine not installed"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "summary/gateways",
+            "mark": "ok",
+            "label": "Gateways",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "label": "ok"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "break": 5
+    },
+    {
+      "id": "machine",
+      "title": "Machine",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "name",
+            "mark": "ok",
+            "label": "name",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "macbook"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "Darwin 27.0.0 arm64"
+                },
+                {
+                  "kind": "text",
+                  "text": "you"
+                },
+                {
+                  "kind": "text",
+                  "text": "zsh"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "uptime",
+            "mark": "ok",
+            "label": "uptime",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "22d 14h"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "battery 100% charged"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "setup",
+            "mark": "ok",
+            "label": "setup",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "done"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "engine",
+            "mark": "attention",
+            "label": "engine",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not installed"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "reason": "degraded",
+            "hint": {
+              "command": "station engine start"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "environment",
+      "title": "Environment",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "local ip",
+            "mark": "ok",
+            "label": "local ip",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "192.168.1.152"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "filevault",
+            "mark": "ok",
+            "label": "filevault",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "firewall",
+            "mark": "ok",
+            "label": "firewall",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "sip",
+            "mark": "ok",
+            "label": "sip",
+            "cells": [
+              {
+                "kind": "off"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "gatekeeper",
+            "mark": "ok",
+            "label": "gatekeeper",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macos",
+            "mark": "attention",
+            "label": "macos",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "2 pending"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "checked 22m ago"
+            },
+            "reason": "degraded"
+          }
+        },
+        {
+          "row": {
+            "id": "brew",
+            "mark": "attention",
+            "label": "brew",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "120 outdated"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "reason": "degraded",
+            "hint": {
+              "command": "station apps update --manager brew"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "ok",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Running"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "macbook-pro.tail1234.ts.net"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "100.98.133.14"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 6
+        },
+        {
+          "mark": "attention",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "workspace",
+      "title": "Workspace",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "disk",
+            "mark": "ok",
+            "label": "disk",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "reclaimable: station disk free"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tart/0",
+            "mark": "attention",
+            "label": "tart",
+            "cells": [
+              {
+                "kind": "path",
+                "text": "~/.tart"
+              }
+            ],
+            "detail": {
+              "kind": "size",
+              "n": 78383153152
+            },
+            "reason": "misplaced",
+            "hint": {
+              "command": "station disk move ~/.tart"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "bun/1",
+            "mark": "attention",
+            "label": "bun",
+            "cells": [
+              {
+                "kind": "path",
+                "text": "~/.bun"
+              }
+            ],
+            "detail": {
+              "kind": "size",
+              "n": 2147483648
+            },
+            "reason": "misplaced",
+            "hint": {
+              "command": "station disk move ~/.bun"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "attention",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "identity",
+      "title": "Identity",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "git-email",
+            "mark": "ok",
+            "label": "git email",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "you@example.com"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "git-signing",
+            "mark": "ok",
+            "label": "git signing",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "background",
+      "title": "Background",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "label",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "group",
+          "kind": "text",
+          "show": "pipe"
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "scope",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "owner",
+          "kind": "text",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "group/station",
+              "label": "station"
+            },
+            "items": [
+              {
+                "empty": {
+                  "noun": "background jobs"
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "group/known",
+              "label": "known"
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "com.github.facebook.watchman",
+                  "mark": "ok",
+                  "label": "com.github.facebook.watchman",
+                  "short": "watchman",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "known"
+                    },
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "running"
+                        },
+                        {
+                          "kind": "text",
+                          "text": "pid 3464"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "text": "user"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "watchman"
+                    }
+                  ],
+                  "detail": {
+                    "kind": "path",
+                    "text": "~/Library/LaunchAgents/com.github.facebook.watchman.plist"
+                  }
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "group/unknown",
+              "label": "unknown"
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "com.example.brain.x-snapshot",
+                  "mark": "broken",
+                  "label": "com.example.brain.x-snapshot",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "unknown"
+                    },
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "failing"
+                        },
+                        {
+                          "kind": "text",
+                          "text": "last exit 2"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "text": "user"
+                    },
+                    {
+                      "kind": "none"
+                    }
+                  ],
+                  "detail": {
+                    "kind": "path",
+                    "text": "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist"
+                  },
+                  "reason": "failing",
+                  "hint": {
+                    "command": "launchctl bootout gui/501/com.example.brain.x-snapshot && rm ~/Library/LaunchAgents/com.example.brain.x-snapshot.plist",
+                    "external": true
+                  }
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "group/orphan",
+              "label": "orphan"
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "com.docker.socket",
+                  "mark": "attention",
+                  "label": "com.docker.socket",
+                  "short": "socket",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "orphan"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "not loaded"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "root"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "Docker.app"
+                    }
+                  ],
+                  "detail": {
+                    "kind": "path",
+                    "text": "/Library/LaunchDaemons/com.docker.socket.plist"
+                  },
+                  "reason": "orphan",
+                  "hint": {
+                    "command": "sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist",
+                    "external": true
+                  }
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        },
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "gateways",
+      "title": "Gateways",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "Tailscale Serve",
+            "mark": "ok",
+            "label": "Tailscale Serve",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "on"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "apps",
+      "title": "Apps",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "method",
+          "kind": "list",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "mise",
+            "mark": "absent",
+            "label": "mise",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "hint": {
+              "command": "station apps install mise"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mas",
+            "mark": "absent",
+            "label": "mas",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "hint": {
+              "command": "station apps install mas"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "pnpm",
+            "mark": "attention",
+            "label": "pnpm",
+            "cells": [
+              {
+                "kind": "version",
+                "text": "11.21.0",
+                "label": "11.22.1"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "update available"
+            },
+            "reason": "outdated",
+            "hint": {
+              "command": "station apps update pnpm"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "bun",
+            "mark": "unknown",
+            "label": "bun",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mise"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "installed, mise not installed"
+            },
+            "reason": "missing",
+            "hint": {
+              "command": "station apps install mise"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "go",
+            "mark": "unknown",
+            "label": "go",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mise"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "installed, mise not installed"
+            },
+            "reason": "missing",
+            "hint": {
+              "command": "station apps install mise"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "java",
+            "mark": "unknown",
+            "label": "java",
+            "cells": [
+              {
+                "kind": "version",
+                "text": "17.0.20"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mise"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "installed, mise not installed"
+            },
+            "reason": "missing",
+            "hint": {
+              "command": "station apps install mise"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "python",
+            "mark": "unknown",
+            "label": "python",
+            "cells": [
+              {
+                "kind": "version",
+                "text": "3.14.6"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mise"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "installed, mise not installed"
+            },
+            "reason": "missing",
+            "hint": {
+              "command": "station apps install mise"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "chatgpt",
+            "mark": "unknown",
+            "label": "chatgpt",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "cask"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "on PATH, not managed by cask"
+            },
+            "reason": "unmanaged"
+          }
+        },
+        {
+          "row": {
+            "id": "typewhisper",
+            "mark": "absent",
+            "label": "typewhisper",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "cask"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "hint": {
+              "command": "station apps install typewhisper"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "frontend-design",
+            "mark": "absent",
+            "label": "frontend-design",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "skill"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "skills not installed"
+            },
+            "reason": "missing",
+            "hint": {
+              "command": "station apps install skills"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "better-ui",
+            "mark": "attention",
+            "label": "better-ui",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "skill"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "update available"
+            },
+            "reason": "outdated",
+            "hint": {
+              "command": "station apps update better-ui"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 6
+        },
+        {
+          "mark": "attention",
+          "n": 7
+        },
+        {
+          "mark": "absent",
+          "n": 4
+        }
+      ],
+      "uncounted": true,
+      "pipe_counts": true
+    },
+    {
+      "id": "settings",
+      "title": "Settings",
+      "fold": "folded",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "description",
+          "kind": "text",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "restart-after-power-cut",
+            "mark": "attention",
+            "label": "restart-after-power-cut",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Restarts after a power cut, and wakes for the network"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "partly applied"
+            },
+            "reason": "partial",
+            "hint": {
+              "command": "station settings apply restart-after-power-cut"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ],
+      "uncounted": true,
+      "pipe_counts": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station overview --all",
+      "text": "for every row"
+    },
+    {
+      "command": "station overview | cat",
+      "external": true,
+      "text": "for records"
+    }
+  ],
+  "actions": [
+    {
+      "key": "enter",
+      "label": "fix",
+      "on": "row",
+      "rows": [
+        "machine/engine",
+        "environment/brew",
+        "workspace/misplaced",
+        "apps/pnpm",
+        "apps/better-ui",
+        "settings/restart-after-power-cut"
+      ],
+      "mutates": true
+    }
+  ]
+}

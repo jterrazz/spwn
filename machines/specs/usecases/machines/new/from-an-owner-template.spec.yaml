@@ -1,0 +1,11 @@
+description: 'machines.new from the owner''s file that makes a workspace names that file, the one the VM follows'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.From, .out.Lifetime, .out.Size.MemoryBytes]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.new","in":{"From":"studio-linux"}}
+      exit: 0
+      stdout: |
+          ["studio-linux","ephemeral",8589934592]

@@ -1,0 +1,37 @@
+description: 'applying a setting that is Off here applies it and turns it back on here'
+env: two-macs
+runs:
+    - command: 'settings off hushlogin --yes'
+      exit: 0
+      stdout: |
+          ●	hushlogin
+    - command: 'settings hushlogin'
+      exit: 0
+      stdout: |
+          ⊘	hushlogin	off here
+          # Detail
+          group	Set by station
+          does	Silence the terminal login message
+          lives on	Macs, Linux VMs, macOS VMs
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.off_here'' world.json'
+      exit: 0
+      stdout: |
+          ["hushlogin"]
+    - command: 'settings apply hushlogin'
+      exit: 0
+      stdout: |
+          ●	hushlogin	~/.hushlogin: created
+    - command: 'settings hushlogin'
+      exit: 0
+      stdout: |
+          ●	hushlogin	applied · ~/.hushlogin
+          # Detail
+          group	Set by station
+          does	Silence the terminal login message
+          lives on	Macs, Linux VMs, macOS VMs
+          where	~/.hushlogin
+          applied	just now
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.off_here'' world.json'
+      exit: 0
+      stdout: |
+          null

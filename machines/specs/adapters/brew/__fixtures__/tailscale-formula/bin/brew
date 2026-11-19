@@ -1,0 +1,15 @@
+#!/bin/sh
+# Homebrew still holding the superseded tailscale formula: the casks are
+# answers/brew/cask.txt (none without it), an uninstall is recorded.
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions") printf 'mise 2026.10.25\ntailscale 1.88.0\n' ;;
+    "list --cask --versions")
+        if [ -f "$HOME/answers/brew/cask.txt" ]; then /bin/cat "$HOME/answers/brew/cask.txt"; fi
+        ;;
+    "uninstall "*) printf 'brew %s\n' "$*" >> "$HOME/.calls" ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

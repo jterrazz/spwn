@@ -1,0 +1,8 @@
+description: 'another Mac''s engine answers its own cleanup: its server is never a candidate, nothing goes'
+env: two-macs
+runs:
+    - command: 'machines cleanup --yes --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          	none

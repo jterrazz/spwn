@@ -1,0 +1,1814 @@
+{
+    "macs": {
+        "agent-7f": {
+            "apps": {
+                "apt": {
+                    "installed": {
+                        "gh": "2.45.0",
+                        "jq": "1.7.1",
+                        "ripgrep": "14.1.0"
+                    }
+                }
+            },
+            "disk": {
+                "total": 40000000000,
+                "free": 30000000000
+            },
+            "files": {
+                "machinefiles/base.machine.yaml": "machinefile: station.machinefile/v1\nname: base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
+                "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [base]\napps: [ripgrep]\n"
+            },
+            "meter": {
+                "sample": {
+                    "at": "2026-11-07T10:30:00Z",
+                    "cpu_busy": 285916,
+                    "cpu_total": 8200000,
+                    "cpus": 4,
+                    "load": [
+                        0.16,
+                        0.16,
+                        0.16
+                    ],
+                    "mem_used": 5726623061,
+                    "mem_total": 8589934592,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 407459701,
+                    "net_out": 161537324,
+                    "thermal": 0,
+                    "boot": "2026-11-07T08:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 52,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 58166,
+                    "net_out": 19846,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                }
+            },
+            "preferences": {
+                "machinefile": {
+                    "name": "linux-dev"
+                }
+            },
+            "self": {
+                "kind": "workspace",
+                "system": {
+                    "OS": "linux",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Memory": 0,
+                    "CPUs": 0
+                }
+            }
+        },
+        "api": {
+            "disk": {
+                "total": 40000000000,
+                "free": 30000000000
+            },
+            "self": {
+                "kind": "workspace",
+                "system": {
+                    "OS": "linux",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Memory": 0,
+                    "CPUs": 0
+                }
+            }
+        },
+        "infra": {
+            "disk": {
+                "total": 80000000000,
+                "free": 60000000000
+            },
+            "meter": {
+                "sample": {
+                    "at": "2026-11-07T10:30:00Z",
+                    "cpu_busy": 155610273,
+                    "cpu_total": 1037800000,
+                    "cpus": 8,
+                    "load": [
+                        1.44,
+                        1.44,
+                        1.44
+                    ],
+                    "mem_used": 17179869184,
+                    "mem_total": 25769803776,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 642175580276,
+                    "net_out": 231788115545,
+                    "thermal": 0,
+                    "boot": "2026-10-26T10:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 187,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 646547,
+                    "net_out": 246126,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                }
+            },
+            "self": {
+                "kind": "server",
+                "system": {
+                    "OS": "linux",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Memory": 0,
+                    "CPUs": 0
+                }
+            }
+        },
+        "linux-1": {
+            "accounts": {
+                "programs": {
+                    "claude": {
+                        "Program": "claude",
+                        "State": "signed-in",
+                        "Who": "you@example.com",
+                        "Scopes": null,
+                        "Plan": "",
+                        "How": "granted",
+                        "Entry": "pw-claude",
+                        "EntryLabel": "Claude token",
+                        "Reason": ""
+                    },
+                    "gh": {
+                        "Program": "gh",
+                        "State": "signed-in",
+                        "Who": "you@example.com",
+                        "Scopes": null,
+                        "Plan": "",
+                        "How": "granted",
+                        "Entry": "pw-github",
+                        "EntryLabel": "GitHub token",
+                        "Reason": ""
+                    }
+                }
+            },
+            "apps": {
+                "apt": {
+                    "installed": {
+                        "gh": "2.45.0",
+                        "jq": "1.7.1"
+                    },
+                    "behind": {
+                        "gh": "2.46.0"
+                    }
+                }
+            },
+            "disk": {
+                "total": 40000000000,
+                "free": 30000000000
+            },
+            "files": {
+                "machinefiles/base.machine.yaml": "machinefile: station.machinefile/v1\nname: base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
+                "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [base]\napps: [ripgrep]\n"
+            },
+            "meter": {
+                "sample": {
+                    "at": "2026-11-07T10:30:00Z",
+                    "cpu_busy": 2658836,
+                    "cpu_total": 8200000,
+                    "cpus": 4,
+                    "load": [
+                        1.48,
+                        1.48,
+                        1.48
+                    ],
+                    "mem_used": 5726623061,
+                    "mem_total": 8589934592,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 3628657175,
+                    "net_out": 2405357580,
+                    "thermal": 0,
+                    "boot": "2026-11-07T08:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 226,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 334319,
+                    "net_out": 263918,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                }
+            },
+            "preferences": {
+                "machinefile": {
+                    "name": "linux-dev"
+                }
+            },
+            "self": {
+                "kind": "workspace",
+                "system": {
+                    "OS": "linux",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Memory": 0,
+                    "CPUs": 0
+                }
+            }
+        },
+        "linux-3": {
+            "accounts": {
+                "programs": {
+                    "gh": {
+                        "Program": "gh",
+                        "State": "signed-in",
+                        "Who": "you@example.com",
+                        "Scopes": null,
+                        "Plan": "",
+                        "How": "granted",
+                        "Entry": "pw-github",
+                        "EntryLabel": "GitHub token",
+                        "Reason": ""
+                    }
+                }
+            },
+            "disk": {
+                "total": 40000000000,
+                "free": 30000000000
+            },
+            "meter": {
+                "sample": {
+                    "at": "2026-11-07T10:30:00Z",
+                    "cpu_busy": 3656140,
+                    "cpu_total": 8200000,
+                    "cpus": 4,
+                    "load": [
+                        2.4,
+                        2.4,
+                        2.4
+                    ],
+                    "mem_used": 5726623061,
+                    "mem_total": 8589934592,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 1614005293,
+                    "net_out": 801011304,
+                    "thermal": 0,
+                    "boot": "2026-11-07T08:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 419,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 174242,
+                    "net_out": 73078,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                }
+            },
+            "self": {
+                "kind": "workspace",
+                "system": {
+                    "OS": "linux",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Memory": 0,
+                    "CPUs": 0
+                }
+            }
+        },
+        "mac-mini": {
+            "disk": {
+                "total": 994000000000,
+                "free": 610000000000
+            },
+            "engine": {
+                "version": "v4.0.0",
+                "started_at": "2026-10-17T10:30:00Z",
+                "memory": {
+                    "infra": {
+                        "state": "running",
+                        "boot_at": "2026-10-26T10:30:00Z",
+                        "check": {
+                            "state": "failing",
+                            "since": "2026-11-07T10:18:00Z",
+                            "at": "2026-11-07T10:29:30Z"
+                        },
+                        "latency": [
+                            {
+                                "at": "2026-11-07T09:31:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T09:32:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T09:33:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T09:34:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T09:35:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T09:36:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T09:37:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T09:38:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T09:39:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T09:40:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T09:41:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T09:42:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T09:43:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T09:44:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T09:45:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T09:46:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T09:47:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T09:48:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T09:49:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T09:50:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T09:51:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T09:52:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T09:53:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T09:54:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T09:55:00Z",
+                                "took": 64000000
+                            },
+                            {
+                                "at": "2026-11-07T09:56:00Z",
+                                "took": 98000000
+                            },
+                            {
+                                "at": "2026-11-07T09:57:00Z",
+                                "took": 91000000
+                            },
+                            {
+                                "at": "2026-11-07T09:58:00Z",
+                                "took": 58000000
+                            },
+                            {
+                                "at": "2026-11-07T09:59:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T10:00:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T10:01:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T10:02:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T10:03:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T10:04:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T10:05:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T10:06:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T10:07:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T10:08:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T10:09:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T10:10:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T10:11:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T10:12:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T10:13:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T10:14:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T10:15:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T10:16:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T10:17:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T10:18:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T10:19:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T10:20:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T10:21:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T10:22:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T10:23:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T10:24:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T10:25:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T10:26:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T10:27:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T10:28:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T10:29:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T10:30:00Z",
+                                "took": 42000000
+                            }
+                        ]
+                    },
+                    "linux-3": {
+                        "state": "running",
+                        "boot_at": "2026-11-07T08:30:00Z"
+                    },
+                    "review-bot": {
+                        "state": "running",
+                        "boot_at": "2026-11-07T08:30:00Z"
+                    }
+                },
+                "past": {
+                    "infra": {
+                        "base": 15,
+                        "swing": 3,
+                        "seed": 13,
+                        "bumps": [
+                            {
+                                "ago": 2280000000000,
+                                "width": 240000000000,
+                                "height": 26
+                            }
+                        ],
+                        "in": 0.55,
+                        "out": 0.2
+                    },
+                    "linux-3": {
+                        "base": 50,
+                        "swing": 8,
+                        "seed": 17,
+                        "in": 0.2,
+                        "out": 0.1
+                    },
+                    "mac-mini": {
+                        "base": 41,
+                        "swing": 4,
+                        "seed": 11,
+                        "bumps": [
+                            {
+                                "ago": 1800000000000,
+                                "width": 180000000000,
+                                "height": 14
+                            }
+                        ],
+                        "plateau": [
+                            "2026-11-07T02:58:00Z",
+                            "2026-11-07T03:32:00Z"
+                        ],
+                        "in": 0.3,
+                        "out": 0.25
+                    },
+                    "review-bot": {
+                        "base": 3,
+                        "swing": 1,
+                        "seed": 19,
+                        "in": 0.02,
+                        "out": 0.01
+                    }
+                }
+            },
+            "facts": {
+                "automatic-updates": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "display-sleep": {
+                    "State": "ok",
+                    "Value": "2",
+                    "Detail": ""
+                },
+                "filevault": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "firewall": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "gatekeeper": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "screen-lock": {
+                    "State": "ok",
+                    "Value": "0",
+                    "Detail": ""
+                },
+                "sip": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "system-updates": {
+                    "State": "ok",
+                    "Value": "up to date",
+                    "Detail": ""
+                },
+                "time-machine": {
+                    "State": "ok",
+                    "Value": "2026-11-06T10:30:00Z",
+                    "Detail": ""
+                }
+            },
+            "fresh": {
+                "size": {
+                    "CPUs": 4,
+                    "Memory": 8589934592,
+                    "Disk": 4000000000
+                },
+                "guest": {
+                    "answers": {
+                        "sudo env *": {},
+                        "env MACHINEFILE=*": {},
+                        "sudo bash -s": {
+                            "poweroff": true
+                        }
+                    }
+                }
+            },
+            "images": [
+                "ghcr.io/jterrazz/station-base-ubuntu:3"
+            ],
+            "listening": [
+                {
+                    "Port": 5900,
+                    "Bind": "100.98.133.20",
+                    "Process": "screensharingd",
+                    "PID": 500
+                }
+            ],
+            "meter": {
+                "sample": {
+                    "at": "2026-11-07T10:30:00Z",
+                    "cpu_busy": 745069804,
+                    "cpu_total": 1815400000,
+                    "cpus": 14,
+                    "load": [
+                        7.700000000000001,
+                        7.700000000000001,
+                        7.700000000000001
+                    ],
+                    "mem_used": 45812984490,
+                    "mem_total": 68719476736,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 613012539991,
+                    "net_out": 507010972651,
+                    "thermal": 0,
+                    "boot": "2026-10-17T10:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 349,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 239681,
+                    "net_out": 196004,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                },
+                "processes": {
+                    "1004": {
+                        "cpu": 10.285714285714286,
+                        "memory": 17179869184,
+                        "started": "2026-10-26T10:30:00Z"
+                    },
+                    "1005": {
+                        "cpu": 17.142857142857142,
+                        "memory": 5726623061,
+                        "started": "2026-11-07T08:30:00Z"
+                    },
+                    "1006": {
+                        "cpu": 0.8571428571428571,
+                        "memory": 2863311530,
+                        "started": "2026-11-07T08:30:00Z"
+                    }
+                }
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "preferences": {
+                "macs": {
+                    "macbook-air": {
+                        "answered": "2026-11-07T08:30:00Z",
+                        "asleep": true,
+                        "hardware": {
+                            "Model": "Mac15,12",
+                            "Chip": "Apple M3",
+                            "Memory": 25769803776,
+                            "CPUs": 8
+                        },
+                        "laptop": true,
+                        "user": "you"
+                    },
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
+                "never_sleeps": true,
+                "ports": {
+                    "not_shared": [
+                        "linux-3:5432",
+                        "review-bot:8000"
+                    ]
+                },
+                "vm_user": "admin"
+            },
+            "self": {
+                "system": {
+                    "OS": "",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Model": "Mac16,11",
+                    "Chip": "Apple M4 Pro",
+                    "Memory": 68719476736,
+                    "CPUs": 14
+                }
+            },
+            "settings": {
+                "restart-after-power-cut": "autorestart=1\nwomp=1",
+                "autologin": "autoLoginUser=jterrazz.agent\n/etc/kcpassword=present"
+            },
+            "stores": {
+                "images": [
+                    {
+                        "name": "base-ubuntu",
+                        "version": "3",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
+                        "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v4.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-11-01T10:30:00Z",
+                        "size_gb": 4
+                    }
+                ],
+                "reservations": [
+                    {
+                        "vm": "linux-3",
+                        "guest_port": 8080,
+                        "host_port": 40001,
+                        "by": "owner",
+                        "http": true,
+                        "reserved_at": "2026-11-07T08:30:00Z"
+                    }
+                ],
+                "declarations": [
+                    {
+                        "machine": "infra",
+                        "port": 443,
+                        "via": "cloudflare-tunnel",
+                        "url": "https://example.com"
+                    }
+                ],
+                "uptime": {
+                    "infra": {
+                        "since": "2026-09-08T10:30:00Z",
+                        "days": [
+                            {
+                                "date": "2026-10-18",
+                                "down_s": 240,
+                                "restarts": 1
+                            },
+                            {
+                                "date": "2026-10-30",
+                                "down_s": 240,
+                                "restarts": 1
+                            }
+                        ],
+                        "incidents": [
+                            {
+                                "from": "2026-10-18T04:30:00Z",
+                                "to": "2026-10-18T04:34:00Z",
+                                "cause": "out of memory"
+                            },
+                            {
+                                "from": "2026-10-30T04:30:00Z",
+                                "to": "2026-10-30T04:34:00Z",
+                                "cause": "out of memory"
+                            }
+                        ]
+                    }
+                }
+            },
+            "tailnet": {
+                "self": {
+                    "ID": "mac-mini",
+                    "Name": "mac-mini",
+                    "DNSName": "mac-mini.tail77a797.ts.net",
+                    "IP": "100.98.133.20",
+                    "Online": true,
+                    "Tags": null,
+                    "Sharing": {
+                        "Backend": "Running",
+                        "On": true,
+                        "DNSName": "mac-mini.tail77a797.ts.net"
+                    },
+                    "Login": "",
+                    "Network": "",
+                    "Client": {
+                        "Path": "",
+                        "Variant": ""
+                    },
+                    "Peers": [
+                        {
+                            "ID": "infra",
+                            "Name": "infra",
+                            "DNSName": "infra.tail77a797.ts.net",
+                            "IP": "",
+                            "Online": true,
+                            "Tags": null
+                        }
+                    ]
+                },
+                "shares": [
+                    {
+                        "Port": 40001,
+                        "Path": "",
+                        "Reserved": 40001,
+                        "Scheme": "https",
+                        "Target": "http://127.0.0.1:40001"
+                    }
+                ]
+            },
+            "vault": {
+                "session:github": "ZmFrZS1zZXNzaW9uLWdpdGh1Yi1vZi10aGUtbWluaQ=="
+            },
+            "vms": {
+                "infra": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "3",
+                        "lifetime": "always-on",
+                        "want": "running",
+                        "check": "https://example.com/healthz",
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "purpose": "The cluster's control plane"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 8,
+                        "Memory": 25769803776,
+                        "Disk": 80000000000
+                    },
+                    "pid": 1004,
+                    "up_at": "2026-10-26T10:30:00Z",
+                    "guest": {},
+                    "listening": [
+                        {
+                            "Port": 443,
+                            "Bind": "0.0.0.0",
+                            "Process": "nginx",
+                            "PID": 10040
+                        },
+                        {
+                            "Port": 20241,
+                            "Bind": "127.0.0.1",
+                            "Process": "cloudflared",
+                            "PID": 10041
+                        },
+                        {
+                            "Port": 6443,
+                            "Bind": "0.0.0.0",
+                            "Process": "kube-apiserver",
+                            "PID": 10042
+                        }
+                    ],
+                    "console": [
+                        "[    0.000000] Linux version 6.8.0-52-generic (buildd@lcy02) #53-Ubuntu SMP PREEMPT_DYNAMIC",
+                        "[    1.412903] virtio_net virtio1 enp0s1: renamed from eth0",
+                        "[    2.108344] EXT4-fs (vda1): mounted filesystem with ordered data mode",
+                        "[    3.221087] systemd[1]: Reached target Multi-User System.",
+                        "[    3.480112] systemd[1]: Started OpenBSD Secure Shell server.",
+                        "[    3.902667] systemd[1]: Started Tailscale node agent.",
+                        "[    4.337941] systemd[1]: Started station guest.",
+                        "[    5.016528] systemd[1]: Started nginx - A high performance web server.",
+                        "[    5.774190] systemd[1]: Started cloudflared - Cloudflare Tunnel.",
+                        "[    6.210455] cloudflared[612]: Registered tunnel connection connIndex=0 location=cdg04",
+                        "[    6.431879] k3s[744]: Running kube-apiserver --secure-port=6443",
+                        "[    9.883012] nginx[598]: GET /healthz 200 0.036s"
+                    ]
+                },
+                "linux-3": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "3",
+                        "lifetime": "ephemeral",
+                        "want": "running",
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "purpose": "Refresh the auth token",
+                        "creator": "studio-os-fe"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 40000000000
+                    },
+                    "pid": 1005,
+                    "up_at": "2026-11-07T08:30:00Z",
+                    "guest": {},
+                    "listening": [
+                        {
+                            "Port": 5432,
+                            "Bind": "0.0.0.0",
+                            "Process": "postgres",
+                            "PID": 10050
+                        },
+                        {
+                            "Port": 8080,
+                            "Bind": "0.0.0.0",
+                            "Process": "python3",
+                            "PID": 10051
+                        }
+                    ]
+                },
+                "review-bot": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "3",
+                        "lifetime": "persistent",
+                        "want": "running",
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "purpose": "Review every pull request of studio-station",
+                        "creator": "studio-os-43"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 2,
+                        "Memory": 4294967296,
+                        "Disk": 40000000000
+                    },
+                    "pid": 1006,
+                    "up_at": "2026-11-07T08:30:00Z",
+                    "guest": {},
+                    "listening": [
+                        {
+                            "Port": 8000,
+                            "Bind": "0.0.0.0",
+                            "Process": "uvicorn",
+                            "PID": 10060
+                        }
+                    ]
+                },
+                "station-image-base-ubuntu-3": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 4000000000
+                    }
+                }
+            }
+        },
+        "macbook-air": {
+            "engine": {
+                "version": "v4.0.0",
+                "started_at": "2026-11-02T10:30:00Z"
+            },
+            "offline": true,
+            "preferences": {
+                "macs": {
+                    "mac-mini": {
+                        "lan": "192.168.1.20",
+                        "user": "you"
+                    },
+                    "macbook-pro": {
+                        "user": "you"
+                    }
+                },
+                "vm_user": "admin"
+            },
+            "self": {
+                "system": {
+                    "OS": "",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Model": "Mac15,12",
+                    "Chip": "Apple M3",
+                    "Memory": 25769803776,
+                    "CPUs": 8
+                }
+            }
+        },
+        "macbook-pro": {
+            "accounts": {
+                "programs": {
+                    "gh": {
+                        "Program": "gh",
+                        "State": "signed-in",
+                        "Who": "you",
+                        "Scopes": [
+                            "repo"
+                        ],
+                        "How": "own"
+                    },
+                    "claude": {
+                        "Program": "claude",
+                        "State": "signed-in",
+                        "Who": "you@example.com",
+                        "Plan": "Max plan",
+                        "How": "own"
+                    },
+                    "wrangler": {
+                        "Program": "wrangler",
+                        "State": "signed-in",
+                        "Who": "you@example.com",
+                        "How": "own"
+                    }
+                },
+                "counter": 3,
+                "passwords": [
+                    {
+                        "ID": "pw-1",
+                        "Label": "GitHub deploy",
+                        "Program": "gh",
+                        "Kind": "fine-grained",
+                        "Who": "you",
+                        "Added": "2026-10-30T09:00:00Z",
+                        "Grants": []
+                    },
+                    {
+                        "ID": "pw-2",
+                        "Label": "npm publish",
+                        "Program": "npm",
+                        "Kind": "token",
+                        "Added": "2026-10-12T09:00:00Z",
+                        "Grants": [
+                            {
+                                "To": "linux-1"
+                            }
+                        ]
+                    },
+                    {
+                        "ID": "pw-3",
+                        "Label": "Claude Max",
+                        "Program": "claude",
+                        "Kind": "oauth-token",
+                        "Who": "you@example.com",
+                        "Added": "2026-10-02T09:00:00Z",
+                        "Grants": []
+                    }
+                ]
+            },
+            "apps": {
+                "brew": {
+                    "installed": {
+                        "gh": "2.97.0",
+                        "jq": "1.8.1",
+                        "lazygit": "0.55.1"
+                    },
+                    "behind": {
+                        "gh": "2.98.0",
+                        "lazygit": "0.56.0"
+                    }
+                },
+                "cask": {
+                    "installed": {
+                        "ghostty": "1.2.0"
+                    },
+                    "behind": {
+                        "ghostty": "1.2.1"
+                    }
+                }
+            },
+            "building": [
+                {
+                    "image": "base-ubuntu",
+                    "version": "4",
+                    "step": "packages",
+                    "owner": {
+                        "pid": 4242,
+                        "start": "1794047380.000000"
+                    }
+                }
+            ],
+            "disk": {
+                "total": 994000000000,
+                "free": 388000000000
+            },
+            "engine": {
+                "version": "v4.0.0",
+                "started_at": "2026-11-04T10:30:00Z",
+                "memory": {
+                    "agent-7f": {
+                        "state": "running",
+                        "boot_at": "2026-11-07T08:30:00Z"
+                    },
+                    "linux-1": {
+                        "state": "running",
+                        "boot_at": "2026-11-07T08:30:00Z"
+                    }
+                },
+                "awake": {
+                    "session": {
+                        "lid": true,
+                        "battery": false,
+                        "started_at": "2026-11-07T09:30:00Z",
+                        "until": "2026-11-07T18:00:00Z",
+                        "by": "station awake --until 18:00 --lid"
+                    }
+                },
+                "past": {
+                    "agent-7f": {
+                        "base": 4,
+                        "swing": 1,
+                        "seed": 8,
+                        "in": 0.05,
+                        "out": 0.02
+                    },
+                    "linux-1": {
+                        "base": 34,
+                        "swing": 6,
+                        "seed": 5,
+                        "bumps": [
+                            {
+                                "ago": 900000000000,
+                                "width": 240000000000,
+                                "height": 36
+                            },
+                            {
+                                "ago": 3120000000000,
+                                "width": 240000000000,
+                                "height": 10
+                            }
+                        ],
+                        "in": 0.45,
+                        "out": 0.3
+                    },
+                    "macbook-pro": {
+                        "base": 22,
+                        "swing": 4,
+                        "seed": 3,
+                        "bumps": [
+                            {
+                                "ago": 1500000000000,
+                                "width": 240000000000,
+                                "height": 24
+                            },
+                            {
+                                "ago": 3000000000000,
+                                "width": 300000000000,
+                                "height": 8
+                            }
+                        ],
+                        "in": 0.5,
+                        "out": 0.45
+                    }
+                }
+            },
+            "facts": {
+                "automatic-updates": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "display-sleep": {
+                    "State": "ok",
+                    "Value": "2",
+                    "Detail": ""
+                },
+                "filevault": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "firewall": {
+                    "State": "absent",
+                    "Value": "off",
+                    "Detail": ""
+                },
+                "gatekeeper": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "screen-lock": {
+                    "State": "ok",
+                    "Value": "0",
+                    "Detail": ""
+                },
+                "sip": {
+                    "State": "ok",
+                    "Value": "on",
+                    "Detail": ""
+                },
+                "system-updates": {
+                    "State": "ok",
+                    "Value": "up to date",
+                    "Detail": ""
+                },
+                "time-machine": {
+                    "State": "ok",
+                    "Value": "2026-11-06T10:30:00Z",
+                    "Detail": ""
+                }
+            },
+            "files": {
+                "machinefiles/base.machine.yaml": "machinefile: station.machinefile/v1\nname: base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
+                "machinefiles/linux-1.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-1\nmachine: { kind: workspace }\nextends: [linux-dev]\nports: { open: [3000], to: public }\n",
+                "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [base]\napps: [ripgrep]\n",
+                "machinefiles/macbook-pro.local.yaml": "machinefile: station.machinefile/v1\noverrides: macbook-pro\napps: { add: [bat], remove: [lazygit] }\n",
+                "machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [base]\napps: [lazygit]\n",
+                "machinefiles/studio-linux.machine.yaml": "machinefile: station.machinefile/v1\nname: studio-linux\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [base-ubuntu]\napps: [jq, gh, ripgrep]\n"
+            },
+            "fresh": {
+                "size": {
+                    "CPUs": 4,
+                    "Memory": 8589934592,
+                    "Disk": 4000000000
+                },
+                "guest": {
+                    "answers": {
+                        "sudo env *": {},
+                        "env MACHINEFILE=*": {},
+                        "sudo bash -s": {
+                            "poweroff": true
+                        }
+                    }
+                }
+            },
+            "images": [
+                "ghcr.io/jterrazz/station-base-ubuntu:3"
+            ],
+            "jobs": {
+                "com.example.brain.x-snapshot": {
+                    "Label": "com.example.brain.x-snapshot",
+                    "Program": "~/.local/bin/x-snapshot",
+                    "File": "~/Library/LaunchAgents/com.example.brain.x-snapshot.plist",
+                    "Scope": "user",
+                    "PID": 0,
+                    "LastExit": 2,
+                    "Running": false,
+                    "Loaded": true,
+                    "Unread": false,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": ""
+                }
+            },
+            "listening": [
+                {
+                    "Port": 5000,
+                    "Bind": "*",
+                    "Process": "ControlCenter",
+                    "PID": 588
+                }
+            ],
+            "meter": {
+                "sample": {
+                    "at": "2026-11-07T10:30:00Z",
+                    "cpu_busy": 57179022,
+                    "cpu_total": 260200000,
+                    "cpus": 16,
+                    "load": [
+                        4.8,
+                        4.8,
+                        4.8
+                    ],
+                    "mem_used": 34359738368,
+                    "mem_total": 51539607552,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 145957623867,
+                    "net_out": 130396098039,
+                    "thermal": 0,
+                    "boot": "2026-11-04T10:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 219,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 497347,
+                    "net_out": 435313,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                },
+                "processes": {
+                    "1001": {
+                        "cpu": 9.25,
+                        "memory": 5726623061,
+                        "started": "2026-11-07T08:30:00Z"
+                    },
+                    "1002": {
+                        "cpu": 1,
+                        "memory": 5726623061,
+                        "started": "2026-11-07T08:30:00Z"
+                    }
+                }
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true,
+                "Health": 98,
+                "Cycles": 112
+            },
+            "preferences": {
+                "machinefile": {
+                    "bound_at": "2026-10-29T10:30:00Z",
+                    "name": "macbook-pro"
+                },
+                "macs": {
+                    "mac-mini": {
+                        "lan": "192.168.1.20",
+                        "user": "you"
+                    },
+                    "macbook-air": {
+                        "answered": "2026-11-07T08:30:00Z",
+                        "asleep": true,
+                        "hardware": {
+                            "Model": "Mac15,12",
+                            "Chip": "Apple M3",
+                            "Memory": 25769803776,
+                            "CPUs": 8
+                        },
+                        "laptop": true,
+                        "user": "you"
+                    }
+                },
+                "ports": {
+                    "not_shared": [
+                        "linux-1:4321",
+                        "linux-1:9229",
+                        "agent-7f:6006"
+                    ]
+                },
+                "vm_user": "admin"
+            },
+            "processes": [
+                {
+                    "pid": 4242,
+                    "start": "1794047380.000000"
+                }
+            ],
+            "self": {
+                "system": {
+                    "OS": "",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Model": "Mac16,5",
+                    "Chip": "Apple M4 Max",
+                    "Memory": 51539607552,
+                    "CPUs": 16
+                }
+            },
+            "stores": {
+                "images": [
+                    {
+                        "name": "base-ubuntu",
+                        "version": "3",
+                        "distro": "ubuntu",
+                        "distro_version": "24.04",
+                        "upstream": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v4.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-11-01T10:30:00Z",
+                        "size_gb": 4
+                    }
+                ],
+                "reservations": [
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 5173,
+                        "host_port": 40001,
+                        "by": "owner",
+                        "http": true,
+                        "reserved_at": "2026-11-07T08:30:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 3000,
+                        "host_port": 40002,
+                        "by": "owner",
+                        "http": true,
+                        "reserved_at": "2026-11-07T08:30:00Z"
+                    }
+                ],
+                "night": {
+                    "at": "2026-11-07T03:00:09Z",
+                    "machinefile": "macbook-pro",
+                    "moved": [
+                        {
+                            "app": "gh",
+                            "was": "2.96.1",
+                            "now": "2.97.0",
+                            "range": "latest"
+                        }
+                    ],
+                    "waiting": [
+                        {
+                            "app": "node",
+                            "newest": "25.1.0",
+                            "range": "24",
+                            "moved": "25",
+                            "file": "~/.config/station/machinefiles/macbook-pro.machine.yaml"
+                        }
+                    ]
+                },
+                "applies": {
+                    "macbook-pro": "2026-11-06T09:12:00Z"
+                }
+            },
+            "tailnet": {
+                "self": {
+                    "ID": "macbook-pro",
+                    "Name": "macbook-pro",
+                    "DNSName": "macbook-pro.tail77a797.ts.net",
+                    "IP": "100.98.133.14",
+                    "Online": true,
+                    "Tags": null,
+                    "Sharing": {
+                        "Backend": "Running",
+                        "On": true,
+                        "DNSName": "macbook-pro.tail77a797.ts.net"
+                    },
+                    "Login": "",
+                    "Network": "",
+                    "Client": {
+                        "Path": "",
+                        "Variant": ""
+                    },
+                    "Peers": null
+                },
+                "shares": [
+                    {
+                        "Port": 40001,
+                        "Path": "",
+                        "Reserved": 40001,
+                        "Scheme": "https",
+                        "Target": "http://127.0.0.1:40001"
+                    },
+                    {
+                        "Port": 40002,
+                        "Path": "",
+                        "Reserved": 40002,
+                        "Scheme": "https",
+                        "Target": "http://127.0.0.1:40002"
+                    }
+                ]
+            },
+            "vault": {
+                "session:github": "ZmFrZS1zZXNzaW9uLWdpdGh1Yi1vZi10aGlzLW1hYw==",
+                "operator:claude:oauth-token": "ZmFrZS1jbGF1ZGUtdG9rZW4tb2YtdGhpcy1tYWM="
+            },
+            "vms": {
+                "agent-7f": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "3",
+                        "lifetime": "ephemeral",
+                        "want": "running",
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "template": "linux-dev",
+                        "purpose": "Write the changelog of v4",
+                        "creator": "studio-os-43"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 40000000000
+                    },
+                    "pid": 1002,
+                    "up_at": "2026-11-07T08:30:00Z",
+                    "guest": {},
+                    "listening": [
+                        {
+                            "Port": 6006,
+                            "Bind": "0.0.0.0",
+                            "Process": "storybook",
+                            "PID": 10020
+                        }
+                    ]
+                },
+                "api": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "3",
+                        "lifetime": "persistent",
+                        "want": "stopped",
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "purpose": "The API's staging copy"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 40000000000
+                    }
+                },
+                "linux-1": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "3",
+                        "lifetime": "ephemeral",
+                        "want": "running",
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "template": "linux-dev",
+                        "purpose": "Lot L2.5, settings from a machine file",
+                        "creator": "studio-os-fe"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 40000000000
+                    },
+                    "pid": 1001,
+                    "up_at": "2026-11-07T08:30:00Z",
+                    "guest": {},
+                    "listening": [
+                        {
+                            "Port": 4321,
+                            "Bind": "0.0.0.0",
+                            "Process": "astro",
+                            "PID": 10010
+                        },
+                        {
+                            "Port": 9229,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 10011
+                        },
+                        {
+                            "Port": 5173,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 10012
+                        },
+                        {
+                            "Port": 3000,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 10013
+                        }
+                    ],
+                    "console": [
+                        "[    0.000000] Linux version 6.8.0-52-generic (buildd@lcy02) #53-Ubuntu SMP PREEMPT_DYNAMIC",
+                        "[    1.388210] virtio_net virtio1 enp0s1: renamed from eth0",
+                        "[    2.090731] EXT4-fs (vda1): mounted filesystem with ordered data mode",
+                        "[    3.150962] systemd[1]: Reached target Multi-User System.",
+                        "[    3.402518] systemd[1]: Started OpenBSD Secure Shell server.",
+                        "[    3.871204] systemd[1]: Started station guest.",
+                        "[    4.655033] station-guest[411]: listening for its Mac over the one way in",
+                        "[    5.120847] station-guest[411]: credentials loaned by macbook-pro: github",
+                        "[    7.304291] sshd[702]: Accepted publickey for admin from 192.168.64.1 port 52211",
+                        "[   12.018664] node[1190]: vite v6.0.7 ready in 412 ms, listening on 5173",
+                        "[   12.540318] node[1203]: astro v5.1.2 dev server listening on 4321",
+                        "[   31.774052] node[1190]: hmr update /src/pages/index.astro"
+                    ]
+                },
+                "linux-2": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "lifetime": "persistent",
+                        "created_at": "2026-11-07T10:29:40Z",
+                        "purpose": "Lot L3, the Machines page",
+                        "creator": "studio-os-fe",
+                        "owner": {
+                            "pid": 4242,
+                            "start": "1794047380.000000"
+                        },
+                        "birth": {
+                            "progress": 20,
+                            "step": "building",
+                            "position": 1,
+                            "steps": 5,
+                            "at": "2026-11-07T10:29:55Z",
+                            "sentence": "Creating: image 1 of 5"
+                        }
+                    },
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 20000000000
+                    }
+                },
+                "station-image-base-ubuntu-3": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 4000000000
+                    }
+                }
+            }
+        },
+        "review-bot": {
+            "accounts": {
+                "programs": {
+                    "claude": {
+                        "Program": "claude",
+                        "State": "signed-in",
+                        "Who": "you@example.com",
+                        "Scopes": null,
+                        "Plan": "",
+                        "How": "granted",
+                        "Entry": "pw-claude",
+                        "EntryLabel": "Claude token",
+                        "Reason": ""
+                    }
+                }
+            },
+            "disk": {
+                "total": 40000000000,
+                "free": 30000000000
+            },
+            "meter": {
+                "sample": {
+                    "at": "2026-11-07T10:30:00Z",
+                    "cpu_busy": 209290,
+                    "cpu_total": 8200000,
+                    "cpus": 2,
+                    "load": [
+                        0.12,
+                        0.12,
+                        0.12
+                    ],
+                    "mem_used": 2863311530,
+                    "mem_total": 4294967296,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 161704006,
+                    "net_out": 80803671,
+                    "thermal": 0,
+                    "boot": "2026-11-07T08:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 34,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 21310,
+                    "net_out": 12720,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                }
+            },
+            "self": {
+                "kind": "workspace",
+                "system": {
+                    "OS": "linux",
+                    "Version": "",
+                    "Arch": ""
+                },
+                "hardware": {
+                    "Memory": 0,
+                    "CPUs": 0
+                }
+            }
+        }
+    },
+    "now": "2026-11-07T10:30:00Z",
+    "registry": {
+        "base-ubuntu": "3"
+    },
+    "sites_down": [
+        "example.com"
+    ],
+    "this_mac": "macbook-pro",
+    "user": "you"
+}

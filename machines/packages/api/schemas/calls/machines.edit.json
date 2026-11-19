@@ -1,0 +1,103 @@
+{
+  "$defs": {
+    "machines.Edited": {
+      "additionalProperties": false,
+      "properties": {
+        "Changed": {
+          "$ref": "#/$defs/machines.Resources"
+        },
+        "Check": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "NoCheck": {
+          "type": "boolean"
+        },
+        "Running": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Changed",
+        "Check",
+        "Name",
+        "NoCheck",
+        "Running"
+      ],
+      "type": "object"
+    },
+    "machines.Resources": {
+      "additionalProperties": false,
+      "properties": {
+        "CPUs": {
+          "type": "integer"
+        },
+        "DiskBytes": {
+          "type": "integer"
+        },
+        "MemoryBytes": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "CPUs",
+        "DiskBytes",
+        "MemoryBytes"
+      ],
+      "type": "object"
+    },
+    "machines.Resources.input": {
+      "additionalProperties": false,
+      "properties": {
+        "CPUs": {
+          "type": "integer"
+        },
+        "DiskBytes": {
+          "type": "integer"
+        },
+        "MemoryBytes": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "machines.calls.EditIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Check": {
+          "type": "string"
+        },
+        "NoCheck": {
+          "type": "boolean"
+        },
+        "Resources": {
+          "$ref": "#/$defs/machines.Resources.input"
+        },
+        "VM": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.edit.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call machines.edit of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.EditIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.Edited"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.edit",
+  "type": "object"
+}

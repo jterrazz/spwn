@@ -1,0 +1,11 @@
+description: 'a server whose purpose is two lines is refused before anything is made, its code on the wire'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-server","in":{"Name":"infra","Purpose":"one\ntwo"}}
+      exit: 0
+      stdout: |
+          {"code":"machines.bad-purpose","message":"a purpose is one line of at most 120 characters"}

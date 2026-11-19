@@ -1,0 +1,15 @@
+description: 'an unnamed Mac''s reserved ports are told as This Mac''s, never under an empty name'
+fixture:
+    - ../../__fixtures__/terminal/
+env: terminal
+runs:
+    - command: '--version >/dev/null; "$STATION" ports | /usr/bin/grep Reserved'
+      exit: 0
+      stdout: |
+          	Reserved on This Mac: 0 of 1000 (40000-40999), 1000 free
+    - command: '--version >/dev/null; terminal --size 80x12 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" ports | /usr/bin/grep -c "engine  the engine is not installed"'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          1

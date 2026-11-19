@@ -1,0 +1,52 @@
+- main:
+  - heading "linux-1 running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "macbook-pro"
+  - button "Stop"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "Running." [level=1]
+  - text: CPU 8% 4 CPUs Memory 1.1GB
+  - meter "Memory used of its total"
+  - text: of 4 GB Disk 7.6GB
+  - meter "Disk used of its total"
+  - text: of 20 GB Uptime 2h since 4 Nov
+  - region "Its file":
+    - heading "Its file" [level=2]
+    - text: "not found no Machinefile named linux-1. give this machine one: station init --machinefile <name>"
+  - region "Ports":
+    - heading "Ports" [level=2]
+    - button "All ports"
+    - region "Port 5173":
+      - text: :5173 Vite Private https://macbook-pro.tail1234.ts.net:40001
+      - button "Stop sharing"
+    - region "Port 7000":
+      - text: :7000 server Private macbook-pro.tail1234.ts.net:40002
+      - button "Stop sharing"
+  - region "Sign-ins":
+    - heading "Sign-ins 4" [level=2]
+    - button "All sign-ins"
+    - text: gh signed out npm from the password npm publish signed in claude you@example.com · Max plan · signed in by itself signed in wrangler Refused at the provider needs signing in again
+  - region "Why it exists":
+    - heading "Why it exists" [level=2]
+    - term: Purpose
+    - definition: No purpose given
+    - term: Created
+    - definition: 4 Nov, by you
+    - term: Hold
+    - definition: Yours. Deleted when it powers off.
+  - region "Busiest now":
+    - heading "Busiest now" [level=2]
+    - text: node
+    - meter "CPU of node"
+    - text: 6 % vite
+    - meter "CPU of vite"
+    - text: 2 %
+  - button "Delete linux-1…"

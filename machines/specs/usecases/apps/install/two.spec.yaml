@@ -1,0 +1,22 @@
+description: 'apps install fd eza says it installed 2 apps on This Mac, each with its version and method'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; NO_COLOR= terminal --size 100x30 "$STATION" apps install fd eza'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          ✓ Installed 2 apps on This Mac
+
+          Changes
+            ● fd   10.3.0  brew
+            ● eza  0.23.4  brew
+    - command: 'apps | /usr/bin/grep -e "	fd	" -e "	eza	"'
+      exit: 0
+      stdout: |
+          ●	eza	0.23.4	brew
+          ●	fd	10.3.0	brew

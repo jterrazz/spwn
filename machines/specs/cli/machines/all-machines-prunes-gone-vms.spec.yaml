@@ -1,0 +1,18 @@
+description: 'a VM block whose VM is gone from All machines is removed once every Mac has answered'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ../../__fixtures__/fleet-y-answers/
+    - ./__fixtures__/stale-blocks/
+runs:
+    - command: 'machines --json | /usr/bin/jq -r ''.macs | length | tostring'''
+      exit: 0
+      stdout: |
+          2
+      files:
+          .ssh/config: { contains: '# >>> jterrazz machine w >>>' }
+    - command: '/usr/bin/grep -c gone .ssh/config'
+      exit: 2
+      stderr: |
+          Error: unknown command "/usr/bin/grep"
+          Hint: station help

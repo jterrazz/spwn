@@ -1,0 +1,8 @@
+#!/bin/sh
+# lsof on a Mac, recorded: caddy listening on 8443 and 9443, both loopback.
+case "$*" in
+    "-iTCP -sTCP:LISTEN -P -n -Fpcn")
+        printf 'p503\nccaddy\nn127.0.0.1:8443\nn127.0.0.1:9443\n'
+        ;;
+    *) exit 97 ;;
+esac

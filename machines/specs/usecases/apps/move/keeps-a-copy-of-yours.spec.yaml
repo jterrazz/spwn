@@ -1,0 +1,13 @@
+description: 'a move from a copy on PATH installs by the manager asked and keeps your copy'
+fixture: ../../__fixtures__/rg-by-hand/
+env: two-macs
+runs:
+    - command: 'apps move ripgrep --to brew'
+      exit: 0
+      stdout: |
+          ●	ripgrep	1.0.0	brew	installed by brew
+          ●	copy on PATH			kept: it is yours, installed by none of its methods
+    - command: 'apps ripgrep | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	ripgrep	1.0.0	brew

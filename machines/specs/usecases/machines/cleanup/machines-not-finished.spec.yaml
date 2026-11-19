@@ -1,0 +1,17 @@
+description: 'a running ephemeral workspace stays and is named; naming it is refused'
+env: two-macs
+runs:
+    - command: 'machines cleanup --yes'
+      exit: 0
+      stdout: |
+          	none
+          	linux-1 is still running, so it stays.
+    - command: 'machines cleanup linux-1 --yes'
+      exit: 2
+      stderr: |
+          Error: linux-1 stays: only a stopped ephemeral workspace is deleted by a cleanup
+          Hint: station machines cleanup
+    - command: 'machines | /usr/bin/grep linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB

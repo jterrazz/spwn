@@ -1,0 +1,11 @@
+description: 'a restarting server that has its address but whose ssh does not answer runs its third step'
+env: two-macs
+runs:
+    - command: 'world fault Guest.Dial'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, .health, .restart.counted, .restart.name]'''
+      exit: 0
+      stdout: |
+          ["running",{"running":true,"address":true,"ssh":false},"3 of 4","SSH answers"]

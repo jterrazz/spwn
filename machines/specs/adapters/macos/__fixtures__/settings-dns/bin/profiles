@@ -1,0 +1,9 @@
+#!/bin/sh
+printf 'profiles %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "-C -v") ;;
+    *)
+        echo "stub profiles: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

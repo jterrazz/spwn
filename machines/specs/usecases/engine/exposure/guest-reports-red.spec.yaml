@@ -1,0 +1,17 @@
+description: 'a bridged VM listening on every interface needs you once its guest says so, not 5 min later'
+env: bridged-macos
+runs:
+    - command: 'world advance 1m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]? | select(.Kind == "port_exposed") | .Text]'' world.json'
+      exit: 0
+      stdout: |
+          ["macos-1: port 8081 is reachable outside Tailscale"]
+    - command: 'world listen macos-1 "*:9000" node'
+      exit: 0
+    - command: 'world advance 0s'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]? | select(.Kind == "port_exposed") | .Text]'' world.json'
+      exit: 0
+      stdout: |
+          ["macos-1: port 8081 is reachable outside Tailscale","macos-1: port 9000 is reachable outside Tailscale"]

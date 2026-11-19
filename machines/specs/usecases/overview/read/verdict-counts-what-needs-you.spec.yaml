@@ -1,0 +1,11 @@
+description: 'the verdict counts what needs you, its line the first of it, and each need says its upkeep and verb'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Verdict, [.Needs[] | [.Subject, .Upkeep, .Verb]]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          [{"Tone":"bad","Sentence":"1 thing needs you.","Line":"The rest is fine. 2 machines on macbook-pro"},[["com.example.brain.x-snapshot","needs-you","remove"],["mise","can-wait","update"],["brew","can-wait","update"],["firewall","can-wait","fix"],["~/.tart","can-wait","move"],["com.bjango.istatmenus.installer","can-wait","fix"],["com.docker.socket","can-wait","fix"],["com.docker.vmnetd","can-wait","fix"]]]

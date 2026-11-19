@@ -1,0 +1,24 @@
+description: 'with admin rights on This Mac an admin setting is applied, and the Always-on Mac group unfolds there'
+env: two-macs
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: 'settings apply restart-after-power-cut'
+      exit: 0
+      stdout: |
+          ●	restart-after-power-cut	restart-after-power-cut: applied
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].settings["restart-after-power-cut"], .as_root]'' world.json'
+      exit: 0
+      stdout: |
+          ["autorestart=1\nwomp=1",null]
+    - command: 'world admin off'
+      exit: 0
+    - command: 'settings | /usr/bin/grep -A5 ''# Always-on'''
+      exit: 0
+      stdout: |
+          # Always-on Mac	1 ●	4 ○
+          ○	autologin	not applied	station settings apply autologin
+          ○	lock-after-login	not applied	station settings apply lock-after-login
+          ○	never-sleeps	not applied	station settings apply never-sleeps
+          ○	sshd	not applied	station settings apply sshd
+          ●	restart-after-power-cut	applied

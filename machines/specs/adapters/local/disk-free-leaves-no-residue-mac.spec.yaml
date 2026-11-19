@@ -1,0 +1,11 @@
+description: 'free empties every macOS cache: what brew cleanup keeps, and no pnpm store made from none'
+fixture: ./__fixtures__/disk-mac-residue/
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p Library/Caches/Homebrew/api Library/Caches/Homebrew/bootsnap Library/Caches/Homebrew/downloads && for f in api/formula.jws.json bootsnap/x downloads/y; do echo x > Library/Caches/Homebrew/$f; done'
+      exit: 0
+    - command: 'disk free </dev/null >/dev/null'
+      exit: 0
+    - command: 'disk --json | /usr/bin/jq -r ''.rows[] | select(.group == "can-rebuild" and .bytes > 0) | .paths[]'''
+      exit: 0
+      files:
+          Library/pnpm/store: absent

@@ -1,0 +1,43 @@
+{
+  "$defs": {
+    "ports.calls.SetHTTPSIn": {
+      "additionalProperties": false,
+      "properties": {
+        "On": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "ports.calls.SetHTTPSOut": {
+      "additionalProperties": false,
+      "properties": {
+        "HTTPS": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "HTTPS"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/ports.set-https.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call ports.set-https of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/ports.calls.SetHTTPSIn"
+    },
+    "out": {
+      "$ref": "#/$defs/ports.calls.SetHTTPSOut"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "ports.set-https",
+  "type": "object"
+}

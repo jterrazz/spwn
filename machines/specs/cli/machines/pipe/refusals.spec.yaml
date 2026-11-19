@@ -1,0 +1,26 @@
+description: 'machines pipe refuses before any byte: an unknown name, a Mac, --on, a VM'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/local-vm/
+env: engine
+runs:
+    - command: 'machines pipe nope'
+      exit: 2
+      stderr: |
+          Error: no machine named "nope"
+          Hint: station machines
+    - command: 'machines pipe x'
+      exit: 2
+      stderr: |
+          Error: x is a Mac
+          Hint: run station machines for the VMs
+    - command: 'machines pipe linux-1 --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "machines pipe"
+          Hint: run it on x itself: ssh x
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" machines pipe a'
+      exit: 2
+      stderr: |
+          Error: only a Mac does this; here is a linux VM
+          Hint: run it on a Mac

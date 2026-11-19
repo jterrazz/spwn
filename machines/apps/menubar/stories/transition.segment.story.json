@@ -1,0 +1,17 @@
+{
+    "freeze": 0.6,
+    "group": "transition",
+    "heightNote": "the prototype's panel stops at its 700 pt cap and scrolls the rest; the story draws the whole segment",
+    "id": "transition.segment",
+    "note": "Overview to Activity on mac-mini: the thumb slides, the body cross-slides 10 pt the way it travels, the height morphs.",
+    "pages": ["pages/machines.history.machine.mac-mini.json"],
+    "play": {
+        "from": "mac.mini.overview",
+        "gesture": "click Activity"
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "activity",
+        "window": "1h"
+    }
+}

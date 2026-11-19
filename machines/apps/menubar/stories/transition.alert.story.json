@@ -1,0 +1,15 @@
+{
+    "freeze": 0.35,
+    "group": "transition",
+    "id": "transition.alert",
+    "note": "Delete agent-7f? over This Mac's page: it scales from 1.08 to 1 with opacity at the panel's centre, the scrim fading in.",
+    "pages": ["pages/machines.macs.machine.macbook-pro.json"],
+    "play": {
+        "from": "mac.this.overview",
+        "gesture": "choose Delete agent-7f from its row's menu"
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "delete@agent-7f"
+    }
+}

@@ -1,0 +1,9 @@
+#!/bin/sh
+printf 'defaults %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "delete com.apple.dock" | "write com.apple.dock persistent-apps -array-add "*) ;;
+    *)
+        echo "stub defaults: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

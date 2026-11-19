@@ -1,0 +1,17 @@
+description: 'a workspace keeps what it is for and the session that made it; with no session, made by you'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; STATION_SESSION=studio-os-fe "$STATION" machines create gate --memory 2G --for "Lot shell · one block per package" | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	gate	Created	Ephemeral · 4 CPU · 2 GB · 20 GB
+    - command: 'machines create web --memory 2G | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	web	Created	Ephemeral · 4 CPU · 2 GB · 20 GB
+    - command: 'machines --this-mac --json | /usr/bin/jq -c ''[.macs[0].vms[] | select(.name == "gate" or .name == "web") | {name, purpose, creator}]'''
+      exit: 0
+      stdout: |
+          [{"name":"gate","purpose":"Lot shell · one block per package","creator":"studio-os-fe"},{"name":"web","purpose":null,"creator":"you"}]

@@ -1,0 +1,14 @@
+description: 'status reports the app''s variant and the CLI it ran, and nothing with no CLI'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/tailscale-app-store/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/rm bin/tailscale; "$STATION" status --json | /usr/bin/jq -c ''.tailnet | [.state, .variant, .cli]'''
+      exit: 0
+      stdout: |
+          ["ok","app-store","{{workdir}}/root/Applications/Tailscale.app/Contents/MacOS/Tailscale"]
+    - command: '--version >/dev/null; /bin/rm -r root/Applications/Tailscale.app; "$STATION" status --json | /usr/bin/jq -c ''.tailnet | [.state, .variant, .cli]'''
+      exit: 0
+      stdout: |
+          ["absent","",""]

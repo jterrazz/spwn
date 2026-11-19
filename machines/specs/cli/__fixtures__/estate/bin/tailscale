@@ -1,0 +1,10 @@
+#!/bin/sh
+# tailscale answering the node listing of the fleet specs from answers/tailscale/status.json.
+printf 'tailscale %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *"status --json") /bin/cat "${0%/*}/../answers/tailscale/status.json" ;;
+    *)
+        echo "stub tailscale: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

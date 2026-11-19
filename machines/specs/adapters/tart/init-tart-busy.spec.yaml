@@ -1,0 +1,23 @@
+description: 'with tart running, init moves nothing and names the relocate step and what to stop'
+fixture:
+    - ./__fixtures__/tart-store/
+    - ../__fixtures__/process-running/
+runs:
+    - command: 'init --name m --yes </dev/null'
+      exit: 1
+      stdout: |
+          # To move
+          ○	~/.tart	to ~/.local/share/station/vms	20 B
+          ○	~/.local/opt/tart.app	to ~/.local/share/station/tart/tart.app	20 B
+          ○	~/.local/opt/LICENSE	to ~/.local/share/station/tart/LICENSE	8 B
+          ●	name	m
+          ●	zshrc
+          ✗	relocate	tart is running: its files cannot move under it
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+      stderr: |
+          Error: init step relocate: tart is running: its files cannot move under it
+          Hint: stop the persistent VMs and delete the ephemeral ones (station machines), then station init
+      files:
+          .tart/vms/station-image-linux-2026.11.01/config.json: exists
+          .local/share/station/vms: absent

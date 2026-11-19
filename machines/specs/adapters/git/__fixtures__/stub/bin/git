@@ -1,0 +1,36 @@
+#!/bin/sh
+# git as a shared source meets it: clone makes the folder at the default
+# branch's commit, fetch reads that commit (from $HOME/.origin when a
+# document moved it), rev-parse names it, merge-base says it descends from
+# HEAD (not when $HOME/.rewritten is there), checkout moves HEAD to a
+# commit, status reads HEAD back and lists a file planted beside the
+# clone's own as untracked. Every call lands in .calls.
+echo "git $*" >> "$HOME/.calls"
+dir=""
+if [ "$1" = "-C" ]; then
+    dir="$2"
+    shift 2
+fi
+while [ "$1" = "-c" ]; do shift 2; done
+case "$1" in
+    clone)
+        for a; do dir="$a"; done
+        /bin/mkdir -p "$dir/.git" "$dir/machinefiles"
+        echo 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d > "$dir/.git/HEAD"
+        ;;
+    checkout) echo "$4" > "$dir/.git/HEAD" ;;
+    rev-parse) /bin/cat "$dir/.git/FETCH_HEAD" ;;
+    merge-base) if [ -f "$HOME/.rewritten" ]; then exit 1; fi ;;
+    fetch)
+        if [ -f "$HOME/.origin" ]; then /bin/cat "$HOME/.origin"; else echo 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d; fi > "$dir/.git/FETCH_HEAD"
+        ;;
+    status)
+        echo "# branch.oid $(/bin/cat "$dir/.git/HEAD")"
+        echo "# branch.head (detached)"
+        if [ -f "$dir/planted.yaml" ]; then echo "? planted.yaml"; fi
+        ;;
+    *)
+        echo "stub git: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

@@ -1,0 +1,16 @@
+# One app per install method of a Mac, none of them in one-per-method.txt, each
+# installed, updated and removed by `station apps`; a third word pins the kind the
+# guest plays for that app. The catalogue places npm and uv apps only on a macOS
+# workspace, so those two run with the guest pinned as one.
+# An App Store app is installed signed out, after mas, so it must refuse with the
+# sign-in hint. A script app's remove is refused with its hint: station installs it
+# but cannot remove it.
+sd brew
+ghostty cask
+speedtest mas
+python mise
+codex bun
+playwright-mcp npm macos
+markitdown uv macos
+ohmyzsh script
+better-writing skill

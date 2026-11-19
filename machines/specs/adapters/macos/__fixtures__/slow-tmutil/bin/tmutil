@@ -1,0 +1,4 @@
+#!/bin/sh
+# Time Machine slower than its probe budget: the sleep itself, so the probe's kill
+# leaves nothing behind.
+exec /bin/sleep 30

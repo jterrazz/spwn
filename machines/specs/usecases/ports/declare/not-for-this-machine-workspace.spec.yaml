@@ -1,0 +1,8 @@
+description: 'inside a workspace, a declaration is refused: its Mac keeps it'
+env: in-workspace
+runs:
+    - command: 'ports declare 3000 --via lan'
+      exit: 2
+      stderr: |
+          Error: linux-1's ports are declared from its Mac
+          Hint: run it on its Mac, naming linux-1

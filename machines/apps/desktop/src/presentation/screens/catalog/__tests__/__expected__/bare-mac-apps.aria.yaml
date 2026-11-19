@@ -1,0 +1,142 @@
+- main:
+  - heading "Every app follows its rule." [level=1]
+  - searchbox "Search the catalog"
+  - group "Show":
+    - button "On your machines1"
+    - button "Everything97" [pressed]
+  - group "Category":
+    - button "All apps97" [pressed]
+    - button "Package Managers8"
+    - button "Runtimes7"
+    - button "Shell & Terminal5"
+    - button "Command line12"
+    - button "Git4"
+    - button "Editors & IDEs5"
+    - button "Containers & VMs6"
+    - button "Deploy4"
+    - button "AI Agents8"
+    - button "AI Tooling5"
+    - button "AI Apps3"
+    - button "Browsers2"
+    - button "Communication4"
+    - button "Productivity7"
+    - button "Media5"
+    - button "Remote Access3"
+    - button "Security3"
+    - button "System Utilities6"
+  - region "Apps":
+    - paragraph: Package Managers 8
+    - button "cocoapods Dependency manager for iOS and macOS projects not installed"
+    - button "github-release manager 1 of 1 machine Commands from a project's GitHub releases, fetched and checked by station itself installed"
+    - button "homebrew manager macOS package manager not installed"
+    - button "mas manager Mac App Store command line not installed"
+    - 'button "mise manager Polyglot runtime manager: node, go, python, bun, rust, java not installed"'
+    - button "pnpm Fast, disk space efficient Node package manager not installed"
+    - button "skills manager Agent skills package manager not installed"
+    - button "uv manager Fast Python package and project manager not installed"
+    - paragraph: Runtimes 7
+    - button "bun manager Fast JavaScript runtime and package manager not installed"
+    - button "go Compiled systems programming language by Google not installed"
+    - button "java Java Development Kit (Temurin) not installed"
+    - button "node manager JavaScript runtime built on Chrome's V8 engine not installed"
+    - button "postgres Relational database server not installed"
+    - button "python Python programming language runtime not installed"
+    - button "rust Systems programming language for safety and speed not installed"
+    - paragraph: Shell & Terminal 5
+    - button "ghostty GPU-accelerated terminal emulator not installed"
+    - button "ohmyzsh Oh My Zsh shell framework not installed"
+    - button "starship Cross-shell prompt (path, git branch/status, versions) not installed"
+    - button "tmux Terminal multiplexer for persistent sessions not installed"
+    - button "zoxide Smarter cd command not installed"
+    - paragraph: Command line 12
+    - button "bat Cat clone with syntax highlighting not installed"
+    - button "difftastic Structural diff not installed"
+    - button "dust Intuitive disk usage viewer not installed"
+    - button "expo React Native framework and its dev server not installed"
+    - button "eza Modern ls replacement not installed"
+    - button "fd Fast find alternative not installed"
+    - button "jq Command-line JSON processor not installed"
+    - button "ripgrep Fast grep, the rg agents and editors shell out to not installed"
+    - button "sd Intuitive sed alternative not installed"
+    - button "tgrep Trigram-indexed grep for large codebases not installed"
+    - button "vite Frontend bundler and dev server not installed"
+    - button "yazi Terminal file manager not installed"
+    - paragraph: Git 4
+    - button "gh GitHub CLI for repository management not installed"
+    - button "git Distributed version control system not installed"
+    - button "gpg GNU Privacy Guard for encryption and signing not installed"
+    - button "lazygit Terminal UI for git not installed"
+    - paragraph: Editors & IDEs 5
+    - button "android-studio Android development IDE not installed"
+    - button "cursor AI-powered code editor not installed"
+    - button "xcode Apple development IDE not installed"
+    - button "xcodegen Generates Xcode projects from a spec not installed"
+    - button "zed Zed code editor not installed"
+    - paragraph: Containers & VMs 6
+    - button "helm Kubernetes package manager not installed"
+    - button "helmfile Declarative deployments of Helm charts not installed"
+    - button "kubectl Kubernetes command line not installed"
+    - button "lens Kubernetes IDE for managing clusters not installed"
+    - button "orbstack Docker and Linux machines on the Mac, for exploration on a Mac not installed"
+    - 'button "tart Virtual machines on Apple silicon: the engine of station''s VMs not installed"'
+    - paragraph: Deploy 4
+    - button "ansible Agentless IT automation and configuration management not installed"
+    - button "eas Expo's EAS CLI for app builds not installed"
+    - button "pulumi Infrastructure as code using real programming languages not installed"
+    - button "terraform Infrastructure as code provisioning not installed"
+    - paragraph: AI Agents 8
+    - button "claude Claude Code CLI for agentic coding not installed"
+    - button "codex OpenAI's CLI coding agent not installed"
+    - button "conductor Runs parallel AI coding agents in git worktrees not installed"
+    - button "gemini Google's CLI coding agent not installed"
+    - button "herdr Agent multiplexer that lives in your terminal not installed"
+    - button "herdr-app Desktop app that keeps coding agents running in the background not installed"
+    - button "herdr-core Herdr's engine and its hc command not installed"
+    - button "opencode Open-source AI coding agent CLI not installed"
+    - paragraph: AI Tooling 5
+    - button "inferrs TurboQuant LLM inference server not installed"
+    - button "ollama Run large language models locally, on the Mac's GPU not installed"
+    - button "plannotator Review AI agent plans and code before committing not installed"
+    - button "qmd Local semantic search over markdown not installed"
+    - button "rtk Token-optimized CLI proxy for agents not installed"
+    - paragraph: AI Apps 3
+    - button "chatgpt OpenAI ChatGPT desktop app not installed"
+    - button "claude-desktop Anthropic Claude desktop app not installed"
+    - button "typewhisper Whisper-based dictation app not installed"
+    - paragraph: Browsers 2
+    - button "brave Privacy-focused web browser not installed"
+    - button "dia The Browser Company's AI-first browser not installed"
+    - paragraph: Communication 4
+    - button "discord Voice and text chat not installed"
+    - button "messenger Facebook Messenger not installed"
+    - button "slack Team communication not installed"
+    - button "whatsapp Messaging app not installed"
+    - paragraph: Productivity 7
+    - button "keynote Apple presentations not installed"
+    - button "linear Project management not installed"
+    - button "notion Workspace for notes and docs not installed"
+    - button "numbers Apple spreadsheets not installed"
+    - button "obsidian Knowledge base and note-taking not installed"
+    - button "pages Apple word processor not installed"
+    - button "raindrop Bookmark manager not installed"
+    - paragraph: Media 5
+    - button "broadcasts Internet radio and stream player not installed"
+    - button "compressor Apple video compression not installed"
+    - button "final-cut-pro Professional video editor not installed"
+    - button "lightroom Adobe photo editor not installed"
+    - button "logic-pro Professional music making not installed"
+    - paragraph: Remote Access 3
+    - button "jump-desktop Jump Desktop viewer/client app not installed"
+    - button "jump-desktop-connect Remote GUI recovery for headless Macs not installed"
+    - 'button "tailscale The Tailscale app: each Mac is a node, and station reads it not installed"'
+    - paragraph: Security 3
+    - button "adguard Ad blocker for Safari not installed"
+    - button "bitwarden Password manager not installed"
+    - button "passepartout VPN client not installed"
+    - paragraph: System Utilities 6
+    - button "betterdisplay Flexible HiDPI scaling and display management not installed"
+    - button "mole Tidy, uninstall, analyze, and optimize macOS from the terminal not installed"
+    - button "pipifier Picture-in-Picture for Safari not installed"
+    - button "snippety Code snippet manager not installed"
+    - button "speedtest Internet speed test not installed"
+    - button "station-menubar Station's menu bar app, from the latest release not installed"

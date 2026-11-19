@@ -1,0 +1,19 @@
+description: 'a diff on another Mac reads that Mac'
+env: two-macs
+runs:
+    - command: 'settings apply dns --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	dns	dns: applied
+    - command: 'settings diff dns --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # dns
+          ●	dns	applied
+    - command: 'settings diff dns'
+      exit: 0
+      stdout: |
+          # dns
+          ○	encrypted DNS	unset	Quad9 DoH

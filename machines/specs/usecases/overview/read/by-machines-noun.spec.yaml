@@ -1,0 +1,34 @@
+description: 'station machines <machine> is byte for byte station overview --on <machine>, a VM or a Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" machines linux-1 > noun.txt; "$STATION" overview --on linux-1 > on.txt; /usr/bin/cmp noun.txt on.txt && /bin/cat noun.txt'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Needs you
+          ✗	wrangler sign-in fails: Refused at the provider	station accounts login wrangler --on linux-1
+          	Activity	memory 1.1 of 4 GB · 12.4 GB free
+          	Apps	● 2 ok · ○ 71 not installed
+          	Settings	set by station · ○ 0 of 6
+          	Disk	● 12.4 GB free · 1.5 GB can rebuild
+          	Ports	Public 0 · Private 2
+          	Accounts	● 2 · ✗ wrangler
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Size	4 CPU · 8 GB · 50 GB
+    - command: '--version >/dev/null; "$STATION" machines infra --json | /usr/bin/jq ''del(.generated_at)'' > noun.json; "$STATION" overview --on infra --json | /usr/bin/jq ''del(.generated_at)'' > on.json; /usr/bin/cmp noun.json on.json && /usr/bin/jq -c ''{schema, machine}'' noun.json'
+      exit: 0
+      stdout: |
+          {"schema":"station.overview.read/v1","machine":{"name":"infra","label":"infra","kind":"server","on":"mac-mini","this_mac":false,"reachable":true}}
+    - command: 'machines mac-mini --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
+      exit: 0
+      stdout: |
+          {"schema":"station.overview.read/v1","machine":"mac-mini"}
+    - command: 'overview --on mac-mini --json | /usr/bin/jq -c ''{schema, machine: .machine.name}'''
+      exit: 0
+      stdout: |
+          {"schema":"station.overview.read/v1","machine":"mac-mini"}
