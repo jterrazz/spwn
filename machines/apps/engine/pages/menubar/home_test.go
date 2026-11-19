@@ -262,6 +262,25 @@ func TestAMacRowSaysOnlineItsVMsAndItsDiskAndAnAsleepOneNoKey(t *testing.T) {
 	}
 }
 
+// invariant: a Mac's disk tints from 80 % used (waits), red from 90 %.
+func TestAMacsDiskTintsFromEightyAndFailsFromNinety(t *testing.T) {
+	for _, c := range []struct {
+		free   int64
+		signal page.Signal
+	}{{210, ""}, {200, page.SignalWaits}, {170, page.SignalWaits}, {101, page.SignalWaits}, {100, page.SignalFailing}, {5, page.SignalFailing}} {
+		w := newHeroWorld().read()
+		for _, rs := range w.r.Samples {
+			for i := range rs {
+				rs[i].Sample.DiskFree = c.free
+			}
+		}
+		row := homeRow(t, homeSection(t, homeOf(t, w), SectionMacs), heroMini)
+		if got := row.Detail.Items[2].Signal; got != c.signal {
+			t.Errorf("%d of 1000 free: signal %q, want %q", c.free, got, c.signal)
+		}
+	}
+}
+
 // invariant: This Mac's head carries the memory a new VM finds there.
 func TestThisMacsHeadSaysItsFreeMemory(t *testing.T) {
 	s := homeSection(t, homeOf(t, newHeroWorld()), SectionThisMac)

@@ -277,6 +277,7 @@ func (h homeReading) macRow(m model.MacView) page.Row {
 	row.Cells = []page.Value{liveOf(engine.LiveKey(engine.LiveCPU, m.Name), readings)}
 	disk := liveOf(engine.LiveKey(engine.LiveDisk, m.Name), readings)
 	disk.Label = "Disk"
+	disk.Signal = diskSignal(measured(readings).disk)
 	row.Detail = page.List(append([]page.Value{word}, shortestFirst(page.Text(counted(len(m.VMs), "VM", "VMs")), disk)...)...)
 	if h.stale != "" && page.MacName(m.Name, h.self) == h.stale {
 		row.Signal = page.SignalStale

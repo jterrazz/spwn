@@ -50,6 +50,23 @@ func measured(readings []activity.Reading) measures {
 	return m
 }
 
+const (
+	diskWarns = 800
+	diskFails = 900
+)
+
+// invariant: a Mac's disk used tints from 80 %, red from 90 %: the one
+// rule of the tone a page sends with it, the share read in per mille.
+func diskSignal(used page.Value) page.Signal {
+	switch {
+	case used.N >= diskFails:
+		return page.SignalFailing
+	case used.N >= diskWarns:
+		return page.SignalWaits
+	}
+	return ""
+}
+
 func LiveValue(key string, readings []activity.Reading) page.Value {
 	// value: a live key's value from its machine's readings, as the page
 	// that lists the key draws it: the measure now led into its series, the
