@@ -2160,10 +2160,24 @@ export type MachinesUptime = {
     since?: string;
 };
 
+export type MachinesUptimeCell = {
+    Date: string;
+    Down?: MachinesIncident[];
+    Mark: '' | 'down' | 'none' | 'ok' | 'restart';
+    Restarts?: number;
+    Sentence?: string;
+};
+
 export type MachinesUptimeDay = {
     date: string;
     down_s?: number;
     restarts?: number;
+};
+
+export type MachinesUptimeStrip = {
+    Availability: number;
+    Days: MachinesUptimeCell[] | null;
+    Sentence: string;
 };
 
 export type MachinesVM = {
@@ -2205,6 +2219,7 @@ export type MachinesVM = {
     SizeGB: number;
     Standing?: 'not-seen' | 'restarting' | 'creating' | 'not-created' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
     State: 'running' | 'stopped' | 'suspended' | 'stale' | 'broken' | 'creating' | 'unknown';
+    Strip?: MachinesUptimeStrip;
     Uptime: MachinesUptime;
     UsedBytes?: number;
     Version: string;

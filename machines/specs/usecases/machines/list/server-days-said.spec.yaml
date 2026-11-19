@@ -1,0 +1,11 @@
+description: 'machines.list says a server''s 30 days in one sentence and each day in its own'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.All.Macs[].VMs[]? | select(.Name == "infra") | .Strip | [.Sentence, .Availability, (.Days | length), (.Days[-1].Sentence | sub("^[A-Za-z]{3} [0-9]+ [A-Za-z]{3}\\. "; ""))]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          ["Up 100 % over 1 day",100,30,"Up all day"]

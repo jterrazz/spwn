@@ -300,28 +300,7 @@ func (s serverView) uptime() (page.Section, bool) {
 		Items:   []page.Item{{Uptime: &page.Uptime{Days: days, Availability: available}}, {Note: &page.Note{Text: "30 days ago"}}, {Note: &page.Note{Text: "today"}}}}, true
 }
 
-func (s serverView) tip(c model.UptimeCell) string {
-	var parts []string
-	for _, in := range c.Down {
-		words := "Down from " + s.clock(in.From) + " to "
-		if in.To.IsZero() {
-			words += "now"
-		} else {
-			words += s.clock(in.To)
-		}
-		if in.Cause != "" {
-			words += ", " + in.Cause
-		}
-		parts = append(parts, words)
-	}
-	if c.Restarts > 0 {
-		parts = append(parts, "restarted "+strconv.Itoa(c.Restarts)+" "+plural(c.Restarts, "time"))
-	}
-	if len(parts) == 0 && c.Mark == model.DayOK {
-		return "Up all day"
-	}
-	return strings.Join(parts, "; ")
-}
+func (s serverView) tip(c model.UptimeCell) string { return c.Tip(s.clock) }
 
 // value: SPEC B5.5's Last lines card: the lines its console kept before
 // it went down, each said as its time, its source and what it said, the

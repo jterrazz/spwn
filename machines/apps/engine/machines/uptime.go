@@ -3,6 +3,7 @@ package machines
 import (
 	"math"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -138,8 +139,82 @@ type UptimeCell struct {
 	Mark DayMark
 	// value: what its tooltip tells: each incident the day held, and the
 	// restarts it counted.
-	Down     []Incident
-	Restarts int
+	Down     []Incident `json:",omitempty"`
+	Restarts int        `json:",omitempty"`
+	// value: the day said in one sentence, its date first; judged by
+	// machines.list, empty in the view.
+	Sentence string `json:",omitempty"`
+}
+
+type UptimeStrip struct {
+	// value: the 30 days said in one sentence, how long it was up and the
+	// restarts it counted: `Up 99.93 % over 30 days, 2 restarts`.
+	Sentence     string
+	Availability float64
+	Days         []UptimeCell
+}
+
+func (c UptimeCell) Tip(clock func(time.Time) string) string {
+	// invariant: a day says each incident it held, from when to when and
+	// why, then its restarts; a day with none is up all day, and a day
+	// before the record says nothing.
+	var parts []string
+	for _, in := range c.Down {
+		words := "Down from " + clock(in.From) + " to "
+		if in.To.IsZero() {
+			words += "now"
+		} else {
+			words += clock(in.To)
+		}
+		if in.Cause != "" {
+			words += ", " + in.Cause
+		}
+		parts = append(parts, words)
+	}
+	if c.Restarts > 0 {
+		parts = append(parts, "restarted "+counted(c.Restarts, "time"))
+	}
+	if len(parts) == 0 && c.Mark == DayOK {
+		return "Up all day"
+	}
+	return strings.Join(parts, "; ")
+}
+
+func counted(n int, noun string) string {
+	if n == 1 {
+		return "1 " + noun
+	}
+	return strconv.Itoa(n) + " " + noun + "s"
+}
+
+func (u Uptime) Strip(now time.Time) (UptimeStrip, bool) {
+	// invariant: each day of the view said by Tip, behind its date as the
+	// Mac's calendar writes it, a day before the record as not recorded;
+	// the sentence counts the days the record holds and the restarts of
+	// them.
+	view, ok := u.View(now)
+	if !ok {
+		return UptimeStrip{}, false
+	}
+	clock := func(t time.Time) string { return t.In(now.Location()).Format("15:04") }
+	strip := UptimeStrip{Availability: view.Availability, Days: view.Cells}
+	recorded, restarts := 0, 0
+	for i, c := range view.Cells {
+		tip := c.Tip(clock)
+		if c.Mark == DayNone {
+			tip = "Not recorded yet"
+		} else {
+			recorded++
+			restarts += c.Restarts
+		}
+		day, _ := time.ParseInLocation(dateLayout, c.Date, time.Local)
+		strip.Days[i].Sentence = day.Format("Mon 2 Jan") + ". " + tip
+	}
+	strip.Sentence = "Up " + strconv.FormatFloat(view.Availability, 'f', -1, 64) + " % over " + counted(recorded, "day")
+	if restarts > 0 {
+		strip.Sentence += ", " + counted(restarts, "restart")
+	}
+	return strip, true
 }
 
 type UptimeView struct {

@@ -133,6 +133,10 @@ type VM struct {
 	// value: the VM's one standing (StandingOf), which its head opens
 	// with; judged by machines.list, empty in any other answer.
 	Standing VMStanding `json:",omitempty"`
+	// value: a server's last 30 days read from its record and said, as
+	// machines.list judges them; nil until its record starts and in any
+	// other answer.
+	Strip *UptimeStrip `json:",omitempty"`
 	// value: what keeps it, and so whether it is safe to delete; the
 	// sections its page has, by its kind; the gestures its header offers, by
 	// its state; all judged by machines.list, nil in any other answer.

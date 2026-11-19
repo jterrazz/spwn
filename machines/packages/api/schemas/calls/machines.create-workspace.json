@@ -704,6 +704,41 @@
       },
       "type": "object"
     },
+    "machines.UptimeCell": {
+      "additionalProperties": false,
+      "properties": {
+        "Date": {
+          "type": "string"
+        },
+        "Down": {
+          "items": {
+            "$ref": "#/$defs/machines.Incident"
+          },
+          "type": "array"
+        },
+        "Mark": {
+          "enum": [
+            "",
+            "down",
+            "none",
+            "ok",
+            "restart"
+          ],
+          "type": "string"
+        },
+        "Restarts": {
+          "type": "integer"
+        },
+        "Sentence": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Date",
+        "Mark"
+      ],
+      "type": "object"
+    },
     "machines.UptimeDay": {
       "additionalProperties": false,
       "properties": {
@@ -719,6 +754,32 @@
       },
       "required": [
         "date"
+      ],
+      "type": "object"
+    },
+    "machines.UptimeStrip": {
+      "additionalProperties": false,
+      "properties": {
+        "Availability": {
+          "type": "number"
+        },
+        "Days": {
+          "items": {
+            "$ref": "#/$defs/machines.UptimeCell"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Sentence": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Availability",
+        "Days",
+        "Sentence"
       ],
       "type": "object"
     },
@@ -909,6 +970,9 @@
             "unknown"
           ],
           "type": "string"
+        },
+        "Strip": {
+          "$ref": "#/$defs/machines.UptimeStrip"
         },
         "Uptime": {
           "$ref": "#/$defs/machines.Uptime"
