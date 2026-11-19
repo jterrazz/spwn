@@ -1,0 +1,24 @@
+description: 'a create that fails at its boot keeps its two reserved ports for its start; a delete releases them'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Boot 1'
+      exit: 0
+    - command: 'machines create --memory 4G'
+      exit: 1
+      stderr: |
+          Error: linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it
+          Hint: station machines start linux-2, or station machines delete linux-2
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.stores.reservations[]? | select(.vm == "linux-2") | [.guest_port, .host_port]]'' world.json'
+      exit: 0
+      stdout: |
+          [[8081,40000],[5173,40003]]
+    - command: 'machines delete linux-2 --confirm=linux-2'
+      exit: 0
+      stdout: |
+          ●	linux-2	deleted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.stores.reservations[]? | select(.vm == "linux-2") | [.guest_port, .host_port]]'' world.json'
+      exit: 0
+      stdout: |
+          []
