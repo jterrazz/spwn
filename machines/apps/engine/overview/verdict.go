@@ -127,7 +127,7 @@ const (
 
 func VerdictOf(s Summary, elsewhere *machines.RollUp) verdict.Verdict {
 	// invariant: the head of Home: the engine stopped first, then what needs
-	// you: a server down by its name, else the count; the other Macs' roll-up
+	// you: a server down by its name (or a VM not created, said so), else the count; the other Macs' roll-up
 	// next, said as "Elsewhere" when it is not fine; a reading still
 	// running, then a Mac with no machine yet ready, else all is well. What
 	// is left past the first is said as the rest, the machines counted, and
@@ -173,7 +173,11 @@ func VerdictOf(s Summary, elsewhere *machines.RollUp) verdict.Verdict {
 			if len(urgent) > 1 {
 				line = more(len(urgent)-1) + " " + line
 			}
-			return verdict.Verdict{Tone: verdict.Bad, Sentence: down.Subject + " is down.", Line: strings.TrimSpace(line + " " + tail)}
+			sentence := down.Subject + " is down."
+			if down.Verb == VerbTryAgain {
+				sentence = down.Subject + " was not created."
+			}
+			return verdict.Verdict{Tone: verdict.Bad, Sentence: sentence, Line: strings.TrimSpace(line + " " + tail)}
 		}
 		return verdict.Verdict{Tone: tone, Sentence: things(len(urgent), "needs", "need") + " you.", Line: strings.TrimSpace(rest + " " + tail)}
 	}
