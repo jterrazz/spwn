@@ -187,7 +187,7 @@ describe('machine files', () => {
     });
 
     test.todo(
-        "D19 waits for a recording of a setting's options with their values and defaults, and the file that set each, on machinefile.explain",
+        "D19 waits for an option's default on machinefile.explain, which gives a setting's option its value and the file that set it, never the package's default",
     );
 
     test("D20 a Mac's own changes list what it added and left out", async () => {
