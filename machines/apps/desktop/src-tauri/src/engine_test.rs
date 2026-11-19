@@ -2,13 +2,13 @@ use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::UnixListener;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
 
-use super::{changed, hello, next, Link, FIRST_BACKOFF, MAX_BACKOFF, RECHECK};
+use super::{changed, hello, next, Bridge, Link, FIRST_BACKOFF, MAX_BACKOFF, RECHECK};
 
 fn socket_path() -> PathBuf {
     static NEXT: AtomicUsize = AtomicUsize::new(0);
@@ -134,4 +134,27 @@ fn a_link_is_emitted_when_it_changes_and_never_when_it_stays() {
     assert!(first);
     assert!(!second);
     assert!(shown.lock().is_ok_and(|link| *link == open));
+}
+
+#[test]
+fn a_wake_cuts_the_supervisors_rest_short_once() {
+    // Given - a bridge whose supervisor rests a minute, and a core started meanwhile
+    let bridge = Bridge::new();
+    let waker = Arc::clone(&bridge);
+    let started = Instant::now();
+    let wakes = thread::spawn(move || {
+        thread::sleep(Duration::from_millis(50));
+        waker.wake();
+    });
+
+    // When - it rests, then rests again
+    let first = bridge.rest(Duration::from_secs(60));
+    let woke_after = started.elapsed();
+    let second = bridge.rest(Duration::from_millis(20));
+    let _ = wakes.join();
+
+    // Then - the first rest ends on the wake, well before its minute, and the next one is a plain rest
+    assert!(first);
+    assert!(woke_after < Duration::from_secs(5));
+    assert!(!second);
 }

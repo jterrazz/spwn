@@ -2,7 +2,7 @@ use std::env;
 use std::io::{BufRead, BufReader};
 use std::net::Shutdown;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -39,6 +39,8 @@ pub enum Link {
 pub struct Bridge {
     pub exchanges: Arc<Exchanges>,
     link: Mutex<Link>,
+    woken: Mutex<bool>,
+    nudge: Condvar,
 }
 
 impl Bridge {
@@ -48,7 +50,28 @@ impl Bridge {
             link: Mutex::new(Link::Connecting {
                 socket: socket_path().display().to_string(),
             }),
+            woken: Mutex::new(false),
+            nudge: Condvar::new(),
         })
+    }
+
+    pub fn wake(&self) {
+        if let Ok(mut woken) = self.woken.lock() {
+            *woken = true;
+            self.nudge.notify_all();
+        }
+    }
+
+    pub fn rest(&self, wait: Duration) -> bool {
+        let Ok(woken) = self.woken.lock() else {
+            thread::sleep(wait);
+            return false;
+        };
+        let (mut woken, _) = self
+            .nudge
+            .wait_timeout_while(woken, wait, |woken| !*woken)
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        std::mem::replace(&mut *woken, false)
     }
 }
 
@@ -182,7 +205,9 @@ pub fn supervise(app: AppHandle, bridge: Arc<Bridge>) {
             if changed(&bridge.link, &link) {
                 let _ = app.emit("engine://link", &link);
             }
-            thread::sleep(wait);
+            if bridge.rest(wait) {
+                backoff = FIRST_BACKOFF;
+            }
         }
     });
 }

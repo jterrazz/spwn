@@ -2,7 +2,10 @@
 
 mod bridge;
 mod engine;
+mod local_core;
 mod opener;
+
+use std::sync::Arc;
 
 use tauri::webview::PageLoadEvent;
 use tauri::WindowEvent;
@@ -14,13 +17,18 @@ fn main() {
     let closing = bridge.exchanges.clone();
     tauri::Builder::default()
         .manage(bridge.clone())
+        .manage(Arc::new(local_core::Runs::default()))
         .invoke_handler(tauri::generate_handler![
             engine::engine_link,
             engine::engine_open,
             engine::engine_cancel,
             engine::engine_close,
             opener::open_url,
-            opener::open_in_terminal
+            opener::open_in_terminal,
+            local_core::core_present,
+            local_core::core_install,
+            local_core::core_start,
+            local_core::core_cancel
         ])
         .on_page_load(move |webview, payload| {
             if payload.event() == PageLoadEvent::Started {
