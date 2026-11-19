@@ -13,5 +13,5 @@ export type Heard = (line: CoreLine) => void;
 export interface CorePort {
     present: () => Promise<boolean>;
     install: (heard: Heard) => CoreRun;
-    start: (heard: Heard) => CoreRun;
+    start: (heard: Heard, executable?: string) => CoreRun;
 }

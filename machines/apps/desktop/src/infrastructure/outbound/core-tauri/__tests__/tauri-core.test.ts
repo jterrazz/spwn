@@ -71,6 +71,27 @@ describe('tauri core', () => {
         expect(invoked.map((one) => one.command)).toStrictEqual(['core_start', 'core_cancel']);
     });
 
+    test('a start hands the shell the station the engine named, and none when it named none', async () => {
+        // Given - a shell that ends every run at once
+        const { invoked, ipc } = fakeShell(
+            async () => await Promise.resolve({ cancelled: false, code: 0, lines: 0 }),
+        );
+        const core = tauriCore(ipc);
+
+        // When - one start names a station, one names none
+        await core.start(() => undefined, '/Users/you/.local/bin/station').ended;
+        await core.start(() => undefined).ended;
+
+        // Then - the first carries it beside the channel, the second the channel alone
+        expect(invoked).toStrictEqual([
+            {
+                args: { channel: 'the channel', executable: '/Users/you/.local/bin/station' },
+                command: 'core_start',
+            },
+            { args: { channel: 'the channel' }, command: 'core_start' },
+        ]);
+    });
+
     test('the core is present only when the shell says true', async () => {
         // Given - a shell whose file check answers true, then one that answers anything else
         const yes = fakeShell(async () => await Promise.resolve(true));

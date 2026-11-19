@@ -76,7 +76,9 @@ async function cancelled(ipc: CoreIpc): Promise<void> {
     }
 }
 
-function ran(ipc: CoreIpc, command: string, heard: Heard): CoreRun {
+type Args = { executable?: string };
+
+function ran(ipc: CoreIpc, command: string, heard: Heard, args: Args = {}): CoreRun {
     const counted = new Counted(heard);
     const channel = ipc.channel((message: unknown) => {
         const line = lineOf(message);
@@ -85,7 +87,9 @@ function ran(ipc: CoreIpc, command: string, heard: Heard): CoreRun {
         }
     });
     const ended = async (): Promise<CoreEnd> => {
-        const { end, lines } = await ipc.invoke(command, { channel }).then(endOf, refusalOf);
+        const { end, lines } = await ipc
+            .invoke(command, { ...args, channel })
+            .then(endOf, refusalOf);
         await counted.all(lines);
         return end;
     };
@@ -101,6 +105,7 @@ export function tauriCore(ipc: CoreIpc): CorePort {
     return {
         install: (heard) => ran(ipc, 'core_install', heard),
         present: async () => (await ipc.invoke('core_present')) === true,
-        start: (heard) => ran(ipc, 'core_start', heard),
+        start: (heard, executable) =>
+            ran(ipc, 'core_start', heard, executable === undefined ? {} : { executable }),
     };
 }
