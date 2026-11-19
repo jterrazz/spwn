@@ -3,6 +3,7 @@
 BINARY       := station
 BUILD_PATH   := .artifacts/go/$(BINARY)
 LINUX_PATH   := .artifacts/go/$(BINARY)-linux-arm64
+SWAP_PATH    := .artifacts/go/$(BINARY)-swap
 # value: the binary the CLI specs run, built once before the runner starts, so its
 # workers never link it concurrently with the sessions they drive. It is the spec
 # build (`-tags world`): with $STATION_WORLD set it runs over the fake world of
@@ -129,9 +130,10 @@ catalog-gallery: catalog ## Draw every story and write $(CATALOG_OUT)/index.html
 e2e-machine: build build-linux ## The machine specs on a real VM of this host: KIND=linux (tier 2) or KIND=macos (tier 3); never in check
 	@specs/machine/run.sh $(KIND) $(LABEL)
 
-e2e-binaries: build-linux ## The two binaries the machine tiers carry (darwin/arm64 and linux/arm64, no cgo, unlike the release's darwin), cross-built where Go is, to copy to the Mac
+e2e-binaries: build-linux ## The binaries the machine tiers carry (darwin/arm64, its v0.0.0-swap build, and linux/arm64, no cgo, unlike the release's darwin), cross-built where Go is, to copy to the Mac
 	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./apps/engine/cmd/station
-	@printf "$(GREEN)●$(RESET) Built $(BUILD_PATH) and $(LINUX_PATH) for the machine tiers\n"
+	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/jterrazz/studio-station/apps/engine/wire.version=v0.0.0-swap" -o $(SWAP_PATH) ./apps/engine/cmd/station
+	@printf "$(GREEN)●$(RESET) Built $(BUILD_PATH), $(SWAP_PATH) and $(LINUX_PATH) for the machine tiers\n"
 
 # hazard: macOS kills (SIGKILL) a signed binary rewritten in place once it has run, so
 # the build lands as a new file renamed over the old one; a running engine keeps its own.

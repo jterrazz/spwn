@@ -437,3 +437,106 @@ in_vm 'cat ~/.local/state/station/ledger.json' > "$fp/ledger.json" || miss "appl
 in_vm "$station disk --json" > "$fp/disk.json" || fail "disk --json"
 footprint "$fp" "$fp/disk.json" "$suite/macos/os-noise.txt" || fail "the footprint test"
 case_pass
+
+# value: the path the window's Update takes, on a real macOS: the engine kept by launchd, a
+# newer binary renamed over the one the job runs, `station engine start`: it restarts the
+# engine onto the new version and rewrites no plist. A VM's run is a child of the engine in
+# the job's process group, and a macOS guest nests no VM (kern.hv_support 0), so the run is
+# stood in for by a child of a job whose plist is the engine's own, restarted by the same
+# `launchctl kickstart -k`; a twin job whose plist lacks AbandonProcessGroup loses its child
+# the same way, so the key is what saves the first.
+case_begin engine-restart-under-launchd ADR-060
+in_vm 'mkdir -p /tmp/station-e2e' || fail "scratch folder"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+# value: the swap build is the binary under test stamped v0.0.0-swap, built here where Go is,
+# or copied to .artifacts/go/ by `make e2e-binaries` where it is not.
+if command -v go > /dev/null; then
+  (cd "$repo" && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/jterrazz/studio-station/apps/engine/wire.version=v0.0.0-swap" -o .artifacts/go/station-swap ./apps/engine/cmd/station) >> "$log" 2>&1 || fail "build the swap binary"
+fi
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station-swap" "$user@$ip:/tmp/station-e2e/station-swap" || fail "copy the swap binary"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$suite/macos/stand-in-run.sh" "$user@$ip:/tmp/station-e2e/stand-in-run.sh" || fail "copy the stand-in"
+in_vm 'sudo -n launchctl asuser "$(id -u)" launchctl setenv STATION_MACHINE_KIND mac' || fail "pin the kind in the user's launchd"
+in_vm "$place" || fail "place the binary"
+agent='gui/$(id -u)/com.jterrazz.station.engine'
+job_pid() { in_vm "launchctl print $1 2> /dev/null | awk '\$1 == \"pid\" { print \$3 }'"; }
+engine_version() { in_vm "$station engine --json 2> /dev/null" | jq -r '.engine.version // empty'; }
+in_vm "$station engine start" >> "$log" 2>&1 || fail "engine start on a bare Mac"
+waited=0
+until [ -n "$(engine_version)" ]; do
+  waited=$((waited + 1))
+  [ $waited -lt 30 ] || fail "the engine kept by launchd never answered: $(in_vm 'tail -5 ~/.local/state/station/logs/engine.log')"
+  sleep 1
+done
+old=$(engine_version)
+[ "$old" != v0.0.0-swap ] || fail "the engine already runs the swap version"
+before=$(job_pid "$agent")
+[ -n "$before" ] || fail "launchd keeps no pid for the engine's job"
+in_vm "cp ~/Library/LaunchAgents/com.jterrazz.station.engine.plist /tmp/station-e2e/engine.plist" || fail "keep the plist"
+say "   the engine kept by launchd: $old, pid $before"
+
+# value: both stand-in jobs are the engine's plist with its label and program changed, so
+# every other key of the job is the one station wrote; the control loses that key alone.
+for kind in kept control; do
+  in_vm "perl -0pe 's|<key>ProgramArguments</key>\s*<array>.*?</array>|<key>ProgramArguments</key><array><string>/bin/sh</string><string>/tmp/station-e2e/stand-in-run.sh</string><string>/tmp/station-e2e/$kind</string></array>|s; s|com\.jterrazz\.station\.engine|com.jterrazz.station.stand-in-$kind|g; s|(<key>Standard(Out\|Error)Path</key>\s*<string>)[^<]*|\${1}/dev/null|g' /tmp/station-e2e/engine.plist > ~/Library/LaunchAgents/com.jterrazz.station.stand-in-$kind.plist" || fail "write the $kind job"
+done
+in_vm "sed -i '' '/<key>AbandonProcessGroup<\/key>/,+1d' ~/Library/LaunchAgents/com.jterrazz.station.stand-in-control.plist" || fail "drop the key from the control job"
+say "   AbandonProcessGroup in the kept job: $(in_vm 'grep -c AbandonProcessGroup ~/Library/LaunchAgents/com.jterrazz.station.stand-in-kept.plist'), in the control: $(in_vm 'grep -c AbandonProcessGroup ~/Library/LaunchAgents/com.jterrazz.station.stand-in-control.plist')"
+for kind in kept control; do
+  in_vm "launchctl bootstrap gui/\$(id -u) ~/Library/LaunchAgents/com.jterrazz.station.stand-in-$kind.plist" || fail "load the $kind job"
+done
+waited=0
+until in_vm 'test -s /tmp/station-e2e/kept/child.pid && test -s /tmp/station-e2e/control/child.pid'; do
+  waited=$((waited + 1))
+  [ $waited -lt 20 ] || fail "a stand-in never started its child"
+  sleep 1
+done
+kept_child=$(in_vm 'cat /tmp/station-e2e/kept/child.pid')
+control_child=$(in_vm 'cat /tmp/station-e2e/control/child.pid')
+in_vm "kill -0 $kept_child && kill -0 $control_child" || fail "a stand-in's child is not alive before the restart"
+sleep 2
+beat_kept=$(in_vm "cat /tmp/station-e2e/kept/beat.$kept_child")
+[ -n "$beat_kept" ] || beat_kept=$(in_vm "cat /tmp/station-e2e/kept/beat.$kept_child")
+
+# value: the Update: the new binary lands as a new file renamed over the old (macOS kills a
+# signed binary rewritten in place), then the engine is started again; the stand-ins are
+# restarted the way the job manager's Restart does, `kickstart -k`.
+in_vm 'cp /tmp/station-e2e/station-swap ~/.local/bin/station.new && chmod +x ~/.local/bin/station.new && mv -f ~/.local/bin/station.new ~/.local/bin/station' || fail "rename the new binary over the old"
+for kind in kept control; do
+  in_vm "launchctl kickstart -k gui/\$(id -u)/com.jterrazz.station.stand-in-$kind" || fail "restart the $kind job"
+done
+started=$(in_vm "$station engine start 2>&1")
+say "$(sed 's/^/   engine start: /' <<< "$started")"
+waited=0
+until [ "$(engine_version)" = v0.0.0-swap ]; do
+  waited=$((waited + 1))
+  [ $waited -lt 30 ] || fail "the engine does not report v0.0.0-swap after its start: $(engine_version)"
+  sleep 1
+done
+after=$(job_pid "$agent")
+{ [ -n "$after" ] && [ "$after" != "$before" ]; } || miss "launchd's pid for the engine did not change ($before, $after)"
+in_vm 'cmp -s ~/Library/LaunchAgents/com.jterrazz.station.engine.plist /tmp/station-e2e/engine.plist' || miss "engine start rewrote the plist"
+grep -q "$old" <<< "$started" || miss "engine start did not name the version it left ($old)"
+say "   the engine restarted: pid $before to $after, $old to v0.0.0-swap, plist unchanged"
+sleep 3
+in_vm "kill -0 $kept_child" || miss "the kept job's child $kept_child ended with its job's restart"
+[ "$(in_vm 'cat /tmp/station-e2e/kept/child.pid')" != "$kept_child" ] || miss "the kept job's parent did not start again"
+# hazard: the child truncates its beat file as it rewrites it, so a read may find it empty.
+beat_after=""
+for _ in 1 2 3 4 5 6 7 8; do
+  beat_after=$(in_vm "cat /tmp/station-e2e/kept/beat.$kept_child")
+  [ "${beat_after:-0}" -gt "$beat_kept" ] && break
+  sleep 1
+done
+[ "${beat_after:-0}" -gt "$beat_kept" ] || miss "the kept job's child stopped beating ($beat_kept, $beat_after)"
+control_state=ended
+if in_vm "kill -0 $control_child"; then
+  control_state=alive
+  miss "the control job's child $control_child lived through its job's restart: the proof proves nothing"
+fi
+say "   kept: child $kept_child alive, beat $beat_kept to $beat_after; control: child $control_child $control_state"
+for kind in kept control; do
+  in_vm "launchctl bootout gui/\$(id -u)/com.jterrazz.station.stand-in-$kind; rm -f ~/Library/LaunchAgents/com.jterrazz.station.stand-in-$kind.plist" > /dev/null 2>&1 || true
+done
+in_vm "kill $kept_child $control_child" > /dev/null 2>&1 || true
+in_vm 'launchctl bootout gui/$(id -u)/com.jterrazz.station.engine; rm -f ~/Library/LaunchAgents/com.jterrazz.station.engine.plist; sudo -n launchctl asuser "$(id -u)" launchctl unsetenv STATION_MACHINE_KIND' > /dev/null 2>&1 || true
+case_pass
