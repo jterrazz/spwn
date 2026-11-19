@@ -7,7 +7,7 @@ runs:
       exit: 1
       stderr: |
           Error: station is not installed on mac-mini
-          Hint: install it there (scripts/install.sh), then add it again
+          Hint: install it there (curl -fsSL https://spwn.sh/install.sh | bash), then add it again
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.preferences.macs, (.ssh.blocks // {})]'' world.json'
       exit: 0
       stdout: |

@@ -5,12 +5,12 @@ runs:
       exit: 1
       stderr: |
           Error: mac-mini runs station v3.2.0, which has no ports.declare
-          Hint: update station on mac-mini (scripts/install.sh there)
+          Hint: update station on mac-mini (run curl -fsSL https://spwn.sh/install.sh | bash there)
     - command: 'activity --on mac-mini'
       exit: 1
       stderr: |
           Error: mac-mini runs station v3.2.0, which has no activity.read
-          Hint: update station on mac-mini (scripts/install.sh there)
+          Hint: update station on mac-mini (run curl -fsSL https://spwn.sh/install.sh | bash there)
     - command: 'apps --on mac-mini | /usr/bin/head -1'
       exit: 0
       stdout: |

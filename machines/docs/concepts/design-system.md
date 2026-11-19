@@ -77,8 +77,6 @@ While it runs, the terminal's stderr says each step and why, as the spinner's la
 
 A program's own words (a curl installer, `brew bundle`, Homebrew's installer) never reach the terminal: they are appended to the log of each app the step serves, `~/.local/state/station/logs/<app>.log`, and a failure prints only that path (`the install failed: its output is in ~/.local/state/station/logs/claude.log`). An interruption keeps its own words, `interrupted (Ctrl-C)`, and nothing is printed after it.
 
-`install.sh` speaks in the same voice, two lines of its own (`Installing station for darwin/arm64`, `● station v3.1.0 in ~/.local/bin`) or one `✗` line on failure, then hands the terminal to `init`.
-
 ## Instant reads
 
 `station overview`, `disk` and `apps` on a terminal draw their frame at once: every row the catalogue or a read table declares, each `◌` with its name only (a size shows its last-known value, Muted, from `~/.cache/station/sizes.json`). Each row fills in as its read answers, the region redrawn at most every 50 ms and clipped to the terminal's height with a Muted `… <n> rows pending` last line; a read past its budget answers `◐ ?` with `no answer in <budget>`. When the last read answers the region is erased and the final document printed once, so the scrollback holds what a pipe would. The reads run on two bounded lanes (16 commands, one walk of 8 workers), and the Overview owns no reading of its own: each of its lines is its section's read through the Router, the same read `apps` and `disk` draw.

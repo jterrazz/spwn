@@ -8,6 +8,7 @@
      No VMs yet  → station machines create --on mac-mini
 
 Needs you
-  ◐ mac-mini  runs v2.0.0-248  update station there (scripts/install.sh)
+  ◐ mac-mini  runs v2.0.0-248
+    update station there (curl -fsSL https://spwn.sh/install.sh | bash)
 Warnings
   mac-mini: station v2.0.0-248, This Mac v2.0.0-250

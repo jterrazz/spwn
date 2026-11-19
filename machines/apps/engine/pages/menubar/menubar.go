@@ -108,7 +108,7 @@ func Stopped(thisMac page.Context, installed bool) page.Page {
 
 func Outdated(thisMac page.Context) page.Page {
 	row := page.Row{ID: "engine", Label: "engine", Mark: page.Attention, Reason: page.Outdated, Cells: []page.Value{page.Text("older than this app")}, Hint: page.Cmd("station engine start")}
-	s := page.Section{ID: SectionNeeds, Title: "Needs you", Role: page.Actions, Caption: []page.Value{page.Text("Update station here (scripts/install.sh)")}, Columns: columns(), Items: []page.Item{{Row: &row}}}
+	s := page.Section{ID: SectionNeeds, Title: "Needs you", Role: page.Actions, Caption: []page.Value{page.Text("Update station here (" + catalog.InstallLine + ")")}, Columns: columns(), Items: []page.Item{{Row: &row}}}
 	return page.Seal(page.Page{ID: ID, Command: "menubar", Context: thisMac, Sections: []page.Section{s}, Actions: []page.Action{openStation()}})
 }
 

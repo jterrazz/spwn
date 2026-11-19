@@ -25,7 +25,7 @@ The `jj`, `jc`, `jo` and `jg` shortcuts attach tmux session `main` and open Clau
 
 ## The shell block
 
-`station init` writes station's main block into `~/.zshrc`; `make provision` and `scripts/install.sh` call it. `make install` never touches the machine.
+`station init` writes station's main block into `~/.zshrc`; `make provision` and the public installer (`install.sh` at spwn.sh) call it. `make install` never touches the machine.
 
 ```zsh
 # >>> station >>>

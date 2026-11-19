@@ -11,4 +11,4 @@ runs:
           ◐	y	Mac	y	Online · runs v0.0.0-other
           ●	w	Workspace	y	Running · persistent	4 CPU	8 GB
           # Needs you
-          ◐	y	runs v0.0.0-other	update station there (scripts/install.sh)
+          ◐	y	runs v0.0.0-other	update station there (curl -fsSL https://spwn.sh/install.sh | bash)

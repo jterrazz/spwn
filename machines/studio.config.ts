@@ -43,7 +43,6 @@ export default defineConfig({
         roots: {
             catalog:
                 'the built-in packages and machines the engine embeds through the catalog module',
-            scripts: 'the curl-piped installer a fresh machine runs before `station` exists on it',
         },
     },
 });

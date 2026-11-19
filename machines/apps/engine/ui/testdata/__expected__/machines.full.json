@@ -279,7 +279,7 @@
               },
               {
                 "kind": "text",
-                "text": "update station there (scripts/install.sh)"
+                "text": "update station there (curl -fsSL https://spwn.sh/install.sh | bash)"
               }
             ],
             "reason": "degraded"

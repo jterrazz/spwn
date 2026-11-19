@@ -11,12 +11,12 @@ runs:
             "code": "remote.far-too-old",
             "subject": "y",
             "message": "y runs station v3.2.0, which has no apps.list",
-            "hint": "update station on y (scripts/install.sh there)",
+            "hint": "update station on y (run curl -fsSL https://spwn.sh/install.sh | bash there)",
             "fix": null
           }
       stderr: |
           Error: y runs station v3.2.0, which has no apps.list
-          Hint: update station on y (scripts/install.sh there)
+          Hint: update station on y (run curl -fsSL https://spwn.sh/install.sh | bash there)
     - command: '--version > /dev/null; printf v3.3.0 > answers/ssh/api-y/version; printf "[]" > answers/ssh/api-y/apps.list.json; "$STATION" apps --json --on y | /usr/bin/jq -r .schema'
       exit: 0
       stdout: |

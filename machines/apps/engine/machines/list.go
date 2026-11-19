@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
@@ -110,9 +111,9 @@ func Behind(h MacView, thisMac string) (fix string, differs bool) {
 		return "", false
 	}
 	if Newer(h.StationVersion, thisMac) {
-		return "update station here (scripts/install.sh)", true
+		return "update station here (" + catalog.InstallLine + ")", true
 	}
-	return "update station there (scripts/install.sh)", true
+	return "update station there (" + catalog.InstallLine + ")", true
 }
 
 func Findings(f AllMachines) []finding.Finding {

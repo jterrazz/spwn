@@ -1,5 +1,5 @@
 #!/bin/bash
-# value: tier 3: one fresh macOS VM plays a Mac: install.sh, init, the apps of every
+# value: tier 3: one fresh macOS VM plays a Mac: the binary placed, init, the apps of every
 # method, every setting, the shell block, Activity, then free and erase on a clone.
 # Sourced by run.sh.
 
@@ -89,10 +89,10 @@ say "kern.hv_vmm_present: $(in_vm 'sysctl -n kern.hv_vmm_present' 2>&1)"
 
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e/hello /tmp/station-e2e/npm' || fail "scratch folder"
 scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/scripts/install.sh" "$user@$ip:/tmp/station-e2e/install.sh" || fail "copy install.sh"
 
 listing() { in_vm 'cd ~ && find . -mindepth 1 -maxdepth 4 2>/dev/null | sed "s|^\./||" | LC_ALL=C sort'; }
 station="\$HOME/.local/bin/station"
+place='mkdir -p $HOME/.local/bin && cp /tmp/station-e2e/station $HOME/.local/bin/station && chmod +x $HOME/.local/bin/station'
 brew_path='PATH=/opt/homebrew/bin:$PATH'
 mise_path="PATH=\$HOME/.local/share/mise/shims:\$HOME/.local/bin:/opt/homebrew/bin:\$PATH"
 fp="$work/home"
@@ -121,8 +121,8 @@ listing > "$fp/0-before.txt" || fail "list the home"
 # whether init reached either; the record lives outside the home the footprint reads.
 in_vm 'mkdir -p /tmp/station-e2e/watch && for c in brew sudo; do real=$(PATH=/opt/homebrew/bin:$PATH command -v $c || echo /usr/bin/false); printf "#!/bin/sh\necho \"%s \$*\" >> /tmp/station-e2e/.calls\nexec %s \"\$@\"\n" "$c" "$real" > /tmp/station-e2e/watch/$c; chmod +x /tmp/station-e2e/watch/$c; done' || fail "the brew and sudo recorders"
 began=$(date +%s)
-step "install.sh" 'PATH=/tmp/station-e2e/watch:/opt/homebrew/bin:$PATH STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh --name e2e </dev/null'
-say "   install.sh and init took $(($(date +%s) - began)) s"
+step "install and init" "$place && PATH=/tmp/station-e2e/watch:/opt/homebrew/bin:\$PATH $station init --name e2e </dev/null"
+say "   the install and init took $(($(date +%s) - began)) s"
 # value: the seam's verdict is said in the log with what it recorded, so a pass
 # is read there, not inferred from a silence.
 seam=$(in_vm 'grep -E "^(brew|sudo) " /tmp/station-e2e/.calls 2>/dev/null')
@@ -130,7 +130,7 @@ if [ -n "$seam" ]; then
   say "$(sed 's/^/   seam: /' <<< "$seam")"
   fail "init ran brew or sudo"
 fi
-say "   seam: install.sh and init ran no brew and no sudo"
+say "   seam: the install and init ran no brew and no sudo"
 init=$(in_vm "PATH=/tmp/station-e2e/watch:/opt/homebrew/bin:\$PATH $station init </dev/null")
 say "$(sed 's/^/   init: /' <<< "$init")"
 for row in name zshrc layout; do
@@ -355,9 +355,8 @@ bare_path='PATH=/usr/bin:/bin:/usr/sbin:/sbin'
 in_vm 'sudo -n rm -rf /opt/homebrew /usr/local/Homebrew' || fail "make the base bare"
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
 scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/scripts/install.sh" "$user@$ip:/tmp/station-e2e/install.sh" || fail "copy install.sh"
 in_vm 'test ! -e /opt/homebrew/bin/brew' || fail "the base still holds Homebrew"
-in_vm "STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh </dev/null" >> "$log" 2>&1 || miss "install.sh exited $?"
+in_vm "$place" >> "$log" 2>&1 || miss "placing the binary exited $?"
 in_vm "$bare_path $station apps install homebrew jq </dev/null" >> "$log" 2>&1 || miss "apps install homebrew jq exited $?: the manager installed in this run was not found in it"
 in_vm 'test -x /opt/homebrew/bin/jq' || miss "no jq under /opt/homebrew after the install"
 first=$(in_vm 'stat -f %m /opt/homebrew/bin/brew')
@@ -367,7 +366,7 @@ grep -q 'already installed' <<< "$reply" || miss "a second run does not find the
 [ "$(in_vm 'stat -f %m /opt/homebrew/bin/brew')" = "$first" ] || miss "a second run ran Homebrew's installer again"
 case_pass
 
-# value: a Machinefile applied on a bare Mac: install.sh, then init --machinefile on a
+# value: a Machinefile applied on a bare Mac: the binary placed, then init --machinefile on a
 # terminal (script gives it one), interrupted by SIGINT while the cask installs, then a
 # bare apply that resumes it, drift with every package present, and the footprint test.
 case_begin init-then-apply SU-12
@@ -380,14 +379,13 @@ ip=$(boot "$applied") || fail "boot $applied"
 in_vm 'sudo -n rm -rf /opt/homebrew /usr/local/Homebrew' || fail "make the base bare"
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
 scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/scripts/install.sh" "$user@$ip:/tmp/station-e2e/install.sh" || fail "copy install.sh"
 scp "${ssh_opts[@]}" -i "$ssh_key" -q "$suite/macos/e2e-apply.machine.yaml" "$user@$ip:/tmp/station-e2e/e2e-apply.machine.yaml" || fail "copy the Machinefile"
 fp="$work/home-apply"
 mkdir -p "$fp"
 steps=()
 n=0
 listing > "$fp/0-before.txt"
-step "install.sh" "STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh --name e2e </dev/null"
+step "install and init" "$place && $station init --name e2e </dev/null"
 # hazard: sudo flushes the terminal's pending input when it prompts, so a stream of
 # passwords loses characters; one line every few seconds lands whole on a prompt.
 password="{ while :; do echo admin; sleep 3; done; }"

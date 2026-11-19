@@ -9,10 +9,10 @@ runs:
       exit: 0
       stdout: |
           ●	mac-mini	added · ssh answers · station v3.2.0
-          ◐	mac-mini	runs v3.2.0 · update station there (scripts/install.sh)
+          ◐	mac-mini	runs v3.2.0 · update station there (curl -fsSL https://spwn.sh/install.sh | bash)
     - command: 'machines | /usr/bin/grep mac-mini'
       exit: 0
       stdout: |
           ◐	mac-mini	Mac	mac-mini	Engine running · runs v3.2.0
           ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
-          ◐	mac-mini	runs v3.2.0	update station there (scripts/install.sh)
+          ◐	mac-mini	runs v3.2.0	update station there (curl -fsSL https://spwn.sh/install.sh | bash)

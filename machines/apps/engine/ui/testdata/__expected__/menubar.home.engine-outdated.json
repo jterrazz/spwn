@@ -15,7 +15,7 @@
       "caption": [
         {
           "kind": "text",
-          "text": "Update station here (scripts/install.sh)"
+          "text": "Update station here (curl -fsSL https://spwn.sh/install.sh | bash)"
         }
       ],
       "columns": [

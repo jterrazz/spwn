@@ -20,8 +20,8 @@ runs:
             └─ ● infra    Server     Running · always on           8 CPU  24 GB
 
           Needs you
-            ◐ mac-mini  runs v3.2.0  update station there (scripts/install.sh)
+            ◐ mac-mini  runs v3.2.0  update station there (curl -fsSL https://spwn.sh/install.sh | bash)
     - command: 'machines --json | /usr/bin/jq -c ''.findings'''
       exit: 0
       stdout: |
-          [{"machine":"mac-mini","severity":"needs-a-look","section":"overview","subject":"mac-mini","text":"mac-mini runs v3.2.0","fix":{"call":null,"command":null,"path":"update station there (scripts/install.sh)"}}]
+          [{"machine":"mac-mini","severity":"needs-a-look","section":"overview","subject":"mac-mini","text":"mac-mini runs v3.2.0","fix":{"call":null,"command":null,"path":"update station there (curl -fsSL https://spwn.sh/install.sh | bash)"}}]
