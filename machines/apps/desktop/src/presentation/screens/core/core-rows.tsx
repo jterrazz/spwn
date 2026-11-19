@@ -1,4 +1,4 @@
-import { CORE_FOLDER } from '../../../domain/core';
+import { INSTALL_FOLDER } from '../../../domain/core';
 import { Mono } from './core-parts';
 import type { Row } from './core-parts';
 
@@ -6,13 +6,13 @@ export const PUTS: readonly Row[] = [
     {
         key: 'station',
         mono: true,
-        place: CORE_FOLDER,
+        place: INSTALL_FOLDER,
         value: 'The engine and its CLI: the machines',
     },
-    { key: 'spwn', mono: true, place: CORE_FOLDER, value: 'The agents' },
+    { key: 'spwn', mono: true, place: INSTALL_FOLDER, value: 'The agents' },
     {
         key: 'Links',
-        place: CORE_FOLDER,
+        place: INSTALL_FOLDER,
         value: (
             <>
                 <Mono>spwn-machines</Mono>, <Mono>spwn-agents</Mono>
@@ -37,8 +37,8 @@ export const PROMISES = [
 ];
 
 export const ON_DISK: readonly Row[] = [
-    { key: 'station', mono: true, place: CORE_FOLDER, value: 'The engine and its CLI' },
-    { key: 'spwn', mono: true, place: CORE_FOLDER, value: 'The agents' },
+    { key: 'station', mono: true, place: INSTALL_FOLDER, value: 'The engine and its CLI' },
+    { key: 'spwn', mono: true, place: INSTALL_FOLDER, value: 'The agents' },
 ];
 
 export const STARTING: readonly Row[] = [

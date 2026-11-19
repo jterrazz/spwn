@@ -1,9 +1,7 @@
 use std::env;
 use std::ffi::{CStr, OsStr, OsString};
-use std::fs;
 use std::io::{BufRead, BufReader, Read};
 use std::os::unix::ffi::OsStringExt;
-use std::os::unix::fs::PermissionsExt;
 use std::os::unix::process::{CommandExt, ExitStatusExt};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -19,13 +17,8 @@ use tauri::State;
 
 use crate::engine::Bridge;
 use crate::opener::Refusal;
+use crate::station::{station_of, Where, INSTALL_LINE};
 
-include!(concat!(env!("OUT_DIR"), "/install_line.rs"));
-
-// outside: the folder the public installer writes `station` to, `INSTALL_DIR` in the site's `public/install.sh` (jterrazz/spwn-web, its ADR-014); it moves to `packages/api` once the engine projects it.
-pub const CORE_DIR: &str = ".local/bin";
-
-pub const CORE_BINARY: &str = "station";
 pub const SEARCH_PATH: &str = "/usr/bin:/bin:/usr/sbin:/sbin";
 pub const FALLBACK_SHELL: &str = "/bin/zsh";
 pub const BUSY: &str = "core.busy";
@@ -131,15 +124,6 @@ pub fn login_shell() -> OsString {
         .unwrap_or_else(|| OsString::from(FALLBACK_SHELL))
 }
 
-pub fn core_dir_of(faked: Option<&Path>, home: &Path) -> PathBuf {
-    faked.map_or_else(|| home.join(CORE_DIR), Path::to_path_buf)
-}
-
-pub fn present(dir: &Path) -> bool {
-    fs::metadata(dir.join(CORE_BINARY))
-        .is_ok_and(|meta| meta.is_file() && meta.permissions().mode() & 0o111 != 0)
-}
-
 pub fn environment(
     home: &Path,
     shell: &OsStr,
@@ -190,12 +174,18 @@ pub fn install_plan(faked: Option<&Path>, env: Vec<(String, OsString)>) -> Resul
 
 pub fn start_plan(
     faked: Option<&Path>,
-    dir: &Path,
+    station: Option<PathBuf>,
     env: Vec<(String, OsString)>,
 ) -> Result<Plan, Refusal> {
     faked_or_refused(faked, "no engine")?;
+    let program = station.ok_or_else(|| {
+        refused(
+            NOT_RUN,
+            "station is neither where the engine said, nor in its record, nor in the install folder",
+        )
+    })?;
     Ok(Plan {
-        program: dir.join(CORE_BINARY),
+        program,
         args: ["engine", "start"].map(OsString::from).to_vec(),
         env,
     })
@@ -343,6 +333,15 @@ fn child_env() -> Vec<(String, OsString)> {
     environment(&home(), &login_shell(), |name: &str| env::var_os(name))
 }
 
+fn station(faked: Option<&Path>, said: Option<&Path>) -> Option<PathBuf> {
+    station_of(Where {
+        faked,
+        said,
+        home: &home(),
+        xdg_state: env::var_os("XDG_STATE_HOME"),
+    })
+}
+
 async fn ran(runs: Arc<Runs>, plan: Plan, channel: Channel<Line>) -> Result<Ended, Refusal> {
     tauri::async_runtime::spawn_blocking(move || runs.run(&plan, Arc::new(channel)))
         .await
@@ -351,7 +350,7 @@ async fn ran(runs: Arc<Runs>, plan: Plan, channel: Channel<Line>) -> Result<Ende
 
 #[tauri::command(async)]
 pub fn core_present() -> bool {
-    present(&core_dir_of(faked_dir().as_deref(), &home()))
+    station(faked_dir().as_deref(), None).is_some()
 }
 
 #[tauri::command]
@@ -368,10 +367,12 @@ pub async fn core_start(
     runs: State<'_, Arc<Runs>>,
     bridge: State<'_, Arc<Bridge>>,
     channel: Channel<Line>,
+    executable: Option<String>,
 ) -> Result<Ended, Refusal> {
     let faked = faked_dir();
-    let dir = core_dir_of(faked.as_deref(), &home());
-    let plan = start_plan(faked.as_deref(), &dir, child_env())?;
+    let said = executable.map(PathBuf::from);
+    let found = station(faked.as_deref(), said.as_deref());
+    let plan = start_plan(faked.as_deref(), found, child_env())?;
     let ended = ran(Arc::clone(&runs), plan, channel).await?;
     if ended.code == 0 {
         bridge.wake();

@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 
 const BRIDGED: &str = "../src/domain/bridged.ts";
-const CORE: &str = "../src/domain/core.ts";
+const INSTALL: &str = "../../../packages/api/install.json";
 
 fn bridged() -> Vec<String> {
     let source = fs::read_to_string(BRIDGED).expect("the bridged list is readable");
@@ -32,23 +32,44 @@ fn bridged() -> Vec<String> {
     names
 }
 
-fn install_line() -> String {
-    let source = fs::read_to_string(CORE).expect("the core's lines are readable");
-    let line = source
-        .split_once("INSTALL_LINE = '")
-        .and_then(|(_, rest)| rest.split_once('\''))
-        .map(|(line, _)| line)
-        .expect("core.ts holds `INSTALL_LINE = '...'`");
+fn one_line(install: &serde_json::Value, pointer: &str) -> String {
+    let value = install
+        .pointer(pointer)
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_else(|| panic!("install.json holds a string at {pointer}"));
     assert!(
-        !line.is_empty() && !line.chars().any(char::is_control),
-        "the install line is one line"
+        !value.is_empty() && !value.chars().any(char::is_control),
+        "install.json's {pointer} is one line"
     );
-    line.to_owned()
+    value.to_owned()
+}
+
+fn install() -> String {
+    let source = fs::read_to_string(INSTALL).expect("install.json is readable");
+    let install: serde_json::Value = serde_json::from_str(&source).expect("install.json is JSON");
+    assert_eq!(
+        one_line(&install, "/record/root"),
+        "state",
+        "the engine record lives under the state root"
+    );
+    [
+        ("INSTALL_LINE", "/line"),
+        ("INSTALL_DIR", "/dir"),
+        ("CORE_BINARY", "/binary"),
+        ("RECORD_PATH", "/record/path"),
+    ]
+    .map(|(name, pointer)| {
+        format!(
+            "pub const {name}: &str = {:?};\n",
+            one_line(&install, pointer)
+        )
+    })
+    .concat()
 }
 
 fn main() {
     println!("cargo:rerun-if-changed={BRIDGED}");
-    println!("cargo:rerun-if-changed={CORE}");
+    println!("cargo:rerun-if-changed={INSTALL}");
     let names = bridged();
     let dir = env::var("OUT_DIR").expect("cargo sets OUT_DIR");
     let out = Path::new(&dir).join("bridged.rs");
@@ -58,10 +79,7 @@ fn main() {
         format!("pub const BRIDGED: &[&str] = &[{}];\n", quoted.join(", ")),
     )
     .expect("the bridged list is written");
-    fs::write(
-        Path::new(&dir).join("install_line.rs"),
-        format!("pub const INSTALL_LINE: &str = {:?};\n", install_line()),
-    )
-    .expect("the install line is written");
+    fs::write(Path::new(&dir).join("install.rs"), install())
+        .expect("the install constants are written");
     tauri_build::build();
 }

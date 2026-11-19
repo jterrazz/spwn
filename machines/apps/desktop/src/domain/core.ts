@@ -1,5 +1,7 @@
-export const INSTALL_LINE = 'curl -fsSL https://spwn.sh/install.sh | bash';
+import install from '@jterrazz/station-api/install.json';
 
-export const START_LINE = 'station engine start';
+export const INSTALL_LINE = install.line;
 
-export const CORE_FOLDER = '~/.local/bin';
+export const INSTALL_FOLDER = install.dir;
+
+export const START_LINE = `${install.binary} engine start`;

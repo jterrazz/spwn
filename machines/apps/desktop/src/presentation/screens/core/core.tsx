@@ -1,5 +1,5 @@
 import type { CoreFlow, CoreState } from '../../../application/use-cases/core-flow';
-import { CORE_FOLDER, START_LINE } from '../../../domain/core';
+import { INSTALL_FOLDER, START_LINE } from '../../../domain/core';
 import { useCore } from '../../dependencies/dependencies';
 import { Button } from '../../ui/index';
 import { shownOrWithheld } from '../../ui/secret';
@@ -67,7 +67,7 @@ function Installing({
         <>
             <Mark />
             <Head title="Installing spwn.">
-                The installer runs the command below. Nothing lands in <Mono>{CORE_FOLDER}</Mono>{' '}
+                The installer runs the command below. Nothing lands in <Mono>{INSTALL_FOLDER}</Mono>{' '}
                 until every checksum matches.
             </Head>
             <Command />

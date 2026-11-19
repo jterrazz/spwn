@@ -1,6 +1,5 @@
 use std::ffi::OsString;
 use std::fs;
-use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
@@ -8,8 +7,8 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use super::{
-    core_dir_of, environment, install_plan, piped, present, start_plan, Ended, Heard, Line, Plan,
-    Runs, Stream, BUSY, CORE_DIR, INSTALL_LINE, NOT_RUN, SEARCH_PATH,
+    environment, install_plan, piped, start_plan, Ended, Heard, Line, Plan, Runs, Stream, BUSY,
+    INSTALL_LINE, NOT_RUN, SEARCH_PATH,
 };
 
 fn scratch() -> PathBuf {
@@ -53,41 +52,6 @@ fn shell(script: &str) -> Plan {
         args: vec![OsString::from("-c"), OsString::from(script)],
         env: environment(Path::new("/nowhere"), "/bin/zsh".as_ref(), |_| None),
     }
-}
-
-fn executable(path: &Path, mode: u32) {
-    fs::write(path, "#!/bin/sh\n").expect("the file is written");
-    fs::set_permissions(path, fs::Permissions::from_mode(mode)).expect("its mode is set");
-}
-
-#[test]
-fn the_core_is_on_disk_only_as_an_executable_station_in_the_installers_folder() {
-    // Given - four folders: one holding station executable, one not executable, one a folder by that name, one empty
-    let [found, plain, folder, empty] = [scratch(), scratch(), scratch(), scratch()];
-    executable(&found.join("station"), 0o755);
-    executable(&plain.join("station"), 0o644);
-    fs::create_dir(folder.join("station")).expect("the folder is made");
-
-    // When - each is looked at
-    let seen = [&found, &plain, &folder, &empty].map(|dir| present(dir));
-
-    // Then - only the executable file counts
-    assert_eq!(seen, [true, false, false, false]);
-}
-
-#[test]
-fn the_folder_looked_at_is_the_installers_under_home_never_a_path_lookup() {
-    // Given - a home and no fake
-    let home = Path::new("/Users/someone");
-
-    // When - the folder is asked, then asked under a fake
-    let real = core_dir_of(None, home);
-    let faked = core_dir_of(Some(Path::new("/tmp/fake-core")), home);
-
-    // Then - it is home's .local/bin, or the fake's folder whole
-    assert_eq!(CORE_DIR, ".local/bin");
-    assert_eq!(real, PathBuf::from("/Users/someone/.local/bin"));
-    assert_eq!(faked, PathBuf::from("/tmp/fake-core"));
 }
 
 #[test]
@@ -222,9 +186,10 @@ fn the_install_runs_the_public_line_under_pipefail_and_a_debug_build_never_runs_
     let public = piped(INSTALL_LINE, env.clone());
     let start = start_plan(
         Some(Path::new("/tmp/fake-core")),
-        Path::new("/tmp/fake-core"),
+        Some(PathBuf::from("/tmp/fake-core/station")),
         env.clone(),
     );
+    let nowhere = start_plan(Some(Path::new("/tmp/fake-core")), None, env.clone());
 
     // Then - a debug build refuses the real installer, runs the fake's script, and starts the fake's station
     assert_eq!(unfaked.map_err(|refusal| refusal.code), Err(NOT_RUN));
@@ -248,8 +213,9 @@ fn the_install_runs_the_public_line_under_pipefail_and_a_debug_build_never_runs_
             ["engine", "start"].map(OsString::from).to_vec()
         ))
     );
+    assert_eq!(nowhere.map_err(|refusal| refusal.code), Err(NOT_RUN));
     assert_eq!(
-        start_plan(None, Path::new("/x"), env).map_err(|refusal| refusal.code),
+        start_plan(None, Some(PathBuf::from("/x/station")), env).map_err(|refusal| refusal.code),
         Err(NOT_RUN)
     );
 }

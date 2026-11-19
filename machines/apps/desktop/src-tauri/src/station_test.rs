@@ -1,0 +1,175 @@
+use std::ffi::OsString;
+use std::fs;
+use std::os::unix::fs::PermissionsExt;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+use super::{
+    recorded, state_root, station_of, under_home, usable, Where, CORE_BINARY, INSTALL_DIR,
+    INSTALL_LINE, RECORD_PATH,
+};
+
+fn scratch() -> PathBuf {
+    static NEXT: AtomicUsize = AtomicUsize::new(0);
+    let n = NEXT.fetch_add(1, Ordering::SeqCst);
+    let dir = std::env::temp_dir().join(format!("window-station-{}-{n}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    fs::create_dir_all(&dir).expect("the scratch folder is made");
+    dir
+}
+
+fn executable(path: &Path, mode: u32) {
+    fs::create_dir_all(path.parent().expect("a file has a folder")).expect("its folder is made");
+    fs::write(path, "#!/bin/sh\n").expect("the file is written");
+    fs::set_permissions(path, fs::Permissions::from_mode(mode)).expect("its mode is set");
+}
+
+fn record(home: &Path, executable: &Path) {
+    let file = home.join(".local/state").join(RECORD_PATH);
+    fs::create_dir_all(file.parent().expect("the record has a folder")).expect("it is made");
+    let text = format!(
+        "{{\"v\":1,\"executable\":{:?},\"version\":\"v0.21.0\",\"at\":\"2026-11-19T09:00:00Z\"}}",
+        executable.display().to_string()
+    );
+    fs::write(file, text).expect("the record is written");
+}
+
+fn looked(home: &Path, said: Option<&Path>) -> Option<PathBuf> {
+    station_of(Where {
+        faked: None,
+        said,
+        home,
+        xdg_state: None,
+    })
+}
+
+#[test]
+fn the_install_constants_are_the_packages_install_json() {
+    // Given - the constants build.rs read from packages/api/install.json
+
+    // When - they are read
+
+    // Then - they are the public installer's line, folder and binary, and the engine's record
+    assert_eq!(INSTALL_LINE, "curl -fsSL https://spwn.sh/install.sh | bash");
+    assert_eq!(INSTALL_DIR, "~/.local/bin");
+    assert_eq!(CORE_BINARY, "station");
+    assert_eq!(RECORD_PATH, "station/engine.json");
+}
+
+#[test]
+fn only_an_executable_file_at_an_absolute_path_counts() {
+    // Given - one executable station, one not executable, a folder by that name, a relative path
+    let [found, plain, folder] = [scratch(), scratch(), scratch()];
+    executable(&found.join("station"), 0o755);
+    executable(&plain.join("station"), 0o644);
+    fs::create_dir(folder.join("station")).expect("the folder is made");
+
+    // When - each is looked at
+    let seen = [
+        found.join("station"),
+        plain.join("station"),
+        folder.join("station"),
+        PathBuf::from("station"),
+    ]
+    .map(|path| usable(&path));
+
+    // Then - only the executable file counts
+    assert_eq!(seen, [true, false, false, false]);
+}
+
+#[test]
+fn the_folder_and_the_state_root_are_under_home_never_a_path_lookup() {
+    // Given - a home
+    let home = Path::new("/Users/someone");
+
+    // When - the install folder and the state root are asked, with and without XDG_STATE_HOME
+    let folder = under_home(INSTALL_DIR, home);
+    let plain = state_root(home, None);
+    let relative = state_root(home, Some(OsString::from("state")));
+    let xdg = state_root(home, Some(OsString::from("/var/state")));
+
+    // Then - home's .local/bin, and the state root as the record's contract says
+    assert_eq!(folder, PathBuf::from("/Users/someone/.local/bin"));
+    assert_eq!(plain, PathBuf::from("/Users/someone/.local/state"));
+    assert_eq!(relative, PathBuf::from("/Users/someone/.local/state"));
+    assert_eq!(xdg, PathBuf::from("/var/state"));
+}
+
+#[test]
+fn the_engine_said_wins_then_its_record_then_the_install_folder() {
+    // Given - a home with a station in each of the three places
+    let home = scratch();
+    let said = home.join("said/station");
+    let kept = home.join("kept/station");
+    let installed = home.join(".local/bin/station");
+    for path in [&said, &kept, &installed] {
+        executable(path, 0o755);
+    }
+    record(&home, &kept);
+
+    // When - station is looked for with what the engine said, then without, then with its record gone
+    let first = looked(&home, Some(&said));
+    let second = looked(&home, None);
+    fs::remove_file(home.join(".local/state").join(RECORD_PATH)).expect("the record goes");
+    let third = looked(&home, None);
+
+    // Then - each place in that order
+    assert_eq!(first, Some(said));
+    assert_eq!(second, Some(kept));
+    assert_eq!(third, Some(installed));
+}
+
+#[test]
+fn a_place_holding_no_station_is_passed_over_and_none_found_is_none() {
+    // Given - the engine names a path with nothing there, and the record names a file not executable
+    let home = scratch();
+    let kept = home.join("kept/station");
+    executable(&kept, 0o644);
+    record(&home, &kept);
+
+    // When - station is looked for
+    let found = looked(&home, Some(&home.join("gone/station")));
+
+    // Then - nothing is found
+    assert_eq!(found, None);
+}
+
+#[test]
+fn a_record_of_another_version_or_shape_is_not_read() {
+    // Given - three records: another version, no executable, not JSON
+    let home = scratch();
+    let file = home.join("engine.json");
+
+    // When - each is read
+    let seen = [
+        "{\"v\":2,\"executable\":\"/x/station\"}",
+        "{\"v\":1}",
+        "not json",
+    ]
+    .map(|text| {
+        fs::write(&file, text).expect("the record is written");
+        recorded(&file)
+    });
+
+    // Then - none gives a path
+    assert_eq!(seen, [None, None, None]);
+}
+
+#[test]
+fn a_fake_folder_is_the_one_place_looked_at() {
+    // Given - a fake folder holding station, and an engine naming another that exists
+    let [fake, other] = [scratch(), scratch()];
+    executable(&fake.join("station"), 0o755);
+    executable(&other.join("station"), 0o755);
+
+    // When - station is looked for under the fake
+    let found = station_of(Where {
+        faked: Some(&fake),
+        said: Some(&other.join("station")),
+        home: &other,
+        xdg_state: None,
+    });
+
+    // Then - it is the fake's station, never what the engine said
+    assert_eq!(found, Some(fake.join("station")));
+}
