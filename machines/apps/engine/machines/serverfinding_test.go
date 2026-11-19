@@ -53,6 +53,15 @@ func TestAServerInALoopIsOfferedItsRestartAndABrokenOneStopsOrRestarts(t *testin
 	if got := GesturesOf(server); !slices.Equal(got, []Gesture{GestureStop, GestureRestart}) {
 		t.Errorf("a broken server offers %v; want stop and restart", got)
 	}
+	broken := VM{Name: "api", Lifetime: AlwaysOn, State: Broken, Detail: BrokenDetail()}
+	f, ok = vmFinding(ref, broken, "")
+	if !ok || f.Severity != finding.Broken || f.Fix.Call != "machines.restart" || f.Fix.Command != "" || f.Fix.Args["Name"] != "api" || f.Fix.On != "mini" || f.Fix.Confirm != "api" || f.Text != "api is broken: rebooting in a loop" {
+		t.Errorf("a broken server: %+v, %v", f, ok)
+	}
+	broken.Lifetime = Persistent
+	if f, _ = vmFinding(ref, broken, ""); f.Fix.Command != "station machines delete api" || f.Text != "api rebooting in a loop, stopped" {
+		t.Errorf("a broken workspace: %+v", f)
+	}
 	server.Lifetime = Persistent
 	if got := GesturesOf(server); got != nil {
 		t.Errorf("a broken workspace offers %v; want none", got)

@@ -187,8 +187,8 @@ func severityOf(t verdict.Tone) finding.Severity {
 // invariant: what a VM's finding says is read from its facts, its severity
 // from its standing (severityOf). A running VM its Mac's Local Network
 // blocks says so first, the cause of whatever else fails; a VM whose
-// create failed, its start the cure; a server in a
-// loop, powered off from inside, or whose check fails since it passed, a VM
+// create failed, its start the cure; a server in a loop, broken, powered
+// off from inside, or whose check fails since it passed, a VM
 // ended unexpectedly or broken, a running one whose SSH fails, and any other
 // VM down each have one; a check that has not answered yet is none. The
 // engine never restarts a server by itself: the restart is the owner's
@@ -214,6 +214,9 @@ func vmFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 		f.Detail = downDetail(ref.On, vm)
 	case vm.State == Stale:
 		f.Text, f.Fix = vm.Name+" ended unexpectedly", finding.Fix{Command: "station machines start " + vm.Name + on}
+	case server && vm.State == Broken:
+		f.Text = vm.Name + " is broken: " + vm.Detail
+		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name}
 	case vm.State == Broken:
 		f.Text, f.Fix = vm.Name+" "+vm.Detail+", stopped", finding.Fix{Command: "station machines delete " + vm.Name + on}
 	case vm.State == Running && !HealthOf(vm).SSH && vm.Guest == "absent":

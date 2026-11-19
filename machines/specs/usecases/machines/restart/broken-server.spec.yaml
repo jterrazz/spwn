@@ -1,4 +1,4 @@
-description: 'a server stopped by a reboot loop is offered stop and restart, and its restart runs it again'
+description: 'a server a reboot loop broke is offered its restart, in its header and its finding, never its delete'
 env:
     - two-macs
     - engine
@@ -15,6 +15,11 @@ runs:
       exit: 0
       stdout: |
           ["broken","down",["stop","restart"]]
+    - command: 'overview --on mac-mini | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ✗	infra is broken: rebooting in a loop	station machines restart infra --confirm=infra --on mac-mini
+          	VMs	○ infra stopped
     - command: 'machines restart infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |
