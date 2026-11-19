@@ -90,7 +90,7 @@ func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 			for _, vm := range h.VMs {
 				switch {
 				case vm.Lifetime == model.AlwaysOn && vm.Restart != nil:
-				case model.Down(vm):
+				case vm.Standing == model.StandingDown:
 					needs = append(needs, w.down(h, vm))
 				}
 			}

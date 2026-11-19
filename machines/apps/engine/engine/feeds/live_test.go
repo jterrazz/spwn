@@ -195,7 +195,7 @@ func TestAVMsShareOfItsMacIsReadOnThatMacAndItsOwnCoresInsideIt(t *testing.T) {
 // invariant: Home draws a far Mac's CPU and its VMs' from the readings
 // the ticks kept of that Mac, each a spark, the Mac asked once a tick.
 func TestHomeDrawsAFarMacAndItsVMsFromThatMacsReadings(t *testing.T) {
-	w := &world{judged: true, infra: []machines.VM{infraAt(machines.Running, 0)}, asked: map[string][]string{}, activity: map[string]uint64{}}
+	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, asked: map[string][]string{}, activity: map[string]uint64{}}
 	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
 	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond, MacOf: func(_ context.Context, vm string) (string, bool) {
 		return mini, vm == "infra"

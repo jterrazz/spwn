@@ -18,7 +18,9 @@ func TestTheStatusItemSaysItsOneSignalAndCountsNothing(t *testing.T) {
 	restarting := server(model.Running, false)
 	restarting.Restart = &model.RestartWalk{Step: 2, At: now}
 	fleet := func(vms ...model.VM) *model.AllMachines {
-		return &model.AllMachines{Macs: []model.MacView{{Name: "macbook-pro", ThisMac: true}, {Name: "mac-mini", VMs: vms}}}
+		all := &model.AllMachines{Macs: []model.MacView{{Name: "macbook-pro", ThisMac: true}, {Name: "mac-mini", VMs: vms}}}
+		standUnsent(all)
+		return all
 	}
 	exposed := &ports.AllMachines{Macs: []ports.MacPorts{{Name: "mac-mini", Ports: []ports.Port{
 		{Port: 5000, Reach: ports.Outside, Answer: ports.Answers},

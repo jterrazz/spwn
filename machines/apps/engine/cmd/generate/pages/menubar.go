@@ -172,6 +172,7 @@ func menubarWorlds() []Fixture {
 	infra.State, infra.Detail = model.Stopped, "restarting"
 	infra.Restarts = model.Restarts{Count: 5, Streak: 5, Looping: true, Wait: time.Minute}
 	down.Macs[1].VMs = []model.VM{infra}
+	down = model.Judged(down)
 	infraDown := two
 	infraDown.All = &down
 	return []Fixture{

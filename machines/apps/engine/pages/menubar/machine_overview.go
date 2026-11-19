@@ -235,7 +235,7 @@ func (o macOverview) vmRow(vm model.VM) page.Row {
 		row.Glyph = page.Glyph{Kind: "symbol:checkmark.circle.fill", Signal: page.SignalWell}
 		row.Detail, row.Fresh = page.Texts("ready", "up 1 min"), true
 		row.Cells, row.Trail = nil, ""
-	case model.Down(vm):
+	case vm.Standing == model.StandingDown:
 		row.Mark, row.Reason = page.Broken, page.Down
 		row.Glyph = page.Glyph{Dot: page.DotFill, Signal: page.SignalFailing}
 		down := page.Text("down")

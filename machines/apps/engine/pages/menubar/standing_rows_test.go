@@ -105,3 +105,34 @@ func TestAToneDrawsAsItsSignal(t *testing.T) {
 		}
 	}
 }
+
+// invariant: the machine pages read a VM's standing as the engine sent it,
+// never judge it again: a VM sent down is drawn down on its Mac's Overview
+// and its server page, where its state alone says running.
+func TestTheMachinePagesReadAVMsStandingAsSent(t *testing.T) {
+	fleet := macFleet()
+	for i := range fleet.Macs[1].VMs {
+		vm := &fleet.Macs[1].VMs[i]
+		vm.Standing = model.StandingDown
+	}
+	mini := macPageOf(t, miniMac, func(m *Machine) { m.All = fleet })
+	for _, name := range []string{"infra", "review-bot"} {
+		if r := rowNamed(mini, name); r == nil || r.Mark != page.Broken {
+			t.Errorf("%s sent down reads %+v on its Mac's page", name, r)
+		}
+	}
+	if s := stateOf(fleet.Macs[1].VMs[2]); s != serverDown {
+		t.Errorf("infra sent down is server state %d", s)
+	}
+}
+
+func rowNamed(p page.Page, id string) *page.Row {
+	for _, s := range p.Sections {
+		for _, it := range s.Items {
+			if it.Row != nil && it.Row.ID == id {
+				return it.Row
+			}
+		}
+	}
+	return nil
+}

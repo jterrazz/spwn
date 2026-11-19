@@ -144,33 +144,24 @@
         {
           "row": {
             "id": "infra",
-            "mark": "ok",
+            "mark": "broken",
             "label": "infra",
-            "cells": [
-              {
-                "kind": "pending",
-                "live": "cpuh:infra"
-              }
-            ],
             "detail": {
               "kind": "list",
               "items": [
                 {
                   "kind": "text",
-                  "text": "healthy"
-                },
-                {
-                  "kind": "pending",
-                  "live": "memh:infra"
+                  "text": "down",
+                  "signal": "failing"
                 }
               ]
             },
+            "reason": "down",
             "glyph": {
-              "signal": "well",
+              "signal": "failing",
               "dot": "fill"
             },
             "mac": "mac-mini",
-            "trail": "value",
             "nav": "menubar.machine:infra"
           }
         }
@@ -3150,8 +3141,6 @@
     "cpu:macbook-pro",
     "memory:macbook-pro",
     "net:macbook-pro",
-    "cpuh:infra",
-    "memh:infra",
     "cpuh:linux-1",
     "memh:linux-1",
     "disk:macbook-pro",

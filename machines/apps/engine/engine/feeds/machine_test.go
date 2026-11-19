@@ -87,9 +87,7 @@ func (s *steps) pass(t *testing.T, d time.Duration) {
 }
 
 type world struct {
-	mu sync.Mutex
-	// value: machines.list answers judged, as the call does.
-	judged bool
+	mu     sync.Mutex
 	infra  []machines.VM
 	beside []machines.VM
 	here   []machines.VM
@@ -137,11 +135,7 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 	switch name {
 	case machinescalls.List.Name:
 		listed, _ := in.(machinescalls.ListIn)
-		all := w.machines(listed.ThisMac)
-		if w.judged {
-			all = machines.Judged(all)
-		}
-		return machinescalls.ListOut{All: all}
+		return machinescalls.ListOut{All: machines.Judged(w.machines(listed.ThisMac))}
 	case portscalls.List.Name:
 		return ports.Listing{}
 	case accountscalls.Programs.Name:
@@ -319,8 +313,8 @@ func TestTheMacMinisPageOpenFromThisMacIsTheMinisOwnAnswer(t *testing.T) {
 		return out
 	}
 	p := until(t, watch(t, w, newSteps(), mini), "mac-mini's time up", func(p page.Page) bool { return len(facts(p)) > 0 })
-	if got := facts(p); !slices.Equal(got, []string{"up 21 days"}) {
-		t.Errorf("mac-mini's page says %q, want the mini's own time up", got)
+	if got := facts(p); !slices.Equal(got, []string{"online", "up 21 days"}) {
+		t.Errorf("mac-mini's page says %q, want its standing, then the mini's own time up", got)
 	}
 	if got := w.askedOf(overviewcalls.Read.Name); !slices.Equal(got, []string{mini}) {
 		t.Errorf("the overview was read on %q, want on mac-mini only", got)

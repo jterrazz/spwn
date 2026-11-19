@@ -41,7 +41,7 @@ func stateOf(vm model.VM) serverState {
 	switch {
 	case vm.Restart != nil && vm.Restart.Step > 0:
 		return serverRestarting
-	case model.Down(vm):
+	case vm.Standing == model.StandingDown:
 		return serverDown
 	case vm.State != model.Running:
 		return serverStopped

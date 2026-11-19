@@ -31,7 +31,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	stop := stopWorkspace(vm, label, shared).action(m.Asks, page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
 		Run: &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
 	running := vm.State == model.Running
-	if !running && !model.Down(vm) {
+	if !running && vm.Standing != model.StandingDown {
 		stop = page.Action{ID: ActionStartVM, Label: "Start " + vm.Name, On: page.OnPage, Priority: 1, Mutates: true,
 			Run: &page.Run{Call: CallStartVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}, Hud: hud(vm.Name + " is starting")}
 	}

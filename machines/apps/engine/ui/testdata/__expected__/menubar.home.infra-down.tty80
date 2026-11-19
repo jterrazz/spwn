@@ -1,7 +1,8 @@
 Needs you
   ✗ infra  down
 This Mac
-Servers  ● infra · healthy
+Servers
+  ✗ infra  down
 VMs  2
   ● linux-1  running
   ○ api      stopped · disk kept

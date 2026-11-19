@@ -79,7 +79,7 @@ func vmRow(vm model.VM, shares int, now time.Time) page.Row {
 	kind := model.KindWord(vm.Lifetime.Kind())
 	life := pagemachines.Lifetime(vm.Lifetime)
 	switch {
-	case model.Down(vm):
+	case vm.Standing == model.StandingDown:
 		row.Mark, row.Reason = page.Broken, page.Down
 		row.Cells = []page.Value{page.Text(kind), page.List(life, pagemachines.State(vm.State))}
 	case vm.State != model.Running:

@@ -24,7 +24,7 @@ func badge(r Reading) *page.Badge {
 				if restarting == nil {
 					restarting = &h.VMs[i]
 				}
-			case model.Down(vm):
+			case vm.Standing == model.StandingDown:
 				reds = append(reds, vm.Name+" down")
 			}
 		}

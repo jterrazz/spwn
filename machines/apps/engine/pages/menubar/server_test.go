@@ -32,6 +32,7 @@ func serverServing(served *ports.AllMachines, edit func(*model.VM)) page.Page {
 		{Name: "macbook-pro", ThisMac: true, Reachable: true},
 		{Name: "mac-mini", Reachable: true, VMs: []model.VM{vm}},
 	}}
+	standUnsent(fleet)
 	page.Strict(true)
 	defer page.Strict(false)
 	return MachinePage(Machine{Name: "infra", All: fleet, Ports: served, Now: serverNow, Zone: time.UTC, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})

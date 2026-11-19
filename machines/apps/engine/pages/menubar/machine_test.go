@@ -36,6 +36,16 @@ func macFleet() *model.AllMachines {
 	}}
 }
 
+func standUnsent(all *model.AllMachines) {
+	for i := range all.Macs {
+		for j := range all.Macs[i].VMs {
+			if vm := &all.Macs[i].VMs[j]; vm.Standing == "" {
+				vm.Standing = model.StandingOf(*vm)
+			}
+		}
+	}
+}
+
 func macPageOf(t *testing.T, name string, edit func(*Machine)) page.Page {
 	t.Helper()
 	m := Machine{Name: name, All: macFleet(), Now: macNow, Zone: time.UTC, Asks: func(string, coremachine.Kind, ...string) string { return LevelYesNo },
@@ -43,6 +53,7 @@ func macPageOf(t *testing.T, name string, edit func(*Machine)) page.Page {
 	if edit != nil {
 		edit(&m)
 	}
+	standUnsent(m.All)
 	page.Strict(true)
 	defer page.Strict(false)
 	return MachinePage(m)

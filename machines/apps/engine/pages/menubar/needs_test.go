@@ -37,6 +37,7 @@ func needsFleet() NeedsReading {
 			{Name: "linux-3", Mac: needsMini, Lifetime: model.Ephemeral, State: model.Running},
 		}},
 	}}
+	standUnsent(&all)
 	exposed := ports.AllMachines{Macs: []ports.MacPorts{{Name: needsPro, ThisMac: true, Reachable: true, Ports: []ports.Port{
 		{Machine: machine.Ref{Name: needsPro}, Port: 5000, Process: "ControlCenter", Reach: ports.Outside},
 		{Machine: machine.Ref{Name: "linux-1", On: needsPro}, Port: 5173, Process: "node", Reach: ports.Tailnet},

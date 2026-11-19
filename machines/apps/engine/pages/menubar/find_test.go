@@ -79,6 +79,7 @@ func findFleetDown() FindReading {
 	infra.State, infra.Cause = model.Stopped, "out of memory"
 	infra.Restarts = model.Restarts{Count: 5, Streak: 5, Looping: true}
 	infra.CheckStatus = model.CheckStatus{State: model.CheckFailing, Since: time.Date(2026, 11, 7, 15, 10, 0, 0, time.UTC)}
+	standUnsent(r.All)
 	return r
 }
 

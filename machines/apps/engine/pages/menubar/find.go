@@ -242,7 +242,7 @@ func (f finder) vm(h model.MacView, vm model.VM) entry {
 // since when, a server's health, else the VM's own.
 func (f finder) state(vm model.VM) (string, page.Signal, page.Dot) {
 	switch {
-	case model.Down(vm):
+	case vm.Standing == model.StandingDown:
 		if since := vm.CheckStatus.Since; !since.IsZero() {
 			return "down since " + f.at(since), page.SignalFailing, page.DotFill
 		}
@@ -461,7 +461,7 @@ func (f finder) restart(h model.MacView, vm model.VM) entry {
 		verb = restartServer(vm, model.Label(*f.r.All, h)).action(f.r.Asks, verb)
 	}
 	switch {
-	case model.Down(vm):
+	case vm.Standing == model.StandingDown:
 		row.Detail = page.Text("down")
 	case verb.Confirm != nil:
 		row.Detail = page.Text("asks first")

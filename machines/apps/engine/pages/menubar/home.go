@@ -352,7 +352,7 @@ func (h homeReading) portsRow() *page.Row {
 				shared++
 				if vm, ok := h.vm(p.Machine.Name); ok && vm.Restart != nil {
 					starting++
-				} else if ok && model.Down(vm) {
+				} else if ok && vm.Standing == model.StandingDown {
 					unreachable++
 				}
 			}

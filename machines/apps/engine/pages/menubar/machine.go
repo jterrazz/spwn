@@ -119,7 +119,7 @@ func vmHead(m Machine, h model.MacView, vm model.VM) (page.Page, page.Section) {
 	if vm.State != model.Running {
 		head.Mark, head.Reason = page.Absent, page.Stopped
 	}
-	if model.Down(vm) {
+	if vm.Standing == model.StandingDown {
 		head.Mark, head.Reason = page.Broken, page.Down
 	}
 	caption := []page.Value{page.Text(model.KindWord(kind) + " VM"), pagemachines.Lifetime(vm.Lifetime), page.Text("on " + on)}
