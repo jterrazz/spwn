@@ -15,4 +15,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          ["stopped","not-created","linux-2 was not created: it failed at boot.","linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it",["start"],true,"booting","Failed at boot 2 of 4"]
+          ["stopped","not-created","linux-2 was not created: it failed at boot.","linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it",["try-again"],true,"booting","Failed at boot 2 of 4"]

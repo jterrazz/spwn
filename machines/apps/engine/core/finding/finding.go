@@ -53,8 +53,11 @@ type Finding struct {
 	Text     string
 	// value: the sentence under the finding's title, empty when the model
 	// tells none.
-	Detail  string `json:",omitempty"`
-	Fix     Fix
+	Detail string `json:",omitempty"`
+	Fix    Fix
+	// value: its fix runs again what failed to begin, as a create's start
+	// does, so a client words its button "Try again", not its call's.
+	Again   bool
 	Urgency Urgency
 	// value: when an expiring finding expires.
 	Ends time.Time

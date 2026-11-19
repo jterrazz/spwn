@@ -726,7 +726,8 @@
             "enum": [
               "start",
               "stop",
-              "restart"
+              "restart",
+              "try-again"
             ],
             "type": "string"
           },

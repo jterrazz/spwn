@@ -242,6 +242,12 @@ func wordedEnums() []worded {
 		{machines.VMStanding(""), standingWords()},
 		{machines.MacStanding(""), macStandingWords()},
 		{machines.RollUpState(""), rollUpWords()},
+		{machines.Gesture(""), map[string]word{
+			string(machines.GestureStart):    plain("Start"),
+			string(machines.GestureStop):     plain("Stop"),
+			string(machines.GestureRestart):  plain("Restart"),
+			string(machines.GestureTryAgain): plain("Try again"),
+		}},
 		{machines.HoldState(""), map[string]word{
 			string(machines.HoldAlwaysOn): plain("Always on"),
 			string(machines.HoldHeld):     toned(verdict.Warn, "Held"),
@@ -273,6 +279,7 @@ func wordedEnums() []worded {
 			string(overview.VerbReview):      plain("Review"),
 			string(overview.VerbRestart):     plain("Restart"),
 			string(overview.VerbStart):       plain("Start"),
+			string(overview.VerbTryAgain):    plain("Try again"),
 			string(overview.VerbUpdate):      plain("Update"),
 			string(overview.VerbRemove):      plain("Remove"),
 			string(overview.VerbMove):        plain("Move"),

@@ -1827,6 +1827,7 @@
             "review",
             "restart",
             "start",
+            "try-again",
             "update",
             "remove",
             "move",

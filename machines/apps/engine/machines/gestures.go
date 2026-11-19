@@ -6,19 +6,24 @@ const (
 	GestureStart   Gesture = "start"
 	GestureStop    Gesture = "stop"
 	GestureRestart Gesture = "restart"
+	// value: the start of a VM whose create failed, worded apart from the
+	// start of a VM its owner stopped: it finishes a create, it does not
+	// resume a VM.
+	GestureTryAgain Gesture = "try-again"
 )
 
 func (Gesture) Enum() []string {
-	return []string{string(GestureStart), string(GestureStop), string(GestureRestart)}
+	return []string{string(GestureStart), string(GestureStop), string(GestureRestart), string(GestureTryAgain)}
 }
 
 func GesturesOf(vm VM) []Gesture {
 	// invariant: what a machine's header offers is what its state allows: a
 	// running one stops, a running server also restarts, a stopped one
 	// starts; a VM in any other state offers none. A VM whose create
-	// failed offers start whatever its state: a start finishes its create.
+	// failed offers try-again whatever its state: that start finishes its
+	// create.
 	if vm.Birth != nil && vm.Birth.Failed {
-		return []Gesture{GestureStart}
+		return []Gesture{GestureTryAgain}
 	}
 	switch vm.State {
 	case Running:

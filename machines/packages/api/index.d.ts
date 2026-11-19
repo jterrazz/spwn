@@ -801,6 +801,7 @@ export type CoreCallWireError = {
 };
 
 export type CoreFindingFinding = {
+    Again: boolean;
     Detail?: string;
     Ends: string;
     Fix: CoreFindingFix;
@@ -2087,7 +2088,7 @@ export type MachinesVM = {
     Detail: string;
     Device: string;
     Drift?: MachinesKeptDrift;
-    Gestures?: ('start' | 'stop' | 'restart')[];
+    Gestures?: ('start' | 'stop' | 'restart' | 'try-again')[];
     Guest: string;
     Head?: CoreVerdictVerdict;
     Health?: CoreVerdictVerdict;
@@ -2219,7 +2220,7 @@ export type OverviewNeed = {
     Subject: string;
     Text: string;
     Upkeep: 'needs-you' | 'can-wait';
-    Verb: 'review' | 'restart' | 'start' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
+    Verb: 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
 };
 
 export type OverviewPart = {
@@ -3560,6 +3561,8 @@ export type MachinesCheckState = 'waiting' | 'passing' | 'failing';
 
 export type MachinesFit = 'fits' | 'no-room';
 
+export type MachinesGesture = 'start' | 'stop' | 'restart' | 'try-again';
+
 export type MachinesHoldState = 'always-on' | 'held' | 'free' | 'yours' | 'not-seen';
 
 export type MachinesLifetime = 'ephemeral' | 'persistent' | 'always-on';
@@ -3578,7 +3581,7 @@ export type OverviewMark = 'exposed' | 'down' | 'needs-you' | 'can-wait';
 
 export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
-export type OverviewVerb = 'review' | 'restart' | 'start' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
+export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
 
 export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant';
 
@@ -3635,6 +3638,7 @@ export type StationWords = {
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
     MachinesCheckState: Record<MachinesCheckState, StationWord>;
     MachinesFit: Record<MachinesFit, StationWord>;
+    MachinesGesture: Record<MachinesGesture, StationWord>;
     MachinesHoldState: Record<MachinesHoldState, StationWord>;
     MachinesLifetime: Record<MachinesLifetime, StationWord>;
     MachinesMacStanding: Record<MachinesMacStanding, StationWord>;

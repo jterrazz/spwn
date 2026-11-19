@@ -57,8 +57,8 @@ func TestAVMWhoseCreateFailedReadsNotCreatedAndOffersItsStart(t *testing.T) {
 	if head, _ := model.HeadOf(vm, b.mac.at); head.Sentence != "web was not created: it failed at boot." || !strings.HasPrefix(head.Line, "web did not boot") {
 		t.Errorf("web's head says %q, %q; want where its create failed, then why", head.Sentence, head.Line)
 	}
-	if g := model.GesturesOf(vm); !slices.Equal(g, []model.Gesture{model.GestureStart}) {
-		t.Errorf("web offers %v; want start, its create's retry", g)
+	if g := model.GesturesOf(vm); !slices.Equal(g, []model.Gesture{model.GestureTryAgain}) {
+		t.Errorf("web offers %v; want try-again, its create's start", g)
 	}
 	if err := b.m.CheckDelete("web"); err != nil {
 		t.Errorf("a delete of web, its create failed: %v; want it let through", err)

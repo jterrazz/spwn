@@ -201,7 +201,8 @@ func vmFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
 	case vm.State == Running && vm.Blocked == LocalNetworkBlock:
 		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On), finding.Fix{Path: LocalNetworkFix(ref.On)}
 	case s == StandingNotCreated:
-		f.Text, f.Fix = vm.Name+" was not created: it failed at "+vm.Birth.Step.Noun(), finding.Fix{Command: "station machines start " + vm.Name + on}
+		f.Text, f.Again = vm.Name+" was not created: it failed at "+vm.Birth.Step.Noun(), true
+		f.Fix = finding.Fix{Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: ref.On, Command: "station machines start " + vm.Name + on}
 	case server && vm.Restarts.Looping:
 		f.Text = vm.Name + " is in a loop: " + vm.Restarts.InALoop()
 	case server && vm.State == Stopped && vm.Detail == PoweredOffInside:

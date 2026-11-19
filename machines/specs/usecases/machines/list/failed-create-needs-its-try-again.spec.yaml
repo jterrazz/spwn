@@ -1,0 +1,18 @@
+description: 'the need of a VM whose create failed carries its start as a call worded try again'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Boot 1'
+      exit: 0
+    - command: 'machines create --memory 4G'
+      exit: 1
+      stderr: |
+          Error: linux-2 did not boot: the hypervisor refused to boot it, as the world scripted it
+          Hint: station machines start linux-2, or station machines delete linux-2
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary.Needs[] | select(.Subject == "linux-2") | [.Text, .Verb, .Call, .Args, .On]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          ["linux-2 was not created: it failed at boot","try-again","machines.start",{"VM":"linux-2"},"macbook-pro"]

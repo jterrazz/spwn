@@ -417,6 +417,9 @@
     "core.finding.Finding": {
       "additionalProperties": false,
       "properties": {
+        "Again": {
+          "type": "boolean"
+        },
         "Detail": {
           "type": "string"
         },
@@ -469,6 +472,7 @@
         }
       },
       "required": [
+        "Again",
         "Ends",
         "Fix",
         "Machine",

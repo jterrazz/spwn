@@ -1530,6 +1530,24 @@
       "Tone": "plain"
     }
   },
+  "MachinesGesture": {
+    "restart": {
+      "Word": "Restart",
+      "Tone": "plain"
+    },
+    "start": {
+      "Word": "Start",
+      "Tone": "plain"
+    },
+    "stop": {
+      "Word": "Stop",
+      "Tone": "plain"
+    },
+    "try-again": {
+      "Word": "Try again",
+      "Tone": "plain"
+    }
+  },
   "MachinesHoldState": {
     "always-on": {
       "Word": "Always on",
@@ -1755,6 +1773,10 @@
     },
     "start-engine": {
       "Word": "Start the engine",
+      "Tone": "plain"
+    },
+    "try-again": {
+      "Word": "Try again",
       "Tone": "plain"
     },
     "update": {

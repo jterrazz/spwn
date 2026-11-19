@@ -24,12 +24,14 @@ it had been made.
 2. **It is a standing of its own, `not-created`**, after `creating` in ADR-054's list, tone bad.
    Its head is `<name> was not created: it failed at <step>.`, its line the cause. It is a finding
    with the same words, broken, its fix its start.
-3. **Its gesture is `start`, and a start is the create's retry.** On such a VM a start runs it,
+3. **Its gesture is `try-again`, and its start is the create's retry.** On such a VM `machines.start` runs it,
    then does the create's set-up from the first boot on (its first boot, its server's SSH wait, its
    `vm_ready`). The birth goes once that set-up answers, or stays failed at the step that failed
    again. A Machinefile's boot steps are not run again: they are `station apply`'s, and the head's
-   reading of the file tells what is missing. No new gesture: `start` already says it and is
-   already drawn. `delete` stays out of the gestures, because the page offers it for every VM.
+   reading of the file tells what is missing. The call stays `machines.start`; the word is the
+   engine's: the `Gesture` `try-again` (words.json `Try again`) in the header's `Gestures`, and the
+   need's `Verb` `try-again`, never `Start`, which says a VM its owner stopped is resumed.
+   `delete` stays out of the gestures, because the page offers it for every VM.
 4. **A delete takes the birth off with the record.** The birth lives in the record store, so it
    outlives the engine's restart.
 

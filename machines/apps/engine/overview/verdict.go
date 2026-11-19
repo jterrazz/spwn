@@ -26,6 +26,7 @@ const (
 	VerbReview      Verb = "review"
 	VerbRestart     Verb = "restart"
 	VerbStart       Verb = "start"
+	VerbTryAgain    Verb = "try-again"
 	VerbUpdate      Verb = "update"
 	VerbRemove      Verb = "remove"
 	VerbMove        Verb = "move"
@@ -34,7 +35,7 @@ const (
 )
 
 func (Verb) Enum() []string {
-	return []string{string(VerbReview), string(VerbRestart), string(VerbStart), string(VerbUpdate), string(VerbRemove),
+	return []string{string(VerbReview), string(VerbRestart), string(VerbStart), string(VerbTryAgain), string(VerbUpdate), string(VerbRemove),
 		string(VerbMove), string(VerbStartEngine), string(VerbFix)}
 }
 
@@ -95,6 +96,9 @@ func VerbOf(f finding.Finding) Verb {
 	case "machines.restart":
 		return VerbRestart
 	case "machines.start":
+		if f.Again {
+			return VerbTryAgain
+		}
 		return VerbStart
 	}
 	if f.Section == section.Ports {
