@@ -1,0 +1,11 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./awake.all.light.view.yaml
+tokens:
+  Role.button: system 12 semibold t1
+added:
+- in group [kit=AwakePage] › group [kit=Panel]:
+  - dialog "Let mac-mini sleep?" [kit=AlertCard] [at=27,145] [size=268x150]:
+    - button "Cancel" [kit=PanelButton] [at=16,108] [size=114x28]:
+      - text "Cancel" [at=37,6.5] [size=40.5x15] [font=Role.button]
+    - button "Let it sleep" [kit=PanelButton] [at=138,108] [size=114x28]:
+      - text "Let it sleep" [at=24.5,6.5] [size=65x15] [font=Role.button]

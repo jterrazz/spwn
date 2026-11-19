@@ -763,7 +763,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![awake.all](stories/awake.all.png) ![awake.all light](stories/awake.all.light.png)
 
 - **Capture**: [dark](stories/awake.all.png), [light](stories/awake.all.light.png)
-- **Shows**: Awake · All Macs: This Mac (Keep This Mac awake switch, segments 1 hr / 4 hr / Until 18:00, With the lid closed, On battery), the footnote "linux-1 pauses while This Mac sleeps"; mac-mini "Never sleeps · hosts infra" with Change…; macbook-air "May sleep · asleep · nothing depends on it".
+- **Shows**: Awake · All Macs: This Mac (Keep This Mac awake switch, segments 1 hr / 4 hr / Until 18:00, With the lid closed, On battery), under its card the note "linux-1 pauses while This Mac sleeps"; mac-mini "Never sleeps · hosts infra" with Change…; macbook-air "May sleep · asleep · nothing depends on it".
 - **Data**: awake state of This Mac (on, mode, until, lid, battery); each Mac's sleep policy and dependants
 - **Interactions**: "All machines" → back; "Keep This Mac awake (switch)" → awakeToggle; "1 hr" → awakeFor(1h); "4 hr" → awakeFor(4h); "Until 18:00" → awakeFor(until); "With the lid closed (switch)" → awakeOpt(lid); "On battery (switch)" → awakeOpt(battery); "Keep mac-mini awake" → awakeChange(mac-mini)
 - **Enters**: #panel: height 689px → 447px 340 ms smooth; .page: transform+opacity none 1 → translateX(-30%) 0 340 ms smooth; .page: transform translateX(100%) → none 340 ms smooth

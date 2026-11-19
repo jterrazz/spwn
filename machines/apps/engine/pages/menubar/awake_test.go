@@ -169,14 +169,14 @@ func TestAwakePauseLineListsOnlyRunningWork(t *testing.T) {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
 	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Pauses: []string{"linux-1"}}
 	p := awakeOf(t, []awake.Report{r})
-	if got := notes(sectionOf(p, SectionPauses)); !slices.Equal(got, []string{"linux-1 pauses while This Mac sleeps."}) {
+	if got := notes(sectionOf(p, SectionPauses)); !slices.Equal(got, []string{"linux-1 pauses while This Mac sleeps"}) {
 		t.Fatalf("the pause line says %q", got)
 	}
 	if p.Footer != nil {
 		t.Fatalf("Awake has a footer: %+v", p.Footer)
 	}
 	two := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", Pauses: []string{"agent-7f", "linux-1"}}})
-	if got := notes(sectionOf(two, SectionPauses)); !slices.Equal(got, []string{"agent-7f and linux-1 pause while This Mac sleeps."}) {
+	if got := notes(sectionOf(two, SectionPauses)); !slices.Equal(got, []string{"agent-7f and linux-1 pause while This Mac sleeps"}) {
 		t.Fatalf("two running workspaces say %q", got)
 	}
 	if s := sectionOf(awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this"}}), SectionPauses); s != nil {

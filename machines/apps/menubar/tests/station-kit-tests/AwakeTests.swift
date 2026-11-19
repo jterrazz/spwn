@@ -7,6 +7,16 @@ import XCTest
 final class AwakeTests: XCTestCase {
     func texts(_ values: [Value]?) -> [String] { (values ?? []).compactMap(\.text) }
 
+    // invariant: the work that pauses is a note under This Mac's card, not
+    // a block of its own; another Mac's card stands alone after it.
+    func testThePauseNoteIsDrawnUnderThisMacsCard() throws {
+        let json = #"{"sections":[{"id":"summary"},{"id":"this-mac","card":"flush"},{"id":"pauses","items":[{"note":{"text":"linux-1 pauses while This Mac sleeps"}}]},{"id":"mac-mini","card":"flush"}]}"#
+        let page = try JSONDecoder().decode(Page.self, from: Data(json.utf8))
+        let groups = AwakePage.groups(page.sections ?? [])
+        XCTAssertEqual(groups.map(\.section.id), ["this-mac", "mac-mini"])
+        XCTAssertEqual(groups.map(\.notes), [["linux-1 pauses while This Mac sleeps"], []])
+    }
+
     // invariant: AW-21: Keep awake for 4 h and Lid closed on This Mac are
     // awake.keep calls; Change… on mac-mini, which never sleeps, asks y/n
     // naming infra, and its yes is settings.off never-sleeps run on mac-mini.

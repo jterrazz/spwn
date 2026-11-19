@@ -1,0 +1,47 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(244 244 244 / 0.64)
+  Glass.window: 18
+  Pane.shades: [rgba(20 20 30 / 0.2) 30 24, rgba(20 20 30 / 0.1) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.18)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.55)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.sectionLabel: system 12 semibold section
+  Role.rowSub: system 11 regular t2
+  Metric.Panel.footer: [6, 12, 12, 12]
+tree:
+- group [kit=AwakePage] [at=24,24] [size=322x439.5]:
+  - group [kit=Panel] [at=0,0] [size=322x439.5] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+    - group [kit=Panel.header] [at=0,0] [size=322x89]:
+      - group [kit=MachineHeader] [at=14,10] [size=294x71]:
+        - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+        - text [kit=FactsLine] [at=0,56] [size=212.5x15] [font=Role.facts]
+    - group [kit=Panel.content] [at=0,89] [size=322x350.5]:
+      - heading "This Mac" [kit=CardLabel] [at=12,2] [size=298x16]:
+        - text "This Mac" [at=4,0.5] [size=53x15] [font=Role.sectionLabel]
+      - group [kit=Card] [at=12,22] [size=298x148.5]:
+        - listitem "" [kit=AwakeMac] [at=4,4] [size=290x34]:
+          - switch [kit=Switch] [at=250,8] [size=30x18]
+        - tablist [kit=Segmented] [at=44,38] [size=242x24]
+        - listitem "" [kit=AwakeMac] [at=4,76] [size=290x34]:
+          - switch [kit=Switch] [at=250,8] [size=30x18]
+        - listitem "" [kit=AwakeMac] [at=4,110.5] [size=290x34]:
+          - switch [kit=Switch] [at=250,8] [size=30x18]
+      - heading "mac-mini" [kit=CardLabel] [at=12,198.5] [size=298x16]:
+        - text "mac-mini" [at=4,0.5] [size=55.5x15] [font=Role.sectionLabel]
+      - group [kit=Card] [at=12,218.5] [size=298x46]:
+        - listitem "Change" [kit=AwakeMac] [at=4,4] [size=290x38] [state=on]:
+          - text [kit=FactsLine] [at=40,20.5] [size=190.5x14] [font=Role.rowSub]
+          - switch [kit=Switch] [at=250,10] [size=30x18] [state=on]
+      - heading "macbook-air" [kit=CardLabel] [at=12,272.5] [size=298x16]:
+        - text "macbook-air" [at=4,0.5] [size=74.5x15] [font=Role.sectionLabel]
+      - group [kit=Card] [at=12,292.5] [size=298x46]:
+        - listitem "" [kit=AwakeMac] [at=4,4] [size=290x38] [state=dimmed]:
+          - img "symbol:moon" [kit=GlyphView] [at=8,7] [size=24x24]
+          - text [kit=FactsLine] [at=40,20.5] [size=240x14] [font=Role.rowSub]
+    - group [kit=Panel.footer] [at=0,439.5] [size=0x0]

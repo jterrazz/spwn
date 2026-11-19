@@ -155,13 +155,13 @@ const sleepsAsUsual = "Sleeps as usual"
 
 func capital(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
 
-// value: the running work that pauses while This Mac sleeps, under its
-// card; none, no line (SPEC A9 1-11).
+// value: the running work that pauses while This Mac sleeps, a note right
+// under its card, one sentence with no period; none, no line (SPEC A9 1-11).
 func pausing(r awake.Report) (page.Section, bool) {
 	if len(r.Pauses) == 0 {
 		return page.Section{}, false
 	}
-	line := strings.Join(r.Pauses, " and ") + " " + pluralVerb(len(r.Pauses), "pauses", "pause") + " while This Mac sleeps."
+	line := strings.Join(r.Pauses, " and ") + " " + pluralVerb(len(r.Pauses), "pauses", "pause") + " while This Mac sleeps"
 	return page.Section{ID: SectionPauses, Title: "While This Mac sleeps", Uncounted: true, Items: []page.Item{{Note: &page.Note{Text: line}}}}, true
 }
 

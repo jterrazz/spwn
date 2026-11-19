@@ -36,8 +36,11 @@ public struct AwakePage: View {
             MachineHeader(page, segment: nil, back: handlers.back)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
-                ForEach(Array((page.sections ?? []).filter { $0.id != "summary" }.enumerated()), id: \.offset) { _, s in
-                    section(s)
+                ForEach(Array(Self.groups(page.sections ?? []).enumerated()), id: \.offset) { _, g in
+                    VStack(alignment: .leading, spacing: Token.Metric.Awake.noteTop) {
+                        section(g.section)
+                        ForEach(Array(g.notes.enumerated()), id: \.offset) { _, n in note(n) }
+                    }
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
@@ -70,6 +73,29 @@ public struct AwakePage: View {
             .lineSpacing(Token.Metric.Footnote.lineSpacing)
             .fixedSize(horizontal: false, vertical: true)
             .padding(Token.Metric.Footnote.padding)
+    }
+
+    // value: a note under a group, the board's: secondary, on the content
+    // edge, 6 pt under the card it speaks of.
+    func note(_ text: String) -> some View {
+        Text(text).font(Token.Role.rowSub.font).foregroundStyle(tokens.tone(Token.Role.rowSub.tone))
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, Token.Metric.Row.padding)
+    }
+
+    // invariant: a section of notes alone (the work that pauses) is drawn
+    // under the card before it, never as a block of its own; the summary
+    // is the header's, never a block.
+    public static func groups(_ sections: [Section]) -> [(section: Section, notes: [String])] {
+        var out: [(section: Section, notes: [String])] = []
+        for s in sections where s.id != "summary" {
+            if s.card == nil, !out.isEmpty, out[out.count - 1].section.card != nil {
+                out[out.count - 1].notes += s.notes
+            } else {
+                out.append((s, []))
+            }
+        }
+        return out
     }
 
     func hairline() -> some View {
