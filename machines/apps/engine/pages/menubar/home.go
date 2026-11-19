@@ -25,6 +25,9 @@ const (
 	RowPorts    = "ports"
 	RowAccounts = "accounts"
 
+	KeyPorts    = "cmd+p"
+	KeyAccounts = "cmd+u"
+
 	RowAddMac = "add-mac"
 
 	ActionNewVMOn = "new-vm:"
@@ -324,7 +327,7 @@ func (h homeReading) shortcuts() (page.Section, page.Action) {
 // exposed, or what a server down leaves unreachable; what a server
 // restarting is starting.
 func (h homeReading) portsRow() *page.Row {
-	row := &page.Row{ID: RowPorts, Label: "Ports", Mark: page.OK, Glyph: symbol("network", page.SignalQuiet), Nav: PortsID, Trail: "value"}
+	row := &page.Row{ID: RowPorts, Label: "Ports", Mark: page.OK, Glyph: symbol("network", page.SignalQuiet), Nav: PortsID, Key: KeyPorts, Trail: "value"}
 	if h.r.Ports == nil {
 		row.Cells = []page.Value{page.Pending()}
 		return row
@@ -376,7 +379,7 @@ func (h homeReading) vm(name string) (model.VM, bool) {
 // value: the Accounts row: what is signed out on any Mac, as its upkeep
 // says it, else how many passwords are granted to machines.
 func (h homeReading) accountsRow() *page.Row {
-	row := &page.Row{ID: RowAccounts, Label: "Accounts", Mark: page.OK, Glyph: symbol("key", page.SignalQuiet), Nav: AccountsID, Trail: "value"}
+	row := &page.Row{ID: RowAccounts, Label: "Accounts", Mark: page.OK, Glyph: symbol("key", page.SignalQuiet), Nav: AccountsID, Key: KeyAccounts, Trail: "value"}
 	out := 0
 	for _, n := range h.upkeep {
 		if n.Finding.Section == section.Accounts {

@@ -2569,6 +2569,7 @@ export type PageRow = {
     glyph?: PageGlyph;
     hint?: PageHint;
     id?: string;
+    key?: string;
     label?: string;
     left?: PageValue;
     mac?: string;

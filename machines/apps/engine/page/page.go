@@ -350,6 +350,7 @@ type Row struct {
 	Trail    string   `json:"trail,omitempty"`
 	Verb     string   `json:"verb,omitempty"`
 	Quick    string   `json:"quick,omitempty"`
+	Key      string   `json:"key,omitempty"`
 	Nav      ID       `json:"nav,omitempty"`
 	Menu     []string `json:"menu,omitempty"`
 	Signal   Signal   `json:"signal,omitempty"`

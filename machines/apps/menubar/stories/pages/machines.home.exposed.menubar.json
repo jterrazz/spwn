@@ -1238,6 +1238,7 @@
               "signal": "quiet"
             },
             "trail": "value",
+            "key": "cmd+p",
             "nav": "menubar.ports"
           }
         },
@@ -1258,6 +1259,7 @@
               "signal": "quiet"
             },
             "trail": "value",
+            "key": "cmd+u",
             "nav": "menubar.accounts"
           }
         }

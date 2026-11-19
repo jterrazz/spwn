@@ -289,6 +289,9 @@ func TestTheShortcutRowsSayOneValueEach(t *testing.T) {
 	if cell(RowPorts).Text != "1 shared" || homeRow(t, s, RowPorts).Nav != PortsID || cell(RowAccounts).Text != "1 granted" || cell(RowAwake).Text != "until 18:00" {
 		t.Fatalf("cells %+v %+v %+v", cell(RowPorts), cell(RowAccounts), cell(RowAwake))
 	}
+	if homeRow(t, s, RowPorts).Key != "cmd+p" || homeRow(t, s, RowAccounts).Key != "cmd+u" || homeRow(t, s, RowAwake).Key != "" {
+		t.Fatalf("keys %q %q %q", homeRow(t, s, RowPorts).Key, homeRow(t, s, RowAccounts).Key, homeRow(t, s, RowAwake).Key)
+	}
 	if toggle := actionOf(p, homeRow(t, s, RowAwake).Verb); toggle.ID != ActionAwakeOff || !toggle.Picked {
 		t.Fatalf("its switch %+v", toggle)
 	}

@@ -361,8 +361,8 @@ func (f finder) sections() []entry {
 		tags                          []string
 	}{
 		{"needs", "Needs you", "", "exclamationmark.circle", "", NeedsID, []string{"needs", "upkeep", "updates"}},
-		{"ports", "Ports", "All machines", "network", "cmd+p", PortsID, []string{"ports", "every", "machines"}},
-		{"accounts", "Accounts", "All machines", "key", "cmd+u", AccountsID, []string{"accounts", "sign-in", "grant", "password"}},
+		{"ports", "Ports", "All machines", "network", KeyPorts, PortsID, []string{"ports", "every", "machines"}},
+		{"accounts", "Accounts", "All machines", "key", KeyAccounts, AccountsID, []string{"accounts", "sign-in", "grant", "password"}},
 		{"awake", "Awake", "All Macs", "sun.max", "cmd+e", AwakeID, []string{"awake", "sleep"}},
 	}
 	for _, s := range every {

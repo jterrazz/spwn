@@ -31,7 +31,7 @@ func everyField() page.Page {
 		Cells:  []page.Value{cpu},
 		Detail: page.List(on, since), Reason: page.Waiting, Hint: hint,
 		Glyph: page.Glyph{Kind: "workspace", Signal: page.SignalWaits, Dot: page.DotPing, Ring: "cpu:linux-1", Spin: true, Progress: 400},
-		Mac:   "mac-mini", Trail: "value", Verb: "reply", Quick: "copy", Nav: "menubar.machine:linux-1",
+		Mac:   "mac-mini", Trail: "value", Verb: "reply", Quick: "copy", Key: "cmd+p", Nav: "menubar.machine:linux-1",
 		Menu: []string{"copy", "-", "delete"}, Signal: page.SignalAsleep, Fresh: true,
 		Left:  &page.Value{Kind: page.KindUntil, N: 1350, Of: 3600},
 		Birth: &page.Value{Kind: page.KindCount, N: 400, Of: 1000},

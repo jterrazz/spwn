@@ -119,5 +119,7 @@ final class AtomTests: XCTestCase {
         XCTAssertEqual(Token.Key.cap("cmd+enter"), "⌘↩")
         XCTAssertEqual(Token.Key.cap("opt+enter"), "⌥↩")
         XCTAssertEqual(Token.Key.cap("shift+cmd+p"), "⇧⌘P")
+        XCTAssertEqual(Token.Key.shown("cmd+p"), "⌘P")
+        XCTAssertEqual(Token.Key.shown("cmd+u"), "⌘U")
     }
 }

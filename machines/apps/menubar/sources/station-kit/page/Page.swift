@@ -233,6 +233,7 @@ public struct Row: Codable, Equatable, Sendable {
     public var trail: String?
     public var verb: String?
     public var quick: String?
+    public var key: String?
     public var nav: String?
     public var menu: [String]?
     public var signal: String?

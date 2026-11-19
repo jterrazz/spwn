@@ -1006,6 +1006,9 @@
         "id": {
           "type": "string"
         },
+        "key": {
+          "type": "string"
+        },
         "label": {
           "type": "string"
         },

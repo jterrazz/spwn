@@ -143,6 +143,7 @@
             "trail": "value",
             "verb": "reply",
             "quick": "copy",
+            "key": "cmd+p",
             "nav": "menubar.machine:linux-1",
             "menu": [
               "copy",

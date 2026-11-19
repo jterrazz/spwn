@@ -139,6 +139,7 @@ public struct RowView: View {
                     .rowPart(.quick)
             }
             trailing.opacity(stale ? m.staleShare : 1)
+            keyEquivalent
             control
         }
         .padding(.horizontal, m.padding)
@@ -214,6 +215,17 @@ public struct RowView: View {
             } else {
                 LiveText(value, role: home ? .homeValue : .rowValue).fixedSize().rowPart(.trail)
             }
+        }
+    }
+
+    @ViewBuilder var keyEquivalent: some View {
+        if let key = row.key {
+            Text(Token.Key.shown(key))
+                .font((home ? Token.Role.homeValue : Token.Role.rowValue).font)
+                .foregroundStyle(tokens.color.t3)
+                .lineLimit(1)
+                .fixedSize()
+                .accessibilityHidden(true)
         }
     }
 
