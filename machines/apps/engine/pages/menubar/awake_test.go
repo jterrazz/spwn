@@ -34,6 +34,21 @@ func TestAwakeOffersTheSwitchesThisMacHas(t *testing.T) {
 	}
 }
 
+// invariant: This Mac's switches read as the board words them: "With the
+// lid closed" and "On battery", under the Keep awake row.
+func TestThisMacsSwitchesReadAsTheBoardWordsThem(t *testing.T) {
+	now := time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)
+	p := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", Caps: machine.Capabilities{Engine: true, Lid: true, Battery: true}}})
+	items := sectionOf(p, SectionThisMac).Items[1:]
+	got := make([]string, 0, len(items))
+	for _, it := range items {
+		got = append(got, it.Row.Label)
+	}
+	if want := []string{"With the lid closed", "On battery"}; !slices.Equal(got, want) {
+		t.Fatalf("This Mac's switches read %q, want %q", got, want)
+	}
+}
+
 // invariant: Keep awake for… shows the term in force: the one the session
 // was taken for, else Until; nothing while This Mac sleeps normally.
 func TestKeepAwakeForPicksTheTermInForce(t *testing.T) {

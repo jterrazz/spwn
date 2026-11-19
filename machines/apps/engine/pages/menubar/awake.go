@@ -140,11 +140,11 @@ func thisMac(r awake.Report, zone *time.Location) page.Section {
 	s.Items = append(s.Items, page.Item{Row: &keep})
 	lid, battery := held && r.Session.Lid, held && r.Session.Battery
 	if r.Caps.Lid {
-		row := page.Row{ID: RowLid, Label: "Stay awake with the lid closed", Glyph: symbol("laptopcomputer", page.SignalQuiet), Cells: switched(lid), Verb: ActionLid, Mark: page.OK}
+		row := page.Row{ID: RowLid, Label: "With the lid closed", Glyph: symbol("laptopcomputer", page.SignalQuiet), Cells: switched(lid), Verb: ActionLid, Mark: page.OK}
 		s.Items = append(s.Items, page.Item{Row: &row})
 	}
 	if r.Caps.Battery {
-		row := page.Row{ID: RowBattery, Label: "Stay awake on battery", Glyph: symbol("battery.75percent", page.SignalQuiet), Cells: switched(battery), Verb: ActionBattery, Mark: page.OK}
+		row := page.Row{ID: RowBattery, Label: "On battery", Glyph: symbol("battery.75percent", page.SignalQuiet), Cells: switched(battery), Verb: ActionBattery, Mark: page.OK}
 		s.Items = append(s.Items, page.Item{Row: &row})
 	}
 	return s

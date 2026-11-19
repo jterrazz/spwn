@@ -1,8 +1,7 @@
 Keep awake  Which Mac may sleep, and until when
 
 This Mac
-  ● Awake until 18:00      on
-  ● Stay awake with the lid closed
-    on
-  ● Stay awake on battery  off
+  ● Awake until 18:00    on
+  ● With the lid closed  on
+  ● On battery           off
 mac-mini  ● Never sleeps · on · hosts infra, which pauses if it sleeps
