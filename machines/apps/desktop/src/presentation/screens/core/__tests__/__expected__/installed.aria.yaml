@@ -1,0 +1,38 @@
+- navigation "Sidebar":
+  - button "Find" [disabled]
+  - button "Home"
+  - button "Inbox" [disabled]
+  - button "Machine files" [disabled]
+  - button "Passwords" [disabled]
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - paragraph: Start the engine to see them
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps" [disabled]
+    - button "Skills" [disabled]
+    - button "Settings" [disabled]
+  - button "Storage" [disabled]
+  - img "installed"
+  - text: Engine not started
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Home
+  - region "spwn on this Mac":
+    - text: installed
+    - heading "spwn is installed. Start the engine next." [level=1]
+    - paragraph: The engine runs your machines. The installer does not start it, so nothing runs yet.
+    - paragraph: On this Mac
+    - list "On this Mac":
+      - listitem: station The engine and its CLI ~/.local/bin
+      - listitem: spwn The agents ~/.local/bin
+    - paragraph: Starting the engine
+    - list "Starting the engine":
+      - listitem: Names this Mac From the Mac's own name
+      - listitem: Runs at login From now on the engine starts with the Mac
+      - listitem: Asks once macOS asks to let station reach the local network
+    - button "Start the engine"
+    - button "Later"
+    - text: station engine start

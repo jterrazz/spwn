@@ -1,0 +1,247 @@
+.center {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    padding: var(--space-24);
+}
+
+.panel {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    max-width: 600px;
+    padding: var(--space-24);
+    background: var(--panel);
+    border-radius: var(--radius-panel);
+}
+
+.mark {
+    width: 30px;
+    height: 28px;
+    color: var(--t1);
+}
+
+.pill {
+    display: flex;
+}
+
+.head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.title {
+    margin: 0;
+    font-size: var(--text-tab-verdict);
+    font-weight: var(--weight-strong);
+    line-height: 1.2;
+    color: var(--t1);
+    overflow-wrap: anywhere;
+}
+
+.lead {
+    margin: 0;
+    font-size: var(--text-row);
+    line-height: 1.4;
+    color: var(--t2);
+}
+
+.mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+}
+
+.rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.caption {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+
+.list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 124px 1fr auto;
+    gap: var(--space-12);
+    align-items: baseline;
+    padding: var(--space-8) 0;
+    font-size: var(--text-body);
+    border-bottom: 1px solid var(--line);
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.key {
+    color: var(--t1);
+}
+
+.keyMono {
+    font-family: var(--font-mono);
+    color: var(--t1);
+}
+
+.value {
+    color: var(--t2);
+}
+
+.place {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--t2);
+    text-align: right;
+}
+
+.assure {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8) 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-body);
+    color: var(--t2);
+}
+
+.assure li {
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+}
+
+.assure svg {
+    width: 14px;
+    height: 14px;
+    color: var(--ok);
+    stroke-width: 1.8;
+}
+
+.command {
+    display: flex;
+    gap: var(--space-12);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-6) var(--space-8) var(--space-6) var(--space-14);
+    background: var(--inset);
+    border-radius: var(--radius-well);
+}
+
+.code {
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-body);
+    color: var(--t1);
+    overflow-wrap: anywhere;
+}
+
+.prompt {
+    color: var(--t4);
+}
+
+.status {
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
+    margin: 0;
+    font-size: var(--text-body);
+    color: var(--t1);
+}
+
+.aside {
+    color: var(--t3);
+}
+
+.spinner {
+    box-sizing: border-box;
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--line-2);
+    border-top-color: var(--new);
+    border-radius: var(--radius-pill);
+    animation: spin 0.9s linear infinite;
+}
+
+.progress {
+    position: relative;
+    height: 3px;
+    overflow: hidden;
+    background: var(--line);
+    border-radius: var(--radius-pill);
+}
+
+.progress::after {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 30%;
+    content: '';
+    background: var(--new);
+    border-radius: var(--radius-pill);
+    animation: sweep 1.4s ease-in-out infinite;
+}
+
+.output {
+    max-height: 210px;
+    padding: var(--space-12) var(--space-14);
+    overflow: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    line-height: 21px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--inset);
+    border-radius: var(--radius-well);
+}
+
+.line {
+    color: var(--t1);
+}
+
+.err {
+    color: var(--bad);
+}
+
+.acts {
+    display: flex;
+    gap: var(--space-16);
+    align-items: center;
+}
+
+.grow {
+    flex: 1;
+}
+
+.fine {
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+@keyframes sweep {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(340%);
+    }
+}

@@ -1,11 +1,13 @@
-import { invoke } from '@tauri-apps/api/core';
+import { Channel, invoke } from '@tauri-apps/api/core';
 
+import type { CorePort } from '../application/ports/core.port';
 import type { Link } from '../application/ports/engine.port';
 import type { OpenerPort } from '../application/ports/opener.port';
+import { tauriCore } from '../infrastructure/outbound/core-tauri/tauri-core';
 import { documentPresence } from '../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../infrastructure/outbound/engine-link/client';
 import type { Transport } from '../infrastructure/outbound/engine-link/transport';
-import { replayTransport } from '../infrastructure/outbound/engine-replay/replay';
+import { replayTransport, stagedReplay } from '../infrastructure/outbound/engine-replay/replay';
 import type { Pace, Recording } from '../infrastructure/outbound/engine-replay/replay';
 import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
 import { NO_OPENER, tauriOpener } from '../infrastructure/outbound/opener-tauri/tauri-opener';
@@ -21,6 +23,14 @@ export type Replayed = {
     link?: Link | undefined;
     pace?: Pace | undefined;
     opener?: OpenerPort | undefined;
+    core?: CorePort | undefined;
+};
+
+const NO_ENGINE_YET: Link = {
+    kind: 'absent',
+    reason: 'connection refused',
+    retryIn: 30_000,
+    socket: '/Users/you/.local/state/station/engine.sock',
 };
 
 function absent(reason: string): Transport {
@@ -30,22 +40,59 @@ function absent(reason: string): Transport {
     );
 }
 
-async function transportOf({ inTauri, query }: Place): Promise<Transport> {
+type Composed = { transport: Transport; core?: CorePort | undefined; coreLookEvery?: number };
+
+const SCRIPTED_LOOK_EVERY = 500;
+
+async function scriptedOf(recording: Recording, script: string, pace: Pace): Promise<Composed> {
+    const { scriptOf } = await import('../infrastructure/outbound/core-scripted/scripts');
+    const found = scriptOf(script);
+    if (found === undefined) {
+        return { transport: replayTransport(recording, undefined, pace) };
+    }
+    const { scriptedCore } = await import('../infrastructure/outbound/core-scripted/scripted-core');
+    const stage = stagedReplay(recording, NO_ENGINE_YET, pace);
+    const opened: Link = {
+        hello: undefined,
+        kind: 'open',
+        refused: undefined,
+        socket: `replay of ${recording.world}`,
+    };
+    const core = scriptedCore(found, {
+        gap: pace.gestureFrame,
+        onStarted: () => {
+            stage.show(opened);
+        },
+    });
+    return { core, coreLookEvery: SCRIPTED_LOOK_EVERY, transport: stage.transport };
+}
+
+async function composedOf({ inTauri, query }: Place): Promise<Composed> {
     if (inTauri) {
-        return tauriTransport();
+        return {
+            core: tauriCore({ channel: (heard) => new Channel(heard), invoke }),
+            transport: tauriTransport(),
+        };
     }
     const world = query.get('world') ?? 'two-macs';
     if (!PROOF || world === 'none') {
-        return absent('no engine bridge outside the Tauri window');
+        return { transport: absent('no engine bridge outside the Tauri window') };
     }
     const { recordingFor } = await import('../infrastructure/outbound/engine-replay/recordings');
     const pace = { gestureFrame: Number(query.get('pace') ?? '0') };
-    return replayTransport(await recordingFor(world), undefined, pace);
+    const recording = await recordingFor(world);
+    const script = query.get('core');
+    return script === null
+        ? { transport: replayTransport(recording, undefined, pace) }
+        : await scriptedOf(recording, script, pace);
 }
 
 export async function compose(place: Place): Promise<Dependencies> {
+    const { core, coreLookEvery, transport } = await composedOf(place);
     return {
-        engine: new Client(await transportOf(place)),
+        core,
+        coreLookEvery,
+        engine: new Client(transport),
         opener: place.inTauri ? tauriOpener({ invoke }) : NO_OPENER,
         presence: documentPresence(),
     };
@@ -56,8 +103,10 @@ export function composeReplay({
     link,
     pace,
     opener = NO_OPENER,
+    core,
 }: Replayed): Dependencies {
     return {
+        core,
         engine: new Client(replayTransport(recording, link, pace)),
         opener,
         presence: documentPresence(),

@@ -9,30 +9,19 @@ import type { Reading } from '../dependencies/dependencies';
 import { Screen } from '../ui/index';
 import { Boundary } from './boundary';
 import { useCarried } from './carried';
+import { crumbsOf, TITLES } from './crumbs';
 import { Find } from './find';
 import { onTabKey, useShortcuts } from './keys';
 import { Lost, useLost } from './lost';
-import { machineRoute, OPENS_AN_ITEM, TAB_PANEL } from './route';
+import { NoEngine, useQuiet } from './no-engine';
+import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
 import { Sidebar } from './sidebar';
 import { Toolbar } from './toolbar';
-import type { Crumb } from './toolbar';
 import { actionOf } from './toolbar-action';
 
 import styles from './window.module.css';
-
-export const TITLES: Record<PlainPage, string> = {
-    home: 'Home',
-    inbox: 'Inbox',
-    storage: 'Storage',
-    'machine-files': 'Machine files',
-    passwords: 'Passwords',
-    'catalog-apps': 'Apps',
-    'catalog-skills': 'Skills',
-    'catalog-settings': 'Settings',
-    gallery: 'Gallery',
-};
 
 type Go = (to: Route) => void;
 
@@ -58,6 +47,7 @@ export type Pages = {
     Head: ComponentType<PageProps>;
     Body: ComponentType<PageProps>;
     Confirm: ComponentType;
+    Core: ComponentType;
     NewMachine: ComponentType<{ go: Go; onClose: () => void; opening: Opening }>;
     AddMac: ComponentType<{ go: Go; onClose: () => void }>;
     AddPassword: ComponentType<{ onClose: () => void }>;
@@ -86,37 +76,6 @@ type Sheet =
     | { kind: 'find' }
     | { kind: 'new-machine'; opening: Opening }
     | { kind: 'none' };
-
-type Crumbed = { route: Route; found: Found | undefined; go: Go; ItemName: Pages['ItemName'] };
-
-function crumbsOf({ route, found, go, ItemName }: Crumbed): Crumb[] {
-    if (route.page !== 'machine') {
-        const { page, item } = route;
-        if (item === undefined || !OPENS_AN_ITEM.has(page)) {
-            return [{ label: TITLES[page] }];
-        }
-        const shelf = {
-            label: TITLES[page],
-            open: () => {
-                go({ page });
-            },
-        };
-        return [shelf, { label: item, shown: <ItemName item={item} page={page} /> }];
-    }
-    if (found?.vm) {
-        const mac = found.mac.Name;
-        return [
-            {
-                label: mac,
-                open: () => {
-                    go(machineRoute(mac));
-                },
-            },
-            { label: found.vm.Name },
-        ];
-    }
-    return found ? [{ label: found.mac.Name }] : [{ label: route.machine }];
-}
 
 export function whereOf(route: Route): string {
     if (route.page === 'machine') {
@@ -232,7 +191,33 @@ function useSheets() {
     return { addMac, addPassword, close, find, newMachine, sheet, sidebar, toggleSidebar };
 }
 
-function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages: Pages }) {
+type FrameProps = { Gallery?: ComponentType | undefined; pages: Pages };
+
+function Frame(props: FrameProps) {
+    return useQuiet() ? <Quiet pages={props.pages} /> : <Answered {...props} />;
+}
+
+const UNFOUND = () => undefined;
+
+function Quiet({ pages }: { pages: Pages }) {
+    const { route, go } = useRouter();
+    const { rail } = useStation();
+    const [sidebar, setSidebar] = useState(true);
+    const toggleSidebar = useCallback(() => {
+        setSidebar((open) => !open);
+    }, []);
+    return (
+        <NoEngine
+            Core={pages.Core}
+            onToggleSidebar={toggleSidebar}
+            sidebar={
+                sidebar ? <Sidebar {...rail} go={go} onFind={UNFOUND} quiet route={route} /> : null
+            }
+        />
+    );
+}
+
+function Answered({ Gallery, pages }: FrameProps) {
     const router = useRouter();
     const { route, go, back, forward, canGoBack, canGoForward } = router;
     const { home, listed, macs, needs, rail } = useStation();

@@ -2,12 +2,13 @@ import { Suspense } from 'react';
 
 import { routeOfNeed } from '../features/overview/needs';
 import { GestureConfirm } from '../kit/gestures';
+import { TITLES } from '../navigation/crumbs';
 import type { PlainPage } from '../navigation/route';
-import { TITLES } from '../navigation/window';
 import type { PageProps, Pages } from '../navigation/window';
 import { AddMac } from './add-mac/add-mac';
 import { ItemPage } from './catalog/item';
 import { ShelfPage } from './catalog/shelf';
+import { CorePage } from './core/core';
 import { HomePage } from './home/home';
 import { InboxPage } from './inbox/inbox';
 import { MachineFilesPage } from './machine-files/machine-files';
@@ -123,6 +124,7 @@ export const PAGES: Pages = {
     AddPassword: AddPasswordSheet,
     Body,
     Confirm: GestureConfirm,
+    Core: CorePage,
     Head,
     ItemName,
     NewMachine,

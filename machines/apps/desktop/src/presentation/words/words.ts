@@ -6,6 +6,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
+import type { CoreKind } from '../../application/use-cases/core-flow';
 import type { DiskCall } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
@@ -34,6 +35,39 @@ export const OWN_STATE_WORDS = {
 } as const;
 
 export type OwnState = keyof typeof OWN_STATE_WORDS;
+
+export const CORE_WORDS: Words<CoreKind> = {
+    failed: 'failed',
+    installed: 'installed',
+    installing: 'installing',
+    looking: 'looking',
+    missing: 'not installed',
+    started: 'starting',
+    starting: 'starting',
+    waiting: 'waiting',
+};
+
+export const CORE_MACHINES_WORDS: Words<CoreKind> = {
+    failed: 'None yet',
+    installed: 'Start the engine to see them',
+    installing: 'None yet',
+    looking: 'None yet',
+    missing: 'None yet',
+    started: 'Start the engine to see them',
+    starting: 'Start the engine to see them',
+    waiting: 'None yet',
+};
+
+export const CORE_FOOT_WORDS: Words<CoreKind> = {
+    failed: 'No engine on this Mac',
+    installed: 'Engine not started',
+    installing: 'Installing spwn',
+    looking: 'No engine on this Mac',
+    missing: 'No engine on this Mac',
+    started: 'Engine starting',
+    starting: 'Engine starting',
+    waiting: 'No engine on this Mac',
+};
 
 export const NEWEST_WORD = 'newest';
 

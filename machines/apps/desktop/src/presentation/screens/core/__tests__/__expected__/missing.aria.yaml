@@ -1,0 +1,39 @@
+- navigation "Sidebar":
+  - button "Find" [disabled]
+  - button "Home"
+  - button "Inbox" [disabled]
+  - button "Machine files" [disabled]
+  - button "Passwords" [disabled]
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - paragraph: None yet
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps" [disabled]
+    - button "Skills" [disabled]
+    - button "Settings" [disabled]
+  - button "Storage" [disabled]
+  - img "not installed"
+  - text: No engine on this Mac
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Home
+  - region "spwn on this Mac":
+    - heading "spwn is not installed on this Mac." [level=1]
+    - paragraph: This window shows the machines the spwn engine runs. Install it here, then start the engine.
+    - paragraph: What it puts on this Mac
+    - list "What it puts on this Mac":
+      - listitem: "station The engine and its CLI: the machines ~/.local/bin"
+      - listitem: spwn The agents ~/.local/bin
+      - listitem: Links spwn-machines, spwn-agents ~/.local/bin
+      - listitem: "Shell profile One PATH line and two aliases, under # Added by spwn installer ~/.zshrc on zsh"
+    - list "What the install promises":
+      - listitem: No admin password
+      - listitem: Nothing is installed unless every checksum matches
+      - listitem: The engine is not started yet
+    - code: curl -fsSL https://spwn.sh/install.sh | bash
+    - button "Copy the install command": Copy
+    - button "Install"
+    - button "I'll install it from the terminal"

@@ -1,0 +1,31 @@
+- navigation "Sidebar":
+  - button "Find" [disabled]
+  - button "Home"
+  - button "Inbox" [disabled]
+  - button "Machine files" [disabled]
+  - button "Passwords" [disabled]
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - paragraph: None yet
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps" [disabled]
+    - button "Skills" [disabled]
+    - button "Settings" [disabled]
+  - button "Storage" [disabled]
+  - img "failed"
+  - text: No engine on this Mac
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Home
+  - region "spwn on this Mac":
+    - text: failed
+    - 'heading "Error: station-darwin-arm64 does not match its checksum, nothing installed" [level=1]'
+    - paragraph: The installer ended with exit code 1. Its output is kept below.
+    - log "The installer's output": "Detecting the newest release... Version: v0.21.0 Downloading spwn_darwin_arm64.tar.gz... Downloading station-darwin-arm64... Error: station-darwin-arm64 does not match its checksum, nothing installed"
+    - code: curl -fsSL https://spwn.sh/install.sh | bash
+    - button "Copy the install command": Copy
+    - button "Retry"
+    - button "I'll install it from the terminal"

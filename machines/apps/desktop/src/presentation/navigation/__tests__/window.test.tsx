@@ -139,12 +139,12 @@ describe('Window', () => {
                 <Window initial={{ page: 'home' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
-                // When - the window has heard from its transport
-                await visitor.see(heading('No engine answers at /run/engine.sock.'));
+                // When - the window has heard from its transport, and found no core on the disk
+                await visitor.see(heading('spwn is not installed on this Mac.'));
             },
         );
 
-        // Then - Home and the foot line say no engine answers at its socket, never an engine stopped
+        // Then - the sidebar is quiet, and Home is the one panel that offers the install
         await expect(result.tree).toMatch(file('./__expected__/no-engine-home.aria.yaml'));
     });
 

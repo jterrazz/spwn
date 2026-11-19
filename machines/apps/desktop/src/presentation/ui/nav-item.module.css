@@ -24,6 +24,14 @@
     background: var(--raise-2);
     color: var(--t1);
 }
+.item:disabled {
+    cursor: default;
+    color: var(--t4);
+    background: none;
+}
+.item:disabled > svg {
+    color: var(--t4);
+}
 .indent {
     padding-left: 20px;
 }

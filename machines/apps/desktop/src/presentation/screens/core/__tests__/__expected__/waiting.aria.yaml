@@ -1,0 +1,29 @@
+- navigation "Sidebar":
+  - button "Find" [disabled]
+  - button "Home"
+  - button "Inbox" [disabled]
+  - button "Machine files" [disabled]
+  - button "Passwords" [disabled]
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - paragraph: None yet
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps" [disabled]
+    - button "Skills" [disabled]
+    - button "Settings" [disabled]
+  - button "Storage" [disabled]
+  - img "waiting"
+  - text: No engine on this Mac
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Home
+  - region "spwn on this Mac":
+    - heading "Waiting for spwn on this Mac." [level=1]
+    - paragraph: Run the command in a terminal. This page moves on by itself when station appears.
+    - code: curl -fsSL https://spwn.sh/install.sh | bash
+    - button "Copy the install command": Copy
+    - status: Looking for station · every few seconds
+    - button "Install it here instead"

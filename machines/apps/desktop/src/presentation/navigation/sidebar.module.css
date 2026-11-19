@@ -67,6 +67,17 @@
     color: var(--t3);
     padding: 0 var(--space-8) var(--space-6);
 }
+.none {
+    margin: 0;
+    padding: 0 var(--space-8);
+    font-size: var(--text-label);
+    color: var(--t4);
+}
+.find:disabled {
+    cursor: default;
+    color: var(--t4);
+    background: var(--panel);
+}
 .foot {
     margin-top: auto;
     padding: var(--space-10) var(--space-8) var(--space-2);

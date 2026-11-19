@@ -16,6 +16,7 @@ export type NavItemProps = {
     indent?: boolean;
     count?: undefined | { value: number; urgent: boolean };
     state?: undefined | { tone: Tone; word: string };
+    disabled?: boolean;
 };
 
 export function NavItem({
@@ -27,11 +28,13 @@ export function NavItem({
     indent = false,
     count,
     state,
+    disabled = false,
 }: NavItemProps) {
     return (
         <button
             aria-current={current ? 'page' : undefined}
             className={`${styles.item} ${indent ? styles.indent : ''}`}
+            disabled={disabled}
             onClick={onSelect}
             type="button"
         >

@@ -7,6 +7,7 @@ import type {
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
+import type { CoreKind } from '../../application/use-cases/core-flow';
 import type { Tone } from '../../domain/tone';
 import type { OwnState } from './words';
 
@@ -24,6 +25,17 @@ export const OWN_STATE_TONES: Tones<OwnState> = {
     unknown: 'warn',
     untyped: 'bad',
     'window-error': 'plain',
+};
+
+export const CORE_TONES: Tones<CoreKind> = {
+    failed: 'bad',
+    installed: 'ok',
+    installing: 'new',
+    looking: 'plain',
+    missing: 'plain',
+    started: 'new',
+    starting: 'new',
+    waiting: 'new',
 };
 
 export const NEWEST_TONE: Tone = 'ok';

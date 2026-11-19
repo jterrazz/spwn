@@ -3,12 +3,13 @@ import type { EngineReadOutput, MachinesMacView, OverviewNeed } from '@jterrazz/
 import { machineNamesOf } from '../../domain/machines/machines';
 import { needsYou } from '../../domain/overview/upkeep';
 import { SEPARATOR } from '../../domain/separator';
-import { useReach } from '../dependencies/dependencies';
+import { useCore, useReach } from '../dependencies/dependencies';
 import type { Reading } from '../dependencies/dependencies';
 import { identityOf, MachineIcon, NavItem, StateDot } from '../ui/index';
 import { failedState } from '../words/failed';
 import { machineKindOf } from '../words/provisional';
-import { engineState, macState, ownState, vmState } from '../words/shown';
+import { coreState, engineState, macState, ownState, vmState } from '../words/shown';
+import { CORE_FOOT_WORDS, CORE_MACHINES_WORDS } from '../words/words';
 import type { Carried } from './carried';
 import { onListKey } from './keys';
 import { machineRoute } from './route';
@@ -24,17 +25,41 @@ export type SidebarProps = {
     route: Route;
     go: (to: Route) => void;
     onFind: () => void;
+    quiet?: boolean;
 };
 
-type Place = (page: PlainPage) => { current: boolean; onSelect: () => void };
+type Place = (page: PlainPage) => { current: boolean; disabled: boolean; onSelect: () => void };
 
-function placeOf(route: Route, go: SidebarProps['go']): Place {
+function placeOf(route: Route, go: SidebarProps['go'], quiet: boolean): Place {
     return (page) => ({
-        current: route.page === page,
+        current: quiet ? page === 'home' : route.page === page,
+        disabled: quiet && page !== 'home',
         onSelect: () => {
             go({ page });
         },
     });
+}
+
+function QuietMachines() {
+    const { state } = useCore();
+    return (
+        <div aria-labelledby="side-machines" className={styles.group} role="group">
+            <h2 className={styles.caption} id="side-machines">
+                Machines
+            </h2>
+            <p className={styles.none}>{CORE_MACHINES_WORDS[state.kind]}</p>
+        </div>
+    );
+}
+
+function QuietFoot() {
+    const { state } = useCore();
+    return (
+        <div className={styles.foot}>
+            <StateDot {...coreState(state.kind)} />
+            <span className={styles.footText}>{CORE_FOOT_WORDS[state.kind]}</span>
+        </div>
+    );
 }
 
 function Places({ needs, place }: { needs: readonly OverviewNeed[]; place: Place }) {
@@ -189,8 +214,19 @@ function Engine({ engine }: Pick<SidebarProps, 'engine'>) {
     );
 }
 
-export function Sidebar({ carried, macs, needs, engine, route, go, onFind }: SidebarProps) {
-    const place = placeOf(route, go);
+const UNCARRIED: Carried = { apps: undefined, settings: undefined, skills: undefined };
+
+export function Sidebar({
+    carried,
+    macs,
+    needs,
+    engine,
+    route,
+    go,
+    onFind,
+    quiet = false,
+}: SidebarProps) {
+    const place = placeOf(route, go, quiet);
     return (
         <nav aria-label="Sidebar" className={styles.sidebar} onKeyDown={onListKey}>
             <div className={styles.lights} data-tauri-drag-region="deep" />
@@ -198,6 +234,7 @@ export function Sidebar({ carried, macs, needs, engine, route, go, onFind }: Sid
                 aria-keyshortcuts="Meta+K"
                 aria-label="Find"
                 className={styles.find}
+                disabled={quiet}
                 onClick={onFind}
                 type="button"
             >
@@ -205,12 +242,12 @@ export function Sidebar({ carried, macs, needs, engine, route, go, onFind }: Sid
                 <kbd aria-hidden="true">⌘K</kbd>
             </button>
             <div className={styles.list}>
-                <Places needs={needs} place={place} />
-                <Machines go={go} macs={macs} route={route} />
-                <Catalog carried={carried} place={place} />
+                <Places needs={quiet ? [] : needs} place={place} />
+                {quiet ? <QuietMachines /> : <Machines go={go} macs={macs} route={route} />}
+                <Catalog carried={quiet ? UNCARRIED : carried} place={place} />
             </div>
             <Storage place={place} />
-            <Engine engine={engine} />
+            {quiet ? <QuietFoot /> : <Engine engine={engine} />}
         </nav>
     );
 }

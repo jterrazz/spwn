@@ -27,6 +27,10 @@ export const NAV_ITEM_STORIES: readonly Story<NavItemProps>[] = [
         },
     },
     {
+        name: 'disabled, while no engine answers',
+        props: { current: false, disabled: true, icon: 'inbox', label: 'Inbox', onSelect: nothing },
+    },
+    {
         name: 'a machine and its state',
         props: {
             current: false,

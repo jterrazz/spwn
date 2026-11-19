@@ -19,12 +19,14 @@ import type {
     StationWord,
 } from '@jterrazz/station-api';
 
+import type { CoreKind } from '../../application/use-cases/core-flow';
 import type { Tone } from '../../domain/tone';
 import { wordOf } from './engine-words';
 import type { CodeOf, Worded } from './engine-words';
 import { machineKindOf } from './provisional';
 import {
     APP_WHY_TONES,
+    CORE_TONES,
     NEWEST_TONE,
     OWN_STATE_TONES,
     PORT_REACH_TONES,
@@ -32,6 +34,7 @@ import {
 } from './tones';
 import {
     APP_WHY_WORDS,
+    CORE_WORDS,
     MACHINE_KIND_WORDS,
     NEWEST_WORD,
     newestOutWord,
@@ -48,6 +51,10 @@ export type Shown = { tone: Tone; word: string };
 
 export function ownState(state: OwnState): Shown {
     return { tone: OWN_STATE_TONES[state], word: OWN_STATE_WORDS[state] };
+}
+
+export function coreState(kind: CoreKind): Shown {
+    return { tone: CORE_TONES[kind], word: CORE_WORDS[kind] };
 }
 
 // invariant: the one place an engine's tone becomes a tone the design draws: the five are the design's own five.
