@@ -119,6 +119,7 @@ describe('EnginePage', () => {
             );
         });
         expect(result.errors.text).toBe('');
+        await expect(result.tree).toMatch(file('./__expected__/engine-check-refused.aria.yaml'));
     });
 
     test('a reading refused before any answer draws no checked time, and one never asked draws neither', async () => {

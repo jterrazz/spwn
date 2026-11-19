@@ -79,7 +79,7 @@ function Latest({ release }: { release: MachinesRelease }) {
         rereads: ['engine.read-release'],
         subject: undefined,
     });
-    const refused = refusedOf(release);
+    const refused = check.state.kind === 'failed' ? undefined : refusedOf(release);
     return (
         <Panel title="Engine">
             <Row

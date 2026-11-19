@@ -1,0 +1,51 @@
+- navigation "Sidebar":
+  - button "Find"
+  - button "Home"
+  - button "Inbox 1"
+  - button "Machine files"
+  - button "Passwords"
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - button "macbook-pro online":
+      - text: macbook-pro
+      - img "online"
+    - button "api stopped":
+      - text: api
+      - img "stopped"
+    - button "linux-1 running":
+      - text: linux-1
+      - img "running"
+    - button "mac-mini online":
+      - text: mac-mini
+      - img "online"
+    - button "infra healthy":
+      - text: infra
+      - img "healthy"
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps 9"
+    - button "Skills 0"
+    - button "Settings 3"
+  - button "Storage"
+  - button "v0.22.0 available Update"
+  - img "running"
+  - text: Engine running · v0.21.0
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Engine
+  - heading "spwn v0.22.0 is out." [level=1]
+  - paragraph:
+    - img "spwn v0.22.0 is out."
+    - text: This Mac runs v0.21.0.
+  - region "Update":
+    - heading "Update station and spwn, by the public installer" [level=2]
+    - button "What changed"
+    - button "Update"
+    - text: curl -fsSL https://spwn.sh/install.sh | bash
+  - region "Engine":
+    - heading "Engine" [level=2]
+    - text: "Latest release Checked 4 Nov, 02:00 failed the latest release was not read: GitHub: dial tcp: connection refused."
+    - button "Dismiss"
+    - button "Check now"
