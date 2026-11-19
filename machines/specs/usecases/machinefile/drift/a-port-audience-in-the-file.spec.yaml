@@ -1,0 +1,20 @@
+description: 'a port the file gives its own audience is read by the drift against that audience'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'world edit macbook-pro machinefiles/linux-dev.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-dev
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base]
+          apps: [ripgrep]
+          ports: { open: 1024-65535, to: private, audiences: { 3000: public } }
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Chapters[] | select(.Chapter == "ports") | [.Listed, .Matching, [.Differing[] | [.Port, .Condition, .SeenTo, .AskedTo]]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","in":{"Machine":"linux-1"}}
+      exit: 0
+      stdout: |
+          [4,2,[[4321,"absent",null,"private"],[9229,"absent",null,"private"]]]

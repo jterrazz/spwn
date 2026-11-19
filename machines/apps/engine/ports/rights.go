@@ -40,37 +40,59 @@ func (r Rights) Line() string {
 	switch {
 	case r.Refused != "":
 		return "It shares nothing: " + r.Refused
-	case len(r.Open) == 0:
+	case !r.Opens():
 		return "It shares nothing by itself; you share a port when you need it"
 	}
-	spans := make([]string, 0, len(r.Open))
-	for _, s := range r.Open {
-		if s.From == s.To {
-			spans = append(spans, strconv.Itoa(s.From))
-		} else {
-			spans = append(spans, strconv.Itoa(s.From)+" to "+strconv.Itoa(s.To))
+	var parts []string
+	if len(r.Open) > 0 {
+		spans := make([]string, 0, len(r.Open))
+		for _, s := range r.Open {
+			if s.From == s.To {
+				spans = append(spans, strconv.Itoa(s.From))
+			} else {
+				spans = append(spans, strconv.Itoa(s.From)+" to "+strconv.Itoa(s.To))
+			}
+		}
+		part := portNoun(len(r.Open) == 1 && r.Open[0].From == r.Open[0].To) + joinAnd(spans)
+		if len(r.Except) > 0 {
+			except := make([]string, 0, len(r.Except))
+			for _, e := range r.Except {
+				except = append(except, strconv.Itoa(e))
+			}
+			part += " except " + joinAnd(except)
+		}
+		parts = append(parts, part+" "+audienceWords(r.To))
+	}
+	for _, a := range []catalog.Audience{catalog.AudienceLocal, catalog.AudiencePrivate, catalog.AudiencePublic} {
+		var own []string
+		for _, port := range r.Audienced() {
+			if r.Audiences[port] == a {
+				own = append(own, strconv.Itoa(port))
+			}
+		}
+		if len(own) > 0 {
+			parts = append(parts, portNoun(len(own) == 1)+joinAnd(own)+" "+audienceWords(a))
 		}
 	}
-	noun := "ports "
-	if len(r.Open) == 1 && r.Open[0].From == r.Open[0].To {
-		noun = "port "
+	return "It may share " + joinAnd(parts)
+}
+
+func portNoun(one bool) string {
+	if one {
+		return "port "
 	}
-	line := "It may share " + noun + joinAnd(spans)
-	if len(r.Except) > 0 {
-		except := make([]string, 0, len(r.Except))
-		for _, e := range r.Except {
-			except = append(except, strconv.Itoa(e))
-		}
-		line += " except " + joinAnd(except)
-	}
-	switch r.Audience() {
+	return "ports "
+}
+
+func audienceWords(a catalog.Audience) string {
+	switch a {
 	case catalog.AudienceLocal:
-		return line + " with this Mac only"
+		return "with this Mac only"
 	case catalog.AudiencePublic:
-		return line + " with the internet"
+		return "with the internet"
 	case catalog.AudiencePrivate:
 	}
-	return line + " with your devices"
+	return "with your devices"
 }
 
 func joinAnd(words []string) string {
@@ -92,16 +114,31 @@ func RightsOf(said *catalog.PortRights, server bool) Rights {
 	return Rights{PortRights: catalog.WorkspaceRights}
 }
 
-func (r Rights) Opens() bool { return len(r.Open) > 0 || r.Refused != "" }
+func (r Rights) Opens() bool { return len(r.Open) > 0 || len(r.Audiences) > 0 || r.Refused != "" }
 
 func (r Rights) Allows(port int) bool {
-	if r.Refused != "" || slices.Contains(r.Except, port) {
+	// invariant: a port audiences names is allowed whatever open and
+	// except say: the most specific rule wins.
+	if r.Refused != "" {
+		return false
+	}
+	if _, own := r.Audiences[port]; own {
+		return true
+	}
+	if slices.Contains(r.Except, port) {
 		return false
 	}
 	return slices.ContainsFunc(r.Open, func(s catalog.PortSpan) bool { return port >= s.From && port <= s.To })
 }
 
-func (r Rights) Audience() catalog.Audience { return r.To }
+func (r Rights) AudienceOf(port int) catalog.Audience {
+	// value: the audience the rights share a port with: its own in
+	// audiences, else theirs.
+	if a, own := r.Audiences[port]; own {
+		return a
+	}
+	return r.To
+}
 
 func (r Rights) Floor() int {
 	// invariant: a port below catalog.SystemPorts is reported only when the
@@ -111,21 +148,22 @@ func (r Rights) Floor() int {
 	for _, s := range r.Open {
 		floor = min(floor, s.From)
 	}
+	for port := range r.Audiences {
+		floor = min(floor, port)
+	}
 	return floor
 }
 
 func (r Rights) Reported(port, ssh int) bool { return port != ssh && port >= r.Floor() }
 
 func (r Rights) PublicPort(port int, httpsMode string) int {
-	// value: the Funnel port a `to: public` right's port is shared on, its
-	// rank in open mapped onto FunnelPortsIn(httpsMode); 0 for any other,
-	// and for one ranked past the Funnel ports the mode leaves.
-	if r.To != catalog.AudiencePublic {
-		return 0
-	}
+	// value: the Funnel port a public port of the rights is shared on, its
+	// rank among their public ports (catalog.PortRights.Public) mapped onto
+	// FunnelPortsIn(httpsMode); 0 for any other, and for one ranked past
+	// the Funnel ports the mode leaves.
 	funnel := FunnelPortsIn(httpsMode)
-	for i, s := range r.Open {
-		if s.From == port && i < len(funnel) {
+	for i, p := range r.Public() {
+		if p == port && i < len(funnel) {
 			return funnel[i]
 		}
 	}
@@ -174,10 +212,10 @@ func (r Rights) Judge(l Reservation, httpsMode string) (Reservation, bool) {
 		return l, true
 	}
 	l.To, l.PublicPort = "", 0
-	if !allowed || r.Audience() == catalog.AudiencePrivate {
+	if !allowed || r.AudienceOf(l.GuestPort) == catalog.AudiencePrivate {
 		return l, true
 	}
-	l.To = r.Audience()
+	l.To = r.AudienceOf(l.GuestPort)
 	if l.To != catalog.AudiencePublic {
 		return l, true
 	}
@@ -194,22 +232,32 @@ func (r Rights) Said() string {
 	if r.Refused != "" {
 		return r.Refused
 	}
-	spans := make([]string, 0, len(r.Open))
-	for _, s := range r.Open {
-		spans = append(spans, s.String())
-	}
-	if len(spans) == 0 {
+	if !r.Opens() {
 		return "opens nothing"
 	}
-	said := "open: " + strings.Join(spans, ", ")
+	var said []string
+	if len(r.Open) > 0 {
+		spans := make([]string, 0, len(r.Open))
+		for _, s := range r.Open {
+			spans = append(spans, s.String())
+		}
+		said = append(said, "open: "+strings.Join(spans, ", "))
+	}
 	if len(r.Except) > 0 {
 		except := make([]string, 0, len(r.Except))
 		for _, e := range r.Except {
 			except = append(except, strconv.Itoa(e))
 		}
-		said += "; except: " + strings.Join(except, ", ")
+		said = append(said, "except: "+strings.Join(except, ", "))
 	}
-	return said
+	if len(r.Audiences) > 0 {
+		own := make([]string, 0, len(r.Audiences))
+		for _, port := range r.Audienced() {
+			own = append(own, strconv.Itoa(port)+": "+string(r.Audiences[port]))
+		}
+		said = append(said, "audiences: "+strings.Join(own, ", "))
+	}
+	return strings.Join(said, "; ")
 }
 
 func NotAllowed(r Rights) string {

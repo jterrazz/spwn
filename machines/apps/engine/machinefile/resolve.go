@@ -271,10 +271,17 @@ func merge(files []Placed) merged {
 		if p := f.Ports; p != nil {
 			m.ports = p
 			m.drop("ports")
-			m.put("ports.open", spans(p.Open), o)
-			m.put("ports.to", string(p.To), o)
+			if len(p.Open) > 0 {
+				m.put("ports.open", spans(p.Open), o)
+			}
+			if p.To != "" {
+				m.put("ports.to", string(p.To), o)
+			}
 			if len(p.Except) > 0 {
 				m.put("ports.except", ints(p.Except), o)
+			}
+			for _, port := range p.Audienced() {
+				m.put("ports.audiences."+strconv.Itoa(port), string(p.Audiences[port]), o)
 			}
 		}
 		if r := f.Run; r != nil {

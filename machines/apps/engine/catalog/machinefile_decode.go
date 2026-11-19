@@ -456,13 +456,21 @@ func checkPorts(p PortRights) string {
 			return fmt.Sprintf("public opens ports one by one, never a range (%s)", s)
 		}
 	}
-	if p.To == AudiencePublic && len(p.Open) > PublicPorts {
-		return fmt.Sprintf("public opens %d ports at most", PublicPorts)
-	}
 	for _, e := range p.Except {
 		if e < 1 || e > 65535 {
 			return fmt.Sprintf("except %d: a port from 1 to 65535", e)
 		}
+	}
+	for _, port := range p.Audienced() {
+		switch a := p.Audiences[port]; {
+		case port < 1 || port > 65535:
+			return fmt.Sprintf("audiences %d: a port from 1 to 65535", port)
+		case !known(a):
+			return fmt.Sprintf("audiences %d: %q is none of %s", port, a, strings.Join(a.Enum(), ", "))
+		}
+	}
+	if len(p.Public()) > PublicPorts {
+		return fmt.Sprintf("public opens %d ports at most", PublicPorts)
 	}
 	return ""
 }

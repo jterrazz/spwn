@@ -260,6 +260,9 @@ func Worded(err error) error {
 		if fileError.Rename != "" {
 			detail["rename"] = fileError.Rename
 		}
+		if fileError.Unknown != "" {
+			detail["unknown"] = fileError.Unknown
+		}
 		return refused(fail.Refused, code, fileError.File, detail)
 	case errors.As(err, &notFound):
 		return refused(fail.NotFound, NotFound, notFound.Name, map[string]string{"by": notFound.By})

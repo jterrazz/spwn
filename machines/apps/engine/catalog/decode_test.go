@@ -51,6 +51,23 @@ func TestAnUnknownKeyIsRefusedWithItsLine(t *testing.T) {
 	refusedFor(t, strings.Replace(gh, "brew: gh", "brew: gh\n      formula: gh", 1), "field formula not found")
 }
 
+func TestAnUnknownKeyIsNamedSinceANewerStationMayHaveWrittenIt(t *testing.T) {
+	for body, want := range map[string]string{
+		gh + "tint: blue\n": "tint",
+		strings.Replace(gh, "brew: gh", "brew: gh\n      formula: gh", 1): "formula",
+		strings.Replace(gh, "provides: [gh]", "provides: &cmds [gh]", 1):  "",
+	} {
+		var file *catalog.FileError
+		if err := decoded(t, body); !errors.As(err, &file) || file.Unknown != want {
+			t.Errorf("decoded with %v, want the unknown key %q", err, want)
+		}
+	}
+	_, err := catalog.DecodeMachinefile("machinefiles/web.machine.yaml", []byte("machinefile: station.machinefile/v1\nname: web\nports: { audiences: { 5432: local }, scope: private }\n"))
+	if file := (*catalog.FileError)(nil); !errors.As(err, &file) || file.Unknown != "scope" {
+		t.Errorf("decoded with %v, want the unknown key scope", err)
+	}
+}
+
 func TestAnAnchorAnAliasOrAMergeKeyIsRefused(t *testing.T) {
 	refusedFor(t, strings.Replace(gh, "provides: [gh]", "provides: &cmds [gh]\nrequires: *cmds", 1), "an anchor (&cmds)")
 	refusedFor(t, strings.Replace(gh, "provides: [gh]", "provides: [gh]\n<<: {replaces: git}", 1), "a merge key (<<)")

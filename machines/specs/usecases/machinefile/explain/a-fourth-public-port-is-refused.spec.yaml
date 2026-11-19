@@ -1,0 +1,33 @@
+description: 'audiences shows each port''s own audience, and a fourth public port is refused at its line'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          ports: { open: [3000, 3001], to: public, audiences: { 3001: local, 5432: public } }
+      exit: 0
+    - command: 'explain ports'
+      exit: 0
+      stdout: |
+          # macbook-pro
+          	ports.open	3000, 3001	user	macbook-pro
+          	ports.to	public	user	macbook-pro
+          	ports.audiences.3001	local	user	macbook-pro
+          	ports.audiences.5432	public	user	macbook-pro
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          ports:
+              open: [3000, 3001, 3002]
+              to: public
+              audiences: { 5432: public }
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: public opens 3 ports at most
+          Hint: fix that line: station never rewrites a Machinefile

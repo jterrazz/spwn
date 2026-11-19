@@ -1,6 +1,10 @@
 package catalog
 
-import "time"
+import (
+	"maps"
+	"slices"
+	"time"
+)
 
 // value: the schema every Machinefile of this station names in its
 // `machinefile:` key, and the family its versions share; a file naming a
@@ -220,12 +224,51 @@ func (Audience) Enum() []string {
 }
 
 // value: the ports a machine may open and to whom: a range (`3000-9999`)
-// or a list of ports and ranges, its audience, and the ports never shared.
+// or a list of ports and ranges, its audience, the ports never shared, and
+// the ports given an audience of their own.
 
 type PortRights struct {
-	Open   PortSet  `yaml:"open,omitempty"`
-	To     Audience `yaml:"to,omitempty"`
-	Except []int    `yaml:"except,omitempty"`
+	Open      PortSet       `yaml:"open,omitempty"`
+	To        Audience      `yaml:"to,omitempty"`
+	Except    []int         `yaml:"except,omitempty"`
+	Audiences PortAudiences `yaml:"audiences,omitempty"`
+}
+
+// value: ports by number, each opened to its own audience whatever open,
+// to and except say (`audiences: { 5432: local }`).
+
+type PortAudiences map[int]Audience
+
+func (PortAudiences) JSONSchema() map[string]any {
+	return map[string]any{
+		"type": "object", "propertyNames": map[string]any{"pattern": "^[1-9][0-9]{0,4}$"},
+		"additionalProperties": map[string]any{"type": "string", "enum": Audience("").Enum()},
+	}
+}
+
+func (p PortRights) Public() []int {
+	// value: the ports the rights open to the internet: each port of open when
+	// they open it to public and audiences gives it none of its own, then each
+	// port audiences opens to public, lowest first.
+	var out []int
+	if p.To == AudiencePublic {
+		for _, s := range p.Open {
+			if _, own := p.Audiences[s.From]; s.From == s.To && !own {
+				out = append(out, s.From)
+			}
+		}
+	}
+	for _, port := range p.Audienced() {
+		if p.Audiences[port] == AudiencePublic && !slices.Contains(out, port) {
+			out = append(out, port)
+		}
+	}
+	return out
+}
+
+func (p PortRights) Audienced() []int {
+	// value: the ports audiences names, lowest first.
+	return slices.Sorted(maps.Keys(p.Audiences))
 }
 
 // value: ports as a file writes them: one range or one port, or a list.

@@ -22,6 +22,9 @@ type FileError struct {
 	Problem string
 	// value: the name the file is read under, when its name alone is refused.
 	Rename string
+	// value: the key this station does not know, when that is what the file
+	// is refused for: a newer station may have written it.
+	Unknown string
 }
 
 func (e *FileError) Error() string {
@@ -104,9 +107,24 @@ func strict(file string, body []byte, f format, v any) (*yaml.Node, error) {
 	decoder := yaml.NewDecoder(bytes.NewReader(body))
 	decoder.KnownFields(true)
 	if err := decoder.Decode(v); err != nil {
-		return nil, &FileError{File: file, Problem: yamlProblem(err)}
+		return nil, &FileError{File: file, Problem: yamlProblem(err), Unknown: unknownKey(err)}
 	}
 	return doc, nil
+}
+
+var unknownField = regexp.MustCompile(`^line \d+: field (\S+) not found in type `)
+
+func unknownKey(err error) string {
+	var typed *yaml.TypeError
+	if !errors.As(err, &typed) {
+		return ""
+	}
+	for _, e := range typed.Errors {
+		if m := unknownField.FindStringSubmatch(e); m != nil {
+			return m[1]
+		}
+	}
+	return ""
 }
 
 func yamlProblem(err error) string {

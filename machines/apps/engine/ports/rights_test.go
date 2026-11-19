@@ -21,7 +21,7 @@ func TestARightAllowsWhatItOpensAndNothingItExcepts(t *testing.T) {
 		t.Errorf("NotAllowed = %q", got)
 	}
 	workspace := ports.RightsOf(nil, false)
-	if !workspace.Allows(1024) || !workspace.Allows(65535) || workspace.Allows(1023) || workspace.Audience() != catalog.AudiencePrivate {
+	if !workspace.Allows(1024) || !workspace.Allows(65535) || workspace.Allows(1023) || workspace.AudienceOf(1024) != catalog.AudiencePrivate {
 		t.Errorf("a workspace's default rights = %+v, want 1024-65535 to private", workspace)
 	}
 	if server := ports.RightsOf(nil, true); server.Opens() || server.Allows(3000) {
@@ -29,6 +29,49 @@ func TestARightAllowsWhatItOpensAndNothingItExcepts(t *testing.T) {
 	}
 	if refused := (ports.Rights{Refused: "linux-1.yaml:4: no"}); !refused.Opens() || refused.Allows(3000) {
 		t.Errorf("a refused Machinefile's rights = %+v, want every port flagged", refused)
+	}
+}
+
+// invariant: a port audiences names opens to its own audience whatever open
+// and except say, counts among the public ports after open's, and is said
+// by the rights' line.
+func TestAPortOfAudiencesOpensToItsOwnAudience(t *testing.T) {
+	r := ports.RightsOf(&catalog.PortRights{
+		Open: catalog.PortSet{{From: 3000, To: 3999}}, To: catalog.AudiencePrivate, Except: []int{3306, 5432},
+		Audiences: catalog.PortAudiences{5432: catalog.AudienceLocal, 3001: catalog.AudiencePublic, 80: catalog.AudiencePrivate},
+	}, false)
+	for port, want := range map[int]catalog.Audience{3000: catalog.AudiencePrivate, 3001: catalog.AudiencePublic, 5432: catalog.AudienceLocal, 80: catalog.AudiencePrivate} {
+		if !r.Allows(port) || r.AudienceOf(port) != want {
+			t.Errorf("port %d: allowed %v, audience %q; want allowed, %q", port, r.Allows(port), r.AudienceOf(port), want)
+		}
+	}
+	if r.Allows(3306) || r.Allows(5433) {
+		t.Errorf("3306 (excepted) or 5433 (outside) allowed: %+v", r)
+	}
+	if r.Floor() != 80 {
+		t.Errorf("floor %d, want 80, the lowest port audiences names", r.Floor())
+	}
+	if got := r.PublicPort(3001, ports.HTTPSPort); got != 443 {
+		t.Errorf("PublicPort(3001) = %d, want 443", got)
+	}
+	want := "It may share ports 3000 to 3999 except 3306 and 5432 with your devices, port 5432 with this Mac only, port 80 with your devices and port 3001 with the internet"
+	if got := r.Line(); got != want {
+		t.Errorf("Line = %q\nwant   %q", got, want)
+	}
+	if got := ports.NotAllowed(r); got != "listens, not allowed (open: 3000-3999; except: 3306, 5432; audiences: 80: private, 3001: public, 5432: local)" {
+		t.Errorf("NotAllowed = %q", got)
+	}
+	public := ports.RightsOf(&catalog.PortRights{
+		Open: catalog.PortSet{{From: 3000, To: 3000}, {From: 5000, To: 5000}}, To: catalog.AudiencePublic,
+		Audiences: catalog.PortAudiences{3000: catalog.AudienceLocal, 9000: catalog.AudiencePublic},
+	}, false)
+	for port, want := range map[int]int{5000: 443, 9000: 8443, 3000: 0} {
+		if got := public.PublicPort(port, ports.HTTPSPort); got != want {
+			t.Errorf("PublicPort(%d) = %d, want %d: open's public ports first, then audiences', a port given local none", port, got, want)
+		}
+	}
+	if only := ports.RightsOf(&catalog.PortRights{Audiences: catalog.PortAudiences{5432: catalog.AudienceLocal}}, false); !only.Opens() || !only.Allows(5432) || only.Allows(5433) {
+		t.Errorf("rights of audiences alone = %+v, want 5432 open alone", only)
 	}
 }
 

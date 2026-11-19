@@ -190,7 +190,7 @@ func accessOf(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.A
 			}
 			port := machinefile.PortHeld{Port: s.GuestPort, Seen: s.To}
 			if rights.Allows(s.GuestPort) {
-				port.Asked = rights.Audience()
+				port.Asked = rights.AudienceOf(s.GuestPort)
 			}
 			held[s.GuestPort] = true
 			access.Ports = append(access.Ports, port)
@@ -202,7 +202,7 @@ func accessOf(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.A
 				continue
 			}
 			held[l.Port] = true
-			access.Ports = append(access.Ports, machinefile.PortHeld{Port: l.Port, Asked: rights.Audience()})
+			access.Ports = append(access.Ports, machinefile.PortHeld{Port: l.Port, Asked: rights.AudienceOf(l.Port)})
 		}
 	}
 	signedIn, granted := map[accounts.Program]bool{}, map[accounts.Program]bool{}

@@ -20,7 +20,7 @@ The built-in packages are embedded in the binary, `catalog/packages/<category>/<
 A file is read strictly, so a typo is a refusal with its line, never a silent default:
 
 - the schema first: a file naming a newer one, `station.package/v2`, is refused with `update station` before anything else is judged;
-- one YAML 1.2 document, every key known (`line 9: field tint not found`);
+- one YAML 1.2 document, every key known (`line 9: field tint not found`), the hint naming `update station` in case a newer station wrote that key;
 - no anchor, alias or merge key: a value is written out;
 - no plain scalar that YAML 1.1 reads otherwise (`yes`, `on`, `0755`): write `true`, quote it, or `0o755`;
 - every enumerated value one of its list, every check of this page passed.

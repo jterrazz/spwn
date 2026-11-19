@@ -32,6 +32,17 @@ type Wording func(e *fail.Error) (message, hint string)
 
 const linuxBinaryHint = "make build-linux, then station images build base-ubuntu --binary .artifacts/go/station-linux-arm64"
 
+// value: the way out of a file a newer station wrote: its schema, or a key
+// this station does not know.
+const updateStation = "update station"
+
+func newerWrote(e *fail.Error) string {
+	if e.Detail["unknown"] == "" {
+		return ""
+	}
+	return "; if a newer station wrote " + e.Detail["unknown"] + ", " + updateStation
+}
+
 // value: how the refusal of a gesture a typed name answers names the doing
 // and the done, by its action.
 func typedGesture(action string) (doing, done string, ok bool) {
@@ -204,16 +215,16 @@ func Codes() map[fail.Code]Wording {
 			if e.Detail["rename"] != "" {
 				return e.Detail["problem"], "rename it " + e.Detail["rename"] + ": station reads a Machinefile by that name alone"
 			}
-			return e.Detail["problem"], "fix that line: station never rewrites a Machinefile"
+			return e.Detail["problem"], "fix that line: station never rewrites a Machinefile" + newerWrote(e)
 		},
 		machinefilecalls.NewerSchema: func(e *fail.Error) (string, string) {
-			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", "update station"
+			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", updateStation
 		},
 		machinefilecalls.CatalogInvalid: func(e *fail.Error) (string, string) {
-			return e.Detail["problem"], "fix that line: station never rewrites a package file"
+			return e.Detail["problem"], "fix that line: station never rewrites a package file" + newerWrote(e)
 		},
 		machinefilecalls.CatalogNewer: func(e *fail.Error) (string, string) {
-			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", "update station"
+			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", updateStation
 		},
 		machinefilecalls.NotATemplate: func(e *fail.Error) (string, string) {
 			return (&machinefile.NotTemplateError{Name: e.Subject}).Error(), "station explain --machinefile " + e.Subject
