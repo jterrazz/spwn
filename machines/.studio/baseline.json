@@ -1,6 +1,6 @@
 {
     "test": {
-        "pixel-goldens/bytes": 2819754
+        "pixel-goldens/bytes": 2819737
     },
     "typescript": {
         "names/no-grab-bag-name": 1,

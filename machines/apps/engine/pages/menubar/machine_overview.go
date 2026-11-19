@@ -326,7 +326,7 @@ func (o macOverview) awakeRow() (page.Row, bool) {
 	if r == nil {
 		return page.Row{}, false
 	}
-	row := page.Row{ID: RowAwake, Label: "Awake", Mark: page.OK, Glyph: symbol("sun.max", page.SignalWaits)}
+	row := page.Row{ID: RowAwake, Label: "Awake", Mark: page.OK, Glyph: symbol("sun.max", page.SignalQuiet)}
 	on := false
 	switch {
 	case r.Mode() == awake.NeverSleeps:

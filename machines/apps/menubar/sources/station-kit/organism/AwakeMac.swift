@@ -20,6 +20,19 @@ public struct AwakeMac: View {
     }
 
     var dim: Bool { row.signal == "asleep" }
+
+    // value: a line's sun or moon, inked as its name is, the board's
+    // monochrome lead; any other glyph draws as its signal says.
+    @ViewBuilder
+    static func lead(_ glyph: Glyph, ink: Color) -> some View {
+        if case let .symbol(name) = GlyphView.drawn(glyph), glyph.signal == "quiet" {
+            Image(systemName: name).font(.system(size: Token.Metric.Marks.glyph, weight: .medium))
+                .foregroundStyle(ink)
+                .frame(width: Token.Metric.Marks.glyphSlot, height: Token.Metric.Marks.glyphSlot)
+        } else {
+            GlyphView(glyph)
+        }
+    }
     var sub: Value? { row.detail.flatMap { $0.isNone ? nil : $0 } }
 
     public var body: some View { drawing.recorded(viewMark) }
@@ -30,7 +43,7 @@ public struct AwakeMac: View {
         let m = Token.Metric.Row.self
         HStack(spacing: m.gap) {
             SwiftUI.Group {
-                if let glyph = row.glyph { GlyphView(glyph) } else { Color.clear }
+                if let glyph = row.glyph { Self.lead(glyph, ink: tokens.tone(Token.Role.rowName.tone)) } else { Color.clear }
             }
             .frame(width: m.accessory)
             VStack(alignment: .leading, spacing: m.subGap) {

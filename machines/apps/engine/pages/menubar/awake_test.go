@@ -49,6 +49,17 @@ func TestThisMacsSwitchesReadAsTheBoardWordsThem(t *testing.T) {
 	}
 }
 
+// invariant: a Mac kept awake draws its sun monochrome, as its moon: the
+// switch beside it says it is on, the glyph never turns orange.
+func TestAKeptMacsSunIsMonochrome(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	p := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", Caps: machine.Capabilities{Engine: true},
+		Session: &awake.Session{StartedAt: now, Until: now.Add(time.Hour), For: time.Hour}}})
+	if g := sectionOf(p, SectionThisMac).Items[0].Row.Glyph; g.Kind != "symbol:sun.max" || g.Signal != page.SignalQuiet {
+		t.Fatalf("a kept Mac's sun is %+v, want sun.max quiet", g)
+	}
+}
+
 // invariant: Keep awake for… shows the term in force: the one the session
 // was taken for, else Until; nothing while This Mac sleeps normally.
 func TestKeepAwakeForPicksTheTermInForce(t *testing.T) {

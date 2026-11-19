@@ -351,7 +351,7 @@
             },
             "glyph": {
               "kind": "symbol:sun.max",
-              "signal": "waits"
+              "signal": "quiet"
             },
             "verb": "change:mac-mini"
           }

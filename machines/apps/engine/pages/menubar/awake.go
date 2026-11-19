@@ -104,10 +104,10 @@ func switched(on bool) []page.Value {
 }
 
 // value: a Mac's sun while it stays awake, its moon while it may sleep
-// (SPEC M14).
+// (SPEC M14), both monochrome: the switch beside says which.
 func sun(on bool) page.Glyph {
 	if on {
-		return symbol("sun.max", page.SignalWaits)
+		return symbol("sun.max", page.SignalQuiet)
 	}
 	return symbol("moon", page.SignalQuiet)
 }
