@@ -9,7 +9,7 @@ WORLDS is the one list of the worlds the window records, each a world of specs/u
 needs that it lacks: machinefiles on This Mac, the fake binaries of a fixture of specs/usecases/__fixtures__/, and
 edits of its machines (a sign-in in progress, a program signed out or broken, an accounts switch the fake reads in
 apps/engine/world/accounts.go, as the presence check a grant asks, a failed sign-in or a failing background task
-dropped, what a Mac's engine keeps of Awake); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
+dropped, what a Mac's engine keeps of Awake, a VM working hard on every core of its Mac); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
 entry names is served as specs/usecases/worlds/ holds it.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
@@ -258,6 +258,34 @@ def first_refused(name, installed, tag):
     return edit
 
 
+def working_hard(mac, vm, cpu, busy, top):
+    """A VM given every core of its Mac and busy on all of them: its guest's meter at `cpu` % of its CPUs, its
+    Virtualization process the same share of its Mac, the Mac at `busy` % in all, the history its Mac's engine kept of
+    both around those levels, and the VM's busiest processes by CPU and by memory, `top`'s (name, pid, CPU %, resident
+    bytes) in that order."""
+    def edit(content):
+        held = content["macs"][mac]
+        cores = held["self"]["hardware"]["CPUs"]
+        record = held["vms"][vm]
+        record["size"]["CPUs"] = cores
+        held["meter"]["processes"][str(record["pid"])]["cpu"] = cpu
+        held["meter"]["per_second"]["cpu_busy"] = round(busy * 10)
+        held["engine"]["past"][vm]["base"], held["engine"]["past"][mac]["base"] = cpu, busy
+        meter = content["macs"][vm]["meter"]
+        meter["sample"]["cpus"] = cores
+        meter["per_second"]["cpu_busy"] = round(cpu * 10)
+        meter["top"] = {
+            "cpu": [{"pid": pid, "name": name, "value": share} for name, pid, share, _ in top],
+            "memory": [{"pid": pid, "name": name, "value": size}
+                       for name, pid, _, size in sorted(top, key=lambda one: -one[3])],
+        }
+    return edit
+
+
+BUSIEST = [("node", 1190, 38.5, 2147483648), ("rustc", 2214, 21.2, 1503238553), ("cc1plus", 2231, 14.7, 943718400),
+           ("esbuild", 2302, 9.4, 314572800), ("git", 2340, 4.1, 104857600)]
+
+
 def plain(name):
     return (name, None, {}, [])
 
@@ -283,7 +311,8 @@ WORLDS = {
                     applied(["lazygit", "{ name: node, version: '24' }", "{ name: go, version: '1.25' }",
                              "{ name: ripgrep, optional: true }"]), []),
     "presence-refused": ("two-macs", None, {}, [switched("presence", "refused")]),
-    "stories-file": ("stories", "homebrew", machine("macbook-pro", ["gh", "lazygit", "ghostty"], "settings: { git-shortcuts: {} }\n"), []),
+    "working-hard": ("stories", None, {}, [working_hard("macbook-pro", "linux-1", 92, 95, BUSIEST)]),
+    "stories-file":("stories", "homebrew", machine("macbook-pro", ["gh", "lazygit", "ghostty"], "settings: { git-shortcuts: {} }\n"), []),
     "leftovers": ("two-macs", None, {}, [leftover("macbook-pro", "old-vm", 9000000000),
                                          holds_file("macbook-pro", STATION_VM, 1000000)]),
     "old-home-running": ("two-macs", None, {}, [holds_file("macbook-pro", STATION_VM, 1000000),
