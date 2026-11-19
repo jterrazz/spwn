@@ -77,7 +77,7 @@ Today `scripts/install.sh` is the only install and its re-run the only self-upgr
   - U1: `Adopt` compares `p_starttime` against `runs/<vm>.json v1` (the `.pid` as fallback).
   - U2: the signed `manifest.json` and `latest.json` in publish.yaml.
   - U3: the versioned layout and receipt in `install.sh`; the plist names the symlink; prune keeps 2.
-  - U4: the update check: fetch, cache, line, silences, preferences.
+  - U4: the update check: fetch and cache are done (the engine's 6 h job, `engine.read-release`); the line, the silences and the preferences remain.
   - U5: `station upgrade --self` and the night's first step, with download, verify, snapshot, flip, kickstart, gate, rollback. It carries the self-replace risk: the release asset with its checksum, replaced by a rename, then the engine restarted (`apps/engine/images/calls/binary.go`'s download lifted to a shared adapter). `station upgrade` today updates what the Machinefile carries, not station.
   - U6: the guest push, at upgrade and at boot.
   - U7: the menu bar's lockstep swap in the engine, the `station.updated` event, the relaunch.
