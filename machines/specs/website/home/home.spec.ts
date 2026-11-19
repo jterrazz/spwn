@@ -86,7 +86,22 @@ describe('home', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('H6 waits for a recording of a VM above 85 % CPU, its usage read by activity.read');
+    test('H6 a machine working hard reads its CPU on its line of the Machines board', async () => {
+        // Given - the window on Home over working-hard, where linux-1 holds every core of macbook-pro and its process takes 92 % of it
+        const result = await website.visit('/?world=working-hard&page=home', async (visitor) => {
+            // When - I look at the Machines board
+            await visitor.see(within(machines, button('linux-1')));
+
+            // Then - its line reads the share, and its Mac's the whole Mac's
+            await visitor.see(within(machines, content('92 %')));
+            await visitor.see(within(machines, content('95 %')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo(
+        'H6 waits for a recording whose activity.read answers twice apart, so the figure moves and its line stays',
+    );
 
     test.todo(
         'H7 waits for a recording of a create with a purpose, whose reads say creating, then running',
