@@ -147,8 +147,8 @@ func checkHead(mf Machinefile, name string, overlay bool) string {
 		return fmt.Sprintf("its file names %q: a Machinefile is named in lower-case words joined by dashes", name)
 	case overlay && mf.Name != "":
 		return "an overlay names the file it changes in overrides, and no name of its own"
-	case overlay && mf.Overrides != name:
-		return fmt.Sprintf("overrides %q, its file %q", mf.Overrides, name+OverlaySuffix)
+	case overlay && !machinefileName.MatchString(mf.Overrides):
+		return fmt.Sprintf("overrides %q: an overlay names the Machinefile it changes, its own (%q) or the one its machine follows", mf.Overrides, name)
 	case !overlay && mf.Overrides != "":
 		return "only an overlay, `" + name + OverlaySuffix + "`, overrides a Machinefile"
 	case !overlay && mf.Name != name:

@@ -457,6 +457,9 @@ func Codes() map[fail.Code]Wording {
 		machinescalls.UnknownImage: func(e *fail.Error) (string, string) {
 			return (&machines.UnknownImageError{Image: e.Subject}).Error(), "station images for the images"
 		},
+		machinescalls.TemplateName: func(e *fail.Error) (string, string) {
+			return (&machines.TemplateNameError{Name: e.Subject, Template: e.Detail["template"]}).Error(), "name it apart: station machines create <name> --from " + e.Detail["template"]
+		},
 		machinescalls.ServerTemplate: func(e *fail.Error) (string, string) {
 			return (&machines.ServerTemplateError{Name: e.Subject}).Error(), "station machines create <name> --server"
 		},

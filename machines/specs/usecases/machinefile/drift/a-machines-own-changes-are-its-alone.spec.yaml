@@ -1,0 +1,44 @@
+description: 'a VM''s own changes move its own drift, never that of another VM of its file'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'world edit macbook-pro machinefiles/linux-dev.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-dev
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base]
+          apps: [ripgrep]
+          ports: { open: 1024-65535, to: private }
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Chapters[] | select(.Chapter == "ports") | [.Listed, .Matching, [.Differing[] | [.Port, .Condition, .SeenTo, .AskedTo]]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","in":{"Machine":"linux-1"}}
+      exit: 0
+      stdout: |
+          [4,1,[[3000,"changed","public","private"],[4321,"absent",null,"private"],[9229,"absent",null,"private"]]]
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Chapters[] | select(.Chapter == "ports") | [.Listed, .Matching, [.Differing[] | [.Port, .Condition, .SeenTo, .AskedTo]]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","in":{"Machine":"agent-7f"}}
+      exit: 0
+      stdout: |
+          [1,0,[[6006,"absent",null,"private"]]]
+    - command: 'world edit macbook-pro machinefiles/linux-1.local.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          overrides: linux-dev
+          ports: { except: [4321], audiences: { 3000: public } }
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Chapters[] | select(.Chapter == "ports") | [.Listed, .Matching, [.Differing[] | [.Port, .Condition, .SeenTo, .AskedTo]]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","in":{"Machine":"linux-1"}}
+      exit: 0
+      stdout: |
+          [3,2,[[9229,"absent",null,"private"]]]
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Chapters[] | select(.Chapter == "ports") | [.Listed, .Matching, [.Differing[] | [.Port, .Condition, .SeenTo, .AskedTo]]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","in":{"Machine":"agent-7f"}}
+      exit: 0
+      stdout: |
+          [1,0,[[6006,"absent",null,"private"]]]

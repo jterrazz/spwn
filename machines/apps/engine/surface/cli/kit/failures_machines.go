@@ -86,6 +86,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 	var tooLittle *model.TooLittleMemoryError
 	var unknownImage *model.UnknownImageError
 	var serverTemplate *model.ServerTemplateError
+	var templateName *model.TemplateNameError
 	var network *model.BadNetworkError
 	var noEngine *model.NoEngineError
 	var serverLifetime *model.ServerLifetimeError
@@ -95,7 +96,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 	switch {
 	case errors.As(err, &tooBig), errors.As(err, &noImage), errors.As(err, &down), errors.As(err, &badLifetime),
 		errors.As(err, &badCheck), errors.As(err, &badCreator), errors.As(err, &badPurpose), errors.As(err, &tooLittle), errors.As(err, &unknownImage),
-		errors.As(err, &serverTemplate), errors.As(err, &network), errors.As(err, &noEngine),
+		errors.As(err, &serverTemplate), errors.As(err, &templateName), errors.As(err, &network), errors.As(err, &noEngine),
 		errors.Is(err, machinescalls.ServerNeedsNameRule), errors.Is(err, machinescalls.CheckForServersRule),
 		errors.Is(err, machinescalls.ServerBridgedRule):
 		return Translate(machinescalls.Worded(err), ""), true

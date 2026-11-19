@@ -138,6 +138,9 @@ func (r Resolved) ScriptOf(phase RunPhase) (Script, bool) {
 // value: this machine, for what a Machinefile does not say of its system.
 
 type Machine struct {
+	// value: the machine's name, whose own changes join the chain of the
+	// Machinefile it follows.
+	Name   string
 	Kind   catalog.MachineRole
 	System catalog.SystemSpec
 }
@@ -192,10 +195,11 @@ func (m *merged) drop(prefix string) {
 // invariant: a Machinefile is its extends, in order, then itself, each
 // file followed by its overlay; a later file's value replaces an earlier
 // one's (an app or a setting whole, by name; accounts and ports whole, an
-// overlay's key by key), a
-// file is read once however many extend it, and a cycle of extends is
-// refused.
-func (l Library) chain(name string) ([]Placed, error) {
+// overlay's key by key), a file is read once however many extend it, and
+// a cycle of extends is refused. The machine it is resolved for, when it
+// names none of them, adds its own changes last: its overlay that
+// overrides the Machinefile asked, which no other machine reads.
+func (l Library) chain(name, machine string) ([]Placed, error) {
 	var out []Placed
 	seen := map[string]bool{}
 	var walk func(name, by string, stack []string) error
@@ -218,12 +222,18 @@ func (l Library) chain(name string) ([]Placed, error) {
 		}
 		seen[name] = true
 		out = append(out, p)
-		if o, ok := l.Overlays[name]; ok {
+		if o, ok := l.Overlays[name]; ok && o.File.Overrides == name {
 			out = append(out, o)
 		}
 		return nil
 	}
-	return out, walk(name, "", nil)
+	if err := walk(name, "", nil); err != nil {
+		return out, err
+	}
+	if o, ok := l.Overlays[machine]; ok && !seen[machine] && o.File.Overrides == name {
+		out = append(out, o)
+	}
+	return out, nil
 }
 
 func originOf(p Placed) Origin {
@@ -450,14 +460,11 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	// lock holds is carried by the lock's method wherever the system and
 	// the entry still allow it, at the lock's version where it meets the
 	// one asked.
-	files, err := lib.chain(name)
+	files, err := lib.chain(name, this.Name)
 	if err != nil {
 		return Resolved{}, err
 	}
-	top := files[len(files)-1]
-	if top.Kind == Overlay {
-		top = files[len(files)-2]
-	}
+	top := lib.Machinefiles[name]
 	if top.File.Machine == nil {
 		return Resolved{}, &MixinError{Name: name}
 	}
@@ -1015,7 +1022,7 @@ func Own(lib Library, name string) (Resolved, error) {
 	// Machinefile's reading order, each app and setting listed as the
 	// strongest file lists it; none is resolved against the catalog or a
 	// system, so a refusal of a plan is never raised here.
-	files, err := lib.chain(name)
+	files, err := lib.chain(name, "")
 	if err != nil {
 		return Resolved{}, err
 	}

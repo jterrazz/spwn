@@ -28,6 +28,7 @@ func TestARefusalOfACreateCarriesItsCodeAndItsMac(t *testing.T) {
 		{&model.BadCreatorError{Session: "Bad"}, BadCreator, "Bad", nil},
 		{&model.UnknownImageError{Image: "linux"}, UnknownImage, "linux", nil},
 		{&model.ServerTemplateError{Name: "infra"}, ServerTemplate, "infra", nil},
+		{&model.TemplateNameError{Name: "base", Template: "linux-dev"}, TemplateName, "base", map[string]string{"template": "linux-dev"}},
 		{&model.BadNetworkError{Value: "bridged", Bridge: true}, BadNetwork, "bridged", map[string]string{"bridge": "yes"}},
 		{&model.NoEngineError{Hypervisor: "hv"}, NoHypervisor, "hv", nil},
 		{&model.BadNameError{Name: "Bad_Name"}, BadName, "Bad_Name", nil},

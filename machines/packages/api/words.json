@@ -894,6 +894,11 @@
       "Detail": "machines",
       "Tone": "plain"
     },
+    "machines.template-name": {
+      "Word": "template name",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
     "machines.too-little-memory": {
       "Word": "too little memory",
       "Detail": "machines",

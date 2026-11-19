@@ -31,22 +31,22 @@ func TestRightsAreReadFromTheChainAndTheOverlayWins(t *testing.T) {
 		"machinefiles/broken.machine.yaml": head + "name: broken\nports: { open: 3000-3999, to: public }\n",
 		"machinefiles/plain.machine.yaml":  head + "name: plain\nmachine: { kind: workspace }\n",
 	})
-	rights, by, err := machinefile.RightsOf([]machinefile.Tree{user}, "api")
+	rights, by, err := machinefile.RightsOf([]machinefile.Tree{user}, "api", "")
 	if err != nil || rights == nil || rights.To != catalog.AudiencePrivate || rights.Open[0] != (catalog.PortSpan{From: 3000, To: 3999}) || by != "base" {
 		t.Fatalf("api's rights = %+v by %q, %v; want its base's 3000-3999 to private, by base", rights, by, err)
 	}
-	rights, by, err = machinefile.RightsOf([]machinefile.Tree{user}, "web")
+	rights, by, err = machinefile.RightsOf([]machinefile.Tree{user}, "web", "")
 	if err != nil || rights == nil || rights.To != catalog.AudiencePublic || len(rights.Open) != 1 || rights.Open[0].From != 3000 || by != "web.local" {
 		t.Fatalf("web's rights = %+v by %q, %v; want its overlay's, 3000 to public, by web.local", rights, by, err)
 	}
-	if rights, by, err = machinefile.RightsOf([]machinefile.Tree{user}, "linux-1"); err != nil || rights != nil || by != "" {
+	if rights, by, err = machinefile.RightsOf([]machinefile.Tree{user}, "linux-1", ""); err != nil || rights != nil || by != "" {
 		t.Fatalf("a VM with no Machinefile reads %+v by %q, %v; want none", rights, by, err)
 	}
-	if rights, by, err = machinefile.RightsOf([]machinefile.Tree{user}, "plain"); err != nil || rights != nil || by != "plain" {
+	if rights, by, err = machinefile.RightsOf([]machinefile.Tree{user}, "plain", ""); err != nil || rights != nil || by != "plain" {
 		t.Fatalf("a Machinefile that says no ports reads %+v by %q, %v; want none, by plain", rights, by, err)
 	}
 	var refused *machinefile.RefusedFileError
-	if _, _, err = machinefile.RightsOf([]machinefile.Tree{user}, "broken"); !errors.As(err, &refused) {
+	if _, _, err = machinefile.RightsOf([]machinefile.Tree{user}, "broken", ""); !errors.As(err, &refused) {
 		t.Fatalf("a public range reads %v; want the refusal of its file", err)
 	}
 }
@@ -60,12 +60,29 @@ func TestAnOverlayChangesTheRightsKeyByKey(t *testing.T) {
 		"machinefiles/api.machine.yaml": head + "name: api\nmachine: { kind: workspace }\nports: { open: 3000-3999, to: private }\n",
 		"machinefiles/api.local.yaml":   head + "overrides: api\nports: { to: public }\n",
 	})
-	rights, by, err := machinefile.RightsOf([]machinefile.Tree{user}, "web")
+	rights, by, err := machinefile.RightsOf([]machinefile.Tree{user}, "web", "")
 	if err != nil || rights.To != catalog.AudiencePrivate || len(rights.Open) != 1 || len(rights.Except) != 1 || rights.Audiences[5432] != catalog.AudienceLocal || rights.Audiences[8080] != catalog.AudiencePublic || by != "web.local" {
 		t.Fatalf("web's rights = %+v by %q, %v; want its own with the overlay's except and audiences", rights, by, err)
 	}
 	var refused *machinefile.RefusedFileError
-	if _, _, err := machinefile.RightsOf([]machinefile.Tree{user}, "api"); !errors.As(err, &refused) || !strings.Contains(err.Error(), "public opens ports one by one") {
+	if _, _, err := machinefile.RightsOf([]machinefile.Tree{user}, "api", ""); !errors.As(err, &refused) || !strings.Contains(err.Error(), "public opens ports one by one") {
 		t.Fatalf("a public range merged reads %v; want the overlay refused", err)
+	}
+}
+
+func TestAMachinesOwnChangesAreItsAlone(t *testing.T) {
+	user := tree(machinefile.User, map[string]string{
+		"machinefiles/dev.machine.yaml":   head + "name: dev\nmachine: { kind: workspace }\nports: { open: 3000-3999, to: private }\n",
+		"machinefiles/linux-1.local.yaml": head + "overrides: dev\nports: { audiences: { 5432: local } }\n",
+		"machinefiles/other.local.yaml":   head + "overrides: web\nports: { to: public }\n",
+	})
+	rights, by, err := machinefile.RightsOf([]machinefile.Tree{user}, "dev", "linux-1")
+	if err != nil || rights.To != catalog.AudiencePrivate || rights.Audiences[5432] != catalog.AudienceLocal || by != "linux-1.local" {
+		t.Fatalf("linux-1's rights = %+v by %q, %v; want dev's with its own audience for 5432", rights, by, err)
+	}
+	for _, vm := range []string{"agent-7f", "other", ""} {
+		if rights, by, err := machinefile.RightsOf([]machinefile.Tree{user}, "dev", vm); err != nil || len(rights.Audiences) != 0 || by != "dev" {
+			t.Errorf("%q's rights = %+v by %q, %v; want dev's alone", vm, rights, by, err)
+		}
 	}
 }

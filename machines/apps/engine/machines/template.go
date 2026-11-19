@@ -24,6 +24,9 @@ type Template struct {
 	// it, by their wire names.
 	SignIns, Grants []string
 	Files           []TemplateFile
+	// value: the names of the Machinefiles its chain reads, itself among
+	// them: a VM named like one would read that file's overlay as its own.
+	Chain []string
 }
 
 type TemplateFile struct {
@@ -57,6 +60,16 @@ type FirstStartGrant struct {
 
 type FirstStartSignIn struct {
 	Program, Command string
+}
+
+// value: a workspace named like a Machinefile its template's chain reads:
+// its own changes, `<name>.local.yaml`, would change that file for every
+// machine that follows it.
+
+type TemplateNameError struct{ Name, Template string }
+
+func (e *TemplateNameError) Error() string {
+	return e.Name + " names a Machinefile of " + e.Template + "'s chain: a workspace's own changes, " + e.Name + ".local.yaml, would be those of every machine that follows " + e.Template
 }
 
 type ServerTemplateError struct{ Name string }

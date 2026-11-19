@@ -153,7 +153,7 @@ func accessOf(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.A
 	if err != nil {
 		return nil, err
 	}
-	asked, err := machinefile.GivenOf(lib, file)
+	asked, err := machinefile.GivenOf(lib, file, vm)
 	if err != nil {
 		return nil, err
 	}

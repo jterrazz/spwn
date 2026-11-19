@@ -43,3 +43,15 @@ func TestAudiencesAreCheckedAndCountTheirPublicPorts(t *testing.T) {
 		t.Errorf("a public port given local leaves room for one of audiences: %v", err)
 	}
 }
+
+// invariant: an overlay overrides a Machinefile by its name: its own file's,
+// or, for a machine's own changes, the one that machine follows.
+func TestAnOverlayOverridesItsFileOrTheOneItsMachineFollows(t *testing.T) {
+	for _, overrides := range []string{"linux-1", "linux-dev"} {
+		if mf, err := decodeMachinefile(t, "linux-1.local.yaml", "overrides: "+overrides+"\nports: { except: [3306] }\n"); err != nil || mf.Overrides != overrides {
+			t.Errorf("an overlay overriding %s decoded %+v, %v", overrides, mf, err)
+		}
+	}
+	machinefileRefused(t, "linux-1.local.yaml", "overrides: Linux_Dev\n", `overrides "Linux_Dev": an overlay names the Machinefile it changes`)
+	machinefileRefused(t, "linux-1.local.yaml", "ports: { except: [3306] }\n", `overrides ""`)
+}

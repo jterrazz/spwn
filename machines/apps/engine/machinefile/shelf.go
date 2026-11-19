@@ -204,7 +204,7 @@ func FilesOf(lib Library) []FileView {
 			Name: name, Origin: p.Kind, Path: p.Path, Description: p.File.Description, Extends: p.File.Extends,
 			Text: secret.Kept(string(p.Body)), Apps: listedApps(p.File), Settings: listedSettings(p.File),
 		}
-		if files, err := lib.chain(name); err == nil {
+		if files, err := lib.chain(name, ""); err == nil {
 			v.Head = headOf(merge(files))
 		}
 		switch {
@@ -215,7 +215,7 @@ func FilesOf(lib Library) []FileView {
 		default:
 			v.Shelf = ShelfYours
 		}
-		if o, ok := lib.Overlays[name]; ok {
+		if o, ok := lib.Overlays[name]; ok && o.File.Overrides == name {
 			v.Local = localOf(o)
 		}
 		out = append(out, v)

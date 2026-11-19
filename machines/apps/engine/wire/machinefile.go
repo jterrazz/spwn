@@ -166,7 +166,7 @@ func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights
 	if rec, err := m.stores.machines.Get(ctx, vm); !named && err == nil && rec.Template != "" {
 		name = rec.Template
 	}
-	rights, by, err := machinefile.RightsOf(trees, name)
+	rights, by, err := machinefile.RightsOf(trees, name, vm)
 	if err != nil {
 		return nil, "", machinefilecalls.Worded(err)
 	}
@@ -242,7 +242,7 @@ func machineOf(p coremachine.Profile) machinefile.Machine {
 	if p.System.OS == coremachine.Linux {
 		os = catalog.OSUbuntu
 	}
-	return machinefile.Machine{Kind: catalog.MachineRole(p.Kind), System: catalog.SystemSpec{OS: os, Version: p.System.Version, Arch: catalog.Arch(p.System.Arch)}}
+	return machinefile.Machine{Name: p.Ref.Name, Kind: catalog.MachineRole(p.Kind), System: catalog.SystemSpec{OS: os, Version: p.System.Version, Arch: catalog.Arch(p.System.Arch)}}
 }
 
 func explainCommand(env kit.Env, m machine) *cobra.Command {

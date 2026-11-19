@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"errors"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -90,6 +91,17 @@ func (s *Machinist) fromTemplate(ctx context.Context, r model.CreateRequest) (mo
 	return r, &t, nil
 }
 
+// invariant: a workspace is named apart from every Machinefile its
+// template's chain reads, so its own changes are its alone: the name asked
+// is judged before anything else of the create, the one chosen once
+// chosen.
+func apart(name string, t *model.Template) error {
+	if t != nil && slices.Contains(t.Chain, name) {
+		return &model.TemplateNameError{Name: name, Template: t.Name}
+	}
+	return nil
+}
+
 func networkFor(img catalog.Image, asked catalog.Network) (catalog.Network, error) {
 	switch asked {
 	case "", catalog.NetworkNAT:
@@ -108,12 +120,18 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	if err := s.CheckMac(); err != nil {
 		return r, err
 	}
-	r, _, err := s.fromTemplate(ctx, r)
+	r, t, err := s.fromTemplate(ctx, r)
 	if err != nil {
 		return r, err
 	}
+	if named := apart(r.Name, t); named != nil {
+		return r, named
+	}
 	if r, _, err = s.checkCreate(ctx, r); err != nil {
 		return r, err
+	}
+	if named := apart(r.Name, t); named != nil {
+		return r, named
 	}
 	if err := s.built(ctx, r.Image); err != nil {
 		return r, err
@@ -390,10 +408,16 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	if err != nil {
 		return model.Created{}, err
 	}
+	if named := apart(r.Name, t); named != nil {
+		return model.Created{}, named
+	}
 	asked := r.Name
 	r, others, err := s.checkCreate(ctx, r)
 	if err != nil {
 		return model.Created{}, err
+	}
+	if named := apart(r.Name, t); named != nil {
+		return model.Created{}, named
 	}
 	switch unbuilt := s.built(ctx, r.Image); {
 	case unbuilt == nil:

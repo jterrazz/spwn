@@ -790,6 +790,7 @@
         "machines.no-image",
         "machines.not-enough-memory",
         "machines.server-template",
+        "machines.template-name",
         "machines.too-little-memory",
         "machines.unknown-image"
       ],

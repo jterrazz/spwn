@@ -28,7 +28,7 @@ func (files) Template(_ context.Context, name string) (model.Template, error) {
 	case catalog.LinuxImage:
 		return model.Template{Name: name, OS: catalog.OSUbuntu, Lifetime: model.Ephemeral, Size: model.Resources{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 20e9}}, nil
 	case "docs-bot":
-		return model.Template{Name: name, OS: catalog.OSUbuntu, Lifetime: model.Persistent, Size: model.Resources{MemoryBytes: 3 << 30}}, nil
+		return model.Template{Name: name, OS: catalog.OSUbuntu, Lifetime: model.Persistent, Size: model.Resources{MemoryBytes: 3 << 30}, Chain: []string{catalog.LinuxImage, name}}, nil
 	case catalog.MacOSImage:
 		return model.Template{Name: name, OS: catalog.OSMacOS, Lifetime: model.Persistent, Size: model.Resources{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 80e9}}, nil
 	}
@@ -80,6 +80,17 @@ func TestACreateAskedNothingButItsFileTakesWhatTheFileSays(t *testing.T) {
 	name, err := m.NameFor(catalog.Linux, model.AllMachines{Macs: []model.MacView{{Name: "mac", ThisMac: true, VMs: []model.VM{{Name: "linux-1"}}}}})
 	if err != nil || name != "linux-2" {
 		t.Errorf("the name over a fleet holding linux-1: %q, %v; want linux-2", name, err)
+	}
+}
+
+func TestAWorkspaceIsNamedApartFromTheMachinefilesItFollows(t *testing.T) {
+	m := unasking(t)
+	for name, refused := range map[string]bool{"docs-bot": true, catalog.LinuxImage: true, "docs-1": false} {
+		_, err := m.CheckCreate(t.Context(), model.CreateRequest{Name: name, From: "docs-bot"})
+		var named *model.TemplateNameError
+		if errors.As(err, &named) != refused || refused && (named.Name != name || named.Template != "docs-bot") {
+			t.Errorf("%s from docs-bot: %v; want refused %v", name, err, refused)
+		}
 	}
 }
 

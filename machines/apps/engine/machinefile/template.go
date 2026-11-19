@@ -37,6 +37,8 @@ type Template struct {
 	// value: each file by its slash path under the owner's folder
 	// (`machinefiles/<name>.machine.yaml`, `machinefiles/<name>.local.yaml`).
 	Files []File
+	// value: the names of the Machinefiles its chain reads, itself last.
+	Chain []string
 	Lock  []byte
 	SHA   string
 }
@@ -44,8 +46,9 @@ type Template struct {
 func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 	// invariant: a template is a Machinefile of a VM (a workspace or a
 	// server) that says the image its disk starts from; a mixin, a
-	// computer's, or one that names no image is none.
-	files, err := lib.chain(name)
+	// computer's, or one that names no image is none. It carries the
+	// overlays of its files alone, never a machine's own changes.
+	files, err := lib.chain(name, "")
 	if err != nil {
 		return Template{}, err
 	}
@@ -70,6 +73,9 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 	}
 	h := sha256.New()
 	for _, f := range files {
+		if f.Kind != Overlay {
+			t.Chain = append(t.Chain, f.File.Name)
+		}
 		file := path.Base(f.Path)
 		h.Write([]byte(file + "\x00"))
 		h.Write(f.Body)
@@ -119,10 +125,10 @@ type Given struct {
 	Server          bool
 }
 
-func GivenOf(lib Library, name string) (Given, error) {
-	// invariant: read from the file's whole chain, its overlays included,
-	// as the resolution merges them.
-	files, err := lib.chain(name)
+func GivenOf(lib Library, name, machine string) (Given, error) {
+	// invariant: read from the file's whole chain, its overlays and the
+	// machine's own changes included, as the resolution merges them.
+	files, err := lib.chain(name, machine)
 	if err != nil {
 		return Given{}, err
 	}

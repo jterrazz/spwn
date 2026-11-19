@@ -1,0 +1,27 @@
+description: 'a workspace named like a Machinefile its file reads is refused before anything is made'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit macbook-pro machinefiles/web-dev.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: web-dev
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+      exit: 0
+    - command: 'machines create base-ubuntu --from web-dev'
+      exit: 2
+      stderr: |
+          Error: base-ubuntu names a Machinefile of web-dev's chain: a workspace's own changes, base-ubuntu.local.yaml, would be those of every machine that follows web-dev
+          Hint: name it apart: station machines create <name> --from web-dev
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"web-dev","From":"web-dev"}}}
+      exit: 0
+      stdout: |
+          {"code":"machines.template-name","subject":"web-dev","message":"web-dev names a Machinefile of web-dev's chain: a workspace's own changes, web-dev.local.yaml, would be those of every machine that follows web-dev"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms // {} | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["api","linux-1","station-image-base-ubuntu-2026.10.20","station-image-base-ubuntu-2026.11.01"]

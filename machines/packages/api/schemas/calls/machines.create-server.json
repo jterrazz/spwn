@@ -317,6 +317,7 @@
             "machines.server-bridged",
             "machines.server-needs-name",
             "machines.server-template",
+            "machines.template-name",
             "machines.too-little-memory",
             "machines.unknown-image",
             "not_allowed",

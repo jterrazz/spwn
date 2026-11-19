@@ -209,7 +209,7 @@ func TestAnOverlayChangesAccountsAndPortsKeyByKey(t *testing.T) {
 	if !slices.Equal(got, want) {
 		t.Errorf("read %v\nwant a's whole, the overlay's keys over it: %v", got, want)
 	}
-	given, err := machinefile.GivenOf(lib, "a")
+	given, err := machinefile.GivenOf(lib, "a", "")
 	if err != nil || given.Ports.To != catalog.AudiencePrivate || !slices.Equal(given.Ports.Except, []int{3306}) || len(given.Ports.Audiences) != 2 || fmt.Sprint(given.SignIns, given.Grants) != "[gh] [claude]" {
 		t.Errorf("given %+v %+v, %v; want a's ports with the overlay's except and audiences, its sign-in kept", given, given.Ports, err)
 	}
@@ -219,13 +219,61 @@ func TestAnOverlayChangesAccountsAndPortsKeyByKey(t *testing.T) {
 	if _, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, &refused) || !strings.Contains(err.Error(), "a.local.yaml: its accounts with those of a's chain: gh is both signed in and granted") {
 		t.Errorf("a grant the chain signs in to reads %v; want the overlay refused", err)
 	}
-	if _, err := machinefile.GivenOf(lib, "a"); !errors.As(err, &refused) {
+	if _, err := machinefile.GivenOf(lib, "a", ""); !errors.As(err, &refused) {
 		t.Errorf("given of a refused merge reads %v; want the refusal", err)
 	}
 	wide := "machinefile: station.machinefile/v1\noverrides: a\nports: { to: public }\n"
 	lib = library(t, map[string]string{"machinefiles/a.machine.yaml": a, "machinefiles/a.local.yaml": wide, "machinefiles/base.machine.yaml": base}, nil)
 	if _, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, &refused) || !strings.Contains(err.Error(), "a.local.yaml: its ports with those of a's chain: public opens ports one by one") {
 		t.Errorf("an overlay making a range public reads %v; want the overlay refused", err)
+	}
+}
+
+func TestAMachinesOwnChangesJoinTheChainOfItsMachinefileAlone(t *testing.T) {
+	dev := machine("dev", "{ os: macos }", "[]") + "vm: { image: { from: base-ubuntu } }\nports: { open: 3000-3999, to: private }\n"
+	own := "machinefile: station.machinefile/v1\noverrides: dev\napps: { add: [fd] }\nports: { except: [3306] }\n"
+	lib := library(t, map[string]string{"machinefiles/dev.machine.yaml": dev, "machinefiles/linux-1.local.yaml": own, "machinefiles/web.machine.yaml": machine("web", "{ os: macos }", "[]")}, nil)
+	listed := func(vm, file string) []string {
+		t.Helper()
+		r, err := machinefile.Resolve(lib, file, machinefile.Machine{Name: vm}, machinefile.Lock{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got []string
+		for _, v := range r.Values {
+			if v.Origin.Kind == machinefile.Overlay {
+				got = append(got, v.Key+"@"+v.Origin.Name)
+			}
+		}
+		return got
+	}
+	if got, want := listed("linux-1", "dev"), []string{"apps.fd@dev", "ports.except@dev"}; !slices.Equal(got, want) {
+		t.Errorf("linux-1 resolves dev to %v, want its own changes: %v", got, want)
+	}
+	for _, read := range [][2]string{{"agent-7f", "dev"}, {"", "dev"}, {"linux-1", "web"}} {
+		if got := listed(read[0], read[1]); len(got) > 0 {
+			t.Errorf("%q resolves %s to %v: linux-1's own changes are linux-1's alone", read[0], read[1], got)
+		}
+	}
+	sameName := library(t, map[string]string{"machinefiles/dev.machine.yaml": dev, "machinefiles/linux-1.machine.yaml": machine("linux-1", "{ os: macos }", "[]"), "machinefiles/linux-1.local.yaml": own}, nil)
+	if r, err := machinefile.Resolve(sameName, "linux-1", machinefile.Machine{}, machinefile.Lock{}); err != nil {
+		t.Fatal(err)
+	} else {
+		for _, v := range r.Values {
+			if v.Origin.Kind == machinefile.Overlay {
+				t.Errorf("machinefile linux-1 reads %s from an overlay that overrides dev: an overlay is file-wide only for the file it overrides", v.Key)
+			}
+		}
+	}
+	given, err := machinefile.GivenOf(lib, "dev", "linux-1")
+	if err != nil || !slices.Equal(given.Ports.Except, []int{3306}) {
+		t.Errorf("given to linux-1 %+v, %v; want its own except", given.Ports, err)
+	}
+	if given, err := machinefile.GivenOf(lib, "dev", "agent-7f"); err != nil || len(given.Ports.Except) != 0 {
+		t.Errorf("given to agent-7f %+v, %v; want dev's alone", given.Ports, err)
+	}
+	if tpl, err := machinefile.TemplateOf(lib, "dev", nil); err != nil || len(tpl.Files) != 1 {
+		t.Errorf("dev's template carries %v, %v; want dev alone: a machine's own changes stay on its Mac", tpl.Files, err)
 	}
 }
 
