@@ -4,6 +4,6 @@ import '../website.specification.js';
 
 describe('narrow', () => {
     test.todo(
-        "A3 waits for a viewport on @jterrazz/test's website chain (a visit opens Chromium's 1280 by 720 alone), and for the window's narrow layout: no sidebar drawer and no secondary column dropped under 860 px",
+        'A3 not in this version (decisions 2026-11-12 and 2026-11-19: the window is used on a computer, its narrow layout is not tuned)',
     );
 });
