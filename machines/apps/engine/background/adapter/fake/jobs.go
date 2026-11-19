@@ -89,8 +89,8 @@ func (j *Jobs) engineJob() background.Job {
 }
 
 // invariant: the engine's job is its Mac's engine: it runs while the world
-// says the engine runs, a load sets it up, a start or a restart runs it, and
-// a stop leaves it set up and stopped; a world that seeds an engine has its
+// says the engine runs, a load sets it up, a start runs it, a restart runs it again as the
+// binary's own, and a stop leaves it set up and stopped; a world that seeds an engine has its
 // job without writing it.
 func (j *Jobs) engine(r contract.Ref) bool { return r.Label == catalog.EngineLabel }
 
@@ -209,6 +209,9 @@ func (j *Jobs) Restart(_ context.Context, r contract.Ref) error {
 	j.w.Lock()
 	defer j.w.Unlock()
 	if j.engine(r) {
+		if e := j.thisMac().Engine; e != nil {
+			e.Version, e.Lacks, e.StartedAt = "", nil, j.w.Now
+		}
 		return j.start(r)
 	}
 	job := j.thisMac().Jobs[r.Label]

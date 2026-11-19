@@ -1,0 +1,19 @@
+description: 'start over a newer binary restarts the older engine onto it, and the VMs keep running'
+env: two-macs
+runs:
+    - command: 'world upgrade macbook-pro v3.0.0'
+      exit: 0
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	restarted · v3.0.0 to {{string}}
+    - command: 'engine'
+      exit: 0
+      stdout: |
+          ●	engine	running · {{string}} · up 15 s · 1 VM
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
