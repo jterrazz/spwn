@@ -1,0 +1,12 @@
+description: 'a second build the same UTC day is version .2, beside the first'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.04	built
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.04.2	built

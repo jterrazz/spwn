@@ -1,0 +1,16 @@
+.storageLink {
+    all: unset;
+    cursor: pointer;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--t4);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+}
+.storageLink:hover {
+    text-decoration-color: var(--t1);
+}
+.storageLink:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 2px;
+}

@@ -1,0 +1,13 @@
+{
+    "group": "find",
+    "id": "find.down",
+    "note": "Find opened while infra is down: Restart infra leads Needs you, run at once.",
+    "pages": ["pages/machines.find.down.find.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "find": {
+            "query": ""
+        },
+        "recent": ["linux-1", "mac-mini", "infra"]
+    }
+}

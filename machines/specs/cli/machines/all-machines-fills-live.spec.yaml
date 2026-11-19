@@ -1,0 +1,16 @@
+description: 'on a terminal All machines draws a row for each Mac as it answers, never waiting for the slowest'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ../../__fixtures__/machines-stubs/
+    - ./__fixtures__/slow-z/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 120x40 /usr/bin/env -u NO_COLOR COLUMNS=120 "$STATION" machines | /usr/bin/grep -c "└─ ● "'
+      stdin: |
+          within 2 see fast-vm
+          see slow-vm
+          within 10 exit 0
+          screen
+      exit: 0
+      stdout: |
+          2

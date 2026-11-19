@@ -1,0 +1,13 @@
+#!/bin/sh
+# mas: Xcode is listed once mas installed it, as the App Store leaves it.
+case "$*" in
+    list) if /usr/bin/grep -q 'mas install 497799835' "$HOME/.calls" 2> /dev/null; then echo "497799835  Xcode  (26.1)"; fi ;;
+    "install 497799835")
+        echo "mas $*" >> "$HOME/.calls"
+        echo "==> Downloading Xcode (26.1)"
+        ;;
+    *)
+        echo "stub mas: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

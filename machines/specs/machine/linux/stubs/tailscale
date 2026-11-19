@@ -1,0 +1,8 @@
+#!/bin/sh
+# The tailnet of the run's Mac: signed in, Serve answering nothing; every call is
+# a line of $HOME/.calls, so no port is ever shared on the owner's tailnet.
+printf 'tailscale %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "status --json") echo '{"BackendState":"Running","CertDomains":["e2e.tail0000.ts.net"],"Self":{"ID":"1","HostName":"e2e","DNSName":"e2e.tail0000.ts.net.","TailscaleIPs":["100.64.0.1"],"Online":true},"Peer":{},"CurrentTailnet":{"Name":"e2e","MagicDNSSuffix":"tail0000.ts.net"}}' ;;
+    *json*) echo '{}' ;;
+esac

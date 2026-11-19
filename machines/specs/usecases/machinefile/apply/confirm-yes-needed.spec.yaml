@@ -1,0 +1,37 @@
+description: 'off a terminal, apply --remove without --yes removes nothing and says so'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [fd]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	fd	brew
+          ●	homebrew	5.0.1	script	the manager of fd
+          ●	fd	10.3.0	brew
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'apply --remove'
+      exit: 2
+      stdout: |
+          # Extra
+          ?	fd	brew	installed by station for macbook-pro, listed no longer
+      stderr: |
+          Error: refusing to remove what the Machinefile lists no longer without --yes
+          Hint: re-run with --yes
+    - command: 'apps | /usr/bin/grep "	fd	"'
+      exit: 0
+      stdout: |
+          ●	fd	10.3.0	brew

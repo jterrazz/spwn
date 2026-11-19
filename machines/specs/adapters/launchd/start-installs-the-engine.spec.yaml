@@ -1,0 +1,42 @@
+description: 'engine start installs a Mac''s one engine under its launchd agent, and starts it'
+fixture: ../__fixtures__/launchctl/
+env: engine
+runs:
+    - command: 'engine start </dev/null'
+      exit: 0
+      stdout: |
+          ●	engine	installed, running · {{string}}
+      files:
+          Library/LaunchAgents/com.jterrazz.station.engine.plist:
+              contains:
+                  - '<string>com.jterrazz.station.engine</string>'
+                  - |-
+                    	<key>ProgramArguments</key>
+                    	<array>
+                    		<string>{{path}}</string>
+                    		<string>engine</string>
+                    		<string>run</string>
+                    	</array>
+                  - |-
+                    		<key>PATH</key>
+                    		<string>{{workdir}}/bin:{{workdir}}/.local/share/bun/bin:{{workdir}}/.local/share/go/bin</string>
+                  - "\t<key>RunAtLoad</key>
+
+                    \t<true/>
+
+                    \t<key>KeepAlive</key>
+
+                    \t<true/>
+
+                    \t<key>AbandonProcessGroup</key>
+
+                    \t<true/>"
+                  - '<string>{{workdir}}/.local/state/station/logs/engine.log</string>'
+          .calls:
+              contains:
+                  - 'launchctl bootstrap gui/{{int}} {{workdir}}/Library/LaunchAgents/com.jterrazz.station.engine.plist'
+                  - 'launchctl kickstart gui/{{int}}/com.jterrazz.station.engine'
+    - command: 'engine stop </dev/null'
+      exit: 0
+      stdout: |
+          ●	engine	the engine stopped

@@ -1,0 +1,13 @@
+description: 'a link''s totals keep growing past 4 GB: its 64-bit counters are read, never wrapped'
+fixture: ./__fixtures__/meter-kernel/
+runs:
+    - command: 'guest serve --stdio < ask.json | /usr/bin/jq -c ''.out.sample | [.net_in, .net_out]'''
+      exit: 0
+      stdout: |
+          [3119505408,3128866816]
+    - command: '--version >/dev/null; /usr/bin/jq ''.links |= map(if .name == "en0" then .in = 6442450944 | .out = 5368709120 else . end)'' kernel/counters.json > next.json && /bin/mv next.json kernel/counters.json'
+      exit: 0
+    - command: 'guest serve --stdio < ask.json | /usr/bin/jq -c ''.out.sample | [.net_in, .net_out]'''
+      exit: 0
+      stdout: |
+          [6442450944,5368709120]

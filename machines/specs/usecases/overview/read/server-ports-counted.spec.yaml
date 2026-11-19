@@ -1,0 +1,17 @@
+description: 'a server''s Overview counts its ports in its Mac''s classes: 443 Public, 6443 and 2379 Private'
+env: two-macs
+runs:
+    - command: 'world listen infra "*:443" nginx'
+      exit: 0
+    - command: 'world listen infra "*:6443" kube-apiserver'
+      exit: 0
+    - command: 'world listen infra "*:2379" etcd'
+      exit: 0
+    - command: 'machines infra | /usr/bin/grep Ports'
+      exit: 0
+      stdout: |
+          	Ports	Public 1 · Private 2
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "infra") | .class] | group_by(.) | map([.[0], length])'''
+      exit: 0
+      stdout: |
+          [["private",2],["public",1]]

@@ -1,0 +1,7 @@
+description: 'station apps update with nothing waiting says every app is up to date, exit 0'
+env: one-mac
+runs:
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	every app is up to date on This Mac

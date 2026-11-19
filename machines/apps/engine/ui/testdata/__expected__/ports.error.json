@@ -1,0 +1,350 @@
+{
+  "schema": "station.page/v1",
+  "id": "ports",
+  "command": "ports",
+  "context": {
+    "machine": "macbook",
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/ports",
+            "mark": "ok",
+            "label": "Every Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "4 ports"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "4 need you"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "tailnet",
+      "title": "Tailscale",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "broken",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "is signed out on This Mac: ports are local only"
+              }
+            ],
+            "reason": "down"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "private",
+      "title": "Private: shared with you on Tailscale",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "engine",
+            "mark": "attention",
+            "label": "engine",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "not shared while the engine is stopped"
+              }
+            ],
+            "reason": "stopped",
+            "hint": {
+              "command": "station engine start"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:5173",
+            "mark": "attention",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "portmap",
+                "n": 5173,
+                "of": 40001
+              },
+              {
+                "kind": "text",
+                "text": "private"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "not shared while the engine is stopped"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "reserved 40001"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "node"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "probably Vite"
+            },
+            "reason": "late"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:5432",
+            "mark": "attention",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "portmap",
+                "n": 5432,
+                "of": 40002
+              },
+              {
+                "kind": "text",
+                "text": "private"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "not shared while the engine is stopped"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "reserved 40002"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "postgres"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "reason": "late"
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini",
+            "mark": "attention",
+            "label": "mac-mini",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "does not answer"
+              }
+            ],
+            "reason": "unreachable",
+            "hint": {
+              "command": "station machines"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 4
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "ranges",
+      "title": "Reserved ports",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "note": {
+            "text": "Reserved on This Mac: 2 of 1000 (40000-40999), 998 free"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "x",
+      "label": "stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-1:5173",
+        "linux-1:5432"
+      ],
+      "confirm": {
+        "danger": true,
+        "yes": "stop sharing"
+      },
+      "priority": 1,
+      "mutates": true
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+description: 'a Mac that does not answer again in time is a failure, exit 1, naming where to look'
+env: two-macs
+runs:
+    - command: 'world hold Unlocker.PlannedRestart'
+      exit: 0
+    - command: 'machines restart mac-mini --yes'
+      exit: 1
+      stderr: |
+          Error: mac-mini did not come back
+          Hint: station machines mac-mini

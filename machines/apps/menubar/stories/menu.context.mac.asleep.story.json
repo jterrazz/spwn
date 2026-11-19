@@ -1,0 +1,18 @@
+{
+    "group": "menu",
+    "id": "menu.context.mac.asleep",
+    "note": "Right-click macbook-air, asleep: Open and Wake macbook-air.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {
+            "row": "macbook-air"
+        }
+    }
+}

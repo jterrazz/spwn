@@ -1,0 +1,286 @@
+{
+  "schema": "station.page/v1",
+  "id": "all-machines",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "all-machines",
+      "title": "All machines",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "kind": "text",
+          "show": "pipe"
+        },
+        {
+          "key": "mac",
+          "kind": "text",
+          "show": "pipe"
+        },
+        {
+          "key": "lifetime",
+          "kind": "text",
+          "show": "pipe"
+        },
+        {
+          "key": "class",
+          "kind": "text",
+          "keep": 70,
+          "show": "eye"
+        },
+        {
+          "key": "role",
+          "kind": "text",
+          "keep": 30,
+          "show": "eye"
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        },
+        {
+          "key": "ip",
+          "kind": "identity",
+          "keep": 50
+        },
+        {
+          "key": "record",
+          "kind": "list",
+          "show": "pipe"
+        },
+        {
+          "key": "resources",
+          "kind": "list",
+          "keep": 10,
+          "show": "eye",
+          "whole": true
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 5,
+          "show": "eye"
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "macbook",
+              "mark": "ok",
+              "label": "macbook",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "mac"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "online"
+                },
+                {
+                  "kind": "text",
+                  "text": "-"
+                },
+                {
+                  "kind": "count",
+                  "unit": "VMs"
+                },
+                {
+                  "kind": "count",
+                  "unit": "VMs"
+                },
+                {
+                  "kind": "none"
+                }
+              ]
+            },
+            "items": [
+              {
+                "empty": {
+                  "noun": "VMs",
+                  "hint": {
+                    "command": "station machines create"
+                  }
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "images",
+      "title": "Images",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "label": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "size",
+          "label": "size",
+          "kind": "size",
+          "keep": 60
+        },
+        {
+          "key": "mac",
+          "label": "on",
+          "kind": "text",
+          "keep": 40,
+          "show": "eye"
+        },
+        {
+          "key": "on",
+          "label": "on",
+          "kind": "text",
+          "keep": 40,
+          "show": "pipe"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "base-ubuntu",
+            "mark": "absent",
+            "label": "base-ubuntu",
+            "detail": {
+              "kind": "text",
+              "text": "not built yet"
+            },
+            "reason": "missing"
+          }
+        },
+        {
+          "row": {
+            "id": "base-macos",
+            "mark": "absent",
+            "label": "base-macos",
+            "detail": {
+              "kind": "text",
+              "text": "not built yet"
+            },
+            "reason": "missing"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "absent",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "tailnet",
+      "title": "Tailscale",
+      "fold": "auto",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "absent",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not installed"
+              }
+            ],
+            "reason": "missing",
+            "hint": {
+              "command": "station apps install tailscale"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "absent",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "ctrl+r",
+      "label": "restart",
+      "on": "row",
+      "rows": [
+        "macbook"
+      ],
+      "confirm": {
+        "danger": true,
+        "yes": "restart"
+      },
+      "priority": 2,
+      "mutates": true
+    },
+    {
+      "key": "n",
+      "label": "create",
+      "on": "page",
+      "priority": 4,
+      "mutates": true
+    },
+    {
+      "key": "b",
+      "label": "build images",
+      "on": "page",
+      "priority": 7,
+      "mutates": true
+    }
+  ]
+}

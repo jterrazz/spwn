@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "home",
+  "command": "status",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "status reads the Mac it runs on",
+    "hint": "station overview --on <vm>"
+  }
+}

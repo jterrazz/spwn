@@ -1,0 +1,39 @@
+description: 'the App Store app counts as tailscale installed, Not managed: never updated nor removed by station'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/two-installed/
+    - ../../__fixtures__/tailscale-app-store/
+runs:
+    - command: 'apps --json | /usr/bin/jq -c ''.apps[] | select(.name == "tailscale") | [.state, .detail]'''
+      exit: 0
+      stdout: |
+          ["not-managed","app-store"]
+    - command: 'apps install tailscale'
+      exit: 0
+      stdout: |
+          ●	tailscale		cask	already installed
+    - command: 'apps update tailscale'
+      exit: 0
+      stdout: |
+          ○	tailscale		cask	the App Store updates it
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	bat	0.24.0	brew
+          ●	jq	1.7.1	brew
+      files:
+          .calls:
+              contains:
+                  - |-
+                    brew bundle install --upgrade --file=-
+                    brew "bat"
+                    brew "jq"
+    - command: 'apps remove tailscale --yes'
+      exit: 2
+      stderr: |
+          Error: tailscale is the App Store's install
+          Hint: remove it from /Applications
+    - command: '--version >/dev/null; /usr/bin/grep -cE "tailscale-app|brew uninstall|brew bundle install --no-upgrade" .calls'
+      exit: 1
+      stdout: |
+          0

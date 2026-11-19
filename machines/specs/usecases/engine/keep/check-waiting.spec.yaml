@@ -1,0 +1,15 @@
+description: 'a server whose check never passed since its boot waits; it is not a failure'
+env: two-macs
+runs:
+    - command: 'world fault CheckRunner.Run'
+      exit: 0
+    - command: 'world reboot-inside infra'
+      exit: 0
+    - command: 'machines infra | /usr/bin/grep -E "Check"'
+      exit: 0
+      stdout: |
+          ◐	Check waiting	https://infra:6443/readyz
+    - command: 'machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

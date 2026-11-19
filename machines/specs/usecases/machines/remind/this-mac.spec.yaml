@@ -1,0 +1,8 @@
+description: 'this Mac is awake already: remind names another Mac'
+env: air-asleep
+runs:
+    - command: 'machines remind macbook-pro'
+      exit: 2
+      stderr: |
+          Error: "macbook-pro" is this machine
+          Hint: pick another machine: station machines lists them all

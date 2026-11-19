@@ -1,0 +1,8 @@
+description: 'an image no registry offers is said so, and nothing is fetched'
+env: two-macs
+runs:
+    - command: 'images update base-macos'
+      exit: 1
+      stderr: |
+          Error: no version of base-macos is released
+          Hint: station images

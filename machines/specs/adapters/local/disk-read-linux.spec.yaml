@@ -1,0 +1,21 @@
+description: 'a Linux VM sizes docker with its own read and has no Mac row; go reads its linux cache path'
+fixture:
+    - ./__fixtures__/disk-docker/
+    - ./__fixtures__/disk-go/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .cache/go-build && echo x > .cache/go-build/a'
+      exit: 0
+    - command: 'disk --json | /usr/bin/jq -c ''[.rows[].app | select(. == "docker" or . == "tart" or . == "xcode" or . == "homebrew")] | unique'''
+      exit: 0
+      stdout: |
+          ["docker"]
+    - command: 'disk --json | /usr/bin/jq -c ''.rows[] | select(.app == "docker") | [.group, .bytes]'''
+      exit: 0
+      stdout: |
+          ["can-rebuild",1800000000]
+    - command: 'disk --json | /usr/bin/jq -r ''.rows[] | select(.app == "go" and .group == "can-rebuild") | .paths[]'''
+      exit: 0
+      stdout: |
+          ~/.cache/go-build

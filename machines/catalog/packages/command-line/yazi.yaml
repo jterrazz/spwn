@@ -1,0 +1,23 @@
+package: station.package/v1
+kind: app
+name: yazi
+description: Terminal file manager
+replaces: Finder in the terminal
+provides: [yazi]
+methods:
+    - os: macos
+      brew: yazi
+    - family: linux
+      arch: arm64
+      github-release: { repo: sxyazi/yazi, asset: 'yazi-aarch64-unknown-linux-gnu.zip' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: sxyazi/yazi, asset: 'yazi-x86_64-unknown-linux-gnu.zip' }
+disk:
+    paths:
+        - path: '{state}/yazi'
+          level: data
+        - path: '{config}/yazi'
+          level: settings
+    erase:
+        - delete: ['{state}/yazi/*']

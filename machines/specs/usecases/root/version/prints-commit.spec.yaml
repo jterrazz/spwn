@@ -1,0 +1,7 @@
+description: 'station --version prints the version it was built from and its commit'
+env: one-mac
+runs:
+    - command: '--version'
+      exit: 0
+      stdout: |
+          station {{string}} ({{sha}})

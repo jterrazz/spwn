@@ -1,0 +1,13 @@
+description: 'at its start the engine removes only its range''s serve entries no reservation justifies, both kinds'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/serving/
+env: engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "40090-40109"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /usr/bin/grep -E "serve --(https|tcp)" .calls; /usr/bin/grep -c "443" .calls; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          tailscale serve --tcp=40098 off
+          tailscale serve --https=40099 off
+          0

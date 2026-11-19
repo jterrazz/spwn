@@ -1,0 +1,332 @@
+{
+  "schema": "station.page/v1",
+  "id": "activity",
+  "command": "activity",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "machine",
+      "title": "Activity",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "machine",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "up 3d 4h"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "rates over the last 10 s"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "values",
+      "title": "Now",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "34 % of 10 CPU"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "load 2.8 3.1 2.9"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "12.4 of 16 GB"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "pressure normal"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "swap 1.2 GB"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "388 GB free of 994 GB"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk-read",
+            "label": "Disk read",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "4.1 MB/s"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "182 GB since boot"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk-write",
+            "label": "Disk write",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1.3 MB/s"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "96 GB since boot"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "in 2.1 MB/s"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "out 210 KB/s"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "network-total",
+            "label": "Network total",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "received 38 GB"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "sent 4.6 GB since boot"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "thermal",
+            "mark": "ok",
+            "label": "Thermal",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Nominal"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "battery",
+            "label": "Battery",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "96 %"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "charging"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "health 98 %"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "112 cycles"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "top",
+      "title": "Top processes",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "by-cpu",
+            "label": "Top by CPU",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Virtualization (linux-1) 18 %"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Zed 9 %"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "WindowServer 4 %"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "by-memory",
+            "label": "Top by memory",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Virtualization (linux-1) 4.1 GB"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Zed 1.9 GB"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station activity --all-machines",
+      "text": "every machine"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+description: 'a server''s Overview names its own Tailscale device; station neither installs nor blocks it'
+env: two-macs
+runs:
+    - command: 'machines infra'
+      exit: 0
+      stdout: |
+          	On infra:
+          	Activity	memory 15 of 24 GB · 44.0 GB free
+          	Ports	Public 0 · Private 0
+          	SSH	ssh infra
+          	Apps, settings, accounts: not managed by station
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Check passes	https://infra:6443/readyz
+          ●	Restarts	↺ 0 · none since boot
+          ●	Size	8 CPU · 24 GB · 80 GB
+          ●	Own Tailscale device	infra
+    - command: 'machines create infra-2 --server --on mac-mini >/dev/null'
+      exit: 0
+    - command: 'machines infra-2'
+      exit: 0
+      stdout: |
+          	On infra-2:
+          	Activity	? not measured
+          	Ports	Public 0 · Private 0
+          	SSH	ssh infra-2
+          	Apps, settings, accounts: not managed by station
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Restarts	↺ 0 · none since boot
+          ●	Size	4 CPU · 8 GB · 50 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].tailnet | {peers: [.self.Peers[].Name], shares: .shares}'' world.json'
+      exit: 0
+      stdout: |
+          {"peers":["infra"],"shares":null}

@@ -1,0 +1,19 @@
+description: 'an admin setting through --on is refused with the ssh line that runs it under sudo there'
+env: two-macs
+runs:
+    - command: 'settings apply restart-after-power-cut --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: restart-after-power-cut needs admin rights
+          Hint: ssh -t mac-mini sudo station settings apply restart-after-power-cut
+    - command: 'world admin on'
+      exit: 0
+    - command: 'settings apply restart-after-power-cut --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: restart-after-power-cut needs admin rights
+          Hint: ssh -t mac-mini sudo station settings apply restart-after-power-cut
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.as_root'' world.json'
+      exit: 0
+      stdout: |
+          null

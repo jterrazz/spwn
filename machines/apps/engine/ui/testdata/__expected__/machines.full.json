@@ -1,0 +1,356 @@
+{
+  "schema": "station.page/v1",
+  "id": "machines",
+  "command": "machines",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "machines",
+      "title": "4 machines",
+      "role": "banner",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "3 running"
+        },
+        {
+          "kind": "text",
+          "text": "1 stopped"
+        },
+        {
+          "kind": "text",
+          "text": "1 needs you"
+        }
+      ],
+      "joined": true,
+      "columns": [
+        {
+          "key": "name",
+          "label": "MACHINE",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "label": "KIND",
+          "kind": "text",
+          "keep": 80,
+          "whole": true
+        },
+        {
+          "key": "mac",
+          "kind": "text",
+          "show": "pipe"
+        },
+        {
+          "key": "state",
+          "label": "STATE",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "cpu",
+          "label": "CPU",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "memory",
+          "label": "MEMORY",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 5
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "macbook",
+              "mark": "ok",
+              "label": "macbook",
+              "short": "This Mac",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "macbook"
+                },
+                {
+                  "kind": "text",
+                  "text": "Engine running"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                }
+              ]
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "api",
+                  "mark": "absent",
+                  "label": "api",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "Workspace"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "macbook"
+                    },
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "Stopped"
+                        },
+                        {
+                          "kind": "text",
+                          "text": "persistent"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "text": "4 CPU"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "8 GB"
+                    },
+                    {
+                      "kind": "none"
+                    }
+                  ]
+                }
+              },
+              {
+                "row": {
+                  "id": "linux-1",
+                  "mark": "ok",
+                  "label": "linux-1",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "Workspace"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "macbook"
+                    },
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "Running"
+                        },
+                        {
+                          "kind": "text",
+                          "text": "ephemeral"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "text": "4 CPU"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "4 GB"
+                    },
+                    {
+                      "kind": "none"
+                    }
+                  ]
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "mac-mini",
+              "mark": "attention",
+              "label": "mac-mini",
+              "short": "mac-mini",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                },
+                {
+                  "kind": "list",
+                  "items": [
+                    {
+                      "kind": "text",
+                      "text": "Engine running"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "runs v2.0.0-248"
+                    }
+                  ]
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                }
+              ],
+              "reason": "mismatch"
+            },
+            "items": [
+              {
+                "empty": {
+                  "noun": "VMs",
+                  "text": "No VMs yet",
+                  "hint": {
+                    "command": "station machines create --on mac-mini"
+                  }
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "columns": [
+        {
+          "key": "subject",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "finding",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "fix",
+          "kind": "list",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "0-mac-mini",
+            "mark": "attention",
+            "label": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "runs v2.0.0-248"
+              },
+              {
+                "kind": "text",
+                "text": "update station there (scripts/install.sh)"
+              }
+            ],
+            "reason": "degraded"
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "warnings",
+      "title": "Warnings",
+      "role": "banner",
+      "items": [
+        {
+          "note": {
+            "text": "mac-mini: station v2.0.0-248, This Mac v2.0.0-250"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "n",
+      "label": "create",
+      "on": "page",
+      "priority": 4,
+      "mutates": true
+    },
+    {
+      "key": "d",
+      "label": "delete",
+      "on": "row",
+      "confirm": {
+        "danger": true,
+        "yes": "delete"
+      },
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "s",
+      "label": "start",
+      "on": "row",
+      "priority": 5,
+      "mutates": true
+    },
+    {
+      "key": "S",
+      "label": "stop",
+      "on": "row",
+      "priority": 6,
+      "mutates": true
+    },
+    {
+      "key": "ctrl+r",
+      "label": "restart",
+      "on": "row",
+      "confirm": {
+        "danger": true,
+        "yes": "restart"
+      },
+      "priority": 2,
+      "mutates": true
+    },
+    {
+      "key": "e",
+      "label": "enter",
+      "on": "row",
+      "priority": 3,
+      "mutates": true
+    }
+  ]
+}

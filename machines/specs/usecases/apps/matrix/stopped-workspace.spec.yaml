@@ -1,0 +1,11 @@
+description: 'apps.matrix: a stopped workspace is a column with no reading, a server has none'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''{columns: [.out.Columns[] | {n: .Name, away: .Away, read: (.Read != "0001-01-01T00:00:00Z")}], servers: .out.Servers}'''
+      stdin: |
+          {"v":2,"id":"1","call":"apps.matrix","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"columns":[{"n":"macbook-pro","away":"","read":true},{"n":"mac-mini","away":"","read":true},{"n":"linux-1","away":"","read":true},{"n":"api","away":"stopped","read":false}],"servers":["infra"]}

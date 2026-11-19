@@ -1,0 +1,8 @@
+description: 'updating an app that is not installed is refused with the install to run, exit 2'
+env: two-macs
+runs:
+    - command: 'apps update yazi'
+      exit: 2
+      stderr: |
+          Error: yazi is not installed
+          Hint: station apps install yazi

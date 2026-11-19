@@ -1,0 +1,8 @@
+description: 'station background remove on a server is refused: station does not manage what runs inside it'
+env: two-macs
+runs:
+    - command: 'background remove com.example.agent --yes --on infra'
+      exit: 2
+      stderr: |
+          Error: infra is a server: station does not manage its background tasks
+          Hint: manage it with your own tooling: ssh infra

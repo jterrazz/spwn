@@ -1,0 +1,29 @@
+description: 'on a terminal, an apply over a setting changed since asks first; no keeps your file and exits 1'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: '--version >/dev/null; printf ''# mine\n'' >> .local/bin/tart'
+      exit: 0
+    - command: '--version >/dev/null; terminal "$STATION" settings apply tart-launcher'
+      stdin: |
+          see yours is lost
+          send n
+          see Error:
+          screen
+      exit: 1
+      stdout: |
+          ┃ Apply tart-launcher? A setting changed since is overwritten: yours is lost
+          ┃
+          Error: tart-launcher kept: you said no
+          Hint: --yes skips the question
+    - command: '--version >/dev/null; /usr/bin/tail -1 .local/bin/tart'
+      exit: 0
+      stdout: |
+          # mine

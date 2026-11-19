@@ -1,0 +1,19 @@
+description: 'on All machines a finding of the mini names it, and its fix reads the mini''s disk, not this Mac''s'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].disk.free = 79000000000'' world.json > w.json && /bin/mv w.json world.json; "$STATION" activity --all-machines | /usr/bin/head -3'
+      exit: 0
+      stdout: |
+          ●	All machines	5 machines · 4 answering · rates over 1 s
+          # Needs you
+          ✗	mac-mini: disk almost full: 3 % free	station disk --on mac-mini
+    - command: 'activity --all-machines --json | /usr/bin/jq -c ''.findings[] | [.machine, .text, .fix.command]'''
+      exit: 0
+      stdout: |
+          ["mac-mini","mac-mini: disk almost full: 3 % free","station disk --on mac-mini"]
+    - command: 'disk --on mac-mini | /usr/bin/sed -n 2p'
+      exit: 0
+      stdout: |
+          ◐	mac-mini	79.0 GB free of 2.0 TB · 1 misplaced folder	station disk move ~/go

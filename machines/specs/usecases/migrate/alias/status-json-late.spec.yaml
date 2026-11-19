@@ -1,0 +1,15 @@
+description: 'a probe that ignores TERM still answers late at its budget, never holding the read'
+fixture:
+    - ./__fixtures__/status/workspace/
+    - ./__fixtures__/status/identity/
+    - ./__fixtures__/stubborn-gpg/
+runs:
+    - command: 'status --json | /usr/bin/jq -c ''.identity[] | select(.name == "gpg-key") | [.state, .value, .detail]'''
+      timeout: 6000
+      exit: 0
+      stdout: |
+          ["unknown","?","no answer in 2s"]
+    - command: '--version >/dev/null; /bin/kill -0 "$(/bin/cat .gpg-pid)" 2>/dev/null || echo gone'
+      exit: 0
+      stdout: |
+          gone

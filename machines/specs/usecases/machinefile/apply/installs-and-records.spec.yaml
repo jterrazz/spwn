@@ -1,0 +1,34 @@
+description: 'apply installs and sets one step at a time, records its installs, then has nothing left to do'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd]
+          settings: { git-shortcuts: {} }
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	fd	brew
+          # To set
+          ○	git-shortcuts	git-aliases
+          ●	git-shortcuts		git-aliases	~/.gitconfig [alias]: written
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ●	fd	10.3.0	brew
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map(.package)'' world.json'
+      exit: 0
+      stdout: |
+          ["fd"]
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          ●	git-shortcuts		git-aliases	~/.gitconfig [alias]
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ●	fd	10.3.0	brew

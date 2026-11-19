@@ -1,0 +1,10 @@
+# One app per method placed on linux, the smallest of each, then what the native
+# commands need. Installed in this order with `station apps install --on ws1`.
+mise
+go
+node
+bun
+uv
+jq
+skills
+frontend-design

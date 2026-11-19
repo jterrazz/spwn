@@ -1,0 +1,35 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "disk free",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "outcome",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "files to free"
+          }
+        }
+      ]
+    }
+  ]
+}

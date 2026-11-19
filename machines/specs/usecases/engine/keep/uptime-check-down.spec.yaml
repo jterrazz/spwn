@@ -1,0 +1,25 @@
+description: 'a failing check holds the server down on its record; the day turns restart once it passes'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 48h'
+      exit: 0
+    - command: 'world fault CheckRunner.Run 2 times'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, (.uptime.days[-1] | [.mark, (.down[] | [.to, .cause])])]'''
+      exit: 0
+      stdout: |
+          ["running",["down",[null,"its check failed"]]]
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0].uptime | [.availability, (.days[-1] | [.mark, (.restarts // 0), (.down[] | [.to != null, .cause])])]'''
+      exit: 0
+      stdout: |
+          [99.9,["restart",0,[true,"its check failed"]]]

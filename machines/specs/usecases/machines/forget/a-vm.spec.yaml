@@ -1,0 +1,12 @@
+description: 'a VM is deleted, never forgotten: forget refuses it, exit 2, and it still runs'
+env: two-macs
+runs:
+    - command: 'machines forget linux-1 --yes'
+      exit: 2
+      stderr: |
+          Error: linux-1 is a VM: a VM is deleted, never forgotten
+          Hint: station machines delete linux-1
+    - command: 'machines | /usr/bin/grep linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB

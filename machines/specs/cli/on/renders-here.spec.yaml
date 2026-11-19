@@ -1,0 +1,24 @@
+description: '--on runs the call on the other Mac''s engine and renders it here: the same bytes as there'
+fixture: ../../__fixtures__/far-mac/
+env: engine
+runs:
+    - command: 'apps --json --on x > on.json; echo "on $?"; "$STATION" apps --on x > on.txt; cd far && for out in "--json > ../there.json" "> ../there.txt"; do eval /usr/bin/env -i HOME="$PWD" PATH="$PWD/bin" TZ=UTC NO_COLOR=1 COLUMNS=80 STATION_MACHINE_KIND=mac STATION_SYSTEM_DIRS= STATION_SYSTEM_ROOT="$PWD/root" STATION_POWER_STUB="$PWD/power" STATION_GITHUB_API_URL=http://127.0.0.1:9 "$STATION" apps $out; done; echo "there $?"; for doc in on there; do /usr/bin/jq ''del(.generated_at, .machine)'' ../$doc.json > ../$doc.body; done; /usr/bin/cmp ../on.body ../there.body && /usr/bin/tail -n +2 ../on.txt | /usr/bin/cmp - ../there.txt && /usr/bin/head -1 ../on.txt && echo same; /usr/bin/jq -r .schema ../on.json'
+      exit: 0
+      stdout: |
+          on 0
+          there 0
+          	On x:
+          same
+          station.apps.list/v1
+      files:
+          .calls:
+              equals: |
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 x -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 x -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+    - command: '--on=y apps --json | /usr/bin/jq -r .schema'
+      exit: 0
+      stdout: |
+          station.apps.list/v1
+      files:
+          .calls:
+              contains: ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c

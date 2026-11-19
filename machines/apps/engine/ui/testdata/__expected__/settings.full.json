@@ -1,0 +1,845 @@
+{
+  "schema": "station.page/v1",
+  "id": "settings",
+  "command": "settings",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/settings",
+            "mark": "attention",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "14 set by station here"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "9 checked"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "6 need a look"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "needs-a-look",
+      "title": "Needs a look",
+      "role": "lifted",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "git-shortcuts",
+            "mark": "attention",
+            "label": "git-shortcuts",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff git-shortcuts"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "dns",
+            "mark": "attention",
+            "label": "dns",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff dns"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "zed-dotfiles",
+            "mark": "attention",
+            "label": "zed-dotfiles",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff zed-dotfiles"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tailscale-cli",
+            "mark": "attention",
+            "label": "tailscale-cli",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tailscale-cli"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "firewall",
+            "mark": "attention",
+            "label": "firewall",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "off"
+                  }
+                ]
+              }
+            ],
+            "reason": "mismatch",
+            "hint": {
+              "command": "System Settings > Network > Firewall",
+              "external": true
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "screen-lock",
+            "mark": "attention",
+            "label": "screen-lock",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "locks after 10 min"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "expected 5 min"
+                  }
+                ]
+              }
+            ],
+            "reason": "mismatch",
+            "hint": {
+              "command": "System Settings > Lock Screen",
+              "external": true
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 6
+        }
+      ]
+    },
+    {
+      "id": "set",
+      "title": "Set by station",
+      "fold": "calm",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "git-shortcuts",
+            "mark": "attention",
+            "label": "git-shortcuts",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff git-shortcuts"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "dns",
+            "mark": "attention",
+            "label": "dns",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff dns"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "zed-dotfiles",
+            "mark": "attention",
+            "label": "zed-dotfiles",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff zed-dotfiles"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tailscale-cli",
+            "mark": "attention",
+            "label": "tailscale-cli",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tailscale-cli"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "ghostty-dotfiles",
+            "mark": "absent",
+            "label": "ghostty-dotfiles",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply ghostty-dotfiles"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "git-signing",
+            "mark": "absent",
+            "label": "git-signing",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply git-signing"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "backup-exclusions",
+            "mark": "absent",
+            "label": "backup-exclusions",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply backup-exclusions"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "docker-shortcuts",
+            "mark": "ok",
+            "label": "docker-shortcuts",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "applied"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "~/.docker-shortcuts"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "tmux-dotfiles",
+            "mark": "ok",
+            "label": "tmux-dotfiles",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "applied"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "~/.tmux-dotfiles"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "ssh-key",
+            "mark": "ok",
+            "label": "ssh-key",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "applied"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "~/.ssh-key"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "tart-launcher",
+            "mark": "ok",
+            "label": "tart-launcher",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "applied"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "~/.tart-launcher"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "hushlogin",
+            "mark": "off-here",
+            "label": "hushlogin",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "off here"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "github-login",
+            "mark": "off-here",
+            "label": "github-login",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "off here"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "dock-reset",
+            "mark": "off-here",
+            "label": "dock-reset",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "off here"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 4
+        },
+        {
+          "mark": "attention",
+          "n": 4
+        },
+        {
+          "mark": "absent",
+          "n": 3
+        },
+        {
+          "mark": "off-here",
+          "n": 3
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "always-on-mac",
+      "title": "Always-on Mac",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "always-on-mac",
+            "mark": "absent",
+            "label": "Always-on Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "5"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "for a Mac that hosts servers"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "checked",
+      "title": "Checked",
+      "fold": "brief",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "firewall",
+            "mark": "attention",
+            "label": "firewall",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "off"
+                  }
+                ]
+              }
+            ],
+            "reason": "mismatch",
+            "hint": {
+              "command": "System Settings > Network > Firewall",
+              "external": true
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "screen-lock",
+            "mark": "attention",
+            "label": "screen-lock",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "locks after 10 min"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "expected 5 min"
+                  }
+                ]
+              }
+            ],
+            "reason": "mismatch",
+            "hint": {
+              "command": "System Settings > Lock Screen",
+              "external": true
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "time-machine",
+            "mark": "unknown",
+            "label": "time-machine",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "unknown"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "no answer in 2 s"
+                  }
+                ]
+              }
+            ],
+            "reason": "late"
+          }
+        },
+        {
+          "row": {
+            "id": "filevault",
+            "mark": "ok",
+            "label": "filevault",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "as expected"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "sip",
+            "mark": "ok",
+            "label": "sip",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "as expected"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "automatic-updates",
+            "mark": "ok",
+            "label": "automatic-updates",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "as expected"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "on"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "remote-login",
+            "mark": "ok",
+            "label": "remote-login",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "as expected"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "off"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "macos-updates",
+            "mark": "ok",
+            "label": "macos-updates",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "as expected"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "up to date"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "gatekeeper",
+            "mark": "off-here",
+            "label": "gatekeeper",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "off here"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "not checked on this machine"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 5
+        },
+        {
+          "mark": "attention",
+          "n": 2
+        },
+        {
+          "mark": "off-here",
+          "n": 1
+        },
+        {
+          "mark": "unknown",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "not-for-this-machine",
+      "title": "Not for this machine",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "not-for-this-machine",
+            "mark": "not-for-this-machine",
+            "label": "3 not for this machine",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "VMs only"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station settings apply",
+      "text": "apply the 7"
+    },
+    {
+      "command": "station settings --all",
+      "text": "for every row"
+    }
+  ],
+  "actions": [
+    {
+      "key": "a",
+      "label": "apply",
+      "on": "row",
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "d",
+      "label": "diff",
+      "on": "row",
+      "priority": 2
+    },
+    {
+      "key": "o",
+      "label": "off here",
+      "on": "row",
+      "confirm": {
+        "yes": "off"
+      },
+      "priority": 3,
+      "mutates": true
+    },
+    {
+      "key": "f",
+      "label": "open the fix",
+      "on": "row",
+      "priority": 4
+    }
+  ]
+}

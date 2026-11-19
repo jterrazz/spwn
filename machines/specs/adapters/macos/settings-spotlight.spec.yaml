@@ -1,0 +1,13 @@
+description: 'spotlight-exclude opens System Settings while ~/Developer is still indexed'
+fixture: ./__fixtures__/settings-spotlight-indexed/
+runs:
+    - command: 'settings apply spotlight-exclude'
+      exit: 0
+      stdout: |
+          ●	spotlight-exclude
+          ●	System Settings	opened at Spotlight > Search Privacy
+          ○	next	click +, pick ~/Developer, then run station settings to confirm
+      files:
+          .calls:
+              contains:
+                  - 'open x-apple.systempreferences:com.apple.Spotlight-Settings.extension'

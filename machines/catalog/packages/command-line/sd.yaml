@@ -1,0 +1,12 @@
+package: station.package/v1
+kind: app
+name: sd
+description: Intuitive sed alternative
+replaces: sed (simple replaces)
+provides: [sd]
+methods:
+    - os: macos
+      brew: sd
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [sd] }

@@ -1,0 +1,38 @@
+description: 'the Overview owns no fact: its counts are each section''s own read, counted the same'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'overview --json > o.json; "$STATION" apps --json | /usr/bin/jq -c ''[.apps | group_by(.state)[] | {(.[0].state): length}] | add'' > a.json; /usr/bin/jq -c ''.sections[] | select(.id == "apps") | .counts'' o.json | /usr/bin/cmp - a.json && /bin/cat a.json'
+      exit: 0
+      stdout: |
+          {"not-installed":105,"ok":7,"update-available":2}
+    - command: 'overview --json > o.json; "$STATION" accounts --json | /usr/bin/jq -c ''[.accounts[] | select(.state == "signed-in")] | length''; /usr/bin/jq -c ''.sections[] | select(.id == "accounts") | .counts["signed-in"]'' o.json'
+      exit: 0
+      stdout: |
+          3
+          3
+    - command: 'overview --json > o.json; "$STATION" background --json | /usr/bin/jq -c ''[(.tasks | length), ([.findings[] | select(.severity == "broken")] | length), ([.findings[] | select(.severity == "needs-a-look")] | length)]''; /usr/bin/jq -c ''.sections[] | select(.id == "background") | .counts | [.ok + .failing + .orphan, .failing, .orphan]'' o.json'
+      exit: 0
+      stdout: |
+          [14,1,3]
+          [14,1,3]
+    - command: 'overview --json > o.json; "$STATION" ports --json | /usr/bin/jq -c ''.ports | length''; /usr/bin/jq -c ''.sections[] | select(.id == "ports") | .counts.private'' o.json'
+      exit: 0
+      stdout: |
+          2
+          2
+    - command: 'overview --json > o.json; "$STATION" disk --json | /usr/bin/jq -c ''[.findings[].text]''; /usr/bin/jq -c ''[.findings[] | select(.section == "disk") | .text]'' o.json'
+      exit: 0
+      stdout: |
+          ["~/.tart is misplaced"]
+          ["~/.tart is misplaced"]
+    - command: 'settings apply hushlogin'
+      exit: 0
+      stdout: |
+          ●	hushlogin	~/.hushlogin: created
+    - command: '--version >/dev/null; "$STATION" settings --json | /usr/bin/jq -r ''[.settings[] | select(.group == "set")] | "● \(map(select(.state == "applied")) | length) of \(length)"''; "$STATION" overview | /usr/bin/grep "	Settings	" | /usr/bin/cut -f3'
+      exit: 0
+      stdout: |
+          ● 1 of 17
+          set by station · ● 1 of 17 · checked · ● 8 of 9

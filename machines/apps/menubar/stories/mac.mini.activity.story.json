@@ -1,0 +1,12 @@
+{
+    "group": "mac",
+    "heightNote": "the prototype's panel stops at its 700 pt cap and scrolls the rest; the story draws the whole segment",
+    "id": "mac.mini.activity",
+    "note": "mac-mini's activity over the hour it remembers, its VMs among its busiest processes.",
+    "pages": ["pages/machines.history.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "activity",
+        "window": "1h"
+    }
+}

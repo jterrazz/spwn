@@ -1,0 +1,17 @@
+.held {
+    display: flex;
+    gap: var(--space-8);
+    align-items: flex-start;
+    margin: 0;
+    padding: var(--space-10) var(--space-12);
+    color: var(--t2);
+    font-size: var(--text-body);
+    background: var(--inset);
+    border-radius: var(--radius-well);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 28%, transparent);
+    user-select: text;
+}
+
+.held svg {
+    margin-top: 2px;
+}

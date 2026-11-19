@@ -1,0 +1,10 @@
+#!/bin/sh
+# uv: its tool list names a package without its extras.
+printf 'uv %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "tool list") printf 'markitdown v0.1.7\n- markitdown\n' ;;
+    *)
+        echo "stub uv: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

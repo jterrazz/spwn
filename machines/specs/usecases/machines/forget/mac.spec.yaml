@@ -1,0 +1,34 @@
+description: 'on a terminal, yes forgets the Mac and its ssh block here; nothing changes on it'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | del(.engine.memory, .engine.activity)'' world.json > mini-before.json'
+      exit: 0
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines forget mac-mini'
+      stdin: |
+          within 10 see Forget mac-mini?
+          send y
+          within 20 exit 0
+          screen
+      exit: 0
+      stdout: |
+          ┃ Forget mac-mini?
+          ┃
+          ✓ mac-mini · forgotten · nothing changed on it
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].ssh.blocks | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["api","linux-1"]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | del(.engine.memory, .engine.activity)'' world.json | /usr/bin/cmp - mini-before.json && echo unchanged'
+      exit: 0
+      stdout: |
+          unchanged

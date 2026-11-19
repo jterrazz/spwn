@@ -1,0 +1,85 @@
+- navigation "Sidebar":
+  - button "Find"
+  - button "Home"
+  - button "Inbox 2"
+  - button "Machine files"
+  - button "Passwords"
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - button "macbook-pro online":
+      - text: macbook-pro
+      - img "online"
+    - button "api stopped":
+      - text: api
+      - img "stopped"
+    - button "linux-1 running":
+      - text: linux-1
+      - img "running"
+    - button "mac-mini online":
+      - text: mac-mini
+      - img "online"
+    - button "infra healthy":
+      - text: infra
+      - img "healthy"
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps 10"
+    - button "Skills 0"
+    - button "Settings 3"
+  - button "Storage"
+  - img "running"
+  - text: Engine running · dev
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Home
+  - button "New machine"
+  - heading "2 things need you." [level=1]
+  - paragraph:
+    - img "2 things need you."
+    - text: The rest is fine. 2 machines on macbook-pro
+  - text: Memory free 40GB
+  - img "Memory each machine holds, and what is free"
+  - text: of 80 CPU, this Mac 34% 10 CPUs Awake, this Mac Off on power Disk free, this Mac 388GB
+  - 'meter "Disk free, this Mac: used of its total"'
+  - text: of 994 GB · machines hold 100 GB
+  - region "Needs you":
+    - heading "Needs you 2" [level=2]
+    - 'button "broken npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"'
+    - button "Fix npm": Fix
+    - button "broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.example.brain.x-snapshot": Remove
+  - region "Machines":
+    - heading "Machines 3" [level=2]
+    - group "Macs":
+      - button "macbook-pro · 2 machines · all running": macbook-pro 2 machines all running
+      - button "mac-mini · 1 machine · all running": mac-mini 1 machine all running
+      - text: all running This Mac
+    - button "macbook-pro"
+    - text: 34 %
+    - img "Memory of macbook-pro"
+    - text: 4 free
+    - button "api"
+    - text: stopped
+    - img "Memory of api"
+    - button "linux-1"
+    - text: running
+    - img "Memory of linux-1"
+    - text: of 8
+    - button "mac-mini"
+    - text: 21 %
+    - img "Memory of mac-mini"
+    - text: 36 free
+    - button "infra"
+    - text: healthy
+    - img "Memory of infra"
+    - text: of 24
+    - button "Add a Mac"
+  - region "Last night":
+    - heading "Last night 2 moved, 1 failed" [level=2]
+    - button "All history"
+    - button "03:15 mise download timed out failed macbook-pro"
+    - button "Retry mise": Retry
+    - button "03:12 node 24.11.0 → 24.11.1 4 machines"
+    - button "03:13 gh 2.97.0 → 2.98.0 macbook-pro"

@@ -1,0 +1,7 @@
+description: 'on a Mac the disk totals count the internal disk only, never a mounted disk image'
+fixture: ./__fixtures__/meter-kernel/
+runs:
+    - command: 'guest serve --stdio < ask.json | /usr/bin/jq -c ''.out.sample | [.disk_read, .disk_written]'''
+      exit: 0
+      stdout: |
+          [22254007472128,14878830428160]

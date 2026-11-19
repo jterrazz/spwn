@@ -1,0 +1,14 @@
+description: 'every station line a menu bar hint gives to copy is a leaf station has, its flags its own'
+runs:
+    - command: 'machines add "<mac>" --help | /usr/bin/grep -o "station machines add <mac>"'
+      exit: 0
+      stdout: |
+          station machines add <mac>
+    - command: 'ports declare 5000 --via "<route>" --help | /usr/bin/grep -o "station ports declare <machine> <port>"'
+      exit: 0
+      stdout: |
+          station ports declare <machine> <port>
+    - command: 'ports declare linux-1 4321 --via "<route>" --help | /usr/bin/grep -o "station ports declare <machine> <port>"'
+      exit: 0
+      stdout: |
+          station ports declare <machine> <port>

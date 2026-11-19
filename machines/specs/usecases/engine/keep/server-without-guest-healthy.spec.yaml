@@ -1,0 +1,22 @@
+description: 'a server whose tooling replaced station''s guest passes its health steps: ssh is its connection'
+env: server-without-guest
+runs:
+    - command: 'machines infra | /usr/bin/grep -A7 "# Health"'
+      exit: 0
+      stdout: |
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Check passes	https://infra:6443/readyz
+          ●	Restarts	↺ 0 · none since boot
+          ●	Size	8 CPU · 24 GB · 80 GB
+          ●	Own Tailscale device	infra
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

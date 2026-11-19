@@ -1,0 +1,22 @@
+description: 'a removal apt would widen to a package that depends on it is refused, and nothing runs as root'
+fixture:
+    - ./__fixtures__/ubuntu/
+    - ./__fixtures__/lib-needed/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps remove jq --yes'
+      exit: 1
+      stdout: |
+          ✗	jq		apt	~/.local/state/station/logs/jq.log
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: re-run it: station apps remove jq
+      files:
+          .local/state/station/logs/jq.log:
+              contains:
+                  - 'removing jq would remove foo-tool too: nothing removed'
+    - command: '--version > /dev/null; /usr/bin/grep -c ''^sudo'' .calls'
+      exit: 1
+      stdout: |
+          0

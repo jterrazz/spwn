@@ -1,0 +1,4 @@
+{"world": "creating", "station": "dev", "exchanges": [
+{"request":{"call":"machines.ssh","in":{"Name":"linux-4"}},"answers":[{"v":2,"out":{"User":"admin","Address":"linux-4","Command":"ssh admin@linux-4"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"linux-5"}},"answers":[{"v":2,"out":{"User":"admin","Address":"linux-5","Command":"ssh admin@linux-5"}}]}
+]}

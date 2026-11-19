@@ -1,0 +1,22 @@
+description: 'a recipe that fails exits 1, deletes the build VM and records nothing'
+fixture:
+    - ./__fixtures__/images-stubs/
+    - ./__fixtures__/images-build/
+    - ./__fixtures__/images-served/
+    - ./__fixtures__/images-recipe-fails/
+serve: sshd
+runs:
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 1
+      stderr: |
+          Error: image base-ubuntu: the recipe failed: exited 1: E: Unable to locate package libatomic1
+          Hint: station images build base-ubuntu
+      files:
+          .calls:
+              contains: 'tart delete station-build-base-ubuntu'
+          .local/state/station/consoles/station-build-base-ubuntu: absent
+    - command: '--version > /dev/null; /bin/ls .local/state/station/images'
+      exit: 0
+      stdout: |
+          key
+          key.pub

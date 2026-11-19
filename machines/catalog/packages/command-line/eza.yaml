@@ -1,0 +1,12 @@
+package: station.package/v1
+kind: app
+name: eza
+description: Modern ls replacement
+replaces: ls
+provides: [eza]
+methods:
+    - os: macos
+      brew: eza
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [eza] }

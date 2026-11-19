@@ -1,0 +1,20 @@
+description: 'the embedded Zed settings and the hidden formatter settings are written to ~/.config/zed'
+runs:
+    - command: 'settings apply zed-dotfiles'
+      exit: 0
+      stdout: |
+          ●	zed-dotfiles
+          ●	~/.config/zed/settings.json	written
+          ●	~/.config/zed/.oxfmtrc.json	written
+      files:
+          .config/zed/.oxfmtrc.json:
+              equals: |
+                  {
+                      "printWidth": 100,
+                      "tabWidth": 4,
+                      "useTabs": false,
+                      "singleQuote": true,
+                      "trailingComma": "all",
+                      "endOfLine": "lf"
+                  }
+          .config/zed/settings.json: exists

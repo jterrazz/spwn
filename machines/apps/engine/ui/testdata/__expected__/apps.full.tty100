@@ -1,0 +1,12 @@
+This Mac · 17 apps for this Mac · 2 updates · 4 not installed
+
+Updates
+  ◐ pnpm       11.21.0 → 11.22.1  brew   update available  → station apps update pnpm
+  ◐ better-ui                     skill  update available  → station apps update better-ui
+Not installed  ○ 4 · mise, mas, typewhisper, frontend-design
+Not managed    ? 5 · bun, go, java, python, chatgpt
+OK             ● 6 · homebrew, uv, cocoapods, skills, claude-desktop, modern-web-guidance
+Not for this machine  107 apps live on other machines
+
+→ station apps update            the 2 updates
+→ station apps install <app...>  install some

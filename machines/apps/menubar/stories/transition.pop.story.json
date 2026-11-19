@@ -1,0 +1,18 @@
+{
+    "freeze": 0.35,
+    "group": "transition",
+    "id": "transition.pop",
+    "note": "A pop back to home: mac-mini's page leaves to the right fading to .6, home returns from a third left.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "play": {
+        "from": "mac.mini.overview",
+        "gesture": "press esc"
+    },
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1"
+}

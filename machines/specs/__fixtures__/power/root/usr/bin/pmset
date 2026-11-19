@@ -1,0 +1,4 @@
+#!/bin/sh
+# pmset as the Power specs reach it through STATION_SYSTEM_ROOT: every call is
+# recorded in $HOME/.calls, so the real pmset never runs in a spec.
+printf 'pmset %s\n' "$*" >> "$HOME/.calls"

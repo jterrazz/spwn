@@ -1,0 +1,22 @@
+description: 'on a terminal, deleting one version asks, then deletes it alone; the VMs keep theirs'
+fixture: ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" images delete base-ubuntu@2026.10.20'
+      stdin: |
+          see Delete base-ubuntu@2026.10.20?
+          send y
+          see deleted
+          screen
+      exit: 0
+      stdout: |
+          ┃ Delete base-ubuntu@2026.10.20?
+          ┃
+          ●       base-ubuntu     2026.10.20      deleted
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version) \(.vms | join(","))"'''
+      exit: 0
+      stdout: |
+          macbook-pro 2026.11.01 api,linux-1
+          mac-mini 2026.11.01 infra

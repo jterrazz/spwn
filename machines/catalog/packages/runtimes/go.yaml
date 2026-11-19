@@ -1,0 +1,92 @@
+package: station.package/v1
+kind: app
+name: go
+description: Compiled systems programming language by Google
+provides: [go]
+methods:
+    - os: any
+      mise:
+          name: go
+          version: latest
+disk:
+    paths:
+        - path: ~/Library/Caches/go-build
+          level: cache
+          os: macos
+        - path: '{cache}/go-build'
+          level: cache
+          family: linux
+        - path: '{cache}/go/mod'
+          level: cache
+        - path: ~/Library/Caches/gopls
+          level: cache
+          os: macos
+          note: gopls's index
+        - path: '{cache}/gopls'
+          level: cache
+          family: linux
+          note: gopls's index
+        - path: ~/Library/Caches/goimports
+          level: cache
+          os: macos
+        - path: '{cache}/goimports'
+          level: cache
+          family: linux
+        - path: '{data}/go/bin/*'
+          level: data
+          note: what go install put there
+        - path: '{data}/go/pkg'
+          level: data
+          note: the checksum database's state
+        - path: ~/Library/Application Support/go/env
+          level: settings
+          os: macos
+        - path: '{config}/go/env'
+          level: settings
+          family: linux
+        - path: ~/Library/Application Support/go/telemetry
+          level: settings
+          os: macos
+          note: Go's telemetry mode and counters
+        - path: '{config}/go/telemetry'
+          level: settings
+          family: linux
+          note: Go's telemetry mode and counters
+    free:
+        - run: [go, clean, -cache, -modcache]
+          uses: go
+        - delete:
+              - ~/Library/Caches/go-build/*
+              - ~/Library/Caches/gopls/*
+              - ~/Library/Caches/goimports/*
+          os: macos
+        - delete: ['{cache}/go-build/*', '{cache}/gopls/*', '{cache}/goimports/*']
+          family: linux
+    erase:
+        - delete: ['{data}/go/bin/*', '{data}/go/pkg/*']
+    relocate:
+        - file: go-env
+          key: GOPATH
+          value: '{data}/go'
+        - file: go-env
+          key: GOMODCACHE
+          value: '{cache}/go/mod'
+        - file: mise settings
+          key: settings.go_set_gobin
+          value: 'false'
+    misplaced:
+        - path: ~/go
+          move:
+              - from: ~/go/bin/*
+                to: '{data}/go/bin'
+              - from: ~/go/pkg/mod/*
+                to: '{cache}/go/mod'
+              - from: ~/go/pkg/sumdb/*
+                to: '{data}/go/pkg/sumdb'
+          prune: [~/go/bin, ~/go/pkg/mod, ~/go/pkg/sumdb, ~/go/pkg, ~/go]
+          free:
+              - run: [go, clean, -modcache]
+                env: [GOMODCACHE=~/go/pkg/mod, GOFLAGS=-modcacherw]
+                uses: go
+              - delete: [~/go/pkg/mod]
+                prune: [~/go/pkg, ~/go/bin, ~/go]

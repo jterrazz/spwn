@@ -1,0 +1,8 @@
+description: 'inside a k3s server the network totals count its eth link only, never a virtual one'
+fixture: ./__fixtures__/meter-proc/
+env: engine
+runs:
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" guest serve --stdio < ask.json | /usr/bin/jq -c ''.out.sample | [.net_in, .net_out]'''
+      exit: 0
+      stdout: |
+          [7340032000,1310720000]

@@ -1,0 +1,7 @@
+description: 'an edit of a stopped VM applies when it next starts, and needs no restart'
+env: two-macs
+runs:
+    - command: 'machines edit api --memory 8G --cpus 6'
+      exit: 0
+      stdout: |
+          ●	api	6 cpus, 8 GB, applies when api next starts

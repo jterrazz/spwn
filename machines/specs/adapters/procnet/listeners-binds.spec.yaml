@@ -1,0 +1,14 @@
+description: '/proc/net/tcp and tcp6 are read in the machine''s byte order, every address kind, listening only'
+fixture: ./__fixtures__/binds/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''.ports[]? | [.port, .ip]'''
+      exit: 0
+      stdout: |
+          [3000,"::"]
+          [5432,"127.0.0.1"]
+          [8000,"192.168.1.20"]
+          [8080,"::1"]
+          [8081,"0.0.0.0"]
+          [8443,"100.101.102.103"]
+          [8444,"fd7a:115c:a1e0::1"]

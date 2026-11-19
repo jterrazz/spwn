@@ -1,0 +1,11 @@
+description: 'the history the engine keeps lives in its memory alone: no file station writes holds a sample'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; for i in 1 2 3; do "$STATION" world advance 1m; done; /usr/bin/jq -r ''.macs["macbook-pro"].engine.activity | keys[]'' world.json; /usr/bin/grep -rlI -e cpu_busy -e disk_written --exclude=world.json . || echo "no file holds a sample"'
+      exit: 0
+      stdout: |
+          linux-1
+          macbook-pro
+          no file holds a sample

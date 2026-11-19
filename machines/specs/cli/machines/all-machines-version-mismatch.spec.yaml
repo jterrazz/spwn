@@ -1,0 +1,14 @@
+description: 'a Mac whose Hello names another station version is a degraded row that says both'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ./__fixtures__/fleet-y-other-version/
+runs:
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	x	Mac	x	Online
+          ◐	y	Mac	y	Online · runs v0.0.0-other
+          ●	w	Workspace	y	Running · persistent	4 CPU	8 GB
+          # Needs you
+          ◐	y	runs v0.0.0-other	update station there (scripts/install.sh)

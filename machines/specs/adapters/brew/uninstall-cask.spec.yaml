@@ -1,0 +1,13 @@
+description: 'a cask uninstalls with brew uninstall --cask'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/cask/
+runs:
+    - command: 'apps remove ghostty --yes'
+      exit: 0
+      stdout: |
+          ●	ghostty		cask
+      files:
+          .calls:
+              contains:
+                  - 'brew uninstall --cask ghostty'

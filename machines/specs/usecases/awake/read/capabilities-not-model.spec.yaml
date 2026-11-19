@@ -1,0 +1,16 @@
+description: 'a Mac of an unknown model behaves by what it reports: no battery, no lid, no lid toggle'
+env: unknown-model
+runs:
+    - command: 'awake --on mac-mini --json | /usr/bin/jq -c ''.macs[0] | {name, capabilities, reading}'''
+      exit: 0
+      stdout: |
+          {"name":"mac-mini","capabilities":{"battery":false,"lid":false,"thermal":true},"reading":null}
+    - command: 'awake 4h --lid --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: mac-mini has no lid: --lid is for laptops
+          Hint: station awake 4h --on mac-mini
+    - command: 'awake | /usr/bin/grep -c -e ''^lid'' -e ''^power'''
+      exit: 0
+      stdout: |
+          2

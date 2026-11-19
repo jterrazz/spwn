@@ -1,0 +1,3 @@
+{"world": "one-mac", "station": "dev", "exchanges": [
+{"request":{"watch":"engine.watch","in":{"machines":[]}},"answers":[{"v":2,"error":{"type":"not-found","code":"call.unknown","subject":"engine.watch","message":"no call is named engine.watch","hint":"run station --help"}}]}
+]}

@@ -1,0 +1,12 @@
+description: 'with Serve off the engine runs no serve at its start, and its log says why once'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/serving/
+env: engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "40090-40109"}/'' .config/station/preferences.json; : > answers/tailscale/status.serve-off; "$STATION" engine run 2> daemon.err & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /usr/bin/grep -c "tailscale serve" .calls; kill $d; wait $d; /usr/bin/cut -d" " -f2- daemon.err'
+      exit: 0
+      stdout: |
+          0
+          tailnet: Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console: ports are local only

@@ -1,0 +1,110 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "disk free",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "outcome",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "homebrew",
+            "mark": "ok",
+            "label": "homebrew",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424,
+                "unit": "freed"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "bun",
+            "mark": "absent",
+            "label": "bun",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "nothing to free"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "absent",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "freed",
+      "title": "Freed",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "outcome",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "freed",
+            "mark": "ok",
+            "label": "Freed",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "nothing is lost"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ]
+}

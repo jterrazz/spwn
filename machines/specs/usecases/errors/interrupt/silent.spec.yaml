@@ -1,0 +1,16 @@
+description: 'ctrl-c at a question prints nothing after it and exits 130'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" apps remove lazygit'
+      stdin: |
+          see Remove lazygit?
+          send \x03
+          scrollback
+      exit: 130
+      stdout: |
+          ┃ Remove lazygit?
+          ┃

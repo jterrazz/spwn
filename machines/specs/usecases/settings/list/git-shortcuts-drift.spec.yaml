@@ -1,0 +1,24 @@
+description: 'with the Git shortcuts applied git wip commits; an alias edited by hand is Changed since'
+env: two-macs
+runs:
+    - command: 'settings apply git-shortcuts'
+      exit: 0
+      stdout: |
+          ●	git-shortcuts	~/.gitconfig [alias]: written
+    - command: '--version >/dev/null; /usr/bin/git -c init.defaultBranch=main init -q repo && cd repo && echo a > a && /usr/bin/git -c user.name=o -c user.email=o@o wip >/dev/null && /usr/bin/git log --format=%s'
+      exit: 0
+      stdout: |
+          WIP
+    - command: 'world advance 48h'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/-m WIP/-m mine/'' .gitconfig'
+      exit: 0
+    - command: 'settings | /usr/bin/grep git-shortcuts'
+      exit: 0
+      stdout: |
+          ◐	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts
+    - command: 'settings diff git-shortcuts | /usr/bin/grep -E ''^[-+]	'''
+      exit: 0
+      stdout: |
+          -	wip = "!git add --all && git commit -m WIP"
+          +	wip = "!git add --all && git commit -m mine"

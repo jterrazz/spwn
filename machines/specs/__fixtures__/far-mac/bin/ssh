@@ -1,0 +1,17 @@
+#!/bin/sh
+# ssh to another Mac: the argv is recorded in $HOME/.calls, and the far side is a real
+# station: the document's far/ folder is that Mac's home, its engine API served over
+# ssh's stdio as `station engine attach` serves it.
+printf 'ssh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *" station engine attach")
+        /bin/mkdir -p "$HOME/far"
+        cd "$HOME/far" && exec /usr/bin/env -i HOME="$HOME/far" PATH="$HOME/far/bin" TZ=UTC NO_COLOR=1 COLUMNS=80 \
+            STATION_MACHINE_KIND=mac STATION_SYSTEM_DIRS= STATION_SYSTEM_ROOT="$HOME/far/root" STATION_POWER_STUB="$HOME/far/power" \
+            STATION_GITHUB_API_URL=http://127.0.0.1:9 "$STATION" engine attach
+        ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

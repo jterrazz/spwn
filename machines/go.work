@@ -1,0 +1,7 @@
+go 1.27.3
+
+use (
+	./apps/engine
+	./catalog
+	./specs
+)

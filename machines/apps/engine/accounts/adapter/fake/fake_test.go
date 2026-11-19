@@ -1,0 +1,57 @@
+package fake_test
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/fake"
+	"github.com/jterrazz/studio-station/apps/engine/accounts/contract"
+	"github.com/jterrazz/studio-station/apps/engine/accounts/contract/contracttest"
+	"github.com/jterrazz/studio-station/apps/engine/world"
+)
+
+func TestVault(t *testing.T) {
+	contracttest.Vault(t, func(*testing.T) contract.Vault {
+		return fake.NewVault(&world.World{}, "mac-mini")
+	})
+}
+
+func TestBookStore(t *testing.T) {
+	contracttest.BookStore(t, func(*testing.T) contract.BookStore { return fake.NewBook() })
+}
+
+func TestSignIns(t *testing.T) {
+	contracttest.SignIns(t, func(*testing.T) contracttest.SignInsSubject {
+		in, out := accounts.Programs()[1], accounts.Programs()[0]
+		w := &world.World{Macs: map[string]*world.Mac{"mac-mini": {Accounts: &world.Accounts{Programs: map[accounts.Program]accounts.Facts{
+			in: {State: accounts.ProgramSignedIn, Who: "you", How: accounts.HowOwn},
+		}}}}}
+		at := time.Date(2026, 11, 14, 9, 0, 0, 0, time.UTC)
+		clock := fake.Clock{Now: func() time.Time { return at }, Sleep: func(ctx context.Context, _ time.Duration) error {
+			<-ctx.Done()
+			return ctx.Err()
+		}}
+		return contracttest.SignInsSubject{SignIns: fake.NewSignIns(w, "mac-mini", clock), SignedIn: in, SignedOut: out}
+	})
+}
+
+func fixed() time.Time { return time.Date(2026, 11, 14, 10, 0, 0, 0, time.UTC) }
+
+func TestPasswords(t *testing.T) {
+	contracttest.Passwords(t, func(*testing.T) contract.Passwords {
+		return fake.NewPasswords(&world.World{}, "mac-mini", fake.Clock{Now: fixed})
+	})
+}
+
+func TestGrants(t *testing.T) {
+	contracttest.Grants(t, func(*testing.T) contracttest.GrantsSubject {
+		w := &world.World{Macs: map[string]*world.Mac{"mac-mini": {VMs: map[string]*world.VM{
+			"linux-1": {PID: 12, Kept: &world.Kept{}},
+			"linux-2": {Kept: &world.Kept{}},
+		}}}}
+		c := fake.Clock{Now: fixed}
+		return contracttest.GrantsSubject{Grants: fake.NewGrants(w, "mac-mini", c), Passwords: fake.NewPasswords(w, "mac-mini", c), Running: "linux-1", Stopped: "linux-2"}
+	})
+}

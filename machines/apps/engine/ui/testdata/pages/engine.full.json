@@ -1,0 +1,70 @@
+{
+  "schema": "station.page/v1",
+  "id": "engine",
+  "command": "engine",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "engine",
+      "title": "Engine",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "engine",
+            "mark": "ok",
+            "label": "engine",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "running"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "v3.1.0"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "up 3 d"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "2 VMs"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Awake until 18:00"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}

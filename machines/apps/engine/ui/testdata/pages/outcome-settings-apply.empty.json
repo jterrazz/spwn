@@ -1,0 +1,30 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "settings apply",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "settings to apply"
+          }
+        }
+      ]
+    }
+  ]
+}

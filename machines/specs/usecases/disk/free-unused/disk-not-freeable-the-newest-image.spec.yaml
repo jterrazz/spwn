@@ -1,0 +1,11 @@
+description: 'the newest image is in use for the next machines: asked by name it is refused, and kept'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["base-ubuntu@2026.11.01"],"Confirm":"base-ubuntu@2026.11.01"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.not-freeable","subject":"base-ubuntu@2026.11.01"}

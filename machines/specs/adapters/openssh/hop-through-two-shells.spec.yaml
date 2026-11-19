@@ -1,0 +1,11 @@
+description: 'a VM of another Mac: its ProxyCommand survives the local shell, then the far one'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ../../__fixtures__/fleet-y-answers/
+    - ./__fixtures__/two-shells/
+runs:
+    - command: 'machines > /dev/null; proxy=$(/usr/bin/sed -n ''/^Host w$/,/^# <<</s/^  ProxyCommand //p'' .ssh/config); PATH="$PWD/hop:/usr/bin:/bin" /bin/sh -c "$proxy"'
+      exit: 0
+      stdout: |
+          far station: machines pipe w

@@ -1,0 +1,17 @@
+package: station.package/v1
+kind: app
+name: tmux
+description: Terminal multiplexer for persistent sessions
+provides: [tmux]
+then: [tmux-dotfiles]
+methods:
+    - os: macos
+      brew: tmux
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [tmux] }
+disk:
+    paths:
+        - path: ~/.tmux.conf
+          level: settings
+    no-erase: 'nothing to erase: keys and logins are kept'

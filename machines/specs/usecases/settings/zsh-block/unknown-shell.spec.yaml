@@ -1,0 +1,17 @@
+description: 'shell takes exactly zsh: another shell, the old init verb, or nothing exits 2 with the one hint'
+runs:
+    - command: 'shell bash'
+      exit: 2
+      stderr: |
+          Error: station shell takes the one shell it serves: zsh
+          Hint: station shell zsh
+    - command: 'shell init zsh'
+      exit: 2
+      stderr: |
+          Error: station shell takes the one shell it serves: zsh
+          Hint: station shell zsh
+    - command: 'shell'
+      exit: 2
+      stderr: |
+          Error: station shell takes the one shell it serves: zsh
+          Hint: station shell zsh

@@ -1,0 +1,8 @@
+#!/bin/sh
+# sysadminctl prints on stderr, after its timestamp.
+case "$*" in
+    "-screenLock status")
+        if [ -e "$HOME/.off" ]; then echo "2026-11-04 10:00:00.000 sysadminctl[501:1001] screenLock is off" >&2
+        else echo "2026-11-04 10:00:00.000 sysadminctl[501:1001] screenLock delay is immediate" >&2; fi ;;
+    *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;
+esac

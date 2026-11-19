@@ -1,0 +1,10 @@
+description: 'a listener is named by its program, not by the thread name a runtime gives its main thread'
+fixture: ./__fixtures__/vm/
+env: engine
+runs:
+    - command: '--version >/dev/null; p=vm/root/proc; /bin/mkdir -p $p/4121/fd $p/90/fd; printf "socket:[101]" > $p/4121/fd/3; printf "node-MainThread\n" > $p/4121/comm; printf "node\0/home/vmu/app/server.js\0" > $p/4121/cmdline; printf "socket:[102]" > $p/90/fd/5; printf "postgres\n" > $p/90/comm; printf "postgres: checkpointer \0" > $p/90/cmdline; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''.ports[]? | [.port, .process, .pid]'''
+      exit: 0
+      stdout: |
+          [3000,"",0]
+          [5432,"postgres",90]
+          [8081,"node",4121]

@@ -1,0 +1,23 @@
+description: 'a workspace whose three boots within a minute end in reboots is stopped as a loop, and kept'
+env: two-macs
+runs:
+    - command: 'world reboot-inside linux-1'
+      exit: 0
+    - command: 'world reboot-inside linux-1'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+    - command: 'world reboot-inside linux-1'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ✗	linux-1	Workspace	macbook-pro	In a loop · ephemeral	4 CPU	8 GB	rebooting in a loop · stopped
+          # Needs you
+          ✗	linux-1	rebooting in a loop, stopped	station machines delete linux-1

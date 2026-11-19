@@ -1,0 +1,8 @@
+description: 'with no Tailscale app the ports begin with Tailscale not installed, and the verb that installs it'
+env: engine
+runs:
+    - command: 'ports --json | /usr/bin/jq -r .tailscale.state; "$STATION" ports | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          not-installed
+          ○	Tailscale	not installed	station apps install tailscale

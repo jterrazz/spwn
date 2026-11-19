@@ -1,0 +1,13 @@
+description: 'with no sign-in to take, the sheet says to sign in first and offers no capture'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["macbook-pro"].accounts.programs.gh)'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {line: .CaptureLine, captures: (.Captures | length)}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.new","in":{}}
+      exit: 0
+      stdout: |
+          {"line":"Sign in to a program on this Mac first; then its sign-in can be kept","captures":0}

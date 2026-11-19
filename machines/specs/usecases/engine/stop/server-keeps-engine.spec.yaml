@@ -1,0 +1,21 @@
+description: 'stop everything skips a running server and says so; the engine keeps running for it'
+env: two-macs
+runs:
+    - command: 'engine stop --on mac-mini --yes'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	engine	infra skipped (server) · the engine keeps running for infra
+    - command: 'engine --on mac-mini | /usr/bin/cut -f1,2'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	engine
+    - command: 'machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | [.engine.stopped, .vms.infra.kept.want, .vms.infra.pid > 0]'' world.json'
+      exit: 0
+      stdout: |
+          [null,"running",true]

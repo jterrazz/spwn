@@ -1,0 +1,44 @@
+- navigation "Sidebar":
+  - button "Find"
+  - button "Home"
+  - button "Inbox"
+  - button "Machine files"
+  - button "Passwords"
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - button "macbook-pro online":
+      - text: macbook-pro
+      - img "online"
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps 1"
+    - button "Skills 0"
+    - button "Settings 0"
+  - button "Storage"
+  - img "running"
+  - text: Engine running · dev
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: macbook-pro
+  - heading "macbook-pro online" [level=2]
+  - paragraph: This Mac · Engine running. Sleeps normally.
+  - button "Keep macbook-pro awake": Awake…
+  - button "New machine on macbook-pro": New machine
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - tabpanel "Overview":
+    - heading "Online, with no machine running." [level=1]
+    - text: CPU 0% Memory not given yet Disk not given yet Its machines 0machines
+    - region "Memory":
+      - heading "Memory" [level=2]
+      - paragraph: not given yet What each machine holds of this Mac's memory.
+    - region "Packages":
+      - heading "Packages" [level=2]
+      - text: "not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"

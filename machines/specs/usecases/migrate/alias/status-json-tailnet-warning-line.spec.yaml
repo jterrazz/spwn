@@ -1,0 +1,8 @@
+description: 'status reads the tailnet and Serve through a CLI that warns on stdout'
+fixture: ../../../__fixtures__/vms/
+env: engine
+runs:
+    - command: '--version >/dev/null; : > answers/tailscale/warn; "$STATION" status --json | /usr/bin/jq -c ''[.tailnet.state, (.gateways[] | select(.name == "Tailscale Serve") | .value)]'''
+      exit: 0
+      stdout: |
+          ["ok","on"]

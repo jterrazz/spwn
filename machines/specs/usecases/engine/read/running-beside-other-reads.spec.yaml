@@ -1,0 +1,13 @@
+description: 'engine reads sent together with the machines and overview reads all find the engine running'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; printf ''%s\n'' ''{"v":2,"id":"1","call":"machines.list"}'' ''{"v":2,"id":"2","call":"overview.read"}'' ''{"v":2,"id":"3","call":"engine.read"}'' ''{"v":2,"id":"4","call":"engine.read"}'' ''{"v":2,"id":"5","call":"engine.read"}'' | "$STATION" guest serve --stdio | /usr/bin/jq -c ''if .out.State then [.id, .out.State] else [.id, (.out != null)] end'' | /usr/bin/sort'
+      exit: 0
+      stdout: |
+          ["1",true]
+          ["2",true]
+          ["3","running"]
+          ["4","running"]
+          ["5","running"]

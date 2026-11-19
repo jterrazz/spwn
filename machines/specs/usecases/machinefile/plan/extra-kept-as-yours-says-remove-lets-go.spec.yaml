@@ -1,0 +1,29 @@
+description: 'a plan whose one extra station cannot uninstall is not calm: apply --remove lets go of its record'
+fixture:
+    - ../../__fixtures__/homebrew/
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.script = {installed: {"https://claude.ai/install.sh": "2.0.14"}} | .macs["macbook-pro"].stores.ledger = [{package: "claude", method: "script", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" plan'
+      stdin: |
+          see Extra
+          scrollback
+      exit: 0
+      stdout: |
+          macbook-pro · 2 present · 1 extra
+
+          Extra  ? claude · script
+                   installed by station for macbook-pro, station cannot uninstall it: kept
+
+          → station apply --remove  lets go of what is yours now

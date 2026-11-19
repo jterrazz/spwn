@@ -1,0 +1,22 @@
+description: 'a VM created on another Mac with --on gets its ssh block on This Mac as soon as the create returns'
+fixture: ./__fixtures__/create-on-y/
+runs:
+    - command: 'machines create --persistent --on y'
+      exit: 0
+      stdout: |
+          	On y:
+          ●	Running
+          ●	Has an address
+          ●	SSH answers
+          ●	linux-1	Created	Persistent · 4 CPU · 4 GB · 50 GB
+      files:
+          .ssh/config:
+              contains:
+                  - |-
+                    Host linux-1
+                      HostName linux-1
+                      User u
+    - command: '--version > /dev/null; /usr/bin/head -n 1 .calls'
+      exit: 0
+      stdout: |
+          ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach

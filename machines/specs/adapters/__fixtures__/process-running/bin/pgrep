@@ -1,0 +1,4 @@
+#!/bin/sh
+# pgrep: the process asked for is running.
+printf 'pgrep %s\n' "$*" >> "$HOME/.calls"
+echo 4242

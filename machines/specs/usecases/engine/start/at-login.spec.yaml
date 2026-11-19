@@ -1,0 +1,9 @@
+description: 'after a stop everything, the next login starts the engine again'
+env: engine-stopped
+runs:
+    - command: 'world reboot macbook-pro'
+      exit: 0
+    - command: 'engine --json | /usr/bin/jq -c ''[.engine.state, .engine.stopped_at]'''
+      exit: 0
+      stdout: |
+          ["running",null]

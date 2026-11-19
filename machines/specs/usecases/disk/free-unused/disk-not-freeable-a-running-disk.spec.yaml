@@ -1,0 +1,17 @@
+description: 'a disk station made that no record names but that runs is no leftover: refused, and kept'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["old-vm"] = {"disk": true, "pid": 4711, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}} | .macs["macbook-pro"].cloned = {"old-vm": 901} | .macs["macbook-pro"].vms["old-vm"].born = 901'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["old-vm"],"Confirm":"old-vm"}}
+      exit: 0
+      stdout: |
+          {"code":"disk.not-freeable","subject":"old-vm"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["old-vm"].disk'' world.json'
+      exit: 0
+      stdout: |
+          true

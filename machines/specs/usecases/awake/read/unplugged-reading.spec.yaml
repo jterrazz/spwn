@@ -1,0 +1,11 @@
+description: 'a laptop unplugged, down to 35 %, its lid closed, reads so at once'
+env: two-macs
+runs:
+    - command: 'world unplug'
+      exit: 0
+    - command: 'world battery 35'
+      exit: 0
+    - command: 'world close-lid'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n ''/^# macbook-pro/,$p'''
+      exit: 0

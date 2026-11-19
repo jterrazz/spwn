@@ -1,0 +1,19 @@
+package: station.package/v1
+kind: app
+name: cocoapods
+description: Dependency manager for iOS and macOS projects
+provides: [pod]
+methods:
+    - os: macos
+      brew: cocoapods
+disk:
+    paths:
+        - path: ~/Library/Caches/CocoaPods
+          level: cache
+        - path: ~/.cocoapods/repos
+          level: cache
+    free:
+        - run: [pod, cache, clean, --all]
+          uses: pod
+        - delete: [~/.cocoapods/repos/*]
+    no-erase: 'nothing to erase: keys and logins are kept'

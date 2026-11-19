@@ -1,0 +1,12 @@
+description: 'a server create sent with --on makes the server on that Mac, none on This Mac'
+env: two-macs
+runs:
+    - command: 'machines create infra-2 --server --on mac-mini | /usr/bin/grep infra-2'
+      exit: 0
+      stdout: |
+          ●	infra-2	is a server	always on · 4 CPU · 8 GB · 50 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[] | .vms["infra-2"]? | select(. != null) | .kept.lifetime], (.macs["macbook-pro"].vms | has("infra-2"))'' world.json'
+      exit: 0
+      stdout: |
+          ["always-on"]
+          false

@@ -1,0 +1,11 @@
+#!/bin/sh
+# A mise shim: every call writes mise's bin_paths resolver file back.
+/bin/mkdir -p "$HOME/.cache/mise/jq/1.8.2" && printf '0123456789' > "$HOME/.cache/mise/jq/1.8.2/bin_paths-e6c40.msgpack.z"
+# node installed: it answers its version.
+case "$*" in
+    --version) echo v22.0.0 ;;
+    *)
+        echo "stub node: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

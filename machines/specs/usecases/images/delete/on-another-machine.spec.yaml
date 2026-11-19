@@ -1,0 +1,13 @@
+description: 'a delete on another Mac deletes its versions there, This Mac''s kept'
+env: two-macs
+runs:
+    - command: 'images delete base-ubuntu --yes --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	base-ubuntu	2026.11.01	deleted
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version)"'''
+      exit: 0
+      stdout: |
+          macbook-pro 2026.11.01
+          macbook-pro 2026.10.20

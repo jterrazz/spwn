@@ -1,0 +1,12 @@
+description: 'erasing gh removes its state and keeps its login and its settings'
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .local/state/gh .config/gh && echo s > .local/state/gh/s && printf "github.com:\n    user: you\n" > .config/gh/hosts.yml && echo "git_protocol: ssh" > .config/gh/config.yml'
+      exit: 0
+    - command: 'disk erase gh --confirm=gh'
+      exit: 0
+      stdout: |
+          ●	gh	2 B erased
+      files:
+          .local/state/gh/s: absent
+          .config/gh/hosts.yml: { equals: "github.com:\n    user: you\n" }
+          .config/gh/config.yml: { equals: "git_protocol: ssh\n" }

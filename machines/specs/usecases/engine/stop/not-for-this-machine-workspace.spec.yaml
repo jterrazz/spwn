@@ -1,0 +1,8 @@
+description: 'inside a workspace, engine stop is refused: only a Mac runs an engine'
+env: in-workspace
+runs:
+    - command: 'engine stop'
+      exit: 2
+      stderr: |
+          Error: linux-1 runs no engine: only a Mac does
+          Hint: run station overview for what linux-1 has

@@ -1,0 +1,15 @@
+description: 'GOENV names go''s env file; GOENV=off writes none and says so'
+env:
+    - GOENV=$WORKDIR/genv
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+      files:
+          genv: exists
+          Library/Application Support/go/env: absent

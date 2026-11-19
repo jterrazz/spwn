@@ -1,0 +1,37 @@
+description: 'station disk tells the volume, then Misplaced, Can rebuild, Your data and Never touched'
+env: two-macs
+runs:
+    - command: 'disk'
+      exit: 0
+      stdout: |
+          ◐	This Mac	388 GB free of 994 GB · 1 misplaced folder	station disk move ~/.tart
+          # Misplaced
+          ◐	~/.tart	73.3 GB	misplaced · tart · station disk move ~/.tart
+          # Can rebuild
+          ●	go	19.4 GB
+          ●	xcode	5.8 GB
+          ●	homebrew	2.1 GB
+          ●	pnpm	1.8 GB
+          ●	mise	1.2 GB
+          ●	rust	900 MB
+          ●	node	800 MB
+          ●	bun	600 MB
+          ●	discord	400 MB
+          ●	ghostty	400 MB
+          ●	claude	300 MB
+          ●	zed	300 MB
+          ●	cursor	200 MB
+          ●	notion	200 MB
+          ●	codex	100 MB
+          ●	gh	100 MB
+          ●	helm	100 MB
+          ●	starship	100 MB
+          # Your data
+          ●	xcode	19.1 GB
+          ●	orbstack	15.8 GB
+          ●	claude	3.6 GB
+          ●	ollama	1.9 GB
+          ●	zed	1.2 GB
+          # Never touched
+          ●	gpg	200 KB
+          ●	ssh	100 KB

@@ -1,0 +1,12 @@
+description: '--lid on a Mac that reports no lid is refused, exit 2, and nothing is held'
+env: two-macs
+runs:
+    - command: 'awake 4h --lid --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: mac-mini has no lid: --lid is for laptops
+          Hint: station awake 4h --on mac-mini
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].power | {holds, clamshell}'' world.json'
+      exit: 0
+      stdout: |
+          {"holds":["station: never sleeps"],"clamshell":null}

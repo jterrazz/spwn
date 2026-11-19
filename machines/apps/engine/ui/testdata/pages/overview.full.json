@@ -1,0 +1,398 @@
+{
+  "schema": "station.page/v1",
+  "id": "overview",
+  "command": "overview",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "overview",
+      "title": "This Mac",
+      "role": "banner",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "macbook-pro"
+        },
+        {
+          "kind": "text",
+          "text": "5 things need you"
+        },
+        {
+          "kind": "text",
+          "text": "Engine running"
+        }
+      ],
+      "joined": true,
+      "uncounted": true
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "columns": [
+        {
+          "key": "finding",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "fix",
+          "kind": "command",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "0-npm",
+            "mark": "broken",
+            "label": "npm sign-in expired",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "npm login"
+              }
+            ],
+            "reason": "failing"
+          }
+        },
+        {
+          "row": {
+            "id": "1-com.example.brain.x-snapshot",
+            "mark": "broken",
+            "label": "1 background task failing",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "station background"
+              }
+            ],
+            "reason": "failing"
+          }
+        },
+        {
+          "row": {
+            "id": "2-brew",
+            "mark": "attention",
+            "label": "122 brew updates waiting",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "station apps update --manager brew"
+              }
+            ],
+            "reason": "degraded"
+          }
+        },
+        {
+          "row": {
+            "id": "3-firewall",
+            "mark": "attention",
+            "label": "Firewall off",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "System Settings > Network > Firewall"
+              }
+            ],
+            "reason": "degraded"
+          }
+        },
+        {
+          "row": {
+            "id": "4-~/.tart",
+            "mark": "attention",
+            "label": "~/.tart is misplaced",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "station disk move ~/.tart"
+              }
+            ],
+            "reason": "degraded"
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "sections",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "section",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "line",
+          "kind": "list",
+          "keep": 90
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "activity",
+            "label": "Activity",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "CPU 34%"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "memory 12.4 of 16 GB"
+                  },
+                  {
+                    "kind": "size",
+                    "n": 388000000000,
+                    "unit": "free"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "in 2.1 MB/s"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "apps",
+            "label": "Apps",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 39,
+                    "unit": "ok",
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 122,
+                    "unit": "updates",
+                    "label": "attention"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 35,
+                    "unit": "not managed",
+                    "label": "unknown"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34,
+                    "unit": "not installed",
+                    "label": "absent"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "settings",
+            "label": "Settings",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "set by station"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "12 of 22",
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "checked"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "8 of 9",
+                    "label": "ok"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "size",
+                    "n": 388000000000,
+                    "unit": "free",
+                    "label": "attention"
+                  },
+                  {
+                    "kind": "size",
+                    "n": 34800000000,
+                    "unit": "can rebuild"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "unit": "misplaced",
+                    "label": "attention"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "ports",
+            "label": "Ports",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Public 0"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Private 2"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "accounts",
+            "label": "Accounts",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "6",
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "npm",
+                    "label": "broken"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "background",
+            "label": "Background",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "10",
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 1,
+                    "unit": "failing",
+                    "label": "broken"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "awake",
+            "label": "Awake",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "until 18:00",
+                    "label": "ok"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "vms",
+            "label": "VMs",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "linux-1 running",
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "api stopped",
+                    "label": "absent"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station apps update --manager brew"
+    }
+  ],
+  "actions": [
+    {
+      "key": "enter",
+      "label": "fix",
+      "on": "row",
+      "rows": [
+        "0-npm",
+        "1-com.example.brain.x-snapshot",
+        "2-brew",
+        "3-firewall",
+        "4-~/.tart"
+      ],
+      "priority": 1,
+      "mutates": true
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+#!/bin/sh
+# A sign-in's lines as claude answers them with no terminal; $HOME/claude.out
+# says signed out, and a login prints its link, then its paste prompt with no
+# newline, then signs in.
+printf 'claude %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "auth status")
+        if [ -f "$HOME/claude.out" ]; then echo '{"loggedIn":false,"authMethod":"none"}'; exit 1; fi
+        echo '{"loggedIn":true,"email":"you@example.com","subscriptionType":"max"}' ;;
+    "auth login --claudeai")
+        /bin/cat "$HOME/outputs/claude-login.txt" "$HOME/outputs/claude-prompt.txt"
+        /bin/sleep 1
+        /bin/rm -f "$HOME/claude.out" ;;
+    *) echo "stub claude: unexpected invocation: $*" >&2; exit 97 ;;
+esac

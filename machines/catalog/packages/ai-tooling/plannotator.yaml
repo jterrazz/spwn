@@ -1,0 +1,13 @@
+package: station.package/v1
+kind: app
+name: plannotator
+description: Review AI agent plans and code before committing
+provides: [plannotator]
+version-read:
+    args: [plannotator, --version]
+    pattern: (\d+\.\d+\S*)
+methods:
+    - os: any
+      script:
+          url: https://plannotator.ai/install.sh
+          args: [--non-interactive]

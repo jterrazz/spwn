@@ -1,0 +1,27 @@
+description: 'on a Linux machine status reads /proc, has no macOS-only section and no broken state'
+fixture:
+    - ./__fixtures__/status/linux/
+    - ../../../__fixtures__/status-registered/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'status --json | /usr/bin/jq -c ''[.machine.kind, .machine.os, (.environment.security | length), (.environment.updates | length), (.background | length), (.services | length)]'''
+      exit: 0
+      stdout: |
+          ["linux","Linux 6.8.0",0,0,0,0]
+    - command: 'status --json | /usr/bin/jq -c ''[.system.uptime, .system.memory.total_bytes, (.system.cpu | map(.name)), (.system.memory.top | map(.name))]'''
+      exit: 0
+      stdout: |
+          ["1d 2h",8388608000,["node","dockerd","systemd"],["node","dockerd","systemd"]]
+    - command: 'status --json | /usr/bin/jq -c ''[.environment.network[] | [.name, .state, .value]]'''
+      exit: 0
+      stdout: |
+          [["local ip","ok","192.168.64.5"],["dns","ok","10.0.2.3, 1.1.1.1"]]
+    - command: 'status --json | /usr/bin/jq -c ''[.setup.steps | map(.name)]'''
+      exit: 0
+      stdout: |
+          [["zshrc"]]
+    - command: 'status --json | /usr/bin/jq -c ''[.. | objects | select(has("state")) | .state] | index("broken")'''
+      exit: 0
+      stdout: |
+          null

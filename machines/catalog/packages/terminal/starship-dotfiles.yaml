@@ -1,0 +1,11 @@
+package: station.package/v1
+kind: setting
+name: starship-dotfiles
+description: The Starship prompt settings
+requires: [starship]
+methods:
+    - os: any
+      file:
+          copy:
+              - from: starship/starship.toml
+                to: ~/.config/starship.toml

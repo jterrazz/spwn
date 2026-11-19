@@ -1,0 +1,23 @@
+description: 'settings diff of a file setting is the unified diff of station''s copy against this machine''s'
+env: two-macs
+runs:
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: 'settings diff tart-launcher'
+      exit: 0
+      stdout: |
+          # tart-launcher
+          ●	tart-launcher	applied · ~/.local/bin/tart
+    - command: '--version >/dev/null; printf ''# mine\n'' >> .local/bin/tart'
+      exit: 0
+    - command: 'settings diff tart-launcher'
+      exit: 0
+      stdout: |
+          --- station's ~/.local/bin/tart
+          +++ ~/.local/bin/tart
+          @@ -3,2 +3,3 @@
+           case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac
+           TART_HOME="$d/station/vms" exec "$d/station/tart/tart.app/Contents/MacOS/tart" "$@"
+          +# mine

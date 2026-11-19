@@ -1,0 +1,13 @@
+description: 'an image station only fetches, not on This Mac, is refused with how to fetch it'
+env: two-macs
+runs:
+    - command: 'machines create --image base-macos --memory 4G'
+      exit: 2
+      stderr: |
+          Error: image base-macos is not on macbook-pro
+          Hint: station images update base-macos
+    - command: 'machines create --image base-macos --memory 4G --yes'
+      exit: 2
+      stderr: |
+          Error: image base-macos is not on macbook-pro
+          Hint: station images update base-macos

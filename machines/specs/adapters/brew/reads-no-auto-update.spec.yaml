@@ -1,0 +1,18 @@
+description: 'every brew read, the listings and the outdated ones, runs with brew''s index refresh off'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/outdated/
+runs:
+    - command: 'apps --json > /dev/null'
+      exit: 0
+      files:
+          .brew-read-env:
+              contains:
+                  - 'list --formula --versions HOMEBREW_NO_AUTO_UPDATE=1'
+                  - 'list --cask --versions HOMEBREW_NO_AUTO_UPDATE=1'
+                  - 'outdated --json=v2 --formula HOMEBREW_NO_AUTO_UPDATE=1'
+                  - 'outdated --json=v2 --cask HOMEBREW_NO_AUTO_UPDATE=1'
+    - command: '--version >/dev/null; /usr/bin/grep -c unset .brew-read-env'
+      exit: 1
+      stdout: |
+          0

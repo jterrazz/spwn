@@ -1,0 +1,16 @@
+description: 'thermal serious needs a look, critical is broken: Running hot, with its level'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].power.Thermal = 2'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; "$STATION" activity | /usr/bin/grep -E "Running hot|	Thermal	"'
+      exit: 0
+      stdout: |
+          ◐	Running hot: Serious
+          ◐	Thermal	Serious
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].power.Thermal = 3'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; "$STATION" activity | /usr/bin/grep -E "Running hot|	Thermal	"; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind == "activity") | .Text]'' world.json'
+      exit: 0
+      stdout: |
+          ✗	Running hot: Critical
+          ✗	Thermal	Critical
+          ["This Mac: Running hot: Critical"]

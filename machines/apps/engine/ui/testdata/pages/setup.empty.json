@@ -1,0 +1,35 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "init",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "step",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "steps"
+          }
+        }
+      ]
+    }
+  ]
+}

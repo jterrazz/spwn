@@ -1,0 +1,13 @@
+description: 'with the mini silent, --all-machines updates the rest and says the mini did not answer, exit 1'
+env: mini-offline
+runs:
+    - command: 'apps update --all-machines'
+      exit: 1
+      stdout: |
+          ●	macbook-pro	updated 2 apps
+          –	api	skipped (stopped)
+          ●	linux-1	every app is up to date
+          ✗	mac-mini	mac-mini does not answer
+      stderr: |
+          Error: 1 of 4 machines failed
+          Hint: station machines

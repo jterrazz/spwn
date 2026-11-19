@@ -1,0 +1,11 @@
+description: 'an edit of a running workspace applies when it next starts; the hint restarts it now'
+env: two-macs
+runs:
+    - command: 'machines edit linux-1 --memory 16G'
+      exit: 0
+      stdout: |
+          ●	linux-1	16 GB, applies when linux-1 next starts · station machines restart linux-1
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[0].vms[] | select(.name == "linux-1") | {state, memory_bytes: .size.memory_bytes}'''
+      exit: 0
+      stdout: |
+          {"state":"running","memory_bytes":17179869184}

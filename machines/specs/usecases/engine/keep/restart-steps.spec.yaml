@@ -1,0 +1,17 @@
+description: 'a restarting server shows the step it runs and since when: "2 of 4" awaiting its address'
+env: two-macs
+runs:
+    - command: 'world fault Hypervisor.Address'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, (.restart | [.step, .of, .name, .counted, .since[11:19]])]'''
+      exit: 0
+      stdout: |
+          ["running",[2,4,"Has an address","2 of 4","10:00:25"]]
+    - command: 'world advance 30s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0].restart | [.counted, .name, .since[11:19]]'''
+      exit: 0
+      stdout: |
+          ["2 of 4","Has an address","10:00:25"]

@@ -1,0 +1,21 @@
+description: 'an ephemeral workspace whose guest reboots boots again, kept, on the same reserved ports'
+env: two-macs
+runs:
+    - command: 'machines create --memory 4G linux-2 | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	linux-2	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+    - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "linux-2") | [.port, .reserved]] | sort'''
+      exit: 0
+      stdout: |
+          [[5173,40003],[8081,40000]]
+    - command: 'world reboot-inside linux-2'
+      exit: 0
+    - command: 'machines --this-mac | /usr/bin/grep linux-2'
+      exit: 0
+      stdout: |
+          ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB
+    - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "linux-2") | [.port, .reserved]] | sort'''
+      exit: 0
+      stdout: |
+          [[5173,40003],[8081,40000]]

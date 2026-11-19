@@ -1,0 +1,313 @@
+{
+  "schema": "station.page/v1",
+  "id": "disk",
+  "command": "disk",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "volume",
+      "title": "Disk",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "size",
+          "label": "size",
+          "kind": "size",
+          "keep": 90
+        },
+        {
+          "key": "folders",
+          "label": "folders",
+          "kind": "list",
+          "show": "detail"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "volume",
+            "mark": "attention",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "size",
+                    "n": 388000000000,
+                    "of": 994000000000,
+                    "unit": "free"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "1 misplaced folder"
+                  }
+                ]
+              }
+            ],
+            "reason": "misplaced",
+            "hint": {
+              "command": "station disk move ~/.tart"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "misplaced",
+      "title": "Misplaced",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "size",
+          "label": "size",
+          "kind": "size",
+          "keep": 90
+        },
+        {
+          "key": "folders",
+          "label": "folders",
+          "kind": "list",
+          "show": "detail"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "misplaced/~/.tart",
+            "mark": "attention",
+            "label": "~/.tart",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 78383153152
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "~/.tart"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "misplaced"
+                },
+                {
+                  "kind": "text",
+                  "text": "tart"
+                }
+              ]
+            },
+            "reason": "misplaced",
+            "hint": {
+              "command": "station disk move ~/.tart"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "can-rebuild",
+      "title": "Can rebuild",
+      "fold": "open",
+      "caption": [
+        {
+          "kind": "size",
+          "n": 29699866624
+        }
+      ],
+      "joined": true,
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "size",
+          "label": "size",
+          "kind": "size",
+          "keep": 90
+        },
+        {
+          "key": "folders",
+          "label": "folders",
+          "kind": "list",
+          "show": "detail"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "can-rebuild/homebrew",
+            "mark": "ok",
+            "label": "homebrew",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 27917287424
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "~/Library/Caches/Homebrew"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "can-rebuild/bun",
+            "mark": "ok",
+            "label": "bun",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 1782579200
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "~/Library/Caches/bun"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "never-touched",
+      "title": "Never touched",
+      "fold": "brief",
+      "caption": [
+        {
+          "kind": "size",
+          "n": 12000
+        }
+      ],
+      "joined": true,
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "size",
+          "label": "size",
+          "kind": "size",
+          "keep": 90
+        },
+        {
+          "key": "folders",
+          "label": "folders",
+          "kind": "list",
+          "show": "detail"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "never-touched/station",
+            "mark": "ok",
+            "label": "station",
+            "cells": [
+              {
+                "kind": "size",
+                "n": 12000
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "~/.config/station/preferences.json"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station disk free",
+      "text": "frees every Can rebuild row, nothing is lost"
+    }
+  ],
+  "actions": [
+    {
+      "key": "v",
+      "label": "move",
+      "on": "row",
+      "rows": [
+        "misplaced/~/.tart"
+      ],
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "f",
+      "label": "free",
+      "on": "row",
+      "rows": [
+        "can-rebuild/homebrew",
+        "can-rebuild/bun"
+      ],
+      "priority": 2,
+      "mutates": true
+    },
+    {
+      "key": "enter",
+      "label": "open",
+      "on": "row",
+      "rows": [
+        "misplaced/~/.tart",
+        "can-rebuild/homebrew",
+        "can-rebuild/bun",
+        "never-touched/station"
+      ],
+      "priority": 4
+    },
+    {
+      "key": "s",
+      "label": "sort",
+      "on": "page",
+      "priority": 5
+    }
+  ]
+}

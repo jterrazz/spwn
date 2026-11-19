@@ -1,0 +1,11 @@
+[38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mAwake until 14:42 · lid closed · 3h 12m left[m
+[38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mNever sleeps · always-on Mac policy[m  [38;2;108;111;133mlast slept: never in 12d · hosts infra (server)[m
+
+[1;38;2;76;79;105mThis Mac[m
+  [1;38;2;76;79;105mlid         [m  [38;2;76;79;105mopen[m
+  [1;38;2;76;79;105mpower source[m  [38;2;76;79;105mAC · 80 % · not charging[m
+  [1;38;2;76;79;105mthermal     [m  [38;2;76;79;105mnominal[m
+  [1;38;2;76;79;105mscreen      [m  [38;2;76;79;105malways turns off[m
+
+[38;2;108;111;133m→ [m[38;2;76;79;105mstation awake 4h --lid[m          [38;2;108;111;133mthis Mac[m
+[38;2;108;111;133m→ [m[38;2;76;79;105mstation awake 4h --on mac-mini[m  [38;2;108;111;133manother Mac[m

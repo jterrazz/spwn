@@ -1,0 +1,12 @@
+description: 'a port Docker exposes counts once, named by its container, with or without its proxy'
+fixture: ./__fixtures__/docker/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm PATH=$PWD/bin STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''.ports[]? | [.port, .ip, .process, .source]'''
+      exit: 0
+      stdout: |
+          [8080,"0.0.0.0","nginx-1","docker"]
+    - command: '--version >/dev/null; /bin/rm vm/root/proc/net/tcp; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm PATH=$PWD/bin STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''.ports[]? | [.port, .ip, .process, .source]'''
+      exit: 0
+      stdout: |
+          [8080,"0.0.0.0","nginx-1","docker"]

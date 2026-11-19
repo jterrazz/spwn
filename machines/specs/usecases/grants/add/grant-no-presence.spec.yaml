@@ -1,0 +1,13 @@
+description: 'when this Mac cannot ask the owner to confirm, nothing is granted'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].accounts.presence = "absent"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-2","To":"linux-1"}}
+      exit: 0
+      stdout: |
+          {"code":"grant.no-presence","field":null,"subject":"pw-2","message":"this Mac cannot ask you to confirm: nothing was granted","hint":"unlock this Mac's screen and grant again"}

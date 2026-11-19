@@ -1,0 +1,22 @@
+description: 'overview inside infra is the server''s own: its parts only, no On line'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - in-server
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x30 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" overview'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          infra · Server · up 12 d
+
+          Activity  ? not measured
+          Ports     Public 0 · Private 0
+          SSH       ssh infra
+          Apps, settings, accounts: not managed by station
+    - command: 'overview --json | /usr/bin/jq -c ''[.machine.kind, [.sections[].id], .findings]'''
+      exit: 0
+      stdout: |
+          ["server",["activity","ports","ssh"],[]]

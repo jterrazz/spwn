@@ -1,0 +1,33 @@
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+.range {
+    width: 100%;
+    margin: 0;
+    height: 18px;
+    accent-color: var(--new);
+}
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+}
+.fold {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-10);
+    font-size: var(--text-label);
+}
+.toggle {
+    all: unset;
+    cursor: pointer;
+    color: var(--new);
+}
+.summary {
+    color: var(--t3);
+}
+.outcome:empty {
+    display: none;
+}

@@ -1,0 +1,8 @@
+description: 'a name no machine of All machines has is refused before anything stops'
+env: two-macs
+runs:
+    - command: 'machines stop nope'
+      exit: 2
+      stderr: |
+          Error: no machine named "nope"
+          Hint: station machines

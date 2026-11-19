@@ -1,0 +1,11 @@
+description: 'an ephemeral VM a session runs or any VM it creates is held by it; a persistent one is yours'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | [.Name, .State, .Purpose, .Creator, .Hold]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [["agent-7f","running","Write the changelog of v4","studio-os-43",{"State":"held","By":"studio-os-43","Sentence":"It is held by its lot, by studio-os-43: work may be in progress."}],["api","stopped","The API's staging copy","you",{"State":"yours","Sentence":"Yours. Stays until you delete it."}],["linux-1","running","Lot L2.5, settings from a machine file","studio-os-fe",{"State":"held","By":"studio-os-fe","Sentence":"It is held by its lot, by studio-os-fe: work may be in progress."}],["linux-2","creating","Lot L3, the Machines page","studio-os-fe",{"State":"held","By":"studio-os-fe","Sentence":"Being created by studio-os-fe. It cannot be deleted until its create ends."}],["infra","running","The cluster's control plane","you",{"State":"always-on","Sentence":"Always on. Stopping it needs its name typed."}],["linux-3","running","Refresh the auth token","studio-os-fe",{"State":"held","By":"studio-os-fe","Sentence":"It is held by its lot, by studio-os-fe: work may be in progress."}],["review-bot","running","Review every pull request of studio-station","studio-os-43",{"State":"yours","Sentence":"Yours. Stays until you delete it."}]]

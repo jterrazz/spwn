@@ -1,0 +1,11 @@
+description: 'inside linux-1, stop sharing its own port runs on its Mac: released and remembered there'
+env: in-linux-1
+runs:
+    - command: 'ports stop-sharing 7000 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1:7000	not shared
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {reserved: [.["macbook-pro"].stores.reservations[].guest_port], remembered: .["macbook-pro"].preferences.ports.not_shared, inside: .["linux-1"].preferences}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[5173],"remembered":["linux-1:7000"],"inside":null}

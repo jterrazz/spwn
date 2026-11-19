@@ -1,0 +1,13 @@
+description: 'A server keeps its own sign-ins: the list is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "infra"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, field, subject, message, hint}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{}}
+      exit: 0
+      stdout: |
+          {"code":"section.not-for-this-machine","field":null,"subject":"infra","message":"infra is a server: station does not manage its accounts","hint":"manage it with your own tooling: ssh infra"}

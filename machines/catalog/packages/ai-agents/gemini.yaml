@@ -1,0 +1,18 @@
+package: station.package/v1
+kind: app
+name: gemini
+description: Google's CLI coding agent
+provides: [gemini]
+methods:
+    - os: macos
+      brew: gemini-cli
+    - family: linux
+      bun: '@google/gemini-cli'
+disk:
+    paths:
+        - path: ~/.gemini
+          level: data
+          note: 'beside its settings: not separable by a glob'
+        - path: ~/.gemini/settings.json
+          level: settings
+    no-erase: 'gemini keeps its login beside its data: erase it by hand'

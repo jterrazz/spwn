@@ -1,0 +1,24 @@
+description: "a name made again after a delete meets no changed host key"
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/engine-vm/
+    - ../../../__fixtures__/vm-api/
+env: engine
+serve: sshd
+runs:
+    - command: '--version > /dev/null; ssh api true'
+      exit: 255
+      stderr: |
+          @@@@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! @@@@
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines delete api --confirm=api; c=$?; kill $d; wait $d; exit $c'
+      exit: 0
+      stdout: |
+          ●	api	deleted
+      files:
+          .local/state/station/known_hosts/api: absent
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api | /usr/bin/tail -1 | /usr/bin/cut -f2; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          api
+    - command: '--version > /dev/null; /usr/bin/cut -d" " -f2- .local/state/station/known_hosts/api > answers/ssh/hostkey; ssh api true'
+      exit: 0

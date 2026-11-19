@@ -1,0 +1,9 @@
+description: 'after 30 min linux-1''s 24 h series is the one This Mac''s engine kept, sampled through its guest'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; for i in $(/usr/bin/seq 30); do "$STATION" world advance 1m; done; "$STATION" activity --on linux-1 --json --history | /usr/bin/jq -c ''{machine: .machine.name, on: .machine.on, source, step: .history.step_s, points: (.history.points | length >= 20), memory: ([.history.points[].memory_used_bytes] | unique)}'''
+      exit: 0
+      stdout: |
+          {"machine":"linux-1","on":"macbook-pro","source":"direct","step":60,"points":true,"memory":[1181116006]}

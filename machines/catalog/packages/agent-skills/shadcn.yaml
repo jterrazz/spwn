@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: shadcn
+description: shadcn/ui components and patterns
+methods:
+    - os: any
+      skill:
+          repo: shadcn-ui/ui
+          name: shadcn

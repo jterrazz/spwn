@@ -1,0 +1,23 @@
+description: 'a word station does not know is one block that points to the help, exit 2, stdout empty'
+env: one-mac
+runs:
+    - command: 'frobnicate'
+      exit: 2
+      stderr: |
+          Error: unknown command "frobnicate"
+          Hint: station help
+    - command: 'workstation'
+      exit: 2
+      stderr: |
+          Error: unknown command "workstation"
+          Hint: station help
+    - command: 'skills install x'
+      exit: 2
+      stderr: |
+          Error: unknown command "skills"
+          Hint: station help
+    - command: 'clean --all --yes'
+      exit: 2
+      stderr: |
+          Error: unknown command "clean"
+          Hint: station help

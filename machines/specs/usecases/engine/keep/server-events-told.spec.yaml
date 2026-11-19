@@ -1,0 +1,35 @@
+description: 'each server event is told in its words, once, to the Notifier and the watches'
+env: two-macs
+runs:
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines | /usr/bin/grep -c infra'
+      exit: 0
+      stdout: |
+          1
+    - command: 'world fault CheckRunner.Run 1 times'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines | /usr/bin/grep -c infra'
+      exit: 0
+      stdout: |
+          2
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines | /usr/bin/grep -c infra'
+      exit: 0
+      stdout: |
+          1
+    - command: 'world poweroff-inside infra'
+      exit: 0
+    - command: 'machines | /usr/bin/grep -c infra'
+      exit: 0
+      stdout: |
+          2
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.told[] | [.Kind, .Subject, .Text]'' world.json'
+      exit: 0
+      stdout: |
+          ["server_restarting","infra","infra stopped and is restarting (↺ 1)"]
+          ["server_back","infra","infra is back · all 4 health steps pass"]
+          ["server_powered_off","infra","infra powered off from inside · it stays stopped"]

@@ -1,0 +1,45 @@
+description: 'a failing check that passes again takes its finding away; the owner is told once it is back'
+env: two-macs
+runs:
+    - command: 'machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: 'world fault CheckRunner.Run 2 times'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines | /usr/bin/tail -2'
+      exit: 0
+      stdout: |
+          # Needs you
+          ✗	infra	check failing since 10:01
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ◐	infra	Server	mac-mini	Running · always on	8 CPU	24 GB	check failing since 10:01
+          ✗	infra	check failing since 10:01
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+    - command: 'machines infra | /usr/bin/grep Check'
+      exit: 0
+      stdout: |
+          ●	Check passes	https://infra:6443/readyz
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]?.Text]'' world.json'
+      exit: 0
+      stdout: |
+          ["infra is back · all 4 health steps pass"]

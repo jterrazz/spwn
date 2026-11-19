@@ -1,0 +1,141 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "init",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/init",
+            "mark": "pending",
+            "label": "Known to station",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "step",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "name",
+            "mark": "pending",
+            "label": "name",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "zshrc",
+            "mark": "pending",
+            "label": "zshrc",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "relocate",
+            "mark": "pending",
+            "label": "relocate",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 3
+        }
+      ]
+    },
+    {
+      "id": "machinefile",
+      "title": "Machinefile",
+      "fold": "open",
+      "items": [
+        {
+          "note": {
+            "text": "none bound by init: init --machinefile binds one"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "exec zsh",
+      "external": true,
+      "text": "so this shell reads the station block"
+    },
+    {
+      "command": "station init --machinefile <name>",
+      "text": "binds a Machinefile, then applies it"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+description: 'a server''s health check is removed by edit: its health has three steps from then on'
+env: two-macs
+runs:
+    - command: 'machines edit infra --on mac-mini --no-check'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	infra	no health check: health has three steps
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {check: .kept.check, running: (.pid > 0)}'' world.json'
+      exit: 0
+      stdout: |
+          {"check":null,"running":true}

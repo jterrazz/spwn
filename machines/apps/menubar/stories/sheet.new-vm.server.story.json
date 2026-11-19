@@ -1,0 +1,15 @@
+{
+    "group": "sheet",
+    "id": "sheet.new-vm.server",
+    "note": "Kind Server on This Mac: Name first, no Lifetime or Share, the line that a laptop's sleep pauses it.",
+    "pages": ["pages/machines.sheet.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "answers": {
+                "Options": "open"
+            },
+            "id": "new-server:macbook-pro"
+        }
+    }
+}

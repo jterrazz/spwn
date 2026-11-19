@@ -1,0 +1,5 @@
+#!/bin/sh
+case "$*" in
+    "print-disabled system") printf 'disabled services = {\n\t"com.openssh.sshd" => disabled\n\t"com.apple.ftpd" => disabled\n}\n' ;;
+    *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;
+esac

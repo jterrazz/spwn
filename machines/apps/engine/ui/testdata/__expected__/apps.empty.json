@@ -1,0 +1,88 @@
+{
+  "schema": "station.page/v1",
+  "id": "apps",
+  "command": "apps",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "apps",
+      "title": "Apps",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "method",
+          "kind": "list",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "apps"
+          }
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station apps install <app...>",
+      "text": "install some"
+    }
+  ],
+  "actions": [
+    {
+      "key": "i",
+      "label": "install",
+      "on": "row",
+      "confirm": {
+        "yes": "install"
+      },
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "x",
+      "label": "remove",
+      "on": "row",
+      "confirm": {
+        "yes": "remove"
+      },
+      "priority": 2,
+      "mutates": true
+    },
+    {
+      "key": "u",
+      "label": "update",
+      "on": "row",
+      "priority": 3,
+      "mutates": true
+    },
+    {
+      "key": "U",
+      "label": "update by method",
+      "on": "page",
+      "priority": 4,
+      "mutates": true
+    },
+    {
+      "key": "enter",
+      "label": "full page",
+      "on": "row",
+      "priority": 5
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+.track {
+    position: relative;
+    height: 10px;
+    min-width: 0;
+    border-radius: 5px;
+    background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.5px);
+    background-size: 8px 10px;
+}
+.segment {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--at) * 100%);
+    width: calc(var(--w) * 100%);
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--c, var(--t3)) 30%, var(--panel));
+    overflow: hidden;
+}
+.segment::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(var(--used, 0) * 100%);
+    background: var(--c, var(--t3));
+}

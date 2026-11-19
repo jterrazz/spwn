@@ -1,0 +1,7 @@
+description: 'the guest runs only in a VM'
+runs:
+    - command: 'guest'
+      exit: 2
+      stderr: |
+          Error: station guest runs only inside a VM
+          Hint: its Mac's engine runs it inside each VM

@@ -1,0 +1,19 @@
+description: 'disk erase xcode --confirm=xcode asks nothing in a script: its caches and its simulators go'
+fixture:
+    - ../../../__fixtures__/disk-xcode/
+env: two-macs
+runs:
+    - command: 'disk erase xcode --confirm=xcode'
+      exit: 0
+      stdout: |
+          ●	xcode	5.8 GB erased
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {derived: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], devices: .["~/Library/Developer/CoreSimulator/Devices/A/data"]}'' world.json'
+      exit: 0
+      stdout: |
+          {"derived":null,"devices":19100000000}
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          xcrun simctl delete unavailable
+          xcrun simctl shutdown all
+          xcrun simctl erase all

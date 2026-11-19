@@ -1,0 +1,8 @@
+#!/bin/sh
+case "$*" in
+    status) echo "FileVault is On." ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

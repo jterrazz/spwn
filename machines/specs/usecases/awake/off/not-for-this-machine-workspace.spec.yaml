@@ -1,0 +1,8 @@
+description: 'inside a workspace awake off is refused: a VM follows its Mac'
+env: in-workspace
+runs:
+    - command: 'awake off'
+      exit: 2
+      stderr: |
+          Error: linux-1 follows its Mac
+          Hint: station awake

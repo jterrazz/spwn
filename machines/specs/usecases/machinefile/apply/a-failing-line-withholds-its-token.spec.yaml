@@ -1,0 +1,27 @@
+description: 'a failing run line that holds a token says withheld in its row and its last words'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          run:
+            boot: |
+              export API_KEY=sk-station-story-not-a-real-key
+      exit: 0
+    - command: 'world fault Shell.Run'
+      exit: 0
+    - command: 'apply --phase boot --yes'
+      exit: 1
+      stdout: |
+          # To run
+          ○	export API_KEY=withheld	run.boot	linux-1
+          ✗	run.boot		linux-1	1 line · exited 1: bash: line 1: the line failed; station: exit 1 at: export API_KEY=withheld
+      stderr: |
+          Error: 1 of 1 steps failed
+          Hint: station apply
+    - command: 'plan --phase boot --json | /usr/bin/jq -c .run'
+      exit: 0
+      stdout: |
+          {"phase":"boot","machinefile":"linux-1","lines":["export API_KEY=withheld"]}

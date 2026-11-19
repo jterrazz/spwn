@@ -1,0 +1,8 @@
+This Mac · 17 set by station here · 9 checked · nothing needs a look
+
+Set by station  ◌ 17 · docker-shortcuts, git-shortcuts, ghostty-dotfiles, …
+Always-on Mac   ○ 5 · for a Mac that hosts servers
+Checked         ◌ 9 · filevault, firewall, sip, automatic-updates, …
+
+→ station settings apply
+→ station settings --all  for every row

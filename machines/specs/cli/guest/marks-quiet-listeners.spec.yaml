@@ -1,0 +1,12 @@
+description: 'the guest marks a listener of the outgoing ports; a range that starts low is not read'
+fixture: ./__fixtures__/vm/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p vm/root/proc/sys/net/ipv4; printf "8000\t8100\n" > vm/root/proc/sys/net/ipv4/ip_local_port_range; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","public_host":"macbook.tail1234.ts.net","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''select(.type == "snapshot") | [.ports[] | [.port, .quiet // false]]'''
+      exit: 0
+      stdout: |
+          [[3000,false],[5432,false],[8081,false]]
+    - command: '--version >/dev/null; /bin/mkdir -p vm/root/proc/sys/net/ipv4; printf "   3: 00000000:C350 00000000:0000 0A 00000000:00000000 00:00000000 00000000  1000        0 106 1 0 100 0 0 10 0\n" >> vm/root/proc/net/tcp; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","public_host":"macbook.tail1234.ts.net","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''select(.type == "snapshot") | [.ports[] | [.port, .quiet // false]]'''
+      exit: 0
+      stdout: |
+          [[3000,false],[5432,false],[8081,false],[50000,true]]

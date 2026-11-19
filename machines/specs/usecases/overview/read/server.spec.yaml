@@ -1,0 +1,31 @@
+description: 'station machines infra: a server''s Overview has its own parts only'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x40 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" machines infra'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          On infra:
+          infra · Server on mac-mini · always on · ● Running
+
+          Activity  memory 15 of 24 GB · 44.0 GB free
+          Ports     Public 0 · Private 0
+          SSH       ssh infra
+          Apps, settings, accounts: not managed by station
+          Health
+            ● Running
+            ● Has an address        192.168.64.5
+            ● SSH answers
+            ● Check passes          https://infra:6443/readyz
+            ● Restarts              ↺ 0 · none since boot
+            ● Size                  8 CPU · 24 GB · 80 GB
+            ● Own Tailscale device  infra
+    - command: 'machines infra --json | /usr/bin/jq -c ''[.machine.kind, [.sections[].id]]'''
+      exit: 0
+      stdout: |
+          ["server",["activity","ports","ssh"]]

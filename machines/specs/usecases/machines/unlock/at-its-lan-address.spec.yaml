@@ -1,0 +1,24 @@
+description: 'after a power cut, off Tailscale, unlock reaches a Mac at the LAN address it last answered with'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'machines >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].preferences.macs["mac-mini"].lan'' world.json'
+      exit: 0
+      stdout: |
+          192.168.1.20
+    - command: 'world power-cut mac-mini'
+      exit: 0
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines unlock mac-mini'
+      stdin: |
+          within 20 exit 0
+          screen
+      exit: 0
+      stdout: |
+          ✓ mac-mini · unlocked · on Tailscale again
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | [.locked, .offline]'' world.json'
+      exit: 0
+      stdout: |
+          [null,null]

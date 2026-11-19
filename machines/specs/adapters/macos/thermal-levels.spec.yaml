@@ -1,0 +1,12 @@
+description: 'each thermalpressurelevel state, 0 to 4, reads its word: nominal, fair, serious, critical'
+fixture: ./__fixtures__/power-battery/
+env: engine
+runs:
+    - command: '--version >/dev/null; for level in 0 1 2 3 4; do printf $level > power/thermal; "$STATION" activity --json | /usr/bin/jq -r .thermal.level; done'
+      exit: 0
+      stdout: |
+          nominal
+          fair
+          serious
+          critical
+          critical

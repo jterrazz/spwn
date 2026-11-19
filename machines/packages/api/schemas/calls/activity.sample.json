@@ -1,0 +1,261 @@
+{
+  "$defs": {
+    "activity.Battery": {
+      "additionalProperties": false,
+      "properties": {
+        "charging": {
+          "type": "boolean"
+        },
+        "cycles": {
+          "type": "integer"
+        },
+        "health": {
+          "type": "integer"
+        },
+        "on_battery": {
+          "type": "boolean"
+        },
+        "percent": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "charging",
+        "on_battery",
+        "percent"
+      ],
+      "type": "object"
+    },
+    "activity.Busiest": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "items": {
+            "$ref": "#/$defs/activity.Process"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "memory": {
+          "items": {
+            "$ref": "#/$defs/activity.Process"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "cpu",
+        "memory"
+      ],
+      "type": "object"
+    },
+    "activity.Process": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "pid": {
+          "type": "integer"
+        },
+        "value": {
+          "type": "number"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "pid",
+        "value"
+      ],
+      "type": "object"
+    },
+    "activity.Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "run": {
+          "$ref": "#/$defs/activity.Usage"
+        },
+        "sample": {
+          "$ref": "#/$defs/activity.Sample"
+        },
+        "top": {
+          "$ref": "#/$defs/activity.Busiest"
+        },
+        "vms": {
+          "items": {
+            "$ref": "#/$defs/activity.VMUsage"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "sample",
+        "top"
+      ],
+      "type": "object"
+    },
+    "activity.Sample": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "battery": {
+          "$ref": "#/$defs/activity.Battery"
+        },
+        "boot": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cpu_busy": {
+          "type": "integer"
+        },
+        "cpu_total": {
+          "type": "integer"
+        },
+        "cpus": {
+          "type": "integer"
+        },
+        "disk_free": {
+          "type": "integer"
+        },
+        "disk_read": {
+          "type": "integer"
+        },
+        "disk_total": {
+          "type": "integer"
+        },
+        "disk_written": {
+          "type": "integer"
+        },
+        "load": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        },
+        "mem_total": {
+          "type": "integer"
+        },
+        "mem_used": {
+          "type": "integer"
+        },
+        "net_in": {
+          "type": "integer"
+        },
+        "net_out": {
+          "type": "integer"
+        },
+        "pressure": {
+          "enum": [
+            "critical",
+            "normal",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "swap_used": {
+          "type": "integer"
+        },
+        "thermal": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "at",
+        "boot",
+        "cpu_busy",
+        "cpu_total",
+        "cpus",
+        "disk_read",
+        "disk_written",
+        "load",
+        "mem_total",
+        "mem_used",
+        "net_in",
+        "net_out",
+        "swap_used",
+        "thermal"
+      ],
+      "type": "object"
+    },
+    "activity.Usage": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "type": "number"
+        },
+        "memory": {
+          "type": "integer"
+        },
+        "started": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cpu",
+        "memory"
+      ],
+      "type": "object"
+    },
+    "activity.VMUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "type": "number"
+        },
+        "memory": {
+          "type": "integer"
+        },
+        "started": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "vm": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cpu",
+        "memory",
+        "vm"
+      ],
+      "type": "object"
+    },
+    "activity.calls.SampleIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/activity.sample.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call activity.sample of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/activity.calls.SampleIn"
+    },
+    "out": {
+      "$ref": "#/$defs/activity.Reading"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "activity.sample",
+  "type": "object"
+}

@@ -1,0 +1,27 @@
+description: 'the hypervisor''s old folder is kept while it holds a vm of yours, a leftover once only a cache is'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {frees: .Station.CanFree.Frees, kept: .Station.Kept}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"frees":[{"Holder":"images","Kind":"image","Name":"base-ubuntu@2026.10.20","Bytes":3000000000}],"kept":null}
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.local/share/station/vms/vms/linux-1/disk.img"] = 1000000'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {frees: .Station.CanFree.Frees, kept: .Station.Kept}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"frees":[{"Holder":"images","Kind":"image","Name":"base-ubuntu@2026.10.20","Bytes":3000000000}],"kept":[{"Name":"~/.tart","VMs":["linux-dev"],"Sentence":"~/.tart holds VMs of yours (linux-dev), so station never frees it: move each into ~/.local/share/station/vms/vms first."}]}
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["macbook-pro"].disk.files["~/.tart/vms/linux-dev/disk.img"]) | .macs["macbook-pro"].disk.files["~/.tart/cache/OCIs/ghcr.io/x/disk.img"] = 4000000000'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {frees: .Station.CanFree.Frees, kept: .Station.Kept, kinds: .Kinds, holds: .Station.Holds}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"frees":[{"Holder":"images","Kind":"image","Name":"base-ubuntu@2026.10.20","Bytes":3000000000},{"Holder":"leftovers","Kind":"folder","Name":"~/.tart","Bytes":4000000000}],"kept":null,"kinds":[{"Kind":"system","Bytes":21400000000},{"Kind":"apps","Bytes":0},{"Kind":"your-data","Bytes":438800000000},{"Kind":"caches","Bytes":34800000000},{"Kind":"machines","Bytes":111000000000},{"Kind":"free","Bytes":388000000000}],"holds":[{"Holder":"machine-disks","Bytes":100000000000},{"Holder":"images","Bytes":7000000000},{"Holder":"leftovers","Bytes":4000000000},{"Holder":"logs","Bytes":0},{"Holder":"this-mac","Bytes":495000000000},{"Holder":"free","Bytes":388000000000}]}

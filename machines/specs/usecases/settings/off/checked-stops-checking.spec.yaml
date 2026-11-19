@@ -1,0 +1,23 @@
+description: 'off on a checked setting stops checking it here: the firewall stays off and leaves Needs you'
+env: two-macs
+runs:
+    - command: 'overview --all | /usr/bin/grep Firewall'
+      exit: 0
+      stdout: |
+          ◐	Firewall: off	System Settings > Network > Firewall
+    - command: 'settings off firewall --yes'
+      exit: 0
+      stdout: |
+          ●	firewall	off here: not checked on this machine
+    - command: 'settings firewall | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ⊘	firewall	off here · not checked on this machine
+    - command: 'overview --all | /usr/bin/grep -c Firewall'
+      exit: 1
+      stdout: |
+          0
+    - command: 'settings --on mac-mini | /usr/bin/grep -w firewall'
+      exit: 0
+      stdout: |
+          ●	firewall	as expected · on

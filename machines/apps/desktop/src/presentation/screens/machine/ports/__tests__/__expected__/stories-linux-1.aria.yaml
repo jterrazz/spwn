@@ -1,0 +1,53 @@
+- main:
+  - heading "linux-1 running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "macbook-pro"
+  - button "Stop"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports" [selected]
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "4 ports listen." [level=1]
+  - paragraph:
+    - img "4 ports listen."
+    - text: 2 are shared.
+  - region "Shared":
+    - heading "Shared" [level=2]
+    - region "Port 3000":
+      - text: :3000 Node or Next node https://macbook-pro.tail77a797.ts.net:443
+      - group "Who reaches linux-1:3000":
+        - button "Local"
+        - button "Private"
+        - button "Public" [pressed]
+      - button "Stop sharing"
+      - button "Copy https://macbook-pro.tail77a797.ts.net:443": Copy
+      - text: ·
+      - button "Open"
+      - text: ·
+      - button "QR code"
+    - region "Port 5173":
+      - text: :5173 Vite node https://macbook-pro.tail77a797.ts.net:40001
+      - group "Who reaches linux-1:5173":
+        - button "Local"
+        - button "Private" [pressed]
+        - button "Public"
+      - button "Stop sharing"
+      - button "Copy https://macbook-pro.tail77a797.ts.net:40001": Copy
+      - text: ·
+      - button "Open"
+      - text: ·
+      - button "QR code"
+  - region "Listening, not shared":
+    - heading "Listening, not shared" [level=2]
+    - text: :4321 astro 0.0.0.0
+    - button "Share :4321": Share
+    - text: :9229 node 0.0.0.0
+    - button "Share :9229": Share
+  - region "Differs from its file":
+    - heading "Differs from its file 3" [level=2]
+    - text: The file says This machine has :3000 Node or Next Private :3000 Node or Next Public :4321 astro Private :4321 astro Not shared :9229 node Private :9229 node Not shared

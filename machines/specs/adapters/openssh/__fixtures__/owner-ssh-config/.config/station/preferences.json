@@ -1,0 +1,10 @@
+{
+  "name": "x",
+  "macs": {
+    "worker": {
+      "user": "deploy"
+    },
+    "x": {}
+  },
+  "vm_user": "vmu"
+}

@@ -1,0 +1,11 @@
+description: 'machines.list says what of its memory each running VM uses, on the VM and on its Mac''s share'
+env:
+    - stories
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.Rooms[] | [.Mac, [.Capacity.VMs[]? | [.Name, .Bytes, .UsedBytes]]]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          [["macbook-pro",[["agent-7f",8589934592,5726623061],["linux-1",8589934592,5726623061],["linux-2",8589934592,null]]],["mac-mini",[["infra",25769803776,17179869184],["linux-3",8589934592,5726623061],["review-bot",4294967296,2863311530]]],["macbook-air",[]]]

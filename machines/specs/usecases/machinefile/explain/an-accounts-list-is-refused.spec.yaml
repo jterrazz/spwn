@@ -1,0 +1,82 @@
+description: 'an accounts list with an old key, a bad program or a clash is refused at its line'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          accounts:
+              share: [npm]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml: unmarshal errors: line 5: accounts.share is no key: the programs a workspace is granted are accounts.grants (`grants: [npm]`)
+          Hint: fix that line: station never rewrites a Machinefile
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          accounts:
+              keep: [gh]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml: unmarshal errors: line 5: accounts.keep is no key: the programs a machine signs in to are accounts.signins (`signins: [gh]`)
+          Hint: fix that line: station never rewrites a Machinefile
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          accounts:
+              grants: [figma]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: grants names "figma", none of gh, npm, claude, wrangler
+          Hint: fix that line: station never rewrites a Machinefile
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          accounts:
+              signins: ['']
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: signins names "", none of gh, npm, claude, wrangler
+          Hint: fix that line: station never rewrites a Machinefile
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          accounts:
+              signins: [gh, gh]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: signins lists gh twice
+          Hint: fix that line: station never rewrites a Machinefile
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          accounts:
+              signins: [gh]
+              grants: [gh]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: gh is both signed in and granted: a machine signed in to a program is not granted it
+          Hint: fix that line: station never rewrites a Machinefile

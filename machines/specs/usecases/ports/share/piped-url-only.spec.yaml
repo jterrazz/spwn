@@ -1,0 +1,12 @@
+description: 'piped, ports share prints the URL alone, for a script to take before the program starts'
+env: in-linux-1
+runs:
+    - command: 'ports share 3000 > url; /usr/bin/printf "[%s]\n" "$(/bin/cat url)"; /usr/bin/wc -l < url | /usr/bin/tr -d " "'
+      exit: 0
+      stdout: |
+          [https://macbook-pro.tail1234.ts.net:40000]
+          1
+    - command: 'ports share 3000'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:40000

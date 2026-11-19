@@ -1,0 +1,18 @@
+description: 'tart-launcher writes the one launcher, executable; off removes it while it is still station''s'
+runs:
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: '--version >/dev/null; /bin/ls -l .local/bin/tart | /usr/bin/cut -c1-10; /usr/bin/head -4 .local/bin/tart'
+      exit: 0
+      stdout: |
+          -rwxr-xr-x
+          #!/bin/sh
+          d="$HOME/.local/share"
+          case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac
+          TART_HOME="$d/station/vms" exec "$d/station/tart/tart.app/Contents/MacOS/tart" "$@"
+    - command: 'settings off tart-launcher --yes'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: removed

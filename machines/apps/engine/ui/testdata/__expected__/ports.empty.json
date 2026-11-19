@@ -1,0 +1,150 @@
+{
+  "schema": "station.page/v1",
+  "id": "ports",
+  "command": "ports",
+  "context": {
+    "machine": "macbook",
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/ports",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "0 ports"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "nothing needs you"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "tailnet",
+      "title": "Tailscale",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "absent",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not installed"
+              }
+            ],
+            "reason": "missing",
+            "hint": {
+              "command": "station apps install tailscale"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "absent",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "private",
+      "title": "Private: shared with you on Tailscale",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "shared ports",
+            "hint": {
+              "command": "station machines create"
+            }
+          }
+        }
+      ],
+      "pipe_counts": true
+    }
+  ]
+}

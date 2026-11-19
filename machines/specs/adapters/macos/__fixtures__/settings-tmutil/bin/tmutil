@@ -1,0 +1,21 @@
+#!/bin/sh
+# tmutil: every call recorded; isexcluded answers [Excluded] per path, or the count in
+# answers/tmutil/excluded when the document gives one.
+printf 'tmutil %s\n' "$*" >> "$HOME/.calls"
+case "$1" in
+    addexclusion | removeexclusion) ;;
+    isexcluded)
+        shift
+        n=$#
+        if [ -f "$HOME/answers/tmutil/excluded" ]; then n=$(/bin/cat "$HOME/answers/tmutil/excluded"); fi
+        i=0
+        for p in "$@"; do
+            if [ "$i" -lt "$n" ]; then echo "[Excluded]    $p"; else echo "[Included]    $p"; fi
+            i=$((i + 1))
+        done
+        ;;
+    *)
+        echo "stub tmutil: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

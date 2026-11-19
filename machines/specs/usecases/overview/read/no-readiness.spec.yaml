@@ -1,0 +1,9 @@
+description: 'a Mac that hosts no server and sleeps has no readiness block'
+env: one-mac
+runs:
+    - command: 'overview >/dev/null'
+      exit: 0
+    - command: 'overview | /usr/bin/grep -c "Mac readiness"'
+      exit: 1
+      stdout: |
+          0

@@ -1,0 +1,20 @@
+description: 'disk move ~/.tart moves it where tart''s own settings say, asks nothing, and the row leaves'
+env: two-macs
+runs:
+    - command: 'disk move ~/.tart'
+      exit: 0
+      stdout: |
+          ●	~/.tart	moved to ~/.local/share/station/vms
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | keys | map(select(test("linux-dev")))'' world.json'
+      exit: 0
+      stdout: |
+          ["~/.local/share/station/vms/vms/linux-dev/disk.img"]
+    - command: 'disk | /usr/bin/head -2'
+      exit: 0
+      stdout: |
+          ●	This Mac	388 GB free of 994 GB · 0 misplaced folders
+          # Can rebuild
+    - command: '--version >/dev/null; /bin/cat .local/bin/tart | /usr/bin/grep -c TART_HOME'
+      exit: 0
+      stdout: |
+          1

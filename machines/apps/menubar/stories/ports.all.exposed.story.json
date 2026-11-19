@@ -1,0 +1,7 @@
+{
+    "group": "ports",
+    "id": "ports.all.exposed",
+    "note": "AirPlay Receiver listens on port 5000 outside Tailscale: the exposed card leads, with Declare public… and Show process.",
+    "pages": ["pages/machines.ports.exposed.ports.json"],
+    "schema": "station.story/v1"
+}

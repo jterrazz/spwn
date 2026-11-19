@@ -1,0 +1,12 @@
+#!/bin/sh
+# bun: its global listing is an answer file; install, remove and update succeed.
+answers="${0%/*}/../answers/bun"
+printf 'bun %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "pm ls -g") /bin/cat "$answers/ls.txt" ;;
+    "install -g "* | "remove -g "* | "update -g "*) ;;
+    *)
+        echo "stub bun: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

@@ -1,0 +1,22 @@
+All machines are fine · infra healthy · up 12 days · all 2 Macs answer
+
+Tiles
+Servers  ● infra · healthy · up 12 days
+Macs
+  ● This Mac  5 upkeep
+  ● mac-mini  1 VM
+Needs you  5 things need you
+  ◐ 2 app updates         station apps update
+  ✗ npm sign-in expired   npm login
+  ✗ A background task is failing: brain snapshot
+    station background  com.example.brain.x-snapshot
+  ◐ Firewall off          System Settings > Network > Firewall
+  ◐ ~/.tart is misplaced  station disk move ~/.tart
+Machines
+  ◐ This Mac       Mac        awake until 18:00
+  └─   Workspaces
+     ├─ ● linux-1  Workspace  Ephemeral · 2 ports shared
+     └─ ○ api      Workspace  Persistent · Stopped
+  ✗ mac-mini       Mac        never sleeps · 1 needs you
+  └─   Servers
+     └─ ● infra    Server     Always on · healthy · up 12 d · 0 restarts

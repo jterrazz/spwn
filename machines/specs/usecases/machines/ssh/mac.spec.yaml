@@ -1,0 +1,7 @@
+description: 'machines ssh of a Mac, by its short name, prints its own login there'
+env: two-macs
+runs:
+    - command: 'machines ssh mac-mini'
+      exit: 0
+      stdout: |
+          ssh jterrazz.agent@mac-mini

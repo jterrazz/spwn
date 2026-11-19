@@ -1,0 +1,21 @@
+{
+    "group": "menu",
+    "id": "menu.new-vm.on",
+    "note": "The On popup of New VM on mac-mini: each Mac with its free memory, an asleep one disabled.",
+    "pages": ["pages/machines.sheet.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {
+            "id": "field:On"
+        },
+        "sheet": {
+            "id": "new-vm:mac-mini"
+        }
+    }
+}

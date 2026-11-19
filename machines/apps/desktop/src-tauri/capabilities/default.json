@@ -1,0 +1,11 @@
+{
+    "identifier": "default",
+    "description": "The main window: the engine link's event, dragging the window by its drag regions and zooming it by a double click there; the engine bridge's commands are the app's own",
+    "windows": ["main"],
+    "permissions": [
+        "core:event:allow-listen",
+        "core:event:allow-unlisten",
+        "core:window:allow-internal-toggle-maximize",
+        "core:window:allow-start-dragging"
+    ]
+}

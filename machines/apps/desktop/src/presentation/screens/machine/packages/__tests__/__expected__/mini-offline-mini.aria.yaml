@@ -1,0 +1,23 @@
+- main:
+  - heading "mac-mini not seen" [level=2]
+  - paragraph: Not seen for 6 h. Asleep or off the network.
+  - button "Keep mac-mini awake": Awake…
+  - button "New machine on mac-mini": New machine
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages" [selected]
+    - tab "Ports"
+    - tab "Sign-ins"
+    - tab "Storage"
+  - heading "No verdict from the engine." [level=1]
+  - paragraph:
+    - img "not given yet"
+    - text: What the engine answered is below
+  - region "Upgrades":
+    - heading "Upgrades" [level=2]
+    - button "Upgrade now"
+    - paragraph: What the engine answered is below
+  - region "Apps":
+    - heading "Apps by file, a later one wins" [level=2]
+    - text: unreachable mac-mini does not answer. station machines mac-mini

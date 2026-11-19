@@ -1,0 +1,34 @@
+description: 'a bare apply applies every Not applied setting that asks nothing and has its app'
+env: two-macs
+runs:
+    - command: 'settings apply'
+      exit: 0
+      stdout: |
+          ●	docker-shortcuts	~/.zshrc [station:docker-shortcuts]: written
+          ●	git-shortcuts	~/.gitconfig [alias]: written
+          ●	hushlogin	~/.hushlogin: created
+          ●	dns	dns: applied
+          ●	spotlight-exclude	spotlight-exclude: applied
+          ●	backup-exclusions	backup-exclusions: applied
+          ●	dock-reset	dock-reset: applied
+          ●	dock-spacer	dock-spacer: applied
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: 'settings | /usr/bin/grep -E ''^#|○'''
+      exit: 0
+      stdout: |
+          # Set by station	9 ●	8 ○
+          ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
+          ○	starship-dotfiles	not applied · needs starship	station apps install starship
+          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
+          ○	git-signing	not applied · needs gpg	station apps install gpg
+          ○	github-login	not applied · needs gh	station apps install gh
+          ○	ssh-key	not applied	station settings apply ssh-key
+          ○	zed-dotfiles	not applied · needs zed	station apps install zed
+          ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
+          # Always-on Mac
+          ○	Always-on Mac	5 · for a Mac that hosts servers
+          # Checked	8 ●	1 ◐
+    - command: 'settings apply'
+      exit: 0
+      stdout: |
+          	none

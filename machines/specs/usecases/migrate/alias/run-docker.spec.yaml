@@ -1,0 +1,36 @@
+description: 'run docker rm|rmi|reset runs the dclean steps, asking as before, named on stderr'
+fixture: ../../__fixtures__/docker/
+env: in-linux-1
+runs:
+    - command: 'run docker rm'
+      exit: 2
+      stderr: |
+          → now: dclean
+          Error: refusing to remove every container without --yes
+          Hint: re-run with --yes
+      files:
+          .calls: absent
+    - command: 'run docker rm --yes'
+      exit: 0
+      stdout: |
+          ●	containers	2 removed
+      stderr: |
+          → now: dclean
+      files:
+          .calls:
+              equals: |
+                  docker ps -aq
+                  docker rm -vf c1 c2
+    - command: 'run docker reset --yes'
+      exit: 0
+      stdout: |
+          ●	containers	2 removed
+          ●	images	1 removed
+      stderr: |
+          → now: dreset
+    - command: 'run docker rmi --yes'
+      exit: 0
+      stdout: |
+          ●	images	1 removed
+      stderr: |
+          → now: dclean-images

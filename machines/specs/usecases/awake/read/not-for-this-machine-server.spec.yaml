@@ -1,0 +1,8 @@
+description: 'inside a server awake is refused: a VM follows its Mac'
+env: in-server
+runs:
+    - command: 'awake'
+      exit: 2
+      stderr: |
+          Error: infra follows its Mac
+          Hint: station awake

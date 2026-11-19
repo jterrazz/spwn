@@ -1,0 +1,38 @@
+description: 'awake off ends the keep-awake: the assertion goes and the lid sleeps the Mac again'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'awake 4h --lid'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 14:00 · lid closed
+    - command: 'awake off'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	sleeps normally again
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power | {holds, clamshell}'' world.json'
+      exit: 0
+      stdout: |
+          {"holds":null,"clamshell":null}
+    - command: 'awake | /usr/bin/sed -n 1,2p'
+      exit: 0
+      stdout: |
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" awake 4h --lid'
+      stdin: |
+          within 20 exit 0
+          screen
+      exit: 0
+      stdout: |
+          ✓ This Mac stays awake until 14:01 · lid closed
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" awake off'
+      stdin: |
+          within 20 exit 0
+          screen
+      exit: 0
+      stdout: |
+          ✓ This Mac sleeps normally again

@@ -1,0 +1,9 @@
+#!/bin/sh
+# mise with nothing installed through it.
+case "$*" in
+    "ls --global --json") echo "{}" ;;
+    *)
+        echo "stub mise: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

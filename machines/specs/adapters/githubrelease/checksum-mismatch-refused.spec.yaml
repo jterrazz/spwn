@@ -1,0 +1,25 @@
+description: 'an asset whose checksum differs from the release checksums is refused, and nothing lands'
+fixture:
+    - ./__fixtures__/release/
+    - ./__fixtures__/wrong-checksum/
+env:
+    - STATION_MACHINE_KIND=linux
+serve:
+    - github
+runs:
+    - command: 'apps install tool'
+      exit: 1
+      stdout: |
+          ✗	tool		github-release	~/.local/state/station/logs/tool.log
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: station apps install tool
+      files:
+          .local/state/station/logs/tool.log:
+              contains:
+                  - 'does not match checksums.txt'
+                  - 'nothing installed'
+    - command: '--version > /dev/null; test -e .local/bin/tool || echo absent'
+      exit: 0
+      stdout: |
+          absent

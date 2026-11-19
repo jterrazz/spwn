@@ -1,0 +1,16 @@
+#!/bin/sh
+# A sign-in's lines as gh answers them with no terminal; $HOME/gh.out says
+# signed out, and a login prints its code on stderr, then signs in.
+printf 'gh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "auth status --hostname github.com")
+        if [ -f "$HOME/gh.out" ]; then echo "You are not logged into any GitHub hosts. To log in, run: gh auth login" >&2; exit 1; fi
+        echo "github.com"
+        echo "  ✓ Logged in to github.com account you (keyring)" ;;
+    "auth login --web --hostname github.com --git-protocol https --skip-ssh-key")
+        echo "! First copy your one-time code: 0A1B-2C3D" >&2
+        echo "Open this URL to continue in your web browser: https://github.com/login/device" >&2
+        /bin/sleep 1
+        /bin/rm -f "$HOME/gh.out" ;;
+    *) echo "stub gh: unexpected invocation: $*" >&2; exit 97 ;;
+esac

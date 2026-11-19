@@ -1,0 +1,15 @@
+description: 'station accounts login of a name that is no program is refused with its words'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - engine
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" accounts login zz --on linux-1'
+      stdin: |
+          scrollback
+      exit: 2
+      stdout: |
+          Error: no program named "zz"
+          Hint: station signs in gh, npm, claude and wrangler

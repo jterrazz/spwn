@@ -1,0 +1,25 @@
+description: 'the stories world holds a last night, so the clock moving an hour runs none and upgrades nothing'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | del(.night.at)'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.nightly","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"night":{"machinefile":"macbook-pro","moved":[{"app":"gh","was":"2.96.1","now":"2.97.0","range":"latest"}],"waiting":[{"app":"node","newest":"25.1.0","range":"24","moved":"25","file":"~/.config/station/machinefiles/macbook-pro.machine.yaml"}]},"ran":true,"bound":"macbook-pro"}
+    - command: 'world advance 1h'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {moved: .night.moved}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.nightly","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"moved":[{"app":"gh","was":"2.96.1","now":"2.97.0","range":"latest"}]}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Upgrades | del(.Last.At)'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"Nightly":true,"File":"macbook-pro","Sentence":"Every night at 03:00, as macbook-pro allows.","Last":{"Verdict":{"Tone":"warn","Sentence":"1 app moved.","Line":"1 app waits for you."}}}

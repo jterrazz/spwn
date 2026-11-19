@@ -1,0 +1,8 @@
+{
+    "group": "needs",
+    "heightNote": "the page header is a Mac page's, 4 pt shorter than the prototype's",
+    "id": "needs.empty",
+    "note": "Nothing needs you: the one empty card.",
+    "pages": ["pages/machines.fine.needs.json"],
+    "schema": "station.story/v1"
+}

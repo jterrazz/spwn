@@ -1,0 +1,16 @@
+description: 'settings --json is station.settings.list/v1, one entry per setting with group and state'
+env: two-macs
+runs:
+    - command: 'settings apply hushlogin'
+      exit: 0
+      stdout: |
+          ●	hushlogin	~/.hushlogin: created
+    - command: 'settings --json | /usr/bin/jq -c ''[.schema, .findings, (.settings | length)]'''
+      exit: 0
+      stdout: |
+          ["station.settings.list/v1",[{"severity":"needs-a-look","section":"settings","subject":"firewall","text":"Firewall: off","fix":{"call":null,"command":null,"path":"System Settings > Network > Firewall"}}],31]
+    - command: 'settings --json | /usr/bin/jq -c ''.settings[] | select(.name == "hushlogin" or .name == "restart-after-power-cut") | .applied_at |= (. != null)'''
+      exit: 0
+      stdout: |
+          {"name":"hushlogin","label":"Silence the terminal login message","group":"set","state":"applied","applied_at":true,"where":"~/.hushlogin","admin":false}
+          {"name":"restart-after-power-cut","label":"Restarts after a power cut, and wakes for the network","group":"always-on-mac","state":"not-applied","applied_at":false,"admin":true}

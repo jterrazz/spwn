@@ -1,0 +1,54 @@
+description: 'the Remote login setting declares 22 on the mini, off takes it back, a laptop declares none'
+env: two-macs
+runs:
+    - command: 'world listen mac-mini "*:22" sshd'
+      exit: 0
+    - command: 'ports --on mac-mini | /usr/bin/grep 22'
+      exit: 0
+      stdout: |
+          ✗	mac-mini	22	needs you	SSH	*:22 all interfaces	declared no
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].root = true'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'settings apply sshd --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	sshd	sshd: applied
+    - command: 'ports --on mac-mini | /usr/bin/grep -e 22 -e "^# Public"'
+      exit: 0
+      stdout: |
+          # Public: reachable from anywhere else, internet or LAN, declared	1 ●
+          ●	mac-mini	22	public	SSH	*:22 all interfaces	your LAN · Remote login · by Settings
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.findings, [.ports[] | select(.port == 22) | .declared]]'''
+      exit: 0
+      stdout: |
+          [[],[{"via":"lan","by":"sshd","seen":true}]]
+    - command: 'settings off sshd --on mac-mini --yes'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	sshd	sshd: undone
+    - command: 'ports --on mac-mini | /usr/bin/grep 22'
+      exit: 0
+      stdout: |
+          ✗	mac-mini	22	needs you	SSH	*:22 all interfaces	declared no
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["mac-mini"].stores.declarations[] | .machine + ":" + (.port|tostring)]'' world.json'
+      exit: 0
+      stdout: |
+          ["infra:443"]
+    - command: 'world listen macbook-pro "*:22" sshd'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].root = true'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'settings apply sshd --on macbook-pro'
+      exit: 0
+      stdout: |
+          ●	sshd	sshd: applied
+    - command: 'ports --on macbook-pro | /usr/bin/grep -w 22'
+      exit: 0
+      stdout: |
+          ✗	macbook-pro	22	needs you	SSH	*:22 all interfaces	declared no
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[].stores.declarations // [] | .[] | .machine + ":" + (.port|tostring)]'' world.json'
+      exit: 0
+      stdout: |
+          ["infra:443"]

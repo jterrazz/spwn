@@ -1,0 +1,15 @@
+description: 'A workspace of another Mac is sent back to that Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["infra"].self.kind = "workspace"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Targets[] | [.To, .Fit, .Line]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"grants.new","in":{"Entry":"pw-1"}}
+      exit: 0
+      stdout: |
+          ["api","no","Start the machine first"]
+          ["linux-1","fits","Signed out here"]
+          ["infra","no","It is on mac-mini: grant from there"]

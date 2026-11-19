@@ -1,0 +1,2 @@
+tests/station-kit-tests/testdata/*.actual.png
+tests/station-kit-tests/testdata/stories/*.actual.png

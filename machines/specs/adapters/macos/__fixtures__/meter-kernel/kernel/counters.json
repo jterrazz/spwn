@@ -1,0 +1,215 @@
+{
+    "cpus": [
+        {
+            "user": 52618592,
+            "system": 34831415,
+            "idle": 87249567,
+            "nice": 0
+        },
+        {
+            "user": 52542717,
+            "system": 33567160,
+            "idle": 88681076,
+            "nice": 0
+        },
+        {
+            "user": 56466856,
+            "system": 27711291,
+            "idle": 90974275,
+            "nice": 0
+        },
+        {
+            "user": 53671848,
+            "system": 26334721,
+            "idle": 95278879,
+            "nice": 0
+        },
+        {
+            "user": 45323458,
+            "system": 22257909,
+            "idle": 107786720,
+            "nice": 0
+        },
+        {
+            "user": 41342947,
+            "system": 19432001,
+            "idle": 114642042,
+            "nice": 0
+        },
+        {
+            "user": 42286115,
+            "system": 11933644,
+            "idle": 121287800,
+            "nice": 0
+        },
+        {
+            "user": 36717885,
+            "system": 10105350,
+            "idle": 128740330,
+            "nice": 0
+        },
+        {
+            "user": 33469097,
+            "system": 8954274,
+            "idle": 133177531,
+            "nice": 0
+        },
+        {
+            "user": 31814453,
+            "system": 8360063,
+            "idle": 135445561,
+            "nice": 0
+        }
+    ],
+    "load": [
+        3.5703125,
+        3.45361328125,
+        4.3984375
+    ],
+    "pages": {
+        "size": 16384,
+        "internal": 262404,
+        "purgeable": 1280,
+        "wired": 208371,
+        "compressor": 239168
+    },
+    "swap_used": 3727425536,
+    "pressure": 1,
+    "memsize": 17179869184,
+    "up": 2113221002058000,
+    "disks": [
+        {
+            "media": "disk0",
+            "interconnect": "Apple Fabric",
+            "location": "Internal",
+            "read": 22254007472128,
+            "written": 14878830428160
+        },
+        {
+            "media": "",
+            "interconnect": "Secure Digital",
+            "location": "Internal",
+            "read": 0,
+            "written": 0
+        },
+        {
+            "media": "disk24",
+            "interconnect": "Virtual Interface",
+            "location": "File",
+            "read": 125405936640,
+            "written": 0
+        }
+    ],
+    "links": [
+        {
+            "name": "lo0",
+            "in": 719170560,
+            "out": 719170560
+        },
+        {
+            "name": "gif0",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "stf0",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "anpi2",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "anpi1",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "anpi0",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "en4",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "en5",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "en6",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "en1",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "en2",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "en3",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "bridge0",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "ap1",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "en0",
+            "in": 3119505408,
+            "out": 3128866816
+        },
+        {
+            "name": "awdl0",
+            "in": 40745984,
+            "out": 401258496
+        },
+        {
+            "name": "llw0",
+            "in": 65765376,
+            "out": 52715520
+        },
+        {
+            "name": "utun0",
+            "in": 0,
+            "out": 0
+        },
+        {
+            "name": "utun1",
+            "in": 0,
+            "out": 25600
+        },
+        {
+            "name": "utun4",
+            "in": 109568,
+            "out": 59392
+        },
+        {
+            "name": "bridge100",
+            "in": 1209483264,
+            "out": 88604672
+        },
+        {
+            "name": "utun8",
+            "in": 11264,
+            "out": 10240
+        }
+    ]
+}

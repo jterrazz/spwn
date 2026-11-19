@@ -1,0 +1,13 @@
+description: 'a workspace whose run crashes is kept, never started again: the owner starts or deletes it'
+env: two-macs
+runs:
+    - command: 'world crash linux-1'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ◐	linux-1	Workspace	macbook-pro	Ended unexpectedly · ephemeral	4 CPU	8 GB
+          # Needs you
+          ✗	linux-1	ended unexpectedly	station machines start linux-1

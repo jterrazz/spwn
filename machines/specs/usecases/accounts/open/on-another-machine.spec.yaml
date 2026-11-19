@@ -1,0 +1,15 @@
+description: 'the mini opens the site of its own exchange'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].accounts.exchanges = {"ex-9": {"program": "gh", "kind": "link", "site": "www.npmjs.com", "expires": "2026-11-04T10:30:00Z"}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"accounts.open","in":{"Exchange":"ex-9"}}
+      exit: 0
+      stdout: |
+          {"Site":"www.npmjs.com"}

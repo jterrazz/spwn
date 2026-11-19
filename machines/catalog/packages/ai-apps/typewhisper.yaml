@@ -1,0 +1,10 @@
+package: station.package/v1
+kind: app
+name: typewhisper
+description: Whisper-based dictation app
+bundle: TypeWhisper
+updates: self
+methods:
+    - os: macos
+      machine: computer
+      cask: typewhisper

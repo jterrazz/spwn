@@ -1,0 +1,7 @@
+description: 'the engine read is station.engine.read/v1: its state, version, uptime and VMs, no stop'
+env: two-macs
+runs:
+    - command: 'engine --json | /usr/bin/jq -c ''[.schema, .engine.state, (.engine.version | length > 0), (.engine.up_s >= 259200), .engine.vms, .engine.stopped_at, .engine.stopped_by]'''
+      exit: 0
+      stdout: |
+          ["station.engine.read/v1","running",true,true,1,null,null]

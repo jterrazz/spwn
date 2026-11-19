@@ -1,0 +1,62 @@
+{
+  "schema": "station.page/v1",
+  "id": "disk",
+  "command": "disk",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "volume",
+      "title": "Disk",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "size",
+          "label": "size",
+          "kind": "size",
+          "keep": 90
+        },
+        {
+          "key": "folders",
+          "label": "folders",
+          "kind": "list",
+          "show": "detail"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "volume",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "size",
+                    "n": 388000000000,
+                    "of": 994000000000,
+                    "unit": "free"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "0 misplaced folders"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ]
+}

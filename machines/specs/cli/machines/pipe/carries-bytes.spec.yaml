@@ -1,0 +1,13 @@
+description: 'machines pipe carries ssh''s bytes to the VM''s current ip behind its Mac'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/engine-vm/
+    - ../../../__fixtures__/local-vm/
+env: engine
+serve: sshd
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "41120-41139"}/'' .config/station/preferences.json; echo running > .tart-vms/linux-1; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; printf ''SSH-2.0-spec\r\n'' | "$STATION" machines pipe linux-1 | /usr/bin/head -c 8; echo; /usr/bin/grep -c ''tart ip linux-1 --wait 5'' .calls; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          SSH-2.0-
+          1

@@ -1,0 +1,12 @@
+description: 'a declaration that says no route is refused with the three routes, and nothing is declared'
+env: two-macs
+runs:
+    - command: 'ports declare mac-mini 443'
+      exit: 2
+      stderr: |
+          Error: say how 443 is reached from elsewhere
+          Hint: add --via, one of cloudflare-tunnel, tailscale-funnel, lan
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.declarations'' world.json'
+      exit: 0
+      stdout: |
+          [{"machine":"infra","port":443,"via":"cloudflare-tunnel"}]

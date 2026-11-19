@@ -1,0 +1,22 @@
+description: 'every --json read carries the findings overview lists for its section, in one shape'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].accounts.programs.npm = {"Program": "npm", "State": "broken", "Reason": "Refused at the provider"}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" overview --json > overview.json; for read in accounts apps settings disk background; do /usr/bin/jq -c --arg s "$read" ''[.findings[] | select(.section == $s) | del(.machine)] | sort_by(.subject)'' overview.json > want.json; "$STATION" $read --json | /usr/bin/jq -c ''.findings | sort_by(.subject)'' > got.json; echo "$read  $(/usr/bin/jq length got.json)  $(/usr/bin/cmp -s want.json got.json && echo same as overview || echo differs)"; done'
+      exit: 0
+      stdout: |
+          accounts  1  same as overview
+          apps  2  same as overview
+          settings  1  same as overview
+          disk  1  same as overview
+          background  4  same as overview
+    - command: '--version >/dev/null; for read in overview activity apps settings disk ports accounts background awake machines images engine; do "$STATION" $read --json | /usr/bin/jq -r ''.findings[] | [(keys_unsorted - ["machine"] | join(" ")), (.fix | keys_unsorted | join(" "))] | join("  ")''; done | /usr/bin/sort -u'
+      exit: 0
+      stdout: |
+          severity section subject text fix  call args command path
+          severity section subject text fix  call command path
+    - command: 'accounts --json | /usr/bin/jq -c ''.findings[0]'''
+      exit: 0
+      stdout: |
+          {"severity":"broken","section":"accounts","subject":"npm","text":"npm sign-in fails: Refused at the provider","fix":{"call":"accounts.login","args":{"Program":"npm"},"command":null,"path":null}}

@@ -1,0 +1,18 @@
+description: 'a package file of the owner''s with an unknown key stops every command at its line'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: app
+          name: jq
+          description: x
+          tint: blue
+          methods:
+              - { os: macos, brew: jq }
+      exit: 0
+    - command: 'apps'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Package
+          Hint: fix that line: station never rewrites a package file

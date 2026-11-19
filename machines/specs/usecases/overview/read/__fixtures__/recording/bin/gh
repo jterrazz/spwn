@@ -1,0 +1,13 @@
+#!/bin/sh
+# gh for the one-reading documents: every call recorded in $HOME/.calls.
+printf 'gh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "auth status")
+        echo "github.com
+  Logged in to github.com account octo (keyring)" >&2
+        ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

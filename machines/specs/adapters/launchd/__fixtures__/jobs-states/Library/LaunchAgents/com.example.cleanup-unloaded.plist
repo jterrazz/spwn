@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0"><dict><key>Label</key><string>com.example.cleanup-unloaded</string><key>ProgramArguments</key><array><string>/usr/local/bin/cleanup</string></array></dict></plist>

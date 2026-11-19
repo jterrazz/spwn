@@ -1,0 +1,8 @@
+description: 'a version never held is refused, pointing at the versions'
+env: two-macs
+runs:
+    - command: 'images delete base-ubuntu@1999.01.01 --yes'
+      exit: 2
+      stderr: |
+          Error: image base-ubuntu has no version 1999.01.01
+          Hint: station images lists the versions

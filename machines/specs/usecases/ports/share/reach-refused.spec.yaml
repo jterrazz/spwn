@@ -1,0 +1,12 @@
+description: 'a share to an audience station knows not is refused, and nothing is reserved'
+env: two-macs
+runs:
+    - command: 'ports share linux-1 3000 --to everyone'
+      exit: 2
+      stderr: |
+          Error: "everyone" is not an audience
+          Hint: --to is one of local, private, public
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[].guest_port]'' world.json'
+      exit: 0
+      stdout: |
+          [5173,7000]

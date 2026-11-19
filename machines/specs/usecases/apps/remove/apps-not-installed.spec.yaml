@@ -1,0 +1,8 @@
+description: 'removing an app that is not installed is refused before any question, nothing run, exit 2'
+env: two-macs
+runs:
+    - command: 'apps remove fd'
+      exit: 2
+      stderr: |
+          Error: fd is not installed
+          Hint: station apps install fd

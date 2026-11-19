@@ -1,0 +1,10 @@
+description: 'an app a script installed is refused before the confirm gate'
+fixture: ../../__fixtures__/stubs/
+runs:
+    - command: 'apps remove claude'
+      exit: 2
+      stderr: |
+          Error: claude cannot be uninstalled by station
+          Hint: station installs it but cannot remove it: remove it by hand
+      files:
+          .calls: absent

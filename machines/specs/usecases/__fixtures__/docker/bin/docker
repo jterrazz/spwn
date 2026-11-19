@@ -1,0 +1,18 @@
+#!/bin/sh
+# docker as the run specs need it: the id listings are answer files, a removal is recorded,
+# and answers/docker/<verb>.exit makes a verb fail.
+answers="${0%/*}/../answers/docker"
+printf 'docker %s\n' "$*" >> "$HOME/.calls"
+if [ -f "$answers/$1.exit" ]; then
+    echo "Cannot connect to the Docker daemon" >&2
+    exit "$(/bin/cat "$answers/$1.exit")"
+fi
+case "$*" in
+    "ps -aq") /bin/cat "$answers/containers.txt" ;;
+    "images -aq") /bin/cat "$answers/images.txt" ;;
+    "rm -vf "* | "rmi -f "*) ;;
+    *)
+        echo "stub docker: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

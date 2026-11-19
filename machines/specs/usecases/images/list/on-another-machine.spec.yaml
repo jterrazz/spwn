@@ -1,0 +1,9 @@
+description: 'the images of another Mac read through that Mac, its own alone'
+env: two-macs
+runs:
+    - command: 'images --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	base-ubuntu	2026.11.01	4.0 GB	mac-mini	infra
+          ○	base-macos				not built yet

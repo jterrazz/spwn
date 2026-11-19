@@ -1,0 +1,12 @@
+description: 'a laptop''s battery reads its percent, charging, health and cycles from IOPowerSources'
+fixture: ./__fixtures__/power-battery/
+env: engine
+runs:
+    - command: 'guest serve --stdio < ask.json | /usr/bin/jq -c .out.sample.battery'
+      exit: 0
+      stdout: |
+          {"percent":96,"charging":true,"on_battery":false,"health":98,"cycles":112}
+    - command: '--version >/dev/null; printf battery > power/source; printf 0 > power/charging; printf 81 > power/health; "$STATION" activity --json | /usr/bin/jq -c .battery'
+      exit: 0
+      stdout: |
+          {"percent":96,"state":"on battery","health_percent":81,"cycles":112}

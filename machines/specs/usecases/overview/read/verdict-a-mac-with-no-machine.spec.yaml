@@ -1,0 +1,11 @@
+description: 'a Mac with no machine yet heads its Overview with this Mac is ready'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Verdict, (.Read != null)]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          [{"Tone":"ok","Sentence":"This Mac is ready."},true]

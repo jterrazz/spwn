@@ -1,0 +1,12 @@
+description: 'uninstalling backup-exclusions gives both trees back to Time Machine'
+fixture: ./__fixtures__/settings-tmutil/
+runs:
+    - command: 'settings off backup-exclusions --yes'
+      exit: 0
+      stdout: |
+          ●	backup-exclusions	Time Machine: backs up {{workdir}}/.cache, {{workdir}}/.local/share/station/vms again
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          tmutil isexcluded {{workdir}}/.cache {{workdir}}/.local/share/station/vms
+          tmutil removeexclusion {{workdir}}/.cache {{workdir}}/.local/share/station/vms

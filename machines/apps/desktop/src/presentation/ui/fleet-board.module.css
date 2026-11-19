@@ -1,0 +1,140 @@
+.board {
+    container: fleet / inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    min-width: 0;
+}
+.stage {
+    border-radius: var(--radius-card);
+    background-color: var(--inset);
+    background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.5px);
+    background-size: 16px 16px;
+    background-position: 8px 8px;
+    padding: 30px var(--space-16) var(--space-14);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+}
+.deck {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--space-10);
+}
+.card {
+    all: unset;
+    width: 168px;
+    box-sizing: border-box;
+    background: var(--raise);
+    border-radius: var(--radius-well);
+    padding: var(--space-10) var(--space-12);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: left;
+    color: var(--t1);
+    cursor: pointer;
+    transition:
+        background var(--motion-hover),
+        box-shadow var(--motion-hover);
+}
+.card:hover {
+    background: var(--raise-2);
+}
+.ringWarn {
+    box-shadow: inset 0 0 0 1.5px var(--warn);
+}
+.ringBad {
+    box-shadow: inset 0 0 0 1.5px var(--bad);
+}
+.quiet {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.card[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--new) 14%, var(--raise));
+    box-shadow: inset 0 0 0 1.5px var(--new);
+}
+.cardName {
+    font-size: var(--text-row);
+    font-weight: var(--weight-strong);
+    line-height: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+    min-width: 0;
+}
+.cut {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.kind {
+    font-size: var(--text-label);
+    line-height: 17px;
+    color: var(--t3);
+}
+.said {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    font-size: var(--text-label);
+    line-height: 17px;
+    margin-top: var(--space-6);
+}
+.ok {
+    color: var(--t2);
+}
+.plain {
+    color: var(--t3);
+}
+.warn {
+    color: var(--warn);
+}
+.bad {
+    color: var(--bad);
+}
+.new {
+    color: var(--new);
+}
+.foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-12);
+    flex-wrap: wrap;
+    font-size: var(--text-label);
+    line-height: 17px;
+    color: var(--t3);
+}
+.foot .said {
+    margin-top: 0;
+}
+.here {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    color: var(--t1);
+    font-weight: var(--weight-medium);
+}
+.end {
+    display: flex;
+    justify-content: flex-start;
+}
+@container fleet (max-width: 600px) {
+    .stage {
+        padding: 22px var(--space-12) var(--space-12);
+    }
+    .card {
+        width: 112px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .card {
+        transition: none;
+    }
+}

@@ -1,0 +1,12 @@
+description: 'the containers shortcut, unconfirmed off a terminal, is refused and deletes nothing'
+fixture: ../../__fixtures__/docker/
+env: in-linux-1
+runs:
+    - command: 'run docker rm'
+      exit: 2
+      stderr: |
+          → now: dclean
+          Error: refusing to remove every container without --yes
+          Hint: re-run with --yes
+      files:
+          .calls: absent

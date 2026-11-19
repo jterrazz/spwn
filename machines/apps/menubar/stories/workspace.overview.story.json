@@ -1,0 +1,9 @@
+{
+    "group": "workspace",
+    "heightNote": "designed after the prototype: no prototype height, its golden is the reference",
+    "id": "workspace.overview",
+    "note": "linux-1's Overview: its facts, its gauges, its ports, its accounts and its activity.",
+    "pages": ["pages/machines.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
+}

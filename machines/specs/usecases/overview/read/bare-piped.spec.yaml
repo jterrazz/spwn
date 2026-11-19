@@ -1,0 +1,11 @@
+description: 'bare station piped prints the overview as records: glyph-led rows, tab-separated, no colour'
+env: two-macs
+runs:
+    - command: '> bare.txt; /bin/echo "station exit $?"; /usr/bin/head -1 bare.txt; /usr/bin/grep -c "^✗	" bare.txt; /usr/bin/grep -c "	Apps	" bare.txt; /usr/bin/grep -c "$(printf "\033")" bare.txt'
+      exit: 1
+      stdout: |
+          station exit 0
+          # Needs you
+          1
+          1
+          0

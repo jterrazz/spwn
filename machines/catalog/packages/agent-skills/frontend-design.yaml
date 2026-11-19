@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: frontend-design
+description: Distinctive, polished frontend interfaces
+methods:
+    - os: any
+      skill:
+          repo: anthropics/skills
+          name: frontend-design

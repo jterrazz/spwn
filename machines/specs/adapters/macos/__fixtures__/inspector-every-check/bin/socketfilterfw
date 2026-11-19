@@ -1,0 +1,5 @@
+#!/bin/sh
+case "$*" in
+    --getglobalstate) if [ -e "$HOME/.off" ]; then echo "Firewall is disabled. (State = 0)"; else echo "Firewall is enabled. (State = 1)"; fi ;;
+    *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;
+esac

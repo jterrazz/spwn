@@ -1,0 +1,8 @@
+description: 'a size without its unit is refused before anything is made, the unit in the hint'
+env: two-macs
+runs:
+    - command: 'machines create --memory 24'
+      exit: 2
+      stderr: |
+          Error: "24" needs a unit
+          Hint: --memory 24G

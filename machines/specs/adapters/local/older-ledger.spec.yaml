@@ -1,0 +1,23 @@
+description: 'a ledger an older station wrote is refused and left as it is, for the owner to move away'
+fixture:
+    - ../__fixtures__/setup-stubs/
+    - ./__fixtures__/older-ledger/
+env:
+    - USER=tester
+runs:
+    - command: 'plan --machinefile t.machine.yaml'
+      exit: 1
+      stderr: |
+          Error: cannot read "{{workdir}}/.local/state/station/ledger.json": written at version 1 by an older station, this one reads 2
+          Hint: move "{{workdir}}/.local/state/station/ledger.json" away to start afresh
+    - command: 'overview | /usr/bin/grep ledger'
+      exit: 0
+      stdout: |
+          ✗	no night's upgrade runs: cannot read {{workdir}}/.local/state/station/ledger.json: written at version 1 by an older station, this one reads 2	{{workdir}}/.local/state/station/ledger.json
+      files:
+          .local/state/station/ledger.json:
+              equals: |
+                  {
+                    "v": 1,
+                    "installed": [{"item": "thing", "method": "script", "machinefile": "t", "at": "2026-11-01T09:00:00Z"}]
+                  }

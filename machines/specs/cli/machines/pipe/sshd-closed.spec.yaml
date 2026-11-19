@@ -1,0 +1,12 @@
+description: 'a VM whose sshd does not answer is a failure that names the health step to run'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/engine-vm/
+    - ../../../__fixtures__/local-vm/
+env: engine
+runs:
+    - command: '--version >/dev/null; echo running > .tart-vms/linux-1; STATION_GUEST_SSH_PORT=9 "$STATION" machines pipe linux-1 </dev/null'
+      exit: 1
+      stderr: |
+          Error: linux-1's sshd does not answer on 127.0.0.1:9
+          Hint: station machines linux-1

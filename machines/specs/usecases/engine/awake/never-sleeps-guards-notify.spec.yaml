@@ -1,0 +1,17 @@
+description: 'on a Mac that never sleeps a guard only tells, once: serious thermal, the mini stays awake'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].power.Thermal = 3'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'awake | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: 'awake | /usr/bin/grep -c mac-mini'
+      exit: 0
+      stdout: |
+          1
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["mac-mini"].power.holds, [.told[] | .Text]]'' world.json'
+      exit: 0
+      stdout: |
+          [["station: never sleeps"],["Never sleeps stays on: thermal serious"]]

@@ -1,0 +1,273 @@
+{
+  "schema": "station.page/v1",
+  "id": "activity",
+  "command": "activity",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "machine",
+      "title": "Activity",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "machine",
+            "mark": "pending",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "values",
+      "title": "Now",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "mark": "pending",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "mark": "pending",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "mark": "pending",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "disk-read",
+            "mark": "pending",
+            "label": "Disk read",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "disk-write",
+            "mark": "pending",
+            "label": "Disk write",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "mark": "pending",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "network-total",
+            "mark": "pending",
+            "label": "Network total",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "thermal",
+            "mark": "pending",
+            "label": "Thermal",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "battery",
+            "mark": "pending",
+            "label": "Battery",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 9
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "top",
+      "title": "Top processes",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "by-cpu",
+            "mark": "pending",
+            "label": "Top by CPU",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "by-memory",
+            "mark": "pending",
+            "label": "Top by memory",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station activity --all-machines",
+      "text": "every machine"
+    }
+  ]
+}

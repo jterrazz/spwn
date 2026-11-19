@@ -1,0 +1,10 @@
+description: 'inside a VM memory pressure is PSI''s some avg10: 5 is normal, 25 warn, 60 critical'
+fixture: ./__fixtures__/meter-proc/
+env: engine
+runs:
+    - command: '--version >/dev/null; for avg in 5.00 25.00 60.00; do /usr/bin/sed -i.bak "s/^some avg10=[0-9.]*/some avg10=$avg/" root/proc/pressure/memory; STATION_MACHINE_KIND=linux "$STATION" guest serve --stdio < ask.json | /usr/bin/jq -r .out.sample.pressure; done'
+      exit: 0
+      stdout: |
+          normal
+          warn
+          critical

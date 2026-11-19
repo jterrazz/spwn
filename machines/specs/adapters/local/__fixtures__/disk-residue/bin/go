@@ -1,0 +1,19 @@
+#!/bin/sh
+# A mise shim: every call writes mise's bin_paths resolver file back.
+/bin/mkdir -p "$HOME/.cache/mise/jq/1.8.2" && printf '0123456789' > "$HOME/.cache/mise/jq/1.8.2/bin_paths-e6c40.msgpack.z"
+# go as it cleans for real: the build cache is emptied, then its README and
+# trim.txt are written back, which go does on every open of that cache.
+case "$1" in
+    --version | version) echo "go version go1.25.3 linux/arm64" ;;
+    clean)
+        printf 'go %s\n' "$*" >> "$HOME/.calls"
+        /bin/rm -rf "$HOME/.cache/go-build"
+        /bin/mkdir -p "$HOME/.cache/go-build"
+        echo "This directory holds cached build artifacts from the Go build system." > "$HOME/.cache/go-build/README"
+        echo "1761955200" > "$HOME/.cache/go-build/trim.txt"
+        ;;
+    *)
+        echo "stub go: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

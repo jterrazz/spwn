@@ -1,0 +1,13 @@
+#!/bin/sh
+# A gpg that never answers and ignores TERM: the sleep it becomes inherits the ignored
+# signal, its pid in $HOME/.gpg-pid, so only a kill ends it.
+case "$*" in
+    "--list-secret-keys --keyid-format long") ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac
+trap '' TERM
+echo $$ > "$HOME/.gpg-pid"
+exec /bin/sleep 60

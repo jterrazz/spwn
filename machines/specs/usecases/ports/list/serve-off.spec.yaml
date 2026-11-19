@@ -1,0 +1,15 @@
+description: 'with Serve off on the tailnet every share is local only, said with the admin console step'
+env: serve-off
+runs:
+    - command: 'ports | /usr/bin/cut -f1-4,6-'
+      exit: 0
+      stdout: |
+          ◐	Tailscale	signed in · macbook-pro.tail1234.ts.net · ports are local only	Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console
+          # Private: shared with you on Tailscale	2 ◐
+          ◐	linux-1	5173	private	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console	node	probably Vite
+          ◐	linux-1	7000	private	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console	server
+          	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
+    - command: 'ports --json | /usr/bin/jq -c ''[.tailscale.serve, [.ports[] | [.machine, .port, .state, .detail]]]'''
+      exit: 0
+      stdout: |
+          ["off",[["linux-1",5173,"local-only","Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console"],["linux-1",7000,"local-only","Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console"]]]

@@ -1,0 +1,8 @@
+{
+  "name": "x",
+  "macs": {
+    "x": {},
+    "y": {"user": "u"}
+  },
+  "vm_user": "vmu"
+}

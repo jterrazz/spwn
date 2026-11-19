@@ -1,0 +1,11 @@
+description: 'a temperature macOS does not expose: Thermal says its level only, cpu_celsius is null'
+env: two-macs
+runs:
+    - command: 'activity | /usr/bin/grep "	Thermal	"'
+      exit: 0
+      stdout: |
+          ●	Thermal	Nominal
+    - command: 'activity --json | /usr/bin/jq -c .thermal'
+      exit: 0
+      stdout: |
+          {"level":"nominal","cpu_celsius":null}

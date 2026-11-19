@@ -1,0 +1,451 @@
+{
+  "schema": "station.page/v1",
+  "id": "settings",
+  "command": "settings",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/settings",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "17 set by station here"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "9 checked"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "nothing needs a look"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "set",
+      "title": "Set by station",
+      "fold": "calm",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "docker-shortcuts",
+            "mark": "pending",
+            "label": "docker-shortcuts",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "git-shortcuts",
+            "mark": "pending",
+            "label": "git-shortcuts",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "ghostty-dotfiles",
+            "mark": "pending",
+            "label": "ghostty-dotfiles",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "hushlogin",
+            "mark": "pending",
+            "label": "hushlogin",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "starship-dotfiles",
+            "mark": "pending",
+            "label": "starship-dotfiles",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tmux-dotfiles",
+            "mark": "pending",
+            "label": "tmux-dotfiles",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "dns",
+            "mark": "pending",
+            "label": "dns",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "git-signing",
+            "mark": "pending",
+            "label": "git-signing",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "github-login",
+            "mark": "pending",
+            "label": "github-login",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "spotlight-exclude",
+            "mark": "pending",
+            "label": "spotlight-exclude",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "ssh-key",
+            "mark": "pending",
+            "label": "ssh-key",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "zed-dotfiles",
+            "mark": "pending",
+            "label": "zed-dotfiles",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "backup-exclusions",
+            "mark": "pending",
+            "label": "backup-exclusions",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "dock-reset",
+            "mark": "pending",
+            "label": "dock-reset",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "dock-spacer",
+            "mark": "pending",
+            "label": "dock-spacer",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tart-launcher",
+            "mark": "pending",
+            "label": "tart-launcher",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tailscale-cli",
+            "mark": "pending",
+            "label": "tailscale-cli",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 17
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "always-on-mac",
+      "title": "Always-on Mac",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "always-on-mac",
+            "mark": "absent",
+            "label": "Always-on Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "5"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "for a Mac that hosts servers"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "checked",
+      "title": "Checked",
+      "fold": "brief",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "filevault",
+            "mark": "pending",
+            "label": "filevault",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "firewall",
+            "mark": "pending",
+            "label": "firewall",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "sip",
+            "mark": "pending",
+            "label": "sip",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "automatic-updates",
+            "mark": "pending",
+            "label": "automatic-updates",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "screen-lock",
+            "mark": "pending",
+            "label": "screen-lock",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "gatekeeper",
+            "mark": "pending",
+            "label": "gatekeeper",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "remote-login",
+            "mark": "pending",
+            "label": "remote-login",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "time-machine",
+            "mark": "pending",
+            "label": "time-machine",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macos-updates",
+            "mark": "pending",
+            "label": "macos-updates",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 9
+        }
+      ],
+      "pipe_counts": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station settings apply"
+    },
+    {
+      "command": "station settings --all",
+      "text": "for every row"
+    }
+  ],
+  "actions": [
+    {
+      "key": "a",
+      "label": "apply",
+      "on": "row",
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "d",
+      "label": "diff",
+      "on": "row",
+      "priority": 2
+    },
+    {
+      "key": "o",
+      "label": "off here",
+      "on": "row",
+      "confirm": {
+        "yes": "off"
+      },
+      "priority": 3,
+      "mutates": true
+    },
+    {
+      "key": "f",
+      "label": "open the fix",
+      "on": "row",
+      "priority": 4
+    }
+  ]
+}

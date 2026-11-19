@@ -1,0 +1,19 @@
+description: 'a question answered no keeps what it asked about: one block, exit 1, nothing removed'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" apps remove lazygit'
+      stdin: |
+          see Remove lazygit?
+          send n
+          see Hint:
+          screen
+      exit: 1
+      stdout: |
+          ┃ Remove lazygit?
+          ┃
+          Error: lazygit kept: you said no
+          Hint: --yes skips the question

@@ -1,0 +1,8 @@
+#!/bin/sh
+case "$*" in
+    "--list-secret-keys --keyid-format long") echo "sec   ed25519/ABCDEF 2026-01-01 [SC]" ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

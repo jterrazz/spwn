@@ -1,0 +1,38 @@
+description: 'an app that updates itself is left to its updater: upgrade moves nothing, the lock keeps its version'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [ghostty]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of ghostty
+          ●	ghostty	1.2.0	cask	updates itself
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script
+          ●	ghostty	1.2.0	cask	updates itself: station checks it is there
+    - command: 'apps update ghostty'
+      exit: 0
+      stdout: |
+          ●	ghostty	1.2.0	cask	updates itself
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].files["machinefiles/macbook-pro.lock"]'' world.json'
+      exit: 0
+      stdout: |+
+          lock: station.lock/v1
+          machinefile: macbook-pro
+          apps:
+              - name: ghostty
+                method: cask
+                version: 1.2.0
+              - name: homebrew
+                method: script
+                version: 5.0.1
+

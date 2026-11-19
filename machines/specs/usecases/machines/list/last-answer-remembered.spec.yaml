@@ -1,0 +1,12 @@
+description: 'a full list remembers when each Mac answered: one that falls silent shows its last answer'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world power-cut mac-mini'
+      exit: 0
+    - command: 'machines | /usr/bin/grep -A1 "mac-mini	Mac"'
+      exit: 0
+      stdout: |
+          ✗	mac-mini	Mac	mac-mini	Unreachable · last answer 10:00
+          ?	infra	Server	mac-mini	Not seen · always on	8 CPU	24 GB

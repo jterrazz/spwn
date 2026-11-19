@@ -1,0 +1,17 @@
+description: 'station apps sums This Mac, then Updates, Not installed, OK folded, and counts what lives elsewhere'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x200 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" apps | /usr/bin/grep -e "This Mac" -e "Updates" -e "Not installed" -e "OK " -e "live on other machines" -e "● jq"'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · 114 apps for this Mac · 2 updates · 105 not installed
+          Updates
+          Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, postgres, python, …
+          OK             ● 7 · github-release, mise, go, ghostty, bat, jq, lazygit
+          Not for this machine  10 apps live on other machines

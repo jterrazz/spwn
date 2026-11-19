@@ -1,0 +1,8 @@
+description: 'stop sharing a port nothing listens on and nothing reserves is refused with where to look'
+env: two-macs
+runs:
+    - command: 'ports stop-sharing linux-1 5174 --yes'
+      exit: 2
+      stderr: |
+          Error: nothing listens on linux-1:5174 and nothing is reserved
+          Hint: station ports --on linux-1

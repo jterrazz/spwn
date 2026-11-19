@@ -1,0 +1,20 @@
+description: 'a misplaced folder holding a file station does not own stays, and the overview still shows it'
+fixture:
+    - ./__fixtures__/disk-go/
+    - ./__fixtures__/disk-relocated/
+    - ./__fixtures__/disk-strays/
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p go/bin && echo mine > go/bin/foo'
+      exit: 0
+    - command: 'disk free go'
+      exit: 0
+      stdout: |
+          ●	go	2 B freed
+          ●	Freed	2 B	nothing is lost
+      files:
+          go/bin/foo: exists
+          go/pkg: absent
+    - command: 'status --json | /usr/bin/jq -c ''.workspace.strays | map([.name, .path, .repair])'''
+      exit: 0
+      stdout: |
+          [["go","~/go","station disk move ~/go"],["node","~/.npm","station disk move ~/.npm"]]

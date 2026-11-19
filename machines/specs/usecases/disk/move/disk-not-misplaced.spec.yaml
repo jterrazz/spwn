@@ -1,0 +1,8 @@
+description: 'a move of a folder that is not misplaced is refused, and nothing moves'
+env: two-macs
+runs:
+    - command: 'disk move ~/Developer'
+      exit: 2
+      stderr: |
+          Error: ~/Developer is not misplaced
+          Hint: station disk

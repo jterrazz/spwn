@@ -1,0 +1,9 @@
+description: 'a workspace shown is sampled through its Mac''s engine, into This Mac''s history of it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].engine.watching = ["linux-1"]'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 2s; /usr/bin/jq -r ''.macs["macbook-pro"].engine.activity["linux-1"].series.fine | "sampled: \(length > 0)"'' world.json'
+      exit: 0
+      stdout: |
+          sampled: true

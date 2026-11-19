@@ -1,0 +1,17 @@
+description: 'A sign-out without yes asks first and signs out nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Program, .State, .Action] else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"accounts.logout","in":{"Program":"gh"}}
+      exit: 0
+      stdout: |
+          {"code":"confirm.yes-needed","subject":"GitHub","message":"refusing without --yes: GitHub"}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {verdict: .Verdict.Sentence, tone: .Verdict.Tone, rows: [.Programs[] | [.Program, .State, .How, .Action, .Line, .Ask]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{}}
+      exit: 0
+      stdout: |
+          {"verdict":"Signed in to 3 of 4 programs","tone":"plain","rows":[["gh","signed-in","own","sign-out",null,"Sign out of GitHub? The token stays valid at GitHub."],["npm","signed-out",null,"sign-in",null,null],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","signed-in","own","sign-out",null,"Sign out of Cloudflare? The token stays valid at Cloudflare."]]}

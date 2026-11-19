@@ -1,0 +1,51 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "engine start",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "engine",
+            "mark": "ok",
+            "label": "engine",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "already running"
+                },
+                {
+                  "kind": "text",
+                  "text": "v3.1.0"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}

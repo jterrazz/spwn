@@ -1,0 +1,10 @@
+{
+    "group": "mac",
+    "id": "mac.mini.ports.https",
+    "note": "mac-mini's HTTPS links on: its switch flips, and linux-3's 8080 opens an https:// link.",
+    "pages": ["pages/machines.ports.https.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "ports"
+    }
+}

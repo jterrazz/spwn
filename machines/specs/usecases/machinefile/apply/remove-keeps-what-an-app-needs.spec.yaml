@@ -1,0 +1,52 @@
+description: 'apply --remove keeps an extra another app there still needs, and its record'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, mas]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	mas	brew
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ●	mas	1.0.0	brew
+    - command: 'apps install keynote'
+      exit: 0
+      stdout: |
+          ●	keynote	1.0.0	mas
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	mas	brew	installed by station for macbook-pro, required by keynote: kept
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	mas	brew	installed by station for macbook-pro, required by keynote: kept
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ●	mas	1.0.0	brew	required by keynote: kept, judged again next run
+    - command: 'apps | /usr/bin/grep -e "^[^	]*	mas	" -e "^[^	]*	keynote	"'
+      exit: 0
+      stdout: |
+          ●	mas	1.0.0	brew
+          ●	keynote	1.0.0	mas
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map(.package)'' world.json'
+      exit: 0
+      stdout: |
+          ["mas"]

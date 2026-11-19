@@ -1,0 +1,23 @@
+description: 'every machine file this mac reads, its shelf, what it makes and the machines that follow it'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Files[] | {name: .Name, shelf: .Shelf, origin: .Origin, kind: .Head.Kind, vm: .Head.VM, extends: .Extends, apps: .Apps, followers: .Followers, verdict: .Verdict.Sentence}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"name":"base","shelf":"yours","origin":"user","kind":"workspace","vm":{"Lifetime":"","CPUs":0,"Memory":"","Disk":"","From":""},"extends":null,"apps":["jq","gh"],"followers":[],"verdict":"No machine follows it."}
+          {"name":"base-macos","shelf":"shipped","origin":"built-in","kind":"workspace","vm":{"Lifetime":"persistent","CPUs":4,"Memory":"8G","Disk":"80G","From":"ghcr.io/cirruslabs/macos-tahoe-base:latest"},"extends":null,"apps":["homebrew","git","ohmyzsh"],"followers":[],"verdict":"No machine follows it."}
+          {"name":"base-ubuntu","shelf":"shipped","origin":"built-in","kind":"workspace","vm":{"Lifetime":"ephemeral","CPUs":4,"Memory":"8G","Disk":"20G","From":"ghcr.io/cirruslabs/ubuntu:24.04"},"extends":null,"apps":["mise","git","ohmyzsh","docker","build-essential","playwright-deps"],"followers":[],"verdict":"No machine follows it."}
+          {"name":"linux-1","shelf":"yours","origin":"user","kind":"workspace","vm":{"Lifetime":"","CPUs":0,"Memory":"","Disk":"","From":""},"extends":["linux-dev"],"apps":[],"followers":[],"verdict":"No machine follows it."}
+          {"name":"linux-dev","shelf":"yours","origin":"user","kind":"workspace","vm":{"Lifetime":"","CPUs":0,"Memory":"","Disk":"","From":""},"extends":["base"],"apps":["ripgrep"],"followers":[{"Machine":"agent-7f","Mac":"macbook-pro","ThisMac":true,"State":"differs","Differences":2},{"Machine":"linux-1","Mac":"macbook-pro","ThisMac":true,"State":"differs","Differences":8}],"verdict":"2 machines differ."}
+          {"name":"macbook-pro","shelf":"yours","origin":"user","kind":"computer","vm":null,"extends":["base"],"apps":["lazygit"],"followers":[{"Machine":"macbook-pro","Mac":"macbook-pro","ThisMac":true,"State":"differs","Differences":3,"Applied":"{{iso8601}}"}],"verdict":"1 machine differs."}
+          {"name":"studio-linux","shelf":"yours","origin":"user","kind":"workspace","vm":{"Lifetime":"ephemeral","CPUs":4,"Memory":"8G","Disk":"20G","From":"ghcr.io/cirruslabs/ubuntu:24.04"},"extends":["base-ubuntu"],"apps":["jq","gh","ripgrep"],"followers":[],"verdict":"No machine follows it."}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Verdict'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.files","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"Tone":"warn","Sentence":"2 files differ from their machines."}

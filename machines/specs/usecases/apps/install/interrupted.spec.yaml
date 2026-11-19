@@ -1,0 +1,22 @@
+description: 'ctrl-c during an install prints nothing after it, exits 130, and what finished stays installed'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world hold Bundler.Bundle'
+      exit: 0
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" apps install fd eza'
+      stdin: |
+          see Installing fd, eza
+          send \x03
+          scrollback
+      exit: 130
+      stdout: |+
+          
+    - command: 'apps | /usr/bin/grep -e "	fd	" -e "	eza	"'
+      exit: 0
+      stdout: |
+          ○	eza		brew	station apps install eza
+          ●	fd	10.3.0	brew

@@ -1,0 +1,5 @@
+#!/bin/sh
+# curl must never run when install.sh installs from a local file: the call is recorded
+# in $HOME/.calls and fails.
+printf 'curl %s\n' "$*" >> "$HOME/.calls"
+exit 97

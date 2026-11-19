@@ -1,0 +1,15 @@
+package: station.package/v1
+kind: setting
+name: github-login
+description: The GitHub CLI logged in over SSH
+requires: [gh]
+needs: [terminal]
+sets:
+    - { key: gh, value: logged in }
+methods:
+    - os: any
+      builtin: github-login
+writes:
+    - path: '{config}/gh/hosts.yml'
+      level: kept
+      note: gh's login

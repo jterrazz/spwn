@@ -1,0 +1,35 @@
+To do
+  no actions
+Summary
+  ● Machine     Mac · Darwin 27.0.0 …    ● Apps          1 ●
+  ● Network     192.168.1.152 · 4/4 on   ● Settings      1 ●
+  ● Tailscale   macbook-pro · Serve on   ● Disk          27.9 GB reclaimable
+  ● Identity    you@example.com …        ● All machines  engine running v2.0.0…
+  ● Background  1 job
+Machine
+  ● name    macbook             Mac · Darwin 27.0.0 arm64 · you · zsh
+  ● uptime  22d 14h             battery 100% charged
+  ● setup   done
+  ● engine  running v2.0.0-250
+Environment
+  ● local ip    192.168.1.152
+  ● filevault   on
+  ● firewall    on
+  ● sip         off
+  ● gatekeeper  on
+  ● macos       up to date     checked 22m ago
+  ● brew        up to date
+  ● Tailscale   Running · macbook-pro.tail1234.ts.net · 100.98.133.14
+Workspace  ● disk · 27.9 GB · reclaimable: station disk free
+Identity
+  ● git email    you@example.com
+  ● git signing  on
+Background
+    station
+     no background jobs
+    known
+  └─ ● watchman  running · pid 3464  user  watchman  ~/Library/La…atchman.plist
+Apps
+Settings
+
+→ station overview | cat  for records

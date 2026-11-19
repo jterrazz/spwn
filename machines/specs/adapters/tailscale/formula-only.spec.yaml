@@ -1,0 +1,9 @@
+description: 'the tailscale formula without the app is a half install, named'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/tailscale-formula/
+runs:
+    - command: 'apps | /usr/bin/awk -F "\t" ''$2 == "tailscale"'''
+      exit: 0
+      stdout: |
+          ?	tailscale		cask	formula installed, app absent

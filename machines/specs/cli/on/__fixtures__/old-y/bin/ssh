@@ -1,0 +1,37 @@
+#!/bin/sh
+# ssh to host y, which runs an older station: every call is recorded in $HOME/.calls;
+# y's engine API answers each call from answers/ssh/api-y/<call>.json, or refuses it
+# with the error frame of <call>.error, and a watch with that one answer then done;
+# its Hello names those calls and the version in api-y/version, read at each attach.
+answers="${0%/*}/../answers/ssh"
+printf 'ssh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *" station engine attach")
+        prev=''
+        for arg; do
+            if [ "$arg" = -- ]; then target=$prev; break; fi
+            prev=$arg
+        done
+        far="$answers/api-$target"
+        [ -d "$far" ] || exit 255
+        version=$(/bin/cat "$far/version" 2>/dev/null)
+        calls=$(cd "$far" && for f in *.json *.error; do [ -f "$f" ] && printf '"%s",' "${f%.*}"; done)
+        while IFS= read -r line; do
+            id=$(printf '%s' "$line" | /usr/bin/jq -r .id)
+            call=$(printf '%s' "$line" | /usr/bin/jq -r '.call // .watch // empty')
+            watch=$(printf '%s' "$line" | /usr/bin/jq -r '.watch // empty')
+            if [ -z "$call" ]; then
+                printf '{"v":2,"id":"%s","hello":{"version":"%s","calls":[%s]}}\n' "$id" "$version" "${calls%,}"
+            elif [ -f "$far/$call.error" ]; then
+                printf '{"v":2,"id":"%s","error":%s}\n' "$id" "$(/bin/cat "$far/$call.error")"
+            else
+                printf '{"v":2,"id":"%s","out":%s}\n' "$id" "$(/bin/cat "$far/$call.json")"
+                [ -n "$watch" ] && printf '{"v":2,"id":"%s","done":true}\n' "$id"
+            fi
+        done
+        ;;
+    *)
+        echo "stub ssh: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

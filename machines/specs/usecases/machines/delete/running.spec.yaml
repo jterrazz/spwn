@@ -1,0 +1,12 @@
+description: 'a running workspace is stopped then deleted, in one call'
+env: two-macs
+runs:
+    - command: 'machines delete linux-1 --confirm=linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB

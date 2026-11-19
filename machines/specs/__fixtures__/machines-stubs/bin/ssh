@@ -1,0 +1,66 @@
+#!/bin/sh
+# ssh as the machines specs need it: every call is recorded in $HOME/.calls, a host's
+# engine API answers each call from answers/ssh/api-<host>/<call>.json, its Hello
+# naming those calls and the version in api-<host>/version, each call answered after
+# the seconds of api-<host>/delay when present (no folder: unreachable, exit 255),
+# `true` pops its exit codes from answers/ssh/true.codes (then true.exit, default 0)
+# after printing answers/ssh/true.stderr, a password session disconnects with 255 as
+# a pre-boot host does once the disk is unlocked, and every other call exits 97. An
+# attach pops its exit code from answers/ssh/attach.codes first: 0 goes on, any
+# other code is that attach's end, as a Mac that is down or rebooting ends ssh.
+answers="${0%/*}/../answers/ssh"
+printf 'ssh %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *" station engine attach")
+        if [ -s "$answers/attach.codes" ]; then
+            code=$(/usr/bin/head -n 1 "$answers/attach.codes")
+            /usr/bin/tail -n +2 "$answers/attach.codes" > "$answers/attach.codes.next"
+            /bin/mv "$answers/attach.codes.next" "$answers/attach.codes"
+            [ "$code" = 0 ] || exit "$code"
+        fi
+        prev=''
+        for arg; do
+            if [ "$arg" = -- ]; then target=$prev; break; fi
+            prev=$arg
+        done
+        far="$answers/api-$target"
+        [ -d "$far" ] || exit 255
+        version=$(/bin/cat "$far/version" 2>/dev/null)
+        calls=$(cd "$far" && for f in *.json; do printf '"%s",' "${f%.json}"; done)
+        while IFS= read -r line; do
+            id=$(printf '%s' "$line" | /usr/bin/jq -r .id)
+            call=$(printf '%s' "$line" | /usr/bin/jq -r '.call // empty')
+            if [ -z "$call" ]; then
+                printf '{"v":2,"id":"%s","hello":{"version":"%s","calls":[%s]}}\n' "$id" "$version" "${calls%,}"
+            else
+                [ -f "$far/delay" ] && /bin/sleep "$(/bin/cat "$far/delay")"
+                printf '{"v":2,"id":"%s","out":%s}\n' "$id" "$(/bin/cat "$far/$call.json")"
+            fi
+        done
+        ;;
+    "-G "*) echo "hostname 127.0.0.1" ;;
+    *"sudo fdesetup authrestart -delayminutes 0")
+        if [ -f "$answers/restart.exit" ]; then
+            echo "sudo: a password is required" >&2
+            exit "$(/bin/cat "$answers/restart.exit")"
+        fi
+        exit 255
+        ;;
+    *" true")
+        if [ -f "$answers/true.stderr" ]; then /bin/cat "$answers/true.stderr" >&2; fi
+        if [ -s "$answers/true.codes" ]; then
+            code=$(/usr/bin/head -n 1 "$answers/true.codes")
+            /usr/bin/tail -n +2 "$answers/true.codes" > "$answers/true.codes.next"
+            /bin/mv "$answers/true.codes.next" "$answers/true.codes"
+            exit "$code"
+        fi
+        if [ -f "$answers/true.exit" ]; then exit "$(/bin/cat "$answers/true.exit")"; fi
+        exit 0
+        ;;
+    "-o PreferredAuthentications=password "*) exit 255 ;;
+    *"stat -f %Su /dev/console") /bin/cat "$answers/console.txt" ;;
+    *)
+        echo "stub ssh: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

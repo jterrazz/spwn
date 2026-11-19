@@ -1,0 +1,17 @@
+description: 'a Mac whose pre-boot ssh does not answer either is unreachable, exit 1, and no session opens'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world offline mac-mini'
+      exit: 0
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines unlock mac-mini'
+      stdin: |
+          within 20 exit 1
+          screen
+      exit: 1
+      stdout: |
+          Error: mac-mini does not answer
+          Hint: station machines

@@ -1,0 +1,17 @@
+# All machines
+●	macbook	mac			online	100.98.133.14	2 VMs
+●	linux-1	workspace	macbook	ephemeral	running	192.168.64.5	4 cpus · 4 GB · 42.9 GB
+○	api	workspace	macbook	persistent	stopped	-	4 cpus · 8 GB · 42.9 GB
+◐	mac-mini	mac			online	100.98.133.20	station v2.0.0-248, This Mac v2.0.0-250
+# Images
+●	base-ubuntu	2026.11.01	4.0 GB	macbook-pro	linux-1 · api
+○	base-ubuntu	2026.10.20	4.0 GB	macbook-pro	older · station images delete base-ubuntu@2026.10.20
+●	base-ubuntu	2026.11.01	4.0 GB	mac-mini	infra
+○	base-macos				not built yet
+# Tailscale
+●	Tailscale	Running · macbook-pro.tail1234.ts.net
+●	node	macbook	100.98.133.14
+●	cli	/Applications/Tailscale.app/Contents/MacOS/Tailscale	app-store
+	mac-mini	100.98.133.20
+	iphone	100.98.133.30
+●	https 40001/	http://127.0.0.1:40001	station

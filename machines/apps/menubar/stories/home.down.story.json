@@ -1,0 +1,13 @@
+{
+    "group": "home",
+    "id": "home.down",
+    "note": "infra is down: the red hero with Restart, the other needs folded into one line.",
+    "pages": ["pages/machines.home.down.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1"
+}

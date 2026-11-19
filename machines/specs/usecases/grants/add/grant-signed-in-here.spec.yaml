@@ -1,0 +1,11 @@
+description: 'A workspace already signed in to claude by itself takes no grant of it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, field, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"grants.add","in":{"Entry":"pw-3","To":"linux-1"}}
+      exit: 0
+      stdout: |
+          {"code":"grant.signed-in-here","field":null,"subject":"linux-1","message":"that program is already signed in on linux-1","hint":"sign it out there first"}

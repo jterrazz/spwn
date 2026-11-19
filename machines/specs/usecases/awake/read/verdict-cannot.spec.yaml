@@ -1,0 +1,18 @@
+description: 'a Mac a keep-awake would be refused on reads warn, its line the words the refusal says'
+env:
+    - on-battery
+    - engine
+runs:
+    - command: 'world battery 20'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Mac, .Verdict, [.Choices[] | select(.Picked) | .Label]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"awake.read","in":{}}
+      exit: 0
+      stdout: |
+          ["macbook-pro",{"Tone":"warn","Sentence":"Sleeps normally.","Line":"cannot be kept awake: the battery is at 20 % on battery"},[]]
+    - command: 'awake 4h'
+      exit: 1
+      stderr: |
+          Error: Awake stays off: the battery is at 20 % on battery
+          Hint: station awake

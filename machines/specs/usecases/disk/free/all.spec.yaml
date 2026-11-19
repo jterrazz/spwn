@@ -1,0 +1,29 @@
+description: 'a bare free empties every Can rebuild row with its app''s own command, asking nothing'
+env: two-macs
+runs:
+    - command: 'disk free'
+      exit: 0
+      stdout: |
+          ●	homebrew	2.1 GB freed
+          ●	mise	1.2 GB freed
+          ●	pnpm	1.8 GB freed
+          ●	bun	600 MB freed
+          ●	go	19.4 GB freed
+          ●	node	800 MB freed
+          ●	rust	900 MB freed
+          ●	ghostty	400 MB freed
+          ●	starship	100 MB freed
+          ●	gh	100 MB freed
+          ●	cursor	200 MB freed
+          ●	xcode	5.8 GB freed
+          ●	zed	300 MB freed
+          ●	helm	100 MB freed
+          ●	claude	300 MB freed
+          ●	codex	100 MB freed
+          ●	discord	400 MB freed
+          ●	notion	200 MB freed
+          ●	Freed	34.8 GB	nothing is lost
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk | {free, kept: (.files | keys)}'' world.json'
+      exit: 0
+      stdout: |
+          {"free":422800000000,"kept":["~/.claude/projects/x","~/.gnupg/pubring.kbx","~/.ollama/models/x","~/.ssh/known_hosts","~/.tart/vms/linux-dev/disk.img","~/Library/Application Support/Zed/db/x","~/Library/Developer/CoreSimulator/Devices/A/data","~/Library/Group Containers/HUAQ24HBR6.dev.orbstack/data.img"]}

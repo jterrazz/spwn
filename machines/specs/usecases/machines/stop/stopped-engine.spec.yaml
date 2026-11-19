@@ -1,0 +1,8 @@
+description: 'with the engine stopped a stop is refused like every action, and the hint starts it'
+env: engine-stopped
+runs:
+    - command: 'machines stop linux-1 --yes'
+      exit: 1
+      stderr: |
+          Error: the engine is stopped on macbook-pro
+          Hint: station engine start

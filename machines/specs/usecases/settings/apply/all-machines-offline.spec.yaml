@@ -1,0 +1,18 @@
+description: 'with the mini offline, apply --all-machines applies the rest and says the mini is silent, exit 1'
+env: mini-offline
+runs:
+    - command: 'settings apply dns --all-machines'
+      exit: 1
+      stdout: |
+          ●	macbook-pro	dns · dns: applied
+          ✗	mac-mini	mac-mini does not answer
+          –	linux-1	skipped (dns is for Macs only)
+          –	api	skipped (stopped)
+          –	infra	skipped (server)
+      stderr: |
+          Error: 1 of 5 machines failed
+          Hint: station machines
+    - command: 'settings --json | /usr/bin/jq -r ''.settings[] | select(.name == "dns") | .state'''
+      exit: 0
+      stdout: |
+          applied

@@ -1,0 +1,12 @@
+description: 'a bare build rebuilds an image whose recipe changed, then, up to date, builds nothing'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'images build --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.04	built
+    - command: 'images build'
+      exit: 0
+      stdout: |
+          	none

@@ -1,0 +1,13 @@
+description: 'inside a VM, services url runs ports share: the URL alone, reserved on its Mac'
+env: in-linux-1
+runs:
+    - command: 'services url 3000'
+      exit: 0
+      stdout: |
+          https://macbook-pro.tail1234.ts.net:40000
+      stderr: |
+          → now: station ports share 3000
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[] | select(.guest_port == 3000) | .host_port]'' world.json'
+      exit: 0
+      stdout: |
+          [40000]

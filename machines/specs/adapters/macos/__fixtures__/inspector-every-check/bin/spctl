@@ -1,0 +1,6 @@
+#!/bin/sh
+# spctl as macOS answers: off, it says so and exits 1.
+case "$*" in
+    --status) if [ -e "$HOME/.off" ]; then echo "assessments disabled"; exit 1; else echo "assessments enabled"; fi ;;
+    *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;
+esac

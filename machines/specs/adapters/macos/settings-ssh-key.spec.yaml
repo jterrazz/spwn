@@ -1,0 +1,27 @@
+description: 'on a terminal, ssh-key keeps the key, adds the Keychain stanza once and leaves the lines it found'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/settings-ssh-key/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" settings apply ssh-key'
+      stdin: |
+          see ssh-ed25519 AAAA u
+      exit: 0
+    - command: '--version >/dev/null; terminal "$STATION" settings apply ssh-key'
+      stdin: |
+          see already configured
+      exit: 0
+      files:
+          .ssh/config:
+              equals: |
+                  Host work
+                    User w
+
+                  Host *
+                    AddKeysToAgent yes
+                    UseKeychain yes
+                    IdentityFile ~/.ssh/id_ed25519
+          .ssh/id_ed25519:
+              equals: |
+                  private

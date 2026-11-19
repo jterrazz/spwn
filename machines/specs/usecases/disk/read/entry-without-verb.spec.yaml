@@ -1,0 +1,8 @@
+description: 'a Disk row named without a verb is refused, its hint the command meant'
+env: two-macs
+runs:
+    - command: 'disk go'
+      exit: 2
+      stderr: |
+          Error: "go" is a disk row: say what to do with it
+          Hint: station disk free go

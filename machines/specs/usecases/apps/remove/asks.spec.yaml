@@ -1,0 +1,18 @@
+description: 'station apps remove on a terminal asks yes or no, then removes'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" apps remove lazygit; "$STATION" apps lazygit | /usr/bin/head -1'
+      stdin: |
+          see Remove lazygit?
+          send y
+          scrollback
+      exit: 0
+      stdout: |
+          ┃ Remove lazygit?
+          ┃
+          ●       lazygit         brew
+          ○	lazygit		brew	station apps install lazygit

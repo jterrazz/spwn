@@ -1,0 +1,8 @@
+#!/bin/sh
+case "$*" in
+    "--dns") printf 'resolver #1\n  nameserver[0] : 9.9.9.9\n  nameserver[1] : 127.0.0.1\n  nameserver[2] : fe80::1\nresolver #2\n  nameserver[0] : 9.9.9.9\n  nameserver[1] : 149.112.112.112\n  nameserver[2] : 1.1.1.1\n' ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

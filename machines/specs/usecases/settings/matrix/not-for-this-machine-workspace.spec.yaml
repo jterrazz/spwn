@@ -1,0 +1,8 @@
+description: 'inside a workspace or aimed at one, the matrix is refused: it is read from a Mac'
+env: in-workspace
+runs:
+    - command: 'settings --all-machines'
+      exit: 2
+      stderr: |
+          Error: linux-1 is a workspace: the settings of every machine are read from a Mac
+          Hint: run station overview for what linux-1 has

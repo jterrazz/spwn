@@ -1,0 +1,342 @@
+{
+  "schema": "station.page/v1",
+  "id": "machines",
+  "command": "machines",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "machines",
+      "title": "4 machines",
+      "role": "banner",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2 running"
+        },
+        {
+          "kind": "text",
+          "text": "1 stopped"
+        },
+        {
+          "kind": "text",
+          "text": "2 need you"
+        }
+      ],
+      "joined": true,
+      "columns": [
+        {
+          "key": "name",
+          "label": "MACHINE",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "label": "KIND",
+          "kind": "text",
+          "keep": 80,
+          "whole": true
+        },
+        {
+          "key": "mac",
+          "kind": "text",
+          "show": "pipe"
+        },
+        {
+          "key": "state",
+          "label": "STATE",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "cpu",
+          "label": "CPU",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "memory",
+          "label": "MEMORY",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 5
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "macbook",
+              "mark": "broken",
+              "label": "macbook",
+              "short": "This Mac",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "macbook"
+                },
+                {
+                  "kind": "text",
+                  "text": "Engine stopped"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                }
+              ],
+              "reason": "stopped"
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "api",
+                  "mark": "absent",
+                  "label": "api",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "Workspace"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "macbook"
+                    },
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "Stopped"
+                        },
+                        {
+                          "kind": "text",
+                          "text": "persistent"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "text": "4 CPU"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "8 GB"
+                    },
+                    {
+                      "kind": "none"
+                    }
+                  ]
+                }
+              },
+              {
+                "row": {
+                  "id": "linux-1",
+                  "mark": "ok",
+                  "label": "linux-1",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "Workspace"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "macbook"
+                    },
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "Running"
+                        },
+                        {
+                          "kind": "text",
+                          "text": "ephemeral"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "text": "4 CPU"
+                    },
+                    {
+                      "kind": "text",
+                      "text": "4 GB"
+                    },
+                    {
+                      "kind": "none"
+                    }
+                  ]
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "mac-mini",
+              "mark": "broken",
+              "label": "mac-mini",
+              "short": "mac-mini",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                },
+                {
+                  "kind": "text",
+                  "text": "Unreachable"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                },
+                {
+                  "kind": "none"
+                }
+              ],
+              "reason": "unreachable"
+            },
+            "fold": "open"
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "columns": [
+        {
+          "key": "subject",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "finding",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "fix",
+          "kind": "list",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "0-This Mac",
+            "mark": "broken",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "has its engine stopped"
+              },
+              {
+                "kind": "command",
+                "text": "station engine start"
+              }
+            ],
+            "reason": "failing"
+          }
+        },
+        {
+          "row": {
+            "id": "1-mac-mini",
+            "mark": "attention",
+            "label": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "does not answer"
+              },
+              {
+                "kind": "none"
+              }
+            ],
+            "reason": "degraded"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "n",
+      "label": "create",
+      "on": "page",
+      "priority": 4,
+      "mutates": true
+    },
+    {
+      "key": "d",
+      "label": "delete",
+      "on": "row",
+      "confirm": {
+        "danger": true,
+        "yes": "delete"
+      },
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "s",
+      "label": "start",
+      "on": "row",
+      "priority": 5,
+      "mutates": true
+    },
+    {
+      "key": "S",
+      "label": "stop",
+      "on": "row",
+      "priority": 6,
+      "mutates": true
+    },
+    {
+      "key": "ctrl+r",
+      "label": "restart",
+      "on": "row",
+      "confirm": {
+        "danger": true,
+        "yes": "restart"
+      },
+      "priority": 2,
+      "mutates": true
+    },
+    {
+      "key": "e",
+      "label": "enter",
+      "on": "row",
+      "priority": 3,
+      "mutates": true
+    }
+  ]
+}

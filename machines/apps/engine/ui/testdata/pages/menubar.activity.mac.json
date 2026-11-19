@@ -1,0 +1,2076 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.activity",
+  "command": "activity",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "machine",
+      "title": "Activity",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "machine",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "up 3d 4h"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "rates over the last 10 s"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "graphs",
+      "title": "Over the last 1 h",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1 h"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "34 % of 10 CPU"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "load 2.8 3.1 2.9"
+                  }
+                ]
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 21
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 24
+                  },
+                  {
+                    "kind": "count",
+                    "n": 26
+                  },
+                  {
+                    "kind": "count",
+                    "n": 27
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 32
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 35
+                  },
+                  {
+                    "kind": "count",
+                    "n": 36
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 39
+                  },
+                  {
+                    "kind": "count",
+                    "n": 41
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 47
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 20
+                  },
+                  {
+                    "kind": "count",
+                    "n": 21
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 24
+                  },
+                  {
+                    "kind": "count",
+                    "n": 26
+                  },
+                  {
+                    "kind": "count",
+                    "n": 27
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 47
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 20
+                  },
+                  {
+                    "kind": "count",
+                    "n": 21
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 24
+                  },
+                  {
+                    "kind": "count",
+                    "n": 26
+                  },
+                  {
+                    "kind": "count",
+                    "n": 27
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 32
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 35
+                  },
+                  {
+                    "kind": "count",
+                    "n": 36
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 39
+                  },
+                  {
+                    "kind": "count",
+                    "n": 41
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 47
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 20
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "12.4 of 16 GB"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "pressure normal"
+                  }
+                ]
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 70
+                  },
+                  {
+                    "kind": "count",
+                    "n": 70
+                  },
+                  {
+                    "kind": "count",
+                    "n": 70
+                  },
+                  {
+                    "kind": "count",
+                    "n": 70
+                  },
+                  {
+                    "kind": "count",
+                    "n": 71
+                  },
+                  {
+                    "kind": "count",
+                    "n": 71
+                  },
+                  {
+                    "kind": "count",
+                    "n": 71
+                  },
+                  {
+                    "kind": "count",
+                    "n": 71
+                  },
+                  {
+                    "kind": "count",
+                    "n": 71
+                  },
+                  {
+                    "kind": "count",
+                    "n": 71
+                  },
+                  {
+                    "kind": "count",
+                    "n": 71
+                  },
+                  {
+                    "kind": "count",
+                    "n": 71
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 72
+                  },
+                  {
+                    "kind": "count",
+                    "n": 73
+                  },
+                  {
+                    "kind": "count",
+                    "n": 73
+                  },
+                  {
+                    "kind": "count",
+                    "n": 73
+                  },
+                  {
+                    "kind": "count",
+                    "n": 73
+                  },
+                  {
+                    "kind": "count",
+                    "n": 73
+                  },
+                  {
+                    "kind": "count",
+                    "n": 73
+                  },
+                  {
+                    "kind": "count",
+                    "n": 73
+                  },
+                  {
+                    "kind": "count",
+                    "n": 73
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 74
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 76
+                  },
+                  {
+                    "kind": "count",
+                    "n": 76
+                  },
+                  {
+                    "kind": "count",
+                    "n": 76
+                  },
+                  {
+                    "kind": "count",
+                    "n": 76
+                  },
+                  {
+                    "kind": "count",
+                    "n": 76
+                  },
+                  {
+                    "kind": "count",
+                    "n": 76
+                  },
+                  {
+                    "kind": "count",
+                    "n": 76
+                  },
+                  {
+                    "kind": "count",
+                    "n": 76
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "swap",
+            "label": "Swap",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1.2 GB used"
+                  }
+                ]
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk-read",
+            "label": "Disk read",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "4.1 MB/s"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "182 GB since boot"
+                  }
+                ]
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 87
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 87
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 87
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 87
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 87
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 87
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 87
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  },
+                  {
+                    "kind": "count",
+                    "n": 87
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 37
+                  },
+                  {
+                    "kind": "count",
+                    "n": 50
+                  },
+                  {
+                    "kind": "count",
+                    "n": 62
+                  },
+                  {
+                    "kind": "count",
+                    "n": 75
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk-write",
+            "label": "Disk write",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1.3 MB/s"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "96 GB since boot"
+                  }
+                ]
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 42
+                  },
+                  {
+                    "kind": "count",
+                    "n": 61
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "net-in",
+            "label": "Net in",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "2.1 MB/s"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "38 GB since boot"
+                  }
+                ]
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 14
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 19
+                  },
+                  {
+                    "kind": "count",
+                    "n": 21
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 5
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 14
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 19
+                  },
+                  {
+                    "kind": "count",
+                    "n": 21
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 5
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 14
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 19
+                  },
+                  {
+                    "kind": "count",
+                    "n": 21
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 5
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 14
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 19
+                  },
+                  {
+                    "kind": "count",
+                    "n": 21
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 5
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 14
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 19
+                  },
+                  {
+                    "kind": "count",
+                    "n": 21
+                  },
+                  {
+                    "kind": "count",
+                    "n": 23
+                  },
+                  {
+                    "kind": "count",
+                    "n": 5
+                  },
+                  {
+                    "kind": "count",
+                    "n": 7
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 14
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 19
+                  },
+                  {
+                    "kind": "count",
+                    "n": 97
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 81
+                  },
+                  {
+                    "kind": "count",
+                    "n": 84
+                  },
+                  {
+                    "kind": "count",
+                    "n": 86
+                  },
+                  {
+                    "kind": "count",
+                    "n": 88
+                  },
+                  {
+                    "kind": "count",
+                    "n": 90
+                  },
+                  {
+                    "kind": "count",
+                    "n": 93
+                  },
+                  {
+                    "kind": "count",
+                    "n": 95
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "net-out",
+            "label": "Net out",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "210 KB/s"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "4.6 GB since boot"
+                  }
+                ]
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 100
+                  },
+                  {
+                    "kind": "count",
+                    "n": 33
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk-free",
+            "label": "Disk free",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "388 GB free of 994 GB"
+              },
+              {
+                "kind": "ratio",
+                "n": 606000000000,
+                "of": 994000000000
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "processes",
+      "title": "Top processes",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100,
+          "whole": true
+        },
+        {
+          "key": "what",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "cpu",
+          "label": "CPU",
+          "kind": "percent",
+          "keep": 90
+        },
+        {
+          "key": "memory",
+          "label": "MEMORY",
+          "kind": "size",
+          "keep": 80
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "1001",
+            "label": "Virtualization",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "VM linux-1"
+              },
+              {
+                "kind": "percent",
+                "n": 180
+              },
+              {
+                "kind": "size",
+                "n": 4402341478
+              }
+            ],
+            "nav": "menubar.machine:linux-1"
+          }
+        },
+        {
+          "row": {
+            "id": "4100",
+            "label": "Zed",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "percent",
+                "n": 90
+              },
+              {
+                "kind": "size",
+                "n": 2040109465
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "310",
+            "label": "WindowServer",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "percent",
+                "n": 40
+              },
+              {
+                "kind": "none"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station activity --all-machines",
+      "text": "every machine"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+description: 'a Mac last heard from hours ago is stale and unreachable, shown as it last answered'
+env: mini-offline
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | select(.last_answer == "2026-11-04T03:12:00Z") | {reachable, reach, stale, last_answer, vms: [.vms[] | {name, state}]}'''
+      exit: 0
+      stdout: |
+          {"reachable":false,"reach":"unreachable","stale":true,"last_answer":"2026-11-04T03:12:00Z","vms":[{"name":"infra","state":"unknown"}]}

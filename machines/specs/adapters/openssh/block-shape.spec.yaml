@@ -1,0 +1,19 @@
+description: 'each block has its shape: a VM of This Mac through its pipe, one elsewhere through its Mac'
+fixture:
+    - ../../__fixtures__/hosts-x-y/
+    - ../../__fixtures__/machines-stubs/
+    - ../../__fixtures__/fleet-y-answers/
+    - ../../__fixtures__/local-vm/
+runs:
+    - command: 'machines > /dev/null; /usr/bin/sed -n ''/^Host /p;/ProxyCommand/p;/IdentityFile/p'' .ssh/config | /usr/bin/sed "s|$PWD|WORKDIR|g"; /usr/bin/grep -c tailscale .ssh/config'
+      exit: 1
+      stdout: |
+          Host linux-1
+            IdentityFile ~/.ssh/id_ed25519
+            ProxyCommand {{path}} machines pipe linux-1
+          Host y
+            IdentityFile ~/.ssh/id_ed25519
+          Host w
+            IdentityFile ~/.ssh/id_ed25519
+            ProxyCommand ssh y -- "sh -c 'PATH=\"\$HOME/.local/bin:/usr/local/bin:\$PATH\" exec station \"\$@\"' station machines pipe w"
+          0

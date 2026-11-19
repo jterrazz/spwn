@@ -1,0 +1,23 @@
+package: station.package/v1
+kind: app
+name: rtk
+description: Token-optimized CLI proxy for agents
+replaces: raw dev commands (token-heavy output)
+provides: [rtk]
+methods:
+    - os: macos
+      brew: rtk
+    - family: linux
+      arch: arm64
+      github-release: { repo: rtk-ai/rtk, asset: 'rtk-aarch64-unknown-linux-gnu.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: rtk-ai/rtk, asset: 'rtk-x86_64-unknown-linux-musl.tar.gz' }
+disk:
+    paths:
+        - path: ~/Library/Application Support/rtk
+          level: data
+          os: macos
+          note: the gain history
+    erase:
+        - delete: [~/Library/Application Support/rtk/*]

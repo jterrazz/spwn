@@ -1,0 +1,23 @@
+description: 'engine stop ends an Awake session first, and with the engine down resets the clamshell itself'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../__fixtures__/launchctl/
+    - ../../__fixtures__/power/
+env: engine
+runs:
+    - command: '--version > /dev/null; "$STATION" engine start > /dev/null; "$STATION" awake 4h --lid > /dev/null; : > .calls; "$STATION" engine stop --yes; echo "exit $?"; /usr/bin/grep -E "^(power|launchctl bootout)" .calls | /usr/bin/sed -E ''s/gui\/[0-9]+/gui\/U/'''
+      exit: 0
+      stdout: |
+          ●	engine	Awake off · the engine stopped
+          exit 0
+          power release idle
+          power clamshell normal
+          launchctl bootout gui/U/com.jterrazz.station.engine
+          power clamshell normal
+    - command: '--version > /dev/null; : > launchctl.loaded; : > .calls; "$STATION" engine stop --yes; echo "exit $?"; /usr/bin/grep -E "^(power|launchctl bootout)" .calls | /usr/bin/sed -E ''s/gui\/[0-9]+/gui\/U/'''
+      exit: 0
+      stdout: |
+          ●	engine	the lid released · the engine stopped
+          exit 0
+          power clamshell normal
+          launchctl bootout gui/U/com.jterrazz.station.engine

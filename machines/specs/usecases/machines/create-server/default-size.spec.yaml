@@ -1,0 +1,11 @@
+description: 'a server with no size asked gets a server''s: 4 CPU, 8 GB, 50 GB, in the outcome and the record'
+env: two-macs
+runs:
+    - command: 'machines create infra-2 --server --on mac-mini --json | /usr/bin/jq -c ''{kind, lifetime, cpus, memory_bytes, disk_bytes}'''
+      exit: 0
+      stdout: |
+          {"kind":"server","lifetime":"always-on","cpus":4,"memory_bytes":8589934592,"disk_bytes":50000000000}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms["infra-2"].size'' world.json'
+      exit: 0
+      stdout: |
+          {"CPUs":4,"Memory":8589934592,"Disk":50000000000}

@@ -1,0 +1,12 @@
+description: 'inside linux-1, a share that names its audience is refused: its rights give it theirs'
+env: in-linux-1
+runs:
+    - command: 'ports share 3000 --to public'
+      exit: 2
+      stderr: |
+          Error: a VM's share takes the audience its rights give it
+          Hint: on its Mac: station ports share linux-1 3000 --to public
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.reservations[] | select(.vm == "linux-1") | .guest_port]'' world.json'
+      exit: 0
+      stdout: |
+          [5173,7000]

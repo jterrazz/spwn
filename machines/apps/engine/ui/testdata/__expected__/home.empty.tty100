@@ -1,0 +1,18 @@
+To do
+  no actions
+Summary
+  ● Machine     Mac · Darwin 27.0.0 · up 22d 14h   ● Apps          1 ●
+  ● Network     192.168.1.152 · 4/4 on             ● Settings      1 ●
+  ● Tailscale   macbook-pro · Serve on             ● Disk          27.9 GB reclaimable
+  ● Identity    you@example.com · signing on       ● All machines  engine running v2.0.0-250
+  ● Background  1 job
+Machine      ● 4 · name, uptime, setup, engine
+Environment  ● 8 · local ip, filevault, firewall, sip, gatekeeper, macos, brew, Tailscale
+Workspace    ● 1 · disk
+Identity     ● 2 · git email, git signing
+Background   ● 1
+Apps         ● 1
+Settings     ● 1
+
+→ station overview --all  for every row
+→ station overview | cat  for records

@@ -1,0 +1,45 @@
+- main:
+  - heading "2 things need you." [level=1]
+  - paragraph:
+    - img "2 things need you."
+    - text: Elsewhere, 1 machine down. 4 machines on macbook-pro
+  - group "Which machines":
+    - button "All machines" [pressed]
+    - button "macbook-pro"
+    - button "mac-mini"
+    - button "macbook-air"
+  - region "Needs you":
+    - heading "Needs you a gesture is due" [level=2]
+    - button "broken port 5000 is reachable outside Tailscale macbook-pro · Ports"
+    - text: Review
+    - button "broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.example.brain.x-snapshot": Remove
+  - region "Upkeep":
+    - heading "Upkeep 3" [level=2]
+    - button "needs a look 2 brew updates waiting macbook-pro · Apps"
+    - button "Update brew": Update
+    - 'button "needs a look node 25.1.0 available: change ''24'' to ''25'' macbook-pro · Apps"'
+    - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
+    - button "Copy ~/.config/station/machinefiles/macbook-pro.machine.yaml": Copy
+    - 'button "needs a look Firewall: off macbook-pro · Settings"'
+    - text: System Settings > Network > Firewall
+    - button "Copy System Settings > Network > Firewall": Copy
+  - region "History":
+    - heading "History what happened, newest first" [level=2]
+    - region "Today":
+      - heading "Today" [level=3]
+      - text: 14:07 gate-2 deleted 8 GB freed by you
+      - button "14:06 infra restarted by you"
+    - region "Last night":
+      - heading "Last night 3 moved, 1 held, 1 failed" [level=3]
+      - button "03:15 ripgrep download timed out failed linux-1"
+      - button "Retry ripgrep": Retry
+      - button "03:12 node 24.11.0 → 24.11.1 6 machines"
+      - button "03:12 gh 2.97.0 → 2.98.0 macbook-pro"
+      - button "03:13 uv 0.9.7 → 0.9.9 5 machines"
+      - button "03:14 orbstack updates itself held macbook-pro"
+    - region "Yesterday":
+      - heading "Yesterday" [level=3]
+      - button "18:02 linux-3 created by agent-7f · review the docs lot"
+      - button "17:40 Port 3000 shared, private by you"
+      - button "09:15 infra restarted after an update by its Mac"

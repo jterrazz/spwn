@@ -1,0 +1,21 @@
+description: 'a source is cloned at its default branch, no hook nor submodule, its url after --, then read as is'
+fixture:
+    - ./__fixtures__/stub/
+    - ./__fixtures__/source/
+runs:
+    - command: 'explain machine.kind --machinefile base-macos'
+      exit: 0
+      stdout: |
+          # base-macos
+          	machine.kind	workspace	built-in	base-macos
+    - command: 'explain machine.kind --machinefile base-macos'
+      exit: 0
+      stdout: |
+          # base-macos
+          	machine.kind	workspace	built-in	base-macos
+      files:
+          .calls:
+              equals: |
+                  git -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always clone --quiet -- https://example.com/studio.git {{workdir}}/.cache/station/sources/studio
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always status --porcelain=v2 --branch --untracked-files=all --ignored
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always status --porcelain=v2 --branch --untracked-files=all --ignored

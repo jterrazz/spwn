@@ -1,0 +1,6 @@
+#!/bin/sh
+# systemsetup as the user exits 0 with its refusal; with $HOME/.off it answers On.
+case "$*" in
+    -getremotelogin) if [ -e "$HOME/.off" ]; then echo "Remote Login: On"; else echo "You need administrator access to run this tool... exiting!"; fi ;;
+    *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;
+esac

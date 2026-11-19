@@ -1,0 +1,62 @@
+.page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 20px var(--space-24) 48px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-14);
+}
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-14);
+}
+.unanswered {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-8);
+    padding: var(--space-8) 0 var(--space-12);
+    font-size: var(--text-row);
+}
+.said {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    flex: 1;
+    min-width: 0;
+}
+.hint {
+    color: var(--t3);
+}
+.none {
+    margin: 0;
+    color: var(--t3);
+    padding: var(--space-8) 0 var(--space-12);
+}
+.outcome {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-8);
+    min-width: 0;
+}
+.rowOutcome {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-8);
+    min-width: 0;
+    padding: 0 0 var(--space-8);
+}
+.rowOutcome:empty {
+    display: none;
+}
+.rowOutcome .unanswered,
+.outcome > .unanswered {
+    padding: 0;
+    flex: 1;
+}
+.fix {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    min-width: 0;
+}

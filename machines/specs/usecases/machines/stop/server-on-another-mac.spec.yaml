@@ -1,0 +1,17 @@
+description: 'a stop sent with --on is judged on the server''s own Mac, with the typed name it carries'
+env: two-macs
+runs:
+    - command: 'machines stop infra --on mac-mini --confirm=linux-1'
+      exit: 2
+      stderr: |
+          Error: not stopped: you typed "linux-1", not "infra"
+          Hint: in a script: --confirm=infra
+    - command: 'machines stop infra --on mac-mini --confirm=infra'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	infra	stopped · wanted state: Stopped
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {running: (.pid > 0), want: .kept.want}'' world.json'
+      exit: 0
+      stdout: |
+          {"running":false,"want":"stopped"}

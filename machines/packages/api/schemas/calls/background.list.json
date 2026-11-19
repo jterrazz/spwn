@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "background.Task": {
+      "additionalProperties": false,
+      "properties": {
+        "ByHand": {
+          "type": "string"
+        },
+        "Exit": {
+          "type": "integer"
+        },
+        "Group": {
+          "enum": [
+            "",
+            "known",
+            "orphan",
+            "station",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Owner": {
+          "type": "string"
+        },
+        "OwnerGone": {
+          "type": "boolean"
+        },
+        "PID": {
+          "type": "integer"
+        },
+        "Plist": {
+          "type": "string"
+        },
+        "Program": {
+          "type": "string"
+        },
+        "Removal": {
+          "type": "string"
+        },
+        "Run": {
+          "enum": [
+            "",
+            "failing",
+            "idle",
+            "not loaded",
+            "running",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Scope": {
+          "type": "string"
+        },
+        "State": {
+          "enum": [
+            "",
+            "absent",
+            "broken",
+            "degraded",
+            "ok",
+            "pending",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "ByHand",
+        "Exit",
+        "Group",
+        "Label",
+        "Owner",
+        "OwnerGone",
+        "PID",
+        "Plist",
+        "Program",
+        "Removal",
+        "Run",
+        "Scope",
+        "State"
+      ],
+      "type": "object"
+    },
+    "background.calls.ListIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/background.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call background.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/background.calls.ListIn"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/background.Task"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "background.list",
+  "type": "object"
+}

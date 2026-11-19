@@ -1,0 +1,18 @@
+#!/bin/sh
+# Homebrew for npm's update: a bundle updates what its Brewfile names, so the listing it was
+# given replaces the old and nothing is outdated.
+answers="${0%/*}/../answers/npm"
+printf 'brew %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions" | "list --cask --versions") ;;
+    "bundle install --upgrade --file=-")
+        /bin/cat >> "$HOME/.calls"
+        /bin/cp "$answers/ls.after.json" "$answers/ls.json"
+        : > "$answers/outdated.json"
+        ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

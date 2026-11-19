@@ -1,0 +1,21 @@
+package: station.package/v1
+kind: app
+name: ansible
+description: Agentless IT automation and configuration management
+provides: [ansible]
+methods:
+    - os: macos
+      brew: ansible
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [ansible] }
+disk:
+    paths:
+        - path: ~/.ansible/tmp
+          level: cache
+        - path: ~/.ansible/collections
+          level: data
+    free:
+        - delete: [~/.ansible/tmp/*]
+    erase:
+        - delete: [~/.ansible/collections/*]

@@ -1,0 +1,22 @@
+description: 'a call the far Hello lacks is refused with the far version and how to update it'
+fixture: ./__fixtures__/old-y/
+runs:
+    - command: 'apps --json --on y'
+      exit: 1
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "far-too-old",
+            "code": "remote.far-too-old",
+            "subject": "y",
+            "message": "y runs station v3.2.0, which has no apps.list",
+            "hint": "update station on y (scripts/install.sh there)",
+            "fix": null
+          }
+      stderr: |
+          Error: y runs station v3.2.0, which has no apps.list
+          Hint: update station on y (scripts/install.sh there)
+      files:
+          .calls:
+              equals: |
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach

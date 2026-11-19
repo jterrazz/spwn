@@ -1,0 +1,8 @@
+description: 'station apps install with no app is refused, its hint the command with its argument'
+env: one-mac
+runs:
+    - command: 'apps install'
+      exit: 2
+      stderr: |
+          Error: station apps install needs an app
+          Hint: station apps install <app>

@@ -1,0 +1,516 @@
+{
+  "schema": "station.page/v1",
+  "id": "apps",
+  "command": "apps",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/apps",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "17 apps for this Mac"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "reading",
+      "title": "Reading",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "method",
+          "kind": "list",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "homebrew",
+            "mark": "pending",
+            "label": "homebrew",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "script"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "mise",
+            "mark": "pending",
+            "label": "mise",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "mas",
+            "mark": "pending",
+            "label": "mas",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "uv",
+            "mark": "pending",
+            "label": "uv",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "cocoapods",
+            "mark": "pending",
+            "label": "cocoapods",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "pnpm",
+            "mark": "pending",
+            "label": "pnpm",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "brew"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "skills",
+            "mark": "pending",
+            "label": "skills",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "bun"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "bun",
+            "mark": "pending",
+            "label": "bun",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mise"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "go",
+            "mark": "pending",
+            "label": "go",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mise"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "java",
+            "mark": "pending",
+            "label": "java",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mise"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "python",
+            "mark": "pending",
+            "label": "python",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mise"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "chatgpt",
+            "mark": "pending",
+            "label": "chatgpt",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "cask"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "claude-desktop",
+            "mark": "pending",
+            "label": "claude-desktop",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "cask"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "typewhisper",
+            "mark": "pending",
+            "label": "typewhisper",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "cask"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "frontend-design",
+            "mark": "pending",
+            "label": "frontend-design",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "skill"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "modern-web-guidance",
+            "mark": "pending",
+            "label": "modern-web-guidance",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "skill"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "better-ui",
+            "mark": "pending",
+            "label": "better-ui",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "skill"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 17
+        }
+      ]
+    },
+    {
+      "id": "not-for-this-machine",
+      "title": "Not for this machine",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "version",
+          "kind": "version",
+          "keep": 50
+        },
+        {
+          "key": "method",
+          "kind": "list",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "note": {
+            "text": "107 apps live on other machines"
+          }
+        }
+      ],
+      "uncounted": true,
+      "pipe_counts": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station apps --all",
+      "text": "for every row"
+    }
+  ],
+  "actions": [
+    {
+      "key": "i",
+      "label": "install",
+      "on": "row",
+      "confirm": {
+        "yes": "install"
+      },
+      "priority": 1,
+      "mutates": true
+    },
+    {
+      "key": "x",
+      "label": "remove",
+      "on": "row",
+      "confirm": {
+        "yes": "remove"
+      },
+      "priority": 2,
+      "mutates": true
+    },
+    {
+      "key": "u",
+      "label": "update",
+      "on": "row",
+      "priority": 3,
+      "mutates": true
+    },
+    {
+      "key": "U",
+      "label": "update by method",
+      "on": "page",
+      "priority": 4,
+      "mutates": true
+    },
+    {
+      "key": "enter",
+      "label": "full page",
+      "on": "row",
+      "priority": 5
+    }
+  ]
+}

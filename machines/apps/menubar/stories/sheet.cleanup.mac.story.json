@@ -1,0 +1,18 @@
+{
+    "group": "sheet",
+    "id": "sheet.cleanup.mac",
+    "note": "Clean up on This Mac: agent-7f stopped, checked, with its disk; linux-1 still running stays; the red Delete 1 ephemeral workspace.",
+    "pages": ["pages/machines.home.cleanup.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "cleanup:macbook-pro"
+        }
+    }
+}

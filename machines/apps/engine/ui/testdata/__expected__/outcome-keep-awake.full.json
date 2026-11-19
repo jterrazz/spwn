@@ -1,0 +1,55 @@
+{
+  "schema": "station.page/v1",
+  "id": "outcome",
+  "command": "awake",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "changes",
+      "title": "Changes",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "awake",
+            "mark": "ok",
+            "label": "awake",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "on"
+                },
+                {
+                  "kind": "text",
+                  "text": "lid"
+                },
+                {
+                  "kind": "text",
+                  "text": "until 14:42 (4h)"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}

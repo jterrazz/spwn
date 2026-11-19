@@ -1,0 +1,11 @@
+description: 'a server down on this Mac is its own need, never said elsewhere'
+env:
+    - standings
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary.Verdict'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{"Elsewhere":true}}
+      exit: 0
+      stdout: |
+          {"Tone":"bad","Sentence":"loop-1 is down.","Line":"The rest is fine. 3 machines on macbook-pro"}

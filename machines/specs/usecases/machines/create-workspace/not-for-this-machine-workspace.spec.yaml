@@ -1,0 +1,8 @@
+description: 'inside a workspace, create is refused: VMs are made on a Mac'
+env: in-workspace
+runs:
+    - command: 'machines create'
+      exit: 2
+      stderr: |
+          Error: linux-1 runs no engine: VMs are made on a Mac
+          Hint: run station overview for what linux-1 has

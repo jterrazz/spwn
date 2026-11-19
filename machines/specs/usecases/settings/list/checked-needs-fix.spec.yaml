@@ -1,0 +1,20 @@
+description: 'the Checked group reads macOS on This Mac: the firewall off needs a fix, shown first'
+env: two-macs
+runs:
+    - command: 'settings | /usr/bin/sed -n ''/^# Checked/,$p'''
+      exit: 0
+      stdout: |
+          # Checked	8 ●	1 ◐
+          ◐	firewall	off	System Settings > Network > Firewall
+          ●	filevault	as expected · on
+          ●	sip	as expected · on
+          ●	automatic-updates	as expected · on
+          ●	screen-lock	as expected · locks after 2 min
+          ●	gatekeeper	as expected · on
+          ●	remote-login	as expected · off
+          ●	time-machine	as expected · last backup 2 d ago
+          ●	macos-updates	as expected · up to date
+    - command: 'settings --json | /usr/bin/jq -c ''.settings[] | select(.name == "firewall")'''
+      exit: 0
+      stdout: |
+          {"name":"firewall","label":"Firewall","group":"checked","state":"needs-fix","applied_at":null,"admin":false,"value":"off","fix":"System Settings > Network > Firewall"}

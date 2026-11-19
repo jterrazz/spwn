@@ -1,0 +1,345 @@
+{
+  "$defs": {
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
+    "disk.Amount": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Kind": {
+          "enum": [
+            "system",
+            "apps",
+            "your-data",
+            "caches",
+            "machines",
+            "free"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Kind"
+      ],
+      "type": "object"
+    },
+    "disk.CanFree": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Call": {
+          "type": "string"
+        },
+        "Frees": {
+          "items": {
+            "$ref": "#/$defs/disk.Freeable"
+          },
+          "type": "array"
+        },
+        "Sentence": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Sentence"
+      ],
+      "type": "object"
+    },
+    "disk.Freeable": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Holder": {
+          "enum": [
+            "machine-disks",
+            "images",
+            "leftovers",
+            "logs",
+            "this-mac",
+            "free"
+          ],
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "image",
+            "disk",
+            "folder"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Holder",
+        "Kind",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "disk.Holding": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Holder": {
+          "enum": [
+            "machine-disks",
+            "images",
+            "leftovers",
+            "logs",
+            "this-mac",
+            "free"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Holder"
+      ],
+      "type": "object"
+    },
+    "disk.Kept": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "VMs": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Name",
+        "Sentence",
+        "VMs"
+      ],
+      "type": "object"
+    },
+    "disk.MachineDisk": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "disk.Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "CanFree": {
+          "$ref": "#/$defs/disk.CanFree"
+        },
+        "Free": {
+          "type": "integer"
+        },
+        "Kinds": {
+          "items": {
+            "$ref": "#/$defs/disk.Amount"
+          },
+          "type": "array"
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "Rows": {
+          "items": {
+            "$ref": "#/$defs/disk.Row"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Station": {
+          "$ref": "#/$defs/disk.StationPart"
+        },
+        "Total": {
+          "type": "integer"
+        },
+        "Used": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Free",
+        "Pending",
+        "Rows",
+        "Total",
+        "Used"
+      ],
+      "type": "object"
+    },
+    "disk.Row": {
+      "additionalProperties": false,
+      "properties": {
+        "App": {
+          "type": "string"
+        },
+        "Bytes": {
+          "type": "integer"
+        },
+        "Group": {
+          "enum": [
+            "misplaced",
+            "can-rebuild",
+            "your-data",
+            "never-touched"
+          ],
+          "type": "string"
+        },
+        "MoveTo": {
+          "type": "string"
+        },
+        "Paths": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Pending": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "App",
+        "Bytes",
+        "Group",
+        "MoveTo",
+        "Paths",
+        "Pending"
+      ],
+      "type": "object"
+    },
+    "disk.StationPart": {
+      "additionalProperties": false,
+      "properties": {
+        "CanFree": {
+          "$ref": "#/$defs/disk.CanFree"
+        },
+        "Holds": {
+          "items": {
+            "$ref": "#/$defs/disk.Holding"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Itself": {
+          "type": "string"
+        },
+        "Kept": {
+          "items": {
+            "$ref": "#/$defs/disk.Kept"
+          },
+          "type": "array"
+        },
+        "Machines": {
+          "items": {
+            "$ref": "#/$defs/disk.MachineDisk"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "CanFree",
+        "Holds",
+        "Itself",
+        "Machines",
+        "Sentence",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "disk.calls.ReadIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/disk.read.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch disk.read of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/disk.calls.ReadIn"
+    },
+    "out": {
+      "$ref": "#/$defs/disk.Reading"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "disk.read",
+  "type": "object"
+}

@@ -1,0 +1,19 @@
+.sign {
+    display: block;
+    flex: none;
+}
+.ok {
+    color: var(--ok);
+}
+.plain {
+    color: var(--t3);
+}
+.warn {
+    color: var(--warn);
+}
+.bad {
+    color: var(--bad);
+}
+.new {
+    color: var(--new);
+}

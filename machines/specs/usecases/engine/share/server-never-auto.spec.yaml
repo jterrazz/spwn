@@ -1,0 +1,13 @@
+description: 'a new port of the server infra is never shared by itself: no reservation, no share on its Mac'
+env: two-macs
+runs:
+    - command: 'world listen infra "*:8080" nginx'
+      exit: 0
+    - command: 'ports --on mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 8080) | [.machine, .class, .state, .reserved]]'''
+      exit: 0
+      stdout: |
+          [["infra","private",null,null]]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | {reserved: [(.stores.reservations // [])[] | .guest_port], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[],"shared":[]}

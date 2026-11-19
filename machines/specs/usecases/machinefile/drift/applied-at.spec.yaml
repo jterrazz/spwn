@@ -1,0 +1,28 @@
+description: 'a drift says its machine applied the file once it did, and says nothing before the first apply'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {applied: (.Applied | type), inPlan: (.Plan.Applied | type)}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"applied":"null","inPlan":"null"}
+    - command: 'apply --machinefile macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {applied: (.Applied | type), inPlan: (.Plan.Applied | type)}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"applied":"string","inPlan":"null"}

@@ -1,0 +1,17 @@
+description: 'settings diff of a setting that writes no file prints its values before, then what station sets'
+env: two-macs
+runs:
+    - command: 'settings diff dns'
+      exit: 0
+      stdout: |
+          # dns
+          ○	encrypted DNS	unset	Quad9 DoH
+    - command: 'settings apply dns'
+      exit: 0
+      stdout: |
+          ●	dns	dns: applied
+    - command: 'settings diff dns'
+      exit: 0
+      stdout: |
+          # dns
+          ●	dns	applied

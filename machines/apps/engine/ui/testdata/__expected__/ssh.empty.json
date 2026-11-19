@@ -1,0 +1,142 @@
+{
+  "schema": "station.page/v1",
+  "id": "ssh",
+  "command": "machines ssh infra",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "door",
+      "title": "SSH",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "infra"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "command",
+            "mark": "absent",
+            "label": "ssh admin@infra",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "infra is stopped: station machines start infra"
+              }
+            ],
+            "reason": "stopped"
+          }
+        },
+        {
+          "row": {
+            "id": "editor",
+            "mark": "ok",
+            "label": "In an editor",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Remote SSH to infra"
+              }
+            ]
+          }
+        },
+        {
+          "note": {
+            "text": "No password: your key. Files travel through the same name; no folder of a Mac is shared."
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "reached",
+      "title": "How it is reached",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "to-mac",
+            "mark": "ok",
+            "label": "This Mac to mac-mini",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "over Tailscale"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "as jterrazz.agent"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "to-vm",
+            "mark": "ok",
+            "label": "mac-mini to infra",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "its Mac's private network"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "inside",
+      "title": "Inside",
+      "items": [
+        {
+          "note": {
+            "text": "Station opens it for debugging only; your tooling owns what runs inside."
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+    "group": "mac",
+    "id": "mac.this.exposed",
+    "note": "This Mac while port 5000 is exposed: the red row leads its Needs you.",
+    "pages": ["pages/machines.macs.exposed.machine.macbook-pro.json"],
+    "schema": "station.story/v1"
+}

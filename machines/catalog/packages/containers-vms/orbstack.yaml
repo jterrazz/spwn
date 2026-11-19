@@ -1,0 +1,19 @@
+package: station.package/v1
+kind: app
+name: orbstack
+description: Docker and Linux machines on the Mac, for exploration on a Mac
+provides: [orb]
+bundle: OrbStack
+updates: self
+methods:
+    - os: macos
+      machine: computer
+      cask: orbstack
+disk:
+    paths:
+        - path: ~/Library/Group Containers/HUAQ24HBR6.dev.orbstack
+          level: data
+        - path: ~/.orbstack
+          level: settings
+    installed: [/Applications/OrbStack.app]
+    no-erase: OrbStack erases its own data, in its Settings

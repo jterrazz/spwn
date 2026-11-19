@@ -1,0 +1,19 @@
+description: 'activity --on infra tells infra''s values and busiest processes from inside it, no Thermal'
+env: two-macs
+runs:
+    - command: 'activity --on infra'
+      exit: 0
+      stdout: |
+          	On infra:
+          ●	infra	Server · up 12d 0h · rates over 1 s
+          # Now
+          	CPU	18 % of 8 CPU · load 1.4 1.5 1.6
+          	Memory	15 of 24 GB · pressure normal · swap 0 B
+          	Disk	44 GB free of 80 GB
+          	Disk read	1.1 MB/s · 610 GB since boot
+          	Disk write	5.9 MB/s · 2.3 TB since boot
+          	Network	in 800 KB/s · out 1.3 MB/s
+          	Network total	received 96 GB · sent 141 GB since boot
+          # Top processes
+          	Top by CPU	k3s-server 9 % · containerd 3 % · traefik 1 %
+          	Top by memory	k3s-server 2.1 GB · postgres 1.4 GB · containerd 0.3 GB

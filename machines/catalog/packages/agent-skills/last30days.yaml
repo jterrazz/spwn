@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: last30days
+description: Research what happened in the last 30 days
+methods:
+    - os: any
+      skill:
+          repo: sickn33/antigravity-awesome-skills
+          name: last30days

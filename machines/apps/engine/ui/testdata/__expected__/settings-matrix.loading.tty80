@@ -1,0 +1,38 @@
+31 settings on 4 machines
+
+Needs a look
+  ◌ This Mac
+  ◌ This Mac
+  ◌ This Mac
+  ◌ This Mac
+  ◌ This Mac
+  ◌ This Mac
+  ◌ mac-mini
+  ◌ mac-mini
+  ◌ mac-mini
+  ◌ mac-mini
+  ◌ mac-mini
+  ◌ mac-mini
+  ◌ linux-1
+  ◌ linux-1
+  ◌ linux-1
+  ◌ linux-1
+  ◌ api
+  ◌ api
+  ◌ api
+  ◌ api
+Machines  ◌ 5 · This Mac, mac-mini, linux-1, api, infra
+Set by station
+  ◌ git-shortcuts
+  ◌ dns
+  ◌ zed-dotfiles
+  ◌ tailscale-cli
+  ◌ 13 more
+Always-on Mac
+  ◌ 5 settings
+Checked
+  ◌ firewall
+  ◌ screen-lock
+  ◌ 7 more
+
+→ station settings --all-machines --all  every row

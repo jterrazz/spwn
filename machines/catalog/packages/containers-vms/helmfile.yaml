@@ -1,0 +1,10 @@
+package: station.package/v1
+kind: app
+name: helmfile
+description: Declarative deployments of Helm charts
+provides: [helmfile]
+methods:
+    - os: macos
+      brew: helmfile
+    - family: linux
+      github-release: { repo: helmfile/helmfile, asset: 'helmfile_*_linux_{arch}.tar.gz' }

@@ -1,0 +1,4 @@
+{
+  "@playwright/mcp": {"current": "0.0.41", "wanted": "0.0.50", "latest": "0.0.50", "dependent": "global", "location": "/home/u/lib/node_modules/@playwright/mcp"},
+  "npm": {"current": "10.7.0", "wanted": "12.2.2", "latest": "12.2.2", "dependent": "global", "location": "/home/u/lib/node_modules/npm"}
+}

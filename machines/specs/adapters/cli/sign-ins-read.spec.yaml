@@ -1,0 +1,18 @@
+description: 'each program of this machine is read by its own status line, by exec, never a shim'
+fixture:
+    - ./__fixtures__/signins/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Programs[] | [.Program, .State, .Who, .Plan, .Action]''; /bin/cat .calls'
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{}}
+      exit: 0
+      stdout: |
+          ["gh","signed-in","you",null,"sign-out"]
+          ["npm","signed-in","you",null,"sign-out"]
+          ["claude","signed-in","you@example.com","Max plan","sign-out"]
+          ["wrangler","signed-out",null,null,"sign-in"]
+          gh auth status --hostname github.com
+          npm whoami
+          claude auth status
+          wrangler whoami --json

@@ -1,0 +1,23 @@
+description: 'a lid closed in a --lid keep-awake sleeps the display by a request, never an assertion'
+env: on-battery
+runs:
+    - command: 'awake 4h --lid --battery'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 14:00 · lid closed · on battery allowed
+    - command: 'world close-lid'
+      exit: 0
+    - command: 'awake'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Awake until 14:00 · lid closed · on battery allowed · 3h 59m left
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          # This Mac
+          lid	closed
+          power source	battery · 35 % · not charging
+          thermal	nominal
+          screen	always turns off
+    - command: 'awake >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].power | {holds, clamshell, display_sleeps}'' world.json'
+      exit: 0
+      stdout: |
+          {"holds":["station: station awake 4h --lid --battery"],"clamshell":true,"display_sleeps":1}

@@ -1,0 +1,12 @@
+description: 'off on an admin setting without admin rights is refused with the sudo line; it stays'
+env: two-macs
+runs:
+    - command: 'settings off restart-after-power-cut --on mac-mini --yes'
+      exit: 2
+      stderr: |
+          Error: restart-after-power-cut needs admin rights
+          Hint: ssh -t mac-mini sudo station settings off restart-after-power-cut
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].settings["restart-after-power-cut"]'' world.json'
+      exit: 0
+      stdout: |
+          "autorestart=1\nwomp=1"

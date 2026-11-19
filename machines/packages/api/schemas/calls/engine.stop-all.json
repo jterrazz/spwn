@@ -1,0 +1,72 @@
+{
+  "$defs": {
+    "engine.StopAll": {
+      "additionalProperties": false,
+      "properties": {
+        "awake_ended": {
+          "type": "boolean"
+        },
+        "sharing_ended": {
+          "type": "boolean"
+        },
+        "vms": {
+          "items": {
+            "$ref": "#/$defs/engine.Stopped"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "awake_ended",
+        "vms"
+      ],
+      "type": "object"
+    },
+    "engine.Stopped": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "lifetime": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "lifetime",
+        "name",
+        "result"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.stop-all.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.stop-all of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.StopAll"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.stop-all",
+  "type": "object"
+}

@@ -1,0 +1,12 @@
+package: station.package/v1
+kind: setting
+name: tmux-dotfiles
+description: The tmux settings
+requires: [tmux]
+methods:
+    - os: any
+      file:
+          copy:
+              - from: tmux/tmux.conf
+                to: ~/.tmux.conf
+          reload: [tmux, source-file, ~/.tmux.conf]

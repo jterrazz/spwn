@@ -1,0 +1,17 @@
+description: 'typed, free-unused deletes the old image and the disk station left, and keeps what it did not make'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["old-vm"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}} | .macs["macbook-pro"].cloned = {"old-vm": 901} | .macs["macbook-pro"].vms["by-hand"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 5000000000}} | .macs["macbook-pro"].vms["station-e2e-macos-1a2b"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 31000000000}} | .macs["macbook-pro"].vms["old-vm"].born = 901'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out'''
+      stdin: |
+          {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["base-ubuntu@2026.10.20","old-vm"],"Confirm":"base-ubuntu@2026.10.20, old-vm"}}
+      exit: 0
+      stdout: |
+          [{"Name":"base-ubuntu@2026.10.20","Result":"ok","Detail":"freed","Reason":"","Hint":"","Freed":3000000000,"Erase":false},{"Name":"old-vm","Result":"ok","Detail":"freed","Reason":"","Hint":"","Freed":9000000000,"Erase":false}]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''{vms: (.macs["macbook-pro"].vms | keys), cloned: .macs["macbook-pro"].cloned}'' world.json'
+      exit: 0
+      stdout: |
+          {"vms":["api","by-hand","linux-1","station-e2e-macos-1a2b","station-image-base-ubuntu-2026.11.01"],"cloned":null}

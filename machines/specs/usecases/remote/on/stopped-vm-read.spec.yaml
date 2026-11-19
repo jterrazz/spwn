@@ -1,0 +1,11 @@
+description: 'a section read inside a stopped VM says it is stopped and how to read it, and exits 0'
+env: two-macs
+runs:
+    - command: 'apps --on api'
+      exit: 0
+      stdout: |
+          ○ api is stopped · start it to read its apps
+    - command: 'disk --on api'
+      exit: 0
+      stdout: |
+          ○ api is stopped · start it to read its disk

@@ -1,0 +1,8 @@
+description: 'inside a VM the disk totals count whole disks only, never a partition, loop or dm device'
+fixture: ./__fixtures__/meter-proc/
+env: engine
+runs:
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" guest serve --stdio < ask.json | /usr/bin/jq -c ''.out.sample | [.disk_read, .disk_written]'''
+      exit: 0
+      stdout: |
+          [2097152000,1048576000]

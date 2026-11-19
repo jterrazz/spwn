@@ -1,0 +1,3 @@
+{"world": "one-mac", "station": "dev", "exchanges": [
+{"request":{"call":"images.list","in":{}},"answers":[{"v":2,"out":null}]}
+]}

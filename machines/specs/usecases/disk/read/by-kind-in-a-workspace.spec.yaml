@@ -1,0 +1,11 @@
+description: 'a workspace''s disk by kind: its system is what /usr holds, and it has no machines'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {kinds: [.Kinds[] | [.Kind, .Bytes]], can: .CanFree, station: .Station}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","target":{"name":"linux-1"},"in":{}}
+      exit: 0
+      stdout: |
+          {"kinds":[["system",2900000000],["apps",0],["your-data",3200000000],["caches",1500000000],["free",12400000000]],"can":{"Bytes":1500000000,"Sentence":"Caches hold 1.5 GB. Each app rebuilds its own when it needs it.","Call":"disk.free"},"station":null}

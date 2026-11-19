@@ -1,0 +1,5 @@
+#!/bin/sh
+# sh as the engine specs need it: the engine's detached run wrapper is recorded in
+# $HOME/.calls, then runs under the real /bin/sh.
+printf 'sh %s\n' "$*" >> "$HOME/.calls"
+exec /bin/sh "$@"

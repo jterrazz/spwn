@@ -1,0 +1,12 @@
+#!/bin/sh
+printf 'launchctl %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "list") printf 'PID\tStatus\tLabel\n12\t0\tai.example.x\n-\t1\tai.example.y\n-\t0\tcom.apple.z\n2211\t0\tTC3Q7MAJXF.com.adguard.safari.AdGuard.Helper\n-\t0\tcom.discord.discord.ShipIt\n' ;;
+    "print-disabled system") echo '"com.openssh.sshd" => enabled' ;;
+    "print system/dev.orbstack.OrbStack.privhelper") printf 'system/dev.orbstack.OrbStack.privhelper = {\n\tstate = not running\n\tlast exit code = 0\n\tendpoints = {\n\t\tstate = active\n\t}\n}\n' ;;
+    "print system/com.docker.vmnetd") echo 'Could not find service "com.docker.vmnetd" in domain for system' >&2; exit 113 ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

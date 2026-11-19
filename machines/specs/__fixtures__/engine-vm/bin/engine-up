@@ -1,0 +1,27 @@
+#!/bin/sh
+# Starts the document's station engine (its stderr in engine.log, its pid in .engine.pid),
+# starts each persistent VM its record does not want stopped (a workspace never starts by
+# itself), and waits
+# until a VM answers SSH (its guest is connected), as a spec that lends needs the engine.
+"$STATION" engine run 2>> "$HOME/engine.log" &
+echo $! > "$HOME/.engine.pid"
+n=0
+while [ ! -S "$HOME/.local/state/station/engine.sock" ] && [ $n -lt 50 ]; do
+    /bin/sleep 0.1
+    n=$((n + 1))
+done
+for record in "$HOME"/.local/state/station/vms/*.json; do
+    [ -f "$record" ] || continue
+    /usr/bin/grep -q -E '"lifetime": *"persistent"' "$record" || continue
+    /usr/bin/grep -q '"want": *"stopped"' "$record" && continue
+    vm=${record##*/}
+    "$STATION" machines start "${vm%.json}" > /dev/null 2>> "$HOME/engine.log"
+done
+n=0
+while [ $n -lt 50 ]; do
+    "$STATION" machines --json 2> /dev/null | /usr/bin/grep -q '"ssh": true' && exit 0
+    /bin/sleep 0.2
+    n=$((n + 1))
+done
+echo "engine-up: no guest connected" >&2
+exit 1

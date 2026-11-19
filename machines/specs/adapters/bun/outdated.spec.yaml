@@ -1,0 +1,21 @@
+description: 'bun outdated -g marks a package an update would move, and a bare update moves it'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/outdated/
+env:
+    - STATION_MACHINE_KIND=macos
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name | IN("codex", "qmd")) | "\(.name) \(.state) \(.installed) \(.newest // "-") \(.detail)"'''
+      exit: 0
+      stdout: |
+          codex update-available 0.154.0 0.160.0 outdated
+          qmd ok 2.0.0 - 
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	codex	0.160.0	bun
+      files:
+          .calls:
+              contains:
+                  - 'bun outdated -g'
+                  - 'bun update -g @openai/codex'

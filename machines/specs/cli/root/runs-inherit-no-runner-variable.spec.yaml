@@ -1,0 +1,19 @@
+description: 'a run holds the runner''s defaults, its document''s variables and its temp root, nothing else'
+runs:
+    - command: '--version >/dev/null; /usr/bin/env | /usr/bin/cut -d= -f1 | /usr/bin/grep -v -x -e PWD -e OLDPWD -e SHLVL -e _ | /usr/bin/sort'
+      exit: 0
+      stdout: |
+          COLUMNS
+          HOME
+          NO_COLOR
+          PATH
+          STATION_GITHUB_API_URL
+          STATION_KERNEL_STUB
+          STATION_MACHINE_KIND
+          STATION_POWER_STUB
+          STATION_SYSTEM_DIRS
+          STATION_SYSTEM_ROOT
+          TEMP
+          TMP
+          TMPDIR
+          TZ

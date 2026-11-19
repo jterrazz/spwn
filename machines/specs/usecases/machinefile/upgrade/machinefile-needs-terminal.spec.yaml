@@ -1,0 +1,32 @@
+description: 'off a terminal, an upgrade whose update asks your password refuses before any change, saying why'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/command-line/rooted.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: app
+          name: rooted
+          description: a tool whose brew update asks root
+          provides: [rooted]
+          methods:
+              - { os: macos, brew: rooted, needs: [sudo] }
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.brew.installed.rooted = "1.0.0" | .macs["macbook-pro"].apps.brew.behind.rooted = "1.1.0"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [rooted]
+      exit: 0
+    - command: 'upgrade'
+      exit: 2
+      stderr: |
+          Error: rooted asks your password: upgrade asks it on a terminal, and this run has none
+          Hint: run station upgrade on a terminal
+    - command: 'apps | /usr/bin/grep "	rooted	"'
+      exit: 0
+      stdout: |
+          ◐	rooted	1.0.0	brew	update available · station apps update rooted

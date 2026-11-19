@@ -1,0 +1,17 @@
+description: 'one of two installs fails: what finished stays installed, the failure is in our words, exit 1'
+env: two-macs
+runs:
+    - command: 'world fault Installer.Install 1 times'
+      exit: 0
+    - command: 'apps install claude ripgrep'
+      exit: 1
+      stdout: |
+          ✗	claude		script	~/.local/state/station/logs/claude.log
+          ●	ripgrep	1.0.0	brew
+      stderr: |
+          Error: 1 of 2 apps failed
+          Hint: station apps install claude
+    - command: 'apps ripgrep | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	ripgrep	1.0.0	brew

@@ -1,0 +1,62 @@
+{
+  "schema": "station.page/v1",
+  "id": "engine",
+  "command": "engine",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "engine",
+      "title": "Engine",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "detail",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "engine",
+            "mark": "attention",
+            "label": "engine",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "stopped"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "since 13:40 by station engine stop"
+                  }
+                ]
+              }
+            ],
+            "reason": "stopped",
+            "hint": {
+              "command": "station engine start"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}

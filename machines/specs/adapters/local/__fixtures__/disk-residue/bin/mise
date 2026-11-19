@@ -1,0 +1,26 @@
+#!/bin/sh
+# mise as it cleans for real: cache clear empties its cache, and prune, which
+# resolves the tools again, writes version listings and lockfiles back into it;
+# with no terminal it prunes only when told --yes.
+case "$*" in
+    "--version") echo "2026.10.25 linux-arm64" ;;
+    "ls --global --json") echo "{}" ;;
+    "cache clear")
+        printf 'mise %s\n' "$*" >> "$HOME/.calls"
+        /bin/rm -rf "$HOME/.cache/mise"
+        ;;
+    "prune --tools")
+        echo "mise ERROR mise prune requires confirmation but there was nobody to ask; pass --yes to prune non-interactively" >&2
+        exit 1
+        ;;
+    "prune --tools --yes")
+        printf 'mise %s\n' "$*" >> "$HOME/.calls"
+        /bin/mkdir -p "$HOME/.cache/mise/jq/1.8.2" "$HOME/.cache/mise/lockfiles"
+        echo "1.8.2" > "$HOME/.cache/mise/jq/1.8.2/remote_versions"
+        : > "$HOME/.cache/mise/lockfiles/56f503fc73247db7"
+        ;;
+    *)
+        echo "stub mise: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

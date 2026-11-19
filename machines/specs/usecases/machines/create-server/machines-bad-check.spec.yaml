@@ -1,0 +1,16 @@
+description: 'a server check that is neither a URL nor host:port is refused, its code on the wire'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create infra-2 --server --check nowhere'
+      exit: 2
+      stderr: |
+          Error: --check "nowhere" is neither a URL nor host:port
+          Hint: --check https://<name>:6443/readyz, or --check <name>:6443
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-server","in":{"Name":"infra-2","Check":"nowhere"}}
+      exit: 0
+      stdout: |
+          {"code":"machines.bad-check","subject":"nowhere","message":"--check \"nowhere\" is neither a URL nor host:port"}

@@ -1,0 +1,27 @@
+description: 'each Set by station state reads its mark and words: applied, changed since, not applied, off here'
+env: two-macs
+runs:
+    - command: 'settings apply tart-launcher hushlogin dns'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+          ●	hushlogin	~/.hushlogin: created
+          ●	dns	dns: applied
+    - command: 'world advance 48h'
+      exit: 0
+    - command: '--version >/dev/null; printf ''# mine\n'' >> .local/bin/tart'
+      exit: 0
+    - command: 'settings off dns --yes'
+      exit: 0
+      stdout: |
+          ●	dns	dns: undone
+    - command: 'settings | /usr/bin/grep -E ''tart-launcher|hushlogin|dns|dock-reset|^#'''
+      exit: 0
+      stdout: |
+          # Set by station	1 ●	1 ◐	14 ○	1 ⊘
+          ◐	tart-launcher	changed since 2 d ago	station settings diff tart-launcher
+          ○	dock-reset	not applied	station settings apply dock-reset
+          ●	hushlogin	applied · ~/.hushlogin
+          ⊘	dns	off here
+          # Always-on Mac
+          # Checked	8 ●	1 ◐

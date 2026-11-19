@@ -1,0 +1,9 @@
+description: 'a node on PATH that mise does not list is Not managed, not absent'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/node-on-path/
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "node") | "\(.state) \(.detail)"'''
+      exit: 0
+      stdout: |
+          not-managed on PATH, not managed by mise

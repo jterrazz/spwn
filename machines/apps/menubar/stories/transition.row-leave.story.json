@@ -1,0 +1,15 @@
+{
+    "freeze": 0.3,
+    "group": "transition",
+    "id": "transition.row-leave",
+    "note": "agent-7f deleted from This Mac's page: its row slides 10 pt right, fades and collapses, and the rows below close up.",
+    "pages": ["pages/machines.macs.machine.macbook-pro.json"],
+    "play": {
+        "from": "mac.this.overview",
+        "gesture": "confirm Delete agent-7f"
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "leaving": "agent-7f"
+    }
+}

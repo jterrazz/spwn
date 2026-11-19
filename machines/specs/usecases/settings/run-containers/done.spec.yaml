@@ -1,0 +1,15 @@
+description: 'the containers shortcut, confirmed, deletes every container'
+fixture: ../../__fixtures__/docker/
+env: in-linux-1
+runs:
+    - command: 'run docker rm --yes'
+      exit: 0
+      stdout: |
+          ●	containers	2 removed
+      stderr: |
+          → now: dclean
+      files:
+          .calls:
+              equals: |
+                  docker ps -aq
+                  docker rm -vf c1 c2

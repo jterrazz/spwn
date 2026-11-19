@@ -1,0 +1,19 @@
+#!/bin/sh
+# Homebrew holding the superseded tailscale formula, whose cask of the app
+# fails to install: the bundle is recorded, so is any uninstall.
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions") printf 'mise 2026.10.25\ntailscale 1.88.0\n' ;;
+    "list --cask --versions") ;;
+    "bundle install --no-upgrade --file=-")
+        /bin/cat >/dev/null
+        printf 'brew %s\n' "$*" >> "$HOME/.calls"
+        echo "Error: tailscale-app: the download failed" >&2
+        exit 1
+        ;;
+    "uninstall "*) printf 'brew %s\n' "$*" >> "$HOME/.calls" ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

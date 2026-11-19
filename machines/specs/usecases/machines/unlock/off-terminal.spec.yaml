@@ -1,0 +1,12 @@
+description: 'off a terminal, unlock is refused, exit 2, and the Mac still waits at pre-boot'
+env: mini-offline
+runs:
+    - command: 'machines unlock mac-mini'
+      exit: 2
+      stderr: |
+          Error: machines unlock needs a terminal
+          Hint: run it in a terminal
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].locked'' world.json'
+      exit: 0
+      stdout: |
+          true

@@ -1,0 +1,8 @@
+#!/bin/sh
+case "$*" in
+    "getifaddr en0") echo 192.168.1.2 ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

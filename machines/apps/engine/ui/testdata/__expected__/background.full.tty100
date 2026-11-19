@@ -1,0 +1,17 @@
+This Mac · 6 background tasks · 1 failing · 1 orphan
+
+Failing
+  ✗ com.example.brain.x-snapshot  user  failing · last exit 2  ~/Library/LaunchA…n.x-snapshot.plist
+    → station background remove com.example.brain.x-snapshot
+Orphans
+  ◐ com.bjango.istatmenus.installer
+    root  idle  iStat Menus (gone)  /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
+    → sudo launchctl bootout system/com.bjango.istatmenus.installer &&
+      sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
+● com.jterrazz.station.engine · user · running · pid 812
+  ~/Library/LaunchAgents/com.jterrazz.station.engine.plist
+Known apps  ● com.github.facebook.watchman · user · running · pid 3464 · watchman
+              ~/Library/LaunchAgents/com.github.facebook.watchman.plist
+Unknown
+  ● com.example.brain.sync  user  idle  ~/Library/LaunchAgents/com.example.brain.sync.plist
+  ◐ com.example.brain.late  user  ?     ~/Library/LaunchAgents/com.example.brain.late.plist

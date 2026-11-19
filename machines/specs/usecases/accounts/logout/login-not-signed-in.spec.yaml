@@ -1,0 +1,11 @@
+description: 'npm is signed out here: there is nothing to sign out of'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [.Program, .State, .Action] else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"accounts.logout","in":{"Program":"npm","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"login.not-signed-in","subject":"npm","message":"npm is not signed in here"}

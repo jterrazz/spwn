@@ -1,0 +1,16 @@
+description: 'a script app with no undo is refused its removal before anything runs'
+fixture: ./__fixtures__/lines/
+runs:
+    - command: 'apps install keeper'
+      exit: 0
+      stdout: |
+          ●	keeper	1.0.0	shell
+    - command: 'apps remove keeper --yes'
+      exit: 2
+      stderr: |
+          Error: keeper cannot be uninstalled by station
+          Hint: station installs it but cannot remove it: remove it by hand
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [make keeper] DIR=

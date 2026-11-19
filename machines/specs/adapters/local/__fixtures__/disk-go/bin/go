@@ -1,0 +1,17 @@
+#!/bin/sh
+# go installed: it answers its version; a clean is recorded with the module cache it was
+# given, and empties that cache as the real one does.
+case "$1" in
+    --version | version) echo "go version go1.25.3 darwin/arm64" ;;
+    clean)
+        printf 'go %s\n' "$*" >> "$HOME/.calls"
+        if [ -n "$GOMODCACHE" ]; then
+            printf 'env GOMODCACHE=%s GOFLAGS=%s\n' "$GOMODCACHE" "$GOFLAGS" >> "$HOME/.calls"
+            /bin/rm -rf "$GOMODCACHE"
+        fi
+        ;;
+    *)
+        echo "stub go: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

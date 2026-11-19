@@ -1,0 +1,15 @@
+package: station.package/v1
+kind: setting
+name: ghostty-dotfiles
+description: The Ghostty settings and its Catppuccin themes
+requires: [ghostty]
+methods:
+    - os: macos
+      file:
+          copy:
+              - from: ghostty/config
+                to: ~/.config/ghostty/config
+              - from: ghostty/themes/catppuccin-espresso-blur
+                to: ~/.config/ghostty/themes/catppuccin-espresso-blur
+              - from: ghostty/themes/catppuccin-latte-blur
+                to: ~/.config/ghostty/themes/catppuccin-latte-blur

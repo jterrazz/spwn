@@ -1,0 +1,8 @@
+description: 'with tart and no answer the daemon is not installed, or stopped once its agent exists'
+fixture: ../../../__fixtures__/vms/
+env: engine
+runs:
+    - command: 'status --json | /usr/bin/jq -c ''.station.daemon'''
+      exit: 0
+      stdout: |
+          {"state":"degraded","running":false,"version":""}

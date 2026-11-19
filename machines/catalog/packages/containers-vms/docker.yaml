@@ -1,0 +1,29 @@
+package: station.package/v1
+kind: app
+name: docker
+description: Container engine, inside the Linux VM
+provides: [docker]
+version-read:
+    args: [docker, --version]
+    pattern: Docker version ([^,\s]+)
+methods:
+    - family: linux
+      script:
+          url: https://get.docker.com
+disk:
+    paths:
+        - path: ~/.docker
+          level: settings
+    size: docker-system-df
+    free:
+        - run: [docker, container, prune, -f]
+          uses: docker
+        - run: [docker, image, prune, -f]
+          uses: docker
+        - run: [docker, volume, prune, -f]
+          uses: docker
+        - run: [docker, network, prune, -f]
+          uses: docker
+        - run: [docker, builder, prune, -f]
+          uses: docker
+    no-erase: dreset, the Docker shortcuts

@@ -1,0 +1,45 @@
+{
+  "schema": "station.page/v1",
+  "id": "activity",
+  "command": "activity",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "on",
+      "role": "banner",
+      "items": [
+        {
+          "note": {
+            "text": "On api:"
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "activity",
+      "title": "Activity",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "stopped",
+            "mark": "absent",
+            "label": "api is stopped",
+            "reason": "stopped"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ]
+}

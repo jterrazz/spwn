@@ -1,0 +1,8 @@
+description: 'inside a server, a declaration is refused: its Mac keeps it'
+env: in-server
+runs:
+    - command: 'ports declare 443 --via cloudflare-tunnel'
+      exit: 2
+      stderr: |
+          Error: infra's ports are declared from its Mac
+          Hint: run it on its Mac, naming infra

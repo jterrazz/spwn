@@ -1,0 +1,4 @@
+#!/bin/sh
+# Xcode installed: it answers its version. Anything else exits 97.
+[ "$1" = -version ] || exit 97
+printf 'Xcode 26.1\nBuild version 17B55\n'

@@ -1,0 +1,1145 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
+        "delete": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "env": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "exists": {
+          "type": "string"
+        },
+        "family": {
+          "enum": [
+            "linux",
+            "debian"
+          ],
+          "type": "string"
+        },
+        "machine": {
+          "oneOf": [
+            {
+              "enum": [
+                "computer",
+                "workspace",
+                "server"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "enum": [
+                  "computer",
+                  "workspace",
+                  "server"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
+        "os": {
+          "enum": [
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
+        },
+        "prune": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "run": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "uses": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AptMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "packages"
+      ],
+      "type": "object"
+    },
+    "Copy": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "integer"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    },
+    "Declares": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "via": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "port",
+        "via",
+        "label"
+      ],
+      "type": "object"
+    },
+    "DefaultKey": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "float",
+            "boolean"
+          ],
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "integer",
+            "boolean"
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "type",
+        "value"
+      ],
+      "type": "object"
+    },
+    "Deprecation": {
+      "additionalProperties": false,
+      "properties": {
+        "use": {
+          "type": "string"
+        },
+        "why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "why"
+      ],
+      "type": "object"
+    },
+    "Disk": {
+      "additionalProperties": false,
+      "properties": {
+        "erase": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "type": "array"
+        },
+        "free": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "type": "array"
+        },
+        "installed": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "misplaced": {
+          "items": {
+            "$ref": "#/$defs/Misplaced"
+          },
+          "type": "array"
+        },
+        "no-erase": {
+          "type": "string"
+        },
+        "paths": {
+          "items": {
+            "$ref": "#/$defs/Stored"
+          },
+          "type": "array"
+        },
+        "quit": {
+          "type": "string"
+        },
+        "relocate": {
+          "items": {
+            "$ref": "#/$defs/Relocation"
+          },
+          "type": "array"
+        },
+        "removal": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "size": {
+          "enum": [
+            "docker-system-df"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "FileMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "copy": {
+          "items": {
+            "$ref": "#/$defs/Copy"
+          },
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "file",
+            "block"
+          ],
+          "type": "string"
+        },
+        "reload": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "touch": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "GitAlias": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "command"
+      ],
+      "type": "object"
+    },
+    "GitAliases": {
+      "additionalProperties": false,
+      "properties": {
+        "aliases": {
+          "items": {
+            "$ref": "#/$defs/GitAlias"
+          },
+          "type": "array"
+        },
+        "file": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "aliases"
+      ],
+      "type": "object"
+    },
+    "GitHubReleaseMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "type": "string"
+        },
+        "checksums": {
+          "type": "string"
+        },
+        "repo": {
+          "type": "string"
+        },
+        "unverified": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repo",
+        "asset"
+      ],
+      "type": "object"
+    },
+    "Liveness": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "process": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MacOSDefaults": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "type": "string"
+        },
+        "keys": {
+          "items": {
+            "$ref": "#/$defs/DefaultKey"
+          },
+          "type": "array"
+        },
+        "this-mac": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "domain",
+        "keys"
+      ],
+      "type": "object"
+    },
+    "MasMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object"
+    },
+    "MethodSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "apt": {
+          "$ref": "#/$defs/AptMethod"
+        },
+        "arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
+        "brew": {
+          "type": "string"
+        },
+        "builtin": {
+          "type": "string"
+        },
+        "bun": {
+          "type": "string"
+        },
+        "cask": {
+          "type": "string"
+        },
+        "family": {
+          "enum": [
+            "linux",
+            "debian"
+          ],
+          "type": "string"
+        },
+        "file": {
+          "$ref": "#/$defs/FileMethod"
+        },
+        "git-aliases": {
+          "$ref": "#/$defs/GitAliases"
+        },
+        "github-release": {
+          "$ref": "#/$defs/GitHubReleaseMethod"
+        },
+        "machine": {
+          "oneOf": [
+            {
+              "enum": [
+                "computer",
+                "workspace",
+                "server"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "enum": [
+                  "computer",
+                  "workspace",
+                  "server"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
+        "macos-defaults": {
+          "$ref": "#/$defs/MacOSDefaults"
+        },
+        "mas": {
+          "$ref": "#/$defs/MasMethod"
+        },
+        "mise": {
+          "$ref": "#/$defs/MiseMethod"
+        },
+        "needs": {
+          "items": {
+            "enum": [
+              "sudo",
+              "terminal",
+              "license",
+              "app-store-login"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "npm": {
+          "type": "string"
+        },
+        "os": {
+          "enum": [
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
+        },
+        "package": {
+          "type": "string"
+        },
+        "path": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pin": {
+          "enum": [
+            "none",
+            "version"
+          ],
+          "type": "string"
+        },
+        "provided-by": {
+          "type": "string"
+        },
+        "provides": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "script": {
+          "$ref": "#/$defs/ScriptMethod"
+        },
+        "shell": {
+          "items": {
+            "$ref": "#/$defs/ShellBlock"
+          },
+          "type": "array"
+        },
+        "skill": {
+          "$ref": "#/$defs/SkillMethod"
+        },
+        "trusted": {
+          "type": "boolean"
+        },
+        "upgrade": {
+          "type": "string"
+        },
+        "uv": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MiseMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "type": "object"
+    },
+    "Misplaced": {
+      "additionalProperties": false,
+      "properties": {
+        "busy": {
+          "type": "string"
+        },
+        "free": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "type": "array"
+        },
+        "move": {
+          "items": {
+            "$ref": "#/$defs/Move"
+          },
+          "type": "array"
+        },
+        "path": {
+          "type": "string"
+        },
+        "prune": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "then": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "yours": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "type": "object"
+    },
+    "Move": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    },
+    "Option": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "type": [
+            "string",
+            "integer",
+            "boolean"
+          ]
+        },
+        "default-env": {
+          "type": "string"
+        },
+        "examples": {
+          "items": {
+            "type": [
+              "string",
+              "integer",
+              "boolean"
+            ]
+          },
+          "type": "array"
+        },
+        "help": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "max": {
+          "type": "integer"
+        },
+        "min": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "secret": {
+          "type": "boolean"
+        },
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "boolean",
+            "enum"
+          ],
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "type"
+      ],
+      "type": "object"
+    },
+    "PortHint": {
+      "additionalProperties": false,
+      "properties": {
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "http": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "port",
+        "label"
+      ],
+      "type": "object"
+    },
+    "Priority": {
+      "additionalProperties": false,
+      "properties": {
+        "debian": {
+          "type": "integer"
+        },
+        "macos": {
+          "type": "integer"
+        },
+        "ubuntu": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "Relocation": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "enum": [
+            "go-env",
+            "npmrc",
+            "bunfig",
+            "mise settings"
+          ],
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "pending": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "key",
+        "value"
+      ],
+      "type": "object"
+    },
+    "ScriptMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "check": {
+          "type": "string"
+        },
+        "env": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "hint": {
+          "type": "string"
+        },
+        "off-terminal": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "on-terminal": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "run": {
+          "type": "string"
+        },
+        "undo": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ShellBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "zsh": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "zsh"
+      ],
+      "type": "object"
+    },
+    "SkillMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "repo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repo",
+        "name"
+      ],
+      "type": "object"
+    },
+    "Stored": {
+      "additionalProperties": false,
+      "properties": {
+        "arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
+        "family": {
+          "enum": [
+            "linux",
+            "debian"
+          ],
+          "type": "string"
+        },
+        "level": {
+          "enum": [
+            "cache",
+            "data",
+            "settings",
+            "kept"
+          ],
+          "type": "string"
+        },
+        "machine": {
+          "oneOf": [
+            {
+              "enum": [
+                "computer",
+                "workspace",
+                "server"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "enum": [
+                  "computer",
+                  "workspace",
+                  "server"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
+        "memos": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "note": {
+          "type": "string"
+        },
+        "os": {
+          "enum": [
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "level"
+      ],
+      "type": "object"
+    },
+    "Value": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "type": "object"
+    },
+    "VersionRead": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "path": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/station.package.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One package of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.",
+  "properties": {
+    "accepts": {
+      "items": {
+        "enum": [
+          "app-store"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "after": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "after-apply": {
+      "items": {
+        "enum": [
+          "restart-dock",
+          "restart-finder",
+          "restart-menu-bar",
+          "logout",
+          "reboot"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "bundle": {
+      "type": "string"
+    },
+    "declares": {
+      "$ref": "#/$defs/Declares"
+    },
+    "deprecated": {
+      "$ref": "#/$defs/Deprecation"
+    },
+    "description": {
+      "type": "string"
+    },
+    "disk": {
+      "$ref": "#/$defs/Disk"
+    },
+    "guided": {
+      "type": "boolean"
+    },
+    "help": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "manager",
+        "app",
+        "setting"
+      ],
+      "type": "string"
+    },
+    "live": {
+      "$ref": "#/$defs/Liveness"
+    },
+    "manages": {
+      "items": {
+        "enum": [
+          "brew",
+          "cask",
+          "mas",
+          "apt",
+          "npm",
+          "uv",
+          "bun",
+          "mise",
+          "github-release",
+          "skill"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "methods": {
+      "items": {
+        "$ref": "#/$defs/MethodSpec"
+      },
+      "type": "array"
+    },
+    "name": {
+      "type": "string"
+    },
+    "needs": {
+      "items": {
+        "enum": [
+          "sudo",
+          "terminal",
+          "license",
+          "app-store-login"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "options": {
+      "items": {
+        "$ref": "#/$defs/Option"
+      },
+      "type": "array"
+    },
+    "package": {
+      "const": "station.package/v1"
+    },
+    "phase": {
+      "enum": [
+        "image",
+        "boot",
+        "apply"
+      ],
+      "type": "string"
+    },
+    "ports": {
+      "items": {
+        "$ref": "#/$defs/PortHint"
+      },
+      "type": "array"
+    },
+    "priority": {
+      "$ref": "#/$defs/Priority"
+    },
+    "provides": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "renamed-from": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "replaces": {
+      "type": "string"
+    },
+    "requires": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "requires-one-of": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "reversible": {
+      "type": "boolean"
+    },
+    "run-once": {
+      "type": "boolean"
+    },
+    "sets": {
+      "items": {
+        "$ref": "#/$defs/Value"
+      },
+      "type": "array"
+    },
+    "supersedes": {
+      "type": "string"
+    },
+    "then": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "updates": {
+      "enum": [
+        "self"
+      ],
+      "type": "string"
+    },
+    "version-read": {
+      "$ref": "#/$defs/VersionRead"
+    },
+    "writes": {
+      "items": {
+        "$ref": "#/$defs/Stored"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "package",
+    "kind",
+    "name",
+    "description",
+    "methods"
+  ],
+  "title": "station.package/v1",
+  "type": "object"
+}

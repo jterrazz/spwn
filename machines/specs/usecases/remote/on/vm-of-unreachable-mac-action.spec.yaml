@@ -1,0 +1,18 @@
+description: 'an action on a VM whose Mac does not answer names where the VM is, exits 1, its hint the Mac''s page'
+env: mini-offline
+runs:
+    - command: 'machines restart infra --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: infra is on mac-mini, which does not answer
+          Hint: station machines mac-mini
+    - command: 'machines stop infra --on mac-mini --yes'
+      exit: 1
+      stderr: |
+          Error: infra is on mac-mini, which does not answer
+          Hint: station machines mac-mini
+    - command: 'settings apply starship --on infra --yes'
+      exit: 1
+      stderr: |
+          Error: infra is on mac-mini, which does not answer
+          Hint: station machines mac-mini

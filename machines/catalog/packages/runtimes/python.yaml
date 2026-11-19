@@ -1,0 +1,25 @@
+package: station.package/v1
+kind: app
+name: python
+description: Python programming language runtime
+provides: [python3]
+version-read:
+    args: [python3, --version]
+    pattern: ^Python (\S+)
+methods:
+    - os: any
+      mise:
+          name: python
+          version: latest
+disk:
+    paths:
+        - path: ~/Library/Caches/pip
+          level: cache
+          os: macos
+        - path: '{cache}/pip'
+          level: cache
+          family: linux
+    free:
+        - run: [pip3, cache, purge]
+          uses: pip3
+    no-erase: 'nothing to erase: keys and logins are kept'

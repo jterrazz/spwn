@@ -1,0 +1,11 @@
+description: 'A password not granted to that machine is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"grants.remove","in":{"Entry":"pw-1","To":"linux-1","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"grant.not-granted","subject":"linux-1","message":"that password is not granted to linux-1"}

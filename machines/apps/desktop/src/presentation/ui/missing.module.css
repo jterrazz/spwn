@@ -1,0 +1,21 @@
+.missing {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-8);
+    color: var(--t3);
+    font-size: var(--text-label);
+    padding: var(--space-8) 0 var(--space-12);
+    border-top: 1px dashed var(--line-2);
+}
+.mark {
+    flex: none;
+    font-size: var(--text-label);
+    font-weight: var(--weight-regular);
+    letter-spacing: 0;
+    padding: 0 var(--space-6);
+    border: 1px dashed var(--line-2);
+    border-radius: var(--radius-hair);
+    color: var(--t3);
+    white-space: nowrap;
+}

@@ -1,0 +1,17 @@
+#!/bin/sh
+# ssh-keygen as the images specs need it: it writes the pair named by -f, its private
+# half a real key (answers/ssh-keygen/key) the served VM sshd accepts.
+printf 'ssh-keygen %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "-q -t ed25519 -N  -C station-image -f "*) ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac
+while [ $# -gt 0 ]; do
+    if [ "$1" = -f ]; then key="$2"; fi
+    shift
+done
+/bin/cat "${0%/*}/../answers/ssh-keygen/key" > "$key"
+echo "ssh-ed25519 AAAAstub station-image" > "$key.pub"

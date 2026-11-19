@@ -1,0 +1,10 @@
+description: 'a created VM boots with no folder of its Mac shared into it'
+env: two-macs
+runs:
+    - command: 'machines create --memory 4G | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	linux-2	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+      files:
+          world.json:
+              contains: '"folders": []'

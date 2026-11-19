@@ -1,0 +1,8 @@
+description: 'add refuses no name, exit 2, before it reaches any Mac'
+env: two-macs
+runs:
+    - command: 'machines add'
+      exit: 2
+      stderr: |
+          Error: say which Mac to add
+          Hint: station machines add <mac>

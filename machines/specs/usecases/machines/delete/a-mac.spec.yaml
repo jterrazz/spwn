@@ -1,0 +1,8 @@
+description: 'a Mac is no VM: delete refuses it, says what restarts it, and changes nothing'
+env: two-macs
+runs:
+    - command: 'machines delete mac-mini'
+      exit: 2
+      stderr: |
+          Error: mac-mini is a Mac
+          Hint: station machines restart mac-mini

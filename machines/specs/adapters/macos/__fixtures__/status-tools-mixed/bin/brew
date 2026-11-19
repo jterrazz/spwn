@@ -1,0 +1,13 @@
+#!/bin/sh
+# Homebrew as status needs it: bat installed, nothing else, and the outdated list an answer file (brew outdated --json=v2).
+answers="${0%/*}/../answers/brew"
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions") /bin/cat "$answers/formula.txt" ;;
+    "list --cask --versions") ;;
+    "outdated --json=v2"*) /bin/cat "$answers/outdated.json" ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

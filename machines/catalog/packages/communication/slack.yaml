@@ -1,0 +1,10 @@
+package: station.package/v1
+kind: app
+name: slack
+description: Team communication
+bundle: Slack
+updates: self
+methods:
+    - os: macos
+      machine: computer
+      cask: slack

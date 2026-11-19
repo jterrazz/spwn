@@ -1,0 +1,13 @@
+description: 'a read slower than the spinner delay erases its spinner before the page prints'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/slow-tmutil/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 80x30 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" settings > scroll.txt; /usr/bin/head -1 scroll.txt; /usr/bin/grep -q reading scroll.txt || echo no spinner'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          This Mac · 17 set by station here · 9 checked · nothing needs a look
+          no spinner

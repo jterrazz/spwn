@@ -1,0 +1,8 @@
+description: 'disk move on a server is refused: station keeps nothing of its own there'
+env: two-macs
+runs:
+    - command: 'disk move ~/go --on infra'
+      exit: 2
+      stderr: |
+          Error: infra is a server: station does not manage its disk
+          Hint: manage it with your own tooling: ssh infra

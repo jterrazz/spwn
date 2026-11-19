@@ -1,0 +1,20 @@
+description: 'npm outdated -g marks a package behind its latest, and a bare update updates it'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/outdated/
+env:
+    - STATION_MACHINE_KIND=macos
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "playwright-mcp") | "\(.name) \(.state) \(.installed) \(.newest // "-") \(.detail)"'''
+      exit: 0
+      stdout: |
+          playwright-mcp update-available 0.0.41 0.0.50 outdated
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	playwright-mcp	0.0.50	npm
+      files:
+          .calls:
+              contains:
+                  - 'npm outdated -g --json'
+                  - 'npm "@playwright/mcp"'

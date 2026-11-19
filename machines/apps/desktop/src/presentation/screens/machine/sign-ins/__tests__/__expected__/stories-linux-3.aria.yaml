@@ -1,0 +1,18 @@
+- main:
+  - heading "linux-3 running" [level=2]
+  - paragraph:
+    - text: workspace · ephemeral · on
+    - button "mac-mini"
+  - button "Stop"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview"
+    - tab "Activity"
+    - tab "Packages"
+    - tab "Ports"
+    - tab "Sign-ins" [selected]
+    - tab "Storage"
+  - heading "Signed in to 1 of 4 programs." [level=1]
+  - region "Sign-ins":
+    - heading "Sign-ins 4" [level=2]
+    - text: gh you@example.com · from the password GitHub token signed in Sign in from mac-mini npm signed out Sign in from mac-mini claude signed out Sign in from mac-mini wrangler signed out Sign in from mac-mini

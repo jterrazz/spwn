@@ -1,0 +1,12 @@
+description: 'a Git shortcut before the Git shortcuts are applied is refused with that setting, and git never runs'
+fixture: ../../__fixtures__/git/
+env: two-macs
+runs:
+    - command: 'run git wip'
+      exit: 2
+      stderr: |
+          → now: git wip
+          Error: git-shortcuts is not applied here
+          Hint: station settings apply git-shortcuts
+      files:
+          .calls: absent

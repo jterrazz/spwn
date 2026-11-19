@@ -1,0 +1,16 @@
+description: 'a server made on a Mac that reports a battery is made, with the warning that it sleeps with it'
+env: two-macs
+runs:
+    - command: 'machines create box --server --memory 2G'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ◐	This Mac is a laptop	box stops whenever it sleeps · see Mac readiness
+          ●	box	is a server	always on · 4 CPU · 2 GB · 50 GB
+          ●	Station sets up nothing inside	no apps, settings or accounts: set it up with your tooling
+    - command: 'machines --this-mac | /usr/bin/grep box'
+      exit: 0
+      stdout: |
+          ●	box	Server	macbook-pro	Running · always on	4 CPU	2 GB

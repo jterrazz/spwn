@@ -1,0 +1,29 @@
+description: 'never-sleeps applies on another Mac without admin: that Mac''s engine holds it, and Awake says so'
+env: two-macs
+runs:
+    - command: 'settings off never-sleeps --on mac-mini --yes'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	never-sleeps	never-sleeps: the Mac sleeps normally
+    - command: 'awake | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ○	mac-mini	Sleeps normally
+    - command: 'settings apply never-sleeps --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	never-sleeps	never-sleeps: held by the engine
+          # never-sleeps before
+          never sleeps	off
+          # never-sleeps after
+          never sleeps	held by the engine
+    - command: 'awake | /usr/bin/grep mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["mac-mini"].power.holds, .macs["mac-mini"].preferences.never_sleeps, .as_root]'' world.json'
+      exit: 0
+      stdout: |
+          [["station: never sleeps"],true,null]

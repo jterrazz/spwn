@@ -1,0 +1,9 @@
+#!/bin/sh
+# pmset printing a policy status does not judge.
+case "$*" in
+    "-g custom") printf "Now drawing from 'AC Power'\n -InternalBattery-0 (id=1)\t92%%; charging; 1:23 remaining present: true\n" ;;
+    *)
+        echo "stub ${0##*/}: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

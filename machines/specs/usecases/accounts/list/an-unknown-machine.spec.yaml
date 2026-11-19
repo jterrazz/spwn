@@ -1,0 +1,11 @@
+description: 'A machine station does not know reads as no machine, with no rows'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {verdict: .Verdict.Sentence, tone: .Verdict.Tone, rows: [.Programs[] | [.Program, .State, .How, .Action, .Line, .Ask]]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{"Machine":"ghost"}}
+      exit: 0
+      stdout: |
+          {"verdict":"No machine named \"ghost\"","tone":"bad","rows":[]}

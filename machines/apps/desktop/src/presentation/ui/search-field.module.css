@@ -1,0 +1,32 @@
+.field {
+    flex: 1 1 auto;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    background: var(--panel);
+    border-radius: var(--radius-well);
+    padding: 0 var(--space-12);
+    height: 34px;
+    color: var(--t3);
+}
+.field:focus-within {
+    box-shadow: inset 0 0 0 1.5px var(--new);
+}
+.field svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    stroke-width: 1.4;
+}
+.input {
+    all: unset;
+    flex: 1;
+    min-width: 0;
+    color: var(--t1);
+    font-size: var(--text-body);
+    user-select: text;
+}
+.input::placeholder {
+    color: var(--t3);
+}

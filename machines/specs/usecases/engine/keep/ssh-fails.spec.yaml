@@ -1,0 +1,22 @@
+description: 'a workspace whose guest connection fails fails SSH answers, a finding'
+env: two-macs
+runs:
+    - command: 'world fault Guest.Dial'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          # Needs you
+          ◐	linux-1	fails SSH answers	station machines restart linux-1
+    - command: 'machines linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ✗	SSH answers	failing
+          ●	Size	4 CPU · 8 GB · 50 GB

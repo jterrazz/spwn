@@ -1,0 +1,55 @@
+- main:
+  - heading "2 files differ from their machines." [level=1]
+  - paragraph: Your machines
+  - group "Your machines":
+    - button "linux-1"
+    - button "linux-dev 2 machines differ.":
+      - text: linux-dev
+      - img "2 machines differ."
+    - button "macbook-pro 1 machine differs." [pressed]:
+      - text: macbook-pro
+      - img "1 machine differs."
+    - button "studio-linux"
+  - paragraph: Mixins
+  - group "Mixins":
+    - button "base"
+  - paragraph: Shipped with station
+  - group "Shipped with station":
+    - button "base-macos"
+    - button "base-ubuntu"
+  - region "macbook-pro.machine.yaml":
+    - heading "macbook-pro.machine.yaml" [level=2]
+    - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
+    - group "How the file is shown":
+      - button "Fields" [pressed]
+      - button "YAML"
+    - paragraph: The owner's Mac
+    - term: Makes
+    - definition: a Mac
+    - term: System
+    - definition: macOS
+    - term: Extends
+    - definition:
+      - button "base"
+  - region "Machines that follow it":
+    - heading "Machines that follow it 1 machine differs." [level=2]
+    - button "macbook-pro the Mac itself · applied 6 Nov, 09:12 3 differences"
+  - region "What it puts on a machine":
+    - heading "What it puts on a machine the boxed values are the ones you set" [level=2]
+    - group "Chapter":
+      - button "Apps5" [pressed]
+      - button "Skills0"
+      - button "Settings1"
+      - button "Access"
+    - region "macbook-pro":
+      - paragraph: macbook-pro this file · 3
+      - button "gh GitHub CLI for repository management takes every version"
+      - button "ghostty GPU-accelerated terminal emulator updates itself"
+      - button "bat Cat clone with syntax highlighting takes every version"
+    - region "base":
+      - paragraph: base extended · 2
+      - button "homebrew manager macOS package manager takes every version"
+      - button "jq Command-line JSON processor takes every version"
+  - region "This Mac's own changes":
+    - heading "This Mac's own changes ~/.config/station/machinefiles/macbook-pro.local.yaml" [level=2]
+    - text: bat an app added on this Mac only added lazygit an app the files declare, left out here removed

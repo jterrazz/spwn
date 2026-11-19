@@ -1,0 +1,13 @@
+description: 'a server back from a crash drops its cause and last lines; its record keeps the cause'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world console infra ''[   92.004012] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009'''
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, .cause, .last_lines, .uptime.days[-1].down[0].cause]'''
+      exit: 0
+      stdout: |
+          ["running",null,null,"kernel panic"]

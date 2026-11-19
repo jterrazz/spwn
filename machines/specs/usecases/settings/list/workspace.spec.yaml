@@ -1,0 +1,21 @@
+description: 'a workspace lists the settings that live there, the Mac-only ones folded with their reason'
+env: in-workspace
+runs:
+    - command: 'settings'
+      exit: 0
+      stdout: |
+          # Set by station	6 ○
+          ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
+          ○	git-shortcuts	not applied	station settings apply git-shortcuts
+          ○	hushlogin	not applied	station settings apply hushlogin
+          ○	starship-dotfiles	not applied · needs starship	station apps install starship
+          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
+          ○	github-login	not applied · needs gh	station apps install gh
+          # Checked
+          –	9 checked	not for this machine · Mac only
+          # Not for this machine
+          –	16 not for this machine	Macs and macOS VMs only · Mac only
+    - command: 'settings --all | /usr/bin/grep -c ''not for this machine'''
+      exit: 0
+      stdout: |
+          25

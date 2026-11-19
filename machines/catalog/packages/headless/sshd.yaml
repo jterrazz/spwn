@@ -1,0 +1,20 @@
+package: station.package/v1
+kind: setting
+name: sshd
+description: macOS Remote Login (sshd)
+needs: [sudo]
+reversible: true
+declares:
+    port: 22
+    via: lan
+    label: Remote login
+sets:
+    - { key: Remote Login, value: 'on' }
+methods:
+    - os: macos
+      machine: computer
+      builtin: sshd
+writes:
+    - path: /System/Library/LaunchDaemons/ssh.plist
+      level: settings
+      note: Remote Login, through systemsetup

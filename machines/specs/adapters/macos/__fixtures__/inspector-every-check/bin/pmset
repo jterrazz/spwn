@@ -1,0 +1,5 @@
+#!/bin/sh
+case "$*" in
+    -g) printf 'System-wide power settings:\nCurrently in use:\n standby              1\n sleep                1\n displaysleep         2\n disksleep            10\n' ;;
+    *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;
+esac

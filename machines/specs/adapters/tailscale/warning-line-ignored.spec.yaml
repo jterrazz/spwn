@@ -1,0 +1,8 @@
+description: 'a CLI that warns of tailscaled''s version on both streams is still read'
+fixture: ../../__fixtures__/vms/
+env: engine
+runs:
+    - command: '--version >/dev/null; : > answers/tailscale/warn; "$STATION" ports --json | /usr/bin/jq -c ''.tailscale | [.state, .dns_name]'''
+      exit: 0
+      stdout: |
+          ["on","macbook.tail1234.ts.net"]

@@ -1,0 +1,18 @@
+description: 'a keep-awake ends at its term: the assertion goes, and the lid sleeps the Mac again'
+env: two-macs
+runs:
+    - command: 'awake 4h --lid'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 14:00 · lid closed
+    - command: 'world advance 4h'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 1,2p'
+      exit: 0
+      stdout: |
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 5h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.macs["macbook-pro"].power | {holds, clamshell}), [.told[] | .Text]]'' world.json'
+      exit: 0
+      stdout: |
+          [{"holds":null,"clamshell":null},["Awake stopped on This Mac: its 4h ended"]]

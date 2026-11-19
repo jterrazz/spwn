@@ -1,0 +1,8 @@
+description: 'a far refusal of a code this binary does not know prints the far side''s words'
+fixture: ./__fixtures__/old-y/
+runs:
+    - command: 'apps update jq --on y'
+      exit: 2
+      stderr: |
+          Error: jq is pinned by y's policy
+          Hint: station apps on y: unpin jq first

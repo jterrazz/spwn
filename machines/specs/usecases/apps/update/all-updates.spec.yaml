@@ -1,0 +1,21 @@
+description: 'apps update takes only the Update available rows and says how many it updated, then none are left'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; NO_COLOR= terminal --size 100x30 "$STATION" apps update'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          ✓ Updated 2 apps on This Mac
+
+          Changes
+            ● gh    2.98.0   brew
+            ● node  24.11.0  mise
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	every app is up to date on This Mac

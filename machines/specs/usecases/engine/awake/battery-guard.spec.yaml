@@ -1,0 +1,36 @@
+description: 'a keep-awake on battery ends at 20 %: told once, Awake stopped for 10 min, then Sleeps normally'
+env: two-macs
+runs:
+    - command: 'awake 4h'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	stays awake until 14:00
+    - command: 'world unplug'
+      exit: 0
+    - command: 'world battery 20'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 1,2p'
+      exit: 0
+      stdout: |
+          ◐	macbook-pro	Awake stopped · battery 20 %
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].power.holds, [.told[] | .Text]]'' world.json'
+      exit: 0
+      stdout: |
+          [null,["Awake stopped on This Mac: battery 20 %"]]
+    - command: 'overview --all | /usr/bin/grep -e ''Awake stopped'' -e ''	Awake'''
+      exit: 0
+      stdout: |
+          ◐	Awake stopped: battery 20 %	station awake
+          	Awake	◐ stopped · battery 20 %
+    - command: 'world advance 10m'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 1,2p'
+      exit: 0
+      stdout: |
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[] | .Text]'' world.json'
+      exit: 0
+      stdout: |
+          ["Awake stopped on This Mac: battery 20 %"]

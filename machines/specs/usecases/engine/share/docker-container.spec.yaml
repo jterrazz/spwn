@@ -1,0 +1,18 @@
+description: 'a port a container exposes is shared like any other, with or without Docker''s proxy'
+env: two-macs
+runs:
+    - command: 'world container-run linux-1 8080:80 nginx-1'
+      exit: 0
+    - command: 'world container-run linux-1 8081:80 api-1 no-proxy'
+      exit: 0
+    - command: 'world advance 5s'
+      exit: 0
+    - command: 'ports | /usr/bin/grep -E "808[01]"'
+      exit: 0
+      stdout: |
+          ●	linux-1	8080	private	https://macbook-pro.tail1234.ts.net:40000	shared	nginx-1
+          ●	linux-1	8081	private	https://macbook-pro.tail1234.ts.net:40003	shared	api-1	probably Expo
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.guest_port >= 8080) | [.vm, .guest_port, .host_port]], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[["linux-1",8080,40000],["linux-1",8081,40003]],"shared":[40001,40002,40000,40003]}

@@ -1,0 +1,27 @@
+description: 'with --yes, an apply over a setting changed since writes station''s again and it reads Applied'
+env: two-macs
+runs:
+    - command: 'settings apply tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: '--version >/dev/null; printf ''# mine\n'' >> .local/bin/tart'
+      exit: 0
+    - command: 'settings apply tart-launcher --yes'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	~/.local/bin/tart: written
+    - command: 'settings tart-launcher'
+      exit: 0
+      stdout: |
+          ●	tart-launcher	applied · ~/.local/bin/tart
+          # Detail
+          group	Set by station
+          does	The tart launcher: Tart's home is station's VMs folder
+          lives on	Macs
+          where	~/.local/bin/tart
+          applied	just now
+    - command: '--version >/dev/null; /usr/bin/grep -c mine .local/bin/tart'
+      exit: 1
+      stdout: |
+          0

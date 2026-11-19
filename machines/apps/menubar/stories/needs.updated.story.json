@@ -1,0 +1,8 @@
+{
+    "group": "needs",
+    "heightNote": "the page header is a Mac page's, 4 pt shorter than the prototype's",
+    "id": "needs.updated",
+    "note": "The updates installed: their row is gone and the upkeep counts one less.",
+    "pages": ["pages/machines.needs.updated.needs.json"],
+    "schema": "station.story/v1"
+}

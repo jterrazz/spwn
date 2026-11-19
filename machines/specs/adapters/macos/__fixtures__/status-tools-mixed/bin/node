@@ -1,0 +1,9 @@
+#!/bin/sh
+# A node nobody installed through mise: it answers, and nothing manages it.
+case "$*" in
+    --version) echo v22.0.0 ;;
+    *)
+        echo "stub node: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

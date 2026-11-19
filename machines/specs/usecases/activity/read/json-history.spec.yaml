@@ -1,0 +1,9 @@
+description: 'station activity --json --history adds the engine''s series in 60 s points, since the engine started'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; for i in 1 2 3 4 5; do "$STATION" world advance 1m; done; "$STATION" activity --json --history | /usr/bin/jq -c --slurpfile w world.json ''{since_engine_start: (.history_since_at == $w[0].macs["macbook-pro"].engine.started_at), step: .history.step_s, points: (.history.points | length >= 5), spaced: ([.history.points[].at | fromdate] | [range(1; length) as $i | .[$i] - .[$i - 1]] | min >= 59), first_cpu: .history.points[0].cpu_percent, later_cpu: .history.points[-1].cpu_percent}'''
+      exit: 0
+      stdout: |
+          {"since_engine_start":true,"step":60,"points":true,"spaced":true,"first_cpu":null,"later_cpu":34}

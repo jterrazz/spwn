@@ -1,0 +1,13 @@
+description: 'a stopped disk station made that no record names is a leftover; hand-made, running, test vms are not'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["old-vm"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}} | .macs["macbook-pro"].vms["running"] = {"disk": true, "pid": 4711, "size": {"CPUs": 0, "Memory": 0, "Disk": 5000000000}} | .macs["macbook-pro"].vms["by-hand"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 7000000000}} | .macs["macbook-pro"].vms["station-e2e-macos-1a2b"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 31000000000}} | .macs["macbook-pro"].cloned = {"old-vm": 901, "running": 902} | .macs["macbook-pro"].vms["old-vm"].born = 901 | .macs["macbook-pro"].vms["running"].born = 902'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {used: .Used, leftovers: [.Station.Holds[] | select(.Holder == "leftovers") | .Bytes], itself: .Station.Itself, can: .Station.CanFree, verdict: .Station.Verdict.Sentence}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"disk.read","in":{}}
+      exit: 0
+      stdout: |
+          {"used":606000000000,"leftovers":[9000000000],"itself":"This Mac itself holds 490 GB.","can":{"Bytes":12000000000,"Sentence":"12.0 GB can be freed: 1 unused image and 1 leftover disk.","Call":"disk.free-unused","Frees":[{"Holder":"images","Kind":"image","Name":"base-ubuntu@2026.10.20","Bytes":3000000000},{"Holder":"leftovers","Kind":"disk","Name":"old-vm","Bytes":9000000000}]},"verdict":"12.0 GB can be freed."}

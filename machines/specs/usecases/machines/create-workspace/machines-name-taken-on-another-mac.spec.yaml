@@ -1,0 +1,8 @@
+description: 'a name a VM of another Mac holds is refused: names are unique across All machines'
+env: two-macs
+runs:
+    - command: 'machines create infra'
+      exit: 2
+      stderr: |
+          Error: "infra" is taken (on mac-mini)
+          Hint: pick another name

@@ -1,0 +1,13 @@
+description: 'infra at 98 % CPU for 10 min needs a look; at 94 % it does not'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs.infra.meter.per_second.cpu_busy = 784'' world.json > w.json && /bin/mv w.json world.json; for i in $(/usr/bin/seq 12); do "$STATION" world advance 1m; done; "$STATION" activity --on infra | /usr/bin/grep "busy"'
+      exit: 0
+      stdout: |
+          ◐	infra busy: 98 % for 14 min	station activity --on infra
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs.infra.meter.per_second.cpu_busy = 752 | .macs["mac-mini"].engine.activity = {}'' world.json > w.json && /bin/mv w.json world.json; for i in $(/usr/bin/seq 12); do "$STATION" world advance 1m; done; "$STATION" activity --on infra | /usr/bin/grep -c "busy"'
+      exit: 1
+      stdout: |
+          0

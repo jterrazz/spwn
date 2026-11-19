@@ -1,0 +1,16 @@
+package: station.package/v1
+kind: setting
+name: backup-exclusions
+description: Keep ~/.cache and station's VMs out of Time Machine
+reversible: true
+methods:
+    - os: macos
+      machine: computer
+      builtin: backup-exclusions
+writes:
+    - path: '{cache}'
+      level: settings
+      note: a sticky Time Machine exclusion (`tmutil addexclusion`)
+    - path: '{data}/station/vms'
+      level: settings
+      note: a sticky Time Machine exclusion (`tmutil addexclusion`)

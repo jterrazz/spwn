@@ -1,0 +1,14 @@
+{
+  "name": "x",
+  "macs": {
+    "x": {},
+    "y": {
+      "user": "u"
+    }
+  },
+  "tailnet": {
+    "mode": "auto",
+    "auth_method": "login"
+  },
+  "vm_user": "vmu"
+}
