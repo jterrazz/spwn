@@ -2,8 +2,8 @@
 
 import { IconX } from '@tabler/icons-react';
 
+import type { LogLine } from './logs';
 import { useWorldLogs } from './use-world';
-import type { LogLine } from './use-world';
 
 export type Panel = 'logs' | 'snapshots';
 

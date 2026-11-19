@@ -6,12 +6,8 @@ import { apiGet } from '../../api/client';
 import { listOf, textOf } from '../../api/fields';
 import type { World } from '../../domain/model';
 import { useBackgroundTask } from '../../hooks/use-background-task';
-
-export interface LogLine {
-    timestamp: string;
-    source: string;
-    message: string;
-}
+import { closedLog, logsPanelOf } from './logs';
+import type { LogLine, SettledLog } from './logs';
 
 /** The world the page shows, polled every five seconds; null once it is known not to exist. */
 export function useWorld(worldId: string) {
@@ -40,25 +36,27 @@ function lineOf(event: unknown): LogLine {
     };
 }
 
-/** The world's activity log, loaded while the logs panel is open. */
+async function activityOf(worldId: string): Promise<LogLine[]> {
+    try {
+        const activity = await apiGet<unknown>(`/api/activity?world=${worldId}&limit=200`);
+        return listOf(activity, 'events').map(lineOf);
+    } catch {
+        return [];
+    }
+}
+
+/** The world's activity log, loaded each time the logs panel opens; what the panel shows of it is `logsPanelOf`'s. */
 export function useWorldLogs(worldId: string, open: boolean) {
-    const [lines, setLines] = useState<LogLine[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [settled, setSettled] = useState<null | SettledLog>(null);
 
     const load = useCallback(async () => {
         if (!open) {
+            setSettled(closedLog);
             return;
         }
-        setLoading(true);
-        try {
-            const activity = await apiGet<unknown>(`/api/activity?world=${worldId}&limit=200`);
-            setLines(listOf(activity, 'events').map(lineOf));
-        } catch {
-            setLines([]);
-        }
-        setLoading(false);
+        setSettled({ lines: await activityOf(worldId), thisOpening: true, worldId });
     }, [open, worldId]);
     useBackgroundTask(load);
 
-    return { lines, loading };
+    return logsPanelOf(settled, worldId, open);
 }
