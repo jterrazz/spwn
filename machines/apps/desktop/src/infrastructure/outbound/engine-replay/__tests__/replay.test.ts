@@ -51,15 +51,14 @@ describe('replay', () => {
         expect(after).toStrictEqual({ State: 'stopped' });
     });
 
-    test('a gesture not recorded is no answer, and changes nothing', async () => {
+    test('a read not recorded is no answer, with no reason and no world named', async () => {
         // Given - the same replay
         const client = new Client(replayTransport(RECORDING));
 
-        // When - a stop with another confirmation is sent
-        const refused = client.call('engine.stop', {});
+        // When - the engine of another Mac is read
+        const unanswered = client.call('engine.read', {}, { target: { name: 'mac-mini' } });
 
-        // Then - no answer, with no reason and no world named, and the engine still reads running
-        await expect(refused).rejects.toMatchObject({ message: '', wire: undefined });
-        await expect(client.call('engine.read', {})).resolves.toStrictEqual({ State: 'running' });
+        // Then - no answer, and nothing said
+        await expect(unanswered).rejects.toMatchObject({ message: '', wire: undefined });
     });
 });

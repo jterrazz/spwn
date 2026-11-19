@@ -16,6 +16,7 @@ import { describe, expect, test } from 'vitest';
 import { composeReplay } from '../../../../composition/compose';
 import { documentPresence } from '../../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../../infrastructure/outbound/engine-link/client';
+import type { Transport } from '../../../../infrastructure/outbound/engine-link/transport';
 import { holdingCall } from '../../../../infrastructure/outbound/engine-replay/__tests__/held-call';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
 import {
@@ -36,6 +37,20 @@ const sidebar = navigation('Sidebar');
 function machineOver(world: string, machine: string) {
     const initial: Route = { machine, page: 'machine', tab: 'Overview' };
     const dependencies = composeReplay({ recording: recordingFor(world) });
+    return (
+        <EngineProvider dependencies={dependencies}>
+            <Window initial={initial} pages={PAGES} />
+        </EngineProvider>
+    );
+}
+
+function linuxOneOver(transport: Transport) {
+    const dependencies = {
+        engine: new Client(transport),
+        opener: NO_OPENER,
+        presence: documentPresence(),
+    };
+    const initial: Route = { machine: 'linux-1', page: 'machine', tab: 'Overview' };
     return (
         <EngineProvider dependencies={dependencies}>
             <Window initial={initial} pages={PAGES} />
@@ -118,58 +133,44 @@ describe('gestures', () => {
     });
 
     test('only the last gesture of the header says how it ended', async () => {
-        // Given - linux-1 stopped from its page over two-macs
-        const result = await component.render(
-            machineOver('two-macs', 'linux-1'),
-            async (visitor) => {
-                await visitor.click(button('Stop'));
-                await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
-                await visitor.see(content('done'));
+        // Given - linux-1 stopped from its page over two-macs, its Start to be held
+        const start = holdingCall(stagedReplay(recordingFor('two-macs')), 'machines.start');
+        const result = await component.render(linuxOneOver(start.transport), async (visitor) => {
+            await visitor.click(button('Stop'));
+            await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
+            await visitor.see(content('done'));
 
-                // When - Start follows, which two-macs never recorded for linux-1
-                await visitor.click(button('Start'));
+            // When - Start follows, and the connection drops before its answer
+            await visitor.click(button('Start'));
+            await waitUntil(() => start.sent(), { why: 'machines.start sent' });
+            start.drop();
 
-                // Then - Start's failure replaces Stop's done
-                await visitor.see(content('No answer from the engine', { exact: false }));
-                await visitor.gone(content('done'));
-            },
-        );
+            // Then - Start's unknown end replaces Stop's done
+            await visitor.see(content('the engine may have done it', { exact: false }));
+            await visitor.gone(content('done'));
+        });
         expect(result.errors.text).toBe('');
     });
 
     test('a stop whose connection drops before it answers is unknown, and the page shows what the engine says', async () => {
         // Given - linux-1's page over two-macs, where machines.stop is held unanswered once sent
         const stop = holdingCall(stagedReplay(recordingFor('two-macs')), 'machines.stop');
-        const result = await component.render(
-            <EngineProvider
-                dependencies={{
-                    engine: new Client(stop.transport),
-                    opener: NO_OPENER,
-                    presence: documentPresence(),
-                }}
-            >
-                <Window
-                    initial={{ machine: 'linux-1', page: 'machine', tab: 'Overview' }}
-                    pages={PAGES}
-                />
-            </EngineProvider>,
-            async (visitor) => {
-                await visitor.see(heading('linux-1 running'));
+        const result = await component.render(linuxOneOver(stop.transport), async (visitor) => {
+            await visitor.see(heading('linux-1 running'));
 
-                // When - Stop is confirmed, and the connection drops before its answer
-                await visitor.click(button('Stop'));
-                await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
-                await visitor.gone(dialog('Stop linux-1?'));
-                await waitUntil(() => stop.sent(), { why: 'machines.stop sent' });
-                stop.drop();
+            // When - Stop is confirmed, and the connection drops before its answer
+            await visitor.click(button('Stop'));
+            await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
+            await visitor.gone(dialog('Stop linux-1?'));
+            await waitUntil(() => stop.sent(), { why: 'machines.stop sent' });
+            stop.drop();
 
-                // Then - the stop is unknown, never failed, and the header is the engine's machines.list read again
-                await visitor.see(content('the engine may have done it', { exact: false }));
-                await visitor.see(content('the engine closed the connection', { exact: false }));
-                await visitor.see(heading('linux-1 running'));
-                await visitor.gone(content('done'));
-            },
-        );
+            // Then - the stop is unknown, never failed, and the header is the engine's machines.list read again
+            await visitor.see(content('the engine may have done it', { exact: false }));
+            await visitor.see(content('the engine closed the connection', { exact: false }));
+            await visitor.see(heading('linux-1 running'));
+            await visitor.gone(content('done'));
+        });
         expect(result.errors.text).toBe('');
     });
 

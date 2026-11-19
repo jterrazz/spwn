@@ -4,6 +4,7 @@ import type { Link } from '../../../application/ports/engine.port';
 import { isRecord, keyOf } from '../../../domain/request-key';
 import type { Exchange as Opened, Receiver, Transport } from '../engine-link/transport';
 import { helloOf } from './hello';
+import { throwIf, unrecordedOf } from './unrecorded';
 
 export type Exchange = { request: Record<string, unknown>; answers: readonly unknown[] };
 
@@ -90,7 +91,8 @@ function play(receiver: Receiver, id: string, { frames, gap, first, onLast }: Pl
 }
 
 // invariant: a request the world holds no answer for ends with no reason, as an engine that never answers does: the
-// invariant: window draws its own no-answer state, and the world's name never reaches the page.
+// invariant: window draws its own no-answer state, and the world's name never reaches the page; a gesture sent with an
+// invariant: input no recording of its call holds is a spec's mistake: it ends on what was sent and what is recorded, and throws.
 function reasonOf(shown: Link): string {
     if (shown.kind === 'absent') {
         return shown.reason;
@@ -216,11 +218,16 @@ class Staging {
             frame: receiver.frame,
         };
         const { shown } = this;
+        const unrecorded =
+            played || shown.kind !== 'open'
+                ? undefined
+                : unrecordedOf(request, [...this.answers.gestures.values()]);
         held.timers = played
             ? play(tracked, request.id, played)
             : [
                   setTimeout(() => {
-                      tracked.end(reasonOf(shown), false);
+                      tracked.end(unrecorded?.message ?? reasonOf(shown), false);
+                      throwIf(unrecorded);
                   }, 0),
               ];
         this.live.add(held);
