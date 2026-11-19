@@ -155,9 +155,43 @@ describe('ports', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'W21 waits for a recording of a VM that differs from its file in packages, ports and accounts, and for the count of its differences per chapter on machinefile.drift',
-    );
+    test('W21 Its file counts the differences per chapter', async () => {
+        // Given - linux-1's Overview over stories, a VM that differs from linux-dev in its apps, its ports and its accounts
+        const result = await website.visit(
+            '/?world=stories&machine=linux-1&tab=Overview',
+            async (visitor) => {
+                const file = region('Its file');
+
+                // When - Its file is read
+                // Then - the file's verdict, then each chapter's own count
+                await visitor.see(within(file, content('8 differences from linux-dev.')));
+                const row = (tab: string) => within(file, button(tab, { exact: false }));
+                await visitor.see(within(row('Packages'), content('3 differences')));
+                await visitor.see(within(row('Ports'), content('3 differences')));
+                await visitor.see(within(row('Sign-ins'), content('2 differences')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("W21 a row of Its file opens its chapter's tab", async () => {
+        // Given - linux-1's Overview over stories
+        const result = await website.visit(
+            '/?world=stories&machine=linux-1&tab=Overview',
+            async (visitor) => {
+                const file = region('Its file');
+                await visitor.see(file);
+
+                // When - its Sign-ins row is pressed
+                await visitor.click(within(file, button('Sign-ins', { exact: false })));
+
+                // Then - the Sign-ins tab stands where the Overview was
+                await visitor.gone(file);
+                await visitor.see(region('Sign-ins'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo(`W22 waits for ${CHAPTER}`);
 
