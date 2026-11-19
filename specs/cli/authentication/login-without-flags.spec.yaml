@@ -9,11 +9,11 @@ runs:
             ⬡ Credentials
 
             Anthropic
-              · oauth          not set  ·  run `claude login` on the host; spwn picks up credentials automatically
+              · oauth          not set  ·  run `claude login` on the host; Spwn picks up credentials automatically
               · api_key        not set  ·  spwn auth login anthropic --api-key sk-ant-...
 
             OpenAI
-              · oauth          not set  ·  run `codex login` on the host; spwn picks up credentials automatically
+              · oauth          not set  ·  run `codex login` on the host; Spwn picks up credentials automatically
               · api_key        not set  ·  spwn auth login openai --api-key sk-... or export OPENAI_API_KEY=sk-...
 
             Tools (CLI)

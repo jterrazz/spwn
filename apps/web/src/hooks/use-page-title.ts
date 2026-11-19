@@ -6,10 +6,10 @@ function titleOf(parts: (null | string | undefined)[]): string {
     const named = parts.filter(
         (part): part is string => part !== null && part !== undefined && part !== '',
     );
-    return [...named, 'spwn'].join(' · ');
+    return [...named, 'Spwn'].join(' · ');
 }
 
-/** Sets the document title: the parts joined with ' · ', ending with 'spwn', so usePageTitle('neo', 'Rhea') gives 'neo · Rhea · spwn'. */
+/** Sets the document title: the parts joined with ' · ', ending with 'Spwn', so usePageTitle('neo', 'Rhea') gives 'neo · Rhea · Spwn'. */
 export function usePageTitle(...parts: (null | string | undefined)[]) {
     const title = titleOf(parts);
 

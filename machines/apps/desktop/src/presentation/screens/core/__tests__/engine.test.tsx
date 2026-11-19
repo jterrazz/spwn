@@ -25,7 +25,7 @@ const recordingFor = await recordingsOf(
 );
 
 const sidebar = navigation('Sidebar');
-const BEHIND = heading('spwn v0.22.0 is out.');
+const BEHIND = heading('Spwn v0.22.0 is out.');
 const ROW = button('v0.22.0 available Update');
 
 type Over = { script?: 'update' | 'update-failing'; link?: Link };

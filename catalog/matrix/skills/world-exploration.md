@@ -1,15 +1,15 @@
 ---
 name: world-exploration
-description: Use when first waking up in a new spwn world to systematically map what's installed, what's mounted, and what the agent can touch.
+description: Use when first waking up in a new Spwn world to systematically map what's installed, what's mounted, and what the agent can touch.
 ---
 
 # Skill: World Exploration
 
-How to systematically explore a spwn world when you first wake up.
+How to systematically explore a Spwn world when you first wake up.
 
 ## The standard tour
 
-Every spwn world has a predictable layout. Walk it in this order:
+Every Spwn world has a predictable layout. Walk it in this order:
 
 ### 1. CLAUDE.md: the world, already in your prompt
 

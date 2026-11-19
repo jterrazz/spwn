@@ -184,9 +184,9 @@ It runs entirely locally - no external API calls needed for search.`,
         skills: [
             {
                 name: 'SKILL.md',
-                content: `# spwn CLI
+                content: `# Spwn CLI
 
-The spwn CLI manages worlds, agents, and the universe from inside a container.
+The Spwn CLI manages worlds, agents, and the universe from inside a container.
 
 ## Key Commands
 \`\`\`bash

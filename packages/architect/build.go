@@ -29,7 +29,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		logw = io.Discard
 	}
 
-	fmt.Fprintln(logw, "Cross-compiling spwn for linux/amd64...")
+	fmt.Fprintln(logw, "Cross-compiling Spwn for linux/amd64...")
 	spwnBinary, err := crossCompileSpwn(ctx, logw)
 	if err != nil {
 		return fmt.Errorf("cross-compile spwn: %w", err)
@@ -134,7 +134,7 @@ func crossCompileSpwn(ctx context.Context, logw io.Writer) (string, error) {
 
 	if err := cmd.Run(); err != nil {
 		os.Remove(tmpFile.Name())
-		return "", fmt.Errorf("go build failed: %w\nMake sure Go is installed and the spwn source tree is available", err)
+		return "", fmt.Errorf("go build failed: %w\nMake sure Go is installed and the Spwn source tree is available", err)
 	}
 
 	return tmpFile.Name(), nil
@@ -163,9 +163,9 @@ func findSourceRoot() (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("cannot find spwn source tree.\n" +
+	return "", fmt.Errorf("cannot find Spwn source tree.\n" +
 		"The architect image requires cross-compilation from source.\n" +
-		"Make sure you're running spwn from within the source tree, or that the binary was built with VCS info")
+		"Make sure you're running Spwn from within the source tree, or that the binary was built with VCS info")
 }
 
 func findRootUpward(dir string) string {

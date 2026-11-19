@@ -1,4 +1,4 @@
-description: build outside a spwn project nudges the user at spwn init
+description: build outside a Spwn project nudges the user at spwn init
 runs:
     - command: build
       exit: 1

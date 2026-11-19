@@ -20,7 +20,7 @@ runs:
               spwn agent neo                 # open an interactive session with neo
       stderr: |4+
           
-            ✓ Initialised spwn project {{string}}
+            ✓ Initialised Spwn project {{string}}
 
 
     - command: world enter nonexistent

@@ -3,7 +3,7 @@
 # hook name; agents subscribe via `hook/session-banner` in their
 # agent.yaml#dependencies.
 #
-# spwn translates this file into each runtime's native hook format
+# Spwn translates this file into each runtime's native hook format
 # at build time, but only for agents that selected it:
 #
 #   Claude Code  →  ~/.claude/settings.json#hooks

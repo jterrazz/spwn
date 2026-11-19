@@ -19,7 +19,7 @@ describe('server', () => {
                 .env({ SPWN_HOME: `$WORKDIR/${MARKER}` })
                 .exec('web --no-open --port 0', {
                     timeout: 15_000,
-                    waitFor: 'spwn API listening on',
+                    waitFor: 'Spwn API listening on',
                 });
 
             // Then - it reached its listening banner, cut there, and printed no error
@@ -35,7 +35,7 @@ describe('server', () => {
 
                   Press Ctrl+C to stop
 
-                spwn API listening on :0
+                Spwn API listening on :0
             `);
         }
 

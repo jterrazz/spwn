@@ -35,7 +35,7 @@ const TERMS: Term[] = [
     {
         word: 'Runtime',
         short: 'How an agent thinks.',
-        long: 'The CLI or SDK that drives an agent - Claude Code, Codex, Aider, etc. Runtimes are swappable adapters; the rest of spwn does not care which one you use.',
+        long: 'The CLI or SDK that drives an agent - Claude Code, Codex, Aider, etc. Runtimes are swappable adapters; the rest of Spwn does not care which one you use.',
     },
     {
         word: 'Provider',
@@ -80,7 +80,7 @@ export function GlossaryButton() {
                     <DialogHeader>
                         <DialogTitle>Glossary</DialogTitle>
                         <DialogDescription>
-                            The vocabulary spwn uses across the CLI and the desktop app.
+                            The vocabulary Spwn uses across the CLI and the desktop app.
                         </DialogDescription>
                     </DialogHeader>
                     <dl className="mt-2 max-h-[60vh] space-y-3 overflow-y-auto pr-2">

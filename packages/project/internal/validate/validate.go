@@ -599,7 +599,7 @@ func ruleWorkspaceMounts(in Input) []Issue {
 				out = append(out, Issue{
 					Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
 					Message: fmt.Sprintf("workspace entry %q uses a container-path form; use name=path instead", entry),
-					Hint:    "drop the container path; spwn mounts named workspaces at /workspaces/<name> automatically",
+					Hint:    "drop the container path; Spwn mounts named workspaces at /workspaces/<name> automatically",
 				})
 			}
 		}

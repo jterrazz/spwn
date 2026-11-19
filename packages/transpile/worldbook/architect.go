@@ -58,7 +58,7 @@ Read /me/skills/ for detailed guides on:
 - Monitoring (monitoring.md)
 
 ## Your Capabilities
-- Full access to the spwn CLI
+- Full access to the Spwn CLI
 - Docker socket access (manage sibling containers)
 - Shared state with the host at $SPWN_HOME (/home/spwn/.spwn/)
 

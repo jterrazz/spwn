@@ -1,4 +1,4 @@
-description: inspect outside a spwn project names the missing manifest
+description: inspect outside a Spwn project names the missing manifest
 runs:
     - command: inspect --offline
       exit: 1

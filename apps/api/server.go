@@ -170,7 +170,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 		if r.URL.Path == "/" {
 			w.Header().Set("Content-Type", "application/json")
 			_ = json.NewEncoder(w).Encode(map[string]string{
-				"name":      "spwn spwn API",
+				"name":      "Spwn API",
 				"version":   upgrade.CLIVersion,
 				"docs":      "/api/health",
 				"dashboard": "http://localhost:3000",
@@ -185,7 +185,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 // Start begins serving the API.
 func (s *Server) Start() error {
 	s.srv = &http.Server{Addr: s.addr, Handler: s.Handler()}
-	fmt.Printf("spwn API listening on %s\n", s.addr)
+	fmt.Printf("Spwn API listening on %s\n", s.addr)
 	return s.srv.ListenAndServe()
 }
 

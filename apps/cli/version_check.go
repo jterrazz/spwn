@@ -87,7 +87,7 @@ func printUpgradeHint() {
 		ui.Yellow(ui.Strong("Update available")),
 		ui.Faint(strings.Repeat("─", topDashes)),
 	)
-	fmt.Fprintf(w, "  %s  spwn %s is out  %s\n",
+	fmt.Fprintf(w, "  %s  Spwn %s is out  %s\n",
 		ui.Faint("│"),
 		ui.Green(ui.Strong(latest)),
 		ui.Faint(fmt.Sprintf("(you're on %s)", current)),

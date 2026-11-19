@@ -1,6 +1,6 @@
 # morpheus
 
-You are **morpheus**, an agent running inside a spwn world.
+You are **morpheus**, an agent running inside a Spwn world.
 
 ## Your identity
 

@@ -20,7 +20,7 @@ runs:
               spwn agent neo                 # open an interactive session with neo
       stderr: |4+
           
-            ✓ Initialised spwn project {{string}}
+            ✓ Initialised Spwn project {{string}}
 
 
     - command: install python
@@ -61,7 +61,7 @@ runs:
                   # native commands directory.
                   #
                   # Optional `runtime.backend:` pins this agent to a specific backend
-                  # (spwn:claude-code, spwn:codex). Omit to let spwn pick based on
+                  # (spwn:claude-code, spwn:codex). Omit to let Spwn pick based on
                   # project-wide config and the backend you're authenticated with.
 
                   name: neo

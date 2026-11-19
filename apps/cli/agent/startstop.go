@@ -14,7 +14,7 @@ var startCmd = &cobra.Command{
 	Hidden: true,
 	Long: `Run an agent as a long-lived autonomous process.
 
-This command is reserved for a future release. Today, spwn agents
+This command is reserved for a future release. Today, Spwn agents
 are invoked interactively ("spwn agent <name>") - they don't run on
 their own between invocations.`,
 	Args: cobra.ExactArgs(1),
@@ -29,7 +29,7 @@ var stopCmd = &cobra.Command{
 	Hidden: true,
 	Long: `Kill a running autonomous agent process.
 
-This command is reserved for a future release. Today, spwn agents
+This command is reserved for a future release. Today, Spwn agents
 don't run between invocations - there is nothing to stop.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -22,7 +22,7 @@ function lockOf(status: DockerStatus | null | undefined): Lock | undefined {
             error: undefined,
             hint: undefined,
             installUrl: undefined,
-            subtitle: 'Start Docker Desktop and spwn will pick it up automatically.',
+            subtitle: 'Start Docker Desktop and Spwn will pick it up automatically.',
             title: 'Waiting for Docker',
         };
     }
@@ -39,8 +39,8 @@ function lockOf(status: DockerStatus | null | undefined): Lock | undefined {
                 : 'https://www.docker.com/products/docker-desktop/'
             : undefined,
         subtitle: missing
-            ? 'Every spwn world runs inside a Docker container. Install Docker to continue.'
-            : 'Start Docker Desktop and spwn will pick it up automatically.',
+            ? 'Every Spwn world runs inside a Docker container. Install Docker to continue.'
+            : 'Start Docker Desktop and Spwn will pick it up automatically.',
         title: missing ? "Docker isn't installed" : 'Waiting for Docker',
     };
 }

@@ -16,7 +16,7 @@ install:
     - |
       cat > /usr/local/bin/greet <<'SPWN_GREET_EOF'
       #!/usr/bin/env bash
-      echo "hello from spwn, $(whoami), it is $(date +%H:%M:%S)"
+      echo "hello from Spwn, $(whoami), it is $(date +%H:%M:%S)"
       SPWN_GREET_EOF
     - chmod +x /usr/local/bin/greet
 

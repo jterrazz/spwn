@@ -17,7 +17,7 @@ shared OAuth clients for sensitive scopes). 5 to 10 minutes, free, no credit car
   1. Open https://console.cloud.google.com/projectcreate
      → name the project "spwn" (or anything), Create.
 
-  2. Enable the APIs you want spwn to use:
+  2. Enable the APIs you want Spwn to use:
        Gmail API:    https://console.cloud.google.com/apis/library/gmail.googleapis.com
        Calendar API: https://console.cloud.google.com/apis/library/calendar-json.googleapis.com
      → Click "Enable" on each.

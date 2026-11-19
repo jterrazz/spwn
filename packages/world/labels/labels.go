@@ -128,7 +128,7 @@ func ParseWorld(lbls map[string]string) (models.World, error) {
 		return models.World{}, fmt.Errorf("nil labels")
 	}
 	if lbls[KindKey] != KindWorld {
-		return models.World{}, fmt.Errorf("not a spwn world container (kind=%q)", lbls[KindKey])
+		return models.World{}, fmt.Errorf("not a Spwn world container (kind=%q)", lbls[KindKey])
 	}
 	id := lbls[WorldID]
 	if id == "" {

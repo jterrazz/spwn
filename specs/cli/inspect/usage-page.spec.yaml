@@ -4,7 +4,7 @@ runs:
       exit: 0
       stdout: |+
           
-          Inspect a spwn project: one block per agent, showing the
+          Inspect a Spwn project: one block per agent, showing the
           resolved dependency tree (with transitive (*)-dedup and composition
           badges), the skills contributed by tool deps, and the hooks bound
           to the agent.

@@ -4,7 +4,7 @@ runs:
       exit: 0
       stderr: |4+
           
-            ✓ openai disabled; spwn will behave as though it has no credentials
+            ✓ openai disabled; Spwn will behave as though it has no credentials
             Re-enable with: spwn auth enable openai
 
     - command: auth default openai

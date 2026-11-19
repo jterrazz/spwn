@@ -24,7 +24,7 @@ install:
       cat > /usr/local/bin/spwn-policy-check <<'POLICYCHECK'
       #!/usr/bin/env python3
       """Per-agent method allow/deny check, materialized at image build
-      time by the spwn compile pipeline. Reads /etc/spwn/policy/<tool>.json
+      time by the Spwn compile pipeline. Reads /etc/spwn/policy/<tool>.json
       written from agent.yaml's dependency entries. Wrapper convention:
           spwn-policy-check <tool> <method>  || exit 1
       No file means no policy, so exit 0 (allow). Empty method or list-style

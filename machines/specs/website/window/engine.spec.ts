@@ -5,7 +5,7 @@ import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
 const ROW = button('v0.22.0 available Update');
-const BEHIND = heading('spwn v0.22.0 is out.');
+const BEHIND = heading('Spwn v0.22.0 is out.');
 
 describe('engine', () => {
     test('U1 a Mac behind the release shows the row at the sidebar foot, and it opens the Engine page', async () => {

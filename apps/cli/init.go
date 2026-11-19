@@ -21,7 +21,7 @@ func init() {
 	initCmd.Flags().BoolVar(&initGlobal, "global", false, "Initialise ~/.spwn/ (legacy user-home mode)")
 	initCmd.Flags().BoolVarP(&initForce, "force", "f", false, "Overwrite existing spwn.yaml")
 	initCmd.Flags().StringVar(&initName, "name", "", "Project name (default: current directory name)")
-	initCmd.Flags().StringVar(&initBackend, "backend", "", "Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let spwn resolve at spawn time.")
+	initCmd.Flags().StringVar(&initBackend, "backend", "", "Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let Spwn resolve at spawn time.")
 	rootCmd.AddCommand(initCmd)
 }
 
@@ -36,8 +36,8 @@ const exampleRefPrefix = "spwn:"
 
 var initCmd = &cobra.Command{
 	Use:   "init [example-ref]",
-	Short: "Scaffold a spwn project in the current directory",
-	Long: `Scaffold a spwn project in the current directory.
+	Short: "Scaffold a Spwn project in the current directory",
+	Long: `Scaffold a Spwn project in the current directory.
 
 Without arguments, creates a blank spwn.yaml plus a default ./spwn/
 tree (one world, one agent) and adds .spwn/ to .gitignore.
@@ -93,7 +93,7 @@ func runInitLocal(cmd *cobra.Command) error {
 	}
 
 	s.Blank()
-	s.Success("Initialised spwn project " + name)
+	s.Success("Initialised Spwn project " + name)
 	s.Blank()
 	fmt.Fprintln(cmd.OutOrStdout(), "  Committed:")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn.yaml                      # project manifest (worlds live inline)")

@@ -18,4 +18,4 @@ runs:
           {"v":2,"id":"1","call":"engine.read-release","in":{}}
       exit: 0
       stdout: |
-          {"Installed":"v0.21.0","Latest":"v0.22.0","Behind":true,"Head":{"Tone":"new","Sentence":"spwn v0.22.0 is out.","Line":"This Mac runs v0.21.0."},"Notes":"https://github.com/jterrazz/spwn/releases/tag/v0.22.0","Checked":true,"Refused":null}
+          {"Installed":"v0.21.0","Latest":"v0.22.0","Behind":true,"Head":{"Tone":"new","Sentence":"Spwn v0.22.0 is out.","Line":"This Mac runs v0.21.0."},"Notes":"https://github.com/jterrazz/spwn/releases/tag/v0.22.0","Checked":true,"Refused":null}

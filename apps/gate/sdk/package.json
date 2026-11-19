@@ -2,7 +2,7 @@
     "name": "@spwn/gate-tool",
     "version": "0.1.0",
     "private": true,
-    "description": "The SDK a catalog tool plugs into the spwn gate with: the browser-session client of the gate-browser sidecar, and the harness that serves a tool's methods as MCP tools and as a CLI.",
+    "description": "The SDK a catalog tool plugs into the Spwn gate with: the browser-session client of the gate-browser sidecar, and the harness that serves a tool's methods as MCP tools and as a CLI.",
     "type": "module",
     "exports": {
         ".": "./src/index.ts"

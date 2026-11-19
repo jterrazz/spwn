@@ -21,7 +21,7 @@ function readingOf(status: DockerStatus | null | undefined, ready: boolean): Rea
         };
     }
     if (status === undefined) {
-        return { dot: 'bg-amber-400', label: 'API offline', title: 'Cannot reach the spwn API' };
+        return { dot: 'bg-amber-400', label: 'API offline', title: 'Cannot reach the Spwn API' };
     }
     if (!ready) {
         return {

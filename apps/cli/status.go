@@ -104,7 +104,7 @@ func rule(label, right string) string {
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show the full status of your spwn environment",
+	Short: "Show the full status of your Spwn environment",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		baseDir := platform.BaseDir()

@@ -430,7 +430,7 @@ func findSourceRoot() (string, error) {
 			return r, nil
 		}
 	}
-	return "", fmt.Errorf("cannot find spwn source tree (looked from cwd, exe dir, vcs.directory)")
+	return "", fmt.Errorf("cannot find Spwn source tree (looked from cwd, exe dir, vcs.directory)")
 }
 
 func findRootUpward(dir string) string {

@@ -1,4 +1,4 @@
-description: build --tree-only outside a spwn project nudges the user at spwn init
+description: build --tree-only outside a Spwn project nudges the user at spwn init
 runs:
     - command: build --tree-only
       exit: 1

@@ -20,7 +20,7 @@ runs:
               spwn agent neo                 # open an interactive session with neo
       stderr: |4+
           
-            ✓ Initialised spwn project sanity-check
+            ✓ Initialised Spwn project sanity-check
 
 
     - command: check --deep

@@ -137,7 +137,7 @@ var upCmd = &cobra.Command{
 	Short: "Spawn a world - an isolated reality for agents",
 	Long: `Spawn a world - the Big Bang.
 
-Inside a spwn project:
+Inside a Spwn project:
   spwn up             brings up every world declared in spwn.yaml
   spwn up <name>      brings up a specific world from spwn.yaml
 

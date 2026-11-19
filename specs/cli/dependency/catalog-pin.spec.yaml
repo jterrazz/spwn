@@ -1,4 +1,4 @@
-description: install pins an spwn ref into spwn.lock
+description: install pins a spwn-scheme ref into spwn.lock
 fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install spwn:python

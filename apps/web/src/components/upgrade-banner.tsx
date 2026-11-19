@@ -55,7 +55,7 @@ export function UpgradeBanner({ version }: UpgradeBannerProps) {
                 <div className="flex items-center gap-2 text-amber-400">
                     <IconArrowUp className="mt-0.5 shrink-0" size={14} />
                     <span className="text-[11px] font-medium">
-                        spwn v{version.latest} available
+                        Spwn v{version.latest} available
                     </span>
                 </div>
                 <button

@@ -9,7 +9,7 @@ runs:
             spwn auth login anthropic --api-key sk-ant-...
 
           For OAuth-backed subscription access (Claude.ai / ChatGPT Plus via codex),
-          run the upstream CLI login first, then re-run this command; spwn will
+          run the upstream CLI login first, then re-run this command; Spwn will
           detect the new credential and record it:
 
             claude login   # then: spwn auth login anthropic

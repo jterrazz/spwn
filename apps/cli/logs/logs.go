@@ -59,7 +59,7 @@ func sortedEventTypes() []string {
 var Cmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Show the system event log across worlds and agents",
-	Long: `Show the spwn event log - spawned worlds, created agents, dream cycles,
+	Long: `Show the Spwn event log - spawned worlds, created agents, dream cycles,
 snapshots, messages, and every other discrete thing that happened.
 
 Scope it with --world or --agent, or use the per-entity shortcuts:

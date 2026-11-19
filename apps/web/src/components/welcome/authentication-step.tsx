@@ -76,7 +76,7 @@ export function AuthenticationStep({
     return (
         <div className="space-y-3">
             <p className="text-muted-foreground/60 text-[11px]">
-                spwn supports subscription sign-in (Anthropic / Codex) and API keys via env vars.
+                Spwn supports subscription sign-in (Anthropic / Codex) and API keys via env vars.
             </p>
             <div className="space-y-1.5">
                 {providers === null && (

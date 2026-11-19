@@ -13,7 +13,7 @@ import (
 var Cmd = &cobra.Command{
 	Use:   "inspect [agent]",
 	Short: "Show per-agent composition: deps, skills, hooks",
-	Long: `Inspect a spwn project: one block per agent, showing the
+	Long: `Inspect a Spwn project: one block per agent, showing the
 resolved dependency tree (with transitive (*)-dedup and composition
 badges), the skills contributed by tool deps, and the hooks bound
 to the agent.

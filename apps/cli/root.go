@@ -33,7 +33,7 @@ var Version = "dev"
 var rootCmd = &cobra.Command{
 	Use:   "spwn",
 	Short: "spwn - create realities for things that can think",
-	Long: `spwn creates isolated Docker environments for AI agents.
+	Long: `Spwn creates isolated Docker environments for AI agents.
 Each world has its own rules (network, filesystem, tools) and a
 Mind (persistent agent identity).`,
 	SilenceUsage:  true,

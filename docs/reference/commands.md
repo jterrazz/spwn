@@ -7,7 +7,7 @@ Every command of the `spwn` binary, as `spwn <command> --help` prints it. The pa
 spwn - create realities for things that can think.
 
 ```text
-spwn creates isolated Docker environments for AI agents.
+Spwn creates isolated Docker environments for AI agents.
 Each world has its own rules (network, filesystem, tools) and a
 Mind (persistent agent identity).
 ```
@@ -21,16 +21,16 @@ Mind (persistent agent identity).
 - [spwn cookie-sync](#spwn-cookie-sync): Browser extension that auto-syncs session cookies to the gate (status + providers).
 - [spwn down](#spwn-down): Destroy a world.
 - [spwn gate](#spwn-gate): Manage the host-side credential broker (start/stop/status/logs/restart).
-- [spwn init](#spwn-init): Scaffold a spwn project in the current directory.
+- [spwn init](#spwn-init): Scaffold a Spwn project in the current directory.
 - [spwn inspect](#spwn-inspect): Show per-agent composition: deps, skills, hooks.
 - [spwn install](#spwn-install): Install a dependency into the project.
 - [spwn logs](#spwn-logs): Show the system event log across worlds and agents.
 - [spwn ls](#spwn-ls): Agent-centric status (running / stopped / orphan).
 - [spwn skill](#spwn-skill): Author bare-markdown skill files.
-- [spwn status](#spwn-status): Show the full status of your spwn environment.
+- [spwn status](#spwn-status): Show the full status of your Spwn environment.
 - [spwn uninstall](#spwn-uninstall): Remove a dependency from the project.
 - [spwn up](#spwn-up): Spawn a world - an isolated reality for agents.
-- [spwn upgrade](#spwn-upgrade): Upgrade spwn to the latest version.
+- [spwn upgrade](#spwn-upgrade): Upgrade Spwn to the latest version.
 - [spwn world](#spwn-world): Manage worlds - ephemeral runtime instances for agents.
 
 ## spwn agent
@@ -385,26 +385,26 @@ Manage credentials: dashboard, login, use, logout, disable.
 spwn auth
 ```
 
-- [spwn auth default](#spwn-auth-default): Pick which provider spwn prefers when multiple are authenticated.
-- [spwn auth disable](#spwn-auth-disable): Tell spwn not to use this provider, even if creds exist.
+- [spwn auth default](#spwn-auth-default): Pick which provider Spwn prefers when multiple are authenticated.
+- [spwn auth disable](#spwn-auth-disable): Tell Spwn not to use this provider, even if creds exist.
 - [spwn auth enable](#spwn-auth-enable): Reverse a previous `disable`.
 - [spwn auth login](#spwn-auth-login): Set up credentials for a provider.
 - [spwn auth logout](#spwn-auth-logout): Clear stored credentials for a provider.
-- [spwn auth use](#spwn-auth-use): Pick which credential method spwn should prefer.
+- [spwn auth use](#spwn-auth-use): Pick which credential method Spwn should prefer.
 
 ## spwn auth default
 
-Pick which provider spwn prefers when multiple are authenticated.
+Pick which provider Spwn prefers when multiple are authenticated.
 
 ```text
-Set a soft preference for which provider's runtime spwn picks
+Set a soft preference for which provider's runtime Spwn picks
 when you're logged into more than one and no runtime is pinned at the
 project or agent level.
 ```
 
 ```text
 This is the durable answer to the "multiple providers authenticated
-and no runtime pinned" error. Set it once and spwn will quietly
+and no runtime pinned" error. Set it once and Spwn will quietly
 resolve ambiguity in that provider's favour. Does NOT disable the
 other provider or override agent.yaml / spwn.yaml pins.
 ```
@@ -425,11 +425,11 @@ spwn auth default [provider] [flags]
 
 ## spwn auth disable
 
-Tell spwn not to use this provider, even if creds exist.
+Tell Spwn not to use this provider, even if creds exist.
 
 ```text
 Opt a provider out without touching credentials. Useful when
-you want spwn to ignore (say) codex OAuth on your machine but leave
+you want Spwn to ignore (say) codex OAuth on your machine but leave
 the codex CLI working.
 ```
 
@@ -460,7 +460,7 @@ API key:
 
 ```text
 For OAuth-backed subscription access (Claude.ai / ChatGPT Plus via codex),
-run the upstream CLI login first, then re-run this command; spwn will
+run the upstream CLI login first, then re-run this command; Spwn will
 detect the new credential and record it:
 ```
 
@@ -514,7 +514,7 @@ spwn auth logout <provider> [flags]
 
 ## spwn auth use
 
-Pick which credential method spwn should prefer.
+Pick which credential method Spwn should prefer.
 
 ```text
 Flip the active method for a provider. Run without a method
@@ -839,10 +839,10 @@ spwn gate stop
 
 ## spwn init
 
-Scaffold a spwn project in the current directory.
+Scaffold a Spwn project in the current directory.
 
 ```text
-Scaffold a spwn project in the current directory.
+Scaffold a Spwn project in the current directory.
 ```
 
 ```text
@@ -870,7 +870,7 @@ spwn init [example-ref] [flags]
 ```
 
 ```text
-      --backend string   Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let spwn resolve at spawn time.
+      --backend string   Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let Spwn resolve at spawn time.
   -f, --force            Overwrite existing spwn.yaml
       --global           Initialise ~/.spwn/ (legacy user-home mode)
       --name string      Project name (default: current directory name)
@@ -881,7 +881,7 @@ spwn init [example-ref] [flags]
 Show per-agent composition: deps, skills, hooks.
 
 ```text
-Inspect a spwn project: one block per agent, showing the
+Inspect a Spwn project: one block per agent, showing the
 resolved dependency tree (with transitive (*)-dedup and composition
 badges), the skills contributed by tool deps, and the hooks bound
 to the agent.
@@ -943,7 +943,7 @@ spwn install <ref> [flags]
 Show the system event log across worlds and agents.
 
 ```text
-Show the spwn event log - spawned worlds, created agents, dream cycles,
+Show the Spwn event log - spawned worlds, created agents, dream cycles,
 snapshots, messages, and every other discrete thing that happened.
 ```
 
@@ -1045,7 +1045,7 @@ spwn skill show <skill-name>
 
 ## spwn status
 
-Show the full status of your spwn environment.
+Show the full status of your Spwn environment.
 
 ```text
 spwn status
@@ -1088,7 +1088,7 @@ Spawn a world - the Big Bang.
 ```
 
 ```text
-Inside a spwn project:
+Inside a Spwn project:
   spwn up             brings up every world declared in spwn.yaml
   spwn up <name>      brings up a specific world from spwn.yaml
 ```
@@ -1115,10 +1115,10 @@ spwn up [name] [flags]
 
 ## spwn upgrade
 
-Upgrade spwn to the latest version.
+Upgrade Spwn to the latest version.
 
 ```text
-Downloads and installs the latest spwn release from GitHub.
+Downloads and installs the latest Spwn release from GitHub.
 ```
 
 ```text
@@ -1412,7 +1412,7 @@ Spawn a world - the Big Bang.
 ```
 
 ```text
-Inside a spwn project:
+Inside a Spwn project:
   spwn up             brings up every world declared in spwn.yaml
   spwn up <name>      brings up a specific world from spwn.yaml
 ```

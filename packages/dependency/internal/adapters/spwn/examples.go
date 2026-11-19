@@ -182,7 +182,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 
 	spwnRoot := filepath.Join(baseDir, "spwn")
 	if err := os.MkdirAll(spwnRoot, 0o755); err != nil {
-		return rep, fmt.Errorf("create spwn dir: %w", err)
+		return rep, fmt.Errorf("create Spwn dir: %w", err)
 	}
 	for _, sub := range topLevelSubdirs {
 		src := contentRoot + "/" + slug + "/" + sub

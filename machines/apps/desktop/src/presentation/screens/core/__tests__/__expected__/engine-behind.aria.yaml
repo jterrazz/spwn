@@ -35,9 +35,9 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Engine
-  - heading "spwn v0.22.0 is out." [level=1]
+  - heading "Spwn v0.22.0 is out." [level=1]
   - paragraph:
-    - img "spwn v0.22.0 is out."
+    - img "Spwn v0.22.0 is out."
     - text: This Mac runs v0.21.0.
   - region "Update":
     - heading "Update the public installer installs station and Spwn" [level=2]

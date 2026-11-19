@@ -20,7 +20,7 @@ runs:
               spwn agent neo                 # open an interactive session with neo
       stderr: |4+
           
-            ✓ Initialised spwn project lifecycle
+            ✓ Initialised Spwn project lifecycle
 
 
     - command: agent ls

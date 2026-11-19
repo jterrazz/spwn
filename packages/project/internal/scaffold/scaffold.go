@@ -434,7 +434,7 @@ func appendGitignore(root string) error {
 	}
 	if len(existing) > 0 {
 		out.WriteByte('\n')
-		out.WriteString("# spwn local state\n")
+		out.WriteString("# Spwn local state\n")
 	}
 	out.WriteString(needle)
 	out.WriteByte('\n')

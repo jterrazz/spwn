@@ -4,7 +4,7 @@ runs:
       exit: 0
       stdout: |+
           
-          Scaffold a spwn project in the current directory.
+          Scaffold a Spwn project in the current directory.
 
           Without arguments, creates a blank spwn.yaml plus a default ./spwn/
           tree (one world, one agent) and adds .spwn/ to .gitignore.
@@ -22,7 +22,7 @@ runs:
             spwn init [example-ref] [flags]
 
           Flags:
-                --backend string   Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let spwn resolve at spawn time.
+                --backend string   Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let Spwn resolve at spawn time.
             -f, --force            Overwrite existing spwn.yaml
                 --global           Initialise ~/.spwn/ (legacy user-home mode)
             -h, --help             help for init

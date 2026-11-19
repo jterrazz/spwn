@@ -4,7 +4,7 @@ runs:
       exit: 0
       stdout: |+
           
-          Show the spwn event log - spawned worlds, created agents, dream cycles,
+          Show the Spwn event log - spawned worlds, created agents, dream cycles,
           snapshots, messages, and every other discrete thing that happened.
 
           Scope it with --world or --agent, or use the per-entity shortcuts:

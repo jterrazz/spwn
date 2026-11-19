@@ -1,4 +1,4 @@
-description: an unknown spwn ref is refused as an unknown builtin
+description: an unknown spwn-scheme ref is refused as an unknown builtin
 fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install spwn:nonesuch

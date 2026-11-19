@@ -17,16 +17,16 @@ import { ArchitectChatProvider } from '../contexts/architect-chat-context';
 
 export const metadata: Metadata = {
     title: {
-        template: '%s · spwn',
-        default: 'spwn',
+        template: '%s · Spwn',
+        default: 'Spwn',
     },
-    description: 'Desktop app for spwn - manage AI agent worlds',
+    description: 'Desktop app for Spwn - manage AI agent worlds',
     icons: [{ rel: 'icon', url: '/favicon.svg', type: 'image/svg+xml' }],
     openGraph: {
-        title: 'spwn',
-        description: 'Desktop app for spwn - manage AI agent worlds',
+        title: 'Spwn',
+        description: 'Desktop app for Spwn - manage AI agent worlds',
         type: 'website',
-        siteName: 'spwn',
+        siteName: 'Spwn',
     },
     metadataBase: new URL('https://spwn.sh'),
 };

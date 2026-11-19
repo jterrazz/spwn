@@ -27,8 +27,8 @@ func init() {
 
 var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
-	Short: "Upgrade spwn to the latest version",
-	Long: `Downloads and installs the latest spwn release from GitHub.
+	Short: "Upgrade Spwn to the latest version",
+	Long: `Downloads and installs the latest Spwn release from GitHub.
 
 Fetches the release binary for your OS/architecture, verifies its SHA256
 against the checksums published with the release, and atomically replaces

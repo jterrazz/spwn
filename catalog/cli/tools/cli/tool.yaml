@@ -1,6 +1,6 @@
 name: "spwn:cli"
 version: latest
-description: "The spwn CLI for managing worlds and agents"
+description: "The Spwn CLI for managing worlds and agents"
 
 install:
   commands:

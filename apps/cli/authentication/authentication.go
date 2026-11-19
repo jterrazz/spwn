@@ -298,7 +298,7 @@ func credSourceDetail(cred *authentication.Credential) string {
 
 var useCmd = &cobra.Command{
 	Use:   "use <provider> <method>",
-	Short: "Pick which credential method spwn should prefer",
+	Short: "Pick which credential method Spwn should prefer",
 	Long: `Flip the active method for a provider. Run without a method
 to clear the preference (back to auto-select).
 
@@ -346,7 +346,7 @@ API key:
   spwn auth login anthropic --api-key sk-ant-...
 
 For OAuth-backed subscription access (Claude.ai / ChatGPT Plus via codex),
-run the upstream CLI login first, then re-run this command; spwn will
+run the upstream CLI login first, then re-run this command; Spwn will
 detect the new credential and record it:
 
   claude login   # then: spwn auth login anthropic
@@ -587,9 +587,9 @@ to unset them manually.
 
 var disableCmd = &cobra.Command{
 	Use:   "disable <provider>",
-	Short: "Tell spwn not to use this provider, even if creds exist",
+	Short: "Tell Spwn not to use this provider, even if creds exist",
 	Long: `Opt a provider out without touching credentials. Useful when
-you want spwn to ignore (say) codex OAuth on your machine but leave
+you want Spwn to ignore (say) codex OAuth on your machine but leave
 the codex CLI working.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -602,7 +602,7 @@ the codex CLI working.`,
 		}
 		s := ui.New()
 		s.Blank()
-		s.Success(fmt.Sprintf("%s disabled; spwn will behave as though it has no credentials", p))
+		s.Success(fmt.Sprintf("%s disabled; Spwn will behave as though it has no credentials", p))
 		s.Info("Re-enable with:", fmt.Sprintf("spwn auth enable %s", p))
 		s.Blank()
 		return nil
@@ -631,13 +631,13 @@ var enableCmd = &cobra.Command{
 
 var defaultCmd = &cobra.Command{
 	Use:   "default [provider]",
-	Short: "Pick which provider spwn prefers when multiple are authenticated",
-	Long: `Set a soft preference for which provider's runtime spwn picks
+	Short: "Pick which provider Spwn prefers when multiple are authenticated",
+	Long: `Set a soft preference for which provider's runtime Spwn picks
 when you're logged into more than one and no runtime is pinned at the
 project or agent level.
 
 This is the durable answer to the "multiple providers authenticated
-and no runtime pinned" error. Set it once and spwn will quietly
+and no runtime pinned" error. Set it once and Spwn will quietly
 resolve ambiguity in that provider's favour. Does NOT disable the
 other provider or override agent.yaml / spwn.yaml pins.
 

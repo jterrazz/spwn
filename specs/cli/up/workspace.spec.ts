@@ -26,7 +26,7 @@ describe('workspace', () => {
             read: inside.stdout.text,
         }).toStrictEqual({
             host: 'written\n',
-            read: '# spwn - project manifest\nversion: 1\nname: docker-pilot\n',
+            read: '# Spwn - project manifest\nversion: 1\nname: docker-pilot\n',
         });
     });
 });

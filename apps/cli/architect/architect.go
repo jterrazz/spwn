@@ -130,7 +130,7 @@ func runStart(cmd *cobra.Command, args []string) error {
 				"Install Docker Desktop or start the daemon")
 		case strings.Contains(msg, "source tree"):
 			return s.FailHint("Image build", err,
-				"Run from the spwn source directory, or build manually: make build-architect-image")
+				"Run from the Spwn source directory, or build manually: make build-architect-image")
 		default:
 			return s.FailHint("Start failed", err, "")
 		}

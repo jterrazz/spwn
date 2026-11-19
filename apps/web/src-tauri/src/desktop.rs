@@ -105,7 +105,7 @@ pub fn run() {
         Err(e) => {
             eprintln!("[spwn] Failed to start API server: {e}");
             eprintln!("[spwn] Looked for binary at: {spwn_bin}");
-            eprintln!("[spwn] Install spwn first: https://spwn.sh");
+            eprintln!("[spwn] Install Spwn first: https://spwn.sh");
             None
         }
     };

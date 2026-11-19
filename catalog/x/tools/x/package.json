@@ -1,7 +1,7 @@
 {
   "name": "spwn-tool-x",
   "version": "0.2.0",
-  "description": "X (Twitter) reads + writes via the user's session cookies, routed through the spwn gate browser sidecar.",
+  "description": "X (Twitter) reads + writes via the user's session cookies, routed through the Spwn gate browser sidecar.",
   "private": true,
   "type": "module",
   "main": "index.js"

@@ -70,7 +70,7 @@ func TestSaveConfig_writesReadableHeader(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.HasPrefix(string(data), "# spwn user config") {
+	if !strings.HasPrefix(string(data), "# Spwn user config") {
 		t.Errorf("config file missing comment header, got start: %q", string(data[:min(60, len(data))]))
 	}
 }
