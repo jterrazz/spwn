@@ -1,0 +1,12 @@
+description: 'a stopped VM''s log reads its console, then its hypervisor''s own lines'
+env: two-macs
+runs:
+    - command: 'world hypervisor api ''Error: the VM exited with status 1'''
+      exit: 0
+    - command: 'world console api ''[    4.118220] systemd[1]: Reached target Power-Off.'''
+      exit: 0
+    - command: 'machines log api'
+      exit: 0
+      stdout: |
+          [    4.118220] systemd[1]: Reached target Power-Off.
+          Error: the VM exited with status 1

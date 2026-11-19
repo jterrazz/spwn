@@ -407,6 +407,9 @@ type VM struct {
 	Address string `json:"address,omitempty"`
 	// value: the lines its runs wrote on its console, the oldest first.
 	Console []string `json:"console,omitempty"`
+	// value: the lines its hypervisor's own output wrote, the oldest first,
+	// read after the console's as the hypervisor's adapter reads them.
+	Hypervisor []string `json:"hypervisor,omitempty"`
 	// value: how long its health check takes to answer; zero is the world's usual.
 	CheckTakes time.Duration `json:"check_takes,omitempty"`
 	// value: its guest, answering over the one way into a VM; nil when no

@@ -40,6 +40,7 @@ func events() []event {
 		{"poweroff-inside", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.GuestPoweroff})},
 		{"reboot-inside", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.GuestReboot})},
 		{"console", []string{"<vm>", "<line>"}, writeConsole},
+		{"hypervisor", []string{"<vm>", "<line>"}, writeHypervisor},
 		{"listen", []string{"<machine>", "<bind>:<port>", "<process>"}, listen},
 		{"unlisten", []string{"<machine>", "<port>"}, unlisten},
 		{"container-run", []string{"<vm>", "<port>:<port>", "<container>", "[no-proxy]"}, containerRun},
@@ -220,6 +221,15 @@ func writeConsole(w *World, args []string) error {
 		return err
 	}
 	v.Console = append(v.Console, args[1])
+	return nil
+}
+
+func writeHypervisor(w *World, args []string) error {
+	v, err := w.vm(args[0])
+	if err != nil {
+		return err
+	}
+	v.Hypervisor = append(v.Hypervisor, args[1])
 	return nil
 }
 

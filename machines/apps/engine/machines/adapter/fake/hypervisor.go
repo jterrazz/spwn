@@ -377,11 +377,16 @@ func (h *Hypervisor) Console(_ context.Context, vm string, n int) ([]string, err
 	return nil, nil
 }
 
-// value: the lines the world scripted on the VM's console, as the
-// hypervisor's adapter keeps them.
+// value: the lines the world scripted on the VM's console, then those of
+// its hypervisor's own output, each source's last n, as the hypervisor's
+// adapter reads its two files.
 func console(v *world.VM, n int) []string {
+	return append(lastMeaningful(v.Console, n), lastMeaningful(v.Hypervisor, n)...)
+}
+
+func lastMeaningful(lines []string, n int) []string {
 	var kept []string
-	for _, line := range v.Console {
+	for _, line := range lines {
 		if machines.Meaningful(line) {
 			kept = append(kept, line)
 		}

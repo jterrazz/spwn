@@ -1,6 +1,7 @@
 package fake
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -34,4 +35,22 @@ func TestTheFakeHypervisorKeepsTheContract(t *testing.T) {
 			},
 		}
 	})
+}
+
+func TestAStoppedVMsLogReadsItsConsoleThenItsHypervisorsLines(t *testing.T) {
+	w := &world.World{}
+	w.Mac("mac-mini").VMs = map[string]*world.VM{"api": {
+		Disk:       true,
+		Console:    []string{"[ 4.1] boot", " ", "[ 4.2] power off"},
+		Hypervisor: []string{"Error: exited", "[ 9.9]", "Error: again"},
+	}}
+	h := HypervisorOf(w, "mac-mini", "vz", nil)
+	got, err := h.Console(t.Context(), "api", 0)
+	want := []string{"[ 4.1] boot", "[ 4.2] power off", "Error: exited", "Error: again"}
+	if err != nil || !slices.Equal(got, want) {
+		t.Errorf("console = %q, %v; want %q", got, err, want)
+	}
+	if got, _ = h.Console(t.Context(), "api", 1); !slices.Equal(got, []string{"[ 4.2] power off", "Error: again"}) {
+		t.Errorf("last 1 of each = %q; want the last console line then the last hypervisor line", got)
+	}
 }
