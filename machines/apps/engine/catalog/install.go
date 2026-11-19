@@ -45,6 +45,9 @@ func (m Method) ReadsCurrency() bool {
 type Install interface {
 	Method() Method
 	Key() string
+	// value: what the install fetches, as a reader words it: its source and
+	// the version or asset asked of it, joined by a space.
+	Fetches() string
 	isInstall()
 }
 
@@ -185,6 +188,38 @@ func (i ShellInstall) Key() string         { return i.Line }
 func (i AppInstall) Key() string           { return i.Hint }
 func (i SkillInstall) Key() string         { return i.Skill }
 func (i ProvidedByInstall) Key() string    { return i.Package }
+
+func (i BrewInstall) Fetches() string { return i.Formula }
+func (i CaskInstall) Fetches() string { return i.Token }
+func (i MasInstall) Fetches() string  { return i.Name }
+func (i NpmInstall) Fetches() string  { return i.Package }
+func (i UvInstall) Fetches() string   { return i.Package }
+
+func (i BunInstall) Fetches() string { return fetched(i.Package, i.Version) }
+func (i MiseInstall) Fetches() string {
+	return fetched(i.App, i.Version)
+}
+
+func (i AptInstall) Fetches() string {
+	return fetched(strings.Join(i.Packages, ", "), i.Version)
+}
+
+func (i GitHubReleaseInstall) Fetches() string { return fetched(i.Repo, i.Asset) }
+func (i ScriptInstall) Fetches() string        { return i.URL }
+func (i ShellInstall) Fetches() string         { return i.Line }
+func (i AppInstall) Fetches() string           { return i.Hint }
+func (i SkillInstall) Fetches() string         { return fetched(i.Repo, i.Skill) }
+func (i ProvidedByInstall) Fetches() string    { return i.Package }
+
+func fetched(parts ...string) string {
+	var out []string
+	for _, p := range parts {
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return strings.Join(out, " ")
+}
 
 func (BrewInstall) isInstall()          {}
 func (CaskInstall) isInstall()          {}

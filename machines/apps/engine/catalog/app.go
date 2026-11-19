@@ -1,6 +1,9 @@
 package catalog
 
-import "slices"
+import (
+	"slices"
+	"strings"
+)
 
 type MachineKind string
 
@@ -29,6 +32,31 @@ func (k MachineKind) Article() string {
 type LivesOn struct {
 	Kinds   []MachineKind
 	Install Install
+}
+
+func (o OS) Word() string {
+	// value: a system as its owner words it: macOS, Ubuntu, Debian.
+	switch o {
+	case OSMacOS:
+		return "macOS"
+	case OSUbuntu:
+		return "Ubuntu"
+	case OSDebian:
+		return "Debian"
+	case OSAny:
+	}
+	return "Any system"
+}
+
+func (p LivesOn) System() string {
+	// value: the systems of the kinds an install runs on, each worded once.
+	var words []string
+	for _, k := range p.Kinds {
+		if w := k.os().Word(); !slices.Contains(words, w) {
+			words = append(words, w)
+		}
+	}
+	return strings.Join(words, ", ")
 }
 
 type VersionRead struct {

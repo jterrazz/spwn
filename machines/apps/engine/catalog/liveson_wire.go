@@ -7,7 +7,12 @@ import (
 )
 
 type wireLivesOn struct {
-	Kinds   []MachineKind
+	Kinds []MachineKind
+	// value: the systems the kinds run, and what the install fetches, as
+	// the engine words them; read again from Kinds and Install, never
+	// decoded.
+	System  string          `json:",omitempty"`
+	Fetches string          `json:",omitempty"`
 	Method  Method          `json:",omitempty"`
 	Install json.RawMessage `json:",omitempty"`
 }
@@ -15,8 +20,9 @@ type wireLivesOn struct {
 func (p LivesOn) MarshalJSON() ([]byte, error) {
 	// invariant: a place travels with its install's method, so the far
 	// side's answer decodes into the same install it named.
-	w := wireLivesOn{Kinds: p.Kinds}
+	w := wireLivesOn{Kinds: p.Kinds, System: p.System()}
 	if p.Install != nil {
+		w.Fetches = p.Install.Fetches()
 		raw, err := json.Marshal(p.Install)
 		if err != nil {
 			return nil, err

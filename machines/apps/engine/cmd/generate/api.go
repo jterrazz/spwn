@@ -59,6 +59,8 @@ type (
 type (
 	livesOnJSON struct {
 		Kinds   []catalog.MachineKind
+		System  string          `json:",omitempty"`
+		Fetches string          `json:",omitempty"`
 		Method  catalog.Method  `json:",omitempty"`
 		Install json.RawMessage `json:",omitempty"`
 	}

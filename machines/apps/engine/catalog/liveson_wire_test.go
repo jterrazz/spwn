@@ -44,3 +44,27 @@ func TestAnAptInstallOfNoPackageDoesNotCrossTheWire(t *testing.T) {
 		t.Errorf("the key of no package is %q; want none", got)
 	}
 }
+
+func TestAnInstallWordsItsSystemAndWhatItFetches(t *testing.T) {
+	for _, c := range []struct {
+		on              catalog.LivesOn
+		system, fetches string
+	}{
+		{catalog.LivesOn{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.BrewInstall{Formula: "jq"}}, "macOS", "jq"},
+		{catalog.LivesOn{Kinds: []catalog.MachineKind{catalog.Mac, catalog.MacOS}, Install: catalog.MiseInstall{App: "node", Version: "lts"}}, "macOS", "node lts"},
+		{catalog.LivesOn{Kinds: []catalog.MachineKind{catalog.Linux}, Install: catalog.AptInstall{Packages: []string{"fd-find", "fzf"}}}, "Ubuntu", "fd-find, fzf"},
+		{catalog.LivesOn{Kinds: []catalog.MachineKind{catalog.Mac, catalog.Linux}, Install: catalog.SkillInstall{Repo: "acme/skills", Skill: "layout"}}, "macOS, Ubuntu", "acme/skills layout"},
+	} {
+		raw, err := json.Marshal(c.on)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got struct{ System, Fetches string }
+		if err := json.Unmarshal(raw, &got); err != nil {
+			t.Fatal(err)
+		}
+		if got.System != c.system || got.Fetches != c.fetches {
+			t.Errorf("%s: system %q, fetches %q; want %q, %q", raw, got.System, got.Fetches, c.system, c.fetches)
+		}
+	}
+}

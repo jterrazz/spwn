@@ -453,6 +453,9 @@
     "catalog.LivesOn": {
       "additionalProperties": false,
       "properties": {
+        "Fetches": {
+          "type": "string"
+        },
         "Install": {},
         "Kinds": {
           "items": {
@@ -469,6 +472,9 @@
           ]
         },
         "Method": {
+          "type": "string"
+        },
+        "System": {
           "type": "string"
         }
       },

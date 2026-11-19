@@ -1,0 +1,11 @@
+description: 'apps.list words each install''s system and what it fetches, so no window words them'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out[] | .App | select(.Name == "jq") | .Installs[] | {Kinds, System, Fetches, Method}]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"apps.list","in":{}}
+      exit: 0
+      stdout: |
+          [{"Kinds":["mac"],"System":"macOS","Fetches":"jq","Method":"brew"},{"Kinds":["linux"],"System":"Ubuntu","Fetches":"jq","Method":"apt"},{"Kinds":["macos"],"System":"macOS","Fetches":"jq","Method":"brew"}]

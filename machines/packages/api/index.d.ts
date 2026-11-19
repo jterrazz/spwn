@@ -619,9 +619,11 @@ export type CatalogLiveness = {
 };
 
 export type CatalogLivesOn = {
+    Fetches?: string;
     Install?: unknown;
     Kinds: ('mac' | 'linux' | 'macos')[] | null;
     Method?: string;
+    System?: string;
 };
 
 export type CatalogLockSource = {

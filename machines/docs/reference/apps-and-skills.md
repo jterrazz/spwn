@@ -30,7 +30,7 @@ methods:
       apt: { packages: [gh] }
 ```
 
-The lists stand by category, then by name. Where it lives, the kinds of machine it may be on (`mac`, `linux`, `macos`), is derived from its methods' selectors, so it cannot disagree with them; `station apps --json` says it as `lives_on` (`every-machine`, `mac-only`, `vms-only`). Dev apps live in VMs: Xcode, CocoaPods, XcodeGen, Android Studio and Lens are placed `macos` only and install nowhere until the macOS VM exists ([TODO](../../TODO.md)); Ollama stays on Macs for the GPU; Docker lives in the Linux VM.
+The lists stand by category, then by name. Where it lives, the kinds of machine it may be on (`mac`, `linux`, `macos`), is derived from its methods' selectors, so it cannot disagree with them; `station apps --json` says it as `lives_on` (`every-machine`, `mac-only`, `vms-only`). On the `apps.list` call each install of an app (`Installs`) carries, beside its kinds and method, the `System` those kinds run (`macOS`, `Ubuntu`, worded once, joined by a comma) and `Fetches`, what the install fetches (`node lts`, `fd-find, fzf`): its source, then the version or asset asked of it, joined by a space. Dev apps live in VMs: Xcode, CocoaPods, XcodeGen, Android Studio and Lens are placed `macos` only and install nowhere until the macOS VM exists ([TODO](../../TODO.md)); Ollama stays on Macs for the GPU; Docker lives in the Linux VM.
 
 An app asked for on a machine it does not live on is refused with exit 2, `dia lives on Macs only`, the hint the command with `--on`.
 
