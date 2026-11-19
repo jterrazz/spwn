@@ -1,9 +1,20 @@
-import { button, content, dialog, disabled, field, heading, within } from '@jterrazz/test';
+import {
+    button,
+    content,
+    dialog,
+    disabled,
+    field,
+    heading,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
 const TWO_MACS = '/?world=two-macs&page=home';
+const machines = region('Machines');
 
 describe('new machine', () => {
     test('H7 a machine launched with what it is for opens running, and says it', async () => {
@@ -25,9 +36,34 @@ describe('new machine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'H7 waits for reads made while a create runs, so its line reads creating before running (a gesture is recorded with the reads after its end)',
-    );
+    test("H7 while the create runs, its page and its line read creating, its share on its Mac's track", async () => {
+        // Given - the New machine sheet opened from Home over two-macs, a create held after its first step
+        const result = await website.visit(
+            `${TWO_MACS}&held=machines.create-workspace`,
+            async (visitor) => {
+                await visitor.click(button('New machine'));
+                const sheet = dialog('New machine on mac-mini');
+
+                // When - linux-2 is launched for what it is for
+                await visitor.fill(within(sheet, field('What is it for?')), 'Lot shell');
+                await visitor.click(within(sheet, button('Launch')));
+                await visitor.click(within(dialog('Launch linux-2?'), button('Launch')));
+
+                // Then - its page reads creating and its step
+                await visitor.see(heading('linux-2 creating'));
+                await visitor.see(content('Creating: boot 2 of 4'));
+
+                // When - Home is opened while it runs
+                await visitor.click(within(navigation('Sidebar'), button('Home')));
+
+                // Then - its line reads creating, and its 8 GB are gone from what mac-mini has free
+                await visitor.see(within(machines, button('linux-2')));
+                await visitor.see(within(machines, content('creating')));
+                await visitor.see(within(machines, content('28 free')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('H8 a preset sets the memory, the figure and what it leaves follow, and no size above what is free is offered', async () => {
         // Given - the New machine sheet opened from Home over two-macs, on the Mac with 36 GB free
