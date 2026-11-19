@@ -485,7 +485,7 @@
                 },
                 {
                   "kind": "text",
-                  "text": "Ephemeral"
+                  "text": "disk kept"
                 }
               ]
             },
@@ -512,7 +512,7 @@
                 },
                 {
                   "kind": "text",
-                  "text": "Persistent"
+                  "text": "disk kept"
                 }
               ]
             },
@@ -539,7 +539,7 @@
                 },
                 {
                   "kind": "text",
-                  "text": "Ephemeral"
+                  "text": "disk kept"
                 }
               ]
             },

@@ -5,7 +5,7 @@
 ●	infra		healthy
 # VMs
 ●	linux-1		running
-○	api		stopped · Persistent
+○	api		stopped · disk kept
 # Macs
 ●	This Mac	34%	online · 2 VMs
 ●	mac-mini		online · 1 VM

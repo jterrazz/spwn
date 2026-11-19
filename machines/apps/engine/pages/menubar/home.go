@@ -224,6 +224,9 @@ func (h homeReading) vmRow(m model.MacView, vm model.VM) page.Row {
 		row.Mark, row.Reason = page.Absent, page.Stopped
 		row.Glyph.Dot = page.DotRing
 		row.Detail = page.List(word, pagemachines.Lifetime(vm.Lifetime))
+		if vm.Standing == model.StandingStopped {
+			row.Detail = page.List(word, page.Text("disk kept"))
+		}
 	}
 	if h.stale != "" && page.MacName(m.Name, h.self) == h.stale {
 		row.Signal = page.SignalStale

@@ -191,7 +191,7 @@ func TestARunningRowEndsInItsCPUSparkAndAStoppedOneInNone(t *testing.T) {
 	w.r.All.Macs[0].VMs = append(w.r.All.Macs[0].VMs, model.VM{Name: "api", Lifetime: model.Persistent, State: model.Stopped})
 	p := homeOf(t, w.read())
 	vms := homeSection(t, p, SectionVMs)
-	if got := rowWords(vms); !reflect.DeepEqual(got, []string{"linux-1 | running", "api | stopped | Persistent"}) {
+	if got := rowWords(vms); !reflect.DeepEqual(got, []string{"linux-1 | running", "api | stopped | disk kept"}) {
 		t.Fatalf("vms %q", got)
 	}
 	if vms.Caption[0].Text != "2" {
