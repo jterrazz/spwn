@@ -27,10 +27,13 @@ key; WINDOW_RECORD_FORCE=1 records all the same.
 Two runs over the same tree write the same bytes. The world build's clock moves when a watch waits on it
 (apps/engine/wire/world_on.go), and what a watch streams before it settles comes in the scheduler's order, so the
 recorder keeps only what no run decides: of a watch its first answer and its last, and of a watch of SETTLED (one
-whose first answer races its walk, disk.read) its last alone; a gesture's reads in the world's order of asks, judged
-changed by `compared`, never by the clock; no read of TIMED after a gesture; and, as the file's last recording holds
-them, the NOISE field of a gesture (the process number the host gave) and the CLOCKED field of an answer (the world's
-clock: settings.matrix's Read, awake.read's Now).
+whose first answer races its walk, disk.read) its last alone; of overview.read, its last alone too unless it streams a
+birth: its summary answers once per part (each section, the machines, the other Macs, the readiness) in the order the
+parts arrive, and the engine ends the watch once every part is in (apps/engine/overview/calls/compose.go), so the
+answer before its done is the whole Overview, which the recorder waits for, never letting go of it on silence; a
+gesture's reads in the world's order of asks, judged changed by `compared`, never by the clock; no read of TIMED after
+a gesture; and, as the file's last recording holds them, the NOISE field of a gesture (the process number the host
+gave) and the CLOCKED field of an answer (the world's clock: settings.matrix's Read, awake.read's Now).
 
 In a world run that door is a Mac's engine socket: a frame for another Mac, or for a VM of another Mac, rides the
 world's far dialer and is answered there, so every Mac machines.list lists and every VM of each is asked, by name.
@@ -64,6 +67,7 @@ CLOCKED = {"settings.matrix": "Read", "awake.read": "Now"}
 MACHINES = {"watch": "machines.list", "in": {}}
 QUIET = 10
 UNENDED = {"overview.read"}
+WHOLE = 30
 STAMP = ROOT / ".artifacts" / "window-record.stamp"
 FORCE = "WINDOW_RECORD_FORCE"
 
@@ -102,24 +106,31 @@ class Door:
 
     def ask(self, requests):
         """Sends every request at once and returns, in their order, the answers of each, once all have ended. A watch
-        of UNENDED the engine holds open (a VM's Overview through its birth) is let go of after QUIET seconds of
-        silence by a cancel frame, as the window lets go of it, and its answers end on the engine's done; any other
-        is waited for to its end, as a watch that settles (disk.read) may be silent longer than QUIET."""
+        of UNENDED the engine holds open, a VM's Overview through its birth (its last answer a `Creating`), is let go
+        of after QUIET seconds of silence by a cancel frame, as the window lets go of it, and its answers end on the
+        engine's done; any other is waited for to its end, as a watch that settles (disk.read) or an Overview whose
+        slowest part has not answered may be silent longer than QUIET. A request still open after WHOLE silences in a
+        row stops the run, so no part-read answer is ever written."""
         ids = [str(self.next + index) for index in range(len(requests))]
         self.next += len(requests)
         self.send([{"v": 2, "id": id, **request} for id, request in zip(ids, requests)])
         watches = {id for id, request in zip(ids, requests) if "watch" in request}
         unended = {id for id, request in zip(ids, requests) if "watch" in request and callOf(request) in UNENDED}
-        answers, ended, cancelled = {}, set(), set()
+        answers, ended, cancelled, silences = {}, set(), set(), 0
         while len(ended) < len(ids):
             try:
                 line = self.lines.get(timeout=QUIET)
             except queue.Empty:
-                held = unended - ended - cancelled
+                held = {id for id in unended - ended - cancelled if born(answers.get(id, [])[-1:])}
                 if held:
                     self.send([{"v": 2, "id": id, "cancel": True} for id in sorted(held)])
                     cancelled |= held
+                silences += 1
+                if silences >= WHOLE:
+                    self.close()
+                    sys.exit(f"{len(ended)} of {len(ids)} requests ended after {WHOLE * QUIET} s of silence")
                 continue
+            silences = 0
             if not line:
                 break
             frame = json.loads(line)
@@ -375,10 +386,16 @@ def bounded(frames):
     return [frame for index, frame in enumerate(frames) if "out" not in frame or index in ends]
 
 
+def born(frames):
+    """Whether a frame of an Overview is a birth's: a VM whose create still runs, answered from its Mac's record."""
+    return any((frame.get("out") or {}).get("Creating") for frame in frames)
+
+
 def kept(request, frames):
     if "watch" not in request:
         return frames
-    return settled(frames) if callOf(request) in SETTLED else bounded(frames)
+    whole = callOf(request) in UNENDED and not born(frames)
+    return settled(frames) if callOf(request) in SETTLED or whole else bounded(frames)
 
 
 def keyOf(request):
