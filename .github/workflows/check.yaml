@@ -180,9 +180,19 @@ jobs:
             - uses: actions/checkout@v4
               with:
                   fetch-depth: 0
+            # outside: setup-node's npm cache runs `npm config get cache` at the repository root, whose package.json demands pnpm through devEngines, so npm refuses (EBADDEVENGINES); Node is set up here with no cache, and the action skips its own
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '24'
+            # outside: setup-node registers tsc and eslint problem matchers that annotate every type error twice; the action drops them only after its own setup-node
+            - run: |
+                  echo "::remove-matcher owner=tsc::"
+                  echo "::remove-matcher owner=eslint-stylish::"
+                  echo "::remove-matcher owner=eslint-compact::"
             - uses: jterrazz/studio-actions/actions/check@main
               with:
                   working-directory: machines
+                  node-version: ''
                   go-version-file: machines/go.work
                   browsers: 'true'
                   dockerfile: ''
