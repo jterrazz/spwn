@@ -1,0 +1,30 @@
+{
+  "$defs": {},
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/station.install-record.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The binary the public installer last installed, written atomically to station/installed.json under the state root at the end of a successful install that installed a station binary, so a client finds station before any engine has started. A platform with no station build gets spwn alone, exits 0 and writes no record; an older record is left byte for byte and never deleted. An install path with a control character (below 0x20, or 0x7f) is refused before any write. The state root is $XDG_STATE_HOME when it is an absolute path, else $HOME/.local/state. The shape is engine.Record's, written by make generate; install.json says where.",
+  "properties": {
+    "at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "executable": {
+      "type": "string"
+    },
+    "v": {
+      "const": 1
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "at",
+    "executable",
+    "v",
+    "version"
+  ],
+  "title": "station.install-record/v1",
+  "type": "object"
+}

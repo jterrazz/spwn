@@ -372,6 +372,7 @@ func apiFiles(root string) map[string][]byte {
 	out[installPath] = indented(installTable())
 	out[installTypesPath] = installDeclaration()
 	out[recordSchemaPath] = indented(recordSchema(w))
+	out[installedSchemaPath] = indented(installedSchema(w))
 	return out
 }
 

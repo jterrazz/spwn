@@ -36,8 +36,37 @@ func TestTheMakefileInstallsWhereTheCatalogSaysStationIsInstalled(t *testing.T) 
 }
 
 func TestARecordTheEngineWritesMatchesItsSchema(t *testing.T) {
+	assertRecordMatches(t, recordSchemaPath)
+}
+
+func TestARecordTheInstallerWritesMatchesItsSchema(t *testing.T) {
+	assertRecordMatches(t, installedSchemaPath)
+}
+
+func TestInstallJSONNamesBothRecordsUnderTheStateRoot(t *testing.T) {
+	got := installTable()
+	if want := (installRecord{Root: "state", Path: "station/installed.json", Schema: "station.install-record/v1"}); got.Installed != want {
+		t.Errorf("installed = %+v, want %+v", got.Installed, want)
+	}
+	if want := (installRecord{Root: "state", Path: "station/engine.json", Schema: "station.engine-record/v1"}); got.Record != want {
+		t.Errorf("record = %+v, want %+v", got.Record, want)
+	}
+	files := apiFiles(root(t))
+	for _, schemaPath := range []string{recordSchemaPath, installedSchemaPath} {
+		var schema map[string]any
+		if err := json.Unmarshal(files[schemaPath], &schema); err != nil {
+			t.Fatal(err)
+		}
+		if description, _ := schema["description"].(string); !strings.Contains(description, "$XDG_STATE_HOME when it is an absolute path, else $HOME/.local/state") {
+			t.Errorf("%s's description lacks the state-root rule: %q", schemaPath, description)
+		}
+	}
+}
+
+func assertRecordMatches(t *testing.T, schemaPath string) {
+	t.Helper()
 	var schema map[string]any
-	if err := json.Unmarshal(apiFiles(root(t))[recordSchemaPath], &schema); err != nil {
+	if err := json.Unmarshal(apiFiles(root(t))[schemaPath], &schema); err != nil {
 		t.Fatal(err)
 	}
 	written, err := json.MarshalIndent(engine.Record{V: engine.RecordVersion, Executable: "/opt/bin/station", Version: "v0.21.0", At: time.Date(2026, 11, 19, 9, 0, 0, 0, time.UTC)}, "", "  ")

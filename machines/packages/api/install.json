@@ -6,5 +6,10 @@
     "root": "state",
     "path": "station/engine.json",
     "schema": "station.engine-record/v1"
+  },
+  "installed": {
+    "root": "state",
+    "path": "station/installed.json",
+    "schema": "station.install-record/v1"
   }
 }
