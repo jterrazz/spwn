@@ -24,7 +24,7 @@ export const PUTS: readonly Row[] = [
         place: '~/.zshrc on zsh',
         value: (
             <>
-                One PATH line and two aliases, under <Mono># Added by spwn installer</Mono>
+                One PATH line and two aliases, under <Mono line># Added by spwn installer</Mono>
             </>
         ),
     },

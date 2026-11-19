@@ -56,6 +56,13 @@
     font-size: var(--text-label);
 }
 
+.monoLine {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+
 .rows {
     display: flex;
     flex-direction: column;

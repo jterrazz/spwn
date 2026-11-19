@@ -39,8 +39,8 @@ export function Head({ title, children }: { title: string; children: ReactNode }
     );
 }
 
-export function Mono({ children }: { children: ReactNode }) {
-    return <span className={styles.mono}>{children}</span>;
+export function Mono({ children, line = false }: { children: ReactNode; line?: boolean }) {
+    return <span className={line ? styles.monoLine : styles.mono}>{children}</span>;
 }
 
 export type Row = { key: string; value: ReactNode; place?: string; mono?: boolean };
