@@ -9,6 +9,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -120,11 +121,15 @@ func TestHomeListsOneKindPerSectionUnderItsTitleAndSearch(t *testing.T) {
 	if got := sectionIDs(p)[:2]; !reflect.DeepEqual(got, []string{SectionNeedsRows, SectionThisMac}) {
 		t.Fatalf("sections %v, want Needs you first while a port is exposed", got)
 	}
-	if got := rowWords(homeSection(t, p, SectionNeedsRows)); !reflect.DeepEqual(got, []string{"This Mac | port 5000 exposed"}) {
+	if got := rowWords(homeSection(t, p, SectionNeedsRows)); !reflect.DeepEqual(got, []string{"Port 5000 | " + catalog.ReachableOutside}) {
 		t.Fatalf("needs %q", got)
 	}
-	if verb := homeSection(t, p, SectionNeedsRows).Items[0].Row.Verb; actionOf(p, verb).Label != "Review" {
-		t.Fatalf("the need's verb %q, want Review", verb)
+	need := homeSection(t, p, SectionNeedsRows).Items[0].Row
+	if actionOf(p, need.Verb).Label != "Review" {
+		t.Fatalf("the need's verb %q, want Review", need.Verb)
+	}
+	if g := need.Glyph; g.Dot != page.DotFill || g.Signal != page.SignalFailing || g.Kind != "" {
+		t.Fatalf("the need leads with %+v, want its signal's dot", g)
 	}
 }
 
@@ -326,9 +331,9 @@ func TestAMacStillAnsweringIsCheckedAndItsNeedsDrawnStale(t *testing.T) {
 	}
 	signals := map[string]page.Signal{}
 	for _, it := range homeSection(t, p, SectionNeedsRows).Items {
-		signals[it.Row.Label] = it.Row.Signal
+		signals[it.Row.Mac+" "+it.Row.Label] = it.Row.Signal
 	}
-	if signals["mac-mini"] != page.SignalStale || signals["This Mac"] != "" {
+	if signals["mac-mini Port 8080"] != page.SignalStale || signals["This Mac Port 5000"] != "" {
 		t.Fatalf("signals %v", signals)
 	}
 	w.mini().Asleep = true

@@ -110,8 +110,8 @@
             },
             "reason": "down",
             "glyph": {
-              "kind": "symbol:xmark.octagon.fill",
-              "signal": "failing"
+              "signal": "failing",
+              "dot": "fill"
             },
             "mac": "mac-mini",
             "verb": "down:infra",

@@ -53,7 +53,10 @@ type Need struct {
 	Hero    string
 	Subject string
 	What    string
-	Find    []string
+	// value: the words of the Mac's own page, which says the need's
+	// subject already; empty where What says it.
+	Said string
+	Find []string
 	// value: the hero's facts line, and an upkeep item's detail.
 	Facts  []page.Value
 	Detail []string
@@ -151,7 +154,7 @@ func (w needSaid) down(h model.MacView, vm model.VM) Need {
 
 func (w needSaid) exposed(mac string, p ports.Port) Need {
 	where := w.mac(p.Machine.Mac())
-	what := "port " + strconv.Itoa(p.Port) + " exposed"
+	said := "port " + strconv.Itoa(p.Port) + " exposed"
 	facts := []page.Value{page.Text(where)}
 	if app := catalog.AppOf(p.Process); app != "" {
 		facts = append(facts, page.Text(app))
@@ -163,7 +166,7 @@ func (w needSaid) exposed(mac string, p ports.Port) Need {
 	}
 	return Need{
 		Finding: finding.Finding{Machine: p.Machine, Section: section.Ports, Severity: finding.Broken, Urgency: finding.Red, Subject: strconv.Itoa(p.Port)},
-		Key:     key, Glyph: symbol("exclamationmark.shield", page.SignalFailing), Hero: "Port " + strconv.Itoa(p.Port) + " is exposed", Subject: where, What: what,
+		Key:     key, Glyph: symbol("exclamationmark.shield", page.SignalFailing), Hero: "Port " + strconv.Itoa(p.Port) + " is exposed", Subject: "Port " + strconv.Itoa(p.Port), What: catalog.ReachableOutside, Said: said,
 		Find: []string{"Port " + strconv.Itoa(p.Port) + " is exposed"}, Facts: facts, Nav: page.ID(string(PortsID) + ":" + mac), Scope: scope,
 		Verb: page.Action{ID: key, Label: VerbReview, On: page.OnRow, Rows: []string{key}, Default: true},
 	}
@@ -356,9 +359,13 @@ func needRows(ns []Need, of, self string) []page.Item {
 			row.Mark = page.Broken
 		}
 		if ownWords(n, of, self) {
-			row.Label, row.Detail = n.What, page.None()
+			words := n.What
+			if n.Said != "" {
+				words = n.Said
+			}
+			row.Label, row.Detail = words, page.None()
 			if n.Finding.Section != section.Accounts {
-				row.Label = titled(n.What)
+				row.Label = titled(words)
 			}
 			switch {
 			case len(n.Detail) > 0:
@@ -373,7 +380,7 @@ func needRows(ns []Need, of, self string) []page.Item {
 }
 
 func ownWords(n Need, of, self string) bool {
-	return of != "" && (n.Subject == of || n.Subject == page.MacName(of, self))
+	return of != "" && (n.Subject == of || n.Subject == page.MacName(of, self) || n.Said != "" && len(n.Scope) > 0 && n.Scope[0] == of)
 }
 
 func reasonOf(f finding.Finding) page.Reason {

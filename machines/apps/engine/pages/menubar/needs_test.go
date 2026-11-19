@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
@@ -64,7 +65,7 @@ func TestTheFleetsNeedsComeInThePrototypesOrderWithTheirVerbsAndThreeWordings(t 
 	}
 	want := []said{
 		{"infra is down", "infra", "down since 14:02", "Restart infra", "Restart"},
-		{"Port 5000 is exposed", "This Mac", "port 5000 exposed", "Port 5000 is exposed", "Review"},
+		{"Port 5000 is exposed", "Port 5000", catalog.ReachableOutside, "Port 5000 is exposed", "Review"},
 	}
 	if !slices.Equal(got, want) {
 		t.Fatalf("the needs say\n%v\nwant\n%v", got, want)

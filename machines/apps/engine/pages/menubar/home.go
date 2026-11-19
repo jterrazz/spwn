@@ -95,12 +95,12 @@ func homeSections(r Reading, self string) ([]page.Section, []page.Action) {
 func alive(vm model.VM) bool { return vm.State == model.Running || vm.State == model.Creating }
 
 // value: Needs you, one row per thing that needs you, ranked, each its
-// subject, the Mac it is on, what it is and its verb; a Mac still
-// answering dims the ones of it. No row, no section.
+// signal's dot, its subject, the Mac it is on, what it is and its verb;
+// a Mac still answering dims the ones of it. No row, no section.
 func (h homeReading) needsRows() (page.Section, bool) {
 	s := page.Section{ID: SectionNeedsRows, Title: "Needs you", Columns: columns(), Uncounted: true}
 	for _, n := range h.needs {
-		row := page.Row{ID: n.Key, Label: n.Subject, Detail: page.Text(n.What), Glyph: n.Glyph, Verb: n.Verb.ID, Nav: n.Nav, Mark: page.Broken, Reason: reasonOf(n.Finding), Signal: h.signal(n)}
+		row := page.Row{ID: n.Key, Label: n.Subject, Detail: page.Text(n.What), Glyph: page.Glyph{Dot: page.DotFill, Signal: n.Glyph.Signal}, Verb: n.Verb.ID, Nav: n.Nav, Mark: page.Broken, Reason: reasonOf(n.Finding), Signal: h.signal(n)}
 		if len(n.Scope) > 0 && n.Subject != page.MacName(n.Scope[0], h.self) {
 			row.Mac = page.MacName(n.Scope[0], h.self)
 		}

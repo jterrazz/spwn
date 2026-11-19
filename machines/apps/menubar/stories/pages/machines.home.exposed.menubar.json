@@ -103,16 +103,17 @@
           "row": {
             "id": "exposed:macbook-pro:5000",
             "mark": "broken",
-            "label": "This Mac",
+            "label": "Port 5000",
             "detail": {
               "kind": "text",
-              "text": "port 5000 exposed"
+              "text": "reachable outside Tailscale"
             },
             "reason": "exposed",
             "glyph": {
-              "kind": "symbol:exclamationmark.shield",
-              "signal": "failing"
+              "signal": "failing",
+              "dot": "fill"
             },
+            "mac": "This Mac",
             "verb": "exposed:macbook-pro:5000",
             "nav": "menubar.ports:macbook-pro"
           }
