@@ -19,6 +19,7 @@ import (
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	enginecontract "github.com/jterrazz/studio-station/apps/engine/engine/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
 	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
@@ -62,6 +63,7 @@ func (*worldMac) unlocker() contract.Unlocker                            { retur
 func (*worldMac) waker() contract.Waker                                  { return nil }
 func (*worldMac) processes(kernel contract.Processes) contract.Processes { return kernel }
 func (*worldMac) jobs() backgroundcontract.Jobs                          { return nil }
+func (*worldMac) releases() enginecontract.Releases                      { return nil }
 func (*worldMac) inspector() settingscontract.Inspector                  { return nil }
 func (*worldMac) procedureAppliers() []settingscontract.Applier          { return nil }
 func (*worldMac) meter() activitycontract.Meter                          { return nil }

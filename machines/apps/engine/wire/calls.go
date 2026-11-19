@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/engine/adapter/github"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/docker"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/gitaliases"
 	"github.com/jterrazz/studio-station/apps/engine/ui/token"
@@ -60,7 +62,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		awakecalls.All(m.awakeDeps()),
 		backgroundcalls.All(m.backgroundDeps()),
 		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind, Name: m.profile.Ref.Name}),
-		enginecalls.All(enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m}, Kind: kind}),
+		enginecalls.All(m.engineDeps()),
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
 		machinefilecalls.All(m.machinefileDeps(thisMac)),
 		machinescalls.All(machinescalls.Deps{Machines: machineCalls{Machinist: m.machines(env.Interactive), m: m}, Images: createImages{imageBuilder{m.images()}}, Kind: kind, OS: m.profile.System.OS, Laptop: m.profile.Caps.Battery, Holdings: holdings{m}, Now: m.sys.Clock.Now}),
@@ -163,5 +165,25 @@ func (m machine) activityDeps(meter activitycontract.Meter) activitycalls.Deps {
 	if m.powerPort != nil && (m.profile.Caps.Thermal || m.profile.Caps.Battery) {
 		d.Power = m.powerPort
 	}
+	return d
+}
+
+// invariant: the engine's calls over this Mac's engine, its job and the
+// releases of station: in a world, its fakes; else GitHub, asked through
+// the same variables as the apps' releases.
+func (m machine) engineDeps() enginecalls.Deps {
+	d := enginecalls.Deps{
+		Control: m.control(), Installer: engineInstaller{m: m}, Kind: m.profile.Kind,
+		Cache: m.stores.release, Version: m.engineVersion(), Arch: m.sys.Env.GOARCH(), Now: m.sys.Clock.Now,
+	}
+	if m.world != nil {
+		d.Releases = m.world.releases()
+		return d
+	}
+	d.Releases = github.New(github.Options{
+		Net: m.sys.Net, Repo: catalog.StationRepo,
+		APIURL: m.or("STATION_GITHUB_API_URL", "https://api.github.com"),
+		Token:  m.or("GITHUB_TOKEN", m.vars["GH_TOKEN"]),
+	})
 	return d
 }

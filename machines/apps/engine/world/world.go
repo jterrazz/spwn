@@ -54,6 +54,15 @@ type World struct {
 	// value: the names a health check asks that answer no more, a site
 	// down whichever machine serves it: example.com.
 	SitesDown []string `json:"sites_down,omitempty"`
+	// value: station's releases on GitHub, in the order made: the
+	// last is the latest.
+	Releases []Release `json:"releases,omitempty"`
+}
+
+type Release struct {
+	Tag    string   `json:"tag"`
+	URL    string   `json:"url"`
+	Assets []string `json:"assets,omitempty"`
 }
 
 // value: a repository's files at each of its commits, by slash path,
@@ -303,6 +312,8 @@ type Stores struct {
 	Applies map[string]time.Time `json:"applies,omitempty"`
 	// value: the blocks of ~/.zshrc apply wrote, by id.
 	Blocks []machinefile.Written `json:"blocks,omitempty"`
+	// value: what the engine keeps of its last asks of the latest release.
+	Release *engine.ReleaseKept `json:"release,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

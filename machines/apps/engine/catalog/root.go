@@ -23,6 +23,8 @@ const StationRepo = "jterrazz/spwn" // value: the repository whose releases are 
 
 const InstallLine = "curl -fsSL https://spwn.sh/install.sh | bash" // value: the one line that installs station on a new Mac, as docs/start/getting-started.md gives it: the one public installer spwn.sh serves, which then runs station init.
 
+const ReleaseName = "spwn" // value: the product a release of station ships as, the word a release's head says: "spwn v0.22.0 is out."
+
 func FarStationLine() string {
 	return `'PATH="$HOME/` + strings.TrimPrefix(InstallDir, "~/") + `:/usr/local/bin:$PATH" exec ` + StationBinary + ` "$@"'`
 }

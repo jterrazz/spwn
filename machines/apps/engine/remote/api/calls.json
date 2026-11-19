@@ -349,11 +349,28 @@
       "out": "Reading"
     },
     {
+      "name": "engine.read-release",
+      "schema": "station.engine.read-release/v1",
+      "where": "in-engine",
+      "in": "ReleaseIn",
+      "out": "Release"
+    },
+    {
       "name": "engine.refresh",
       "schema": "station.engine.refresh/v1",
       "where": "in-engine",
       "in": "PagesIn",
       "own": true
+    },
+    {
+      "name": "engine.refresh-release",
+      "schema": "station.engine.refresh-release/v1",
+      "where": "in-engine",
+      "errors": [
+        "engine.release-unreachable"
+      ],
+      "in": "ReleaseIn",
+      "out": "Release"
     },
     {
       "name": "engine.release",

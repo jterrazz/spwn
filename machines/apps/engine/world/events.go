@@ -63,6 +63,7 @@ func events() []event {
 		{"certificate", []string{"<mac>", "pending|issued"}, certificate},
 		{"local-network", []string{"<mac>", "approved|not-approved"}, localNetwork},
 		{"admin", []string{"on|off"}, admin},
+		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
 	}
 }
 
@@ -549,4 +550,21 @@ func localNetwork(w *World, args []string) error {
 		return nil
 	}
 	return fmt.Errorf("world local-network: %q is not approved or not-approved", args[1])
+}
+
+// invariant: the release made last is the latest; one made no-asset
+// carries the Linux binaries alone, as between its making and the attach
+// of its darwin assets.
+func releaseTag(w *World, args []string) error {
+	r := Release{Tag: args[0], URL: "https://github.com/" + catalog.StationRepo + "/releases/tag/" + args[0]}
+	switch {
+	case len(args) == 1:
+		r.Assets = []string{"station-linux-amd64", "station-linux-arm64", "station-darwin-amd64", "station-darwin-arm64", "Station.app.zip"}
+	case args[1] == "no-asset":
+		r.Assets = []string{"station-linux-amd64", "station-linux-arm64"}
+	default:
+		return fmt.Errorf("world release %s takes [no-asset], not %q", args[0], args[1])
+	}
+	w.Releases = append(w.Releases, r)
+	return nil
 }

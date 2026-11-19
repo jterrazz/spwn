@@ -1,0 +1,11 @@
+description: 'inside a server, the release is refused: only a Mac runs an engine'
+env:
+    - in-server
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | {Installed, Latest, Behind, Head, Notes, Checked: (.Checked != null), Refused: .Refused.Message} else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.refresh-release","in":{}}
+      exit: 0
+      stdout: |
+          {"code":"section.not-for-this-machine","message":"infra runs no engine: only a Mac does"}

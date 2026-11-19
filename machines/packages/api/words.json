@@ -510,6 +510,11 @@
       "Detail": "disk",
       "Tone": "plain"
     },
+    "engine.release-unreachable": {
+      "Word": "release unreachable",
+      "Detail": "engine",
+      "Tone": "plain"
+    },
     "engine.start-failed": {
       "Word": "Engine did not start",
       "Tone": "plain"

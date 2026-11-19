@@ -1,0 +1,12 @@
+description: 'a GitHub that does not answer refuses the ask, and the refusal is kept'
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | {Latest, Notes, Refused: .Refused.Message} else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.refresh-release","in":{}}
+      exit: 0
+      stdout: |
+          {"code":"engine.release-unreachable","message":"the latest release was not read: GitHub: Get \"http://127.0.0.1:9/repos/jterrazz/spwn/releases/latest\": dial tcp 127.0.0.1:9: connect: connection refused"}
+      files:
+          .cache/station/release.json:
+              contains:
+                  - '"refused"'

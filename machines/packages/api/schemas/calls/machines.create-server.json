@@ -227,6 +227,7 @@
             "disk.nothing-to-free",
             "disk.record-unreadable",
             "disk.unknown",
+            "engine.release-unreachable",
             "engine.start-failed",
             "grant.cannot-deliver",
             "grant.machine-stopped",

@@ -126,6 +126,9 @@ func Codes() map[fail.Code]Wording {
 		enginecalls.StartFailed: func(e *fail.Error) (string, string) {
 			return "the engine did not start: " + e.Detail["last"], "station engine"
 		},
+		enginecalls.ReleaseUnreachable: func(e *fail.Error) (string, string) {
+			return "the latest release was not read: " + e.Detail["cause"], "station engine"
+		},
 		enginecalls.VMStopped: func(e *fail.Error) (string, string) {
 			return carried(e, "the VM is stopped", "station machines")
 		},

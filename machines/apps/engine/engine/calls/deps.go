@@ -2,11 +2,13 @@ package calls
 
 import (
 	"context"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/engine/contract"
 )
 
 type Deps struct {
@@ -15,6 +17,13 @@ type Deps struct {
 	// station; nil where no job can be written.
 	Installer Installer
 	Kind      machine.Kind
+	// value: station's releases on GitHub and the engine's last asks of
+	// them; the version of the engine that answers, and this Mac's arch,
+	// the binary a release carries for it.
+	Releases      contract.Releases
+	Cache         contract.ReleaseCache
+	Version, Arch string
+	Now           func() time.Time
 }
 
 type Installer interface {
@@ -30,7 +39,10 @@ type Control interface {
 	Start(ctx context.Context) (engine.StartReport, error)
 }
 
-const StartFailed fail.Code = "engine.start-failed"
+const (
+	StartFailed        fail.Code = "engine.start-failed"
+	ReleaseUnreachable fail.Code = "engine.release-unreachable"
+)
 
 var Applies machine.Applies = func(p machine.Profile) machine.Verdict {
 	// value: the engine's calls apply where an engine runs: a Mac.
@@ -41,5 +53,5 @@ var Applies machine.Applies = func(p machine.Profile) machine.Verdict {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Stop, d)}
+	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d)}
 }

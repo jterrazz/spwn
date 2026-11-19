@@ -244,6 +244,11 @@ func Newer(a, b string) bool {
 	return preceded(pb.pre, pa.pre)
 }
 
+func Released(v string) bool {
+	// value: whether v reads as a release Newer orders.
+	return release(v) != nil
+}
+
 type semver struct {
 	core []int
 	pre  []string

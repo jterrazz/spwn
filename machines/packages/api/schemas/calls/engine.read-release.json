@@ -1,0 +1,103 @@
+{
+  "$defs": {
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Line": {
+          "type": "string"
+        },
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
+    "engine.calls.ReleaseIn": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "machines.Release": {
+      "additionalProperties": false,
+      "properties": {
+        "Behind": {
+          "type": "boolean"
+        },
+        "Checked": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Head": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        },
+        "Installed": {
+          "type": "string"
+        },
+        "Latest": {
+          "type": "string"
+        },
+        "Notes": {
+          "type": "string"
+        },
+        "Refused": {
+          "$ref": "#/$defs/machines.ReleaseRefused"
+        }
+      },
+      "required": [
+        "Behind",
+        "Head",
+        "Installed"
+      ],
+      "type": "object"
+    },
+    "machines.ReleaseRefused": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "At",
+        "Message"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/engine.read-release.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.read-release of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.calls.ReleaseIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.Release"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.read-release",
+  "type": "object"
+}

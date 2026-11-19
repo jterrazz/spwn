@@ -1,0 +1,6 @@
+{
+    "tag_name": "v0.22.0",
+    "html_url": "https://github.com/jterrazz/spwn/releases/tag/v0.22.0",
+    "prerelease": false,
+    "assets": [{ "name": "station-linux-amd64" }, { "name": "station-linux-arm64" }]
+}

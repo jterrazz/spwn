@@ -1,0 +1,16 @@
+description: 'the latest release on GitHub with this Mac''s binary is the latest, kept in the cache'
+fixture:
+    - ./__fixtures__/latest/
+serve:
+    - github
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | {Latest, Notes, Refused: .Refused.Message} else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.refresh-release","in":{}}
+      exit: 0
+      stdout: |
+          {"Latest":"v0.22.0","Notes":"https://github.com/jterrazz/spwn/releases/tag/v0.22.0","Refused":null}
+      files:
+          .cache/station/release.json:
+              contains:
+                  - '"v0.22.0"'

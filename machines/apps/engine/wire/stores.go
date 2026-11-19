@@ -10,6 +10,8 @@ import (
 	accountscontract "github.com/jterrazz/studio-station/apps/engine/accounts/contract"
 	corejsonfile "github.com/jterrazz/studio-station/apps/engine/core/adapter/jsonfile"
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
+	enginejsonfile "github.com/jterrazz/studio-station/apps/engine/engine/adapter/jsonfile"
+	enginecontract "github.com/jterrazz/studio-station/apps/engine/engine/contract"
 	imagesjsonfile "github.com/jterrazz/studio-station/apps/engine/images/adapter/jsonfile"
 	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
 	machinefilejsonfile "github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/jsonfile"
@@ -53,6 +55,7 @@ type stores struct {
 	applied      settingscontract.AppliedStore
 	uptime       machinescontract.UptimeStore
 	ledger       machinefilecontract.Ledger
+	release      enginecontract.ReleaseCache
 }
 
 func newStores(files local.FS, p setup.Paths) *stores {
@@ -67,6 +70,7 @@ func newStores(files local.FS, p setup.Paths) *stores {
 		applied:      settingsjsonfile.NewApplied(files, filepath.Join(p.State, "applied")),
 		uptime:       machinesjsonfile.NewUptime(files, filepath.Join(p.State, "uptime.json")),
 		ledger:       machinefilejsonfile.NewLedger(lockable{files}, filepath.Join(p.State, "ledger.json")),
+		release:      enginejsonfile.NewReleaseCache(files, filepath.Join(p.Cache, "release.json")),
 	}
 }
 

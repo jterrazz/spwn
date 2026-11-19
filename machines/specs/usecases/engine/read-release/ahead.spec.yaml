@@ -1,0 +1,19 @@
+description: 'a Mac on a pre-release past the latest release reads it is past it, never behind'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world upgrade macbook-pro v0.21.0-alpha.1'
+      exit: 0
+    - command: 'world release v0.20.0'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio > /dev/null'
+      stdin: |
+          {"v":2,"id":"1","call":"engine.refresh-release","in":{}}
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | {Installed, Latest, Behind, Head, Notes, Checked: (.Checked != null), Refused: .Refused.Message} else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.read-release","in":{}}
+      exit: 0
+      stdout: |
+          {"Installed":"v0.21.0-alpha.1","Latest":"v0.20.0","Behind":false,"Head":{"Tone":"plain","Sentence":"This Mac runs v0.21.0-alpha.1, past the latest release v0.20.0."},"Notes":"https://github.com/jterrazz/spwn/releases/tag/v0.20.0","Checked":true,"Refused":null}

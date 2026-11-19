@@ -1,0 +1,12 @@
+description: 'a latest release with no darwin binary yet is not taken'
+fixture:
+    - ./__fixtures__/linux-only/
+serve:
+    - github
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | {Latest, Notes, Refused: .Refused.Message} else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.refresh-release","in":{}}
+      exit: 0
+      stdout: |
+          {"Latest":null,"Notes":null,"Refused":null}
