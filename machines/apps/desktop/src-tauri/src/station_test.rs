@@ -156,6 +156,34 @@ fn a_record_of_another_version_or_shape_is_not_read() {
 }
 
 #[test]
+fn a_record_of_version_2_or_unreadable_is_ignored_for_the_install_folder() {
+    // Given - a station in the install folder, another one a record of version 2 names
+    let home = scratch();
+    let kept = home.join("kept/station");
+    let installed = home.join(".local/bin/station");
+    for path in [&kept, &installed] {
+        executable(path, 0o755);
+    }
+    let file = home.join(".local/state").join(RECORD_PATH);
+    fs::create_dir_all(file.parent().expect("the record has a folder")).expect("it is made");
+    let text = format!(
+        "{{\"v\":2,\"executable\":{:?},\"version\":\"v0.22.0\",\"at\":\"2026-11-19T09:00:00Z\"}}",
+        kept.display().to_string()
+    );
+    fs::write(&file, text).expect("the record is written");
+
+    // When - station is looked for, then again once the record is a folder no read opens
+    let newer = looked(&home, None);
+    fs::remove_file(&file).expect("the record goes");
+    fs::create_dir(&file).expect("a folder takes its place");
+    let unreadable = looked(&home, None);
+
+    // Then - both times the install folder's
+    assert_eq!(newer, Some(installed.clone()));
+    assert_eq!(unreadable, Some(installed));
+}
+
+#[test]
 fn a_fake_folder_is_the_one_place_looked_at() {
     // Given - a fake folder holding station, and an engine naming another that exists
     let [fake, other] = [scratch(), scratch()];
