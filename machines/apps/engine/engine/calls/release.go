@@ -30,7 +30,11 @@ var RefreshRelease = call.Call[Deps, ReleaseIn, model.Release]{
 	Run: func(ctx context.Context, d Deps, _ ReleaseIn, _ call.Progress) (model.Release, error) {
 		// invariant: GitHub is asked now and what it answered is kept; a
 		// GitHub that does not answer is kept as the refusal, beside the
-		// last answer, and refused.
+		// last answer, and refused. One ask runs at a time, the engine's own
+		// and a window's, from the read of what was kept to its write; an ask
+		// cut short by its context is no refusal of GitHub and keeps nothing.
+		d.Asking.Lock()
+		defer d.Asking.Unlock()
 		kept, _, err := d.Cache.Read(ctx)
 		if err != nil {
 			kept = engine.ReleaseKept{}
@@ -38,6 +42,9 @@ var RefreshRelease = call.Call[Deps, ReleaseIn, model.Release]{
 		now := d.Now()
 		latest, asked := d.Releases.Latest(ctx)
 		if asked != nil {
+			if ctx.Err() != nil {
+				return model.Release{}, ctx.Err()
+			}
 			if err := d.Cache.Write(ctx, kept.Failed(now, asked.Error())); err != nil {
 				return model.Release{}, err
 			}

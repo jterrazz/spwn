@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"path/filepath"
+	"sync"
 
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 
@@ -56,6 +57,8 @@ type stores struct {
 	uptime       machinescontract.UptimeStore
 	ledger       machinefilecontract.Ledger
 	release      enginecontract.ReleaseCache
+	// value: held while the engine asks GitHub for the latest release.
+	asking sync.Mutex
 }
 
 func newStores(files local.FS, p setup.Paths) *stores {

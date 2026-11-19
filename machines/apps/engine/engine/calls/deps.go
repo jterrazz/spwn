@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -24,6 +25,9 @@ type Deps struct {
 	Cache         contract.ReleaseCache
 	Version, Arch string
 	Now           func() time.Time
+	// value: held from the read of what the engine kept to the write of its
+	// next asks, one for the Mac, shared by every ask of it.
+	Asking *sync.Mutex
 }
 
 type Installer interface {

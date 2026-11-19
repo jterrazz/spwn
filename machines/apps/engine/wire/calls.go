@@ -175,6 +175,7 @@ func (m machine) engineDeps() enginecalls.Deps {
 	d := enginecalls.Deps{
 		Control: m.control(), Installer: engineInstaller{m: m}, Kind: m.profile.Kind,
 		Cache: m.stores.release, Version: m.engineVersion(), Arch: m.sys.Env.GOARCH(), Now: m.sys.Clock.Now,
+		Asking: &m.stores.asking,
 	}
 	if m.world != nil {
 		d.Releases = m.world.releases()
