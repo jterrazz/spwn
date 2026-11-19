@@ -94,7 +94,7 @@ func TestDriftSaysWhatApplyWouldDo(t *testing.T) {
 			line("tree", catalog.KindApp, machinefile.NotManaged, machinefile.Adopt),
 			line("node", catalog.KindApp, machinefile.Changed, machinefile.Leave),
 		}, Extra: []machinefile.ExtraLine{{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: "jq"}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.Remove}}}},
-			"Apply will install 1, adopt 1, remove 1 and leave 1."},
+			"Apply will install 1, adopt 1 and leave 1."},
 		{"only what is left", machinefile.Plan{Lines: []machinefile.Line{line("node", catalog.KindApp, machinefile.Changed, machinefile.Leave)}}, "Nothing to apply."},
 		{"none", machinefile.Plan{}, "Nothing to apply."},
 	} {
@@ -120,7 +120,7 @@ func TestDriftSaysWhatApplyLeaves(t *testing.T) {
 			line("tree", catalog.KindApp, machinefile.Present, machinefile.Keep),
 			line("ripgrep", catalog.KindApp, machinefile.Absent, machinefile.Install),
 		}}, "Nothing is removed. 2 apps stay as they are."},
-		{"a removal", machinefile.Plan{Lines: []machinefile.Line{line("jq", catalog.KindApp, machinefile.Present, machinefile.Keep)}, Extra: []machinefile.ExtraLine{removing}}, "1 removed. 1 app stays as it is."},
+		{"an extra is left, not removed", machinefile.Plan{Lines: []machinefile.Line{line("jq", catalog.KindApp, machinefile.Present, machinefile.Keep)}, Extra: []machinefile.ExtraLine{removing}}, "Nothing is removed. 1 app stays as it is."},
 		{"a setting is not an app", machinefile.Plan{Lines: []machinefile.Line{line("macos-dock", catalog.KindSetting, machinefile.Present, machinefile.Keep)}}, "Nothing is removed."},
 	} {
 		t.Run(c.name, func(t *testing.T) {
@@ -128,6 +128,30 @@ func TestDriftSaysWhatApplyLeaves(t *testing.T) {
 				t.Errorf("%q; want %q", got, c.stays)
 			}
 		})
+	}
+}
+
+func TestDriftNamesTheExtrasApplyLeaves(t *testing.T) {
+	extra := func(name string) machinefile.ExtraLine {
+		return machinefile.ExtraLine{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: name}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.Remove}}
+	}
+	for _, c := range []struct {
+		extras []string
+		left   string
+	}{
+		{nil, ""},
+		{[]string{"rg"}, "rg stays: Apply leaves extras."},
+		{[]string{"rg", "fd"}, "rg and fd stay: Apply leaves extras."},
+		{[]string{"rg", "fd", "jq", "bat"}, "rg, fd and 2 more stay: Apply leaves extras."},
+	} {
+		var p machinefile.Plan
+		for _, n := range c.extras {
+			p.Extra = append(p.Extra, extra(n))
+		}
+		d := machinefile.DriftOf(p, nil)
+		if d.Apply.Left != c.left || d.Apply.Sentence != "Nothing to apply." {
+			t.Errorf("%v: left %q, sentence %q; want %q, nothing to apply", c.extras, d.Apply.Left, d.Apply.Sentence, c.left)
+		}
 	}
 }
 

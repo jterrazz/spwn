@@ -1,6 +1,7 @@
 package machinefile
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -103,14 +104,17 @@ const (
 
 func (FileSide) Enum() []string { return []string{string(FileShared), string(FileLacks)} }
 
-// value: what apply would do with the lines that differ, by its verb, and
-// the sentence that says it, and the one that says what it leaves: what is
-// removed, and how many apps stay as they are.
+// value: what a bare apply does with the lines that differ, by its verb, and
+// the sentence that says it; the extras it leaves, by name, and the sentence
+// that says so; and the one that says nothing is removed and how many apps
+// stay as they are. Only apply --remove takes an extra back.
 
 type Applying struct {
-	Install, Adopt, Remove, Leave int
-	Sentence                      string
-	Stays                         string
+	Install, Adopt, Leave int
+	Sentence              string
+	Extras                []string
+	Left                  string
+	Stays                 string
 }
 
 // value: what a VM's Mac holds of what its Machinefile gives it: each port
@@ -168,22 +172,14 @@ func DriftOf(p Plan, access *Access) Drift {
 	apps := chapters[ChapterApps]
 	for _, e := range p.Extra {
 		apps.Differing = append(apps.Differing, Differing{Package: e.Step.Package, Condition: Extra, Seen: e.Seen.Version})
-		if e.Takes() {
-			apply.Remove++
-		} else {
-			apply.Leave++
-		}
+		apply.extra(e.Step.Package)
 	}
 	for _, b := range p.Blocks {
 		if b.Condition != Extra {
 			continue
 		}
 		apps.Differing = append(apps.Differing, Differing{Package: b.Package, Block: b.ID, Condition: Extra})
-		if b.Action == Remove {
-			apply.Remove++
-		} else {
-			apply.Leave++
-		}
+		apply.extra(b.Package)
 	}
 	for _, l := range p.Lines {
 		c := chapters[of[l.Step.Package]]
@@ -286,21 +282,23 @@ func (a *Applying) count(act Action) {
 		a.Install++
 	case Adopt:
 		a.Adopt++
-	case Remove:
-		a.Remove++
 	case Leave:
 		a.Leave++
-	case Keep:
+	case Keep, Remove:
+	}
+}
+
+func (a *Applying) extra(pkg string) {
+	if !slices.Contains(a.Extras, pkg) {
+		a.Extras = append(a.Extras, pkg)
 	}
 }
 
 func (a Applying) worded(matching int) Applying {
-	// value: what the plan leaves: nothing removed, or how many are, then
-	// the apps that match and stay as they are.
+	// value: what a bare apply leaves: nothing is removed, then the apps
+	// that match and stay as they are; and each extra it does not take back.
 	a.Stays = "Nothing is removed."
-	if a.Remove > 0 {
-		a.Stays = strconv.Itoa(a.Remove) + " removed."
-	}
+	a.Left = a.leaves()
 	switch matching {
 	case 0:
 	case 1:
@@ -312,7 +310,7 @@ func (a Applying) worded(matching int) Applying {
 	// value: the mockup's sentence: each verb with its count, in the order
 	// install, adopt, remove, leave; nothing to apply when apply would only
 	// leave lines as they are.
-	if a.Install+a.Adopt+a.Remove == 0 {
+	if a.Install+a.Adopt == 0 {
 		a.Sentence = "Nothing to apply."
 		return a
 	}
@@ -320,7 +318,7 @@ func (a Applying) worded(matching int) Applying {
 	for _, v := range []struct {
 		verb string
 		n    int
-	}{{"install", a.Install}, {"adopt", a.Adopt}, {"remove", a.Remove}, {"leave", a.Leave}} {
+	}{{"install", a.Install}, {"adopt", a.Adopt}, {"leave", a.Leave}} {
 		if v.n > 0 {
 			parts = append(parts, v.verb+" "+strconv.Itoa(v.n))
 		}
@@ -331,6 +329,21 @@ func (a Applying) worded(matching int) Applying {
 	}
 	a.Sentence = "Apply will " + words + "."
 	return a
+}
+
+func (a Applying) leaves() string {
+	// value: the extras a bare apply leaves, by name, as the owner reads
+	// them: one or two named, more as a count after the first two.
+	switch n := len(a.Extras); n {
+	case 0:
+		return ""
+	case 1:
+		return a.Extras[0] + " stays: Apply leaves extras."
+	case 2:
+		return a.Extras[0] + " and " + a.Extras[1] + " stay: Apply leaves extras."
+	default:
+		return a.Extras[0] + ", " + a.Extras[1] + " and " + strconv.Itoa(n-2) + " more stay: Apply leaves extras."
+	}
 }
 
 func (c ChapterDrift) worded() ChapterDrift {

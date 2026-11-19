@@ -1,0 +1,40 @@
+description: 'drift counts a bare apply''s work and names the extras it leaves, and it removes none'
+fixture: ../../__fixtures__/homebrew/
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd, eza]
+      exit: 0
+    - command: 'apply > /dev/null'
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, eza]
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Apply'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"Install":0,"Adopt":0,"Leave":0,"Sentence":"Nothing to apply.","Extras":["fd"],"Left":"fd stays: Apply leaves extras.","Stays":"Nothing is removed. 3 apps stay as they are."}
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	fd	brew	installed by station for macbook-pro, listed no longer
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ●	eza	0.23.4	brew
+    - command: 'apps | /usr/bin/grep -e "	fd	"'
+      exit: 0
+      stdout: |
+          ●	fd	10.3.0	brew

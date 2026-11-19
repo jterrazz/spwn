@@ -1374,9 +1374,10 @@ export type MachinefileApplied = {
 
 export type MachinefileApplying = {
     Adopt: number;
+    Extras: string[] | null;
     Install: number;
     Leave: number;
-    Remove: number;
+    Left: string;
     Sentence: string;
     Stays: string;
 };

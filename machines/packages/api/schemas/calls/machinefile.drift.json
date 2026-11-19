@@ -640,14 +640,23 @@
         "Adopt": {
           "type": "integer"
         },
+        "Extras": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Install": {
           "type": "integer"
         },
         "Leave": {
           "type": "integer"
         },
-        "Remove": {
-          "type": "integer"
+        "Left": {
+          "type": "string"
         },
         "Sentence": {
           "type": "string"
@@ -658,9 +667,10 @@
       },
       "required": [
         "Adopt",
+        "Extras",
         "Install",
         "Leave",
-        "Remove",
+        "Left",
         "Sentence",
         "Stays"
       ],
