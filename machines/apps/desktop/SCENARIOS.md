@@ -14,6 +14,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | Library and Storage      | D1 to D38                                         |
 | The window itself        | A1 to A6                                          |
 | No engine on this Mac    | E1 to E6                                          |
+| The engine's release     | U1 to U4                                          |
 
 ## How a scenario is proved
 
@@ -205,3 +206,14 @@ The window opened on a Mac where no engine answers: its shell looks for the core
 | E4  | Install from my own terminal          | no core is on disk                       | I choose the terminal and run the command | the page looks for station every few seconds and moves on to the start by itself                        | yes    |
 | E5  | Stop an install                       | the installer is running                 | I press Cancel                            | the installer and its children are stopped and the offer comes back                                     | yes    |
 | E6  | Start a core already installed        | a core is on disk and no engine answers  | I open the window                         | the start panel, its command, and a foot that says the engine is not started                            | yes    |
+
+## The engine's release
+
+The engine reads the latest release; the window offers it at the sidebar foot and on the Engine page, and updates on a press ([ADR 060](../../docs/decisions/060-the-window-offers-the-engines-release-and-updates-on-a-press.md)).
+
+| ID  | Scenario                        | Given                                                 | When                                                  | Then                                                                                                 | Mockup |
+| --- | ------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------ |
+| U1  | Learn that a release is out     | the engine says this Mac is behind the latest release | I look at the sidebar foot, then press its row        | the row names the release and offers Update, and it opens the Engine page                            | yes    |
+| U2  | See nothing when nothing is out | the engine says this Mac is not behind                | I look at the sidebar foot, then open the Engine page | no row at the foot, and the page says what the engine says                                           | no     |
+| U3  | Read why a check failed         | the engine cannot reach the releases                  | I press Check now                                     | a failed row says the engine's message, and I can dismiss it                                         | no     |
+| U4  | Update in one press             | the engine says this Mac is behind                    | I press Update                                        | the installer's own lines run, then the engine start, and the row goes once the engine is not behind | yes    |
