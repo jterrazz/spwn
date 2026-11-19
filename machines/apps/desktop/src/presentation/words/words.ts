@@ -99,6 +99,12 @@ export const THE_MAC_ITSELF_WORD = 'the Mac itself';
 
 export const NO_PURPOSE_WORD = 'No purpose given';
 
+// value: the window's words around a create that failed: the step's sentence and the lines are the engine's.
+export const FAILED_CREATE_WORDS = {
+    lines: 'What its console last wrote',
+    none: 'The engine kept no line of its console.',
+} as const;
+
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;
 
 export const MACHINE_KIND_WORDS: WordsOfAnOpenCode = {

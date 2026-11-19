@@ -21,6 +21,7 @@ import type { Route } from '../../../navigation/route';
 import { Page } from '../../../ui/page';
 import { machineKindOf } from '../../../words/provisional';
 import { DeleteGesture } from '../gestures';
+import { FailedCreate } from './birth';
 import { CheckLatency, CheckTile, Health, LastDays } from './health';
 import { FileChapters, ItsFile } from './its-file';
 import { Follows, Machines, MachinesTile } from './mac';
@@ -122,6 +123,7 @@ function StoppedOverview({ mac, vm, go }: VmProps) {
     return (
         <Page>
             <VmHead vm={vm} />
+            <FailedCreate birth={vm.Birth} />
             <FileChapters drift={undefined} go={go} vm={vm.Name} />
             <DeleteGesture go={go} key={vm.Name} mac={mac} vm={vm} />
         </Page>

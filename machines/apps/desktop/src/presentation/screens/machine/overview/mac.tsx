@@ -36,7 +36,7 @@ function upFor(vm: MachinesVM, read: string | undefined): string | undefined {
 
 function stateUp(vm: MachinesVM, read: string | undefined) {
     const shown = vmState(vm);
-    if (vm.Birth !== null) {
+    if (vm.Birth !== null && vm.Birth.failed !== true) {
         return { ...shown, word: vm.Birth.sentence };
     }
     return { ...shown, word: sentence([shown.word, upFor(vm, read)]) };
@@ -61,6 +61,7 @@ export function Machines({ found, go }: { found: Found; go: Go }) {
                         go(machineRoute(vm.Name));
                     }}
                     sentence={sentence([
+                        vm.Birth?.failed === true ? vm.Birth.sentence : undefined,
                         vm.Purpose,
                         vm.Creator === '' ? undefined : `by ${vm.Creator}`,
                     ])}
