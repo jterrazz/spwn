@@ -448,4 +448,28 @@ rm -f "$mac/.config/station/machinefiles/ws1.machine.yaml"
 say "   3000 shared on $on and served; 8443 flagged, never served"
 case_pass
 
+case_begin engine-restart-over-a-new-binary
+# value: the binary under the engine is replaced by a build of another version and
+# the engine started again from it, as the launchd agent does after an upgrade: the
+# engine then reports the new version, and ws1's run is the process it was, with the
+# same pid, still answering ssh. The launchd half is tier 3's.
+runs="$mac/.local/state/station/runs"
+vm_pid=$(cat "$runs/ws1.pid")
+kill -0 "$vm_pid" 2>/dev/null || fail "ws1's run $vm_pid is not alive before the engine's restart"
+[ "$(st engine --json | jq -r .engine.version)" != v0.0.0-swap ] || fail "the engine already runs the swap version"
+(cd "$repo" && go build -ldflags "-X github.com/jterrazz/studio-station/apps/engine/wire.version=v0.0.0-swap" -o "$work/station-swap" ./apps/engine/cmd/station) >> "$log" 2>&1 || fail "build the swap binary"
+kill "$engine_pid" 2>/dev/null
+wait "$engine_pid" 2>/dev/null
+cp "$work/station-swap" "$mac/.local/bin/station"
+(as_exec "$mac" station engine run) >> "$work/engine.log" 2>&1 &
+engine_pid=$!
+swapped() { [ "$(st engine --json 2> /dev/null | jq -r .engine.version)" = v0.0.0-swap ]; }
+until_true 6 swapped || fail "the engine started from the replaced binary does not report v0.0.0-swap"
+[ "$(cat "$runs/ws1.pid")" = "$vm_pid" ] || fail "ws1's run is $(cat "$runs/ws1.pid") after the engine's restart, it was $vm_pid"
+kill -0 "$vm_pid" 2>/dev/null || fail "ws1's run $vm_pid ended with the engine's restart"
+in_vm ws1 true || fail "ws1 does not answer ssh after the engine's restart"
+[ "$(st machines ws1 --json | jq -r .health.running)" = true ] || fail "ws1 does not read running after the engine's restart"
+say "   the engine restarted from a v0.0.0-swap binary, ws1's run $vm_pid lived through it and answers ssh"
+case_pass
+
 st machines delete ws1 --confirm=ws1 >> "$log" 2>&1 || true
