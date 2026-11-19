@@ -49,6 +49,8 @@ it had been made.
 - A VM blocked by Local Network that later connects keeps its failure until a start, its first boot
   never having run. The create's hint says so, worded by the engine: `approve station on <mac>'s
 screen, or in System Settings > Privacy & Security > Local Network; start <vm> once approved`.
+- Its `Sections` are its Overview alone: it never booted, so its Activity, Packages, Ports, Sign-ins and
+  Storage have nothing to read, and the window draws no tab for them.
 - A create that fails after its first run now leaves a broken finding until it is started or
   deleted.
 - The CLI's row of such a VM says `Failed at boot 2 of 4`, and the menu bar's Home row reads

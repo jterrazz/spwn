@@ -74,6 +74,15 @@ func TestAVMsSectionsAreItsKindsAndEachSectionHasAFlag(t *testing.T) {
 	}
 }
 
+func TestAVMNotCreatedHasItsOverviewAlone(t *testing.T) {
+	for _, lifetime := range []machines.Lifetime{machines.AlwaysOn, machines.Persistent, machines.Ephemeral} {
+		vm := machines.VM{Lifetime: lifetime, State: machines.Stopped, Birth: &machines.Birth{Failed: true, Step: machines.BornBooting}}
+		if got, want := machines.SectionsOf(vm), (machines.Sections{Overview: true}); got != want {
+			t.Errorf("a %v not created: %+v; want its Overview alone", lifetime, got)
+		}
+	}
+}
+
 func TestAMacNotSeenIsNeverSaidDown(t *testing.T) {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
 	silent := machines.MacView{Name: "mac-mini", Answered: now.Add(-12 * time.Minute)}
