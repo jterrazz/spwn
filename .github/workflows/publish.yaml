@@ -16,6 +16,24 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
+    # invariant: a release tag ships only signed and notarized macOS artefacts, so a tag whose signing secrets are not all set fails here, before any build; a dry run with none of them builds unsigned
+    signing:
+        name: Signing
+        runs-on: ubuntu-26.04-arm
+        outputs:
+            signed: ${{ steps.require.outputs.signed }}
+        steps:
+            - uses: actions/checkout@v4
+            - id: require
+              run: scripts/sign-macos.sh require
+              env:
+                  MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+                  MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+                  APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
+                  APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+                  APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
     # value: station's linux binaries need no cgo, so they cross-build on Linux; its darwin ones need cgo for IOKit and build on a Mac below
     machines-linux:
         name: Machines (linux)
@@ -47,6 +65,7 @@ jobs:
 
     machines-darwin:
         name: Machines (darwin)
+        needs: [signing]
         runs-on: macos-26
         defaults:
             run:
@@ -88,13 +107,55 @@ jobs:
                       [ "$minos" = "$MACOSX_DEPLOYMENT_TARGET" ]
                   done
                   "$dist/station-darwin-arm64" --version
+            - name: Import the signing identity
+              if: needs.signing.outputs.signed == 'true'
+              run: ../scripts/sign-macos.sh keychain
+              env:
+                  MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+                  MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+                  APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
+            # value: a bare binary cannot be stapled, so both are notarized inside one zip that is not shipped, and Gatekeeper reads their ticket online
+            - name: Sign and notarize the binaries
+              if: needs.signing.outputs.signed == 'true'
+              env:
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+                  APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+              run: |
+                  set -euo pipefail
+                  dist="$RUNNER_TEMP/station"
+                  ../scripts/sign-macos.sh sign "$dist/station-darwin-arm64" "$dist/station-darwin-amd64"
+                  mkdir -p "$RUNNER_TEMP/notary/station-darwin"
+                  cp "$dist/station-darwin-arm64" "$dist/station-darwin-amd64" "$RUNNER_TEMP/notary/station-darwin/"
+                  ditto -c -k --keepParent "$RUNNER_TEMP/notary/station-darwin" "$RUNNER_TEMP/notary/station-darwin.zip"
+                  ../scripts/sign-macos.sh notarize "$RUNNER_TEMP/notary/station-darwin.zip"
             - name: Build Station.app
               run: |
                   set -euo pipefail
                   make menubar
+                  vtool -show-build .artifacts/menubar/Station.app/Contents/MacOS/StationMenuBar | awk '$1 == "minos"'
+            - name: Sign, notarize and staple Station.app
+              if: needs.signing.outputs.signed == 'true'
+              env:
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+                  APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+              run: |
+                  set -euo pipefail
+                  ../scripts/sign-macos.sh sign .artifacts/menubar/Station.app
+                  mkdir -p "$RUNNER_TEMP/notary"
+                  ditto -c -k --keepParent .artifacts/menubar/Station.app "$RUNNER_TEMP/notary/Station.app.zip"
+                  ../scripts/sign-macos.sh notarize "$RUNNER_TEMP/notary/Station.app.zip"
+                  ../scripts/sign-macos.sh staple .artifacts/menubar/Station.app
+            # invariant: the shipped zip is made after the staple, so the app it carries holds its ticket offline
+            - name: Zip Station.app
+              run: |
+                  set -euo pipefail
                   ditto -c -k --keepParent .artifacts/menubar/Station.app "$RUNNER_TEMP/station/Station.app.zip"
                   codesign -dv .artifacts/menubar/Station.app
-                  vtool -show-build .artifacts/menubar/Station.app/Contents/MacOS/StationMenuBar | awk '$1 == "minos"'
+            - name: Delete the signing keychain
+              if: always() && needs.signing.outputs.signed == 'true'
+              run: ../scripts/sign-macos.sh cleanup
             - uses: actions/upload-artifact@v4
               with:
                   name: station-darwin
@@ -105,7 +166,7 @@ jobs:
     # invariant: the release opens only once both station jobs are built, so a failed station leaves no spwn-only release
     publish:
         name: Publish
-        needs: [machines-linux, machines-darwin]
+        needs: [signing, machines-linux, machines-darwin]
         runs-on: ubuntu-26.04-arm
         permissions:
             contents: write
@@ -130,4 +191,11 @@ jobs:
                   args: release --clean ${{ github.event_name == 'workflow_dispatch' && '--snapshot' || '' }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  # value: GoReleaser signs and notarizes spwn's darwin binaries itself, from Linux, before it archives them (`notarize` in .goreleaser.yml)
+                  MACOS_SIGN: ${{ needs.signing.outputs.signed }}
+                  MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+                  MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+                  APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
+                  APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+                  APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
             - run: cat .artifacts/goreleaser/checksums.txt

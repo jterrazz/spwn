@@ -29,9 +29,10 @@ triggers the entire pipeline.
 
 1. Cross-compiles `spwn` for `darwin_{arm64,amd64}` and `linux_{arm64,amd64}`.
 2. Embeds the git tag into the binary via `-ldflags "-X spwn.sh/apps/cli.Version={{.Version}}"`.
-3. Dependencies each binary into `spwn_{os}_{arch}.tar.gz`.
-4. Computes SHA256 of every archive into `checksums.txt`.
-5. Uploads archives + `checksums.txt` to the GitHub Release.
+3. On a signed run, signs the two darwin binaries with the Developer ID and notarizes them ([Release](../guides/release.md#2-signing-and-notarization)).
+4. Dependencies each binary into `spwn_{os}_{arch}.tar.gz`.
+5. Computes SHA256 of every archive into `checksums.txt`.
+6. Uploads archives + `checksums.txt` to the GitHub Release.
 
 ### Client flow (`spwn upgrade`)
 

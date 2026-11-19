@@ -11,7 +11,9 @@ GitHub Release, and a user's `spwn upgrade` or the Tauri updater does the rest.
 
 ## One-time setup (do this once per clone)
 
-### 1. GitHub repository secrets
+### 1. GitHub repository secrets for the Tauri updater
+
+These sign the updater manifest of the desktop app in `apps/web`, which no job builds today.
 
 | Secret                               | Purpose                                 |
 | ------------------------------------ | --------------------------------------- |
@@ -54,10 +56,30 @@ Paste the **public** key into `apps/web/src-tauri/tauri.conf.json`:
 Commit that change **once**. Never rotate the pubkey casually - see
 [Key rotation](#key-rotation) below.
 
-### 2. GoReleaser is already configured
+### 2. Signing and notarization
 
-No extra setup needed. `.goreleaser.yml` is committed and the workflow
-uses the default `GITHUB_TOKEN`.
+Every macOS artefact a tag ships is signed with a Developer ID Application certificate, with the hardened runtime and a secure timestamp, and notarized by Apple: spwn's two darwin binaries, signed and notarized by GoReleaser before it archives them; station's two darwin binaries, notarized inside a zip that is not shipped, since a bare binary cannot be stapled; and `Station.app`, notarized, then stapled before it is zipped into `Station.app.zip`. The Publish workflow reads six repository secrets, all or none:
+
+| Secret                    | What it is                                                                               | How to make it                                                                                                                                                                                                                                                                                     |
+| ------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MACOS_CERT_P12_BASE64`   | The Developer ID Application certificate and its private key, a `.p12` in base64         | Create the certificate in the Apple Developer account (Certificates, type Developer ID Application) from a signing request made by Keychain Access, then export the certificate with its key from Keychain Access as a `.p12`; `base64 -i developer-id.p12 \| gh secret set MACOS_CERT_P12_BASE64` |
+| `MACOS_CERT_PASSWORD`     | The password the `.p12` was exported with                                                | `gh secret set MACOS_CERT_PASSWORD`, which prompts                                                                                                                                                                                                                                                 |
+| `APPLE_API_KEY_P8_BASE64` | An App Store Connect API key, the `.p8` notarytool and GoReleaser submit with, in base64 | App Store Connect, Users and Access, Integrations, Team Keys: generate a key with the Developer role and download its `.p8`, once; `base64 -i AuthKey_<id>.p8 \| gh secret set APPLE_API_KEY_P8_BASE64`                                                                                            |
+| `APPLE_API_KEY_ID`        | That key's ID, ten characters                                                            | The Key ID column of the same page                                                                                                                                                                                                                                                                 |
+| `APPLE_API_ISSUER_ID`     | The issuer of the team's keys, a UUID                                                    | The Issuer ID shown above the keys on the same page                                                                                                                                                                                                                                                |
+| `APPLE_TEAM_ID`           | The ten-character team the certificate belongs to                                        | The Membership details of the Apple Developer account; every signature is checked to carry it                                                                                                                                                                                                      |
+
+The workflow's first job, Signing, runs `scripts/sign-macos.sh require`. On a `v*` tag a missing secret fails it, naming the missing ones, and nothing is built or released: a tag never ships unsigned. On a dry run the six together sign as a tag does, none builds unsigned, and a partial set fails. The Check workflow never signs. The certificate is imported into a keychain the macOS job creates and deletes, with a random password masked in the log, and the decoded key files live in the runner's temporary folder until that job ends.
+
+No artefact carries entitlements: neither `station` nor `Station.app` uses an API the hardened runtime withholds without one. The script signs ad hoc with `MACOS_SIGN_IDENTITY=-` and skips notarization and stapling with `MACOS_NOTARIZE=skip`, to run its logic on a Mac with no certificate:
+
+```sh
+MACOS_SIGN_IDENTITY=- MACOS_NOTARIZE=skip scripts/sign-macos.sh sign machines/.artifacts/menubar/Station.app
+```
+
+### 3. GoReleaser is already configured
+
+`.goreleaser.yml` is committed; the workflow passes it the default `GITHUB_TOKEN` and the signing secrets above.
 
 ## Cutting a release
 
@@ -107,21 +129,25 @@ both products of the repository, spwn and station (`machines/`):
 
 ```text
 .github/workflows/publish.yaml
+├─ signing          (ubuntu, arm)   on a tag, fails unless every signing secret is set
 ├─ machines-linux   (ubuntu, arm)   station-linux-arm64, station-linux-amd64, cgo off
-├─ machines-darwin  (macos-26)      station-darwin-arm64, station-darwin-amd64 (cgo, IOKit), Station.app.zip
-└─ publish (GoReleaser)             opens the release once both are built: spwn's archives,
-                                    station's files as extra_files, one checksums.txt for all
+├─ machines-darwin  (macos-26)      station-darwin-arm64, station-darwin-amd64 (cgo, IOKit), Station.app.zip,
+│                                   each signed and notarized, the app stapled
+└─ publish (GoReleaser)             opens the release once both are built: spwn's archives, its darwin
+                                    binaries signed and notarized, station's files as extra_files,
+                                    one checksums.txt for all
 ```
 
 The release is opened once, by GoReleaser, and only after both station jobs
 succeeded, so a failed station leaves no release behind. Station's binaries
 carry its version through `-X .../apps/engine/wire.version=<tag>`, as its own
-release did. The desktop app and its `latest.json` have no job until the
-signing and notarization secrets are in place: the shared
-`release-tauri.yaml` they called is deleted.
+release did. The desktop app and its `latest.json` have no job: the shared
+`release-tauri.yaml` they called is deleted, and a job that builds them
+again signs them as the macOS job does.
 
 A manual run of the workflow (`workflow_dispatch`) is a dry run: every job
-builds, GoReleaser runs with `--snapshot`, and nothing is published.
+builds, signed when the signing secrets are set, GoReleaser runs with
+`--snapshot`, and nothing is published.
 
 ### 4. Verify
 

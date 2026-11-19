@@ -46,7 +46,8 @@ export default defineConfig({
                 verbatim: true,
             },
             docker: 'the build context of the test image: `make test-image` builds spwn-test:latest, the mock Claude and Codex runtimes baked in, from docker/spwn-test',
-            scripts: 'the installer `make install-binary` runs, and the manual-pass harness',
+            scripts:
+                'the installer `make install-binary` runs, the manual-pass harness, and the signing and notarization steps of the Publish workflow',
         },
     },
 });
