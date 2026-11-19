@@ -13,6 +13,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | A server                 | S1 to S6                                          |
 | Library and Storage      | D1 to D38                                         |
 | The window itself        | A1 to A6                                          |
+| No engine on this Mac    | E1 to E6                                          |
 
 ## How a scenario is proved
 
@@ -191,3 +192,16 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 | A4  | Go back                             | I followed two links            | I press the arrow in the toolbar, or ⌘[ | I am back on the page and the tab I came from                                                                                                                                    | part   |
 | A5  | Look the same on Linux              | the app runs on Linux           | I open it                               | the same pages, with the same proportions                                                                                                                                        | no     |
 | A6  | Find the same tabs on every machine | a Mac, a workspace and a server | I open each                             | a Mac and a workspace the same six tabs in the same order, a server the tabs its engine has sections for; a tab with nothing in it says so in its head and still shows its lists | yes    |
+
+## No engine on this Mac
+
+The window opened on a Mac where no engine answers: its shell looks for the core on the disk, installs it and starts it ([ADR 058](../../docs/decisions/058-the-window-installs-and-starts-the-core-itself.md)).
+
+| ID  | Scenario                              | Given                                    | When                                      | Then                                                                                                    | Mockup |
+| --- | ------------------------------------- | ---------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------ |
+| E1  | Learn that spwn is not on this Mac    | no engine answers and no core is on disk | I open the window                         | one panel on Home says so, what the install puts where, and the command; the sidebar's items are dimmed | yes    |
+| E2  | Install and start spwn in two presses | no core is on disk                       | I press Install, then Start the engine    | the installer's own lines run in the well, then the start panel, then the window the engine answers     | yes    |
+| E3  | Read why an install failed            | the installer exits 1                    | I press Install                           | its last error line is the sentence, its output stays in the well, and Retry is the one bright button   | yes    |
+| E4  | Install from my own terminal          | no core is on disk                       | I choose the terminal and run the command | the page looks for station every few seconds and moves on to the start by itself                        | yes    |
+| E5  | Stop an install                       | the installer is running                 | I press Cancel                            | the installer and its children are stopped and the offer comes back                                     | yes    |
+| E6  | Start a core already installed        | a core is on disk and no engine answers  | I open the window                         | the start panel, its command, and a foot that says the engine is not started                            | yes    |
