@@ -751,6 +751,7 @@
         "State": {
           "enum": [
             "down",
+            "not-created",
             "engine-stopped",
             "not-seen",
             "engine-not-installed",

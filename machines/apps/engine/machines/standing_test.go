@@ -233,16 +233,21 @@ func TestARollUpIsItsFirstRuleThatMatchesAndCountsWhatItNames(t *testing.T) {
 	}
 	down := VM{Name: "linux-1", Lifetime: Persistent, State: Stale}
 	stopped := VM{Name: "api", Lifetime: Persistent, State: Stopped}
+	uncreated := VM{Name: "linux-2", Lifetime: Ephemeral, State: Stopped, Birth: &Birth{Failed: true, Step: BornBooting}}
 	silent := MacView{Answered: seen, VMs: []VM{{Name: "infra", Lifetime: AlwaysOn, State: UnknownState, Restarts: Restarts{Looping: true}}}}
 	asleep := MacView{Answered: seen, Asleep: true, VMs: []VM{{Name: "linux-3", State: UnknownState}}}
 	for name, c := range map[string]struct {
 		macs []MacView
 		want RollUp
 	}{
-		"no Mac":                                        {nil, RollUp{State: RollUpEmpty}},
-		"a Mac with no VM":                              {[]MacView{online()}, RollUp{State: RollUpEmpty}},
-		"every VM up or stopped":                        {[]MacView{online(healthyServer(), stopped)}, RollUp{State: RollUpFine}},
-		"a VM down":                                     {[]MacView{online(down, stopped)}, RollUp{State: RollUpDown, N: 1}},
+		"no Mac":                            {nil, RollUp{State: RollUpEmpty}},
+		"a Mac with no VM":                  {[]MacView{online()}, RollUp{State: RollUpEmpty}},
+		"every VM up or stopped":            {[]MacView{online(healthyServer(), stopped)}, RollUp{State: RollUpFine}},
+		"a VM down":                         {[]MacView{online(down, stopped)}, RollUp{State: RollUpDown, N: 1}},
+		"a VM not created":                  {[]MacView{online(uncreated, stopped)}, RollUp{State: RollUpNotCreated, N: 1}},
+		"a VM down before a VM not created": {[]MacView{online(uncreated, down)}, RollUp{State: RollUpDown, N: 1}},
+		"a VM not created before an engine stopped":     {[]MacView{engineStopped(), online(uncreated)}, RollUp{State: RollUpNotCreated, N: 1}},
+		"two VMs not created":                           {[]MacView{online(uncreated, uncreated)}, RollUp{State: RollUpNotCreated, N: 2}},
 		"an engine stopped, no VM":                      {[]MacView{engineStopped()}, RollUp{State: RollUpEngineStopped, N: 1}},
 		"an engine not installed, no VM":                {[]MacView{engineNotInstalled()}, RollUp{State: RollUpEngineNotInstalled, N: 1}},
 		"a VM down before an engine stopped":            {[]MacView{engineStopped(), engineNotInstalled(), online(down)}, RollUp{State: RollUpDown, N: 1}},
@@ -269,6 +274,7 @@ func TestEveryRollUpStateHasItsToneAndItsWords(t *testing.T) {
 		one, many string
 	}{
 		RollUpDown:               {verdict.Bad, "1 machine down", "2 machines down"},
+		RollUpNotCreated:         {verdict.Bad, "1 machine not created", "2 machines not created"},
 		RollUpEngineStopped:      {verdict.Bad, "1 Mac with its engine stopped", "2 Macs with their engine stopped"},
 		RollUpNotSeen:            {verdict.Warn, "1 Mac not seen", "2 Macs not seen"},
 		RollUpEngineNotInstalled: {verdict.Warn, "1 Mac without its engine", "2 Macs without their engine"},
@@ -300,9 +306,11 @@ func TestEveryRollUpStateHasItsToneAndItsWords(t *testing.T) {
 func TestARollUpTakesTheToneOfTheStandingItCounts(t *testing.T) {
 	seen := time.Date(2026, 11, 18, 9, 0, 0, 0, time.UTC)
 	down := VM{Name: "linux-1", Lifetime: Persistent, State: Stale}
+	uncreated := VM{Name: "linux-2", Lifetime: Ephemeral, State: Stopped, Birth: &Birth{Failed: true, Step: BornBooting}}
 	pool := map[string]MacView{
 		"online":               {Reachable: true, Engine: EngineView{State: EngineRunning}, VMs: []VM{healthyServer()}},
 		"a VM down":            {Reachable: true, Engine: EngineView{State: EngineRunning}, VMs: []VM{down}},
+		"a VM not created":     {Reachable: true, Engine: EngineView{State: EngineRunning}, VMs: []VM{uncreated}},
 		"engine stopped":       engineStopped(),
 		"engine not installed": engineNotInstalled(),
 		"not seen":             {Answered: seen, VMs: []VM{{Name: "infra", Lifetime: AlwaysOn, State: UnknownState}}},
@@ -321,8 +329,8 @@ func TestARollUpTakesTheToneOfTheStandingItCounts(t *testing.T) {
 				}
 				if MacStandingOf(h) != MacNotSeen && MacStandingOf(h) != MacAsleep {
 					for _, vm := range h.VMs {
-						if StandingOf(vm) == StandingDown {
-							tones = append(tones, StandingDown.Tone())
+						if st := StandingOf(vm); st == StandingDown || st == StandingNotCreated {
+							tones = append(tones, st.Tone())
 						}
 					}
 				}

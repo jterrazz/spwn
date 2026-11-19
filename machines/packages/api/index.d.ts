@@ -2022,7 +2022,7 @@ export type MachinesRestarts = {
 
 export type MachinesRollUp = {
     N?: number;
-    State: 'down' | 'engine-stopped' | 'not-seen' | 'engine-not-installed' | 'empty' | 'fine';
+    State: 'down' | 'not-created' | 'engine-stopped' | 'not-seen' | 'engine-not-installed' | 'empty' | 'fine';
 };
 
 export type MachinesRoom = {
@@ -3568,7 +3568,7 @@ export type MachinesMacStanding = 'asleep' | 'not-seen' | 'engine-stopped' | 'en
 
 export type MachinesPreset = 'small' | 'workspace' | 'gate';
 
-export type MachinesRollUpState = 'down' | 'engine-stopped' | 'not-seen' | 'engine-not-installed' | 'empty' | 'fine';
+export type MachinesRollUpState = 'down' | 'not-created' | 'engine-stopped' | 'not-seen' | 'engine-not-installed' | 'empty' | 'fine';
 
 export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 

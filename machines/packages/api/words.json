@@ -1631,6 +1631,12 @@
       "Word": "all running",
       "Tone": "ok"
     },
+    "not-created": {
+      "Word": "not created",
+      "One": "machine not created",
+      "Other": "machines not created",
+      "Tone": "bad"
+    },
     "not-seen": {
       "Word": "not seen",
       "One": "Mac not seen",

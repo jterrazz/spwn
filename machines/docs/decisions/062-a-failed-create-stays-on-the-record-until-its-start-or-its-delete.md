@@ -38,8 +38,10 @@ it had been made.
 - `machines.list`'s `Standing` gains `not-created` (words.json `not created`, bad), and the birth
   (`Birth`, and `birth` in `machines --json`) gains `failed`, `cause` and `last_lines`. The window
   draws the new standing through words.json.
-- The roll-up does not count a VM that was not created: `down` stays the one VM state it counts.
-  Whether `1 machine not created` should join it is left open.
+- The roll-up counts a VM that was not created, by ADR-054's rule at each level: `RollUpState` gains
+  `not-created`, bad, right after `down` (`1 machine not created`, N counting the VMs), so a header
+  never reads `all running` while one VM shows not created. A VM of a Mac that does not answer still
+  counts through its Mac.
 - A create that fails after its first run now leaves a broken finding until it is started or
   deleted.
 - The CLI's row of such a VM says `Failed at boot 2 of 4`, and the menu bar's Home row reads

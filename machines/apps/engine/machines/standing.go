@@ -152,6 +152,7 @@ type RollUpState string
 
 const (
 	RollUpDown               RollUpState = "down"
+	RollUpNotCreated         RollUpState = "not-created"
 	RollUpEngineStopped      RollUpState = "engine-stopped"
 	RollUpNotSeen            RollUpState = "not-seen"
 	RollUpEngineNotInstalled RollUpState = "engine-not-installed"
@@ -160,7 +161,7 @@ const (
 )
 
 func (RollUpState) Enum() []string {
-	return []string{string(RollUpDown), string(RollUpEngineStopped), string(RollUpNotSeen), string(RollUpEngineNotInstalled), string(RollUpEmpty), string(RollUpFine)}
+	return []string{string(RollUpDown), string(RollUpNotCreated), string(RollUpEngineStopped), string(RollUpNotSeen), string(RollUpEngineNotInstalled), string(RollUpEmpty), string(RollUpFine)}
 }
 
 func (s RollUpState) Tone() verdict.Tone {
@@ -168,6 +169,8 @@ func (s RollUpState) Tone() verdict.Tone {
 	switch s {
 	case RollUpDown:
 		return StandingDown.Tone()
+	case RollUpNotCreated:
+		return StandingNotCreated.Tone()
 	case RollUpEngineStopped:
 		return MacEngineStopped.Tone()
 	case RollUpNotSeen:
@@ -189,7 +192,7 @@ func (s RollUpState) Word() string {
 		return "no machine yet"
 	case RollUpFine:
 		return "all running"
-	case RollUpDown, RollUpEngineStopped, RollUpNotSeen, RollUpEngineNotInstalled:
+	case RollUpDown, RollUpNotCreated, RollUpEngineStopped, RollUpNotSeen, RollUpEngineNotInstalled:
 	}
 	return strings.ReplaceAll(string(s), "-", " ")
 }
@@ -201,6 +204,8 @@ func (s RollUpState) Noun(n int) string {
 	switch s {
 	case RollUpDown:
 		return pick(one, "machine down", "machines down")
+	case RollUpNotCreated:
+		return pick(one, "machine not created", "machines not created")
 	case RollUpEngineStopped:
 		return pick(one, "Mac with its engine stopped", "Macs with their engine stopped")
 	case RollUpNotSeen:
@@ -221,7 +226,7 @@ func pick(one bool, singular, plural string) string {
 
 type RollUp struct {
 	State RollUpState
-	// value: how many its state names: the VMs down, or the Macs whose
+	// value: how many its state names: the VMs down or not created, or the Macs whose
 	// engine is stopped, not seen, or whose engine is not installed; absent
 	// for empty and fine.
 	N int `json:",omitempty"`
@@ -239,10 +244,10 @@ func (r RollUp) Words() string {
 func RollUpOf(macs []MacView) RollUp {
 	// invariant: how a set of Macs and their VMs stands, read from their
 	// standings alone, its first rule that matches, bad before warn: down (a
-	// VM down), engine stopped, not seen, engine not installed (each a Mac
+	// VM down), not created (a VM whose create failed), engine stopped, not seen, engine not installed (each a Mac
 	// in that standing), empty (no VM), fine. A VM of a Mac that does not
 	// answer counts through its Mac only; an asleep Mac is no fault.
-	down, stopped, unseen, missing, vms := 0, 0, 0, 0, 0
+	down, uncreated, stopped, unseen, missing, vms := 0, 0, 0, 0, 0, 0
 	for _, h := range macs {
 		vms += len(h.VMs)
 		switch MacStandingOf(h) {
@@ -258,14 +263,20 @@ func RollUpOf(macs []MacView) RollUp {
 		case MacOnline:
 		}
 		for _, vm := range h.VMs {
-			if StandingOf(vm) == StandingDown {
+			switch StandingOf(vm) {
+			case StandingDown:
 				down++
+			case StandingNotCreated:
+				uncreated++
+			case StandingNotSeen, StandingRestarting, StandingCreating, StandingStopped, StandingSuspended, StandingHealthy, StandingRunning:
 			}
 		}
 	}
 	switch {
 	case down > 0:
 		return RollUp{State: RollUpDown, N: down}
+	case uncreated > 0:
+		return RollUp{State: RollUpNotCreated, N: uncreated}
 	case stopped > 0:
 		return RollUp{State: RollUpEngineStopped, N: stopped}
 	case unseen > 0:
