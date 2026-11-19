@@ -1,6 +1,6 @@
 import type { MemoryPickProps } from './memory-pick';
 import type { Story } from './story';
-import { LONG_NAME } from './story';
+import { LONG_NAME, nothing } from './story';
 
 export const MEMORY_PICK_STORIES: readonly Story<MemoryPickProps>[] = [
     {
@@ -15,6 +15,21 @@ export const MEMORY_PICK_STORIES: readonly Story<MemoryPickProps>[] = [
             identity: 'purple',
             line: 'leaves 28 GB free on this Mac',
             name: 'mac-mini',
+        },
+    },
+    {
+        name: 'takeable by a drag, from 2 GB to all 36 free',
+        props: {
+            chosen: 8,
+            free: 28,
+            holders: [
+                { identity: 'system', key: 'macos', label: 'macOS', squares: 4 },
+                { identity: 'blue', key: 'infra', label: 'infra', squares: 24 },
+            ],
+            identity: 'purple',
+            line: 'leaves 28 GB free on this Mac',
+            name: 'mac-mini',
+            take: { max: 36, min: 2, onTake: nothing },
         },
     },
     {

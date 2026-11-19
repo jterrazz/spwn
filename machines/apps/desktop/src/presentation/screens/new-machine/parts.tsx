@@ -111,7 +111,7 @@ function Range({ answer, on, memory, change }: Omit<MemoryProps, 'name' | 'refus
 }
 
 export function Memory(props: MemoryProps) {
-    const { on, memory, name, refusal } = props;
+    const { answer, on, memory, name, change, refusal } = props;
     const identityOfListed = useIdentityOf();
     const identity = useNewIdentity(name);
     if (on.Room === null) {
@@ -145,6 +145,17 @@ export function Memory(props: MemoryProps) {
                 identity={identity}
                 line={leavesFreeOf(on, memory)}
                 name={on.Mac}
+                take={
+                    memory === undefined
+                        ? undefined
+                        : {
+                              max: gbOf(on.MaxMemory),
+                              min: gbOf(answer.MinMemory),
+                              onTake: (squares) => {
+                                  change({ memory: squares * GB });
+                              },
+                          }
+                }
             >
                 <Range {...props} />
                 <Presets {...props} />
