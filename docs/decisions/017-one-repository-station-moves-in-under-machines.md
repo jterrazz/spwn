@@ -1,6 +1,6 @@
 # ADR-017: One repository, station moves in under machines/
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-18
 
 An agent leaves the status `Proposed`; only the owner writes `Accepted`.
