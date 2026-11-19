@@ -96,10 +96,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 			return seen
 		},
 	}
-	jobs := []process.Tick{sample.Run}
-	if m.kind == catalog.Mac {
-		jobs = append(jobs, m.nightly(calls).Run, m.releaseJob(calls).Run)
-	}
+	jobs := append([]process.Tick{sample.Run}, m.macJobs(calls)...)
 	d = process.New(engineMac{m.sys}, engineHypervisor{m.hypervisor()}, guests, m.machines(false), tailnet, process.Stores{Ports: m.stores.ports(), Reservations: m.stores.reservations}, process.Options{
 		Remember: func(vm string, port int, stopped bool) error {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
@@ -167,6 +164,13 @@ func (m machine) beside() func(func()) {
 		return m.world.beside
 	}
 	return nil
+}
+
+func (m machine) macJobs(calls call.Router) []process.Tick {
+	if m.kind != catalog.Mac {
+		return nil
+	}
+	return []process.Tick{m.nightly(calls).Run, m.releaseJob(calls).Run}
 }
 
 // invariant: a Mac's engine upgrades its bound Machinefile every night,
