@@ -42,6 +42,9 @@
         "Newest": {
           "type": "string"
         },
+        "Origin": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
         "Pending": {
           "type": "boolean"
         },
@@ -86,6 +89,7 @@
         "Method",
         "Needs",
         "Newest",
+        "Origin",
         "Pending",
         "State",
         "Version",
@@ -676,6 +680,35 @@
         "Args",
         "Path",
         "Pattern"
+      ],
+      "type": "object"
+    },
+    "machinefile.Origin": {
+      "additionalProperties": false,
+      "properties": {
+        "File": {
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "overlay",
+            "user",
+            "shared",
+            "built-in",
+            "this machine",
+            "catalog",
+            "lock"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "File",
+        "Kind",
+        "Name"
       ],
       "type": "object"
     }

@@ -2,12 +2,14 @@ package calls
 
 import (
 	"context"
+	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 )
 
 type ListIn struct {
@@ -22,8 +24,38 @@ var List = call.Watch[Deps, ListIn, []apps.Report]{
 		if in.Fresh {
 			d.Apps.Forget()
 		}
-		return call.Updates(ctx, d.Apps.Watch(ctx)), nil
+		return call.Updates(ctx, placedFrom(ctx, d, d.Apps.Watch(ctx))), nil
 	},
+}
+
+func originOf(d Deps, name string) machinefile.Origin {
+	if d.Origin == nil {
+		return machinefile.Origin{Name: name, Kind: machinefile.Builtin}
+	}
+	return d.Origin(name)
+}
+
+func stamped(d Deps, frame []apps.Report) []apps.Report {
+	out := slices.Clone(frame)
+	for i := range out {
+		out[i].Origin = originOf(d, out[i].App.Name)
+	}
+	return out
+}
+
+func placedFrom(ctx context.Context, d Deps, frames <-chan []apps.Report) <-chan []apps.Report {
+	out := make(chan []apps.Report)
+	go func() {
+		defer close(out)
+		for frame := range frames {
+			select {
+			case out <- stamped(d, frame):
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+	return out
 }
 
 type ShowIn struct{ Name string }
@@ -46,7 +78,7 @@ var Show = call.Call[Deps, ShowIn, ShowOut]{
 		}
 		for _, t := range d.Known {
 			if t.Name == in.Name {
-				return ShowOut{Report: apps.Report{App: t, State: catalog.StateAbsent}}, nil
+				return ShowOut{Report: apps.Report{App: t, State: catalog.StateAbsent, Origin: originOf(d, t.Name)}}, nil
 			}
 		}
 		if err := ctx.Err(); err != nil {
@@ -61,7 +93,7 @@ func read(ctx context.Context, d Deps) []apps.Report {
 	for frame := range d.Apps.Watch(ctx) {
 		last = frame
 	}
-	return last
+	return stamped(d, last)
 }
 
 func installed(ctx context.Context, d Deps, names []string) error {

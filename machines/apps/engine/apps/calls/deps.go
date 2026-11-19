@@ -8,6 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 )
 
 type Deps struct {
@@ -15,6 +16,8 @@ type Deps struct {
 	// value: the catalog's apps: one that lives on other machines is still
 	// shown, with where it lives.
 	Known []catalog.App
+	// value: where each package of the catalog was read, by its name.
+	Origin func(name string) machinefile.Origin
 	// value: the kind of the machine these calls run on.
 	Kind machine.Kind
 	All  AllMachines

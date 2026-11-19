@@ -1,0 +1,11 @@
+description: 'settings.list says where each setting comes from: its source and file, a checked one built in'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out[] | select(.Group == "set" or .Group == "checked") | .Origin] | .[0:2]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"settings.list","in":{}}
+      exit: 0
+      stdout: |
+          [{"Name":"docker-shortcuts","Kind":"built-in","File":"packages/shell/docker-shortcuts.yaml"},{"Name":"git-shortcuts","Kind":"built-in","File":"packages/shell/git-shortcuts.yaml"}]

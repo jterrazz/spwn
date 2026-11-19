@@ -314,6 +314,35 @@
       ],
       "type": "object"
     },
+    "machinefile.Origin": {
+      "additionalProperties": false,
+      "properties": {
+        "File": {
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "overlay",
+            "user",
+            "shared",
+            "built-in",
+            "this machine",
+            "catalog",
+            "lock"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "File",
+        "Kind",
+        "Name"
+      ],
+      "type": "object"
+    },
     "settings.Cell": {
       "additionalProperties": false,
       "properties": {
@@ -514,6 +543,9 @@
         "Needs": {
           "type": "string"
         },
+        "Origin": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
         "Package": {
           "$ref": "#/$defs/catalog.Setting"
         },
@@ -550,6 +582,7 @@
         "Group",
         "Name",
         "Needs",
+        "Origin",
         "Package",
         "Since",
         "State",

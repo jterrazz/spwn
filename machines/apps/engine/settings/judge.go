@@ -6,6 +6,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 )
 
 type Group string
@@ -77,6 +78,10 @@ type Row struct {
 	// fixes it.
 	Value, Expected string
 	Fix             finding.Fix
+	// value: where its package was read: the owner's own, a shared source
+	// or the built-in catalog, and the file; a checked setting stands in the
+	// built-in one with no file.
+	Origin machinefile.Origin
 }
 
 func Known(rows []Row, local func(string) (catalog.Setting, bool)) []Row {

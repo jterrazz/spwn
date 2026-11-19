@@ -33,7 +33,7 @@ var List = call.Watch[Deps, ListIn, []settings.Row]{
 				rows[i], _ = judge(ctx, d, it, off)
 				continue
 			}
-			rows[i] = settings.Row{Name: it.Name, Package: it, Group: settings.GroupOf(it), State: settings.StateReading}
+			rows[i] = settings.Row{Name: it.Name, Package: it, Group: settings.GroupOf(it), State: settings.StateReading, Origin: originOf(d, it.Name)}
 			left++
 			go func() {
 				row, _ := judge(ctx, d, it, off)
@@ -43,7 +43,7 @@ var List = call.Watch[Deps, ListIn, []settings.Row]{
 		expect := sync.OnceValue(func() settings.Expectation { return expectation(ctx, d, off) })
 		for _, it := range catalog.CheckedSettings {
 			i := len(rows)
-			rows = append(rows, settings.Row{Name: it.Name, Group: settings.Checked, State: settings.StateReading})
+			rows = append(rows, settings.Row{Name: it.Name, Group: settings.Checked, State: settings.StateReading, Origin: originOf(d, it.Name)})
 			left++
 			go func() { answers <- answer{i, judgeChecked(ctx, d, it, off, expect())} }()
 		}

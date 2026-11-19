@@ -25,6 +25,7 @@ import (
 	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	journalcalls "github.com/jterrazz/studio-station/apps/engine/journal/calls"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
@@ -59,7 +60,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		accountscalls.All(accountscalls.Deps{SignIns: m.signIns(), Kind: kind}),
 		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),
-		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Known: m.cat.Apps, Kind: kind, All: appsAllMachines{m}, Now: m.sys.Clock.Now}),
+		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Known: m.cat.Apps, Origin: machinefile.OriginsOf(m.cat), Kind: kind, All: appsAllMachines{m}, Now: m.sys.Clock.Now}),
 		awakecalls.All(m.awakeDeps()),
 		backgroundcalls.All(m.backgroundDeps()),
 		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind, Name: m.profile.Ref.Name}),
@@ -74,7 +75,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		settingscalls.All(settingscalls.Deps{
 			Settings: settings, Appliers: settings.Appliers(), Applied: m.stores.applied, OffThisMac: settingscontract.OffHere(m.stores.prefs),
 			Now: m.sys.Clock.Now, Ask: ask, Shortcuts: docker.New(m.sys.Run), GitAliases: gitaliases.NewShortcuts(m.sys.Run), Shell: m.shell(), Kind: kind,
-			Facts: m.facts(), Caps: m.profile.Caps, Admin: m.sys.Env.Euid() == 0, Mac: m.profile.Ref.Name, All: settingsAllMachines{m}, Public: settingsPublic{thisMac},
+			Origin: machinefile.OriginsOf(m.cat), Facts: m.facts(), Caps: m.profile.Caps, Admin: m.sys.Env.Euid() == 0, Mac: m.profile.Ref.Name, All: settingsAllMachines{m}, Public: settingsPublic{thisMac},
 		}),
 	)
 	if err != nil {

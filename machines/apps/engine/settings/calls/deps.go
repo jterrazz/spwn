@@ -9,6 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract"
 )
@@ -53,6 +54,8 @@ type Deps struct {
 	All AllMachines
 	// value: the ports family, which keeps what a setting declares public.
 	Public Public
+	// value: where each package of the catalog was read, by its name.
+	Origin func(name string) machinefile.Origin
 }
 
 type Public interface {
@@ -148,6 +151,7 @@ func judge(ctx context.Context, d Deps, it catalog.Setting, off map[string]bool)
 		}
 	}
 	row := settings.JudgeSet(it, lives, record(ctx, d, it.Name), now, off[it.Name])
+	row.Origin = originOf(d, it.Name)
 	if row.State == settings.StateNotApplied {
 		row.Needs = d.Settings.Needs(it)
 	}
@@ -164,7 +168,9 @@ func judgeChecked(ctx context.Context, d Deps, it catalog.CheckedSetting, off ma
 			facts[f] = readFact(ctx, d.Facts, f, it.Budget)
 		}
 	}
-	return settings.JudgeChecked(it, lives, facts, expect, off[it.Name])
+	row := settings.JudgeChecked(it, lives, facts, expect, off[it.Name])
+	row.Origin = originOf(d, it.Name)
+	return row
 }
 
 func readFact(ctx context.Context, i contract.Inspector, f catalog.Fact, budget time.Duration) settings.Fact {
@@ -188,4 +194,11 @@ func expectation(ctx context.Context, d Deps, off map[string]bool) settings.Expe
 		}
 	}
 	return settings.Expect(d.Caps, alwaysOn, d.Now())
+}
+
+func originOf(d Deps, name string) machinefile.Origin {
+	if d.Origin == nil {
+		return machinefile.Origin{Name: name, Kind: machinefile.Builtin}
+	}
+	return d.Origin(name)
 }

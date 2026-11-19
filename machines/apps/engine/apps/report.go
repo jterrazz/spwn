@@ -3,6 +3,7 @@ package apps
 import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 )
 
 type Report struct {
@@ -31,6 +32,9 @@ type Report struct {
 	// the catalogue tool whose absence explains it.
 	Why   Why
 	Needs string
+	// value: where its package was read: the owner's own, a shared source
+	// or the built-in catalog, and the file.
+	Origin machinefile.Origin
 }
 
 const AlreadyInstalled = "already installed"

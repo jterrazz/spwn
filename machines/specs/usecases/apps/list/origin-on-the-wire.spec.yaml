@@ -1,0 +1,11 @@
+description: 'apps.list says where each app comes from: its source and file'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out[] | select(.App.Name == "jq") | .Origin]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"apps.list","in":{}}
+      exit: 0
+      stdout: |
+          [{"Name":"jq","Kind":"built-in","File":"packages/command-line/jq.yaml"}]

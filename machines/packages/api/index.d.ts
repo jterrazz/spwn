@@ -350,6 +350,7 @@ export type AppsReport = {
     Method: string;
     Needs: string;
     Newest: string;
+    Origin: MachinefileOrigin;
     Pending: boolean;
     State: '' | 'absent' | 'broken' | 'degraded' | 'ok' | 'pending' | 'unknown';
     Version: string;
@@ -1616,6 +1617,12 @@ export type MachinefileOrigin = {
     File: string;
     Kind: 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
     Name: string;
+};
+
+export type MachinefileOriginInput = {
+    File?: string;
+    Kind?: 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
+    Name?: string;
 };
 
 export type MachinefilePlan = {
@@ -3170,6 +3177,7 @@ export type SettingsRow = {
     Group: '' | 'always-on-mac' | 'checked' | 'set';
     Name: string;
     Needs: string;
+    Origin: MachinefileOrigin;
     Package: CatalogSetting;
     Since: string;
     State: '' | 'applied' | 'changed-since' | 'not-applied' | 'not-for-this-machine' | 'off-here' | 'reading';
@@ -3185,6 +3193,7 @@ export type SettingsRowInput = {
     Group?: 'always-on-mac' | 'checked' | 'set';
     Name?: string;
     Needs?: string;
+    Origin?: MachinefileOriginInput;
     Package?: CatalogSettingInput;
     Since?: string;
     State?: 'applied' | 'changed-since' | 'not-applied' | 'not-for-this-machine' | 'off-here' | 'reading';

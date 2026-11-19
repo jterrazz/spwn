@@ -38,6 +38,24 @@ func (OriginKind) Enum() []string {
 	return []string{string(Overlay), string(User), string(Shared), string(Builtin), string(ThisMachine), string(Catalog), string(Locked)}
 }
 
+// value: where a package was read, from the catalog that holds it: its
+// name, the kind of source it stands in and its file; a package the
+// catalog does not hold (a checked setting, which station's own code
+// defines) stands in the built-in source, with no file.
+
+func OriginsOf(c catalog.Catalog) func(name string) Origin {
+	placed := make(map[string]Origin, len(c.Packages))
+	for _, p := range c.Packages {
+		placed[p.Package.Name] = Origin{Name: p.Package.Name, Kind: OriginKind(p.Origin), File: p.File}
+	}
+	return func(name string) Origin {
+		if o, ok := placed[name]; ok {
+			return o
+		}
+		return Origin{Name: name, Kind: Builtin}
+	}
+}
+
 // value: one source's files: its kind, the words a reader names it by
 // (`~/.config/station`, `studio@1a2b3c4`, `built-in`), and its files by
 // slash path under it, `catalog/<category>/<name>.yaml` and

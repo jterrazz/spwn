@@ -199,6 +199,30 @@
       },
       "type": "object"
     },
+    "machinefile.Origin.input": {
+      "additionalProperties": false,
+      "properties": {
+        "File": {
+          "type": "string"
+        },
+        "Kind": {
+          "enum": [
+            "overlay",
+            "user",
+            "shared",
+            "built-in",
+            "this machine",
+            "catalog",
+            "lock"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "settings.LastRead.input": {
       "additionalProperties": false,
       "properties": {
@@ -247,6 +271,9 @@
         },
         "Needs": {
           "type": "string"
+        },
+        "Origin": {
+          "$ref": "#/$defs/machinefile.Origin.input"
         },
         "Package": {
           "$ref": "#/$defs/catalog.Setting.input"
