@@ -6,8 +6,8 @@ func TestAPreReleaseOrdersBetweenTheReleasesAroundIt(t *testing.T) {
 	order := []string{"v3.1.0", "v4.0.0-alpha.1", "v4.0.0-alpha.2", "v4.0.0-alpha.10", "v4.0.0-beta", "v4.0.0-rc.2", "v4.0.0", "v4.0.1"}
 	for i, lo := range order {
 		for j, hi := range order {
-			if got := newer(hi, lo); got != (j > i) {
-				t.Errorf("newer(%q, %q) = %v; want %v", hi, lo, got, j > i)
+			if got := Newer(hi, lo); got != (j > i) {
+				t.Errorf("Newer(%q, %q) = %v; want %v", hi, lo, got, j > i)
 			}
 		}
 	}
@@ -15,7 +15,7 @@ func TestAPreReleaseOrdersBetweenTheReleasesAroundIt(t *testing.T) {
 
 func TestAVersionThatIsNotAReleaseIsNeverNewer(t *testing.T) {
 	for _, v := range []string{"dev", "", "4.0.0", "v4.0", "v4.0.0-"} {
-		if newer(v, "v3.0.0") || newer("v3.0.0", v) {
+		if Newer(v, "v3.0.0") || Newer("v3.0.0", v) {
 			t.Errorf("newer on %q ordered it against v3.0.0", v)
 		}
 	}

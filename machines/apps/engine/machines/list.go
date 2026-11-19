@@ -109,7 +109,7 @@ func Behind(h MacView, thisMac string) (fix string, differs bool) {
 	if h.ThisMac || h.StationVersion == "" || thisMac == "" || h.StationVersion == thisMac {
 		return "", false
 	}
-	if newer(h.StationVersion, thisMac) {
+	if Newer(h.StationVersion, thisMac) {
 		return "update station here (scripts/install.sh)", true
 	}
 	return "update station there (scripts/install.sh)", true
@@ -230,9 +230,10 @@ func downDetail(mac string, vm VM) string {
 	return strings.Join(parts, ". ") + "."
 }
 
-// value: whether release a is past release b, both vMAJOR.MINOR.PATCH with
-// anything after the patch ignored; an unreadable one is never newer.
-func newer(a, b string) bool {
+func Newer(a, b string) bool {
+	// value: whether release a is past release b, both vMAJOR.MINOR.PATCH
+	// with the pre-release words semver allows; an unreadable one is never
+	// newer.
 	pa, pb := release(a), release(b)
 	if pa == nil || pb == nil {
 		return false
