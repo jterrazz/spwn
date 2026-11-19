@@ -266,6 +266,43 @@ func (p PortRights) Public() []int {
 	return out
 }
 
+func (p PortRights) Over(o PortRights) PortRights {
+	// value: these rights with an overlay's changed key by key: each of
+	// open, to and except it says replaces that key alone, and audiences
+	// merges port by port.
+	out := p
+	if o.Open != nil {
+		out.Open = o.Open
+	}
+	if o.To != "" {
+		out.To = o.To
+	}
+	if o.Except != nil {
+		out.Except = o.Except
+	}
+	if o.Audiences != nil {
+		out.Audiences = maps.Clone(p.Audiences)
+		if out.Audiences == nil {
+			out.Audiences = PortAudiences{}
+		}
+		maps.Copy(out.Audiences, o.Audiences)
+	}
+	return out
+}
+
+func (a AccountsSpec) Over(o AccountsSpec) AccountsSpec {
+	// value: these accounts with an overlay's changed key by key: signins
+	// and grants each replace that key alone.
+	out := a
+	if o.SignIns != nil {
+		out.SignIns = o.SignIns
+	}
+	if o.Grants != nil {
+		out.Grants = o.Grants
+	}
+	return out
+}
+
 func (p PortRights) Audienced() []int {
 	// value: the ports audiences names, lowest first.
 	return slices.Sorted(maps.Keys(p.Audiences))

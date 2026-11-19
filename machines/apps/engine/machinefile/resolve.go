@@ -154,8 +154,13 @@ type merged struct {
 	mounts  []catalog.Mount
 	scripts map[RunPhase]Script
 	prefer  []catalog.ManagerKey
-	// value: the ports of the strongest file that says them, whole.
-	ports   *catalog.PortRights
+	// value: the ports of the strongest file that says them, whole, an
+	// overlay's changes made key by key on them.
+	ports    *catalog.PortRights
+	accounts *catalog.AccountsSpec
+	// value: an overlay's ports or accounts merged into what cannot be
+	// read, by the overlay that made them so.
+	refused error
 	apps    []listed[catalog.AppEntry]
 	set     map[string]listed[catalog.SettingEntry]
 	setting []string
@@ -186,7 +191,8 @@ func (m *merged) drop(prefix string) {
 
 // invariant: a Machinefile is its extends, in order, then itself, each
 // file followed by its overlay; a later file's value replaces an earlier
-// one's (an app or a setting whole, by name; accounts and ports whole), a
+// one's (an app or a setting whole, by name; accounts and ports whole, an
+// overlay's key by key), a
 // file is read once however many extend it, and a cycle of extends is
 // refused.
 func (l Library) chain(name string) ([]Placed, error) {
@@ -260,35 +266,87 @@ func merge(files []Placed) merged {
 			mergeSettings(&m, *s, o)
 		}
 		if a := f.Accounts; a != nil {
-			m.drop("accounts")
-			for _, p := range a.SignIns {
-				m.put(signInKey+string(p), "signs in", o)
-			}
-			for _, p := range a.Grants {
-				m.put(grantKey+string(p), "granted", o)
-			}
+			mergeAccounts(&m, *a, p)
 		}
-		if p := f.Ports; p != nil {
-			m.ports = p
-			m.drop("ports")
-			if len(p.Open) > 0 {
-				m.put("ports.open", spans(p.Open), o)
-			}
-			if p.To != "" {
-				m.put("ports.to", string(p.To), o)
-			}
-			if len(p.Except) > 0 {
-				m.put("ports.except", ints(p.Except), o)
-			}
-			for _, port := range p.Audienced() {
-				m.put("ports.audiences."+strconv.Itoa(port), string(p.Audiences[port]), o)
-			}
+		if ports := f.Ports; ports != nil {
+			mergePorts(&m, *ports, p)
 		}
 		if r := f.Run; r != nil {
 			mergeRun(&m, *r, o)
 		}
 	}
 	return m
+}
+
+// invariant: a Machinefile's accounts replace those of the files it
+// extends whole; an overlay's change them key by key (AccountsSpec.Over),
+// and a merge that cannot be read is refused at the overlay.
+func mergeAccounts(m *merged, a catalog.AccountsSpec, p Placed) {
+	o := originOf(p)
+	said := a
+	if p.Kind == Overlay && m.accounts != nil {
+		said = m.accounts.Over(a)
+	}
+	m.accounts = &said
+	if p.Kind != Overlay || a.SignIns != nil {
+		m.drop("accounts.signins")
+		for _, n := range a.SignIns {
+			m.put(signInKey+string(n), "signs in", o)
+		}
+	}
+	if p.Kind != Overlay || a.Grants != nil {
+		m.drop("accounts.grants")
+		for _, n := range a.Grants {
+			m.put(grantKey+string(n), "granted", o)
+		}
+	}
+	if problem := said.Problem(); p.Kind == Overlay && problem != "" && m.refused == nil {
+		m.refused = mergeRefused(p, "accounts", problem)
+	}
+}
+
+// invariant: a Machinefile's ports replace those of the files it extends
+// whole; an overlay's change them key by key (PortRights.Over), and a
+// merge that cannot be read is refused at the overlay.
+func mergePorts(m *merged, ports catalog.PortRights, p Placed) {
+	o := originOf(p)
+	said := ports
+	if p.Kind == Overlay && m.ports != nil {
+		said = m.ports.Over(ports)
+	}
+	m.ports = &said
+	whole := p.Kind != Overlay
+	if whole {
+		m.drop("ports")
+	}
+	if whole || ports.Open != nil {
+		m.drop("ports.open")
+		if len(ports.Open) > 0 {
+			m.put("ports.open", spans(ports.Open), o)
+		}
+	}
+	if whole || ports.To != "" {
+		m.drop("ports.to")
+		if ports.To != "" {
+			m.put("ports.to", string(ports.To), o)
+		}
+	}
+	if whole || ports.Except != nil {
+		m.drop("ports.except")
+		if len(ports.Except) > 0 {
+			m.put("ports.except", ints(ports.Except), o)
+		}
+	}
+	for _, port := range ports.Audienced() {
+		m.put("ports.audiences."+strconv.Itoa(port), string(ports.Audiences[port]), o)
+	}
+	if problem := said.Problem(); p.Kind == Overlay && problem != "" && m.refused == nil {
+		m.refused = mergeRefused(p, "ports", problem)
+	}
+}
+
+func mergeRefused(p Placed, key, problem string) error {
+	return refusedFile("machinefile", &catalog.FileError{File: p.Path, Problem: "its " + key + " with those of " + p.File.Overrides + "'s chain: " + problem})
 }
 
 // invariant: a file that says a phase's lines replaces those of the files
@@ -404,6 +462,9 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 		return Resolved{}, &MixinError{Name: name}
 	}
 	m := merge(files)
+	if m.refused != nil {
+		return Resolved{}, m.refused
+	}
 	if said := m.values["machine.system.os"].Text; said == "" || said == string(this.System.OS) {
 		mine := Origin{Name: name, Kind: ThisMachine}
 		for _, kv := range [][2]string{{"os", string(this.System.OS)}, {"version", this.System.Version}, {"arch", string(this.System.Arch)}} {

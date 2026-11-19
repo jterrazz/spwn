@@ -121,12 +121,14 @@ type Given struct {
 
 func GivenOf(lib Library, name string) (Given, error) {
 	// invariant: read from the file's whole chain, its overlays included,
-	// the strongest file that says ports winning whole, as the resolution
-	// merges them.
+	// as the resolution merges them.
 	files, err := lib.chain(name)
 	if err != nil {
 		return Given{}, err
 	}
 	m := merge(files)
+	if m.refused != nil {
+		return Given{}, m.refused
+	}
 	return Given{Ports: m.ports, SignIns: m.programs(signInKey), Grants: m.programs(grantKey), Server: catalog.MachineRole(m.values["machine.kind"].Text) == catalog.RoleServer}, nil
 }

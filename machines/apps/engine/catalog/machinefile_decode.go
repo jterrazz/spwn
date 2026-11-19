@@ -126,12 +126,12 @@ func checkMachinefile(file string, doc *yaml.Node, mf Machinefile) error {
 		}
 	}
 	if a := mf.Accounts; a != nil {
-		if problem := checkAccounts(*a); problem != "" {
+		if problem := a.Problem(); problem != "" {
 			return refused(file, doc, "accounts", problem)
 		}
 	}
 	if p := mf.Ports; p != nil {
-		if problem := checkPorts(*p); problem != "" {
+		if problem := checkPorts(*p, overlay); problem != "" {
 			return refused(file, doc, "ports", problem)
 		}
 	}
@@ -416,7 +416,9 @@ func checkValues(pkg string, values map[string]OptionValue) string {
 	return ""
 }
 
-func checkAccounts(a AccountsSpec) string {
+func (a AccountsSpec) Problem() string {
+	// value: why these accounts cannot be read, a file's or what a chain
+	// merges; empty when they can.
 	known := ProgramName("").Enum()
 	for _, list := range []struct {
 		key   string
@@ -439,11 +441,20 @@ func checkAccounts(a AccountsSpec) string {
 	return ""
 }
 
-func checkPorts(p PortRights) string {
+func (p PortRights) Problem() string {
+	// value: why these rights cannot be read, a Machinefile's or what a
+	// chain merges; empty when they can.
+	return checkPorts(p, false)
+}
+
+// invariant: an overlay's ports change their Machinefile's key by key, so
+// it may say to or except with no open; what they merge into is judged
+// whole by the resolution (PortRights.Problem).
+func checkPorts(p PortRights, overlay bool) string {
 	switch {
-	case len(p.Open) == 0 && (p.To != "" || len(p.Except) > 0):
+	case !overlay && len(p.Open) == 0 && (p.To != "" || len(p.Except) > 0):
 		return "names no ports it may open (open)"
-	case len(p.Open) > 0 && p.To == "":
+	case !overlay && len(p.Open) > 0 && p.To == "":
 		return "says not to whom its ports are open (to: local, private or public)"
 	case p.To != "" && !known(p.To):
 		return fmt.Sprintf("to %q is none of %s", p.To, strings.Join(p.To.Enum(), ", "))

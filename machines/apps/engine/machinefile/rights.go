@@ -10,8 +10,8 @@ import (
 func RightsOf(trees []Tree, name string) (rights *catalog.PortRights, by string, err error) {
 	// invariant: the ports a Machinefile names are read from its own files
 	// alone: itself, what it extends (depth first, a file read once), and the
-	// owner's overlay after each, the last that says ports winning whole, as
-	// the resolution merges them. A file elsewhere that the decoder refuses
+	// owner's overlay after each, the last file that says ports winning whole
+	// and an overlay changing them key by key, as the resolution merges them. A file elsewhere that the decoder refuses
 	// changes nothing here; one of these that it refuses is the error. rights
 	// is nil when no source holds a Machinefile of that name, or its files say
 	// no ports. by is the file that says them (`base`, `web.local`), else the
@@ -41,11 +41,20 @@ func RightsOf(trees []Tree, name string) (rights *catalog.PortRights, by string,
 		}
 		seen = append(seen, name)
 		if mf.Ports != nil {
-			rights, by = mf.Ports, name
+			whole := *mf.Ports
+			rights, by = &whole, name
 		}
 		overlay, ok, overlayErr := decodeNamed(trees, name, true)
 		if overlayErr == nil && ok && overlay.Ports != nil {
-			rights, by = overlay.Ports, strings.TrimSuffix(name+catalog.OverlaySuffix, ".yaml")
+			changed := *overlay.Ports
+			if rights != nil {
+				changed = rights.Over(changed)
+			}
+			file := name + catalog.OverlaySuffix
+			if problem := changed.Problem(); problem != "" {
+				return refusedFile("machinefile", &catalog.FileError{File: file, Problem: "its ports with those of " + name + "'s chain: " + problem})
+			}
+			rights, by = &changed, strings.TrimSuffix(file, ".yaml")
 		}
 		return overlayErr
 	}

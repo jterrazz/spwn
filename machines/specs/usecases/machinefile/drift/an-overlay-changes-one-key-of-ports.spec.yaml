@@ -1,0 +1,26 @@
+description: 'an overlay that says one key of ports keeps the others its file says'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'world edit macbook-pro machinefiles/linux-dev.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-dev
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base]
+          apps: [ripgrep]
+          ports: { open: 1024-65535, to: private }
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/linux-dev.local.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          overrides: linux-dev
+          ports: { except: [4321], audiences: { 3000: public } }
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Chapters[] | select(.Chapter == "ports") | [.Listed, .Matching, [.Differing[] | [.Port, .Condition, .SeenTo, .AskedTo]]]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","in":{"Machine":"linux-1"}}
+      exit: 0
+      stdout: |
+          [3,2,[[9229,"absent",null,"private"]]]
