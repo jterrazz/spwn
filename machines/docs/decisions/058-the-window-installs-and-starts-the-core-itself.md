@@ -11,7 +11,8 @@ left the window useless on its own. The owner decided on 2026-11-19 that the app
 without the core, it takes the owner from nothing to a running engine.
 
 The install already has one public form, `curl -fsSL https://spwn.sh/install.sh | bash`, which writes `station` and
-`spwn` to `~/.local/bin` (`scripts/install.sh:7`, [the footprint](../reference/footprint.md)) and starts nothing.
+`spwn` to `~/.local/bin` (`INSTALL_DIR` in the site's `public/install.sh`, jterrazz/spwn-web, its ADR-014) and starts
+nothing.
 
 ## Decision
 
@@ -38,8 +39,8 @@ What it never does:
 
 The page fetches nothing and the CSP is unchanged: the shell runs the programs, the page sends four commands.
 
-The install folder has one owner, `scripts/install.sh:7`. Until the engine projects it into `packages/api`, the window
-holds it as `CORE_DIR` in `apps/desktop/src-tauri/src/local_core.rs`, its comment citing that owner, and draws it as
+The install folder has one owner, the public installer's `INSTALL_DIR`. Until the engine projects it into
+`packages/api`, the window holds it as `CORE_DIR` in `apps/desktop/src-tauri/src/local_core.rs`, its comment citing that owner, and draws it as
 `CORE_FOLDER` in `apps/desktop/src/domain/core.ts`.
 
 ## Alternatives refused

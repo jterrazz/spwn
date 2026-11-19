@@ -22,7 +22,7 @@ use crate::opener::Refusal;
 
 include!(concat!(env!("OUT_DIR"), "/install_line.rs"));
 
-// outside: the folder the public installer writes `station` to, `machines/scripts/install.sh:7` and `machines/docs/reference/footprint.md:53`; it moves to `packages/api` once the engine projects it.
+// outside: the folder the public installer writes `station` to, `INSTALL_DIR` in the site's `public/install.sh` (jterrazz/spwn-web, its ADR-014); it moves to `packages/api` once the engine projects it.
 pub const CORE_DIR: &str = ".local/bin";
 
 pub const CORE_BINARY: &str = "station";
