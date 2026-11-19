@@ -1,8 +1,8 @@
 {
     "group": "home",
     "id": "home.needs",
-    "note": "The daily home: nothing red needs you, so This Mac, Servers, VMs and Macs, each running row ending in its CPU spark; the upkeep waits apart.",
-    "pages": ["pages/machines.home.menubar.json"],
+    "note": "What needs you leads Home: port 5000 exposed, its red dot and Review over This Mac, then the servers, VMs and Macs.",
+    "pages": ["pages/machines.home.exposed.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,
         "cpu:macbook-pro": 30,

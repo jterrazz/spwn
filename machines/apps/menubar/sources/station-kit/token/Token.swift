@@ -57,8 +57,8 @@ public enum Token {
         public static let measure: CGFloat = 22
         public static let dot: CGFloat = 7
         public static let chevron: CGFloat = 14
-        public static let switchWidth: CGFloat = 38
-        public static let switchHeight: CGFloat = 22
+        public static let switchWidth: CGFloat = 32
+        public static let switchHeight: CGFloat = 18
         public static let roundButton: CGFloat = 28
         public static let squareButton: CGFloat = 26
         public static let squareCorner: CGFloat = 8
@@ -667,7 +667,6 @@ extension Token {
             public static let verbMinWidth: CGFloat = 64
             public static let round: CGFloat = 24
             public static let roundSmall: CGFloat = 20
-            public static let roundTopBar: CGFloat = 26
             public static let icon: CGFloat = 24
             public static let switchSize = CGSize(width: 30, height: 18)
             public static let knob: CGFloat = 14
@@ -912,7 +911,7 @@ extension Token {
         public static let menu: CGFloat = 13
         public static let menuStroke: CGFloat = 14
         public static let check: CGFloat = 12
-        public static let knob: CGFloat = 18
+        public static let knob: CGFloat = 14
         public static let caretHeight: CGFloat = 14
         public static let anchor: CGFloat = 1
         public static let figureTracking: CGFloat = -0.01

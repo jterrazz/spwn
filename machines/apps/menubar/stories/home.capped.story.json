@@ -1,0 +1,16 @@
+{
+    "group": "home",
+    "id": "home.capped",
+    "note": "A fleet taller than the panel's 720 pt cap: the body is cut at the cap and fades out, as it scrolls under the header.",
+    "pages": ["pages/machines.home.down-exposed.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "capped": true
+    }
+}

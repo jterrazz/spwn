@@ -71,6 +71,9 @@ public struct StoryUI: Codable, Equatable, Sendable {
     // value: the row a transition story catches leaving its list, by its
     // id.
     public var leaving: String?
+    // value: the panel drawn at its cap, its body cut and faded at the cap
+    // as the live panel scrolls it, not drawn whole.
+    public var capped: Bool?
 
     public init() {}
 }

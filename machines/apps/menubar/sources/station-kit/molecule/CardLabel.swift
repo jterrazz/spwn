@@ -61,21 +61,26 @@ public struct CardLabel: View {
 }
 
 // invariant: a card: its fill and radius, flush around rows (4) or padded
-// around anything else.
+// around anything else, or as its caller pads it (Home's boxes, rows from
+// edge to edge).
 public struct Card<Content: View>: View {
-    let flush: Bool
+    let padding: EdgeInsets
     let content: Content
 
     public init(flush: Bool = true, @ViewBuilder content: () -> Content) {
-        self.flush = flush
+        let m = Token.Metric.Card.self
+        self.init(padding: flush ? EdgeInsets(top: m.flush, leading: m.flush, bottom: m.flush, trailing: m.flush) : m.padding, content: content)
+    }
+
+    public init(padding: EdgeInsets, @ViewBuilder content: () -> Content) {
+        self.padding = padding
         self.content = content()
     }
 
     public var body: some View {
-        let m = Token.Metric.Card.self
         VStack(spacing: 0) { content }
-            .padding(flush ? EdgeInsets(top: m.flush, leading: m.flush, bottom: m.flush, trailing: m.flush) : m.padding)
+            .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .modifier(CardFill(lit: false, radius: m.radius))
+            .modifier(CardFill(lit: false, radius: Token.Metric.Card.radius))
     }
 }

@@ -173,7 +173,7 @@ public struct AtomSheet: View {
             line {
                 RoundButton(Token.Symbol.terminal)
                 RoundButton(Token.Symbol.plus, size: .small)
-                RoundButton(Token.Symbol.search, size: .topBar)
+                RoundButton(Token.Symbol.search, size: .bare)
                 RoundButton(Token.Symbol.copy, size: .small, quiet: true)
                 IconButton(Token.Symbol.gear)
             }

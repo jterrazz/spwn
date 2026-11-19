@@ -65,7 +65,6 @@ extension Token.Metric.Control {
     public static let verbPadding: CGFloat = 10
     public static let roundGlyph: CGFloat = 13
     public static let roundSmallGlyph: CGFloat = 11
-    public static let roundTopBarGlyph: CGFloat = 14
     public static let iconGlyph: CGFloat = 15
     public static let softShare = 0.15
     public static let disabledShare = 0.4

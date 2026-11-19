@@ -47,10 +47,14 @@ public struct FindField: View {
 
     @ViewBuilder
     var look: some View {
+        if open != nil { resting } else { finding }
+    }
+
+    var finding: some View {
         let m = Token.Metric.Find.self
         let f = Token.Find.self
         let shape = RoundedRectangle(cornerRadius: m.fieldRadius, style: .continuous)
-        HStack(spacing: f.fieldGap) {
+        return HStack(spacing: f.fieldGap) {
             Image(systemName: Token.Symbol.search)
                 .font(.system(size: Token.Metric.Marks.glyph, weight: .medium))
                 .frame(width: f.fieldGlyph, height: f.fieldGlyph)
@@ -62,6 +66,25 @@ public struct FindField: View {
         .frame(height: m.field)
         .background(shape.fill(tokens.color.q))
         .overlay(shape.strokeBorder(tokens.color.accent.opacity(m.focusShare), lineWidth: f.fieldRim))
+    }
+
+    // value: Home's field as the board draws it, the panel's first focus:
+    // 28 tall, its glyph in t2, its prompt in t3, ringed outside by 1 pt of
+    // accent, then the accent's soft ring out to 3.5 pt.
+    var resting: some View {
+        let h = Token.HomeHeader.self
+        return HStack(spacing: h.fieldGap) {
+            Image(systemName: Token.Symbol.search)
+                .font(.system(size: h.fieldGlyph, weight: .medium))
+                .foregroundStyle(tokens.color.t2)
+            field
+        }
+        .font(Token.Role.findResult.font)
+        .padding(h.fieldPadding)
+        .frame(height: h.fieldHeight)
+        .background(Capsule().fill(tokens.color.q))
+        .overlay(Capsule().strokeBorder(tokens.color.accent, lineWidth: h.rim).padding(-h.rim))
+        .overlay(Capsule().strokeBorder(tokens.color.accent.opacity(h.ringShare), lineWidth: h.ring - h.rim).padding(-h.ring))
     }
 
     @ViewBuilder

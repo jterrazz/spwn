@@ -212,7 +212,7 @@ public struct VerbButton: View {
 }
 
 public struct RoundButton: View {
-    public enum Size: Sendable { case regular, small, topBar }
+    public enum Size: Sendable { case regular, small, bare }
 
     let symbol: String
     let size: Size
@@ -233,22 +233,27 @@ public struct RoundButton: View {
         switch size {
         case .regular: return (c.round, c.roundGlyph)
         case .small: return (c.roundSmall, c.roundSmallGlyph)
-        case .topBar: return (c.roundTopBar, c.roundTopBarGlyph)
+        case .bare: return (Token.HomeHeader.button, Token.HomeHeader.glyph)
         }
     }
 
     var fill: Color {
-        if quiet { return hovering ? tokens.color.q : Color.clear }
+        if quiet || size == .bare { return hovering ? tokens.color.q : Color.clear }
         return hovering ? tokens.color.qq : tokens.color.q
+    }
+
+    var ink: Color {
+        if size == .bare { return tokens.color.t1.opacity(hovering ? 1 : Token.HomeHeader.glyphShare) }
+        return hovering ? tokens.color.t1 : quiet ? tokens.color.t3 : tokens.color.t2
     }
 
     public var body: some View {
         Button(action: action) {
-            Image(systemName: symbol).font(.system(size: measure.glyph, weight: .semibold))
-                .foregroundStyle(hovering ? tokens.color.t1 : quiet ? tokens.color.t3 : tokens.color.t2)
+            Image(systemName: symbol).font(.system(size: measure.glyph, weight: size == .bare ? .regular : .semibold))
+                .foregroundStyle(ink)
                 .frame(width: measure.box, height: measure.box)
                 .background(Circle().fill(fill))
-                .overlay { if tokens.increased && !quiet { Circle().strokeBorder(tokens.color.hair, lineWidth: Token.Metric.Control.contrastRim) } }
+                .overlay { if tokens.increased && !quiet && size != .bare { Circle().strokeBorder(tokens.color.hair, lineWidth: Token.Metric.Control.contrastRim) } }
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)

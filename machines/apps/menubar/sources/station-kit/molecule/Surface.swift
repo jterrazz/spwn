@@ -444,7 +444,7 @@ public struct StationButton: View {
     }
 }
 
-// invariant: a switch as the vision draws one: 38 by 22, green when on,
+// invariant: a switch as the vision draws one: 32 by 18, the accent when on,
 // its white knob shadowed; one control, live or drawn still.
 public struct StationSwitch: View {
     let on: Bool
@@ -460,7 +460,7 @@ public struct StationSwitch: View {
     public var body: some View {
         Button(action: tap) {
             ZStack(alignment: on ? .trailing : .leading) {
-                Capsule().fill(on ? AnyShapeStyle(palette.good) : AnyShapeStyle(Token.Fill.faint(scheme)))
+                Capsule().fill(on ? AnyShapeStyle(palette.accent) : AnyShapeStyle(Token.Fill.faint(scheme)))
                     .frame(width: Token.Tile.switchWidth, height: Token.Tile.switchHeight)
                 Circle().fill(palette.onTint).frame(width: Token.Detail.knob, height: Token.Detail.knob)
                     .shadow(color: Token.Shadow.toggle.color, radius: Token.Shadow.toggle.radius, y: Token.Shadow.toggle.y).padding(.horizontal, Token.Gap.tight)

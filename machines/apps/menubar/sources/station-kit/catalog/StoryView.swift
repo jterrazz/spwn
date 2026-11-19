@@ -168,11 +168,11 @@ public struct StoryView: View {
         } else if story.ui.statusItem == true {
             MenuBarStrip(MenuBarIcon.of(connection: state.connection, page: state.page), pressed: story.ui.pressed == true, turn: story.freeze ?? 0)
         } else if state.find != nil || state.pushed != nil || state.page.map(Self.panel) == true {
-            Popover(state, handlers: handlers, scrolls: false)
-        } else if let own = MenuPage.view(state, handlers: handlers, scrolls: false) {
+            Popover(state, handlers: handlers, scrolls: story.ui.capped == true)
+        } else if let own = MenuPage.view(state, handlers: handlers, scrolls: story.ui.capped == true) {
             own
         } else {
-            Popover(state, handlers: handlers, scrolls: false)
+            Popover(state, handlers: handlers, scrolls: story.ui.capped == true)
         }
     }
 }

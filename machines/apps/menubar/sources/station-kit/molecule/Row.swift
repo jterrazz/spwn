@@ -36,6 +36,7 @@ public struct RowView: View {
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationFocus) private var focus
     @Environment(\.stationPointerHeld) private var held
+    @Environment(\.stationHomeRows) private var home
     @State private var hovering = false
 
     public init(_ row: Row, columns: [Column] = [], actions: [Action] = [], highlighted: Bool = false, switches: Bool = false,
@@ -82,6 +83,13 @@ public struct RowView: View {
         return value
     }
 
+    // value: a value without its signal, which its dot says beside it.
+    static func unsignalled(_ value: Value) -> Value {
+        var v = value
+        v.signal = nil
+        return v
+    }
+
     // value: a series' value now, under the series' live key.
     static func lead(_ spark: Value) -> Value {
         var lead = spark.items?.first ?? Value()
@@ -101,11 +109,16 @@ public struct RowView: View {
     var stale: Bool { row.signal == "stale" }
     var sub: Value? { row.detail.flatMap { $0.isNone ? nil : $0 } }
 
+    var height: CGFloat {
+        if home { return sub == nil ? Token.HomeRow.height : Token.HomeRow.twoLines }
+        return sub == nil ? m.height : m.twoLines
+    }
+
     public var body: some View {
         let m = Token.Metric.Row.self
         HStack(spacing: m.gap) {
             accessory
-                .frame(width: m.accessory)
+                .frame(width: home ? Token.HomeRow.lead : m.accessory)
                 .opacity(dim ? m.dimShare : 1)
                 .rowPart(.accessory)
             VStack(alignment: .leading, spacing: m.subGap) {
@@ -129,7 +142,7 @@ public struct RowView: View {
             control
         }
         .padding(.horizontal, m.padding)
-        .frame(minHeight: sub == nil ? m.height : m.twoLines)
+        .frame(minHeight: height)
         .overlay(alignment: .bottom) { if let birth = row.birth { BirthBar(birth) } }
         .background {
             if navigable && lit {
@@ -153,10 +166,12 @@ public struct RowView: View {
     }
 
     @ViewBuilder var accessory: some View {
-        if let glyph = row.glyph {
+        if home, let glyph = row.glyph, Self.accessory(row) != .dot {
+            HomeLead(glyph: glyph)
+        } else if let glyph = row.glyph {
             switch Self.accessory(row) {
             case .dot:
-                if let progress = glyph.progress { ProgressRing(perMille: progress) } else { StatusDot(glyph.dot, signal: glyph.signal) }
+                if let progress = glyph.progress { ProgressRing(perMille: progress) } else { StatusDot(glyph.dot, signal: glyph.signal, size: home ? Token.HomeRow.dot : Token.Metric.Marks.dot) }
             case .glyph, .ring: GlyphView(glyph)
             case .none: Color.clear
             }
@@ -167,13 +182,14 @@ public struct RowView: View {
 
     var nameLine: some View {
         let m = Token.Metric.Row.self
-        return HStack(alignment: .firstTextBaseline, spacing: m.suffixGap) {
+        return HStack(alignment: .firstTextBaseline, spacing: home ? Token.HomeRow.suffixGap : m.suffixGap) {
             Text(row.label ?? "")
-                .font(Token.Role.rowName.font)
-                .foregroundStyle(row.signal == "done" ? tokens.color.t2 : tokens.tone(Token.Role.rowName.tone))
-                .opacity(dim ? m.dimShare : 1)
+                .font(home ? Token.Role.homeName.font : Token.Role.rowName.font)
+                .foregroundStyle(row.signal == "done" || (home && dim) ? tokens.color.t2 : tokens.tone(Token.Role.rowName.tone))
+                .opacity(dim && !home ? m.dimShare : 1)
             if let mac = row.mac {
-                Text(mac).font(Token.Role.rowSuffix.font).foregroundStyle(tokens.tone(Token.Role.rowSuffix.tone))
+                let role = home ? Token.Role.homeSuffix : Token.Role.rowSuffix
+                Text(mac).font(role.font).foregroundStyle(tokens.tone(role.tone))
             }
         }
         .lineLimit(1)
@@ -185,17 +201,28 @@ public struct RowView: View {
         } else if let spark = Self.spark(row, columns: columns) {
             HStack(spacing: Token.Metric.Chart.rowSparkGap) {
                 LiveRead { store in RowSpark(store.points(spark, else: spark.points) ?? []) }
-                LiveText(Self.lead(spark), role: .rowValue).fixedSize()
+                LiveText(Self.lead(spark), role: home ? .homeValue : .rowValue).fixedSize()
             }
             .rowPart(.trail)
         } else if let value = Self.trail(row, columns: columns) {
-            LiveText(value, role: .rowValue).fixedSize().rowPart(.trail)
+            if home, let signal = value.signal {
+                HStack(spacing: Token.HomeRow.valueGap) {
+                    StatusDot("fill", signal: signal, size: Token.HomeRow.valueDot)
+                    LiveText(Self.unsignalled(value), role: .homeValue).fixedSize()
+                }
+                .rowPart(.trail)
+            } else {
+                LiveText(value, role: home ? .homeValue : .rowValue).fixedSize().rowPart(.trail)
+            }
         }
     }
 
     @ViewBuilder var control: some View {
         if switches, let verb = Self.action(row.verb, in: actions) {
             StationSwitch(on: verb.picked == true) { run(verb) }
+                .rowPart(.control)
+        } else if home, let verb = Self.action(row.verb, in: actions) {
+            HomeVerb(verb.label ?? "") { run(verb) }
                 .rowPart(.control)
         } else if let verb = Self.action(row.verb, in: actions) {
             VerbButton(verb.label ?? "") { run(verb) }
@@ -246,6 +273,7 @@ public struct RowStack: View {
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationFocus) private var focus
+    @Environment(\.stationHomeRows) private var home
     @State private var hovered: Int?
 
     var lit: String? {
@@ -288,7 +316,7 @@ public struct RowStack: View {
                     if i > 0 {
                         Rectangle().fill(tokens.color.hair)
                             .frame(height: m.hairline)
-                            .padding(.leading, RowView.inset(RowView.accessory(row)))
+                            .padding(.leading, home ? Token.HomeRow.inset - Token.HomeCard.rows.leading : RowView.inset(RowView.accessory(row)))
                             .padding(.trailing, m.insetEnd)
                             .opacity(Self.hairline(i, of: rows, hovered: hovered, highlighted: lit) ? 1 : 0)
                     }
@@ -309,5 +337,58 @@ struct RowFocus: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+// invariant: a lead on Home that is no dot: a Mac's glyph on its 28 pt
+// grey plate, in t1 (t2 while it sleeps), any other glyph bare in t1 at
+// three quarters.
+struct HomeLead: View {
+    let glyph: Glyph
+    @Environment(\.stationTokens) private var tokens
+
+    var mac: Bool { ["laptop", "desktop"].contains(glyph.kind ?? "") }
+
+    var body: some View {
+        let h = Token.HomeRow.self
+        if mac {
+            Image(systemName: Token.Object.mac(lid: glyph.kind == "laptop"))
+                .font(.system(size: h.plateGlyph, weight: .regular))
+                .foregroundStyle(glyph.signal == "quiet" ? tokens.color.t2 : tokens.color.t1)
+                .frame(width: h.plate, height: h.plate)
+                .background(Circle().fill(tokens.color.q))
+                .overlay(Circle().strokeBorder(tokens.color.edge, lineWidth: Token.Metric.Row.hairline))
+        } else if case let .symbol(name) = GlyphView.drawn(glyph) {
+            Image(systemName: name)
+                .font(.system(size: h.glyph, weight: .regular))
+                .foregroundStyle(tokens.color.t1.opacity(h.glyphShare))
+        } else {
+            GlyphView(glyph)
+        }
+    }
+}
+
+// invariant: a row's verb on Home, the board's: a filled accent capsule,
+// 24 tall, its word white.
+struct HomeVerb: View {
+    let title: String
+    let action: () -> Void
+    @Environment(\.stationTokens) private var tokens
+
+    init(_ title: String, action: @escaping () -> Void) {
+        self.title = title
+        self.action = action
+    }
+
+    var body: some View {
+        let h = Token.HomeRow.self
+        Button(action: action) {
+            Text(title).font(Token.Role.homeVerb.font).foregroundStyle(Color.white).lineLimit(1)
+                .padding(h.verb)
+                .frame(height: h.verbHeight)
+                .background(Capsule().fill(tokens.color.accent))
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
