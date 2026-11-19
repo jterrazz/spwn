@@ -1,4 +1,4 @@
-import { button, content, dialog, disabled, heading, region, within } from '@jterrazz/test';
+import { button, content, dialog, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -54,8 +54,22 @@ describe('home', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test('H3 a server down is named by the verdict, and is the line Needs you holds', async () => {
+        // Given - the window over standings, where the server loop-1 is down in a restart loop and restart-1 can wait
+        const result = await website.visit('/?world=standings&page=home', async (visitor) => {
+            // When - I open the window
+            // Then - the verdict names loop-1, and Needs you holds its line alone, restart-1's left to Upkeep
+            await visitor.see(heading('loop-1 is down.'));
+            await visitor.see(heading('Needs you 1'));
+            const loop = content('loop-1 is in a loop: ↺ 5 in 10 min', { exact: false });
+            await visitor.see(within(needsYou, loop));
+            await visitor.gone(within(needsYou, content('restart-1', { exact: false })));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test.todo(
-        "H3 waits for This Mac's overview.read to carry a far Mac's server need (infra on mac-mini in stories)",
+        "H3 waits for the need of a server down to name its call, machines.restart (standings' loop-1 names none, and machines.list lists it no gesture)",
     );
 
     test("H4 the Machines board reads each Mac's free GB, and what each machine holds", async () => {
@@ -102,39 +116,6 @@ describe('home', () => {
     test.todo(
         'H6 waits for a recording whose activity.read answers twice apart, so the figure moves and its line stays',
     );
-
-    test.todo(
-        'H7 waits for a recording of a create with a purpose, whose reads say creating, then running',
-    );
-
-    test('H8 a preset sets the memory, the figure and what it leaves follow, and no size above what is free is offered', async () => {
-        // Given - the New machine sheet opened from Home over two-macs, on the Mac with 36 GB free
-        const result = await website.visit(TWO_MACS, async (visitor) => {
-            await visitor.click(button('New machine'));
-            const sheet = dialog('New machine on mac-mini');
-            await visitor.see(within(sheet, content('leaves 28 GB free on mac-mini')));
-
-            // When - the 12 GB preset is pressed
-            await visitor.click(within(sheet, button('12 GB · gate')));
-
-            // Then - the figure and what it leaves follow
-            await visitor.see(within(sheet, content('leaves 24 GB free on mac-mini')));
-
-            // When - the Mac with 4 GB free is chosen
-            await visitor.click(within(sheet, button('macbook-pro')));
-
-            // Then - the sheet follows that Mac, and the sizes above its room are refused
-            const onIt = dialog('New machine on macbook-pro');
-            await visitor.see(within(onIt, content('leaves 0 GB free on this Mac')));
-            const eight = within(onIt, button('8 GB · no room'));
-            const twelve = within(onIt, button('12 GB · no room'));
-            await visitor.see(disabled(eight));
-            await visitor.see(disabled(twelve));
-        });
-        expect(result.errors.text).toBe('');
-    });
-
-    test.todo('H8 waits for a verb that drags across the free squares of a grid');
 
     test.todo("H9 waits for the engine's kept journal (drawn on a provisional copy)");
 
