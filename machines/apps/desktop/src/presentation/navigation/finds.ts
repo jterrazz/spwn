@@ -50,7 +50,7 @@ export type Held = {
 
 const PLACES: readonly PlainPage[] = ['home', 'inbox', 'storage', 'passwords'];
 const SHELVES: readonly PlainPage[] = ['catalog-apps', 'catalog-skills', 'catalog-settings'];
-const FOUND_BY_NAME: ReadonlySet<PlainPage> = new Set<PlainPage>(['gallery']);
+const FOUND_BY_NAME: ReadonlySet<PlainPage> = new Set<PlainPage>(['engine', 'gallery']);
 
 const WITH_A_QUERY: ReadonlySet<Kind> = new Set<Kind>(['Actions', 'Needs', 'Packages', 'Tabs']);
 
@@ -144,7 +144,9 @@ function sentenceOf(parts: readonly string[]): string {
 }
 
 export function everything(held: Held): readonly Result[] {
-    const places = held.withGallery ? [...PLACES, 'gallery' as const] : PLACES;
+    const places: readonly PlainPage[] = held.withGallery
+        ? [...PLACES, 'engine', 'gallery']
+        : [...PLACES, 'engine'];
     return [
         ...places.map((one) => page(held, 'Places', one)),
         ...held.needs.map((need): Result => ({

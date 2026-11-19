@@ -12,8 +12,10 @@ export type ScriptedRun = {
     holds?: boolean;
 };
 
+// value: `answering` scripts a core whose engine answers from the start: an update, not a first install.
 export type CoreScript = {
     present: boolean;
+    answering?: boolean;
     appearsAt?: number;
     install: ScriptedRun;
     start: ScriptedRun;

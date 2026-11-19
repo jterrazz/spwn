@@ -8,6 +8,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import type { CoreKind } from '../../application/use-cases/core-flow';
+import type { UpdateKind } from '../../application/use-cases/update-flow';
 import type { Tone } from '../../domain/tone';
 import type { OwnState } from './words';
 
@@ -37,6 +38,14 @@ export const CORE_TONES: Tones<CoreKind> = {
     started: 'new',
     starting: 'new',
     waiting: 'new',
+};
+
+export const UPDATE_TONES: Tones<UpdateKind> = {
+    failed: 'bad',
+    idle: 'plain',
+    restarting: 'new',
+    updated: 'ok',
+    updating: 'new',
 };
 
 export const NEWEST_TONE: Tone = 'ok';

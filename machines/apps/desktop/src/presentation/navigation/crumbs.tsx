@@ -14,6 +14,7 @@ export const TITLES: Record<PlainPage, string> = {
     'catalog-apps': 'Apps',
     'catalog-skills': 'Skills',
     'catalog-settings': 'Settings',
+    engine: 'Engine',
     gallery: 'Gallery',
 };
 

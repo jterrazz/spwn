@@ -7,6 +7,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import type { CoreKind } from '../../application/use-cases/core-flow';
+import type { UpdateKind } from '../../application/use-cases/update-flow';
 import type { DiskCall } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
@@ -69,6 +70,23 @@ export const CORE_FOOT_WORDS: Words<CoreKind> = {
     starting: 'Engine starting',
     waiting: 'No engine on this Mac',
 };
+
+export const UPDATE_WORDS: Words<UpdateKind> = {
+    failed: 'failed',
+    idle: 'idle',
+    restarting: 'restarting',
+    updated: 'updated',
+    updating: 'updating',
+};
+
+// value: the window's own words around the engine's release reading; the head and a refusal are the engine's.
+export const RELEASE_WORDS = {
+    available: 'available',
+    checked: 'Checked',
+    checkNow: 'Check now',
+    update: 'Update',
+    whatChanged: 'What changed',
+} as const;
 
 export const NEWEST_WORD = 'newest';
 

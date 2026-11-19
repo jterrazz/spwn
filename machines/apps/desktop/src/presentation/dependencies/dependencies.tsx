@@ -1,4 +1,4 @@
-import type { CallName, Target } from '@jterrazz/station-api';
+import type { CallName, EngineHello, Target } from '@jterrazz/station-api';
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 
@@ -17,10 +17,13 @@ import { CoreFlow, NO_CORE } from '../../application/use-cases/core-flow';
 import type { CoreState } from '../../application/use-cases/core-flow';
 import { READING } from '../../application/use-cases/entry';
 import type { Asked, Reading } from '../../application/use-cases/entry';
+import { offers } from '../../application/use-cases/fresh';
 import { GestureStore } from '../../application/use-cases/gesture-store';
 import { reachOf } from '../../application/use-cases/reach';
 import type { Reach } from '../../application/use-cases/reach';
 import { askedKey, ReadStore } from '../../application/use-cases/store';
+import { UpdateFlow } from '../../application/use-cases/update-flow';
+import type { UpdateState } from '../../application/use-cases/update-flow';
 
 export type { Reading } from '../../application/use-cases/entry';
 
@@ -38,6 +41,7 @@ type Engine = {
     gestures: GestureStore;
     opener: OpenerPort;
     core: CoreFlow;
+    update: UpdateFlow;
 };
 
 const EngineContext = createContext<Engine | null>(null);
@@ -57,6 +61,7 @@ export function EngineProvider({
             gestures: new GestureStore(),
             opener,
             store: new ReadStore(client, presence),
+            update: new UpdateFlow(core),
         }),
         [client, core, coreLookEvery, opener, presence],
     );
@@ -106,6 +111,21 @@ export function useCore(): { flow: CoreFlow; state: CoreState } {
     const { core } = useEngine();
     const state = useSyncExternalStore(core.subscribe, core.state);
     return { flow: core, state };
+}
+
+export function useUpdate(): { flow: UpdateFlow; state: UpdateState } {
+    const { update } = useEngine();
+    const state = useSyncExternalStore(update.subscribe, update.state);
+    return { flow: update, state };
+}
+
+export function useHello(): EngineHello | undefined {
+    const link = useLink();
+    return link?.kind === 'open' ? link.hello : undefined;
+}
+
+export function useOffers(call: CallName): boolean {
+    return offers(useHello(), call);
 }
 
 // invariant: the answer is the type the call declares: the store holds what the client resolved for this name.

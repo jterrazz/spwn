@@ -7,6 +7,7 @@ import type { Receiver, Transport } from '../../../infrastructure/outbound/engin
 import type { Link } from '../../ports/engine.port';
 import type { PresencePort } from '../../ports/presence.port';
 import type { Asked } from '../entry';
+import { offers } from '../fresh';
 import { ReadStore } from '../store';
 
 type Opened = { request: Request; receiver: Receiver; closed: boolean };
@@ -246,5 +247,24 @@ describe('fresh', () => {
             plain.engine.asked('machines.list'),
             refusing.engine.asked('machines.list'),
         ]).toStrictEqual([2, 2]);
+    });
+
+    test('a call is offered only when the hello lists it, and no hello offers nothing', () => {
+        // Given - a hello listing the release reading, one without calls, and none
+        const listing: EngineHello = {
+            calls: ['engine.read-release'],
+            pid: 1,
+            started_at: '',
+            version: 'v0.22.0',
+        };
+        const bare: EngineHello = { pid: 1, started_at: '', version: 'v0.20.0' };
+
+        // When - each is asked for the release reading
+        const offered = [listing, bare, undefined].map((hello) =>
+            offers(hello, 'engine.read-release'),
+        );
+
+        // Then - the listing hello alone offers it
+        expect(offered).toStrictEqual([true, false, false]);
     });
 });

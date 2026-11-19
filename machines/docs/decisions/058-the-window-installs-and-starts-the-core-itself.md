@@ -35,11 +35,13 @@ While no engine answers, the shell looks for the core on the disk and runs two p
 
 What it never does:
 
-- It reads no release: no version, no upgrade, no check of what is out. The installer alone fetches.
+- It reads no release of its own: what is out is the engine's answer, and the update it offers on a press is
+  [ADR-060](060-the-window-offers-the-engines-release-and-updates-on-a-press.md)'s. The installer alone fetches.
 - It looks nowhere but those three places: no `PATH` lookup (a window opened from the Finder has launchd's), no
   `which`, no shell profile read.
 - It never runs `station init`: the engine start alone, as the installer leaves the core.
-- Nothing once the engine answers: the panel goes, and the window is the engine's client as before.
+- Nothing once the engine answers, but the update ADR-060 offers: the panel goes, and the window is the engine's
+  client as before.
 
 The page fetches nothing and the CSP is unchanged: the shell runs the programs, the page sends four commands.
 

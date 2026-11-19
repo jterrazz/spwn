@@ -1,4 +1,4 @@
-import type { EngineEventsOutput, EngineHello } from '@jterrazz/station-api';
+import type { CallName, EngineEventsOutput, EngineHello } from '@jterrazz/station-api';
 
 import type { EnginePort, Watch } from '../ports/engine.port';
 import type { PresencePort } from '../ports/presence.port';
@@ -18,8 +18,12 @@ export function sameEngine(
     return before?.pid === after?.pid && before?.started_at === after?.started_at;
 }
 
+export function offers(hello: EngineHello | undefined, call: CallName): boolean {
+    return hello?.calls?.includes(call) === true;
+}
+
 function offersEvents(hello: EngineHello | undefined): boolean {
-    return hello?.calls?.includes('engine.events') === true;
+    return offers(hello, 'engine.events');
 }
 
 function isNotice(out: EngineEventsOutput): boolean {

@@ -28,6 +28,7 @@ export const PLAIN_PAGES = [
     'catalog-apps',
     'catalog-settings',
     'catalog-skills',
+    'engine',
     'gallery',
     'home',
     'inbox',

@@ -7,6 +7,7 @@ import { tauriCore } from '../infrastructure/outbound/core-tauri/tauri-core';
 import { documentPresence } from '../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../infrastructure/outbound/engine-link/client';
 import type { Transport } from '../infrastructure/outbound/engine-link/transport';
+import { helloOf } from '../infrastructure/outbound/engine-replay/hello';
 import { replayTransport, stagedReplay } from '../infrastructure/outbound/engine-replay/replay';
 import type { Pace, Recording } from '../infrastructure/outbound/engine-replay/replay';
 import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
@@ -51,6 +52,18 @@ async function scriptedOf(recording: Recording, script: string, pace: Pace): Pro
         return { transport: replayTransport(recording, undefined, pace) };
     }
     const { scriptedCore } = await import('../infrastructure/outbound/core-scripted/scripted-core');
+    if (found.answering === true) {
+        const { updated } = await import('../infrastructure/outbound/core-scripted/release');
+        const stage = stagedReplay(recording, undefined, pace);
+        const after = updated(recording);
+        const core = scriptedCore(found, {
+            gap: pace.gestureFrame,
+            onStarted: () => {
+                stage.restart({ ...helloOf(after), pid: 1, started_at: 'restarted' }, after);
+            },
+        });
+        return { core, transport: stage.transport };
+    }
     const stage = stagedReplay(recording, NO_ENGINE_YET, pace);
     const opened: Link = {
         hello: undefined,
@@ -80,7 +93,10 @@ async function composedOf({ inTauri, query }: Place): Promise<Composed> {
     }
     const { recordingFor } = await import('../infrastructure/outbound/engine-replay/recordings');
     const pace = { gestureFrame: Number(query.get('pace') ?? '0') };
-    const recording = await recordingFor(world);
+    const recorded = await recordingFor(world);
+    const release = await import('../infrastructure/outbound/core-scripted/release');
+    const recording =
+        query.get('release') === 'refused' ? release.refreshRefused(recorded) : recorded;
     const script = query.get('core');
     return script === null
         ? { transport: replayTransport(recording, undefined, pace) }

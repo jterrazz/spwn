@@ -10,6 +10,7 @@ const TITLES: Record<PlainPage, string> = {
     'catalog-apps': 'Apps',
     'catalog-settings': 'Settings',
     'catalog-skills': 'Skills',
+    engine: 'Engine',
     gallery: 'Gallery',
     home: 'Home',
     inbox: 'Inbox',
@@ -195,6 +196,20 @@ describe('finds', () => {
         // Then - only the proof window finds it, and its empty query does not list it
         expect(production).toStrictEqual([]);
         expect(shown(proof)).toStrictEqual([['Places', ['Gallery']]]);
+        expect(shown(unasked)).toContainEqual([
+            'Places',
+            ['Home', 'Inbox', 'Storage', 'Passwords'],
+        ]);
+    });
+
+    test('the Engine page is found only by its name, and opens its own page', () => {
+        // Given - the query engine, then the empty query
+        const asked = matching(everything(HELD), 'engine');
+        const unasked = matching(everything(HELD), '');
+
+        // Then - the page is found by its name alone
+        expect(shown(asked)).toStrictEqual([['Places', ['Engine']]]);
+        expect(asked[0]?.results[0]?.to).toStrictEqual({ route: { page: 'engine' } });
         expect(shown(unasked)).toContainEqual([
             'Places',
             ['Home', 'Inbox', 'Storage', 'Passwords'],

@@ -1,0 +1,56 @@
+- navigation "Sidebar":
+  - button "Find"
+  - button "Home"
+  - button "Inbox 2"
+  - button "Machine files"
+  - button "Passwords"
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - button "macbook-pro online":
+      - text: macbook-pro
+      - img "online"
+    - button "agent-7f running":
+      - text: agent-7f
+      - img "running"
+    - button "api stopped":
+      - text: api
+      - img "stopped"
+    - button "linux-1 running":
+      - text: linux-1
+      - img "running"
+    - button "linux-2 creating":
+      - text: linux-2
+      - img "creating"
+    - button "mac-mini online":
+      - text: mac-mini
+      - img "online"
+    - button "infra down":
+      - text: infra
+      - img "down"
+    - button "linux-3 running":
+      - text: linux-3
+      - img "running"
+    - button "review-bot running":
+      - text: review-bot
+      - img "running"
+    - button "macbook-air asleep":
+      - text: macbook-air
+      - img "asleep"
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps 6"
+    - button "Skills 0"
+    - button "Settings 3"
+  - button "Storage"
+  - img "running"
+  - text: Engine running · v4.0.0
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Engine
+  - heading "The latest release is not known yet." [level=1]
+  - region "Engine":
+    - heading "Engine" [level=2]
+    - text: Latest release Checked 7 Nov, 10:30
+    - button "Check now"

@@ -1,6 +1,6 @@
 import type { CoreFlow, CoreState } from '../../../application/use-cases/core-flow';
 import { INSTALL_FOLDER, START_LINE } from '../../../domain/core';
-import { useCore } from '../../dependencies/dependencies';
+import { useCore, useUpdate } from '../../dependencies/dependencies';
 import { Button } from '../../ui/index';
 import { shownOrWithheld } from '../../ui/secret';
 import {
@@ -18,6 +18,7 @@ import {
     Status,
 } from './core-parts';
 import { ON_DISK, PROMISES, PUTS, STARTING } from './core-rows';
+import { UpdatePanel } from './update';
 
 import styles from './core.module.css';
 
@@ -251,6 +252,14 @@ function Shown({ flow, state }: { flow: CoreFlow; state: CoreState }) {
 
 export function CorePage() {
     const { flow, state } = useCore();
+    const update = useUpdate();
+    if (update.state.kind !== 'idle') {
+        return (
+            <div className={styles.center}>
+                <UpdatePanel flow={update.flow} state={update.state} />
+            </div>
+        );
+    }
     return (
         <div className={styles.center}>
             {state.kind === 'looking' ? null : (

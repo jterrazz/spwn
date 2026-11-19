@@ -9,6 +9,7 @@ import { AddMac } from './add-mac/add-mac';
 import { ItemPage } from './catalog/item';
 import { ShelfPage } from './catalog/shelf';
 import { CorePage } from './core/core';
+import { EnginePage } from './core/engine';
 import { HomePage } from './home/home';
 import { InboxPage } from './inbox/inbox';
 import { MachineFilesPage } from './machine-files/machine-files';
@@ -84,6 +85,9 @@ function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps
         }
         case 'storage': {
             return <StoragePage go={go} macs={home.macs} />;
+        }
+        case 'engine': {
+            return <EnginePage />;
         }
         case 'machine': {
             return found ? (

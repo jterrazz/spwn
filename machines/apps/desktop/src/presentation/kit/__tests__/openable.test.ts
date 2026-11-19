@@ -52,4 +52,21 @@ describe('openable', () => {
             undefined,
         ]);
     });
+
+    test("a release's notes open as the engine named them, and a release without them opens nothing", () => {
+        // Given - a reading with notes, one with empty notes, one with none
+        const head = { Sentence: 'spwn v0.22.0 is out.', Tone: 'new' } as const;
+        const notes = 'https://github.com/jterrazz/spwn/releases/tag/v0.22.0';
+        const readings = [
+            { Behind: true, Head: head, Installed: 'v0.21.0', Notes: notes },
+            { Behind: true, Head: head, Installed: 'v0.21.0', Notes: '' },
+            { Behind: true, Head: head, Installed: 'v0.21.0' },
+        ];
+
+        // When - each is read
+        const opens = readings.map((release) => Openable.ofRelease(release)?.value);
+
+        // Then - the url as sent, then nothing twice
+        expect(opens).toStrictEqual([notes, undefined, undefined]);
+    });
 });

@@ -88,6 +88,36 @@
     gap: var(--space-8);
     align-items: center;
 }
+.release {
+    flex: none;
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
+    margin: var(--space-8) 0 0;
+    padding: var(--space-6) var(--space-8);
+    border: 1px solid color-mix(in srgb, var(--new) 45%, transparent);
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--new) 10%, transparent);
+    color: var(--t1);
+    font: inherit;
+    font-size: var(--text-label);
+    text-align: left;
+    cursor: pointer;
+}
+.release:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 1px;
+}
+.releaseText {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.releaseGo {
+    color: var(--new);
+}
 .footText {
     min-width: 0;
     overflow: hidden;

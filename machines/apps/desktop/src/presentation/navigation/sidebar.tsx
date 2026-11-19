@@ -12,6 +12,7 @@ import { coreState, engineState, macState, ownState, vmState } from '../words/sh
 import { CORE_FOOT_WORDS, CORE_MACHINES_WORDS } from '../words/words';
 import type { Carried } from './carried';
 import { onListKey } from './keys';
+import { ReleaseRow } from './release-row';
 import { machineRoute } from './route';
 import type { PlainPage, Route } from './route';
 
@@ -249,6 +250,7 @@ export function Sidebar({
                 <Catalog carried={quiet ? UNCARRIED : carried} place={place} />
             </div>
             <Storage place={place} />
+            {quiet ? null : <ReleaseRow go={go} />}
             {quiet ? <QuietFoot /> : <Engine engine={engine} />}
         </nav>
     );

@@ -3,6 +3,7 @@ import type { EngineHello, Request } from '@jterrazz/station-api';
 import type { Link } from '../../../application/ports/engine.port';
 import { isRecord, keyOf } from '../../../domain/request-key';
 import type { Exchange as Opened, Receiver, Transport } from '../engine-link/transport';
+import { helloOf } from './hello';
 
 export type Exchange = { request: Record<string, unknown>; answers: readonly unknown[] };
 
@@ -155,7 +156,7 @@ class Staging {
         this.pace = pace;
         this.answers = answersOf(recording);
         this.shown = link ?? {
-            hello: undefined,
+            hello: helloOf(recording),
             kind: 'open',
             refused: undefined,
             socket: this.socket(),
