@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 )
 
@@ -35,7 +36,7 @@ type Options struct {
 
 // invariant: the owner's own ssh to a VM of another Mac hops through that
 // Mac's station (machines pipe); station's own code never takes this way.
-const hop = `'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"'`
+var hop = catalog.FarStationLine()
 
 type Files interface {
 	ReadFile(path string) ([]byte, error)

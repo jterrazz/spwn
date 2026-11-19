@@ -246,7 +246,7 @@ func withAppBins(env []string, guest bool) []string {
 	have := strings.Split(path, ":")
 	var dirs []string
 	if guest {
-		dirs = append(dirs, filepath.Join(home, ".local", "bin"), filepath.Join(apps, catalog.AppShims))
+		dirs = append(dirs, catalog.InstallDirIn(home), filepath.Join(apps, catalog.AppShims))
 	}
 	for _, bin := range catalog.GlobalBins {
 		dirs = append(dirs, filepath.Join(home, bin))
@@ -284,7 +284,7 @@ func landing(cat catalog.Catalog, vars map[string]string) local.Search {
 		s.System = append(s.System, a.Path...)
 	}
 	if home := vars["HOME"]; filepath.IsAbs(home) {
-		s.Home = []string{filepath.Join(home, ".local", "bin"), filepath.Join(appData(home, vars[catalog.AppDataVar]), catalog.AppShims)}
+		s.Home = []string{catalog.InstallDirIn(home), filepath.Join(appData(home, vars[catalog.AppDataVar]), catalog.AppShims)}
 	}
 	return s
 }
@@ -372,11 +372,11 @@ func pathsOf(home string, vars map[string]string) setup.Paths {
 		Cache: root("XDG_CACHE_HOME", ".cache"),
 	}
 	return setup.Paths{
-		Prefs: filepath.Join(roots.Prefs, "station"),
-		Data:  filepath.Join(roots.Data, "station"),
-		State: filepath.Join(roots.State, "station"),
-		Cache: filepath.Join(roots.Cache, "station"),
-		Bin:   filepath.Join(home, ".local", "bin"),
+		Prefs: filepath.Join(roots.Prefs, catalog.StateFolder),
+		Data:  filepath.Join(roots.Data, catalog.StateFolder),
+		State: filepath.Join(roots.State, catalog.StateFolder),
+		Cache: filepath.Join(roots.Cache, catalog.StateFolder),
+		Bin:   catalog.InstallDirIn(home),
 		Roots: roots,
 	}
 }

@@ -9,12 +9,13 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 )
 
 const (
 	releaseAsset = "station-linux-arm64"
-	releaseBase  = "https://github.com/jterrazz/spwn/releases/download/"
+	releaseBase  = "https://github.com/" + catalog.StationRepo + "/releases/download/"
 
 	releaseChecksums = "checksums.txt"
 )

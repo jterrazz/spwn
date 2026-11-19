@@ -191,7 +191,7 @@ var StationDisk = Disk{
 		noted(data("{state}/station/ledger.json.lock"), "empty: the lock two applies at once take in turn to change the ledger"),
 		noted(data("{state}/station/runs.lock"), "empty: the turn an apply, an upgrade and the night's upgrade take, so one runs at a time"),
 	},
-	Installed: []string{"~/.local/bin/station"},
+	Installed: []string{InstallDir + "/" + StationBinary},
 	Free: []Action{remove(
 		"{cache}/station/*",
 		StationLogs,

@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
@@ -22,10 +23,11 @@ const (
 	connectWait = 5
 	// value: what the far side is given to end once its stdin is closed.
 	closeWait = 2 * time.Second
-	// value: the far Mac's own login PATH is not ssh's, so station is looked
-	// for where scripts/install.sh puts it.
-	attach = `'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"'`
 )
+
+// value: the far Mac's own login PATH is not ssh's, so station is looked for
+// where the installer puts it.
+var attach = catalog.FarStationLine()
 
 type Dialer struct {
 	spawn local.Spawner
