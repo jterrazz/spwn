@@ -57,13 +57,13 @@ func TestEverySubpageHeaderSaysBackAndCarriesItsTitle(t *testing.T) {
 	fleet := judgedFleet(nil)
 	here := page.Context{Machine: proMac, Kind: "computer"}
 	pages := map[string]page.Page{
-		"This Mac":  macPageOf(t, proMac, func(m *Machine) { m.All = fleet }),
-		"infra":     macPageOf(t, "infra", func(m *Machine) { m.All = fleet }),
-		"linux-3":   macPageOf(t, "linux-3", func(m *Machine) { m.All = fleet }),
-		"Accounts":  Accounts(signInsOfTwo(t), AccountsOf{Asks: yesNo}, here),
-		"Awake":     awakeOf(t, nil),
-		"Ports":     fleetPorts(t, portFleet(), PortsOf{}),
-		"Needs you": NeedsPage(needsFleet(), "", here),
+		"This Mac":   macPageOf(t, proMac, func(m *Machine) { m.All = fleet }),
+		"infra":      macPageOf(t, "infra", func(m *Machine) { m.All = fleet }),
+		"linux-3":    macPageOf(t, "linux-3", func(m *Machine) { m.All = fleet }),
+		"Accounts":   Accounts(signInsOfTwo(t), AccountsOf{Asks: yesNo}, here),
+		"Keep awake": awakeOf(t, nil),
+		"Ports":      fleetPorts(t, portFleet(), PortsOf{}),
+		"Needs you":  NeedsPage(needsFleet(), "", here),
 	}
 	pages["Needs you, a Mac's"] = NeedsPage(needsFleet(), needsMini, here)
 	for name, p := range pages {

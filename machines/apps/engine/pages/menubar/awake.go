@@ -45,8 +45,8 @@ func Awake(f pageawake.AllMachines, ctx page.Context) page.Page {
 	// them (E1), then the running work that pauses while it sleeps; then
 	// each other Mac on its own card by its policy and what depends on it,
 	// with Change… on its switch. No footer (judges r4 #11).
-	p := page.Page{ID: AwakeID, Command: "awake", Context: ctx, Header: &page.Header{Back: Back, Title: "Awake", Glyph: symbol("sun.max", page.SignalQuiet)}}
-	p.Sections = []page.Section{{ID: SectionSummary, Title: "Awake", Role: page.Summary, Caption: []page.Value{page.Text("All Macs"), page.Text("which may sleep, and what pauses")}}}
+	p := page.Page{ID: AwakeID, Command: "awake", Context: ctx, Header: &page.Header{Back: Back, Title: "Keep awake", Glyph: symbol("sun.max", page.SignalQuiet)}}
+	p.Sections = []page.Section{{ID: SectionSummary, Title: "Keep awake", Role: page.Summary, Caption: []page.Value{page.Text("Which Mac may sleep, and until when")}}}
 	if f.Label == nil {
 		self := ""
 		for _, r := range f.Reports {
@@ -58,7 +58,7 @@ func Awake(f pageawake.AllMachines, ctx page.Context) page.Page {
 	}
 	for _, r := range f.Reports {
 		if isThisMac(f, r) {
-			p.Sections = append(p.Sections, thisMac(r))
+			p.Sections = append(p.Sections, thisMac(r, f.Zone))
 			if s, ok := pausing(r); ok {
 				p.Sections = append(p.Sections, s)
 			}
@@ -118,10 +118,14 @@ func macCard(mac, name string, row page.Row) page.Section {
 
 // value: This Mac's card: Keep This Mac awake and its switch, then the
 // switches its capabilities allow.
-func thisMac(r awake.Report) page.Section {
+func thisMac(r awake.Report, zone *time.Location) page.Section {
+	r.Zone = zone
 	s := page.Section{ID: SectionThisMac, Title: page.ThisMac, Card: page.CardFlush, Uncounted: true, Columns: awakeColumns()}
 	held := r.Keeping() != nil
-	keep := page.Row{ID: r.Mac, Label: "Keep This Mac awake", Glyph: sun(held), Cells: switched(held), Detail: page.Text("Stays on for a while"), Mark: page.OK}
+	keep := page.Row{ID: r.Mac, Label: "Keep awake", Glyph: sun(held), Cells: switched(held), Mark: page.OK}
+	if held {
+		keep.Label = capital(r.Clauses()[0])
+	}
 	switch {
 	case r.Engine == awake.EngineReading:
 		keep.Mark, keep.Detail = page.Awaiting, page.Pending()
@@ -145,6 +149,11 @@ func thisMac(r awake.Report) page.Section {
 	}
 	return s
 }
+
+// value: the words of a Mac that sleeps as it always does.
+const sleepsAsUsual = "Sleeps as usual"
+
+func capital(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
 
 // value: the running work that pauses while This Mac sleeps, under its
 // card; none, no line (SPEC A9 1-11).
@@ -181,6 +190,9 @@ func otherMac(r awake.Report, zone *time.Location) page.Row {
 		return row
 	}
 	row.Label = strings.TrimSuffix(v.Sentence, ".")
+	if r.EngineDown() || r.Mode() == awake.SleepsNormally {
+		row.Label = sleepsAsUsual
+	}
 	switch {
 	case r.EngineDown():
 		row.Detail = page.Texts(v.Line, dependants(r.Servers, r.Pauses))
@@ -218,7 +230,7 @@ func silentMac(s pageawake.Silent, now time.Time) page.Row {
 		words = append(words, "seen "+ago(now.Sub(s.Answered))+" ago")
 	}
 	words = append(words, dependants(s.Servers, nil))
-	return page.Row{ID: s.Mac, Label: "May sleep", Glyph: symbol("moon", page.SignalAsleep), Mark: page.Absent, Signal: page.SignalAsleep, Detail: page.Texts(words...)}
+	return page.Row{ID: s.Mac, Label: sleepsAsUsual, Glyph: symbol("moon", page.SignalAsleep), Mark: page.Absent, Signal: page.SignalAsleep, Detail: page.Texts(words...)}
 }
 
 func nanos(d time.Duration) string { return strconv.FormatInt(int64(d), 10) }

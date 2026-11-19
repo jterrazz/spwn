@@ -10,16 +10,12 @@
   "sections": [
     {
       "id": "summary",
-      "title": "Awake",
+      "title": "Keep awake",
       "role": "summary",
       "caption": [
         {
           "kind": "text",
-          "text": "All Macs"
-        },
-        {
-          "kind": "text",
-          "text": "which may sleep, and what pauses"
+          "text": "Which Mac may sleep, and until when"
         }
       ]
     },
@@ -43,16 +39,12 @@
           "row": {
             "id": "macbook-pro",
             "mark": "ok",
-            "label": "Keep This Mac awake",
+            "label": "Awake until 14:30",
             "cells": [
               {
                 "kind": "on"
               }
             ],
-            "detail": {
-              "kind": "text",
-              "text": "Stays on for a while"
-            },
             "glyph": {
               "kind": "symbol:sun.max",
               "signal": "waits"
@@ -171,7 +163,7 @@
           "row": {
             "id": "macbook-air",
             "mark": "absent",
-            "label": "May sleep",
+            "label": "Sleeps as usual",
             "detail": {
               "kind": "list",
               "items": [
@@ -391,7 +383,7 @@
   ],
   "header": {
     "back": "Back",
-    "title": "Awake",
+    "title": "Keep awake",
     "glyph": {
       "kind": "symbol:sun.max",
       "signal": "quiet"

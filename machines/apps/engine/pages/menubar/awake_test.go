@@ -178,7 +178,7 @@ func TestAwakeSaysEachMacsPolicyAndDependants(t *testing.T) {
 	for _, v := range air.Detail.Items {
 		words = append(words, v.Text)
 	}
-	if air.Label != "May sleep" || air.Signal != page.SignalAsleep || air.Verb != "" || !slices.Equal(words, []string{"asleep", "seen 2 hr ago", "nothing depends on it"}) {
+	if air.Label != "Sleeps as usual" || air.Signal != page.SignalAsleep || air.Verb != "" || !slices.Equal(words, []string{"asleep", "seen 2 hr ago", "nothing depends on it"}) {
 		t.Fatalf("the asleep Mac reads %q, %q (%s), verb %q", air.Label, words, air.Signal, air.Verb)
 	}
 }
@@ -207,6 +207,9 @@ func TestAMacsCardRowIsWordedAndMarkedByItsVerdict(t *testing.T) {
 			want, label := page.Awaiting, "Checking"
 			if v := awake.VerdictOf(r); v != nil {
 				want, label = marks[string(v.Tone)], strings.TrimSuffix(v.Sentence, ".")
+				if r.EngineDown() || r.Mode() == awake.SleepsNormally {
+					label = "Sleeps as usual"
+				}
 			}
 			got := otherMac(r, time.UTC)
 			if got.Mark != want {
@@ -216,6 +219,24 @@ func TestAMacsCardRowIsWordedAndMarkedByItsVerdict(t *testing.T) {
 				t.Errorf("%s %06b: labeled %q; its verdict says %q", engine, bits, got.Label, label)
 			}
 		}
+	}
+}
+
+// invariant: the page is headed Keep awake, and This Mac's row says the
+// term in force ("Awake until 18:00", lid or not), else only Keep awake.
+func TestAwakeHeadAndThisMacsRowSayTheTerm(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	held := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", Caps: machine.Capabilities{Engine: true, Lid: true},
+		Session: &awake.Session{StartedAt: now, Until: now.Add(7*time.Hour + 30*time.Minute), Lid: true}}})
+	if held.Header.Title != "Keep awake" || held.Sections[0].Caption[0].Text != "Which Mac may sleep, and until when" {
+		t.Fatalf("the page is headed %q, %+v", held.Header.Title, held.Sections[0].Caption)
+	}
+	if got := sectionOf(held, SectionThisMac).Items[0].Row.Label; got != "Awake until 18:00" {
+		t.Fatalf("This Mac holding until 18:00 reads %q", got)
+	}
+	free := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this"}})
+	if got := sectionOf(free, SectionThisMac).Items[0].Row.Label; got != "Keep awake" {
+		t.Fatalf("This Mac with no term reads %q", got)
 	}
 }
 
