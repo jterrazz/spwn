@@ -1,0 +1,6 @@
+{"world": "create-failed", "station": "dev", "exchanges": [
+{"request":{"call":"machines.log","in":{"VM":"api"}},"answers":[{"v":2,"out":{"Lines":null}}]},
+{"request":{"call":"machines.log","in":{"VM":"linux-1"}},"answers":[{"v":2,"out":{"Lines":null}}]},
+{"request":{"call":"machines.log","in":{"VM":"linux-2"}},"answers":[{"v":2,"out":{"Lines":["[    0.000000] Linux version 6.8.0-49-generic","[    1.842113] EXT4-fs (vda1): mounted filesystem","[    2.371005] cloud-init[498]: running init-local","[    4.102771] Kernel panic - not syncing: VFS: unable to mount root fs"]}}]},
+{"request":{"call":"machines.log","in":{"VM":"infra"},"target":{"name":"mac-mini"}},"answers":[{"v":2,"out":{"Lines":null}}]}
+]}
