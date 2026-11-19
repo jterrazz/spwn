@@ -1,0 +1,30 @@
+{
+  "$defs": {},
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/station.engine-record.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The binary the engine last started from, written to station/engine.json under the state root at each engine start, so a client finds station while the engine does not answer. Written by make generate from engine.Record; install.json says where.",
+  "properties": {
+    "at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "executable": {
+      "type": "string"
+    },
+    "v": {
+      "const": 1
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "at",
+    "executable",
+    "v",
+    "version"
+  ],
+  "title": "station.engine-record/v1",
+  "type": "object"
+}

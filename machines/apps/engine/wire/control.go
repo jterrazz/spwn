@@ -63,7 +63,7 @@ func (m machine) engineRecords() engine.Records {
 	if m.world != nil {
 		return m.world.records()
 	}
-	return fileRecord{fs: m.sys.FS, file: path.Join(m.paths.State, "engine.json")}
+	return fileRecord{fs: m.sys.FS, file: path.Join(m.paths.State, engine.RecordFile)}
 }
 
 // invariant: the binary the engine started from, written whole beside its

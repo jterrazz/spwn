@@ -30,6 +30,10 @@ export default defineConfig({
                     "written by `make generate` from the calls' confirmations, byte for byte what the packages-api drift test compares",
                 'packages/api/confirms.d.ts':
                     'written by `make generate` beside confirms.json, byte for byte what the packages-api drift test compares',
+                'packages/api/install.json':
+                    "written by `make generate` from the catalog's install folder and the engine's record, byte for byte what the packages-api drift test compares",
+                'packages/api/install.d.ts':
+                    'written by `make generate` beside install.json, byte for byte what the packages-api drift test compares',
                 'packages/api/words.d.ts':
                     'written by `make generate` beside words.json, byte for byte what the packages-api drift test compares',
                 'packages/api/schemas/**':

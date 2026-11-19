@@ -5,6 +5,8 @@
         "confirms.d.ts",
         "confirms.json",
         "index.d.ts",
+        "install.d.ts",
+        "install.json",
         "schemas",
         "words.d.ts",
         "words.json"
@@ -18,6 +20,10 @@
         "./confirms.json": {
             "types": "./confirms.d.ts",
             "default": "./confirms.json"
+        },
+        "./install.json": {
+            "types": "./install.d.ts",
+            "default": "./install.json"
         },
         "./words.json": {
             "types": "./words.d.ts",

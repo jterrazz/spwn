@@ -367,6 +367,9 @@ func apiFiles(root string) map[string][]byte {
 	out[wordsTypesPath] = wordsDeclaration()
 	out[confirmsPath] = indented(confirmsTable())
 	out[confirmsTypesPath] = confirmsDeclaration()
+	out[installPath] = indented(installTable())
+	out[installTypesPath] = installDeclaration()
+	out[recordSchemaPath] = indented(recordSchema(w))
 	return out
 }
 

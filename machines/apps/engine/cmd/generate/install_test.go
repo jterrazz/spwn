@@ -1,13 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 )
 
 func makeVariable(t *testing.T, name string) string {
@@ -29,5 +32,27 @@ func TestTheMakefileInstallsWhereTheCatalogSaysStationIsInstalled(t *testing.T) 
 	}
 	if got := makeVariable(t, "BINARY"); got != catalog.StationBinary {
 		t.Errorf("Makefile BINARY = %q, catalog.StationBinary says %q", got, catalog.StationBinary)
+	}
+}
+
+func TestARecordTheEngineWritesMatchesItsSchema(t *testing.T) {
+	var schema map[string]any
+	if err := json.Unmarshal(apiFiles(root(t))[recordSchemaPath], &schema); err != nil {
+		t.Fatal(err)
+	}
+	written, err := json.MarshalIndent(engine.Record{V: engine.RecordVersion, Executable: "/opt/bin/station", Version: "v0.21.0", At: time.Date(2026, 11, 19, 9, 0, 0, 0, time.UTC)}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var record map[string]any
+	if err := json.Unmarshal(written, &record); err != nil {
+		t.Fatal(err)
+	}
+	for _, problem := range validate(schema, schema, record, "record") {
+		t.Error(problem)
+	}
+	record["v"] = float64(engine.RecordVersion + 1)
+	if len(validate(schema, schema, record, "record")) == 0 {
+		t.Error("a record of another v is taken for v1: the schema describes v1 alone")
 	}
 }

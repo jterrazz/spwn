@@ -5,6 +5,8 @@ import "time"
 const (
 	RecordSchema  = "station.engine-record/v1"
 	RecordVersion = 1
+	// value: the record's file, in the engine's state folder.
+	RecordFile = "engine.json"
 )
 
 type Record struct {

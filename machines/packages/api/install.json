@@ -1,0 +1,10 @@
+{
+  "line": "curl -fsSL https://spwn.sh/install.sh | bash",
+  "dir": "~/.local/bin",
+  "binary": "station",
+  "record": {
+    "root": "state",
+    "path": "station/engine.json",
+    "schema": "station.engine-record/v1"
+  }
+}

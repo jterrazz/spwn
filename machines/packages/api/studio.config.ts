@@ -23,6 +23,13 @@ export default defineConfig({
                     },
                 },
                 {
+                    files: ['install.d.ts'],
+                    reason: "written by `make generate` under the generated header its drift test compares, the type of `install.json` a client's import resolves to",
+                    rules: {
+                        'jterrazz-typescript/comment-states-its-kind': 'off',
+                    },
+                },
+                {
                     files: ['words.d.ts'],
                     reason: "written by `make generate` under the generated header its drift test compares, the type of `words.json` a client's import resolves to",
                     rules: {
